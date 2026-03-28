@@ -245,7 +245,7 @@
 - name: Remove stale Harbor networks after the compose reset
   ansible.builtin.shell: |
     set -euo pipefail
-    stale_networks="$(docker network ls -q --filter label=com.docker.compose.project=harbor)"
+    stale_networks="$(docker network ls -q --filter label=com.docker.compose.project={{ harbor_compose_project_name }})"
     if [ -n "${stale_networks}" ]; then
       docker network rm ${stale_networks}
       echo changed
@@ -278,6 +278,84 @@
     or 'Pulling' in harbor_compose_up.stdout
   when: harbor_compose_assets_changed or not harbor_runtime_healthy_before_reconcile
 
+- name: Read the Harbor compose network state after reconciliation
+  ansible.builtin.command:
+    argv:
+      - docker
+      - network
+      - inspect
+      - "{{ harbor_compose_network_name }}"
+      - --format
+      - "{{ '{{ json .Containers }}' }}"
+  register: harbor_network_inspect
+  failed_when: false
+  changed_when: false
+
+- name: Record the Harbor compose network container membership
+  ansible.builtin.set_fact:
+    harbor_network_container_members: "{{ harbor_network_inspect.stdout | default('{}') | from_json if harbor_network_inspect.rc == 0 else {} }}"
+    harbor_network_container_names: >-
+      {{
+        (
+          (harbor_network_inspect.stdout | default('{}') | from_json if harbor_network_inspect.rc == 0 else {})
+          | dict2items
+          | map(attribute='value.Name')
+          | list
+        )
+      }}
+
+- name: Record whether Harbor needs one forced network recovery recycle
+  ansible.builtin.set_fact:
+    harbor_compose_needs_recovery: >-
+      {{
+        harbor_network_inspect.rc != 0
+        or (
+          harbor_runtime_container_names
+          | difference(harbor_network_container_names | default([]))
+          | length
+        ) > 0
+      }}
+
+- name: Force one Harbor recycle when compose network membership is incomplete
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - -f
+      - "{{ harbor_generated_compose_file }}"
+      - down
+      - --remove-orphans
+  args:
+    chdir: "{{ harbor_installer_dir }}"
+  register: harbor_compose_recovery_down
+  changed_when: >-
+    'Stopping' in harbor_compose_recovery_down.stdout
+    or 'Removing' in harbor_compose_recovery_down.stdout
+    or 'Network' in harbor_compose_recovery_down.stdout
+  when: harbor_compose_needs_recovery
+
+- name: Force one Harbor recreate when compose network membership is incomplete
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - -f
+      - "{{ harbor_generated_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+  args:
+    chdir: "{{ harbor_installer_dir }}"
+  register: harbor_compose_recovery_up
+  retries: 6
+  delay: 10
+  until: harbor_compose_recovery_up.rc == 0
+  changed_when: >-
+    'Creating' in harbor_compose_recovery_up.stdout
+    or 'Recreating' in harbor_compose_recovery_up.stdout
+    or 'Starting' in harbor_compose_recovery_up.stdout
+  when: harbor_compose_needs_recovery
+
 - name: Wait for Harbor ping locally
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/ping"
@@ -287,6 +365,31 @@
   retries: 30
   delay: 10
   until: harbor_ping.status == 200
+  changed_when: false
+
+- name: Wait for Harbor containers to become healthy on the compose network
+  ansible.builtin.shell: |
+    set -euo pipefail
+    unhealthy=0
+    for container in {{ harbor_runtime_container_names | join(' ') }}; do
+      state="$(docker inspect "${container}" --format '{{ "{{ .State.Status }}" }} {{ "{{ if .State.Health }}" }}{{ "{{ .State.Health.Status }}" }}{{ "{{ else }}" }}none{{ "{{ end }}" }} {{ "{{ range .NetworkSettings.Networks }}" }}{{ "{{ .IPAddress }}" }}{{ "{{ end }}" }}' 2>/dev/null || echo missing missing missing)"
+      echo "${container} ${state}"
+      case "${state}" in
+        running\ healthy\ *) ;;
+        running\ none\ *) ;;
+        *)
+          unhealthy=1
+          ;;
+      esac
+    done
+    test "${unhealthy}" -eq 0
+  args:
+    executable: /bin/bash
+    chdir: "{{ harbor_installer_dir }}"
+  register: harbor_container_health
+  retries: 12
+  delay: 10
+  until: harbor_container_health.rc == 0
   changed_when: false
 
 - name: Read the Keycloak bootstrap admin password
