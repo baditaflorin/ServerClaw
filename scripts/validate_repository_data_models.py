@@ -25,6 +25,7 @@ from fixture_manager import load_ephemeral_pool_catalog
 from canonical_errors import ErrorRegistry
 from container_image_policy import load_image_catalog, validate_image_catalog as validate_container_image_catalog
 from changelog_redaction import load_redaction_policy, validate_redaction_policy
+from correction_loops import load_correction_loop_catalog, validate_correction_loop_catalog
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from control_plane_lanes import load_lane_catalog
 from data_catalog import load_data_catalog, validate_data_catalog
@@ -2504,6 +2505,7 @@ def validate_repository_data_models() -> int:
     validate_secret_manifest(secret_manifest)
     workflow_catalog = load_workflow_catalog()
     validate_workflow_catalog(workflow_catalog, secret_manifest)
+    validate_correction_loop_catalog(load_correction_loop_catalog(), workflow_catalog)
     validate_agent_policies(workflow_catalog)
     command_catalog = load_command_catalog()
     validate_command_catalog(command_catalog, workflow_catalog, secret_manifest)

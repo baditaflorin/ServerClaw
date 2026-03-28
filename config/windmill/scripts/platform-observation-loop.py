@@ -133,6 +133,11 @@ def main(
                     "run_id": run["run_id"],
                     "service_id": run["service_id"],
                     "state": run["current_state"],
+                    "correction_loop_id": (
+                        run.get("correction_loop", {}).get("loop_id")
+                        if isinstance(run.get("correction_loop"), dict)
+                        else None
+                    ),
                 }
             )
         session.transition(
@@ -150,6 +155,7 @@ def main(
         "job_id_present": bool(__import__("os").environ.get("WM_JOB_ID")),
         "finding_count": len(finding_list),
         "processed_count": len(processed),
+        "correction_loop_id": processed[0]["correction_loop_id"] if processed else None,
         "processed_runs": processed,
     }
 

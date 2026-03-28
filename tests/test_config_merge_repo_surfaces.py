@@ -16,6 +16,7 @@ def test_repo_merge_eligible_catalog_validates() -> None:
     catalog = validate_merge_eligible_catalog(REPO_ROOT / "config" / "merge-eligible-files.yaml")
     assert "config/service-capability-catalog.json" in catalog
     assert catalog["config/workflow-catalog.json"].collection_type == "mapping"
+    assert catalog["config/correction-loops.json"].key_field == "id"
     assert catalog["config/agent-policies.yaml"].collection_path == ()
 
 

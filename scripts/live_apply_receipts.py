@@ -25,6 +25,13 @@ COMMIT_HASH_PATTERN = re.compile(r"^[0-9a-f]{7,64}$")
 LEGACY_WORKFLOW_ID_PATTERN = re.compile(r"^adr-\d{4}-[a-z0-9-]+-live-apply$")
 ALLOWED_RESULTS = {"pass", "partial", "fail"}
 ALLOWED_ENVIRONMENTS = set(receipt_environment_ids())
+ALLOWED_CORRECTION_LOOP_DIAGNOSES = {
+    "transient_failure",
+    "contract_drift",
+    "dependency_outage",
+    "stale_input",
+    "irreversible_data_loss_risk",
+}
 
 
 def load_receipt(path: Path) -> dict:
@@ -185,6 +192,21 @@ def validate_receipt(receipt: dict, path: Path, workflow_catalog: dict) -> None:
         if not isinstance(note, str) or not note:
             raise ValueError(f"{path.name}: notes entries must be non-empty strings")
 
+    correction_loop = receipt.get("correction_loop")
+    if correction_loop is not None:
+        if not isinstance(correction_loop, dict):
+            raise ValueError(f"{path.name}: correction_loop must be an object when present")
+        for field in ("loop_id", "surface", "repair_action", "verification"):
+            value = correction_loop.get(field)
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(f"{path.name}: correction_loop.{field} must be a non-empty string")
+        diagnosis = correction_loop.get("diagnosis")
+        if diagnosis is not None:
+            if not isinstance(diagnosis, str) or diagnosis not in ALLOWED_CORRECTION_LOOP_DIAGNOSES:
+                raise ValueError(
+                    f"{path.name}: correction_loop.diagnosis must be one of {sorted(ALLOWED_CORRECTION_LOOP_DIAGNOSES)}"
+                )
+
 
 def validate_receipts() -> int:
     secret_manifest = load_secret_manifest()
@@ -272,6 +294,15 @@ def show_receipt(receipt_id: str) -> int:
     print("Evidence refs:")
     for ref in receipt["evidence_refs"]:
         print(f"  - {ref}")
+    correction_loop = receipt.get("correction_loop")
+    if isinstance(correction_loop, dict):
+        print("Correction loop:")
+        print(f"  - loop_id: {correction_loop['loop_id']}")
+        print(f"  - surface: {correction_loop['surface']}")
+        if correction_loop.get("diagnosis"):
+            print(f"  - diagnosis: {correction_loop['diagnosis']}")
+        print(f"  - repair_action: {correction_loop['repair_action']}")
+        print(f"  - verification: {correction_loop['verification']}")
     if receipt["notes"]:
         print("Notes:")
         for note in receipt["notes"]:

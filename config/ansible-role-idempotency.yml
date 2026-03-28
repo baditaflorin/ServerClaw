@@ -31,6 +31,9 @@ roles:
   common_handlers:
     policy: exempt
     reason: Shared handler include library; not applied as a standalone role.
+  coolify_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   control_plane_recovery:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.

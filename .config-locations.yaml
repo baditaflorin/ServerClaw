@@ -98,6 +98,19 @@ infrastructure_state:
       - "docs/schema/preview-environment-profiles.schema.json: Schema for the profile catalog"
       - "scripts/preview_environment.py: Lifecycle automation for create/validate/destroy"
 
+  config/correction-loops.json:
+    purpose: Canonical ADR 0204 registry of governed self-correcting automation loops and their workflow selectors
+    owner: human
+    format: JSON
+    use_for: Declaring the invariant, observation sources, diagnosis taxonomy, repair actions, verification probe, and escalation boundary for mutable automation surfaces
+    update_when: Adding a new mutating workflow, changing repair policy, or adjusting a loop's retry budget
+    update_by: Agent or human implementing ADR 0204 self-correction changes
+    validation: "python3 scripts/correction_loops.py --validate"
+    related_files:
+      - "docs/schema/correction-loop-catalog.schema.json: Schema for the correction-loop catalog"
+      - "scripts/correction_loops.py: Selector resolution and validation helper"
+      - "config/workflow-catalog.json: Workflows that must be covered by the correction-loop selectors"
+
   receipts/preview-environments/:
     purpose: Durable branch-local evidence for completed preview create/validate/destroy cycles
     owner: automation

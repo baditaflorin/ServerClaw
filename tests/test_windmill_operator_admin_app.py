@@ -28,20 +28,6 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         defaults_text
     )
 
-    assert defaults["windmill_platform_service_topology"] == "{{ hostvars[inventory_hostname].platform_service_topology }}"
-    assert defaults["windmill_server_port"] == (
-        "{{ windmill_platform_service_topology | platform_service_port('windmill', 'internal') }}"
-    )
-    assert defaults["windmill_host_proxy_port"] == (
-        "{{ windmill_platform_service_topology | platform_service_port('windmill', 'controller') }}"
-    )
-    assert defaults["windmill_private_base_url"] == (
-        "{{ windmill_platform_service_topology | platform_service_url('windmill', 'internal') }}"
-    )
-    assert defaults["windmill_base_url"] == (
-        "{{ windmill_platform_service_topology | platform_service_url('windmill', 'controller') }}"
-    )
-
     script_paths = {entry["path"] for entry in defaults["windmill_seed_scripts"]}
     raw_app_paths = {entry["path"] for entry in defaults["windmill_seed_raw_apps"]}
 
@@ -57,6 +43,11 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_bootstrap_identity_email"] == "superadmin_secret@windmill.dev"
     assert defaults["windmill_bootstrap_identity_username"] == "superadmin_secret"
     assert defaults["windmill_bootstrap_identity_login_type"] == "password"
+    assert defaults["windmill_service_topology"] == "{{ hostvars[inventory_hostname].platform_service_topology }}"
+    assert defaults["windmill_server_port"] == "{{ windmill_service_topology | platform_service_port('windmill', 'internal') }}"
+    assert defaults["windmill_host_proxy_port"] == "{{ windmill_service_topology | platform_service_port('windmill', 'controller') }}"
+    assert defaults["windmill_private_base_url"] == "{{ windmill_service_topology | platform_service_url('windmill', 'internal') }}"
+    assert defaults["windmill_base_url"] == "{{ windmill_service_topology | platform_service_url('windmill', 'controller') }}"
     assert defaults["windmill_worker_checkout_repo_root_local_dir"] == "{{ playbook_dir }}/.."
     assert {
         "README.md",

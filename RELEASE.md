@@ -3,10 +3,10 @@
 - Date: 2026-03-28
 
 ## Summary
-- implemented ADR 0207 by translating Hetzner DNS provider payloads into canonical DNS facts at the boundary and by enforcing that contract in both the repository validation path and the live post-merge validation gate
+- implemented ADR 0204 by adding a governed correction-loop catalog, enforcing exact workflow coverage in repo validation, and wiring the live observation loop to persist and report its bounded self-correction contract
 
 ## Platform Impact
-- promote ADR 0207 onto main after the verified provider-boundary live apply; bump canonical platform version from 0.130.37 to 0.130.38 for the now-merged provider-boundary contract and validation-gate replay
+- no live platform version bump; this release records the merged ADR 0204 correction-loop catalog and the verified observation-loop replay already live on platform 0.130.35
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

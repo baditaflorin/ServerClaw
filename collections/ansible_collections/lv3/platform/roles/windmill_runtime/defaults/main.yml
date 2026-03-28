@@ -24,9 +24,9 @@ windmill_runtime_packages:
   - openssl
   - python3-psycopg
   - tar
-windmill_platform_service_topology: "{{ hostvars[inventory_hostname].platform_service_topology }}"
-windmill_server_port: "{{ windmill_platform_service_topology | platform_service_port('windmill', 'internal') }}"
-windmill_host_proxy_port: "{{ windmill_platform_service_topology | platform_service_port('windmill', 'controller') }}"
+windmill_service_topology: "{{ hostvars[inventory_hostname].platform_service_topology }}"
+windmill_server_port: "{{ windmill_service_topology | platform_service_port('windmill', 'internal') }}"
+windmill_host_proxy_port: "{{ windmill_service_topology | platform_service_port('windmill', 'controller') }}"
 windmill_server_network_mode: host
 windmill_server_requires_docker_nat: "{{ windmill_server_network_mode != 'host' }}"
 windmill_image: "{{ container_image_catalog.images.windmill_runtime.ref }}"
@@ -111,8 +111,8 @@ windmill_controller_local_root: "{{ windmill_local_artifact_dir | dirname }}"
 windmill_bootstrap_identity_email: superadmin_secret@windmill.dev
 windmill_bootstrap_identity_username: superadmin_secret
 windmill_bootstrap_identity_login_type: password
-windmill_private_base_url: "{{ windmill_platform_service_topology | platform_service_url('windmill', 'internal') }}"
-windmill_base_url: "{{ windmill_platform_service_topology | platform_service_url('windmill', 'controller') }}"
+windmill_private_base_url: "{{ windmill_service_topology | platform_service_url('windmill', 'internal') }}"
+windmill_base_url: "{{ windmill_service_topology | platform_service_url('windmill', 'controller') }}"
 windmill_runtime_api_base_url: "http://127.0.0.1:{{ windmill_server_port }}"
 windmill_worker_api_base_url: "http://windmill_server:8000"
 windmill_seed_job_timeout_seconds: 120

@@ -36,6 +36,7 @@ See [docs/runbooks/validation-gate.md](/Users/live/Documents/GITHUB_PROJECTS/pro
 - canonical repository data models pass schema validation
 - architecture fitness functions verify the governed replaceability scorecards and vendor exit plans for critical product ADRs
 - provider-boundary anti-corruption guards keep raw provider payload selectors confined to the declared boundary translation step
+- the ADR 0204 correction-loop catalog covers every governed mutating workflow exactly once
 - generated status documents are current for their canonical inputs
 - the workflow catalog, command catalog, control-plane lane catalog, and controller-local secret manifest cross-reference cleanly
 - the API publication catalog classifies every governed API and webhook surface
@@ -87,6 +88,7 @@ make validate-generated-docs
 - [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml)
 - [inventory/group_vars/platform.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/platform.yml)
 - [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json)
+- [config/correction-loops.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0204-live-apply/config/correction-loops.json)
 - [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/command-catalog.json)
 - [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json)
 - [config/api-publication.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/api-publication.json)
@@ -99,6 +101,12 @@ make validate-generated-docs
 - [receipts/live-applies](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies)
 
 `make validate-architecture-fitness` currently enforces ADR 0212 by checking that every governed critical product ADR carries the required `Replaceability Scorecard` and `Vendor Exit Plan` sections with non-placeholder values.
+
+The correction-loop catalog can also be checked directly with:
+
+```bash
+python3 scripts/correction_loops.py --validate
+```
 
 ## Troubleshooting
 
