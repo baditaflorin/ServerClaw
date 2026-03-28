@@ -6931,8 +6931,9 @@ workstreams:
       - platform/session_workspace.py
       - platform/run_namespace.py
       - platform/ansible_drift.py
-      - platform/events/publisher.py
+      - platform/events/
       - platform/correction_loops.py
+      - platform/mutation_audit.py
       - platform/maintenance/
       - platform/slo.py
       - platform/ansible/execution_scopes.py
@@ -6944,6 +6945,7 @@ workstreams:
       - platform/graph/client.py
       - platform/health/composite.py
       - platform/interface_contracts.py
+      - platform/use_cases/runbooks.py
       - platform/ledger/
       - platform/live_apply/merge_train.py
       - platform/scheduler/watchdog.py
@@ -6996,8 +6998,9 @@ workstreams:
             - platform/session_workspace.py
             - platform/run_namespace.py
             - platform/ansible_drift.py
-            - platform/events/publisher.py
+            - platform/events/**
             - platform/correction_loops.py
+            - platform/mutation_audit.py
             - platform/maintenance/**
             - platform/slo.py
             - platform/ansible/execution_scopes.py
@@ -7009,6 +7012,7 @@ workstreams:
             - platform/graph/client.py
             - platform/health/composite.py
             - platform/interface_contracts.py
+            - platform/use_cases/runbooks.py
             - platform/ledger/**
             - platform/live_apply/merge_train.py
             - platform/scheduler/watchdog.py
