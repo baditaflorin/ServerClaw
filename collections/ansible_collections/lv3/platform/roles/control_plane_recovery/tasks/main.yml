@@ -5,11 +5,17 @@
       - control_plane_recovery_runtime_root | length > 0
       - control_plane_recovery_runtime_backup_script | length > 0
       - control_plane_recovery_runtime_ssh_private_key_local_file | length > 0
-      - control_plane_recovery_runtime_openbao_backup_token_remote_file | length > 0
+      - control_plane_recovery_runtime_openbao_policy_name | length > 0
+      - control_plane_recovery_runtime_openbao_secret_path | length > 0
+      - control_plane_recovery_runtime_openbao_approle_name | length > 0
+      - control_plane_recovery_runtime_openbao_agent_dir | length > 0
+      - control_plane_recovery_runtime_openbao_agent_service_name | length > 0
+      - control_plane_recovery_runtime_credential_dir | length > 0
+      - control_plane_recovery_runtime_openbao_token_file | length > 0
+      - control_plane_recovery_runtime_windmill_db_dsn_file | length > 0
       - control_plane_recovery_runtime_backup_target_host | length > 0
       - control_plane_recovery_runtime_backup_target_user | length > 0
       - control_plane_recovery_runtime_backup_target_dir | length > 0
-      - control_plane_recovery_runtime_openbao_backup_policy_name | length > 0
       - control_plane_recovery_windmill_backup_database_dsn | length > 0
       - openbao_init_local_file | length > 0
       - step_ca_home | length > 0
@@ -55,19 +61,6 @@
   register: control_plane_recovery_runtime_private_key_raw
   no_log: true
 
-- name: Read the controller-local OpenBao init payload
-  ansible.builtin.slurp:
-    src: "{{ openbao_init_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: control_plane_recovery_openbao_init_payload_raw
-  no_log: true
-
-- name: Record the OpenBao init payload facts for recovery automation
-  ansible.builtin.set_fact:
-    control_plane_recovery_openbao_init_payload: "{{ control_plane_recovery_openbao_init_payload_raw.content | b64decode | from_json }}"
-  no_log: true
-
 - name: Install control-plane recovery runtime packages
   ansible.builtin.apt:
     name:
@@ -80,51 +73,6 @@
     state: present
     update_cache: true
     force_apt_get: true
-
-- name: Read OpenBao seal status for recovery automation
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
-    method: GET
-    return_content: true
-  register: control_plane_recovery_openbao_seal_status
-
-- name: Unseal OpenBao before managing backup policy state
-  ansible.builtin.shell: >-
-    curl -sS
-    -H 'Content-Type: application/json'
-    --data '{"key":"{{ item }}"}'
-    'http://127.0.0.1:{{ openbao_http_port }}/v1/sys/unseal'
-  args:
-    executable: /bin/bash
-  loop: "{{ control_plane_recovery_openbao_init_payload.keys_base64[:(openbao_init_key_threshold | default(2) | int)] }}"
-  when: control_plane_recovery_openbao_seal_status.json.sealed | bool
-  changed_when: control_plane_recovery_openbao_seal_status.json.sealed | bool
-  failed_when: false
-  no_log: true
-
-- name: Confirm OpenBao is unsealed for recovery automation
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
-    method: GET
-    return_content: true
-  register: control_plane_recovery_openbao_unsealed_status
-
-- name: Assert OpenBao is unsealed before recovery policy management
-  ansible.builtin.assert:
-    that:
-      - not (control_plane_recovery_openbao_unsealed_status.json.sealed | bool)
-    fail_msg: "OpenBao is sealed, so the control-plane recovery workflow cannot manage snapshot policy state."
-
-- name: Wait for OpenBao to become the active node for recovery automation
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"
-    method: GET
-    return_content: true
-    status_code: 200
-  register: control_plane_recovery_openbao_active_health
-  retries: 30
-  delay: 2
-  until: control_plane_recovery_openbao_active_health.status == 200
 
 - name: Ensure the control-plane recovery runtime directories exist
   ansible.builtin.file:
@@ -182,81 +130,35 @@
     connect_timeout: 5
     sleep: 2
 
-- name: Read the currently deployed OpenBao backup token artifact if it exists
-  ansible.builtin.stat:
-    path: "{{ control_plane_recovery_runtime_openbao_backup_token_remote_file }}"
-  register: control_plane_recovery_openbao_backup_token_remote
+- name: Provision OpenBao-backed systemd credentials for control-plane backups
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_systemd_credentials
+  vars:
+    common_openbao_systemd_credentials_service_name: control-plane-backup
+    common_openbao_systemd_credentials_agent_dir: "{{ control_plane_recovery_runtime_openbao_agent_dir }}"
+    common_openbao_systemd_credentials_credential_dir: "{{ control_plane_recovery_runtime_credential_dir }}"
+    common_openbao_systemd_credentials_credential_file: "{{ control_plane_recovery_runtime_windmill_db_dsn_file }}"
+    common_openbao_systemd_credentials_token_file: "{{ control_plane_recovery_runtime_openbao_token_file }}"
+    common_openbao_systemd_credentials_secret_path: "{{ control_plane_recovery_runtime_openbao_secret_path }}"
+    common_openbao_systemd_credentials_secret_payload: "{{ control_plane_recovery_runtime_openbao_secret_payload }}"
+    common_openbao_systemd_credentials_policy_name: "{{ control_plane_recovery_runtime_openbao_policy_name }}"
+    common_openbao_systemd_credentials_policy_rules: "{{ control_plane_recovery_runtime_openbao_policy_rules }}"
+    common_openbao_systemd_credentials_approle_name: "{{ control_plane_recovery_runtime_openbao_approle_name }}"
+    common_openbao_systemd_credentials_agent_config_file: "{{ control_plane_recovery_runtime_openbao_agent_config_file }}"
+    common_openbao_systemd_credentials_agent_template_file: "{{ control_plane_recovery_runtime_openbao_agent_template_file }}"
+    common_openbao_systemd_credentials_agent_template_content: >-
+      [[ with secret "kv/data/{{ control_plane_recovery_runtime_openbao_secret_path }}" ]][[ .Data.data.windmill_db_dsn ]][[ end ]]
+    common_openbao_systemd_credentials_role_id_file: "{{ control_plane_recovery_runtime_openbao_role_id_file }}"
+    common_openbao_systemd_credentials_secret_id_file: "{{ control_plane_recovery_runtime_openbao_secret_id_file }}"
+    common_openbao_systemd_credentials_image: "{{ openbao_agent_image }}"
+    common_openbao_systemd_credentials_agent_service_name: "{{ control_plane_recovery_runtime_openbao_agent_service_name }}"
+    common_openbao_systemd_credentials_container_name: "{{ control_plane_recovery_runtime_openbao_agent_container_name }}"
 
-- name: Read the existing OpenBao backup token artifact
-  ansible.builtin.slurp:
-    src: "{{ control_plane_recovery_runtime_openbao_backup_token_remote_file }}"
-  when: control_plane_recovery_openbao_backup_token_remote.stat.exists
-  register: control_plane_recovery_openbao_existing_token_raw
-  no_log: true
-
-- name: Record the existing OpenBao backup token artifact
-  ansible.builtin.set_fact:
-    control_plane_recovery_openbao_existing_token: "{{ control_plane_recovery_openbao_existing_token_raw.content | b64decode | from_json }}"
-  when: control_plane_recovery_openbao_backup_token_remote.stat.exists
-  no_log: true
-
-- name: Ensure the OpenBao backup policy exists
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/policies/acl/{{ control_plane_recovery_runtime_openbao_backup_policy_name }}"
-    method: PUT
-    headers:
-      X-Vault-Token: "{{ control_plane_recovery_openbao_init_payload.root_token }}"
-    body_format: json
-    body:
-      policy: |
-        path "sys/storage/raft/snapshot" {
-          capabilities = ["read", "create", "update", "sudo"]
-        }
-    status_code: 204
-  no_log: true
-
-- name: Revoke the previously deployed OpenBao backup token accessor
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/token/revoke-accessor"
-    method: POST
-    headers:
-      X-Vault-Token: "{{ control_plane_recovery_openbao_init_payload.root_token }}"
-    body_format: json
-    body:
-      accessor: "{{ control_plane_recovery_openbao_existing_token.accessor }}"
-    status_code: 204
-  when:
-    - control_plane_recovery_openbao_existing_token is defined
-    - (control_plane_recovery_openbao_existing_token.accessor | default('')) | length > 0
-  failed_when: false
-  no_log: true
-
-- name: Create a refreshed OpenBao backup token
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/token/create"
-    method: POST
-    headers:
-      X-Vault-Token: "{{ control_plane_recovery_openbao_init_payload.root_token }}"
-    body_format: json
-    body:
-      display_name: lv3-control-plane-backup
-      renewable: false
-      no_parent: true
-      policies:
-        - "{{ control_plane_recovery_runtime_openbao_backup_policy_name }}"
-    return_content: true
-    status_code: 200
-  register: control_plane_recovery_openbao_backup_token_response
-  no_log: true
-
-- name: Persist the OpenBao backup token artifact for the runtime backup script
-  ansible.builtin.copy:
-    dest: "{{ control_plane_recovery_runtime_openbao_backup_token_remote_file }}"
-    content: "{{ {'token': control_plane_recovery_openbao_backup_token_response.json.auth.client_token, 'accessor': control_plane_recovery_openbao_backup_token_response.json.auth.accessor, 'policy': control_plane_recovery_runtime_openbao_backup_policy_name, 'generated_at': ansible_date_time.iso8601} | to_nice_json }}\n"
-    owner: root
-    group: root
-    mode: "0600"
-  no_log: true
+- name: Remove the legacy OpenBao backup token artifact
+  ansible.builtin.file:
+    path: "{{ control_plane_recovery_runtime_config_dir }}/openbao-backup-token.json"
+    state: absent
 
 - name: Render the runtime backup script
   ansible.builtin.template:
@@ -289,8 +191,12 @@
     state: started
     daemon_reload: true
 
-- name: Run the control-plane backup script immediately
-  ansible.builtin.command: "{{ control_plane_recovery_runtime_backup_script }}"
+- name: Run the control-plane backup service immediately
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - start
+      - "{{ control_plane_recovery_runtime_backup_service }}"
   register: control_plane_recovery_runtime_backup_now
   changed_when: true
   when: control_plane_recovery_run_backup_now | bool

@@ -146,3 +146,122 @@ argument_specs:
           - absent
         description:
           - Expected listener state passed to `wait_for`.
+  openbao_systemd_credentials:
+    short_description: Install an OpenBao Agent plus systemd-credential bundle for a host-native service.
+    options:
+      common_openbao_systemd_credentials_service_name:
+        type: str
+        required: true
+        description:
+          - Friendly service label used for the managed OpenBao Agent bundle.
+      common_openbao_systemd_credentials_agent_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores the AppRole bootstrap files and agent templates.
+      common_openbao_systemd_credentials_credential_dir:
+        type: path
+        required: true
+        description:
+          - Runtime directory where the OpenBao Agent renders credential files for systemd to load.
+      common_openbao_systemd_credentials_credential_file:
+        type: path
+        required: true
+        description:
+          - Credential file rendered by the OpenBao Agent for the target systemd service.
+      common_openbao_systemd_credentials_token_file:
+        type: path
+        required: false
+        default: ""
+        description:
+          - Optional OpenBao token sink file rendered by the agent for services that must call the API directly.
+      common_openbao_systemd_credentials_secret_path:
+        type: str
+        required: true
+        description:
+          - Relative KV v2 path under `kv/data/` that stores the rendered credential payload.
+      common_openbao_systemd_credentials_secret_payload:
+        type: dict
+        required: true
+        description:
+          - Secret payload persisted under the declared OpenBao KV path.
+      common_openbao_systemd_credentials_policy_name:
+        type: str
+        required: true
+        description:
+          - OpenBao ACL policy name attached to the AppRole.
+      common_openbao_systemd_credentials_policy_rules:
+        type: str
+        required: true
+        description:
+          - ACL policy rules granted to the AppRole token.
+      common_openbao_systemd_credentials_approle_name:
+        type: str
+        required: true
+        description:
+          - AppRole name used by the managed OpenBao Agent auto-auth flow.
+      common_openbao_systemd_credentials_agent_config_file:
+        type: path
+        required: true
+        description:
+          - Managed OpenBao Agent HCL configuration path on the target host.
+      common_openbao_systemd_credentials_agent_template_file:
+        type: path
+        required: true
+        description:
+          - Managed template path that the OpenBao Agent reads inside the mounted agent directory.
+      common_openbao_systemd_credentials_agent_template_local_file:
+        type: path
+        required: false
+        default: ""
+        description:
+          - Optional controller-local source file copied verbatim as the agent template.
+      common_openbao_systemd_credentials_agent_template_src:
+        type: str
+        required: false
+        default: ""
+        description:
+          - Optional Ansible template source rendered into the agent template path.
+      common_openbao_systemd_credentials_agent_template_content:
+        type: str
+        required: false
+        default: ""
+        description:
+          - Optional inline template content written into the agent template path.
+      common_openbao_systemd_credentials_role_id_file:
+        type: path
+        required: true
+        description:
+          - Host-local file that stores the durable AppRole role ID.
+      common_openbao_systemd_credentials_secret_id_file:
+        type: path
+        required: true
+        description:
+          - Host-local file that stores the durable AppRole secret ID.
+      common_openbao_systemd_credentials_image:
+        type: str
+        required: true
+        description:
+          - Container image used to run the OpenBao Agent under systemd supervision.
+      common_openbao_systemd_credentials_container_entrypoint:
+        type: str
+        required: false
+        default: /bin/vault
+        description:
+          - Executable path inside the container used to bypass the image entrypoint and run the OpenBao Agent directly.
+      common_openbao_systemd_credentials_agent_service_name:
+        type: str
+        required: true
+        description:
+          - Name of the managed systemd service that supervises the OpenBao Agent container.
+      common_openbao_systemd_credentials_container_name:
+        type: str
+        required: true
+        description:
+          - Container name used for the managed OpenBao Agent runtime.
+      common_openbao_systemd_credentials_openbao_address:
+        type: str
+        required: false
+        default: ""
+        description:
+          - Optional explicit OpenBao API address; defaults to the local loopback listener on `openbao_http_port`.

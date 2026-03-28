@@ -1,8 +1,19 @@
 [Unit]
 Description=LV3 control-plane backup export
-After=network-online.target
+After=network-online.target {{ control_plane_recovery_runtime_openbao_agent_service_name }}.service
 Wants=network-online.target
+Requires={{ control_plane_recovery_runtime_openbao_agent_service_name }}.service
 
 [Service]
 Type=oneshot
+User=root
+Group=root
+UMask=0077
+LoadCredential=openbao-token:{{ control_plane_recovery_runtime_openbao_token_file }}
+LoadCredential=windmill-db-dsn:{{ control_plane_recovery_runtime_windmill_db_dsn_file }}
 ExecStart={{ control_plane_recovery_runtime_backup_script }}
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths={{ control_plane_recovery_runtime_state_dir }}

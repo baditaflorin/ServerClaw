@@ -3879,7 +3879,7 @@ adr_index:
   - adr: '0231'
     title: Local Secret Delivery Via OpenBao Agent And Systemd Credentials
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: security
     keywords:
@@ -3892,6 +3892,7 @@ adr_index:
       - credentials
     summary: We will standardize host-local secret delivery on OpenBao Agent plus systemd
     filename: 0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials.md
+    implemented_version: 0.177.39
   - adr: '0232'
     title: Nomad For Durable Batch And Long-Running Internal Jobs
     status: Accepted

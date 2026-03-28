@@ -58,16 +58,46 @@ argument_specs:
         required: true
         description:
           - Controller-local public key file paired with the runtime archive identity.
-      control_plane_recovery_runtime_openbao_backup_policy_name:
+      control_plane_recovery_runtime_openbao_policy_name:
         type: str
         required: true
         description:
-          - OpenBao policy name used for the scoped backup token.
-      control_plane_recovery_runtime_openbao_backup_token_remote_file:
+          - OpenBao policy name used for the host-native backup credential AppRole.
+      control_plane_recovery_runtime_openbao_secret_path:
+        type: str
+        required: true
+        description:
+          - OpenBao KV path that stores the non-token runtime credentials needed by the backup unit.
+      control_plane_recovery_runtime_openbao_approle_name:
+        type: str
+        required: true
+        description:
+          - AppRole name used by the managed OpenBao Agent for the backup unit.
+      control_plane_recovery_runtime_openbao_agent_dir:
         type: path
         required: true
         description:
-          - Guest-local file that stores the managed OpenBao backup token.
+          - Guest-local directory that stores the OpenBao Agent bootstrap files.
+      control_plane_recovery_runtime_openbao_agent_service_name:
+        type: str
+        required: true
+        description:
+          - Managed systemd service name for the OpenBao Agent container that renders backup credentials.
+      control_plane_recovery_runtime_credential_dir:
+        type: path
+        required: true
+        description:
+          - Runtime directory where the OpenBao Agent renders systemd credential source files.
+      control_plane_recovery_runtime_openbao_token_file:
+        type: path
+        required: true
+        description:
+          - Runtime file used as the source for the OpenBao token systemd credential.
+      control_plane_recovery_runtime_windmill_db_dsn_file:
+        type: path
+        required: true
+        description:
+          - Runtime file used as the source for the Windmill database DSN systemd credential.
       control_plane_recovery_runtime_backup_target_host:
         type: str
         required: true
