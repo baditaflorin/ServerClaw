@@ -3,7 +3,7 @@
 - ADR: [ADR 0226](../adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md)
 - Title: Live apply the systemd service, timer, and path baseline for host-resident control loops on `proxmox_florin`
 - Status: live_applied
-- Implemented In Repo Version: 0.177.48
+- Implemented In Repo Version: 0.177.50
 - Live Applied In Platform Version: 0.130.38
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
@@ -54,8 +54,8 @@
 - `sudo systemctl show` on `proxmox_florin` reported `lv3-host-control-loop-reconcile.service Result=success ActiveState=inactive`, the timer as `active/waiting` with `NextElapseUSecRealtime=Sat 2026-03-28 18:00:59 CET` and `LastTriggerUSec=Sat 2026-03-28 17:31:04 CET`, and the path unit as `active/waiting` with `Triggers=lv3-host-control-loop-reconcile.service`.
 - `sudo systemctl start lv3-host-control-loop-reconcile.service` recorded `trigger: scheduled_or_manual` at `2026-03-28T16:39:33Z` with history file `/var/lib/lv3-host-control-loops/runs/20260328T163933Z.json`.
 - Writing `ws-0226-path-20260328T163913Z` to `/var/lib/lv3-host-control-loops/requests/reconcile.request` was consumed immediately; `latest.json` recorded `trigger: path_request` with the request payload at `2026-03-28T16:39:13Z`, journald showed a clean start and finish at `17:39:13 CET`, and `/var/lib/lv3-host-control-loops/runs/20260328T163913Z.json` was created.
-- `make pre-push-gate` was exercised and failed only on shared integration surfaces outside ADR 0226 ownership: stale generated artifacts in `docs/diagrams` and `build/platform-manifest.json`, plus a timeout in the containerized `ansible-lint` step on the local arm64 host.
-- As part of the ADR 0224 exact-main proof, the integrated `0.177.48` candidate kept the live units healthy after the host-local `ansible-pull` replay from private Gitea snapshot `64417a8866bcc103ea3b5815359a6e5027504831`: request payload `ws-0224-path-20260328T201750Z` was consumed into `/var/lib/lv3-host-control-loops/runs/20260328T201751Z.json`, and an immediate manual `systemctl start` recorded `trigger: scheduled_or_manual` at `2026-03-28T20:17:59Z` with history file `/var/lib/lv3-host-control-loops/runs/20260328T201759Z.json`.
+- The integrated `0.177.50` candidate commit `c11de34d3495e7617488246cda6577b1af75b672` passed `make pre-push-gate`, including `alert-rule-validation`, `ansible-lint`, `ansible-syntax`, `artifact-secret-scan`, `dependency-direction`, `dependency-graph`, `integration-tests`, `packer-validate`, `policy-validation`, `schema-validation`, `security-scan`, `service-completeness`, `tofu-validate`, `type-check`, and `yaml-lint`.
+- As part of the ADR 0224 exact-main proof, the integrated `0.177.50` candidate kept the live units healthy after the host-local `ansible-pull` replay from private Gitea snapshot `c3ef5f172c7ec178a692b0ee772d2d1349096ab5`: request payload `ws-0224-path-20260328T204845Z` was consumed into `/var/lib/lv3-host-control-loops/runs/20260328T204846Z.json`, and an immediate manual `systemctl start` recorded `trigger: scheduled_or_manual` at `2026-03-28T20:49:17Z` with history file `/var/lib/lv3-host-control-loops/runs/20260328T204917Z.json`.
 
 ## Outcome
 
@@ -65,5 +65,5 @@
 
 ## Mainline Integration
 
-- Release `0.177.48` now carries ADR 0226 into merged repository truth with refreshed protected surfaces, generated artifacts, and receipt mapping under `host_control_loops`.
+- Release `0.177.50` now carries ADR 0226 into merged repository truth with refreshed protected surfaces, generated artifacts, and receipt mapping under `host_control_loops`.
 - The exact-main ADR 0224 replay re-proved the already-live unit contract without another controller-side `make configure-host-control-loops` mutation because the live host already matched the repo-managed baseline.
