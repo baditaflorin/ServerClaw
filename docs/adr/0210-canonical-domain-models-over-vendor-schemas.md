@@ -1,9 +1,10 @@
 # ADR 0210: Canonical Domain Models Over Vendor Schemas
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.177.32
+- Implemented In Platform Version: 0.130.36
+- Implemented On: 2026-03-28
 - Date: 2026-03-28
 
 ## Context

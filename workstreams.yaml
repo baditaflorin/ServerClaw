@@ -6287,7 +6287,6 @@ workstreams:
       - docs/adr/0207-anti-corruption-layers-at-provider-boundaries.md
       - docs/adr/0208-dependency-direction-and-composition-roots.md
       - docs/adr/0209-use-case-services-and-thin-delivery-adapters.md
-      - docs/adr/0210-canonical-domain-models-over-vendor-schemas.md
       - docs/adr/0211-shared-policy-packs-and-rule-registries.md
       - docs/adr/0212-replaceability-scorecards-and-vendor-exit-plans.md
       - docs/adr/0213-architecture-fitness-functions-in-the-validation-gate.md
@@ -6319,14 +6318,17 @@ workstreams:
             - docs/adr/0207-anti-corruption-layers-at-provider-boundaries.md
             - docs/adr/0208-dependency-direction-and-composition-roots.md
             - docs/adr/0209-use-case-services-and-thin-delivery-adapters.md
-            - docs/adr/0210-canonical-domain-models-over-vendor-schemas.md
             - docs/adr/0211-shared-policy-packs-and-rule-registries.md
             - docs/adr/0212-replaceability-scorecards-and-vendor-exit-plans.md
             - docs/adr/0213-architecture-fitness-functions-in-the-validation-gate.md
             - docs/workstreams/adr-0204-architecture-governance.md
-            - docs/adr/.index.yaml
             - config/ansible-role-idempotency.yml
           mode: exclusive
+        - id: adr_index
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
         - id: integration_release_surfaces
           paths:
             - VERSION
