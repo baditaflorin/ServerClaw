@@ -402,11 +402,20 @@ validate_generated_docs() {
 }
 
 validate_generated_portals() {
+  local generated_docs_dir=""
+  local mkdocs_config=""
+
   echo "Generated portal validation"
   run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/generate_ops_portal.py" --check >/dev/null
   run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/generate_changelog_portal.py" --check >/dev/null
+  generated_docs_dir="$(mktemp -d "${TMPDIR:-/tmp}/lv3-docs-site.XXXXXX")"
+  mkdocs_config="$(mktemp "$REPO_ROOT/.mkdocs-validate.XXXXXX.yml")"
+  trap 'rm -rf "$generated_docs_dir" "$mkdocs_config"' RETURN
   "${UV_CMD[@]}" run --with-requirements "$REPO_ROOT/requirements/docs.txt" \
-    mkdocs build --strict --config-file "$REPO_ROOT/mkdocs.yml" --site-dir "$REPO_ROOT/build/docs-portal" \
+    python3 "$REPO_ROOT/scripts/generate_docs_site.py" --write --output-dir "$generated_docs_dir" >/dev/null
+  sed "s|^docs_dir: .*|docs_dir: $generated_docs_dir|" "$REPO_ROOT/mkdocs.yml" >"$mkdocs_config"
+  "${UV_CMD[@]}" run --with-requirements "$REPO_ROOT/requirements/docs.txt" \
+    mkdocs build --strict --config-file "$mkdocs_config" --site-dir "$REPO_ROOT/build/docs-portal" \
     >/dev/null
 }
 
