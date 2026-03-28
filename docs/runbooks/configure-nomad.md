@@ -27,7 +27,9 @@ Before running the workflow, confirm:
 
 - syntax check: `make syntax-check-nomad`
 - direct converge: `make converge-nomad`
+- immutable replacement plan: `make immutable-guest-replacement-plan service=nomad`
 - guarded live apply: `make live-apply-service service=nomad env=production`
+- documented in-place exception: `make live-apply-service service=nomad env=production ALLOW_IN_PLACE_MUTATION=true`
 
 ## Delivered Surfaces
 
@@ -54,15 +56,17 @@ After a successful converge, these controller-local files should exist:
 
 ## Verification
 
-Run these checks after converge:
+Run these checks after converge or after the guarded live apply:
 
 1. `make syntax-check-nomad`
-2. `curl -sS https://100.64.0.1:8013/v1/status/leader --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tls/nomad-agent-ca.pem -H "X-Nomad-Token: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tokens/bootstrap-management.token)"`
-3. `curl -sS https://100.64.0.1:8013/v1/nodes --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tls/nomad-agent-ca.pem -H "X-Nomad-Token: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tokens/bootstrap-management.token)" | jq -r '.[] | "\(.Name)\t\(.Status)\t\(.NodeClass)"'`
-4. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'sudo systemctl status lv3-nomad --no-pager && sudo /usr/local/bin/lv3-nomad job status lv3-nomad-smoke-service'`
-5. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.30 'curl -fsS http://10.10.10.30:18180/'`
-6. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'sudo cat /var/lib/nomad/verification/lv3-nomad-smoke-batch/last-run.log'`
-7. `make live-apply-service service=nomad env=production`
+2. `make immutable-guest-replacement-plan service=nomad`
+3. `curl -sS https://100.64.0.1:8013/v1/status/leader --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tls/nomad-agent-ca.pem -H "X-Nomad-Token: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tokens/bootstrap-management.token)"`
+4. `curl -sS https://100.64.0.1:8013/v1/nodes --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tls/nomad-agent-ca.pem -H "X-Nomad-Token: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tokens/bootstrap-management.token)" | jq -r '.[] | "\(.Name)\t\(.Status)\t\(.NodeClass)"'`
+5. `ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml monitoring-lv3 -m shell -a 'sudo systemctl is-active lv3-nomad && sudo /usr/local/bin/lv3-nomad job status lv3-nomad-smoke-service' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+6. `ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-build-lv3 -m shell -a 'systemctl is-active lv3-nomad && curl -fsS http://10.10.10.30:18180/' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+7. `ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell -a 'systemctl is-active lv3-nomad && sudo cat /var/lib/nomad/verification/lv3-nomad-smoke-batch/last-run.log' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+8. `make live-apply-service service=nomad env=production`
+9. `make live-apply-service service=nomad env=production ALLOW_IN_PLACE_MUTATION=true`
 
 ## Notes
 
@@ -71,3 +75,4 @@ Run these checks after converge:
 - The controller-local bootstrap token is the branch-safe source of truth; if the local token is missing but the mirrored server token still exists, rerun the playbook to restore it automatically.
 - The smoke service is pinned to the build client and is verified through the build node's advertised address `10.10.10.30:18180`, not `127.0.0.1`.
 - The dispatchable batch smoke job is pinned to the runtime client and writes a durable verification marker to `/var/lib/nomad/verification/lv3-nomad-smoke-batch/last-run.log` so the post-dispatch proof does not depend on ephemeral allocation log state.
+- Because `nomad` is hosted on `monitoring-lv3`, the guarded production entrypoint is governed by ADR 0191 immutable guest replacement. The default `make live-apply-service service=nomad env=production` path therefore fails closed until an immutable replacement plan is used or a documented narrow exception is acknowledged with `ALLOW_IN_PLACE_MUTATION=true`.
