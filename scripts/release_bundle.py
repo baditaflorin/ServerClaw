@@ -450,6 +450,13 @@ def sign_bundle(
     )
     if result.returncode != 0:
         raise RuntimeError(result.stderr.strip() or result.stdout.strip() or "cosign sign-blob failed")
+    if not sigstore_bundle_path.exists():
+        raise FileNotFoundError(f"cosign did not materialize the Sigstore bundle at {sigstore_bundle_path}")
+    if not signature_path.exists():
+        signature_stdout = result.stdout.strip()
+        if not signature_stdout:
+            raise FileNotFoundError(f"cosign did not materialize the detached signature at {signature_path}")
+        signature_path.write_text(signature_stdout + "\n")
 
 
 def verify_bundle(

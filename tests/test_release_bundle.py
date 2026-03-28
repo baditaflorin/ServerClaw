@@ -91,6 +91,7 @@ def test_sign_bundle_writes_sigstore_bundle_argument(tmp_path: Path, monkeypatch
     bundle_path.write_text("bundle")
     signature_path = tmp_path / "bundle.tar.gz.sig"
     sigstore_bundle_path = tmp_path / "bundle.tar.gz.sigstore.json"
+    sigstore_bundle_path.write_text("{}")
     private_key_path = tmp_path / "cosign.key"
     private_key_path.write_text("key")
     password_file = tmp_path / "cosign.password"
@@ -103,7 +104,7 @@ def test_sign_bundle_writes_sigstore_bundle_argument(tmp_path: Path, monkeypatch
 
     def fake_run(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
         captured["command"] = command
-        return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+        return subprocess.CompletedProcess(command, 0, stdout="signed-payload", stderr="")
 
     monkeypatch.setattr(release_bundle.subprocess, "run", fake_run)
 
@@ -128,6 +129,7 @@ def test_sign_bundle_writes_sigstore_bundle_argument(tmp_path: Path, monkeypatch
         "--tlog-upload=false",
         str(bundle_path),
     ]
+    assert signature_path.read_text() == "signed-payload\n"
 
 
 def test_verify_bundle_prefers_sigstore_bundle_when_present(tmp_path: Path, monkeypatch) -> None:
