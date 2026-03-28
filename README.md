@@ -130,7 +130,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.37` |
+| Repository version | `0.177.38` |
 | Platform version | `0.130.37` |
 | Observed check date | `2026-03-28` |
 | Observed OS | `Debian 13` |
@@ -269,7 +269,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
 | `vaultwarden` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
-| `windmill` | `2026-03-28-adr-0204-self-correcting-automation-loops-live-apply` |
+| `windmill` | `2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply` |
 | `world_state_materializer` | `2026-03-27-adr-0113-world-state-materializer-mainline-live-apply` |
 <!-- END GENERATED: platform-status -->
 
@@ -1089,7 +1089,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.37` |
+| Repository version | `0.177.38` |
 | Platform version | `0.130.37` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
