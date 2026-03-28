@@ -1,9 +1,10 @@
 # ADR 0205: Capability Contracts Before Product Selection
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.177.41
+- Implemented In Platform Version: 0.130.39
+- Implemented On: 2026-03-28
 - Date: 2026-03-28
 
 ## Context

@@ -12,11 +12,15 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 
 ## Unreleased
 
+- implements ADR 0205 with a contract-first catalog for critical shared capabilities, repo validation for product selection inputs, and ops-portal plus manifest visibility for the current contract set
+
 ## Latest Release
 
-- [0.177.40 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.40.md)
+- [0.177.41 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.41.md)
 
 ## Previous Releases
+
+- [0.177.40 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.40.md)
 
 - [0.177.39 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.39.md)
 

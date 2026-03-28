@@ -196,6 +196,160 @@ workstreams:
           mode: exclusive
     ready_to_merge: true
     live_applied: false
+  - id: ws-0205-live-apply
+    adr: "0205"
+    title: Live apply capability contracts before product selection
+    status: merged
+    owner: codex
+    branch: codex/ws-0205-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0205-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0205-capability-contracts-before-product-selection.md
+    depends_on:
+      - adr-0075-service-capability-catalog
+      - adr-0093-interactive-ops-portal
+      - adr-0132-self-describing-platform-manifest
+      - adr-0204-architecture-governance
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/adr-0205-capability-contracts-before-product-selection.md
+      - docs/adr/0205-capability-contracts-before-product-selection.md
+      - docs/adr/.index.yaml
+      - config/capability-contract-catalog.json
+      - docs/schema/capability-contract-catalog.schema.json
+      - scripts/capability_contracts.py
+      - tests/test_capability_contracts.py
+      - scripts/platform_manifest.py
+      - docs/schema/platform-manifest.schema.json
+      - tests/test_platform_manifest.py
+      - build/platform-manifest.json
+      - scripts/ops_portal/app.py
+      - scripts/ops_portal/templates/partials/overview.html
+      - tests/test_interactive_ops_portal.py
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+      - Makefile
+      - scripts/validate_repo.sh
+      - scripts/validate_repository_data_models.py
+      - config/validation-gate.json
+      - config/manifest-static.yaml
+      - .config-locations.yaml
+      - docs/runbooks/capability-contract-catalog.md
+      - docs/runbooks/add-a-new-service.md
+      - docs/runbooks/scaffold-new-service.md
+      - docs/runbooks/platform-manifest.md
+      - receipts/live-applies/evidence/2026-03-28-adr-0205-*.txt
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0205 with a contract-first catalog for critical shared capabilities, repo validation for product selection inputs, and ops-portal plus manifest visibility for the current contract set
+      release_bump: patch
+      included_in_repo_version: 0.177.41
+      latest_receipts:
+        capability_contracts: 2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply
+        ops_portal: 2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply
+  - id: ws-0205-main-final
+    adr: "0205"
+    title: Integrate ADR 0205 live apply into origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0205-main-final
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0205-main-final
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0205-main-final.md
+    depends_on:
+      - ws-0205-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0205-main-final.md
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/adr/0205-capability-contracts-before-product-selection.md
+      - docs/workstreams/adr-0205-capability-contracts-before-product-selection.md
+      - docs/adr/.index.yaml
+      - .config-locations.yaml
+      - Makefile
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+      - config/capability-contract-catalog.json
+      - config/manifest-static.yaml
+      - config/validation-gate.json
+      - docs/runbooks/add-a-new-service.md
+      - docs/runbooks/capability-contract-catalog.md
+      - docs/runbooks/platform-manifest.md
+      - docs/runbooks/scaffold-new-service.md
+      - docs/schema/capability-contract-catalog.schema.json
+      - docs/schema/platform-manifest.schema.json
+      - scripts/capability_contracts.py
+      - scripts/ops_portal/app.py
+      - scripts/ops_portal/templates/partials/overview.html
+      - scripts/platform_manifest.py
+      - scripts/validate_repo.sh
+      - scripts/validate_repository_data_models.py
+      - tests/test_capability_contracts.py
+      - tests/test_interactive_ops_portal.py
+      - tests/test_platform_manifest.py
+      - receipts/live-applies/2026-03-28-adr-0205-capability-contracts-before-product-selection*.json
+      - receipts/live-applies/evidence/2026-03-28-adr-0205-*.txt
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0205_mainline_contract_surface
+          paths:
+            - docs/workstreams/ws-0205-main-final.md
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/adr/0205-capability-contracts-before-product-selection.md
+            - docs/workstreams/adr-0205-capability-contracts-before-product-selection.md
+            - docs/adr/.index.yaml
+            - .config-locations.yaml
+            - Makefile
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+            - config/capability-contract-catalog.json
+            - config/manifest-static.yaml
+            - config/validation-gate.json
+            - docs/runbooks/add-a-new-service.md
+            - docs/runbooks/capability-contract-catalog.md
+            - docs/runbooks/platform-manifest.md
+            - docs/runbooks/scaffold-new-service.md
+            - docs/schema/capability-contract-catalog.schema.json
+            - docs/schema/platform-manifest.schema.json
+            - scripts/capability_contracts.py
+            - scripts/ops_portal/app.py
+            - scripts/ops_portal/templates/partials/overview.html
+            - scripts/platform_manifest.py
+            - scripts/validate_repo.sh
+            - scripts/validate_repository_data_models.py
+            - tests/test_capability_contracts.py
+            - tests/test_interactive_ops_portal.py
+            - tests/test_platform_manifest.py
+            - receipts/live-applies/2026-03-28-adr-0205-capability-contracts-before-product-selection*.json
+            - receipts/live-applies/evidence/2026-03-28-adr-0205-*.txt
+          mode: shared_contract
+          contract: adr-0205-mainline-integration-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: integrated ADR 0205 with the contract-first capability catalog, repo validation, platform manifest publication, and verified ops-portal visibility from merged mainline
+      release_bump: patch
+      included_in_repo_version: 0.177.41
+      latest_receipts:
+        capability_contracts: 2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply
+        ops_portal: 2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply
   - id: ws-0224-server-resident-ops-adrs
     adr: "0224"
     title: Server-resident operations architecture bundle
@@ -269,7 +423,7 @@ workstreams:
     canonical_truth:
       changelog_entry: accepted ADRs 0224 through 0233 to move routine platform operation from the Codex chat session into server-resident control loops and mature tools including Ansible Pull, systemd, Windmill, Gitea Actions runners, OPA, OpenBao Agent, Nomad, and signed release bundles
       release_bump: patch
-      included_in_repo_version: 0.177.33
+      included_in_repo_version: 0.177.41
   - id: ws-0210-live-apply
     adr: "0210"
     title: Live apply canonical publication models over adapter-shaped vendor fields

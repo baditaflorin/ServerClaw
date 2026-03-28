@@ -234,7 +234,7 @@
     "capabilities": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["available_workflows", "automation_eligible_runbooks"],
+      "required": ["available_workflows", "automation_eligible_runbooks", "capability_contracts"],
       "properties": {
         "available_workflows": {
           "type": "array",
@@ -330,6 +330,116 @@
                 "items": {
                   "type": "string",
                   "minLength": 1
+                }
+              }
+            }
+          }
+        },
+        "capability_contracts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["summary", "items"],
+          "properties": {
+            "summary": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["total", "selected", "contract_only", "export_ready"],
+              "properties": {
+                "total": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "selected": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "contract_only": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "export_ready": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "name",
+                  "summary",
+                  "scope",
+                  "owner",
+                  "review_cadence",
+                  "service_id",
+                  "selection_adr",
+                  "runbook",
+                  "export_format_count",
+                  "fallback_behaviour",
+                  "failure_mode_count"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "summary": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "scope": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "owner": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "review_cadence": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "selected_product": {
+                    "type": ["string", "null"]
+                  },
+                  "service_id": {
+                    "type": ["string", "null"]
+                  },
+                  "service_name": {
+                    "type": ["string", "null"]
+                  },
+                  "service_url": {
+                    "type": ["string", "null"]
+                  },
+                  "selection_adr": {
+                    "type": ["string", "null"]
+                  },
+                  "runbook": {
+                    "type": ["string", "null"]
+                  },
+                  "selection_notes": {
+                    "type": ["string", "null"]
+                  },
+                  "export_format_count": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "fallback_behaviour": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "failure_mode_count": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
                 }
               }
             }

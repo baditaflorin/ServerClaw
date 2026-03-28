@@ -1,0 +1,474 @@
+{
+  "$schema": "docs/schema/capability-contract-catalog.schema.json",
+  "schema_version": "1.0.0",
+  "capabilities": [
+    {
+      "id": "git_forge",
+      "name": "Git Forge",
+      "summary": "Host the canonical repository, issues, pull requests, and webhook-driven automation without coupling other services to one forge vendor.",
+      "scope": "critical_shared_surface",
+      "owner": "platform-operations",
+      "review_cadence": "quarterly",
+      "required_outcomes": [
+        "Provide the authoritative git remote for platform code and automation artifacts.",
+        "Support governed webhook and CI entrypoints that other services can consume through stable repo metadata."
+      ],
+      "service_guarantees": [
+        "Repository clone, push, pull request, and webhook workflows remain available through stable git and HTTP interfaces.",
+        "Repository-level auth, branch protection, and automation tokens stay manageable through repo-documented procedures."
+      ],
+      "canonical_inputs": [
+        {
+          "name": "git_repository_event",
+          "description": "Repo-managed commits, branches, pull requests, tags, and webhook triggers emitted by platform repositories."
+        },
+        {
+          "name": "automation_runner_registration",
+          "description": "Runner and webhook credentials required by downstream CI and promotion workflows."
+        }
+      ],
+      "canonical_outputs": [
+        {
+          "name": "git_remote_surface",
+          "description": "Stable git-over-SSH or git-over-HTTPS endpoints consumed by operators, runners, and automation."
+        },
+        {
+          "name": "webhook_delivery_events",
+          "description": "Repository events delivered to approved downstream automation consumers without forge-specific rewrites."
+        }
+      ],
+      "security_expectations": [
+        "Support repo-managed admin bootstrap, token rotation, and named non-root automation identities.",
+        "Support SSO-backed operator login and scoped automation credentials."
+      ],
+      "audit_expectations": [
+        "Repository mutations and automation token creation remain attributable to a named actor.",
+        "Webhook and runner configuration changes are exportable for review."
+      ],
+      "observability_requirements": [
+        "Expose health signals for the forge UI and git transport path.",
+        "Provide logs or metrics for webhook failures and runner registration drift."
+      ],
+      "portability_constraints": [
+        "Downstream automation must depend on git, webhooks, and documented API contracts rather than a Gitea-only SDK.",
+        "Repository metadata, hooks, and runner configuration must stay representable in repo-managed exports."
+      ],
+      "migration_expectations": {
+        "export_formats": [
+          "git bare mirrors",
+          "repository metadata exports",
+          "runner and webhook manifests"
+        ],
+        "import_requirements": [
+          "A replacement forge can import repositories and recreate webhook plus runner configuration from repo-managed artifacts.",
+          "Git remote URLs and webhook payload handling stay compatible with downstream automation contracts."
+        ],
+        "fallback_behaviour": "Git fetch and push access may fail closed during migration, but repository data and webhook contracts remain exportable from committed artifacts."
+      },
+      "failure_modes": [
+        {
+          "mode": "forge web UI unavailable",
+          "acceptable_degradation": "CLI git operations may continue over SSH while browser-based repository administration is unavailable.",
+          "operator_response": "Use the documented git and admin recovery paths rather than ad hoc UI edits on a replacement system."
+        }
+      ],
+      "current_selection": {
+        "product_name": "Gitea",
+        "service_id": "gitea",
+        "selection_adr": "0143",
+        "runbook": "docs/runbooks/configure-gitea.md",
+        "notes": "Selected for self-hosted git, repo bootstrap, webhook control, and lightweight runner coordination."
+      }
+    },
+    {
+      "id": "identity_provider",
+      "name": "Identity Provider",
+      "summary": "Authenticate operators, browsers, and automation clients through one governed SSO contract that downstream services can consume without provider-specific coupling.",
+      "scope": "critical_shared_surface",
+      "owner": "platform-operations",
+      "review_cadence": "quarterly",
+      "required_outcomes": [
+        "Authenticate human and machine identities through one repo-managed OIDC boundary.",
+        "Issue stable claims consumed by oauth2-proxy, the API gateway, and operator-facing services."
+      ],
+      "service_guarantees": [
+        "OIDC discovery, authorization, token, and JWKS endpoints stay stable for downstream consumers.",
+        "Realm, client, and claim mappings remain reproducible from repo-managed inputs."
+      ],
+      "canonical_inputs": [
+        {
+          "name": "browser_oidc_login",
+          "description": "Interactive sign-in request initiated by oauth2-proxy or a browser-based operator surface."
+        },
+        {
+          "name": "machine_client_definition",
+          "description": "Repo-managed OIDC client registration, scopes, redirect URIs, and secret material for automation consumers."
+        }
+      ],
+      "canonical_outputs": [
+        {
+          "name": "id_token",
+          "description": "OIDC identity token with repo-governed identity, role, and group claims."
+        },
+        {
+          "name": "session_claims",
+          "description": "Stable authorization assertions passed to downstream auth boundaries."
+        }
+      ],
+      "security_expectations": [
+        "Support MFA for operator logins and short-lived browser sessions.",
+        "Support repo-managed client secret rotation and deterministic claim mapping."
+      ],
+      "audit_expectations": [
+        "Successful and failed sign-in events are exportable for audit review.",
+        "Client and realm changes remain attributable to a named operator or automation identity."
+      ],
+      "observability_requirements": [
+        "Expose a health signal or synthetic check for the identity control plane.",
+        "Emit latency or failure data for discovery, authorization, and token exchange paths."
+      ],
+      "portability_constraints": [
+        "Downstream services consume OIDC and OAuth contracts rather than Keycloak-only SDK types.",
+        "Realm, client, and group data remain representable in portable repo-managed exports."
+      ],
+      "migration_expectations": {
+        "export_formats": [
+          "OIDC discovery metadata",
+          "realm export JSON",
+          "client and group mapping manifests"
+        ],
+        "import_requirements": [
+          "A replacement identity provider can recreate clients, groups, and claim mappings from repo-managed artifacts.",
+          "The replacement can publish OIDC discovery and JWKS endpoints without changing downstream contracts."
+        ],
+        "fallback_behaviour": "Existing sessions may continue until expiry, but new browser logins fail closed if the provider is unavailable."
+      },
+      "failure_modes": [
+        {
+          "mode": "primary identity provider unavailable",
+          "acceptable_degradation": "Cached sessions and recently-fetched JWKS material may continue briefly, but new interactive logins fail closed.",
+          "operator_response": "Use documented break-glass identities only for recovery while keeping downstream services on the OIDC contract."
+        }
+      ],
+      "current_selection": {
+        "product_name": "Keycloak",
+        "service_id": "keycloak",
+        "selection_adr": "0056",
+        "runbook": "docs/runbooks/configure-keycloak.md",
+        "notes": "Selected for repo-managed OIDC, MFA, and group-aware operator login across shared edge and private surfaces."
+      }
+    },
+    {
+      "id": "mesh_control_plane",
+      "name": "Private Access Mesh Control Plane",
+      "summary": "Coordinate zero-trust node enrollment, private routing, and operator access policy without forcing downstream automation to depend on one mesh vendor API.",
+      "scope": "critical_shared_surface",
+      "owner": "platform-operations",
+      "review_cadence": "quarterly",
+      "required_outcomes": [
+        "Provide private operator access to the Proxmox host and guest network without public SSH exposure.",
+        "Publish governed subnet routes and node identity state for repo-managed automation."
+      ],
+      "service_guarantees": [
+        "Node enrollment, route advertisement, and ACL policy remain deterministic from repo-managed inputs.",
+        "Private reachability to the host and guest network remains available without exposing new public management surfaces."
+      ],
+      "canonical_inputs": [
+        {
+          "name": "node_enrollment_request",
+          "description": "Operator or host request to enroll a node into the private mesh with a named identity."
+        },
+        {
+          "name": "route_and_acl_policy",
+          "description": "Repo-managed subnet route and access control declarations for the managed mesh."
+        }
+      ],
+      "canonical_outputs": [
+        {
+          "name": "node_identity_record",
+          "description": "Stable node identity, ownership, and route publication state for operators and automation."
+        },
+        {
+          "name": "private_management_path",
+          "description": "Reachable private network path used by SSH, Ansible, and internal service verification."
+        }
+      ],
+      "security_expectations": [
+        "Support named node ownership, non-public management access, and deterministic ACL policy.",
+        "Support revocation or removal of stale nodes without manual hidden state."
+      ],
+      "audit_expectations": [
+        "Node enrollment and ACL changes are attributable to a named operator or automation identity.",
+        "Approved subnet route publications are exportable for review."
+      ],
+      "observability_requirements": [
+        "Expose health or control-plane reachability checks for the mesh coordinator.",
+        "Surface connected-node and subnet-route state for verification."
+      ],
+      "portability_constraints": [
+        "Downstream automation depends on private IP reachability and identity metadata rather than Headscale-specific APIs.",
+        "ACLs, route ownership, and enrollment policy remain representable in repo-managed exports."
+      ],
+      "migration_expectations": {
+        "export_formats": [
+          "ACL policy files",
+          "node enrollment inventory",
+          "route ownership manifests"
+        ],
+        "import_requirements": [
+          "A replacement mesh control plane can recreate node ownership, ACLs, and subnet routes from repo-managed artifacts.",
+          "The replacement preserves the private management path to the host and guest network."
+        ],
+        "fallback_behaviour": "Existing private sessions may continue temporarily, but new enrollments or route changes pause until the replacement mesh control plane is ready."
+      },
+      "failure_modes": [
+        {
+          "mode": "mesh control plane unavailable",
+          "acceptable_degradation": "Already-connected nodes may retain reachability for a time, but new enrollments and policy changes stop.",
+          "operator_response": "Recover the control plane before widening public management access; preserve the private-only operator model."
+        }
+      ],
+      "current_selection": {
+        "product_name": "Headscale",
+        "service_id": "headscale",
+        "selection_adr": "0144",
+        "runbook": "docs/runbooks/configure-headscale.md",
+        "notes": "Selected for self-hosted mesh coordination and controlled subnet routing into the private guest network."
+      }
+    },
+    {
+      "id": "secret_authority",
+      "name": "Secret Authority",
+      "summary": "Store, issue, and rotate runtime secrets through one governed contract that keeps downstream workloads independent of a single secret manager API.",
+      "scope": "critical_shared_surface",
+      "owner": "platform-operations",
+      "review_cadence": "quarterly",
+      "required_outcomes": [
+        "Provide the authoritative secret store for runtime credentials, tokens, and bootstrap material.",
+        "Support repo-managed secret distribution and rotation without committed plaintext secrets."
+      ],
+      "service_guarantees": [
+        "KV paths, auth methods, and lease-backed injection workflows remain reproducible from repo-managed automation.",
+        "Secret consumers can receive rendered runtime material without embedding OpenBao-only logic."
+      ],
+      "canonical_inputs": [
+        {
+          "name": "secret_definition",
+          "description": "Repo-managed secret identifier, rotation metadata, and delivery contract for a runtime credential."
+        },
+        {
+          "name": "consumer_auth_binding",
+          "description": "Named workload or automation identity authorized to read or render a governed secret path."
+        }
+      ],
+      "canonical_outputs": [
+        {
+          "name": "versioned_secret_material",
+          "description": "Rendered secret value or payload delivered to the approved workload or operator surface."
+        },
+        {
+          "name": "rotation_metadata",
+          "description": "Lease, age, and rotation policy information used by secret automation."
+        }
+      ],
+      "security_expectations": [
+        "Support mTLS or equivalent strong auth for private secret delivery paths.",
+        "Support named workload auth policies and governed rotation workflows."
+      ],
+      "audit_expectations": [
+        "Secret writes, rotations, and policy changes are attributable to named identities.",
+        "Auth and path policies remain exportable for review."
+      ],
+      "observability_requirements": [
+        "Expose seal state, auth health, and request failure signals for the secret authority.",
+        "Surface lease or rotation drift through repo-managed reporting."
+      ],
+      "portability_constraints": [
+        "Consumers rely on injected files or environment contracts rather than OpenBao-specific client code.",
+        "Secret metadata, policies, and path layout remain representable in portable repo-managed exports."
+      ],
+      "migration_expectations": {
+        "export_formats": [
+          "policy HCL or JSON",
+          "secret metadata manifests",
+          "path and auth mount inventories"
+        ],
+        "import_requirements": [
+          "A replacement secret authority can recreate auth policies, secret metadata, and path layout from repo-managed artifacts.",
+          "Consumers can continue using injected runtime files or env contracts without changing application code."
+        ],
+        "fallback_behaviour": "Existing rendered secrets may remain usable until rotated, but new reads and rotations pause until the replacement authority is available."
+      },
+      "failure_modes": [
+        {
+          "mode": "secret authority sealed or unavailable",
+          "acceptable_degradation": "Running workloads may continue on already-rendered secrets, but new secret reads and rotations fail closed.",
+          "operator_response": "Recover the secret authority rather than hand-writing replacement secrets outside the documented contract."
+        }
+      ],
+      "current_selection": {
+        "product_name": "OpenBao",
+        "service_id": "openbao",
+        "selection_adr": "0043",
+        "runbook": "docs/runbooks/configure-openbao.md",
+        "notes": "Selected for repo-managed secret policy, private mTLS publication, and controlled runtime injection."
+      }
+    },
+    {
+      "id": "service_inventory",
+      "name": "Service Inventory And Topology",
+      "summary": "Keep the canonical inventory of hosts, IPs, prefixes, and service ownership in a replaceable topology contract rather than a product-specific data model.",
+      "scope": "critical_shared_surface",
+      "owner": "platform-operations",
+      "review_cadence": "quarterly",
+      "required_outcomes": [
+        "Provide the authoritative record of managed hosts, VMs, prefixes, and service ownership.",
+        "Support repo-managed synchronization into a browsable operator inventory."
+      ],
+      "service_guarantees": [
+        "Managed prefixes, IP assignments, device records, and service ownership remain reproducible from repo-managed inputs.",
+        "Topology data can be queried without coupling consumers to one inventory vendor schema."
+      ],
+      "canonical_inputs": [
+        {
+          "name": "topology_snapshot",
+          "description": "Repo-managed host, VM, prefix, IP, and service declarations for the current platform estate."
+        },
+        {
+          "name": "synchronization_run",
+          "description": "Governed sync request that applies the canonical repo view to the live inventory system."
+        }
+      ],
+      "canonical_outputs": [
+        {
+          "name": "inventory_records",
+          "description": "Queryable host, VM, IPAM, and ownership records aligned with the repo-managed topology."
+        },
+        {
+          "name": "sync_drift_signal",
+          "description": "Evidence that the live inventory still matches or diverges from repo-managed topology."
+        }
+      ],
+      "security_expectations": [
+        "Support scoped automation credentials and read-only operator views where appropriate.",
+        "Keep authoritative topology edits in repo-managed automation rather than manual hidden UI state."
+      ],
+      "audit_expectations": [
+        "Topology mutations are attributable to a named operator or automation identity.",
+        "Exported inventory objects remain reviewable against repo-managed topology."
+      ],
+      "observability_requirements": [
+        "Expose inventory reachability or API health for sync verification.",
+        "Surface sync drift or failed object reconciliation."
+      ],
+      "portability_constraints": [
+        "Downstream consumers depend on canonical service and topology terms rather than NetBox-only field names.",
+        "Inventory exports remain transformable into another IPAM or inventory system."
+      ],
+      "migration_expectations": {
+        "export_formats": [
+          "device and VM exports",
+          "prefix and IPAM exports",
+          "service ownership manifests"
+        ],
+        "import_requirements": [
+          "A replacement inventory system can import the canonical topology and ownership artifacts from repo-managed data.",
+          "Synchronization logic can recreate stable service, VM, and network objects without NetBox-specific identifiers."
+        ],
+        "fallback_behaviour": "The repo remains the canonical topology source while live inventory sync is paused or being migrated."
+      },
+      "failure_modes": [
+        {
+          "mode": "inventory system unavailable",
+          "acceptable_degradation": "Operators lose the browsable inventory UI, but repo-managed topology and sync inputs remain intact.",
+          "operator_response": "Use the repo as the source of truth while repairing or replacing the live inventory surface."
+        }
+      ],
+      "current_selection": {
+        "product_name": "NetBox",
+        "service_id": "netbox",
+        "selection_adr": "0054",
+        "runbook": "docs/runbooks/configure-netbox.md",
+        "notes": "Selected for operator-facing topology browsing while the repo stays canonical for managed inventory inputs."
+      }
+    },
+    {
+      "id": "workflow_orchestrator",
+      "name": "Workflow Orchestrator",
+      "summary": "Run governed operator and automation workflows behind a stable execution contract so later product changes stay bounded by adapters and workflow metadata.",
+      "scope": "critical_shared_surface",
+      "owner": "platform-operations",
+      "review_cadence": "quarterly",
+      "required_outcomes": [
+        "Execute repo-managed workflows with approval, audit, and retry semantics.",
+        "Expose a durable execution surface for operators, agents, and scheduled automation."
+      ],
+      "service_guarantees": [
+        "Named workflows, schedules, and parameters remain reproducible from repo-managed sources.",
+        "Execution metadata, logs, and result handling remain stable for operators and dependent services."
+      ],
+      "canonical_inputs": [
+        {
+          "name": "workflow_definition",
+          "description": "Repo-managed workflow code, metadata, schedules, and approval requirements."
+        },
+        {
+          "name": "workflow_invocation",
+          "description": "Operator or automation request to execute one governed workflow with typed parameters."
+        }
+      ],
+      "canonical_outputs": [
+        {
+          "name": "workflow_run_record",
+          "description": "Durable execution status, logs, and result metadata for one workflow run."
+        },
+        {
+          "name": "workflow_schedule_state",
+          "description": "Current enabled or disabled schedule posture for governed recurring workflows."
+        }
+      ],
+      "security_expectations": [
+        "Support named operator and automation identities with scoped execution rights.",
+        "Keep approvals, tokens, and schedule changes inside repo-documented control paths."
+      ],
+      "audit_expectations": [
+        "Workflow launches, approvals, and schedule edits remain attributable to named actors.",
+        "Execution history is exportable for incident or change review."
+      ],
+      "observability_requirements": [
+        "Expose workflow health, queue, and execution failure signals.",
+        "Provide durable logs or traces for governed workflow runs."
+      ],
+      "portability_constraints": [
+        "Workflow callers depend on the repo-managed workflow catalog and HTTP or CLI boundaries rather than Windmill-only types.",
+        "Workflow code and metadata remain exportable as source files and manifests."
+      ],
+      "migration_expectations": {
+        "export_formats": [
+          "workflow source files",
+          "schedule manifests",
+          "execution metadata exports"
+        ],
+        "import_requirements": [
+          "A replacement orchestrator can recreate workflow code, schedules, and approval metadata from repo-managed artifacts.",
+          "Operators can still trigger workflows through named repo entrypoints during or after migration."
+        ],
+        "fallback_behaviour": "Paused scheduling is acceptable during migration as long as manual repo-triggered recovery paths remain available."
+      },
+      "failure_modes": [
+        {
+          "mode": "workflow orchestrator unavailable",
+          "acceptable_degradation": "Scheduled and browser-triggered workflows pause, but controller-local repo entrypoints remain available for recovery.",
+          "operator_response": "Use documented controller-side entrypoints for high-priority recovery while restoring the orchestrator."
+        }
+      ],
+      "current_selection": {
+        "product_name": "Windmill",
+        "service_id": "windmill",
+        "selection_adr": "0044",
+        "runbook": "docs/runbooks/configure-windmill.md",
+        "notes": "Selected for governed workflow execution, schedules, and API-backed operator automation."
+      }
+    }
+  ]
+}

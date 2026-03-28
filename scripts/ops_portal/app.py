@@ -261,6 +261,12 @@ class PortalRepository:
         payload = load_json_file(self.settings.publication_registry_path, {"publications": []})
         return registry_entries(payload)
 
+    def load_capability_contract_catalog(self) -> list[dict[str, Any]]:
+        contract_path = self.settings.service_catalog_path.parent / "capability-contract-catalog.json"
+        payload = load_json_file(contract_path, {"capabilities": []})
+        capabilities = payload.get("capabilities", [])
+        return capabilities if isinstance(capabilities, list) else []
+
     def load_workflow_catalog(self) -> list[dict[str, Any]]:
         payload = load_json_file(self.settings.workflow_catalog_path, {"workflows": {}})
         workflows = []
@@ -402,6 +408,54 @@ def normalize_health(payload: dict[str, Any], services: list[dict[str, Any]]) ->
                 "detail": str(payload.get("detail") or payload.get("message") or "No detail"),
             }
     return health_map
+
+
+def build_capability_contract_models(
+    capability_contracts: list[dict[str, Any]],
+    services: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], dict[str, int]]:
+    service_index = {service.get("id"): service for service in services if isinstance(service.get("id"), str)}
+    models: list[dict[str, Any]] = []
+    selected = 0
+    export_ready = 0
+
+    for capability in sorted(capability_contracts, key=lambda item: str(item.get("id", ""))):
+        migration = capability.get("migration_expectations", {})
+        selection = capability.get("current_selection", {})
+        if not isinstance(migration, dict):
+            migration = {}
+        if not isinstance(selection, dict):
+            selection = {}
+        export_formats = migration.get("export_formats", [])
+        if not isinstance(export_formats, list):
+            export_formats = []
+        service = service_index.get(selection.get("service_id"), {})
+        if selection:
+            selected += 1
+        if export_formats:
+            export_ready += 1
+        models.append(
+            {
+                "id": capability.get("id", "unknown"),
+                "name": capability.get("name", capability.get("id", "Unknown capability")),
+                "summary": capability.get("summary", ""),
+                "selected_product": selection.get("product_name"),
+                "service_name": service.get("name"),
+                "service_url": service.get("public_url") or service.get("internal_url"),
+                "selection_adr": selection.get("selection_adr"),
+                "runbook": selection.get("runbook"),
+                "review_cadence": capability.get("review_cadence", "unspecified"),
+                "export_format_count": len(export_formats),
+                "fallback_behaviour": migration.get("fallback_behaviour", "No fallback recorded."),
+            }
+        )
+
+    return models, {
+        "total": len(models),
+        "selected": selected,
+        "contract_only": len(models) - selected,
+        "export_ready": export_ready,
+    }
 
 
 def status_tone(status: str) -> str:
@@ -595,7 +649,8 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
 
     services = repository.load_service_catalog()
     publications = repository.load_publication_registry()
-    workflows = repository.load_workflow_catalog()
+
+    capability_contracts = repository.load_capability_contract_catalog()
     maintenance_windows = repository.load_maintenance_windows()
     deployments = repository.recent_deployments(services)
     drift_report = repository.latest_drift_report()
@@ -625,6 +680,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     coordination = normalize_agent_coordination(coordination_payload)
     raw_runbooks = runbook_payload.get("runbooks") if isinstance(runbook_payload, dict) else []
     runbooks = raw_runbooks if isinstance(raw_runbooks, list) else []
+    capability_models, capability_summary = build_capability_contract_models(capability_contracts, services)
     service_models = build_service_models(
         services,
         publications,
@@ -641,6 +697,8 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "request": request,
         "operator": session,
         "services": service_models,
+        "capability_contracts": capability_models,
+        "capability_contract_summary": capability_summary,
         "maintenance_windows": active_maintenance,
         "maintenance_count": len(active_maintenance),
         "runbooks": build_runbook_models(runbooks),
