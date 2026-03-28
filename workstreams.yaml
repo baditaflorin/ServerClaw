@@ -48,6 +48,7 @@ workstreams:
       - RELEASE.md
       - docs/release-notes/README.md
       - docs/release-notes/0.177.31.md
+      - docs/diagrams/agent-coordination-map.excalidraw
       - build/platform-manifest.json
     ownership_manifest:
       owned_surfaces:
@@ -78,6 +79,7 @@ workstreams:
             - RELEASE.md
             - docs/release-notes/README.md
             - docs/release-notes/0.177.31.md
+            - docs/diagrams/agent-coordination-map.excalidraw
             - build/platform-manifest.json
           mode: exclusive
     ready_to_merge: true

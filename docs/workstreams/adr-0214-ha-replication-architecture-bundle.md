@@ -18,6 +18,7 @@
   `docs/workstreams/adr-0214-ha-replication-architecture-bundle.md`,
   `workstreams.yaml`, `VERSION`, `changelog.md`, `RELEASE.md`,
   `docs/release-notes/README.md`, `docs/release-notes/0.177.31.md`,
+  `docs/diagrams/agent-coordination-map.excalidraw`,
   `build/platform-manifest.json`
 
 ## Scope
@@ -59,6 +60,7 @@
 - `RELEASE.md`
 - `docs/release-notes/README.md`
 - `docs/release-notes/0.177.31.md`
+- `docs/diagrams/agent-coordination-map.excalidraw`
 - `build/platform-manifest.json`
 
 ## Expected Live Surfaces
@@ -96,6 +98,9 @@
   production and staging, including cells, node roles, criticality rings,
   one-way data authority, data-class replication policy, bring-up sequencing,
   placement boundaries, failover authority, and DRY automation profiles
+- the integration step also refreshed the generated agent coordination diagram
+  so the dependency-graph gate stayed in sync with the latest mainline release
+  metadata
 - no platform version bump was required because the workstream is governance-only
 
 ## Notes For The Next Assistant
