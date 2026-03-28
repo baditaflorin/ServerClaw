@@ -68,7 +68,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implements ADR 0206 on the live operator access workflow by routing Keycloak, OpenBao, Tailscale, Mattermost, and step-ca through explicit ports and adapters
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.34
       latest_receipts:
         operator_access: 2026-03-28-adr-0206-ports-and-adapters-live-apply
         openbao_operator_entity: 2026-03-28-adr-0206-ports-and-adapters-live-apply
@@ -101,7 +101,7 @@ workstreams:
       - changelog.md
       - RELEASE.md
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.33.md
+      - docs/release-notes/0.177.34.md
       - versions/stack.yaml
       - build/platform-manifest.json
       - docs/diagrams/agent-coordination-map.excalidraw
@@ -126,7 +126,7 @@ workstreams:
             - changelog.md
             - RELEASE.md
             - docs/release-notes/README.md
-            - docs/release-notes/0.177.33.md
+            - docs/release-notes/0.177.34.md
             - versions/stack.yaml
             - build/platform-manifest.json
             - docs/diagrams/agent-coordination-map.excalidraw

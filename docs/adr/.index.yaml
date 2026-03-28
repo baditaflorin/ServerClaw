@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-28'
 total_adrs: 238
 implementation_status_summary:
-  Implemented: 198
+  Implemented: 199
   Partial: 3
-  Not Implemented: 36
+  Not Implemented: 35
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3501,7 +3501,7 @@ adr_index:
   - adr: '0206'
     title: Ports And Adapters For External Integrations
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -3511,6 +3511,7 @@ adr_index:
       - integrations
     summary: We will use ports and adapters for all critical external integrations.
     filename: 0206-ports-and-adapters-for-external-integrations.md
+    implemented_version: 0.177.34
   - adr: '0207'
     title: Anti-Corruption Layers At Provider Boundaries
     status: Accepted
