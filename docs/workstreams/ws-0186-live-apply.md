@@ -3,6 +3,10 @@
 - ADR: [ADR 0186](../adr/0186-prewarmed-fixture-pools-and-lease-based-ephemeral-capacity.md)
 - Title: Live apply the lease-based warm-pool reconciler and verify prewarmed fixture handoff from an isolated worktree
 - Status: live_applied
+- Implemented In Repo Version: 0.177.21
+- Live Applied In Platform Version: 0.130.32
+- Implemented On: 2026-03-28
+- Live Applied On: 2026-03-28
 - Branch: `codex/ws-0186-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0186-live-apply`
 - Owner: codex
@@ -46,4 +50,10 @@
 ## Outcome
 
 - ADR 0186 is implemented and branch-locally live-applied from the dedicated worktree.
-- Merge-to-main must still update the protected integration surfaces only after review: `README.md`, `VERSION`, `changelog.md`, and `versions/stack.yaml`.
+- The governed warm-pool catalog, warm-handoff lease path, asynchronous Windmill refill automation, and live evidence are now merged on `main`.
+
+## Mainline Integration
+
+- merged to `main` in repository version `0.177.21`
+- no new platform version bump was required during the mainline merge because the verified ADR 0186 live state was already present on platform version `0.130.32`
+- release `0.177.21` also carried the already-pending ADR 0190 repository release note from the newer `origin/main` baseline that this merge was integrated against

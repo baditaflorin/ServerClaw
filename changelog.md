@@ -12,13 +12,13 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 
 ## Unreleased
 
-- implemented ADR 0190 synthetic transaction replay for restore verification, including the governed replay catalog, guest-agent restore fallback, and committed live-apply evidence for the current restore-health gap
-
 ## Latest Release
 
-- [0.177.20 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.20.md)
+- [0.177.21 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.21.md)
 
 ## Previous Releases
+
+- [0.177.20 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.20.md)
 
 - [0.177.19 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.19.md)
 

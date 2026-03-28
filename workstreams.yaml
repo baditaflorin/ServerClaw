@@ -145,7 +145,7 @@ workstreams:
     canonical_truth:
       changelog_entry: integrated ADR 0186 by adding governed prewarmed fixture pools, warm-handoff leases, and the asynchronous Windmill reconciler for local ephemeral capacity
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.21
       latest_receipts:
         fixture_pools: 2026-03-28-adr-0186-prewarmed-fixture-pools-live-apply
 
@@ -4825,7 +4825,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0190 synthetic transaction replay for restore verification, including the governed replay catalog, guest-agent restore fallback, and committed live-apply evidence for the current restore-health gap
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.21
 
   - id: ws-0202-live-apply
     adr: "0202"

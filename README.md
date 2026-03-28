@@ -123,7 +123,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.20` |
+| Repository version | `0.177.21` |
 | Platform version | `0.130.32` |
 | Observed check date | `2026-03-28` |
 | Observed OS | `Debian 13` |
@@ -191,6 +191,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `dozzle` | `2026-03-26-adr-0150-dozzle-live-apply` |
 | `excalidraw` | `2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply` |
 | `failure_domain_policy` | `2026-03-27-adr-0184-failure-domain-labels-live-apply` |
+| `fixture_pools` | `2026-03-28-adr-0186-prewarmed-fixture-pools-live-apply` |
 | `gitea` | `2026-03-26-adr-0143-gitea-live-apply` |
 | `guest_network_policy` | `2026-03-22-adr-0067-guest-network-policy-live-apply` |
 | `homepage` | `2026-03-26-adr-0152-homepage-live-apply` |
@@ -971,6 +972,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0105-live-apply: Live Apply ADR 0105 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0105-live-apply.md)
 - [Workstream WS-0108: Operator Onboarding and Off-boarding Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0108-live-apply.md)
 - [Workstream WS-0184: Failure-Domain Labels And Anti-Affinity Policy Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0184-live-apply.md)
+- [Workstream ws-0186-live-apply: Live Apply ADR 0186 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0186-live-apply.md)
 - [Workstream WS-0188: Failover Rehearsal Gate Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0188-live-apply.md)
 - [Workstream ws-0190-live-apply: ADR 0190 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0190-live-apply.md)
 - [Workstream ws-0191-live-apply: ADR 0191 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0191-live-apply.md)
@@ -992,7 +994,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.20` |
+| Repository version | `0.177.21` |
 | Platform version | `0.130.32` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1188,6 +1190,7 @@ This repository is intentionally opinionated:
 | `0183` | Multi-environment live lanes | `live_applied` | [adr-0183-multi-environment-live-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0183-multi-environment-live-lanes.md) |
 | `0184` | Failure-domain labels and anti-affinity policy live apply | `live_applied` | [ws-0184-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0184-live-apply.md) |
 | `0185` | Branch-scoped ephemeral preview environments | `live_applied` | [adr-0185-branch-scoped-ephemeral-preview-environments.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply/docs/workstreams/adr-0185-branch-scoped-ephemeral-preview-environments.md) |
+| `0186` | Live apply ADR 0186 prewarmed fixture pools and lease-based ephemeral capacity | `live_applied` | [ws-0186-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0186-live-apply.md) |
 | `0188` | Failover rehearsal gate live apply | `live_applied` | [ws-0188-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/worktree-ws-0188-live-apply/docs/workstreams/ws-0188-live-apply.md) |
 | `0190` | ADR 0190 live apply from latest origin/main | `merged` | [ws-0190-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0190-live-apply.md) |
 | `0191` | Immutable guest replacement for stateful and edge services | `live_applied` | [ws-0191-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0191-live-apply.md) |

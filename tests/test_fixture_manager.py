@@ -365,7 +365,7 @@ def test_reap_expired_only_destroys_expired_receipts(fixture_repo: Path, monkeyp
     assert json.loads(reaper_runs[0].read_text())["skipped_vmids"] == [911]
 
 
-def test_build_runtime_main_targets_destroyable_vm_module(fixture_repo: Path) -> None:
+def test_build_runtime_main_targets_fixture_module(fixture_repo: Path) -> None:
     receipt = fixture_manager.build_receipt(
         fixture_manager.load_fixture_definition(fixture_repo / "tests" / "fixtures" / "docker-host-fixture.yml"),
         fixture_repo / "tests" / "fixtures" / "docker-host-fixture.yml",
@@ -377,7 +377,7 @@ def test_build_runtime_main_targets_destroyable_vm_module(fixture_repo: Path) ->
         lifetime_minutes=30,
     )
     rendered = fixture_manager.build_runtime_main(receipt)
-    assert "proxmox-vm-destroyable" in rendered
+    assert "proxmox-fixture" in rendered
     assert '"prevent_destroy"' not in rendered
     assert "agent_enabled = false" in rendered
     assert 'agent_timeout = "10s"' in rendered

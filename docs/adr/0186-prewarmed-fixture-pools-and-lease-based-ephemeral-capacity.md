@@ -2,8 +2,8 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: pending merge to main
-- Implemented In Platform Version: 0.130.31
+- Implemented In Repo Version: 0.177.21
+- Implemented In Platform Version: 0.130.32
 - Implemented On: 2026-03-28
 - Date: 2026-03-27
 
@@ -80,4 +80,4 @@ If local burst capacity is exhausted, preview and fixture leases should spill to
 - The repository now carries a canonical warm-pool catalog, repo validation for that catalog, Windmill entrypoints for refill and expiry handling, and live-pool commands through `fixture_manager.py` and `lv3 fixture`.
 - The first verified live proof used the `ops-base` pool end to end from the dedicated `codex/ws-0186-live-apply` worktree: prewarm, warm-handoff lease, in-guest verification over the Tailscale-backed Proxmox jump path, destroy, and refill back to `prewarmed`.
 - The branch-local live-apply evidence is recorded in `receipts/live-applies/2026-03-28-adr-0186-prewarmed-fixture-pools-live-apply.json`.
-- Merge to `main` still needs the protected integration surfaces updated there, not on this workstream branch: `README.md`, `VERSION`, `changelog.md`, and `versions/stack.yaml`.
+- Mainline integration completed in repository version `0.177.21`, which also updated the protected integration surfaces and the generated release notes on `main`.
