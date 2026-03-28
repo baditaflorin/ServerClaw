@@ -88,7 +88,8 @@ a {
 
 .operator-card,
 .panel,
-.service-card {
+.service-card,
+.assurance-stat {
   border: 1px solid var(--line);
   border-radius: 22px;
   background: rgba(255, 253, 248, 0.9);
@@ -155,7 +156,8 @@ a {
 
 .overview-grid,
 .changelog-grid,
-.runbook-grid {
+.runbook-grid,
+.chart-grid {
   display: grid;
   gap: 1rem;
 }
@@ -166,8 +168,20 @@ a {
   gap: 1rem;
 }
 
+.assurance-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin: 1rem 0 0;
+}
+
 .overview-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.chart-grid,
+.changelog-grid {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 }
 
 .service-grid {
@@ -179,7 +193,9 @@ a {
 .summary-panel,
 .deployment-console,
 .runbook-card,
-.drift-panel {
+.drift-panel,
+.chart-panel {
+.assurance-stat {
   padding: 1.2rem;
 }
 
@@ -272,6 +288,10 @@ a {
   margin-top: 0.9rem;
 }
 
+.compact-links {
+  margin-top: 0.5rem;
+}
+
 .action-button {
   border: 0;
   border-radius: 999px;
@@ -324,10 +344,32 @@ a {
   font-family: "IBM Plex Mono", monospace;
 }
 
+.chart-panel {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.chart-canvas {
+  width: 100%;
+  min-height: 260px;
+}
+
+.chart-canvas-tall {
+  min-height: 320px;
+}
+
+.chart-caption {
+  margin: 0;
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1rem;
+}
+
+.table-scroll {
+  overflow-x: auto;
 }
 
 .data-table th,
@@ -336,6 +378,33 @@ a {
   border-bottom: 1px solid var(--line);
   text-align: left;
   vertical-align: top;
+}
+
+.assurance-table {
+  min-width: 1280px;
+}
+
+.cell-detail {
+  margin-top: 0.45rem;
+  color: rgba(20, 33, 61, 0.72);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.status-text.ok {
+  color: var(--ok);
+}
+
+.status-text.warn {
+  color: var(--warn);
+}
+
+.status-text.danger {
+  color: var(--danger);
+}
+
+.status-text.neutral {
+  color: var(--ink-soft);
 }
 
 .compact-list,
@@ -415,7 +484,9 @@ select {
 
   .hero,
   .overview-grid,
-  .changelog-grid {
+  .changelog-grid,
+  .chart-grid,
+  .assurance-summary-grid {
     grid-template-columns: 1fr;
   }
 

@@ -104,6 +104,16 @@
     group: root
     mode: "0644"
 
+- name: Remove stale ops portal service sources before sync
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ ops_portal_service_dir }}/ops_portal"
+    - "{{ ops_portal_service_dir }}/search_fabric"
+    - "{{ ops_portal_service_dir }}/publication_contract.py"
+    - "{{ ops_portal_service_dir }}/requirements.txt"
+
 - name: Sync the ops portal application sources
   ansible.builtin.copy:
     src: "{{ ops_portal_repo_root }}/scripts/ops_portal/"
@@ -112,6 +122,24 @@
     group: root
     mode: "0644"
     directory_mode: "0755"
+
+- name: Ensure the ops portal overlay directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ ops_portal_runtime_overlay_directories }}"
+
+- name: Overlay the critical ops portal runtime files explicitly
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ ops_portal_runtime_file_sources }}"
 
 - name: Sync the shared search fabric package
   ansible.builtin.copy:

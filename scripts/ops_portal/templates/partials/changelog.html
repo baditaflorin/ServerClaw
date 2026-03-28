@@ -1,4 +1,17 @@
 <div class="changelog-grid">
+  <section class="panel chart-panel">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Live Apply Cadence</p>
+        <h3>Recent rollout tempo</h3>
+      </div>
+      <span class="pill">14-day window</span>
+    </div>
+    <div class="chart-canvas" data-echart-target="live-apply-timeline-chart"></div>
+    <script id="live-apply-timeline-chart" type="application/json">{{ charts.live_apply_timeline|tojson }}</script>
+    <p class="muted chart-caption">Bars show receipt count per day, while the line tracks how many unique services were touched.</p>
+  </section>
+
   <section class="panel">
     <h3>Recent Live Applies</h3>
     {% if deployments %}

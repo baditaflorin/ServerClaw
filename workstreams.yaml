@@ -102,6 +102,70 @@ workstreams:
         plus certificate admission
       release_bump: patch
       included_in_repo_version: 0.177.56
+  - id: ws-0253-live-apply
+    adr: "0253"
+    title: Unified runtime assurance scoreboard live apply
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0253-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0253-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0253-live-apply.md
+    depends_on:
+      - adr-0093-interactive-ops-portal
+      - adr-0113-world-state-materializer
+      - adr-0244-runtime-assurance-matrix
+      - adr-0209-use-case-services
+    conflicts_with: []
+    shared_surfaces:
+      - docs/adr/0244-runtime-assurance-matrix-per-service-and-environment.md
+      - docs/adr/0253-unified-runtime-assurance-scoreboard-and-rollup.md
+      - docs/workstreams/ws-0253-live-apply.md
+      - docs/runbooks/runtime-assurance-scoreboard.md
+      - docs/runbooks/ops-portal-down.md
+      - scripts/ops_portal/app.py
+      - scripts/ops_portal/runtime_assurance.py
+      - scripts/ops_portal/templates/partials/overview.html
+      - scripts/ops_portal/static/portal.css
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+      - tests/test_interactive_ops_portal.py
+      - tests/test_runtime_assurance_scoreboard.py
+      - docs/adr/.index.yaml
+      - workstreams.yaml
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_registry
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: runtime_assurance_live_apply
+          paths:
+            - docs/adr/0244-runtime-assurance-matrix-per-service-and-environment.md
+            - docs/adr/0253-unified-runtime-assurance-scoreboard-and-rollup.md
+            - docs/workstreams/ws-0253-live-apply.md
+            - docs/runbooks/runtime-assurance-scoreboard.md
+            - docs/runbooks/ops-portal-down.md
+            - scripts/ops_portal/app.py
+            - scripts/ops_portal/runtime_assurance.py
+            - scripts/ops_portal/templates/partials/overview.html
+            - scripts/ops_portal/static/portal.css
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+            - tests/test_interactive_ops_portal.py
+            - tests/test_runtime_assurance_scoreboard.py
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false
+    canonical_truth:
+      changelog_entry: implements the live interactive runtime assurance scoreboard
+        and service-environment rollup for the ops portal, combining live health,
+        publication truth, and receipt-backed evidence into one operator-facing
+        trust surface while leaving protected release files for merge-to-main
+      release_bump: patch
   - id: ws-0254-serverclaw-adrs
     adr: "0254"
     title: ServerClaw architecture bundle
@@ -480,6 +544,66 @@ workstreams:
       changelog_entry: records ADR 0242 exact-main evidence on the current mainline by preserving the verified Shepherd-tour rollout, refreshed release surfaces, and operator-access onboarding truth while the live platform baseline remains 0.130.44
       release_bump: patch
       included_in_repo_version: 0.177.58
+  - id: ws-0240-live-apply
+    adr: "0240"
+    title: Live apply operator visualization panels via Apache ECharts
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0240-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0240-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0240-live-apply.md
+    depends_on:
+      - adr-0093-interactive-ops-portal
+      - adr-0104-service-dependency-graph
+      - adr-0161-real-time-agent-coordination-map
+      - adr-0205-capability-contracts-before-product-selection
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0240-live-apply.md
+      - docs/adr/0240-operator-visualization-panels-via-apache-echarts.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/ops-portal-down.md
+      - scripts/ops_portal/**
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+      - tests/test_interactive_ops_portal.py
+      - receipts/live-applies/2026-03-28-adr-0240-operator-visualization-panels-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0240_live_apply
+          paths:
+            - docs/workstreams/ws-0240-live-apply.md
+            - docs/adr/0240-operator-visualization-panels-via-apache-echarts.md
+            - docs/runbooks/ops-portal-down.md
+            - scripts/ops_portal/**
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+            - tests/test_interactive_ops_portal.py
+          mode: exclusive
+        - id: adr_index
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: live_apply_evidence
+          paths:
+            - receipts/live-applies/2026-03-28-adr-0240-operator-visualization-panels-live-apply.json
+          mode: shared_contract
+          contract: live-apply-receipts-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0240 by embedding Apache ECharts-backed
+        health, coordination, rollout, and dependency topology panels in the
+        interactive ops portal from canonical repository data
+      release_bump: patch
+      included_in_repo_version: 0.177.54
+      latest_receipts:
+        ops_portal_visualizations: 2026-03-28-adr-0240-operator-visualization-panels-live-apply
   - id: ws-0230-live-apply
     adr: "0230"
     title: Live apply policy decisions via Open Policy Agent and Conftest
