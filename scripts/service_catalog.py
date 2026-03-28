@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import subprocess
 import sys
 from typing import Any, Final
 
@@ -22,6 +23,7 @@ SERVICE_CATALOG_SCHEMA_PATH: Final = repo_path(
 )
 HOST_VARS_PATH: Final = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 STACK_PATH: Final = repo_path("versions", "stack.yaml")
+WORKSTREAMS_PATH: Final = repo_path("workstreams.yaml")
 UPTIME_MONITORS_PATH: Final = repo_path("config", "uptime-kuma", "monitors.json")
 HEALTH_PROBE_CATALOG_PATH: Final = repo_path("config", "health-probe-catalog.json")
 IMAGE_CATALOG_PATH: Final = repo_path("config", "image-catalog.json")
@@ -45,6 +47,31 @@ ALLOWED_EXPOSURES = {
     "private-only",
 }
 ALLOWED_DEPENDENCY_TYPES = {"hard", "soft", "optional"}
+
+
+def current_git_branch() -> str:
+    try:
+        branch = subprocess.check_output(
+            ["git", "-C", str(repo_path()), "rev-parse", "--abbrev-ref", "HEAD"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except (OSError, subprocess.CalledProcessError):
+        return "HEAD"
+    return branch or "HEAD"
+
+
+def service_catalog_enforces_observed_guest_surfaces() -> bool:
+    registry = load_yaml(WORKSTREAMS_PATH)
+    if not isinstance(registry, dict):
+        return True
+    release_policy = registry.get("release_policy")
+    if not isinstance(release_policy, dict):
+        return True
+    branch_policy = release_policy.get("versions_stack_branch_policy")
+    if branch_policy != "main_only":
+        return True
+    return current_git_branch() == "main"
 
 
 def require_environment_bindings(
@@ -239,6 +266,9 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
             "observed_state.guests.instances",
         )
     }
+    allowed_service_surfaces = set(observed_guests)
+    if not service_catalog_enforces_observed_guest_surfaces():
+        allowed_service_surfaces.update(guest_vmids.keys())
     monitor_names = {monitor["name"] for monitor in monitor_catalog}
     probe_service_ids = health_probe_service_ids()
     known_image_ids = image_catalog_ids()
@@ -364,7 +394,7 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
 
         if lifecycle_status == "active":
             active_service_ids.add(service_id)
-            if vm != "proxmox_florin" and vm not in observed_guests:
+            if vm != "proxmox_florin" and vm not in allowed_service_surfaces:
                 raise ValueError(
                     f"active service '{service_id}' must reference an observed guest or host surface"
                 )
