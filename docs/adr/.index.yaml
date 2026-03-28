@@ -3791,7 +3791,7 @@ adr_index:
   - adr: '0225'
     title: Server-Resident Reconciliation Via Ansible Pull
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -3801,6 +3801,7 @@ adr_index:
       - pull
     summary: We will use ansible-pull as the default server-resident reconcile
     filename: 0225-server-resident-reconciliation-via-ansible-pull.md
+    implemented_version: 0.177.41
   - adr: '0226'
     title: Systemd Units, Timers, And Paths For Host-Resident Control Loops
     status: Accepted

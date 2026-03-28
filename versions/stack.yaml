@@ -93,6 +93,7 @@ live_apply_evidence:
     operator_access_quarterly_review: 2026-03-28-adr-0206-ports-and-adapters-live-apply
     canonical_publication_models: 2026-03-28-adr-0210-canonical-domain-models-live-apply
     provider_boundaries: 2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply
+    server_resident_reconciliation: 2026-03-28-adr-0225-server-resident-reconciliation-via-ansible-pull-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated

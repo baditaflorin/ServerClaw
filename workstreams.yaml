@@ -7238,7 +7238,7 @@ workstreams:
   - id: ws-0225-live-apply
     adr: "0225"
     title: Server-resident reconciliation via ansible-pull live apply
-    status: in-progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0225-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0225-live-apply
@@ -7250,15 +7250,24 @@ workstreams:
       - adr-0224-server-resident-operations-architecture-bundle
     conflicts_with: []
     shared_surfaces:
+      - README.md
+      - VERSION
+      - changelog.md
+      - config/ansible-role-idempotency.yml
       - docs/adr/0225-server-resident-reconciliation-via-ansible-pull.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.41.md
       - docs/workstreams/ws-0225-live-apply.md
       - docs/runbooks/server-resident-reconciliation.md
+      - docs/diagrams/agent-coordination-map.excalidraw
       - playbooks/server-resident-reconciliation.yml
+      - build/platform-manifest.json
       - collections/ansible_collections/lv3/platform/roles/server_resident_reconciliation/**
       - receipts/live-applies/2026-03-28-adr-0225-server-resident-reconciliation-via-ansible-pull-live-apply.json
       - receipts/live-applies/evidence/2026-03-28-adr-0225-*
       - tests/test_server_resident_reconciliation.py
       - docs/adr/.index.yaml
+      - versions/stack.yaml
       - workstreams.yaml
     ownership_manifest:
       owned_surfaces:
@@ -7277,13 +7286,31 @@ workstreams:
             - tests/test_server_resident_reconciliation.py
             - docs/adr/.index.yaml
           mode: exclusive
+        - id: adr_0225_mainline_truth
+          paths:
+            - README.md
+            - VERSION
+            - changelog.md
+            - config/ansible-role-idempotency.yml
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.41.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - build/platform-manifest.json
+            - versions/stack.yaml
+          mode: exclusive
         - id: adr_0225_live_evidence
           paths:
             - receipts/live-applies/2026-03-28-adr-0225-server-resident-reconciliation-via-ansible-pull-live-apply.json
             - receipts/live-applies/evidence/2026-03-28-adr-0225-*
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0225 by installing a durable server-resident ansible-pull reconcile loop on proxmox_florin, bootstrapping a least-privilege Gitea pull identity, and verifying host-local receipts through the private Gitea source
+      release_bump: patch
+      included_in_repo_version: 0.177.41
+      latest_receipts:
+        server_resident_reconciliation: 2026-03-28-adr-0225-server-resident-reconciliation-via-ansible-pull-live-apply
 
   - id: ws-0021-edge-cert-repair
     adr: "0021"
