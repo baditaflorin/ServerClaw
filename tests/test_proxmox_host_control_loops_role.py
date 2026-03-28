@@ -55,7 +55,9 @@ def test_role_renders_service_timer_and_path_units() -> None:
     assert "Render the host control-loop systemd path unit" in tasks
     assert "common_systemd_unit_name: \"{{ proxmox_host_control_loops_timer_name }}\"" in tasks
     assert "Type=oneshot" in service
-    assert "Restart=on-failure" in service
+    assert "Restart=no" in service
+    assert "RestartSec=" not in service
+    assert "StartLimitIntervalSec=" not in service
     assert "TimeoutStartSec={{ proxmox_host_control_loops_timeout_start_seconds }}" in service
     assert "ReadWritePaths={{ proxmox_host_control_loops_root }}" in service
     assert "OnCalendar={{ proxmox_host_control_loops_timer_on_calendar }}" in timer

@@ -33,9 +33,6 @@ proxmox_host_control_loops_timer_on_calendar: "*:0/30"
 proxmox_host_control_loops_timer_accuracy: 1m
 proxmox_host_control_loops_randomized_delay_seconds: 120
 proxmox_host_control_loops_timeout_start_seconds: 300
-proxmox_host_control_loops_restart_seconds: 30
-proxmox_host_control_loops_start_limit_interval_seconds: 900
-proxmox_host_control_loops_start_limit_burst: 3
 proxmox_host_control_loops_after_units:
   - network-online.target
   - pveproxy.service

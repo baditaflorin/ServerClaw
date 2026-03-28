@@ -86,5 +86,8 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 
 - The current loop records execution state only; ADR 0225 will later replace
   the placeholder reconcile body with a repo-managed `ansible-pull` path.
+- The reconcile service is a bounded `oneshot` unit. Retry comes from the next
+  timer tick, a new request file, or an explicit `systemctl start`, not from a
+  service-level restart loop.
 - Use `systemctl start lv3-host-control-loop-reconcile.service` for an explicit
   one-shot replay when you do not want to go through the path trigger.
