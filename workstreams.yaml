@@ -32,6 +32,14 @@ workstreams:
       - docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md
       - docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md
       - docs/adr/.index.yaml
+      - docs/runbooks/configure-coolify.md
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - config/subdomain-exposure-registry.json
+      - scripts/coolify_tool.py
+      - scripts/lv3_cli.py
+      - tests/test_coolify_tool.py
+      - tests/test_lv3_cli.py
       - workstreams.yaml
     ownership_manifest:
       owned_surfaces:
@@ -44,6 +52,16 @@ workstreams:
           paths:
             - docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md
             - docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md
+          mode: exclusive
+        - id: repo_intake_runtime_wrapper
+          paths:
+            - docs/runbooks/configure-coolify.md
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - config/subdomain-exposure-registry.json
+            - scripts/coolify_tool.py
+            - tests/test_coolify_tool.py
+            - tests/test_lv3_cli.py
           mode: exclusive
         - id: adr_index_generation
           paths:

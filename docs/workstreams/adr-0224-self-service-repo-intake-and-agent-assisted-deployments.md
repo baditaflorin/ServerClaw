@@ -14,16 +14,22 @@
 - Conflicts With: none
 - Shared Surfaces: `docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md`,
   `docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md`,
-  `docs/adr/.index.yaml`, `workstreams.yaml`
+  `docs/adr/.index.yaml`, `docs/runbooks/configure-coolify.md`,
+  `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`,
+  `config/subdomain-exposure-registry.json`,
+  `scripts/coolify_tool.py`, `scripts/lv3_cli.py`,
+  `tests/test_coolify_tool.py`, `tests/test_lv3_cli.py`, `workstreams.yaml`
 - Ownership Manifest: `workstreams.yaml` `ownership_manifest`
 
 ## Scope
 
 - create a tracked workstream for the requested repo-intake flow
 - record the architecture direction in ADR 0224
-- capture the current live platform baseline and the missing pieces before
-  private repo deployment can be self-served
-- anchor the first smoke target on `education_wemeshup`
+- implement the governed private-repo bootstrap path for the existing Coolify
+  repo deploy wrapper
+- expose the new private deploy-key and Docker Compose fields through `lv3`
+- anchor the first smoke target on the Dockerized `education_wemeshup`
+  repository
 
 ## Non-Goals
 
@@ -33,73 +39,92 @@
 - editing the dirty local
   `/Users/live/Documents/GITHUB_PROJECTS/education_wemeshup` checkout owned by
   another session
+- redesigning the entire intake catalog before the first governed smoke path
+  works end to end
 
 ## Expected Repo Surfaces
 
+- `docs/runbooks/configure-coolify.md`
+- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/group_vars/platform.yml`
+- `config/subdomain-exposure-registry.json`
+- `scripts/coolify_tool.py`
+- `scripts/lv3_cli.py`
+- `tests/test_coolify_tool.py`
+- `tests/test_lv3_cli.py`
 - `docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md`
 - `docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md`
 - `docs/adr/.index.yaml`
 - `workstreams.yaml`
 
-Future implementation on this branch will likely expand into:
-
-- `scripts/coolify_tool.py`
-- `scripts/lv3_cli.py`
-- a repo-intake or deployment-profile catalog
-- operator runbooks for private repo bootstrap and intake operations
-
 ## Expected Live Surfaces
 
 - none yet
 
-The first live smoke path should be a private-repo deployment of the committed
+The first live smoke path should be a private-repo deployment of the Dockerized
 `education_wemeshup` GitHub repository into `*.apps.lv3.org`.
 
 ## Ownership Notes
 
 - The current governed deployment lane already exists through ADR 0194:
   private Coolify API, protected dashboard, and wildcard app ingress are live.
-- The missing governed capability is private-repo credential bootstrap plus a
-  richer intake contract on top of the existing deploy wrapper.
-- The local `education_wemeshup` checkout is dirty and ahead of deployable Git
-  truth. Treat it as reference-only until its upstream branch commits the new
-  runtime shape.
+- The missing governed capability was private-repo credential bootstrap plus a
+  richer intake contract on top of the existing deploy wrapper. This workstream
+  implements that slice first.
+- The original `/Users/live/Documents/GITHUB_PROJECTS/education_wemeshup`
+  checkout is still dirty and remains reference-only.
+- A clean deployment worktree at
+  `/Users/live/Documents/GITHUB_PROJECTS/education_wemeshup/.worktrees/live-11-deploy-fixes`
+  is pinned to committed GitHub state for verification and any app-side fixes.
 
 ## Verification
 
 - `git ls-remote git@github.com:baditaflorin/education_wemeshup.git HEAD`
-- `git -C /Users/live/Documents/GITHUB_PROJECTS/education_wemeshup ls-tree -r --name-only HEAD`
-- `git -C /Users/live/Documents/GITHUB_PROJECTS/education_wemeshup status --short --branch`
-- `git -C /Users/live/Documents/GITHUB_PROJECTS/education_wemeshup npm run build`
+- `git -C /Users/live/Documents/GITHUB_PROJECTS/education_wemeshup/.worktrees/live-11-deploy-fixes status --short --branch`
+- `git -C /Users/live/Documents/GITHUB_PROJECTS/education_wemeshup/.worktrees/live-11-deploy-fixes log -1 --oneline`
+- `docker compose -f /Users/live/Documents/GITHUB_PROJECTS/education_wemeshup/.worktrees/live-11-deploy-fixes/compose.yaml config`
+- `docker compose -f /Users/live/Documents/GITHUB_PROJECTS/education_wemeshup/.worktrees/live-11-deploy-fixes/compose.yaml up --build -d`
+- `curl http://127.0.0.1:8081/readyz`
+- `curl http://127.0.0.1:8080/healthz`
+- `curl http://127.0.0.1:8080/api/v1/catalog/taxonomy`
 
 Observed on 2026-03-28:
 
 - GitHub SSH access works from the controller.
-- The committed repo `HEAD` contains only `.gitignore` and `index.html`.
-- The local working tree has uncommitted Vite-era additions.
-- `npm run build` fails in the local working tree because
-  `src/domain/catalog.js` is missing.
+- The current committed app head is `0f3c228 Add compose live stack wiring`.
+- The clean deployment worktree composes three healthy services:
+  `postgres`, `catalog-api`, and `catalog-web`.
+- Local smoke checks pass against the committed Dockerized stack:
+  `/readyz`, `/healthz`, and `/api/v1/catalog/taxonomy`.
+- After the app-side port fix merged, Coolify deployment finished healthy from
+  `main`, but the outer wildcard edge still looped on `307` because NGINX was
+  proxying wildcard app traffic to the Coolify VM over plain HTTP instead of
+  HTTPS.
+- After switching the wildcard edge upstream to HTTPS, the public app path still
+  timed out until the managed `coolify-lv3` guest firewall allowed `nginx-lv3`
+  to reach TCP `443` in addition to `80` and `8000`.
 
 ## Merge Criteria
 
 - a governed private-repo auth path is documented and implemented
-- one catalog-driven deployment request can select environment and domain
-  without hand-editing commands
+- one governed deployment request can select environment, source mode, and
+  domain without hand-editing Coolify API calls
 - the first private GitHub smoke repo deploys from committed Git state
 - the path clearly separates direct deploy, bounded agent assist, and
   production promotion
 
 ## Notes For The Next Assistant
 
-- If the user wants the absolute fastest smoke test, deploy the committed remote
-  `education_wemeshup` `index.html` first and leave the uncommitted Vite refactor
-  to its own repo session.
-- The current `scripts/coolify_tool.py` wrapper handles repo URL, branch, build
-  pack, ports, and domain, but it does not manage private-repo credentials or a
-  deployment-profile catalog yet.
-- The user asked whether a GitHub token is needed. For local analysis, no. For
-  live private-repo deployment, yes: we still need a governed server-side auth
-  path, ideally a GitHub App or per-repo deploy key instead of a broad PAT.
+- The app repo has moved beyond the original `index.html` baseline. Use the
+  clean `live-11-deploy-fixes` worktree, not the dirty top-level checkout, if
+  app-side fixes become necessary.
+- The current implementation path uses per-repo GitHub deploy keys and a
+  matching Coolify private key instead of a broad PAT.
+- If wildcard app traffic loops on `307 https://same-host/...`, check whether
+  the NGINX edge is still proxying `coolify_apps` to `http://<coolify-vm>:80`
+  instead of `https://<coolify-vm>:443`.
+- The next layer after this workstream should be a deployment-profile catalog
+  and intake UI, not another bespoke deployment mechanism.
 - The first normal push attempt on 2026-03-28 was blocked by stale generated
   `build/platform-manifest.json` and `docs/diagrams/agent-coordination-map.excalidraw`
   surfaces that are currently claimed by `adr-0204-architecture-governance`, so

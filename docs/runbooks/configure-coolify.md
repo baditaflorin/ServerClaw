@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This runbook converges the dedicated `coolify-lv3` PaaS VM, publishes the protected dashboard at `https://coolify.lv3.org`, enables the private API path through the Proxmox host Tailscale proxy, and verifies repo-driven application deployment through the `*.apps.lv3.org` wildcard ingress lane.
+This runbook converges the dedicated `coolify-lv3` PaaS VM, publishes the protected dashboard at `https://coolify.lv3.org`, enables the private API path through the Proxmox host Tailscale proxy, and verifies both public and private repo-driven application deployment through the `*.apps.lv3.org` wildcard ingress lane.
 
 ## Managed Surfaces
 
@@ -21,6 +21,8 @@ This runbook converges the dedicated `coolify-lv3` PaaS VM, publishes the protec
 - the controller has the bootstrap SSH key configured for the Proxmox jump path
 - `HETZNER_DNS_API_TOKEN` is available for dashboard DNS publication and shared edge certificate expansion
 - the shared NGINX edge, Keycloak, and oauth2-proxy path are already converged
+- for private GitHub repository deployment bootstrap, `gh auth status` succeeds on
+  the controller with repository administration access to the target repo
 
 On a workstream branch, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate` can remain blocked until the final merge-to-main step updates the protected canonical truth in `versions/stack.yaml`.
 
@@ -66,6 +68,38 @@ python3 scripts/coolify_tool.py deploy-repo \
   --timeout 900
 ```
 
+Private GitHub Docker Compose deployment:
+
+```bash
+python3 scripts/coolify_tool.py deploy-repo \
+  --repo git@github.com:baditaflorin/education_wemeshup.git \
+  --branch main \
+  --source private-deploy-key \
+  --app-name education-wemeshup \
+  --project "LV3 Apps" \
+  --environment production \
+  --build-pack dockercompose \
+  --docker-compose-location /compose.yaml \
+  --compose-domain catalog-web=education-wemeshup.apps.lv3.org \
+  --ports 80 \
+  --wait \
+  --timeout 1800
+```
+
+Equivalent operator CLI dry run:
+
+```bash
+python3 scripts/lv3_cli.py deploy-repo \
+  --repo git@github.com:baditaflorin/education_wemeshup.git \
+  --source private-deploy-key \
+  --app-name education-wemeshup \
+  --build-pack dockercompose \
+  --docker-compose-location /compose.yaml \
+  --compose-domain catalog-web=education-wemeshup.apps.lv3.org \
+  --wait \
+  --dry-run
+```
+
 App reachability:
 
 ```bash
@@ -82,6 +116,16 @@ Expected results:
 
 - `coolify.lv3.org` returns `302` to the shared oauth2-proxy sign-in flow
 - `repo-smoke.apps.lv3.org` returns `200`
+- the private GitHub wrapper run creates or reuses a local SSH keypair, a GitHub
+  repo deploy key, and a Coolify private key before triggering the deployment
+- Docker Compose applications must use `--compose-domain SERVICE=DOMAIN`
+  instead of the top-level `--domain` or `--subdomain` flags
+- the wildcard `*.apps.lv3.org` edge must proxy to the Coolify VM over
+  `https://<coolify-vm>:443`; proxying to plain HTTP causes an infinite `307`
+  loop for healthy apps
+- the `coolify-lv3` guest firewall must allow `nginx-lv3` to reach TCP `443`,
+  not just `80` and `8000`, or the public edge will time out while connecting
+  upstream
 - `apps.lv3.org` returns `404` until an apex app is assigned
 
 If public DNS has not propagated to the controller yet, keep using `--resolve` against `65.108.75.123` for verification and record that separately from DNS visibility.
@@ -92,6 +136,7 @@ If public DNS has not propagated to the controller yet, keep using `--resolve` a
 - `.local/coolify/api-token.txt`
 - `.local/coolify/server-key`
 - `.local/coolify/server-key.pub`
+- `.local/coolify/git-keys/`
 - `.local/coolify/deployments/`
 
 These files are generated or refreshed by the repo-managed automation and are not committed.

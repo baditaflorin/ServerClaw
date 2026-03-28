@@ -222,6 +222,12 @@ class CoolifyClient:
     def applications(self) -> list[dict[str, Any]]:
         return self._request("GET", "/api/v1/applications")
 
+    def private_keys(self) -> list[dict[str, Any]]:
+        return self._request("GET", "/api/v1/security/keys")
+
+    def github_apps(self) -> list[dict[str, Any]]:
+        return self._request("GET", "/api/v1/github-apps")
+
     def create_project(self, name: str, description: str | None = None) -> str:
         payload: dict[str, Any] = {"name": name}
         if description:
@@ -240,6 +246,19 @@ class CoolifyClient:
 
     def create_public_application(self, payload: dict[str, Any]) -> str:
         response = self._request("POST", "/api/v1/applications/public", payload=payload, expected=(201,))
+        return str(response["uuid"])
+
+    def create_private_deploy_key_application(self, payload: dict[str, Any]) -> str:
+        response = self._request("POST", "/api/v1/applications/private-deploy-key", payload=payload, expected=(201,))
+        return str(response["uuid"])
+
+    def create_private_key(self, *, name: str, description: str, private_key: str) -> str:
+        response = self._request(
+            "POST",
+            "/api/v1/security/keys",
+            payload={"name": name, "description": description, "private_key": private_key},
+            expected=(201,),
+        )
         return str(response["uuid"])
 
     def update_application(self, application_uuid: str, payload: dict[str, Any]) -> None:
@@ -282,6 +301,16 @@ class CoolifyClient:
                 return environment
         raise RuntimeError(f"Unable to discover environment {environment_name!r} after creation")
 
+    def ensure_private_key(self, *, name: str, description: str, private_key: str) -> dict[str, Any]:
+        for entry in self.private_keys():
+            if entry.get("name") == name:
+                return entry
+        private_key_uuid = self.create_private_key(name=name, description=description, private_key=private_key)
+        for entry in self.private_keys():
+            if entry.get("uuid") == private_key_uuid:
+                return entry
+        return {"uuid": private_key_uuid, "name": name, "description": description}
+
     def resolve_server(self, server_uuid: str | None) -> dict[str, Any]:
         if server_uuid:
             for server in self.servers():
@@ -307,20 +336,46 @@ class CoolifyClient:
         ports_exposes: str,
         base_directory: str | None,
         domains: list[str],
+        source: str = "public",
+        private_key_uuid: str | None = None,
+        description: str | None = None,
+        dockerfile_location: str | None = None,
+        docker_compose_location: str | None = None,
+        docker_compose_domains: list[dict[str, str]] | None = None,
+        publish_directory: str | None = None,
     ) -> dict[str, Any]:
         normalized_domains = ",".join(domain for domain in domains if domain)
+        compose_domains = docker_compose_domains or []
+
+        def update_payload(*, include_private_key_uuid: bool) -> dict[str, Any]:
+            payload: dict[str, Any] = {
+                "name": app_name,
+                "git_repository": repo,
+                "git_branch": branch,
+                "build_pack": build_pack,
+                "ports_exposes": ports_exposes,
+            }
+            if normalized_domains:
+                payload["domains"] = normalized_domains
+            if description:
+                payload["description"] = description
+            if base_directory:
+                payload["base_directory"] = base_directory
+            if include_private_key_uuid and private_key_uuid:
+                payload["private_key_uuid"] = private_key_uuid
+            if dockerfile_location:
+                payload["dockerfile_location"] = dockerfile_location
+            if docker_compose_location:
+                payload["docker_compose_location"] = docker_compose_location
+            if compose_domains:
+                payload["docker_compose_domains"] = compose_domains
+            if publish_directory:
+                payload["publish_directory"] = publish_directory
+            return payload
+
         for application in self.applications():
             if application.get("name") == app_name:
-                payload: dict[str, Any] = {
-                    "name": app_name,
-                    "git_repository": repo,
-                    "git_branch": branch,
-                    "build_pack": build_pack,
-                    "ports_exposes": ports_exposes,
-                    "domains": normalized_domains,
-                }
-                if base_directory:
-                    payload["base_directory"] = base_directory
+                payload = update_payload(include_private_key_uuid=False)
                 self.update_application(str(application["uuid"]), payload)
                 application = dict(application)
                 application.update(payload)
@@ -332,16 +387,15 @@ class CoolifyClient:
             "server_uuid": server_uuid,
             "destination_uuid": destination_uuid,
             "environment_name": environment_name,
-            "git_repository": repo,
-            "git_branch": branch,
-            "build_pack": build_pack,
-            "ports_exposes": ports_exposes,
-            "domains": normalized_domains,
             "autogenerate_domain": False,
         }
-        if base_directory:
-            payload["base_directory"] = base_directory
-        application_uuid = self.create_public_application(payload)
+        payload.update(update_payload(include_private_key_uuid=True))
+        if source == "private-deploy-key":
+            if not private_key_uuid:
+                raise RuntimeError("private-deploy-key source requires a private_key_uuid")
+            application_uuid = self.create_private_deploy_key_application(payload)
+        else:
+            application_uuid = self.create_public_application(payload)
         for application in self.applications():
             if application.get("uuid") == application_uuid:
                 return application
@@ -350,6 +404,16 @@ class CoolifyClient:
 
 def load_auth(path: str) -> dict[str, Any]:
     return load_json(Path(path).expanduser())
+
+
+def run_command(command: list[str]) -> subprocess.CompletedProcess[str]:
+    completed = subprocess.run(command, capture_output=True, text=True, check=False)
+    if completed.returncode != 0:
+        stderr = completed.stderr.strip()
+        stdout = completed.stdout.strip()
+        detail = stderr or stdout or f"exit code {completed.returncode}"
+        raise RuntimeError(f"Command failed: {command!r}: {detail}")
+    return completed
 
 
 def normalize_repository(repo: str) -> str:
@@ -365,11 +429,131 @@ def normalize_repository(repo: str) -> str:
     return candidate
 
 
+def slugify(value: str) -> str:
+    return "".join(char.lower() if char.isalnum() else "-" for char in value).strip("-")
+
+
+def resolve_source(requested_source: str, repo: str) -> str:
+    if requested_source != "auto":
+        return requested_source
+    if repo.strip().startswith("git@"):
+        return "private-deploy-key"
+    return "public"
+
+
+def github_repo_slug(repo: str, normalized_repo: str) -> str | None:
+    candidate = repo.strip()
+    if candidate.startswith("git@github.com:"):
+        return normalize_repository(candidate)
+    parsed = urllib.parse.urlparse(candidate)
+    if parsed.scheme and parsed.netloc == "github.com":
+        return normalize_repository(candidate)
+    if normalized_repo.count("/") == 1 and "://" not in normalized_repo and not normalized_repo.startswith("git@"):
+        return normalized_repo
+    return None
+
+
+def default_deploy_key_name(normalized_repo: str) -> str:
+    return f"coolify-{slugify(normalized_repo)}"
+
+
+def default_deploy_key_path(normalized_repo: str) -> Path:
+    return Path(
+        "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/coolify/git-keys"
+    ) / f"{slugify(normalized_repo)}.ed25519"
+
+
+def ensure_local_keypair(*, key_path: Path, comment: str) -> tuple[Path, Path]:
+    public_key_path = Path(f"{key_path}.pub")
+    if key_path.exists() and public_key_path.exists():
+        return key_path, public_key_path
+    key_path.parent.mkdir(parents=True, exist_ok=True)
+    run_command(
+        [
+            "ssh-keygen",
+            "-q",
+            "-t",
+            "ed25519",
+            "-N",
+            "",
+            "-C",
+            comment,
+            "-f",
+            str(key_path),
+        ]
+    )
+    if not key_path.exists() or not public_key_path.exists():
+        raise RuntimeError(f"Failed to create deploy keypair at {key_path}")
+    return key_path, public_key_path
+
+
+def github_deploy_keys(repo_slug: str) -> list[dict[str, Any]]:
+    completed = run_command(["gh", "api", f"repos/{repo_slug}/keys"])
+    return json.loads(completed.stdout)
+
+
+def ensure_github_deploy_key(*, repo_slug: str, title: str, public_key_path: Path) -> dict[str, Any]:
+    public_key = public_key_path.read_text(encoding="utf-8").strip()
+    normalized_public_key = " ".join(public_key.split()[:2])
+    for entry in github_deploy_keys(repo_slug):
+        if entry.get("key", "").strip() == normalized_public_key:
+            return entry
+        if entry.get("title") == title:
+            raise RuntimeError(f"GitHub deploy key title '{title}' already exists on {repo_slug} with different key material")
+    run_command(
+        [
+            "gh",
+            "repo",
+            "deploy-key",
+            "add",
+            str(public_key_path),
+            "--repo",
+            repo_slug,
+            "--title",
+            title,
+        ]
+    )
+    for entry in github_deploy_keys(repo_slug):
+        if entry.get("key", "").strip() == normalized_public_key:
+            return entry
+    raise RuntimeError(f"Unable to confirm deploy key '{title}' on GitHub repository {repo_slug}")
+
+
 def app_url_for_domain(domain: str) -> str:
     parsed = urllib.parse.urlparse(domain)
     if parsed.scheme and parsed.netloc:
         return domain
     return f"https://{domain.lstrip('/')}"
+
+
+def normalize_repo_location(value: str | None) -> str | None:
+    if value is None:
+        return None
+    candidate = value.strip()
+    if not candidate:
+        return None
+    if candidate == "/":
+        return candidate
+    return f"/{candidate.lstrip('/')}"
+
+
+def private_repo_url(repo: str, normalized_repo: str) -> str:
+    candidate = repo.strip()
+    if candidate.startswith("git@"):
+        return candidate
+    repo_slug = github_repo_slug(candidate, normalized_repo)
+    if repo_slug:
+        return f"git@github.com:{repo_slug}.git"
+    raise RuntimeError(
+        "private-deploy-key source requires an SSH-style repository URL or a GitHub repository path that can be converted into one"
+    )
+
+
+def parse_compose_domain_mapping(value: str) -> dict[str, str]:
+    service_name, separator, raw_domain = value.partition("=")
+    if not separator or not service_name.strip() or not raw_domain.strip():
+        raise ValueError("--compose-domain entries must use SERVICE=DOMAIN")
+    return {"name": service_name.strip(), "domain": app_url_for_domain(raw_domain.strip())}
 
 
 def wait_for_deployment(client: CoolifyClient, deployment_uuid: str, timeout_seconds: int) -> dict[str, Any]:
@@ -417,6 +601,11 @@ def command_deploy_repo(args: argparse.Namespace) -> int:
     auth = load_auth(args.auth_file)
     client = CoolifyClient(auth)
     normalized_repo = normalize_repository(args.repo)
+    source = resolve_source(args.source, args.repo)
+    base_directory = normalize_repo_location(args.base_directory)
+    dockerfile_location = normalize_repo_location(args.dockerfile_location)
+    docker_compose_location = normalize_repo_location(args.docker_compose_location)
+    compose_domains = [parse_compose_domain_mapping(item) for item in (args.compose_domain or [])]
     project = client.ensure_project(args.project, description="Repo-managed Coolify applications for ADR 0194.")
     environment = client.ensure_environment(str(project["uuid"]), args.environment)
     server = client.resolve_server(auth.get("server_uuid"))
@@ -430,15 +619,55 @@ def command_deploy_repo(args: argparse.Namespace) -> int:
         raise RuntimeError("Unable to determine the Coolify destination UUID")
 
     domains: list[str]
-    if args.domain:
-        domains = [args.domain]
-    elif args.subdomain:
-        domains = [f"http://{args.subdomain}.apps.lv3.org"]
+    domains_for_api: list[str]
+    if args.build_pack == "dockercompose":
+        if not compose_domains and (args.domain or args.subdomain or auth.get("smoke_domains")):
+            raise RuntimeError(
+                "dockercompose applications must use --compose-domain SERVICE=DOMAIN for public routing"
+            )
+        domains = [str(entry["domain"]) for entry in compose_domains]
+        domains_for_api = []
     else:
-        smoke_domains = auth.get("smoke_domains", [])
-        if not isinstance(smoke_domains, list) or not smoke_domains:
-            raise RuntimeError("No --domain or --subdomain provided, and auth file has no smoke_domains fallback")
-        domains = [str(item) for item in smoke_domains]
+        if args.domain:
+            domains = [args.domain]
+        elif args.subdomain:
+            domains = [f"http://{args.subdomain}.apps.lv3.org"]
+        else:
+            smoke_domains = auth.get("smoke_domains", [])
+            if not isinstance(smoke_domains, list) or not smoke_domains:
+                raise RuntimeError("No --domain or --subdomain provided, and auth file has no smoke_domains fallback")
+            domains = [str(item) for item in smoke_domains]
+        domains_for_api = domains
+
+    private_key_uuid = args.private_key_uuid
+    repo_for_coolify = normalized_repo
+    github_deploy_key: dict[str, Any] | None = None
+    coolify_private_key: dict[str, Any] | None = None
+    if source == "private-deploy-key":
+        repo_for_coolify = private_repo_url(args.repo, normalized_repo)
+        if not private_key_uuid:
+            repo_slug = github_repo_slug(args.repo, normalized_repo)
+            if not repo_slug:
+                raise RuntimeError(
+                    "Automatic deploy-key bootstrap currently requires a GitHub repository path or SSH URL; otherwise pass --private-key-uuid"
+                )
+            deploy_key_name = args.deploy_key_name or default_deploy_key_name(normalized_repo)
+            deploy_key_path = Path(args.deploy_key_path).expanduser() if args.deploy_key_path else default_deploy_key_path(normalized_repo)
+            private_key_path, public_key_path = ensure_local_keypair(
+                key_path=deploy_key_path,
+                comment=f"coolify:{repo_slug}",
+            )
+            github_deploy_key = ensure_github_deploy_key(
+                repo_slug=repo_slug,
+                title=deploy_key_name,
+                public_key_path=public_key_path,
+            )
+            coolify_private_key = client.ensure_private_key(
+                name=deploy_key_name,
+                description=args.description or f"Deploy key for {repo_slug}",
+                private_key=private_key_path.read_text(encoding="utf-8"),
+            )
+            private_key_uuid = str(coolify_private_key["uuid"])
 
     application = client.ensure_application(
         app_name=args.app_name,
@@ -446,12 +675,19 @@ def command_deploy_repo(args: argparse.Namespace) -> int:
         environment_name=str(environment["name"]),
         server_uuid=str(server["uuid"]),
         destination_uuid=destination_uuid,
-        repo=normalized_repo,
+        repo=repo_for_coolify,
         branch=args.branch,
         build_pack=args.build_pack,
         ports_exposes=args.ports,
-        base_directory=args.base_directory,
-        domains=domains,
+        base_directory=base_directory,
+        domains=domains_for_api,
+        source=source,
+        private_key_uuid=private_key_uuid,
+        description=args.description,
+        dockerfile_location=dockerfile_location,
+        docker_compose_location=docker_compose_location,
+        docker_compose_domains=compose_domains,
+        publish_directory=args.publish_directory,
     )
     deployment_uuid = client.deploy_application(str(application["uuid"]), force=args.force)
     result = {
@@ -459,11 +695,26 @@ def command_deploy_repo(args: argparse.Namespace) -> int:
       "application_name": args.app_name,
       "deployment_uuid": deployment_uuid,
       "domains": domains,
+      "source": source,
+      "repository": repo_for_coolify,
       "project_uuid": str(project["uuid"]),
       "environment_uuid": str(environment["uuid"]),
       "server_uuid": str(server["uuid"]),
       "destination_uuid": destination_uuid,
     }
+    if compose_domains:
+        result["compose_domains"] = compose_domains
+    if github_deploy_key is not None:
+        result["github_deploy_key"] = {
+            "id": github_deploy_key.get("id"),
+            "title": github_deploy_key.get("title"),
+            "read_only": github_deploy_key.get("read_only"),
+        }
+    if coolify_private_key is not None:
+        result["coolify_private_key"] = {
+            "uuid": coolify_private_key.get("uuid"),
+            "name": coolify_private_key.get("name"),
+        }
     if args.wait:
         deployment = wait_for_deployment(client, deployment_uuid, args.timeout)
         result["deployment"] = deployment
@@ -489,6 +740,12 @@ def build_parser() -> argparse.ArgumentParser:
     deploy_parser = subparsers.add_parser("deploy-repo", help="Create or update one repo-backed Coolify application and deploy it.")
     deploy_parser.add_argument("--repo", required=True, help="Repository URL.")
     deploy_parser.add_argument("--branch", default="main", help="Repository branch.")
+    deploy_parser.add_argument(
+        "--source",
+        default="auto",
+        choices=["auto", "public", "private-deploy-key"],
+        help="Repository source mode. 'auto' treats SSH URLs as private deploy-key repos and HTTPS URLs as public repos.",
+    )
     deploy_parser.add_argument("--base-directory", help="Optional base directory inside the repository.")
     deploy_parser.add_argument("--app-name", default="repo-smoke", help="Coolify application name.")
     deploy_parser.add_argument("--project", default="LV3 Apps", help="Coolify project name.")
@@ -497,6 +754,18 @@ def build_parser() -> argparse.ArgumentParser:
     deploy_parser.add_argument("--subdomain", help="Subdomain under apps.lv3.org, for example hello.")
     deploy_parser.add_argument("--build-pack", default="static", choices=["nixpacks", "static", "dockerfile", "dockercompose"])
     deploy_parser.add_argument("--ports", default="80", help="Comma-separated exposed ports.")
+    deploy_parser.add_argument("--description", help="Optional Coolify application description.")
+    deploy_parser.add_argument("--private-key-uuid", help="Existing Coolify private key UUID for private deploy-key applications.")
+    deploy_parser.add_argument("--deploy-key-name", help="Deploy key label to reuse or create for GitHub and Coolify.")
+    deploy_parser.add_argument("--deploy-key-path", help="Local SSH private key path used for deploy-key bootstrap.")
+    deploy_parser.add_argument("--dockerfile-location", help="Repository-relative Dockerfile path for dockerfile build pack.")
+    deploy_parser.add_argument("--docker-compose-location", help="Repository-relative compose file path for dockercompose build pack.")
+    deploy_parser.add_argument(
+        "--compose-domain",
+        action="append",
+        help="Map one Docker Compose service to one public domain using SERVICE=DOMAIN. Repeat for multiple services.",
+    )
+    deploy_parser.add_argument("--publish-directory", help="Static publish directory for static build pack deployments.")
     deploy_parser.add_argument("--wait", action="store_true", help="Wait for the deployment result.")
     deploy_parser.add_argument("--timeout", type=int, default=900, help="Wait timeout in seconds.")
     deploy_parser.add_argument("--force", action="store_true", help="Force a rebuild without cache.")

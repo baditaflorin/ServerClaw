@@ -662,6 +662,7 @@ network_policy:
           protocol: tcp
           ports:
             - 80
+            - 443
             - 8000
           description: Shared edge publication for the Coolify dashboard and wildcard app ingress
     postgres-lv3:
@@ -1372,7 +1373,7 @@ lv3_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.coolify_proxy_port }}"
+      upstream: "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:443"
       aliases:
         - "*.apps.lv3.org"
       crawl_policy_enabled: false
