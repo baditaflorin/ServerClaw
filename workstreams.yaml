@@ -14,6 +14,60 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0231-live-apply
+    adr: "0231"
+    title: Live apply ADR 0231 local secret delivery via OpenBao Agent and systemd credentials
+    status: in-progress
+    owner: codex
+    branch: codex/ws-0231-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0231-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0231-live-apply.md
+    depends_on:
+      - adr-0043-openbao
+      - adr-0051-control-plane-backup-recovery-and-break-glass
+      - adr-0077-compose-runtime-secrets-injection
+      - adr-0224-server-resident-operations-as-the-default-control-model
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0231-live-apply.md
+      - docs/adr/0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/configure-control-plane-recovery.md
+      - collections/ansible_collections/lv3/platform/roles/common/README.md
+      - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+      - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.hcl.j2
+      - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.service.j2
+      - collections/ansible_collections/lv3/platform/roles/control_plane_recovery/**
+      - tests/test_compose_runtime_secret_injection.py
+      - receipts/live-applies/2026-03-28-adr-0231-local-secret-delivery-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0231_live_apply
+          paths:
+            - docs/workstreams/ws-0231-live-apply.md
+            - docs/adr/0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials.md
+            - docs/adr/.index.yaml
+            - docs/runbooks/configure-control-plane-recovery.md
+            - collections/ansible_collections/lv3/platform/roles/common/README.md
+            - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+            - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.hcl.j2
+            - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.service.j2
+            - collections/ansible_collections/lv3/platform/roles/control_plane_recovery/**
+            - tests/test_compose_runtime_secret_injection.py
+            - receipts/live-applies/2026-03-28-adr-0231-local-secret-delivery-live-apply.json
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false
   - id: ws-0206-live-apply
     adr: "0206"
     title: Live apply ADR 0206 ports and adapters for external integrations

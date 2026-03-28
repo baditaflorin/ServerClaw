@@ -102,12 +102,32 @@ def test_control_plane_recovery_no_longer_requires_windmill_env_file() -> None:
 
 def test_control_plane_recovery_uses_dedicated_windmill_backup_dsn() -> None:
     defaults_text = (REPO_ROOT / "roles" / "control_plane_recovery" / "defaults" / "main.yml").read_text()
-    template_text = (REPO_ROOT / "roles" / "control_plane_recovery" / "templates" / "lv3-control-plane-backup.sh.j2").read_text()
+    script_text = (REPO_ROOT / "roles" / "control_plane_recovery" / "templates" / "lv3-control-plane-backup.sh.j2").read_text()
+    service_text = (REPO_ROOT / "roles" / "control_plane_recovery" / "templates" / "lv3-control-plane-backup.service.j2").read_text()
+    tasks_text = (REPO_ROOT / "roles" / "control_plane_recovery" / "tasks" / "main.yml").read_text()
+    helper_text = (REPO_ROOT / "roles" / "common" / "tasks" / "openbao_systemd_credentials.yml").read_text()
+    helper_config_text = (
+        REPO_ROOT / "roles" / "common" / "templates" / "openbao-agent-systemd-credentials.hcl.j2"
+    ).read_text()
+    helper_service_text = (
+        REPO_ROOT / "roles" / "common" / "templates" / "openbao-agent-systemd-credentials.service.j2"
+    ).read_text()
 
     assert "patroni-superuser-password.txt" in defaults_text
     assert "control_plane_recovery_windmill_backup_database_dsn" in defaults_text
-    assert '. "{{ windmill_env_file }}"' not in template_text
-    assert "control_plane_recovery_windmill_backup_database_dsn" in template_text
+    assert "openbao-backup-token.json" not in defaults_text
+    assert '. "{{ windmill_env_file }}"' not in script_text
+    assert "CREDENTIALS_DIRECTORY" in script_text
+    assert "postgresql://" not in script_text
+    assert "openbao-backup-token.json" not in script_text
+    assert 'LoadCredential=openbao-token:' in service_text
+    assert 'LoadCredential=windmill-db-dsn:' in service_text
+    assert "openbao_systemd_credentials" in tasks_text
+    assert 'systemctl\n      - start' in tasks_text
+    assert 'command: "{{ control_plane_recovery_runtime_backup_script }}"' not in tasks_text
+    assert 'sink "file"' in helper_config_text
+    assert "docker run --rm --name" in helper_service_text
+    assert "common_openbao_systemd_credentials_secret_path" in helper_text
 
 
 def test_mail_gateway_image_includes_telemetry_module() -> None:
