@@ -15,6 +15,17 @@ ROLE_TASKS = (
     / "tasks"
     / "main.yml"
 )
+VERIFY_TASKS = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "harbor_runtime"
+    / "tasks"
+    / "verify.yml"
+)
 HOST_VARS = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 
 
@@ -30,6 +41,52 @@ def test_role_tracks_robot_reconcile_state_before_refreshing_secret() -> None:
     assert "Refresh the check-runner Harbor robot secret when local state is missing" in task_names
     assert "Read the desired Harbor registry credential password" in task_names
     assert "Record whether Harbor registry credential containers need recreation" in task_names
+    assert "Record whether the Harbor admin password needs reconciliation" in task_names
+    assert "Reset the Harbor admin password seed in the Harbor database when credentials drift" in task_names
+
+
+def test_role_waits_for_keycloak_before_bootstrap_token_request() -> None:
+    tasks = load_yaml(ROLE_TASKS)
+    task_by_name = {task["name"]: task for task in tasks}
+
+    readiness_task = task_by_name["Wait for the local Keycloak admin endpoint to recover after Docker reconciliation"]
+    token_task = task_by_name["Request a Keycloak admin token for Harbor bootstrap"]
+
+    assert readiness_task["retries"] == 24
+    assert readiness_task["delay"] == 5
+    assert readiness_task["until"] == "harbor_keycloak_admin_ready.status == 200"
+    assert token_task["retries"] == 12
+    assert token_task["delay"] == 5
+    assert token_task["until"] == "harbor_keycloak_admin_token_response.status == 200"
+
+
+def test_role_gates_network_recovery_on_boolean_fact() -> None:
+    tasks = load_yaml(ROLE_TASKS)
+    task_by_name = {task["name"]: task for task in tasks}
+
+    reset_task = task_by_name["Reset the Harbor compose stack before a controlled reapply"]
+    recycle_task = task_by_name["Force one Harbor recycle when compose network membership is incomplete"]
+    recreate_task = task_by_name["Force one Harbor recreate when compose network membership is incomplete"]
+
+    assert reset_task["when"] == "(harbor_compose_assets_changed | bool) or not (harbor_runtime_healthy_before_reconcile | bool)"
+    assert recycle_task["when"] == "harbor_compose_needs_recovery | bool"
+    assert recreate_task["when"] == "harbor_compose_needs_recovery | bool"
+
+
+def test_verify_accepts_running_services_after_ping() -> None:
+    tasks = load_yaml(VERIFY_TASKS)
+    task_by_name = {task["name"]: task for task in tasks}
+
+    verify_task = task_by_name["Assert Harbor runtime services include the expected core components"]
+    verify_running_task = task_by_name["Verify Harbor core containers are running"]
+    verify_checks = verify_task["ansible.builtin.assert"]["that"]
+
+    assert "'harbor-core running ' in harbor_verify_services.stdout" in verify_checks
+    assert "'nginx running ' in harbor_verify_services.stdout" in verify_checks
+    assert "running\\ starting)" in verify_running_task["ansible.builtin.shell"]
+    assert verify_task["ansible.builtin.assert"]["fail_msg"] == (
+        "Harbor answered the ping endpoint but one or more core services are not running."
+    )
 
 
 def test_host_network_policy_allows_nginx_edge_access_to_harbor() -> None:

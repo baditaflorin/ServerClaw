@@ -230,7 +230,7 @@
     or 'Removing' in harbor_compose_down.stderr
     or 'Network' in harbor_compose_down.stdout
     or 'Network' in harbor_compose_down.stderr
-  when: harbor_compose_assets_changed or not harbor_runtime_healthy_before_reconcile
+  when: (harbor_compose_assets_changed | bool) or not (harbor_runtime_healthy_before_reconcile | bool)
 
 - name: Remove stale Harbor containers after the compose reset
   ansible.builtin.shell: |
@@ -244,7 +244,7 @@
     executable: /bin/bash
   register: harbor_force_remove_containers
   changed_when: "'changed' in harbor_force_remove_containers.stdout"
-  when: harbor_compose_assets_changed or not harbor_runtime_healthy_before_reconcile
+  when: (harbor_compose_assets_changed | bool) or not (harbor_runtime_healthy_before_reconcile | bool)
 
 - name: Remove stale Harbor networks after the compose reset
   ansible.builtin.shell: |
@@ -258,7 +258,7 @@
     executable: /bin/bash
   register: harbor_force_remove_networks
   changed_when: "'changed' in harbor_force_remove_networks.stdout"
-  when: harbor_compose_assets_changed or not harbor_runtime_healthy_before_reconcile
+  when: (harbor_compose_assets_changed | bool) or not (harbor_runtime_healthy_before_reconcile | bool)
 
 - name: Start or update the Harbor compose stack
   ansible.builtin.command:
@@ -280,7 +280,7 @@
     or 'Recreating' in harbor_compose_up.stdout
     or 'Starting' in harbor_compose_up.stdout
     or 'Pulling' in harbor_compose_up.stdout
-  when: harbor_compose_assets_changed or not harbor_runtime_healthy_before_reconcile
+  when: (harbor_compose_assets_changed | bool) or not (harbor_runtime_healthy_before_reconcile | bool)
 
 - name: Read the Harbor compose network state after reconciliation
   ansible.builtin.command:
@@ -336,7 +336,7 @@
     'Stopping' in harbor_compose_recovery_down.stdout
     or 'Removing' in harbor_compose_recovery_down.stdout
     or 'Network' in harbor_compose_recovery_down.stdout
-  when: harbor_compose_needs_recovery
+  when: harbor_compose_needs_recovery | bool
 
 - name: Force one Harbor recreate when compose network membership is incomplete
   ansible.builtin.command:
@@ -358,7 +358,7 @@
     'Creating' in harbor_compose_recovery_up.stdout
     or 'Recreating' in harbor_compose_recovery_up.stdout
     or 'Starting' in harbor_compose_recovery_up.stdout
-  when: harbor_compose_needs_recovery
+  when: harbor_compose_needs_recovery | bool
 
 - name: Wait for Harbor ping locally
   ansible.builtin.uri:
@@ -376,11 +376,12 @@
     set -euo pipefail
     unhealthy=0
     for container in {{ harbor_runtime_container_names | join(' ') }}; do
-      state="$(docker inspect "${container}" --format '{{ "{{ .State.Status }}" }} {{ "{{ if .State.Health }}" }}{{ "{{ .State.Health.Status }}" }}{{ "{{ else }}" }}none{{ "{{ end }}" }} {{ "{{ range .NetworkSettings.Networks }}" }}{{ "{{ .IPAddress }}" }}{{ "{{ end }}" }}' 2>/dev/null || echo missing missing missing)"
+      state="$(docker inspect "${container}" --format '{{ "{{ .State.Status }}" }} {{ "{{ if .State.Health }}" }}{{ "{{ .State.Health.Status }}" }}{{ "{{ else }}" }}none{{ "{{ end }}" }}' 2>/dev/null || echo missing missing)"
       echo "${container} ${state}"
       case "${state}" in
-        running\ healthy\ *) ;;
-        running\ none\ *) ;;
+        running\ healthy) ;;
+        running\ none) ;;
+        running\ starting) ;;
         *)
           unhealthy=1
           ;;
@@ -407,6 +408,17 @@
     harbor_keycloak_bootstrap_admin_password: "{{ harbor_keycloak_bootstrap_admin_password_raw.content | b64decode | trim }}"
   no_log: true
 
+- name: Wait for the local Keycloak admin endpoint to recover after Docker reconciliation
+  ansible.builtin.uri:
+    url: "{{ harbor_keycloak_local_admin_url }}/realms/master/.well-known/openid-configuration"
+    method: GET
+    status_code: 200
+  register: harbor_keycloak_admin_ready
+  retries: 24
+  delay: 5
+  until: harbor_keycloak_admin_ready.status == 200
+  changed_when: false
+
 - name: Request a Keycloak admin token for Harbor bootstrap
   ansible.builtin.uri:
     url: "{{ harbor_keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
@@ -419,6 +431,9 @@
       password: "{{ harbor_keycloak_bootstrap_admin_password }}"
     status_code: 200
   register: harbor_keycloak_admin_token_response
+  retries: 12
+  delay: 5
+  until: harbor_keycloak_admin_token_response.status == 200
   no_log: true
 
 - name: Record the Keycloak admin token
@@ -543,9 +558,74 @@
     user: admin
     password: "{{ harbor_admin_password }}"
     force_basic_auth: true
-    status_code: 200
+    status_code:
+      - 200
+      - 401
   register: harbor_config_query
+  failed_when: false
   changed_when: false
+  no_log: true
+
+- name: Record whether the Harbor admin password needs reconciliation
+  ansible.builtin.set_fact:
+    harbor_admin_password_needs_reset: "{{ harbor_config_query.status | default(0) == 401 }}"
+
+- name: Reset the Harbor admin password seed in the Harbor database when credentials drift
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - harbor-db
+      - psql
+      - -U
+      - postgres
+      - -d
+      - registry
+      - -c
+      - update harbor_user set salt='', password='' where user_id = 1;
+  register: harbor_admin_password_reset
+  changed_when: "'UPDATE 1' in harbor_admin_password_reset.stdout"
+  when: harbor_admin_password_needs_reset | bool
+  no_log: true
+
+- name: Restart Harbor core after resetting the managed admin password seed
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - -f
+      - "{{ harbor_generated_compose_file }}"
+      - restart
+      - harbor-core
+  args:
+    chdir: "{{ harbor_installer_dir }}"
+  register: harbor_core_restart_after_password_reset
+  changed_when: harbor_core_restart_after_password_reset.rc == 0
+  when: harbor_admin_password_needs_reset | bool
+
+- name: Wait for Harbor ping locally after resetting the managed admin password seed
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/ping"
+    method: GET
+    status_code: 200
+  register: harbor_ping_after_admin_password_reset
+  retries: 30
+  delay: 10
+  until: harbor_ping_after_admin_password_reset.status == 200
+  changed_when: false
+  when: harbor_admin_password_needs_reset | bool
+
+- name: Re-query Harbor configuration after resetting the managed admin password seed
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/configurations"
+    method: GET
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: harbor_config_query_after_password_reset
+  changed_when: false
+  when: harbor_admin_password_needs_reset | bool
   no_log: true
 
 - name: Configure Harbor OIDC defaults
