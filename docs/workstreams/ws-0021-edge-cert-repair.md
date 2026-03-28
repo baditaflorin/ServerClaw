@@ -6,7 +6,7 @@
 - Branch: `codex/wiki-edge-cert-fix`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/wiki-edge-cert-fix`
 - Owner: codex
-- Included In Repo Version: pending merge to `main`
+- Included In Repo Version: `0.177.28`
 - Depends On: `adr-0021-public-subdomain-publication`, `adr-0033-declarative-service-topology-catalog`, `adr-0101-automated-certificate-lifecycle-management`, `adr-0199-outline-living-knowledge-wiki`, `adr-0202-excalidraw-auto-generated-architecture-diagrams`
 - Conflicts With: none
 - Shared Surfaces: `playbooks/{outline,excalidraw,public-edge,langfuse,homepage,keycloak,headscale,n8n,uptime-kuma}.yml`, `collections/ansible_collections/lv3/platform/playbooks/{dozzle,headscale,keycloak,n8n,public-edge,uptime-kuma}.yml`, `tests/test_edge_publication_playbooks.py`, `receipts/live-applies/`, `workstreams.yaml`
@@ -27,6 +27,7 @@
 - `curl -I https://wiki.lv3.org`
 - `curl -I https://wiki.lv3.org/_health`
 - `openssl s_client -connect wiki.lv3.org:443 -servername wiki.lv3.org`
+- `grep -n 'wiki\.lv3\.org\|draw\.lv3\.org' /etc/nginx/sites-available/lv3-edge.conf`
 - `python3 scripts/sync_docs_to_outline.py verify --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/wiki-edge-cert-fix --base-url https://wiki.lv3.org --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/outline/api-token.txt`
 
 ## Outcome
@@ -35,7 +36,8 @@
 - every service playbook that republishes the shared edge now loads the canonical platform vars explicitly, and a regression test guards that contract
 - the live repair replay restored `wiki.lv3.org` and `draw.lv3.org` to `/etc/nginx/sites-available/lv3-edge.conf`, expanded the shared certificate SANs to include both hostnames again, and returned `HTTP/2 200` for `https://wiki.lv3.org` and `https://wiki.lv3.org/_health`
 - `python3 scripts/sync_docs_to_outline.py verify ...` returned `outline living collections verified` after the repair, confirming the published Outline surface is healthy again
-- remaining for merge to `main`: record the canonical mainline live-apply receipt, cut the release/version updates, and bump `platform_version` only after replaying the repair from merged `main`
+- the canonical mainline replay from merged `main` completed on `2026-03-28` and is recorded in `receipts/live-applies/2026-03-28-adr-0021-shared-edge-certificate-repair-mainline-live-apply.json`
+- remaining for merge to `main`: none
 
 ## Merge Criteria
 

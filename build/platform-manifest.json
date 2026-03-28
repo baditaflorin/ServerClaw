@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.27",
-  "platform_version": "0.130.34",
-  "generated_at": "2026-03-28T08:40:09Z",
-  "next_refresh_at": "2026-03-28T09:40:09Z",
+  "repo_version": "0.177.28",
+  "platform_version": "0.130.35",
+  "generated_at": "2026-03-28T09:07:17Z",
+  "next_refresh_at": "2026-03-28T10:07:17Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3740,10 +3740,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.25",
+    "last_version": "0.177.27",
     "deployed_at": "2026-03-28",
-    "summary": "integrated ADR 0198 by switching platform-context retrieval to local Ollama semantic embeddings, grounding operator and LLM query paths with cited vector matches, and hardening the governed `rag-context` live-apply wrapper across alias-aware service checks added bounded degraded-index recovery during governed live apply so the semantic platform-context collection self-heals legacy `384` to Ollama `768` vector-dimension drift without forcing a synchronous full mirrored-corpus rebuild",
-    "release_notes_url": "docs/release-notes/0.177.26.md"
+    "summary": "repaired shared edge publication playbooks so service-specific converges always load the canonical platform topology before rebuilding the shared certificate SAN set, preventing `wiki.lv3.org` and `draw.lv3.org` from dropping out of live publication replayed the shared edge from merged `main`, re-expanded the live certificate, and re-verified the governed Outline surface at `wiki.lv3.org`",
+    "release_notes_url": "docs/release-notes/0.177.28.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

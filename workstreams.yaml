@@ -5634,6 +5634,6 @@ workstreams:
     canonical_truth:
       changelog_entry: repaired shared edge publication playbooks so service-specific converges always load the canonical platform topology before rebuilding the shared certificate SAN set, preventing `wiki.lv3.org` and `draw.lv3.org` from dropping out of live publication
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.28
       latest_receipts:
-        public_edge_publication: 2026-03-28-adr-0021-shared-edge-certificate-repair-live-apply
+        public_edge_publication: 2026-03-28-adr-0021-shared-edge-certificate-repair-mainline-live-apply

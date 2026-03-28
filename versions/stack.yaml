@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.27
-platform_version: 0.130.34
+repo_version: 0.177.28
+platform_version: 0.130.35
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -11,7 +11,7 @@ live_apply_evidence:
     world_state_materializer: 2026-03-27-adr-0113-world-state-materializer-mainline-live-apply
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
     mutation_ledger: 2026-03-27-adr-0115-mutation-ledger-mainline-live-apply
-    public_edge_publication: 2026-03-26-adr-0134-changelog-redaction-live-apply
+    public_edge_publication: 2026-03-28-adr-0021-shared-edge-certificate-repair-mainline-live-apply
     agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
     api_gateway: 2026-03-26-adr-0163-retry-taxonomy-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
@@ -955,8 +955,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.27
+    current: 0.177.28
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.34
+    current: 0.130.35
     meaning: intended platform release for the actual server configuration
