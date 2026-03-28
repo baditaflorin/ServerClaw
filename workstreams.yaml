@@ -7581,3 +7581,58 @@ workstreams:
       changelog_entry: integrated ADR 0208 into main by enforcing inward dependency direction for reusable platform code and preserving explicit composition roots at the runtime edges
       release_bump: patch
       included_in_repo_version: 0.177.40
+
+  - id: ws-0229-live-apply
+    adr: "0229"
+    title: Gitea Actions runners live apply from latest origin/main
+    status: in-progress
+    owner: codex
+    branch: codex/ws-0229-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0229-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0229-live-apply.md
+    depends_on:
+      - adr-0083-docker-based-check-runner
+      - adr-0143-gitea
+      - adr-0168-agent-standards
+      - adr-0224-server-resident-operations-architecture-bundle
+    conflicts_with: []
+    shared_surfaces:
+      - docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md
+      - docs/workstreams/ws-0229-live-apply.md
+      - docs/runbooks/configure-gitea.md
+      - docs/runbooks/validate-repository-automation.md
+      - .gitea/workflows/validate.yml
+      - playbooks/gitea.yml
+      - collections/ansible_collections/lv3/platform/roles/gitea_runner/**
+      - collections/ansible_collections/lv3/platform/roles/gitea_runtime/**
+      - scripts/validate_repo.sh
+      - tests/test_gitea_runtime_role.py
+      - workstreams.yaml
+      - receipts/live-applies/**
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0229_runner_surface
+          paths:
+            - docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md
+            - docs/workstreams/ws-0229-live-apply.md
+            - docs/runbooks/configure-gitea.md
+            - docs/runbooks/validate-repository-automation.md
+            - .gitea/workflows/validate.yml
+            - playbooks/gitea.yml
+            - collections/ansible_collections/lv3/platform/roles/gitea_runner/**
+            - collections/ansible_collections/lv3/platform/roles/gitea_runtime/**
+            - scripts/validate_repo.sh
+            - tests/test_gitea_runtime_role.py
+          mode: exclusive
+        - id: live_apply_evidence
+          paths:
+            - receipts/live-applies/**
+          mode: shared_contract
+          contract: live-apply-receipts-v1
+    ready_to_merge: false
+    live_applied: false
