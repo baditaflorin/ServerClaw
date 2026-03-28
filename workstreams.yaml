@@ -14,6 +14,94 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0264-receipt-driven-resilience-adrs
+    adr: "0264"
+    title: Receipt-driven resilience architecture bundle
+    status: merged
+    owner: codex
+    branch: codex/ws-0264-receipt-driven-resilience-adrs-r3
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md
+    depends_on:
+      - adr-0036-live-apply-receipts
+      - adr-0087-validation-gate
+      - adr-0099-backup-restore-verification
+      - adr-0102-security-posture-reporting
+      - adr-0141-api-token-lifecycle-and-exposure-response
+      - adr-0163-platform-wide-retry-taxonomy-and-exponential-backoff
+      - adr-0170-platform-wide-timeout-hierarchy
+      - adr-0188-failover-rehearsal-gate-for-redundancy-tiers
+      - adr-0247-authenticated-browser-journey-verification-via-playwright
+      - adr-0252-route-and-dns-publication-assertion-ledger
+    conflicts_with: []
+    shared_surfaces:
+      - docs/adr/0264-failure-domain-isolated-validation-lanes.md
+      - docs/adr/0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+      - docs/adr/0266-validation-runner-capability-contracts-and-environment-attestation.md
+      - docs/adr/0267-expiring-gate-bypass-waivers-with-structured-reason-codes.md
+      - docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
+      - docs/adr/0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+      - docs/adr/0270-docker-publication-self-healing-and-port-programming-assertions.md
+      - docs/adr/0271-backup-coverage-assertion-ledger-and-backup-of-backup-policy.md
+      - docs/adr/0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md
+      - docs/adr/0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md
+      - docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md
+      - docs/adr/.index.yaml
+      - workstreams.yaml
+      - VERSION
+      - changelog.md
+      - RELEASE.md
+      - README.md
+      - versions/stack.yaml
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.56.md
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - build/platform-manifest.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: receipt_driven_resilience_bundle
+          paths:
+            - docs/adr/0264-failure-domain-isolated-validation-lanes.md
+            - docs/adr/0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+            - docs/adr/0266-validation-runner-capability-contracts-and-environment-attestation.md
+            - docs/adr/0267-expiring-gate-bypass-waivers-with-structured-reason-codes.md
+            - docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
+            - docs/adr/0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+            - docs/adr/0270-docker-publication-self-healing-and-port-programming-assertions.md
+            - docs/adr/0271-backup-coverage-assertion-ledger-and-backup-of-backup-policy.md
+            - docs/adr/0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md
+            - docs/adr/0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md
+            - docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md
+            - docs/adr/.index.yaml
+          mode: exclusive
+        - id: integration_release_surfaces
+          paths:
+            - VERSION
+            - changelog.md
+            - RELEASE.md
+            - README.md
+            - versions/stack.yaml
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.56.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - build/platform-manifest.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: accepted ADRs 0264 through 0273 to turn repeated gate
+        bypasses, recovery repairs, restore failures, security drift, and
+        public-endpoint mismatches into governed guardrails across validation,
+        builder snapshots, waiver policy, bootstrap preflight, vulnerability
+        budgets, Docker publication, backup coverage, restore warm-up, and DNS
+        plus certificate admission
+      release_bump: patch
+      included_in_repo_version: 0.177.56
   - id: ws-0254-serverclaw-adrs
     adr: "0254"
     title: ServerClaw architecture bundle
@@ -99,7 +187,7 @@ workstreams:
         mautrix, OpenClaw-compatible skill packs, Temporal, n8n, Nextcloud,
         Playwright, OpenFGA, and a PostgreSQL-Qdrant-search memory stack
       release_bump: patch
-      included_in_repo_version: 0.177.53
+      included_in_repo_version: 0.177.54
   - id: ws-0244-runtime-assurance-adrs
     adr: "0244"
     title: Runtime assurance architecture bundle
@@ -361,6 +449,178 @@ workstreams:
         command_catalog: 2026-03-28-adr-0230-policy-decisions-live-apply
         policy_validation: 2026-03-28-adr-0230-policy-decisions-live-apply
         promotion_pipeline: 2026-03-28-adr-0230-policy-decisions-live-apply
+  - id: ws-0233-live-apply
+    adr: "0233"
+    title: Live apply signed release bundles via Gitea Releases and Cosign
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0233-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0233-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0233-live-apply.md
+    depends_on:
+      - adr-0143-gitea-for-self-hosted-git-and-ci
+      - adr-0168-automated-validation-gate
+      - adr-0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0233-live-apply.md
+      - docs/adr/0233-signed-release-bundles-via-gitea-releases-and-cosign.md
+      - docs/runbooks/configure-gitea.md
+      - docs/runbooks/signed-release-bundles.md
+      - config/controller-local-secrets.json
+      - config/workflow-catalog.json
+      - .config-locations.yaml
+      - .gitea/workflows/release-bundle.yml
+      - keys/gitea-release-bundle-cosign.pub
+      - scripts/release_bundle.py
+      - collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/gitea_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/bootstrap-gitea.sh.j2
+      - tests/test_release_bundle.py
+      - tests/test_gitea_runtime_role.py
+      - receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-live-apply.json
+      - receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0233_live_apply
+          paths:
+            - docs/workstreams/ws-0233-live-apply.md
+            - docs/adr/0233-signed-release-bundles-via-gitea-releases-and-cosign.md
+            - docs/runbooks/configure-gitea.md
+            - docs/runbooks/signed-release-bundles.md
+            - config/controller-local-secrets.json
+            - config/workflow-catalog.json
+            - .config-locations.yaml
+            - .gitea/workflows/release-bundle.yml
+            - keys/gitea-release-bundle-cosign.pub
+            - scripts/release_bundle.py
+            - collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/gitea_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/bootstrap-gitea.sh.j2
+            - tests/test_release_bundle.py
+            - tests/test_gitea_runtime_role.py
+            - receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-live-apply.json
+            - receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply.json
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0233 by publishing signed control-plane release bundles from private Gitea Releases, seeding a durable repository token for private asset replay, and verifying bundle provenance with Cosign before runtime consumption
+      release_bump: patch
+      included_in_repo_version: 0.177.53
+      latest_receipts:
+        signed_release_bundles: 2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply
+      live_apply_verification:
+        release_tag: bundle-branch-codex-ws-0233-main-merge-2fb56c14b62a
+        head_sha: 2fb56c14b62a73d0de47cb367a78c987dfd257c5
+        workflow_runs:
+          publish_verify_run_id: 68
+          validate_run_id: 69
+        bundle_sha256: da9139777eadf4d0a6f4b520decc40781fb13282486ef67326217990e6223a8f
+  - id: ws-0233-main-merge
+    adr: "0233"
+    title: Integrate ADR 0233 signed release bundles into origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0233-main-merge
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0233-main-merge
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0233-main-merge.md
+    depends_on:
+      - ws-0233-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0233-main-merge.md
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.54.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/adr/.index.yaml
+      - docs/adr/0233-signed-release-bundles-via-gitea-releases-and-cosign.md
+      - docs/runbooks/configure-gitea.md
+      - docs/runbooks/signed-release-bundles.md
+      - docs/workstreams/ws-0233-live-apply.md
+      - .config-locations.yaml
+      - .gitea/workflows/release-bundle.yml
+      - keys/gitea-release-bundle-cosign.pub
+      - scripts/release_bundle.py
+      - config/controller-local-secrets.json
+      - config/workflow-catalog.json
+      - collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/gitea_runtime/meta/argument_specs.yml
+      - collections/ansible_collections/lv3/platform/roles/gitea_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/bootstrap-gitea.sh.j2
+      - tests/test_release_bundle.py
+      - tests/test_gitea_runtime_role.py
+      - receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-live-apply.json
+      - receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws_0233_main_merge_doc
+          paths:
+            - docs/workstreams/ws-0233-main-merge.md
+          mode: exclusive
+        - id: adr_0233_mainline_truth
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.54.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: exclusive
+        - id: adr_0233_main_merge_surfaces
+          paths:
+            - docs/adr/.index.yaml
+            - docs/adr/0233-signed-release-bundles-via-gitea-releases-and-cosign.md
+            - docs/runbooks/configure-gitea.md
+            - docs/runbooks/signed-release-bundles.md
+            - docs/workstreams/ws-0233-live-apply.md
+            - .config-locations.yaml
+            - .gitea/workflows/release-bundle.yml
+            - keys/gitea-release-bundle-cosign.pub
+            - scripts/release_bundle.py
+            - config/controller-local-secrets.json
+            - config/workflow-catalog.json
+            - collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/gitea_runtime/meta/argument_specs.yml
+            - collections/ansible_collections/lv3/platform/roles/gitea_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/bootstrap-gitea.sh.j2
+            - tests/test_release_bundle.py
+            - tests/test_gitea_runtime_role.py
+          mode: shared_contract
+          contract: adr-0233-main-merge-v1
+        - id: live_apply_evidence
+          paths:
+            - receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-live-apply.json
+            - receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply.json
+          mode: shared_contract
+          contract: live-apply-receipts-v1
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: integrated ADR 0233 into main by carrying the verified private Gitea release-bundle publication path, durable repository-token secret seeding, and Cosign verification evidence onto the protected release surfaces
+      release_bump: patch
+      included_in_repo_version: 0.177.54
   - id: ws-0231-live-apply
     adr: "0231"
     title: Live apply ADR 0231 local secret delivery via OpenBao Agent and systemd credentials
@@ -727,6 +987,7 @@ workstreams:
       - Makefile
       - config/workflow-catalog.json
       - config/command-catalog.json
+      - config/ansible-role-idempotency.yml
       - playbooks/proxmox-install.yml
       - collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/**
       - tests/test_proxmox_host_control_loops_role.py
@@ -747,6 +1008,7 @@ workstreams:
             - Makefile
             - config/workflow-catalog.json
             - config/command-catalog.json
+            - config/ansible-role-idempotency.yml
             - playbooks/proxmox-install.yml
             - collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/**
             - tests/test_proxmox_host_control_loops_role.py
@@ -759,7 +1021,93 @@ workstreams:
       release_bump: patch
       included_in_repo_version: 0.177.52
       latest_receipts:
-        host_control_loops: 2026-03-28-adr-0226-host-control-loops-live-apply
+        host_control_loops: 2026-03-28-adr-0226-host-control-loops-mainline-live-apply
+  - id: ws-0226-main-merge
+    adr: "0226"
+    title: Finalize ADR 0226 exact-main evidence on origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0226-main-merge
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0226-main-merge
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0226-main-merge.md
+    depends_on:
+      - ws-0226-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0226-main-merge.md
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.55.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/adr/.index.yaml
+      - docs/adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
+      - docs/runbooks/configure-host-control-loops.md
+      - docs/workstreams/ws-0226-live-apply.md
+      - Makefile
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - config/ansible-role-idempotency.yml
+      - playbooks/proxmox-install.yml
+      - collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/**
+      - tests/test_proxmox_host_control_loops_role.py
+      - receipts/live-applies/2026-03-28-adr-0226-host-control-loops-live-apply.json
+      - receipts/live-applies/2026-03-28-adr-0226-host-control-loops-mainline-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws_0226_main_merge_doc
+          paths:
+            - docs/workstreams/ws-0226-main-merge.md
+          mode: exclusive
+        - id: adr_0226_mainline_truth
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.55.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: exclusive
+        - id: adr_0226_main_merge_surfaces
+          paths:
+            - docs/adr/.index.yaml
+            - docs/adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
+            - docs/runbooks/configure-host-control-loops.md
+            - docs/workstreams/ws-0226-live-apply.md
+            - Makefile
+            - config/workflow-catalog.json
+            - config/command-catalog.json
+            - config/ansible-role-idempotency.yml
+            - playbooks/proxmox-install.yml
+            - collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/**
+            - tests/test_proxmox_host_control_loops_role.py
+          mode: shared_contract
+          contract: adr-0226-main-merge-v1
+        - id: live_apply_evidence
+          paths:
+            - receipts/live-applies/2026-03-28-adr-0226-host-control-loops-live-apply.json
+            - receipts/live-applies/2026-03-28-adr-0226-host-control-loops-mainline-live-apply.json
+          mode: shared_contract
+          contract: live-apply-receipts-v1
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: records ADR 0226 exact-main evidence on the current mainline by preserving the repaired host control-loop systemd baseline, the canonical mainline replay receipt, and the shared release-truth surfaces while the current live platform baseline remains 0.130.43
+      release_bump: patch
+      included_in_repo_version: 0.177.55
   - id: ws-0224-live-apply
     adr: "0224"
     title: Live apply ADR 0224 server-resident operations as the default control model

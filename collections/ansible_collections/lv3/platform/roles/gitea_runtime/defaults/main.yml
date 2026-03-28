@@ -45,6 +45,12 @@ gitea_runner_registration_token_remote_file: "{{ gitea_secret_dir }}/runner-regi
 gitea_runner_registration_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/runner-registration-token.txt
 gitea_webhook_secret_remote_file: "{{ gitea_secret_dir }}/webhook-secret"
 gitea_webhook_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/webhook-secret.txt
+gitea_release_bundle_cosign_private_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/release-bundle-cosign.key
+gitea_release_bundle_cosign_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/release-bundle-cosign.password.txt
+gitea_release_bundle_cosign_public_key_repo_file: "{{ playbook_dir | dirname }}/keys/gitea-release-bundle-cosign.pub"
+gitea_release_bundle_cosign_private_key_secret_name: RELEASE_BUNDLE_COSIGN_PRIVATE_KEY
+gitea_release_bundle_cosign_password_secret_name: RELEASE_BUNDLE_COSIGN_PASSWORD
+gitea_release_bundle_repo_token_secret_name: RELEASE_BUNDLE_REPO_TOKEN
 gitea_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea
 gitea_repo_org: ops
 gitea_repo_name: proxmox_florin_server

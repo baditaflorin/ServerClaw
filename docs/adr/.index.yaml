@@ -7,11 +7,11 @@
 
 schema_version: 1
 generated: '2026-03-28'
-total_adrs: 268
+total_adrs: 278
 implementation_status_summary:
-  Implemented: 214
+  Implemented: 215
   Partial: 4
-  Not Implemented: 49
+  Not Implemented: 58
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -38,6 +38,7 @@ concerns:
     - 0049
     - '0075'
     - '0145'
+    - '0272'
   automation:
     - '0030'
     - '0035'
@@ -65,6 +66,7 @@ concerns:
     - '0003'
     - '0215'
     - '0220'
+    - 0268
   ci-cd:
     - 0009
     - '0031'
@@ -95,6 +97,11 @@ concerns:
     - '0230'
     - '0233'
     - '0251'
+    - '0264'
+    - '0265'
+    - '0266'
+    - '0267'
+    - 0269
   documentation:
     - '0074'
     - 0081
@@ -144,6 +151,7 @@ concerns:
     - 0189
     - '0252'
     - '0256'
+    - '0273'
   platform:
     - 0019
     - '0025'
@@ -235,6 +243,7 @@ concerns:
     - 0259
     - '0260'
     - '0261'
+    - '0270'
   release:
     - 0008
     - '0110'
@@ -273,6 +282,7 @@ concerns:
     - '0020'
     - '0051'
     - 0099
+    - '0271'
   testing:
     - '0111'
     - 0187
@@ -3949,7 +3959,7 @@ adr_index:
   - adr: '0233'
     title: Signed Release Bundles Via Gitea Releases And Cosign
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -3961,6 +3971,7 @@ adr_index:
       - cosign
     summary: We will package server-consumable control inputs as signed release bundles
     filename: 0233-signed-release-bundles-via-gitea-releases-and-cosign.md
+    implemented_version: 0.177.54
   - adr: '0234'
     title: Shared Human App Shell And Navigation Via PatternFly
     status: Accepted
@@ -4413,3 +4424,155 @@ adr_index:
       - substrate
     summary: We will use PostgreSQL, Qdrant, and the local search fabric together as the
     filename: 0263-qdrant-postgresql-and-local-search-as-the-serverclaw-memory-substrate.md
+  - adr: '0264'
+    title: Failure-Domain-Isolated Validation Lanes
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - failure-domain-isolated
+      - validation
+      - lanes
+    summary: We will split repository and promotion validation into failure-domain-isolated
+    filename: 0264-failure-domain-isolated-validation-lanes.md
+  - adr: '0265'
+    title: Immutable Validation Snapshots For Remote Builders And Schema Checks
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - immutable
+      - validation
+      - snapshots
+      - remote
+      - builders
+      - schema
+      - checks
+    summary: We will run remote builder and schema validation against immutable repository
+    filename: 0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+  - adr: '0266'
+    title: Validation Runner Capability Contracts And Environment Attestation
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - validation
+      - runner
+      - capability
+      - contracts
+      - environment
+      - attestation
+    summary: We will require every local or remote validation runner to publish a
+    filename: 0266-validation-runner-capability-contracts-and-environment-attestation.md
+  - adr: '0267'
+    title: Expiring Gate Bypass Waivers With Structured Reason Codes
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - expiring
+      - gate
+      - bypass
+      - waivers
+      - structured
+      - reason
+      - codes
+    summary: We will treat every gate bypass as an expiring waiver with a structured
+    filename: 0267-expiring-gate-bypass-waivers-with-structured-reason-codes.md
+  - adr: 0268
+    title: Fresh-Worktree Bootstrap Manifests For Generated Artifacts And Local Inputs
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: bootstrap
+    keywords:
+      - fresh-worktree
+      - bootstrap
+      - manifests
+      - generated
+      - artifacts
+      - local
+      - inputs
+    summary: We will require a bootstrap manifest for every fresh worktree path that can
+    filename: 0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
+  - adr: 0269
+    title: Vulnerability Budgets And Image-Host Freshness Promotion Gates
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - vulnerability
+      - budgets
+      - image-host
+      - freshness
+      - promotion
+      - gates
+    summary: We will introduce vulnerability budgets and freshness gates for managed
+    filename: 0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+  - adr: '0270'
+    title: Docker Publication Self-Healing And Port-Programming Assertions
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - docker
+      - publication
+      - self-healing
+      - port-programming
+      - assertions
+    summary: We will add Docker publication self-healing and port-programming
+    filename: 0270-docker-publication-self-healing-and-port-programming-assertions.md
+  - adr: '0271'
+    title: Backup Coverage Assertion Ledger And Backup-Of-Backup Policy
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: storage
+    keywords:
+      - backup
+      - coverage
+      - assertion
+      - ledger
+      - backup-of-backup
+      - policy
+    summary: We will maintain a backup coverage assertion ledger and a declared
+    filename: 0271-backup-coverage-assertion-ledger-and-backup-of-backup-policy.md
+  - adr: '0272'
+    title: Restore Readiness Ladders And Stateful Warm-Up Verification Profiles
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: api
+    keywords:
+      - restore
+      - readiness
+      - ladders
+      - stateful
+      - warm-up
+      - verification
+      - profiles
+    summary: We will verify restores through readiness ladders and
+    filename: 0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md
+  - adr: '0273'
+    title: Public Endpoint Admission Control For DNS Catalog And Certificate Concordance
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: networking
+    keywords:
+      - public
+      - endpoint
+      - admission
+      - control
+      - dns
+      - catalog
+      - certificate
+      - concordance
+    summary: We will require public endpoint admission control that proves concordance
+    filename: 0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md
