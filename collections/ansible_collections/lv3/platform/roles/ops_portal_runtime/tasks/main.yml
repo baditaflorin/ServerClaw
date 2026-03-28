@@ -114,23 +114,103 @@
     - "{{ ops_portal_service_dir }}/publication_contract.py"
     - "{{ ops_portal_service_dir }}/requirements.txt"
 
-- name: Sync the ops portal application sources
-  ansible.builtin.copy:
-    src: "{{ ops_portal_repo_root }}/scripts/ops_portal/"
-    dest: "{{ ops_portal_service_dir }}/ops_portal/"
-    owner: root
-    group: root
-    mode: "0644"
-    directory_mode: "0755"
+- name: Stage and expand the ops portal application sources
+  block:
+    - name: Create a local staging archive path for the ops portal application sources
+      ansible.builtin.tempfile:
+        state: file
+        suffix: .tar.gz
+      delegate_to: localhost
+      become: false
+      register: ops_portal_app_archive_local
 
-- name: Sync the shared search fabric package
-  ansible.builtin.copy:
-    src: "{{ ops_portal_repo_root }}/scripts/search_fabric/"
-    dest: "{{ ops_portal_service_dir }}/search_fabric/"
-    owner: root
-    group: root
-    mode: "0644"
-    directory_mode: "0755"
+    - name: Build the local staging archive for the ops portal application sources
+      ansible.builtin.shell: |
+        set -euo pipefail
+        tar -C "{{ ops_portal_repo_root }}/scripts" -czf "{{ ops_portal_app_archive_local.path }}" ops_portal
+      args:
+        executable: /bin/bash
+      delegate_to: localhost
+      become: false
+      changed_when: false
+
+    - name: Copy the staged archive to the guest for the ops portal application sources
+      ansible.builtin.copy:
+        src: "{{ ops_portal_app_archive_local.path }}"
+        dest: "{{ ops_portal_site_dir }}/ops-portal-app-sync.tar.gz"
+        owner: root
+        group: root
+        mode: "0600"
+
+    - name: Expand the staged archive on the guest for the ops portal application sources
+      ansible.builtin.shell: |
+        set -euo pipefail
+        tar -xzf "{{ ops_portal_site_dir }}/ops-portal-app-sync.tar.gz" -C "{{ ops_portal_service_dir }}"
+      args:
+        executable: /bin/bash
+      changed_when: true
+  always:
+    - name: Remove the staged archive from the guest for the ops portal application sources
+      ansible.builtin.file:
+        path: "{{ ops_portal_site_dir }}/ops-portal-app-sync.tar.gz"
+        state: absent
+
+    - name: Remove the local staging archive for the ops portal application sources
+      ansible.builtin.file:
+        path: "{{ ops_portal_app_archive_local.path }}"
+        state: absent
+      delegate_to: localhost
+      become: false
+      when: ops_portal_app_archive_local is defined
+
+- name: Stage and expand the shared search fabric package
+  block:
+    - name: Create a local staging archive path for the shared search fabric package
+      ansible.builtin.tempfile:
+        state: file
+        suffix: .tar.gz
+      delegate_to: localhost
+      become: false
+      register: ops_portal_search_fabric_archive_local
+
+    - name: Build the local staging archive for the shared search fabric package
+      ansible.builtin.shell: |
+        set -euo pipefail
+        tar -C "{{ ops_portal_repo_root }}/scripts" -czf "{{ ops_portal_search_fabric_archive_local.path }}" search_fabric
+      args:
+        executable: /bin/bash
+      delegate_to: localhost
+      become: false
+      changed_when: false
+
+    - name: Copy the staged archive to the guest for the shared search fabric package
+      ansible.builtin.copy:
+        src: "{{ ops_portal_search_fabric_archive_local.path }}"
+        dest: "{{ ops_portal_site_dir }}/ops-portal-search-fabric-sync.tar.gz"
+        owner: root
+        group: root
+        mode: "0600"
+
+    - name: Expand the staged archive on the guest for the shared search fabric package
+      ansible.builtin.shell: |
+        set -euo pipefail
+        tar -xzf "{{ ops_portal_site_dir }}/ops-portal-search-fabric-sync.tar.gz" -C "{{ ops_portal_service_dir }}"
+      args:
+        executable: /bin/bash
+      changed_when: true
+  always:
+    - name: Remove the staged archive from the guest for the shared search fabric package
+      ansible.builtin.file:
+        path: "{{ ops_portal_site_dir }}/ops-portal-search-fabric-sync.tar.gz"
+        state: absent
+
+    - name: Remove the local staging archive for the shared search fabric package
+      ansible.builtin.file:
+        path: "{{ ops_portal_search_fabric_archive_local.path }}"
+        state: absent
+      delegate_to: localhost
+      become: false
+      when: ops_portal_search_fabric_archive_local is defined
 
 - name: Sync the shared publication contract helper
   ansible.builtin.copy:

@@ -34,8 +34,10 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert '"{{ ops_portal_service_dir }}/search_fabric"' in tasks
     assert '"{{ ops_portal_service_dir }}/publication_contract.py"' in tasks
     assert '"{{ ops_portal_service_dir }}/requirements.txt"' in tasks
-    assert "Sync the ops portal application sources" in tasks
-    assert "Sync the shared search fabric package" in tasks
+    assert "Stage and expand the ops portal application sources" in tasks
+    assert 'tar -C "{{ ops_portal_repo_root }}/scripts" -czf "{{ ops_portal_app_archive_local.path }}" ops_portal' in tasks
+    assert "Stage and expand the shared search fabric package" in tasks
+    assert 'tar -C "{{ ops_portal_repo_root }}/scripts" -czf "{{ ops_portal_search_fabric_archive_local.path }}" search_fabric' in tasks
     assert "Sync the shared publication contract helper" in tasks
     assert "Sync the ops portal requirements file" in tasks
 
