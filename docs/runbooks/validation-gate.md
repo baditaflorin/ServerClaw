@@ -62,6 +62,8 @@ It defines these blocking checks:
 
 `scripts/run_gate.py` reads that manifest and executes the checks in parallel via [scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/parallel_check.py).
 
+The `schema-validation` stage now also runs [scripts/provider_boundary_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/provider_boundary_catalog.py) so ADR 0207 provider-boundary guards fail the gate if a declared boundary leaks raw provider payload selectors beyond its translation step.
+
 The `integration-tests` stage runs [scripts/integration_suite.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/integration_suite.py) in `gate` mode against the `staging` environment. If the service catalog does not currently expose any active staging endpoints and no `LV3_INTEGRATION_*` overrides are supplied, the check records a structured skip and exits successfully instead of failing the gate.
 
 The `artifact-secret-scan` stage runs [scripts/published_artifact_secret_scan.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/published_artifact_secret_scan.py) in the security runner image so published receipts and generated portal/search artifacts are checked with `gitleaks` before merge.

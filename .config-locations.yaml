@@ -236,6 +236,18 @@ automation:
       - "config/windmill/scripts/network-impairment-matrix.py: mirrored worker entrypoint"
       - "docs/runbooks/network-impairment-matrix.md: operator procedure"
 
+  config/provider-boundary-catalog.yaml:
+    purpose: Canonical ADR 0207 catalog of provider boundaries that must translate raw provider payloads into canonical internal facts
+    owner: human
+    format: YAML
+    use_for: Declaring which provider integrations are governed by anti-corruption validation and how their implementation guardrails are enforced
+    update_when: Adding a new critical provider boundary or tightening the validation contract for an existing one
+    validation: "uv run --with pyyaml python scripts/provider_boundary_catalog.py --validate"
+    related_files:
+      - "scripts/provider_boundary_catalog.py: validator and catalog reader"
+      - "docs/runbooks/subdomain-governance.md: operator workflow for DNS-boundary usage"
+      - "docs/runbooks/validation-gate.md: remote and post-merge validation path"
+
   playbooks/site.yml:
     purpose: Main site playbook — full host bootstrap from bare Debian 13
     owner: human  # maintained by platform team

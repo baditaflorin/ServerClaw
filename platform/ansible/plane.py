@@ -5,13 +5,16 @@ import http.cookiejar
 import json
 import re
 import socket
-import time
 import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
+import time
+
+from platform.retry import MaxRetriesExceeded, RetryPolicy, with_retry
 
 
 class PlaneError(RuntimeError):
@@ -115,20 +118,29 @@ class PlaneClient:
             headers["Content-Type"] = "application/json"
         request = urllib.request.Request(url, data=data, method=method, headers=headers)
         expected = expected_statuses or {200}
-        attempt = 0
-        while True:
+
+        retry_policy = RetryPolicy(
+            max_attempts=self.max_rate_limit_retries + 1,
+            base_delay_s=self.rate_limit_backoff_seconds,
+            max_delay_s=self.rate_limit_backoff_seconds * (2**self.max_rate_limit_retries),
+            multiplier=2.0,
+            jitter=False,
+            transient_max=0,
+        )
+
+        def perform_request() -> tuple[int, Any]:
             try:
                 with self._opener.open(request, timeout=self.timeout) as response:
                     raw = response.read().decode("utf-8")
                     status = response.status
             except urllib.error.HTTPError as exc:
+                if exc.code not in expected:
+                    raise
                 status = exc.code
                 raw = exc.read().decode("utf-8")
             except (TimeoutError, socket.timeout, urllib.error.URLError) as exc:
-                if _is_timeout_error(exc) and attempt < self.max_rate_limit_retries:
-                    time.sleep(self.rate_limit_backoff_seconds * (2**attempt))
-                    attempt += 1
-                    continue
+                if _is_timeout_error(exc):
+                    raise
                 raise PlaneError(f"{method} {path} timed out: {exc}") from exc
             if status in expected:
                 if not raw:
@@ -136,11 +148,17 @@ class PlaneClient:
                 if accept_json:
                     return status, json.loads(raw)
                 return status, raw
-            if status in {429, 500, 502, 503, 504} and attempt < self.max_rate_limit_retries:
-                time.sleep(self.rate_limit_backoff_seconds * (2**attempt))
-                attempt += 1
-                continue
             raise PlaneError(f"{method} {path} returned HTTP {status}: {raw}")
+
+        try:
+            return with_retry(
+                perform_request,
+                policy=retry_policy,
+                error_context=f"{method} {path}",
+                sleep_fn=time.sleep,
+            )
+        except MaxRetriesExceeded as exc:
+            raise PlaneError(f"{method} {path} exhausted retry policy: {exc}") from exc
 
     def verify_api_key(self) -> bool:
         try:

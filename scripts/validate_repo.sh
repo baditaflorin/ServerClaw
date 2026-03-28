@@ -207,6 +207,7 @@ validate_data_models() {
   uv run --with pyyaml python3 "$REPO_ROOT/scripts/ansible_scope_runner.py" validate >/dev/null
   uv run --with pyyaml python "$REPO_ROOT/scripts/validate_timeout_hierarchy.py" >/dev/null
   python3 "$REPO_ROOT/scripts/check_hardcoded_timeouts.py" >/dev/null
+  uv run --with pyyaml python "$REPO_ROOT/scripts/provider_boundary_catalog.py" --validate >/dev/null
   uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/validate_repository_data_models.py" --validate >/dev/null
   uvx --from pyyaml python "$REPO_ROOT/scripts/execution_lanes.py" --validate >/dev/null
   uvx --from pyyaml python "$REPO_ROOT/scripts/operator_manager.py" validate >/dev/null

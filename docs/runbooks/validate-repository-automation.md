@@ -35,6 +35,7 @@ See [docs/runbooks/validation-gate.md](/Users/live/Documents/GITHUB_PROJECTS/pro
 - service-owning roles ship and import explicit `tasks/verify.yml` contracts
 - canonical repository data models pass schema validation
 - architecture fitness functions verify the governed replaceability scorecards and vendor exit plans for critical product ADRs
+- provider-boundary anti-corruption guards keep raw provider payload selectors confined to the declared boundary translation step
 - generated status documents are current for their canonical inputs
 - the workflow catalog, command catalog, control-plane lane catalog, and controller-local secret manifest cross-reference cleanly
 - the API publication catalog classifies every governed API and webhook surface
@@ -86,6 +87,7 @@ make validate-generated-docs
 - [config/api-publication.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/api-publication.json)
 - [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json)
 - [config/health-probe-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/health-probe-catalog.json)
+- [config/provider-boundary-catalog.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/provider-boundary-catalog.yaml)
 - [config/uptime-kuma/monitors.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/uptime-kuma/monitors.json)
 - [config/immutable-guest-replacement-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/immutable-guest-replacement-catalog.json)
 - [config/replaceability-review-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/replaceability-review-catalog.json)

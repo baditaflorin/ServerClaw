@@ -18,19 +18,33 @@
   changed_when: false
   no_log: true
 
-- name: Assert the Hetzner DNS zone lookup is unambiguous
+- name: Translate Hetzner DNS zone provider payload into canonical zone facts
+  ansible.builtin.set_fact:
+    dns_provider_boundary_zone_candidates: >-
+      {%- set items = [] -%}
+      {%- for zone in hetzner_dns_zone_lookup.json.zones | default([]) -%}
+      {%- set _ = items.append({
+        "zone_ref": "dns-zone:" ~ (zone.name | default(hetzner_dns_zone_name)),
+        "zone_name": zone.name | default(hetzner_dns_zone_name),
+        "provider_ref": zone.id | default(""),
+        "provider": "hetzner_dns"
+      }) -%}
+      {%- endfor -%}
+      {{ items }}
+
+- name: Assert the canonical DNS zone lookup is unambiguous
   ansible.builtin.assert:
     that:
-      - hetzner_dns_zone_lookup.json.zones | length == 1
+      - dns_provider_boundary_zone_candidates | length == 1
     fail_msg: "Expected exactly one Hetzner DNS zone named {{ hetzner_dns_zone_name }}."
 
-- name: Record the Hetzner DNS zone id
+- name: Record the canonical DNS zone reference
   ansible.builtin.set_fact:
-    hetzner_dns_zone_id: "{{ hetzner_dns_zone_lookup.json.zones[0].id }}"
+    dns_provider_boundary_zone: "{{ dns_provider_boundary_zone_candidates[0] }}"
 
 - name: Read current Hetzner DNS records for the zone
   ansible.builtin.uri:
-    url: "{{ hetzner_dns_api_base_url }}/records?zone_id={{ hetzner_dns_zone_id | urlencode }}"
+    url: "{{ hetzner_dns_api_base_url }}/records?zone_id={{ dns_provider_boundary_zone.provider_ref | urlencode }}"
     method: GET
     headers:
       Auth-API-Token: "{{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
@@ -38,6 +52,23 @@
   register: hetzner_dns_records_lookup
   changed_when: false
   no_log: true
+
+- name: Translate Hetzner DNS record provider payload into canonical record facts
+  ansible.builtin.set_fact:
+    dns_provider_boundary_existing_records: >-
+      {%- set items = [] -%}
+      {%- for record in hetzner_dns_records_lookup.json.records | default([]) -%}
+      {%- set _ = items.append({
+        "record_ref": "dns-record:" ~ (record.type | default("unknown")) ~ ":" ~ (record.name | default("")),
+        "record_name": record.name | default(""),
+        "record_type": record.type | default(""),
+        "record_value": record.value | default(""),
+        "record_ttl": record.ttl | default(0) | int,
+        "provider_ref": record.id | default(""),
+        "provider": "hetzner_dns"
+      }) -%}
+      {%- endfor -%}
+      {{ items }}
 
 - name: Ensure desired Hetzner DNS records are present
   ansible.builtin.include_tasks: record.yml

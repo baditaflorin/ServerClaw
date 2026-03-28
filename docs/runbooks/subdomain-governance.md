@@ -19,6 +19,7 @@ Run the subdomain-specific checks directly:
 ```bash
 cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
 uvx --from pyyaml python scripts/subdomain_catalog.py --validate
+uv run --with pyyaml python scripts/provider_boundary_catalog.py --validate
 ```
 
 Run the full repository gate:
@@ -57,6 +58,7 @@ What the target does:
 - regenerates the canonical publication model plus delivery-adapter split used
   by shared consumers
 - converges the DNS record through `roles/hetzner_dns_record`
+- translates raw Hetzner provider payloads into canonical DNS facts before any matching or drift decisions are made
 - if the FQDN already has a repo-managed edge route, re-runs `configure-edge-publication` so NGINX and the shared certificate set stay aligned
 
 ## Constraints

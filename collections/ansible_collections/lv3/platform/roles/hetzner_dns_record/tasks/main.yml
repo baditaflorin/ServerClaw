@@ -20,20 +20,34 @@
   register: hetzner_dns_zone_query
   no_log: true
 
-- name: Assert that exactly one Hetzner DNS zone matched
+- name: Translate Hetzner DNS zone provider payload into canonical zone facts
+  ansible.builtin.set_fact:
+    dns_provider_boundary_zone_candidates: >-
+      {%- set items = [] -%}
+      {%- for zone in hetzner_dns_zone_query.json.zones | default([]) -%}
+      {%- set _ = items.append({
+        "zone_ref": "dns-zone:" ~ (zone.name | default(hetzner_dns_record_zone_name)),
+        "zone_name": zone.name | default(hetzner_dns_record_zone_name),
+        "provider_ref": zone.id | default(""),
+        "provider": "hetzner_dns"
+      }) -%}
+      {%- endfor -%}
+      {{ items }}
+
+- name: Assert that exactly one canonical DNS zone matched
   ansible.builtin.assert:
     that:
-      - hetzner_dns_zone_query.json.zones | length == 1
+      - dns_provider_boundary_zone_candidates | length == 1
     fail_msg: >-
       Expected exactly one Hetzner DNS zone named {{ hetzner_dns_record_zone_name }}.
 
-- name: Record Hetzner DNS zone id
+- name: Record the canonical DNS zone reference
   ansible.builtin.set_fact:
-    hetzner_dns_zone_id: "{{ hetzner_dns_zone_query.json.zones[0].id }}"
+    dns_provider_boundary_zone: "{{ dns_provider_boundary_zone_candidates[0] }}"
 
 - name: Query existing Hetzner DNS records for the zone
   ansible.builtin.uri:
-    url: "{{ hetzner_dns_api_url }}/records?zone_id={{ hetzner_dns_zone_id }}"
+    url: "{{ hetzner_dns_api_url }}/records?zone_id={{ dns_provider_boundary_zone.provider_ref }}"
     method: GET
     headers:
       Auth-API-Token: "{{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
@@ -41,43 +55,60 @@
   register: hetzner_dns_records_query
   no_log: true
 
-- name: Select existing Hetzner DNS records with the same name and type
+- name: Translate Hetzner DNS record provider payload into canonical record facts
   ansible.builtin.set_fact:
-    hetzner_dns_same_name_type_records: >-
+    dns_provider_boundary_existing_records: >-
+      {%- set items = [] -%}
+      {%- for record in hetzner_dns_records_query.json.records | default([]) -%}
+      {%- set _ = items.append({
+        "record_ref": "dns-record:" ~ (record.type | default("unknown")) ~ ":" ~ (record.name | default("")),
+        "record_name": record.name | default(""),
+        "record_type": record.type | default(""),
+        "record_value": record.value | default(""),
+        "record_ttl": record.ttl | default(0) | int,
+        "provider_ref": record.id | default(""),
+        "provider": "hetzner_dns"
+      }) -%}
+      {%- endfor -%}
+      {{ items }}
+
+- name: Select existing canonical DNS records with the same name and type
+  ansible.builtin.set_fact:
+    dns_provider_boundary_same_name_type_records: >-
       {{
-        hetzner_dns_records_query.json.records
-        | selectattr('name', 'equalto', hetzner_dns_record_name)
-        | selectattr('type', 'equalto', hetzner_dns_record_type)
+        dns_provider_boundary_existing_records
+        | selectattr('record_name', 'equalto', hetzner_dns_record_name)
+        | selectattr('record_type', 'equalto', hetzner_dns_record_type)
         | list
       }}
 
-- name: Select exact Hetzner DNS record matches by value
+- name: Select exact canonical DNS record matches by value
   ansible.builtin.set_fact:
-    hetzner_dns_exact_records: >-
+    dns_provider_boundary_exact_records: >-
       {{
-        hetzner_dns_same_name_type_records
-        | selectattr('value', 'equalto', hetzner_dns_record_value)
+        dns_provider_boundary_same_name_type_records
+        | selectattr('record_value', 'equalto', hetzner_dns_record_value)
         | list
       }}
 
-- name: Select managed Hetzner DNS records by value identity
+- name: Select canonical managed DNS records by value identity
   ansible.builtin.set_fact:
-    hetzner_dns_matching_records: >-
+    dns_provider_boundary_matching_records: >-
       {{
-        hetzner_dns_exact_records
-        if (hetzner_dns_exact_records | length > 0)
+        dns_provider_boundary_exact_records
+        if (dns_provider_boundary_exact_records | length > 0)
         else (
           (
-            hetzner_dns_same_name_type_records
-            | selectattr('value', 'search', hetzner_dns_record_value_match_regex)
+            dns_provider_boundary_same_name_type_records
+            | selectattr('record_value', 'search', hetzner_dns_record_value_match_regex)
             | list
           )
           if (hetzner_dns_record_value_match_regex | default('') | length > 0)
-          else hetzner_dns_exact_records
+          else dns_provider_boundary_exact_records
         )
       }}
 
-- name: Create Hetzner DNS record when absent
+- name: Create the canonical DNS record when absent
   ansible.builtin.uri:
     url: "{{ hetzner_dns_api_url }}/records"
     method: POST
@@ -85,7 +116,7 @@
       Auth-API-Token: "{{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
     body_format: json
     body:
-      zone_id: "{{ hetzner_dns_zone_id }}"
+      zone_id: "{{ dns_provider_boundary_zone.provider_ref }}"
       name: "{{ hetzner_dns_record_name }}"
       type: "{{ hetzner_dns_record_type }}"
       value: "{{ hetzner_dns_record_value }}"
@@ -93,35 +124,35 @@
     status_code:
       - 200
       - 201
-  when: hetzner_dns_matching_records | length == 0
+  when: dns_provider_boundary_matching_records | length == 0
   changed_when: true
   no_log: true
 
-- name: Update Hetzner DNS record when drifted
+- name: Update the canonical DNS record when drift is detected
   ansible.builtin.uri:
-    url: "{{ hetzner_dns_api_url }}/records/{{ hetzner_dns_matching_records[0].id }}"
+    url: "{{ hetzner_dns_api_url }}/records/{{ dns_provider_boundary_matching_records[0].provider_ref }}"
     method: PUT
     headers:
       Auth-API-Token: "{{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
     body_format: json
     body:
-      zone_id: "{{ hetzner_dns_zone_id }}"
+      zone_id: "{{ dns_provider_boundary_zone.provider_ref }}"
       name: "{{ hetzner_dns_record_name }}"
       type: "{{ hetzner_dns_record_type }}"
       value: "{{ hetzner_dns_record_value }}"
       ttl: "{{ hetzner_dns_record_ttl | int }}"
     status_code: 200
   when:
-    - hetzner_dns_matching_records | length == 1
-    - hetzner_dns_matching_records[0].value != hetzner_dns_record_value
-      or (hetzner_dns_matching_records[0].ttl | int) != (hetzner_dns_record_ttl | int)
+    - dns_provider_boundary_matching_records | length == 1
+    - dns_provider_boundary_matching_records[0].record_value != hetzner_dns_record_value
+      or (dns_provider_boundary_matching_records[0].record_ttl | int) != (hetzner_dns_record_ttl | int)
   changed_when: true
   no_log: true
 
-- name: Assert that only one matching Hetzner DNS record exists
+- name: Assert that only one canonical DNS record match exists
   ansible.builtin.assert:
     that:
-      - hetzner_dns_matching_records | length <= 1
+      - dns_provider_boundary_matching_records | length <= 1
     fail_msg: >-
       Multiple Hetzner DNS records matched {{ hetzner_dns_record_name }} {{ hetzner_dns_record_type }}
       for managed identity {{ hetzner_dns_record_value_match_regex | default(hetzner_dns_record_value) }}.
