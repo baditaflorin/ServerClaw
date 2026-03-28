@@ -40,6 +40,7 @@ The workflow manages these live surfaces:
 - seeded script `f/lv3/scheduler_watchdog_loop`
 - seeded script `f/lv3/rotate_credentials`
 - seeded script `f/lv3/deploy_and_promote`
+- seeded default operations surface documented in `docs/runbooks/windmill-default-operations-surface.md`, including `f/lv3/post_merge_gate`, `f/lv3/nightly_integration_tests`, `f/lv3/continuous_drift_detection`, `f/lv3/weekly_capacity_report`, `f/lv3/weekly_security_scan`, `f/lv3/runbook_executor`, and `f/lv3/maintenance_window`
 - seeded helper `f/lv3/mutation_audit_emit`
 - seeded helper `f/lv3/lane_scheduler`
 - seeded helper `f/lv3/scheduler_watchdog`
@@ -113,3 +114,4 @@ Run these checks after converge:
 - ADR 0172 owns the live scheduler watchdog seed and schedule. ADR 0170 aligns the timeout hierarchy used around that path.
 - ADR 0204 now expects the seeded `f/lv3/platform_observation_loop` script to report the governed correction-loop id in its JSON result and persist the same contract snapshot in the worker checkout closure-loop state.
 - Backup coverage comes from the existing VM backup policy: `postgres-lv3` protects the Windmill database and `docker-runtime-lv3` protects the runtime filesystem and logs.
+- ADR 0228 makes Windmill the default browser-and-API operations surface for repo-managed workflows that already ship a Windmill wrapper in `config/workflow-catalog.json`; use `docs/runbooks/windmill-default-operations-surface.md` for the discovery, verification, and representative API routes instead of duplicating the full catalog here.

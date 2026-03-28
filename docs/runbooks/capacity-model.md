@@ -69,6 +69,8 @@ Render the weekly markdown report through the repo entry point:
 make weekly-capacity-report
 ```
 
+Windmill seeds the same payload builder at `f/lv3/weekly_capacity_report` so operators can trigger the repo-managed capacity summary from the default browser-and-API operations surface.
+
 ## Live Metrics Path
 
 - the report reads the committed model from `config/capacity-model.json`

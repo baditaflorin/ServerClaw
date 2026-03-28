@@ -107,7 +107,7 @@ Windmill should call:
 python3 config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox_florin_server
 ```
 
-That workflow re-runs the same `config/validation-gate.json` manifest after merge on `main` and records the result in the worker checkout.
+That workflow is seeded into the `lv3` workspace as `f/lv3/post_merge_gate`, re-runs the same `config/validation-gate.json` manifest after merge on `main`, and records the result in the worker checkout.
 
 If the worker cannot pull the registry-backed `check-runner` images and the manifest run fails with a runner-image error, the post-merge script falls back to a worker-safe local subset:
 

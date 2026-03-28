@@ -8251,3 +8251,85 @@ workstreams:
       changelog_entry: integrated ADR 0229 by carrying the verified Gitea Actions runner evidence into main after replaying the latest-main Gitea convergence, passing the private push gate, and recording workflow run 36 on docker-build-lv3
       release_bump: patch
       included_in_repo_version: 0.177.45
+
+  - id: ws-0228-live-apply
+    adr: "0228"
+    title: Live apply Windmill as the default browser and API operations surface
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0228-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0228-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0228-live-apply.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0087-validation-gate
+      - adr-0091-continuous-drift-detection
+      - adr-0105-capacity-model
+      - adr-0111-end-to-end-integration-test-suite
+      - adr-0129-runbook-automation-executor
+      - adr-0141-token-lifecycle-management
+      - adr-0142-public-surface-security-scanning
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0228-live-apply.md
+      - docs/adr/0228-windmill-as-the-default-browser-and-api-operations-surface.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/windmill-default-operations-surface.md
+      - docs/runbooks/configure-windmill.md
+      - docs/runbooks/validation-gate.md
+      - docs/runbooks/drift-detection.md
+      - docs/runbooks/capacity-model.md
+      - docs/runbooks/integration-test-suite.md
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
+      - config/windmill/scripts/nightly-integration-tests.py
+      - config/windmill/scripts/weekly-capacity-report.py
+      - config/windmill/scripts/collection-publish.py
+      - config/windmill/scripts/audit-token-inventory.py
+      - config/windmill/scripts/token-exposure-response.py
+      - tests/test_ansible_collection_packaging.py
+      - tests/test_nightly_integration_tests.py
+      - tests/test_weekly_capacity_report_windmill.py
+      - tests/test_windmill_default_operations_surface.py
+      - tests/test_token_lifecycle_windmill.py
+      - receipts/live-applies/2026-03-28-adr-0228-windmill-default-operations-surface-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0228_windmill_default_operations_surface
+          paths:
+            - docs/workstreams/ws-0228-live-apply.md
+            - docs/adr/0228-windmill-as-the-default-browser-and-api-operations-surface.md
+            - docs/adr/.index.yaml
+            - docs/runbooks/windmill-default-operations-surface.md
+            - docs/runbooks/configure-windmill.md
+            - docs/runbooks/validation-gate.md
+            - docs/runbooks/drift-detection.md
+            - docs/runbooks/capacity-model.md
+            - docs/runbooks/integration-test-suite.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
+            - config/windmill/scripts/nightly-integration-tests.py
+            - config/windmill/scripts/weekly-capacity-report.py
+            - config/windmill/scripts/collection-publish.py
+            - config/windmill/scripts/audit-token-inventory.py
+            - config/windmill/scripts/token-exposure-response.py
+            - tests/test_ansible_collection_packaging.py
+            - tests/test_nightly_integration_tests.py
+            - tests/test_weekly_capacity_report_windmill.py
+            - tests/test_windmill_default_operations_surface.py
+            - tests/test_token_lifecycle_windmill.py
+            - receipts/live-applies/2026-03-28-adr-0228-windmill-default-operations-surface-live-apply.json
+          mode: shared_contract
+          contract: adr-0228-windmill-default-operations-surface-v1
+    ready_to_merge: true
+    live_applied: true
