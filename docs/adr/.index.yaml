@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-28'
 total_adrs: 238
 implementation_status_summary:
-  Implemented: 199
+  Implemented: 200
   Partial: 3
-  Not Implemented: 35
+  Not Implemented: 34
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3556,7 +3556,7 @@ adr_index:
   - adr: '0210'
     title: Canonical Domain Models Over Vendor Schemas
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -3568,6 +3568,7 @@ adr_index:
       - schemas
     summary: The repository will prefer canonical domain models over vendor-native schemas
     filename: 0210-canonical-domain-models-over-vendor-schemas.md
+    implemented_version: 0.177.35
   - adr: '0211'
     title: Shared Policy Packs And Rule Registries
     status: Accepted

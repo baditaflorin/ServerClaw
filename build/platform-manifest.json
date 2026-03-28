@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.35",
   "platform_version": "0.130.37",
-  "generated_at": "2026-03-28T12:17:09Z",
-  "next_refresh_at": "2026-03-28T13:17:09Z",
+  "generated_at": "2026-03-28T12:13:16Z",
+  "next_refresh_at": "2026-03-28T13:13:16Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3874,7 +3874,7 @@
   "recent_changes": {
     "last_version": "0.177.34",
     "deployed_at": "2026-03-28",
-    "summary": "centralized shared redundancy, capacity-class, and placement rules into one machine-checkable registry so validation, live-apply preflights, and docs consume the same canonical policy pack integrated ADR 0211 by promoting the shared policy registry into main and re-verifying the governed headscale live-apply path from merged main",
+    "summary": "integrated ADR 0210 by separating canonical publication semantics from delivery-adapter fields in the shared subdomain registry, surfacing that contract in the live ops portal, and hardening the live publication audit to record TLS probe drift without aborting",
     "release_notes_url": "docs/release-notes/0.177.35.md"
   },
   "agentic_architecture": {

@@ -160,6 +160,80 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
         + "\n",
         encoding="utf-8",
     )
+    (data_root / "config" / "subdomain-exposure-registry.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "2.0.0",
+                "zone_name": "lv3.org",
+                "publications": [
+                    {
+                        "fqdn": "grafana.lv3.org",
+                        "service_id": "grafana",
+                        "environment": "production",
+                        "status": "active",
+                        "owner_adr": "0011",
+                        "publication": {
+                            "delivery_model": "shared-edge",
+                            "access_model": "open",
+                            "audience": "public",
+                        },
+                        "adapter": {
+                            "dns": {"target": "65.108.75.123", "target_port": 443, "record_type": "A"},
+                            "routing": {"mode": "edge", "source": "service_topology", "kind": "proxy"},
+                            "edge_auth": {
+                                "provider": "none",
+                                "unauthenticated_paths": [],
+                                "unauthenticated_prefix_paths": [],
+                            },
+                            "repo_route_service_id": "grafana",
+                            "repo_route_metadata": {},
+                            "tls": {"provider": "letsencrypt", "cert_path": "/etc/letsencrypt/live/lv3-edge/", "auto_renew": True},
+                        },
+                        "live_tracking_expected": True,
+                        "notes": "Published through the shared edge.",
+                    },
+                    {
+                        "fqdn": "ops.lv3.org",
+                        "service_id": "ops_portal",
+                        "environment": "production",
+                        "status": "active",
+                        "owner_adr": "0093",
+                        "publication": {
+                            "delivery_model": "shared-edge",
+                            "access_model": "platform-sso",
+                            "audience": "operator",
+                        },
+                        "adapter": {
+                            "dns": {"target": "65.108.75.123", "target_port": 443, "record_type": "A"},
+                            "routing": {"mode": "edge", "source": "service_topology", "kind": "proxy"},
+                            "edge_auth": {
+                                "provider": "oauth2_proxy",
+                                "unauthenticated_paths": [],
+                                "unauthenticated_prefix_paths": [],
+                            },
+                            "repo_route_service_id": "ops_portal",
+                            "repo_route_metadata": {},
+                            "tls": {"provider": "letsencrypt", "cert_path": "/etc/letsencrypt/live/lv3-edge/", "auto_renew": True},
+                        },
+                        "live_tracking_expected": True,
+                        "notes": "Authenticated operator entrypoint.",
+                    },
+                ],
+                "summary": {
+                    "catalog_total": 2,
+                    "active_total": 2,
+                    "active_public_total": 2,
+                    "active_private_total": 0,
+                    "planned_total": 0,
+                    "shared_edge_total": 2,
+                    "platform_sso_total": 1,
+                },
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     (data_root / "config" / "workflow-catalog.json").write_text(
         json.dumps(
             {
@@ -223,6 +297,7 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
         session_secret="test-secret",
         static_api_token="test-token",
         service_catalog_path=data_root / "config" / "service-capability-catalog.json",
+        publication_registry_path=data_root / "config" / "subdomain-exposure-registry.json",
         workflow_catalog_path=data_root / "config" / "workflow-catalog.json",
         changelog_path=data_root / "changelog.md",
         live_applies_dir=data_root / "receipts" / "live-applies",
@@ -250,6 +325,8 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Search Fabric" in response.text
     assert "Runbook Launcher" in response.text
     assert "Recent Live Applies" in response.text
+    assert "shared-edge / platform-sso" in response.text
+    assert "ops.lv3.org · operator · shared-edge · platform-sso" in response.text
     assert gateway.platform_health_tokens == ["test-token"]
     assert gateway.agent_coordination_tokens == ["test-token"]
 

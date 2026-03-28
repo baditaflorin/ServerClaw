@@ -20,6 +20,11 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
 try:
+    from scripts.publication_contract import registry_entries
+except ImportError:  # pragma: no cover - packaged import path
+    from publication_contract import registry_entries
+
+try:
     from search_fabric.collectors import available_collections
 except ImportError:  # pragma: no cover - packaged import path
     from scripts.search_fabric.collectors import available_collections
@@ -71,6 +76,7 @@ class PortalSettings:
     session_secret: str
     static_api_token: str | None
     service_catalog_path: Path
+    publication_registry_path: Path
     workflow_catalog_path: Path
     changelog_path: Path
     live_applies_dir: Path
@@ -89,6 +95,12 @@ class PortalSettings:
             static_api_token=os.getenv("OPS_PORTAL_STATIC_API_TOKEN") or None,
             service_catalog_path=Path(
                 os.getenv("OPS_PORTAL_SERVICE_CATALOG", data_root / "config" / "service-capability-catalog.json")
+            ),
+            publication_registry_path=Path(
+                os.getenv(
+                    "OPS_PORTAL_PUBLICATION_REGISTRY",
+                    data_root / "config" / "subdomain-exposure-registry.json",
+                )
             ),
             workflow_catalog_path=Path(
                 os.getenv("OPS_PORTAL_WORKFLOW_CATALOG", data_root / "config" / "workflow-catalog.json")
@@ -236,6 +248,10 @@ class PortalRepository:
     def load_service_catalog(self) -> list[dict[str, Any]]:
         payload = load_json_file(self.settings.service_catalog_path, {"services": []})
         return payload.get("services", [])
+
+    def load_publication_registry(self) -> list[dict[str, Any]]:
+        payload = load_json_file(self.settings.publication_registry_path, {"publications": []})
+        return registry_entries(payload)
 
     def load_workflow_catalog(self) -> list[dict[str, Any]]:
         payload = load_json_file(self.settings.workflow_catalog_path, {"workflows": {}})
@@ -393,6 +409,7 @@ def status_tone(status: str) -> str:
 
 def build_service_models(
     services: list[dict[str, Any]],
+    publications: list[dict[str, Any]],
     health: dict[str, dict[str, str]],
     drift_report: dict[str, Any],
     maintenance_windows: list[dict[str, Any]],
@@ -416,10 +433,21 @@ def build_service_models(
         if service_id:
             windows_by_service[service_id].append(window)
 
+    publications_by_service: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for publication in publications:
+        service_id = publication.get("service_id")
+        if not isinstance(service_id, str) or not service_id:
+            continue
+        publications_by_service[service_id].append(publication)
+
     models = []
     for service in sorted(services, key=lambda item: (item.get("category", ""), item["name"])):
         service_id = service["id"]
         deployment = latest_deploy_by_service.get(service_id)
+        publication_models = sorted(
+            publications_by_service.get(service_id, []),
+            key=lambda item: item.get("fqdn", ""),
+        )
         models.append(
             {
                 "id": service_id,
@@ -439,6 +467,16 @@ def build_service_models(
                 "maintenance_windows": windows_by_service.get(service_id, []) + windows_by_service.get("all", []),
                 "last_deployment": deployment,
                 "logs_url": build_logs_url(settings.grafana_logs_url, service_id),
+                "publications": [
+                    {
+                        "fqdn": publication["fqdn"],
+                        "delivery_model": publication.get("publication", {}).get("delivery_model", "unknown"),
+                        "access_model": publication.get("publication", {}).get("access_model", "unknown"),
+                        "audience": publication.get("publication", {}).get("audience", "unknown"),
+                        "status": publication.get("status", "unknown"),
+                    }
+                    for publication in publication_models
+                ],
             }
         )
     return models
@@ -553,6 +591,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     gateway: Any = request.app.state.gateway_client
 
     services = repository.load_service_catalog()
+    publications = repository.load_publication_registry()
     workflows = repository.load_workflow_catalog()
     maintenance_windows = repository.load_maintenance_windows()
     deployments = repository.recent_deployments(services)
@@ -576,6 +615,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     coordination = normalize_agent_coordination(coordination_payload)
     service_models = build_service_models(
         services,
+        publications,
         health,
         drift_report,
         maintenance_windows,

@@ -13,7 +13,15 @@ This runbook covers the ADR 0139 subdomain exposure registry and audit workflow.
 
 ## Registry
 
-The committed registry is a deterministic projection of the canonical subdomain catalog plus the repo-managed edge publication surfaces.
+The committed registry is a deterministic projection of the canonical subdomain
+catalog plus the repo-managed edge publication surfaces.
+
+The shared contract is now split into two layers:
+
+- `publication`: canonical delivery, access, and audience semantics used by
+  shared consumers
+- `adapter`: DNS, NGINX route, oauth2-proxy, and TLS details that stay at the
+  delivery edge
 
 Refresh it after catalog or edge-routing changes:
 
@@ -37,7 +45,8 @@ make subdomain-exposure-audit
 
 This performs four checks:
 
-1. repo contract validation between the catalog and repo-managed edge auth wiring
+1. repo contract validation between the canonical publication model and the
+   repo-managed edge auth adapter wiring
 2. live public DNS resolution for production hostnames that should already be active
 3. unauthenticated HTTP probing for `edge_oidc` hostnames
 4. Hetzner DNS zone enumeration when `HETZNER_DNS_API_TOKEN` is available
@@ -58,8 +67,12 @@ Treat CRITICAL findings as exposure drift that should block further public-surfa
 
 ## Remediation
 
-- If a hostname is live but still marked `planned`, update `config/subdomain-catalog.json`, regenerate the registry, and commit both changes.
-- If the catalog says `edge_oidc` but the edge route is not protected, update `roles/nginx_edge_publication/defaults/main.yml` and re-run the audit.
+- If a hostname is live but still marked `planned`, update
+  `config/subdomain-catalog.json`, regenerate the registry, and commit both
+  changes.
+- If the canonical publication model says `platform-sso` but the edge route is
+  not protected, update `roles/nginx_edge_publication/defaults/main.yml` and
+  re-run the audit.
 - If Hetzner DNS exposes a hostname that is absent from the catalog, either catalog and govern it immediately or remove the DNS record.
 - If an active hostname no longer resolves publicly, verify Hetzner DNS, the shared edge IP target, and recent DNS-management changes before changing the catalog.
 

@@ -3,11 +3,10 @@
 - Date: 2026-03-28
 
 ## Summary
-- centralized shared redundancy, capacity-class, and placement rules into one machine-checkable registry so validation, live-apply preflights, and docs consume the same canonical policy pack
-- integrated ADR 0211 by promoting the shared policy registry into main and re-verifying the governed headscale live-apply path from merged main
+- integrated ADR 0210 by separating canonical publication semantics from delivery-adapter fields in the shared subdomain registry, surfacing that contract in the live ops portal, and hardening the live publication audit to record TLS probe drift without aborting
 
 ## Platform Impact
-- promotes the platform to 0.130.37; this release integrates ADR 0211 on top of 0.177.34 so the shared policy registry now governs redundancy, capacity-class, and placement rules across validation, docs, and the verified headscale live-apply path
+- promotes the platform to `0.130.37`; this release records the ADR 0210 canonical publication-model live apply, the live ops-portal publication contract update, and the hardened subdomain exposure audit path.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)
