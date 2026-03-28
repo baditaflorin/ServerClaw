@@ -189,6 +189,8 @@
     mutation_audit_target: "{{ windmill_worker_repo_checkout_host_path }}"
   ansible.builtin.shell: |
     set -euo pipefail
+    export COPYFILE_DISABLE=1
+    export COPY_EXTENDED_ATTRIBUTES_DISABLE=1
     tar \
       --exclude='._*' \
       --exclude='*/._*' \
@@ -484,7 +486,7 @@
     path: "{{ windmill_worker_checkout_manifest_remote_file }}"
     state: absent
 
-- name: Find AppleDouble artifacts in the Windmill worker checkout
+- name: Find stale macOS metadata files in the Windmill worker checkout
   ansible.builtin.shell: |
     set -euo pipefail
     find \
@@ -495,13 +497,13 @@
       -delete
   args:
     executable: /bin/bash
-  register: windmill_worker_checkout_appledouble_files
-  changed_when: windmill_worker_checkout_appledouble_files.stdout | trim | length > 0
+  register: windmill_worker_checkout_macos_metadata_files
+  changed_when: windmill_worker_checkout_macos_metadata_files.stdout | trim | length > 0
 
-- name: Remove AppleDouble artifacts from the Windmill worker checkout
+- name: Remove stale macOS metadata files from the Windmill worker checkout
   ansible.builtin.debug:
-    msg: "Removed AppleDouble artifacts from the Windmill worker checkout"
-  when: windmill_worker_checkout_appledouble_files.stdout | trim | length > 0
+    msg: "Removed stale macOS metadata files from the Windmill worker checkout"
+  when: windmill_worker_checkout_macos_metadata_files.stdout | trim | length > 0
   changed_when: false
 
 - name: Find stale Python bytecode files in the Windmill worker checkout

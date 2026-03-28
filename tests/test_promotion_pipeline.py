@@ -2,6 +2,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -68,6 +69,37 @@ class PromotionPipelineTests(unittest.TestCase):
             ],
             "evidence_refs": ["docs/adr/0073-environment-promotion-gate-and-deployment-pipeline.md"],
             "notes": [],
+        }
+        self.policy_patcher = patch.object(
+            promotion_pipeline,
+            "evaluate_promotion_gate_policy",
+            side_effect=self._fake_policy_decision,
+        )
+        self.policy_patcher.start()
+
+    def tearDown(self) -> None:
+        self.policy_patcher.stop()
+
+    def _fake_policy_decision(self, payload: dict, *, repo_root=None, toolchain=None) -> dict:
+        reasons = list(payload["approval"]["reasons"])
+        if payload["staging_receipt"]["age_hours"] > 24:
+            reasons.append("staging receipt is older than 24 hours")
+        if not payload["staging_receipt"]["verification_passed"]:
+            reasons.append("staging receipt verification is not clean")
+        if payload["blocking_findings"]["count"] > 0:
+            reasons.append(f"open critical findings exist for service '{payload['service_id']}'")
+        reasons.extend(payload["capacity_gate"]["reasons"])
+        reasons.extend(payload["standby_gate"]["reasons"])
+        if not payload["slo_gate"]["checked"]:
+            reasons.append(f"SLO gate could not evaluate: {payload['slo_gate']['reason']}")
+        elif payload["slo_gate"]["blocking_budget_messages"]:
+            reasons.append(
+                "SLO error budget below 10%: "
+                + ", ".join(payload["slo_gate"]["blocking_budget_messages"])
+            )
+        return {
+            "gate_decision": "approved" if not reasons else "rejected",
+            "reasons": reasons,
         }
 
     def test_gate_accepts_recent_clean_staging_receipt(self) -> None:

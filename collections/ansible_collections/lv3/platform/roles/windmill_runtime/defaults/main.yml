@@ -119,7 +119,11 @@ windmill_healthcheck_script_path: f/lv3/windmill_healthcheck
 windmill_validation_gate_status_script_path: f/lv3/gate-status
 windmill_seed_job_timeout_seconds: 120
 windmill_worker_checkout_repo_root_local_dir: >-
-  {{ lookup('ansible.builtin.env', 'PWD') | default(playbook_dir ~ '/..', true) }}
+  {{
+    (inventory_dir ~ '/..')
+    if (inventory_dir is defined and inventory_dir | length > 0)
+    else (lookup('ansible.builtin.env', 'PWD') | default(playbook_dir ~ '/..', true))
+  }}
 windmill_worker_repo_checkout_host_path: /srv/proxmox_florin_server
 windmill_worker_repo_checkout_container_path: /srv/proxmox_florin_server
 windmill_worker_repo_checkout_compat_root: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
@@ -176,6 +180,9 @@ windmill_worker_checkout_checksum_file: "{{ windmill_site_dir }}/worker-checkout
 windmill_worker_checkout_manifest_remote_file: "{{ windmill_site_dir }}/worker-checkout-files.txt"
 windmill_worker_checkout_integrity_files:
   - Makefile
+  - scripts/policy_checks.py
+  - scripts/policy_toolchain.py
+  - scripts/command_catalog.py
   - scripts/gate_status.py
   - config/windmill/scripts/gate-status.py
 windmill_worker_checkout_sync_paths:
@@ -193,6 +200,7 @@ windmill_worker_checkout_sync_paths:
   - mkdocs.yml
   - migrations
   - playbooks
+  - policy
   - platform
   - receipts
   - versions

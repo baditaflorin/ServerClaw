@@ -52,8 +52,13 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_base_url"] == "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
     assert defaults["windmill_healthcheck_script_path"] == "f/lv3/windmill_healthcheck"
     assert defaults["windmill_validation_gate_status_script_path"] == "f/lv3/gate-status"
-    assert defaults["windmill_worker_checkout_repo_root_local_dir"] == "{{ playbook_dir }}/.."
+    assert "inventory_dir" in defaults["windmill_worker_checkout_repo_root_local_dir"]
+    assert "playbook_dir" in defaults["windmill_worker_checkout_repo_root_local_dir"]
     assert defaults["windmill_worker_checkout_integrity_files"] == [
+        "Makefile",
+        "scripts/policy_checks.py",
+        "scripts/policy_toolchain.py",
+        "scripts/command_catalog.py",
         "scripts/gate_status.py",
         "config/windmill/scripts/gate-status.py",
     ]
@@ -68,11 +73,15 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "docs",
         "filter_plugins",
         "inventory",
+        "Makefile",
         "mkdocs.yml",
         "migrations",
         "playbooks",
+        "policy",
         "platform",
+        "pytest.ini",
         "receipts",
+        "requirements",
         "scripts",
         "versions",
         "windmill",
@@ -93,12 +102,25 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_runtime_api_base_url"] == "http://127.0.0.1:{{ windmill_server_port }}"
     assert defaults["windmill_worker_api_base_url"] == "http://windmill_server:8000"
     assert defaults["windmill_seed_job_timeout_seconds"] == 120
-    assert defaults["windmill_worker_repo_mutable_directories"] == [
-        {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/operator-access", "mode": "0777"}
-    ]
-    assert defaults["windmill_worker_repo_mutable_files"] == [
-        {"path": "{{ windmill_worker_repo_checkout_host_path }}/config/operators.yaml", "mode": "0666"}
-    ]
+    mutable_directories = {frozenset(item.items()) for item in defaults["windmill_worker_repo_mutable_directories"]}
+    assert {
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state", "mode": "0777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/operator-access", "mode": "0777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/idempotency", "mode": "0777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/execution-lanes", "mode": "0777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/scheduler", "mode": "0777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fault-injection", "mode": "0777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/network-impairment-matrix", "mode": "0777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/integration-tests", "mode": "0777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/governed-command/logs", "mode": "0777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/governed-command/receipts", "mode": "0777"}.items()),
+    }.issubset(mutable_directories)
+    mutable_files = {frozenset(item.items()) for item in defaults["windmill_worker_repo_mutable_files"]}
+    assert {
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/config/operators.yaml", "mode": "0666"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/execution-lanes/registry.json", "mode": "0666"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/execution-lanes/registry.lock", "mode": "0666"}.items()),
+    }.issubset(mutable_files)
     assert defaults["windmill_worker_repo_secret_directories"] == [
         {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/keycloak", "mode": "0700"},
         {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/openbao", "mode": "0700"},
@@ -355,17 +377,22 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "BASE_INTERNAL_URL" in tasks
     assert "windmill_runtime_api_base_url" in tasks
     assert "Build the local staging archive for the Windmill worker checkout" in tasks
+    assert "COPYFILE_DISABLE=1" in tasks
+    assert "COPY_EXTENDED_ATTRIBUTES_DISABLE=1" in tasks
     assert "--exclude='._*'" in tasks
     assert "--exclude='*/._*'" in tasks
     assert "--exclude='.DS_Store'" in tasks
+    assert "--exclude='*/.DS_Store'" in tasks
     assert "changed_when: false" in tasks
     assert "Expand the staged Windmill worker checkout on the guest" in tasks
-    assert "Find AppleDouble artifacts in the Windmill worker checkout" in tasks
-    assert "Remove AppleDouble artifacts from the Windmill worker checkout" in tasks
+    assert "Find stale macOS metadata files in the Windmill worker checkout" in tasks
+    assert "Remove stale macOS metadata files from the Windmill worker checkout" in tasks
     assert "Find stale Python bytecode files in the Windmill worker checkout" in tasks
     assert "Remove stale Python bytecode files from the Windmill worker checkout" in tasks
     assert "Find stale Python bytecode cache directories in the Windmill worker checkout" in tasks
     assert "Remove stale Python bytecode cache directories from the Windmill worker checkout" in tasks
+    assert ".DS_Store" in tasks
+    assert "._*" in tasks
     assert "__pycache__" in tasks
     assert "*.pyc" in tasks
     assert "-delete" in tasks

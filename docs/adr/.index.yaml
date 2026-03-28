@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-28'
 total_adrs: 248
 implementation_status_summary:
-  Implemented: 213
+  Implemented: 214
   Partial: 4
-  Not Implemented: 30
+  Not Implemented: 29
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3881,7 +3881,7 @@ adr_index:
   - adr: '0230'
     title: Policy Decisions Via Open Policy Agent And Conftest
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -3893,6 +3893,7 @@ adr_index:
       - conftest
     summary: We will use Open Policy Agent (OPA) as the shared decision engine and
     filename: 0230-policy-decisions-via-open-policy-agent-and-conftest.md
+    implemented_version: 0.177.49
   - adr: '0231'
     title: Local Secret Delivery Via OpenBao Agent And Systemd Credentials
     status: Accepted
