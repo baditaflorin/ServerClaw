@@ -4092,7 +4092,7 @@ adr_index:
   - adr: '0242'
     title: Guided Human Onboarding Via Shepherd Tours
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4103,6 +4103,7 @@ adr_index:
       - tours
     summary: We will use Shepherd.js for guided first-run tours, contextual onboarding,
     filename: 0242-guided-human-onboarding-via-shepherd-tours.md
+    implemented_version: 0.177.56
   - adr: '0243'
     title: Component Stories, Accessibility, And UI Contracts Via Storybook, Playwright, And Axe-Core
     status: Accepted

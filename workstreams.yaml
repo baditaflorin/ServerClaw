@@ -366,11 +366,15 @@ workstreams:
       - docs/workstreams/ws-0242-live-apply.md
       - docs/adr/0242-guided-human-onboarding-via-shepherd-tours.md
       - docs/adr/.index.yaml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+      - docs/runbooks/configure-windmill.md
       - docs/runbooks/windmill-operator-access-admin.md
       - docs/runbooks/operator-onboarding.md
+      - docs/runbooks/operator-offboarding.md
       - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
+      - scripts/validate_repo.sh
       - tests/test_windmill_operator_admin_app.py
-      - receipts/live-applies/
+      - receipts/live-applies/2026-03-28-adr-0242-guided-human-onboarding-live-apply.json
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -383,14 +387,18 @@ workstreams:
             - docs/workstreams/ws-0242-live-apply.md
             - docs/adr/0242-guided-human-onboarding-via-shepherd-tours.md
             - docs/adr/.index.yaml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+            - docs/runbooks/configure-windmill.md
             - docs/runbooks/windmill-operator-access-admin.md
             - docs/runbooks/operator-onboarding.md
+            - docs/runbooks/operator-offboarding.md
             - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
+            - scripts/validate_repo.sh
             - tests/test_windmill_operator_admin_app.py
-            - receipts/live-applies/
+            - receipts/live-applies/2026-03-28-adr-0242-guided-human-onboarding-live-apply.json
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
   - id: ws-0230-live-apply
     adr: "0230"
     title: Live apply policy decisions via Open Policy Agent and Conftest
@@ -667,7 +675,7 @@ workstreams:
   - id: ws-0231-live-apply
     adr: "0231"
     title: Live apply ADR 0231 local secret delivery via OpenBao Agent and systemd credentials
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/ws-0231-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0231-live-apply
@@ -717,7 +725,7 @@ workstreams:
             - receipts/live-applies/2026-03-28-adr-0231-local-secret-delivery-live-apply.json
           mode: exclusive
     ready_to_merge: true
-    live_applied: false
+    live_applied: true
     canonical_truth:
       changelog_entry: implements ADR 0231 on the live control-plane recovery path by replacing the backup unit's plaintext OpenBao token and baked-in Windmill DSN with OpenBao Agent delivery through systemd credentials
       release_bump: patch
