@@ -303,6 +303,39 @@
         or (windmill_worker_checkout_integrity_mismatch | default(false) | bool)
       }}
 
+- name: Collect controller-side root entry types for the Windmill worker checkout sync set
+  ansible.builtin.stat:
+    path: "{{ windmill_worker_checkout_repo_root_local_dir }}/{{ item }}"
+    follow: false
+  loop: "{{ windmill_worker_checkout_sync_paths }}"
+  delegate_to: localhost
+  become: false
+  register: windmill_worker_checkout_sync_roots_local
+  when: windmill_worker_checkout_needs_refresh | bool
+
+- name: Collect guest-side root entry types for the Windmill worker checkout sync set
+  ansible.builtin.stat:
+    path: "{{ windmill_worker_repo_checkout_host_path }}/{{ item.item }}"
+    follow: false
+  loop: "{{ windmill_worker_checkout_sync_roots_local.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  register: windmill_worker_checkout_sync_roots_remote
+  when: windmill_worker_checkout_needs_refresh | bool
+
+- name: Remove guest-side paths that block symlinked Windmill worker checkout roots
+  ansible.builtin.file:
+    path: "{{ windmill_worker_repo_checkout_host_path }}/{{ windmill_worker_checkout_sync_roots_local.results[item].item }}"
+    state: absent
+  loop: "{{ range(0, windmill_worker_checkout_sync_roots_local.results | length) | list }}"
+  loop_control:
+    label: "{{ windmill_worker_checkout_sync_roots_local.results[item].item }}"
+  when:
+    - windmill_worker_checkout_needs_refresh | bool
+    - windmill_worker_checkout_sync_roots_local.results[item].stat.islnk | default(false)
+    - windmill_worker_checkout_sync_roots_remote.results[item].stat.exists | default(false)
+    - not (windmill_worker_checkout_sync_roots_remote.results[item].stat.islnk | default(false))
+
 - name: Expand the staged Windmill worker checkout on the guest when the archive changed
   ansible.builtin.shell: |
     set -euo pipefail

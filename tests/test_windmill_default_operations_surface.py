@@ -101,3 +101,23 @@ def test_worker_checkout_staging_paths_are_per_run() -> None:
     assert "{{ windmill_worker_checkout_archive_remote_file.path }}" in tasks
     assert "{{ windmill_worker_checkout_manifest_remote.path }}" in tasks
     assert "{{ windmill_site_dir }}/worker-checkout.tar.gz" not in tasks
+
+
+def test_worker_checkout_replaces_guest_directories_for_symlink_roots_before_extract() -> None:
+    tasks = (
+        REPO_ROOT
+        / "collections"
+        / "ansible_collections"
+        / "lv3"
+        / "platform"
+        / "roles"
+        / "windmill_runtime"
+        / "tasks"
+        / "main.yml"
+    ).read_text()
+
+    assert "Collect controller-side root entry types for the Windmill worker checkout sync set" in tasks
+    assert "Collect guest-side root entry types for the Windmill worker checkout sync set" in tasks
+    assert "Remove guest-side paths that block symlinked Windmill worker checkout roots" in tasks
+    assert "windmill_worker_checkout_sync_roots_local.results[item].stat.islnk" in tasks
+    assert "windmill_worker_checkout_sync_roots_remote.results[item].stat.exists" in tasks
