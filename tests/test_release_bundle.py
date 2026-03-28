@@ -180,3 +180,24 @@ def test_normalize_asset_url_reuses_explicit_gitea_host() -> None:
     asset_url = "http://git.lv3.org:3009/api/v1/repos/ops/proxmox_florin_server/releases/1/assets/2"
     normalized = release_bundle.normalize_asset_url(asset_url, gitea_url="http://100.64.0.1:3009")
     assert normalized == "http://100.64.0.1:3009/api/v1/repos/ops/proxmox_florin_server/releases/1/assets/2"
+
+
+def test_download_asset_retries_transient_http_404(tmp_path: Path, monkeypatch) -> None:
+    destination = tmp_path / "bundle.tar.gz"
+    observed_calls: list[int] = []
+    observed_sleeps: list[float] = []
+
+    def fake_api_request(method: str, url: str, *, token: str, **_: object) -> tuple[int, bytes]:
+        observed_calls.append(1)
+        if len(observed_calls) < 3:
+            raise RuntimeError(f"{method} {url} failed with HTTP 404: Not found")
+        return 200, b"bundle-bytes"
+
+    monkeypatch.setattr(release_bundle, "api_request", fake_api_request)
+    monkeypatch.setattr(release_bundle.time, "sleep", lambda seconds: observed_sleeps.append(seconds))
+
+    release_bundle.download_asset("http://example.test/bundle.tar.gz", token="token", destination=destination)
+
+    assert destination.read_bytes() == b"bundle-bytes"
+    assert len(observed_calls) == 3
+    assert observed_sleeps == [1.0, 2.0]

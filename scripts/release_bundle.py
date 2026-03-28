@@ -13,6 +13,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -500,8 +501,22 @@ def extract_manifest(bundle_path: Path) -> dict[str, Any]:
 
 
 def download_asset(url: str, *, token: str, destination: Path) -> None:
-    _status, payload = api_request("GET", url, token=token)
-    destination.write_bytes(payload)
+    delay_seconds = 1.0
+    for attempt in range(1, 6):
+        try:
+            _status, payload = api_request("GET", url, token=token)
+            destination.write_bytes(payload)
+            return
+        except urllib.error.URLError:
+            if attempt == 5:
+                raise
+        except RuntimeError as exc:
+            status_match = re.search(r"HTTP (\d+)", str(exc))
+            status_code = int(status_match.group(1)) if status_match else None
+            if attempt == 5 or status_code not in {404, 408, 409, 423, 425, 429, 500, 502, 503, 504}:
+                raise
+        time.sleep(delay_seconds)
+        delay_seconds = min(delay_seconds * 2, 8.0)
 
 
 def normalize_asset_url(asset_url: str, *, gitea_url: str) -> str:
