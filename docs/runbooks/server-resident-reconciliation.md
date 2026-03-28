@@ -30,7 +30,8 @@ The bootstrap run will:
 - ensure that user has read-only access to `ops/proxmox_florin_server`
 - create or recover the mirrored low-privilege Gitea token
 - mirror that token to `proxmox_florin`
-- install the managed checkout path, askpass helper, wrapper, and systemd timer
+- install the managed checkout path, askpass helper, dedicated local
+  `ansible-pull` inventory, wrapper, and systemd timer
 
 ## Source Publication
 
@@ -82,6 +83,11 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 - Recurring host-local runs do not require the controller-side Gitea admin
   token; that admin token is only needed to mint or recover the low-privilege
   read token during bootstrap.
+- The recurring wrapper now uses the managed local inventory
+  `/var/lib/lv3/server-resident-reconciliation/ansible-pull-inventory.yml`
+  instead of the repo inventory, which lets `ansible-pull` complete its own
+  checkout step through `localhost` while the playbook still limits itself to
+  the durable `proxmox_florin` alias.
 - The host-local receipts live under
   `/var/lib/lv3/server-resident-reconciliation/receipts/` so the git checkout
   stays clean between timer runs.
