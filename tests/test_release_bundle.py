@@ -64,6 +64,7 @@ def test_write_bundle_archive_embeds_manifest_and_selected_files(tmp_path: Path,
         manifest_payload = json.loads(archive.extractfile("release-bundle-manifest.json").read().decode("utf-8"))
     assert manifest_payload["contents"]["file_count"] == 2
     assert manifest_payload["bundle"]["verification_public_key"] == "keys/gitea-release-bundle-cosign.pub"
+    assert manifest_payload["bundle"]["sigstore_bundle_asset"] == "lv3-control-bundle-branch-main-0123456789ab.tar.gz.sigstore.json"
 
 
 def test_resolve_tracked_bundle_files_respects_excludes(tmp_path: Path, monkeypatch) -> None:
@@ -83,3 +84,87 @@ def test_resolve_tracked_bundle_files_respects_excludes(tmp_path: Path, monkeypa
         exclude_globs=[".local/**"],
     )
     assert [str(path.relative_to(tmp_path)).replace("\\", "/") for path in files] == ["docs/keep.md"]
+
+
+def test_sign_bundle_writes_sigstore_bundle_argument(tmp_path: Path, monkeypatch) -> None:
+    bundle_path = tmp_path / "bundle.tar.gz"
+    bundle_path.write_text("bundle")
+    signature_path = tmp_path / "bundle.tar.gz.sig"
+    sigstore_bundle_path = tmp_path / "bundle.tar.gz.sigstore.json"
+    private_key_path = tmp_path / "cosign.key"
+    private_key_path.write_text("key")
+    password_file = tmp_path / "cosign.password"
+    password_file.write_text("secret\n")
+
+    monkeypatch.setattr(release_bundle, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(release_bundle.shutil, "which", lambda path: path)
+
+    captured: dict[str, object] = {}
+
+    def fake_run(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+        captured["command"] = command
+        return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+
+    monkeypatch.setattr(release_bundle.subprocess, "run", fake_run)
+
+    release_bundle.sign_bundle(
+        bundle_path=bundle_path,
+        signature_path=signature_path,
+        sigstore_bundle_path=sigstore_bundle_path,
+        private_key_path=private_key_path,
+        password_file=password_file,
+        cosign_path="cosign",
+    )
+
+    assert captured["command"] == [
+        "cosign",
+        "sign-blob",
+        "--key",
+        str(private_key_path),
+        "--output-signature",
+        str(signature_path),
+        "--bundle",
+        str(sigstore_bundle_path),
+        "--tlog-upload=false",
+        str(bundle_path),
+    ]
+
+
+def test_verify_bundle_prefers_sigstore_bundle_when_present(tmp_path: Path, monkeypatch) -> None:
+    bundle_path = tmp_path / "bundle.tar.gz"
+    bundle_path.write_text("bundle")
+    public_key_path = tmp_path / "cosign.pub"
+    public_key_path.write_text("pub")
+    signature_path = tmp_path / "bundle.tar.gz.sig"
+    signature_path.write_text("sig")
+    sigstore_bundle_path = tmp_path / "bundle.tar.gz.sigstore.json"
+    sigstore_bundle_path.write_text("{}")
+
+    monkeypatch.setattr(release_bundle, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(release_bundle.shutil, "which", lambda path: path)
+
+    captured: dict[str, object] = {}
+
+    def fake_run(command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+        captured["command"] = command
+        return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+
+    monkeypatch.setattr(release_bundle.subprocess, "run", fake_run)
+
+    release_bundle.verify_bundle(
+        bundle_path=bundle_path,
+        public_key_path=public_key_path,
+        cosign_path="cosign",
+        signature_path=signature_path,
+        sigstore_bundle_path=sigstore_bundle_path,
+    )
+
+    assert captured["command"] == [
+        "cosign",
+        "verify-blob",
+        "--key",
+        str(public_key_path),
+        "--bundle",
+        str(sigstore_bundle_path),
+        str(bundle_path),
+    ]

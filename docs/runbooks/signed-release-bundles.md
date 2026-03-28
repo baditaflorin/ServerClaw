@@ -10,7 +10,7 @@ The current ADR 0233 implementation:
 
 - assembles a repo-managed control bundle with `scripts/release_bundle.py`
 - signs the bundle with a Cosign key pair mirrored only under `.local/gitea/`
-- publishes the bundle, detached signature, and SHA256 sidecar into a private Gitea Release
+- publishes the bundle, detached signature, Sigstore bundle, and SHA256 sidecar into a private Gitea Release
 - re-downloads and verifies the same release assets through the private Gitea API
 
 ## Bootstrap Signing Material
@@ -85,7 +85,7 @@ curl -sS \
 
 ## Verify A Published Bundle
 
-Download the private release assets and verify the detached Cosign signature:
+Download the private release assets and verify the published Sigstore bundle with the committed public key:
 
 ```bash
 python3 scripts/release_bundle.py verify-release \
@@ -100,8 +100,8 @@ python3 scripts/release_bundle.py verify-release \
 The verifier checks:
 
 - the release exists in the private Gitea repo
-- the expected `.tar.gz`, `.sig`, and `.sha256` assets are present
-- `cosign verify-blob` succeeds with the committed public key
+- the expected `.tar.gz`, `.sig`, `.sigstore.json`, and `.sha256` assets are present
+- `cosign verify-blob` succeeds with the committed public key and the published Sigstore bundle
 - the detached SHA256 sidecar matches the downloaded bundle
 - the embedded `release-bundle-manifest.json` can be read from the archive
 
