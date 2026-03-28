@@ -169,6 +169,14 @@ inventory:
 
 automation:
 
+  config/seed-data-catalog.json:
+    purpose: Canonical contract for anonymized seed-data snapshot classes and storage paths
+    owner: human
+    format: JSON
+    use_for: Building deterministic tiny/standard/recovery seed snapshots and resolving the managed backup-lv3 store
+    update_when: Adjusting seed classes, dataset volumes, or storage locations
+    validation: "uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate"
+
   playbooks/site.yml:
     purpose: Main site playbook — full host bootstrap from bare Debian 13
     owner: human  # maintained by platform team

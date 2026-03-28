@@ -8,6 +8,7 @@ ADR 0099 adds a repository-managed restore verification workflow that restores t
 - direct script: `python3 scripts/restore_verification.py`
 - Windmill worker wrapper: `python3 config/windmill/scripts/restore-verification.py`
 - receipts: `receipts/restore-verifications/*.json`
+- optional ADR 0187 seed staging: `python3 scripts/restore_verification.py --seed-class standard`
 
 ## Targets
 
@@ -30,10 +31,11 @@ Each restore uses the staging bridge and IP assignments already defined for the 
 3. Restore the backup into VMIDs `900` to `902`.
 4. Rewire the restored guest to `vmbr20`, keep the original MAC, refresh cloud-init, and boot it.
 5. Wait for SSH through the Proxmox jump path.
-6. Run guest-local smoke tests.
-7. Write one JSON receipt under `receipts/restore-verifications/`.
-8. Emit the mutation-audit event and optional NATS plus Mattermost notifications.
-9. Destroy the restored VMs even when an earlier step fails.
+6. Optionally stage an ADR 0187 seed snapshot under `/var/lib/lv3-seed-data/restore-verification/<vm-name>/`.
+7. Run guest-local smoke tests.
+8. Write one JSON receipt under `receipts/restore-verifications/`.
+9. Emit the mutation-audit event and optional NATS plus Mattermost notifications.
+10. Destroy the restored VMs even when an earlier step fails.
 
 ## Smoke Tests
 

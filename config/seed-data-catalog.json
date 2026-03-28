@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0.0",
+  "controller_secret_id": "seed_data_anonymization_salt",
+  "local_snapshot_root": ".local/seed-data/snapshots",
+  "guest_stage_root": "/var/lib/lv3-seed-data",
+  "remote_store": {
+    "host": "backup-lv3",
+    "base_path": "/var/lib/lv3/seed-data-snapshots",
+    "directory_mode": "0750"
+  },
+  "managed_postgres_databases": [
+    "keycloak",
+    "mattermost",
+    "netbox",
+    "windmill"
+  ],
+  "classes": {
+    "tiny": {
+      "description": "Fast smoke seed for branch-local and developer validation.",
+      "datasets": {
+        "identities": 16,
+        "sessions": 24,
+        "workflow_runs": 18,
+        "messages": 48,
+        "assets": 20,
+        "audit_events": 120
+      }
+    },
+    "standard": {
+      "description": "Representative integration and preview validation seed.",
+      "datasets": {
+        "identities": 120,
+        "sessions": 180,
+        "workflow_runs": 160,
+        "messages": 800,
+        "assets": 140,
+        "audit_events": 1800
+      }
+    },
+    "recovery": {
+      "description": "Heavier restore and failover rehearsal seed.",
+      "datasets": {
+        "identities": 480,
+        "sessions": 720,
+        "workflow_runs": 640,
+        "messages": 3600,
+        "assets": 520,
+        "audit_events": 6400
+      }
+    }
+  }
+}

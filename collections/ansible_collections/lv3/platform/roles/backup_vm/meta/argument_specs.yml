@@ -68,3 +68,19 @@ argument_specs:
         required: true
         description:
           - Controller-local JSON file that stores the generated API token.
+      backup_vm_seed_snapshot_store_path:
+        type: path
+        required: false
+        description:
+          - Root directory on backup-lv3 used to store anonymized seed-data snapshots.
+      backup_vm_seed_snapshot_store_mode:
+        type: str
+        required: false
+        description:
+          - File mode applied to the managed seed snapshot store directories.
+      backup_vm_seed_snapshot_classes:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Seed snapshot class directories created and verified on backup-lv3.
