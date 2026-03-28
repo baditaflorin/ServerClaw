@@ -223,7 +223,9 @@ open_webui_default_models: "{{ ollama_default_model }}"
 open_webui_default_pinned_models: "{{ ollama_default_model }}"
 platform_context_host_proxy_port: 8010
 platform_context_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ platform_context_host_proxy_port }}"
-platform_context_embedding_backend: token-hash
+platform_context_embedding_backend: ollama
+platform_context_embedding_model: nomic-embed-text
+platform_context_embedding_dimension: 0
 ntopng_proxy_port: 3001
 ntopng_http_port: 3000
 ntopng_operator_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ ntopng_proxy_port }}"

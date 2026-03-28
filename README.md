@@ -92,6 +92,8 @@ The repository now also ships continuous drift detection across OpenTofu, Ansibl
 The repository now also ships ADR 0100 disaster-recovery targets, a structured recovery runbook, and `make dr-status` / `lv3 release status` readiness views; ADR 0181 off-host witness publication is now live, while the optional second off-site copy of `backup-lv3` still depends on external storage credentials.
 ADR 0096 SLO tracking is now live on `monitoring-lv3`: the repo-managed blackbox exporter, generated Prometheus SLO rules and targets, and the `LV3 SLO Overview` Grafana dashboard were re-converged on 2026-03-25, and `grafana.lv3.org` now keeps `/api/health` blocked while dashboard URLs continue to redirect operators to login.
 ADR 0105 capacity modeling is now live on `monitoring-lv3`: the `lv3-capacity-overview` Grafana dashboard, repo-managed platform alert bundle, and both capacity-report entrypoints were re-verified from latest `main` on 2026-03-27, and the official separate-worktree live-apply path now avoids SSH control-socket overflows by using compact per-run directories under `/tmp`.
+ADR 0191 immutable guest replacement is now implemented in repository automation: governed stateful and edge services expose a replacement plan, and the production `live-apply-service` path now fails closed unless an operator explicitly acknowledges the narrow in-place exception.
+ADR 0185 branch-scoped ephemeral preview environments are now live in the repository and verified against the platform: the repo-managed preview lifecycle can create, converge, validate, and destroy isolated preview VMs on `vmbr20`, and the latest committed-head replay completed on 2026-03-27 with a full create/validate/destroy receipt recorded for merge-to-main promotion.
 The repository now also ships ADR 0115 mutation-ledger primitives live on production: the `ledger.events` Postgres schema migration, the `platform.ledger` writer/reader/replay package, the one-time `audit_log` migration helper, and optional dual-write from the existing mutation-audit emitter when `LV3_LEDGER_DSN` is configured; the latest `main` replay on 2026-03-27 re-projected the Windmill runtime ledger env and verified a fresh guest-side `execution.completed` row through both `ledger.events` and the compatibility `audit_log` view.
 The repository now also ships ADR 0117 dependency-graph runtime live on production: the `platform.graph` traversal client, `graph.nodes` / `graph.edges` schema migration, repo-managed graph rebuild helpers, `/v1/graph/*` gateway routes, and risk-scorer integration are now verified against the live Windmill, PostgreSQL, and API-gateway runtime after the 2026-03-26 dependency-graph apply.
 The repository now also ships ADR 0121 local search live on production: a repo-managed search fabric under `scripts/search_fabric/`, a persisted local index at `build/search-index/documents.json`, the `lv3 search` CLI command, the `/v1/search` API surface, and an ops-portal search panel backed by the same corpus, with the first production receipt recorded on 2026-03-26 after the API gateway and Windmill worker indexing paths were hardened against malformed corpus files.
@@ -105,6 +107,7 @@ The repository now also ships ADR 0148 private web search live on production: th
 The repository now also ships ADR 0165 workflow idempotency: `platform.idempotency`, scheduler-side cached result replay, closure-loop trigger scoping, `execution.idempotent_hit` ledger events, and `lv3 intent status <intent_id>` provide deterministic duplicate suppression for platform-managed workflows; the live Windmill converge from `main` on 2026-03-25 now applies and verifies the shared `platform.idempotency_records` schema on `postgres-lv3`.
 The repository now also ships ADR 0119 budgeted workflow scheduling live on production: the latest-main Windmill replay on 2026-03-27 re-verified bootstrap-session auth fallback, worker token propagation, the dispatcher and lane scheduler, and both watchdog seed paths plus their enabled schedules on `docker-runtime-lv3`.
 The repository now also ships ADR 0146 Langfuse observability live on production: `https://langfuse.lv3.org` is published through the shared NGINX edge, the seeded `lv3-agent-observability` project is reachable through the public API, and the 2026-03-26 smoke verification ingested a trace that resolved successfully in the Langfuse UI.
+The repository now also ships ADR 0199 Outline living knowledge wiki live on production: `https://wiki.lv3.org` is published through the shared NGINX edge, the Keycloak-backed `outline.automation` bootstrap path is repo-managed, and the 2026-03-28 merged-main replay re-verified the five governed living-knowledge collections end to end.
 The developer portal generator now stamps published docs pages with sensitivity metadata, keeps `RESTRICTED` ADRs and runbooks summary-only in portal output, and leaves `CONFIDENTIAL` documents source-only until a dedicated admin-view path exists.
 Portal access is now authentication-by-default on the live platform: `ops.lv3.org`, `docs.lv3.org`, and `changelog.lv3.org` are gated by the shared Keycloak edge auth flow, and Grafana no longer serves anonymous dashboards.
 ADR 0134 changelog redaction is now live on the shared authenticated edge: the published deployment-history view masks emails, private IPs, internal hostnames, and inline secret material before changelog data reaches `changelog.lv3.org`.
@@ -120,9 +123,9 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.12` |
-| Platform version | `0.130.31` |
-| Observed check date | `2026-03-27` |
+| Repository version | `0.177.19` |
+| Platform version | `0.130.32` |
+| Observed check date | `2026-03-28` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
 | Observed kernel | `6.17.13-2-pve` |
@@ -147,6 +150,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `build.lv3.org` | `docker-build` | `informational-only` | `docker-build-lv3` |
 | `database.lv3.org` | `postgres` | `private-only` | `postgres-lv3` |
 | `docker.lv3.org` | `docker-runtime` | `informational-only` | `docker-runtime-lv3` |
+| `draw.lv3.org` | `excalidraw` | `edge-published` | `docker-runtime-lv3` |
 | `git.lv3.org` | `gitea` | `private-only` | `docker-runtime-lv3` |
 | `grafana.lv3.org` | `grafana` | `edge-published` | `monitoring-lv3` |
 | `headscale.lv3.org` | `headscale` | `edge-published` | `proxmox_florin` |
@@ -163,6 +167,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `status.lv3.org` | `status-page` | `edge-published` | `docker-runtime-lv3` |
 | `uptime.lv3.org` | `uptime-kuma` | `edge-published` | `docker-runtime-lv3` |
 | `vault.lv3.org` | `vaultwarden` | `private-only` | `docker-runtime-lv3` |
+| `wiki.lv3.org` | `outline` | `edge-published` | `docker-runtime-lv3` |
 
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
@@ -172,6 +177,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `backup_vm` | `2026-03-22-adr-0029-backup-vm-live-apply` |
 | `budgeted_workflow_scheduler` | `2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply` |
 | `build_telemetry` | `2026-03-22-adr-0028-build-telemetry-live-apply` |
+| `capacity_classes` | `2026-03-27-adr-0192-capacity-classes-live-apply` |
 | `capacity_model` | `2026-03-27-adr-0105-capacity-model-mainline-live-apply` |
 | `certificate_lifecycle` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
 | `command_catalog` | `2026-03-22-adr-0048-command-catalog-live-apply` |
@@ -183,10 +189,13 @@ Template VM: `9000` `debian13-cloud-template`
 | `dependency_graph_runtime` | `2026-03-26-adr-0117-dependency-graph-live-apply` |
 | `docker_runtime` | `2026-03-22-adr-0023-docker-runtime-live-apply` |
 | `dozzle` | `2026-03-26-adr-0150-dozzle-live-apply` |
+| `excalidraw` | `2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply` |
+| `failure_domain_policy` | `2026-03-27-adr-0184-failure-domain-labels-live-apply` |
 | `gitea` | `2026-03-26-adr-0143-gitea-live-apply` |
 | `guest_network_policy` | `2026-03-22-adr-0067-guest-network-policy-live-apply` |
 | `homepage` | `2026-03-26-adr-0152-homepage-live-apply` |
 | `identity_taxonomy` | `2026-03-22-adr-0046-identity-classes-live-apply` |
+| `immutable_guest_replacement` | `2026-03-27-adr-0191-immutable-guest-replacement-live-apply` |
 | `keycloak` | `2026-03-26-adr-0171-fault-injection-live-apply` |
 | `langfuse` | `2026-03-26-adr-0146-langfuse-live-apply` |
 | `local_search_and_indexing_fabric` | `2026-03-26-adr-0121-search-indexing-fabric-live-apply` |
@@ -205,10 +214,12 @@ Template VM: `9000` `debian13-cloud-template`
 | `openbao` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
 | `operator_access` | `2026-03-27-adr-0108-operator-onboarding-mainline-live-apply` |
 | `ops_portal` | `2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply` |
+| `outline` | `2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply` |
 | `platform_context` | `2026-03-26-adr-0166-canonical-error-response-live-apply` |
 | `platform_event_taxonomy` | `2026-03-26-adr-0124-platform-event-taxonomy-live-apply` |
 | `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
+| `preview_environment` | `2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z` |
 | `public_edge_publication` | `2026-03-26-adr-0134-changelog-redaction-live-apply` |
 | `remote_build_gateway` | `2026-03-26-adr-0156-agent-session-workspace-isolation-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
@@ -429,6 +440,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Break-Glass References](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/break-glass.md)
 - [Budgeted Workflow Scheduler](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/budgeted-workflow-scheduler.md)
 - [Canonical Truth Assembly](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/canonical-truth-assembly.md)
+- [Capacity Classes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/capacity-classes.md)
 - [Capacity Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/capacity-model.md)
 - [Certificate Expired](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/cert-expired.md)
 - [Change Risk Scoring](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/change-risk-scoring.md)
@@ -445,6 +457,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Docker Runtime Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-docker-runtime.md)
 - [Configure Dozzle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-dozzle.md)
 - [Configure Edge Publication](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-edge-publication.md)
+- [Configure Excalidraw](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-excalidraw.md)
 - [Configure Gitea](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-gitea.md)
 - [Configure Guest Network Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-guest-network-policy.md)
 - [Configure Headscale](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-headscale.md)
@@ -460,6 +473,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Ollama](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-ollama.md)
 - [Configure Open WebUI](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-open-webui.md)
 - [Configure OpenBao](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-openbao.md)
+- [Configure Outline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-outline.md)
 - [Configure Portainer](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-portainer.md)
 - [Configure PostgreSQL VM Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-postgres-vm.md)
 - [Configure Proxmox Network Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-proxmox-network.md)
@@ -490,6 +504,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Dry-Run Semantic Diff Engine](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/dry-run-semantic-diff-engine.md)
 - [Environment Promotion Pipeline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/environment-promotion-pipeline.md)
 - [Ephemeral Fixtures](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ephemeral-fixtures.md)
+- [Failure-Domain Labels And Anti-Affinity Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/failure-domain-policy.md)
 - [Fault Injection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/fault-injection.md)
 - [Generate Status Documents](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/generate-status-documents.md)
 - [Graceful Degradation Modes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/graceful-degradation-modes.md)
@@ -498,6 +513,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Health Probe Contracts Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/health-probe-contracts.md)
 - [HTTP Security Headers](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/http-security-headers.md)
 - [Identity Taxonomy And Managed Principals](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/identity-taxonomy-and-managed-principals.md)
+- [Immutable Guest Replacement](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/immutable-guest-replacement.md)
 - [Incident Triage Engine](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/incident-triage-engine.md)
 - [Initial Access Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/initial-access.md)
 - [Install Proxmox Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/install-proxmox.md)
@@ -539,6 +555,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Runbook: Postgres Down](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/postgres-down.md)
 - [PostgreSQL Failover Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/postgres-failover.md)
 - [Prepare Mail Platform Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/prepare-mail-platform-rollout.md)
+- [Preview Environments](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/preview-environments.md)
 - [Private-First API Publication](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/private-first-api-publication.md)
 - [Provision Guests Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/provision-guests.md)
 - [Proxmox API Automation Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/proxmox-api-automation.md)
@@ -783,6 +800,9 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0190: Synthetic Transaction Replay for Capacity and Recovery Validation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0190-synthetic-transaction-replay-for-capacity-and-recovery-validation.md)
 - [ADR 0191: Immutable Guest Replacement for Stateful and Edge Services](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0191-immutable-guest-replacement-for-stateful-and-edge-services.md)
 - [ADR 0192: Separate Capacity Classes for Standby, Recovery, and Preview Workloads](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads.md)
+- [ADR 0198: Qdrant Vector Search for Semantic Platform RAG](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0198-qdrant-vector-search-semantic-rag.md)
+- [ADR 0199: Outline Living Knowledge Wiki](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0199-outline-living-knowledge-wiki.md)
+- [ADR 0202: Excalidraw Auto Generated Architecture Diagrams](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0202-excalidraw-auto-generated-architecture-diagrams.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -941,9 +961,16 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0181: Off-Host Witness And Control Metadata Replication](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0181-off-host-witness-replication.md)
 - [Workstream ADR 0182: Live Apply Merge Train and Rollback Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0182-live-apply-merge-train-and-rollback-bundle.md)
 - [Workstream ADR 0183: Multi-Environment Live Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0183-multi-environment-live-lanes.md)
+- [Workstream ADR 0185: Branch-Scoped Ephemeral Preview Environments](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0185-branch-scoped-ephemeral-preview-environments.md)
+- [Workstream ADR 0198: Qdrant Vector Search for Semantic Platform RAG](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0198-qdrant-vector-search-semantic-rag.md)
+- [Workstream ADR 0199: Outline Living Knowledge Wiki](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0199-outline-living-knowledge-wiki.md)
+- [Workstream ADR 0202: Excalidraw Auto Generated Architecture Diagrams](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md)
 - [Workstream ws-0101-live-apply: ADR 0101 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0101-live-apply.md)
 - [Workstream ws-0105-live-apply: Live Apply ADR 0105 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0105-live-apply.md)
 - [Workstream WS-0108: Operator Onboarding and Off-boarding Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0108-live-apply.md)
+- [Workstream WS-0184: Failure-Domain Labels And Anti-Affinity Policy Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0184-live-apply.md)
+- [Workstream ws-0191-live-apply: ADR 0191 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0191-live-apply.md)
+- [Workstream ws-0192-live-apply: Live Apply ADR 0192 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0192-live-apply.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -961,8 +988,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.12` |
-| Platform version | `0.130.31` |
+| Repository version | `0.177.19` |
+| Platform version | `0.130.32` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1155,6 +1182,13 @@ This repository is intentionally opinionated:
 | `0181` | Off-host witness and control metadata replication | `live_applied` | [adr-0181-off-host-witness-replication.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0181-off-host-witness-replication.md) |
 | `0182` | Live apply merge train and rollback bundle | `merged` | [adr-0182-live-apply-merge-train-and-rollback-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0182-live-apply-merge-train-and-rollback-bundle.md) |
 | `0183` | Multi-environment live lanes | `live_applied` | [adr-0183-multi-environment-live-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0183-multi-environment-live-lanes.md) |
+| `0184` | Failure-domain labels and anti-affinity policy live apply | `live_applied` | [ws-0184-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0184-live-apply.md) |
+| `0185` | Branch-scoped ephemeral preview environments | `live_applied` | [adr-0185-branch-scoped-ephemeral-preview-environments.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply/docs/workstreams/adr-0185-branch-scoped-ephemeral-preview-environments.md) |
+| `0191` | Immutable guest replacement for stateful and edge services | `live_applied` | [ws-0191-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0191-live-apply.md) |
+| `0192` | Live apply ADR 0192 capacity classes for standby, recovery, and preview workloads | `live_applied` | [ws-0192-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0192-live-apply.md) |
+| `0198` | Qdrant vector search semantic platform RAG | `merged` | [adr-0198-qdrant-vector-search-semantic-rag.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0198-qdrant-vector-search-semantic-rag.md) |
+| `0199` | Outline living knowledge wiki | `live_applied` | [adr-0199-outline-living-knowledge-wiki.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0199-outline-living-knowledge-wiki.md) |
+| `0202` | Excalidraw auto generated architecture diagrams | `live_applied` | [adr-0202-excalidraw-auto-generated-architecture-diagrams.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

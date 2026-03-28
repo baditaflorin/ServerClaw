@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -158,6 +159,9 @@ workstreams:
     monkeypatch.setattr(release_manager, "WORKSTREAMS_PATH", tmp_path / "workstreams.yaml")
     monkeypatch.setattr(release_manager, "ADR_DIR", tmp_path / "docs" / "adr")
     monkeypatch.setattr(release_manager, "VERSION_SEMANTICS_PATH", tmp_path / "config" / "version-semantics.json")
+    monkeypatch.setattr(release_manager, "OUTLINE_SYNC_SCRIPT", tmp_path / "scripts" / "sync_docs_to_outline.py")
+    monkeypatch.setattr(release_manager, "OUTLINE_API_TOKEN_PATH", tmp_path / ".local" / "outline" / "api-token.txt")
+    monkeypatch.setattr(release_manager, "OUTLINE_BASE_URL", "https://wiki.lv3.org")
     monkeypatch.setattr(release_manager, "CHANGELOG_PATH", tmp_path / "changelog.md")
     monkeypatch.setattr(release_manager, "RELEASE_NOTES_INDEX_PATH", tmp_path / "docs" / "release-notes" / "README.md")
     monkeypatch.setattr(canonical_truth, "infer_release_bump", lambda: "patch")
@@ -222,3 +226,68 @@ def test_release_cut_can_infer_bump_from_canonical_truth_metadata(release_repo: 
 
     assert exit_code == 0
     assert (release_repo / "VERSION").read_text().strip() == "0.1.1"
+
+
+def test_release_cut_skips_outline_sync_when_bootstrap_artifacts_are_missing(
+    release_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    commands: list[list[str]] = []
+
+    def fake_run_command(command: list[str], *, cwd: Path, text: bool = True, capture_output: bool = True):
+        commands.append(command)
+        return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+
+    monkeypatch.setattr(release_manager, "run_command", fake_run_command)
+
+    exit_code = release_manager.main(
+        [
+            "--bump",
+            "patch",
+            "--platform-impact",
+            "no live platform version bump; repository-only release",
+        ]
+    )
+
+    assert exit_code == 0
+    assert commands == []
+
+
+def test_release_cut_syncs_outline_when_bootstrap_artifacts_exist(
+    release_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    script_path = release_manager.OUTLINE_SYNC_SCRIPT
+    script_path.parent.mkdir(parents=True, exist_ok=True)
+    script_path.write_text("#!/usr/bin/env python3\n")
+    release_manager.OUTLINE_API_TOKEN_PATH.parent.mkdir(parents=True, exist_ok=True)
+    release_manager.OUTLINE_API_TOKEN_PATH.write_text("token\n")
+    commands: list[list[str]] = []
+
+    def fake_run_command(command: list[str], *, cwd: Path, text: bool = True, capture_output: bool = True):
+        commands.append(command)
+        return subprocess.CompletedProcess(command, 0, stdout="synced\n", stderr="")
+
+    monkeypatch.setattr(release_manager, "run_command", fake_run_command)
+
+    exit_code = release_manager.main(
+        [
+            "--bump",
+            "patch",
+            "--platform-impact",
+            "no live platform version bump; repository-only release",
+        ]
+    )
+
+    assert exit_code == 0
+    assert commands == [
+        [
+            "python3",
+            str(script_path),
+            "sync",
+            "--repo-root",
+            str(release_repo),
+            "--base-url",
+            "https://wiki.lv3.org",
+            "--api-token-file",
+            str(release_manager.OUTLINE_API_TOKEN_PATH),
+        ]
+    ]

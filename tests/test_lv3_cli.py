@@ -45,7 +45,9 @@ def minimal_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     monkeypatch.setenv("LV3_MAINTENANCE_WINDOWS_FILE", str(maintenance_state))
     (tmp_path / "config").mkdir()
     (tmp_path / "docs" / "adr").mkdir(parents=True)
+    (tmp_path / "docs" / "diagrams").mkdir(parents=True)
     (tmp_path / "docs" / "runbooks").mkdir(parents=True)
+    (tmp_path / "docs" / "diagrams" / "network-topology.excalidraw").write_text("{}", encoding="utf-8")
     (tmp_path / "inventory").mkdir()
     (tmp_path / "receipts" / "live-applies").mkdir(parents=True)
     (tmp_path / "receipts" / "dr-table-top-reviews").mkdir(parents=True)
@@ -465,6 +467,38 @@ def test_logs_dry_run_builds_loki_query(
     assert "query=%7Bservice%3D%22windmill%22%7D" in captured.out
 
 
+def test_query_platform_context_command_prints_matches(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class FakeRetriever:
+        def __init__(self, timeout_seconds: float = 30) -> None:
+            self.timeout_seconds = timeout_seconds
+
+        def retrieve_payload(self, question: str, top_k: int = 5) -> dict[str, object]:
+            assert question == "how does step-ca issue SSH certificates"
+            assert top_k == 3
+            return {
+                "matches": [
+                    {
+                        "score": 0.95,
+                        "source_path": "docs/adr/0042-step-ca.md",
+                        "adr_number": "0042",
+                        "section_heading": "Decision",
+                        "content": "step-ca issues SSH certificates for humans and services.",
+                    }
+                ]
+            }
+
+    monkeypatch.setattr(lv3_cli, "PlatformContextRetriever", FakeRetriever)
+
+    exit_code = lv3_cli.main(["query-platform-context", "how does step-ca issue SSH certificates", "--limit", "3"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "docs/adr/0042-step-ca.md" in captured.out
+    assert "ADR 0042" in captured.out
+
+
 def test_run_dry_run_redacts_token(
     capsys: pytest.CaptureFixture[str], minimal_repo: Path
 ) -> None:
@@ -702,6 +736,22 @@ def test_vm_list_uses_inventory(
 def test_completion_suggests_services(minimal_repo: Path) -> None:
     candidates = lv3_cli.completion_candidates(["lv3", "open"], "g")
     assert candidates == ["grafana"]
+
+
+def test_completion_suggests_diagram_names(minimal_repo: Path) -> None:
+    candidates = lv3_cli.completion_candidates(["lv3", "diagram", "open"], "n")
+    assert candidates == ["network-topology"]
+
+
+def test_diagram_open_dry_run_prints_local_browser_target(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(["diagram", "open", "network-topology", "--dry-run"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "open diagram network-topology" in captured.out
+    assert "file://" in captured.out
 
 
 def test_loop_start_outputs_resolved_run(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:

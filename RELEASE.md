@@ -1,12 +1,12 @@
-# Release 0.177.10
+# Release 0.177.19
 
-- Date: 2026-03-27
+- Date: 2026-03-28
 
 ## Summary
-- completed ADR 0119 latest-main live apply by hardening Windmill seed sync and replaying the scheduler dispatcher, lane, watchdog, and watchdog-loop paths from the current mainline
+- integrated ADR 0199 by publishing the repo-managed Outline living knowledge wiki at `wiki.lv3.org`, wiring the durable `outline.automation` Keycloak bootstrap path, and verifying the governed living-knowledge collections end to end
 
 ## Platform Impact
-- platform_version advances to 0.130.30; ADR 0119 is now verified from main with durable worker checkout refresh, bootstrap-session auth fallback, scheduler token propagation, and the repo-managed scheduler schedules enabled on production Windmill.
+- Publishes the repo-managed Outline living knowledge wiki at wiki.lv3.org and integrates the release-time sync path.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

@@ -37,7 +37,14 @@ def test_configured_environment_ids_and_receipt_subdirectories_follow_catalog(tm
     )
     assert environment_catalog.active_environment_ids(topology_path) == ("production",)
     assert environment_catalog.primary_environment(topology_path) == "production"
+    assert environment_catalog.receipt_environment_ids(topology_path) == (
+        "production",
+        "development",
+        "staging",
+        "preview",
+    )
     assert environment_catalog.receipt_subdirectory_environments(topology_path) == {
         "development",
+        "preview",
         "staging",
     }

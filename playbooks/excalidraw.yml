@@ -1,0 +1,128 @@
+---
+# Playbook: excalidraw.yml
+# Purpose: Converge the Excalidraw runtime on docker-runtime-lv3 and publish draw.lv3.org through the shared authenticated edge.
+# Use case: Run when changing ADR 0202 runtime automation, shared-edge publication, or live Excalidraw image pins.
+#
+# Inputs (required):
+#   - HETZNER_DNS_API_TOKEN (env, required for edge publication): Allows certbot DNS-01 updates when SANs change.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): SSH transport mode for guest access.
+#
+# Outputs:
+#   - Excalidraw frontend and collaboration room containers running on docker-runtime-lv3
+#   - Shared-edge publication for https://draw.lv3.org with the repo-managed oauth2-proxy gate
+#
+# Idempotency: Partially idempotent
+#              Reruns reconcile the same containers, shared-edge config, and certificate SAN set without changing shared release truth.
+#
+# Dependencies:
+#   - ADR 0202: Defines the self-hosted Excalidraw and generated diagram publication model.
+#   - Requires: docker-runtime-lv3, nginx-lv3, and the shared edge auth stack to be reachable.
+#   - Role: lv3.platform.excalidraw_runtime — converges the frontend and collaboration room.
+#   - Role: lv3.platform.nginx_edge_publication — publishes draw.lv3.org through the shared edge.
+#
+# Related ADRs: 0133, 0136, 0165
+# Related Runbooks: docs/runbooks/configure-excalidraw.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-27
+- name: Ensure Hetzner DNS publication for Excalidraw
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    subdomain_catalog_path: "{{ playbook_dir }}/../config/subdomain-catalog.json"
+    inventory_defaults_path: "{{ playbook_dir }}/../inventory/group_vars/all.yml"
+    subdomain_fqdn: draw.lv3.org
+
+  tasks:
+    - name: Load controller defaults
+      ansible.builtin.include_vars:
+        file: "{{ inventory_defaults_path }}"
+
+    - name: Load the subdomain catalog
+      ansible.builtin.include_vars:
+        file: "{{ subdomain_catalog_path }}"
+        name: subdomain_catalog
+
+    - name: Select the Excalidraw subdomain entry
+      ansible.builtin.set_fact:
+        selected_subdomain: >-
+          {{
+            (
+              subdomain_catalog.subdomains
+              | selectattr('fqdn', 'equalto', subdomain_fqdn)
+              | list
+              | first
+            ) | default({})
+          }}
+
+    - name: Assert the Excalidraw subdomain is catalogued
+      ansible.builtin.assert:
+        that:
+          - selected_subdomain != {}
+          - selected_subdomain.status in ['active', 'planned']
+          - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
+        fail_msg: "draw.lv3.org must exist in config/subdomain-catalog.json before live apply."
+
+    - name: Derive the managed Hetzner record name
+      ansible.builtin.set_fact:
+        selected_subdomain_record_name: >-
+          {{
+            '@'
+            if selected_subdomain.fqdn == hetzner_dns_zone_name
+            else (
+              selected_subdomain.fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
+            )
+          }}
+
+    - name: Converge the Excalidraw Hetzner DNS record
+      ansible.builtin.include_role:
+        name: lv3.platform.hetzner_dns_record
+      vars:
+        hetzner_dns_record_zone_name: "{{ hetzner_dns_zone_name }}"
+        hetzner_dns_record_name: "{{ selected_subdomain_record_name }}"
+        hetzner_dns_record_type: A
+        hetzner_dns_record_value: "{{ selected_subdomain.target }}"
+        hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"
+
+- name: Converge Excalidraw on the Docker runtime VM
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+  vars:
+    preflight_wait_for_connection: false
+  tags:
+    - tier-2
+    - documentation
+    - service-excalidraw
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.excalidraw_runtime
+
+- name: Publish Excalidraw on the shared NGINX edge
+  hosts: nginx-lv3
+  become: true
+  gather_facts: true
+  vars:
+    preflight_wait_for_connection: false
+    public_edge_sync_generated_static_dirs: false
+  tags:
+    - tier-1
+    - documentation
+    - service-excalidraw
+    - publication-excalidraw
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.nginx_edge_publication

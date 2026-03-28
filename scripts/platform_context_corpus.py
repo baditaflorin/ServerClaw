@@ -27,9 +27,13 @@ CORPUS_PATHS: tuple[str, ...] = (
 )
 CORPUS_FILES: tuple[str, ...] = (
     "versions/stack.yaml",
+    "config/dependency-graph.json",
     "config/workflow-catalog.json",
     "config/command-catalog.json",
     "config/agent-tool-registry.json",
+    "config/error-codes.yaml",
+    "config/service-capability-catalog.json",
+    "config/slo-catalog.json",
     "docs/schema/promotion-receipt.json",
     "changelog.md",
     "VERSION",
@@ -88,6 +92,8 @@ def document_kind_for_path(relative_path: str) -> str:
         return "promotion"
     if relative_path == "versions/stack.yaml":
         return "stack"
+    if relative_path == "config/error-codes.yaml":
+        return "error_code_catalog"
     if relative_path.startswith("config/"):
         return "catalog"
     if relative_path == "changelog.md":

@@ -41,6 +41,21 @@
         "cidr": 24,
         "network": "10.20.10.0/24"
       },
+      "placement": {
+        "failure_domain": "host:proxmox_florin",
+        "placement_class": "preview",
+        "anti_affinity_group": "staging-preview",
+        "co_location_exceptions": [
+          {
+            "scope": "failure_domain",
+            "rationale": "Staging currently shares the primary Proxmox host until the auxiliary cloud failure domain is active."
+          }
+        ],
+        "reserved_capacity_exclusions": [
+          "standby",
+          "recovery"
+        ]
+      },
       "notes": "Live from 2026-03-27 with docker-runtime-staging-lv3 and monitoring-staging-lv3 on vmbr20; staged guest network policy and service bindings remain follow-up work."
     }
   ]

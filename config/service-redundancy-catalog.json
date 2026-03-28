@@ -146,6 +146,23 @@
         "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Dozzle converge from git."
       }
     },
+    "excalidraw": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Excalidraw, the room backend, or the shared runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Excalidraw converge from git."
+      }
+    },
     "gitea": {
       "tier": "R1",
       "recovery_objective": {
@@ -433,6 +450,24 @@
         "location": "docker-runtime-lv3",
         "failover_trigger": "Restore docker-runtime-lv3 when the ops portal runtime cannot be recovered in place.",
         "failback_method": "Restore or rebuild docker-runtime-lv3, then regenerate and redeploy the ops portal from git."
+      }
+    },
+    "outline": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120",
+        "pbs_vm_150"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Outline or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Outline converge from git."
       }
     },
     "platform_context_api": {

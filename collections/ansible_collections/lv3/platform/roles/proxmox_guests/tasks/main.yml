@@ -5,7 +5,7 @@
       - proxmox_storage_id | length > 0
       - proxmox_internal_bridge | length > 0
       - proxmox_vm_templates | length > 0
-      - (proxmox_guests_active | default(proxmox_guests)) | length > 0
+      - (proxmox_guests_active | default(proxmox_guests, true)) | length > 0
     fail_msg: "proxmox_guests requires template catalog, storage, bridge, and guest inventory inputs."
 
 - name: Ensure snippets directory exists
@@ -21,16 +21,26 @@
       - item.template_key in proxmox_vm_templates
       - proxmox_vm_templates[item.template_key].vmid is defined
     fail_msg: "Each guest must declare template_key present in proxmox_vm_templates."
-  loop: "{{ proxmox_guests_active | default(proxmox_guests) }}"
+  loop: "{{ proxmox_guests_active | default(proxmox_guests, true) }}"
   loop_control:
     label: "{{ item.name }}"
+
+- name: Build failure-domain live label map
+  ansible.builtin.set_fact:
+    proxmox_failure_domain_live_labels: >-
+      {{
+        dict(
+          (platform_failure_domains | default([]) | map(attribute='id'))
+          | zip(platform_failure_domains | default([]) | map(attribute='live_label'))
+        )
+      }}
 
 - name: Render cloud-init user-data snippets for guests
   ansible.builtin.template:
     src: user-data.yml.j2
     dest: "/var/lib/vz/snippets/{{ item.name }}-user-data.yml"
     mode: "0644"
-  loop: "{{ proxmox_guests_active | default(proxmox_guests) }}"
+  loop: "{{ proxmox_guests_active | default(proxmox_guests, true) }}"
   loop_control:
     label: "{{ item.name }}"
 
@@ -39,7 +49,7 @@
   register: proxmox_guest_status
   failed_when: false
   changed_when: false
-  loop: "{{ proxmox_guests_active | default(proxmox_guests) }}"
+  loop: "{{ proxmox_guests_active | default(proxmox_guests, true) }}"
   loop_control:
     label: "{{ item.name }}"
 
@@ -48,7 +58,7 @@
   register: proxmox_guest_config
   failed_when: false
   changed_when: false
-  loop: "{{ proxmox_guests_active | default(proxmox_guests) }}"
+  loop: "{{ proxmox_guests_active | default(proxmox_guests, true) }}"
   loop_control:
     label: "{{ item.name }}"
 
@@ -106,7 +116,7 @@
       - --onboot
       - "1"
       - --tags
-      - "{{ item.tags | join(';') }}"
+      - "{{ ((item.tags | default([])) + proxmox_guest_policy_tags) | unique | join(';') }}"
       - --net0
       - >-
         virtio{% if item.macaddr is defined %}={{ item.macaddr }}{% endif %},bridge={{ proxmox_internal_bridge }}
@@ -120,8 +130,32 @@
       - "user={{ proxmox_snippets_storage_id }}:snippets/{{ item.name }}-user-data.yml"
       - --description
       - "{{ item.role }} VM for lv3.org platform"
-  loop: "{{ proxmox_guests_active | default(proxmox_guests) }}"
+  loop: "{{ proxmox_guests_active | default(proxmox_guests, true) }}"
   changed_when: true
+  vars:
+    proxmox_guest_policy_tags: >-
+      {{
+        (
+          [proxmox_failure_domain_live_labels[item.placement.failure_domain]]
+          + ['pc-' ~ item.placement.placement_class]
+          + [
+            'aag-'
+            ~ (
+              item.placement.anti_affinity_group
+              | lower
+              | regex_replace('[^a-z0-9]+', '-')
+              | regex_replace('(^-+|-+$)', '')
+            )
+          ]
+          + (
+            ['exc-same-domain']
+            if (item.placement.co_location_exceptions | default([]) | length > 0)
+            else []
+          )
+        )
+        if item.placement is defined
+        else []
+      }}
   loop_control:
     label: "{{ item.name }}"
 
@@ -133,7 +167,7 @@
       - "{{ item.0.vmid | string }}"
       - "--{{ item.1.interface }}"
       - "{{ item.1.storage | default(proxmox_storage_id) }}:{{ item.1.size_gb }}"
-  loop: "{{ (proxmox_guests_active | default(proxmox_guests)) | subelements('extra_disks', skip_missing=True) }}"
+  loop: "{{ (proxmox_guests_active | default(proxmox_guests, true)) | subelements('extra_disks', skip_missing=True) }}"
   changed_when: true
   loop_control:
     label: "{{ item.0.name }} {{ item.1.interface }}"
@@ -152,7 +186,7 @@
       - cloudinit
       - update
       - "{{ item.vmid | string }}"
-  loop: "{{ proxmox_guests_active | default(proxmox_guests) }}"
+  loop: "{{ proxmox_guests_active | default(proxmox_guests, true) }}"
   loop_control:
     label: "{{ item.name }}"
   changed_when: true
@@ -162,6 +196,6 @@
   register: proxmox_guest_start
   failed_when: proxmox_guest_start.rc not in [0, 255]
   changed_when: proxmox_guest_start.rc == 0
-  loop: "{{ proxmox_guests_active | default(proxmox_guests) }}"
+  loop: "{{ proxmox_guests_active | default(proxmox_guests, true) }}"
   loop_control:
     label: "{{ item.name }}"

@@ -1,0 +1,21 @@
+services:
+  excalidraw-app:
+    image: {{ excalidraw_runtime_app_image }}
+    container_name: {{ excalidraw_runtime_app_container_name }}
+    restart: unless-stopped
+    entrypoint:
+      - /bin/sh
+      - /opt/lv3/bootstrap-app.sh
+    ports:
+      - "{{ excalidraw_runtime_bind_host }}:{{ excalidraw_runtime_app_port }}:{{ excalidraw_runtime_app_container_port }}"
+    volumes:
+      - {{ excalidraw_runtime_bootstrap_script }}:/opt/lv3/bootstrap-app.sh:ro
+
+  excalidraw-room:
+    image: {{ excalidraw_runtime_room_image }}
+    container_name: {{ excalidraw_runtime_room_container_name }}
+    restart: unless-stopped
+    environment:
+      PORT: "{{ excalidraw_runtime_room_port }}"
+    ports:
+      - "{{ excalidraw_runtime_bind_host }}:{{ excalidraw_runtime_room_port }}:{{ excalidraw_runtime_room_port }}"

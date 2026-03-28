@@ -33,3 +33,25 @@ def test_read_api_credentials_uses_token_file(tmp_path: Path) -> None:
     endpoint, api_token = vmid_allocator.read_api_credentials(token_file=token_path)
     assert endpoint == "https://proxmox.example.invalid:8006/api2/json"
     assert api_token == "lv3-automation@pve!primary=secret"
+
+
+def test_read_api_credentials_allows_endpoint_override_with_token_file_fallback(
+    tmp_path: Path, monkeypatch
+) -> None:
+    token_path = tmp_path / "token.json"
+    token_path.write_text(
+        json.dumps(
+            {
+                "api_url": "https://proxmox.example.invalid:8006/api2/json",
+                "full_token_id": "lv3-automation@pve!primary",
+                "value": "secret",
+            }
+        )
+    )
+    monkeypatch.setenv("TF_VAR_proxmox_endpoint", "https://100.64.0.1:8006/api2/json")
+    monkeypatch.delenv("TF_VAR_proxmox_api_token", raising=False)
+
+    endpoint, api_token = vmid_allocator.read_api_credentials(token_file=token_path)
+
+    assert endpoint == "https://100.64.0.1:8006/api2/json"
+    assert api_token == "lv3-automation@pve!primary=secret"

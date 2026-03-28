@@ -3,7 +3,10 @@
 import json
 import math
 import os
+import re
 import time
+import urllib.error
+import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -73,6 +76,50 @@ class SentenceTransformersEmbedder:
         return self.model.encode([text], normalize_embeddings=True).tolist()[0]
 
 
+class OllamaEmbedder:
+    def __init__(self, base_url: str, model_name: str) -> None:
+        self.base_url = base_url.rstrip("/")
+        self.model_name = model_name
+
+    def _request(self, path: str, payload: dict[str, Any]) -> dict[str, Any]:
+        request = urllib.request.Request(
+            f"{self.base_url}{path}",
+            method="POST",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=300) as response:  # noqa: S310
+                return json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace")
+            raise RuntimeError(f"Ollama {path} returned HTTP {exc.code}: {detail}") from exc
+
+    @staticmethod
+    def _extract_embeddings(payload: dict[str, Any]) -> list[list[float]]:
+        embeddings = payload.get("embeddings")
+        if isinstance(embeddings, list) and embeddings and isinstance(embeddings[0], list):
+            return [[float(value) for value in vector] for vector in embeddings]
+        embedding = payload.get("embedding")
+        if isinstance(embedding, list):
+            return [[float(value) for value in embedding]]
+        raise RuntimeError("Ollama embedding response did not contain embeddings")
+
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        if not texts:
+            return []
+        payload = {"model": self.model_name, "input": texts}
+        try:
+            response = self._request("/api/embed", payload)
+        except RuntimeError:
+            legacy_response = [self._request("/api/embeddings", {"model": self.model_name, "prompt": text}) for text in texts]
+            return [self._extract_embeddings(item)[0] for item in legacy_response]
+        return self._extract_embeddings(response)
+
+    def embed_query(self, text: str) -> list[float]:
+        return self.embed_documents([text])[0]
+
+
 @dataclass
 class ServiceConfig:
     api_token: str
@@ -84,6 +131,7 @@ class ServiceConfig:
     embedding_backend: str
     embedding_model: str
     embedding_dimension: int
+    ollama_url: str | None = None
     prometheus_url: str | None = None
     grafana_url: str | None = None
 
@@ -94,16 +142,19 @@ class PlatformContextService:
         self.error_registry = ErrorRegistry.load(config.error_registry_path)
         self.client = self._build_client()
         self.embedder = self._build_embedder()
-        self.ensure_collection()
 
     def _build_client(self) -> QdrantClient:
         if self.config.qdrant_location:
             return QdrantClient(location=self.config.qdrant_location)
         return QdrantClient(url=self.config.qdrant_url)
 
-    def _build_embedder(self) -> TokenHashEmbedder | SentenceTransformersEmbedder:
+    def _build_embedder(self) -> TokenHashEmbedder | SentenceTransformersEmbedder | OllamaEmbedder:
         if self.config.embedding_backend == "token-hash":
             return TokenHashEmbedder(self.config.embedding_dimension)
+        if self.config.embedding_backend == "ollama":
+            if not self.config.ollama_url:
+                raise ValueError("PLATFORM_CONTEXT_OLLAMA_URL is required when PLATFORM_CONTEXT_EMBEDDING_BACKEND=ollama")
+            return OllamaEmbedder(self.config.ollama_url, self.config.embedding_model)
         if self.config.embedding_backend == "sentence-transformers":
             try:
                 return SentenceTransformersEmbedder(self.config.embedding_model)
@@ -122,23 +173,31 @@ class PlatformContextService:
                 return TokenHashEmbedder(self.config.embedding_dimension)
         raise ValueError(f"unsupported embedding backend: {self.config.embedding_backend}")
 
-    def ensure_collection(self) -> None:
+    def _required_dimension(self, embeddings: list[list[float]] | None = None) -> int:
+        if embeddings:
+            return len(embeddings[0])
+        if self.config.embedding_dimension > 0:
+            return self.config.embedding_dimension
+        return len(self.embedder.embed_query("platform context dimension probe"))
+
+    def ensure_collection(self, *, replace: bool = False, dimension: int | None = None) -> None:
+        if replace and self.client.collection_exists(self.config.collection_name):
+            self.client.delete_collection(self.config.collection_name)
         if self.client.collection_exists(self.config.collection_name):
             return
         self.client.create_collection(
             collection_name=self.config.collection_name,
             vectors_config=VectorParams(
-                size=self.config.embedding_dimension,
+                size=dimension or self._required_dimension(),
                 distance=Distance.COSINE,
             ),
         )
 
     def rebuild(self, chunks: list[dict[str, Any]], *, replace: bool = True) -> dict[str, Any]:
-        if replace:
-            self.ensure_collection()
         if not chunks:
             return {"collection_name": self.config.collection_name, "indexed_chunks": 0}
         embeddings = self.embedder.embed_documents([chunk["content"] for chunk in chunks])
+        self.ensure_collection(replace=replace, dimension=self._required_dimension(embeddings))
         points = [
             PointStruct(
                 id=chunk["chunk_id"],
@@ -174,46 +233,87 @@ class PlatformContextService:
         return result
 
     def query(self, question: str, top_k: int) -> dict[str, Any]:
-        vector = self.embedder.embed_query(question)
-        if hasattr(self.client, "query_points"):
-            response = self.client.query_points(
-                collection_name=self.config.collection_name,
-                query=vector,
-                limit=top_k,
-                with_payload=True,
-            )
-            matches = response.points
-        else:
-            matches = self.client.search(
-                collection_name=self.config.collection_name,
-                query_vector=vector,
-                limit=top_k,
-                with_payload=True,
-            )
-        payload = {
-            "question": question,
-            "matches": [
-                {
-                    "score": match.score,
-                    "source_path": match.payload.get("source_path"),
-                    "document_kind": match.payload.get("document_kind"),
-                    "document_title": match.payload.get("document_title"),
-                    "section_heading": match.payload.get("section_heading"),
-                    "adr_number": match.payload.get("adr_number"),
-                    "content": match.payload.get("content"),
-                }
-                for match in matches
-            ],
-        }
+        fallback_reason = None
+        try:
+            vector = self.embedder.embed_query(question)
+            if hasattr(self.client, "query_points"):
+                response = self.client.query_points(
+                    collection_name=self.config.collection_name,
+                    query=vector,
+                    limit=top_k,
+                    with_payload=True,
+                )
+                matches = response.points
+            else:
+                matches = self.client.search(
+                    collection_name=self.config.collection_name,
+                    query_vector=vector,
+                    limit=top_k,
+                    with_payload=True,
+                )
+            payload = {
+                "question": question,
+                "matches": [
+                    {
+                        "score": match.score,
+                        "source_path": match.payload.get("source_path"),
+                        "document_kind": match.payload.get("document_kind"),
+                        "document_title": match.payload.get("document_title"),
+                        "section_heading": match.payload.get("section_heading"),
+                        "adr_number": match.payload.get("adr_number"),
+                        "content": match.payload.get("content"),
+                    }
+                    for match in matches
+                ],
+                "retrieval_backend": "vector",
+            }
+        except Exception as exc:  # noqa: BLE001
+            fallback_reason = str(exc)
+            payload = {
+                "question": question,
+                "matches": self.keyword_query(question, top_k),
+                "retrieval_backend": "keyword-fallback",
+            }
+            payload["fallback_reason"] = fallback_reason
         SERVICE_LOGGER.info(
             "Answered platform-context query",
             extra={
                 "target": "collection:" + self.config.collection_name,
                 "query_top_k": top_k,
                 "match_count": len(payload["matches"]),
+                "retrieval_backend": payload.get("retrieval_backend"),
+                "fallback_reason": fallback_reason,
             },
         )
         return payload
+
+    def keyword_query(self, question: str, top_k: int) -> list[dict[str, Any]]:
+        query_tokens = {token for token in re.findall(r"[a-z0-9]{3,}", question.lower())}
+        scored: list[tuple[float, dict[str, Any]]] = []
+        for chunk in build_chunks(self.config.corpus_root):
+            content = str(chunk.get("content", ""))
+            content_tokens = {token for token in re.findall(r"[a-z0-9]{3,}", content.lower())}
+            if not content_tokens:
+                continue
+            overlap = query_tokens & content_tokens
+            if not overlap:
+                continue
+            score = len(overlap) / len(query_tokens or {""})
+            scored.append(
+                (
+                    score,
+                    {
+                        "score": score,
+                        "source_path": chunk.get("source_path"),
+                        "document_kind": chunk.get("document_kind"),
+                        "document_title": chunk.get("document_title"),
+                        "section_heading": chunk.get("section_heading"),
+                        "adr_number": chunk.get("adr_number"),
+                        "content": content,
+                    },
+                )
+            )
+        return [item for _score, item in sorted(scored, key=lambda entry: entry[0], reverse=True)[:top_k]]
 
     def recent_receipts(self, limit: int) -> dict[str, Any]:
         receipts_dir = self.config.corpus_root / "receipts" / "live-applies"
@@ -317,6 +417,7 @@ def build_config() -> ServiceConfig:
         embedding_dimension=int(
             os.environ.get("PLATFORM_CONTEXT_EMBEDDING_DIMENSION", str(DEFAULT_DIMENSION))
         ),
+        ollama_url=os.environ.get("PLATFORM_CONTEXT_OLLAMA_URL"),
         prometheus_url=os.environ.get("PLATFORM_CONTEXT_PROMETHEUS_URL")
         or default_prometheus_url(stack_path=corpus_root / "versions" / "stack.yaml"),
         grafana_url=os.environ.get("PLATFORM_CONTEXT_GRAFANA_URL")

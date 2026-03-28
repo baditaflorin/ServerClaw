@@ -30,6 +30,7 @@ from control_plane_lanes import load_lane_catalog
 from data_catalog import load_data_catalog, validate_data_catalog
 from dependency_graph import load_dependency_graph
 from data_catalog import load_data_catalog, validate_data_catalog
+from failure_domain_policy import validate_failure_domain_policy
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
 from platform.circuit import load_circuit_policies
 from platform.interface_contracts import validate_contracts
@@ -41,6 +42,7 @@ from promotion_pipeline import validate_promotion_receipts
 from public_surface_scan import load_public_surface_scan_policy
 from validate_ephemeral_vmid import validate_ephemeral_vmid_ranges
 from generate_slo_rules import outputs_match as slo_outputs_match
+from immutable_guest_replacement import load_guest_replacement_catalog, validate_guest_replacement_catalog
 from slo_tracking import (
     GRAFANA_DASHBOARD_PATH,
     PROMETHEUS_ALERTS_PATH,
@@ -59,6 +61,7 @@ from workflow_catalog import (
 )
 from workstream_surface_ownership import validate_registry as validate_workstream_surface_ownership_registry
 from platform.config_merge import validate_merge_eligible_catalog
+from preview_environment import load_profile_catalog, validate_profile_catalog
 
 
 STACK_PATH = repo_path("versions", "stack.yaml")
@@ -2389,6 +2392,10 @@ def validate_slo_catalog_assets() -> None:
         raise ValueError("generated SLO artifacts are out of date")
 
 
+def validate_preview_environment_profiles() -> None:
+    validate_profile_catalog(load_profile_catalog())
+
+
 def validate_repository_data_models() -> int:
     load_dependency_graph(validate_schema=True)
     secret_manifest = load_secret_manifest()
@@ -2408,6 +2415,7 @@ def validate_repository_data_models() -> int:
     validate_api_publication_catalog(api_publication_catalog, lane_catalog)
     load_service_completeness_context()
     validate_redundancy_catalog(load_redundancy_catalog())
+    validate_guest_replacement_catalog(load_guest_replacement_catalog())
     validate_mutation_audit_schema(load_mutation_audit_schema())
     validate_receipts()
     validate_promotion_receipts()
@@ -2416,6 +2424,7 @@ def validate_repository_data_models() -> int:
     validate_certificate_catalog(host_vars_context)
     validate_health_probe_catalog(host_vars_context)
     validate_data_catalog(load_data_catalog())
+    validate_failure_domain_policy()
     validate_slo_catalog_assets()
     validate_secret_catalog(secret_manifest)
     token_classes = validate_token_policy()
@@ -2433,6 +2442,7 @@ def validate_repository_data_models() -> int:
     validate_maintenance_window_schema()
     validate_capacity_model_schema()
     validate_capacity_model()
+    validate_preview_environment_profiles()
     validate_ephemeral_pool_catalog()
     load_public_surface_scan_policy()
     validate_vm_template_manifest(host_vars_context["proxmox_vm_templates"])

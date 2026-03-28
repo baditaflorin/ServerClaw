@@ -44,6 +44,7 @@ except ImportError:  # pragma: no cover - packaged entrypoint path
 
 from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 from platform.idempotency import IdempotencyStore
+from platform.llm import PlatformContextRetriever
 from platform.scheduler import build_scheduler
 from scripts.risk_scorer import ExecutionIntent, assemble_context, compile_workflow_intent, score_intent
 CLI_VERSION = "0.1.0"
@@ -1503,6 +1504,30 @@ def open_service_url(service_id: str, environment: str, *, dry_run: bool, explai
     return 0 if webbrowser.open(url) else 1
 
 
+def available_diagrams() -> list[str]:
+    diagrams_dir = repo_path("docs", "diagrams")
+    if not diagrams_dir.exists():
+        return []
+    return sorted(path.stem for path in diagrams_dir.glob("*.excalidraw"))
+
+
+def open_diagram_source(diagram_name: str, *, dry_run: bool, explain: bool, no_color: bool) -> int:
+    diagrams_dir = repo_path("docs", "diagrams")
+    path = diagrams_dir / f"{diagram_name}.excalidraw"
+    if not path.exists():
+        raise SystemExit(f"Unknown diagram '{diagram_name}'.")
+    uri = path.resolve().as_uri()
+    plan = CommandPlan(
+        label=f"open diagram {diagram_name}",
+        route="controller local browser",
+        command=["python3", "-m", "webbrowser", uri],
+    )
+    print_plan(plan, no_color=no_color)
+    if dry_run or explain:
+        return 0
+    return 0 if webbrowser.open(uri) else 1
+
+
 def manifest_show_command(*, as_json: bool, refresh: bool) -> int:
     import platform_manifest
 
@@ -1948,6 +1973,36 @@ def search_command(query: str, *, collection: str | None, limit: int, rebuild: b
     return 0
 
 
+def query_platform_context_command(question: str, *, limit: int, json_output: bool) -> int:
+    try:
+        retriever = PlatformContextRetriever(timeout_seconds=30)
+        payload = retriever.retrieve_payload(question, top_k=limit)
+    except (OSError, RuntimeError, ValueError) as exc:
+        print(f"Platform context query failed: {exc}", file=sys.stderr)
+        return 1
+    if json_output:
+        emit_json(payload)
+        return 0
+    matches = payload.get("matches", [])
+    if not matches:
+        print(f"No platform-context matches for '{question}'.")
+        return 0
+    for index, match in enumerate(matches, start=1):
+        citation = [str(match.get("source_path", "") or "unknown")]
+        adr_number = match.get("adr_number")
+        section_heading = match.get("section_heading")
+        if adr_number:
+            citation.append(f"ADR {adr_number}")
+        if section_heading:
+            citation.append(str(section_heading))
+        print(f"[{index}] {' | '.join(citation)}  score={float(match.get('score', 0.0) or 0.0):.3f}")
+        content = str(match.get("content", "") or "").strip()
+        if content:
+            print(textwrap.shorten(content.replace("\n", " "), width=200, placeholder=" ..."))
+        print()
+    return 0
+
+
 def agent_state_client(agent_id: str, task_id: str) -> AgentStateClient:
     return AgentStateClient(agent_id=agent_id, task_id=task_id)
 
@@ -2215,6 +2270,7 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
         "capacity",
         "promote",
         "run",
+        "diagram",
         "runbook",
         "logs",
         "ssh",
@@ -2230,6 +2286,10 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
     if words[1] in {"deploy", "impact", "status", "logs", "open"}:
         candidates = sorted(set(load_service_map()) | set(SERVICE_ALIASES))
         return [service_id for service_id in candidates if service_id.startswith(current)]
+    if words[1:3] == ["diagram", "open"]:
+        return [diagram for diagram in available_diagrams() if diagram.startswith(current)]
+    if words[1] == "diagram" and len(words) == 3:
+        return [action for action in ["open"] if action.startswith(current)]
     if words[1] == "validate" and "--service" in words:
         candidates = sorted(set(load_service_map()) | set(SERVICE_ALIASES))
         return [service_id for service_id in candidates if service_id.startswith(current)]
@@ -2394,6 +2454,14 @@ def build_parser() -> argparse.ArgumentParser:
     search.add_argument("--collection")
     search.add_argument("--limit", type=int, default=10)
     search.add_argument("--rebuild", action="store_true")
+
+    query_platform_context = subparsers.add_parser(
+        "query-platform-context",
+        help="Query the private semantic platform context service.",
+    )
+    query_platform_context.add_argument("question")
+    query_platform_context.add_argument("--limit", type=int, default=5)
+    query_platform_context.add_argument("--json", action="store_true")
 
     status = subparsers.add_parser("status", help="Show service health status.")
     status.add_argument("service", nargs="?")
@@ -2560,6 +2628,13 @@ def build_parser() -> argparse.ArgumentParser:
     open_parser.add_argument("--env", default=DEFAULT_ENVIRONMENT, choices=ENVIRONMENT_CHOICES)
     open_parser.add_argument("--dry-run", action="store_true")
     open_parser.add_argument("--explain", action="store_true")
+
+    diagram = subparsers.add_parser("diagram", help="Open one generated Excalidraw source file.")
+    diagram_subparsers = diagram.add_subparsers(dest="diagram_action", required=True)
+    diagram_open = diagram_subparsers.add_parser("open", help="Open one generated diagram source locally.")
+    diagram_open.add_argument("name")
+    diagram_open.add_argument("--dry-run", action="store_true")
+    diagram_open.add_argument("--explain", action="store_true")
 
     manifest = subparsers.add_parser("manifest", help="Inspect or refresh the platform manifest.")
     manifest_subparsers = manifest.add_subparsers(dest="manifest_action", required=True)
@@ -2747,6 +2822,8 @@ def main(argv: list[str] | None = None) -> int:
         )
     if args.command == "search":
         return search_command(args.query, collection=args.collection, limit=args.limit, rebuild=args.rebuild)
+    if args.command == "query-platform-context":
+        return query_platform_context_command(args.question, limit=args.limit, json_output=args.json)
     if args.command == "status":
         return status_command(args.service, args.env, timeout=args.timeout, no_color=no_color)
     if args.command == "health":
@@ -2860,6 +2937,9 @@ def main(argv: list[str] | None = None) -> int:
         return ssh_command(args.vm_name, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "open":
         return open_service_url(args.service, args.env, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
+    if args.command == "diagram":
+        if args.diagram_action == "open":
+            return open_diagram_source(args.name, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "manifest":
         if args.manifest_action == "show":
             return manifest_show_command(as_json=args.json, refresh=args.refresh)

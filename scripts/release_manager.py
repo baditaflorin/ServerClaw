@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import urllib.error
@@ -30,6 +31,10 @@ STACK_PATH = repo_path("versions", "stack.yaml")
 WORKSTREAMS_PATH = repo_path("workstreams.yaml")
 ADR_DIR = repo_path("docs", "adr")
 VERSION_SEMANTICS_PATH = repo_path("config", "version-semantics.json")
+OUTLINE_SYNC_SCRIPT = repo_path("scripts", "sync_docs_to_outline.py")
+OUTLINE_API_TOKEN_PATH = repo_path(".local", "outline", "api-token.txt")
+OUTLINE_BASE_URL = "https://wiki.lv3.org"
+OUTLINE_SYNC_DISABLE_ENV = "LV3_SKIP_OUTLINE_SYNC"
 SEMVER_PATTERN = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
 
 
@@ -345,6 +350,30 @@ def default_platform_impact() -> str:
     return "no live platform version bump; this release updates repository automation, release metadata, and operator tooling only"
 
 
+def sync_outline_knowledge_surface() -> None:
+    if os.environ.get(OUTLINE_SYNC_DISABLE_ENV) == "1":
+        return
+    if not OUTLINE_SYNC_SCRIPT.exists() or not OUTLINE_API_TOKEN_PATH.exists():
+        return
+    result = run_command(
+        [
+            "python3",
+            str(OUTLINE_SYNC_SCRIPT),
+            "sync",
+            "--repo-root",
+            str(REPO_ROOT),
+            "--base-url",
+            OUTLINE_BASE_URL,
+            "--api-token-file",
+            str(OUTLINE_API_TOKEN_PATH),
+        ],
+        cwd=REPO_ROOT,
+    )
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or "unknown error").strip()
+        raise ValueError(f"outline knowledge sync failed: {detail}")
+
+
 def write_release(version: str, *, platform_impact: str, released_on: str | None = None) -> dict[str, Any]:
     blockers = release_blockers_result(load_version_semantics())
     if not blockers.met:
@@ -374,6 +403,7 @@ def write_release(version: str, *, platform_impact: str, released_on: str | None
     )
     canonical_truth.mark_pending_workstreams_released(version)
     canonical_truth.write_assembled_truth(update_readme=True)
+    sync_outline_knowledge_surface()
     return {"version": version, "notes": notes}
 
 

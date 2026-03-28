@@ -1,4 +1,31 @@
 ---
+# Purpose: Declare the shared default inputs for publishing private and public services through the NGINX edge VM.
+# Use case: Used whenever the nginx_edge_publication role renders edge config, certificate domains, and hardened response headers.
+#
+# Inputs (required):
+#   - hostvars / inventory facts (generated, required): Platform topology, guest inventory, and port assignments.
+#
+# Inputs (optional):
+#   - public_edge_sync_generated_static_dirs (bool, optional, default=true): Whether generated static directories are synced on a run.
+#   - public_edge_dns_hetzner_propagation_seconds (int, optional, default=30): DNS wait used for certbot DNS-01 issuance.
+#
+# Outputs:
+#   - Shared defaults consumed by the edge publication role for packages, directories, certificates, proxy sites, and security headers.
+#
+# Idempotency: Fully idempotent
+#              This file only declares role defaults.
+#
+# Dependencies:
+#   - ADR 0133: Keeps operator-facing publications authenticated by default.
+#   - ADR 0136: Defines the hardened edge security-header baseline.
+#   - Requires: inventory topology and host facts to be current.
+#   - Role: nginx_edge_publication — publishes repo-managed sites and certificate domains.
+#
+# Related ADRs: 0133, 0136, 0165
+# Related Runbooks: docs/runbooks/configure-edge-publication.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-27
 public_edge_control_plane_host: "{{ groups['proxmox_hosts'][0] }}"
 proxmox_guests: "{{ hostvars[public_edge_control_plane_host].proxmox_guests }}"
 management_tailscale_ipv4: "{{ hostvars[public_edge_control_plane_host].management_tailscale_ipv4 }}"
@@ -55,6 +82,13 @@ public_edge_security_headers_overrides:
       object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'
       https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' data:
       https://fonts.gstatic.com; connect-src 'self'; manifest-src 'self'
+  draw.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
+      'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:;
+      connect-src 'self' https://draw.lv3.org wss://draw.lv3.org; worker-src 'self' blob:;
+      child-src 'self' blob:; manifest-src 'self'
   grafana.lv3.org:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
@@ -112,6 +146,8 @@ public_edge_authenticated_sites:
   changelog.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
   docs.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+  draw.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
   langfuse.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180

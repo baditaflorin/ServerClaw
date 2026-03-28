@@ -17,6 +17,7 @@ DURATION_MINUTES ?= 30
 TTL_SECONDS ?= 300
 REASON ?=
 FORCE ?= false
+ALLOW_IN_PLACE_MUTATION ?= false
 WARNING_DAYS ?= 45
 INACTIVE_DAYS ?= 60
 FAULT_INJECTION_ARGS ?=
@@ -77,7 +78,7 @@ ANSIBLE_PLAYBOOK_CMD := $(RUN_ID_ENV) ANSIBLE_REMOTE_TEMP=$(ANSIBLE_REMOTE_TEMP)
 TOFU_EXEC_CMD := $(RUN_ID_ENV) $(REPO_ROOT)/scripts/run_with_namespace.sh $(REPO_ROOT)/scripts/tofu_exec.sh
 ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_INTENT_ID),-e platform_intent_id=$(PLATFORM_INTENT_ID),)
 
-.PHONY: prepare-run-namespace validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-ansible-idempotency validate-shell validate-json validate-compose-runtime-envs validate-data-models validate-interface-contracts validate-health-probes validate-alert-rules validate-tofu generate-platform-vars show-platform-facts generate-slo-rules validate-generated-slo generate-status-docs assemble-canonical-truth check-canonical-truth generate-platform-manifest generate-status generate-ops-portal generate-changelog-portal generate-dependency-diagram generate-uptime-kuma-monitors validate-generated-uptime-kuma-monitors docs deploy-ops-portal deploy-changelog-portal deploy-docs-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info interface-contracts interface-contract-info services show-service environments environment-info lanes lane-info execution-lanes execution-lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness upgrade-container-image pin-image scaffold-service install-hooks pre-push-gate gate-status dr-status dr-runbook runbook-executor post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop intent-queue-dispatcher platform-observation-loop fault-injection triage-alert triage-calibration search-index-rebuild scan-published-artifacts setup preflight syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-api-gateway syntax-check-gitea syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-headscale syntax-check-semaphore syntax-check-windmill syntax-check-keycloak syntax-check-langfuse syntax-check-netbox syntax-check-searxng syntax-check-ollama syntax-check-n8n syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-vaultwarden syntax-check-rag-context syntax-check-secret-rotation syntax-check-dozzle collection-sync collection-build collection-publish collection-install check-platform-drift drift-report subdomain-exposure-audit security-posture-report security-headers-audit public-surface-security-scan open-maintenance-window close-maintenance-window ensure-resource-lock-registry resource-locks resource-lock-acquire resource-lock-release resource-lock-heartbeat operator-onboard operator-offboard sync-operators quarterly-access-review install-proxmox configure-network configure-staging-bridge configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-api-gateway converge-gitea converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-headscale converge-semaphore converge-windmill converge-control-plane-recovery converge-keycloak converge-langfuse converge-netbox converge-searxng converge-ollama converge-n8n converge-open-webui converge-mattermost converge-portainer converge-vaultwarden converge-rag-context converge-dozzle rotate-secret token-inventory-audit token-exposure-response rotate-keycloak-client-secret rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage configure-backups configure-backup-vm database-dns provision-subdomain start-workstream capacity-report weekly-capacity-report check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status fixture-pool-reconcile fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import
+.PHONY: prepare-run-namespace validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-ansible-idempotency validate-shell validate-json validate-compose-runtime-envs validate-data-models validate-interface-contracts validate-health-probes validate-alert-rules validate-tofu generate-platform-vars show-platform-facts generate-slo-rules validate-generated-slo generate-status-docs assemble-canonical-truth check-canonical-truth generate-platform-manifest generate-status generate-ops-portal generate-changelog-portal generate-dependency-diagram generate-diagrams generate-uptime-kuma-monitors validate-generated-uptime-kuma-monitors docs deploy-ops-portal deploy-changelog-portal deploy-docs-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info interface-contracts interface-contract-info services show-service environments environment-info preview-create preview-validate preview-destroy preview-list preview-info lanes lane-info execution-lanes execution-lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness upgrade-container-image pin-image scaffold-service install-hooks pre-push-gate gate-status dr-status dr-runbook runbook-executor post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop intent-queue-dispatcher platform-observation-loop fault-injection triage-alert triage-calibration search-index-rebuild scan-published-artifacts setup preflight syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-api-gateway syntax-check-gitea syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-headscale syntax-check-semaphore syntax-check-windmill syntax-check-keycloak syntax-check-langfuse syntax-check-netbox syntax-check-searxng syntax-check-ollama syntax-check-n8n syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-vaultwarden syntax-check-rag-context syntax-check-secret-rotation syntax-check-dozzle syntax-check-excalidraw collection-sync collection-build collection-publish collection-install check-platform-drift drift-report subdomain-exposure-audit security-posture-report security-headers-audit public-surface-security-scan open-maintenance-window close-maintenance-window ensure-resource-lock-registry resource-locks resource-lock-acquire resource-lock-release resource-lock-heartbeat operator-onboard operator-offboard sync-operators quarterly-access-review install-proxmox configure-network configure-staging-bridge configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-api-gateway converge-gitea converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-headscale converge-semaphore converge-windmill converge-control-plane-recovery converge-keycloak converge-langfuse converge-netbox converge-searxng converge-ollama converge-n8n converge-open-webui converge-mattermost converge-portainer converge-vaultwarden converge-rag-context converge-dozzle converge-excalidraw rotate-secret token-inventory-audit token-exposure-response rotate-keycloak-client-secret rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage configure-backups configure-backup-vm database-dns provision-subdomain start-workstream capacity-report weekly-capacity-report immutable-guest-replacement-plan check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status fixture-pool-reconcile fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import
 
 prepare-run-namespace:
 	@$(RUN_ID_ENV) python3 $(REPO_ROOT)/scripts/run_namespace.py --repo-root "$(REPO_ROOT)" --ensure >/dev/null
@@ -291,6 +292,9 @@ scaffold-service:
 generate-status-docs:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/generate_status_docs.py --write
 
+generate-diagrams:
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_diagrams.py --write
+
 assemble-canonical-truth:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/canonical_truth.py --write
 
@@ -323,10 +327,11 @@ deploy-changelog-portal: generate-changelog-portal
 deploy-docs-portal: docs
 	$(MAKE) configure-edge-publication
 
-generate-status: generate-slo-rules generate-status-docs generate-platform-manifest generate-ops-portal generate-changelog-portal docs
+generate-status: generate-slo-rules generate-status-docs generate-platform-manifest generate-ops-portal generate-changelog-portal generate-diagrams docs
 
 validate-generated-docs:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/generate_status_docs.py --check
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_diagrams.py --check
 
 validate-generated-portals:
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_ops_portal.py --check
@@ -375,6 +380,25 @@ environments:
 environment-info:
 	@test -n "$(ENVIRONMENT)" || (echo "set ENVIRONMENT=<production|staging>"; exit 1)
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/environment_topology.py --environment $(ENVIRONMENT)
+
+preview-create: generate-platform-manifest
+	@test -n "$(WORKSTREAM)" || (echo "set WORKSTREAM=<workstream-id>"; exit 1)
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/preview_environment.py create --workstream "$(WORKSTREAM)" $(if $(BRANCH),--branch "$(BRANCH)",) $(if $(PROFILE),--profile "$(PROFILE)",) $(if $(MANIFEST),--manifest "$(MANIFEST)",) $(if $(OWNER),--owner "$(OWNER)",) $(if $(TTL_HOURS),--ttl-hours "$(TTL_HOURS)",) $(if $(POLICY),--policy "$(POLICY)",) $(if $(filter true,$(JSON)),--json,)
+
+preview-validate:
+	@test -n "$(PREVIEW_ID)" || (echo "set PREVIEW_ID=<preview-id>"; exit 1)
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/preview_environment.py validate --preview-id "$(PREVIEW_ID)" $(if $(filter true,$(JSON)),--json,)
+
+preview-destroy:
+	@test -n "$(PREVIEW_ID)" || (echo "set PREVIEW_ID=<preview-id>"; exit 1)
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/preview_environment.py destroy --preview-id "$(PREVIEW_ID)" $(if $(filter true,$(JSON)),--json,)
+
+preview-list:
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/preview_environment.py list $(if $(filter true,$(JSON)),--json,)
+
+preview-info:
+	@test -n "$(PREVIEW_ID)" || (echo "set PREVIEW_ID=<preview-id>"; exit 1)
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/preview_environment.py show --preview-id "$(PREVIEW_ID)" $(if $(filter true,$(ARCHIVED)),--archived,) $(if $(filter true,$(JSON)),--json,)
 
 lanes:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/control_plane_lanes.py --list
@@ -492,6 +516,9 @@ syntax-check-open-webui:
 
 syntax-check-homepage:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/homepage.yml --syntax-check
+
+syntax-check-excalidraw:
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/excalidraw.yml --syntax-check
 
 syntax-check-portainer:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/portainer.yml --syntax-check
@@ -724,6 +751,11 @@ converge-homepage:
 	$(MAKE) preflight WORKFLOW=converge-homepage
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/homepage.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
+converge-excalidraw:
+	$(MAKE) preflight WORKFLOW=converge-excalidraw
+	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/excalidraw.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
 converge-rag-context:
 	$(MAKE) preflight WORKFLOW=converge-rag-context
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/rag-context.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS)
@@ -829,6 +861,15 @@ capacity-report:
 weekly-capacity-report:
 	uv run --with pyyaml python $(REPO_ROOT)/config/windmill/scripts/weekly-capacity-report.py --repo-path $(REPO_ROOT) $(if $(filter true,$(NO_LIVE_METRICS)),--no-live-metrics,)
 
+immutable-guest-replacement-plan:
+	@if [ -n "$(service)" ]; then \
+		uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/immutable_guest_replacement.py --service "$(service)"; \
+	elif [ -n "$(guest)" ]; then \
+		uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/immutable_guest_replacement.py --guest "$(guest)"; \
+	else \
+		echo "set service=<service-id> or guest=<guest-name>"; exit 1; \
+	fi
+
 check-nats-streams:
 	uv run --with pyyaml --with nats-py python $(REPO_ROOT)/scripts/nats_streams.py
 
@@ -863,6 +904,7 @@ live-apply-service:
 	fi
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/standby_capacity.py --service "$(service)"
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply --service "$(service)"
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/immutable_guest_replacement.py --check-live-apply --service "$(service)" $(if $(filter true,$(ALLOW_IN_PLACE_MUTATION)),--allow-in-place-mutation,)
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/services/$(service).yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 
 live-apply-site:

@@ -127,6 +127,16 @@ variable "user_data_file_id" {
   default = null
 }
 
+variable "agent_enabled" {
+  type    = bool
+  default = false
+}
+
+variable "agent_timeout" {
+  type    = string
+  default = "15m"
+}
+
 variable "network_firewall" {
   type    = bool
   default = true

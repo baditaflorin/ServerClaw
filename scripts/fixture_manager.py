@@ -12,6 +12,7 @@ import json
 import math
 import os
 import re
+import shlex
 import shutil
 import socket
 import ssl
@@ -21,6 +22,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from urllib.parse import urlparse
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -173,13 +175,40 @@ def load_capacity_model() -> dict[str, Any]:
 
 
 def load_ephemeral_pool() -> dict[str, Any]:
-    reservations = load_capacity_model().get("reservations")
+    payload = load_capacity_model()
+    legacy_pool = payload.get("ephemeral_pool")
+    if isinstance(legacy_pool, dict):
+        return legacy_pool
+
+    reservations = payload.get("reservations")
     if not isinstance(reservations, list):
-        raise ValueError(f"{CAPACITY_MODEL_PATH} must define a reservations list")
-    for reservation in reservations:
-        if isinstance(reservation, dict) and reservation.get("kind") == "ephemeral_pool":
-            return reservation
-    raise ValueError(f"{CAPACITY_MODEL_PATH} must define one reservation with kind=ephemeral_pool")
+        raise ValueError(f"{CAPACITY_MODEL_PATH} must define reservations for the preview_burst pool")
+
+    pool = next(
+        (
+            reservation
+            for reservation in reservations
+            if isinstance(reservation, dict) and reservation.get("kind") == "ephemeral_pool"
+        ),
+        None,
+    )
+    if not isinstance(pool, dict):
+        raise ValueError(f"{CAPACITY_MODEL_PATH} must define one reservation with kind=ephemeral_pool")
+
+    vmid_range = pool.get("vmid_range")
+    reserved = pool.get("reserved")
+    if not isinstance(vmid_range, dict) or not isinstance(reserved, dict):
+        raise ValueError(f"{CAPACITY_MODEL_PATH} reservations.ephemeral_pool must define vmid_range and reserved mappings")
+
+    return {
+        "vmid_range": [int(vmid_range["start"]), int(vmid_range["end"])],
+        "max_concurrent_vms": int(pool["max_concurrent_vms"]),
+        "reserved_ram_gb": int(reserved["ram_gb"]),
+        "reserved_vcpu": int(reserved["vcpu"]),
+        "reserved_disk_gb": int(reserved["disk_gb"]),
+        "capacity_class": pool.get("capacity_class", "preview_burst"),
+        "notes": pool.get("notes", ""),
+    }
 
 
 def load_ephemeral_pool_catalog() -> tuple[EphemeralPoolDefaults, dict[str, EphemeralPoolConfig]]:
@@ -658,13 +687,10 @@ def build_runtime_main(receipt: dict[str, Any]) -> str:
     )
     module_path = tofu_module_source_path()
     assignments = {
-        "fixture_id": definition["fixture_id"],
         "name": f"{definition['fixture_id']}-{receipt['vm_id']}",
         "description": f"ephemeral fixture {definition['fixture_id']}",
         "node_name": fixture_context["node_name"],
         "vm_id": receipt["vm_id"],
-        "vmid_range": definition["vmid_range"],
-        "lifetime_minutes": definition["lifetime_minutes"],
         "template_node_name": fixture_context["template_node_name"],
         "template_vmid": int(definition.get("template_vmid") or template_vmid(definition["template"])),
         "datastore_id": fixture_context["datastore_id"],
@@ -682,6 +708,10 @@ def build_runtime_main(receipt: dict[str, Any]) -> str:
         "tags": tags,
         "ci_user": definition.get("ssh_user", fixture_context["ci_user"]),
         "ssh_authorized_keys": [bootstrap_public_key()],
+        "agent_enabled": False,
+        "agent_timeout": "10s",
+        "network_firewall": False,
+        "protection": False,
     }
     lines = [
         'terraform {',
@@ -724,7 +754,7 @@ def build_runtime_main(receipt: dict[str, Any]) -> str:
             "}",
             "",
             'output "ip_address" {',
-            "  value = module.fixture.ip_address",
+            f'  value = "{network_ip}"',
             "}",
         ]
     )
@@ -798,6 +828,13 @@ def proxmox_api_request(
     url = endpoint.rstrip("/") + path
     headers = {"Authorization": f"PVEAPIToken={api_token}"}
     data = None
+    parsed = urlparse(endpoint)
+    context = None
+    try:
+        ipaddress.ip_address(parsed.hostname or "")
+        context = ssl._create_unverified_context()
+    except ValueError:
+        context = None
     if method in {"POST", "PUT"} and params:
         data = urllib.parse.urlencode(params).encode("utf-8")
         headers["Content-Type"] = "application/x-www-form-urlencoded"
@@ -868,10 +905,9 @@ def emit_ephemeral_event(action: str, target: str, *, actor_id: str, evidence_re
 
 def ensure_ephemeral_pool_capacity(definition: dict[str, Any], cluster_resources: list[dict[str, Any]]) -> None:
     pool = load_ephemeral_pool()
-    vmid_range = pool.get("vmid_range")
-    if not isinstance(vmid_range, dict):
-        raise ValueError(f"{CAPACITY_MODEL_PATH} reservations.ephemeral_pool.vmid_range must be a mapping")
-    pool_range = (int(vmid_range.get("start")), int(vmid_range.get("end")))
+    if pool.get("capacity_class") not in {None, "preview_burst"}:
+        raise ValueError("ephemeral_pool must map to the preview_burst capacity class")
+    pool_range = tuple(int(value) for value in pool.get("vmid_range", EPHEMERAL_VMID_RANGE))
     if tuple(int(value) for value in definition["vmid_range"]) != pool_range:
         return
 
@@ -883,7 +919,7 @@ def ensure_ephemeral_pool_capacity(definition: dict[str, Any], cluster_resources
         or receipt.get("status") not in {"prewarming", "prewarmed"}
     ]
     if len(active_leases) >= int(pool["max_concurrent_vms"]):
-        raise RuntimeError("Ephemeral pool capacity exhausted: max_concurrent_vms reached")
+        raise RuntimeError("preview_burst capacity exhausted: max_concurrent_vms reached")
 
     proposed = definition.get("resources")
     if not isinstance(proposed, dict):
@@ -902,15 +938,12 @@ def ensure_ephemeral_pool_capacity(definition: dict[str, Any], cluster_resources
             used_vcpu += int(item.get("cpus", 0) or 0)
         used_disk_gb += bytes_to_gb(item.get("maxdisk"))
 
-    reserved = pool.get("reserved")
-    if not isinstance(reserved, dict):
-        raise ValueError(f"{CAPACITY_MODEL_PATH} reservations.ephemeral_pool.reserved must be a mapping")
-    if used_ram_gb + proposed_ram_gb > int(reserved["ram_gb"]):
-        raise RuntimeError("Ephemeral pool capacity exhausted: reserved RAM budget exceeded")
-    if used_vcpu + proposed_vcpu > int(reserved["vcpu"]):
-        raise RuntimeError("Ephemeral pool capacity exhausted: reserved vCPU budget exceeded")
-    if used_disk_gb + proposed_disk_gb > int(reserved["disk_gb"]):
-        raise RuntimeError("Ephemeral pool capacity exhausted: reserved disk budget exceeded")
+    if used_ram_gb + proposed_ram_gb > int(pool["reserved_ram_gb"]):
+        raise RuntimeError("preview_burst capacity exhausted: reserved RAM budget exceeded")
+    if used_vcpu + proposed_vcpu > int(pool["reserved_vcpu"]):
+        raise RuntimeError("preview_burst capacity exhausted: reserved vCPU budget exceeded")
+    if used_disk_gb + proposed_disk_gb > int(pool["reserved_disk_gb"]):
+        raise RuntimeError("preview_burst capacity exhausted: reserved disk budget exceeded")
 
 
 def tofu_command(runtime_dir: Path, *args: str, env: dict[str, str] | None = None) -> list[str]:
@@ -924,12 +957,14 @@ def tofu_command(runtime_dir: Path, *args: str, env: dict[str, str] | None = Non
         "--rm",
         "--platform",
         TOFU_PLATFORM,
+        "-e",
+        "TF_VAR_proxmox_endpoint",
+        "-e",
+        "TF_VAR_proxmox_api_token",
         "-v",
-        f"{REPO_ROOT}:/workspace",
-        "-v",
-        f"{runtime_dir}:/runtime",
+        f"{REPO_ROOT}:{REPO_ROOT}",
         "-w",
-        "/runtime",
+        str(runtime_dir),
     ]
     effective_env = env or os.environ
     for key in PROXMOX_ENV_KEYS:
@@ -1017,6 +1052,48 @@ def wait_for_ssh(receipt: dict[str, Any], timeout_seconds: int = 300) -> None:
     raise RuntimeError(f"SSH did not become ready for fixture {receipt['receipt_id']}")
 
 
+def wait_for_cloud_init(receipt: dict[str, Any], timeout_seconds: int = 120) -> None:
+    deadline = time.monotonic() + timeout_seconds
+    lock_check = "sudo fuser /var/lib/apt/lists/lock /var/lib/dpkg/lock-frontend >/dev/null 2>&1"
+    while time.monotonic() < deadline:
+        status = run_command(ssh_argv(receipt, "cloud-init status || true", timeout_seconds=10))
+        locks = run_command(ssh_argv(receipt, lock_check, timeout_seconds=10))
+        if locks.returncode != 0:
+            return
+        if "status: done" in status.stdout:
+            return
+        time.sleep(5)
+
+    # Ephemeral previews hand package management to Ansible after boot. If cloud-init's
+    # first-boot apt update is still holding the lock past the grace window, terminate it
+    # so the governed converge step can continue.
+    run_command(
+        ssh_argv(
+            receipt,
+            "sudo pkill -TERM apt-get >/dev/null 2>&1 || true; sudo pkill -TERM apt >/dev/null 2>&1 || true",
+            timeout_seconds=10,
+        )
+    )
+    unlock_deadline = time.monotonic() + 30
+    while time.monotonic() < unlock_deadline:
+        locks = run_command(ssh_argv(receipt, lock_check, timeout_seconds=10))
+        if locks.returncode != 0:
+            return
+        time.sleep(2)
+    raise RuntimeError("cloud-init left apt locked after the preview grace window")
+
+
+def prepare_guest_for_converge(receipt: dict[str, Any]) -> None:
+    script = "\n".join(
+        [
+            "set -euo pipefail",
+            "sudo install -d -m 0755 /etc/apt/apt.conf.d",
+            "printf 'Acquire::ForceIPv4 \"true\";\\n' | sudo tee /etc/apt/apt.conf.d/99-lv3-force-ipv4 >/dev/null",
+        ]
+    )
+    ensure_command(run_command(ssh_argv(receipt, script, timeout_seconds=10)), "prepare guest for converge")
+
+
 def ansible_inventory(receipt: dict[str, Any]) -> dict[str, Any]:
     key_path = bootstrap_private_key()
     jump_user = receipt["context"]["jump_user"]
@@ -1047,6 +1124,7 @@ def converge_roles(receipt: dict[str, Any], *, skip_roles: bool = False) -> None
     inventory_path = runtime_dir / "inventory.json"
     playbook_path = runtime_dir / "converge.json"
     write_json(inventory_path, ansible_inventory(receipt))
+    play_vars = receipt["definition"].get("ansible_vars", {})
     playbook = [
         {
             "name": "Converge ephemeral fixture roles",
@@ -1054,6 +1132,7 @@ def converge_roles(receipt: dict[str, Any], *, skip_roles: bool = False) -> None
             "gather_facts": True,
             "become": True,
             "vars_files": [str(GROUP_VARS_PATH), str(HOST_VARS_PATH)],
+            "vars": play_vars,
             "roles": roles,
         }
     ]
@@ -1232,6 +1311,8 @@ def cold_provision_receipt(
     try:
         apply_fixture(runtime_dir, endpoint, api_token)
         wait_for_ssh(receipt)
+        wait_for_cloud_init(receipt)
+        prepare_guest_for_converge(receipt)
         converge_roles(receipt, skip_roles=skip_roles)
         verification = {"ok": True, "checks": []} if skip_verify else verify_fixture(receipt, receipt["definition"])
         if not verification["ok"]:
@@ -1599,7 +1680,7 @@ def fixture_down(
     destroyed = []
     for receipt in receipts:
         runtime_dir = REPO_ROOT / receipt["runtime_dir"]
-        destroy_fixture(runtime_dir, endpoint, api_token)
+        destroy_fixture(runtime_dir, endpoint, api_token, receipt=receipt)
         receipt["status"] = "destroyed"
         receipt["destroyed_at"] = isoformat(utc_now())
         archive_receipt(receipt)
