@@ -1160,21 +1160,26 @@ def validate_site(output_dir: Path) -> None:
             raise ValueError(f"missing generated docs artifact: {path}")
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Generate the MkDocs source tree for docs.lv3.org.")
     parser.add_argument("--write", action="store_true", help="Write generated site source into docs/site-generated.")
     parser.add_argument("--check", action="store_true", help="Generate into a temp dir and validate the expected artifacts.")
+    parser.add_argument(
+        "--output-dir",
+        help="Optional output directory to use with --write instead of docs/site-generated.",
+    )
     parser.add_argument("--openapi-url", default=OPENAPI_DEFAULT_URL, help="OpenAPI schema URL to snapshot before build.")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if not args.write and not args.check:
         parser.error("choose --write or --check")
 
     try:
         if args.write:
-            render_site(SITE_GENERATED_DIR, openapi_url=args.openapi_url)
-            validate_site(SITE_GENERATED_DIR)
-            print(f"Generated docs site source: {SITE_GENERATED_DIR}")
+            output_dir = Path(args.output_dir).resolve() if args.output_dir else SITE_GENERATED_DIR
+            render_site(output_dir, openapi_url=args.openapi_url)
+            validate_site(output_dir)
+            print(f"Generated docs site source: {output_dir}")
             return 0
 
         with tempfile.TemporaryDirectory(prefix="lv3-docs-site-") as temp_dir:
