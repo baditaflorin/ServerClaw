@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.51",
+  "repo_version": "0.177.52",
   "platform_version": "0.130.42",
-  "generated_at": "2026-03-28T20:44:06Z",
-  "next_refresh_at": "2026-03-28T21:44:06Z",
+  "generated_at": "2026-03-28T21:02:09Z",
+  "next_refresh_at": "2026-03-28T22:02:09Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -726,6 +726,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-edge-publication.md"
+      },
+      {
+        "id": "configure-host-control-loops",
+        "description": "Install the ADR 0226 host-resident control-loop baseline on proxmox_florin, including the managed systemd service, timer, path unit, and verification state paths.",
+        "tags": [
+          "configure-host-control-loops",
+          "host-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 120,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-host-control-loops.md"
       },
       {
         "id": "configure-ingress",
@@ -3277,6 +3303,16 @@
         ]
       },
       {
+        "id": "configure-host-control-loops",
+        "title": "Configure Host Control Loops",
+        "agent_trust_required": "T3",
+        "steps": 5,
+        "path": "docs/runbooks/configure-host-control-loops.md",
+        "workflow_ids": [
+          "configure-host-control-loops"
+        ]
+      },
+      {
         "id": "configure-keycloak",
         "title": "Configure Keycloak",
         "agent_trust_required": "T3",
@@ -4026,10 +4062,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.50",
+    "last_version": "0.177.51",
     "deployed_at": "2026-03-28",
-    "summary": "accepted ADRs 0244 through 0253 to define a stage-aware runtime-assurance",
-    "release_notes_url": "docs/release-notes/0.177.51.md"
+    "summary": "verifies ADR 0224 from the latest mainline by carrying the host-resident supervisor baseline into repo truth and re-proving that reconciliation, supervision, validation, and approval now run through server-resident platform surfaces implemented ADR 0226 by installing the repo-managed systemd service, timer, and path baseline for host-resident control loops on proxmox_florin and verifying both manual and path-triggered reconcile passes",
+    "release_notes_url": "docs/release-notes/0.177.52.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

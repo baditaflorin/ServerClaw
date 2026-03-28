@@ -671,7 +671,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0226 by installing the repo-managed systemd service, timer, and path baseline for host-resident control loops on proxmox_florin and verifying both manual and path-triggered reconcile passes
       release_bump: patch
-      included_in_repo_version: 0.177.50
+      included_in_repo_version: 0.177.52
       latest_receipts:
         host_control_loops: 2026-03-28-adr-0226-host-control-loops-live-apply
   - id: ws-0224-live-apply
@@ -758,7 +758,7 @@ workstreams:
     canonical_truth:
       changelog_entry: verifies ADR 0224 from the latest mainline by carrying the host-resident supervisor baseline into repo truth and re-proving that reconciliation, supervision, validation, and approval now run through server-resident platform surfaces
       release_bump: patch
-      included_in_repo_version: 0.177.50
+      included_in_repo_version: 0.177.52
       latest_receipts:
         server_resident_operations: 2026-03-28-adr-0224-server-resident-operations-default-control-live-apply
   - id: ws-0210-live-apply
