@@ -216,6 +216,9 @@ roles:
   proxmox_guests:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  proxmox_host_control_loops:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   proxmox_headscale:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.

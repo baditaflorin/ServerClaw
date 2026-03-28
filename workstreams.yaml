@@ -14,6 +14,94 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0264-receipt-driven-resilience-adrs
+    adr: "0264"
+    title: Receipt-driven resilience architecture bundle
+    status: merged
+    owner: codex
+    branch: codex/ws-0264-receipt-driven-resilience-adrs-r3
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md
+    depends_on:
+      - adr-0036-live-apply-receipts
+      - adr-0087-validation-gate
+      - adr-0099-backup-restore-verification
+      - adr-0102-security-posture-reporting
+      - adr-0141-api-token-lifecycle-and-exposure-response
+      - adr-0163-platform-wide-retry-taxonomy-and-exponential-backoff
+      - adr-0170-platform-wide-timeout-hierarchy
+      - adr-0188-failover-rehearsal-gate-for-redundancy-tiers
+      - adr-0247-authenticated-browser-journey-verification-via-playwright
+      - adr-0252-route-and-dns-publication-assertion-ledger
+    conflicts_with: []
+    shared_surfaces:
+      - docs/adr/0264-failure-domain-isolated-validation-lanes.md
+      - docs/adr/0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+      - docs/adr/0266-validation-runner-capability-contracts-and-environment-attestation.md
+      - docs/adr/0267-expiring-gate-bypass-waivers-with-structured-reason-codes.md
+      - docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
+      - docs/adr/0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+      - docs/adr/0270-docker-publication-self-healing-and-port-programming-assertions.md
+      - docs/adr/0271-backup-coverage-assertion-ledger-and-backup-of-backup-policy.md
+      - docs/adr/0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md
+      - docs/adr/0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md
+      - docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md
+      - docs/adr/.index.yaml
+      - workstreams.yaml
+      - VERSION
+      - changelog.md
+      - RELEASE.md
+      - README.md
+      - versions/stack.yaml
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.56.md
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - build/platform-manifest.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: receipt_driven_resilience_bundle
+          paths:
+            - docs/adr/0264-failure-domain-isolated-validation-lanes.md
+            - docs/adr/0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+            - docs/adr/0266-validation-runner-capability-contracts-and-environment-attestation.md
+            - docs/adr/0267-expiring-gate-bypass-waivers-with-structured-reason-codes.md
+            - docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
+            - docs/adr/0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+            - docs/adr/0270-docker-publication-self-healing-and-port-programming-assertions.md
+            - docs/adr/0271-backup-coverage-assertion-ledger-and-backup-of-backup-policy.md
+            - docs/adr/0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md
+            - docs/adr/0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md
+            - docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md
+            - docs/adr/.index.yaml
+          mode: exclusive
+        - id: integration_release_surfaces
+          paths:
+            - VERSION
+            - changelog.md
+            - RELEASE.md
+            - README.md
+            - versions/stack.yaml
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.56.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - build/platform-manifest.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: accepted ADRs 0264 through 0273 to turn repeated gate
+        bypasses, recovery repairs, restore failures, security drift, and
+        public-endpoint mismatches into governed guardrails across validation,
+        builder snapshots, waiver policy, bootstrap preflight, vulnerability
+        budgets, Docker publication, backup coverage, restore warm-up, and DNS
+        plus certificate admission
+      release_bump: patch
+      included_in_repo_version: 0.177.56
   - id: ws-0254-serverclaw-adrs
     adr: "0254"
     title: ServerClaw architecture bundle
@@ -975,6 +1063,7 @@ workstreams:
       - Makefile
       - config/workflow-catalog.json
       - config/command-catalog.json
+      - config/ansible-role-idempotency.yml
       - playbooks/proxmox-install.yml
       - collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/**
       - tests/test_proxmox_host_control_loops_role.py
@@ -995,6 +1084,7 @@ workstreams:
             - Makefile
             - config/workflow-catalog.json
             - config/command-catalog.json
+            - config/ansible-role-idempotency.yml
             - playbooks/proxmox-install.yml
             - collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/**
             - tests/test_proxmox_host_control_loops_role.py
@@ -1007,7 +1097,93 @@ workstreams:
       release_bump: patch
       included_in_repo_version: 0.177.52
       latest_receipts:
-        host_control_loops: 2026-03-28-adr-0226-host-control-loops-live-apply
+        host_control_loops: 2026-03-28-adr-0226-host-control-loops-mainline-live-apply
+  - id: ws-0226-main-merge
+    adr: "0226"
+    title: Finalize ADR 0226 exact-main evidence on origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0226-main-merge
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0226-main-merge
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0226-main-merge.md
+    depends_on:
+      - ws-0226-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0226-main-merge.md
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.55.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/adr/.index.yaml
+      - docs/adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
+      - docs/runbooks/configure-host-control-loops.md
+      - docs/workstreams/ws-0226-live-apply.md
+      - Makefile
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - config/ansible-role-idempotency.yml
+      - playbooks/proxmox-install.yml
+      - collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/**
+      - tests/test_proxmox_host_control_loops_role.py
+      - receipts/live-applies/2026-03-28-adr-0226-host-control-loops-live-apply.json
+      - receipts/live-applies/2026-03-28-adr-0226-host-control-loops-mainline-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws_0226_main_merge_doc
+          paths:
+            - docs/workstreams/ws-0226-main-merge.md
+          mode: exclusive
+        - id: adr_0226_mainline_truth
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.55.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: exclusive
+        - id: adr_0226_main_merge_surfaces
+          paths:
+            - docs/adr/.index.yaml
+            - docs/adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
+            - docs/runbooks/configure-host-control-loops.md
+            - docs/workstreams/ws-0226-live-apply.md
+            - Makefile
+            - config/workflow-catalog.json
+            - config/command-catalog.json
+            - config/ansible-role-idempotency.yml
+            - playbooks/proxmox-install.yml
+            - collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/**
+            - tests/test_proxmox_host_control_loops_role.py
+          mode: shared_contract
+          contract: adr-0226-main-merge-v1
+        - id: live_apply_evidence
+          paths:
+            - receipts/live-applies/2026-03-28-adr-0226-host-control-loops-live-apply.json
+            - receipts/live-applies/2026-03-28-adr-0226-host-control-loops-mainline-live-apply.json
+          mode: shared_contract
+          contract: live-apply-receipts-v1
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: records ADR 0226 exact-main evidence on the current mainline by preserving the repaired host control-loop systemd baseline, the canonical mainline replay receipt, and the shared release-truth surfaces while the current live platform baseline remains 0.130.43
+      release_bump: patch
+      included_in_repo_version: 0.177.55
   - id: ws-0224-live-apply
     adr: "0224"
     title: Live apply ADR 0224 server-resident operations as the default control model
