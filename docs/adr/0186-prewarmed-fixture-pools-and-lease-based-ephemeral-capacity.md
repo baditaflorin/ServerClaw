@@ -1,10 +1,10 @@
 # ADR 0186: Prewarmed Fixture Pools and Lease-Based Ephemeral Capacity
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: pending merge to main
+- Implemented In Platform Version: 0.130.31
+- Implemented On: 2026-03-28
 - Date: 2026-03-27
 
 ## Context
@@ -74,3 +74,10 @@ If local burst capacity is exhausted, preview and fixture leases should spill to
 - ADR 0106: Ephemeral VM lifecycle governance
 - ADR 0157: Per-VM concurrency budget and resource reservation
 - ADR 0183: Auxiliary cloud failure domain for witness, recovery, and burst capacity
+
+## Implementation Notes
+
+- The repository now carries a canonical warm-pool catalog, repo validation for that catalog, Windmill entrypoints for refill and expiry handling, and live-pool commands through `fixture_manager.py` and `lv3 fixture`.
+- The first verified live proof used the `ops-base` pool end to end from the dedicated `codex/ws-0186-live-apply` worktree: prewarm, warm-handoff lease, in-guest verification over the Tailscale-backed Proxmox jump path, destroy, and refill back to `prewarmed`.
+- The branch-local live-apply evidence is recorded in `receipts/live-applies/2026-03-28-adr-0186-prewarmed-fixture-pools-live-apply.json`.
+- Merge to `main` still needs the protected integration surfaces updated there, not on this workstream branch: `README.md`, `VERSION`, `changelog.md`, and `versions/stack.yaml`.

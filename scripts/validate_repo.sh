@@ -418,8 +418,12 @@ _validate_config_registry_updated() {
 _validate_structure_index_updated() {
   local new_dirs structure_updated
 
-  new_dirs=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
-    grep -oE '^[^/]+/' | sort -u | wc -l | tr -d ' ' || true)
+  new_dirs=$(
+    (
+      git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
+        grep -oE '^[^/]+/' || true
+    ) | sort -u | wc -l | tr -d ' '
+  )
   new_dirs=${new_dirs:-0}
   structure_updated=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
     grep -c '^\.repo-structure\.yaml' || true)
