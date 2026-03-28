@@ -129,7 +129,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.31` |
+| Repository version | `0.177.32` |
 | Platform version | `0.130.36` |
 | Observed check date | `2026-03-28` |
 | Observed OS | `Debian 13` |
@@ -845,6 +845,16 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0211: Shared Policy Packs And Rule Registries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0211-shared-policy-packs-and-rule-registries.md)
 - [ADR 0212: Replaceability Scorecards And Vendor Exit Plans](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0212-replaceability-scorecards-and-vendor-exit-plans.md)
 - [ADR 0213: Architecture Fitness Functions In The Validation Gate](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0213-architecture-fitness-functions-in-the-validation-gate.md)
+- [ADR 0214: Production And Staging Cells As The Unit Of High Availability](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0214-production-and-staging-cells-as-the-unit-of-high-availability.md)
+- [ADR 0215: Node Role Taxonomy For Bootstrap, Control, State, Edge, Workload, Observability, Recovery, And Build](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0215-node-role-taxonomy-for-bootstrap-control-state-edge-workload-observability-recovery-and-build.md)
+- [ADR 0216: Service Criticality Rings For Foundation, Core, Supporting, And Peripheral Functions](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0216-service-criticality-rings-for-foundation-core-supporting-and-peripheral-functions.md)
+- [ADR 0217: One-Way Environment Data Flow And Replication Authority](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0217-one-way-environment-data-flow-and-replication-authority.md)
+- [ADR 0218: Relational Database Replication And Single-Writer Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0218-relational-database-replication-and-single-writer-policy.md)
+- [ADR 0219: Data-Class Replication Policies For Queues, Object Stores, Search, Cache, Secrets, And Time-Series](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0219-data-class-replication-policies-for-queues-object-stores-search-cache-secrets-and-time-series.md)
+- [ADR 0220: Bootstrap And Recovery Sequencing For Environment Cells](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0220-bootstrap-and-recovery-sequencing-for-environment-cells.md)
+- [ADR 0221: Role-Based Node Pools And Placement Boundaries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0221-role-based-node-pools-and-placement-boundaries.md)
+- [ADR 0222: Failover Authority And Service Endpoint Separation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0222-failover-authority-and-service-endpoint-separation.md)
+- [ADR 0223: Canonical HA Topology Catalog And Reusable Automation Profiles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0223-canonical-ha-topology-catalog-and-reusable-automation-profiles.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -1011,6 +1021,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0199: Outline Living Knowledge Wiki](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0199-outline-living-knowledge-wiki.md)
 - [Workstream ADR 0202: Excalidraw Auto Generated Architecture Diagrams](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md)
 - [Workstream ADR 0204: Architecture Governance Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0204-architecture-governance.md)
+- [Workstream ADR 0214: HA And Replication Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0214-ha-replication-architecture-bundle.md)
 - [Workstream ws-0021-edge-cert-repair: Shared Edge Certificate Expansion Repair](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0021-edge-cert-repair.md)
 - [Workstream ws-0101-live-apply: ADR 0101 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0101-live-apply.md)
 - [Workstream ws-0105-live-apply: Live Apply ADR 0105 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0105-live-apply.md)
@@ -1044,7 +1055,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.31` |
+| Repository version | `0.177.32` |
 | Platform version | `0.130.36` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1255,6 +1266,7 @@ This repository is intentionally opinionated:
 | `0197` | Dify visual workflow canvas live apply | `merged` | [ws-0197-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0197-live-apply.md) |
 | `0199` | Outline living knowledge wiki | `merged` | [adr-0199-outline-living-knowledge-wiki.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0199-live-apply/docs/workstreams/adr-0199-outline-living-knowledge-wiki.md) |
 | `0202` | Excalidraw auto generated architecture diagrams | `live_applied` | [adr-0202-excalidraw-auto-generated-architecture-diagrams.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md) |
+| `0214` | HA and replication architecture bundle for production and staging | `merged` | [adr-0214-ha-replication-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0214-ha-replication-architecture-bundle.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow
