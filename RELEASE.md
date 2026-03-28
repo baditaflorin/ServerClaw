@@ -1,13 +1,12 @@
-# Release 0.177.26
+# Release 0.177.30
 
 - Date: 2026-03-28
 
 ## Summary
-- integrated ADR 0198 by switching platform-context retrieval to local Ollama semantic embeddings, grounding operator and LLM query paths with cited vector matches, and hardening the governed `rag-context` live-apply wrapper across alias-aware service checks
-- added bounded degraded-index recovery during governed live apply so the semantic platform-context collection self-heals legacy `384` to Ollama `768` vector-dimension drift without forcing a synchronous full mirrored-corpus rebuild
+- integrated ADR 0194 into the latest `origin/main` by carrying the verified Coolify repo-deploy lane forward on top of the newer mainline, preserving the protected dashboard publication, wildcard app ingress, and governed `lv3 deploy-repo` path as canonical repo truth
 
 ## Platform Impact
-- this release is intended to promote the platform to `0.130.34` once the latest-`main` governed `rag-context` replay verifies healthy semantic vector retrieval on `docker-runtime-lv3`
+- no platform version bump; Coolify remains live on platform version `0.130.35`, and this mainline release records the verified repo-managed rollout on top of the newer Dify-inclusive mainline.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

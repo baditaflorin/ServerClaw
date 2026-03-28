@@ -25,7 +25,6 @@ if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path, write_json
 from mutation_audit import build_event, emit_event_best_effort
-from platform.events import build_envelope
 
 
 HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
@@ -420,6 +419,8 @@ async def get_bucket(js: Any, *, create: bool) -> Any | None:
 
 
 async def publish_event(nc: Any, subject: str, payload: dict[str, Any]) -> None:
+    from platform.events import build_envelope
+
     envelope = build_envelope(subject, payload, actor_id="service/maintenance-window-tool")
     await nc.publish(subject, json.dumps(envelope, separators=(",", ":")).encode())
     await nc.flush(timeout=5)

@@ -22,6 +22,17 @@ def test_build_platform_vars_includes_langfuse_publication_topology() -> None:
     assert platform_vars["outline_port"] == 3006
 
 
+def test_build_platform_vars_includes_dify_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    dify = platform_vars["platform_service_topology"]["dify"]
+
+    assert dify["public_hostname"] == "agents.lv3.org"
+    assert dify["dns"]["name"] == "agents"
+    assert dify["ports"]["internal"] == 8094
+    assert dify["urls"]["public"] == "https://agents.lv3.org"
+    assert dify["urls"]["internal"] == "http://10.10.10.20:8094"
+
+
 def test_build_service_urls_supports_private_gitea_proxy_and_root_url() -> None:
     ports = {
         "gitea_http_port": 3003,
@@ -120,3 +131,42 @@ def test_build_service_urls_resolves_realtime_internal_url() -> None:
 
     assert port_map == {"internal": 19999}
     assert urls == {"internal": "http://10.10.10.40:19999"}
+
+
+def test_build_service_urls_include_coolify_controller_and_apps_endpoints() -> None:
+    ports = {
+        "coolify_dashboard_port": 8000,
+        "coolify_proxy_port": 80,
+        "coolify_host_proxy_port": 8012,
+    }
+    host_vars = {"management_tailscale_ipv4": "100.64.0.1"}
+    guest_ipv4_by_name = {"coolify-lv3": "10.10.10.70"}
+    stack = {"desired_state": {"host_id": "proxmox_florin"}}
+
+    controller_port_map, controller_urls = generate_platform_vars.build_service_urls(
+        "coolify",
+        {"owning_vm": "coolify-lv3", "public_hostname": "coolify.lv3.org"},
+        host_vars,
+        guest_ipv4_by_name,
+        ports,
+        stack,
+    )
+    app_port_map, app_urls = generate_platform_vars.build_service_urls(
+        "coolify_apps",
+        {"owning_vm": "coolify-lv3", "public_hostname": "apps.lv3.org"},
+        host_vars,
+        guest_ipv4_by_name,
+        ports,
+        stack,
+    )
+    assert controller_port_map == {"internal": 8000, "controller": 8012}
+    assert controller_urls == {
+        "public": "https://coolify.lv3.org",
+        "internal": "http://10.10.10.70:8000",
+        "controller": "http://100.64.0.1:8012",
+    }
+    assert app_port_map == {"internal": 80}
+    assert app_urls == {
+        "public": "https://apps.lv3.org",
+        "internal": "http://10.10.10.70:80",
+    }

@@ -52,6 +52,8 @@
   hosts: nginx-lv3
   become: true
   gather_facts: true
+  vars_files:
+    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
 
   roles:
     - role: lv3.platform.nginx_edge_publication

@@ -69,6 +69,14 @@
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
+    "dify": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "suppression_preset": "legacy-service"
+    },
     "docs_portal": {
       "service_type": "nginx-plugin",
       "requires_subdomain": true,
@@ -344,6 +352,35 @@
       "requires_secrets": true,
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
+    },
+    "coolify": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": false,
+      "suppressed_checks": {
+        "api_gateway": "2026-09-23",
+        "keycloak_client": "2026-09-23",
+        "grafana_dashboard": "2026-09-23",
+        "slo_definition": "2026-09-23",
+        "data_catalog": "2026-09-23",
+        "alert_rules": "2026-09-23"
+      }
+    },
+    "coolify_apps": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "suppressed_checks": {
+        "api_gateway": "2026-09-23",
+        "grafana_dashboard": "2026-09-23",
+        "slo_definition": "2026-09-23",
+        "data_catalog": "2026-09-23",
+        "alert_rules": "2026-09-23"
+      }
     },
     "plane": {
       "service_type": "compose",

@@ -1,0 +1,31 @@
+# Purpose: Verify that the deployed Dify runtime is reachable and reports a bootstrap-safe setup state.
+# Use case: Included after Dify convergence to confirm the stack is healthy before follow-on smoke automation runs.
+# Inputs: The Dify internal base URL and the expected setup state contract.
+# Outputs: Records health and setup probe results and fails fast if Dify is not ready for use.
+# Idempotency: Fully idempotent because these are read-only verification probes.
+# Dependencies: ADR 0165 and ADR 0197.
+---
+- name: Verify the Dify public health endpoint
+  ansible.builtin.uri:
+    url: "{{ dify_internal_base_url }}/healthz"
+    method: GET
+    status_code: 200
+  register: dify_verify_health
+  retries: 36
+  delay: 5
+  until: dify_verify_health.status == 200
+  changed_when: false
+
+- name: Verify the Dify setup endpoint is reachable
+  ansible.builtin.uri:
+    url: "{{ dify_internal_base_url }}/console/api/setup"
+    method: GET
+    status_code: 200
+  register: dify_verify_setup
+  changed_when: false
+
+- name: Assert Dify reported a bootstrap-safe setup state
+  ansible.builtin.assert:
+    that:
+      - dify_verify_setup.json.step in ['not_started', 'finished']
+    fail_msg: "Dify started, but the setup endpoint did not return a valid bootstrap state."

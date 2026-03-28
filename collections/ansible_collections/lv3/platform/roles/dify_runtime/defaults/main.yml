@@ -1,0 +1,93 @@
+# Purpose: Define the default filesystem layout, secret paths, image refs, and public topology used by the Dify runtime.
+# Use case: Loaded whenever the Dify runtime role renders the stack, secrets, and verification settings.
+# Inputs: Inventory topology, image catalog refs, OpenBao defaults, and optional operator overrides.
+# Outputs: Supplies stable defaults for Dify container deployment, secret mirroring, and public URL wiring.
+# Idempotency: Fully idempotent because this file only declares role defaults.
+# Dependencies: ADR 0165, ADR 0043, ADR 0044, ADR 0146, and ADR 0197.
+---
+dify_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('dify') }}"
+dify_site_dir: /opt/dify
+dify_data_dir: "{{ dify_site_dir }}/data"
+dify_storage_dir: "{{ dify_data_dir }}/storage"
+dify_qdrant_dir: "{{ dify_data_dir }}/qdrant"
+dify_redis_dir: "{{ dify_data_dir }}/redis"
+dify_plugin_dir: "{{ dify_data_dir }}/plugin-daemon"
+dify_sandbox_dir: "{{ dify_data_dir }}/sandbox"
+dify_nginx_dir: "{{ dify_site_dir }}/nginx"
+dify_nginx_conf_dir: "{{ dify_nginx_dir }}/conf.d"
+dify_ssrf_proxy_dir: "{{ dify_site_dir }}/ssrf_proxy"
+dify_secret_dir: /etc/lv3/dify
+dify_compose_file: "{{ dify_site_dir }}/docker-compose.yml"
+dify_env_file: "{{ compose_runtime_secret_root }}/dify/runtime.env"
+dify_legacy_env_file: "{{ dify_site_dir }}/dify.env"
+dify_openbao_agent_dir: "{{ dify_site_dir }}/openbao"
+dify_openbao_agent_image: "{{ openbao_agent_image }}"
+dify_openbao_agent_container_name: dify-openbao-agent
+dify_openbao_secret_path: services/dify/runtime-env
+dify_openbao_policy_name: lv3-service-dify-runtime
+dify_openbao_approle_name: dify-runtime
+dify_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify
+dify_database_name: dify
+dify_database_user: dify
+dify_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+dify_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/database-password.txt
+dify_init_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/init-password.txt
+dify_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/admin-password.txt
+dify_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/secret-key.txt
+dify_redis_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/redis-password.txt
+dify_qdrant_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/qdrant-api-key.txt
+dify_sandbox_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/sandbox-api-key.txt
+dify_plugin_daemon_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/plugin-daemon-key.txt
+dify_plugin_inner_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/plugin-inner-api-key.txt
+dify_tools_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/tools-api-key.txt
+dify_export_smoke_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/export-smoke.yml
+dify_init_password_remote_file: "{{ dify_secret_dir }}/init-password.txt"
+dify_admin_password_remote_file: "{{ dify_secret_dir }}/admin-password.txt"
+dify_secret_key_remote_file: "{{ dify_secret_dir }}/secret-key.txt"
+dify_redis_password_remote_file: "{{ dify_secret_dir }}/redis-password.txt"
+dify_qdrant_api_key_remote_file: "{{ dify_secret_dir }}/qdrant-api-key.txt"
+dify_sandbox_api_key_remote_file: "{{ dify_secret_dir }}/sandbox-api-key.txt"
+dify_plugin_daemon_key_remote_file: "{{ dify_secret_dir }}/plugin-daemon-key.txt"
+dify_plugin_inner_api_key_remote_file: "{{ dify_secret_dir }}/plugin-inner-api-key.txt"
+dify_tools_api_key_remote_file: "{{ dify_secret_dir }}/tools-api-key.txt"
+dify_api_container_name: dify-api
+dify_worker_container_name: dify-worker
+dify_worker_beat_container_name: dify-worker-beat
+dify_web_container_name: dify-web
+dify_redis_container_name: dify-redis
+dify_qdrant_container_name: dify-qdrant
+dify_sandbox_container_name: dify-sandbox
+dify_plugin_daemon_container_name: dify-plugin-daemon
+dify_nginx_container_name: dify-nginx
+dify_ssrf_proxy_container_name: dify-ssrf-proxy
+dify_api_image: "{{ container_image_catalog.images.dify_api_runtime.ref }}"
+dify_web_image: "{{ container_image_catalog.images.dify_web_runtime.ref }}"
+dify_redis_image: "{{ container_image_catalog.images.dify_redis_runtime.ref }}"
+dify_qdrant_image: "{{ container_image_catalog.images.dify_qdrant_runtime.ref }}"
+dify_sandbox_image: "{{ container_image_catalog.images.dify_sandbox_runtime.ref }}"
+dify_plugin_daemon_image: "{{ container_image_catalog.images.dify_plugin_daemon_runtime.ref }}"
+dify_nginx_image: "{{ container_image_catalog.images.dify_nginx_runtime.ref }}"
+dify_ssrf_proxy_image: "{{ container_image_catalog.images.dify_ssrf_proxy_runtime.ref }}"
+dify_port: "{{ platform_service_topology | platform_service_port('dify', 'internal') }}"
+dify_internal_base_url: "{{ platform_service_topology | platform_service_url('dify', 'internal') }}"
+dify_public_base_url: "https://{{ dify_service_topology.public_hostname }}"
+dify_public_hostname: "{{ dify_service_topology.public_hostname }}"
+dify_console_api_url: "{{ dify_public_base_url }}"
+dify_console_web_url: "{{ dify_public_base_url }}"
+dify_app_api_url: "{{ dify_public_base_url }}"
+dify_app_web_url: "{{ dify_public_base_url }}"
+dify_trigger_url: "{{ dify_public_base_url }}"
+dify_files_url: "{{ dify_public_base_url }}"
+dify_internal_files_url: http://api:5001
+dify_gateway_tools_endpoint: https://api.lv3.org/v1/dify-tools
+dify_langfuse_host: https://langfuse.lv3.org
+dify_admin_email: baditaflorin@gmail.com
+dify_admin_name: Florin Badita
+dify_vector_store: qdrant
+dify_ollama_base_url: "http://host.docker.internal:{{ platform_service_topology | platform_service_port('ollama', 'internal') }}"
+dify_sandbox_port: 8194
+dify_plugin_daemon_port: 5002
+dify_nginx_port: 80
+dify_ssrf_proxy_port: 3128
+dify_redis_uid: "999"
+dify_redis_gid: "999"

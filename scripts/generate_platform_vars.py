@@ -47,6 +47,7 @@ PORT_KEYS = (
     "searxng_port",
     "searxng_host_proxy_port",
     "langfuse_port",
+    "dify_port",
     "outline_port",
     "dozzle_http_port",
     "dozzle_agent_port",
@@ -54,6 +55,9 @@ PORT_KEYS = (
     "excalidraw_room_port",
     "ollama_api_port",
     "n8n_port",
+    "coolify_dashboard_port",
+    "coolify_proxy_port",
+    "coolify_host_proxy_port",
     "open_webui_port",
     "open_webui_host_proxy_port",
     "api_gateway_internal_port",
@@ -325,6 +329,9 @@ def build_service_urls(
     elif service_id == "langfuse":
         urls["internal"] = service_url("http", private_ip, ports["langfuse_port"])
         port_map["internal"] = ports["langfuse_port"]
+    elif service_id == "dify":
+        urls["internal"] = service_url("http", private_ip, ports["dify_port"])
+        port_map["internal"] = ports["dify_port"]
     elif service_id == "plane":
         urls["internal"] = service_url("http", private_ip, ports["plane_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["plane_host_proxy_port"])
@@ -342,6 +349,14 @@ def build_service_urls(
     elif service_id == "n8n":
         urls["internal"] = service_url("http", private_ip, ports["n8n_port"])
         port_map["internal"] = ports["n8n_port"]
+    elif service_id == "coolify":
+        urls["internal"] = service_url("http", private_ip, ports["coolify_dashboard_port"])
+        urls["controller"] = service_url("http", tailscale_ipv4, ports["coolify_host_proxy_port"])
+        port_map["internal"] = ports["coolify_dashboard_port"]
+        port_map["controller"] = ports["coolify_host_proxy_port"]
+    elif service_id == "coolify_apps":
+        urls["internal"] = service_url("http", private_ip, ports["coolify_proxy_port"])
+        port_map["internal"] = ports["coolify_proxy_port"]
     elif service_id == "open_webui":
         urls["internal"] = service_url("http", private_ip, ports["open_webui_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["open_webui_host_proxy_port"])

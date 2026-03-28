@@ -26,6 +26,19 @@
     ]
   },
   {
+    "name": "Dify Public",
+    "type": "http",
+    "url": "https://agents.lv3.org/healthz",
+    "description": "Dify publication through the shared NGINX edge and oauth2-proxy gate.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
     "name": "Gitea Private",
     "type": "http",
     "url": "http://10.10.10.20:3003/api/healthz",

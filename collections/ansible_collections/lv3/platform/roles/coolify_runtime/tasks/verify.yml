@@ -1,0 +1,110 @@
+---
+- name: Verify Coolify is listening on the guest dashboard port
+  ansible.builtin.wait_for:
+    host: "{{ ansible_host }}"
+    port: "{{ coolify_dashboard_port }}"
+    delay: 0
+    timeout: 240
+
+- name: Verify the guest-local Coolify health endpoint
+  ansible.builtin.uri:
+    url: "{{ coolify_private_url }}/api/health"
+    method: GET
+    status_code: 200
+    return_content: true
+    validate_certs: "{{ coolify_verify_ssl }}"
+  register: coolify_verify_health
+  changed_when: false
+
+- name: Assert the Coolify health payload reports success
+  ansible.builtin.assert:
+    that:
+      - coolify_verify_health.status == 200
+      - >-
+        (
+          (coolify_verify_health.json.success | default(false)) | bool
+        ) or (
+          (coolify_verify_health.content | default('') | trim) == 'OK'
+        )
+    fail_msg: "Coolify did not report a healthy guest-local API response."
+
+- name: Ensure the Coolify auth artifact exists locally
+  ansible.builtin.stat:
+    path: "{{ coolify_admin_auth_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: coolify_admin_auth_local_stat
+
+- name: Assert the Coolify auth artifact exists locally
+  ansible.builtin.assert:
+    that:
+      - coolify_admin_auth_local_stat.stat.exists
+      - (coolify_admin_auth_local_stat.stat.size | default(0)) | int > 0
+    fail_msg: "Coolify did not persist the local admin auth artifact."
+
+- name: Read the Coolify auth artifact from the control machine
+  ansible.builtin.slurp:
+    src: "{{ coolify_admin_auth_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: coolify_admin_auth_local_raw
+  no_log: true
+
+- name: Record the Coolify auth payload
+  ansible.builtin.set_fact:
+    coolify_admin_auth_payload: "{{ coolify_admin_auth_local_raw.content | b64decode | from_json }}"
+  no_log: true
+
+- name: Verify the private controller API version endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ coolify_dashboard_port }}/api/v1/version"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ coolify_admin_auth_payload.api_token }}"
+    status_code: 200
+    return_content: true
+    validate_certs: "{{ coolify_verify_ssl }}"
+  register: coolify_controller_version
+  changed_when: false
+  no_log: true
+
+- name: Verify the private controller can read the current team
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ coolify_dashboard_port }}/api/v1/teams/current"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ coolify_admin_auth_payload.api_token }}"
+    status_code: 200
+    return_content: true
+    validate_certs: "{{ coolify_verify_ssl }}"
+  register: coolify_current_team
+  changed_when: false
+  no_log: true
+
+- name: Read the private controller server inventory
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ coolify_dashboard_port }}/api/v1/servers"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ coolify_admin_auth_payload.api_token }}"
+    status_code: 200
+    return_content: true
+    validate_certs: "{{ coolify_verify_ssl }}"
+  register: coolify_controller_servers
+  changed_when: false
+  no_log: true
+
+- name: Assert the registered Coolify deployment server is visible through the private controller
+  ansible.builtin.assert:
+    that:
+      - (coolify_controller_version.content | default('') | trim) | length > 0
+      - (coolify_current_team.json.name | default('') | trim) | length > 0
+      - >-
+        (
+          coolify_controller_servers.json
+          | default([])
+          | selectattr('uuid', 'defined')
+          | selectattr('uuid', 'equalto', coolify_admin_auth_payload.server_uuid)
+          | list
+        ) | length == 1
+    fail_msg: "Coolify controller verification did not return the expected team and server state."

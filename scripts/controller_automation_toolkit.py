@@ -4,6 +4,7 @@ import json
 import re
 import subprocess
 import sys
+from ast import literal_eval
 from pathlib import Path
 from typing import Any, Final
 
@@ -48,11 +49,167 @@ def write_json(
         path.chmod(mode)
 
 
+def _strip_inline_comment(value: str) -> str:
+    in_single = False
+    in_double = False
+    for index, char in enumerate(value):
+        if char == "'" and not in_double:
+            in_single = not in_single
+        elif char == '"' and not in_single:
+            in_double = not in_double
+        elif char == "#" and not in_single and not in_double:
+            if index == 0 or value[index - 1].isspace():
+                return value[:index].rstrip()
+    return value.rstrip()
+
+
+def _split_key_value(content: str) -> tuple[str, str | None]:
+    in_single = False
+    in_double = False
+    for index, char in enumerate(content):
+        if char == "'" and not in_double:
+            in_single = not in_single
+        elif char == '"' and not in_single:
+            in_double = not in_double
+        elif char == ":" and not in_single and not in_double:
+            key = content[:index].strip()
+            value = content[index + 1 :].strip()
+            return key, value
+    raise ValueError(f"Unsupported YAML line (missing ':'): {content}")
+
+
+def _parse_simple_scalar(value: str) -> Any:
+    value = _strip_inline_comment(value).strip()
+    if not value:
+        return ""
+    if value in {"null", "~"}:
+        return None
+    if value == "true":
+        return True
+    if value == "false":
+        return False
+    if value == "[]":
+        return []
+    if value == "{}":
+        return {}
+    if value[0] in {"'", '"'} and value[-1] == value[0]:
+        return literal_eval(value)
+    if re.fullmatch(r"-?\d+", value):
+        return int(value)
+    if re.fullmatch(r"-?\d+\.\d+", value):
+        return float(value)
+    return value
+
+
+def _load_yaml_without_pyyaml(path: Path) -> Any:
+    raw_lines = path.read_text().splitlines()
+    tokens: list[tuple[int, str]] = []
+    for line_number, raw_line in enumerate(raw_lines, start=1):
+        if not raw_line.strip() or raw_line.lstrip().startswith("#"):
+            continue
+        indent = len(raw_line) - len(raw_line.lstrip(" "))
+        content = _strip_inline_comment(raw_line[indent:]).rstrip()
+        if not content:
+            continue
+        tokens.append((indent, content))
+
+    def parse_mapping_entry(index: int, indent: int, mapping: dict[str, Any]) -> int:
+        if index >= len(tokens):
+            return index
+        line_indent, content = tokens[index]
+        if line_indent != indent or content.startswith("- "):
+            return index
+        key, value = _split_key_value(content)
+        if not key:
+            raise ValueError(f"{path}:{index + 1} defines an empty YAML key")
+        index += 1
+        if value:
+            mapping[key] = _parse_simple_scalar(value)
+            return index
+        if index < len(tokens) and tokens[index][0] > indent:
+            child_indent = tokens[index][0]
+            child, index = parse_block(index, child_indent)
+            mapping[key] = child
+            return index
+        mapping[key] = None
+        return index
+
+    def parse_mapping(index: int, indent: int, initial: dict[str, Any] | None = None) -> tuple[dict[str, Any], int]:
+        mapping: dict[str, Any] = {} if initial is None else initial
+        while index < len(tokens):
+            line_indent, content = tokens[index]
+            if line_indent < indent:
+                break
+            if line_indent > indent:
+                raise ValueError(f"{path}:{index + 1} has unexpected indentation")
+            if content.startswith("- "):
+                break
+            index = parse_mapping_entry(index, indent, mapping)
+        return mapping, index
+
+    def parse_list(index: int, indent: int) -> tuple[list[Any], int]:
+        items: list[Any] = []
+        while index < len(tokens):
+            line_indent, content = tokens[index]
+            if line_indent < indent:
+                break
+            if line_indent > indent:
+                raise ValueError(f"{path}:{index + 1} has unexpected indentation")
+            if not content.startswith("- "):
+                break
+            item_content = content[2:].strip()
+            index += 1
+            if not item_content:
+                if index < len(tokens) and tokens[index][0] > indent:
+                    child_indent = tokens[index][0]
+                    item, index = parse_block(index, child_indent)
+                else:
+                    item = None
+                items.append(item)
+                continue
+            if ":" in item_content:
+                key, value = _split_key_value(item_content)
+                mapping: dict[str, Any] = {}
+                if value:
+                    mapping[key] = _parse_simple_scalar(value)
+                elif index < len(tokens) and tokens[index][0] > indent:
+                    child_indent = tokens[index][0]
+                    child, index = parse_block(index, child_indent)
+                    mapping[key] = child
+                else:
+                    mapping[key] = None
+                if index < len(tokens) and tokens[index][0] > indent:
+                    child_indent = tokens[index][0]
+                    if child_indent == indent + 2 and not tokens[index][1].startswith("- "):
+                        mapping, index = parse_mapping(index, child_indent, mapping)
+                items.append(mapping)
+                continue
+            items.append(_parse_simple_scalar(item_content))
+        return items, index
+
+    def parse_block(index: int, indent: int) -> tuple[Any, int]:
+        if index >= len(tokens):
+            return None, index
+        if tokens[index][1].startswith("- "):
+            return parse_list(index, indent)
+        return parse_mapping(index, indent)
+
+    if not tokens:
+        return None
+    payload, index = parse_block(0, tokens[0][0])
+    if index != len(tokens):
+        raise ValueError(f"{path} contains unsupported YAML near line {index + 1}")
+    return payload
+
+
 def load_yaml(path: Path) -> Any:
     try:
         import yaml
     except ModuleNotFoundError as exc:  # pragma: no cover - direct runtime guard
-        raise RuntimeError(PYYAML_INSTALL_HINT) from exc
+        try:
+            return _load_yaml_without_pyyaml(path)
+        except ValueError as parse_error:
+            raise RuntimeError(PYYAML_INSTALL_HINT) from parse_error
     return yaml.safe_load(path.read_text())
 
 

@@ -6,8 +6,8 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Alertmanager, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Headscale, Mail Platform, NGINX Edge, Netdata Realtime Metrics, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Changelog Portal, Developer Portal, Excalidraw, Gitea, Keycloak, Langfuse, Mattermost, NetBox, Open WebUI, Outline, Plane, Public Status Page, Semaphore, Vaultwarden, Windmill, n8n |
+| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Headscale, Mail Platform, NGINX Edge, Netdata Realtime Metrics, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
+| `2` | Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Excalidraw, Gitea, Keycloak, Langfuse, Mattermost, NetBox, Open WebUI, Outline, Plane, Public Status Page, Semaphore, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway |
 | `4` | Ops Portal |
 
@@ -16,6 +16,7 @@ Generated from `config/dependency-graph.json`.
 ```mermaid
 graph TD
     alertmanager["Alertmanager\nTier 1"]
+    coolify["Coolify\nTier 1"]
     docker_build["Docker Build VM\nTier 1"]
     docker_runtime["Docker Runtime VM\nTier 1"]
     dozzle["Dozzle\nTier 1"]
@@ -37,7 +38,9 @@ graph TD
     step_ca["step-ca\nTier 1"]
     uptime_kuma["Uptime Kuma\nTier 1"]
     changelog_portal["Changelog Portal\nTier 2"]
+    coolify_apps["Coolify Apps Ingress\nTier 2"]
     docs_portal["Developer Portal\nTier 2"]
+    dify["Dify\nTier 2"]
     excalidraw["Excalidraw\nTier 2"]
     gitea["Gitea\nTier 2"]
     keycloak["Keycloak\nTier 2"]
@@ -60,6 +63,17 @@ graph TD
     api_gateway -->|hard| keycloak
     api_gateway -->|soft| nginx_edge
     changelog_portal -->|hard| nginx_edge
+    coolify -->|soft| keycloak
+    coolify -->|soft| nginx_edge
+    coolify_apps -->|hard| coolify
+    coolify_apps -->|soft| nginx_edge
+    dify -->|soft| api_gateway
+    dify -->|soft| keycloak
+    dify -->|soft| langfuse
+    dify -->|soft| nginx_edge
+    dify -->|soft| ollama
+    dify -->|startup_only| openbao
+    dify -->|hard| postgres
     docs_portal -->|hard| nginx_edge
     dozzle -->|soft| keycloak
     dozzle -->|soft| nginx_edge

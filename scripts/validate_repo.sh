@@ -364,7 +364,7 @@ _validate_workstream_entry() {
   [[ ! -f "$workstreams_file" ]] && return 0
 
   local entry_count
-  entry_count=$(grep -Ec "branch:[[:space:]]*\"?$current_branch\"?$" "$workstreams_file" 2>/dev/null || true)
+  entry_count=$(grep -Ec "^[[:space:]]*branch:[[:space:]]*\"?$current_branch\"?[[:space:]]*$" "$workstreams_file" 2>/dev/null || true)
   entry_count="${entry_count:-0}"
 
   if [[ "$entry_count" -eq 0 ]]; then

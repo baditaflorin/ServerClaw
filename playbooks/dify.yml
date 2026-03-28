@@ -1,0 +1,165 @@
+---
+# Playbook: dify.yml
+# Purpose: Converge the repo-managed Dify runtime, database, and edge publication.
+# Use case: Run when applying ADR 0197 to production or replaying the Dify live rollout from the latest mainline base.
+#
+# Inputs (required):
+#   - env (string, required): Target environment selector; production by default.
+#
+# Inputs (optional):
+#   - dify_skip_edge (boolean, optional, default=false): Skip NGINX edge publication when testing the runtime privately.
+#
+# Outputs:
+#   - Dify database state, runtime containers, edge publication, and controller-local bootstrap artifacts are aligned with repo truth.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - ADR 0197: Dify visual workflow canvas deployment and governance boundary.
+#   - Requires: OpenBao, Keycloak, Langfuse, and the shared NGINX edge to already be converged.
+#   - Role: lv3.platform.dify_postgres - provisions the named PostgreSQL role and database.
+#   - Role: lv3.platform.dify_runtime - converges the Dify runtime stack and bootstrap state.
+#
+# Related ADRs: 0044, 0146, 0197
+# Related Runbooks: docs/runbooks/configure-dify.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-27
+
+- name: Ensure Hetzner DNS publication for Dify
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    subdomain_catalog_path: "{{ playbook_dir }}/../config/subdomain-catalog.json"
+    inventory_defaults_path: "{{ playbook_dir }}/../inventory/group_vars/all.yml"
+    subdomain_fqdn: agents.lv3.org
+
+  tasks:
+    - name: Load controller defaults
+      ansible.builtin.include_vars:
+        file: "{{ inventory_defaults_path }}"
+
+    - name: Load the subdomain catalog
+      ansible.builtin.include_vars:
+        file: "{{ subdomain_catalog_path }}"
+        name: subdomain_catalog
+
+    - name: Select the Dify subdomain entry
+      ansible.builtin.set_fact:
+        selected_subdomain: >-
+          {{
+            (
+              subdomain_catalog.subdomains
+              | selectattr('fqdn', 'equalto', subdomain_fqdn)
+              | list
+              | first
+            ) | default({})
+          }}
+
+    - name: Assert the Dify subdomain is catalogued
+      ansible.builtin.assert:
+        that:
+          - selected_subdomain != {}
+          - selected_subdomain.status in ['active', 'planned']
+          - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
+        fail_msg: "agents.lv3.org must exist in config/subdomain-catalog.json before live apply."
+
+    - name: Derive the managed Hetzner record name
+      ansible.builtin.set_fact:
+        selected_subdomain_record_name: >-
+          {{
+            '@'
+            if selected_subdomain.fqdn == hetzner_dns_zone_name
+            else (
+              selected_subdomain.fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
+            )
+          }}
+
+    - name: Converge the Dify Hetzner DNS record
+      ansible.builtin.include_role:
+        name: lv3.platform.hetzner_dns_record
+      vars:
+        hetzner_dns_record_zone_name: "{{ hetzner_dns_zone_name }}"
+        hetzner_dns_record_name: "{{ selected_subdomain_record_name }}"
+        hetzner_dns_record_type: A
+        hetzner_dns_record_value: "{{ selected_subdomain.target }}"
+        hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"
+
+- name: Prepare PostgreSQL for Dify
+  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.postgres_vm
+      vars:
+        postgres_vm_client_allowed_sources_extra:
+          - >-
+            {{
+              (
+                hostvars['proxmox_florin'].proxmox_guests
+                | selectattr('name', 'equalto', playbook_execution_host_patterns.docker_runtime[playbook_execution_env])
+                | map(attribute='ipv4')
+                | first
+              )
+            }}/32
+    - role: lv3.platform.dify_postgres
+
+- name: Converge Dify on the Docker runtime VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.dify
+        playbook_execution_audit_target: dify
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.dify_runtime
+
+  post_tasks:
+    - name: Run shared Dify post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: dify
+        playbook_execution_post_verify_audit_action: playbook.verify.dify
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: dify
+
+- name: Publish Dify through the NGINX edge
+  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.nginx_edge_publication
+      when: not (dify_skip_edge | default(false) | bool)

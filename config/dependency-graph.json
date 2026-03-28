@@ -57,6 +57,33 @@
       "adr": "0023"
     },
     {
+      "id": "coolify",
+      "service": "coolify",
+      "name": "Coolify",
+      "vm": "coolify-lv3",
+      "tier": 1,
+      "category": "infrastructure",
+      "adr": "0194"
+    },
+    {
+      "id": "coolify_apps",
+      "service": "coolify_apps",
+      "name": "Coolify Apps Ingress",
+      "vm": "coolify-lv3",
+      "tier": 2,
+      "category": "infrastructure",
+      "adr": "0194"
+    },
+    {
+      "id": "dify",
+      "service": "dify",
+      "name": "Dify",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0197"
+    },
+    {
       "id": "dozzle",
       "service": "dozzle",
       "name": "Dozzle",
@@ -417,6 +444,72 @@
       "to": "nginx_edge",
       "type": "hard",
       "description": "The private diagram surface is published at draw.lv3.org through the shared NGINX edge, including the routed /socket.io/ collaboration path."
+    },
+    {
+      "from": "coolify",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Authenticated browser access to coolify.lv3.org depends on the shared Keycloak-backed edge auth path, while the private controller remains reachable over the management network."
+    },
+    {
+      "from": "coolify",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public dashboard access to coolify.lv3.org depends on the shared NGINX edge publication, while the private controller proxy remains reachable directly."
+    },
+    {
+      "from": "coolify_apps",
+      "to": "coolify",
+      "type": "hard",
+      "description": "The shared applications ingress is configured and served by the Coolify runtime and its managed proxy."
+    },
+    {
+      "from": "coolify_apps",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public access to apps.lv3.org depends on the shared NGINX edge publication while the guest-local ingress remains reachable for direct verification."
+    },
+    {
+      "from": "dify",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Dify stores application state, accounts, knowledge metadata, and workflow definitions in Postgres."
+    },
+    {
+      "from": "dify",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Dify loads its mirrored database, admin, and tool-bridge secrets through the OpenBao agent before startup."
+    },
+    {
+      "from": "dify",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public reachability for agents.lv3.org depends on the shared NGINX edge publication path."
+    },
+    {
+      "from": "dify",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Operator browser access to Dify is gated behind the shared oauth2-proxy and Keycloak authentication flow at the edge."
+    },
+    {
+      "from": "dify",
+      "to": "api_gateway",
+      "type": "soft",
+      "description": "Dify uses the governed API gateway route to call named LV3 tools, but the canvas remains reachable without tool invocation."
+    },
+    {
+      "from": "dify",
+      "to": "langfuse",
+      "type": "soft",
+      "description": "Dify can publish workflow traces into Langfuse, but authoring and bootstrap access remain available without trace export."
+    },
+    {
+      "from": "dify",
+      "to": "ollama",
+      "type": "soft",
+      "description": "Dify can use the private Ollama runtime for local model inference, but the canvas can still operate with external model providers."
     },
     {
       "from": "dozzle",
