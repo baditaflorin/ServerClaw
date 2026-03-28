@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.42",
-  "platform_version": "0.130.39",
-  "generated_at": "2026-03-28T17:30:39Z",
-  "next_refresh_at": "2026-03-28T18:30:39Z",
+  "repo_version": "0.177.43",
+  "platform_version": "0.130.40",
+  "generated_at": "2026-03-28T17:56:19Z",
+  "next_refresh_at": "2026-03-28T18:56:19Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4026,10 +4026,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.41",
+    "last_version": "0.177.42",
     "deployed_at": "2026-03-28",
-    "summary": "implemented ADR 0207 by translating Hetzner DNS provider payloads into canonical DNS facts at the boundary and by enforcing that contract in both the repository validation path and the live post-merge validation gate",
-    "release_notes_url": "docs/release-notes/0.177.42.md"
+    "summary": "implemented ADR 0225 by installing a durable server-resident ansible-pull reconcile loop on proxmox_florin, bootstrapping a least-privilege Gitea pull identity, and verifying host-local receipts through the private Gitea source",
+    "release_notes_url": "docs/release-notes/0.177.43.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

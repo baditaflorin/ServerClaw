@@ -1,0 +1,154 @@
+---
+argument_specs:
+  main:
+    short_description: Bootstrap and maintain a server-resident ansible-pull reconcile loop.
+    options:
+      server_resident_reconciliation_enabled:
+        type: bool
+        required: false
+        default: true
+      server_resident_reconciliation_bootstrap_gitea_access:
+        type: bool
+        required: false
+        default: false
+      server_resident_reconciliation_gitea_base_url:
+        type: str
+        required: false
+        default: "{{ gitea_controller_url }}"
+      server_resident_reconciliation_repo_owner:
+        type: str
+        required: false
+        default: ops
+      server_resident_reconciliation_repo_name:
+        type: str
+        required: false
+        default: proxmox_florin_server
+      server_resident_reconciliation_repo_branch:
+        type: str
+        required: false
+        default: main
+      server_resident_reconciliation_repo_url:
+        type: str
+        required: false
+        default: >-
+          {{ server_resident_reconciliation_gitea_base_url }}/{{ server_resident_reconciliation_repo_owner }}/{{ server_resident_reconciliation_repo_name }}.git
+      server_resident_reconciliation_inventory_host:
+        type: str
+        required: false
+        default: proxmox_florin
+      server_resident_reconciliation_playbook_path:
+        type: str
+        required: false
+        default: playbooks/server-resident-reconciliation.yml
+      server_resident_reconciliation_checkout_path:
+        type: str
+        required: false
+        default: /srv/proxmox_florin_server
+      server_resident_reconciliation_runtime_root:
+        type: str
+        required: false
+        default: /var/lib/lv3/server-resident-reconciliation
+      server_resident_reconciliation_inventory_path:
+        type: str
+        required: false
+        default: "{{ server_resident_reconciliation_runtime_root }}/ansible-pull-inventory.yml"
+      server_resident_reconciliation_receipts_dir:
+        type: str
+        required: false
+        default: "{{ server_resident_reconciliation_runtime_root }}/receipts"
+      server_resident_reconciliation_lock_file:
+        type: str
+        required: false
+        default: "{{ server_resident_reconciliation_runtime_root }}/reconcile.lock"
+      server_resident_reconciliation_secret_dir:
+        type: str
+        required: false
+        default: /etc/lv3/server-resident-reconciliation
+      server_resident_reconciliation_http_token_remote_file:
+        type: str
+        required: false
+        default: "{{ server_resident_reconciliation_secret_dir }}/gitea-read-token"
+      server_resident_reconciliation_gitea_admin_token_local_file:
+        type: str
+        required: false
+      server_resident_reconciliation_gitea_read_token_local_file:
+        type: str
+        required: false
+      server_resident_reconciliation_gitea_username:
+        type: str
+        required: false
+        default: lv3-reconcile
+      server_resident_reconciliation_gitea_email:
+        type: str
+        required: false
+        default: lv3-reconcile@lv3.org
+      server_resident_reconciliation_gitea_login_name:
+        type: str
+        required: false
+        default: empty
+      server_resident_reconciliation_gitea_source_id:
+        type: int
+        required: false
+        default: 0
+      server_resident_reconciliation_gitea_token_name:
+        type: str
+        required: false
+        default: proxmox-florin-ansible-pull
+      server_resident_reconciliation_gitea_token_scopes:
+        type: list
+        elements: str
+        required: false
+        default:
+          - read:repository
+      server_resident_reconciliation_gitea_restricted_user:
+        type: bool
+        required: false
+        default: true
+      server_resident_reconciliation_gitea_collaborator_permission:
+        type: str
+        required: false
+        default: read
+        choices:
+          - read
+          - write
+          - admin
+      server_resident_reconciliation_askpass_path:
+        type: str
+        required: false
+        default: /usr/local/libexec/lv3-server-resident-reconciliation-askpass.sh
+      server_resident_reconciliation_wrapper_path:
+        type: str
+        required: false
+        default: /usr/local/libexec/lv3-server-resident-reconciliation.sh
+      server_resident_reconciliation_service_name:
+        type: str
+        required: false
+        default: lv3-server-resident-reconciliation.service
+      server_resident_reconciliation_timer_name:
+        type: str
+        required: false
+        default: lv3-server-resident-reconciliation.timer
+      server_resident_reconciliation_on_calendar:
+        type: str
+        required: false
+        default: "*:0/30"
+      server_resident_reconciliation_randomized_delay_sec:
+        type: int
+        required: false
+        default: 300
+      server_resident_reconciliation_timeout_start_sec:
+        type: int
+        required: false
+        default: 2700
+      server_resident_reconciliation_managed_packages:
+        type: list
+        elements: str
+        required: false
+        default:
+          - ansible-core
+          - git
+          - python3
+      server_resident_reconciliation_receipt_schema_version:
+        type: str
+        required: false
+        default: "1.0.0"

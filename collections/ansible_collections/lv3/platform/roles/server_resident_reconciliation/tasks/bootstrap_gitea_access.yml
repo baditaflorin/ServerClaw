@@ -1,0 +1,285 @@
+---
+- name: Ensure the controller-local Gitea artifact directory exists
+  ansible.builtin.file:
+    path: "{{ server_resident_reconciliation_gitea_read_token_local_file | dirname }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Ensure the controller-local Gitea admin token exists
+  ansible.builtin.stat:
+    path: "{{ server_resident_reconciliation_gitea_admin_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: server_resident_reconciliation_gitea_admin_token_local
+
+- name: Fail if the controller-local Gitea admin token is missing
+  ansible.builtin.fail:
+    msg: >-
+      {{ server_resident_reconciliation_gitea_admin_token_local_file }} is missing on the control machine.
+      Re-run the Gitea converge from a controller that has the mirrored admin token before bootstrapping
+      the host-local ansible-pull reconcile path.
+  when: not server_resident_reconciliation_gitea_admin_token_local.stat.exists
+
+- name: Check whether the controller-local low-privilege Gitea token already exists
+  ansible.builtin.stat:
+    path: "{{ server_resident_reconciliation_gitea_read_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: server_resident_reconciliation_gitea_read_token_local
+
+- name: Check whether the host-local low-privilege Gitea token already exists
+  ansible.builtin.stat:
+    path: "{{ server_resident_reconciliation_http_token_remote_file }}"
+  register: server_resident_reconciliation_host_token_stat
+
+- name: Read the host-local low-privilege Gitea token when the controller copy is missing
+  ansible.builtin.slurp:
+    src: "{{ server_resident_reconciliation_http_token_remote_file }}"
+  register: server_resident_reconciliation_host_token_raw
+  when:
+    - not server_resident_reconciliation_gitea_read_token_local.stat.exists
+    - server_resident_reconciliation_host_token_stat.stat.exists
+  no_log: true
+
+- name: Restore the controller-local low-privilege Gitea token from the host copy
+  ansible.builtin.copy:
+    dest: "{{ server_resident_reconciliation_gitea_read_token_local_file }}"
+    content: "{{ server_resident_reconciliation_host_token_raw.content | b64decode | trim }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  when:
+    - not server_resident_reconciliation_gitea_read_token_local.stat.exists
+    - server_resident_reconciliation_host_token_stat.stat.exists
+  no_log: true
+
+- name: Recheck the controller-local low-privilege Gitea token after host recovery
+  ansible.builtin.stat:
+    path: "{{ server_resident_reconciliation_gitea_read_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: server_resident_reconciliation_gitea_read_token_local
+
+- name: Read the controller-local Gitea admin token
+  ansible.builtin.slurp:
+    src: "{{ server_resident_reconciliation_gitea_admin_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: server_resident_reconciliation_gitea_admin_token_raw
+  no_log: true
+
+- name: Record the controller-local Gitea admin token
+  ansible.builtin.set_fact:
+    server_resident_reconciliation_gitea_admin_token: "{{ server_resident_reconciliation_gitea_admin_token_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Query Gitea for the reconcile user
+  ansible.builtin.uri:
+    url: >-
+      {{ server_resident_reconciliation_gitea_base_url }}/api/v1/users/search?q={{ server_resident_reconciliation_gitea_username | urlencode }}
+    method: GET
+    headers:
+      Authorization: "token {{ server_resident_reconciliation_gitea_admin_token }}"
+    return_content: true
+    status_code: 200
+  delegate_to: localhost
+  become: false
+  register: server_resident_reconciliation_gitea_user_search
+  no_log: true
+
+- name: Record whether the Gitea reconcile user already exists
+  ansible.builtin.set_fact:
+    server_resident_reconciliation_gitea_user_exists: >-
+      {{
+        (
+          server_resident_reconciliation_gitea_user_search.json.data | default([])
+          | selectattr('login', 'equalto', server_resident_reconciliation_gitea_username)
+          | list
+          | length
+        ) > 0
+      }}
+
+- name: Generate a bootstrap password for the Gitea reconcile user
+  ansible.builtin.command:
+    argv:
+      - python3
+      - -c
+      - "import secrets; print(secrets.token_urlsafe(24))"
+  delegate_to: localhost
+  become: false
+  register: server_resident_reconciliation_gitea_bootstrap_password
+  changed_when: false
+  when:
+    - not server_resident_reconciliation_gitea_read_token_local.stat.exists
+    - not server_resident_reconciliation_host_token_stat.stat.exists
+  no_log: true
+
+- name: Create the restricted Gitea reconcile user
+  ansible.builtin.uri:
+    url: "{{ server_resident_reconciliation_gitea_base_url }}/api/v1/admin/users"
+    method: POST
+    headers:
+      Authorization: "token {{ server_resident_reconciliation_gitea_admin_token }}"
+    body_format: json
+    status_code: 201
+    body:
+      username: "{{ server_resident_reconciliation_gitea_username }}"
+      email: "{{ server_resident_reconciliation_gitea_email }}"
+      login_name: "{{ server_resident_reconciliation_gitea_login_name }}"
+      source_id: "{{ server_resident_reconciliation_gitea_source_id }}"
+      password: "{{ server_resident_reconciliation_gitea_bootstrap_password.stdout | trim }}"
+      must_change_password: false
+      restricted: "{{ server_resident_reconciliation_gitea_restricted_user }}"
+      send_notify: false
+      visibility: private
+  delegate_to: localhost
+  become: false
+  when: not server_resident_reconciliation_gitea_user_exists
+  no_log: true
+
+- name: Reset the restricted Gitea reconcile user password before token rotation
+  ansible.builtin.uri:
+    url: "{{ server_resident_reconciliation_gitea_base_url }}/api/v1/admin/users/{{ server_resident_reconciliation_gitea_username }}"
+    method: PATCH
+    headers:
+      Authorization: "token {{ server_resident_reconciliation_gitea_admin_token }}"
+    body_format: json
+    status_code: 200
+    body:
+      email: "{{ server_resident_reconciliation_gitea_email }}"
+      login_name: "{{ server_resident_reconciliation_gitea_login_name }}"
+      source_id: "{{ server_resident_reconciliation_gitea_source_id }}"
+      password: "{{ server_resident_reconciliation_gitea_bootstrap_password.stdout | trim }}"
+      must_change_password: false
+      restricted: "{{ server_resident_reconciliation_gitea_restricted_user }}"
+      visibility: private
+  delegate_to: localhost
+  become: false
+  when:
+    - server_resident_reconciliation_gitea_user_exists
+    - not server_resident_reconciliation_gitea_read_token_local.stat.exists
+    - not server_resident_reconciliation_host_token_stat.stat.exists
+  no_log: true
+
+- name: Read the existing repository collaborator permission for the reconcile user
+  ansible.builtin.uri:
+    url: >-
+      {{ server_resident_reconciliation_gitea_base_url }}/api/v1/repos/{{ server_resident_reconciliation_repo_owner }}/{{ server_resident_reconciliation_repo_name }}/collaborators/{{ server_resident_reconciliation_gitea_username }}/permission
+    method: GET
+    headers:
+      Authorization: "token {{ server_resident_reconciliation_gitea_admin_token }}"
+    return_content: true
+    status_code:
+      - 200
+      - 404
+  delegate_to: localhost
+  become: false
+  register: server_resident_reconciliation_gitea_collaborator_permission_current
+  no_log: true
+
+- name: Ensure the Gitea reconcile user has read-only access to the repo
+  ansible.builtin.uri:
+    url: >-
+      {{ server_resident_reconciliation_gitea_base_url }}/api/v1/repos/{{ server_resident_reconciliation_repo_owner }}/{{ server_resident_reconciliation_repo_name }}/collaborators/{{ server_resident_reconciliation_gitea_username }}
+    method: PUT
+    headers:
+      Authorization: "token {{ server_resident_reconciliation_gitea_admin_token }}"
+    body_format: json
+    status_code: 204
+    body:
+      permission: "{{ server_resident_reconciliation_gitea_collaborator_permission }}"
+  delegate_to: localhost
+  become: false
+  when: >-
+    server_resident_reconciliation_gitea_collaborator_permission_current.status != 200
+    or (server_resident_reconciliation_gitea_collaborator_permission_current.json.permission | default('')) != server_resident_reconciliation_gitea_collaborator_permission
+  no_log: true
+
+- name: List existing low-privilege Gitea tokens for the reconcile user
+  ansible.builtin.uri:
+    url: "{{ server_resident_reconciliation_gitea_base_url }}/api/v1/users/{{ server_resident_reconciliation_gitea_username }}/tokens"
+    method: GET
+    force_basic_auth: true
+    url_username: "{{ server_resident_reconciliation_gitea_username }}"
+    url_password: "{{ server_resident_reconciliation_gitea_bootstrap_password.stdout | trim }}"
+    return_content: true
+    status_code: 200
+  delegate_to: localhost
+  become: false
+  register: server_resident_reconciliation_gitea_token_list
+  when:
+    - not server_resident_reconciliation_gitea_read_token_local.stat.exists
+    - not server_resident_reconciliation_host_token_stat.stat.exists
+  no_log: true
+
+- name: Delete stale Gitea reconcile tokens before issuing a new one
+  ansible.builtin.uri:
+    url: >-
+      {{ server_resident_reconciliation_gitea_base_url }}/api/v1/users/{{ server_resident_reconciliation_gitea_username }}/tokens/{{ item.id }}
+    method: DELETE
+    force_basic_auth: true
+    url_username: "{{ server_resident_reconciliation_gitea_username }}"
+    url_password: "{{ server_resident_reconciliation_gitea_bootstrap_password.stdout | trim }}"
+    status_code: 204
+  delegate_to: localhost
+  become: false
+  loop: >-
+    {{
+      server_resident_reconciliation_gitea_token_list.json
+      | default([])
+      | selectattr('name', 'equalto', server_resident_reconciliation_gitea_token_name)
+      | list
+    }}
+  when:
+    - not server_resident_reconciliation_gitea_read_token_local.stat.exists
+    - not server_resident_reconciliation_host_token_stat.stat.exists
+  no_log: true
+
+- name: Create the low-privilege Gitea read token for ansible-pull
+  ansible.builtin.uri:
+    url: "{{ server_resident_reconciliation_gitea_base_url }}/api/v1/users/{{ server_resident_reconciliation_gitea_username }}/tokens"
+    method: POST
+    force_basic_auth: true
+    url_username: "{{ server_resident_reconciliation_gitea_username }}"
+    url_password: "{{ server_resident_reconciliation_gitea_bootstrap_password.stdout | trim }}"
+    body_format: json
+    return_content: true
+    status_code: 201
+    body:
+      name: "{{ server_resident_reconciliation_gitea_token_name }}"
+      scopes: "{{ server_resident_reconciliation_gitea_token_scopes }}"
+  delegate_to: localhost
+  become: false
+  register: server_resident_reconciliation_gitea_token_create
+  when:
+    - not server_resident_reconciliation_gitea_read_token_local.stat.exists
+    - not server_resident_reconciliation_host_token_stat.stat.exists
+  no_log: true
+
+- name: Persist the low-privilege Gitea read token on the controller
+  ansible.builtin.copy:
+    dest: "{{ server_resident_reconciliation_gitea_read_token_local_file }}"
+    content: "{{ server_resident_reconciliation_gitea_token_create.json.sha1 | trim }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  when:
+    - not server_resident_reconciliation_gitea_read_token_local.stat.exists
+    - not server_resident_reconciliation_host_token_stat.stat.exists
+  no_log: true
+
+- name: Verify the low-privilege Gitea token can read the repo over Git HTTP
+  ansible.builtin.command:
+    argv:
+      - git
+      - ls-remote
+      - "http://{{ server_resident_reconciliation_gitea_username }}:{{ lookup('ansible.builtin.file', server_resident_reconciliation_gitea_read_token_local_file) | trim }}@{{ server_resident_reconciliation_gitea_base_url | regex_replace('^https?://', '') }}/{{ server_resident_reconciliation_repo_owner }}/{{ server_resident_reconciliation_repo_name }}.git"
+      - HEAD
+  environment:
+    GIT_TERMINAL_PROMPT: "0"
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  no_log: true
