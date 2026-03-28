@@ -70,7 +70,25 @@
         <dt>Surface</dt>
         <dd>{{ service.public_url or service.internal_url or "Private only" }}</dd>
       </div>
+      <div>
+        <dt>Publication</dt>
+        <dd>
+          {% if service.publications %}
+          {{ service.publications[0].delivery_model }} / {{ service.publications[0].access_model }}
+          {% else %}
+          Uncatalogued
+          {% endif %}
+        </dd>
+      </div>
     </dl>
+
+    {% if service.publications %}
+    <div class="hint-strip">
+      {% for publication in service.publications[:2] %}
+      <span>{{ publication.fqdn }} · {{ publication.audience }} · {{ publication.delivery_model }} · {{ publication.access_model }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
 
     {% if service.maintenance_windows %}
     <div class="hint-strip">

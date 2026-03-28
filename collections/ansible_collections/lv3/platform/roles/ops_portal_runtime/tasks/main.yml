@@ -122,6 +122,14 @@
     mode: "0644"
     directory_mode: "0755"
 
+- name: Sync the shared publication contract helper
+  ansible.builtin.copy:
+    src: "{{ ops_portal_repo_root }}/scripts/publication_contract.py"
+    dest: "{{ ops_portal_service_dir }}/publication_contract.py"
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Sync the ops portal requirements file
   ansible.builtin.copy:
     src: "{{ ops_portal_repo_root }}/requirements/ops-portal.txt"
