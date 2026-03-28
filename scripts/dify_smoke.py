@@ -26,13 +26,37 @@ workflow:
 """
 
 
+def candidate_repo_roots(repo_root: Path) -> list[Path]:
+    candidates = [repo_root]
+    git_dir = repo_root / ".git"
+    if git_dir.is_file():
+        gitdir_line = next(
+            (line for line in git_dir.read_text(encoding="utf-8").splitlines() if line.startswith("gitdir: ")),
+            None,
+        )
+        if gitdir_line:
+            common_root = (Path(gitdir_line.removeprefix("gitdir: ").strip()).resolve().parents[2]).resolve()
+            if common_root not in candidates:
+                candidates.append(common_root)
+    return candidates
+
+
 def maybe_langfuse_trace_config(repo_root: Path) -> dict[str, str] | None:
-    local_dir = repo_root / ".local" / "langfuse"
-    public_key = local_dir / "project-public-key.txt"
-    secret_key = local_dir / "project-secret-key.txt"
-    if not public_key.exists() or not secret_key.exists():
+    public_key: Path | None = None
+    secret_key: Path | None = None
+    config_root = repo_root
+    for candidate_root in candidate_repo_roots(repo_root):
+        local_dir = candidate_root / ".local" / "langfuse"
+        candidate_public_key = local_dir / "project-public-key.txt"
+        candidate_secret_key = local_dir / "project-secret-key.txt"
+        if candidate_public_key.exists() and candidate_secret_key.exists():
+            public_key = candidate_public_key
+            secret_key = candidate_secret_key
+            config_root = candidate_root
+            break
+    if not public_key or not secret_key:
         return None
-    platform_vars_path = repo_root / "inventory" / "group_vars" / "platform.yml"
+    platform_vars_path = config_root / "inventory" / "group_vars" / "platform.yml"
     langfuse_host = "https://langfuse.lv3.org"
     if platform_vars_path.exists():
         platform_vars = yaml.safe_load(platform_vars_path.read_text(encoding="utf-8")) or {}

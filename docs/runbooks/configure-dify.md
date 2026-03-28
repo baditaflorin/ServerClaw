@@ -91,6 +91,8 @@ curl -sS -X POST https://api.lv3.org/v1/dify-tools/get-platform-status \
 
 The smoke script verifies the setup flow, signs in with the bootstrap administrator, syncs the governed tool provider, imports a minimal workflow DSL, exports it back into `platform/dify-workflows/`, and confirms Langfuse trace configuration can be written and read on the smoke app.
 
+When you run the smoke flow from a linked git worktree, the script now falls back to the shared repository `.local/langfuse/` directory automatically, so trace verification still succeeds without copying controller-local secrets into the worktree.
+
 ## Operational Notes
 
 - This workstream deploys a Dify-local Qdrant sidecar so the live apply can remain isolated from ADR 0198.
