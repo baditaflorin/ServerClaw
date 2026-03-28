@@ -24,9 +24,9 @@ coolify_proxy_path: "{{ coolify_data_root }}/proxy"
 coolify_dashboard_port: "{{ platform_service_topology | platform_service_port('coolify', 'internal') }}"
 coolify_proxy_port: "{{ platform_service_topology | platform_service_port('coolify_apps', 'internal') }}"
 coolify_controller_url: "{{ platform_service_topology | platform_service_url('coolify', 'controller') }}"
-coolify_private_url: "{{ platform_service_topology | platform_service_url('coolify', 'internal') }}"
-coolify_public_url: "https://{{ platform_service_topology.coolify.public_hostname }}"
-coolify_apps_public_url: "https://{{ platform_service_topology.coolify_apps.public_hostname }}"
+coolify_private_url: "http://{{ ansible_host }}:{{ coolify_dashboard_port }}"
+coolify_public_url: https://coolify.lv3.org
+coolify_apps_public_url: https://apps.lv3.org
 coolify_tunnel_host: "{{ hostvars['proxmox_florin'].ansible_host | default(hostvars['proxmox_florin'].management_ipv4 | default(''), true) }}"
 coolify_tunnel_user: ops
 coolify_bridge_subnet: 172.18.0.0/16
