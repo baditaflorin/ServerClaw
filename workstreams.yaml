@@ -271,7 +271,7 @@ workstreams:
   - id: ws-0246-live-apply
     adr: "0246"
     title: Live apply startup, readiness, liveness, and degraded-state semantics
-    status: in_progress
+    status: ready
     owner: codex
     branch: codex/ws-0246-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0246-live-apply
@@ -292,6 +292,7 @@ workstreams:
       - config/health-probe-catalog.json
       - playbooks/tasks/post-verify.yml
       - collections/ansible_collections/lv3/platform/playbooks/tasks/post-verify.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
       - platform/health/semantics.py
       - platform/health/composite.py
       - platform/graph/client.py
@@ -328,6 +329,7 @@ workstreams:
             - config/health-probe-catalog.json
             - playbooks/tasks/post-verify.yml
             - collections/ansible_collections/lv3/platform/playbooks/tasks/post-verify.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
             - platform/health/semantics.py
             - platform/health/composite.py
             - platform/graph/client.py
@@ -343,8 +345,8 @@ workstreams:
             - tests/unit/test_graph_client.py
             - receipts/live-applies/2026-03-28-adr-0246-runtime-state-semantics-live-apply.json
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
     canonical_truth:
       changelog_entry: implemented ADR 0246 by teaching the probe catalog,
         shared post-verify path, world-state service health worker, observation
@@ -352,6 +354,8 @@ workstreams:
         failed runtime states
       release_bump: patch
       included_in_repo_version: null
+      latest_receipts:
+        runtime_state_semantics: 2026-03-28-adr-0246-runtime-state-semantics-live-apply
   - id: ws-0234-human-ux-adrs
     adr: "0234"
     title: Human user experience architecture bundle

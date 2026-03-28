@@ -4151,7 +4151,7 @@ adr_index:
   - adr: '0246'
     title: Startup, Readiness, Liveness, And Degraded State Semantics
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: release
     keywords:
@@ -4163,6 +4163,7 @@ adr_index:
       - semantics
     summary: 'We will standardize four service-health semantics for runtime assurance:'
     filename: 0246-startup-readiness-liveness-and-degraded-state-semantics.md
+    implemented_version: 0.130.44
   - adr: '0247'
     title: Authenticated Browser Journey Verification Via Playwright
     status: Accepted
