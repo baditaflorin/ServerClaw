@@ -126,7 +126,6 @@ The repository now also ships ADR 0129 runbook automation: structured YAML, JSON
 The repository now also ships ADR 0209 use-case services and thin delivery adapters live on production: the API gateway and ops portal now expose the same shared structured runbook service already used by the CLI and Windmill wrapper, and the 2026-03-28 latest-main replay re-verified `validation-gate-status` end to end through the worker checkout, `api.lv3.org` gateway contract, and the interactive `ops.lv3.org` runbook launcher.
 The repository now also ships ADR 0197 Dify visual workflow canvas fully live on production: `https://agents.lv3.org/healthz` now returns `200`, governed Dify tool calls through `https://api.lv3.org/v1/dify-tools/get-platform-status` re-verified from the latest-main replay, and the linked-worktree smoke export plus Langfuse trace path completed successfully on 2026-03-28.
 The repository now also ships ADR 0231 local secret delivery live on production: `docker-runtime-lv3` now serves the control-plane backup path through a repo-managed OpenBao Agent plus systemd credentials, the legacy `/etc/lv3/control-plane-recovery/openbao-backup-token.json` artifact is gone, and the 2026-03-28 replay re-verified a fresh backup generation plus restore drill on `backup-lv3`.
-The repository now also ships ADR 0224 server-resident operations as the default live control model: the trusted Proxmox-host reconcile path now replays the private Gitea `main` snapshot through `lv3-server-resident-reconciliation.service`, and the host-resident ADR 0226 timer plus path units still record clean path-triggered and manual runs under `/var/lib/lv3-host-control-loops/` without any controller-open mutate loop.
 The repository now also ships ADR 0137 crawl policy automation live on production: the shared public edge serves a universal `robots.txt`, emits `X-Robots-Tag: noindex, nofollow` across published hostnames, adds robots meta tags to repository-generated HTML surfaces, and includes `lv3.org` in the shared edge certificate definition.
 The repository now also ships the first ADR 0166 canonical error rollout live on production: `config/error-codes.yaml` and `scripts/canonical_errors.py` now normalize repo-managed gateway and platform-context failures behind one trace-id-backed error envelope, and the 2026-03-26 live replay from `main` verified the canonical `AUTH_TOKEN_MISSING` response on both `https://api.lv3.org/v1/health` and `http://100.64.0.1:8010/v1/platform-summary`.
 
@@ -136,7 +135,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.50` |
+| Repository version | `0.177.52` |
 | Platform version | `0.130.42` |
 | Observed check date | `2026-03-28` |
 | Observed OS | `Debian 13` |
@@ -910,6 +909,16 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0241: Rich Content And Inline Knowledge Editing Via Tiptap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0241-rich-content-and-inline-knowledge-editing-via-tiptap.md)
 - [ADR 0242: Guided Human Onboarding Via Shepherd Tours](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0242-guided-human-onboarding-via-shepherd-tours.md)
 - [ADR 0243: Component Stories, Accessibility, And UI Contracts Via Storybook, Playwright, And Axe-Core](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core.md)
+- [ADR 0244: Runtime Assurance Matrix Per Service And Environment](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0244-runtime-assurance-matrix-per-service-and-environment.md)
+- [ADR 0245: Declared-To-Live Service Attestation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0245-declared-to-live-service-attestation.md)
+- [ADR 0246: Startup, Readiness, Liveness, And Degraded State Semantics](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0246-startup-readiness-liveness-and-degraded-state-semantics.md)
+- [ADR 0247: Authenticated Browser Journey Verification Via Playwright](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0247-authenticated-browser-journey-verification-via-playwright.md)
+- [ADR 0248: Session And Logout Authority Across Keycloak, Oauth2-Proxy, And App Surfaces](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0248-session-and-logout-authority-across-keycloak-oauth2-proxy-and-apps.md)
+- [ADR 0249: HTTPS And TLS Assurance Via Blackbox Exporter And testssl.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md)
+- [ADR 0250: Log Ingestion And Queryability Canaries Via Loki Canary](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0250-log-ingestion-and-queryability-canaries-via-loki-canary.md)
+- [ADR 0251: Stage-Scoped Smoke Suites And Promotion Gates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md)
+- [ADR 0252: Route And DNS Publication Assertion Ledger](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0252-route-and-dns-publication-assertion-ledger.md)
+- [ADR 0253: Unified Runtime Assurance Scoreboard And Rollup](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0253-unified-runtime-assurance-scoreboard-and-rollup.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -1082,6 +1091,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0214: HA And Replication Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0214-ha-replication-architecture-bundle.md)
 - [Workstream ADR 0224: Server-Resident Operations Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0224-server-resident-operations-architecture-bundle.md)
 - [Workstream ADR 0234: Human User Experience Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md)
+- [Workstream ADR 0244: Runtime Assurance Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0244-runtime-assurance-architecture-bundle.md)
 - [Workstream ws-0021-edge-cert-repair: Shared Edge Certificate Expansion Repair](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0021-edge-cert-repair.md)
 - [Workstream ws-0101-live-apply: ADR 0101 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0101-live-apply.md)
 - [Workstream ws-0105-live-apply: Live Apply ADR 0105 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0105-live-apply.md)
@@ -1135,7 +1145,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.50` |
+| Repository version | `0.177.52` |
 | Platform version | `0.130.42` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1364,6 +1374,7 @@ This repository is intentionally opinionated:
 | `0230` | Live apply policy decisions via Open Policy Agent and Conftest | `live_applied` | [ws-0230-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0230-live-apply.md) |
 | `0231` | Integrate ADR 0231 live apply into origin/main | `merged` | [ws-0231-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0231-main-merge.md) |
 | `0234` | Human user experience architecture bundle | `merged` | [adr-0234-human-user-experience-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md) |
+| `0244` | Runtime assurance architecture bundle | `merged` | [adr-0244-runtime-assurance-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0244-runtime-assurance-architecture-bundle.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

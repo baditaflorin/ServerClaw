@@ -54,6 +54,16 @@ class DocsSiteTests(unittest.TestCase):
         finally:
             shutil.rmtree(temp_dir)
 
+    def test_write_mode_can_target_explicit_output_dir(self) -> None:
+        temp_dir = Path(tempfile.mkdtemp(prefix="docs-site-cli-test-"))
+        try:
+            exit_code = docs_site.main(["--write", "--output-dir", str(temp_dir), "--openapi-url", ""])
+
+            self.assertEqual(exit_code, 0)
+            docs_site.validate_site(temp_dir)
+        finally:
+            shutil.rmtree(temp_dir)
+
     def test_build_portal_document_defaults_to_internal_sensitivity(self) -> None:
         temp_dir = Path(tempfile.mkdtemp(prefix="docs-site-test-"))
         try:
