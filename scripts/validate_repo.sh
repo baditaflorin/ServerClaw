@@ -6,6 +6,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VALIDATION_CACHE_DIR="${LV3_VALIDATION_CACHE_DIR:-$REPO_ROOT/.ansible/validation}"
 ANSIBLE_COLLECTIONS_DIR="${LV3_ANSIBLE_COLLECTIONS_DIR:-$VALIDATION_CACHE_DIR/collections}"
 ANSIBLE_COLLECTIONS_SHA_FILE="${LV3_ANSIBLE_COLLECTIONS_SHA_FILE:-$VALIDATION_CACHE_DIR/requirements.sha}"
+PYTHON_BIN="${LV3_VALIDATE_PYTHON_BIN:-}"
 UV_CMD=(uv)
 ANSIBLE_PLAYBOOK_CMD=()
 ANSIBLE_GALAXY_CMD=()
@@ -33,13 +34,76 @@ require_command() {
   fi
 }
 
+python_candidate_path() {
+  local candidate="$1"
+
+  if [[ "$candidate" == */* ]]; then
+    [[ -x "$candidate" ]] || return 1
+    printf '%s\n' "$candidate"
+    return 0
+  fi
+
+  command -v "$candidate" 2>/dev/null
+}
+
+python_meets_min_version() {
+  local candidate="$1"
+
+  "$candidate" - <<'PY' >/dev/null 2>&1
+import sys
+
+raise SystemExit(0 if sys.version_info >= (3, 10) else 1)
+PY
+}
+
+resolve_python_bin() {
+  local candidate=""
+  local candidate_path=""
+  local candidates=()
+
+  if [[ -n "$PYTHON_BIN" ]]; then
+    candidate_path="$(python_candidate_path "$PYTHON_BIN")" || {
+      echo "Configured LV3_VALIDATE_PYTHON_BIN is not executable: $PYTHON_BIN" >&2
+      exit 1
+    }
+    python_meets_min_version "$candidate_path" || {
+      echo "LV3_VALIDATE_PYTHON_BIN must resolve to Python 3.10 or newer: $candidate_path" >&2
+      exit 1
+    }
+    PYTHON_BIN="$candidate_path"
+    return 0
+  fi
+
+  candidates=(
+    python3
+    python3.13
+    python3.12
+    python3.11
+    python3.10
+    /opt/homebrew/bin/python3
+    /usr/local/bin/python3
+  )
+
+  for candidate in "${candidates[@]}"; do
+    candidate_path="$(python_candidate_path "$candidate")" || continue
+    if python_meets_min_version "$candidate_path"; then
+      PYTHON_BIN="$candidate_path"
+      return 0
+    fi
+  done
+
+  echo "Missing Python 3.10+ for validation. Set LV3_VALIDATE_PYTHON_BIN to a compatible interpreter." >&2
+  exit 1
+}
+
 ensure_uv() {
+  resolve_python_bin
   if command -v uv >/dev/null 2>&1; then
     return 0
   fi
 
-  python3 -m pip install --user --quiet uv >/dev/null
-  UV_CMD=(python3 -m uv)
+  "$PYTHON_BIN" -m pip install --user --quiet uv >/dev/null
+  UV_CMD=("$PYTHON_BIN" -m uv)
 }
 
 configure_validation_commands() {
@@ -71,7 +135,7 @@ tracked_files() {
     return 0
   fi
 
-  python3 - "$REPO_ROOT" "$@" <<'PY'
+  "$PYTHON_BIN" - "$REPO_ROOT" "$@" <<'PY'
 from pathlib import Path
 import sys
 
@@ -251,7 +315,7 @@ validate_json() {
     if command -v jq >/dev/null 2>&1; then
       jq empty "$resolved_json_file"
     else
-      python3 - "$resolved_json_file" <<'PY'
+      "$PYTHON_BIN" - "$resolved_json_file" <<'PY'
 import json
 import pathlib
 import sys
@@ -285,14 +349,14 @@ validate_compose_runtime_envs() {
 
 validate_retry_guard() {
   echo "Retry guard"
-  python3 "$REPO_ROOT/scripts/check_ad_hoc_retry.py" >/dev/null
+  "$PYTHON_BIN" "$REPO_ROOT/scripts/check_ad_hoc_retry.py" >/dev/null
 }
 
 validate_data_models() {
   echo "Repository data model validation"
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/ansible_scope_runner.py" validate >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_timeout_hierarchy.py" >/dev/null
-  python3 "$REPO_ROOT/scripts/check_hardcoded_timeouts.py" >/dev/null
+  "$PYTHON_BIN" "$REPO_ROOT/scripts/check_hardcoded_timeouts.py" >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/provider_boundary_catalog.py" --validate >/dev/null
   run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/validate_repository_data_models.py" --validate >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/execution_lanes.py" --validate >/dev/null
@@ -302,14 +366,14 @@ validate_data_models() {
   run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/service_catalog.py" --validate >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/environment_topology.py" --validate >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/subdomain_catalog.py" --validate >/dev/null
-  python3 "$REPO_ROOT/scripts/validate_service_completeness.py" --validate >/dev/null
+  "$PYTHON_BIN" "$REPO_ROOT/scripts/validate_service_completeness.py" --validate >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/agent_tool_registry.py" --export-mcp >/dev/null
-  python3 "$REPO_ROOT/scripts/mutation_audit.py" --validate-schema >/dev/null
+  "$PYTHON_BIN" "$REPO_ROOT/scripts/mutation_audit.py" --validate-schema >/dev/null
 }
 
 validate_architecture_fitness() {
   echo "Architecture fitness validation"
-  python3 "$REPO_ROOT/scripts/replaceability_scorecards.py" --validate >/dev/null
+  "$PYTHON_BIN" "$REPO_ROOT/scripts/replaceability_scorecards.py" --validate >/dev/null
 }
 
 validate_workstream_surfaces() {

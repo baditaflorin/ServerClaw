@@ -536,6 +536,10 @@ run_local_command() {
   echo "remote_exec: running local fallback for $COMMAND_LABEL" >&2
   (
     cd "$REPO_ROOT"
+    if [[ -z "${LV3_VALIDATE_PYTHON_BIN:-}" ]]; then
+      export LV3_VALIDATE_PYTHON_BIN
+      LV3_VALIDATE_PYTHON_BIN="$(command -v python3 2>/dev/null || true)"
+    fi
     bash -lc "$LOCAL_COMMAND"
   )
 }

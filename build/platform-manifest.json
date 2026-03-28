@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.38",
+  "repo_version": "0.177.39",
   "platform_version": "0.130.38",
-  "generated_at": "2026-03-28T15:58:43Z",
-  "next_refresh_at": "2026-03-28T16:58:43Z",
+  "generated_at": "2026-03-28T16:17:28Z",
+  "next_refresh_at": "2026-03-28T17:17:28Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3908,10 +3908,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.37",
+    "last_version": "0.177.38",
     "deployed_at": "2026-03-28",
-    "summary": "implemented ADR 0209 by extracting a shared runbook use-case service and converging thin CLI, Windmill, API gateway, and ops-portal adapters around the same structured runbook contract",
-    "release_notes_url": "docs/release-notes/0.177.38.md"
+    "summary": "implemented ADR 0207 by translating Hetzner DNS provider payloads into canonical DNS facts at the boundary and by enforcing that contract in both the repository validation path and the live post-merge validation gate",
+    "release_notes_url": "docs/release-notes/0.177.39.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -158,6 +158,7 @@ workstreams:
       - config/ansible-role-idempotency.yml
       - .config-locations.yaml
       - scripts/check_role_argument_specs.sh
+      - scripts/controller_automation_toolkit.py
       - scripts/provider_boundary_catalog.py
       - scripts/remote_exec.sh
       - scripts/validate_repo.sh
@@ -165,6 +166,7 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/
       - collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/
       - platform/ansible/plane.py
+      - docs/runbooks/remote-build-gateway.md
       - docs/runbooks/subdomain-governance.md
       - docs/runbooks/validate-repository-automation.md
       - docs/runbooks/validation-gate.md
@@ -213,9 +215,11 @@ workstreams:
         - id: validation_gate_contract
           paths:
             - scripts/check_role_argument_specs.sh
+            - scripts/controller_automation_toolkit.py
             - scripts/remote_exec.sh
             - scripts/validate_repo.sh
             - config/validation-gate.json
+            - docs/runbooks/remote-build-gateway.md
             - docs/runbooks/validate-repository-automation.md
             - docs/runbooks/validation-gate.md
             - tests/test_remote_exec.py
@@ -232,7 +236,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0207 by translating Hetzner DNS provider payloads into canonical DNS facts at the boundary and by enforcing that contract in both the repository validation path and the live post-merge validation gate
       release_bump: patch
-      included_in_repo_version: 0.177.38
+      included_in_repo_version: 0.177.39
       latest_receipts:
         provider_boundaries: 2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply
   - id: ws-0207-main-merge
@@ -255,10 +259,12 @@ workstreams:
       - config/validation-gate.json
       - collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/
       - collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/
+      - docs/runbooks/remote-build-gateway.md
       - docs/runbooks/subdomain-governance.md
       - docs/runbooks/validate-repository-automation.md
       - docs/runbooks/validation-gate.md
       - scripts/check_role_argument_specs.sh
+      - scripts/controller_automation_toolkit.py
       - scripts/provider_boundary_catalog.py
       - scripts/remote_exec.sh
       - scripts/validate_repo.sh
@@ -285,6 +291,7 @@ workstreams:
       - docs/adr/0207-anti-corruption-layers-at-provider-boundaries.md
       - docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md
       - docs/adr/.index.yaml
+      - receipts/live-applies/2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply.json
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -315,6 +322,7 @@ workstreams:
             - tests/test_hetzner_dns_record_role.py
             - tests/test_hetzner_dns_records_role.py
             - tests/test_windmill_operator_admin_app.py
+            - receipts/live-applies/2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply.json
           mode: exclusive
         - id: adr_0207_architecture_contract
           paths:
@@ -325,9 +333,11 @@ workstreams:
         - id: validation_gate_contract
           paths:
             - scripts/check_role_argument_specs.sh
+            - scripts/controller_automation_toolkit.py
             - scripts/remote_exec.sh
             - scripts/validate_repo.sh
             - config/validation-gate.json
+            - docs/runbooks/remote-build-gateway.md
             - docs/runbooks/validate-repository-automation.md
             - docs/runbooks/validation-gate.md
             - tests/test_remote_exec.py

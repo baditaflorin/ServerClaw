@@ -132,7 +132,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.38` |
+| Repository version | `0.177.39` |
 | Platform version | `0.130.38` |
 | Observed check date | `2026-03-28` |
 | Observed OS | `Debian 13` |
@@ -1092,7 +1092,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.38` |
+| Repository version | `0.177.39` |
 | Platform version | `0.130.38` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1312,6 +1312,7 @@ This repository is intentionally opinionated:
 | `0206` | Integrate ADR 0206 live apply into origin/main | `merged` | [ws-0206-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-main-merge.md) |
 | `0207` | Anti-corruption layers at provider boundaries live apply | `live_applied` | [adr-0207-anti-corruption-layers-at-provider-boundaries.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md) |
 | `0207` | Integrate ADR 0207 live apply into origin/main | `merged` | [ws-0207-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0207-main-merge.md) |
+| `0209` | Shared runbook use-case service with thin CLI, API gateway, Windmill, and ops portal adapters | `live_applied` | [ws-0209-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0209-live-apply.md) |
 | `0210` | Live apply canonical publication models over adapter-shaped vendor fields | `merged` | [ws-0210-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0210-live-apply.md) |
 | `0212` | Replaceability scorecards and vendor exit plans live apply | `merged` | [ws-0212-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0212-live-apply.md) |
 | `0214` | HA and replication architecture bundle for production and staging | `merged` | [adr-0214-ha-replication-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0214-ha-replication-architecture-bundle.md) |
