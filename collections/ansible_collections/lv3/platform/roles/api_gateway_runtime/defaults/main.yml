@@ -6,6 +6,7 @@
 # Dependencies: ADR 0165, ADR 0092, ADR 0175, and ADR 0197.
 ---
 api_gateway_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('api_gateway') }}"
+api_gateway_windmill_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('windmill') }}"
 api_gateway_repo_root: "{{ inventory_dir | dirname }}"
 api_gateway_site_dir: /opt/api-gateway
 api_gateway_service_dir: "{{ api_gateway_site_dir }}/service"
@@ -130,6 +131,9 @@ api_gateway_drift_receipts_glob: "{{ api_gateway_repo_root }}/receipts/drift-rep
 api_gateway_platform_context_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt
 api_gateway_dify_tools_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/tools-api-key.txt
 api_gateway_dify_tools_api_key_header: X-LV3-Dify-Api-Key
+api_gateway_windmill_base_url: "http://{{ api_gateway_windmill_service_topology.private_ip }}:{{ windmill_server_port }}"
+api_gateway_windmill_token_local_file: "{{ api_gateway_shared_local_root }}/windmill/superadmin-secret.txt"
+api_gateway_runbook_runs_dir: /data/runbooks/runs
 api_gateway_sources:
   - src: "{{ api_gateway_repo_root }}/.githooks/pre-push"
     dest: .githooks/pre-push
@@ -241,6 +245,12 @@ api_gateway_include_upstream_openapi: false
 api_gateway_dify_tools_api_key: >-
   {{
     lookup('ansible.builtin.file', api_gateway_dify_tools_api_key_local_file, errors='ignore')
+    | default('', true)
+    | trim
+  }}
+api_gateway_windmill_token: >-
+  {{
+    lookup('ansible.builtin.file', api_gateway_windmill_token_local_file, errors='ignore')
     | default('', true)
     | trim
   }}

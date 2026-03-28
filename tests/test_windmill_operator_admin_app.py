@@ -40,12 +40,20 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_bootstrap_identity_email"] == "superadmin_secret@windmill.dev"
     assert defaults["windmill_bootstrap_identity_username"] == "superadmin_secret"
     assert defaults["windmill_bootstrap_identity_login_type"] == "password"
-    assert defaults["windmill_service_topology"] == "{{ hostvars[inventory_hostname].platform_service_topology }}"
-    assert defaults["windmill_server_port"] == "{{ windmill_service_topology | platform_service_port('windmill', 'internal') }}"
-    assert defaults["windmill_host_proxy_port"] == "{{ windmill_service_topology | platform_service_port('windmill', 'controller') }}"
-    assert defaults["windmill_private_base_url"] == "{{ windmill_service_topology | platform_service_url('windmill', 'internal') }}"
-    assert defaults["windmill_base_url"] == "{{ windmill_service_topology | platform_service_url('windmill', 'controller') }}"
+    assert defaults["windmill_service_topology"] == (
+        "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('windmill') }}"
+    )
+    assert defaults["windmill_server_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.windmill_server_port }}"
+    assert defaults["windmill_host_proxy_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.windmill_host_proxy_port }}"
+    assert defaults["windmill_private_base_url"] == "http://{{ windmill_service_topology.private_ip }}:{{ windmill_server_port }}"
+    assert defaults["windmill_base_url"] == "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
+    assert defaults["windmill_healthcheck_script_path"] == "f/lv3/windmill_healthcheck"
+    assert defaults["windmill_validation_gate_status_script_path"] == "f/lv3/gate-status"
     assert defaults["windmill_worker_checkout_repo_root_local_dir"] == "{{ playbook_dir }}/.."
+    assert defaults["windmill_worker_checkout_integrity_files"] == [
+        "scripts/gate_status.py",
+        "config/windmill/scripts/gate-status.py",
+    ]
     assert {
         "ansible.cfg",
         "callback_plugins",
@@ -285,6 +293,9 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     tasks = (
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml"
     ).read_text()
+    verify_tasks = (
+        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml"
+    ).read_text()
     compose_template = (
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2"
     ).read_text()
@@ -310,6 +321,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "WINDMILL_TOKEN" in tasks
     assert "Sync repo-managed Windmill schedules" in tasks
     assert "scripts/sync_windmill_seed_schedules.py" in tasks
+    assert "--path {{ windmill_healthcheck_script_path | quote }}" in tasks
     assert '$1 == "DATABASE_URL"' in tasks
     assert '. "{{ windmill_env_file }}"' not in tasks
     assert "Converge repo-managed Windmill schedule enabled flags" in tasks
@@ -352,10 +364,18 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "windmill_worker_superadmin_secret_file" in tasks
     assert "windmill_worker_checkout_repo_root_local_dir" in tasks
     assert "windmill_worker_checkout_checksum_file" in tasks
+    assert "windmill_worker_checkout_integrity_files" in tasks
+    assert "Collect controller-side integrity checksums for Windmill worker checkout sentinels" in tasks
+    assert "Collect guest-side integrity checksums for Windmill worker checkout sentinels" in tasks
+    assert "Flag the Windmill worker checkout for refresh when integrity sentinels drift" in tasks
+    assert "windmill_worker_checkout_integrity_mismatch" in tasks
     assert "windmill_worker_checkout_sync_paths" in tasks
     assert "scripts/windmill_run_wait_result.py" in tasks
     assert "--payload-json" in tasks
     assert "--timeout {{ windmill_seed_job_timeout_seconds }}" in tasks
+    assert "--path {{ windmill_validation_gate_status_script_path | quote }}" in verify_tasks
+    assert "Run the Windmill validation gate status script" in verify_tasks
+    assert "Assert the Windmill validation gate status result" in verify_tasks
     assert "delegate_to: localhost" in tasks
     assert "become: false" in tasks
     assert "Decide whether the Windmill worker checkout needs to be refreshed" in tasks

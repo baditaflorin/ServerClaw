@@ -144,15 +144,17 @@
       "implementation_refs": [
         "Makefile",
         "config/validation-gate.json",
+        "config/windmill/scripts/gate-status.py",
         "scripts/gate_status.py",
         "scripts/log_gate_bypass.py",
         "receipts/gate-bypasses/.gitkeep"
       ],
       "outputs": [
-        "A human-readable summary of enabled validation checks, the last local gate run, the last post-merge gate run, and the latest explicit bypass receipt."
+        "A human-readable or machine-readable summary of enabled validation checks, the last local gate run, the last post-merge gate run, and the latest explicit bypass receipt."
       ],
       "verification_commands": [
-        "make gate-status"
+        "make gate-status",
+        "python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server"
       ],
       "execution_class": "diagnostic",
       "budget": {
@@ -2464,6 +2466,56 @@
         "max_steps": 250,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-ops-portal": {
+      "description": "Converge the interactive ops portal on docker-runtime-lv3 so the browser control plane stays aligned with the shared API gateway contracts.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-ops-portal",
+        "command": "make converge-ops-portal"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "platform_context_api_token"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-ops-portal"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/platform-operations-portal.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/ops-portal.yml",
+        "collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2",
+        "scripts/ops_portal/app.py",
+        "docs/runbooks/platform-operations-portal.md",
+        "docs/runbooks/ops-portal-down.md"
+      ],
+      "outputs": [
+        "A repo-managed interactive ops portal on docker-runtime-lv3 that stays aligned with the shared platform API gateway contracts for health, coordination, and runbook operations."
+      ],
+      "verification_commands": [
+        "make syntax-check-ops-portal",
+        "ssh ops@100.118.189.95 'ssh ops@10.10.10.20 \"curl -sf http://127.0.0.1:8092/health\"'",
+        "curl -I https://ops.lv3.org"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
         "max_restarts": 0,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
