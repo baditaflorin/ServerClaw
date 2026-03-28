@@ -60,6 +60,18 @@ The `Rich Notes` panel is the first bounded ADR 0241 editing surface.
 
 This is intentionally bounded knowledge editing, not a replacement for the larger Outline knowledge system at `wiki.lv3.org`.
 
+## Runtime Feedback Model
+
+The browser app now uses TanStack Query for server-state and mutation feedback:
+
+- roster query key: `["operator-roster"]`
+- inventory query key: `["operator-inventory", "<operator_id>"]`
+- roster background refresh cadence: every `60` seconds
+- inventory background refresh cadence: every `45` seconds while an operator is selected
+- onboarding, off-boarding, roster reconciliation, and rich-notes persistence invalidate the affected query keys instead of forcing a full-page reload
+
+Operators should expect explicit `Loading`, `Refreshing`, `Stale`, `Fresh`, and `Error` state pills in both the roster and inventory panels, plus a structured mutation result panel that records the last action outcome.
+
 ## Operator Workflows Backed By The App
 
 - onboarding: `f/lv3/operator_onboard`
@@ -136,6 +148,9 @@ tmpdir="$(mktemp -d)" && mkdir -p "$tmpdir/f/lv3" && rsync -a config/windmill/ap
 - The bootstrap password is intentionally shown once in the onboarding result and is not written to git.
 - The app depends on the worker checkout being mounted at `/srv/proxmox_florin_server`; the Windmill runtime now bind-mounts that host checkout into both worker pools.
 - The AG Grid roster keeps the browser experience dense, but the actual access mutations still flow only through the repo-governed ADR 0108 scripts.
+- The app now relies on repo-managed frontend dependencies staged during raw-app sync, so new browser libraries must be added to the raw app `package.json` and verified through `make converge-windmill`.
+- The AG Grid roster keeps the browser experience dense, but the actual access mutations still flow only through the repo-governed ADR 0108 scripts.
+- The app now relies on repo-managed frontend dependencies staged during raw-app sync, so new browser libraries must be added to the raw app `package.json` and verified through `make converge-windmill`.
 - The app is a Windmill-private admin surface; `ops.lv3.org` remains a separate portal.
 - ADR 0241 keeps the stored source format as markdown even though the editor is rich text, so repo diffs, sync workflows, and later migrations stay inspectable.
 - Inline validation mirrors the frontend schema only; the governed backend scripts remain the authoritative enforcement path for live identity mutations.

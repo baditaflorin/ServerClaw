@@ -157,6 +157,9 @@
       - 200
       - 404
   register: common_openbao_compose_env_current_secret
+  retries: 12
+  delay: 5
+  until: common_openbao_compose_env_current_secret.status in [200, 404]
   changed_when: false
   no_log: true
 
@@ -186,6 +189,9 @@
       - 200
       - 404
   register: common_openbao_compose_env_current_policy
+  retries: 12
+  delay: 5
+  until: common_openbao_compose_env_current_policy.status in [200, 404]
   changed_when: false
   no_log: true
 

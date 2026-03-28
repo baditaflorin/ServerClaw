@@ -273,6 +273,19 @@ textarea {
   transform: translateY(-1px);
 }
 
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.statusMeta {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
 .tableWrap {
   display: grid;
   gap: 14px;
@@ -404,9 +417,29 @@ textarea {
   color: var(--ink);
 }
 
+.pillFresh {
+  background: rgba(35, 98, 58, 0.12);
+  color: var(--ok);
+}
+
+.pillInfo {
+  background: rgba(23, 92, 170, 0.12);
+  color: #175caa;
+}
+
 .pillWarning {
   background: rgba(165, 65, 28, 0.12);
   color: var(--accent);
+}
+
+.pillDanger {
+  background: rgba(126, 29, 19, 0.12);
+  color: var(--danger);
+}
+
+.pillNeutral {
+  background: rgba(28, 26, 22, 0.08);
+  color: var(--ink);
 }
 
 .pillSuccess {
@@ -576,6 +609,12 @@ textarea {
   background: rgba(126, 29, 19, 0.08);
   border-color: rgba(126, 29, 19, 0.14);
   color: var(--danger);
+}
+
+.bannerSuccess {
+  background: rgba(35, 98, 58, 0.08);
+  border-color: rgba(35, 98, 58, 0.14);
+  color: var(--ok);
 }
 
 .inventoryMeta {
@@ -883,5 +922,9 @@ textarea {
 
   .gridHost {
     height: 540px;
+  }
+
+  .statusRow {
+    align-items: flex-start;
   }
 }

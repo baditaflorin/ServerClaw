@@ -167,6 +167,7 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     package = json.loads((app_dir / "package.json").read_text())
     lock_config = yaml.safe_load(lock_path.read_text())
     package_lock = json.loads((app_dir / "package-lock.json").read_text())
+    index_source = (app_dir / "index.tsx").read_text()
     app_source = (app_dir / "App.tsx").read_text()
     schema_source = (app_dir / "schemas.ts").read_text()
     tour_source = (app_dir / "touring.ts").read_text()
@@ -175,6 +176,7 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert package["dependencies"]["@hookform/resolvers"] == "^5.1.1"
     assert package["dependencies"]["ag-grid-community"] == "35.2.0"
     assert package["dependencies"]["ag-grid-react"] == "35.2.0"
+    assert package["dependencies"]["@tanstack/react-query"] == "^5.85.1"
     assert package["dependencies"]["react"] == "19.0.0"
     assert package["dependencies"]["react-hook-form"] == "^7.69.0"
     assert package["dependencies"]["shepherd.js"] == "15.2.2"
@@ -184,6 +186,8 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert package["dependencies"]["zod"] == "^4.3.6"
     assert lock_config["version"] == "v2"
     assert "f/lv3/operator_access_admin.raw_app+__app_hash" in lock_config["locks"]
+    assert "QueryClient" in index_source
+    assert "QueryClientProvider" in index_source
     assert "Operator Access Admin" in app_source
     assert "AgGridReact" in app_source
     assert "Task-specific Shepherd tours for first-run operators" in app_source
@@ -194,6 +198,14 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert "rowSelection={rosterRowSelection}" in app_source
     assert "paginationPageSizeSelector={[10, 25, 50]}" in app_source
     assert "includeHiddenColumnsInQuickFilter={true}" in app_source
+    assert "useQuery" in app_source
+    assert "useMutation" in app_source
+    assert "queryKeys.operatorRoster()" in app_source
+    assert "queryKeys.operatorInventoryRoot()" in app_source
+    assert "invalidateQueries" in app_source
+    assert "refetchInterval: 60_000" in app_source
+    assert "refetchInterval: selectedOperatorId ? 45_000 : false" in app_source
+    assert "Mutations now invalidate TanStack Query cache entries" in app_source
     assert "isRosterPayload" in app_source
     assert "candidate.status === \"ok\" && Array.isArray(candidate.operators)" in app_source
     assert "extractRosterError" in app_source
@@ -220,6 +232,7 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert 'const ONBOARD_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/operator-onboarding/`;' in tour_source
     assert 'const OFFBOARD_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/operator-offboarding/`;' in tour_source
     assert 'const ADMIN_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/windmill-operator-access-admin/`;' in tour_source
+    assert package_lock["packages"][""]["dependencies"]["@tanstack/react-query"] == "^5.85.1"
     assert package_lock["packages"][""]["dependencies"]["ag-grid-community"] == "35.2.0"
     assert package_lock["packages"][""]["dependencies"]["ag-grid-react"] == "35.2.0"
     assert package_lock["packages"][""]["dependencies"]["react-hook-form"] == "^7.69.0"
@@ -310,6 +323,19 @@ def test_operator_admin_raw_app_lockfile_and_runtime_sync_contract() -> None:
         "- name: Sync repo-managed Windmill raw apps"
     )
     assert "windmill_seed_app_repo_root_local_dir" in argument_specs["argument_specs"]["main"]["options"]
+
+
+def test_windmill_worker_checkout_archive_builder_avoids_macos_xattrs() -> None:
+    runtime_tasks = (
+        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml"
+    ).read_text()
+
+    assert "gzip.GzipFile" in runtime_tasks
+    assert "mtime=0" in runtime_tasks
+    assert "tarfile.GNU_FORMAT" in runtime_tasks
+    assert "member.pax_headers = {}" in runtime_tasks
+    assert 'candidate.rglob("*")' in runtime_tasks
+    assert "tar -czf" not in runtime_tasks
 
 
 def test_operator_roster_script_returns_sanitized_roster(tmp_path: Path) -> None:

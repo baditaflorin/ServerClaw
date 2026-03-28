@@ -11,6 +11,7 @@ import {
   type SelectionChangedEvent,
 } from "ag-grid-community";
 import { AgGridReact, type CustomCellRendererProps } from "ag-grid-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Editor } from "@tiptap/react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { Markdown } from "@tiptap/markdown";
@@ -129,6 +130,26 @@ type ToolbarButtonProps = {
   disabled?: boolean;
 };
 
+type QueryFeedback = {
+  label: string;
+  toneClass: string;
+  detail: string;
+};
+
+type ActionResultState = {
+  title: string;
+  kind: "idle" | "pending" | "success" | "error";
+  payload?: unknown;
+  error?: string;
+  updatedAt?: number;
+};
+
+type UpdateNotesMutationInput = {
+  operator_id: string;
+  notes_markdown: string;
+  dry_run: boolean;
+};
+
 const operatorGridTheme = themeQuartz.withParams({
   spacing: 7,
   accentColor: "#a5411c",
@@ -138,6 +159,12 @@ const operatorGridTheme = themeQuartz.withParams({
   headerTextColor: "#4c4035",
   rowHoverColor: "rgba(165, 65, 28, 0.08)",
 });
+
+const queryKeys = {
+  operatorRoster: () => ["operator-roster"] as const,
+  operatorInventory: (operatorId: string) => ["operator-inventory", operatorId] as const,
+  operatorInventoryRoot: () => ["operator-inventory"] as const,
+};
 
 function ToolbarButton({ label, onClick, active = false, disabled = false }: ToolbarButtonProps) {
   return (
@@ -165,6 +192,13 @@ function formatDate(value?: string | null): string {
     return value;
   }
   return date.toLocaleString();
+}
+
+function formatTimestamp(value?: number): string {
+  if (!value) {
+    return "not loaded yet";
+  }
+  return new Date(value).toLocaleTimeString();
 }
 
 function formatOperatorSearchText(operator: OperatorRecord): string {
@@ -235,6 +269,14 @@ function extractRosterError(payload: RosterPayloadError): string {
   return payload.reason || payload.stderr || payload.error || payload.message || "Windmill returned an invalid operator roster payload.";
 }
 
+function extractCommandError(payload: Partial<ActionPayload> & RosterPayloadError): string {
+  return payload.reason || payload.stderr || payload.error || payload.message || `Windmill returned status "${payload.status ?? "unknown"}".`;
+}
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 function isRosterPayload(payload: unknown): payload is RosterPayload {
   if (!payload || typeof payload !== "object") {
     return false;
@@ -251,6 +293,77 @@ function setEditorMarkdown(editor: Editor | null, markdown: string) {
     return;
   }
   editor.commands.setContent(markdown, { contentType: "markdown" });
+}
+
+function assertActionOk(payload: ActionPayload, fallbackMessage: string): ActionPayload {
+  if (payload.status !== "ok") {
+    throw new Error(extractCommandError(payload));
+  }
+  if (payload.returncode !== 0) {
+    throw new Error(payload.stderr || fallbackMessage);
+  }
+  return payload;
+}
+
+function getQueryFeedback(
+  isPending: boolean,
+  isFetching: boolean,
+  isError: boolean,
+  isStale: boolean,
+  dataUpdatedAt: number,
+  failureCount: number,
+  cadence: string,
+): QueryFeedback {
+  if (isError) {
+    return {
+      label: "Error",
+      toneClass: "pillDanger",
+      detail: `Last good update ${formatTimestamp(dataUpdatedAt)}. Retries used: ${failureCount}. ${cadence}`,
+    };
+  }
+  if (isPending) {
+    return {
+      label: "Loading",
+      toneClass: "pillNeutral",
+      detail: `Initial fetch in progress. ${cadence}`,
+    };
+  }
+  if (isFetching) {
+    return {
+      label: "Refreshing",
+      toneClass: "pillInfo",
+      detail: `Showing cached data while a background refresh runs. ${cadence}`,
+    };
+  }
+  if (isStale) {
+    return {
+      label: "Stale",
+      toneClass: "pillWarning",
+      detail: `Last updated ${formatTimestamp(dataUpdatedAt)}. ${cadence}`,
+    };
+  }
+  return {
+    label: "Fresh",
+    toneClass: "pillFresh",
+    detail: `Last updated ${formatTimestamp(dataUpdatedAt)}. ${cadence}`,
+  };
+}
+
+async function fetchRoster(): Promise<RosterPayload> {
+  const payload = await backend.list_operators({});
+  if (!isRosterPayload(payload)) {
+    throw new Error(extractRosterError((payload ?? {}) as RosterPayloadError));
+  }
+  return payload;
+}
+
+async function fetchInventory(operatorId: string): Promise<InventoryPayload> {
+  const payload = (await backend.operator_inventory({
+    operator_id: operatorId,
+    offline: false,
+    dry_run: false,
+  })) as InventoryPayload;
+  return assertActionOk(payload as ActionPayload, "Windmill returned an invalid operator inventory payload.") as InventoryPayload;
 }
 
 function FieldShell({
@@ -309,21 +422,18 @@ function FormStatus({ isSubmitting, isDirty, submitCount, errorCount, idleMessag
 }
 
 function App() {
-  const [roster, setRoster] = useState<RosterPayload | null>(null);
-  const [rosterLoading, setRosterLoading] = useState(true);
-  const [rosterError, setRosterError] = useState("");
+  const queryClient = useQueryClient();
   const [selectedOperatorId, setSelectedOperatorId] = useState("");
   const [quickFilterText, setQuickFilterText] = useState("");
   const [displayedOperatorCount, setDisplayedOperatorCount] = useState(0);
   const [mentionTarget, setMentionTarget] = useState("");
   const [notesMarkdown, setNotesMarkdown] = useState("");
-  const [actionLoading, setActionLoading] = useState(false);
-  const [actionTitle, setActionTitle] = useState("No action executed yet");
-  const [actionPayload, setActionPayload] = useState<ActionPayload | null>(null);
-  const [inventoryPayload, setInventoryPayload] = useState<InventoryPayload | null>(null);
-  const [inventoryLoading, setInventoryLoading] = useState(false);
   const gridApiRef = useRef<GridApi<OperatorRecord> | null>(null);
   const deferredQuickFilterText = useDeferredValue(quickFilterText);
+  const [actionResult, setActionResult] = useState<ActionResultState>({
+    title: "No action executed yet",
+    kind: "idle",
+  });
   const [tourProgress, setTourProgress] = useState<TourProgress>(() => readTourProgress());
   const [tourRunning, setTourRunning] = useState(false);
   const tourRef = useRef<Tour | null>(null);
@@ -343,7 +453,22 @@ function App() {
     mode: "onTouched",
   });
 
-  const operators = roster?.operators ?? [];
+  const rosterQuery = useQuery({
+    queryKey: queryKeys.operatorRoster(),
+    queryFn: fetchRoster,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+  });
+  const inventoryQuery = useQuery({
+    queryKey: queryKeys.operatorInventory(selectedOperatorId || "unselected"),
+    queryFn: () => fetchInventory(selectedOperatorId),
+    enabled: selectedOperatorId.length > 0,
+    staleTime: 20_000,
+    refetchInterval: selectedOperatorId ? 45_000 : false,
+    retry: 1,
+  });
+
+  const operators = rosterQuery.data?.operators ?? [];
   const selectedOperator = useMemo(
     () => operators.find((item) => item.id === selectedOperatorId) ?? null,
     [operators, selectedOperatorId],
@@ -538,82 +663,30 @@ function App() {
     },
   });
 
-  async function refreshRoster(): Promise<string> {
-    setRosterLoading(true);
-    setRosterError("");
-    try {
-      const payload = await backend.list_operators({});
-      if (!isRosterPayload(payload)) {
-        setRoster(null);
+  useEffect(() => {
+    if (!operators.length) {
+      if (selectedOperatorId) {
         setSelectedOperatorId("");
-        setInventoryPayload(null);
+      }
+      if (
+        offboardForm.getValues("operator_id") ||
+        offboardForm.getValues("reason") ||
+        offboardForm.getValues("dry_run")
+      ) {
         offboardForm.reset(offboardFormDefaults);
-        setRosterError(extractRosterError((payload ?? {}) as RosterPayloadError));
-        return "";
       }
-
-      setRoster(payload);
-
-      const nextSelectedOperatorId = payload.operators.length
-        ? payload.operators.some((item) => item.id === selectedOperatorId)
-          ? selectedOperatorId
-          : payload.operators[0].id
-        : "";
-
-      setSelectedOperatorId(nextSelectedOperatorId);
-      offboardForm.setValue("operator_id", nextSelectedOperatorId, {
-        shouldValidate: offboardForm.formState.submitCount > 0,
-      });
-
-      if (!nextSelectedOperatorId) {
-        setInventoryPayload(null);
-      }
-
-      return nextSelectedOperatorId;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      setRosterError(message);
-      return "";
-    } finally {
-      setRosterLoading(false);
-    }
-  }
-
-  async function loadInventory(operatorId: string) {
-    if (!operatorId) {
-      setInventoryPayload(null);
       return;
     }
-    setInventoryLoading(true);
-    try {
-      const payload = (await backend.operator_inventory({
-        operator_id: operatorId,
-        offline: false,
-        dry_run: false,
-      })) as InventoryPayload;
-      setInventoryPayload(payload);
-    } finally {
-      setInventoryLoading(false);
+
+    const hasSelectedOperator = operators.some((item) => item.id === selectedOperatorId);
+    const nextSelectedOperatorId = !selectedOperatorId || !hasSelectedOperator ? operators[0].id : selectedOperatorId;
+    if (nextSelectedOperatorId !== selectedOperatorId) {
+      setSelectedOperatorId(nextSelectedOperatorId);
     }
-  }
-
-  useEffect(() => {
-    void refreshRoster();
-  }, []);
-
-  useEffect(() => {
-    offboardForm.setValue("operator_id", selectedOperatorId, {
+    offboardForm.setValue("operator_id", nextSelectedOperatorId, {
       shouldValidate: offboardForm.formState.submitCount > 0,
     });
-  }, [selectedOperatorId, offboardForm]);
-
-  useEffect(() => {
-    if (!selectedOperatorId) {
-      setInventoryPayload(null);
-      return;
-    }
-    void loadInventory(selectedOperatorId);
-  }, [selectedOperatorId]);
+  }, [offboardForm, operators, selectedOperatorId]);
 
   useEffect(() => {
     setNotesMarkdown(selectedOperatorNotes);
@@ -672,27 +745,10 @@ function App() {
   }
 
   useEffect(() => {
-    if (!rosterLoading && !rosterError && !tourProgress.autoPrompted && !tourRunning) {
+    if (!rosterQuery.isPending && !rosterQuery.isError && !tourProgress.autoPrompted && !tourRunning) {
       launchTour("first_run", { autoPrompted: true });
     }
-  }, [rosterLoading, rosterError, tourProgress.autoPrompted, tourRunning]);
-
-  async function executeAction(title: string, runner: () => Promise<ActionPayload>, refresh = true) {
-    setActionLoading(true);
-    setActionTitle(title);
-    try {
-      const payload = await runner();
-      setActionPayload(payload);
-      if (refresh) {
-        const nextSelectedOperatorId = await refreshRoster();
-        if (nextSelectedOperatorId) {
-          await loadInventory(nextSelectedOperatorId);
-        }
-      }
-    } finally {
-      setActionLoading(false);
-    }
-  }
+  }, [rosterQuery.isError, rosterQuery.isPending, tourProgress.autoPrompted, tourRunning]);
 
   function selectOperator(nextId: string) {
     if (nextId !== selectedOperatorId && notesDirty && !window.confirm("Discard unsaved note edits for the current operator?")) {
@@ -730,41 +786,217 @@ function App() {
     editor.chain().focus().insertContent(`@${targetOperatorId} `).run();
   }
 
-  const handleOnboardSubmit = onboardForm.handleSubmit(async (values) => {
-    await executeAction("Operator onboarding result", async () => {
+  const onboardMutation = useMutation<ActionPayload, Error, OnboardFormValues>({
+    mutationFn: async (values) => {
       const payload = (await backend.create_operator(values)) as ActionPayload;
-      if (payload.status === "ok" && !values.dry_run) {
+      return assertActionOk(payload, "Operator onboarding failed.");
+    },
+    onMutate: (payload) => {
+      setActionResult({
+        title: "Operator onboarding result",
+        kind: "pending",
+        payload,
+        updatedAt: Date.now(),
+      });
+    },
+    onSuccess: async (payload, variables) => {
+      setActionResult({
+        title: "Operator onboarding result",
+        kind: "success",
+        payload,
+        updatedAt: Date.now(),
+      });
+      if (!variables.dry_run) {
         onboardForm.reset({
           ...onboardFormDefaults,
-          role: values.role,
+          role: variables.role,
         });
       }
-      return payload;
-    });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.operatorRoster() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.operatorInventoryRoot() }),
+      ]);
+    },
+    onError: (error) => {
+      setActionResult({
+        title: "Operator onboarding result",
+        kind: "error",
+        error: getErrorMessage(error),
+        updatedAt: Date.now(),
+      });
+    },
+  });
+
+  const offboardMutation = useMutation<ActionPayload, Error, OffboardFormValues>({
+    mutationFn: async (values) => {
+      const payload = (await backend.offboard_operator(values)) as ActionPayload;
+      return assertActionOk(payload, "Operator off-boarding failed.");
+    },
+    onMutate: (payload) => {
+      setActionResult({
+        title: "Operator off-boarding result",
+        kind: "pending",
+        payload,
+        updatedAt: Date.now(),
+      });
+    },
+    onSuccess: async (payload, variables) => {
+      setActionResult({
+        title: "Operator off-boarding result",
+        kind: "success",
+        payload,
+        updatedAt: Date.now(),
+      });
+      if (!variables.dry_run) {
+        offboardForm.reset({
+          ...offboardFormDefaults,
+          operator_id: variables.operator_id,
+        });
+      }
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.operatorRoster() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.operatorInventoryRoot() }),
+      ]);
+    },
+    onError: (error) => {
+      setActionResult({
+        title: "Operator off-boarding result",
+        kind: "error",
+        error: getErrorMessage(error),
+        updatedAt: Date.now(),
+      });
+    },
+  });
+
+  const syncMutation = useMutation<ActionPayload, Error, SyncFormValues>({
+    mutationFn: async (values) => {
+      const payload = (await backend.sync_operators(values)) as ActionPayload;
+      return assertActionOk(payload, "Operator roster reconciliation failed.");
+    },
+    onMutate: (payload) => {
+      setActionResult({
+        title: "Operator roster reconciliation result",
+        kind: "pending",
+        payload,
+        updatedAt: Date.now(),
+      });
+    },
+    onSuccess: async (payload, variables) => {
+      setActionResult({
+        title: "Operator roster reconciliation result",
+        kind: "success",
+        payload,
+        updatedAt: Date.now(),
+      });
+      if (!variables.dry_run) {
+        syncForm.reset(syncFormDefaults);
+      }
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.operatorRoster() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.operatorInventoryRoot() }),
+      ]);
+    },
+    onError: (error) => {
+      setActionResult({
+        title: "Operator roster reconciliation result",
+        kind: "error",
+        error: getErrorMessage(error),
+        updatedAt: Date.now(),
+      });
+    },
+  });
+
+  const notesMutation = useMutation<ActionPayload, Error, UpdateNotesMutationInput>({
+    mutationFn: async (payload) => {
+      const response = (await backend.update_operator_notes(payload)) as ActionPayload;
+      return assertActionOk(response, "Operator notes update failed.");
+    },
+    onMutate: (payload) => {
+      setActionResult({
+        title: "Operator notes update result",
+        kind: "pending",
+        payload,
+        updatedAt: Date.now(),
+      });
+    },
+    onSuccess: async (payload) => {
+      setActionResult({
+        title: "Operator notes update result",
+        kind: "success",
+        payload,
+        updatedAt: Date.now(),
+      });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.operatorRoster() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.operatorInventoryRoot() }),
+      ]);
+    },
+    onError: (error) => {
+      setActionResult({
+        title: "Operator notes update result",
+        kind: "error",
+        error: getErrorMessage(error),
+        updatedAt: Date.now(),
+      });
+    },
+  });
+
+  const handleOnboardSubmit = onboardForm.handleSubmit(async (values) => {
+    await onboardMutation.mutateAsync(values);
   });
 
   const handleOffboardSubmit = offboardForm.handleSubmit(async (values) => {
-    await executeAction("Operator off-boarding result", async () => backend.offboard_operator(values) as Promise<ActionPayload>);
+    await offboardMutation.mutateAsync(values);
   });
 
   const handleSyncSubmit = syncForm.handleSubmit(async (values) => {
-    await executeAction("Operator roster reconciliation result", async () => backend.sync_operators(values) as Promise<ActionPayload>);
+    await syncMutation.mutateAsync(values);
   });
 
   async function handleSaveNotes() {
     if (!selectedOperatorId) {
       return;
     }
-    await executeAction(
-      "Operator notes update result",
-      async () =>
-        (backend.update_operator_notes({
-          operator_id: selectedOperatorId,
-          notes_markdown: notesMarkdown,
-          dry_run: false,
-        }) as Promise<ActionPayload>),
-    );
+    await notesMutation.mutateAsync({
+      operator_id: selectedOperatorId,
+      notes_markdown: notesMarkdown,
+      dry_run: false,
+    });
   }
+
+  const actionLoading =
+    onboardMutation.isPending || offboardMutation.isPending || syncMutation.isPending || notesMutation.isPending;
+  const rosterFeedback = getQueryFeedback(
+    rosterQuery.isPending,
+    rosterQuery.isFetching,
+    rosterQuery.isError,
+    rosterQuery.isStale,
+    rosterQuery.dataUpdatedAt,
+    rosterQuery.failureCount,
+    "Background refresh every 60 seconds with retry-on-failure.",
+  );
+  const inventoryFeedback =
+    selectedOperatorId.length > 0
+      ? getQueryFeedback(
+          inventoryQuery.isPending,
+          inventoryQuery.isFetching,
+          inventoryQuery.isError,
+          inventoryQuery.isStale,
+          inventoryQuery.dataUpdatedAt,
+          inventoryQuery.failureCount,
+          "Background refresh every 45 seconds while an operator is selected.",
+        )
+      : {
+          label: "Idle",
+          toneClass: "pillNeutral",
+          detail: "Select an operator to start live inventory polling.",
+        };
+  const actionResultPreview =
+    actionResult.kind === "error"
+      ? prettyJson({ status: "error", message: actionResult.error })
+      : actionResult.payload
+        ? prettyJson(actionResult.payload)
+        : "Run an action to inspect the structured result here.";
   const onboardErrorCount = Object.keys(onboardForm.formState.errors).length;
   const offboardErrorCount = Object.keys(offboardForm.formState.errors).length;
   const syncErrorCount = Object.keys(syncForm.formState.errors).length;
@@ -783,15 +1015,15 @@ function App() {
         <div className="heroStats">
           <div className="heroCard stat">
             <span className="statLabel">Total Operators</span>
-            <span className="statValue">{roster?.operator_count ?? "…"}</span>
+            <span className="statValue">{rosterQuery.data?.operator_count ?? "…"}</span>
           </div>
           <div className="heroCard stat">
             <span className="statLabel">Active</span>
-            <span className="statValue">{roster?.active_count ?? "…"}</span>
+            <span className="statValue">{rosterQuery.data?.active_count ?? "…"}</span>
           </div>
           <div className="heroCard stat">
             <span className="statLabel">Inactive</span>
-            <span className="statValue">{roster?.inactive_count ?? "…"}</span>
+            <span className="statValue">{rosterQuery.data?.inactive_count ?? "…"}</span>
           </div>
         </div>
       </section>
@@ -858,14 +1090,23 @@ function App() {
                 <p>Current human operators from the repo-authoritative `config/operators.yaml` roster.</p>
               </div>
               <div className="toolbar">
-                <button className="buttonGhost" onClick={() => void refreshRoster()} disabled={rosterLoading || actionLoading}>
-                  {rosterLoading ? "Refreshing…" : "Refresh"}
+                <button
+                  className="buttonGhost"
+                  onClick={() => void rosterQuery.refetch()}
+                  disabled={rosterQuery.isFetching || actionLoading}
+                >
+                  {rosterQuery.isFetching ? "Refreshing…" : "Refresh"}
                 </button>
               </div>
             </div>
 
-            {rosterError ? <div className="banner bannerError">{rosterError}</div> : null}
-            {!rosterError ? (
+            <div className="statusRow">
+              <span className={`pill ${rosterFeedback.toneClass}`}>{rosterFeedback.label}</span>
+              <span className="statusMeta">{rosterFeedback.detail}</span>
+            </div>
+
+            {rosterQuery.error ? <div className="banner bannerError">{getErrorMessage(rosterQuery.error)}</div> : null}
+            {!rosterQuery.error ? (
               <div className="banner bannerInfo">
                 Bootstrap passwords are returned once on successful onboarding. Store them securely and expect the
                 new operator to rotate them and enroll TOTP at first sign-in.
@@ -932,7 +1173,9 @@ function App() {
                   headerHeight={50}
                   getRowId={({ data }) => data.id}
                   overlayNoRowsTemplate={
-                    rosterLoading ? '<span class="ag-overlay-loading-center">Loading operator roster…</span>' : "No operators found in the roster."
+                    rosterQuery.isPending
+                      ? '<span class="ag-overlay-loading-center">Loading operator roster…</span>'
+                      : "No operators found in the roster."
                   }
                   onGridReady={handleGridReady}
                   onModelUpdated={handleGridModelUpdated}
@@ -953,11 +1196,21 @@ function App() {
                 </p>
               </div>
               <div className="toolbar">
-                <button className="buttonGhost" type="button" onClick={() => setNotesMarkdown(selectedOperatorNotes)} disabled={!notesDirty || actionLoading}>
+                <button
+                  className="buttonGhost"
+                  type="button"
+                  onClick={() => setNotesMarkdown(selectedOperatorNotes)}
+                  disabled={!notesDirty || actionLoading}
+                >
                   Reset
                 </button>
-                <button className="button" type="button" onClick={() => void handleSaveNotes()} disabled={!selectedOperatorId || !notesDirty || actionLoading}>
-                  {actionLoading ? "Saving…" : "Save Notes"}
+                <button
+                  className="button"
+                  type="button"
+                  onClick={() => void handleSaveNotes()}
+                  disabled={!selectedOperatorId || !notesDirty || actionLoading}
+                >
+                  {notesMutation.isPending ? "Saving…" : "Save Notes"}
                 </button>
               </div>
             </div>
@@ -1353,10 +1606,10 @@ function App() {
             <div className="panelHeader">
               <div>
                 <h3>Latest Result</h3>
-                <p>{actionTitle}</p>
+                <p>{actionResult.title}</p>
               </div>
             </div>
-            <pre>{actionPayload ? prettyJson(actionPayload) : "Run an action to inspect the structured result here."}</pre>
+            <pre>{actionResultPreview}</pre>
           </section>
 
           <section className="resultPanel" data-tour-target="inventory-panel">
@@ -1368,12 +1621,16 @@ function App() {
               <div className="toolbar">
                 <button
                   className="buttonGhost"
-                  onClick={() => selectedOperatorId && void loadInventory(selectedOperatorId)}
-                  disabled={!selectedOperatorId || inventoryLoading}
+                  onClick={() => selectedOperatorId && void inventoryQuery.refetch()}
+                  disabled={!selectedOperatorId || inventoryQuery.isFetching}
                 >
-                  {inventoryLoading ? "Loading…" : "Refresh Inventory"}
+                  {inventoryQuery.isFetching ? "Loading…" : "Refresh Inventory"}
                 </button>
               </div>
+            </div>
+            <div className="statusRow">
+              <span className={`pill ${inventoryFeedback.toneClass}`}>{inventoryFeedback.label}</span>
+              <span className="statusMeta">{inventoryFeedback.detail}</span>
             </div>
             {selectedOperator ? (
               <div className="inventoryMeta">
@@ -1383,7 +1640,13 @@ function App() {
                 <span className="pill">{selectedOperator.keycloak_username || "no username"}</span>
               </div>
             ) : null}
-            <pre>{inventoryPayload ? prettyJson(inventoryPayload) : "Select an operator to inspect their access inventory."}</pre>
+            <pre>
+              {inventoryQuery.data
+                ? prettyJson(inventoryQuery.data)
+                : inventoryQuery.error
+                  ? prettyJson({ status: "error", message: getErrorMessage(inventoryQuery.error) })
+                  : "Select an operator to inspect their access inventory."}
+            </pre>
           </section>
         </aside>
       </div>
