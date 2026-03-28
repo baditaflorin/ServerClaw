@@ -280,6 +280,10 @@ workstreams:
           contract: generated-portals-v1
     ready_to_merge: true
     live_applied: true
+    canonical_truth:
+      changelog_entry: integrated ADR 0199 by publishing the repo-managed Outline living knowledge wiki at `wiki.lv3.org`, wiring the durable `outline.automation` Keycloak bootstrap path, and verifying the governed living-knowledge collections end to end
+      release_bump: patch
+      included_in_repo_version: 0.177.19
 
   - id: adr-0180-standby-capacity
     adr: "0180"

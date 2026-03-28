@@ -116,6 +116,21 @@ def test_role_verifies_internal_mail_network_connectivity() -> None:
     assert "{{ keycloak_mail_platform_submission_port }}" in connect_task["ansible.builtin.shell"]
 
 
+def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile() -> None:
+    tasks = load_tasks()
+    token_probe_task = next(
+        task for task in tasks if task.get("name") == "Wait for the Keycloak bootstrap admin token endpoint to succeed"
+    )
+    admin_probe_task = next(
+        task for task in tasks if task.get("name") == "Wait for an authenticated Keycloak admin realm query to answer"
+    )
+    assert token_probe_task["ansible.builtin.uri"]["return_content"] is True
+    assert admin_probe_task["ansible.builtin.uri"]["url"] == "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
+    assert admin_probe_task["ansible.builtin.uri"]["headers"]["Authorization"] == (
+        "Bearer {{ keycloak_bootstrap_admin_token_probe.json.access_token }}"
+    )
+
+
 def test_compose_template_joins_the_mail_platform_network() -> None:
     template = COMPOSE_TEMPLATE_PATH.read_text()
     assert "      - mail-platform" in template
@@ -164,9 +179,20 @@ def test_role_manages_the_outline_automation_identity() -> None:
     tasks = load_tasks()
     password_generation_task = next(task for task in tasks if task.get("name") == "Generate the Outline automation password")
     password_mirror_task = next(task for task in tasks if task.get("name") == "Mirror the Outline automation password to the control machine")
-    automation_user_task = next(task for task in tasks if task.get("name") == "Ensure the Outline automation user exists in Keycloak")
+    admin_token_task = next(
+        task for task in tasks if task.get("name") == "Request a Keycloak admin token for repo-managed user reconciliation"
+    )
+    operator_update_task = next(task for task in tasks if task.get("name") == "Update the named operator profile in Keycloak")
+    operator_password_task = next(task for task in tasks if task.get("name") == "Reset the named operator password in Keycloak")
+    automation_user_task = next(task for task in tasks if task.get("name") == "Update the Outline automation user profile in Keycloak")
+    automation_password_task = next(
+        task for task in tasks if task.get("name") == "Reset the Outline automation user password in Keycloak"
+    )
     assert password_generation_task["ansible.builtin.shell"].count("openssl rand -base64 24") == 1
     assert password_mirror_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_outline_automation_password_local_file }}"
-    assert automation_user_task["community.general.keycloak_user"]["username"] == "{{ keycloak_outline_automation_username }}"
-    assert automation_user_task["community.general.keycloak_user"]["required_actions"] == []
-    assert automation_user_task["community.general.keycloak_user"]["credentials"][0]["temporary"] is False
+    assert admin_token_task["ansible.builtin.uri"]["body"]["client_id"] == "admin-cli"
+    assert operator_update_task["ansible.builtin.uri"]["body"]["requiredActions"] == ["CONFIGURE_TOTP"]
+    assert operator_password_task["ansible.builtin.uri"]["body"]["temporary"] is False
+    assert automation_user_task["ansible.builtin.uri"]["body"]["username"] == "{{ keycloak_outline_automation_username }}"
+    assert automation_user_task["ansible.builtin.uri"]["body"]["requiredActions"] == []
+    assert automation_password_task["ansible.builtin.uri"]["body"]["temporary"] is False

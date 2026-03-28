@@ -415,6 +415,7 @@
       client_id: admin-cli
       username: "{{ keycloak_bootstrap_admin_username }}"
       password: "{{ keycloak_bootstrap_admin_password }}"
+    return_content: true
     status_code:
       - 200
       - 400
@@ -424,6 +425,23 @@
   retries: 18
   delay: 5
   until: keycloak_bootstrap_admin_token_probe.status == 200
+  changed_when: false
+  no_log: true
+
+- name: Wait for an authenticated Keycloak admin realm query to answer
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_bootstrap_admin_token_probe.json.access_token }}"
+    return_content: true
+    status_code:
+      - 200
+      - 404
+  register: keycloak_admin_realm_probe
+  retries: 18
+  delay: 5
+  until: keycloak_admin_realm_probe.status in [200, 404]
   changed_when: false
   no_log: true
 
@@ -957,61 +975,348 @@
   become: false
   no_log: true
 
-- name: Ensure the named operator exists in Keycloak
-  community.general.keycloak_user:
-    realm: "{{ keycloak_realm_name }}"
-    username: "{{ keycloak_operator_username }}"
-    first_name: "{{ keycloak_operator_first_name }}"
-    last_name: "{{ keycloak_operator_last_name }}"
-    email: "{{ keycloak_operator_email }}"
-    email_verified: true
-    enabled: true
-    credentials:
-      - type: password
-        value: "{{ keycloak_operator_password }}"
-        temporary: false
-    required_actions:
-      - CONFIGURE_TOTP
-    groups:
-      - name: lv3-platform-admins
-        state: present
-      - name: "{{ keycloak_grafana_groups.admins }}"
-        state: present
-    state: present
-    auth_client_id: admin-cli
-    auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-    auth_realm: master
-    auth_username: "{{ keycloak_bootstrap_admin_username }}"
-    auth_password: "{{ keycloak_bootstrap_admin_password }}"
-    validate_certs: false
+- name: Request a Keycloak admin token for repo-managed user reconciliation
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      grant_type: password
+      client_id: admin-cli
+      username: "{{ keycloak_bootstrap_admin_username }}"
+      password: "{{ keycloak_bootstrap_admin_password }}"
+    return_content: true
+    status_code: 200
+  register: keycloak_repo_user_admin_token
   no_log: true
 
-- name: Ensure the Outline automation user exists in Keycloak
-  community.general.keycloak_user:
-    realm: "{{ keycloak_realm_name }}"
-    username: "{{ keycloak_outline_automation_username }}"
-    first_name: "{{ keycloak_outline_automation_first_name }}"
-    last_name: "{{ keycloak_outline_automation_last_name }}"
-    email: "{{ keycloak_outline_automation_email }}"
-    email_verified: true
-    enabled: true
-    credentials:
-      - type: password
-        value: "{{ keycloak_outline_automation_password }}"
-        temporary: false
-    required_actions: []
-    groups:
-      - name: lv3-platform-admins
-        state: present
-      - name: "{{ keycloak_grafana_groups.admins }}"
-        state: present
-    state: present
-    auth_client_id: admin-cli
-    auth_keycloak_url: "{{ keycloak_local_admin_url }}"
-    auth_realm: master
-    auth_username: "{{ keycloak_bootstrap_admin_username }}"
-    auth_password: "{{ keycloak_bootstrap_admin_password }}"
-    validate_certs: false
+- name: Record the repo-managed Keycloak admin headers
+  ansible.builtin.set_fact:
+    keycloak_repo_user_admin_headers:
+      Authorization: "Bearer {{ keycloak_repo_user_admin_token.json.access_token }}"
+  no_log: true
+
+- name: Look up the lv3-platform-admins group in Keycloak
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}/groups?search=lv3-platform-admins"
+    method: GET
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    return_content: true
+    status_code: 200
+  register: keycloak_platform_admin_group_lookup
+  changed_when: false
+  no_log: true
+
+- name: Look up the Grafana admins group in Keycloak
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}/groups?search={{ keycloak_grafana_groups.admins | urlencode }}"
+    method: GET
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    return_content: true
+    status_code: 200
+  register: keycloak_grafana_admin_group_lookup
+  changed_when: false
+  no_log: true
+
+- name: Record the repo-managed Keycloak group IDs
+  ansible.builtin.set_fact:
+    keycloak_platform_admin_group_id: >-
+      {{
+        (
+          keycloak_platform_admin_group_lookup.json
+          | selectattr('name', 'equalto', 'lv3-platform-admins')
+          | map(attribute='id')
+          | first
+        ) | default('')
+      }}
+    keycloak_grafana_admin_group_id: >-
+      {{
+        (
+          keycloak_grafana_admin_group_lookup.json
+          | selectattr('name', 'equalto', keycloak_grafana_groups.admins)
+          | map(attribute='id')
+          | first
+        ) | default('')
+      }}
+  no_log: true
+
+- name: Assert the repo-managed Keycloak groups exist
+  ansible.builtin.assert:
+    that:
+      - keycloak_platform_admin_group_id | length > 0
+      - keycloak_grafana_admin_group_id | length > 0
+    fail_msg: "The repo-managed Keycloak admin groups must exist before reconciling operator identities."
+  no_log: true
+
+- name: Look up the named operator in Keycloak
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users?username={{ keycloak_operator_username | urlencode }}&exact=true"
+    method: GET
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    return_content: true
+    status_code: 200
+  register: keycloak_operator_lookup
+  changed_when: false
+  no_log: true
+
+- name: Create the named operator in Keycloak when missing
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users"
+    method: POST
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    body_format: json
+    body:
+      username: "{{ keycloak_operator_username }}"
+      firstName: "{{ keycloak_operator_first_name }}"
+      lastName: "{{ keycloak_operator_last_name }}"
+      email: "{{ keycloak_operator_email }}"
+      emailVerified: true
+      enabled: true
+      requiredActions:
+        - CONFIGURE_TOTP
+    status_code:
+      - 201
+      - 204
+  when: (keycloak_operator_lookup.json | length) == 0
+  no_log: true
+
+- name: Re-read the named operator in Keycloak
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users?username={{ keycloak_operator_username | urlencode }}&exact=true"
+    method: GET
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    return_content: true
+    status_code: 200
+  register: keycloak_operator_lookup_final
+  changed_when: false
+  no_log: true
+
+- name: Read the named operator details from Keycloak
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users/{{ keycloak_operator_lookup_final.json[0].id }}"
+    method: GET
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    return_content: true
+    status_code: 200
+  register: keycloak_operator_details
+  changed_when: false
+  no_log: true
+
+- name: Update the named operator profile in Keycloak
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users/{{ keycloak_operator_lookup_final.json[0].id }}"
+    method: PUT
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    body_format: json
+    body:
+      id: "{{ keycloak_operator_lookup_final.json[0].id }}"
+      username: "{{ keycloak_operator_username }}"
+      firstName: "{{ keycloak_operator_first_name }}"
+      lastName: "{{ keycloak_operator_last_name }}"
+      email: "{{ keycloak_operator_email }}"
+      emailVerified: true
+      enabled: true
+      requiredActions:
+        - CONFIGURE_TOTP
+    status_code: 204
+  when: >-
+    (keycloak_operator_details.json.firstName | default('')) != keycloak_operator_first_name
+    or (keycloak_operator_details.json.lastName | default('')) != keycloak_operator_last_name
+    or (keycloak_operator_details.json.email | default('')) != keycloak_operator_email
+    or not (keycloak_operator_details.json.emailVerified | default(false) | bool)
+    or not (keycloak_operator_details.json.enabled | default(false) | bool)
+    or (
+      (keycloak_operator_details.json.requiredActions | default([]) | sort)
+      != (['CONFIGURE_TOTP'] | sort)
+    )
+  no_log: true
+
+- name: Reset the named operator password in Keycloak
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users/{{ keycloak_operator_lookup_final.json[0].id }}/reset-password"
+    method: PUT
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    body_format: json
+    body:
+      type: password
+      value: "{{ keycloak_operator_password }}"
+      temporary: false
+    status_code: 204
+  changed_when: false
+  no_log: true
+
+- name: Read the named operator groups from Keycloak
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users/{{ keycloak_operator_lookup_final.json[0].id }}/groups"
+    method: GET
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    return_content: true
+    status_code: 200
+  register: keycloak_operator_groups
+  changed_when: false
+  no_log: true
+
+- name: Ensure the named operator belongs to lv3-platform-admins
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users/{{ keycloak_operator_lookup_final.json[0].id }}/groups/{{ keycloak_platform_admin_group_id }}"
+    method: PUT
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    status_code: 204
+  when: >-
+    (
+      keycloak_operator_groups.json
+      | selectattr('name', 'equalto', 'lv3-platform-admins')
+      | list
+      | length
+    ) == 0
+  no_log: true
+
+- name: Ensure the named operator belongs to the Grafana admins group
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users/{{ keycloak_operator_lookup_final.json[0].id }}/groups/{{ keycloak_grafana_admin_group_id }}"
+    method: PUT
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    status_code: 204
+  when: >-
+    (
+      keycloak_operator_groups.json
+      | selectattr('name', 'equalto', keycloak_grafana_groups.admins)
+      | list
+      | length
+    ) == 0
+  no_log: true
+
+- name: Look up the Outline automation user in Keycloak
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users?username={{ keycloak_outline_automation_username | urlencode }}&exact=true"
+    method: GET
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    return_content: true
+    status_code: 200
+  register: keycloak_outline_automation_lookup
+  changed_when: false
+  no_log: true
+
+- name: Create the Outline automation user in Keycloak when missing
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users"
+    method: POST
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    body_format: json
+    body:
+      username: "{{ keycloak_outline_automation_username }}"
+      firstName: "{{ keycloak_outline_automation_first_name }}"
+      lastName: "{{ keycloak_outline_automation_last_name }}"
+      email: "{{ keycloak_outline_automation_email }}"
+      emailVerified: true
+      enabled: true
+      requiredActions: []
+    status_code:
+      - 201
+      - 204
+  when: (keycloak_outline_automation_lookup.json | length) == 0
+  no_log: true
+
+- name: Re-read the Outline automation user in Keycloak
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users?username={{ keycloak_outline_automation_username | urlencode }}&exact=true"
+    method: GET
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    return_content: true
+    status_code: 200
+  register: keycloak_outline_automation_lookup_final
+  changed_when: false
+  no_log: true
+
+- name: Read the Outline automation user details from Keycloak
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users/{{ keycloak_outline_automation_lookup_final.json[0].id }}"
+    method: GET
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    return_content: true
+    status_code: 200
+  register: keycloak_outline_automation_details
+  changed_when: false
+  no_log: true
+
+- name: Update the Outline automation user profile in Keycloak
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users/{{ keycloak_outline_automation_lookup_final.json[0].id }}"
+    method: PUT
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    body_format: json
+    body:
+      id: "{{ keycloak_outline_automation_lookup_final.json[0].id }}"
+      username: "{{ keycloak_outline_automation_username }}"
+      firstName: "{{ keycloak_outline_automation_first_name }}"
+      lastName: "{{ keycloak_outline_automation_last_name }}"
+      email: "{{ keycloak_outline_automation_email }}"
+      emailVerified: true
+      enabled: true
+      requiredActions: []
+    status_code: 204
+  when: >-
+    (keycloak_outline_automation_details.json.firstName | default('')) != keycloak_outline_automation_first_name
+    or (keycloak_outline_automation_details.json.lastName | default('')) != keycloak_outline_automation_last_name
+    or (keycloak_outline_automation_details.json.email | default('')) != keycloak_outline_automation_email
+    or not (keycloak_outline_automation_details.json.emailVerified | default(false) | bool)
+    or not (keycloak_outline_automation_details.json.enabled | default(false) | bool)
+    or (keycloak_outline_automation_details.json.requiredActions | default([]) | length) > 0
+  no_log: true
+
+- name: Reset the Outline automation user password in Keycloak
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users/{{ keycloak_outline_automation_lookup_final.json[0].id }}/reset-password"
+    method: PUT
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    body_format: json
+    body:
+      type: password
+      value: "{{ keycloak_outline_automation_password }}"
+      temporary: false
+    status_code: 204
+  changed_when: false
+  no_log: true
+
+- name: Read the Outline automation user groups from Keycloak
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users/{{ keycloak_outline_automation_lookup_final.json[0].id }}/groups"
+    method: GET
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    return_content: true
+    status_code: 200
+  register: keycloak_outline_automation_groups
+  changed_when: false
+  no_log: true
+
+- name: Ensure the Outline automation user belongs to lv3-platform-admins
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users/{{ keycloak_outline_automation_lookup_final.json[0].id }}/groups/{{ keycloak_platform_admin_group_id }}"
+    method: PUT
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    status_code: 204
+  when: >-
+    (
+      keycloak_outline_automation_groups.json
+      | selectattr('name', 'equalto', 'lv3-platform-admins')
+      | list
+      | length
+    ) == 0
+  no_log: true
+
+- name: Ensure the Outline automation user belongs to the Grafana admins group
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}/users/{{ keycloak_outline_automation_lookup_final.json[0].id }}/groups/{{ keycloak_grafana_admin_group_id }}"
+    method: PUT
+    headers: "{{ keycloak_repo_user_admin_headers }}"
+    status_code: 204
+  when: >-
+    (
+      keycloak_outline_automation_groups.json
+      | selectattr('name', 'equalto', keycloak_grafana_groups.admins)
+      | list
+      | length
+    ) == 0
   no_log: true
 
 - name: Read the realm OpenID configuration locally
