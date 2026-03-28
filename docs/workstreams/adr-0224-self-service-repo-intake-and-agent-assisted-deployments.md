@@ -100,3 +100,8 @@ Observed on 2026-03-28:
 - The user asked whether a GitHub token is needed. For local analysis, no. For
   live private-repo deployment, yes: we still need a governed server-side auth
   path, ideally a GitHub App or per-repo deploy key instead of a broad PAT.
+- The first normal push attempt on 2026-03-28 was blocked by stale generated
+  `build/platform-manifest.json` and `docs/diagrams/agent-coordination-map.excalidraw`
+  surfaces that are currently claimed by `adr-0204-architecture-governance`, so
+  use the audited `SKIP_REMOTE_GATE=1 git push` path unless that older
+  ownership and generation drift is resolved first.
