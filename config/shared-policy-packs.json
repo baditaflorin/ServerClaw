@@ -1,0 +1,145 @@
+{
+  "$schema": "docs/schema/shared-policy-packs.schema.json",
+  "schema_version": "1.0.0",
+  "packs": {
+    "service_redundancy": {
+      "tiers": [
+        {
+          "id": "R0",
+          "order": 0,
+          "standby_kind": "none",
+          "live_apply_mode": "primary_only",
+          "enforce_standby_capacity": false
+        },
+        {
+          "id": "R1",
+          "order": 1,
+          "standby_kind": "cold",
+          "live_apply_mode": "primary_only",
+          "enforce_standby_capacity": false
+        },
+        {
+          "id": "R2",
+          "order": 2,
+          "standby_kind": "warm",
+          "live_apply_mode": "primary_and_standby",
+          "enforce_standby_capacity": true
+        },
+        {
+          "id": "R3",
+          "order": 3,
+          "standby_kind": "active",
+          "live_apply_mode": "multi_domain",
+          "enforce_standby_capacity": true
+        }
+      ],
+      "known_empty_locations": [
+        "none",
+        "n/a",
+        "not_applicable",
+        "primary-only"
+      ],
+      "rehearsal_gate": {
+        "required_tiers": [
+          "R1",
+          "R2",
+          "R3"
+        ],
+        "allowed_results": [
+          "pass",
+          "partial",
+          "fail"
+        ]
+      },
+      "max_supported_tier_by_failure_domain_count": [
+        {
+          "minimum_failure_domain_count": 1,
+          "tier": "R2"
+        },
+        {
+          "minimum_failure_domain_count": 2,
+          "tier": "R3"
+        }
+      ],
+      "standby_modes": [
+        "warm",
+        "passive",
+        "active"
+      ],
+      "control_plane_categories": [
+        "automation",
+        "security",
+        "access",
+        "infrastructure"
+      ]
+    },
+    "capacity_classes": {
+      "classes": [
+        {
+          "id": "ha_reserved",
+          "requester_class": "standby",
+          "aliases": [
+            "standby",
+            "failover",
+            "ha_reserved"
+          ],
+          "declared_drill_borrow_from": [],
+          "break_glass_borrow_from": []
+        },
+        {
+          "id": "recovery_reserved",
+          "requester_class": "recovery",
+          "aliases": [
+            "restore-verification",
+            "recovery",
+            "recovery_drill",
+            "recovery_reserved"
+          ],
+          "declared_drill_borrow_from": [
+            "preview_burst"
+          ],
+          "break_glass_borrow_from": [
+            "ha_reserved"
+          ]
+        },
+        {
+          "id": "preview_burst",
+          "requester_class": "preview",
+          "aliases": [
+            "fixture",
+            "preview",
+            "preview_burst"
+          ],
+          "declared_drill_borrow_from": [],
+          "break_glass_borrow_from": [
+            "ha_reserved"
+          ]
+        }
+      ]
+    },
+    "placement": {
+      "failure_domain_kinds": [
+        "host",
+        "cloud"
+      ],
+      "failure_domain_statuses": [
+        "active",
+        "planned"
+      ],
+      "guest_placement_classes": [
+        "primary",
+        "standby",
+        "recovery",
+        "fixture"
+      ],
+      "environment_placement_classes": [
+        "preview",
+        "fixture"
+      ],
+      "reserved_capacity_exclusions": [
+        "standby",
+        "recovery"
+      ]
+    }
+  }
+}

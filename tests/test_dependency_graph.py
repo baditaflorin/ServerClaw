@@ -49,6 +49,16 @@ def test_render_dependency_markdown_contains_mermaid_and_tiers() -> None:
     assert "| `4` | Ops Portal |" in markdown
 
 
+def test_render_dependency_page_wraps_markdown_for_generated_docs() -> None:
+    graph = dependency_graph.load_dependency_graph(validate_schema=False)
+    page = dependency_graph.render_dependency_page(graph)
+
+    assert page.startswith("---\nsensitivity: INTERNAL\nportal_display: full\n")
+    assert '!!! note "Sensitivity: INTERNAL"' in page
+    assert "# Service Dependency Graph" in page
+    assert "```mermaid" in page
+
+
 def test_graph_to_dict_is_json_serializable() -> None:
     graph = dependency_graph.load_dependency_graph(validate_schema=False)
     payload = dependency_graph.graph_to_dict(graph)

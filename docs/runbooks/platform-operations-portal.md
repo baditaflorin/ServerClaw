@@ -105,7 +105,7 @@ Operator flow:
 3. Pick one runbook that explicitly opts into the `ops_portal` delivery surface.
 4. Submit JSON parameters if the runbook requires them.
 
-The safest verification path is the repo-managed [`validation-gate-status.yaml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/validation-gate-status.yaml) runbook, which is read-only and returns the current validation-gate summary through the shared runbook service.
+The safest verification path is the repo-managed `docs/runbooks/validation-gate-status.yaml` runbook, which is read-only and returns the current validation-gate summary through the shared runbook service.
 
 Portal operators do not need to know how the workflow is wired underneath:
 

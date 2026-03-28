@@ -21,7 +21,7 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 from api_publication import load_api_publication_catalog
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
-from dependency_graph import load_dependency_graph, render_dependency_markdown
+from dependency_graph import load_dependency_graph, render_dependency_page
 
 
 SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
@@ -794,11 +794,7 @@ def render_dependency_graph_page(output_dir: Path) -> None:
     write_generated(
         output_dir,
         Path("architecture", "dependency-graph.md"),
-        wrap_generated_page(
-            render_dependency_markdown(graph),
-            sensitivity="INTERNAL",
-            tags=["architecture", "dependency-graph"],
-        ),
+        render_dependency_page(graph),
     )
 
 
