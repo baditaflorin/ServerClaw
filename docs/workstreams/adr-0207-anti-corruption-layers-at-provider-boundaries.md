@@ -94,6 +94,7 @@
 
 - the Windmill worker replay must pin `windmill_worker_checkout_repo_root_local_dir` to the active worktree during multi-worktree integration, otherwise `/srv/proxmox_florin_server` can mirror the shared top-level checkout instead of the branch being verified
 - the authoritative full-manifest proof comes from the merged `0.177.38` build-server `make remote-validate` run; after the `0.177.41` recut, the same target hit build-server `rsync` mtime errors under `build/docs-portal/*`, fell back locally, and still exited `0` because `scripts/remote_exec.sh` now preserves a Python 3.10+ interpreter for the login-shell fallback while `scripts/validate_repo.sh` resolves its direct Python validators through that contract
+- the first push attempt after the `0.177.41` recut exposed two additional local-fallback gate issues on the integration tree: one duplicate `coolify_runtime` YAML key in `config/ansible-role-idempotency.yml` and loose payload typing in `config/windmill/scripts/post-merge-gate.py`; both were fixed before the final local `scripts/run_gate.py --workspace . --status-file .local/validation-gate/recheck.json --source local-fallback --print-json` pass
 - the worker-local fallback remains the live proof that ADR 0207 checks pass even while the registry-backed `check-runner` images remain unavailable on `docker-runtime-lv3`
 
 ## Notes For The Next Assistant

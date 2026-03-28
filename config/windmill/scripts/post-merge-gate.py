@@ -5,6 +5,7 @@ import subprocess
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, TypedDict
 
 
 LOCAL_FALLBACK_STAGES = [
@@ -30,11 +31,16 @@ RUNNER_IMAGE_ERROR_MARKERS = (
 )
 
 
+class CommandResult(TypedDict):
+    command: str
+    returncode: int
+
+
 def _run(command: list[str], *, cwd: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(command, cwd=cwd, text=True, capture_output=True, check=False)
 
 
-def _load_gate_status(status_path: Path) -> dict | None:
+def _load_gate_status(status_path: Path) -> dict[str, Any] | None:
     if status_path.exists():
         return json.loads(status_path.read_text(encoding="utf-8"))
     return None
@@ -52,8 +58,8 @@ def _fallback_status_payload(
     status: str,
     returncode: int,
     duration_seconds: float,
-    commands: list[dict[str, object]],
-) -> dict:
+    commands: list[CommandResult],
+) -> dict[str, Any]:
     return {
         "status": status,
         "source": "windmill-post-merge-local-fallback",
@@ -76,13 +82,13 @@ def _fallback_status_payload(
     }
 
 
-def _run_local_fallback(repo_root: Path, manifest_path: Path, status_path: Path) -> dict:
+def _run_local_fallback(repo_root: Path, manifest_path: Path, status_path: Path) -> dict[str, Any]:
     commands = [
         ["./scripts/validate_repo.sh", *LOCAL_FALLBACK_STAGES],
         LOCAL_PROVIDER_BOUNDARY_COMMAND,
     ]
     started = time.monotonic()
-    command_results: list[dict[str, object]] = []
+    command_results: list[CommandResult] = []
     combined_stdout: list[str] = []
     combined_stderr: list[str] = []
     returncode = 0
@@ -115,7 +121,7 @@ def _run_local_fallback(repo_root: Path, manifest_path: Path, status_path: Path)
     )
     status_path.parent.mkdir(parents=True, exist_ok=True)
     status_path.write_text(json.dumps(fallback_status, indent=2) + "\n", encoding="utf-8")
-    payload = {
+    payload: dict[str, Any] = {
         "status": "ok" if returncode == 0 else "error",
         "command": " && ".join(entry["command"] for entry in command_results),
         "commands": command_results,
@@ -128,7 +134,7 @@ def _run_local_fallback(repo_root: Path, manifest_path: Path, status_path: Path)
     return payload
 
 
-def main(repo_path: str = "/srv/proxmox_florin_server"):
+def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
     repo_root = Path(repo_path)
     gate_script = repo_root / "scripts" / "run_gate.py"
     manifest_path = repo_root / "config" / "validation-gate.json"
@@ -155,7 +161,7 @@ def main(repo_path: str = "/srv/proxmox_florin_server"):
         "--print-json",
     ]
     result = _run(command, cwd=repo_root)
-    payload = {
+    payload: dict[str, Any] = {
         "status": "ok" if result.returncode == 0 else "error",
         "command": " ".join(shlex.quote(part) for part in command),
         "returncode": result.returncode,
