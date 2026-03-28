@@ -511,10 +511,22 @@ def zone_name_from_record(name: str, zone_name: str) -> str | None:
 
 
 def fetch_tls_metadata(hostname: str, port: int = 443) -> dict[str, Any]:
+    verification_error: str | None = None
+    cert: dict[str, Any]
+
     context = ssl.create_default_context()
-    with socket.create_connection((hostname, port), timeout=10) as sock:
-        with context.wrap_socket(sock, server_hostname=hostname) as tls_sock:
-            cert = tls_sock.getpeercert()
+    try:
+        with socket.create_connection((hostname, port), timeout=10) as sock:
+            with context.wrap_socket(sock, server_hostname=hostname) as tls_sock:
+                cert = tls_sock.getpeercert()
+    except ssl.SSLCertVerificationError as exc:
+        verification_error = str(exc)
+        insecure_context = ssl.create_default_context()
+        insecure_context.check_hostname = False
+        insecure_context.verify_mode = ssl.CERT_NONE
+        with socket.create_connection((hostname, port), timeout=10) as sock:
+            with insecure_context.wrap_socket(sock, server_hostname=hostname) as tls_sock:
+                cert = tls_sock.getpeercert()
 
     not_after = cert.get("notAfter")
     if not not_after:
@@ -525,6 +537,7 @@ def fetch_tls_metadata(hostname: str, port: int = 443) -> dict[str, Any]:
         "expires_at": iso_timestamp(expires_at),
         "days_remaining": int((expires_at - utc_now()).total_seconds() // 86400),
         "issuer": issuer,
+        "verification_error": verification_error,
     }
 
 
@@ -540,7 +553,30 @@ def collect_tls_findings(registry: dict[str, Any]) -> list[dict[str, Any]]:
         if entry["adapter"]["dns"]["target_port"] not in (None, 443):
             continue
 
-        metadata = fetch_tls_metadata(entry["fqdn"])
+        try:
+            metadata = fetch_tls_metadata(entry["fqdn"])
+        except (OSError, ssl.SSLError, ValueError) as exc:
+            findings.append(
+                {
+                    "check": "tls_certificate",
+                    "severity": "CRITICAL",
+                    "subdomain": entry["fqdn"],
+                    "finding": "tls_probe_failed",
+                    "detail": f"TLS probe failed: {exc}",
+                }
+            )
+            continue
+
+        if metadata.get("verification_error"):
+            findings.append(
+                {
+                    "check": "tls_certificate",
+                    "severity": "CRITICAL",
+                    "subdomain": entry["fqdn"],
+                    "finding": "certificate_hostname_mismatch",
+                    "detail": f"TLS identity verification failed: {metadata['verification_error']}",
+                }
+            )
         if metadata["days_remaining"] < 14:
             findings.append(
                 {

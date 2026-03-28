@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import shutil
+import ssl
 import sys
 import tempfile
 import unittest
@@ -110,6 +111,67 @@ class SubdomainExposureAuditTests(unittest.TestCase):
 
         self.assertEqual(findings[0]["severity"], "CRITICAL")
         self.assertIn("Keycloak", findings[0]["detail"])
+
+    def test_tls_findings_record_hostname_mismatch_without_crashing(self) -> None:
+        registry = {
+            "publications": [
+                {
+                    "fqdn": "mail.lv3.org",
+                    "status": "active",
+                    "environment": "production",
+                    "adapter": {
+                        "tls": {"provider": "letsencrypt"},
+                        "dns": {"target_port": 443},
+                    },
+                }
+            ]
+        }
+
+        original = audit.fetch_tls_metadata
+        audit.fetch_tls_metadata = lambda hostname: {
+            "expires_at": "2026-04-30T00:00:00Z",
+            "days_remaining": 30,
+            "issuer": "CN=Test",
+            "verification_error": "hostname mismatch",
+        }
+        try:
+            findings = audit.collect_tls_findings(registry)
+        finally:
+            audit.fetch_tls_metadata = original
+
+        self.assertEqual(findings[0]["severity"], "CRITICAL")
+        self.assertEqual(findings[0]["finding"], "certificate_hostname_mismatch")
+        self.assertIn("hostname mismatch", findings[0]["detail"])
+
+    def test_tls_findings_record_probe_failures_without_crashing(self) -> None:
+        registry = {
+            "publications": [
+                {
+                    "fqdn": "mail.lv3.org",
+                    "status": "active",
+                    "environment": "production",
+                    "adapter": {
+                        "tls": {"provider": "letsencrypt"},
+                        "dns": {"target_port": 443},
+                    },
+                }
+            ]
+        }
+
+        original = audit.fetch_tls_metadata
+
+        def fail_probe(hostname: str) -> dict[str, object]:
+            raise ssl.SSLError("certificate verify failed")
+
+        audit.fetch_tls_metadata = fail_probe
+        try:
+            findings = audit.collect_tls_findings(registry)
+        finally:
+            audit.fetch_tls_metadata = original
+
+        self.assertEqual(findings[0]["severity"], "CRITICAL")
+        self.assertEqual(findings[0]["finding"], "tls_probe_failed")
+        self.assertIn("certificate verify failed", findings[0]["detail"])
 
     def test_check_registry_current_detects_staleness(self) -> None:
         temp_dir = Path(tempfile.mkdtemp(prefix="subdomain-exposure-"))
