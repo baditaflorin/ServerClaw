@@ -16,12 +16,14 @@ def test_compute_impact_for_postgres_includes_direct_and_transitive_failures() -
     impact = dependency_graph.compute_impact("postgres", graph)
 
     assert set(impact.direct_hard) == {
+        "dify",
         "gitea",
         "keycloak",
         "langfuse",
         "mattermost",
         "n8n",
         "netbox",
+        "outline",
         "plane",
         "semaphore",
         "vaultwarden",

@@ -44,6 +44,10 @@
 - selected governed product ADRs listed in `config/replaceability-review-catalog.json`
 - `docs/adr/.index.yaml`
 - `docs/site-generated/architecture/dependency-graph.md`
+- `docs/diagrams/agent-coordination-map.excalidraw`
+- `scripts/generate_dependency_diagram.py`
+- `tests/test_dependency_graph.py`
+- `tests/test_docs_site.py`
 - `docs/workstreams/ws-0212-live-apply.md`
 
 ## Expected Live Surfaces
@@ -55,6 +59,7 @@
 
 - this workstream owns the replaceability catalog, validator, runbook, receipt, and the governed ADR backfill set
 - repo validation surfaced a pre-existing workstream-status enum mismatch, so this workstream also owns the minimal contract/test fix needed to let `in_progress` workstreams validate cleanly
+- repo validation also surfaced a generator mismatch between `scripts/generate_dependency_diagram.py` and `make docs`, so this workstream owns the minimal fix that keeps the standalone dependency-graph check aligned with the docs-site output
 - protected integration files still stay out of scope on the branch even if the live docs portal publish succeeds
 - the live publish is bounded to existing docs publication infrastructure and does not introduce a new production service
 
@@ -66,6 +71,7 @@
 - `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
 - `./scripts/validate_repo.sh architecture-fitness agent-standards workstream-surfaces`
 - `./scripts/validate_repo.sh generated-portals`
+- `uv run --with pytest --with jinja2 --with pyyaml --with jsonschema python -m pytest tests/test_docs_site.py tests/test_dependency_graph.py tests/test_interface_contracts.py tests/test_replaceability_scorecards.py tests/test_scaffold_service.py tests/test_validate_repo_cache.py -q`
 - `make docs`
 - `make deploy-docs-portal`
 
@@ -82,6 +88,7 @@
 - the recovery followed the documented shared-edge path: `make generate-ops-portal`, `make generate-changelog-portal`, `make docs`, and `make configure-edge-publication env=production`
 - independent verification confirmed `docs.lv3.org` and the ADR 0212 path return `302` to the shared `/oauth2/sign_in` flow with `X-Robots-Tag: noindex, nofollow`
 - independent verification on `nginx-lv3` confirmed the deployed ADR 0212 and ADR 0042 HTML pages exist, contain `Replaceability Scorecard` and `Vendor Exit Plan`, and match the local SHA-256 digests
+- repo validation after the live apply also reconciled the standalone dependency-graph generator with the docs-site wrapper so the `generated-docs`/`generated-portals` paths no longer disagree on `docs/site-generated/architecture/dependency-graph.md`
 
 ## Merge-To-Main Remaining
 

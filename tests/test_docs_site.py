@@ -12,6 +12,7 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 import generate_docs_site as docs_site  # noqa: E402
+import generate_dependency_diagram as dependency_diagram  # noqa: E402
 
 
 class DocsSiteTests(unittest.TestCase):
@@ -38,6 +39,8 @@ class DocsSiteTests(unittest.TestCase):
             subdomains_md = (temp_dir / "reference" / "subdomains.md").read_text(encoding="utf-8")
             self.assertIn("edge_oidc", subdomains_md)
             self.assertIn("upstream_auth", subdomains_md)
+            dependency_graph_md = (temp_dir / "architecture" / "dependency-graph.md").read_text(encoding="utf-8")
+            self.assertEqual(dependency_graph_md, dependency_diagram.render())
         finally:
             shutil.rmtree(temp_dir)
 
