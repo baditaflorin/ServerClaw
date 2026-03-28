@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.16
-platform_version: 0.130.31
+repo_version: 0.177.19
+platform_version: 0.130.32
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -61,10 +61,13 @@ live_apply_evidence:
     ops_portal: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
     ollama: 2026-03-27-adr-0176-inventory-sharding-mainline-live-apply
     operator_access: 2026-03-27-adr-0108-operator-onboarding-mainline-live-apply
+    preview_environment: 2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z
     staging_environment: 2026-03-27-adr-0183-staging-live-apply
     immutable_guest_replacement: 2026-03-27-adr-0191-immutable-guest-replacement-live-apply
     capacity_classes: 2026-03-27-adr-0192-capacity-classes-live-apply
     excalidraw: 2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply
+    failure_domain_policy: 2026-03-27-adr-0184-failure-domain-labels-live-apply
+    outline: 2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -372,9 +375,10 @@ desired_state:
       - sso.lv3.org
       - status.lv3.org
       - uptime.lv3.org
+      - wiki.lv3.org
 
 observed_state:
-  checked_at: 2026-03-27
+  checked_at: 2026-03-28
   access:
     ssh_bootstrap_key_working: true
     host_ops_user_working: true
@@ -751,6 +755,21 @@ observed_state:
       - grafana-admins
       - grafana-viewers
       - approved-agent-clients
+  outline:
+    runtime_vm: 10.10.10.20
+    postgres_backend_vm: 10.10.10.50
+    public_url: https://wiki.lv3.org
+    local_http_url: http://10.10.10.20:3001
+    container_running: true
+    public_health_verified: true
+    keycloak_oidc_verified: true
+    automation_token_verified: true
+    managed_collections:
+      - ADRs
+      - Agent Findings
+      - Architecture
+      - Incident Postmortems
+      - Runbooks
   open_webui:
     runtime_vm: 10.10.10.20
     host_tailscale_proxy_url: http://100.64.0.1:8008
@@ -873,6 +892,7 @@ observed_state:
     sso_domain_live: true
     status_domain_live: true
     uptime_domain_live: true
+    wiki_domain_live: true
     security_headers_audit_passed: true
     security_headers_audited_at: 2026-03-25T06:15:03Z
     published_hostnames:
@@ -888,6 +908,7 @@ observed_state:
       - sso.lv3.org
       - status.lv3.org
       - uptime.lv3.org
+      - wiki.lv3.org
   postgres:
     vm: 10.10.10.50
     service_running: true
@@ -928,8 +949,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.16
+    current: 0.177.19
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.31
+    current: 0.130.32
     meaning: intended platform release for the actual server configuration

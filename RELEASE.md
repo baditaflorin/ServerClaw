@@ -1,12 +1,12 @@
-# Release 0.177.16
+# Release 0.177.19
 
 - Date: 2026-03-28
 
 ## Summary
-- implemented ADR 0202 by publishing private Excalidraw at draw.lv3.org, generating committed architecture diagrams from repo-managed platform data, and recording verified live-apply evidence
+- integrated ADR 0199 by publishing the repo-managed Outline living knowledge wiki at `wiki.lv3.org`, wiring the durable `outline.automation` Keycloak bootstrap path, and verifying the governed living-knowledge collections end to end
 
 ## Platform Impact
-- no platform version bump; ADR 0202 is already live on production and this release integrates the Excalidraw runtime, generated architecture diagrams, and recorded live-apply evidence on main
+- Publishes the repo-managed Outline living knowledge wiki at wiki.lv3.org and integrates the release-time sync path.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

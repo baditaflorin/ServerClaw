@@ -142,6 +142,7 @@ platform_ports:
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
+  outline_port: 3006
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
   excalidraw_port: 3095
@@ -190,6 +191,7 @@ platform_port_assignments:
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
+  outline_port: 3006
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
   excalidraw_port: 3095
@@ -229,6 +231,11 @@ platform_guest_catalog:
         - ingress
         - nginx
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: edge-publication
+        co_location_exceptions: []
       packages:
         - nginx
     - vmid: 120
@@ -247,6 +254,11 @@ platform_guest_catalog:
         - docker
         - runtime
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-shared
+        co_location_exceptions: []
       packages:
         - docker.io
     - vmid: 130
@@ -264,6 +276,11 @@ platform_guest_catalog:
         - docker
         - build
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: build-jobs
+        co_location_exceptions: []
       packages:
         - docker.io
         - git
@@ -285,6 +302,11 @@ platform_guest_catalog:
         - monitoring
         - grafana
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: observability-core
+        co_location_exceptions: []
       packages:
         - prometheus-node-exporter
     - vmid: 150
@@ -302,6 +324,11 @@ platform_guest_catalog:
         - postgres
         - database
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: postgres-ha
+        co_location_exceptions: []
       packages:
         - acl
         - nftables
@@ -323,6 +350,15 @@ platform_guest_catalog:
         - database
         - ha
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: standby
+        anti_affinity_group: postgres-ha
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: The platform still has only one active failure domain, so the
+              PostgreSQL standby carries an explicit temporary same-domain waiver
+              until auxiliary capacity is live.
       packages:
         - acl
         - nftables
@@ -347,6 +383,14 @@ platform_guest_catalog:
         - backup
         - pbs
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: recovery
+        anti_affinity_group: control-plane-recovery
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: Backup and restore automation still share the dedicated host
+              while the auxiliary cloud recovery domain remains planned but not active.
       packages:
         - acl
         - xfsprogs
@@ -368,6 +412,11 @@ platform_guest_catalog:
         - ingress
         - nginx
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: edge-publication
+        co_location_exceptions: []
       packages:
         - nginx
     docker-runtime-lv3:
@@ -387,6 +436,11 @@ platform_guest_catalog:
         - docker
         - runtime
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-shared
+        co_location_exceptions: []
       packages:
         - docker.io
     docker-build-lv3:
@@ -405,6 +459,11 @@ platform_guest_catalog:
         - docker
         - build
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: build-jobs
+        co_location_exceptions: []
       packages:
         - docker.io
         - git
@@ -427,6 +486,11 @@ platform_guest_catalog:
         - monitoring
         - grafana
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: observability-core
+        co_location_exceptions: []
       packages:
         - prometheus-node-exporter
     postgres-lv3:
@@ -445,6 +509,11 @@ platform_guest_catalog:
         - postgres
         - database
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: postgres-ha
+        co_location_exceptions: []
       packages:
         - acl
         - nftables
@@ -467,6 +536,15 @@ platform_guest_catalog:
         - database
         - ha
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: standby
+        anti_affinity_group: postgres-ha
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: The platform still has only one active failure domain, so the
+              PostgreSQL standby carries an explicit temporary same-domain waiver
+              until auxiliary capacity is live.
       packages:
         - acl
         - nftables
@@ -492,6 +570,14 @@ platform_guest_catalog:
         - backup
         - pbs
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: recovery
+        anti_affinity_group: control-plane-recovery
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: Backup and restore automation still share the dedicated host
+              while the auxiliary cloud recovery domain remains planned but not active.
       packages:
         - acl
         - xfsprogs
@@ -513,6 +599,11 @@ platform_guest_catalog:
         - ingress
         - nginx
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: edge-publication
+        co_location_exceptions: []
       packages:
         - nginx
     docker-runtime:
@@ -532,6 +623,11 @@ platform_guest_catalog:
         - docker
         - runtime
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-shared
+        co_location_exceptions: []
       packages:
         - docker.io
     docker-build:
@@ -550,6 +646,11 @@ platform_guest_catalog:
         - docker
         - build
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: build-jobs
+        co_location_exceptions: []
       packages:
         - docker.io
         - git
@@ -572,6 +673,11 @@ platform_guest_catalog:
         - monitoring
         - grafana
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: observability-core
+        co_location_exceptions: []
       packages:
         - prometheus-node-exporter
     postgres:
@@ -590,6 +696,11 @@ platform_guest_catalog:
         - postgres
         - database
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: postgres-ha
+        co_location_exceptions: []
       packages:
         - acl
         - nftables
@@ -612,6 +723,15 @@ platform_guest_catalog:
         - database
         - ha
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: standby
+        anti_affinity_group: postgres-ha
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: The platform still has only one active failure domain, so the
+              PostgreSQL standby carries an explicit temporary same-domain waiver
+              until auxiliary capacity is live.
       packages:
         - acl
         - nftables
@@ -637,6 +757,14 @@ platform_guest_catalog:
         - backup
         - pbs
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: recovery
+        anti_affinity_group: control-plane-recovery
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: Backup and restore automation still share the dedicated host
+              while the auxiliary cloud recovery domain remains planned but not active.
       packages:
         - acl
         - xfsprogs
@@ -1093,6 +1221,34 @@ platform_service_topology:
     urls:
       public: https://langfuse.lv3.org
       internal: http://10.10.10.20:3002
+  outline:
+    service_name: outline
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: wiki.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: wiki
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3')
+        | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port
+        }}
+    service_id: outline
+    ports: {}
+    urls:
+      public: https://wiki.lv3.org
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3
@@ -1506,6 +1662,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: langfuse
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: wiki
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -2049,6 +2209,34 @@ public_edge_service_topology:
     urls:
       public: https://langfuse.lv3.org
       internal: http://10.10.10.20:3002
+  outline:
+    service_name: outline
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: wiki.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: wiki
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3')
+        | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port
+        }}
+    service_id: outline
+    ports: {}
+    urls:
+      public: https://wiki.lv3.org
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3
@@ -2523,6 +2711,7 @@ netbox_server_port: 8082
 searxng_port: 8881
 searxng_host_proxy_port: 80
 langfuse_port: 3002
+outline_port: 3006
 dozzle_http_port: 8089
 dozzle_agent_port: 7007
 excalidraw_port: 3095

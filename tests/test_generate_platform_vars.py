@@ -19,6 +19,7 @@ def test_build_platform_vars_includes_langfuse_publication_topology() -> None:
     assert langfuse["ports"]["internal"] == 3002
     assert langfuse["urls"]["public"] == "https://langfuse.lv3.org"
     assert langfuse["urls"]["internal"] == "http://10.10.10.20:3002"
+    assert platform_vars["outline_port"] == 3006
 
 
 def test_build_service_urls_supports_private_gitea_proxy_and_root_url() -> None:

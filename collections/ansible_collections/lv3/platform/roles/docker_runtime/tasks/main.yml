@@ -89,7 +89,7 @@
 
 - name: Build the Docker bridge forward-compat rule block
   ansible.builtin.set_fact:
-    docker_runtime_container_forward_rule_block: "{{ docker_runtime_container_forward_source_cidrs | map('regex_replace', '^(.*)$', 'ip saddr \\1 accept') | join('\n') }}"
+    docker_runtime_container_forward_rules: "{{ docker_runtime_container_forward_source_cidrs | map('regex_replace', '^(.*)$', 'ip saddr \\1 accept') | list }}"
     docker_runtime_nftables_config_current: "{{ docker_runtime_nftables_config_raw.content | b64decode }}"
   when:
     - docker_runtime_container_forward_compat_enabled | bool
@@ -98,12 +98,13 @@
 - name: Patch nftables forward policy for Docker bridge egress
   ansible.builtin.lineinfile:
     path: "{{ docker_runtime_nftables_config_file }}"
-    line: "    {{ docker_runtime_container_forward_rule_block }}"
+    line: "    {{ item }}"
     insertafter: '^\s*ct state established,related accept$'
+  loop: "{{ docker_runtime_container_forward_rules }}"
   when:
     - docker_runtime_container_forward_compat_enabled | bool
     - docker_runtime_nftables_config_stat.stat.exists
-    - docker_runtime_container_forward_rule_block | trim not in docker_runtime_nftables_config_current
+    - item not in docker_runtime_nftables_config_current
   register: docker_runtime_nftables_forward_patch
 
 - name: Read the nftables config after forward compatibility patch
@@ -117,7 +118,7 @@
 - name: Assert the Docker bridge forward-compat rule is present
   ansible.builtin.assert:
     that:
-      - docker_runtime_container_forward_rule_block | trim in (docker_runtime_nftables_config_after.content | b64decode)
+      - docker_runtime_container_forward_rules | difference((docker_runtime_nftables_config_after.content | b64decode).splitlines() | map('trim') | list) | length == 0
     fail_msg: >-
       Existing nftables config did not accept the Docker bridge forward-compat patch; update
       {{ docker_runtime_nftables_config_file }} before rerunning the Docker runtime converge.
@@ -127,11 +128,11 @@
 
 - name: Reload nftables after forward compatibility patch
   ansible.builtin.command: "nft -f {{ docker_runtime_nftables_config_file }}"
-  changed_when: docker_runtime_nftables_forward_patch.changed
+  changed_when: docker_runtime_nftables_forward_patch.results | selectattr('changed') | list | length > 0
   when:
     - docker_runtime_container_forward_compat_enabled | bool
     - docker_runtime_nftables_config_stat.stat.exists
-    - docker_runtime_nftables_forward_patch.changed
+    - docker_runtime_nftables_forward_patch.results | selectattr('changed') | list | length > 0
 
 - name: Ensure Docker service is enabled and running
   ansible.builtin.include_role:

@@ -46,6 +46,7 @@ PORT_KEYS = (
     "searxng_port",
     "searxng_host_proxy_port",
     "langfuse_port",
+    "outline_port",
     "dozzle_http_port",
     "dozzle_agent_port",
     "excalidraw_port",

@@ -1,0 +1,390 @@
+---
+# Purpose: Deploy Outline and seed the repo-managed living knowledge surfaces.
+
+- name: Validate Outline runtime inputs
+  ansible.builtin.assert:
+    that:
+      - outline_site_dir | length > 0
+      - outline_data_dir | length > 0
+      - outline_secret_dir | length > 0
+      - outline_compose_file | length > 0
+      - outline_env_file | length > 0
+      - outline_internal_port | int > 0
+      - outline_internal_base_url | length > 0
+      - outline_public_base_url | length > 0
+      - outline_database_password_local_file | length > 0
+      - outline_keycloak_client_secret_local_file | length > 0
+      - outline_image | length > 0
+      - outline_redis_image | length > 0
+      - outline_minio_image | length > 0
+    fail_msg: >-
+      outline_runtime requires runtime paths, image refs, database auth,
+      and Keycloak OIDC credentials.
+
+- name: Check whether the Outline database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ outline_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: outline_database_password_local
+
+- name: Check whether the Outline Keycloak client secret exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ outline_keycloak_client_secret_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: outline_keycloak_client_secret_local
+
+- name: Fail if the Outline database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ outline_database_password_local_file }} is missing on the control machine.
+      Converge outline_postgres before deploying Outline.
+  when: not outline_database_password_local.stat.exists
+
+- name: Fail if the Outline Keycloak client secret is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ outline_keycloak_client_secret_local_file }} is missing on the control machine.
+      Converge the Keycloak runtime before deploying Outline.
+  when: not outline_keycloak_client_secret_local.stat.exists
+
+- name: Ensure the Outline runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Outline runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ outline_site_dir }}"
+      mode: "0755"
+    - path: "{{ outline_data_dir }}"
+      mode: "0755"
+    - path: "{{ outline_minio_data_dir }}"
+      mode: "0755"
+    - path: "{{ outline_minio_data_dir }}/{{ outline_bucket_name }}"
+      mode: "0755"
+    - path: "{{ outline_secret_dir }}"
+      mode: "0700"
+
+- name: Generate the Outline runtime secrets
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item.path }}" ]; then
+      umask 077
+      {{ item.command }} > "{{ item.path }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop:
+    - path: "{{ outline_secret_key_remote_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ outline_utils_secret_remote_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ outline_redis_password_remote_file }}"
+      command: "openssl rand -base64 24 | tr -d '\\n'"
+    - path: "{{ outline_minio_root_password_remote_file }}"
+      command: "openssl rand -base64 24 | tr -d '\\n'"
+  register: outline_secret_generation
+  changed_when: "'changed' in outline_secret_generation.stdout"
+  no_log: true
+
+- name: Read the Outline runtime secrets
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  register: outline_secret_reads
+  loop:
+    - "{{ outline_secret_key_remote_file }}"
+    - "{{ outline_utils_secret_remote_file }}"
+    - "{{ outline_redis_password_remote_file }}"
+    - "{{ outline_minio_root_password_remote_file }}"
+  no_log: true
+
+- name: Record the Outline runtime secrets
+  ansible.builtin.set_fact:
+    outline_secret_key: "{{ outline_secret_reads.results[0].content | b64decode | trim }}"
+    outline_utils_secret: "{{ outline_secret_reads.results[1].content | b64decode | trim }}"
+    outline_redis_password: "{{ outline_secret_reads.results[2].content | b64decode | trim }}"
+    outline_minio_root_password: "{{ outline_secret_reads.results[3].content | b64decode | trim }}"
+    outline_database_password: "{{ lookup('ansible.builtin.file', outline_database_password_local_file) | trim }}"
+    outline_keycloak_client_secret: "{{ lookup('ansible.builtin.file', outline_keycloak_client_secret_local_file) | trim }}"
+    outline_runtime_secret_payload:
+      DATABASE_URL: >-
+        postgres://{{ outline_database_user }}:{{ (lookup('ansible.builtin.file', outline_database_password_local_file) | trim) | urlencode }}@{{ outline_database_host }}:5432/{{ outline_database_name }}
+      PGSSLMODE: disable
+      REDIS_URL: "redis://:{{ outline_secret_reads.results[2].content | b64decode | trim | urlencode | replace('/', '%2F') }}@redis:6379/0"
+      SECRET_KEY: "{{ outline_secret_reads.results[0].content | b64decode | trim }}"
+      UTILS_SECRET: "{{ outline_secret_reads.results[1].content | b64decode | trim }}"
+      OIDC_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', outline_keycloak_client_secret_local_file) | trim }}"
+      AWS_SECRET_ACCESS_KEY: "{{ outline_secret_reads.results[3].content | b64decode | trim }}"
+      AWS_S3_UPLOAD_BUCKET_URL: "http://minio:9000"
+  no_log: true
+
+- name: Ensure the local Outline artifact directory exists
+  ansible.builtin.file:
+    path: "{{ outline_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the Outline runtime secrets to the control machine
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.content }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  loop:
+    - dest: "{{ outline_secret_key_local_file }}"
+      content: "{{ outline_secret_key }}"
+    - dest: "{{ outline_utils_secret_local_file }}"
+      content: "{{ outline_utils_secret }}"
+    - dest: "{{ outline_redis_password_local_file }}"
+      content: "{{ outline_redis_password }}"
+    - dest: "{{ outline_minio_root_password_local_file }}"
+      content: "{{ outline_minio_root_password }}"
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for Outline
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: outline
+    common_openbao_compose_env_agent_dir: "{{ outline_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ outline_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ outline_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ outline_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ outline_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ outline_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ outline_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ outline_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ outline_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ outline_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ outline_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: outline.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ outline_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ outline_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ outline_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ outline_legacy_env_file }}"
+  no_log: true
+
+- name: Render the Outline environment file
+  ansible.builtin.template:
+    src: outline.env.j2
+    dest: "{{ outline_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  register: outline_env_template
+  no_log: true
+
+- name: Render the Outline compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ outline_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: outline_compose_template
+
+- name: Pull the Outline images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ outline_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ outline_site_dir }}"
+  register: outline_pull
+  changed_when: >-
+    'Pulling' in outline_pull.stdout
+    or 'Downloaded newer image' in outline_pull.stdout
+    or 'Pull complete' in outline_pull.stdout
+
+- name: Check whether the Docker nat chain exists before Outline startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: outline_docker_nat_chain
+  changed_when: false
+  failed_when: false
+
+- name: Restore Docker networking when the nat chain is missing before Outline startup
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: outline_docker_nat_chain.rc != 0
+
+- name: Recheck the Docker nat chain before Outline startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: outline_docker_nat_chain_recheck
+  changed_when: false
+  failed_when: outline_docker_nat_chain_recheck.rc not in [0, 1]
+  retries: 10
+  delay: 2
+  until: outline_docker_nat_chain_recheck.rc == 0
+  when: outline_docker_nat_chain.rc != 0
+
+- name: Wait for the Docker daemon to answer after networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - info
+      - --format
+      - '{{ "{{.ServerVersion}}" }}'
+  register: outline_docker_info
+  changed_when: false
+  retries: 10
+  delay: 2
+  until: outline_docker_info.rc == 0
+  when: outline_docker_nat_chain.rc != 0
+
+- name: Assert Docker nat chain is present before Outline startup
+  ansible.builtin.assert:
+    that:
+      - outline_docker_nat_chain.rc == 0 or outline_docker_nat_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; Outline published ports will fail."
+
+- name: Check whether the Outline local port is already published
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ outline_internal_port }}"
+    delay: 0
+    timeout: 1
+  register: outline_local_port_probe
+  changed_when: false
+  failed_when: false
+
+- name: Check whether the current Outline local health endpoint is healthy before startup
+  ansible.builtin.uri:
+    url: "{{ outline_internal_base_url }}/_health"
+    method: GET
+    status_code: 200
+  register: outline_health_probe
+  changed_when: false
+  failed_when: false
+
+- name: Record whether the Outline startup needs a force recreate
+  ansible.builtin.set_fact:
+    outline_force_recreate: >-
+      {{
+        outline_docker_nat_chain.rc != 0
+        or (outline_env_template.changed | default(false))
+        or (outline_compose_template.changed | default(false))
+        or (outline_pull.changed | default(false))
+        or (outline_local_port_probe.failed | default(false))
+        or (outline_health_probe.status | default(0)) != 200
+      }}
+
+- name: Force-recreate the Outline runtime stack after Docker networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ outline_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+      - --force-recreate
+  args:
+    chdir: "{{ outline_site_dir }}"
+  register: outline_force_recreate_up
+  changed_when: >-
+    'Creating' in outline_force_recreate_up.stdout
+    or 'Recreating' in outline_force_recreate_up.stdout
+    or 'Starting' in outline_force_recreate_up.stdout
+  failed_when: false
+  retries: 3
+  delay: 5
+  until: outline_force_recreate_up.rc == 0
+  when: outline_force_recreate
+
+- name: Assert the Outline force-recreate succeeded
+  ansible.builtin.assert:
+    that:
+      - outline_force_recreate_up.rc == 0
+    fail_msg: "{{ outline_force_recreate_up.stderr | default(outline_force_recreate_up.msg | default('outline compose force-recreate failed')) }}"
+  when: outline_force_recreate
+
+- name: Start the Outline runtime stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ outline_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ outline_site_dir }}"
+  register: outline_start_up
+  changed_when: >-
+    'Creating' in outline_start_up.stdout
+    or 'Recreating' in outline_start_up.stdout
+    or 'Starting' in outline_start_up.stdout
+  when: not outline_force_recreate
+
+- name: Assert the Outline runtime stack started successfully
+  ansible.builtin.assert:
+    that:
+      - outline_start_up.rc == 0
+    fail_msg: "{{ outline_start_up.stderr | default(outline_start_up.msg | default('outline compose up failed')) }}"
+  when: not outline_force_recreate
+
+- name: Wait for the Outline runtime listener
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ outline_internal_port }}"
+    delay: 0
+    timeout: 240
+
+- name: Wait for the Outline local health endpoint
+  ansible.builtin.uri:
+    url: "{{ outline_internal_base_url }}/_health"
+    method: GET
+    status_code: 200
+  register: outline_health_check
+  retries: 36
+  delay: 5
+  until: outline_health_check.status == 200
+  changed_when: false
+
+- name: Verify the Outline runtime
+  ansible.builtin.import_tasks: verify.yml

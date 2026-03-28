@@ -75,7 +75,10 @@ def fixture_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
         )
         + "\n"
     )
-    (repo_root / "inventory" / "host_vars" / "proxmox_florin.yml").write_text("management_ipv4: 65.108.75.123\n")
+    (repo_root / "inventory" / "host_vars" / "proxmox_florin.yml").write_text(
+        "management_ipv4: 65.108.75.123\n"
+        "management_tailscale_ipv4: 100.64.0.1\n"
+    )
     (repo_root / "tests" / "fixtures" / "docker-host-fixture.yml").write_text(
         json.dumps(
             {
@@ -114,8 +117,10 @@ def test_fixture_up_writes_active_receipt(fixture_repo: Path, monkeypatch: pytes
         "fetch_cluster_resources",
         lambda endpoint, api_token: [{"vmid": 9000}, {"vmid": 9001}],
     )
-    monkeypatch.setattr(fixture_manager, "apply_fixture", lambda runtime_dir, endpoint, api_token: None)
+    monkeypatch.setattr(fixture_manager, "apply_fixture", lambda runtime_dir, endpoint, api_token, **kwargs: None)
     monkeypatch.setattr(fixture_manager, "wait_for_ssh", lambda receipt, timeout_seconds=300: None)
+    monkeypatch.setattr(fixture_manager, "wait_for_cloud_init", lambda receipt: None)
+    monkeypatch.setattr(fixture_manager, "prepare_guest_for_converge", lambda receipt: None)
     monkeypatch.setattr(fixture_manager, "converge_roles", lambda receipt, skip_roles=False: None)
     monkeypatch.setattr(fixture_manager, "verify_fixture", lambda receipt, definition: {"ok": True, "checks": [{"ok": True}]})
     monkeypatch.setattr(fixture_manager, "capture_ssh_fingerprint", lambda receipt: "fingerprint")
@@ -133,6 +138,37 @@ def test_fixture_up_writes_active_receipt(fixture_repo: Path, monkeypatch: pytes
     assert len(saved_receipts) == 1
     payload = json.loads(saved_receipts[0].read_text())
     assert payload["ssh_fingerprint"] == "fingerprint"
+    assert payload["context"]["jump_host"] == "100.64.0.1"
+
+
+def test_load_ephemeral_pool_accepts_reservation_shape(
+    fixture_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (fixture_repo / "config" / "capacity-model.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0.0",
+                "reservations": [
+                    {
+                        "id": "ephemeral-pool",
+                        "kind": "ephemeral_pool",
+                        "status": "reserved",
+                        "vmid_range": {"start": 910, "end": 979},
+                        "max_concurrent_vms": 5,
+                        "reserved": {"ram_gb": 20, "vcpu": 8, "disk_gb": 100},
+                    }
+                ],
+            }
+        )
+        + "\n"
+    )
+    monkeypatch.setattr(fixture_manager, "CAPACITY_MODEL_PATH", fixture_repo / "config" / "capacity-model.json")
+
+    pool = fixture_manager.load_ephemeral_pool()
+
+    assert pool["vmid_range"] == [910, 979]
+    assert pool["reserved_ram_gb"] == 20
+    assert pool["reserved_vcpu"] == 8
 
 
 def test_fixture_down_archives_and_removes_receipt(fixture_repo: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -159,7 +195,7 @@ def test_fixture_down_archives_and_removes_receipt(fixture_repo: Path, monkeypat
         "context": {"ci_user": "ops"},
     }
     (fixture_repo / "receipts" / "fixtures" / "docker-host-20260323T100000Z.json").write_text(json.dumps(receipt) + "\n")
-    monkeypatch.setattr(fixture_manager, "destroy_fixture", lambda runtime_dir, endpoint, api_token: None)
+    monkeypatch.setattr(fixture_manager, "destroy_fixture", lambda runtime_dir, endpoint, api_token, **kwargs: None)
     monkeypatch.setattr(fixture_manager, "emit_ephemeral_event", lambda *args, **kwargs: None)
 
     payload = fixture_manager.fixture_down("docker-host")
@@ -272,7 +308,7 @@ def test_reap_expired_only_destroys_expired_receipts(fixture_repo: Path, monkeyp
     assert json.loads(reaper_runs[0].read_text())["skipped_vmids"] == [911]
 
 
-def test_build_runtime_main_targets_fixture_module(fixture_repo: Path) -> None:
+def test_build_runtime_main_targets_destroyable_vm_module(fixture_repo: Path) -> None:
     receipt = fixture_manager.build_receipt(
         fixture_manager.load_fixture_definition(fixture_repo / "tests" / "fixtures" / "docker-host-fixture.yml"),
         fixture_repo / "tests" / "fixtures" / "docker-host-fixture.yml",
@@ -284,8 +320,11 @@ def test_build_runtime_main_targets_fixture_module(fixture_repo: Path) -> None:
         lifetime_minutes=30,
     )
     rendered = fixture_manager.build_runtime_main(receipt)
-    assert "proxmox-fixture" in rendered
+    assert "proxmox-vm-destroyable" in rendered
     assert '"prevent_destroy"' not in rendered
+    assert "agent_enabled = false" in rendered
+    assert 'agent_timeout = "10s"' in rendered
+    assert 'value = "10.20.10.100"' in rendered
 
 
 def test_fixture_list_reads_cluster_ephemeral_metadata(
@@ -309,6 +348,33 @@ def test_fixture_list_reads_cluster_ephemeral_metadata(
     assert rows[0]["owner"] == "codex"
     assert rows[0]["purpose"] == "adr-0106-test"
     assert rows[0]["vm_id"] == 910
+
+
+def test_converge_roles_writes_ansible_vars_into_runtime_playbook(
+    fixture_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    runtime_dir = fixture_repo / ".local" / "fixtures" / "runtime" / "docker-host-20260323T100000Z"
+    runtime_dir.mkdir(parents=True)
+    receipt = {
+        "runtime_dir": ".local/fixtures/runtime/docker-host-20260323T100000Z",
+        "ip_address": "10.20.10.100",
+        "context": {"ci_user": "ops", "jump_user": "ops", "jump_host": "100.64.0.1"},
+        "definition": {
+            "roles_under_test": ["lv3.platform.docker_runtime"],
+            "ansible_vars": {"docker_runtime_container_forward_compat_enabled": False},
+        },
+    }
+
+    monkeypatch.setattr(
+        fixture_manager,
+        "run_command",
+        lambda argv, cwd=None: fixture_manager.CommandResult(list(argv), 0, "", ""),
+    )
+
+    fixture_manager.converge_roles(receipt)
+
+    playbook = json.loads((runtime_dir / "converge.json").read_text())
+    assert playbook[0]["vars"] == {"docker_runtime_container_forward_compat_enabled": False}
 
 
 def test_reaper_retags_untagged_cluster_vms(fixture_repo: Path, monkeypatch: pytest.MonkeyPatch) -> None:

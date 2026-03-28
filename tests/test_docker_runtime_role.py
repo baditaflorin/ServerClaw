@@ -43,3 +43,15 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert forward_recheck["retries"] == 10
     assert forward_recheck["delay"] == 2
     assert forward_recheck["until"] == "docker_runtime_forward_chain_recheck.rc == 0"
+
+
+def test_docker_runtime_patches_nftables_one_rule_per_cidr() -> None:
+    tasks = load_tasks()
+    build_rules = next(task for task in tasks if task["name"] == "Build the Docker bridge forward-compat rule block")
+    patch_rules = next(task for task in tasks if task["name"] == "Patch nftables forward policy for Docker bridge egress")
+    reload_rules = next(task for task in tasks if task["name"] == "Reload nftables after forward compatibility patch")
+
+    assert "docker_runtime_container_forward_rules" in build_rules["ansible.builtin.set_fact"]
+    assert patch_rules["ansible.builtin.lineinfile"]["line"] == "    {{ item }}"
+    assert patch_rules["loop"] == "{{ docker_runtime_container_forward_rules }}"
+    assert reload_rules["changed_when"] == "docker_runtime_nftables_forward_patch.results | selectattr('changed') | list | length > 0"
