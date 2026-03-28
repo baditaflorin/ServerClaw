@@ -288,6 +288,11 @@ windmill_seed_scripts:
     language: python3
     summary: ADR 0106 ephemeral VM lifecycle reaper
     description: Repo-managed worker that sweeps the governed 910-979 ephemeral VM pool, retags unowned VMs with a one-hour grace period, and destroys expired VMs.
+  - path: f/lv3/ephemeral_pool_reconciler
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/ephemeral-pool-reconciler.py"
+    language: python3
+    summary: ADR 0186 ephemeral fixture pool reconciler
+    description: Repo-managed worker that keeps the declared prewarmed fixture pools topped up, records spillover decisions, and preserves one warm spare per common fixture profile when local capacity allows.
   - path: f/lv3/fault-injection
     local_file: "{{ playbook_dir }}/../config/windmill/scripts/fault-injection.py"
     language: python3
@@ -499,6 +504,15 @@ windmill_seed_schedules:
     enabled: true
     summary: ADR 0106 ephemeral VM lifecycle reaper
     description: Repo-managed 30-minute sweep that enforces expiry on the governed 910-979 ephemeral VM pool and applies a one-hour grace tag to unowned VMs before the next pass.
+    no_flow_overlap: true
+  - path: f/lv3/ephemeral_pool_reconciler_every_15m
+    schedule: "0 */15 * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/ephemeral_pool_reconciler
+    args: {}
+    enabled: true
+    summary: ADR 0186 prewarmed fixture pool reconciler
+    description: Repo-managed 15-minute sweep that keeps the declared warm fixture pools topped up after lease handoff and records any auxiliary-domain spillover requirements.
     no_flow_overlap: true
   - path: f/lv3/detect_deadlocks_every_30s
     schedule: "*/30 * * * * *"

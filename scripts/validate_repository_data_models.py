@@ -21,6 +21,7 @@ from command_catalog import load_command_catalog, validate_command_catalog
 from api_gateway_catalog import load_api_gateway_catalog, validate_api_gateway_catalog
 from api_publication import load_api_publication_catalog, validate_api_publication_catalog
 from capacity_report import load_capacity_model
+from fixture_manager import load_ephemeral_pool_catalog
 from canonical_errors import ErrorRegistry
 from container_image_policy import load_image_catalog, validate_image_catalog as validate_container_image_catalog
 from changelog_redaction import load_redaction_policy, validate_redaction_policy
@@ -80,6 +81,8 @@ MAINTENANCE_WINDOW_SCHEMA_PATH = repo_path("docs", "schema", "maintenance-window
 VM_TEMPLATE_MANIFEST_PATH = repo_path("config", "vm-template-manifest.json")
 CAPACITY_MODEL_PATH = repo_path("config", "capacity-model.json")
 CAPACITY_MODEL_SCHEMA_PATH = repo_path("docs", "schema", "capacity-model.schema.json")
+EPHEMERAL_POOL_CATALOG_PATH = repo_path("config", "ephemeral-capacity-pools.json")
+EPHEMERAL_POOL_SCHEMA_PATH = repo_path("docs", "schema", "ephemeral-capacity-pools.schema.json")
 VERSION_SEMANTICS_PATH = repo_path("config", "version-semantics.json")
 WORKSTREAMS_PATH = repo_path("workstreams.yaml")
 TRIAGE_RULES_PATH = repo_path("config", "triage-rules.yaml")
@@ -1327,6 +1330,21 @@ def validate_capacity_model_schema() -> None:
             raise ValueError(f"docs/schema/capacity-model.schema.json.properties must include '{field}'")
 
 
+def validate_ephemeral_pool_catalog() -> None:
+    load_ephemeral_pool_catalog()
+    payload = require_mapping(load_json(EPHEMERAL_POOL_CATALOG_PATH), str(EPHEMERAL_POOL_CATALOG_PATH))
+    require_str(payload.get("$schema"), "config/ephemeral-capacity-pools.json.$schema")
+    if payload["$schema"] != "docs/schema/ephemeral-capacity-pools.schema.json":
+        raise ValueError(
+            "config/ephemeral-capacity-pools.json.$schema must reference docs/schema/ephemeral-capacity-pools.schema.json"
+        )
+    require_semver(payload.get("schema_version"), "config/ephemeral-capacity-pools.json.schema_version")
+    schema = require_mapping(load_json(EPHEMERAL_POOL_SCHEMA_PATH), str(EPHEMERAL_POOL_SCHEMA_PATH))
+    require_str(schema.get("$schema"), "docs/schema/ephemeral-capacity-pools.schema.json.$schema")
+    require_str(schema.get("$id"), "docs/schema/ephemeral-capacity-pools.schema.json.$id")
+    require_str(schema.get("title"), "docs/schema/ephemeral-capacity-pools.schema.json.title")
+
+
 def validate_error_registry() -> None:
     payload = require_mapping(load_yaml(ERROR_REGISTRY_PATH), str(ERROR_REGISTRY_PATH))
     require_semver(payload.get("schema_version"), "config/error-codes.yaml.schema_version")
@@ -2427,6 +2445,7 @@ def validate_repository_data_models() -> int:
     validate_capacity_model_schema()
     validate_capacity_model()
     validate_preview_environment_profiles()
+    validate_ephemeral_pool_catalog()
     load_public_surface_scan_policy()
     validate_vm_template_manifest(host_vars_context["proxmox_vm_templates"])
     validate_operator_roster(load_yaml(ROSTER_PATH))

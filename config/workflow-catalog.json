@@ -3990,6 +3990,52 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "ephemeral-pool-reconcile": {
+      "description": "Keep the ADR 0186 prewarmed fixture pools topped up, record spillover decisions, and preserve one warm spare per common fixture profile when local capacity allows.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "fixture-pool-reconcile",
+        "command": "make fixture-pool-reconcile"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "host_live",
+      "owner_runbook": "docs/runbooks/ephemeral-fixtures.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/capacity-model.json",
+        "config/ephemeral-capacity-pools.json",
+        "config/windmill/scripts/ephemeral-pool-reconciler.py",
+        "docs/runbooks/ephemeral-fixtures.md",
+        "docs/schema/ephemeral-capacity-pools.schema.json",
+        "scripts/fixture_manager.py",
+        "tests/test_fixture_manager.py"
+      ],
+      "outputs": [
+        "Any missing warm members are recreated as stopped or lightly initialized fixtures ready for lease handoff.",
+        "Local exhaustion is reported as an explicit auxiliary-domain spillover requirement instead of silently borrowing standby capacity."
+      ],
+      "verification_commands": [
+        "python3 scripts/fixture_manager.py pool-status --json",
+        "python3 scripts/fixture_manager.py reconcile-pools --json"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 2400,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "check-platform-drift": {
       "description": "Run the ADR 0071 observation loop checks and emit structured findings from the controller command lane.",
       "lifecycle_status": "active",
