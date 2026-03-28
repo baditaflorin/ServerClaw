@@ -17,9 +17,11 @@
 - Conflicts With: none
 - Shared Surfaces: `scripts/ops_portal/`, `docs/adr/0234-*`,
   `docs/runbooks/ops-portal-down.md`,
+  `playbooks/ops-portal.yml`,
+  `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/*.yml`,
   `collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml`,
   `tests/test_interactive_ops_portal.py`,
-  `tests/test_nginx_edge_publication_role.py`,
+  `tests/test_nginx_edge_publication_role.py`, `tests/test_ops_portal_playbook.py`,
   `tests/test_security_headers_audit.py`, `workstreams.yaml`
 
 ## Scope
@@ -50,6 +52,9 @@
 - `docs/adr/0234-shared-human-app-shell-and-navigation-via-patternfly.md`
 - `docs/adr/.index.yaml`
 - `docs/runbooks/ops-portal-down.md`
+- `playbooks/ops-portal.yml`
+- `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml`
+- `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml`
 - `scripts/ops_portal/static/portal.css`
 - `scripts/ops_portal/static/portal.js`
 - `scripts/ops_portal/templates/base.html`
@@ -65,6 +70,7 @@
 - `collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml`
 - `tests/test_interactive_ops_portal.py`
 - `tests/test_nginx_edge_publication_role.py`
+- `tests/test_ops_portal_playbook.py`
 - `tests/test_security_headers_audit.py`
 - `receipts/live-applies/2026-03-28-adr-0234-patternfly-shell-live-apply.json`
 - `workstreams.yaml`
@@ -81,7 +87,7 @@
 
 ## Verification
 
-- `uv run --with pytest --with pyyaml --with jsonschema --with-requirements requirements/ops-portal.txt python -m pytest -q tests/test_interactive_ops_portal.py tests/test_nginx_edge_publication_role.py tests/test_security_headers_audit.py`
+- `uv run --with pytest --with pyyaml --with jsonschema --with-requirements requirements/ops-portal.txt python -m pytest -q tests/test_interactive_ops_portal.py tests/test_nginx_edge_publication_role.py tests/test_security_headers_audit.py tests/test_ops_portal_playbook.py`
 - `make syntax-check-ops-portal`
 - `./scripts/validate_repo.sh agent-standards`
 - `./scripts/validate_repo.sh workstream-surfaces`
@@ -98,3 +104,6 @@
   because the shared shell depends on the pinned PatternFly asset URL
 - the protected `README.md`, `VERSION`, `changelog.md`, `versions/stack.yaml`,
   and release-note updates still belong to the final integration step
+- the branch carries a generated `README.md` document-index update only because
+  `check-canonical-truth` blocked `make live-apply-service` until that derived
+  index was current; the top-level integrated status summary remains untouched

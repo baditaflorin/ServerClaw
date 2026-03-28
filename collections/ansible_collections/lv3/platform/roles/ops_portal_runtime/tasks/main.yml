@@ -104,10 +104,15 @@
     group: root
     mode: "0644"
 
-- name: Reset the synced ops portal application tree before refresh
+- name: Remove stale ops portal service sources before sync
   ansible.builtin.file:
-    path: "{{ ops_portal_service_dir }}/ops_portal"
+    path: "{{ item }}"
     state: absent
+  loop:
+    - "{{ ops_portal_service_dir }}/ops_portal"
+    - "{{ ops_portal_service_dir }}/search_fabric"
+    - "{{ ops_portal_service_dir }}/publication_contract.py"
+    - "{{ ops_portal_service_dir }}/requirements.txt"
 
 - name: Ensure the ops portal application root exists
   ansible.builtin.file:
