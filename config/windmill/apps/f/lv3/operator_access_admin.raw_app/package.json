@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@hookform/resolvers": "^5.1.1",
     "ag-grid-community": "35.2.0",
     "ag-grid-react": "35.2.0",
     "@tiptap/extension-table": "3.21.0",
@@ -13,8 +14,10 @@
     "@tiptap/starter-kit": "3.21.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "react-hook-form": "^7.69.0",
     "shepherd.js": "15.2.2",
-    "windmill-client": "^1"
+    "windmill-client": "^1",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
