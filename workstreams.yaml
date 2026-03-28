@@ -97,7 +97,7 @@ workstreams:
   - id: ws-0231-live-apply
     adr: "0231"
     title: Live apply ADR 0231 local secret delivery via OpenBao Agent and systemd credentials
-    status: live_applied
+    status: ready
     owner: codex
     branch: codex/ws-0231-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0231-live-apply
@@ -147,7 +147,7 @@ workstreams:
             - receipts/live-applies/2026-03-28-adr-0231-local-secret-delivery-live-apply.json
           mode: exclusive
     ready_to_merge: true
-    live_applied: true
+    live_applied: false
     canonical_truth:
       changelog_entry: implements ADR 0231 on the live control-plane recovery path by replacing the backup unit's plaintext OpenBao token and baked-in Windmill DSN with OpenBao Agent delivery through systemd credentials
       release_bump: patch
@@ -496,7 +496,7 @@ workstreams:
   - id: ws-0224-live-apply
     adr: "0224"
     title: Live apply ADR 0224 server-resident operations as the default control model
-    status: live_applied
+    status: ready
     owner: codex
     branch: codex/ws-0224-live-apply-r3
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0224-live-apply-r3
@@ -573,7 +573,7 @@ workstreams:
             - docs/diagrams/agent-coordination-map.excalidraw
           mode: exclusive
     ready_to_merge: true
-    live_applied: true
+    live_applied: false
     canonical_truth:
       changelog_entry: verifies ADR 0224 from the latest mainline by carrying the host-resident supervisor baseline into repo truth and re-proving that reconciliation, supervision, validation, and approval now run through server-resident platform surfaces
       release_bump: patch
