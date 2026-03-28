@@ -6,7 +6,7 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Alertmanager, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Headscale, Mail Platform, NGINX Edge, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
+| `1` | Alertmanager, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Headscale, Mail Platform, NGINX Edge, Netdata Realtime Metrics, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
 | `2` | Changelog Portal, Developer Portal, Excalidraw, Gitea, Keycloak, Langfuse, Mattermost, NetBox, Open WebUI, Outline, Public Status Page, Semaphore, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway |
 | `4` | Ops Portal |
@@ -22,6 +22,7 @@ graph TD
     grafana["Grafana\nTier 1"]
     headscale["Headscale\nTier 1"]
     mail_platform["Mail Platform\nTier 1"]
+    realtime["Netdata Realtime Metrics\nTier 1"]
     nginx_edge["NGINX Edge\nTier 1"]
     ntfy["ntfy\nTier 1"]
     ntopng["ntopng\nTier 1"]
@@ -104,6 +105,8 @@ graph TD
     outline -->|hard| postgres
     platform_context_api -->|startup_only| openbao
     platform_context_api -->|reads_from| step_ca
+    realtime -->|soft| keycloak
+    realtime -->|soft| nginx_edge
     semaphore -->|startup_only| openbao
     semaphore -->|hard| postgres
     status_page -->|hard| nginx_edge

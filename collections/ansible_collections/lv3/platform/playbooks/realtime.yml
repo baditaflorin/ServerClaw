@@ -29,6 +29,8 @@
   hosts: nginx-lv3
   become: true
   gather_facts: true
+  vars_files:
+    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
   vars:
     realtime_repo_root: "{{ lookup('ansible.builtin.env', 'PWD') }}"
   tags:
@@ -67,6 +69,8 @@
   hosts: proxmox_hosts
   become: true
   gather_facts: true
+  vars_files:
+    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
   tags:
     - tier-1
     - network
@@ -89,6 +93,8 @@
   hosts: monitoring-lv3
   become: true
   gather_facts: true
+  vars_files:
+    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
   tags:
     - tier-1
     - observability
@@ -124,6 +130,8 @@
   hosts: proxmox_florin:nginx-lv3:docker-runtime-lv3:postgres-lv3
   become: true
   gather_facts: true
+  vars_files:
+    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
   tags:
     - tier-1
     - observability

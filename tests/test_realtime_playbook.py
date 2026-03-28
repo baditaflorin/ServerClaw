@@ -29,6 +29,12 @@ def test_realtime_playbook_converges_network_before_agents() -> None:
         {"role": "lv3.platform.monitoring_vm"},
         {"role": "lv3.platform.netdata_runtime"},
     ]
+    assert all(
+        play["vars_files"] == [
+            "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
+        ]
+        for play in plays
+    )
 
 
 def test_realtime_edge_play_builds_generated_portals_before_publication() -> None:
@@ -42,6 +48,9 @@ def test_realtime_edge_play_builds_generated_portals_before_publication() -> Non
     )
 
     assert edge_play["vars"]["realtime_repo_root"] == "{{ lookup('ansible.builtin.env', 'PWD') }}"
+    assert edge_play["vars_files"] == [
+        "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
+    ]
     assert build_task["ansible.builtin.command"]["argv"] == ["make", "generate-changelog-portal", "docs"]
     assert build_task["args"]["chdir"] == "{{ realtime_repo_root }}"
     assert build_task["delegate_to"] == "localhost"
