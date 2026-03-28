@@ -5,7 +5,7 @@
   "applied_on": "2026-03-28",
   "recorded_on": "2026-03-28",
   "recorded_by": "codex/ws-0208-live-apply",
-  "source_commit": "ec45696887705e3332ff05a9dc47a4a18e5fb7f7",
+  "source_commit": "734bef665716eb23aac2152528c84f1fb8d81ce5",
   "repo_version_context": "0.177.31",
   "workflow_id": "adr-0208-dependency-direction-live-apply",
   "adr": "0208",
@@ -25,12 +25,12 @@
     {
       "check": "Local validation entrypoints",
       "result": "pass",
-      "observed": "`make validate-dependency-direction` passed, and `./scripts/validate_repo.sh dependency-direction agent-standards` passed after the workstream registry entry was added."
+      "observed": "`make validate-dependency-direction` passed, and `./scripts/validate_repo.sh dependency-direction data-models architecture-fitness workstream-surfaces agent-standards` passed on the latest `origin/main` replay after the workstream registry and dependency-direction surfaces were refreshed."
     },
     {
       "check": "Focused ADR 0208 regression slice",
       "result": "pass",
-      "observed": "`UV_CACHE_DIR=/tmp/uv-cache uv run --with pytest --with pyyaml --with jsonschema python -m pytest ... -q` passed for 119 tests covering the validator, gate wiring, session/run namespace wrappers, health/world-state refactors, closure-loop composition-root wiring, diff engine adapters, goal compiler, CLI loop behavior, and interface contracts."
+      "observed": "`UV_CACHE_DIR=/tmp/uv-cache uv run --with pytest --with pyyaml --with jsonschema --with httpx --with cryptography --with fastapi --with pydantic python -m pytest ... -q` passed for 146 tests covering the validator, gate wiring, correction-loop and mutation-audit refactors, runbook/API gateway use-case wiring, session/run namespace wrappers, closure-loop composition-root wiring, diff engine adapters, goal compiler, CLI loop behavior, and interface contracts."
     }
   ],
   "evidence_refs": [
@@ -52,6 +52,7 @@
   "notes": [
     "This is a repository-only live rollout. No host or service converge and no platform_version update are required for ADR 0208.",
     "The workstream branch intentionally leaves protected integration files for merge-to-main: VERSION, release sections in changelog.md, and any README.md integrated-status update if the final integrator decides one is warranted.",
-    "versions/stack.yaml should remain unchanged for ADR 0208 because the change enforces repository architecture and validation, not live platform state."
+    "versions/stack.yaml should remain unchanged for ADR 0208 because the change enforces repository architecture and validation, not live platform state.",
+    "The latest-main replay also exercised the full validation entrypoint; remaining non-ADR-0208 failures before the main integration step were pre-existing ansible-lint warnings in untouched role files and stale/generated docs portal surfaces that require protected canonical-truth updates on main."
   ]
 }
