@@ -28,6 +28,7 @@
           - "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
 
   roles:
+    - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.postgres_vm
     - role: lv3.platform.keycloak_postgres
 

@@ -10,9 +10,14 @@ POSTGRES_CLIENT_PLAYBOOKS = [
     REPO_ROOT / "playbooks" / "dify.yml",
     REPO_ROOT / "playbooks" / "keycloak.yml",
     REPO_ROOT / "playbooks" / "langfuse.yml",
+    REPO_ROOT / "playbooks" / "mattermost.yml",
     REPO_ROOT / "playbooks" / "n8n.yml",
     REPO_ROOT / "playbooks" / "outline.yml",
     REPO_ROOT / "playbooks" / "plane.yml",
+    REPO_ROOT / "playbooks" / "postgres-vm.yml",
+    REPO_ROOT / "playbooks" / "semaphore.yml",
+    REPO_ROOT / "playbooks" / "vaultwarden.yml",
+    REPO_ROOT / "playbooks" / "windmill.yml",
 ]
 
 
@@ -44,3 +49,28 @@ def test_postgres_client_sources_are_centralized_in_group_vars() -> None:
         ]
         assert postgres_roles
         assert all("vars" not in role for role in postgres_roles)
+
+
+def test_postgres_playbooks_apply_linux_guest_firewall_before_postgres_role() -> None:
+    for playbook_path in POSTGRES_CLIENT_PLAYBOOKS:
+        plays = yaml.safe_load(playbook_path.read_text())
+        firewall_before_postgres = False
+
+        for play in plays:
+            role_names = [
+                role.get("role")
+                for role in play.get("roles", [])
+                if isinstance(role, dict)
+            ]
+            if "lv3.platform.postgres_vm" not in role_names:
+                continue
+            firewall_before_postgres = (
+                "lv3.platform.linux_guest_firewall" in role_names
+                and role_names.index("lv3.platform.linux_guest_firewall")
+                < role_names.index("lv3.platform.postgres_vm")
+            )
+            break
+
+        assert firewall_before_postgres, (
+            f"{playbook_path} must apply lv3.platform.linux_guest_firewall before lv3.platform.postgres_vm"
+        )
