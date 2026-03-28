@@ -7,11 +7,11 @@
 
 schema_version: 1
 generated: '2026-03-28'
-total_adrs: 248
+total_adrs: 258
 implementation_status_summary:
   Implemented: 211
   Partial: 4
-  Not Implemented: 32
+  Not Implemented: 42
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -93,6 +93,7 @@ concerns:
     - 0229
     - '0230'
     - '0233'
+    - '0251'
   documentation:
     - '0074'
     - 0081
@@ -126,6 +127,7 @@ concerns:
     - '0053'
     - '0146'
     - 0196
+    - '0250'
   networking:
     - '0015'
     - '0021'
@@ -137,6 +139,7 @@ concerns:
     - '0161'
     - 0183
     - 0189
+    - '0252'
   platform:
     - 0019
     - '0025'
@@ -220,11 +223,15 @@ concerns:
     - '0240'
     - '0241'
     - '0242'
+    - '0244'
+    - '0247'
+    - '0253'
   release:
     - 0008
     - '0110'
     - '0120'
     - '0155'
+    - '0246'
   resilience:
     - '0163'
     - '0167'
@@ -250,6 +257,8 @@ concerns:
     - '0165'
     - 0219
     - '0231'
+    - 0248
+    - 0249
   storage:
     - '0020'
     - '0051'
@@ -257,6 +266,7 @@ concerns:
   testing:
     - '0111'
     - 0187
+    - '0245'
   vm-topology:
     - '0005'
     - '0013'
@@ -4086,3 +4096,149 @@ adr_index:
       - axe-core
     summary: We will use Storybook for component stories and docs, Playwright for
     filename: 0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core.md
+  - adr: '0244'
+    title: Runtime Assurance Matrix Per Service And Environment
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - runtime
+      - assurance
+      - matrix
+      - per
+      - service
+      - environment
+    summary: We will govern runtime assurance through a service-by-environment assurance
+    filename: 0244-runtime-assurance-matrix-per-service-and-environment.md
+  - adr: '0245'
+    title: Declared-To-Live Service Attestation
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: testing
+    keywords:
+      - declared-to-live
+      - service
+      - attestation
+    summary: We will require declared-to-live service attestation for every active
+    filename: 0245-declared-to-live-service-attestation.md
+  - adr: '0246'
+    title: Startup, Readiness, Liveness, And Degraded State Semantics
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: release
+    keywords:
+      - startup
+      - readiness
+      - liveness
+      - degraded
+      - state
+      - semantics
+    summary: 'We will standardize four service-health semantics for runtime assurance:'
+    filename: 0246-startup-readiness-liveness-and-degraded-state-semantics.md
+  - adr: '0247'
+    title: Authenticated Browser Journey Verification Via Playwright
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - authenticated
+      - browser
+      - journey
+      - verification
+      - playwright
+    summary: We will use Playwright as the default browser-journey verification tool for
+    filename: 0247-authenticated-browser-journey-verification-via-playwright.md
+  - adr: 0248
+    title: Session And Logout Authority Across Keycloak, Oauth2-Proxy, And App Surfaces
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: security
+    keywords:
+      - session
+      - logout
+      - authority
+      - across
+      - keycloak
+      - oauth2-proxy
+      - app
+      - surfaces
+    summary: We will make Keycloak the session authority for protected browser surfaces
+    filename: 0248-session-and-logout-authority-across-keycloak-oauth2-proxy-and-apps.md
+  - adr: 0249
+    title: HTTPS And TLS Assurance Via Blackbox Exporter And testssl.sh
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: security
+    keywords:
+      - https
+      - tls
+      - assurance
+      - blackbox
+      - exporter
+      - testssl
+      - sh
+    summary: We will use Prometheus Blackbox Exporter for recurring protocol-level probe
+    filename: 0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md
+  - adr: '0250'
+    title: Log Ingestion And Queryability Canaries Via Loki Canary
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: monitoring
+    keywords:
+      - log
+      - ingestion
+      - queryability
+      - canaries
+      - loki
+      - canary
+    summary: We will use Loki Canary as the default end-to-end log-path assurance signal
+    filename: 0250-log-ingestion-and-queryability-canaries-via-loki-canary.md
+  - adr: '0251'
+    title: Stage-Scoped Smoke Suites And Promotion Gates
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - stage-scoped
+      - smoke
+      - suites
+      - promotion
+      - gates
+    summary: We will require stage-scoped smoke suites for active services and wire them
+    filename: 0251-stage-scoped-smoke-suites-and-promotion-gates.md
+  - adr: '0252'
+    title: Route And DNS Publication Assertion Ledger
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: networking
+    keywords:
+      - route
+      - dns
+      - publication
+      - assertion
+      - ledger
+    summary: We will maintain a route and DNS publication assertion ledger for all
+    filename: 0252-route-and-dns-publication-assertion-ledger.md
+  - adr: '0253'
+    title: Unified Runtime Assurance Scoreboard And Rollup
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - unified
+      - runtime
+      - assurance
+      - scoreboard
+      - rollup
+    summary: We will publish a unified runtime assurance scoreboard that rolls the
+    filename: 0253-unified-runtime-assurance-scoreboard-and-rollup.md

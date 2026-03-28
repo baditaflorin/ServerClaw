@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.48",
+  "repo_version": "0.177.49",
   "platform_version": "0.130.42",
-  "generated_at": "2026-03-28T19:34:49Z",
-  "next_refresh_at": "2026-03-28T20:34:49Z",
+  "generated_at": "2026-03-28T20:32:46Z",
+  "next_refresh_at": "2026-03-28T21:32:46Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4026,10 +4026,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.47",
+    "last_version": "0.177.48",
     "deployed_at": "2026-03-28",
-    "summary": "integrated ADR 0197 on current main by replaying the public Dify edge, re-verifying the governed `api.lv3.org` tool bridge, and preserving packaged API gateway runbook compatibility plus worktree-safe smoke tracing",
-    "release_notes_url": "docs/release-notes/0.177.48.md"
+    "summary": "accepted ADRs 0244 through 0253 to define a stage-aware runtime-assurance",
+    "release_notes_url": "docs/release-notes/0.177.49.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
