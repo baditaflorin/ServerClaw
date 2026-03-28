@@ -43,10 +43,10 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_service_topology"] == (
         "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('windmill') }}"
     )
-    assert defaults["windmill_server_port"] == "{{ windmill_service_topology | platform_service_port('windmill', 'internal') }}"
-    assert defaults["windmill_host_proxy_port"] == "{{ windmill_service_topology | platform_service_port('windmill', 'controller') }}"
-    assert defaults["windmill_private_base_url"] == "{{ windmill_service_topology | platform_service_url('windmill', 'internal') }}"
-    assert defaults["windmill_base_url"] == "{{ windmill_service_topology | platform_service_url('windmill', 'controller') }}"
+    assert defaults["windmill_server_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.windmill_server_port }}"
+    assert defaults["windmill_host_proxy_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.windmill_host_proxy_port }}"
+    assert defaults["windmill_private_base_url"] == "http://{{ windmill_service_topology.private_ip }}:{{ windmill_server_port }}"
+    assert defaults["windmill_base_url"] == "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
     assert defaults["windmill_healthcheck_script_path"] == "f/lv3/windmill_healthcheck"
     assert defaults["windmill_validation_gate_status_script_path"] == "f/lv3/gate-status"
     assert defaults["windmill_worker_checkout_repo_root_local_dir"] == "{{ playbook_dir }}/.."

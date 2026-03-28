@@ -146,6 +146,13 @@ curl -sS http://100.64.0.1:8083/v1/platform/runbooks/execute \
   -d '{"runbook_id":"validation-gate-status"}'
 ```
 
+When verifying from an SSH shell on `docker-runtime-lv3`, use the guest-local listeners instead of the Proxmox host proxy:
+
+- API gateway: `http://127.0.0.1:8083`
+- Windmill: `http://127.0.0.1:8000`
+
+The `http://100.64.0.1:8005` Windmill endpoint is the Proxmox host Tailscale proxy and is not expected to listen on the guest loopback.
+
 ## Windmill Worker Path
 
 From a worker checkout mounted at `/srv/proxmox_florin_server`:
