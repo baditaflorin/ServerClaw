@@ -7,7 +7,23 @@
     "notes": [
       "The current platform has one physical Hetzner host, so guest- or software-level warm standbys can be implemented but cross-host active redundancy cannot.",
       "Any future R3 declaration remains a design target until a second failure domain exists and live apply is allowed to converge both domains."
-    ]
+    ],
+    "rehearsal_gate": {
+      "tiers": {
+        "R1": {
+          "exercise": "restore_to_preview",
+          "freshness_window_days": 90
+        },
+        "R2": {
+          "exercise": "standby_switchover_or_promotion",
+          "freshness_window_days": 30
+        },
+        "R3": {
+          "exercise": "cross_domain_failover",
+          "freshness_window_days": 30
+        }
+      }
+    }
   },
   "services": {
     "alertmanager": {
@@ -519,6 +535,24 @@
         "location": "postgres-replica-lv3",
         "failover_trigger": "Promote postgres-replica-lv3 through the documented Patroni failover path when postgres-lv3 or the current leader becomes unavailable.",
         "failback_method": "Rebuild the old primary as a replica, let it resync, and only then move the writable VIP back if a planned failback is required."
+      },
+      "rehearsal": {
+        "proofs": [
+          {
+            "proves_tier": "R2",
+            "result": "fail",
+            "performed_on": "2026-03-27",
+            "exercise": "standby_switchover_or_promotion",
+            "trigger": "Operator-initiated planned PostgreSQL failover rehearsal from ws-0188-live-apply.",
+            "target_environment": "production",
+            "duration_minutes": 7,
+            "observed_rto_seconds": 0,
+            "observed_data_loss": "No switchover occurred because the standby guest and VIP path were both unavailable, so no data-loss window was exercised.",
+            "health_verification": "VM 151 is absent from `qm list`, `/etc/patroni` on VM 150 only contains template inputs, both `patroni` and `keepalived` are inactive on postgres-lv3, and the Proxmox host can open `10.10.10.50:5432` but not the expected VIP `10.10.10.55:5432`.",
+            "rollback_result": "Not applicable because no promotion or failback was performed.",
+            "evidence_ref": "receipts/live-applies/2026-03-27-adr-0188-postgres-rehearsal-evidence.md"
+          }
+        ]
       }
     },
     "proxmox_ui": {

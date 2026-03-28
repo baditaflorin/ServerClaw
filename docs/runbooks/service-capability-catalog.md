@@ -74,7 +74,7 @@ make show-service SERVICE=grafana
 
 This prints the lifecycle state, VM, URLs, health probe, image or secret references, degradation modes, runbook, dashboard, and tags for the selected service.
 
-For the redundancy tier, recovery objective, backup sources, and failover metadata, query the paired catalog:
+For the redundancy tier, implemented redundancy claim, recovery objective, backup sources, failover metadata, and rehearsal evidence, query the paired catalog:
 
 ```bash
 uv run --with pyyaml --with jsonschema python scripts/service_redundancy.py --service grafana

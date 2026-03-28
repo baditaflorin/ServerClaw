@@ -4595,6 +4595,38 @@ workstreams:
       latest_receipts:
         failure_domain_policy: 2026-03-27-adr-0184-failure-domain-labels-live-apply
 
+  - id: ws-0188-live-apply
+    adr: "0188"
+    title: Failover rehearsal gate live apply
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0188-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-ws-0188-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/worktree-ws-0188-live-apply/docs/workstreams/ws-0188-live-apply.md
+    depends_on:
+      - adr-0098-postgres-ha
+      - adr-0099-restore-verification
+      - adr-0179-service-redundancy-tier-matrix
+    conflicts_with: []
+    shared_surfaces:
+      - config/service-redundancy-catalog.json
+      - docs/schema/service-redundancy-catalog.schema.json
+      - scripts/service_redundancy.py
+      - docs/runbooks/service-redundancy-tier-matrix.md
+      - docs/runbooks/postgres-failover.md
+      - docs/runbooks/service-capability-catalog.md
+      - tests/test_service_redundancy.py
+      - receipts/live-applies/
+      - workstreams.yaml
+    ready_to_merge: false
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0188 failover rehearsal gating so redundancy reporting now distinguishes declared tiers from currently proven tiers and the unproven PostgreSQL warm-standby path is surfaced as implemented `R0`
+      release_bump: patch
+      included_in_repo_version: 0.177.20
+      latest_receipts:
+        service_redundancy: 2026-03-27-adr-0188-failover-rehearsal-gate-live-apply
+
   - id: ws-0191-live-apply
     adr: "0191"
     title: Immutable guest replacement for stateful and edge services

@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.19",
+  "repo_version": "0.177.20",
   "platform_version": "0.130.32",
-  "generated_at": "2026-03-28T01:03:43Z",
-  "next_refresh_at": "2026-03-28T02:03:43Z",
+  "generated_at": "2026-03-28T01:05:08Z",
+  "next_refresh_at": "2026-03-28T02:05:08Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3556,10 +3556,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.18",
+    "last_version": "0.177.19",
     "deployed_at": "2026-03-28",
-    "summary": "integrated ADR 0199 by publishing the repo-managed Outline living knowledge wiki at `wiki.lv3.org`, wiring the durable `outline.automation` Keycloak bootstrap path, and verifying the governed living-knowledge collections end to end",
-    "release_notes_url": "docs/release-notes/0.177.19.md"
+    "summary": "implemented ADR 0188 failover rehearsal gating so redundancy reporting now distinguishes declared tiers from currently proven tiers and the unproven PostgreSQL warm-standby path is surfaced as implemented `R0`",
+    "release_notes_url": "docs/release-notes/0.177.20.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -3650,13 +3650,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0187-anonymized-seed-data-snapshots-for-repeatable-tests.md"
-    },
-    {
-      "adr": "0188",
-      "title": "Failover Rehearsal Gate for Redundancy Tiers",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0188-failover-rehearsal-gate-for-redundancy-tiers.md"
     },
     {
       "adr": "0189",
