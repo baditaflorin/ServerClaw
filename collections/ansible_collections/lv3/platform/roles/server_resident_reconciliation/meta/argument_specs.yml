@@ -40,10 +40,6 @@ argument_specs:
         type: str
         required: false
         default: playbooks/server-resident-reconciliation.yml
-      server_resident_reconciliation_inventory_path:
-        type: str
-        required: false
-        default: inventory/hosts.yml
       server_resident_reconciliation_checkout_path:
         type: str
         required: false
@@ -52,6 +48,10 @@ argument_specs:
         type: str
         required: false
         default: /var/lib/lv3/server-resident-reconciliation
+      server_resident_reconciliation_inventory_path:
+        type: str
+        required: false
+        default: "{{ server_resident_reconciliation_runtime_root }}/ansible-pull-inventory.yml"
       server_resident_reconciliation_receipts_dir:
         type: str
         required: false

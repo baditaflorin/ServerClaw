@@ -102,6 +102,14 @@
     group: root
     mode: "0750"
 
+- name: Render the server-resident reconciliation ansible-pull inventory
+  ansible.builtin.template:
+    src: ansible-pull-inventory.yml.j2
+    dest: "{{ server_resident_reconciliation_inventory_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Render the server-resident reconciliation wrapper
   ansible.builtin.template:
     src: server-resident-reconciliation.sh.j2

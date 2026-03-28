@@ -1,0 +1,10 @@
+all:
+  vars:
+    gitea_controller_url: {{ server_resident_reconciliation_gitea_base_url | to_json }}
+  hosts:
+    localhost:
+      ansible_connection: local
+      ansible_python_interpreter: /usr/bin/python3
+    {{ server_resident_reconciliation_inventory_host }}:
+      ansible_connection: local
+      ansible_python_interpreter: /usr/bin/python3
