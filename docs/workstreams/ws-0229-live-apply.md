@@ -8,7 +8,7 @@
 - Owner: codex
 - Depends On: `adr-0083-docker-based-check-runner`, `adr-0143-gitea`, `adr-0168-automated-validation-gate`, `adr-0224-server-resident-operations-architecture-bundle`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md`, `docs/runbooks/configure-gitea.md`, `.gitea/workflows/validate.yml`, `playbooks/gitea.yml`, `collections/ansible_collections/lv3/platform/roles/gitea_runner/`, `collections/ansible_collections/lv3/platform/roles/gitea_runtime/`, `tests/test_gitea_runtime_role.py`, `receipts/live-applies/`, `workstreams.yaml`
+- Shared Surfaces: `docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md`, `docs/runbooks/configure-gitea.md`, `docs/diagrams/agent-coordination-map.excalidraw`, `.gitea/workflows/validate.yml`, `playbooks/gitea.yml`, `collections/ansible_collections/lv3/platform/roles/gitea_runner/`, `collections/ansible_collections/lv3/platform/roles/gitea_runtime/`, `tests/test_gitea_runtime_role.py`, `receipts/live-applies/`, `workstreams.yaml`
 
 ## Scope
 
@@ -27,6 +27,7 @@
 
 - `docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md`
 - `docs/workstreams/ws-0229-live-apply.md`
+- `docs/diagrams/agent-coordination-map.excalidraw`
 - `docs/runbooks/configure-gitea.md`
 - `docs/runbooks/validate-repository-automation.md`
 - `.gitea/workflows/validate.yml`

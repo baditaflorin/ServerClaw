@@ -7585,7 +7585,7 @@ workstreams:
   - id: ws-0229-live-apply
     adr: "0229"
     title: Gitea Actions runners live apply from latest origin/main
-    status: in-progress
+    status: in_progress
     owner: codex
     branch: codex/ws-0229-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0229-live-apply
@@ -7599,6 +7599,7 @@ workstreams:
     shared_surfaces:
       - docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md
       - docs/workstreams/ws-0229-live-apply.md
+      - docs/diagrams/agent-coordination-map.excalidraw
       - docs/runbooks/configure-gitea.md
       - docs/runbooks/validate-repository-automation.md
       - .gitea/workflows/validate.yml
@@ -7620,6 +7621,7 @@ workstreams:
           paths:
             - docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md
             - docs/workstreams/ws-0229-live-apply.md
+            - docs/diagrams/agent-coordination-map.excalidraw
             - docs/runbooks/configure-gitea.md
             - docs/runbooks/validate-repository-automation.md
             - .gitea/workflows/validate.yml
