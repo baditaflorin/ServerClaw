@@ -11,6 +11,8 @@ from typing import Any
 
 from pathlib import Path
 
+import jsonschema
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
@@ -94,6 +96,8 @@ CAPACITY_MODEL_PATH = repo_path("config", "capacity-model.json")
 CAPACITY_MODEL_SCHEMA_PATH = repo_path("docs", "schema", "capacity-model.schema.json")
 EPHEMERAL_POOL_CATALOG_PATH = repo_path("config", "ephemeral-capacity-pools.json")
 EPHEMERAL_POOL_SCHEMA_PATH = repo_path("docs", "schema", "ephemeral-capacity-pools.schema.json")
+PERSONA_CATALOG_PATH = repo_path("config", "persona-catalog.json")
+PERSONA_CATALOG_SCHEMA_PATH = repo_path("docs", "schema", "persona-catalog.schema.json")
 REPLACEABILITY_REVIEW_CATALOG_PATH = repo_path("config", "replaceability-review-catalog.json")
 VERSION_SEMANTICS_PATH = repo_path("config", "version-semantics.json")
 WORKSTREAMS_PATH = repo_path("workstreams.yaml")
@@ -137,6 +141,7 @@ IDENTITY_REQUIRED_METADATA = {
     "rotation_or_expiry",
     "credential_storage",
 }
+LAUNCHER_PURPOSES = {"operate", "observe", "learn", "plan", "administer"}
 
 
 def require_str_int_mapping(value: Any, path: str) -> dict[str, int]:
@@ -313,6 +318,9 @@ def validate_no_scaffold_placeholders() -> None:
         ),
         repo_path("config", "capability-contract-catalog.json"): load_json(
             repo_path("config", "capability-contract-catalog.json")
+        ),
+        repo_path("config", "persona-catalog.json"): load_json(
+            repo_path("config", "persona-catalog.json")
         ),
         repo_path("config", "service-redundancy-catalog.json"): load_json(
             repo_path("config", "service-redundancy-catalog.json")
@@ -2517,6 +2525,39 @@ def validate_slo_catalog_assets() -> None:
         raise ValueError("generated SLO artifacts are out of date")
 
 
+def validate_persona_catalog() -> None:
+    payload = load_json(PERSONA_CATALOG_PATH)
+    schema = load_json(PERSONA_CATALOG_SCHEMA_PATH)
+    jsonschema.validate(instance=payload, schema=schema)
+
+    personas = require_list(payload.get("personas"), "config/persona-catalog.json.personas")
+    seen_ids: set[str] = set()
+    default_count = 0
+    for index, persona in enumerate(personas):
+        path = f"config/persona-catalog.json.personas[{index}]"
+        persona = require_mapping(persona, path)
+        persona_id = require_identifier(persona.get("id"), f"{path}.id")
+        if persona_id in seen_ids:
+            raise ValueError(f"{path}.id duplicates '{persona_id}'")
+        seen_ids.add(persona_id)
+        require_str(persona.get("name"), f"{path}.name")
+        require_str(persona.get("description"), f"{path}.description")
+        is_default = require_bool(persona.get("default"), f"{path}.default")
+        if is_default:
+            default_count += 1
+        focus_purposes = require_string_list(persona.get("focus_purposes"), f"{path}.focus_purposes")
+        for purpose in focus_purposes:
+            if purpose not in LAUNCHER_PURPOSES:
+                raise ValueError(f"{path}.focus_purposes contains unsupported purpose '{purpose}'")
+        default_favorites = require_string_list(persona.get("default_favorites"), f"{path}.default_favorites")
+        for favorite in default_favorites:
+            if ":" not in favorite:
+                raise ValueError(f"{path}.default_favorites item '{favorite}' must use '<kind>:<id>' format")
+
+    if default_count != 1:
+        raise ValueError("config/persona-catalog.json must declare exactly one default persona")
+
+
 def validate_preview_environment_profiles() -> None:
     validate_profile_catalog(load_profile_catalog())
 
@@ -2577,6 +2618,7 @@ def validate_repository_data_models() -> int:
     validate_shared_policy_packs()
     validate_capacity_model_schema()
     validate_capacity_model()
+    validate_persona_catalog()
     validate_preview_environment_profiles()
     validate_ephemeral_pool_catalog()
     validate_replaceability_review_data()
