@@ -24,6 +24,7 @@ from public_surface_scan import (
 DEFAULT_RECEIPT_DIR = repo_path("receipts", "https-tls-assurance")
 DEFAULT_ARTIFACTS_ROOT = repo_path(".local", "https-tls-assurance")
 DEFAULT_TESTSSL_IMAGE = "ghcr.io/testssl/testssl.sh:latest"
+DEFAULT_TIMEOUT_SECONDS = 60
 
 
 def relative_repo_path(path: Path) -> str:
@@ -167,6 +168,7 @@ def run_scan(
 
 
 def build_parser() -> argparse.ArgumentParser:
+    timeout_default = int(os.environ.get("HTTPS_TLS_TIMEOUT_SECONDS", str(DEFAULT_TIMEOUT_SECONDS)))
     parser = argparse.ArgumentParser(
         description="Run the ADR 0249 HTTPS/TLS assurance scan and write a receipt."
     )
@@ -176,7 +178,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--testssl-image", default=os.environ.get("HTTPS_TLS_TESTSSL_IMAGE", DEFAULT_TESTSSL_IMAGE))
     parser.add_argument("--skip-testssl", action="store_true")
     parser.add_argument("--skip-pull", action="store_true")
-    parser.add_argument("--timeout-seconds", type=int, default=1800)
+    parser.add_argument("--timeout-seconds", type=int, default=timeout_default)
     parser.add_argument("--print-report-json", action="store_true")
     return parser
 

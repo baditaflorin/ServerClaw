@@ -24,6 +24,7 @@ FORCE ?= false
 ALLOW_IN_PLACE_MUTATION ?= false
 WARNING_DAYS ?= 45
 INACTIVE_DAYS ?= 60
+HTTPS_TLS_TIMEOUT_SECONDS ?= 60
 FAULT_INJECTION_ARGS ?=
 STAGING_RECEIPT ?=
 BRANCH ?=
@@ -619,7 +620,7 @@ public-surface-security-scan:
 
 https-tls-assurance:
 	@test -n "$(ENV)" || (echo "set ENV=<production|staging>"; exit 1)
-	uv run --with pyyaml python $(REPO_ROOT)/scripts/https_tls_assurance.py --env "$(ENV)"
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/https_tls_assurance.py --env "$(ENV)" --timeout-seconds "$(HTTPS_TLS_TIMEOUT_SECONDS)"
 
 security-headers-audit:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/security_headers_audit.py

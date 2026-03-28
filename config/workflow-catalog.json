@@ -2174,9 +2174,9 @@
       ],
       "verification_commands": [
         "python3 -m py_compile scripts/https_tls_assurance_targets.py scripts/generate_https_tls_assurance.py scripts/https_tls_assurance.py config/windmill/scripts/https-tls-assurance.py",
-        "python3 scripts/generate_https_tls_assurance.py --check",
-        "python3 scripts/https_tls_assurance.py --env production --skip-testssl --print-report-json",
-        "uv run --with pytest --with pyyaml pytest -q tests/test_https_tls_assurance_targets.py tests/test_monitoring_vm_role.py"
+        "uv run --with pyyaml python scripts/generate_https_tls_assurance.py --check",
+        "uv run --with pyyaml python scripts/https_tls_assurance.py --env production --skip-testssl --print-report-json",
+        "uv run --with pytest --with pyyaml pytest -q tests/test_https_tls_assurance_targets.py tests/test_monitoring_vm_role.py tests/test_https_tls_assurance_windmill_wrapper.py"
       ],
       "execution_class": "diagnostic",
       "budget": {

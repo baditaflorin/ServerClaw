@@ -28,11 +28,19 @@ Run the deeper TLS posture scan:
 make https-tls-assurance ENV=production
 ```
 
+The scheduled and `make` paths default to a 60-second per-target `testssl.sh`
+timeout so the sequential 31-surface production scan stays within the weekly
+workflow budget. Override it when a slower manual replay is intentional:
+
+```bash
+make https-tls-assurance ENV=production HTTPS_TLS_TIMEOUT_SECONDS=180
+```
+
 Or call the Python entrypoints directly:
 
 ```bash
-python3 scripts/generate_https_tls_assurance.py --write
-python3 scripts/https_tls_assurance.py --env production --print-report-json
+uv run --with pyyaml python scripts/generate_https_tls_assurance.py --write
+uv run --with pyyaml python scripts/https_tls_assurance.py --env production --timeout-seconds 60 --print-report-json
 ```
 
 ## What the workflow does
@@ -65,9 +73,9 @@ Use these checks after regenerating or replaying the workflow:
 
 ```bash
 python3 -m py_compile scripts/https_tls_assurance_targets.py scripts/generate_https_tls_assurance.py scripts/https_tls_assurance.py config/windmill/scripts/https-tls-assurance.py
-python3 scripts/generate_https_tls_assurance.py --check
-python3 scripts/https_tls_assurance.py --env production --skip-testssl --print-report-json
-uv run --with pytest --with pyyaml pytest -q tests/test_https_tls_assurance_targets.py tests/test_monitoring_vm_role.py
+uv run --with pyyaml python scripts/generate_https_tls_assurance.py --check
+uv run --with pyyaml python scripts/https_tls_assurance.py --env production --skip-testssl --print-report-json
+uv run --with pytest --with pyyaml pytest -q tests/test_https_tls_assurance_targets.py tests/test_monitoring_vm_role.py tests/test_https_tls_assurance_windmill_wrapper.py
 ```
 
 After `make converge-monitoring`, confirm:
@@ -77,3 +85,10 @@ After `make converge-monitoring`, confirm:
 - Prometheus reports the `https-tls-blackbox` job as healthy
 - the newest receipt under `receipts/https-tls-assurance/` matches the current
   discovered target set
+
+If `ssh -J` is unreliable from a clean controller checkout, the same guest
+verification can use an explicit proxy hop instead:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -W %h:%p ops@100.64.0.1' ops@10.10.10.40 'curl -fsS http://127.0.0.1:9090/api/v1/rules | jq -e ".data.groups[] | select(.name == \"https_tls_assurance\")" >/dev/null'
+```
