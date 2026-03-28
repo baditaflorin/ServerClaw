@@ -17,6 +17,12 @@ playbooks:
     shared_surfaces:
       - service:control-plane-recovery
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/coolify.yml:
+    playbook_id: coolify
+    mutation_scope: platform
+    shared_surfaces:
+      - service:coolify
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/database-dns.yml:
     playbook_id: database-dns
     mutation_scope: platform
@@ -154,6 +160,12 @@ playbooks:
     mutation_scope: host
     shared_surfaces:
       - service:proxmox-install
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/proxmox-staging-bridge.yml:
+    playbook_id: proxmox-staging-bridge
+    mutation_scope: host
+    shared_surfaces:
+      - service:staging-environment
       - inventory/host_vars/proxmox_florin.yml
   playbooks/rag-context.yml:
     playbook_id: rag-context

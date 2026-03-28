@@ -1,0 +1,28 @@
+---
+# Playbook: services/coolify.yml
+# Purpose: Expose the governed service wrapper for the Coolify multi-play converge path.
+# Use case: Used by make live-apply-service service=coolify and other scoped live-apply entrypoints.
+#
+# Inputs (required):
+#   - bootstrap_ssh_private_key (controller secret, required): Controller-side SSH key used by the imported playbook.
+#
+# Inputs (optional):
+#   - env (string, optional, default=production): Target deployment environment.
+#
+# Outputs:
+#   - Imports and executes playbooks/coolify.yml.
+#
+# Idempotency: Fully idempotent
+#              This wrapper only imports the canonical Coolify playbook.
+#
+# Dependencies:
+#   - ADR 0194: Coolify PaaS deploy from repo.
+#   - Requires: playbooks/coolify.yml exists and remains the canonical Coolify service converge path.
+#
+# Related ADRs: 0194
+# Related Runbooks: docs/runbooks/configure-coolify.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-27
+
+- import_playbook: ../coolify.yml

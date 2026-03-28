@@ -424,6 +424,22 @@ def validate_service_topology_entry(
     if edge is not None:
         edge = require_mapping(edge, f"lv3_service_topology.{service_id}.edge")
         enabled = require_bool(edge.get("enabled"), f"lv3_service_topology.{service_id}.edge.enabled")
+        aliases = require_string_list(
+            edge.get("aliases", []), f"lv3_service_topology.{service_id}.edge.aliases"
+        )
+        for index, alias in enumerate(aliases):
+            alias = require_str(alias, f"lv3_service_topology.{service_id}.edge.aliases[{index}]")
+            if not (
+                HOSTNAME_PATTERN.match(alias)
+                or (
+                    alias.startswith("*.")
+                    and HOSTNAME_PATTERN.match(alias[2:])
+                    and "." in alias[2:]
+                )
+            ):
+                raise ValueError(
+                    f"lv3_service_topology.{service_id}.edge.aliases[{index}] must be a lowercase hostname or wildcard hostname"
+                )
         if enabled:
             if public_hostname is None:
                 raise ValueError(f"lv3_service_topology.{service_id} enables edge without public_hostname")

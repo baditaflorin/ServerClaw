@@ -115,6 +115,11 @@ platform_host:
         listen_port: 443
         upstream_host: 10.10.10.20
         upstream_port: 8222
+      - name: coolify
+        listen_address: 100.64.0.1
+        listen_port: 8012
+        upstream_host: 10.10.10.70
+        upstream_port: 8000
 platform_ports:
   alertmanager_port: 9093
   monitoring_grafana_port: 3000
@@ -146,6 +151,9 @@ platform_ports:
   dozzle_agent_port: 7007
   ollama_api_port: 11434
   n8n_port: 5678
+  coolify_dashboard_port: 8000
+  coolify_proxy_port: 80
+  coolify_host_proxy_port: 8012
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
   api_gateway_internal_port: 8083
@@ -192,6 +200,9 @@ platform_port_assignments:
   dozzle_agent_port: 7007
   ollama_api_port: 11434
   n8n_port: 5678
+  coolify_dashboard_port: 8000
+  coolify_proxy_port: 80
+  coolify_host_proxy_port: 8012
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
   api_gateway_internal_port: 8083
@@ -346,6 +357,24 @@ platform_guest_catalog:
       packages:
         - acl
         - xfsprogs
+    - vmid: 170
+      name: coolify-lv3
+      role: coolify
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.70
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:C7:84:19
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 96
+      tags:
+        - paas
+        - coolify
+        - lv3
+      packages:
+        - docker.io
+        - git
   by_name:
     nginx-lv3:
       vmid: 110
@@ -491,6 +520,25 @@ platform_guest_catalog:
       packages:
         - acl
         - xfsprogs
+    coolify-lv3:
+      vmid: 170
+      name: coolify-lv3
+      role: coolify
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.70
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:C7:84:19
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 96
+      tags:
+        - paas
+        - coolify
+        - lv3
+      packages:
+        - docker.io
+        - git
   by_role:
     nginx:
       vmid: 110
@@ -636,6 +684,25 @@ platform_guest_catalog:
       packages:
         - acl
         - xfsprogs
+    coolify:
+      vmid: 170
+      name: coolify-lv3
+      role: coolify
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.70
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:C7:84:19
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 96
+      tags:
+        - paas
+        - coolify
+        - lv3
+      packages:
+        - docker.io
+        - git
 platform_service_topology:
   nginx_edge:
     service_name: nginx-edge
@@ -1175,6 +1242,71 @@ platform_service_topology:
     urls:
       public: https://n8n.lv3.org
       internal: http://10.10.10.20:5678
+  coolify:
+    service_name: coolify
+    owning_vm: coolify-lv3
+    private_ip: 10.10.10.70
+    public_hostname: coolify.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: coolify
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.70:8000
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8012
+    service_id: coolify
+    ports:
+      internal: 8000
+      controller: 8012
+    urls:
+      public: https://coolify.lv3.org
+      internal: http://10.10.10.70:8000
+      controller: http://100.64.0.1:8012
+  coolify_apps:
+    service_name: coolify-apps
+    owning_vm: coolify-lv3
+    private_ip: 10.10.10.70
+    public_hostname: apps.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: apps
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.70:80
+      aliases:
+        - '*.apps.lv3.org'
+      crawl_policy_enabled: false
+      security_headers_enabled: false
+      preserve_upstream_security_headers: true
+    service_id: coolify_apps
+    ports:
+      internal: 80
+    urls:
+      public: https://apps.lv3.org
+      internal: http://10.10.10.70:80
   api_gateway:
     service_name: api-gateway
     owning_vm: docker-runtime-lv3
@@ -1479,6 +1611,14 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: n8n
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: coolify
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: apps
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -2096,6 +2236,71 @@ public_edge_service_topology:
     urls:
       public: https://n8n.lv3.org
       internal: http://10.10.10.20:5678
+  coolify:
+    service_name: coolify
+    owning_vm: coolify-lv3
+    private_ip: 10.10.10.70
+    public_hostname: coolify.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: coolify
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.70:8000
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8012
+    service_id: coolify
+    ports:
+      internal: 8000
+      controller: 8012
+    urls:
+      public: https://coolify.lv3.org
+      internal: http://10.10.10.70:8000
+      controller: http://100.64.0.1:8012
+  coolify_apps:
+    service_name: coolify-apps
+    owning_vm: coolify-lv3
+    private_ip: 10.10.10.70
+    public_hostname: apps.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: apps
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.70:80
+      aliases:
+        - '*.apps.lv3.org'
+      crawl_policy_enabled: false
+      security_headers_enabled: false
+      preserve_upstream_security_headers: true
+    service_id: coolify_apps
+    ports:
+      internal: 80
+    urls:
+      public: https://apps.lv3.org
+      internal: http://10.10.10.70:80
   api_gateway:
     service_name: api-gateway
     owning_vm: docker-runtime-lv3
@@ -2457,6 +2662,9 @@ dozzle_http_port: 8089
 dozzle_agent_port: 7007
 ollama_api_port: 11434
 n8n_port: 5678
+coolify_dashboard_port: 8000
+coolify_proxy_port: 80
+coolify_host_proxy_port: 8012
 open_webui_port: 8088
 homepage_port: 3090
 ops_portal_port: 8092

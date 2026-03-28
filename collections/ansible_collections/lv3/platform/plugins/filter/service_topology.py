@@ -36,6 +36,7 @@ def service_topology_edge_certificate_domains(catalog):
         if edge.get("enabled") and edge.get("tls", True) and service.get(
             "public_hostname"
         ):
+            domains.extend(edge.get("aliases", []))
             domains.append(service["public_hostname"])
     return domains
 

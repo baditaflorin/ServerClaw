@@ -151,6 +151,27 @@
       "notes": "Validated from live qm config on 2026-03-23. Disk includes the 32 GB root disk plus the 640 GB PBS datastore disk."
     },
     {
+      "vmid": 170,
+      "name": "coolify-lv3",
+      "status": "active",
+      "environment": "production",
+      "metrics_host": "coolify-lv3",
+      "allocated": {
+        "ram_gb": 8,
+        "vcpu": 4,
+        "disk_gb": 96
+      },
+      "budget": {
+        "ram_gb": 12,
+        "vcpu": 6,
+        "disk_gb": 128
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Declared from inventory for ADR 0194 Coolify rollout."
+    },
+    {
       "vmid": 210,
       "name": "nginx-staging-lv3",
       "status": "planned",

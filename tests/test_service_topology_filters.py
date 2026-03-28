@@ -79,3 +79,23 @@ def test_root_headscale_playbook_does_not_duplicate_edge_site_overrides() -> Non
     )
 
     assert "vars" not in edge_publish_play
+
+
+def test_edge_certificate_domains_include_aliases() -> None:
+    filters = load_module()
+    domains = filters.service_topology_edge_certificate_domains(
+        {
+            "coolify_apps": {
+                "public_hostname": "apps.lv3.org",
+                "edge": {
+                    "enabled": True,
+                    "tls": True,
+                    "kind": "proxy",
+                    "upstream": "http://10.10.10.70:80",
+                    "aliases": ["*.apps.lv3.org"],
+                },
+            }
+        }
+    )
+
+    assert domains == ["*.apps.lv3.org", "apps.lv3.org"]

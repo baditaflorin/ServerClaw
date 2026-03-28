@@ -240,6 +240,20 @@
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
     },
+    "coolify": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": true
+    },
+    "coolify_apps": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false
+    },
     "vaultwarden": {
       "service_type": "compose",
       "requires_subdomain": true,

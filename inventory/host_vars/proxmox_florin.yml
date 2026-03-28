@@ -52,6 +52,9 @@ platform_port_assignments:
   dozzle_agent_port: 7007
   ollama_api_port: 11434
   n8n_port: 5678
+  coolify_dashboard_port: 8000
+  coolify_proxy_port: 80
+  coolify_host_proxy_port: 8012
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
   api_gateway_internal_port: 8083
@@ -162,6 +165,11 @@ proxmox_tailscale_tcp_proxies:
     listen_port: 443
     upstream_host: 10.10.10.20
     upstream_port: "{{ platform_port_assignments.vaultwarden_https_port }}"
+  - name: coolify
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: "{{ platform_port_assignments.coolify_host_proxy_port }}"
+    upstream_host: 10.10.10.70
+    upstream_port: "{{ platform_port_assignments.coolify_dashboard_port }}"
 
 proxmox_guests:
   - vmid: 110
@@ -301,6 +309,24 @@ proxmox_guests:
     packages:
       - acl
       - xfsprogs
+  - vmid: 170
+    name: coolify-lv3
+    role: coolify
+    template_key: lv3-debian-base
+    ipv4: 10.10.10.70
+    cidr: 24
+    gateway4: 10.10.10.1
+    macaddr: BC:24:11:C7:84:19
+    cores: 4
+    memory_mb: 8192
+    disk_gb: 96
+    tags:
+      - paas
+      - coolify
+      - lv3
+    packages:
+      - docker.io
+      - git
 
 network_policy:
   guest_management_sources:
@@ -523,6 +549,30 @@ network_policy:
             - 2379
             - 2380
           description: etcd quorum traffic from the replica PostgreSQL member
+    coolify-lv3:
+      allow_container_forwarding: true
+      allowed_inbound:
+        - source: management
+          protocol: tcp
+          ports:
+            - 22
+          description: Operator and Ansible SSH access
+        - source: host
+          protocol: tcp
+          ports:
+            - 8000
+          description: Proxmox host Tailscale controller proxy access to the Coolify dashboard API
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 22
+          description: Docker bridge access for Coolify self-managed deployment server SSH validation
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 80
+            - 8000
+          description: Shared edge publication for the Coolify dashboard and wildcard app ingress
     postgres-lv3:
       allowed_inbound:
         - source: management
@@ -1067,6 +1117,57 @@ lv3_service_topology:
       tls: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.n8n_port }}"
+  coolify:
+    service_name: coolify
+    owning_vm: coolify-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: coolify.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: coolify
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.coolify_dashboard_port }}"
+    access:
+      kind: tailscale-tcp-proxy
+      url: "{{ coolify_controller_url }}"
+  coolify_apps:
+    service_name: coolify-apps
+    owning_vm: coolify-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: apps.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: apps
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.coolify_proxy_port }}"
+      aliases:
+        - "*.apps.lv3.org"
+      crawl_policy_enabled: false
+      security_headers_enabled: false
+      preserve_upstream_security_headers: true
   api_gateway:
     service_name: api-gateway
     owning_vm: docker-runtime-lv3

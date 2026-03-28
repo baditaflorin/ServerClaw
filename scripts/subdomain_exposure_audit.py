@@ -121,6 +121,7 @@ def build_edge_route_index(
         for hostname in subdomain_catalog.collect_site_hostnames(
             site,
             f"inventory/host_vars/proxmox_florin.yml.lv3_service_topology.{service_id}",
+            allow_wildcards=True,
         ):
             routes[hostname] = _route_entry(
                 hostname=hostname,
@@ -138,7 +139,11 @@ def build_edge_route_index(
         )
     ):
         site = subdomain_catalog.require_mapping(site, f"public_edge_extra_sites[{index}]")
-        for hostname in subdomain_catalog.collect_site_hostnames(site, f"public_edge_extra_sites[{index}]"):
+        for hostname in subdomain_catalog.collect_site_hostnames(
+            site,
+            f"public_edge_extra_sites[{index}]",
+            allow_wildcards=True,
+        ):
             routes[hostname] = _route_entry(
                 hostname=hostname,
                 route_source="public_edge_extra_sites",
@@ -151,6 +156,27 @@ def build_edge_route_index(
             )
 
     return routes
+
+
+def resolve_route_for_hostname(
+    hostname: str,
+    route_index: dict[str, dict[str, Any]] | list[dict[str, Any]],
+) -> dict[str, Any] | None:
+    if isinstance(route_index, list):
+        route_index = {
+            subdomain_catalog.require_str(entry.get("hostname"), "route.hostname"): entry
+            for entry in route_index
+        }
+    route = route_index.get(hostname)
+    if route is not None:
+        return route
+    for route_hostname, route_entry in route_index.items():
+        if subdomain_catalog.hostname_matches_route(hostname, route_hostname):
+            return route_entry
+        for alias in route_entry.get("aliases", []):
+            if subdomain_catalog.hostname_matches_route(hostname, alias):
+                return route_entry
+    return None
 
 
 def build_registry(
@@ -172,7 +198,7 @@ def build_registry(
     registry_entries: list[dict[str, Any]] = []
 
     for entry in sorted(catalog["subdomains"], key=lambda item: item["fqdn"]):
-        route = route_index.get(entry["fqdn"])
+        route = resolve_route_for_hostname(entry["fqdn"], route_index)
         route_mode = "edge" if route else "dns-only"
         is_public_dns = entry["environment"] == "production" and entry["exposure"] != "private-only"
         registry_entries.append(

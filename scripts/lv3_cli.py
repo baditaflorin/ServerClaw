@@ -377,6 +377,60 @@ def resolve_deploy_command(service_id: str, environment: str) -> CommandPlan:
     )
 
 
+def resolve_deploy_repo_command(
+    *,
+    repo: str,
+    branch: str,
+    app_name: str,
+    project: str,
+    environment: str,
+    base_directory: str | None,
+    domain: str | None,
+    subdomain: str | None,
+    build_pack: str,
+    wait: bool,
+    force: bool,
+    timeout: int,
+) -> CommandPlan:
+    coolify_args: list[str] = [
+        "--repo",
+        repo,
+        "--branch",
+        branch,
+        "--app-name",
+        app_name,
+        "--project",
+        project,
+        "--environment",
+        environment,
+        "--build-pack",
+        build_pack,
+    ]
+    if base_directory:
+        coolify_args.extend(["--base-directory", base_directory])
+    if domain:
+        coolify_args.extend(["--domain", domain])
+    if subdomain:
+        coolify_args.extend(["--subdomain", subdomain])
+    if wait:
+        coolify_args.append("--wait")
+    if force:
+        coolify_args.append("--force")
+    if timeout != 900:
+        coolify_args.extend(["--timeout", str(timeout)])
+
+    return CommandPlan(
+        label=f"deploy-repo {app_name}",
+        route="controller local -> Coolify API wrapper",
+        command=[
+            "make",
+            "coolify-manage",
+            "ACTION=deploy-repo",
+            f"COOLIFY_ARGS={command_string(coolify_args)}",
+        ],
+    )
+
+
 def resolve_lint_command(local: bool) -> CommandPlan:
     if local:
         return CommandPlan(
@@ -2372,6 +2426,22 @@ def build_parser() -> argparse.ArgumentParser:
     deploy.add_argument("--dry-run", action="store_true")
     deploy.add_argument("--explain", action="store_true")
 
+    deploy_repo = subparsers.add_parser("deploy-repo", help="Deploy one repository through the governed Coolify wrapper.")
+    deploy_repo.add_argument("--repo", required=True, help="Repository URL.")
+    deploy_repo.add_argument("--branch", default="main", help="Repository branch.")
+    deploy_repo.add_argument("--base-directory", help="Optional base directory inside the repository.")
+    deploy_repo.add_argument("--app-name", default="repo-smoke", help="Coolify application name.")
+    deploy_repo.add_argument("--project", default="LV3 Apps", help="Coolify project name.")
+    deploy_repo.add_argument("--environment", default="production", help="Coolify environment name.")
+    deploy_repo.add_argument("--domain", help="Full domain URL, for example http://apps.lv3.org.")
+    deploy_repo.add_argument("--subdomain", help="Subdomain under apps.lv3.org, for example hello.")
+    deploy_repo.add_argument("--build-pack", default="static", choices=["nixpacks", "static", "dockerfile", "dockercompose"])
+    deploy_repo.add_argument("--wait", action="store_true")
+    deploy_repo.add_argument("--force", action="store_true")
+    deploy_repo.add_argument("--timeout", type=int, default=900)
+    deploy_repo.add_argument("--dry-run", action="store_true")
+    deploy_repo.add_argument("--explain", action="store_true")
+
     impact = subparsers.add_parser("impact", help="Show dependency and failure impact for one service.")
     impact.add_argument("service")
 
@@ -2730,6 +2800,26 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "deploy":
         return run_plan(resolve_deploy_command(args.service, args.env), dry_run=args.dry_run, explain=args.explain, no_color=no_color)
+    if args.command == "deploy-repo":
+        return run_plan(
+            resolve_deploy_repo_command(
+                repo=args.repo,
+                branch=args.branch,
+                app_name=args.app_name,
+                project=args.project,
+                environment=args.environment,
+                base_directory=args.base_directory,
+                domain=args.domain,
+                subdomain=args.subdomain,
+                build_pack=args.build_pack,
+                wait=args.wait,
+                force=args.force,
+                timeout=args.timeout,
+            ),
+            dry_run=args.dry_run,
+            explain=args.explain,
+            no_color=no_color,
+        )
     if args.command == "impact":
         return impact_command(args.service)
     if args.command == "lint":

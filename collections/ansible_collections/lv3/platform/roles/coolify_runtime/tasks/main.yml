@@ -1,0 +1,450 @@
+---
+- name: Validate Coolify runtime inputs
+  ansible.builtin.assert:
+    that:
+      - coolify_app_image | length > 0
+      - coolify_realtime_image | length > 0
+      - coolify_site_dir | length > 0
+      - coolify_data_root | length > 0
+      - coolify_compose_file | length > 0
+      - coolify_env_file | length > 0
+      - coolify_controller_url | length > 0
+      - coolify_private_url | length > 0
+      - coolify_public_url | length > 0
+      - coolify_dashboard_port | int > 0
+      - coolify_proxy_port | int > 0
+      - coolify_root_email | length > 0
+      - coolify_root_password_local_file | length > 0
+      - coolify_api_token_local_file | length > 0
+      - coolify_server_key_local_file | length > 0
+      - coolify_server_key_public_local_file | length > 0
+      - coolify_admin_auth_local_file | length > 0
+      - coolify_api_allowed_ips | length > 0
+    fail_msg: "coolify_runtime requires runtime paths, controller URLs, local bootstrap artifacts, and API allowlist inputs."
+
+- name: Ensure the Coolify local artifact directory exists
+  ansible.builtin.file:
+    path: "{{ coolify_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Ensure the Coolify root password exists locally
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ coolify_root_password_local_file }}" ]; then
+      umask 077
+      password="$(openssl rand -base64 24 | tr -d '\n')Aa1!"
+      printf '%s\n' "${password}" > "{{ coolify_root_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: coolify_root_password_generation
+  changed_when: "'changed' in coolify_root_password_generation.stdout"
+  no_log: true
+
+- name: Ensure the Coolify deployment SSH key exists locally
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ coolify_server_key_local_file }}" ] || [ ! -s "{{ coolify_server_key_public_local_file }}" ]; then
+      rm -f "{{ coolify_server_key_local_file }}" "{{ coolify_server_key_public_local_file }}"
+      umask 077
+      ssh-keygen -t ed25519 -N "" -C "coolify-lv3" -f "{{ coolify_server_key_local_file }}" >/dev/null
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: coolify_server_key_generation
+  changed_when: "'changed' in coolify_server_key_generation.stdout"
+  no_log: true
+
+- name: Read the Coolify root password from the control machine
+  ansible.builtin.slurp:
+    src: "{{ coolify_root_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: coolify_root_password_raw
+  no_log: true
+
+- name: Read the Coolify SSH private key from the control machine
+  ansible.builtin.slurp:
+    src: "{{ coolify_server_key_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: coolify_server_private_key_raw
+  no_log: true
+
+- name: Read the Coolify SSH public key from the control machine
+  ansible.builtin.slurp:
+    src: "{{ coolify_server_key_public_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: coolify_server_public_key_raw
+  no_log: true
+
+- name: Record Coolify bootstrap facts
+  ansible.builtin.set_fact:
+    coolify_root_password: "{{ coolify_root_password_raw.content | b64decode | trim }}"
+    coolify_server_private_key: "{{ coolify_server_private_key_raw.content | b64decode }}"
+    coolify_server_public_key: "{{ coolify_server_public_key_raw.content | b64decode | trim }}"
+    coolify_api_allowed_ips_csv: "{{ coolify_api_allowed_ips | join(',') }}"
+    coolify_app_key: "{{ (coolify_root_password_raw.content | b64decode | trim ~ ':app') | hash('sha256') | truncate(32, True, '') }}"
+    coolify_db_password: "{{ (coolify_root_password_raw.content | b64decode | trim ~ ':db') | hash('sha256') | truncate(32, True, '') }}"
+    coolify_redis_password: "{{ (coolify_root_password_raw.content | b64decode | trim ~ ':redis') | hash('sha256') | truncate(32, True, '') }}"
+    coolify_pusher_app_id: "{{ ((coolify_root_password_raw.content | b64decode | trim ~ ':pusher:id') | hash('sha256'))[:12] }}"
+    coolify_pusher_app_key: "{{ ((coolify_root_password_raw.content | b64decode | trim ~ ':pusher:key') | hash('sha256'))[:32] }}"
+    coolify_pusher_app_secret: "{{ ((coolify_root_password_raw.content | b64decode | trim ~ ':pusher:secret') | hash('sha256'))[:32] }}"
+  no_log: true
+
+- name: Ensure Coolify runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: >-
+      {{
+        'root'
+        if item in [coolify_site_dir, coolify_bootstrap_dir]
+        else coolify_container_uid
+      }}
+    group: >-
+      {{
+        'root'
+        if item in [coolify_site_dir, coolify_bootstrap_dir]
+        else coolify_container_gid
+      }}
+    mode: "{{ '0700' if item.startswith(coolify_bootstrap_dir) else '0755' }}"
+  loop:
+    - "{{ coolify_site_dir }}"
+    - "{{ coolify_bootstrap_dir }}"
+    - "{{ coolify_data_root }}"
+    - "{{ coolify_data_root }}/source"
+    - "{{ coolify_data_root }}/ssh"
+    - "{{ coolify_data_root }}/applications"
+    - "{{ coolify_data_root }}/databases"
+    - "{{ coolify_data_root }}/services"
+    - "{{ coolify_data_root }}/backups"
+    - "{{ coolify_proxy_path }}"
+    - "{{ coolify_proxy_path }}/dynamic"
+
+- name: Install the Coolify bootstrap SSH private key on the guest
+  ansible.builtin.copy:
+    dest: "{{ coolify_bootstrap_private_key_file }}"
+    content: "{{ coolify_server_private_key }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Ensure root can accept the Coolify deployment SSH key
+  ansible.posix.authorized_key:
+    user: root
+    key: "{{ coolify_server_public_key }}"
+    state: present
+
+- name: Render the Coolify environment file
+  ansible.builtin.template:
+    src: coolify.env.j2
+    dest: "{{ coolify_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the Coolify compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ coolify_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Coolify container images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ coolify_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ coolify_site_dir }}"
+  register: coolify_pull
+  changed_when: >-
+    'Pulling' in coolify_pull.stdout
+    or 'Downloaded newer image' in coolify_pull.stdout
+    or 'Pull complete' in coolify_pull.stdout
+
+- name: Start the Coolify stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ coolify_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ coolify_site_dir }}"
+  register: coolify_up
+  changed_when: >-
+    'Creating' in coolify_up.stdout
+    or 'Recreating' in coolify_up.stdout
+    or 'Starting' in coolify_up.stdout
+
+- name: Wait for Coolify to listen on the guest dashboard port
+  ansible.builtin.wait_for:
+    host: "{{ ansible_host }}"
+    port: "{{ coolify_dashboard_port }}"
+    delay: 0
+    timeout: 240
+
+- name: Wait for the guest-local Coolify health endpoint
+  ansible.builtin.uri:
+    url: "{{ coolify_private_url }}/api/health"
+    method: GET
+    status_code: 200
+    return_content: true
+    validate_certs: "{{ coolify_verify_ssl }}"
+  register: coolify_health
+  retries: 30
+  delay: 5
+  until:
+    - coolify_health.status == 200
+    - >-
+      (
+        (coolify_health.json.success | default(false)) | bool
+      ) or (
+        (coolify_health.content | default('') | trim) == 'OK'
+      )
+  changed_when: false
+
+- name: Ensure the Coolify root account and API settings are enforced
+  ansible.builtin.shell: |
+    set -euo pipefail
+    docker exec \
+      -e LV3_ROOT_USERNAME="{{ coolify_root_username }}" \
+      -e LV3_ROOT_EMAIL="{{ coolify_root_email }}" \
+      -e LV3_ROOT_PASSWORD="{{ coolify_root_password }}" \
+      -e LV3_ALLOWED_IPS="{{ coolify_api_allowed_ips_csv }}" \
+      "{{ coolify_service_name }}" \
+      php artisan tinker --execute='
+        use App\Models\InstanceSettings;
+        use App\Models\User;
+        use Illuminate\Support\Facades\Hash;
+
+        $user = User::find(0);
+        if (! $user) {
+            $user = User::create([
+                "id" => 0,
+                "name" => getenv("LV3_ROOT_USERNAME"),
+                "email" => getenv("LV3_ROOT_EMAIL"),
+                "password" => Hash::make(getenv("LV3_ROOT_PASSWORD")),
+            ]);
+        } else {
+            $user->name = getenv("LV3_ROOT_USERNAME");
+            $user->email = getenv("LV3_ROOT_EMAIL");
+            $user->password = Hash::make(getenv("LV3_ROOT_PASSWORD"));
+            $user->save();
+        }
+
+        $settings = InstanceSettings::find(0);
+        if (! $settings) {
+            $settings = InstanceSettings::create(["id" => 0]);
+        }
+        $settings->is_registration_enabled = false;
+        $settings->is_api_enabled = true;
+        $settings->allowed_ips = getenv("LV3_ALLOWED_IPS");
+        $settings->save();
+
+      echo "__LV3_BOOTSTRAP__" . json_encode([
+          "root_user_id" => $user->id,
+          "api_enabled" => $settings->is_api_enabled,
+          "allowed_ips" => $settings->allowed_ips,
+        ]);
+      '
+  args:
+    executable: /bin/bash
+  register: coolify_bootstrap_state
+  changed_when: false
+  no_log: true
+
+- name: Register the Coolify deployment SSH key and local server
+  ansible.builtin.shell: |
+    set -euo pipefail
+    docker exec \
+      -e LV3_SERVER_PRIVATE_KEY_B64="{{ coolify_server_private_key | b64encode }}" \
+      "{{ coolify_service_name }}" \
+      php artisan tinker --execute='
+      use App\Actions\Server\ValidateServer;
+      use App\Models\PrivateKey;
+      use App\Models\Server;
+      use App\Models\StandaloneDocker;
+
+      $keyName = "{{ coolify_server_name }}";
+      $privateKey = base64_decode(getenv("LV3_SERVER_PRIVATE_KEY_B64"));
+      $record = PrivateKey::where("team_id", 0)->where("name", $keyName)->first();
+      if (! $record) {
+          $record = PrivateKey::create([
+              "team_id" => 0,
+              "name" => $keyName,
+              "description" => "Repo-managed SSH key for the local Coolify deployment target.",
+              "private_key" => $privateKey,
+          ]);
+      } else {
+          $record->description = "Repo-managed SSH key for the local Coolify deployment target.";
+          $record->private_key = $privateKey;
+          $record->save();
+      }
+
+      $server = Server::where("team_id", 0)->where("name", "{{ coolify_server_name }}")->first();
+      if (! $server) {
+          $server = Server::create([
+              "name" => "{{ coolify_server_name }}",
+              "description" => "{{ coolify_server_description }}",
+              "ip" => "{{ coolify_server_host }}",
+              "port" => {{ coolify_server_port | int }},
+              "user" => "{{ coolify_server_user }}",
+              "private_key_id" => $record->id,
+              "team_id" => 0,
+          ]);
+      } else {
+          $server->description = "{{ coolify_server_description }}";
+          $server->ip = "{{ coolify_server_host }}";
+          $server->port = {{ coolify_server_port | int }};
+          $server->user = "{{ coolify_server_user }}";
+          $server->private_key_id = $record->id;
+          $server->save();
+      }
+
+      $server->proxy->set("type", "{{ coolify_server_proxy_type }}");
+      $server->proxy->set("status", "exited");
+      $server->save();
+      ValidateServer::run($server);
+      $server = Server::find($server->id)->load("settings");
+      $destination = StandaloneDocker::where("server_id", $server->id)->orderBy("id")->first();
+
+      echo "__LV3_SERVER_REGISTRATION__" . json_encode([
+          "server_uuid" => $server->uuid,
+          "destination_uuid" => $destination ? $destination->uuid : null,
+          "is_reachable" => $server->settings->is_reachable,
+          "is_usable" => $server->settings->is_usable,
+          "proxy_type" => $server->proxyType(),
+      ]);
+    '
+  args:
+    executable: /bin/bash
+  register: coolify_server_registration
+  changed_when: false
+  no_log: true
+
+- name: Record the Coolify server registration payload
+  ansible.builtin.set_fact:
+    coolify_server_registration_payload: >-
+      {{
+        (
+          coolify_server_registration.stdout_lines
+          | select('match', '^__LV3_SERVER_REGISTRATION__')
+          | map('regex_replace', '^__LV3_SERVER_REGISTRATION__', '')
+          | list
+          | first
+          | default('{}', true)
+        ) | from_json
+      }}
+
+- name: Assert the Coolify server registration payload was emitted
+  ansible.builtin.assert:
+    that:
+      - coolify_server_registration_payload | length > 0
+    fail_msg: "Coolify server registration did not emit the expected marker-prefixed JSON payload."
+
+- name: Assert the Coolify local deployment server is usable
+  ansible.builtin.assert:
+    that:
+      - coolify_server_registration_payload.server_uuid | default('') | length > 0
+      - coolify_server_registration_payload.destination_uuid | default('') | length > 0
+      - coolify_server_registration_payload.is_reachable | default(false) | bool
+      - coolify_server_registration_payload.is_usable | default(false) | bool
+    fail_msg: "Coolify did not expose a validated local deployment server after bootstrap."
+
+- name: Rotate the Coolify API token and persist it locally
+  ansible.builtin.shell: |
+    set -euo pipefail
+    docker exec "{{ coolify_service_name }}" php artisan tinker --execute='
+      use App\Models\User;
+      use Illuminate\Support\Str;
+
+      $user = User::find(0);
+      $user->tokens()->where("name", "{{ coolify_api_token_name }}")->delete();
+      $tokenEntropy = Str::random(40);
+      $plainTextToken = $tokenEntropy . hash("crc32b", $tokenEntropy);
+      $token = $user->tokens()->create([
+          "name" => "{{ coolify_api_token_name }}",
+          "token" => hash("sha256", $plainTextToken),
+          "abilities" => ["*"],
+          "expires_at" => null,
+          "team_id" => "0",
+      ]);
+      echo $token->id . "|" . $plainTextToken;
+    '
+  args:
+    executable: /bin/bash
+  register: coolify_api_token_rotation
+  changed_when: false
+  no_log: true
+
+- name: Persist the Coolify API token locally
+  ansible.builtin.copy:
+    dest: "{{ coolify_api_token_local_file }}"
+    content: "{{ coolify_api_token_rotation.stdout | trim }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Build the Coolify controller auth payload JSON
+  ansible.builtin.set_fact:
+    coolify_admin_auth_payload_json: >-
+      {{
+        {
+          'public_url': coolify_public_url,
+          'controller_url': coolify_controller_url,
+          'private_url': coolify_private_url,
+          'apps_public_url': coolify_apps_public_url,
+          'ssh_tunnel_host': coolify_tunnel_host,
+          'ssh_tunnel_user': coolify_tunnel_user,
+          'email': coolify_root_email,
+          'password': coolify_root_password,
+          'api_token': coolify_api_token_rotation.stdout | trim,
+          'verify_ssl': coolify_verify_ssl,
+          'server_uuid': coolify_server_registration_payload.server_uuid,
+          'destination_uuid': coolify_server_registration_payload.destination_uuid,
+          'server_name': coolify_server_name,
+          'project_name': coolify_smoke_project_name,
+          'environment_name': coolify_smoke_environment_name,
+          'smoke_app_name': coolify_smoke_app_name,
+          'smoke_repo_url': coolify_smoke_repo_url,
+          'smoke_repo_branch': coolify_smoke_repo_branch,
+          'smoke_base_directory': coolify_smoke_base_directory,
+          'smoke_domains': [coolify_smoke_domain, coolify_smoke_alias_domain]
+        } | to_nice_json
+      }}
+  no_log: true
+
+- name: Persist the Coolify controller auth locally
+  ansible.builtin.copy:
+    dest: "{{ coolify_admin_auth_local_file }}"
+    content: "{{ coolify_admin_auth_payload_json }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Verify the Coolify runtime health
+  ansible.builtin.import_tasks: verify.yml

@@ -68,8 +68,9 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertNotIn("ops.lv3.org", extra_hostnames)
         self.assertEqual(
             sorted(protected_sites),
-            ["changelog.lv3.org", "docs.lv3.org", "home.lv3.org", "langfuse.lv3.org", "logs.lv3.org", "n8n.lv3.org", "ops.lv3.org"],
+            ["changelog.lv3.org", "coolify.lv3.org", "docs.lv3.org", "home.lv3.org", "langfuse.lv3.org", "logs.lv3.org", "n8n.lv3.org", "ops.lv3.org"],
         )
+        self.assertNotIn("unauthenticated_paths", protected_sites["coolify.lv3.org"])
         self.assertNotIn("unauthenticated_paths", protected_sites["langfuse.lv3.org"])
         self.assertEqual(protected_sites["n8n.lv3.org"]["unauthenticated_paths"], ["/healthz"])
         self.assertEqual(
@@ -135,8 +136,10 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertEqual(security_defaults["cross_origin_resource_policy"], "same-origin")
         self.assertEqual(security_defaults["x_content_type_options"], "nosniff")
         self.assertIn("frame-ancestors 'none'", security_defaults["content_security_policy"])
+        self.assertIn("coolify.lv3.org", security_overrides)
         self.assertIn("grafana.lv3.org", security_overrides)
         self.assertIn("logs.lv3.org", security_overrides)
+        self.assertIn("'unsafe-eval'", security_overrides["coolify.lv3.org"]["content_security_policy"])
         self.assertIn("'unsafe-eval'", security_overrides["grafana.lv3.org"]["content_security_policy"])
         self.assertIn("wss://n8n.lv3.org", security_overrides["n8n.lv3.org"]["content_security_policy"])
         self.assertIn("https://fonts.googleapis.com", security_overrides["docs.lv3.org"]["content_security_policy"])
@@ -168,11 +171,14 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("proxy_buffering off;", self.template)
 
     def test_template_renders_security_headers_from_default_and_override_maps(self) -> None:
+        self.assertIn("site.security_headers_enabled | default(true)", self.template)
         self.assertIn("public_edge_security_headers_default | combine(", self.template)
         self.assertIn('add_header Strict-Transport-Security', self.template)
         self.assertIn('add_header Cross-Origin-Resource-Policy', self.template)
         self.assertIn('add_header Content-Security-Policy', self.template)
         self.assertIn('add_header Permissions-Policy', self.template)
+        self.assertIn("site.preserve_upstream_security_headers | default(false)", self.template)
+        self.assertIn("site.crawl_policy_enabled | default(true)", self.template)
         self.assertIn('proxy_hide_header Cross-Origin-Resource-Policy;', self.template)
         self.assertIn('proxy_hide_header Content-Security-Policy;', self.template)
 

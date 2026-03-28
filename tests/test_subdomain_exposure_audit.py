@@ -127,6 +127,14 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         finally:
             shutil.rmtree(temp_dir)
 
+    def test_wildcard_edge_alias_matches_catalog_hostname(self) -> None:
+        route = {
+            "hostname": "apps.lv3.org",
+            "aliases": ["*.apps.lv3.org"],
+        }
+
+        self.assertEqual(audit.resolve_route_for_hostname("repo-smoke.apps.lv3.org", [route]), route)
+
 
 if __name__ == "__main__":
     unittest.main()

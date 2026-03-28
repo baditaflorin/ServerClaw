@@ -57,6 +57,24 @@
       "adr": "0023"
     },
     {
+      "id": "coolify",
+      "service": "coolify",
+      "name": "Coolify",
+      "vm": "coolify-lv3",
+      "tier": 1,
+      "category": "infrastructure",
+      "adr": "0194"
+    },
+    {
+      "id": "coolify_apps",
+      "service": "coolify_apps",
+      "name": "Coolify Apps Ingress",
+      "vm": "coolify-lv3",
+      "tier": 2,
+      "category": "infrastructure",
+      "adr": "0194"
+    },
+    {
       "id": "dozzle",
       "service": "dozzle",
       "name": "Dozzle",
@@ -363,6 +381,30 @@
       "to": "nginx_edge",
       "type": "hard",
       "description": "The generated developer portal is published as static content on nginx-lv3."
+    },
+    {
+      "from": "coolify",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Authenticated browser access to coolify.lv3.org depends on the shared Keycloak-backed edge auth path, while the private controller remains reachable over the management network."
+    },
+    {
+      "from": "coolify",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public dashboard access to coolify.lv3.org depends on the shared NGINX edge publication, while the private controller proxy remains reachable directly."
+    },
+    {
+      "from": "coolify_apps",
+      "to": "coolify",
+      "type": "hard",
+      "description": "The shared applications ingress is configured and served by the Coolify runtime and its managed proxy."
+    },
+    {
+      "from": "coolify_apps",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public access to apps.lv3.org depends on the shared NGINX edge publication while the guest-local ingress remains reachable for direct verification."
     },
     {
       "from": "dozzle",
