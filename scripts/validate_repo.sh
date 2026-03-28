@@ -364,6 +364,7 @@ validate_data_models() {
   "$PYTHON_BIN" "$REPO_ROOT/scripts/check_hardcoded_timeouts.py" >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/provider_boundary_catalog.py" --validate >/dev/null
   run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/validate_repository_data_models.py" --validate >/dev/null
+  run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/capability_contracts.py" --validate >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/execution_lanes.py" --validate >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/operator_manager.py" validate >/dev/null
   run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/data_catalog.py" --validate >/dev/null

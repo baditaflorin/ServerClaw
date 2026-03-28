@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-28'
 total_adrs: 238
 implementation_status_summary:
-  Implemented: 206
+  Implemented: 207
   Partial: 4
-  Not Implemented: 27
+  Not Implemented: 26
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3488,7 +3488,7 @@ adr_index:
   - adr: '0205'
     title: Capability Contracts Before Product Selection
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -3499,6 +3499,7 @@ adr_index:
       - selection
     summary: We will define the capability contract before selecting or changing a product on
     filename: 0205-capability-contracts-before-product-selection.md
+    implemented_version: 0.177.41
   - adr: '0206'
     title: Ports And Adapters For External Integrations
     status: Accepted
@@ -3527,7 +3528,7 @@ adr_index:
       - boundaries
     summary: Every critical external integration must define an anti-corruption layer at the
     filename: 0207-anti-corruption-layers-at-provider-boundaries.md
-    implemented_version: 0.177.41
+    implemented_version: 0.177.42
   - adr: 0208
     title: Dependency Direction And Composition Roots
     status: Implemented

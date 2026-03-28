@@ -318,6 +318,18 @@ service_configuration:
     format: JSON
     update_by: "scripts/service_catalog.py --write"
 
+  config/capability-contract-catalog.json:
+    purpose: Contract-first catalog for critical shared platform capabilities and their current product selections
+    owner: human
+    format: JSON
+    use_for: Defining capability requirements before selecting or replacing a critical product surface
+    update_when: Adding or changing a critical product selection, or tightening the shared capability contract
+    validation: "uv run --with pyyaml --with jsonschema python scripts/capability_contracts.py --validate"
+    related_files:
+      - "docs/schema/capability-contract-catalog.schema.json: JSON Schema for the contract catalog"
+      - "scripts/capability_contracts.py: Validation, CLI inspection, and manifest summaries"
+      - "docs/runbooks/capability-contract-catalog.md: Operator workflow for contract-first product choices"
+
   config/immutable-guest-replacement-catalog.json:
     purpose: Guest-level ADR 0191 policy for immutable replacement, validation mode, and documented in-place exceptions
     owner: human
