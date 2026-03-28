@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.18",
+  "repo_version": "0.177.19",
   "platform_version": "0.130.31",
-  "generated_at": "2026-03-27T23:25:31Z",
-  "next_refresh_at": "2026-03-28T00:25:31Z",
+  "generated_at": "2026-03-28T00:07:52Z",
+  "next_refresh_at": "2026-03-28T01:07:52Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3556,10 +3556,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.17",
-    "deployed_at": "2026-03-27",
-    "summary": "implemented ADR 0184 failure-domain labels and anti-affinity policy, adding repo-validated placement metadata, live Proxmox guest tag convergence, and the verified workstream receipt for the current managed guests",
-    "release_notes_url": "docs/release-notes/0.177.18.md"
+    "last_version": "0.177.18",
+    "deployed_at": "2026-03-28",
+    "summary": "integrated ADR 0199 by publishing the repo-managed Outline living knowledge wiki at `wiki.lv3.org`, wiring the durable `outline.automation` Keycloak bootstrap path, and verifying the governed living-knowledge collections end to end",
+    "release_notes_url": "docs/release-notes/0.177.19.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
