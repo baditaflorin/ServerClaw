@@ -82,6 +82,6 @@
     "The first branch-local replay failed before the platform was healthy because the ops portal image did not copy `publication_contract.py`; the follow-up fix added that `COPY` line to the role Dockerfile template and the exact-commit replay then succeeded idempotently.",
     "The first manual replay attempt also required explicitly setting `ansible_ssh_private_key_file=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519` because Ansible did not select the repo SSH identity automatically through the proxmox jump path.",
     "The live publication audit findings recorded in `receipts/subdomain-exposure-audit/20260328T113654Z.json` are outside the direct scope of ADR 0210 and document pre-existing TLS and DNS governance drift rather than regressions introduced by the canonical publication model change.",
-    "Main-only integration files still need the final merge step from `main`: `VERSION`, numbered release notes or release sections in `changelog.md`, the top-level `README.md` integrated status summary, and `versions/stack.yaml`."
+    "The integrated `main` release now consumes this verified live-apply receipt as the canonical ADR 0210 evidence while recording repo version `0.177.35` and platform version `0.130.37`."
   ]
 }

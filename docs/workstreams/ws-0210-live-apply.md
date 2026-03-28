@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0210](../adr/0210-canonical-domain-models-over-vendor-schemas.md)
 - Title: Separate canonical publication models from delivery-adapter fields and verify the live public-surface automation path
-- Status: ready
-- Implemented In Repo Version: 0.177.32
-- Live Applied In Platform Version: 0.130.36
+- Status: merged
+- Implemented In Repo Version: 0.177.35
+- Live Applied In Platform Version: 0.130.37
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
 - Branch: `codex/ws-0210-live-apply`
@@ -40,4 +40,8 @@
 - ADR 0210 is live on the platform: the canonical publication contract now separates `publication` semantics from delivery-specific `adapter` fields, and the interactive ops portal renders that canonical model on the live overview cards.
 - The first replay exposed a packaging regression where the portal image omitted `publication_contract.py`; the branch fixed that Dockerfile contract and added a regression test so future rollouts fail in CI instead of at runtime.
 - The live publication audit path is now resilient to TLS probe failures and records those issues as findings instead of aborting; the latest live audit still reports pre-existing drift outside ADR 0210 for `mail.lv3.org`, `vault.lv3.org`, `autoconfig.lv3.org`, `lv3.org`, `notify.lv3.org`, `registry.lv3.org`, `www.lv3.org`, and `database.lv3.org`.
-- Main-only integration work remains to be applied from `main`: `VERSION`, release sections in `changelog.md`, the top-level `README.md` integrated status summary, and `versions/stack.yaml`.
+
+## Mainline Integration
+
+- merged to `main` in repository version `0.177.35`
+- the canonical repo truth now records this ADR in `VERSION`, `RELEASE.md`, `changelog.md`, `docs/release-notes/0.177.35.md`, `README.md`, `versions/stack.yaml`, and the generated platform manifest
