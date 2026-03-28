@@ -214,7 +214,10 @@
       },
       "preflight": {
         "required": false,
-        "required_secret_ids": []
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "windmill_superadmin_secret"
+        ]
       },
       "validation_targets": [
         "validate"
@@ -268,7 +271,11 @@
       },
       "preflight": {
         "required": false,
-        "required_secret_ids": []
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "windmill_superadmin_secret",
+          "nats_jetstream_admin_password"
+        ]
       },
       "validation_targets": [
         "validate"
@@ -317,7 +324,11 @@
       },
       "preflight": {
         "required": false,
-        "required_secret_ids": []
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "windmill_superadmin_secret",
+          "nats_jetstream_admin_password"
+        ]
       },
       "validation_targets": [
         "validate"

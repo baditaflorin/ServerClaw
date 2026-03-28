@@ -65,6 +65,15 @@ def require_mapping(value: object, path: str) -> dict:
     return value
 
 
+def validate_string_mapping(value: object, path: str) -> dict[str, str]:
+    mapping = require_mapping(value, path)
+    result: dict[str, str] = {}
+    for key, item in mapping.items():
+        normalized_key = require_str(key, f"{path} key")
+        result[normalized_key] = require_str(item, f"{path}.{normalized_key}")
+    return result
+
+
 def require_int(value: object, path: str, minimum: int = 0) -> int:
     if isinstance(value, bool) or not isinstance(value, int):
         raise ValueError(f"{path} must be an integer")
@@ -120,6 +129,8 @@ def validate_command_catalog(command_catalog: dict, workflow_catalog: dict, secr
             )
         require_str(profile.get("log_directory"), f"execution_profiles.{profile_id}.log_directory")
         require_str(profile.get("receipt_directory"), f"execution_profiles.{profile_id}.receipt_directory")
+        if profile.get("env") is not None:
+            validate_string_mapping(profile.get("env"), f"execution_profiles.{profile_id}.env")
 
     policies = require_mapping(command_catalog.get("approval_policies"), "approval_policies")
     if not policies:
@@ -310,6 +321,8 @@ def show_command(command_catalog: dict, workflow_catalog: dict, command_id: str)
     print(f"  - kill_mode: {profile['kill_mode']}")
     print(f"  - log_directory: {profile['log_directory']}")
     print(f"  - receipt_directory: {profile['receipt_directory']}")
+    if profile.get("env"):
+        print(f"  - env: {json.dumps(profile['env'], sort_keys=True)}")
     if CORRECTION_LOOP_CATALOG_PATH.exists():
         correction_catalog = load_correction_loop_catalog()
         correction_loop = resolve_workflow_correction_loop(correction_catalog, contract["workflow_id"])

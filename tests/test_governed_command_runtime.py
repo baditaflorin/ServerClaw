@@ -80,11 +80,18 @@ def test_submit_stages_files_writes_receipt_and_redacts_env(monkeypatch, tmp_pat
             }
         ],
     }
+    chowned_paths: list[tuple[Path, int, int]] = []
 
     monkeypatch.setattr(
         runtime.subprocess,
         "run",
         lambda *_args, **_kwargs: SimpleNamespace(returncode=0, stdout="ok", stderr=""),
+    )
+    monkeypatch.setattr(runtime, "resolve_account_ids", lambda _user: (1000, 1000))
+    monkeypatch.setattr(
+        runtime,
+        "chown_path",
+        lambda path, uid, gid: chowned_paths.append((Path(path), uid, gid)),
     )
 
     result, exit_code = runtime.submit(payload)
@@ -99,3 +106,5 @@ def test_submit_stages_files_writes_receipt_and_redacts_env(monkeypatch, tmp_pat
     assert receipt["status"] == "ok"
     assert receipt["returncode"] == 0
     assert receipt["systemd_command"].count("--setenv=<redacted>") >= 5
+    assert (runtime_repo_root / ".local" / "ssh", 1000, 1000) in chowned_paths
+    assert (staged_secret, 1000, 1000) in chowned_paths

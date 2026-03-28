@@ -241,8 +241,14 @@ def build_execution_payload(
     profile = command_catalog["execution_profiles"][execution["profile"]]
     runtime_repo_root = Path(profile["runtime_repo_root"])
     operator_parameters = validate_operator_parameters(contract, parameters)
-    staged_files, env = build_secret_materialization(contract, secret_manifest, runtime_repo_root)
-    env.update(operator_parameters)
+    profile_env = {
+        require_str(name, f"execution_profiles.{execution['profile']}.env key"): require_str(
+            value, f"execution_profiles.{execution['profile']}.env.{name}"
+        )
+        for name, value in require_mapping(profile.get("env", {}), f"execution_profiles.{execution['profile']}.env").items()
+    }
+    staged_files, secret_env = build_secret_materialization(contract, secret_manifest, runtime_repo_root)
+    env = {**profile_env, **secret_env, **operator_parameters}
     env.setdefault("ANSIBLE_HOST_KEY_CHECKING", "False")
     env.setdefault("MAKEFLAGS", "--no-print-directory")
     target = require_str(

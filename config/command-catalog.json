@@ -349,6 +349,27 @@
       "approval_policy": "operator_approved",
       "inputs": [
         {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-managed SSH identity staged into the worker checkout for maintenance-window and host reachability helpers."
+        },
+        {
+          "name": "windmill_superadmin_secret",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Windmill bootstrap token staged into the worker checkout so the repo-managed CLI can authenticate the governed workflow surface."
+        },
+        {
+          "name": "nats_jetstream_admin_password",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Private NATS JetStream admin password staged into the worker checkout so maintenance-window helpers can inspect suppression state during governed execution."
+        },
+        {
           "name": "NETWORK_IMPAIRMENT_MATRIX_ARGS",
           "kind": "operator_parameter",
           "required": false,
@@ -1678,6 +1699,10 @@
           "Restore the last known-good portal and runtime configuration from version control before retrying.",
           "Do not leave `ops.lv3.org` published with a runbook launcher that bypasses or drifts from the shared gateway contract."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
       }
     },
     "converge-dify": {
@@ -3578,6 +3603,9 @@
       "runtime_compat_repo_root": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server",
       "effective_user": "ops",
       "working_directory": "/srv/proxmox_florin_server",
+      "env": {
+        "LV3_WINDMILL_BASE_URL": "http://127.0.0.1:8000"
+      },
       "kill_mode": "mixed",
       "log_directory": "/srv/proxmox_florin_server/.local/governed-command/logs",
       "receipt_directory": "/srv/proxmox_florin_server/.local/governed-command/receipts"

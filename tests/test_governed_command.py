@@ -12,12 +12,23 @@ import governed_command as command
 
 
 def test_build_execution_payload_materializes_controller_secrets(monkeypatch, tmp_path: Path) -> None:
-    controller_secret = tmp_path / "controller" / ".local" / "ssh" / "bootstrap.id_ed25519"
-    controller_secret.parent.mkdir(parents=True)
-    controller_secret.write_text("bootstrap-secret", encoding="utf-8")
+    bootstrap_secret = tmp_path / "controller" / ".local" / "ssh" / "bootstrap.id_ed25519"
+    bootstrap_secret.parent.mkdir(parents=True)
+    bootstrap_secret.write_text("bootstrap-secret", encoding="utf-8")
+    nats_secret = tmp_path / "controller" / ".local" / "nats" / "jetstream-admin-password.txt"
+    nats_secret.parent.mkdir(parents=True)
+    nats_secret.write_text("nats-secret", encoding="utf-8")
+    windmill_secret = tmp_path / "controller" / ".local" / "windmill" / "superadmin-secret.txt"
+    windmill_secret.parent.mkdir(parents=True)
+    windmill_secret.write_text("windmill-secret", encoding="utf-8")
     runtime_repo_root = tmp_path / "runtime"
     monkeypatch.setenv("FAKE_API_TOKEN", "token-123")
-    monkeypatch.setattr(command, "resolve_repo_local_path", lambda _value: controller_secret)
+    secret_paths = {
+        "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519": bootstrap_secret,
+        "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nats/jetstream-admin-password.txt": nats_secret,
+        "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt": windmill_secret,
+    }
+    monkeypatch.setattr(command, "resolve_repo_local_path", lambda value: secret_paths[str(value)])
 
     contract = {
         "workflow_id": "open-maintenance-window",
@@ -29,6 +40,16 @@ def test_build_execution_payload_materializes_controller_secrets(monkeypatch, tm
             },
             {
                 "name": "api_token",
+                "kind": "controller_secret",
+                "required": True,
+            },
+            {
+                "name": "nats_jetstream_admin_password",
+                "kind": "controller_secret",
+                "required": True,
+            },
+            {
+                "name": "windmill_superadmin_secret",
                 "kind": "controller_secret",
                 "required": True,
             },
@@ -52,6 +73,9 @@ def test_build_execution_payload_materializes_controller_secrets(monkeypatch, tm
                 "runtime_compat_repo_root": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server",
                 "effective_user": "ops",
                 "working_directory": str(runtime_repo_root),
+                "env": {
+                    "LV3_WINDMILL_BASE_URL": "http://127.0.0.1:8000",
+                },
                 "kill_mode": "mixed",
                 "log_directory": str(runtime_repo_root / ".local" / "governed-command" / "logs"),
                 "receipt_directory": str(runtime_repo_root / ".local" / "governed-command" / "receipts"),
@@ -68,6 +92,14 @@ def test_build_execution_payload_materializes_controller_secrets(monkeypatch, tm
                 "kind": "env",
                 "name": "FAKE_API_TOKEN",
             },
+            "nats_jetstream_admin_password": {
+                "kind": "file",
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nats/jetstream-admin-password.txt",
+            },
+            "windmill_superadmin_secret": {
+                "kind": "file",
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt",
+            },
         }
     }
 
@@ -81,9 +113,13 @@ def test_build_execution_payload_materializes_controller_secrets(monkeypatch, tm
     )
 
     runtime_secret = runtime_repo_root / ".local" / "ssh" / "bootstrap.id_ed25519"
+    runtime_nats_secret = runtime_repo_root / ".local" / "nats" / "jetstream-admin-password.txt"
+    runtime_windmill_secret = runtime_repo_root / ".local" / "windmill" / "superadmin-secret.txt"
     assert payload["command"] == ["make", "open-maintenance-window"]
     assert payload["runtime_host"] == "docker-runtime-lv3"
     assert payload["env"]["BOOTSTRAP_KEY"] == str(runtime_secret)
+    assert payload["env"]["LV3_NATS_PASSWORD_FILE"] == str(runtime_nats_secret)
+    assert payload["env"]["LV3_WINDMILL_BASE_URL"] == "http://127.0.0.1:8000"
     assert payload["env"]["FAKE_API_TOKEN"] == "token-123"
     assert payload["env"]["SERVICE"] == "grafana"
     assert payload["timeout_seconds"] == 180
@@ -92,6 +128,16 @@ def test_build_execution_payload_materializes_controller_secrets(monkeypatch, tm
         {
             "path": str(runtime_secret),
             "content_b64": base64.b64encode(b"bootstrap-secret").decode("utf-8"),
+            "mode": "0600",
+        },
+        {
+            "path": str(runtime_nats_secret),
+            "content_b64": base64.b64encode(b"nats-secret").decode("utf-8"),
+            "mode": "0600",
+        },
+        {
+            "path": str(runtime_windmill_secret),
+            "content_b64": base64.b64encode(b"windmill-secret").decode("utf-8"),
             "mode": "0600",
         }
     ]
@@ -121,6 +167,9 @@ def test_execute_governed_command_submits_runtime_payload(monkeypatch) -> None:
                 "runtime_compat_repo_root": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server",
                 "effective_user": "ops",
                 "working_directory": str(runtime_root),
+                "env": {
+                    "LV3_WINDMILL_BASE_URL": "http://127.0.0.1:8000",
+                },
                 "kill_mode": "mixed",
                 "log_directory": str(runtime_root / ".local" / "governed-command" / "logs"),
                 "receipt_directory": str(runtime_root / ".local" / "governed-command" / "receipts"),
@@ -190,6 +239,7 @@ def test_execute_governed_command_submits_runtime_payload(monkeypatch) -> None:
     payload = captured["payload"]
     assert isinstance(payload, dict)
     assert payload["command"] == ["make", "network-impairment-matrix"]
+    assert payload["env"]["LV3_WINDMILL_BASE_URL"] == "http://127.0.0.1:8000"
     assert payload["env"]["NETWORK_IMPAIRMENT_MATRIX_ARGS"] == "target_class=staging --approve-risk"
 
 

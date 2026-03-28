@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0227](../adr/0227-bounded-command-execution-via-systemd-run-and-approved-wrappers.md)
 - Title: Live apply bounded governed command execution through `systemd-run` on the server-resident runtime
-- Status: in_progress
-- Implemented In Repo Version: N/A
-- Live Applied In Platform Version: N/A
-- Implemented On: N/A
-- Live Applied On: N/A
+- Status: live_applied
+- Implemented In Repo Version: not yet
+- Live Applied In Platform Version: 0.130.38
+- Implemented On: 2026-03-28
+- Live Applied On: 2026-03-28
 - Branch: `codex/ws-0227-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0227-live-apply`
 - Owner: codex
@@ -50,9 +50,27 @@
 
 ## Verification
 
-- pending live apply
+- `python3 scripts/command_catalog.py --validate`
+- `python3 scripts/agent_tool_registry.py --validate`
+- `uv run --with pytest --with pyyaml pytest -q tests/test_maintenance_window_tool.py tests/test_governed_command.py tests/test_governed_command_runtime.py tests/test_controller_automation_toolkit.py tests/test_lv3_cli.py`
+- `./scripts/validate_repo.sh agent-standards`
+- `make converge-windmill`
+- authenticated governed replay of `network-impairment-matrix` through `python3 scripts/governed_command.py`
+
+## Live Apply Outcome
+
+- branch-local live apply succeeded on 2026-03-28 from the isolated worktree, and governed `network-impairment-matrix` execution now runs as transient `systemd-run` units with durable stdout, stderr, and receipt capture under `.local/governed-command/`
+- the successful end-to-end replay returned unit `lv3-governed-network-impairment-matrix-79b10a86f237`, receipt `/srv/proxmox_florin_server/.local/governed-command/receipts/lv3-governed-network-impairment-matrix-79b10a86f237.json`, and report `/srv/proxmox_florin_server/.local/network-impairment-matrix/latest.json` with `status: planned` and `entry_count: 4`
+- the first replay exposed pre-existing root-owned execution-lane registry files on `docker-runtime-lv3`; the branch fixed the role contract to manage those files as mutable runtime surfaces, and the live guest required one one-time repair `sudo chmod 0666 /srv/proxmox_florin_server/.local/state/execution-lanes/registry.json /srv/proxmox_florin_server/.local/state/execution-lanes/registry.lock` before the final successful governed replay
+
+## Live Evidence
+
+- branch-local live-apply receipt: `receipts/live-applies/2026-03-28-adr-0227-bounded-command-execution-live-apply.json`
+- successful runtime receipt on `docker-runtime-lv3`: `/srv/proxmox_florin_server/.local/governed-command/receipts/lv3-governed-network-impairment-matrix-79b10a86f237.json`
+- successful runtime stdout log: `/srv/proxmox_florin_server/.local/governed-command/logs/lv3-governed-network-impairment-matrix-79b10a86f237.stdout.log`
+- successful runtime stderr log: `/srv/proxmox_florin_server/.local/governed-command/logs/lv3-governed-network-impairment-matrix-79b10a86f237.stderr.log`
 
 ## Merge-To-Main Notes
 
-- this branch must not bump `VERSION`, update numbered `changelog.md` release sections, or rewrite the top-level `README.md` summary
-- if the live apply succeeds before merge, update this workstream doc, ADR 0227 metadata, and the live receipt in-branch so the final merge can safely carry the mainline release metadata later
+- this branch still leaves the protected integration files for the final mainline step: `VERSION`, `changelog.md`, the top-level `README.md` summary blocks, `docs/release-notes/*`, and `versions/stack.yaml`
+- the final merge should carry forward the branch-local receipt, bump the repo version on `main`, cut release notes, and only bump `platform_version` after replaying or explicitly re-verifying the merged-main state

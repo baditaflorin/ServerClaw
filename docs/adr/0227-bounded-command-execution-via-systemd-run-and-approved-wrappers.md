@@ -1,9 +1,10 @@
 # ADR 0227: Bounded Command Execution Via Systemd-Run And Approved Wrappers
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented on workstream branch
+- Implemented In Repo Version: not yet
+- Implemented In Platform Version: 0.130.38
+- Implemented On: 2026-03-28
 - Date: 2026-03-28
 
 ## Context

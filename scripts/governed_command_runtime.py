@@ -7,6 +7,7 @@ import argparse
 import base64
 import json
 import os
+import pwd
 import shlex
 import subprocess
 import sys
@@ -61,7 +62,41 @@ def ensure_repo_compat_symlink(repo_root: Path, compat_repo_root: Path) -> None:
     compat_repo_root.symlink_to(repo_root)
 
 
-def stage_files(staged_files: list[dict[str, Any]]) -> list[str]:
+def resolve_account_ids(user: str) -> tuple[int, int]:
+    account = pwd.getpwnam(user)
+    return account.pw_uid, account.pw_gid
+
+
+def chown_path(path: Path, uid: int, gid: int) -> None:
+    os.chown(path, uid, gid)
+
+
+def grant_runtime_secret_access(destination: Path, repo_root: Path, uid: int, gid: int) -> None:
+    try:
+        relative = destination.relative_to(repo_root)
+    except ValueError:
+        return
+    if ".local" not in relative.parts:
+        return
+    marker_index = relative.parts.index(".local")
+    if len(relative.parts) <= marker_index + 1:
+        return
+    current = repo_root / ".local"
+    for part in relative.parts[marker_index + 1 : -1]:
+        current = current / part
+        if not current.exists():
+            continue
+        chown_path(current, uid, gid)
+        current.chmod(current.stat().st_mode | 0o700)
+
+
+def stage_files(
+    staged_files: list[dict[str, Any]],
+    *,
+    runtime_user: str,
+    repo_root: Path,
+) -> list[str]:
+    uid, gid = resolve_account_ids(runtime_user)
     written_paths: list[str] = []
     for index, item in enumerate(staged_files):
         item = require_mapping(item, f"payload.staged_files[{index}]")
@@ -69,7 +104,9 @@ def stage_files(staged_files: list[dict[str, Any]]) -> list[str]:
         mode = int(str(item.get("mode", "0600")), 8)
         content_b64 = require_str(item.get("content_b64"), f"payload.staged_files[{index}].content_b64")
         destination.parent.mkdir(parents=True, exist_ok=True)
+        grant_runtime_secret_access(destination, repo_root, uid, gid)
         destination.write_bytes(base64.b64decode(content_b64.encode("utf-8")))
+        chown_path(destination, uid, gid)
         destination.chmod(mode)
         written_paths.append(str(destination))
     return written_paths
@@ -121,7 +158,9 @@ def submit(payload: dict[str, Any]) -> tuple[dict[str, Any], int]:
     receipt_directory.mkdir(parents=True, exist_ok=True)
     ensure_repo_compat_symlink(repo_root, compat_repo_root)
     staged_paths = stage_files(
-        [require_mapping(item, "payload.staged_files[]") for item in payload.get("staged_files", [])]
+        [require_mapping(item, "payload.staged_files[]") for item in payload.get("staged_files", [])],
+        runtime_user=require_str(payload.get("effective_user"), "payload.effective_user"),
+        repo_root=repo_root,
     )
     stdout_log = log_directory / f"{payload['unit_name']}.stdout.log"
     stderr_log = log_directory / f"{payload['unit_name']}.stderr.log"

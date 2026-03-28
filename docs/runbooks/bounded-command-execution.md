@@ -23,6 +23,7 @@ Each governed command now declares:
 - a per-command timeout
 - the effective runtime user
 - the runtime working directory
+- any required runtime environment overrides
 - the `systemd` kill mode
 - receipt and log destinations
 
@@ -33,6 +34,11 @@ existing SSH path.
 
 The runtime helper converts that payload into a transient `systemd-run` unit so
 the command survives client disconnects and leaves durable logs and receipts.
+Execution profiles can also pin guest-local service URLs when the runtime
+wrapper must call a service from inside the worker VM. ADR 0227 now uses that
+contract for `network-impairment-matrix` so the governed replay targets
+`http://127.0.0.1:8000` on `docker-runtime-lv3` instead of a controller-side
+proxy address.
 
 ## Primary Commands
 
@@ -64,6 +70,13 @@ python3 scripts/governed_command.py \
   --param NETWORK_IMPAIRMENT_MATRIX_ARGS='target_class=staging --approve-risk'
 ```
 
+The governed `network-impairment-matrix` wrapper now resolves to:
+
+```bash
+uv run --with pyyaml --with nats-py python scripts/lv3_cli.py run \
+  network-impairment-matrix --args target_class=staging --approve-risk
+```
+
 Validate the repo-side contracts before a live apply:
 
 ```bash
@@ -86,10 +99,34 @@ On the runtime host, these paths live under the repo checkout:
 
 - stdout and stderr logs: `.local/governed-command/logs/`
 - bounded execution receipts: `.local/governed-command/receipts/`
+- execution-lane state registry: `.local/state/execution-lanes/registry.json`
+  and `.local/state/execution-lanes/registry.lock`
 
 The runtime helper also maintains the compatibility symlink for
 `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server` when the worker
 checkout actually lives at `/srv/proxmox_florin_server`.
+
+The worker converge now also enforces the execution-lane registry directory and
+files as mutable runtime surfaces so `ops`-scoped governed commands can acquire
+their coordination lock without root-owned write failures.
+
+## Live Apply Repair Note
+
+The 2026-03-28 ADR 0227 live apply exposed a pre-existing permissions edge on
+`docker-runtime-lv3`: the execution-lane registry files already existed as
+root-owned `0644` files before the new mutable-file contract was converged.
+
+After the role change landed, a one-time repair was required on the live guest:
+
+```bash
+sudo chmod 0666 \
+  /srv/proxmox_florin_server/.local/state/execution-lanes/registry.json \
+  /srv/proxmox_florin_server/.local/state/execution-lanes/registry.lock
+```
+
+That chmod is not the long-term operating model. The repository contract now
+declares those files as worker-mutable so future converges recreate or preserve
+the correct permissions automatically.
 
 ## Operating Rule
 

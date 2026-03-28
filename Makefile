@@ -176,7 +176,7 @@ fault-injection:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/lv3_cli.py run fault-injection --approve-risk $(if $(FAULT_INJECTION_ARGS),--args $(FAULT_INJECTION_ARGS),)
 
 network-impairment-matrix:
-	uv run --with pyyaml python $(REPO_ROOT)/scripts/lv3_cli.py run network-impairment-matrix $(if $(NETWORK_IMPAIRMENT_MATRIX_ARGS),--args $(NETWORK_IMPAIRMENT_MATRIX_ARGS),)
+	uv run --with pyyaml --with nats-py python $(REPO_ROOT)/scripts/lv3_cli.py run network-impairment-matrix $(if $(NETWORK_IMPAIRMENT_MATRIX_ARGS),--args $(NETWORK_IMPAIRMENT_MATRIX_ARGS),)
 
 triage-alert:
 	python3 $(REPO_ROOT)/scripts/incident_triage.py $(TRIAGE_ARGS)

@@ -156,7 +156,8 @@ def build_guest_ssh_command(context: dict[str, Any], target: str, *extra_args: s
     host_login = f"{context['host_user']}@{context['host_addr']}"
     proxy_command = (
         f"ssh -i {shlex.quote(key_path)} -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=10 "
-        f"-o LogLevel=ERROR {shlex.quote(host_login)} -W %h:%p"
+        f"-o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "
+        f"{shlex.quote(host_login)} -W %h:%p"
     )
     return [
         "ssh",

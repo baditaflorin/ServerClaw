@@ -743,7 +743,7 @@ workstreams:
   - id: ws-0227-live-apply
     adr: "0227"
     title: Live apply bounded command execution via systemd-run and approved wrappers
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0227-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0227-live-apply
@@ -810,8 +810,20 @@ workstreams:
             - tests/test_governed_command_runtime.py
             - receipts/live-applies/2026-03-28-adr-0227-bounded-command-execution-live-apply.json
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0227 by routing governed commands through transient systemd-run units with repo-local secret staging, approved wrapper contracts, and durable receipts on the server-resident runtime
+      release_bump: patch
+      included_in_repo_version: not yet
+      latest_receipts:
+        windmill: 2026-03-28-adr-0227-bounded-command-execution-live-apply
+        network_impairment_matrix: 2026-03-28-adr-0227-bounded-command-execution-live-apply
+      live_apply_verification:
+        governed_command:
+          unit_name: lv3-governed-network-impairment-matrix-79b10a86f237
+          receipt_path: /srv/proxmox_florin_server/.local/governed-command/receipts/lv3-governed-network-impairment-matrix-79b10a86f237.json
+          report_path: /srv/proxmox_florin_server/.local/network-impairment-matrix/latest.json
   - id: ws-0210-live-apply
     adr: "0210"
     title: Live apply canonical publication models over adapter-shaped vendor fields
