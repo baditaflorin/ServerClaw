@@ -48,6 +48,7 @@ See [docs/runbooks/validation-gate.md](/Users/live/Documents/GITHUB_PROJECTS/pro
 - validation runs repo Python validators through `uv run --with ... python3 ...` so the build-server path and local fallback use the same interpreter contract
 - the Windmill post-merge fallback reuses the worker-safe `validate_repo.sh` subset and then runs `scripts/provider_boundary_catalog.py --validate` explicitly so ADR 0207 still gets checked even when full runner-image-based manifest execution is unavailable
 - the mirrored Windmill worker checkout must include `README.md`, `VERSION`, `changelog.md`, `mkdocs.yml`, `roles/`, `versions/`, and `workstreams.yaml` because the worker-safe `generated-docs` and `generated-portals` checks read those canonical inputs even when the checkout has no `.git` metadata
+- when replaying `playbooks/windmill.yml` from a non-primary git worktree, pass `-e windmill_worker_checkout_repo_root_local_dir=/absolute/worktree/path` so `/srv/proxmox_florin_server` mirrors the active worktree instead of the shared top-level checkout
 - validation resolves tracked JSON files against the repo root, falls back to `python3` when `jq` is unavailable, and skips rsync-excluded generated JSON artifacts that are intentionally absent from mirrored remote workspaces
 - required Ansible collections are installed from [collections/requirements.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/requirements.yml)
 - validation collections are cached under `.ansible/validation/collections`

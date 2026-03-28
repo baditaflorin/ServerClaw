@@ -8,7 +8,7 @@
 - Owner: codex
 - Depends On: `adr-0206-ports-and-adapters-for-external-integrations`, `adr-0210-canonical-domain-models-over-vendor-schemas`, `adr-0213-architecture-fitness-functions-in-the-validation-gate`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `docs/adr/0207-anti-corruption-layers-at-provider-boundaries.md`, `docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md`, `config/provider-boundary-catalog.yaml`, `scripts/provider_boundary_catalog.py`, `config/validation-gate.json`, `scripts/validate_repo.sh`, `collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/`, `collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/`, `docs/runbooks/subdomain-governance.md`, `docs/runbooks/validate-repository-automation.md`, `docs/runbooks/validation-gate.md`
+- Shared Surfaces: `workstreams.yaml`, `docs/adr/0207-anti-corruption-layers-at-provider-boundaries.md`, `docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md`, `config/provider-boundary-catalog.yaml`, `scripts/provider_boundary_catalog.py`, `config/validation-gate.json`, `scripts/check_role_argument_specs.sh`, `scripts/remote_exec.sh`, `scripts/validate_repo.sh`, `config/windmill/scripts/post-merge-gate.py`, `collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml`, `collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml`, `collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/`, `collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/`, `docs/runbooks/subdomain-governance.md`, `docs/runbooks/validate-repository-automation.md`, `docs/runbooks/validation-gate.md`, `tests/test_post_merge_gate.py`, `tests/test_validate_repo_cache.py`, `tests/test_windmill_operator_admin_app.py`
 - Ownership Manifest: `workstreams.yaml` `ownership_manifest`
 
 ## Scope
@@ -34,8 +34,11 @@
 - `config/ansible-role-idempotency.yml`
 - `.config-locations.yaml`
 - `scripts/provider_boundary_catalog.py`
+- `config/windmill/scripts/post-merge-gate.py`
 - `scripts/validate_repo.sh`
 - `config/validation-gate.json`
+- `collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml`
+- `collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml`
 - `collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/tasks/main.yml`
 - `collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/README.md`
 - `collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/main.yml`
@@ -46,9 +49,12 @@
 - `docs/runbooks/validate-repository-automation.md`
 - `docs/runbooks/validation-gate.md`
 - `tests/test_plane_client.py`
+- `tests/test_post_merge_gate.py`
 - `tests/test_provider_boundary_catalog.py`
 - `tests/test_hetzner_dns_record_role.py`
 - `tests/test_hetzner_dns_records_role.py`
+- `tests/test_validate_repo_cache.py`
+- `tests/test_windmill_operator_admin_app.py`
 
 ## Expected Live Surfaces
 
@@ -66,11 +72,11 @@
 
 ## Verification
 
-- `uv run --with pytest --with pyyaml python -m pytest tests/test_provider_boundary_catalog.py tests/test_hetzner_dns_record_role.py tests/test_hetzner_dns_records_role.py -q`
-- `./scripts/validate_repo.sh data-models`
-- `make remote-validate`
-- live DNS reconcile from merged `main` using a governed hostname that already exists in the subdomain catalog
-- Windmill post-merge gate from `/srv/proxmox_florin_server`
+- `uv run --with pytest --with pyyaml python -m pytest tests/test_validate_repo_cache.py tests/test_validate_alert_rules.py tests/test_windmill_operator_admin_app.py tests/test_config_merge_windmill.py tests/test_post_merge_gate.py tests/test_provider_boundary_catalog.py tests/test_hetzner_dns_record_role.py tests/test_hetzner_dns_records_role.py tests/test_plane_client.py tests/test_remote_exec.py tests/test_validation_gate.py -q` passed with `88 passed in 9.10s`
+- `./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules data-models generated-docs generated-portals agent-standards` is the branch-local repository gate that must pass before final merge-to-main
+- the live Windmill converge now succeeds with `docker-runtime-lv3 : ok=220 changed=39 failed=0` and prunes stale immutable files from the worker mirror
+- the guest-local worker proof now succeeds from the mirrored checkout via `python3 /srv/proxmox_florin_server/config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox_florin_server`, where the worker-safe fallback returns `status: ok` after `./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals` and `uv run --with pyyaml python3 scripts/provider_boundary_catalog.py --validate`
+- the governed Hetzner DNS reconcile for `ops.lv3.org` still finishes `ok=19 changed=0 skipped=2 failed=0`
 
 ## Merge Criteria
 
@@ -78,6 +84,11 @@
 - the Hetzner DNS roles only use canonical DNS facts after the provider boundary translation tasks
 - the merged-main validation path and the worker post-merge validation path both exercise the new provider-boundary guard successfully
 - the workstream records exactly which shared integration updates still belong to the final `main` step
+
+## Mainline Notes
+
+- the Windmill worker replay must pin `windmill_worker_checkout_repo_root_local_dir` to the active worktree during multi-worktree integration, otherwise `/srv/proxmox_florin_server` can mirror the shared top-level checkout instead of the branch being verified
+- the authoritative full-manifest proof still comes from `make remote-validate`; the worker-local fallback is the live proof that ADR 0207 checks pass even while the registry-backed `check-runner` images remain unavailable on `docker-runtime-lv3`
 
 ## Notes For The Next Assistant
 

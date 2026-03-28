@@ -173,7 +173,12 @@ workstreams:
       - tests/test_provider_boundary_catalog.py
       - tests/test_hetzner_dns_record_role.py
       - tests/test_hetzner_dns_records_role.py
+      - tests/test_post_merge_gate.py
       - tests/test_validate_repo_cache.py
+      - tests/test_windmill_operator_admin_app.py
+      - config/windmill/scripts/post-merge-gate.py
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
       - receipts/live-applies/2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply.json
     ownership_manifest:
       owned_surfaces:
@@ -194,10 +199,15 @@ workstreams:
             - collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/**
             - docs/runbooks/subdomain-governance.md
             - platform/ansible/plane.py
+            - config/windmill/scripts/post-merge-gate.py
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
             - tests/test_plane_client.py
+            - tests/test_post_merge_gate.py
             - tests/test_provider_boundary_catalog.py
             - tests/test_hetzner_dns_record_role.py
             - tests/test_hetzner_dns_records_role.py
+            - tests/test_windmill_operator_admin_app.py
             - receipts/live-applies/2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply.json
           mode: exclusive
         - id: validation_gate_contract
@@ -228,7 +238,7 @@ workstreams:
   - id: ws-0207-main-merge
     adr: "0207"
     title: Integrate ADR 0207 live apply into origin/main
-    status: ready
+    status: in_progress
     owner: codex
     branch: codex/ws-0207-main-recut
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0207-main-recut
@@ -257,8 +267,13 @@ workstreams:
       - tests/test_provider_boundary_catalog.py
       - tests/test_hetzner_dns_record_role.py
       - tests/test_hetzner_dns_records_role.py
+      - tests/test_post_merge_gate.py
       - tests/test_remote_exec.py
       - tests/test_validate_repo_cache.py
+      - tests/test_windmill_operator_admin_app.py
+      - config/windmill/scripts/post-merge-gate.py
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
       - README.md
       - VERSION
       - changelog.md
@@ -291,10 +306,15 @@ workstreams:
             - docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md
             - platform/ansible/plane.py
             - scripts/provider_boundary_catalog.py
+            - config/windmill/scripts/post-merge-gate.py
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
             - tests/test_plane_client.py
+            - tests/test_post_merge_gate.py
             - tests/test_provider_boundary_catalog.py
             - tests/test_hetzner_dns_record_role.py
             - tests/test_hetzner_dns_records_role.py
+            - tests/test_windmill_operator_admin_app.py
           mode: exclusive
         - id: adr_0207_architecture_contract
           paths:
