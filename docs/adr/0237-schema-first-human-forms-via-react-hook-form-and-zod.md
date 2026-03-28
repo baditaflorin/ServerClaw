@@ -1,9 +1,10 @@
 # ADR 0237: Schema-First Human Forms Via React Hook Form And Zod
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Live Applied
+- Implemented In Repo Version: Pending merge to main
+- Implemented In Platform Version: 0.130.43
+- Implemented On: 2026-03-28
 - Date: 2026-03-28
 
 ## Context

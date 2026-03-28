@@ -139,4 +139,6 @@ tmpdir="$(mktemp -d)" && mkdir -p "$tmpdir/f/lv3" && rsync -a config/windmill/ap
 - The app is a Windmill-private admin surface; `ops.lv3.org` remains a separate portal.
 - ADR 0241 keeps the stored source format as markdown even though the editor is rich text, so repo diffs, sync workflows, and later migrations stay inspectable.
 - Inline validation mirrors the frontend schema only; the governed backend scripts remain the authoritative enforcement path for live identity mutations.
+- Guided tours are browser-local helpers only; they do not change the governed backend path or replace the runbooks.
+- Repo-managed Windmill raw apps with frontend dependencies should commit `package-lock.json`; the runtime now prefers `npm ci` before raw-app sync and only falls back to `npm install --no-package-lock` when no lockfile exists.
 - Raw-app dependency changes must refresh `config/windmill/apps/wmill-lock.yaml` with `wmill generate-metadata` before the next live Windmill sync, or the remote bundle step can fail with unresolved package imports.
