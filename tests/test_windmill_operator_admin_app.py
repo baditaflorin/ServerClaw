@@ -165,6 +165,7 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     app_config = yaml.safe_load((app_dir / "raw_app.yaml").read_text())
     package = json.loads((app_dir / "package.json").read_text())
     lock_config = yaml.safe_load(lock_path.read_text())
+    package_lock = json.loads((app_dir / "package-lock.json").read_text())
     app_source = (app_dir / "App.tsx").read_text()
     tour_source = (app_dir / "touring.ts").read_text()
 
@@ -203,6 +204,9 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert 'const ONBOARD_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/operator-onboarding/`;' in tour_source
     assert 'const OFFBOARD_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/operator-offboarding/`;' in tour_source
     assert 'const ADMIN_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/windmill-operator-access-admin/`;' in tour_source
+    assert package_lock["packages"][""]["dependencies"]["ag-grid-community"] == "35.2.0"
+    assert package_lock["packages"][""]["dependencies"]["ag-grid-react"] == "35.2.0"
+    assert package_lock["lockfileVersion"] == 3
     roster_script = (REPO_ROOT / "config/windmill/scripts/operator-roster.py").read_text()
     onboard_script = (REPO_ROOT / "config/windmill/scripts/operator-onboard.py").read_text()
     offboard_script = (REPO_ROOT / "config/windmill/scripts/operator-offboard.py").read_text()
@@ -272,8 +276,8 @@ def test_operator_admin_raw_app_lockfile_and_runtime_sync_contract() -> None:
     assert "register: windmill_seed_raw_app_frontend_install" in runtime_tasks
     assert "missing package-lock.json for {{ item.path }}" in runtime_tasks
     assert "npm ci --no-audit --no-fund" in runtime_tasks
-    assert "retries: 3" in runtime_tasks
-    assert "delay: 5" in runtime_tasks
+    assert runtime_tasks.count("retries: 3") >= 2
+    assert runtime_tasks.count("delay: 5") >= 2
     assert "until: windmill_seed_raw_app_frontend_install.rc == 0" in runtime_tasks
     assert "register: windmill_seed_raw_app_sync" in runtime_tasks
     assert "until: windmill_seed_raw_app_sync.rc == 0" in runtime_tasks
@@ -481,16 +485,29 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Sync repo-managed Windmill schedules" in tasks
     assert "scripts/sync_windmill_seed_schedules.py" in tasks
     assert "--path {{ windmill_healthcheck_script_path | quote }}" in tasks
-    assert '$1 == "DATABASE_URL"' in tasks
     assert '. "{{ windmill_env_file }}"' not in tasks
-    assert "Converge repo-managed Windmill schedule enabled flags" in tasks
-    assert 'psql "${database_url}"' in tasks
+    assert "Converge repo-managed Windmill schedule enabled flags" not in tasks
+    assert 'psql "${database_url}"' not in tasks
     assert "become: true" in tasks
     assert "Sync repo-managed Windmill raw apps" in tasks
+    assert "Install repo-managed Windmill raw app frontend dependencies" in tasks
+    assert "register: windmill_seed_raw_app_frontend_install" in tasks
+    assert "missing package-lock.json for {{ item.path }}" in tasks
+    assert "npm ci --no-audit --no-fund" in tasks
+    assert "npm ci --prefix" not in tasks
+    assert "npm install --prefix" not in tasks
+    assert tasks.count("retries: 3") >= 2
+    assert tasks.count("delay: 5") >= 2
+    assert "until: windmill_seed_raw_app_frontend_install.rc == 0" in tasks
+    assert tasks.index("Install repo-managed Windmill raw app frontend dependencies") < tasks.index(
+        "Sync repo-managed Windmill raw apps"
+    )
     assert "wmill sync push" in tasks
     assert "--skip-scripts" in tasks
     assert "--includes \"{{ item.sync_pattern }}\"" in tasks
     assert "--skip-branch-validation" in tasks
+    assert "register: windmill_seed_raw_app_sync" in tasks
+    assert "until: windmill_seed_raw_app_sync.rc == 0" in tasks
     assert "WM_TOKEN" in tasks
     assert 'WM_TOKEN: "{{ windmill_bootstrap_session_token }}"' in tasks
     assert "BASE_INTERNAL_URL" in tasks
@@ -564,9 +581,14 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "delegate_to: localhost" in tasks
     assert "become: false" in tasks
     assert "Decide whether the Windmill worker checkout needs to be refreshed" in tasks
+    assert "windmill_seed_app_repo_root_local_dir" in tasks
     assert "windmill_worker_checkout_checksum_file" in tasks
     assert "windmill_worker_checkout_repo_root_local_dir" in tasks
     assert "windmill_worker_checkout_sync_paths" in tasks
+    assert (
+        defaults["windmill_seed_app_repo_root_local_dir"]
+        == "{{ windmill_worker_checkout_repo_root_local_dir }}/config/windmill/apps"
+    )
     assert defaults["windmill_worker_repo_checkout_host_path"] == "/srv/proxmox_florin_server"
     assert defaults["windmill_worker_repo_checkout_container_path"] == "/srv/proxmox_florin_server"
     assert "{{ windmill_worker_repo_checkout_host_path }}:{{ windmill_worker_repo_checkout_container_path }}" in compose_template

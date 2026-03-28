@@ -226,6 +226,7 @@ def test_schedule_sync_helper_retries_connection_reset_during_update(
     }
     attempts = {"count": 0}
 
+    monkeypatch.setattr(module, "script_exists", lambda **kwargs: True)
     monkeypatch.setattr(module, "schedule_exists", lambda **kwargs: True)
 
     def fake_update_schedule(**kwargs):
@@ -246,6 +247,101 @@ def test_schedule_sync_helper_retries_connection_reset_during_update(
     )
 
     assert payload == {"path": "f/lv3/quarterly_access_review_every_monday_0900", "attempts": 2, "status": "updated"}
+
+
+def test_schedule_payload_keeps_enabled_and_script_binding() -> None:
+    module = load_module("schedule_sync_helper_payload", SCHEDULE_SYNC_HELPER_PATH)
+    spec = {
+        "path": "f/lv3/scheduler_watchdog_loop_every_10s",
+        "schedule": "*/10 * * * * *",
+        "timezone": "Europe/Bucharest",
+        "script_path": "f/lv3/scheduler_watchdog_loop",
+        "summary": "ADR 0172 scheduler watchdog loop",
+        "description": "Repo-managed schedule payload test",
+        "enabled": True,
+    }
+
+    assert module.schedule_payload(spec) == {
+        "schedule": "*/10 * * * * *",
+        "timezone": "Europe/Bucharest",
+        "script_path": "f/lv3/scheduler_watchdog_loop",
+        "is_flow": False,
+        "args": {},
+        "enabled": True,
+        "summary": "ADR 0172 scheduler watchdog loop",
+        "description": "Repo-managed schedule payload test",
+        "no_flow_overlap": True,
+    }
+
+
+def test_schedule_sync_helper_retries_until_script_target_is_visible(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = load_module("schedule_sync_helper_waits_for_script", SCHEDULE_SYNC_HELPER_PATH)
+    spec = {
+        "path": "f/lv3/world_state/refresh_container_inventory_every_minute",
+        "schedule": "0 * * * * *",
+        "timezone": "Europe/Bucharest",
+        "script_path": "f/lv3/world_state/refresh_container_inventory",
+        "summary": "ADR 0113 container inventory world-state refresh",
+        "description": "Repo-managed schedule sync test",
+    }
+    attempts = {"count": 0}
+
+    def fake_script_exists(**kwargs):
+        attempts["count"] += 1
+        return attempts["count"] >= 2
+
+    monkeypatch.setattr(module, "script_exists", fake_script_exists)
+    monkeypatch.setattr(module, "schedule_exists", lambda **kwargs: True)
+    monkeypatch.setattr(module, "update_schedule", lambda **kwargs: None)
+
+    payload = module.sync_schedule(
+        base_url="http://windmill.internal",
+        workspace="lv3",
+        token="token",
+        spec=spec,
+        max_attempts=3,
+        settle_interval_s=0.0,
+        request_timeout_s=5.0,
+    )
+
+    assert payload == {
+        "path": "f/lv3/world_state/refresh_container_inventory_every_minute",
+        "attempts": 2,
+        "status": "updated",
+    }
+
+
+def test_schedule_sync_helper_treats_missing_script_update_error_as_retryable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = load_module("schedule_sync_helper_missing_script_retry", SCHEDULE_SYNC_HELPER_PATH)
+
+    def fake_request_json_or_text(**kwargs):
+        raise module.SyncError(
+            "POST schedules/update/f%2Flv3%2Fworld_state%2Frefresh_container_inventory_every_minute "
+            "returned 404: Not found: script not found at name "
+            "f/lv3/world_state/refresh_container_inventory (lib.rs:1154)"
+        )
+
+    monkeypatch.setattr(module, "request_json_or_text", fake_request_json_or_text)
+
+    with pytest.raises(module.RetryableSyncError, match="script not found at name"):
+        module.update_schedule(
+            base_url="http://windmill.internal",
+            workspace="lv3",
+            token="token",
+            spec={
+                "path": "f/lv3/world_state/refresh_container_inventory_every_minute",
+                "schedule": "0 * * * * *",
+                "timezone": "Europe/Bucharest",
+                "script_path": "f/lv3/world_state/refresh_container_inventory",
+                "summary": "summary",
+                "description": "desc",
+            },
+            timeout_s=5.0,
+        )
 
 
 def test_schedule_sync_helper_uses_configured_http_timeout(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -31,6 +31,7 @@
 - `config/windmill/apps/f/lv3/operator_access_admin.raw_app/App.tsx`
 - `config/windmill/apps/f/lv3/operator_access_admin.raw_app/index.css`
 - `config/windmill/apps/f/lv3/operator_access_admin.raw_app/package.json`
+- `config/windmill/apps/f/lv3/operator_access_admin.raw_app/package-lock.json`
 - `docs/runbooks/windmill-operator-access-admin.md`
 - `docs/adr/0238-data-dense-operator-grids-via-ag-grid-community.md`
 - `docs/workstreams/ws-0238-live-apply.md`
@@ -55,7 +56,7 @@
 - `ANSIBLE_CONFIG=ansible.cfg ANSIBLE_COLLECTIONS_PATH=collections uvx --from ansible-core ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --syntax-check`
 - `./scripts/validate_repo.sh agent-standards`
 - `uv run --with pyyaml python scripts/generate_adr_index.py --write`
-- `tmpdir="$(mktemp -d)" && rsync -a config/windmill/apps/f/lv3/operator_access_admin.raw_app/ "$tmpdir"/ && cd "$tmpdir" && npm install && npx tsc --noEmit`
+- `tmpdir="$(mktemp -d)" && mkdir -p "$tmpdir/f/lv3" && rsync -a config/windmill/apps/f/lv3/operator_access_admin.raw_app/ "$tmpdir/f/lv3/operator_access_admin.raw_app/" && cd "$tmpdir/f/lv3/operator_access_admin.raw_app" && npm ci && npx tsc --noEmit`
 - `make converge-windmill`
 - `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.64.0.1:8005/api/w/lv3/apps/get/p/f/lv3/operator_access_admin`
 - `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{}' http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Foperator_roster`
