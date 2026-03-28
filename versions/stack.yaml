@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.32
-platform_version: 0.130.36
+repo_version: 0.177.33
+platform_version: 0.130.37
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -77,6 +77,7 @@ live_apply_evidence:
     fixture_pools: 2026-03-28-adr-0186-prewarmed-fixture-pools-live-apply
     seed_data_snapshots: 2026-03-28-adr-0187-anonymized-seed-data-snapshots-mainline-live-apply
     dify: 2026-03-28-adr-0197-dify-live-apply
+    shared_policy_packs: 2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -982,8 +983,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.32
+    current: 0.177.33
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.36
+    current: 0.130.37
     meaning: intended platform release for the actual server configuration

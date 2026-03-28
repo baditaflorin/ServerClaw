@@ -458,6 +458,25 @@ def render_dependency_markdown(graph: DependencyGraph) -> str:
     ).strip() + "\n"
 
 
+def render_dependency_page(graph: DependencyGraph) -> str:
+    return "\n".join(
+        [
+            "---",
+            "sensitivity: INTERNAL",
+            "portal_display: full",
+            "tags:",
+            "  - architecture",
+            "  - dependency-graph",
+            "---",
+            "",
+            '!!! note "Sensitivity: INTERNAL"',
+            "    This page is intended for authenticated operators and internal collaborators.",
+            "",
+            render_dependency_markdown(graph).lstrip(),
+        ]
+    ).strip() + "\n"
+
+
 def graph_to_dict(graph: DependencyGraph) -> dict[str, Any]:
     return {
         "schema_version": graph.schema_version,

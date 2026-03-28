@@ -3581,6 +3581,7 @@ adr_index:
       - registries
     summary: We will centralize shared platform policies into reusable policy packs or rule
     filename: 0211-shared-policy-packs-and-rule-registries.md
+    implemented_version: 0.177.33
   - adr: '0212'
     title: Replaceability Scorecards And Vendor Exit Plans
     status: Accepted
