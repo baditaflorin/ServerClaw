@@ -6,6 +6,8 @@ This runbook defines the repo-managed Plane runtime for the LV3 task board and A
 
 Plane is public on this platform at `tasks.lv3.org`, but browser access is gated by the shared Keycloak-backed edge auth flow. The private controller path remains available through the Proxmox host Tailscale TCP proxy for governed bootstrap and API automation.
 
+The shared edge certificate now expands through the repo-managed NGINX `webroot` ACME path on `nginx-lv3`. Hetzner DNS still governs the public A records, but routine Plane edge certificate expansion no longer depends on DNS-01 propagation.
+
 ## Canonical Surfaces
 
 - playbook: [playbooks/plane.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/plane.yml)
@@ -88,6 +90,8 @@ After a converge:
 6. `make plane-manage ACTION=sync-adrs`
 7. `curl -I https://tasks.lv3.org/`
 8. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/plane/docker-compose.yml ps && sudo ls -l /run/lv3-secrets/plane /etc/lv3/plane /opt/plane/data'`
+
+If step 7 returns `302` to `/oauth2/sign_in`, treat that as the expected authenticated public entrypoint. A second probe to the quoted sign-in URL should then return `302` into `https://sso.lv3.org/...`.
 
 If step 7 returns `308` to `https://nginx.lv3.org/`, treat that as a shared NGINX publication blocker rather than a Plane runtime failure. The controller path at `http://100.64.0.1:8011` remains the authoritative automation surface until the edge publication lane is reconciled.
 

@@ -2,13 +2,13 @@
 
 - ADR: [ADR 0193](../adr/0193-plane-kanban-task-board.md)
 - Title: Deploy a repo-managed Plane task board with authenticated browser access and idempotent ADR synchronization
-- Status: blocked
+- Status: ready-to-merge
 - Branch: `codex/ws-0193-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0193-live-apply`
 - Owner: codex
 - Depends On: `adr-0096-openbao`, `adr-0146-langfuse`, `adr-0149-semaphore`, `adr-0152-homepage-service-catalog`
 - Conflicts With: none
-- Shared Surfaces: `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `config/service-capability-catalog.json`, `config/health-probe-catalog.json`, `config/subdomain-catalog.json`, `config/service-completeness.json`, `config/api-gateway-catalog.json`, `config/dependency-graph.json`, `config/slo-catalog.json`, `config/data-catalog.json`, `config/secret-catalog.json`, `config/controller-local-secrets.json`, `config/image-catalog.json`, `config/service-redundancy-catalog.json`, `config/workflow-catalog.json`, `workstreams.yaml`
+- Shared Surfaces: `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `config/service-capability-catalog.json`, `config/health-probe-catalog.json`, `config/subdomain-catalog.json`, `config/subdomain-exposure-registry.json`, `config/service-completeness.json`, `config/api-gateway-catalog.json`, `config/dependency-graph.json`, `config/slo-catalog.json`, `config/data-catalog.json`, `config/secret-catalog.json`, `config/controller-local-secrets.json`, `config/image-catalog.json`, `config/service-redundancy-catalog.json`, `config/workflow-catalog.json`, `build/platform-manifest.json`, `docs/site-generated/architecture/dependency-graph.md`, `workstreams.yaml`
 
 ## Scope
 
@@ -69,13 +69,13 @@
 
 ## Outcome
 
-- controller/runtime/ADR-sync live apply verified on branch `codex/ws-0193-live-apply`
+- full live apply verified on branch `codex/ws-0193-live-apply`
 - `make syntax-check-plane` passed
-- `uv run --with pytest pytest -q tests/test_plane_client.py tests/test_plane_runtime_role.py` passed
-- `./scripts/validate_repo.sh agent-standards json health-probes workstream-surfaces alert-rules` passed
+- `uv run --with pytest pytest -q tests/test_plane_client.py tests/test_plane_runtime_role.py tests/test_nginx_edge_publication_role.py` passed
+- `./scripts/validate_repo.sh agent-standards json health-probes workstream-surfaces alert-rules` passed after recording the generated dependency-graph surface in the workstream ownership manifest
 - `make plane-manage ACTION=whoami` and `make plane-manage ACTION=list-projects PLANE_ARGS='--workspace lv3-platform'` passed after wiring the wrapper to the canonical controller-local auth file
-- `ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/plane.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e env=production -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --tags tier-2 --limit docker-runtime-lv3` passed
-- `ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/plane.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e env=production -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --tags tier-2` reached `postgres-lv3`, `docker-runtime-lv3`, and `nginx-lv3`, then failed on unrelated missing `build/changelog-portal/` and `build/docs-portal/` artifacts in the shared NGINX publication role
-- the unscoped full `playbooks/plane.yml` replay is additionally blocked on the externally supplied `HETZNER_DNS_API_TOKEN` required by the shared Hetzner DNS role
-- the public `tasks.lv3.org` hostname still returns `308` to `https://nginx.lv3.org/`; merge-to-`main` must not claim the public browser surface is verified until the shared NGINX publication prerequisites and DNS-lane input are available
-- merge-to-`main` must still update shared integration truth after the remaining shared-edge blockers are cleared
+- `make plane-manage ACTION=sync-adrs` completed against the live Plane project after extending the ADR-sync timeout budget for slow Plane PATCH replies
+- `ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/plane.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e env=production -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --limit nginx-lv3` passed after switching the shared edge certificate automation to the repo-managed `webroot` ACME path
+- `ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/plane.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e env=production -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` passed end to end across `proxmox_florin`, `postgres-lv3`, `docker-runtime-lv3`, and `nginx-lv3`
+- `https://tasks.lv3.org/` now returns `302` to `https://tasks.lv3.org/oauth2/sign_in?...`, and that sign-in path returns `302` into the shared `sso.lv3.org` realm flow
+- merge-to-`main` still must update the protected integration files (`README.md`, `VERSION`, `changelog.md`, and `versions/stack.yaml`) as the final integration step

@@ -331,6 +331,9 @@
   delegate_to: localhost
   become: false
   register: plane_sync
+  retries: 4
+  delay: 30
+  until: plane_sync.rc == 0
   changed_when: false
 
 - name: Verify the Plane runtime

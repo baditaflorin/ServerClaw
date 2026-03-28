@@ -51,3 +51,13 @@ def test_plane_compose_template_runs_migrator_before_the_api_path() -> None:
     assert "migrator:\n        condition: service_started" in compose_template
     assert '  plane-redis:\n    image: {{ plane_valkey_image }}' in compose_template
     assert '      - --save\n      - ""' in compose_template
+
+
+def test_plane_runtime_retries_adr_sync_until_plane_is_settled() -> None:
+    task_file = (REPO_ROOT / "roles" / "plane_runtime" / "tasks" / "main.yml").read_text()
+
+    assert "- name: Synchronize ADRs into Plane" in task_file
+    assert "register: plane_sync" in task_file
+    assert "retries: 4" in task_file
+    assert "delay: 30" in task_file
+    assert "until: plane_sync.rc == 0" in task_file

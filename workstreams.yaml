@@ -56,6 +56,7 @@ workstreams:
       - config/service-capability-catalog.json
       - config/health-probe-catalog.json
       - config/subdomain-catalog.json
+      - config/subdomain-exposure-registry.json
       - config/service-completeness.json
       - config/api-gateway-catalog.json
       - config/dependency-graph.json
@@ -73,6 +74,8 @@ workstreams:
       - config/prometheus/rules/slo_alerts.yml
       - config/prometheus/file_sd/slo_targets.yml
       - config/grafana/dashboards/slo-overview.json
+      - build/platform-manifest.json
+      - docs/site-generated/architecture/dependency-graph.md
       - receipts/image-scans/
       - receipts/live-applies/
       - tests/test_plane_client.py
@@ -120,6 +123,7 @@ workstreams:
             - config/service-capability-catalog.json
             - config/health-probe-catalog.json
             - config/subdomain-catalog.json
+            - config/subdomain-exposure-registry.json
             - config/service-completeness.json
             - config/api-gateway-catalog.json
             - config/dependency-graph.json
@@ -130,6 +134,8 @@ workstreams:
             - config/image-catalog.json
             - config/service-redundancy-catalog.json
             - config/workflow-catalog.json
+            - build/platform-manifest.json
+            - docs/site-generated/architecture/dependency-graph.md
             - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
           mode: shared_contract
           contract: plane-service-contract-v1
@@ -158,11 +164,9 @@ workstreams:
             - changelog.md
             - versions/stack.yaml
           mode: generated
-    ready_to_merge: false
-    live_applied: false
-    blockers:
-      - "Full public-edge verification is still blocked because playbooks/plane.yml requires external HETZNER_DNS_API_TOKEN input for the shared Hetzner DNS lane."
-      - "The tier-2 cross-host replay reaches lv3.platform.nginx_edge_publication but fails on unrelated missing build/changelog-portal and build/docs-portal artifacts, leaving https://tasks.lv3.org/ redirecting to https://nginx.lv3.org/."
+    ready_to_merge: true
+    live_applied: true
+    blockers: []
   - id: adr-0180-standby-capacity
     adr: "0180"
     title: Standby capacity reservation and placement rules

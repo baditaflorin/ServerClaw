@@ -138,6 +138,94 @@ def test_plane_client_retries_rate_limited_requests(monkeypatch) -> None:
     assert sleeps == [0.01, 0.02]
 
 
+def test_plane_client_retries_timeout_requests(monkeypatch) -> None:
+    client = plane.PlaneClient(
+        "http://plane.invalid",
+        "token",
+        verify_ssl=False,
+        max_rate_limit_retries=2,
+        rate_limit_backoff_seconds=0.01,
+    )
+    attempts = {"count": 0}
+
+    def fake_open(request, timeout):
+        attempts["count"] += 1
+        if attempts["count"] < 3:
+            raise TimeoutError("timed out")
+
+        class _Response:
+            status = 200
+
+            def read(self):
+                return b'{"ok": true}'
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+        return _Response()
+
+    monkeypatch.setattr(client._opener, "open", fake_open)
+    sleeps: list[float] = []
+    monkeypatch.setattr(plane.time, "sleep", sleeps.append)
+
+    status, payload = client._request("/api/v1/users/me/")
+
+    assert status == 200
+    assert payload == {"ok": True}
+    assert attempts["count"] == 3
+    assert sleeps == [0.01, 0.02]
+
+
+def test_plane_client_retries_transient_server_errors(monkeypatch) -> None:
+    client = plane.PlaneClient(
+        "http://plane.invalid",
+        "token",
+        verify_ssl=False,
+        max_rate_limit_retries=2,
+        rate_limit_backoff_seconds=0.01,
+    )
+    attempts = {"count": 0}
+
+    def fake_open(request, timeout):
+        attempts["count"] += 1
+        if attempts["count"] < 3:
+            raise plane.urllib.error.HTTPError(
+                request.full_url,
+                502,
+                "Bad Gateway",
+                hdrs=None,
+                fp=None,
+            )
+
+        class _Response:
+            status = 200
+
+            def read(self):
+                return b'{"ok": true}'
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+        return _Response()
+
+    monkeypatch.setattr(client._opener, "open", fake_open)
+    sleeps: list[float] = []
+    monkeypatch.setattr(plane.time, "sleep", sleeps.append)
+
+    status, payload = client._request("/api/v1/users/me/")
+
+    assert status == 200
+    assert payload == {"ok": True}
+    assert attempts["count"] == 3
+    assert sleeps == [0.01, 0.02]
+
+
 def test_sync_adrs_reuses_issue_index_for_repo_adr_updates(tmp_path, monkeypatch) -> None:
     auth_file = tmp_path / "auth.json"
     auth_file.write_text(
@@ -172,6 +260,8 @@ def test_sync_adrs_reuses_issue_index_for_repo_adr_updates(tmp_path, monkeypatch
     class FakeClient:
         def __init__(self, *args, **kwargs):
             self.list_issues_calls = 0
+            self.timeout = kwargs["timeout"]
+            self.max_rate_limit_retries = kwargs["max_rate_limit_retries"]
 
         def verify_api_key(self):
             return True
@@ -186,11 +276,52 @@ def test_sync_adrs_reuses_issue_index_for_repo_adr_updates(tmp_path, monkeypatch
         def update_issue(self, workspace_slug, project_id, issue_id, payload):
             return {"id": issue_id, "name": payload["name"], "state_id": payload["state_id"]}
 
-    fake_client = FakeClient()
-    monkeypatch.setattr(sync_adrs_to_plane, "PlaneClient", lambda *args, **kwargs: fake_client)
+    captured: dict[str, FakeClient] = {}
+
+    def fake_plane_client(*args, **kwargs):
+        client = FakeClient(*args, **kwargs)
+        captured["client"] = client
+        return client
+
+    monkeypatch.setattr(sync_adrs_to_plane, "PlaneClient", fake_plane_client)
 
     summary = sync_adrs_to_plane.sync_adrs(auth_file=str(auth_file), adr_dir=str(adr_dir))
 
     assert summary["count"] == 1
     assert summary["synced"][0]["issue_id"] == "issue-1"
-    assert fake_client.list_issues_calls == 1
+    assert captured["client"].list_issues_calls == 1
+    assert captured["client"].timeout == 120
+    assert captured["client"].max_rate_limit_retries == 8
+
+
+def test_ensure_issue_for_adr_skips_patch_when_issue_already_matches() -> None:
+    record = plane.AdrRecord(
+        adr_id="0193",
+        title="Plane Kanban Task Board",
+        status="Accepted",
+        implementation_status="Partial",
+        path=Path("docs/adr/0193-plane-kanban-task-board.md"),
+        summary="Track ADRs in Plane.",
+    )
+
+    class FakeClient:
+        def update_issue(self, *args, **kwargs):
+            raise AssertionError("update_issue should not be called when the issue is already current")
+
+    existing_issue = {
+        "id": "issue-1",
+        "name": "ADR 0193: Plane Kanban Task Board",
+        "description_html": plane.render_adr_description(record),
+        "state": "state-todo",
+    }
+
+    issue = plane.ensure_issue_for_adr(
+        FakeClient(),
+        workspace_slug="lv3-platform",
+        project_id="project-1",
+        states_by_name={"Todo": "state-todo"},
+        record=record,
+        existing_issue=existing_issue,
+    )
+
+    assert issue is existing_issue

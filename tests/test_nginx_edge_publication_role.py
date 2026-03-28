@@ -18,8 +18,8 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.template = TEMPLATE_PATH.read_text()
         self.static_template = STATIC_TEMPLATE_PATH.read_text()
 
-    def test_defaults_enable_pinned_dns_hetzner_acme(self) -> None:
-        self.assertEqual(self.defaults["public_edge_acme_challenge_method"], "dns-hetzner")
+    def test_defaults_use_webroot_acme_with_dns_hetzner_fallback_support(self) -> None:
+        self.assertEqual(self.defaults["public_edge_acme_challenge_method"], "webroot")
         self.assertEqual(self.defaults["public_edge_control_plane_host"], "{{ groups['proxmox_hosts'][0] }}")
         self.assertEqual(
             self.defaults["proxmox_guests"],
@@ -43,6 +43,8 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             self.defaults["public_edge_dns_hetzner_credentials_file"],
             "/etc/letsencrypt/hetzner.ini",
         )
+        self.assertEqual(self.defaults["public_edge_dns_hetzner_propagation_seconds"], 120)
+        self.assertEqual(self.defaults["public_edge_acme_root"], "/var/www/lv3-edge-acme")
         self.assertEqual(
             self.defaults["public_edge_dns_hetzner_virtualenv"],
             "/opt/certbot-dns-hetzner",

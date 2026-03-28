@@ -4,6 +4,7 @@ import html
 import http.cookiejar
 import json
 import re
+import socket
 import time
 import urllib.error
 import urllib.parse
@@ -33,6 +34,15 @@ def _parse_query_error(location: str | None) -> str | None:
     if values:
         return values[0]
     return None
+
+
+def _is_timeout_error(exc: BaseException) -> bool:
+    if isinstance(exc, TimeoutError | socket.timeout):
+        return True
+    if isinstance(exc, urllib.error.URLError):
+        reason = exc.reason
+        return isinstance(reason, TimeoutError | socket.timeout)
+    return False
 
 
 def _paged_results(payload: Any) -> list[dict[str, Any]]:
@@ -114,13 +124,19 @@ class PlaneClient:
             except urllib.error.HTTPError as exc:
                 status = exc.code
                 raw = exc.read().decode("utf-8")
+            except (TimeoutError, socket.timeout, urllib.error.URLError) as exc:
+                if _is_timeout_error(exc) and attempt < self.max_rate_limit_retries:
+                    time.sleep(self.rate_limit_backoff_seconds * (2**attempt))
+                    attempt += 1
+                    continue
+                raise PlaneError(f"{method} {path} timed out: {exc}") from exc
             if status in expected:
                 if not raw:
                     return status, None
                 if accept_json:
                     return status, json.loads(raw)
                 return status, raw
-            if status == 429 and attempt < self.max_rate_limit_retries:
+            if status in {429, 500, 502, 503, 504} and attempt < self.max_rate_limit_retries:
                 time.sleep(self.rate_limit_backoff_seconds * (2**attempt))
                 attempt += 1
                 continue
@@ -567,5 +583,12 @@ def ensure_issue_for_adr(
         issue_id = issue.get("id")
         if not issue_id:
             raise PlaneError(f"Plane returned an issue without an id for {record.external_id}")
+        current_state = issue.get("state_id") or issue.get("state")
+        if (
+            issue.get("name") == payload["name"]
+            and issue.get("description_html") == payload["description_html"]
+            and current_state == payload["state_id"]
+        ):
+            return issue
         return client.update_issue(workspace_slug, project_id, issue_id, payload)
     return client.create_issue(workspace_slug, project_id, payload)

@@ -1,9 +1,9 @@
 # ADR 0193: Plane Kanban Task Board
 
 - Status: Accepted
-- Implementation Status: Partial
+- Implementation Status: Implemented
 - Implemented In Repo Version: Not yet merged
-- Implemented In Platform Version: 0.177.12 (controller/runtime and ADR sync live-applied; public edge publication still blocked)
+- Implemented In Platform Version: 0.177.12
 - Implemented On: 2026-03-27
 - Date: 2026-03-27
 
@@ -62,13 +62,14 @@ Shared integration files remain intentionally unchanged on the workstream branch
 
 ## Live Apply Status
 
-As of 2026-03-27, the Plane runtime, PostgreSQL access, Proxmox-host Tailscale proxy, controller-local bootstrap artifacts, and ADR synchronization path have all been replayed and verified from this workstream branch.
+As of 2026-03-27, the full repo-managed Plane path is replayed and verified from this workstream branch across the Proxmox host, PostgreSQL VM, Docker runtime VM, and shared NGINX edge VM.
 
 Verified live evidence includes:
 
+- `ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/plane.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e env=production -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` completed successfully
 - `http://100.64.0.1:8011/api/instances/` returns `200`
 - the seeded `lv3-platform` workspace and `ADR` project exist and are reachable through `make plane-manage`
-- `scripts/sync_adrs_to_plane.py` synchronized 202 ADR records into Plane
+- `scripts/sync_adrs_to_plane.py` synchronized 202 ADR records into Plane, and the full playbook replay now tolerates a transient first sync failure through role-level retries
 - the docker-runtime stack is up on `docker-runtime-lv3`, with the Plane API, web, proxy, admin, live, worker, MinIO, RabbitMQ, and Valkey containers running
-
-The public `https://tasks.lv3.org` browser surface is not yet verified as live from this branch. The shared NGINX publication role is still blocked by missing generated static-site build artifacts for unrelated edge pages, and the full unscoped playbook also requires an externally supplied `HETZNER_DNS_API_TOKEN` for the Hetzner DNS lane.
+- `https://tasks.lv3.org/` returns `302` to the shared oauth2-proxy sign-in path, and that sign-in path returns `302` into the shared Keycloak realm instead of the previous `https://nginx.lv3.org/` fallback
+- the shared NGINX edge certificate expansion now succeeds through the repo-managed `webroot` ACME path

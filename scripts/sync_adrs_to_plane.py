@@ -24,7 +24,13 @@ def sync_adrs(
     summary_output: str | None = None,
 ) -> dict[str, Any]:
     auth = load_json(Path(auth_file).expanduser())
-    client = PlaneClient(auth["base_url"], auth["api_token"], verify_ssl=bool(auth.get("verify_ssl", True)))
+    client = PlaneClient(
+        auth["base_url"],
+        auth["api_token"],
+        verify_ssl=bool(auth.get("verify_ssl", True)),
+        timeout=120,
+        max_rate_limit_retries=8,
+    )
     if not client.verify_api_key():
         raise PlaneError(f"Plane API token in {auth_file} is not valid")
     workspace_slug = auth["workspace_slug"]
