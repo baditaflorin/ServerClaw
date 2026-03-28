@@ -2,17 +2,17 @@
 
 - ADR: [ADR 0239](../adr/0239-browser-local-search-experience-via-pagefind.md)
 - Title: Live apply browser-local docs search via Pagefind on `docs.lv3.org`
-- Status: in_progress
+- Status: live_applied
 - Implemented In Repo Version: pending main integration
-- Live Applied In Platform Version: pending main replay
-- Implemented On: pending
-- Live Applied On: pending
+- Live Applied In Platform Version: 0.130.43
+- Implemented On: 2026-03-28
+- Live Applied On: 2026-03-28
 - Branch: `codex/ws-0239-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0239-live-apply`
 - Owner: codex
 - Depends On: `adr-0094-developer-portal`, `adr-0121-local-search-and-indexing-fabric`, `adr-0135-developer-portal-sensitivity-classification`, `adr-0137-robots-and-crawl-policy`, `adr-0138-published-artifact-secret-scanning`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0239-live-apply.md`, `docs/adr/0239-browser-local-search-experience-via-pagefind.md`, `docs/adr/.index.yaml`, `docs/runbooks/developer-portal.md`, `Makefile`, `mkdocs.yml`, `requirements/docs.txt`, `scripts/generate_docs_site.py`, `scripts/build_docs_portal.py`, `scripts/validate_repo.sh`, `docs/theme-overrides/**`, `tests/test_docs_site.py`, `receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json`
+- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0239-live-apply.md`, `docs/adr/0239-browser-local-search-experience-via-pagefind.md`, `docs/adr/.index.yaml`, `docs/runbooks/developer-portal.md`, `docs/runbooks/deployment-history-portal.md`, `docs/site-generated/architecture/dependency-graph.md`, `Makefile`, `mkdocs.yml`, `requirements/docs.txt`, `scripts/generate_docs_site.py`, `scripts/build_docs_portal.py`, `scripts/validate_repo.sh`, `docs/theme-overrides/**`, `tests/test_docs_site.py`, `receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json`
 
 ## Scope
 
@@ -54,15 +54,19 @@
 
 - `uv run --with pytest --with-requirements requirements/docs.txt pytest -q tests/test_docs_site.py`
 - `uv run --with-requirements requirements/docs.txt python3 scripts/build_docs_portal.py --generated-dir "$(mktemp -d /tmp/lv3-docs-generated.XXXXXX)" --output-dir "$(mktemp -d /tmp/lv3-docs-portal.XXXXXX)" --openapi-url ""`
-- `./scripts/validate_repo.sh generated-portals agent-standards`
+- `./scripts/validate_repo.sh generated-portals workstream-surfaces agent-standards`
 - `make docs`
 - `make deploy-docs-portal`
 - live checks on `nginx-lv3` and `docs.lv3.org` for deployed Pagefind assets, Pagefind-backed HTML wiring, and authenticated edge behaviour
 
-## Outcome
+## Live Apply Outcome
 
-- pending implementation and live verification
+- `make deploy-docs-portal` now refreshes both shared edge static directories before publication, fixing the repo automation gap where the shared `public-edge` lane failed when `build/changelog-portal/` was absent locally
+- `make docs` now renders the docs portal through `scripts/build_docs_portal.py`, which builds the MkDocs site, generates the Pagefind bundle under `build/docs-portal/pagefind/`, and secret-scans the published search artifacts before publication
+- the docs theme now opens a Pagefind-backed modal from the header search control and emits Pagefind filters for `section`, `audience`, `service`, `capability`, `sensitivity`, and `tag` across the generated docs corpus
+- live verification on `nginx-lv3` confirmed `pagefind/pagefind-entry.json`, `pagefind/pagefind-ui.js`, and `pagefind/pagefind-ui.css` on the published docs tree, while the deployed HTML carries `pagefind/pagefind-ui.js`, `id="pagefind-search"`, and `data-pagefind-filter="section"` without the earlier dependency-graph frontmatter leak
+- external verification confirmed `https://docs.lv3.org/` still returns `302` to `/oauth2/sign_in` with `X-Robots-Tag: noindex, nofollow`, preserving the existing authenticated edge contract while serving the new browser-local search assets behind the auth gate
 
 ## Merge-To-Main Notes
 
-- pending; protected integration files remain untouched on this workstream branch
+- remaining for merge to `main`: bump `VERSION`, update `changelog.md`, refresh the top-level `README.md` integrated status summary, and update `versions/stack.yaml` to point the docs portal/search truth at receipt `2026-03-28-adr-0239-browser-local-search-live-apply.json`

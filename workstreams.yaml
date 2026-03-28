@@ -759,7 +759,7 @@ workstreams:
   - id: ws-0239-live-apply
     adr: "0239"
     title: Live apply browser-local search experience via Pagefind
-    status: in-progress
+    status: ready
     owner: codex
     branch: codex/ws-0239-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0239-live-apply
@@ -825,7 +825,7 @@ workstreams:
             - receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json
           mode: shared_contract
           contract: live-apply-receipts-v1
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
     canonical_truth:
       changelog_entry: implements ADR 0239 by publishing a Pagefind-backed
@@ -833,6 +833,8 @@ workstreams:
         audience, service, capability, sensitivity, and tag facets from the
         generated portal corpus
       release_bump: patch
+      latest_receipts:
+        docs_portal: 2026-03-28-adr-0239-browser-local-search-live-apply
   - id: ws-0241-live-apply
     adr: "0241"
     title: Live apply ADR 0241 rich content and inline knowledge editing via Tiptap
