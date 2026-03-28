@@ -1,9 +1,10 @@
 # ADR 0238: Data-Dense Operator Grids Via AG Grid Community
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented on workstream branch
+- Implemented In Repo Version: 0.177.56
+- Implemented In Platform Version: 0.130.43
+- Implemented On: 2026-03-28
 - Date: 2026-03-28
 
 ## Context
