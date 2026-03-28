@@ -232,13 +232,13 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0207 by translating Hetzner DNS provider payloads into canonical DNS facts at the boundary and by enforcing that contract in both the repository validation path and the live post-merge validation gate
       release_bump: patch
-      included_in_repo_version: 0.177.37
+      included_in_repo_version: 0.177.38
       latest_receipts:
         provider_boundaries: 2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply
   - id: ws-0207-main-merge
     adr: "0207"
     title: Integrate ADR 0207 live apply into origin/main
-    status: in_progress
+    status: merged
     owner: codex
     branch: codex/ws-0207-main-recut
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0207-main-recut

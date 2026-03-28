@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-28'
 total_adrs: 238
 implementation_status_summary:
-  Implemented: 202
+  Implemented: 203
   Partial: 4
-  Not Implemented: 31
+  Not Implemented: 30
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3484,7 +3484,7 @@ adr_index:
       - loops
     summary: We will treat self-correction as an explicit architecture concern.
     filename: 0204-self-correcting-automation-loops.md
-    implemented_version: 0.130.35
+    implemented_version: 0.177.37
   - adr: '0205'
     title: Capability Contracts Before Product Selection
     status: Accepted
@@ -3527,7 +3527,7 @@ adr_index:
       - boundaries
     summary: Every critical external integration must define an anti-corruption layer at the
     filename: 0207-anti-corruption-layers-at-provider-boundaries.md
-    implemented_version: 0.177.37
+    implemented_version: 0.177.38
   - adr: 0208
     title: Dependency Direction And Composition Roots
     status: Accepted
