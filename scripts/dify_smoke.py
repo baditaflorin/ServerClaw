@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 from dify_api import DifyClient, read_secret
 from sync_tools_to_dify import sync_tool_provider
 
@@ -30,10 +32,23 @@ def maybe_langfuse_trace_config(repo_root: Path) -> dict[str, str] | None:
     secret_key = local_dir / "project-secret-key.txt"
     if not public_key.exists() or not secret_key.exists():
         return None
+    platform_vars_path = repo_root / "inventory" / "group_vars" / "platform.yml"
+    langfuse_host = "https://langfuse.lv3.org"
+    if platform_vars_path.exists():
+        platform_vars = yaml.safe_load(platform_vars_path.read_text(encoding="utf-8")) or {}
+        langfuse_host = (
+            (
+                platform_vars.get("platform_service_topology", {})
+                .get("langfuse", {})
+                .get("urls", {})
+                .get("internal")
+            )
+            or langfuse_host
+        )
     return {
         "public_key": public_key.read_text(encoding="utf-8").strip(),
         "secret_key": secret_key.read_text(encoding="utf-8").strip(),
-        "host": "https://langfuse.lv3.org",
+        "host": langfuse_host,
     }
 
 

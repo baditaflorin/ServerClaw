@@ -29,17 +29,6 @@
 
   roles:
     - role: lv3.platform.postgres_vm
-      vars:
-        postgres_vm_client_allowed_sources_extra:
-          - >-
-            {{
-              (
-                hostvars['proxmox_florin'].proxmox_guests
-                | selectattr('name', 'equalto', playbook_execution_host_patterns.docker_runtime[playbook_execution_env])
-                | map(attribute='ipv4')
-                | first
-              )
-            }}/32
     - role: lv3.platform.keycloak_postgres
 
 - name: Converge Keycloak on the Docker runtime VM
