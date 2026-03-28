@@ -268,6 +268,90 @@ workstreams:
         gates, route truth, and one operator-facing assurance rollup
       release_bump: patch
       included_in_repo_version: 0.177.51
+  - id: ws-0246-live-apply
+    adr: "0246"
+    title: Live apply startup, readiness, liveness, and degraded-state semantics
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0246-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0246-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0246-live-apply.md
+    depends_on:
+      - adr-0064-health-probe-contracts
+      - adr-0123-service-uptime-contracts
+      - adr-0244-runtime-assurance-matrix-per-service-and-environment
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0246-live-apply.md
+      - docs/adr/0246-startup-readiness-liveness-and-degraded-state-semantics.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/health-probe-contracts.md
+      - docs/runbooks/service-uptime-contracts.md
+      - docs/runbooks/scaffold-new-service.md
+      - config/health-probe-catalog.json
+      - playbooks/tasks/post-verify.yml
+      - collections/ansible_collections/lv3/platform/playbooks/tasks/post-verify.yml
+      - platform/health/semantics.py
+      - platform/health/composite.py
+      - platform/graph/client.py
+      - platform/world_state/workers.py
+      - scripts/platform_observation_tool.py
+      - scripts/scaffold_service.py
+      - scripts/validate_repository_data_models.py
+      - tests/test_post_verify_tasks.py
+      - tests/test_platform_observation_tool.py
+      - tests/test_world_state_workers.py
+      - tests/test_health_composite.py
+      - tests/test_scaffold_service.py
+      - tests/unit/test_graph_client.py
+      - receipts/live-applies/2026-03-28-adr-0246-runtime-state-semantics-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_registry
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: adr_0246_live_apply
+          paths:
+            - docs/workstreams/ws-0246-live-apply.md
+            - docs/adr/0246-startup-readiness-liveness-and-degraded-state-semantics.md
+            - docs/runbooks/health-probe-contracts.md
+            - docs/runbooks/service-uptime-contracts.md
+            - docs/runbooks/scaffold-new-service.md
+            - config/health-probe-catalog.json
+            - playbooks/tasks/post-verify.yml
+            - collections/ansible_collections/lv3/platform/playbooks/tasks/post-verify.yml
+            - platform/health/semantics.py
+            - platform/health/composite.py
+            - platform/graph/client.py
+            - platform/world_state/workers.py
+            - scripts/platform_observation_tool.py
+            - scripts/scaffold_service.py
+            - scripts/validate_repository_data_models.py
+            - tests/test_post_verify_tasks.py
+            - tests/test_platform_observation_tool.py
+            - tests/test_world_state_workers.py
+            - tests/test_health_composite.py
+            - tests/test_scaffold_service.py
+            - tests/unit/test_graph_client.py
+            - receipts/live-applies/2026-03-28-adr-0246-runtime-state-semantics-live-apply.json
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false
+    canonical_truth:
+      changelog_entry: implemented ADR 0246 by teaching the probe catalog,
+        shared post-verify path, world-state service health worker, observation
+        loop, and health composite to distinguish startup, ready, degraded, and
+        failed runtime states
+      release_bump: patch
+      included_in_repo_version: null
   - id: ws-0234-human-ux-adrs
     adr: "0234"
     title: Human user experience architecture bundle
