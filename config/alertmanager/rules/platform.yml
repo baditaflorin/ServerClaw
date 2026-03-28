@@ -109,3 +109,70 @@ groups:
         annotations:
           summary: Guest RAM usage is above 90 percent of its current allocation
           runbook_url: https://docs.lv3.org/runbooks/capacity-model/
+
+  - name: lv3-log-canary
+    rules:
+      - alert: LokiCanaryTargetDown
+        expr: max(up{job="loki-canary"}) == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: grafana
+          component: loki-canary
+        annotations:
+          summary: Loki Canary is no longer being scraped by Prometheus.
+          description: The managed Loki Canary runtime on monitoring-lv3 is down or its metrics endpoint is unreachable.
+          runbook_url: https://docs.lv3.org/runbooks/log-queryability-canary/
+          dashboard_url: https://grafana.lv3.org/d/lv3-log-canary-overview/lv3-log-canary-overview
+
+      - alert: LokiCanaryMissingEntries
+        expr: increase(loki_canary_missing_entries_total[15m]) > 0
+        for: 5m
+        labels:
+          severity: critical
+          service: grafana
+          component: loki-canary
+        annotations:
+          summary: Loki Canary has confirmed missing log entries.
+          description: The canary emitted logs that could not be recovered from Loki during the last 15 minutes.
+          runbook_url: https://docs.lv3.org/runbooks/log-queryability-canary/
+          dashboard_url: https://grafana.lv3.org/d/lv3-log-canary-overview/lv3-log-canary-overview
+
+      - alert: LokiCanarySpotCheckMissingEntries
+        expr: increase(loki_canary_spot_check_missing_entries_total[15m]) > 0
+        for: 5m
+        labels:
+          severity: critical
+          service: grafana
+          component: loki-canary
+        annotations:
+          summary: Loki Canary spot checks are failing.
+          description: Historical canary entries that should still be queryable were missing from Loki during the last 15 minutes.
+          runbook_url: https://docs.lv3.org/runbooks/log-queryability-canary/
+          dashboard_url: https://grafana.lv3.org/d/lv3-log-canary-overview/lv3-log-canary-overview
+
+      - alert: LokiCanaryWebsocketMissingEntries
+        expr: increase(loki_canary_websocket_missing_entries_total[15m]) > 0
+        for: 10m
+        labels:
+          severity: warning
+          service: grafana
+          component: loki-canary
+        annotations:
+          summary: Loki Canary is missing entries on the websocket path.
+          description: The canary had to fall back to direct Loki queries because websocket delivery lagged or dropped entries during the last 15 minutes.
+          runbook_url: https://docs.lv3.org/runbooks/log-queryability-canary/
+          dashboard_url: https://grafana.lv3.org/d/lv3-log-canary-overview/lv3-log-canary-overview
+
+      - alert: LokiCanaryMetricDeviationHigh
+        expr: abs(loki_canary_metric_test_deviation) > 4
+        for: 10m
+        labels:
+          severity: warning
+          service: grafana
+          component: loki-canary
+        annotations:
+          summary: Loki Canary metric-test deviation is above the expected bound.
+          description: The canary's expected versus observed log-count comparison has drifted beyond four entries for at least 10 minutes.
+          runbook_url: https://docs.lv3.org/runbooks/log-queryability-canary/
+          dashboard_url: https://grafana.lv3.org/d/lv3-log-canary-overview/lv3-log-canary-overview

@@ -7915,64 +7915,32 @@ workstreams:
       latest_receipts:
         public_edge_publication: 2026-03-28-adr-0021-shared-edge-certificate-repair-mainline-live-apply
 
-  - id: ws-0208-live-apply
-    adr: "0208"
-    title: Dependency direction and composition roots live apply
+  - id: ws-0250-live-apply
+    adr: "0250"
+    title: ADR 0250 live apply from latest origin/main
     status: live_applied
     owner: codex
-    branch: codex/ws-0208-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0208-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0208-live-apply.md
+    branch: codex/ws-0250-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0250-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0250-live-apply.md
     depends_on:
-      - adr-0204-architecture-governance
-      - adr-0206-ports-and-adapters-for-external-integrations
+      - adr-0011-monitoring
+      - adr-0052-loki-logs
+      - adr-0097-alerting-routing
+      - adr-0244-runtime-assurance-matrix
     conflicts_with: []
     shared_surfaces:
-      - workstreams.yaml
-      - docs/adr/0208-dependency-direction-and-composition-roots.md
-      - docs/workstreams/ws-0208-live-apply.md
-      - docs/runbooks/validate-repository-automation.md
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/
+      - config/alertmanager/rules/platform.yml
+      - config/grafana/dashboards/log-canary-overview.json
+      - docs/adr/0250-log-ingestion-and-queryability-canaries-via-loki-canary.md
+      - docs/runbooks/log-queryability-canary.md
+      - docs/runbooks/monitoring-stack.md
+      - docs/workstreams/ws-0250-live-apply.md
+      - receipts/live-applies/2026-03-28-adr-0250-log-queryability-canary-live-apply.json
+      - tests/test_monitoring_vm_role.py
       - docs/adr/.index.yaml
-      - config/validation-gate.json
-      - Makefile
-      - scripts/validate_repo.sh
-      - scripts/validate_dependency_direction.py
-      - scripts/controller_automation_toolkit.py
-      - scripts/repo_package_loader.py
-      - scripts/session_workspace.py
-      - scripts/run_namespace.py
-      - scripts/parse_ansible_drift.py
-      - scripts/lv3_cli.py
-      - config/windmill/scripts/platform-observation-loop.py
-      - platform/repo.py
-      - platform/catalogs.py
-      - platform/package_loader.py
-      - platform/session_workspace.py
-      - platform/run_namespace.py
-      - platform/ansible_drift.py
-      - platform/events/
-      - platform/correction_loops.py
-      - platform/mutation_audit.py
-      - platform/maintenance/
-      - platform/slo.py
-      - platform/ansible/execution_scopes.py
-      - platform/agent/
-      - platform/closure_loop/engine.py
-      - platform/config_merge/registry.py
-      - platform/diff_engine/
-      - platform/goal_compiler/compiler.py
-      - platform/graph/client.py
-      - platform/health/composite.py
-      - platform/interface_contracts.py
-      - platform/use_cases/runbooks.py
-      - platform/ledger/
-      - platform/live_apply/merge_train.py
-      - platform/scheduler/watchdog.py
-      - platform/world_state/workers.py
-      - tests/test_validate_dependency_direction.py
-      - tests/test_dependency_direction_gate.py
-      - tests/test_health_composite.py
-      - tests/test_lv3_cli.py
+      - workstreams.yaml
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -7980,526 +7948,39 @@ workstreams:
             - workstreams.yaml
           mode: shared_contract
           contract: workstream-registry-v1
-        - id: adr_index_contract
+        - id: adr_index
           paths:
             - docs/adr/.index.yaml
           mode: shared_contract
           contract: adr-index-v1
-        - id: adr_metadata_contract
+        - id: monitoring_stack_role
           paths:
-            - docs/adr/0208-dependency-direction-and-composition-roots.md
+            - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
+            - tests/test_monitoring_vm_role.py
           mode: shared_contract
-          contract: adr-metadata-v1
-        - id: lv3_cli_composition_root_contract
+          contract: monitoring-stack-role-v1
+        - id: alertmanager_runtime_verify
           paths:
-            - scripts/lv3_cli.py
+            - collections/ansible_collections/lv3/platform/roles/alertmanager_runtime/tasks/verify.yml
+            - tests/test_alertmanager_runtime_role.py
           mode: shared_contract
-          contract: lv3-cli-composition-root-v1
-        - id: repo_validation_pipeline_contract
+          contract: monitoring-alertmanager-verify-v1
+        - id: adr_0250_live_apply
           paths:
-            - config/validation-gate.json
-            - docs/runbooks/validate-repository-automation.md
-            - scripts/validate_dependency_direction.py
-            - scripts/validate_repo.sh
-          mode: shared_contract
-          contract: repo-validation-pipeline-v1
-        - id: makefile_validation_contract
-          paths:
-            - Makefile
-          mode: shared_contract
-          contract: makefile-validation-targets-v1
-        - id: dependency_direction_repo_surface
-          paths:
-            - docs/workstreams/ws-0208-live-apply.md
-            - platform/repo.py
-            - platform/catalogs.py
-            - platform/package_loader.py
-            - platform/session_workspace.py
-            - platform/run_namespace.py
-            - platform/ansible_drift.py
-            - platform/events/**
-            - platform/correction_loops.py
-            - platform/mutation_audit.py
-            - platform/maintenance/**
-            - platform/slo.py
-            - platform/ansible/execution_scopes.py
-            - platform/agent/**
-            - platform/closure_loop/engine.py
-            - platform/config_merge/registry.py
-            - platform/diff_engine/**
-            - platform/goal_compiler/compiler.py
-            - platform/graph/client.py
-            - platform/health/composite.py
-            - platform/interface_contracts.py
-            - platform/use_cases/runbooks.py
-            - platform/ledger/**
-            - platform/live_apply/merge_train.py
-            - platform/scheduler/watchdog.py
-            - platform/world_state/workers.py
-            - scripts/controller_automation_toolkit.py
-            - scripts/repo_package_loader.py
-            - scripts/session_workspace.py
-            - scripts/run_namespace.py
-            - scripts/parse_ansible_drift.py
-            - config/windmill/scripts/platform-observation-loop.py
-            - tests/test_validate_dependency_direction.py
-            - tests/test_dependency_direction_gate.py
-            - tests/test_health_composite.py
-            - tests/test_lv3_cli.py
+            - docs/workstreams/ws-0250-live-apply.md
+            - docs/adr/0250-log-ingestion-and-queryability-canaries-via-loki-canary.md
+            - config/alertmanager/rules/platform.yml
+            - config/grafana/dashboards/log-canary-overview.json
+            - docs/runbooks/log-queryability-canary.md
+            - docs/runbooks/monitoring-stack.md
+            - receipts/live-applies/2026-03-28-adr-0250-log-queryability-canary-live-apply.json
           mode: exclusive
-        - id: live_apply_evidence
-          paths:
-            - receipts/live-applies/2026-03-28-adr-0208-dependency-direction-and-composition-roots-live-apply.json
-          mode: shared_contract
-          contract: live-apply-receipts-v1
-        - id: integration_truth
-          paths:
-            - VERSION
-            - changelog.md
-            - README.md
-            - versions/stack.yaml
-          mode: generated
     ready_to_merge: false
     live_applied: true
     canonical_truth:
-      changelog_entry: implemented ADR 0208 by moving reusable helpers under `platform/`, enforcing inward dependency-direction validation, and wiring explicit composition roots at the CLI and Windmill observation-loop edges
+      changelog_entry: implemented ADR 0250 by adding repo-managed Loki Canary ingestion and queryability assurance on monitoring-lv3, scraping its metrics in Prometheus, surfacing the signal in Grafana, and alerting on missing or non-queryable canary entries
       release_bump: patch
-      included_in_repo_version: 0.177.40
-
-  - id: ws-0208-main-merge
-    adr: "0208"
-    title: Integrate ADR 0208 live apply into origin/main
-    status: merged
-    owner: codex
-    branch: codex/ws-0208-main-merge
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0208-main-merge
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0208-main-merge.md
-    depends_on:
-      - ws-0208-live-apply
-    conflicts_with: []
-    shared_surfaces:
-      - workstreams.yaml
-      - docs/workstreams/ws-0208-main-merge.md
-      - README.md
-      - RELEASE.md
-      - VERSION
-      - changelog.md
-      - docs/release-notes/README.md
-      - docs/release-notes/0.177.40.md
-      - versions/stack.yaml
-      - build/platform-manifest.json
-      - docs/diagrams/agent-coordination-map.excalidraw
-      - docs/site-generated/architecture/dependency-graph.md
-      - docs/adr/0208-dependency-direction-and-composition-roots.md
-      - docs/workstreams/ws-0208-live-apply.md
-      - docs/adr/.index.yaml
-      - docs/runbooks/validate-repository-automation.md
-      - config/validation-gate.json
-      - Makefile
-      - config/windmill/scripts/platform-observation-loop.py
-      - platform/repo.py
-      - platform/catalogs.py
-      - platform/package_loader.py
-      - platform/session_workspace.py
-      - platform/run_namespace.py
-      - platform/ansible_drift.py
-      - platform/events/
-      - platform/correction_loops.py
-      - platform/mutation_audit.py
-      - platform/maintenance/
-      - platform/slo.py
-      - platform/ansible/execution_scopes.py
-      - platform/agent/
-      - platform/closure_loop/engine.py
-      - platform/config_merge/registry.py
-      - platform/diff_engine/
-      - platform/goal_compiler/compiler.py
-      - platform/graph/client.py
-      - platform/health/composite.py
-      - platform/interface_contracts.py
-      - platform/use_cases/runbooks.py
-      - platform/ledger/
-      - platform/live_apply/merge_train.py
-      - platform/scheduler/watchdog.py
-      - platform/world_state/workers.py
-      - scripts/controller_automation_toolkit.py
-      - scripts/repo_package_loader.py
-      - scripts/session_workspace.py
-      - scripts/run_namespace.py
-      - scripts/parse_ansible_drift.py
-      - scripts/lv3_cli.py
-      - scripts/validate_dependency_direction.py
-      - scripts/validate_repo.sh
-      - tests/test_validate_dependency_direction.py
-      - tests/test_dependency_direction_gate.py
-      - tests/test_health_composite.py
-      - tests/test_lv3_cli.py
-      - receipts/live-applies/2026-03-28-adr-0208-dependency-direction-and-composition-roots-live-apply.json
-    ownership_manifest:
-      owned_surfaces:
-        - id: workstream_registry
-          paths:
-            - workstreams.yaml
-          mode: shared_contract
-          contract: workstream-registry-v1
-        - id: ws_0208_main_merge_doc
-          paths:
-            - docs/workstreams/ws-0208-main-merge.md
-          mode: exclusive
-        - id: adr_0208_mainline_truth
-          paths:
-            - README.md
-            - RELEASE.md
-            - VERSION
-            - changelog.md
-            - docs/release-notes/README.md
-            - docs/release-notes/0.177.40.md
-            - versions/stack.yaml
-            - build/platform-manifest.json
-            - docs/diagrams/agent-coordination-map.excalidraw
-            - docs/site-generated/architecture/dependency-graph.md
-          mode: exclusive
-        - id: dependency_direction_main_merge
-          paths:
-            - docs/adr/0208-dependency-direction-and-composition-roots.md
-            - docs/workstreams/ws-0208-live-apply.md
-            - docs/adr/.index.yaml
-            - docs/runbooks/validate-repository-automation.md
-            - config/validation-gate.json
-            - Makefile
-            - config/windmill/scripts/platform-observation-loop.py
-            - platform/repo.py
-            - platform/catalogs.py
-            - platform/package_loader.py
-            - platform/session_workspace.py
-            - platform/run_namespace.py
-            - platform/ansible_drift.py
-            - platform/events/**
-            - platform/correction_loops.py
-            - platform/mutation_audit.py
-            - platform/maintenance/**
-            - platform/slo.py
-            - platform/ansible/execution_scopes.py
-            - platform/agent/**
-            - platform/closure_loop/engine.py
-            - platform/config_merge/registry.py
-            - platform/diff_engine/**
-            - platform/goal_compiler/compiler.py
-            - platform/graph/client.py
-            - platform/health/composite.py
-            - platform/interface_contracts.py
-            - platform/use_cases/runbooks.py
-            - platform/ledger/**
-            - platform/live_apply/merge_train.py
-            - platform/scheduler/watchdog.py
-            - platform/world_state/workers.py
-            - scripts/controller_automation_toolkit.py
-            - scripts/repo_package_loader.py
-            - scripts/session_workspace.py
-            - scripts/run_namespace.py
-            - scripts/parse_ansible_drift.py
-            - scripts/lv3_cli.py
-            - scripts/validate_dependency_direction.py
-            - scripts/validate_repo.sh
-            - tests/test_validate_dependency_direction.py
-            - tests/test_dependency_direction_gate.py
-            - tests/test_health_composite.py
-            - tests/test_lv3_cli.py
-          mode: shared_contract
-          contract: dependency-direction-main-merge-v1
-        - id: live_apply_evidence
-          paths:
-            - receipts/live-applies/2026-03-28-adr-0208-dependency-direction-and-composition-roots-live-apply.json
-          mode: shared_contract
-          contract: live-apply-receipts-v1
-    ready_to_merge: true
-    live_applied: false
-    canonical_truth:
-      changelog_entry: integrated ADR 0208 into main by enforcing inward dependency direction for reusable platform code and preserving explicit composition roots at the runtime edges
-      release_bump: patch
-      included_in_repo_version: 0.177.40
-
-  - id: ws-0229-live-apply
-    adr: "0229"
-    title: Gitea Actions runners live apply from latest origin/main
-    status: live_applied
-    owner: codex
-    branch: codex/ws-0229-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0229-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0229-live-apply.md
-    depends_on:
-      - adr-0083-docker-based-check-runner
-      - adr-0143-gitea
-      - adr-0168-agent-standards
-      - adr-0224-server-resident-operations-architecture-bundle
-    conflicts_with: []
-    shared_surfaces:
-      - docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md
-      - docs/adr/.index.yaml
-      - docs/workstreams/ws-0229-live-apply.md
-      - docs/diagrams/agent-coordination-map.excalidraw
-      - build/platform-manifest.json
-      - docs/runbooks/configure-gitea.md
-      - docs/runbooks/validate-repository-automation.md
-      - .gitea/workflows/validate.yml
-      - playbooks/gitea.yml
-      - collections/ansible_collections/lv3/platform/roles/gitea_runner/**
-      - collections/ansible_collections/lv3/platform/roles/gitea_runtime/**
-      - scripts/validate_repo.sh
-      - tests/test_gitea_runtime_role.py
-      - workstreams.yaml
-      - receipts/live-applies/**
-    ownership_manifest:
-      owned_surfaces:
-        - id: workstream_registry
-          paths:
-            - workstreams.yaml
-          mode: shared_contract
-          contract: workstream-registry-v1
-        - id: adr_0229_runner_surface
-          paths:
-            - docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md
-            - docs/adr/.index.yaml
-            - docs/workstreams/ws-0229-live-apply.md
-            - docs/diagrams/agent-coordination-map.excalidraw
-            - build/platform-manifest.json
-            - docs/runbooks/configure-gitea.md
-            - docs/runbooks/validate-repository-automation.md
-            - .gitea/workflows/validate.yml
-            - playbooks/gitea.yml
-            - collections/ansible_collections/lv3/platform/roles/gitea_runner/**
-            - collections/ansible_collections/lv3/platform/roles/gitea_runtime/**
-            - scripts/validate_repo.sh
-            - tests/test_gitea_runtime_role.py
-          mode: exclusive
-        - id: live_apply_evidence
-          paths:
-            - receipts/live-applies/**
-          mode: shared_contract
-          contract: live-apply-receipts-v1
-    ready_to_merge: true
-    live_applied: true
-    canonical_truth:
-      changelog_entry: re-verified ADR 0229 Gitea Actions runners from the latest merged mainline by replaying `make converge-gitea`, passing the private Gitea server-side push gate, and completing a branch `validate` workflow on runner `docker-build-lv3`
-      release_bump: patch
-      included_in_repo_version: 0.177.44
+      included_in_repo_version: 0.177.57
       latest_receipts:
-        gitea_actions_runners: 2026-03-28-adr-0229-gitea-actions-runners-live-apply
-      live_apply_verification:
-        runner:
-          runner_id: 1
-          runner_name: docker-build-lv3
-          status: online
-        workflow_run:
-          run_id: 36
-          head_branch: codex/ws-0229-live-apply
-          head_sha: 65d4ed1599138b8160e904ef5bd82a9e43b8f195
-          conclusion: success
-
-  - id: ws-0229-main-merge
-    adr: "0229"
-    title: Integrate ADR 0229 live apply into origin/main
-    status: merged
-    owner: codex
-    branch: codex/ws-0229-main-merge
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0229-main-merge
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0229-main-merge.md
-    depends_on:
-      - ws-0229-live-apply
-    conflicts_with: []
-    shared_surfaces:
-      - workstreams.yaml
-      - docs/workstreams/ws-0229-main-merge.md
-      - VERSION
-      - changelog.md
-      - RELEASE.md
-      - docs/release-notes/README.md
-      - docs/release-notes/0.177.45.md
-      - versions/stack.yaml
-      - README.md
-      - build/platform-manifest.json
-      - docs/diagrams/agent-coordination-map.excalidraw
-      - docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md
-      - docs/workstreams/ws-0229-live-apply.md
-      - docs/runbooks/configure-gitea.md
-      - docs/runbooks/validate-repository-automation.md
-      - docs/adr/.index.yaml
-      - receipts/live-applies/2026-03-28-adr-0229-gitea-actions-runners-live-apply.json
-    ownership_manifest:
-      owned_surfaces:
-        - id: workstream_registry
-          paths:
-            - workstreams.yaml
-          mode: shared_contract
-          contract: workstream-registry-v1
-        - id: ws_0229_main_merge_doc
-          paths:
-            - docs/workstreams/ws-0229-main-merge.md
-          mode: exclusive
-        - id: adr_0229_mainline_truth
-          paths:
-            - VERSION
-            - changelog.md
-            - RELEASE.md
-            - docs/release-notes/README.md
-            - docs/release-notes/0.177.45.md
-            - versions/stack.yaml
-            - README.md
-            - build/platform-manifest.json
-            - docs/diagrams/agent-coordination-map.excalidraw
-            - docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md
-            - docs/workstreams/ws-0229-live-apply.md
-            - docs/runbooks/configure-gitea.md
-            - docs/runbooks/validate-repository-automation.md
-            - docs/adr/.index.yaml
-            - receipts/live-applies/2026-03-28-adr-0229-gitea-actions-runners-live-apply.json
-          mode: exclusive
-    ready_to_merge: true
-    live_applied: false
-    canonical_truth:
-      changelog_entry: integrated ADR 0229 by carrying the verified Gitea Actions runner evidence into main after replaying the latest-main Gitea convergence, passing the private push gate, and recording workflow run 36 on docker-build-lv3
-      release_bump: patch
-      included_in_repo_version: 0.177.45
-
-  - id: ws-0228-live-apply
-    adr: "0228"
-    title: Live apply Windmill as the default browser and API operations surface
-    status: live_applied
-    owner: codex
-    branch: codex/ws-0228-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0228-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0228-live-apply.md
-    depends_on:
-      - adr-0044-windmill
-      - adr-0087-validation-gate
-      - adr-0091-continuous-drift-detection
-      - adr-0105-capacity-model
-      - adr-0111-end-to-end-integration-test-suite
-      - adr-0129-runbook-automation-executor
-      - adr-0141-token-lifecycle-management
-      - adr-0142-public-surface-security-scanning
-    conflicts_with: []
-    shared_surfaces:
-      - workstreams.yaml
-      - docs/workstreams/ws-0228-live-apply.md
-      - docs/adr/0228-windmill-as-the-default-browser-and-api-operations-surface.md
-      - docs/adr/.index.yaml
-      - docs/runbooks/windmill-default-operations-surface.md
-      - docs/runbooks/configure-windmill.md
-      - docs/runbooks/validation-gate.md
-      - docs/runbooks/drift-detection.md
-      - docs/runbooks/capacity-model.md
-      - docs/runbooks/integration-test-suite.md
-      - docs/diagrams/agent-coordination-map.excalidraw
-      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
-      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
-      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
-      - config/windmill/scripts/nightly-integration-tests.py
-      - config/windmill/scripts/weekly-capacity-report.py
-      - config/windmill/scripts/collection-publish.py
-      - config/windmill/scripts/audit-token-inventory.py
-      - config/windmill/scripts/token-exposure-response.py
-      - tests/test_ansible_collection_packaging.py
-      - tests/test_nightly_integration_tests.py
-      - tests/test_weekly_capacity_report_windmill.py
-      - tests/test_windmill_default_operations_surface.py
-      - tests/test_token_lifecycle_windmill.py
-      - receipts/live-applies/2026-03-28-adr-0228-windmill-default-operations-surface-live-apply.json
-    ownership_manifest:
-      owned_surfaces:
-        - id: workstream_registry
-          paths:
-            - workstreams.yaml
-          mode: shared_contract
-          contract: workstream-registry-v1
-        - id: adr_0228_windmill_default_operations_surface
-          paths:
-            - docs/workstreams/ws-0228-live-apply.md
-            - docs/adr/0228-windmill-as-the-default-browser-and-api-operations-surface.md
-            - docs/adr/.index.yaml
-            - docs/runbooks/windmill-default-operations-surface.md
-            - docs/runbooks/configure-windmill.md
-            - docs/runbooks/validation-gate.md
-            - docs/runbooks/drift-detection.md
-            - docs/runbooks/capacity-model.md
-            - docs/runbooks/integration-test-suite.md
-            - docs/diagrams/agent-coordination-map.excalidraw
-            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
-            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
-            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
-            - config/windmill/scripts/nightly-integration-tests.py
-            - config/windmill/scripts/weekly-capacity-report.py
-            - config/windmill/scripts/collection-publish.py
-            - config/windmill/scripts/audit-token-inventory.py
-            - config/windmill/scripts/token-exposure-response.py
-            - tests/test_ansible_collection_packaging.py
-            - tests/test_nightly_integration_tests.py
-            - tests/test_weekly_capacity_report_windmill.py
-            - tests/test_windmill_default_operations_surface.py
-            - tests/test_token_lifecycle_windmill.py
-            - receipts/live-applies/2026-03-28-adr-0228-windmill-default-operations-surface-live-apply.json
-          mode: shared_contract
-          contract: adr-0228-windmill-default-operations-surface-v1
-    ready_to_merge: true
-    live_applied: true
-
-  - id: ws-0228-main-merge
-    adr: "0228"
-    title: Integrate ADR 0228 live apply into origin/main
-    status: in_progress
-    owner: codex
-    branch: codex/ws-0228-main-merge
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0228-main-merge
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0228-main-merge.md
-    depends_on:
-      - ws-0228-live-apply
-    conflicts_with: []
-    shared_surfaces:
-      - workstreams.yaml
-      - docs/workstreams/ws-0228-main-merge.md
-      - VERSION
-      - changelog.md
-      - RELEASE.md
-      - docs/release-notes/README.md
-      - docs/release-notes/0.177.50.md
-      - versions/stack.yaml
-      - README.md
-      - build/platform-manifest.json
-      - docs/diagrams/agent-coordination-map.excalidraw
-      - docs/adr/0228-windmill-as-the-default-browser-and-api-operations-surface.md
-      - docs/workstreams/ws-0228-live-apply.md
-      - docs/runbooks/windmill-default-operations-surface.md
-      - docs/adr/.index.yaml
-      - receipts/live-applies/2026-03-28-adr-0228-windmill-default-operations-surface-live-apply.json
-      - receipts/live-applies/2026-03-28-adr-0228-windmill-default-operations-surface-mainline-live-apply.json
-    ownership_manifest:
-      owned_surfaces:
-        - id: workstream_registry
-          paths:
-            - workstreams.yaml
-          mode: shared_contract
-          contract: workstream-registry-v1
-        - id: ws_0228_main_merge_doc
-          paths:
-            - docs/workstreams/ws-0228-main-merge.md
-          mode: exclusive
-        - id: adr_0228_mainline_truth
-          paths:
-            - VERSION
-            - changelog.md
-            - RELEASE.md
-            - docs/release-notes/README.md
-            - docs/release-notes/0.177.50.md
-            - versions/stack.yaml
-            - README.md
-            - build/platform-manifest.json
-            - docs/diagrams/agent-coordination-map.excalidraw
-            - docs/adr/0228-windmill-as-the-default-browser-and-api-operations-surface.md
-            - docs/workstreams/ws-0228-live-apply.md
-            - docs/runbooks/windmill-default-operations-surface.md
-            - docs/adr/.index.yaml
-            - receipts/live-applies/2026-03-28-adr-0228-windmill-default-operations-surface-live-apply.json
-            - receipts/live-applies/2026-03-28-adr-0228-windmill-default-operations-surface-mainline-live-apply.json
-          mode: exclusive
-    ready_to_merge: true
-    live_applied: false
+        monitoring: 2026-03-28-adr-0250-log-queryability-canary-live-apply
+        log_queryability_canary: 2026-03-28-adr-0250-log-queryability-canary-live-apply
