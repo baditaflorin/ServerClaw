@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.12",
   "platform_version": "0.130.31",
-  "generated_at": "2026-03-27T17:00:55Z",
-  "next_refresh_at": "2026-03-27T18:00:55Z",
+  "generated_at": "2026-03-28T01:05:13Z",
+  "next_refresh_at": "2026-03-28T02:05:13Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -37,7 +37,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://api.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "backup_pbs": {
         "service_name": "Proxmox Backup Server",
@@ -59,7 +59,29 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://changelog.lv3.org",
-        "last_live_apply": "2026-03-26T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
+      },
+      "coolify": {
+        "service_name": "Coolify",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://coolify.lv3.org",
+        "last_live_apply": "2026-03-28T00:00:00Z"
+      },
+      "coolify_apps": {
+        "service_name": "Coolify Apps Ingress",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://apps.lv3.org",
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "docker_build": {
         "service_name": "Docker Build VM",
@@ -70,7 +92,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://build.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "docker_runtime": {
         "service_name": "Docker Runtime VM",
@@ -81,7 +103,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://docker.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "docs_portal": {
         "service_name": "Developer Portal",
@@ -92,7 +114,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://docs.lv3.org",
-        "last_live_apply": "2026-03-26T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "dozzle": {
         "service_name": "Dozzle",
@@ -103,7 +125,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://logs.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
       "gitea": {
@@ -115,7 +137,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:3009",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
       "grafana": {
@@ -139,7 +161,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://headscale.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "homepage": {
         "service_name": "Homepage",
@@ -197,7 +219,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8066",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "n8n": {
         "service_name": "n8n",
@@ -208,7 +230,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://n8n.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "netbox": {
         "service_name": "NetBox",
@@ -231,7 +253,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://nginx.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
       "ntfy": {
@@ -243,7 +265,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:2586",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "ntopng": {
         "service_name": "ntopng",
@@ -254,7 +276,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:3001",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "ollama": {
         "service_name": "Ollama",
@@ -265,7 +287,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:11434",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "open_webui": {
         "service_name": "Open WebUI",
@@ -299,7 +321,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://ops.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "platform_context_api": {
         "service_name": "Platform Context API",
@@ -322,7 +344,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9444",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "postgres": {
         "service_name": "PostgreSQL",
@@ -333,7 +355,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "postgres://database.lv3.org:5432",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "proxmox_ui": {
         "service_name": "Proxmox UI",
@@ -344,7 +366,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://proxmox.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "searxng": {
         "service_name": "SearXNG",
@@ -366,7 +388,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.118.189.95:8020",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
       "status_page": {
@@ -378,7 +400,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://status.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
       "step_ca": {
@@ -390,7 +412,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9443",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "uptime_kuma": {
         "service_name": "Uptime Kuma",
@@ -401,7 +423,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://uptime.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
       "vaultwarden": {
@@ -413,7 +435,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://vault.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
       "windmill": {
@@ -425,7 +447,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8005",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       }
     }
@@ -801,6 +823,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-control-plane-recovery.md"
+      },
+      {
+        "id": "converge-coolify",
+        "description": "Converge Coolify on coolify-lv3, publish the authenticated dashboard plus public applications ingress, and verify repo-backed smoke deployment through the governed API wrapper.",
+        "tags": [
+          "converge-coolify",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 4,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-coolify.md"
       },
       {
         "id": "converge-docker-runtime",
@@ -1477,6 +1525,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-windmill.md"
+      },
+      {
+        "id": "coolify-manage",
+        "description": "Run governed Coolify API actions such as identity checks, application inventory, or repo-backed smoke deployments through the repo-managed wrapper.",
+        "tags": [
+          "coolify-manage",
+          "external-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "external_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-coolify.md"
       },
       {
         "id": "database-dns",
@@ -2837,6 +2911,17 @@
         ]
       },
       {
+        "id": "configure-coolify",
+        "title": "Configure Coolify",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-coolify.md",
+        "workflow_ids": [
+          "converge-coolify",
+          "coolify-manage"
+        ]
+      },
+      {
         "id": "configure-docker-runtime",
         "title": "Configure Docker Runtime Runbook",
         "agent_trust_required": "T3",
@@ -3497,7 +3582,7 @@
   },
   "recent_changes": {
     "last_version": "0.177.11",
-    "deployed_at": "2026-03-27",
+    "deployed_at": "2026-03-28",
     "summary": "completed the first live staging activation for ADR 0183 by applying the staging VMs on `vmbr20`, recording the staging live-apply receipt, and codifying `network_firewall = false` for staged VM NICs until staged guest-network-policy automation exists",
     "release_notes_url": "docs/release-notes/0.177.12.md"
   },
