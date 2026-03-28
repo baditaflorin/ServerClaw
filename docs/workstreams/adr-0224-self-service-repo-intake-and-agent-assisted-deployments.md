@@ -103,6 +103,10 @@ Observed on 2026-03-28:
 - After switching the wildcard edge upstream to HTTPS, the public app path still
   timed out until the managed `coolify-lv3` guest firewall allowed `nginx-lv3`
   to reach TCP `443` in addition to `80` and `8000`.
+- After replaying the Proxmox guest-firewall files plus the `coolify-lv3`
+  nftables policy, `education-wemeshup.apps.lv3.org` returned `HTTP/2 200` and
+  `/api/v1/catalog/taxonomy` answered with API version `v1`, `2` categories,
+  and `6` activities through the public edge.
 
 ## Merge Criteria
 
@@ -123,6 +127,9 @@ Observed on 2026-03-28:
 - If wildcard app traffic loops on `307 https://same-host/...`, check whether
   the NGINX edge is still proxying `coolify_apps` to `http://<coolify-vm>:80`
   instead of `https://<coolify-vm>:443`.
+- If the wildcard edge already proxies to `https://<coolify-vm>:443` but the
+  request still times out, verify both the Proxmox VM firewall file and the
+  `coolify-lv3` guest nftables policy allow `nginx-lv3` to reach TCP `443`.
 - The next layer after this workstream should be a deployment-profile catalog
   and intake UI, not another bespoke deployment mechanism.
 - The first normal push attempt on 2026-03-28 was blocked by stale generated

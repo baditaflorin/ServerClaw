@@ -1604,7 +1604,7 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: https://10.10.10.70:443
+      upstream: http://10.10.10.70:80
       aliases:
         - '*.apps.lv3.org'
       crawl_policy_enabled: false
@@ -2768,7 +2768,7 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: https://10.10.10.70:443
+      upstream: http://10.10.10.70:80
       aliases:
         - '*.apps.lv3.org'
       crawl_policy_enabled: false
