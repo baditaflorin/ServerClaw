@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.177.43
+repo_version: 0.177.44
 platform_version: 0.130.40
 
 live_apply_evidence:
@@ -44,7 +44,7 @@ live_apply_evidence:
     identity_taxonomy: 2026-03-22-adr-0046-identity-classes-live-apply
     command_catalog: 2026-03-22-adr-0048-command-catalog-live-apply
     config_merge: 2026-03-26-adr-0158-config-merge-live-apply
-    control_plane_recovery: 2026-03-27-adr-0181-control-metadata-witness-live-apply
+    control_plane_recovery: 2026-03-28-adr-0231-local-secret-delivery-live-apply
     control_metadata_witness: 2026-03-27-adr-0181-control-metadata-witness-live-apply
     local_search_and_indexing_fabric: 2026-03-26-adr-0121-search-indexing-fabric-live-apply
     notification_profiles: 2026-03-22-adr-0050-notification-profiles-live-apply
@@ -983,13 +983,13 @@ observed_state:
       runtime_backup_ssh_source: 10.10.10.20
       runtime_backup_timer_active: true
       runtime_backup_schedule_utc: "*-*-* 01,07,13,19:15:00"
-      latest_runtime_backup_timestamp: 20260322T212846Z
-      latest_runtime_backup_path: /srv/control-plane-recovery/runtime/docker-runtime-lv3/latest
+      latest_runtime_backup_timestamp: 20260328T164431Z
+      latest_runtime_backup_path: /srv/control-plane-recovery/runtime/docker-runtime-lv3/20260328T164431Z
       controller_bundle_path: /srv/control-plane-recovery/controller/controller-recovery-bundle.tar.zst
       restore_drill_timer_active: true
       restore_drill_schedule_utc: "*-*-* 05:45:00"
       latest_restore_drill:
-        checked_at: 2026-03-22T21:29:48Z
+        checked_at: 2026-03-28T16:45:06Z
         result: pass
 
 release_tracks:
@@ -999,7 +999,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.43
+    current: 0.177.44
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.40
