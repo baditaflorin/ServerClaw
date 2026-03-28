@@ -2,8 +2,8 @@
 
 - ADR: [ADR 0208](../adr/0208-dependency-direction-and-composition-roots.md)
 - Title: enforce inward dependency direction for reusable `platform/` code and move runtime wiring to explicit composition roots
-- Status: in_progress (live applied, awaiting main integration)
-- Implemented In Repo Version: pending merge-to-main
+- Status: live_applied
+- Implemented In Repo Version: 0.177.40
 - Implemented In Platform Version: not applicable (repository-only)
 - Implemented On: 2026-03-28
 - Branch: `codex/ws-0208-live-apply`
@@ -25,8 +25,9 @@
 - add an ADR 0208 dependency-direction validator to the local validation
   wrapper, the remote validation gate manifest, and a dedicated `make`
   target
-- capture branch-local verification evidence and leave protected integration
-  files for merge-to-main
+- capture repository-only live-apply evidence and complete the mainline repo
+  version, changelog, and release-note integration without changing the
+  platform version
 
 ## Non-Goals
 
@@ -87,11 +88,10 @@
   emission, and NATS publishing
 - the CLI and Windmill observation-loop wrapper are the composition roots that
   now inject the incident-triage builder into `ClosureLoop`
-- protected integration files still deferred to merge-to-main are `VERSION`,
-  release sections in `changelog.md`, the top-level `README.md` integrated
-  status summary if needed, and any mainline-only release metadata updates;
-  `versions/stack.yaml` should remain unchanged because ADR 0208 is
-  repository-only
+- the final `main` integration released ADR 0208 in repo version `0.177.40`
+  and updated `VERSION`, `changelog.md`, release notes, `README.md`, and the
+  repository-version fields in `versions/stack.yaml` while leaving
+  `platform_version` unchanged at `0.130.38`
 
 ## Verification
 
@@ -112,17 +112,19 @@
 
 - reusable helper logic now lives under `platform/`, and the affected platform
   services no longer depend on `scripts/` imports or script-file dynamic loads
-- branch-local validation and the focused pytest slice both passed after the
-  composition-root wiring moved to the CLI and Windmill wrappers
-- merge-to-main still needs the normal repository version bump and changelog
-  integration, plus the final mainline live-apply receipt if a separate main
-  replay is required
+- the ADR 0208 validator now gates regressions through `scripts/validate_repo.sh`,
+  `config/validation-gate.json`, and the dedicated `make validate-dependency-direction`
+  target
+- repository version `0.177.40` integrated the workstream into `main` without a
+  platform-version bump because the rollout is repository-only
+- the branch-local receipt remains the canonical live-apply evidence; no
+  separate platform replay receipt was required for the `main` integration
 
 ## Notes For The Next Assistant
 
 - if another workstream needs to touch `scripts/lv3_cli.py`, `Makefile`, or the
   validation gate manifest before this branch lands, refresh from the latest
   `origin/main` first and keep the ADR 0208 validator entry intact
-- if the final integration step on `main` chooses to emit a dedicated mainline
-  receipt, keep the branch-local receipt and note which one is canonical for
-  release bookkeeping
+- future work on these surfaces should preserve the composition-root wiring and
+  the inward dependency rule; ADR 0208 itself has no remaining mainline truth
+  updates pending
