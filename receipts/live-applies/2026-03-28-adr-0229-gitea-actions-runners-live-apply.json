@@ -5,12 +5,12 @@
   "applied_on": "2026-03-28",
   "recorded_on": "2026-03-28",
   "recorded_by": "codex",
-  "source_commit": "de44415b1bc0c99051f72753681a56e70f9f2182",
-  "repo_version_context": "0.177.41",
-  "platform_version_context": "0.130.38",
+  "source_commit": "65d4ed1599138b8160e904ef5bd82a9e43b8f195",
+  "repo_version_context": "0.177.42",
+  "platform_version_context": "0.130.39",
   "workflow_id": "adr-0229-gitea-actions-runners-live-apply",
   "adr": "0229",
-  "summary": "Replayed the latest-origin-main `0.177.41` Gitea stack and self-hosted Actions runner from branch head `de44415b`, hit a transient Keycloak repo-user token failure on the first attempt, immediately verified the live token endpoint with `HTTP 200`, and completed a clean second convergence with the dedicated runner still online.",
+  "summary": "Replayed the latest-origin-main `0.177.42` Gitea stack and self-hosted Actions runner from branch head `65d4ed15`, completed a clean convergence, and confirmed that the same source commit passed the private Gitea push gate plus workflow run `36` on runner `docker-build-lv3`.",
   "targets": [
     {
       "kind": "host",
@@ -45,32 +45,32 @@
     {
       "check": "Focused Gitea runner repo slice and branch validation surfaces",
       "result": "pass",
-      "observed": "The focused repository validation slice passed from the rebased `0.177.41` branch state: `uv run --with pytest --with pyyaml python -m pytest -q tests/test_gitea_runtime_role.py`, `./scripts/validate_repo.sh agent-standards`, `uv run --with pyyaml --with jsonschema python3 scripts/validate_repository_data_models.py --validate`, `python3 scripts/generate_diagrams.py --check`, `uv run --with pyyaml --with jsonschema python3 scripts/platform_manifest.py --check`, `git diff --check`, and `make pre-push-gate`."
+      "observed": "The focused repository validation slice passed from the rebased `0.177.42` branch state: `uv run --with pytest --with pyyaml python -m pytest -q tests/test_gitea_runtime_role.py`, `./scripts/validate_repo.sh agent-standards`, `uv run --with pyyaml --with jsonschema python3 scripts/validate_repository_data_models.py --validate`, `python3 scripts/generate_diagrams.py --check`, `uv run --with pyyaml --with jsonschema python3 scripts/platform_manifest.py --check`, `git diff --check`, and `make pre-push-gate`."
     },
     {
       "check": "Merged-main Gitea replay",
       "result": "pass",
-      "observed": "The second `make converge-gitea` run completed successfully from current branch head `de44415b` with `proxmox_florin ok=36 changed=4 failed=0`, `postgres-lv3 ok=24 changed=0 failed=0`, `docker-runtime-lv3 ok=224 changed=0 failed=0`, and `docker-build-lv3 ok=100 changed=5 failed=0`."
+      "observed": "The `make converge-gitea` replay completed successfully from current branch head `65d4ed15` with `proxmox_florin ok=36 changed=4 failed=0`, `postgres-lv3 ok=24 changed=0 failed=0`, `docker-runtime-lv3 ok=224 changed=0 failed=0`, and `docker-build-lv3 ok=100 changed=5 failed=0`."
     },
     {
       "check": "Transient Keycloak admin recovery history",
       "result": "pass",
-      "observed": "An earlier `0.177.39` rebased replay failed in `lv3.platform.keycloak_runtime` while creating the operations portal OAuth client because the local token endpoint returned `HTTP 500`. On the latest `0.177.41` rebase, the first replay failed later while requesting the repo-managed user reconciliation token, but a direct token probe on `docker-runtime-lv3` immediately returned `HTTP 200` and the next full replay completed cleanly without changing repo automation."
+      "observed": "An earlier `0.177.39` rebased replay failed in `lv3.platform.keycloak_runtime` while creating the operations portal OAuth client because the local token endpoint returned `HTTP 500`. On the later `0.177.41` rebase, the first replay failed while requesting the repo-managed user reconciliation token, but a direct token probe on `docker-runtime-lv3` immediately returned `HTTP 200`. The successful `0.177.42` replay did not reproduce either transient Keycloak failure."
     },
     {
       "check": "Runner registration and runtime state",
       "result": "pass",
-      "observed": "The Gitea admin API `GET /api/v1/admin/actions/runners` returned runner `1` named `docker-build-lv3` with `status: online`, `busy: false`, and labels `self-hosted`, `linux`, `amd64`, and `docker`; direct host-side inspection on `docker-build-lv3` also confirmed container `lv3-gitea-runner` running."
+      "observed": "The Gitea login page responded at `http://100.64.0.1:3009/user/login`, and the Gitea admin API `GET /api/v1/admin/actions/runners` returned runner `1` named `docker-build-lv3` with `status: online`, `busy: false`, and labels `self-hosted`, `linux`, `amd64`, and `docker`."
     },
     {
       "check": "Private Gitea git push gate",
       "result": "pass",
-      "observed": "A branch push to `http://100.64.0.1:3009/ops/proxmox_florin_server.git` using the mirrored `ops-gitea` admin token over HTTP basic auth was accepted only after the server-side gate passed `alert-rule-validation`, `ansible-lint`, `ansible-syntax`, `artifact-secret-scan`, `dependency-graph`, `integration-tests`, `packer-validate`, `schema-validation`, `security-scan`, `service-completeness`, `tofu-validate`, `type-check`, and `yaml-lint`."
+      "observed": "The push of branch head `65d4ed15` to `http://100.64.0.1:3009/ops/proxmox_florin_server.git` using the mirrored `ops-gitea` admin token over HTTP basic auth was accepted only after the server-side gate passed `alert-rule-validation`, `ansible-lint`, `ansible-syntax`, `artifact-secret-scan`, `dependency-direction`, `dependency-graph`, `integration-tests`, `packer-validate`, `schema-validation`, `security-scan`, `service-completeness`, `tofu-validate`, `type-check`, and `yaml-lint`."
     },
     {
       "check": "Runner-backed branch workflow",
       "result": "pass",
-      "observed": "Gitea recorded workflow run `29` for `head_branch: codex/ws-0229-live-apply` and `head_sha: 40c1501ba05368ca2c203dd66ed84015aa7a5bfd`; the run finished with `status: completed` and `conclusion: success`. Job `33` named `validate` ran on `runner_id: 1` / `runner_name: docker-build-lv3`, started at `2026-03-28T17:01:49Z`, and completed at `2026-03-28T17:01:52Z`."
+      "observed": "Gitea recorded workflow run `36` for `head_branch: codex/ws-0229-live-apply` and `head_sha: 65d4ed1599138b8160e904ef5bd82a9e43b8f195`; the run finished with `status: completed` and `conclusion: success`. Job `41` named `validate` ran on `runner_id: 1` / `runner_name: docker-build-lv3`, started at `2026-03-28T18:00:27Z`, and completed at `2026-03-28T18:00:30Z`."
     },
     {
       "check": "Gate troubleshooting loop",
@@ -102,7 +102,7 @@
     "workstreams.yaml"
   ],
   "notes": [
-    "ADR 0229 is marked implemented retroactively because the first repo and platform versions where the runner capability became true were already recorded by ADR 0143 (`0.165.0` / `0.130.15` on `2026-03-26`); this receipt records the fresh current-base replay from `0.177.41` / `0.130.38` plus the latest successful rebased branch automation proof captured before the final merge step.",
+    "ADR 0229 is marked implemented retroactively because the first repo and platform versions where the runner capability became true were already recorded by ADR 0143 (`0.165.0` / `0.130.15` on `2026-03-26`); this receipt records the fresh current-base replay from `0.177.42` / `0.130.39` plus the matching branch automation proof for source commit `65d4ed15` before the final merge step.",
     "The private Gitea git SSH endpoint on port `2222` did not accept the Proxmox host bootstrap key; the documented smoke push used the mirrored `ops-gitea` admin token over HTTP basic auth instead.",
     "This branch intentionally does not update `README.md`, `VERSION`, `changelog.md`, or `versions/stack.yaml` yet because the integrated platform truth already described the live runner capability before the branch-local verification replay."
   ]
