@@ -78,6 +78,7 @@ def test_default_operations_surface_keeps_token_lifecycle_receipts_writable() ->
     writable_paths = {entry["path"]: entry["mode"] for entry in defaults["windmill_worker_runtime_writable_directories"]}
 
     assert writable_paths["{{ windmill_worker_repo_checkout_host_path }}/receipts/token-lifecycle"] == "1777"
+    assert writable_paths["{{ windmill_worker_repo_checkout_host_path }}/receipts/security-incidents"] == "1777"
 
 
 def test_worker_checkout_staging_paths_are_per_run() -> None:
