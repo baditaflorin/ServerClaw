@@ -36,6 +36,26 @@ Initial placement:
 - database: `postgres-lv3`
 - exposure: private-only at first, with operator access over private networks and a Tailscale TCP proxy on the Proxmox host
 
+## Replaceability Scorecard
+
+- Capability Definition: `workflow_orchestrator` as defined by ADR 0035 workflow catalog contracts, ADR 0048 command approvals, and the Windmill operator runbook.
+- Contract Fit: strong for scheduled, API-triggered, and operator-invoked workflow execution while keeping repo-managed scripts as the primary portable unit.
+- Data Export / Import: repo-managed scripts, workflow definitions, schedules, webhook contracts, worker configuration, and runbook procedures can be recreated on another orchestrator; historical run records can be exported for audit retention.
+- Migration Complexity: medium because schedules, worker runtime secrets, webhook endpoints, and operator bookmarks must all move in sync to avoid dropping automation entrypoints.
+- Proprietary Surface Area: medium because workspace, trigger, and run-history semantics are Windmill-shaped even though the actual scripts and command contracts remain repo-owned.
+- Approved Exceptions: the Windmill workspace model and API-trigger wiring are accepted while the repo keeps workflows, scripts, and approval contracts in canonical machine-readable form.
+- Fallback / Downgrade: controller-executed repo scripts, Ansible playbooks, and command-catalog wrappers can cover the minimum operational path if the workflow runtime must be retired before a full replacement lands.
+- Observability / Audit Continuity: workflow receipts, command audit logs, run history, and health probes provide the migration continuity surface.
+
+## Vendor Exit Plan
+
+- Reevaluation Triggers: scheduler instability, unacceptable worker isolation limits, missing approval controls, or an inability to keep workflow definitions repo-first.
+- Portable Artifacts: repo-managed scripts, workflow catalog entries, schedule definitions, webhook contracts, worker bootstrap config, and live-apply receipts.
+- Migration Path: stand up the replacement orchestrator in parallel, port repo-managed scripts and schedules first, mirror webhook and API entrypoints behind compatibility shims, replay workflow smoke checks, then cut traffic and scheduled execution over by wave.
+- Alternative Product: Temporal or n8n.
+- Owner: platform automation.
+- Review Cadence: quarterly.
+
 ## Consequences
 
 - Agentic operations gain a durable API and workflow surface that is not just "SSH and run commands."

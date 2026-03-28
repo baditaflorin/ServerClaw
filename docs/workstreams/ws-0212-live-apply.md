@@ -1,0 +1,102 @@
+# Workstream ws-0212-live-apply: ADR 0212 Live Apply From Latest `origin/main`
+
+- ADR: [ADR 0212](../adr/0212-replaceability-scorecards-and-vendor-exit-plans.md)
+- Title: enforce replaceability scorecards and vendor exit plans for critical integrated product ADRs, then publish the updated governance docs live
+- Status: merged
+- Branch: `codex/ws-0212-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0212-live-apply`
+- Owner: codex
+- Depends On: `adr-0205-capability-contracts-before-product-selection`, `adr-0213-architecture-fitness-functions-in-the-validation-gate`
+- Conflicts With: none
+- Shared Surfaces: `docs/adr/0212-replaceability-scorecards-and-vendor-exit-plans.md`, `config/replaceability-review-catalog.json`, `scripts/replaceability_scorecards.py`, `docs/runbooks/replaceability-scorecards.md`, `receipts/live-applies/`
+
+## Scope
+
+- define the governed set of critical integrated product ADRs that must carry replaceability scorecards and exit plans
+- add the repo fitness function and validation-gate wiring that enforce those sections automatically
+- backfill the governed ADR set with concrete scorecards and exit plans
+- publish the resulting ADR updates to the live docs portal from this workstream branch and verify the deployed output on the edge host
+- finish the protected integration updates on `main` only after the branch-local live apply is verified and safely pushed
+
+## Non-Goals
+
+- backfilling every historical product ADR in one pass regardless of current criticality or integrated status
+- claiming ADR 0205 is fully implemented everywhere a capability contract might eventually exist
+- rewriting unrelated release metadata on the workstream branch
+
+## Expected Repo Surfaces
+
+- `config/replaceability-review-catalog.json`
+- `docs/schema/replaceability-review-catalog.schema.json`
+- `scripts/replaceability_scorecards.py`
+- `tests/test_replaceability_scorecards.py`
+- `scripts/validate_repository_data_models.py`
+- `scripts/validate_repo.sh`
+- `platform/interface_contracts.py`
+- `Makefile`
+- `docs/runbooks/replaceability-scorecards.md`
+- `docs/runbooks/validate-repository-automation.md`
+- `collections/ansible_collections/lv3/platform/roles/_template/service_scaffold/adr.md.tpl`
+- `tests/test_interface_contracts.py`
+- `tests/test_scaffold_service.py`
+- `docs/adr/0212-replaceability-scorecards-and-vendor-exit-plans.md`
+- `docs/adr/0213-architecture-fitness-functions-in-the-validation-gate.md`
+- selected governed product ADRs listed in `config/replaceability-review-catalog.json`
+- `docs/adr/.index.yaml`
+- `docs/site-generated/architecture/dependency-graph.md`
+- `docs/diagrams/agent-coordination-map.excalidraw`
+- `scripts/generate_dependency_diagram.py`
+- `tests/test_dependency_graph.py`
+- `tests/test_docs_site.py`
+- `docs/workstreams/ws-0212-live-apply.md`
+
+## Expected Live Surfaces
+
+- `docs.lv3.org` serves the updated governed ADR pages with their replaceability scorecards and vendor exit plans
+- the edge host carries the refreshed generated docs content for the governed ADR paths
+
+## Ownership Notes
+
+- this workstream owns the replaceability catalog, validator, runbook, receipt, and the governed ADR backfill set
+- repo validation surfaced a pre-existing workstream-status enum mismatch, so this workstream also owns the minimal contract/test fix needed to let `in_progress` workstreams validate cleanly
+- repo validation also surfaced a generator mismatch between `scripts/generate_dependency_diagram.py` and `make docs`, so this workstream owns the minimal fix that keeps the standalone dependency-graph check aligned with the docs-site output
+- protected integration files were intentionally deferred on the live-apply branch and completed only during the final `main` integration
+- the live publish is bounded to existing docs publication infrastructure and does not introduce a new production service
+
+## Verification
+
+- `python3 scripts/replaceability_scorecards.py --validate`
+- `python3 scripts/replaceability_scorecards.py --report`
+- `uv run --with pytest python -m pytest tests/test_interface_contracts.py tests/test_replaceability_scorecards.py tests/test_scaffold_service.py tests/test_validate_repo_cache.py -q`
+- `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
+- `./scripts/validate_repo.sh architecture-fitness agent-standards workstream-surfaces`
+- `./scripts/validate_repo.sh generated-portals`
+- `uv run --with pytest --with jinja2 --with pyyaml --with jsonschema python -m pytest tests/test_docs_site.py tests/test_dependency_graph.py tests/test_interface_contracts.py tests/test_replaceability_scorecards.py tests/test_scaffold_service.py tests/test_validate_repo_cache.py -q`
+- `make docs`
+- `make deploy-docs-portal`
+
+## Merge Criteria
+
+- the governed ADR set is machine-readable instead of being implied by title conventions
+- validation fails closed when a governed ADR loses one of the required scorecard or exit-plan fields
+- the docs portal publish and edge-host verification prove the updated governance guidance reached the live platform
+
+## Live Apply Outcome
+
+- 2026-03-28 live apply receipt: `receipts/live-applies/2026-03-28-adr-0212-replaceability-scorecards-live-apply.json`
+- the first `make deploy-docs-portal` run copied the updated `docs-portal` content but failed because the shared edge publication lane also expected `build/changelog-portal/`
+- the recovery followed the documented shared-edge path: `make generate-ops-portal`, `make generate-changelog-portal`, `make docs`, and `make configure-edge-publication env=production`
+- independent verification confirmed `docs.lv3.org` and the ADR 0212 path return `302` to the shared `/oauth2/sign_in` flow with `X-Robots-Tag: noindex, nofollow`
+- independent verification on `nginx-lv3` confirmed the deployed ADR 0212 and ADR 0042 HTML pages exist, contain `Replaceability Scorecard` and `Vendor Exit Plan`, and match the local SHA-256 digests
+- repo validation after the live apply also reconciled the standalone dependency-graph generator with the docs-site wrapper so the `generated-docs`/`generated-portals` paths no longer disagree on `docs/site-generated/architecture/dependency-graph.md`
+
+## Mainline Integration Outcome
+
+- merged to `main` in repository version `0.177.34`
+- updated `VERSION`, `changelog.md`, `RELEASE.md`, and versioned release notes only during the final mainline integration step
+- updated `versions/stack.yaml` on `main` to record the canonical `docs_portal` live-apply receipt while keeping platform version `0.130.36`
+
+## Notes For The Next Assistant
+
+- the live publication and protected mainline integration are both complete for ADR 0212
+- future ADR 0213 work should add more architecture fitness functions beyond the first replaceability gate now enforced here

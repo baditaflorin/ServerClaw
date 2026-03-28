@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-28'
 total_adrs: 238
 implementation_status_summary:
-  Implemented: 198
-  Partial: 3
-  Not Implemented: 36
+  Implemented: 199
+  Partial: 4
+  Not Implemented: 34
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3584,7 +3584,7 @@ adr_index:
   - adr: '0212'
     title: Replaceability Scorecards And Vendor Exit Plans
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -3595,10 +3595,11 @@ adr_index:
       - plans
     summary: Every critical product ADR must include a replaceability scorecard and a vendor
     filename: 0212-replaceability-scorecards-and-vendor-exit-plans.md
+    implemented_version: 0.130.36
   - adr: '0213'
     title: Architecture Fitness Functions In The Validation Gate
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Partial
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -3609,6 +3610,7 @@ adr_index:
       - gate
     summary: We will add architecture fitness functions to the repository validation gate.
     filename: 0213-architecture-fitness-functions-in-the-validation-gate.md
+    implemented_version: 0.130.36
   - adr: '0214'
     title: Production And Staging Cells As The Unit Of High Availability
     status: Accepted

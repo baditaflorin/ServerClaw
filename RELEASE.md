@@ -1,12 +1,13 @@
-# Release 0.177.33
+# Release 0.177.34
 
 - Date: 2026-03-28
 
 ## Summary
-- accepted ADRs 0224 through 0233 to define a production-oriented server-resident operations model, moving more routine control-plane work away from the Codex chat client and into mature tools such as Ansible Pull, systemd, Windmill, Gitea Actions runners, OPA, OpenBao Agent, Nomad, and signed release bundles
+- implemented ADR 0212 by governing critical integrated product ADRs with machine-checked replaceability scorecards, vendor exit plans, and live docs publication evidence
+- aligned the dependency-graph and generated-diagram validation paths so the docs-site and pre-push gate now agree on the governed generated artifacts
 
 ## Platform Impact
-- no platform version bump; this is a repo-only architecture release that defines how the server should increasingly operate from inside the platform boundary rather than from a live authoring session.
+- no platform version bump; the docs-governance rollout was already live-verified on platform version `0.130.36`, and this release records that verified state on `main` without introducing a second live apply.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

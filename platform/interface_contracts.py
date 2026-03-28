@@ -17,7 +17,7 @@ ALLOWED_COMPATIBILITY_POLICIES = {
     "backward_compatible_patch",
     "versioned_breaking_change",
 }
-ALLOWED_WORKSTREAM_STATUSES = {"implemented", "live_applied", "merged", "ready"}
+ALLOWED_WORKSTREAM_STATUSES = {"implemented", "in_progress", "live_applied", "merged", "ready"}
 
 
 def _require_mapping(value: Any, path: str) -> dict[str, Any]:

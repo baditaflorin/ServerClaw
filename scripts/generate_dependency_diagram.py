@@ -30,7 +30,19 @@ def build_parser() -> argparse.ArgumentParser:
 
 def render() -> str:
     graph = load_dependency_graph(validate_schema=True)
-    return render_dependency_markdown(graph)
+    content = render_dependency_markdown(graph)
+    return (
+        "---\n"
+        "sensitivity: INTERNAL\n"
+        "portal_display: full\n"
+        "tags:\n"
+        "  - architecture\n"
+        "  - dependency-graph\n"
+        "---\n\n"
+        '!!! note "Sensitivity: INTERNAL"\n'
+        "    This page is intended for authenticated operators and internal collaborators.\n\n"
+        f"{content.lstrip()}"
+    )
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -202,6 +202,19 @@ inventory:
 
 automation:
 
+  config/replaceability-review-catalog.json:
+    purpose: Canonical ADR 0212 catalog of critical integrated product ADRs that must carry replaceability scorecards and vendor exit plans
+    owner: human
+    format: JSON
+    use_for: Declaring which ADRs are governed by the replaceability fitness function and which capability-definition references anchor each review
+    update_when: Adding or removing a governed critical product ADR, or changing its capability identifier or definition references
+    update_by: Agent or human implementing ADR 0212 governance work
+    validation: "python3 scripts/replaceability_scorecards.py --validate"
+    related_files:
+      - "docs/schema/replaceability-review-catalog.schema.json: Schema for the governed replaceability catalog"
+      - "scripts/replaceability_scorecards.py: ADR section validator and summary report"
+      - "docs/runbooks/replaceability-scorecards.md: authoring and review procedure"
+
   config/seed-data-catalog.json:
     purpose: Canonical contract for anonymized seed-data snapshot classes and storage paths
     owner: human
