@@ -273,41 +273,100 @@ textarea {
 }
 
 .tableWrap {
-  overflow: auto;
-  border-radius: 18px;
-  border: 1px solid var(--line);
+  display: grid;
+  gap: 14px;
 }
 
-.rosterTable {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 720px;
+.gridControls,
+.gridSummary {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
 }
 
-.rosterTable th,
-.rosterTable td {
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--line);
-  text-align: left;
-  vertical-align: top;
+.gridSearch {
+  display: grid;
+  gap: 6px;
+  flex: 1;
+  min-width: min(100%, 420px);
 }
 
-.rosterTable th {
-  font-size: 0.86rem;
+.gridSearchLabel {
+  font-size: 0.82rem;
   color: var(--muted);
-  background: rgba(28, 26, 22, 0.03);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
-.rosterTable tr:last-child td {
-  border-bottom: none;
+.gridSearch input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  background: white;
+  border-radius: 14px;
+  color: var(--ink);
 }
 
-.rosterTable tbody tr {
-  cursor: pointer;
+.gridHost {
+  height: 640px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--panel);
 }
 
-.rosterTable tbody tr.isSelected {
-  background: rgba(165, 65, 28, 0.08);
+.gridHost .ag-root-wrapper {
+  border: none;
+}
+
+.gridHost .ag-cell-value {
+  width: 100%;
+}
+
+.gridHost .ag-header-cell-label {
+  font-weight: 700;
+}
+
+.gridHost .ag-row-selected .ag-cell {
+  background: rgba(165, 65, 28, 0.12);
+}
+
+.gridHost .ag-row-focus .ag-cell {
+  box-shadow: inset 0 0 0 1px rgba(165, 65, 28, 0.35);
+}
+
+.gridHost .ag-paging-panel,
+.gridHost .ag-header {
+  border-color: var(--line);
+}
+
+.operatorIdentity {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.operatorPrimary,
+.operatorSecondary,
+.gridTimestamp {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.operatorPrimary {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.operatorSecondary {
+  color: var(--muted);
+  font-size: 0.84rem;
+  white-space: nowrap;
+}
+
+.gridTimestamp {
+  white-space: nowrap;
 }
 
 .muted {
@@ -735,5 +794,15 @@ textarea {
 
   .toolbarSelect {
     min-width: 100%;
+  }
+
+  .gridControls,
+  .gridSummary {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .gridHost {
+    height: 540px;
   }
 }
