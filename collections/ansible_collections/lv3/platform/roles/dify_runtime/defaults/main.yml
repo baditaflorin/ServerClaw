@@ -68,8 +68,8 @@ dify_sandbox_image: "{{ container_image_catalog.images.dify_sandbox_runtime.ref 
 dify_plugin_daemon_image: "{{ container_image_catalog.images.dify_plugin_daemon_runtime.ref }}"
 dify_nginx_image: "{{ container_image_catalog.images.dify_nginx_runtime.ref }}"
 dify_ssrf_proxy_image: "{{ container_image_catalog.images.dify_ssrf_proxy_runtime.ref }}"
-dify_port: "{{ platform_service_topology | platform_service_port('dify', 'internal') }}"
-dify_internal_base_url: "{{ platform_service_topology | platform_service_url('dify', 'internal') }}"
+dify_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('dify', 'internal') }}"
+dify_internal_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('dify', 'internal') }}"
 dify_public_base_url: "https://{{ dify_service_topology.public_hostname }}"
 dify_public_hostname: "{{ dify_service_topology.public_hostname }}"
 dify_console_api_url: "{{ dify_public_base_url }}"
@@ -84,7 +84,7 @@ dify_langfuse_host: https://langfuse.lv3.org
 dify_admin_email: baditaflorin@gmail.com
 dify_admin_name: Florin Badita
 dify_vector_store: qdrant
-dify_ollama_base_url: "http://host.docker.internal:{{ platform_service_topology | platform_service_port('ollama', 'internal') }}"
+dify_ollama_base_url: "http://host.docker.internal:{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('ollama', 'internal') }}"
 dify_sandbox_port: 8194
 dify_plugin_daemon_port: 5002
 dify_nginx_port: 80

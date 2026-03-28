@@ -231,7 +231,11 @@ def parse_runbook_payload(path: Path) -> dict[str, Any]:
 
 
 def normalize_delivery_surfaces(automation: dict[str, Any], *, path: str) -> list[str]:
-    surfaces = automation.get("delivery_surfaces")
+    surfaces: Any = automation.get("delivery_surfaces")
+    if surfaces is None:
+        legacy_surface = automation.get("delivery_surface")
+        if legacy_surface is not None:
+            surfaces = [legacy_surface]
     if surfaces is None:
         return list(DEFAULT_DELIVERY_SURFACES)
     if not isinstance(surfaces, list) or not surfaces:
@@ -239,6 +243,8 @@ def normalize_delivery_surfaces(automation: dict[str, Any], *, path: str) -> lis
     normalized: list[str] = []
     for index, item in enumerate(surfaces):
         surface = require_string(item, f"{path}.delivery_surfaces[{index}]")
+        if surface == "portal":
+            surface = "ops_portal"
         if surface not in DELIVERY_SURFACE_LABELS:
             raise ValueError(
                 f"{path}.delivery_surfaces[{index}] must be one of: {', '.join(sorted(DELIVERY_SURFACE_LABELS))}"
@@ -394,6 +400,7 @@ class WindmillWorkflowRunner:
         self.base_url = base_url.rstrip("/")
         self.token = token
         self.workspace = workspace
+        self.repo_root = repo_root
         self.circuit_breaker = circuit_breaker
         if self.circuit_breaker is None:
             registry = circuit_registry or CircuitRegistry(repo_root or REPO_ROOT)
@@ -829,3 +836,16 @@ def render_status(record: dict[str, Any]) -> str:
         detail = outcome.get("error") or ""
         lines.append(f"  - {step_id}: {status} (attempts={attempts}) {detail}".rstrip())
     return "\n".join(lines)
+
+
+__all__ = [
+    "RunbookExecutor",
+    "RunbookRegistry",
+    "RunbookRunStore",
+    "RunbookSurfaceError",
+    "RunbookUseCaseService",
+    "WindmillWorkflowRunner",
+    "parse_runbook_payload",
+    "render_status",
+    "validate_runbook_payload",
+]

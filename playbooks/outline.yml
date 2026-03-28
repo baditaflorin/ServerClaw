@@ -80,18 +80,8 @@
           - "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
 
   roles:
+    - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.postgres_vm
-      vars:
-        postgres_vm_client_allowed_sources_extra:
-          - >-
-            {{
-              (
-                hostvars['proxmox_florin'].proxmox_guests
-                | selectattr('name', 'equalto', playbook_execution_host_patterns.docker_runtime[playbook_execution_env])
-                | map(attribute='ipv4')
-                | first
-              )
-            }}/32
     - role: lv3.platform.outline_postgres
 
 - name: Converge Outline on the Docker runtime VM

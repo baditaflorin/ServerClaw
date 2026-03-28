@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.48",
   "platform_version": "0.130.42",
-  "generated_at": "2026-03-28T20:23:35Z",
-  "next_refresh_at": "2026-03-28T21:23:35Z",
+  "generated_at": "2026-03-28T20:28:35Z",
+  "next_refresh_at": "2026-03-28T21:28:35Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4064,7 +4064,7 @@
   "recent_changes": {
     "last_version": "0.177.47",
     "deployed_at": "2026-03-28",
-    "summary": "verifies ADR 0224 from the latest mainline by carrying the host-resident supervisor baseline into repo truth and re-proving that reconciliation, supervision, validation, and approval now run through server-resident platform surfaces implemented ADR 0226 by installing the repo-managed systemd service, timer, and path baseline for host-resident control loops on proxmox_florin and verifying both manual and path-triggered reconcile passes",
+    "summary": "integrated ADR 0197 on current main by replaying the public Dify edge, re-verifying the governed `api.lv3.org` tool bridge, and preserving packaged API gateway runbook compatibility plus worktree-safe smoke tracing",
     "release_notes_url": "docs/release-notes/0.177.48.md"
   },
   "agentic_architecture": {

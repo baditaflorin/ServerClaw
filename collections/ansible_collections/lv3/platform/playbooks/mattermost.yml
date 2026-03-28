@@ -21,6 +21,7 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.postgres_vm
     - role: lv3.platform.mattermost_postgres
 
