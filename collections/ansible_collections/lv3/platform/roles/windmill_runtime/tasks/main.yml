@@ -292,6 +292,12 @@
   when: windmill_worker_checkout_python_cache_dirs.stdout | trim | length > 0
   changed_when: false
 
+- name: Remove stale packaging metadata from the Windmill worker checkout
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop: "{{ windmill_worker_checkout_stale_paths }}"
+
 - name: Remove the local staging archive for the Windmill worker checkout
   ansible.builtin.file:
     path: "{{ windmill_worker_checkout_archive_local.path }}"

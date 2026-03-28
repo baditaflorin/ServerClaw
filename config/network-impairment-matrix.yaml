@@ -1,0 +1,177 @@
+schema_version: 1.0.0
+
+target_classes:
+  staging:
+    description: Use the dedicated staging lane on vmbr20 before wider preview, standby, or recovery drills.
+    inventory_hosts:
+      - docker-runtime-staging-lv3
+      - postgres-staging-lv3
+      - monitoring-staging-lv3
+      - backup-staging-lv3
+    maintenance_window_required: false
+    notes: Live staging guests already exist and are the default first stop for ADR 0189 validation.
+  preview:
+    description: Use branch-scoped ephemeral preview environments once ADR 0185 is landed.
+    inventory_hosts: []
+    maintenance_window_required: false
+    notes: Planned target class for short-lived branch previews isolated from integrated truth.
+  fixture:
+    description: Use ephemeral fixtures for bounded network drills that need VM lifecycle control.
+    inventory_hosts: []
+    maintenance_window_required: false
+    notes: Best fit for isolated role, dependency, and edge-case rehearsal without a full preview stack.
+  standby:
+    description: Use stateful standby or replica targets when the scenario needs replication or promotion checks.
+    inventory_hosts: []
+    maintenance_window_required: false
+    notes: Reserve for higher-fidelity drills that need switchover or replica visibility.
+  recovery:
+    description: Use restore-drill and recovery surfaces assembled from backup or replica state.
+    inventory_hosts:
+      - backup-lv3
+      - backup-staging-lv3
+    maintenance_window_required: false
+    notes: Useful when the test includes reconnecting recovered services to impaired dependencies.
+  primary:
+    description: Use the live production primaries only during explicit maintenance or break-glass validation.
+    inventory_hosts:
+      - docker-runtime-lv3
+      - postgres-lv3
+      - backup-lv3
+    maintenance_window_required: true
+    notes: ADR 0189 keeps primary impairments out of routine use.
+
+impairments:
+  - id: added_latency
+    description: Add bounded latency or jitter with tc/netem or equivalent overlay controls.
+    safe_target_classes:
+      - staging
+      - preview
+      - fixture
+      - standby
+      - recovery
+    blocked_target_classes:
+      - primary
+    notes: Prefer at least one bounded probe plus a post-recovery probe for every latency drill.
+  - id: packet_loss
+    description: Drop a bounded percentage of packets between a caller and dependency.
+    safe_target_classes:
+      - staging
+      - preview
+      - fixture
+      - standby
+      - recovery
+    blocked_target_classes:
+      - primary
+    notes: Use loss percentages that still allow deterministic teardown and recovery.
+  - id: dns_resolution_failure
+    description: Force lookup failure or stale name resolution for the dependency endpoint.
+    safe_target_classes:
+      - staging
+      - preview
+      - fixture
+      - standby
+      - recovery
+    blocked_target_classes:
+      - primary
+    notes: Validate both cache-hit and cache-miss behaviour when the dependency uses DNS discovery.
+  - id: one_way_dependency_isolation
+    description: Break traffic in one direction while leaving the reverse path or control plane intact.
+    safe_target_classes:
+      - staging
+      - preview
+      - fixture
+      - standby
+      - recovery
+    blocked_target_classes:
+      - primary
+    notes: Use when queueing, retries, or asymmetric failure handling are the main contract under test.
+  - id: temporary_gateway_loss
+    description: Withdraw or blackhole the caller-side default route to the dependency network for a bounded window.
+    safe_target_classes:
+      - staging
+      - preview
+      - fixture
+      - standby
+      - recovery
+    blocked_target_classes:
+      - primary
+    notes: Most useful for host, VM, and bridge level drills rather than in-container network changes alone.
+  - id: tls_validation_failure
+    description: Present a trust or name mismatch so the dependency remains reachable but invalid to the client.
+    safe_target_classes:
+      - staging
+      - preview
+      - fixture
+      - standby
+      - recovery
+    blocked_target_classes:
+      - primary
+    notes: Separate transport reachability from TLS trust so assertions cover the correct failure mode.
+
+entries:
+  - service: api_gateway
+    dependency: keycloak
+    expected_behaviour: degrade_gracefully
+    service_catalog_tested_by: fault:keycloak-unavailable
+    target_classes:
+      - staging
+      - preview
+      - fixture
+    impairments:
+      - added_latency
+      - packet_loss
+      - dns_resolution_failure
+      - tls_validation_failure
+    notes: Warm the JWKS cache first, then assert cached validation and explicit Retry-After behaviour as the cache ages out.
+  - service: api_gateway
+    dependency: nats
+    expected_behaviour: queue_and_retry
+    service_catalog_tested_by: fault:nats-unavailable
+    target_classes:
+      - staging
+      - preview
+      - fixture
+      - standby
+    impairments:
+      - added_latency
+      - packet_loss
+      - one_way_dependency_isolation
+      - temporary_gateway_loss
+    notes: Assert outbox growth during the impairment and bounded flush after connectivity returns.
+  - service: openbao
+    dependency: postgres
+    expected_behaviour: fail_fast
+    service_catalog_tested_by: fault:postgres-unavailable
+    target_classes:
+      - staging
+      - preview
+      - fixture
+      - standby
+      - recovery
+    impairments:
+      - added_latency
+      - packet_loss
+      - dns_resolution_failure
+      - one_way_dependency_isolation
+      - temporary_gateway_loss
+      - tls_validation_failure
+    notes: Keep singleton production OpenBao out of routine network drills; use staging or recovery targets first.
+  - service: windmill
+    dependency: postgres
+    expected_behaviour: fail_fast
+    service_catalog_tested_by: fault:postgres-unavailable
+    target_classes:
+      - staging
+      - preview
+      - fixture
+      - standby
+      - recovery
+    impairments:
+      - added_latency
+      - packet_loss
+      - dns_resolution_failure
+      - one_way_dependency_isolation
+      - temporary_gateway_loss
+      - tls_validation_failure
+    notes: The worker and API should fail explicitly when the database path is impaired instead of masking the fault with retries.

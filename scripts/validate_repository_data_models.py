@@ -32,6 +32,7 @@ from data_catalog import load_data_catalog, validate_data_catalog
 from failure_domain_policy import validate_failure_domain_policy
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
 from platform.circuit import load_circuit_policies
+from platform.faults import load_network_impairment_matrix
 from platform.interface_contracts import validate_contracts
 from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
 from mutation_audit import load_mutation_audit_schema, validate_mutation_audit_schema
@@ -2416,6 +2417,7 @@ def validate_repository_data_models() -> int:
     validate_workstreams_release_policy()
     validate_workstream_canonical_truth_metadata()
     validate_workstream_live_apply_contracts()
+    load_network_impairment_matrix()
     validate_interface_contracts()
     validate_merge_eligible_files_contract()
     validate_triage_rule_contracts()

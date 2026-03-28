@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-28'
 total_adrs: 204
 implementation_status_summary:
-  Implemented: 189
+  Implemented: 190
   Partial: 3
-  Not Implemented: 11
+  Not Implemented: 10
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3264,8 +3264,8 @@ adr_index:
     filename: 0188-failover-rehearsal-gate-for-redundancy-tiers.md
   - adr: 0189
     title: Network Impairment Test Matrix for Staging and Previews
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Implemented
+    implementation_status: Implemented
     date: '2026-03-27'
     concern: networking
     keywords:
@@ -3277,6 +3277,7 @@ adr_index:
       - previews
     summary: We will define a network impairment test matrix for preview, fixture, standby, and recovery environments.
     filename: 0189-network-impairment-test-matrix-for-staging-and-previews.md
+    implemented_version: 0.177.20
   - adr: 0190
     title: Synthetic Transaction Replay for Capacity and Recovery Validation
     status: Proposed

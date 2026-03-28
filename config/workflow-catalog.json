@@ -305,6 +305,56 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "network-impairment-matrix": {
+      "description": "Render the ADR 0189 network impairment matrix for one target class from the live Windmill worker checkout and write a JSON report.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "network-impairment-matrix",
+        "command": "make network-impairment-matrix NETWORK_IMPAIRMENT_MATRIX_ARGS='target_class=staging'"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/network-impairment-matrix.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/network-impairment-matrix.yaml",
+        "config/fault-scenarios.yaml",
+        "config/service-capability-catalog.json",
+        "config/windmill/scripts/network-impairment-matrix.py",
+        "docs/adr/0189-network-impairment-test-matrix-for-staging-and-previews.md",
+        "docs/runbooks/network-impairment-matrix.md",
+        "platform/faults/network_impairment_matrix.py",
+        "scripts/network_impairment_matrix.py",
+        "tests/test_network_impairment_matrix.py",
+        "tests/test_network_impairment_matrix_repo_surfaces.py",
+        "tests/test_network_impairment_matrix_windmill.py"
+      ],
+      "outputs": [
+        "A JSON report under .local/network-impairment-matrix/latest.json describing the selected ADR 0189 target-class slice and its linked service degradation contracts."
+      ],
+      "verification_commands": [
+        "python3 -m py_compile scripts/network_impairment_matrix.py config/windmill/scripts/network-impairment-matrix.py platform/faults/network_impairment_matrix.py",
+        "python3 -m pytest tests/test_network_impairment_matrix.py tests/test_network_impairment_matrix_repo_surfaces.py tests/test_network_impairment_matrix_windmill.py -q",
+        "python3 config/windmill/scripts/network-impairment-matrix.py --repo-path /srv/proxmox_florin_server --target-class staging"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 600,
+        "max_steps": 40,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
+    },
     "run-triage": {
       "description": "Run the ADR 0114 rule-based incident triage engine for one alert payload, write the report, and optionally post the summary to Mattermost.",
       "lifecycle_status": "active",

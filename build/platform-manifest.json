@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.19",
+  "repo_version": "0.177.20",
   "platform_version": "0.130.32",
-  "generated_at": "2026-03-28T00:19:28Z",
-  "next_refresh_at": "2026-03-28T01:19:28Z",
+  "generated_at": "2026-03-28T01:07:14Z",
+  "next_refresh_at": "2026-03-28T02:07:14Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -1935,6 +1935,31 @@
         "runbook": "docs/runbooks/config-merge-protocol.md"
       },
       {
+        "id": "network-impairment-matrix",
+        "description": "Render the ADR 0189 network impairment matrix for one target class from the live Windmill worker checkout and write a JSON report.",
+        "tags": [
+          "diagnostic",
+          "guest-live",
+          "network-impairment-matrix",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "diagnostic",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 600,
+          "max_steps": 40,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/network-impairment-matrix.md"
+      },
+      {
         "id": "nightly-integration-tests",
         "description": "Run the ADR 0111 nightly integration suite, post the summary to Mattermost, and emit GlitchTip failures when checks regress.",
         "tags": [
@@ -3324,6 +3349,16 @@
         ]
       },
       {
+        "id": "network-impairment-matrix",
+        "title": "Network Impairment Matrix",
+        "agent_trust_required": "T2",
+        "steps": 6,
+        "path": "docs/runbooks/network-impairment-matrix.md",
+        "workflow_ids": [
+          "network-impairment-matrix"
+        ]
+      },
+      {
         "id": "observation-to-action-closure-loop",
         "title": "Observation-to-Action Closure Loop",
         "agent_trust_required": "T1",
@@ -3556,10 +3591,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.18",
+    "last_version": "0.177.19",
     "deployed_at": "2026-03-28",
-    "summary": "integrated ADR 0199 by publishing the repo-managed Outline living knowledge wiki at `wiki.lv3.org`, wiring the durable `outline.automation` Keycloak bootstrap path, and verifying the governed living-knowledge collections end to end",
-    "release_notes_url": "docs/release-notes/0.177.19.md"
+    "summary": "implemented ADR 0189 governed network-impairment matrix rendering and hardened the mirrored Windmill worker checkout so repo-managed Python jobs no longer trip stale editable-build metadata before startup",
+    "release_notes_url": "docs/release-notes/0.177.20.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -3657,13 +3692,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0188-failover-rehearsal-gate-for-redundancy-tiers.md"
-    },
-    {
-      "adr": "0189",
-      "title": "Network Impairment Test Matrix for Staging and Previews",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0189-network-impairment-test-matrix-for-staging-and-previews.md"
     },
     {
       "adr": "0190",
