@@ -17,7 +17,7 @@ workstreams:
   - id: ws-0193-main-merge
     adr: "0193"
     title: Integrate ADR 0193 live apply into origin/main
-    status: in-progress
+    status: ready
     owner: codex
     branch: "codex/ws-0193-main-merge"
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0193-main-merge

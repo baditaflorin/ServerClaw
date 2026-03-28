@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0193](../adr/0193-plane-kanban-task-board.md)
 - Title: Integrate ADR 0193 live apply into `origin/main`
-- Status: in-progress
+- Status: ready
 - Branch: `codex/ws-0193-main-merge`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0193-main-merge`
 - Owner: codex
