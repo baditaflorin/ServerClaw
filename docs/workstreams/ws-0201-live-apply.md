@@ -3,8 +3,8 @@
 - ADR: [ADR 0201](../adr/0201-harbor-container-registry-with-cve-scanning.md)
 - Title: Harbor runtime deployment, registry cutover, and repository automation replay from latest `origin/main`
 - Status: live_applied
-- Branch: `codex/ws-0201-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0201-live-apply`
+- Branch: `codex/ws-0201-main-merge-r2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0201-main-merge-r2`
 - Owner: codex
 - Depends On: `adr-0056-keycloak`, `adr-0083-docker-check-runner`, `adr-0089-build-artifact-cache`
 - Conflicts With: none
@@ -49,8 +49,10 @@
 - The `check-runner` Harbor project now reports `repo_count: 4`, all four runner repositories exist, and Harbor reports Trivy scan data on pushed artifacts.
 - `docker-build-lv3` can both push and pull `registry.lv3.org/check-runner/*` after the split-horizon host pinning, BuildKit socket fixes, and robot-auth rebuild helper updates.
 - Local repo validation is green for the touched Harbor surfaces and generated artifacts.
+- On the rebased branch replay from current `origin/main`, `make converge-harbor` completed with `docker-runtime-lv3 : ok=123 changed=9 failed=0 skipped=14` and `nginx-lv3 : ok=38 changed=3 failed=0 skipped=11`.
+- The rebased replay re-verified `curl -fsS https://registry.lv3.org/api/v2.0/ping` => `Pong`, `curl -I https://registry.lv3.org/v2/` => `HTTP/2 401`, and `docker pull registry.lv3.org/check-runner/python:3.12.10` on `docker-build-lv3` => `registry.lv3.org/check-runner/python@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff`.
 
 ## Remaining For Merge To `main`
 
 - update the protected integration files on the synchronized `main` branch: `VERSION`, release sections in `changelog.md`, canonical observed state in `versions/stack.yaml`, and the top-level `README.md` integrated status summary
-- rerun `make remote-validate` from the synchronized `main` branch after canonical truth and `README.md` are updated there; on this workstream branch the remote worker reached generated-docs and then stopped on intentional branch-local canonical truth drift (`README.md`)
+- rerun `make remote-validate` and `make remote-pre-push` from the synchronized `main` branch after canonical truth and `README.md` are updated there
