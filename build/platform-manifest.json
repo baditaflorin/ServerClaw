@@ -2,9 +2,9 @@
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
   "repo_version": "0.177.33",
-  "platform_version": "0.130.36",
-  "generated_at": "2026-03-28T11:43:10Z",
-  "next_refresh_at": "2026-03-28T12:43:10Z",
+  "platform_version": "0.130.37",
+  "generated_at": "2026-03-28T12:01:09Z",
+  "next_refresh_at": "2026-03-28T13:01:09Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3082,7 +3082,7 @@
         "id": "capacity-model",
         "title": "Capacity Model",
         "agent_trust_required": "T2",
-        "steps": 8,
+        "steps": 9,
         "path": "docs/runbooks/capacity-model.md",
         "workflow_ids": [
           "capacity-report",
@@ -3874,7 +3874,7 @@
   "recent_changes": {
     "last_version": "0.177.32",
     "deployed_at": "2026-03-28",
-    "summary": "accepted ADRs 0224 through 0233 to define a production-oriented",
+    "summary": "accepted ADRs 0224 through 0233 to define a production-oriented centralized shared redundancy, capacity-class, and placement rules into one machine-checkable registry so validation, live-apply preflights, and docs consume the same canonical policy pack",
     "release_notes_url": "docs/release-notes/0.177.33.md"
   },
   "agentic_architecture": {

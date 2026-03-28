@@ -11,7 +11,7 @@ total_adrs: 238
 implementation_status_summary:
   Implemented: 199
   Partial: 3
-  Not Implemented: 36
+  Not Implemented: 35
   Deprecated: 1
 concerns:
   agent-coordination:
