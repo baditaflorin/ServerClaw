@@ -7,11 +7,11 @@
 
 schema_version: 1
 generated: '2026-03-28'
-total_adrs: 228
+total_adrs: 229
 implementation_status_summary:
   Implemented: 198
   Partial: 3
-  Not Implemented: 26
+  Not Implemented: 27
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -33,6 +33,7 @@ concerns:
     - '0167'
     - 0168
     - 0181
+    - '0224'
   api:
     - 0049
     - '0075'
@@ -3753,3 +3754,17 @@ adr_index:
       - profiles
     summary: We will centralize HA and replication intent in one canonical topology
     filename: 0223-canonical-ha-topology-catalog-and-reusable-automation-profiles.md
+  - adr: '0224'
+    title: Self-Service Repo Intake And Agent-Assisted Deployments
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: agent-discovery
+    keywords:
+      - self-service
+      - repo
+      - intake
+      - agent-assisted
+      - deployments
+    summary: We will extend the existing ADR 0194 Coolify deploy path instead of introducing
+    filename: 0224-self-service-repo-intake-and-agent-assisted-deployments.md
