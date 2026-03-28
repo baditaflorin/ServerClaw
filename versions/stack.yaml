@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.177.43
+repo_version: 0.177.44
 platform_version: 0.130.40
 
 live_apply_evidence:
@@ -94,6 +94,7 @@ live_apply_evidence:
     canonical_publication_models: 2026-03-28-adr-0210-canonical-domain-models-live-apply
     provider_boundaries: 2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply
     server_resident_reconciliation: 2026-03-28-adr-0225-server-resident-reconciliation-via-ansible-pull-live-apply
+    gitea_actions_runners: 2026-03-28-adr-0229-gitea-actions-runners-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -999,7 +1000,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.43
+    current: 0.177.44
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.40

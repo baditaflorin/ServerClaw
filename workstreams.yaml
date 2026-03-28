@@ -7722,7 +7722,7 @@ workstreams:
     canonical_truth:
       changelog_entry: re-verified ADR 0229 Gitea Actions runners from the latest merged mainline by replaying `make converge-gitea`, passing the private Gitea server-side push gate, and completing a branch `validate` workflow on runner `docker-build-lv3`
       release_bump: patch
-      included_in_repo_version: 0.177.42
+      included_in_repo_version: 0.177.44
       latest_receipts:
         gitea_actions_runners: 2026-03-28-adr-0229-gitea-actions-runners-live-apply
       live_apply_verification:
@@ -7735,3 +7735,68 @@ workstreams:
           head_branch: codex/ws-0229-live-apply
           head_sha: 65d4ed1599138b8160e904ef5bd82a9e43b8f195
           conclusion: success
+
+  - id: ws-0229-main-merge
+    adr: "0229"
+    title: Integrate ADR 0229 live apply into origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0229-main-merge
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0229-main-merge
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0229-main-merge.md
+    depends_on:
+      - ws-0229-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0229-main-merge.md
+      - VERSION
+      - changelog.md
+      - RELEASE.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.44.md
+      - versions/stack.yaml
+      - README.md
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md
+      - docs/workstreams/ws-0229-live-apply.md
+      - docs/runbooks/configure-gitea.md
+      - docs/runbooks/validate-repository-automation.md
+      - docs/adr/.index.yaml
+      - receipts/live-applies/2026-03-28-adr-0229-gitea-actions-runners-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws_0229_main_merge_doc
+          paths:
+            - docs/workstreams/ws-0229-main-merge.md
+          mode: exclusive
+        - id: adr_0229_mainline_truth
+          paths:
+            - VERSION
+            - changelog.md
+            - RELEASE.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.44.md
+            - versions/stack.yaml
+            - README.md
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md
+            - docs/workstreams/ws-0229-live-apply.md
+            - docs/runbooks/configure-gitea.md
+            - docs/runbooks/validate-repository-automation.md
+            - docs/adr/.index.yaml
+            - receipts/live-applies/2026-03-28-adr-0229-gitea-actions-runners-live-apply.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: integrated ADR 0229 by carrying the verified Gitea Actions runner evidence into main after replaying the latest-main Gitea convergence, passing the private push gate, and recording workflow run 36 on docker-build-lv3
+      release_bump: patch
+      included_in_repo_version: 0.177.44

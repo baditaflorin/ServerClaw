@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.43",
+  "repo_version": "0.177.44",
   "platform_version": "0.130.40",
-  "generated_at": "2026-03-28T17:56:19Z",
-  "next_refresh_at": "2026-03-28T18:56:19Z",
+  "generated_at": "2026-03-28T18:19:14Z",
+  "next_refresh_at": "2026-03-28T19:19:14Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4026,10 +4026,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.42",
+    "last_version": "0.177.43",
     "deployed_at": "2026-03-28",
-    "summary": "implemented ADR 0225 by installing a durable server-resident ansible-pull reconcile loop on proxmox_florin, bootstrapping a least-privilege Gitea pull identity, and verifying host-local receipts through the private Gitea source",
-    "release_notes_url": "docs/release-notes/0.177.43.md"
+    "summary": "integrated ADR 0229 by carrying the verified Gitea Actions runner evidence into main after replaying the latest-main Gitea convergence, passing the private push gate, and recording workflow run 36 on docker-build-lv3",
+    "release_notes_url": "docs/release-notes/0.177.44.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
