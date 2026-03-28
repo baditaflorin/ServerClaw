@@ -782,7 +782,7 @@ workstreams:
     canonical_truth:
       changelog_entry: completed ADR 0198 by switching platform-context retrieval to local Ollama semantic embeddings, expanding the indexed corpus, and grounding the operator CLI plus LLM client with cited vector matches
       release_bump: patch
-      included_in_repo_version: 0.177.24
+      included_in_repo_version: 0.177.26
       latest_receipts:
         platform_context: 2026-03-28-adr-0198-semantic-rag-mainline-live-apply
 

@@ -5,11 +5,11 @@
   "applied_on": "2026-03-28",
   "recorded_on": "2026-03-28",
   "recorded_by": "codex",
-  "source_commit": "327cbb311f8243bfd455bcd65f6727afa0bad7c7",
-  "repo_version_context": "0.177.24",
+  "source_commit": "4e492732ac1deb7ea3e5f210869b7f57897632bc",
+  "repo_version_context": "0.177.26",
   "workflow_id": "converge-rag-context",
   "adr": "0198",
-  "summary": "Replayed ADR 0198 from committed mainline release `0.177.24` through `make live-apply-service service=rag-context env=production`, preserved the healthy semantic Ollama-backed vector collection on `docker-runtime-lv3`, and re-verified end-to-end vector retrieval through the managed role plus the operator query entrypoints after the earlier same-day degraded-index repair path had already been proven on the latest-main replay branch.",
+  "summary": "Replayed ADR 0198 from committed mainline release `0.177.26` through `make live-apply-service service=rag-context env=production`, preserved the healthy semantic Ollama-backed vector collection on `docker-runtime-lv3`, and re-verified end-to-end vector retrieval through the managed role plus the operator query entrypoints after the earlier same-day degraded-index repair path had already been proven on the latest-main replay branch.",
   "targets": [
     {
       "kind": "guest",
@@ -32,17 +32,17 @@
     {
       "check": "Semantic RAG regression tests",
       "result": "pass",
-      "observed": "`uv run --with pytest --with pyyaml --with httpx --with fastapi --with qdrant-client python -m pytest tests/test_platform_context_corpus.py tests/test_platform_context_service.py tests/test_platform_llm_client.py tests/test_lv3_cli.py tests/test_rag_context_runtime_role.py -q` passed with `70 passed in 2.11s`."
+      "observed": "`uv run --with pytest --with pyyaml --with httpx --with fastapi --with qdrant-client python -m pytest tests/test_platform_context_corpus.py tests/test_platform_context_service.py tests/test_platform_llm_client.py tests/test_lv3_cli.py tests/test_rag_context_runtime_role.py -q` passed with `70 passed in 2.17s`."
     },
     {
       "check": "Live-apply guardrail tests",
       "result": "pass",
-      "observed": "`uv run --with pytest --with pyyaml --with jsonschema python -m pytest tests/test_standby_capacity.py tests/test_service_redundancy.py tests/test_immutable_guest_replacement.py -q` passed with `19 passed in 0.57s`, covering the `rag-context` to `platform_context_api` wrapper alias used by the governed service entrypoint."
+      "observed": "`uv run --with pytest --with pyyaml --with jsonschema python -m pytest tests/test_standby_capacity.py tests/test_service_redundancy.py tests/test_immutable_guest_replacement.py -q` passed with `19 passed in 0.53s`, covering the `rag-context` to `platform_context_api` wrapper alias used by the governed service entrypoint."
     },
     {
       "check": "Syntax and governed live-apply replay",
       "result": "pass",
-      "observed": "`make syntax-check-rag-context` passed, and `make live-apply-service service=rag-context env=production ALLOW_IN_PLACE_MUTATION=true` completed successfully from committed mainline release commit `327cbb31` with `docker-runtime-lv3 : ok=94 changed=4 unreachable=0 failed=0 skipped=19` and `proxmox_florin : ok=36 changed=4 unreachable=0 failed=0 skipped=14`."
+      "observed": "`make syntax-check-rag-context` passed, and `make live-apply-service service=rag-context env=production ALLOW_IN_PLACE_MUTATION=true` completed successfully from committed mainline release commit `4e492732` with `docker-runtime-lv3 : ok=94 changed=4 unreachable=0 failed=0 skipped=19` and `proxmox_florin : ok=36 changed=4 unreachable=0 failed=0 skipped=14`."
     },
     {
       "check": "Managed degraded-index recovery path",
@@ -85,7 +85,7 @@
     "workstreams.yaml"
   ],
   "notes": [
-    "Production live apply now succeeds from the committed `main` replay path through the governed `rag-context` service wrapper.",
+    "Production live apply now succeeds from the committed `0.177.26` main replay path through the governed `rag-context` service wrapper.",
     "The managed verify path preserves a healthy live vector collection when possible and only performs the bounded semantic seed repair when the collection is degraded; the final `main` replay completed without needing the repair.",
     "A full repo-grounded `python3 scripts/index_platform_knowledge.py --api-url http://100.64.0.1:8010 --api-token-file .local/platform-context/api-token.txt` rebuild remains an explicit maintenance action because the expanded mirrored corpus exceeds the safe synchronous Ollama rebuild budget on `docker-runtime-lv3`."
   ]

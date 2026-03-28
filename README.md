@@ -82,7 +82,7 @@ Portainer is now live on `docker-runtime-lv3` and reachable privately at `https:
 
 Private Ollama is now live on `docker-runtime-lv3` at `10.10.10.20:11434`, the repo-managed `llama3.2:3b` startup model is present, and Open WebUI now uses that connector privately through `host.docker.internal:11434` without publishing Ollama on the public edge.
 
-Semantic platform-context retrieval is now live on `docker-runtime-lv3` at `http://100.64.0.1:8010`: the committed `0.177.24` governed `main` replay on 2026-03-28 preserved the healthy Ollama-backed vector collection, the earlier same-day latest-main replay proved the bounded repair path for legacy `384` to `768` drift, and direct API plus operator CLI queries now verify `retrieval_backend: "vector"` end to end.
+Semantic platform-context retrieval is now live on `docker-runtime-lv3` at `http://100.64.0.1:8010`: the committed `0.177.26` governed `main` replay on 2026-03-28 preserved the healthy Ollama-backed vector collection, the earlier same-day latest-main replay proved the bounded repair path for legacy `384` to `768` drift, and direct API plus operator CLI queries now verify `retrieval_backend: "vector"` end to end.
 
 The repository now also ships the repo-managed `lv3` operator CLI for terminal-first discovery, validation, status checks, and private control-plane entrypoints.
 The repository now also ships ADR 0156 session workspace isolation for controller automation and the remote build gateway: separate checkouts now resolve to separate session namespaces and remote build-server workspaces, and the first live verification from current `main` completed on 2026-03-26.

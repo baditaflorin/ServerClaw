@@ -3259,7 +3259,7 @@ adr_index:
       - tests
     summary: We will maintain anonymized seed data snapshots for repeatable preview, restore, and failover tests.
     filename: 0187-anonymized-seed-data-snapshots-for-repeatable-tests.md
-    implemented_version: 0.177.24
+    implemented_version: 0.177.26
   - adr: 0188
     title: Failover Rehearsal Gate for Redundancy Tiers
     status: Implemented
@@ -3372,7 +3372,7 @@ adr_index:
     summary: We will make the platform-context retrieval path semantic by default while preserving the existing private-first
       operati
     filename: 0198-qdrant-vector-search-semantic-rag.md
-    implemented_version: 0.177.24
+    implemented_version: 0.177.26
   - adr: 0199
     title: Outline Living Knowledge Wiki
     status: Accepted
