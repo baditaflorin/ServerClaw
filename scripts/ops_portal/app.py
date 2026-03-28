@@ -192,6 +192,9 @@ class GatewayClient:
     async def fetch_platform_health(self, token: str | None = None) -> dict[str, Any]:
         return await self._request("GET", "/v1/platform/health", token=token)
 
+    async def fetch_platform_attestation(self, token: str | None = None) -> dict[str, Any]:
+        return await self._request("GET", "/v1/platform/attestation", token=token)
+
     async def fetch_agent_coordination(self, token: str | None = None) -> dict[str, Any]:
         return await self._request("GET", "/v1/platform/agents", token=token)
 
@@ -441,6 +444,57 @@ def normalize_health(payload: dict[str, Any], services: list[dict[str, Any]]) ->
     return health_map
 
 
+def describe_attestation(item: dict[str, Any]) -> str:
+    endpoint_status = str(item.get("endpoint_proof", {}).get("status", "unknown"))
+    route_status = str(item.get("route_proof", {}).get("status", "unknown"))
+    receipt_status = str(item.get("receipt_witness", {}).get("status", "unknown"))
+    return f"endpoint {endpoint_status} / route {route_status} / receipt {receipt_status}"
+
+
+def normalize_attestation(
+    payload: dict[str, Any],
+    services: list[dict[str, Any]],
+) -> tuple[dict[str, dict[str, Any]], dict[str, Any]]:
+    attestation_map = {
+        service["id"]: {
+            "status": "unknown",
+            "detail": "No live attestation data",
+            "route_status": "unknown",
+            "receipt_status": "unknown",
+        }
+        for service in services
+    }
+    summary: dict[str, Any] = {"total": 0, "attested": 0, "missing": 0, "route_failed": 0}
+
+    if not isinstance(payload, dict):
+        return attestation_map, summary
+
+    raw_summary = payload.get("summary")
+    if isinstance(raw_summary, dict):
+        summary.update(raw_summary)
+
+    raw_services = payload.get("services")
+    if not isinstance(raw_services, list):
+        return attestation_map, summary
+
+    for item in raw_services:
+        if not isinstance(item, dict):
+            continue
+        service_id = item.get("service_id")
+        if service_id not in attestation_map:
+            continue
+        route_proof = item.get("route_proof", {}) if isinstance(item.get("route_proof"), dict) else {}
+        receipt_witness = item.get("receipt_witness", {}) if isinstance(item.get("receipt_witness"), dict) else {}
+        attestation_map[service_id] = {
+            "status": str(item.get("status", "unknown")),
+            "detail": describe_attestation(item),
+            "route_status": str(route_proof.get("status", "unknown")),
+            "receipt_status": str(receipt_witness.get("status", "unknown")),
+        }
+
+    return attestation_map, summary
+
+
 def build_capability_contract_models(
     capability_contracts: list[dict[str, Any]],
     services: list[dict[str, Any]],
@@ -504,6 +558,7 @@ def build_service_models(
     services: list[dict[str, Any]],
     publications: list[dict[str, Any]],
     health: dict[str, dict[str, str]],
+    attestation: dict[str, dict[str, Any]],
     drift_report: dict[str, Any],
     maintenance_windows: list[dict[str, Any]],
     deployments: list[dict[str, Any]],
@@ -556,6 +611,11 @@ def build_service_models(
                 "status": health.get(service_id, {}).get("status", "unknown"),
                 "status_detail": health.get(service_id, {}).get("detail", "No detail"),
                 "status_tone": status_tone(health.get(service_id, {}).get("status", "unknown")),
+                "attestation_status": attestation.get(service_id, {}).get("status", "unknown"),
+                "attestation_detail": attestation.get(service_id, {}).get("detail", "No live attestation data"),
+                "attestation_tone": status_tone(attestation.get(service_id, {}).get("status", "unknown")),
+                "route_status": attestation.get(service_id, {}).get("route_status", "unknown"),
+                "receipt_status": attestation.get(service_id, {}).get("receipt_status", "unknown"),
                 "drift_items": drift_by_service.get(service_id, []),
                 "maintenance_windows": windows_by_service.get(service_id, []) + windows_by_service.get("all", []),
                 "last_deployment": deployment,
@@ -688,27 +748,30 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     drift_report = repository.latest_drift_report()
     changelog_notes = repository.changelog_notes()
 
-    try:
-        health_payload = await gateway.fetch_platform_health(
-            token=read_api_token(session, request.app.state.settings),
-        )
-    except Exception as exc:  # noqa: BLE001
-        health_payload = {"warning": str(exc)}
-    try:
-        runbook_payload = await gateway.fetch_runbooks(
-            token=read_api_token(session, request.app.state.settings),
-            delivery_surface="ops_portal",
-        )
-    except Exception as exc:  # noqa: BLE001
-        runbook_payload = {"warning": str(exc), "runbooks": []}
-    try:
-        coordination_payload = await gateway.fetch_agent_coordination(
-            token=read_api_token(session, request.app.state.settings),
-        )
-    except Exception as exc:  # noqa: BLE001
-        coordination_payload = {"warning": str(exc)}
+    token = read_api_token(session, request.app.state.settings)
+    health_result, attestation_result, runbook_result, coordination_result = await asyncio.gather(
+        gateway.fetch_platform_health(token=token),
+        gateway.fetch_platform_attestation(token=token),
+        gateway.fetch_runbooks(token=token, delivery_surface="ops_portal"),
+        gateway.fetch_agent_coordination(token=token),
+        return_exceptions=True,
+    )
+
+    health_payload = {"warning": str(health_result)} if isinstance(health_result, Exception) else health_result
+    attestation_payload = {"warning": str(attestation_result)} if isinstance(attestation_result, Exception) else attestation_result
+    runbook_payload = (
+        {"warning": str(runbook_result), "runbooks": []}
+        if isinstance(runbook_result, Exception)
+        else runbook_result
+    )
+    coordination_payload = (
+        {"warning": str(coordination_result)}
+        if isinstance(coordination_result, Exception)
+        else coordination_result
+    )
 
     health = normalize_health(health_payload, services)
+    attestation, attestation_summary = normalize_attestation(attestation_payload, services)
     coordination = normalize_agent_coordination(coordination_payload)
     raw_runbooks = runbook_payload.get("runbooks") if isinstance(runbook_payload, dict) else []
     runbooks = raw_runbooks if isinstance(raw_runbooks, list) else []
@@ -717,6 +780,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         services,
         publications,
         health,
+        attestation,
         drift_report,
         maintenance_windows,
         deployments,
@@ -747,6 +811,8 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "drift_report": drift_report,
         "drift_summary": drift_summary,
         "health_warning": health_payload.get("warning") if isinstance(health_payload, dict) else None,
+        "attestation_warning": attestation_payload.get("warning") if isinstance(attestation_payload, dict) else None,
+        "attestation_summary": attestation_summary,
         "coordination_warning": coordination_payload.get("warning") if isinstance(coordination_payload, dict) else None,
         "runbook_warning": runbook_payload.get("warning") if isinstance(runbook_payload, dict) else None,
         "coordination": coordination,

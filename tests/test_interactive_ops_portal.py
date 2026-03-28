@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from scripts.ops_portal.app import PortalSettings, create_app, normalize_health
+from scripts.ops_portal.app import PortalSettings, create_app, normalize_attestation, normalize_health
 
 
 def test_ops_portal_package_import_works_in_container_layout() -> None:
@@ -35,6 +35,7 @@ def test_ops_portal_package_import_works_in_container_layout() -> None:
 class FakeGatewayClient:
     def __init__(self) -> None:
         self.platform_health_tokens: list[str | None] = []
+        self.platform_attestation_tokens: list[str | None] = []
         self.agent_coordination_tokens: list[str | None] = []
         self.runbook_fetch_tokens: list[str | None] = []
         self.service_health_calls: list[dict[str, object]] = []
@@ -99,6 +100,28 @@ class FakeGatewayClient:
                     ],
                 },
             ]
+        }
+
+    async def fetch_platform_attestation(self, token: str | None = None) -> dict[str, object]:
+        self.platform_attestation_tokens.append(token)
+        return {
+            "summary": {"total": 3, "attested": 2, "missing": 1, "route_failed": 0},
+            "services": [
+                {
+                    "service_id": "grafana",
+                    "status": "attested",
+                    "endpoint_proof": {"status": "pass"},
+                    "route_proof": {"status": "pass"},
+                    "receipt_witness": {"status": "pass"},
+                },
+                {
+                    "service_id": "ops_portal",
+                    "status": "missing",
+                    "endpoint_proof": {"status": "pass"},
+                    "route_proof": {"status": "pass"},
+                    "receipt_witness": {"status": "fail"},
+                },
+            ],
         }
 
     async def fetch_agent_coordination(self, token: str | None = None) -> dict[str, object]:
@@ -493,10 +516,13 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Recent Live Applies" in response.text
     assert "shared-edge / platform-sso" in response.text
     assert "ops.lv3.org · operator · shared-edge · platform-sso" in response.text
+    assert "Attested" in response.text
+    assert "Declared-live missing" in response.text
     assert "Capability Contracts" in response.text
     assert "Identity Provider" in response.text
     assert "Keycloak" in response.text
     assert gateway.platform_health_tokens == ["test-token"]
+    assert gateway.platform_attestation_tokens == ["test-token"]
     assert gateway.agent_coordination_tokens == ["test-token"]
     assert gateway.runbook_fetch_tokens == ["test-token"]
 
@@ -648,3 +674,34 @@ def test_normalize_health_accepts_service_id_list_payload() -> None:
 
     assert result["grafana"]["status"] == "healthy"
     assert result["ops_portal"]["detail"] == "Maintenance window"
+
+
+def test_normalize_attestation_preserves_route_and_receipt_statuses() -> None:
+    services = [{"id": "grafana"}, {"id": "ops_portal"}]
+    payload = {
+        "summary": {"total": 2, "attested": 1, "missing": 1, "route_failed": 0},
+        "services": [
+            {
+                "service_id": "grafana",
+                "status": "attested",
+                "endpoint_proof": {"status": "pass"},
+                "route_proof": {"status": "pass"},
+                "receipt_witness": {"status": "pass"},
+            },
+            {
+                "service_id": "ops_portal",
+                "status": "missing",
+                "endpoint_proof": {"status": "pass"},
+                "route_proof": {"status": "pass"},
+                "receipt_witness": {"status": "fail"},
+            },
+        ],
+    }
+
+    attestation, summary = normalize_attestation(payload, services)
+
+    assert summary["attested"] == 1
+    assert attestation["grafana"]["status"] == "attested"
+    assert attestation["grafana"]["route_status"] == "pass"
+    assert attestation["ops_portal"]["receipt_status"] == "fail"
+    assert attestation["ops_portal"]["detail"] == "endpoint pass / route pass / receipt fail"
