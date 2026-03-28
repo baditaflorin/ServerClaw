@@ -243,6 +243,12 @@ argument_specs:
         required: true
         description:
           - Container image used to run the OpenBao Agent under systemd supervision.
+      common_openbao_systemd_credentials_container_entrypoint:
+        type: str
+        required: false
+        default: /bin/vault
+        description:
+          - Executable path inside the container used to bypass the image entrypoint and run the OpenBao Agent directly.
       common_openbao_systemd_credentials_agent_service_name:
         type: str
         required: true

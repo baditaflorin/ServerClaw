@@ -127,6 +127,7 @@ def test_control_plane_recovery_uses_dedicated_windmill_backup_dsn() -> None:
     assert 'command: "{{ control_plane_recovery_runtime_backup_script }}"' not in tasks_text
     assert 'sink "file"' in helper_config_text
     assert "docker run --rm --name" in helper_service_text
+    assert "--entrypoint {{ common_openbao_systemd_credentials_container_entrypoint }}" in helper_service_text
     assert "common_openbao_systemd_credentials_secret_path" in helper_text
 
 

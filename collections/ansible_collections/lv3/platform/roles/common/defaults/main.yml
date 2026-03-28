@@ -41,6 +41,7 @@ common_openbao_systemd_credentials_agent_template_content: ""
 common_openbao_systemd_credentials_role_id_file: ""
 common_openbao_systemd_credentials_secret_id_file: ""
 common_openbao_systemd_credentials_image: ""
+common_openbao_systemd_credentials_container_entrypoint: /bin/vault
 common_openbao_systemd_credentials_agent_service_name: ""
 common_openbao_systemd_credentials_container_name: ""
 common_openbao_systemd_credentials_openbao_address: ""

@@ -147,7 +147,8 @@
     common_openbao_systemd_credentials_approle_name: "{{ control_plane_recovery_runtime_openbao_approle_name }}"
     common_openbao_systemd_credentials_agent_config_file: "{{ control_plane_recovery_runtime_openbao_agent_config_file }}"
     common_openbao_systemd_credentials_agent_template_file: "{{ control_plane_recovery_runtime_openbao_agent_template_file }}"
-    common_openbao_systemd_credentials_agent_template_src: "{{ role_path }}/templates/control-plane-backup-windmill-dsn.ctmpl.j2"
+    common_openbao_systemd_credentials_agent_template_content: >-
+      [[ with secret "kv/data/{{ control_plane_recovery_runtime_openbao_secret_path }}" ]][[ .Data.data.windmill_db_dsn ]][[ end ]]
     common_openbao_systemd_credentials_role_id_file: "{{ control_plane_recovery_runtime_openbao_role_id_file }}"
     common_openbao_systemd_credentials_secret_id_file: "{{ control_plane_recovery_runtime_openbao_secret_id_file }}"
     common_openbao_systemd_credentials_image: "{{ openbao_agent_image }}"
