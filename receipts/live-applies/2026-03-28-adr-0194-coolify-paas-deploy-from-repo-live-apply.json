@@ -7,7 +7,7 @@
   "recorded_by": "codex",
   "source_commit": "e213cce2d3f362f5689f8710213ec0090551031e",
   "repo_version_context": "0.177.12",
-  "workflow_id": "ws-0194-live-apply",
+  "workflow_id": "converge-coolify",
   "adr": "0194",
   "summary": "Live-applied ADR 0194 from `codex/ws-0194-live-apply`, converged the dedicated Coolify guest plus shared edge publication, restored the private controller registration flow, brought up the guest-side `coolify-proxy`, and re-verified repo-backed deployment through `repo-smoke.apps.lv3.org`.",
   "targets": [

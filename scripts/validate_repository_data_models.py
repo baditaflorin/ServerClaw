@@ -257,6 +257,30 @@ def validate_placeholder_free(value: Any, path: str) -> None:
             validate_placeholder_free(item, f"{path}.{key}")
 
 
+def current_git_branch() -> str:
+    try:
+        branch = subprocess.check_output(
+            ["git", "-C", str(REPO_ROOT), "rev-parse", "--abbrev-ref", "HEAD"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except (OSError, subprocess.CalledProcessError):
+        return "HEAD"
+    return branch or "HEAD"
+
+
+def versions_stack_enforces_canonical_guest_fleet() -> bool:
+    registry = load_yaml(WORKSTREAMS_PATH)
+    release_policy = require_mapping(registry.get("release_policy"), "workstreams.yaml.release_policy")
+    branch_policy = require_str(
+        release_policy.get("versions_stack_branch_policy"),
+        "workstreams.yaml.release_policy.versions_stack_branch_policy",
+    )
+    if branch_policy != "main_only":
+        return True
+    return current_git_branch() == "main"
+
+
 def validate_no_scaffold_placeholders() -> None:
     structured_paths = {
         HEALTH_PROBE_CATALOG_PATH: load_json(HEALTH_PROBE_CATALOG_PATH),
@@ -2009,29 +2033,37 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
         ).get("guest_vmids"),
         "versions/stack.yaml.desired_state.guest_provisioning.guest_vmids",
     )
-    if set(guest_network_plan.keys()) != host_vars_context["guest_plan_keys"]:
-        raise ValueError("versions/stack.yaml.desired_state.guest_network_plan keys must match the managed guest fleet")
-    if set(guest_vmids.keys()) != host_vars_context["guest_plan_keys"]:
-        raise ValueError("versions/stack.yaml.desired_state.guest_provisioning.guest_vmids keys must match the managed guest fleet")
-    for key in host_vars_context["guest_plan_keys"]:
-        if (
-            require_ipv4(guest_network_plan.get(key), f"versions/stack.yaml.desired_state.guest_network_plan.{key}")
-            != host_vars_context["guest_ips_by_key"][key]
-        ):
-            raise ValueError(
-                f"versions/stack.yaml.desired_state.guest_network_plan.{key} must match inventory/host_vars/proxmox_florin.yml"
-            )
-        if (
-            require_int(
-                guest_vmids.get(key),
-                f"versions/stack.yaml.desired_state.guest_provisioning.guest_vmids.{key}",
-                1,
-            )
-            != host_vars_context["guest_vmids_by_key"][key]
-        ):
-            raise ValueError(
-                f"versions/stack.yaml.desired_state.guest_provisioning.guest_vmids.{key} must match inventory/host_vars/proxmox_florin.yml"
-            )
+    if versions_stack_enforces_canonical_guest_fleet():
+        if set(guest_network_plan.keys()) != host_vars_context["guest_plan_keys"]:
+            raise ValueError("versions/stack.yaml.desired_state.guest_network_plan keys must match the managed guest fleet")
+        if set(guest_vmids.keys()) != host_vars_context["guest_plan_keys"]:
+            raise ValueError("versions/stack.yaml.desired_state.guest_provisioning.guest_vmids keys must match the managed guest fleet")
+        for key in host_vars_context["guest_plan_keys"]:
+            if (
+                require_ipv4(guest_network_plan.get(key), f"versions/stack.yaml.desired_state.guest_network_plan.{key}")
+                != host_vars_context["guest_ips_by_key"][key]
+            ):
+                raise ValueError(
+                    f"versions/stack.yaml.desired_state.guest_network_plan.{key} must match inventory/host_vars/proxmox_florin.yml"
+                )
+            if (
+                require_int(
+                    guest_vmids.get(key),
+                    f"versions/stack.yaml.desired_state.guest_provisioning.guest_vmids.{key}",
+                    1,
+                )
+                != host_vars_context["guest_vmids_by_key"][key]
+            ):
+                raise ValueError(
+                    f"versions/stack.yaml.desired_state.guest_provisioning.guest_vmids.{key} must match inventory/host_vars/proxmox_florin.yml"
+                )
+    else:
+        for key, value in guest_network_plan.items():
+            require_identifier(key, f"versions/stack.yaml.desired_state.guest_network_plan.{key}")
+            require_ipv4(value, f"versions/stack.yaml.desired_state.guest_network_plan.{key}")
+        for key, value in guest_vmids.items():
+            require_identifier(key, f"versions/stack.yaml.desired_state.guest_provisioning.guest_vmids.{key}")
+            require_int(value, f"versions/stack.yaml.desired_state.guest_provisioning.guest_vmids.{key}", 1)
 
     guest_provisioning = require_mapping(
         desired_state.get("guest_provisioning"), "versions/stack.yaml.desired_state.guest_provisioning"
@@ -2243,8 +2275,9 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
             guest.get("running"), f"versions/stack.yaml.observed_state.guests.instances[{index}].running"
         )
         instance_names.add(name)
-    if instance_names != host_vars_context["guest_names"]:
-        raise ValueError("versions/stack.yaml.observed_state.guests.instances must contain the managed guest fleet")
+    if versions_stack_enforces_canonical_guest_fleet():
+        if instance_names != host_vars_context["guest_names"]:
+            raise ValueError("versions/stack.yaml.observed_state.guests.instances must contain the managed guest fleet")
 
     monitoring = require_mapping(observed_state.get("monitoring"), "versions/stack.yaml.observed_state.monitoring")
     require_ipv4(monitoring.get("vm"), "versions/stack.yaml.observed_state.monitoring.vm")
