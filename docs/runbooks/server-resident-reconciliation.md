@@ -44,6 +44,10 @@ The host-local service pulls only from the private Gitea repository at
   explicit internal snapshot or staging ref into the private repo first;
   bootstrapping the host alone does not change the source tree that
   `ansible-pull` will fetch.
+- For ADR 0224 exact-main verification, publish the validated integration
+  candidate into the private Gitea `main`, then confirm that both
+  `/srv/proxmox_florin_server` and the latest receipt's `source_commit`
+  resolve to that published snapshot.
 
 ## Verify The Live Host
 
@@ -61,11 +65,12 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   'sudo systemctl start lv3-server-resident-reconciliation.service'
 ```
 
-3. Confirm the checkout, latest commit, and latest host-local receipt:
+3. Confirm the checkout, latest commit, clean working tree, and latest
+   host-local receipt:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 \
-  'sudo git -C /srv/proxmox_florin_server rev-parse HEAD && echo --- && sudo cat /var/lib/lv3/server-resident-reconciliation/receipts/latest.json'
+  'sudo git -C /srv/proxmox_florin_server rev-parse HEAD && echo --- && sudo git -C /srv/proxmox_florin_server status --short && echo --- && sudo cat /var/lib/lv3/server-resident-reconciliation/receipts/latest.json'
 ```
 
 4. Inspect the journal when a run fails:

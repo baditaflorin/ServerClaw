@@ -3,7 +3,7 @@
 - ADR: [ADR 0233](../adr/0233-signed-release-bundles-via-gitea-releases-and-cosign.md)
 - Title: Live apply signed control-plane release bundles via Gitea Releases and Cosign
 - Status: live_applied
-- Implemented In Repo Version: 0.177.52
+- Implemented In Repo Version: 0.177.53
 - Live Applied In Platform Version: 0.130.43
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
@@ -65,9 +65,9 @@
 
 ## Mainline Integration Outcome
 
-- merged to `main` in repository version `0.177.52`
+- merged to `main` in repository version `0.177.53`
 - bumped the live platform version to `0.130.43` after recording the merged-main-equivalent release-bundle receipt and carrying the verified signed-bundle evidence into canonical `main`
-- updated `VERSION`, `changelog.md`, `RELEASE.md`, `docs/release-notes/0.177.52.md`, `README.md`, `versions/stack.yaml`, `build/platform-manifest.json`, and the ADR metadata only during the final mainline integration step
+- updated `VERSION`, `changelog.md`, `RELEASE.md`, `docs/release-notes/0.177.53.md`, `README.md`, `versions/stack.yaml`, `build/platform-manifest.json`, and the ADR metadata only during the final mainline integration step
 
 ## Live Evidence
 

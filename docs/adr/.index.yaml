@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-28'
 total_adrs: 258
 implementation_status_summary:
-  Implemented: 213
+  Implemented: 215
   Partial: 4
-  Not Implemented: 40
+  Not Implemented: 38
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3796,7 +3796,7 @@ adr_index:
   - adr: '0224'
     title: Server-Resident Operations As The Default Control Model
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: resilience
     keywords:
@@ -3808,6 +3808,7 @@ adr_index:
       - model
     summary: We will make server-resident operations the default control model.
     filename: 0224-server-resident-operations-as-the-default-control-model.md
+    implemented_version: 0.177.52
   - adr: '0225'
     title: Server-Resident Reconciliation Via Ansible Pull
     status: Accepted
@@ -3825,7 +3826,7 @@ adr_index:
   - adr: '0226'
     title: Systemd Units, Timers, And Paths For Host-Resident Control Loops
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -3838,6 +3839,7 @@ adr_index:
       - loops
     summary: We will use systemd as the canonical host-resident supervisor for platform
     filename: 0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
+    implemented_version: 0.177.52
   - adr: '0227'
     title: Bounded Command Execution Via Systemd-Run And Approved Wrappers
     status: Accepted
@@ -3949,7 +3951,7 @@ adr_index:
       - cosign
     summary: We will package server-consumable control inputs as signed release bundles
     filename: 0233-signed-release-bundles-via-gitea-releases-and-cosign.md
-    implemented_version: 0.177.52
+    implemented_version: 0.177.53
   - adr: '0234'
     title: Shared Human App Shell And Navigation Via PatternFly
     status: Accepted

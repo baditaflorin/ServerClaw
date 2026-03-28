@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.177.52
+repo_version: 0.177.53
 platform_version: 0.130.43
 
 live_apply_evidence:
@@ -98,6 +98,8 @@ live_apply_evidence:
     bounded_command_execution: 2026-03-28-adr-0227-bounded-command-execution-mainline-live-apply
     policy_validation: 2026-03-28-adr-0230-policy-decisions-live-apply
     promotion_pipeline: 2026-03-28-adr-0230-policy-decisions-live-apply
+    server_resident_operations: 2026-03-28-adr-0224-server-resident-operations-default-control-live-apply
+    host_control_loops: 2026-03-28-adr-0226-host-control-loops-live-apply
     signed_release_bundles: 2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
@@ -1004,7 +1006,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.52
+    current: 0.177.53
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.43

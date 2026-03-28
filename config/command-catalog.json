@@ -689,6 +689,44 @@
         "timeout_seconds": 1200
       }
     },
+    "configure-host-control-loops": {
+      "description": "Converge the ADR 0226 host-resident control-loop service, timer, and path units on the Proxmox host.",
+      "workflow_id": "configure-host-control-loops",
+      "scope": "proxmox_host",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used for the Proxmox host control-loop replay."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=configure-host-control-loops passes",
+        "make validate passes before the apply",
+        "Operators understand that the service, timer, and path units become the canonical host-resident supervisor baseline for later server-side automation"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record timer and path activation, the latest status file, and journal-backed proof that a manual path trigger was consumed successfully."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the systemd units fail to load, activate, or stay within the configured timeout and restart policy.",
+          "Stop if the manual path-trigger verification does not consume the request file or produce a new journal entry."
+        ],
+        "rollback_guidance": [
+          "Disable the new timer and path units before attempting further host-resident automation changes.",
+          "Return the host to the last known-good systemd unit set from version control before retrying."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
+      }
+    },
     "converge-headscale": {
       "description": "Converge Headscale on the Proxmox host, publish headscale.lv3.org through the shared edge, and provision the public DNS record.",
       "workflow_id": "converge-headscale",

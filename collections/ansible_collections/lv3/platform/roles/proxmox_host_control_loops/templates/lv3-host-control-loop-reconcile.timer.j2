@@ -1,0 +1,12 @@
+[Unit]
+Description={{ proxmox_host_control_loops_description }} schedule
+
+[Timer]
+OnCalendar={{ proxmox_host_control_loops_timer_on_calendar }}
+Persistent=true
+AccuracySec={{ proxmox_host_control_loops_timer_accuracy }}
+RandomizedDelaySec={{ proxmox_host_control_loops_randomized_delay_seconds }}
+Unit={{ proxmox_host_control_loops_service_name }}
+
+[Install]
+WantedBy=timers.target
