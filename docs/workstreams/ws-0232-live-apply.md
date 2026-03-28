@@ -12,7 +12,7 @@
 - Owner: codex
 - Depends On: `adr-0044-windmill`, `adr-0179-service-redundancy-tier-matrix`, `adr-0184-failure-domain-labels-and-anti-affinity-policy`, `adr-0224-server-resident-operations-as-the-default-control-model`
 - Conflicts With: none
-- Shared Surfaces: `Makefile`, `docs/adr/0232-nomad-for-durable-batch-and-long-running-internal-jobs.md`, `docs/adr/.index.yaml`, `docs/runbooks/configure-nomad.md`, `docs/workstreams/ws-0232-live-apply.md`, `workstreams.yaml`, `playbooks/groups/automation.yml`, `playbooks/nomad.yml`, `playbooks/services/nomad.yml`, `collections/ansible_collections/lv3/platform/roles/nomad_cluster_member/`, `collections/ansible_collections/lv3/platform/roles/nomad_cluster_bootstrap/`, `config/nomad/jobs/`, `config/ansible-execution-scopes.yaml`, `config/service-capability-catalog.json`, `config/service-completeness.json`, `config/service-redundancy-catalog.json`, `config/health-probe-catalog.json`, `config/secret-catalog.json`, `config/controller-local-secrets.json`, `config/dependency-graph.json`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `tests/test_nomad_playbook.py`, `tests/test_nomad_cluster_roles.py`, `tests/test_generate_platform_vars.py`, `tests/test_proxmox_tailscale_proxy_role.py`, `receipts/live-applies/`
+- Shared Surfaces: `Makefile`, `docs/adr/0232-nomad-for-durable-batch-and-long-running-internal-jobs.md`, `docs/adr/.index.yaml`, `docs/runbooks/configure-nomad.md`, `docs/workstreams/ws-0232-live-apply.md`, `workstreams.yaml`, `playbooks/groups/automation.yml`, `playbooks/nomad.yml`, `playbooks/services/nomad.yml`, `collections/ansible_collections/lv3/platform/roles/nomad_cluster_member/`, `collections/ansible_collections/lv3/platform/roles/nomad_cluster_bootstrap/`, `config/nomad/jobs/`, `config/ansible-execution-scopes.yaml`, `config/command-catalog.json`, `config/service-capability-catalog.json`, `config/service-completeness.json`, `config/service-redundancy-catalog.json`, `config/health-probe-catalog.json`, `config/secret-catalog.json`, `config/controller-local-secrets.json`, `config/dependency-graph.json`, `config/workflow-catalog.json`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `tests/test_nomad_playbook.py`, `tests/test_nomad_cluster_roles.py`, `tests/test_generate_platform_vars.py`, `tests/test_proxmox_tailscale_proxy_role.py`, `receipts/live-applies/`
 
 ## Scope
 
@@ -32,6 +32,8 @@
 - `collections/ansible_collections/lv3/platform/roles/nomad_cluster_bootstrap/`
 - `config/nomad/jobs/lv3-nomad-smoke-service.nomad.hcl`
 - `config/nomad/jobs/lv3-nomad-smoke-batch.nomad.hcl`
+- `config/command-catalog.json`
+- `config/workflow-catalog.json`
 - `docs/runbooks/configure-nomad.md`
 - `docs/workstreams/ws-0232-live-apply.md`
 - `docs/adr/0232-nomad-for-durable-batch-and-long-running-internal-jobs.md`

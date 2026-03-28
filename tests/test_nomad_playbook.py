@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import yaml
@@ -7,6 +8,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "nomad.yml"
 SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "nomad.yml"
 HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
+COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 
 
 def load_yaml(path: Path) -> list[dict] | dict:
@@ -60,3 +63,25 @@ def test_nomad_inventory_opens_rpc_in_both_directions_between_server_and_clients
     assert "Nomad client RPC from docker-build-lv3" in host_vars
     assert "Nomad server RPC to docker-runtime-lv3" in host_vars
     assert "Nomad server RPC to docker-build-lv3" in host_vars
+
+
+def test_nomad_workflow_catalog_declares_the_converge_entrypoint() -> None:
+    catalog = json.loads(WORKFLOW_CATALOG_PATH.read_text())
+    workflow = catalog["workflows"]["converge-nomad"]
+
+    assert workflow["preferred_entrypoint"] == {
+        "kind": "make_target",
+        "target": "converge-nomad",
+        "command": "make converge-nomad",
+    }
+    assert "syntax-check-nomad" in workflow["validation_targets"]
+    assert workflow["owner_runbook"] == "docs/runbooks/configure-nomad.md"
+
+
+def test_nomad_command_catalog_declares_live_change_contract() -> None:
+    catalog = json.loads(COMMAND_CATALOG_PATH.read_text())
+    command = catalog["commands"]["converge-nomad"]
+
+    assert command["workflow_id"] == "converge-nomad"
+    assert command["approval_policy"] == "sensitive_live_change"
+    assert command["evidence"]["live_apply_receipt_required"] is True
