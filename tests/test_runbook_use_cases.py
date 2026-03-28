@@ -92,9 +92,11 @@ steps:
 
     service = RunbookUseCaseService(repo_root=runbook_repo, workflow_runner=FakeRunner())
 
-    runbooks = service.list_runbooks(surface="api_gateway")
+    gateway_runbooks = service.list_runbooks(surface="api_gateway")
+    ops_portal_runbooks = service.list_runbooks(surface="ops_portal")
 
-    assert [item["id"] for item in runbooks] == ["default-runbook", "gateway-only"]
+    assert [item["id"] for item in gateway_runbooks] == ["gateway-only"]
+    assert [item["id"] for item in ops_portal_runbooks] == ["portal-only"]
 
 
 def test_runbook_use_case_service_rejects_disallowed_surface(runbook_repo: Path) -> None:
