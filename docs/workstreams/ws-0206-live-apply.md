@@ -24,10 +24,12 @@
 ## Expected Repo Surfaces
 
 - `scripts/operator_manager.py`
+- `scripts/controller_automation_toolkit.py`
 - `platform/operator_access/__init__.py`
 - `platform/operator_access/http.py`
 - `platform/operator_access/ports.py`
 - `platform/operator_access/adapters.py`
+- `tests/test_controller_automation_toolkit.py`
 - `tests/test_operator_manager.py`
 - `tests/test_operator_access_adapters.py`
 - `docs/adr/0206-ports-and-adapters-for-external-integrations.md`
@@ -42,16 +44,18 @@
 ## Verification
 
 - `python3 -m py_compile scripts/operator_manager.py platform/operator_access/__init__.py platform/operator_access/http.py platform/operator_access/ports.py platform/operator_access/adapters.py tests/test_operator_manager.py tests/test_operator_access_adapters.py` passed
-- `uv run --with pytest --with pyyaml pytest -q tests/test_operator_manager.py tests/test_operator_access_adapters.py` passed with `15 passed in 0.16s`
-- `uv run --with pyyaml python scripts/operator_manager.py validate`, `make workflow-info WORKFLOW=operator-onboard`, `make workflow-info WORKFLOW=operator-offboard`, `make workflow-info WORKFLOW=sync-operators`, `make workflow-info WORKFLOW=quarterly-access-review`, `./scripts/validate_repo.sh agent-standards`, `uv run --with pyyaml python scripts/operator_manager.py --emit-json quarterly-review --dry-run`, and `git diff --check` all passed
+- `uv run --with pytest --with pyyaml pytest -q tests/test_controller_automation_toolkit.py tests/test_operator_manager.py tests/test_operator_access_adapters.py tests/test_release_manager.py` passed with `22 passed in 0.22s`
+- `uv run --with requests --with pyyaml python scripts/operator_manager.py validate`, `make workflow-info WORKFLOW=operator-onboard`, `make workflow-info WORKFLOW=operator-offboard`, `make workflow-info WORKFLOW=sync-operators`, `make workflow-info WORKFLOW=quarterly-access-review`, `./scripts/validate_repo.sh agent-standards`, `uv run --with requests --with pyyaml python scripts/operator_manager.py --emit-json quarterly-review --dry-run`, `python3 scripts/operator_access_inventory.py --id florin-badita --format json --offline`, and `git diff --check` all passed
 - The controller-side live replay used `LV3_OPENBAO_URL=http://127.0.0.1:18201` plus the shared controller-local Keycloak and OpenBao bootstrap secrets from the main checkout, and `curl -fsS http://127.0.0.1:18201/v1/sys/health` returned `initialized: true` and `sealed: false`
 - `LiveBackend.ensure_prerequisites()` from commit `74cc510ddd7629793d8e41bbb4bbfce015e2c61f` upserted the repo-managed OpenBao policies and confirmed the governed Keycloak roles and groups exist
 - The first live inventory showed Keycloak `active` but OpenBao `missing` for `florin.badita`; running `backend.secret_authority.ensure_entity()` created OpenBao entity `125fb8b1-c72c-a320-a537-3d415dda752e`, and the follow-up inventory returned Keycloak `active`, OpenBao `active`, Tailscale `unavailable` because `TAILSCALE_TAILNET` is unset, and step-ca `unknown` because no controller-local state has been recorded yet
+- While replaying the documented inventory command under plain `python3`, the workstream also hardened `scripts/controller_automation_toolkit.py` so the fallback YAML loader keeps list scalars like `tag:platform-operator` intact without PyYAML; `python3 scripts/operator_access_inventory.py --id florin-badita --format json` then succeeded once the controller-local Keycloak/OpenBao secrets were exported explicitly
 
 ## Outcome
 
 - the repo now exposes explicit ports and adapters for the critical ADR 0108 integrations with Keycloak, OpenBao, Tailscale, Mattermost, and step-ca under `platform/operator_access/`
 - `scripts/operator_manager.py` is now a composition root and orchestration layer instead of a provider-specific implementation bundle
+- the controller-toolkit YAML fallback now preserves colon-bearing list scalars, which keeps the documented `python3` inventory verification path working even when PyYAML is absent
 - the workstream repaired pre-existing live drift by recreating the missing OpenBao entity for `florin.badita` and verifying the repaired state through the new port-backed inventory path
 
 ## Mainline Integration
