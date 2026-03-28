@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.56",
-  "platform_version": "0.130.43",
-  "generated_at": "2026-03-28T22:33:39Z",
-  "next_refresh_at": "2026-03-28T23:33:39Z",
+  "repo_version": "0.177.58",
+  "platform_version": "0.130.44",
+  "generated_at": "2026-03-28T23:20:14Z",
+  "next_refresh_at": "2026-03-29T00:20:14Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -172,18 +172,6 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://grafana.lv3.org",
-        "last_live_apply": "2026-03-28T00:00:00Z",
-        "slo_status": "unknown"
-      },
-      "harbor": {
-        "service_name": "Harbor",
-        "status": "healthy",
-        "score": 0.95,
-        "safe_to_act": true,
-        "source": "repo_evidence",
-        "reason": "Repository evidence is complete enough for normal automation.",
-        "lifecycle_status": "active",
-        "primary_url": "https://registry.lv3.org",
         "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -1102,32 +1090,6 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-guest-network-policy.md"
-      },
-      {
-        "id": "converge-harbor",
-        "description": "Converge Harbor on docker-runtime-lv3, publish it at registry.lv3.org through the shared edge, bootstrap Keycloak OIDC, and seed the check-runner project automation credentials.",
-        "tags": [
-          "converge-harbor",
-          "guest-live",
-          "mutation",
-          "preflight",
-          "validated"
-        ],
-        "risk_class": "HIGH",
-        "automation_eligible": true,
-        "agent_trust_required": "T3",
-        "execution_class": "mutation",
-        "live_impact": "guest_live",
-        "budget": {
-          "max_duration_seconds": 1800,
-          "max_steps": 350,
-          "max_concurrent_instances": 1,
-          "max_touched_hosts": 3,
-          "max_restarts": 1,
-          "max_rollback_depth": 1,
-          "escalation_action": "notify_and_abort"
-        },
-        "runbook": "docs/runbooks/configure-harbor.md"
       },
       {
         "id": "converge-headscale",
@@ -3321,16 +3283,6 @@
         ]
       },
       {
-        "id": "configure-harbor",
-        "title": "Configure Harbor",
-        "agent_trust_required": "T3",
-        "steps": 10,
-        "path": "docs/runbooks/configure-harbor.md",
-        "workflow_ids": [
-          "converge-harbor"
-        ]
-      },
-      {
         "id": "configure-headscale",
         "title": "Configure Headscale",
         "agent_trust_required": "T3",
@@ -3733,7 +3685,7 @@
         "id": "monitoring-stack",
         "title": "Monitoring Stack Runbook",
         "agent_trust_required": "T3",
-        "steps": 20,
+        "steps": 21,
         "path": "docs/runbooks/monitoring-stack.md",
         "workflow_ids": [
           "converge-monitoring"
@@ -4110,10 +4062,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.55",
+    "last_version": "0.177.57",
     "deployed_at": "2026-03-28",
-    "summary": "accepted ADRs 0264 through 0273 to turn repeated gate bypasses, recovery repairs, restore failures, security drift, and public-endpoint mismatches into governed guardrails across validation, builder snapshots, waiver policy, bootstrap preflight, vulnerability budgets, Docker publication, backup coverage, restore warm-up, and DNS plus certificate admission",
-    "release_notes_url": "docs/release-notes/0.177.56.md"
+    "summary": "implemented ADR 0242 by adding Shepherd.js-guided first-run tours to the Windmill operator-access admin surface and hardening raw-app dependency sync with committed lockfiles before converge",
+    "release_notes_url": "docs/release-notes/0.177.58.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

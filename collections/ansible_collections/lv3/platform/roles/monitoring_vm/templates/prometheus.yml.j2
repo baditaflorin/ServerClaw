@@ -39,6 +39,15 @@ scrape_configs:
         labels:
           service: otel-collector
 
+  - job_name: loki-canary
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 127.0.0.1:{{ monitoring_loki_canary_metrics_port }}
+        labels:
+          service: loki-canary
+          assurance_dimension: log-queryability
+
   - job_name: netdata
     metrics_path: /api/v1/allmetrics
     params:
