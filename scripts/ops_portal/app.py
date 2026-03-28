@@ -30,9 +30,9 @@ except ImportError:  # pragma: no cover - packaged import path
     from scripts.search_fabric.collectors import available_collections
 
 try:
-    from runtime_assurance import build_runtime_assurance_models
+    from .runtime_assurance import build_runtime_assurance_models
 except ImportError:  # pragma: no cover - packaged import path
-    from scripts.ops_portal.runtime_assurance import build_runtime_assurance_models
+    from runtime_assurance import build_runtime_assurance_models
 
 
 def utc_now() -> datetime:
