@@ -1,0 +1,10 @@
+[Unit]
+Description={{ proxmox_host_control_loops_description }} path trigger
+After={{ proxmox_host_control_loops_after_units | join(' ') }}
+
+[Path]
+PathExists={{ proxmox_host_control_loops_reconcile_request_path }}
+Unit={{ proxmox_host_control_loops_service_name }}
+
+[Install]
+WantedBy=multi-user.target

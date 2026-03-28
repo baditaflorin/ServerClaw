@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import socket
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+
+def _utc_now() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _timestamp_slug() -> str:
+    return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+
+
+def _write_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = path.with_suffix(path.suffix + ".tmp")
+    tmp_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    os.replace(tmp_path, path)
+
+
+def _read_request_payload(path: Path) -> tuple[str, Any]:
+    if not path.exists():
+        return "scheduled_or_manual", None
+
+    raw_payload = path.read_text(encoding="utf-8").strip()
+    try:
+        parsed_payload: Any = json.loads(raw_payload) if raw_payload else None
+    except json.JSONDecodeError:
+        parsed_payload = raw_payload or None
+    path.unlink(missing_ok=True)
+    return "path_request", parsed_payload
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Record the latest host control-loop reconcile pass.")
+    parser.add_argument("--status-file", type=Path, required=True)
+    parser.add_argument("--history-dir", type=Path, required=True)
+    parser.add_argument("--request-path", type=Path, required=True)
+    parser.add_argument("--unit-name", required=True)
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    trigger, request_payload = _read_request_payload(args.request_path)
+    recorded_at = _utc_now()
+    history_path = args.history_dir / f"{_timestamp_slug()}.json"
+    payload = {
+        "schema_version": "1.0.0",
+        "recorded_at": recorded_at,
+        "hostname": socket.gethostname(),
+        "fqdn": socket.getfqdn(),
+        "unit_name": args.unit_name,
+        "trigger": trigger,
+        "request_payload": request_payload,
+        "pid": os.getpid(),
+        "systemd_invocation_id": os.environ.get("INVOCATION_ID", ""),
+        "history_path": str(history_path),
+    }
+    _write_json(history_path, payload)
+    _write_json(args.status_file, payload)
+    print(json.dumps(payload, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
