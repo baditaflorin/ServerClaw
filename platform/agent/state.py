@@ -7,9 +7,9 @@ import threading
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from pathlib import Path
 from typing import Any, Callable
 
+from platform.events.publisher import publish_nats_events
 from platform.world_state._db import (
     ConnectionFactory,
     connection_kind,
@@ -28,22 +28,7 @@ def _default_checkpoint_publisher(subject: str, payload: dict[str, Any]) -> None
     nats_url = os.environ.get("LV3_AGENT_STATE_NATS_URL", "").strip() or os.environ.get("LV3_NATS_URL", "").strip()
     if not nats_url:
         return
-    repo_root = Path(__file__).resolve().parents[2]
-    drift_lib_path = repo_root / "scripts" / "drift_lib.py"
-    if not drift_lib_path.exists():
-        return
-
-    import importlib.util
-    import sys
-
-    module_name = "lv3_agent_state_drift_lib"
-    spec = importlib.util.spec_from_file_location(module_name, drift_lib_path)
-    if spec is None or spec.loader is None:  # pragma: no cover - defensive
-        return
-    module = importlib.util.module_from_spec(spec)
-    sys.modules.setdefault(module_name, module)
-    spec.loader.exec_module(module)
-    module.publish_nats_events(  # pragma: no cover - network side effect
+    publish_nats_events(  # pragma: no cover - network side effect
         [{"subject": subject, "payload": payload}],
         nats_url=nats_url,
         credentials=None,

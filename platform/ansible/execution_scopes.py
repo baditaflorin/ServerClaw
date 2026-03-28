@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from scripts.controller_automation_toolkit import REPO_ROOT, load_yaml
+from platform.repo import REPO_ROOT, load_yaml
 
 
 CATALOG_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"

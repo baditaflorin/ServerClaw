@@ -1,15 +1,16 @@
 from __future__ import annotations
 
-import importlib
 import json
 import os
-import sys
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Callable
 
+from platform.degradation import default_state_path
 from platform.ledger import LedgerReader
+from platform.maintenance import list_active_windows_best_effort
+from platform.slo import build_slo_status_entries
 from platform.world_state._db import (
     ConnectionFactory,
     connection_kind,
@@ -30,10 +31,6 @@ from platform.world_state.client import (
 from platform.world_state.materializer import SQLITE_CURRENT_VIEW_NAME, SQLITE_SNAPSHOTS_TABLE_NAME
 
 
-SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "scripts"
-from platform.degradation import default_state_path
-
-
 DEFAULT_TTL_SECONDS = 120
 DEFAULT_SIGNAL_WEIGHTS = {
     "health_probe": 0.40,
@@ -51,13 +48,6 @@ SQLITE_HEALTH_TABLE_NAME = "health_composite"
 
 def repo_root_default() -> Path:
     return Path(__file__).resolve().parents[2]
-
-
-def _load_script_symbol(module_name: str, symbol_name: str) -> Any:
-    if str(SCRIPTS_DIR) not in sys.path:
-        sys.path.insert(0, str(SCRIPTS_DIR))
-    module = importlib.import_module(module_name)
-    return getattr(module, symbol_name)
 
 
 @dataclass(frozen=True)
@@ -202,13 +192,9 @@ def load_maintenance_windows(
         if isinstance(active_windows, list):
             return [item for item in active_windows if isinstance(item, dict)]
     try:
-        list_active_windows_best_effort = _load_script_symbol(
-            "maintenance_window_tool",
-            "list_active_windows_best_effort",
-        )
-    except ImportError:
+        windows = list_active_windows_best_effort(repo_root=repo_root)
+    except (ModuleNotFoundError, OSError, RuntimeError, ValueError, json.JSONDecodeError):
         return []
-    windows = list_active_windows_best_effort()
     return [window for window in windows.values() if isinstance(window, dict)]
 
 
@@ -228,18 +214,15 @@ def load_slo_entries(
     catalog_path = repo_root / "config" / "slo-catalog.json"
     if not catalog_path.exists():
         return []
-    try:
-        build_slo_status_entries = _load_script_symbol("slo_tracking", "build_slo_status_entries")
-    except ImportError:
-        return []
     prometheus_url = None if allow_live_queries else ""
-    return build_slo_status_entries(
-        prometheus_url=prometheus_url,
-        query_fn=query_fn,
-        catalog_path=catalog_path,
-        service_catalog_path=repo_root / "config" / "service-capability-catalog.json",
-        stack_path=repo_root / "versions" / "stack.yaml",
-    )
+    try:
+        return build_slo_status_entries(
+            repo_root=repo_root,
+            prometheus_url=prometheus_url,
+            query_fn=query_fn,
+        )
+    except (ModuleNotFoundError, OSError, RuntimeError, ValueError, json.JSONDecodeError):
+        return []
 
 
 def _load_ledger_events_from_file(path: Path) -> list[dict[str, Any]]:

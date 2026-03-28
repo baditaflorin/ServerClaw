@@ -1,34 +1,15 @@
 from __future__ import annotations
 
 import datetime as dt
-import importlib.util
 import json
 import os
-import sys
 from pathlib import Path
 from typing import Any, Callable
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SCRIPTS_DIR = REPO_ROOT / "scripts"
 LEDGER_EVENT_TYPES_PATH = REPO_ROOT / "config" / "ledger-event-types.yaml"
 LEDGER_DSN_ENV = "LV3_LEDGER_DSN"
-
-
-def ensure_scripts_on_path() -> None:
-    scripts_dir = str(SCRIPTS_DIR)
-    if scripts_dir not in sys.path:
-        sys.path.insert(0, scripts_dir)
-
-
-def load_module_from_repo(path: Path, module_name: str) -> Any:
-    spec = importlib.util.spec_from_file_location(module_name, path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"unable to load module from {path}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules.setdefault(module_name, module)
-    spec.loader.exec_module(module)
-    return module
 
 
 def load_event_type_registry(path: Path = LEDGER_EVENT_TYPES_PATH) -> list[str]:

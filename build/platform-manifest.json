@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.39",
+  "repo_version": "0.177.40",
   "platform_version": "0.130.38",
-  "generated_at": "2026-03-28T16:12:47Z",
-  "next_refresh_at": "2026-03-28T17:12:47Z",
+  "generated_at": "2026-03-28T16:35:14Z",
+  "next_refresh_at": "2026-03-28T17:35:14Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3908,10 +3908,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.38",
+    "last_version": "0.177.39",
     "deployed_at": "2026-03-28",
-    "summary": "integrated ADR 0211 by promoting the shared policy registry into main and re-verifying the governed headscale live-apply path from merged main",
-    "release_notes_url": "docs/release-notes/0.177.39.md"
+    "summary": "implemented ADR 0208 by moving reusable helpers under `platform/`, enforcing inward dependency-direction validation, and wiring explicit composition roots at the CLI and Windmill observation-loop edges",
+    "release_notes_url": "docs/release-notes/0.177.40.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

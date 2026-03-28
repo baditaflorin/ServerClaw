@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import io
-import importlib.util
 import json
 import re
 import sys
@@ -11,33 +10,24 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "scripts"
-if str(SCRIPTS_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPTS_DIR))
-
-from maintenance_window_tool import list_active_windows_best_effort
 from platform.agent_policy import AgentPolicyEngine, PolicyOutcome
 from platform.conflict import infer_resource_claims
 from platform.execution_lanes import resolve_lanes
 from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
+from platform.maintenance import list_active_windows_best_effort
+from platform.package_loader import load_repo_package
 
 from .rules import AliasConfig, GoalRule, GroupAlias, load_alias_config, load_goal_rules, match_rule
 from .schema import ExecutionIntent, IntentScope, IntentTarget, RiskClass, RiskScore
 
 
-REPO_PACKAGE_LOADER_PATH = Path(__file__).resolve().parents[2] / "scripts" / "repo_package_loader.py"
-_LOADER_SPEC = importlib.util.spec_from_file_location("lv3_goal_compiler_repo_package_loader", REPO_PACKAGE_LOADER_PATH)
-if _LOADER_SPEC is None or _LOADER_SPEC.loader is None:
-    raise ImportError(f"Unable to load repo package loader from {REPO_PACKAGE_LOADER_PATH}")
-_LOADER_MODULE = importlib.util.module_from_spec(_LOADER_SPEC)
-_LOADER_SPEC.loader.exec_module(_LOADER_MODULE)
-_WORLD_STATE_MODULE = _LOADER_MODULE.load_repo_package(
+_WORLD_STATE_MODULE = load_repo_package(
     "lv3_goal_compiler_world_state",
     Path(__file__).resolve().parents[1] / "world_state",
 )
 WorldStateClient = _WORLD_STATE_MODULE.WorldStateClient
 WorldStateUnavailable = _WORLD_STATE_MODULE.WorldStateUnavailable
-_LLM_MODULE = _LOADER_MODULE.load_repo_package(
+_LLM_MODULE = load_repo_package(
     "lv3_goal_compiler_llm",
     Path(__file__).resolve().parents[1] / "llm",
 )
@@ -511,7 +501,7 @@ class GoalCompiler:
 
     def _inject_preconditions(self, rule: GoalRule, captures: dict[str, str], target: IntentTarget) -> list[str]:
         preconditions = self._render_list(rule.preconditions, captures, target, None)
-        active_windows = list_active_windows_best_effort(stderr=io.StringIO())
+        active_windows = list_active_windows_best_effort(repo_root=self.repo_root, stderr=io.StringIO())
         if target.services:
             active = []
             for service_id in target.services:

@@ -115,10 +115,10 @@ def test_load_maintenance_windows_skips_missing_script_dependencies(monkeypatch:
         def get(self, *_args: object, **_kwargs: object) -> None:
             return None
 
-    def fail_import(module_name: str) -> object:
-        raise ImportError(f"missing {module_name}")
+    def fail_windows(*_args: object, **_kwargs: object) -> object:
+        raise RuntimeError("missing maintenance dependency")
 
-    monkeypatch.setattr(composite_module.importlib, "import_module", fail_import)
+    monkeypatch.setattr(composite_module, "list_active_windows_best_effort", fail_windows)
 
     assert composite_module.load_maintenance_windows(tmp_path, world_state=FakeWorldStateClient()) == []
 
@@ -127,9 +127,9 @@ def test_load_slo_entries_skips_missing_script_dependencies(monkeypatch: object,
     (tmp_path / "config").mkdir()
     (tmp_path / "config" / "slo-catalog.json").write_text('{"schema_version":"1.0.0","slos":[]}', encoding="utf-8")
 
-    def fail_import(module_name: str) -> object:
-        raise ImportError(f"missing {module_name}")
+    def fail_slo(*_args: object, **_kwargs: object) -> object:
+        raise RuntimeError("missing slo dependency")
 
-    monkeypatch.setattr(composite_module.importlib, "import_module", fail_import)
+    monkeypatch.setattr(composite_module, "build_slo_status_entries", fail_slo)
 
     assert composite_module.load_slo_entries(tmp_path, allow_live_queries=False) == []

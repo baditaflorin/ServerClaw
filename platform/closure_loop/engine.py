@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import importlib.util
 import json
 import os
-import sys
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
@@ -11,8 +9,10 @@ from types import SimpleNamespace
 from typing import Any, Callable
 
 from platform.agent import AgentCoordinationStore
+from platform.correction_loops import load_correction_loop_catalog, resolve_workflow_correction_loop
+from platform.events.publisher import publish_nats_events
 from platform.ledger import LedgerWriter
-from platform.ledger._common import REPO_ROOT, ensure_scripts_on_path, load_module_from_repo
+from platform.ledger._common import REPO_ROOT
 from platform.world_state._db import parse_timestamp
 from platform.world_state.client import WorldStateClient, WorldStateError
 
@@ -50,22 +50,11 @@ def _default_event_publisher(subject: str, payload: dict[str, Any]) -> None:
     nats_url = os.environ.get("LV3_NATS_URL", "").strip() or os.environ.get("LV3_LEDGER_NATS_URL", "").strip()
     if not nats_url:
         return
-    drift_lib = load_module_from_repo(REPO_ROOT / "scripts" / "drift_lib.py", "lv3_closure_loop_drift_lib")
-    drift_lib.publish_nats_events(
+    publish_nats_events(
         [{"subject": subject, "payload": payload}],
         nats_url=nats_url,
         credentials=None,
     )
-
-
-def load_module(name: str, path: Path) -> Any:
-    spec = importlib.util.spec_from_file_location(name, path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"unable to load module from {path}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules.setdefault(name, module)
-    spec.loader.exec_module(module)
-    return module
 
 
 def observation_finding_to_alert_payload(finding: dict[str, Any], *, fallback_ref: str) -> dict[str, Any] | None:
@@ -130,7 +119,6 @@ class ClosureLoop:
         self._clock = clock
         self._correction_loop_catalog_loaded = False
         self._correction_loop_catalog: dict[str, Any] | None = None
-        self._correction_loop_module: Any | None = None
 
     def start(
         self,
@@ -376,11 +364,10 @@ class ClosureLoop:
         return "agent/observation-loop"
 
     def _default_triage_report_builder(self, payload: dict[str, Any]) -> dict[str, Any]:
-        scripts_dir = self._repo_root / "scripts"
-        if str(scripts_dir) not in sys.path:
-            sys.path.insert(0, str(scripts_dir))
-        incident_triage = load_module("lv3_closure_loop_incident_triage", self._repo_root / "scripts" / "incident_triage.py")
-        return incident_triage.build_report(payload)
+        raise RuntimeError(
+            "ClosureLoop requires triage_report_builder from a composition root; "
+            "pass scripts.incident_triage.build_report when wiring the runtime."
+        )
 
     def _load_workflow_catalog(self) -> dict[str, Any]:
         payload = json.loads((self._repo_root / "config" / "workflow-catalog.json").read_text(encoding="utf-8"))
@@ -395,27 +382,15 @@ class ClosureLoop:
             self._correction_loop_catalog_loaded = True
             self._correction_loop_catalog = None
             return None
-        script_path = self._repo_root / "scripts" / "correction_loops.py"
-        if not script_path.exists():
-            ensure_scripts_on_path()
-            script_path = REPO_ROOT / "scripts" / "correction_loops.py"
-        if not script_path.exists():
-            self._correction_loop_catalog_loaded = True
-            self._correction_loop_catalog = None
-            return None
-        self._correction_loop_module = load_module_from_repo(
-            script_path,
-            "lv3_closure_loop_correction_loops",
-        )
-        self._correction_loop_catalog = self._correction_loop_module.load_correction_loop_catalog(path=catalog_path)
+        self._correction_loop_catalog = load_correction_loop_catalog(path=catalog_path)
         self._correction_loop_catalog_loaded = True
         return self._correction_loop_catalog
 
     def _resolve_correction_loop(self, workflow_id: str) -> dict[str, Any] | None:
         catalog = self._load_correction_loop_catalog()
-        if catalog is None or self._correction_loop_module is None:
+        if catalog is None:
             return None
-        return self._correction_loop_module.resolve_workflow_correction_loop(catalog, workflow_id)
+        return resolve_workflow_correction_loop(catalog, workflow_id)
 
     def _correction_loop_snapshot(self, workflow_id: str) -> dict[str, Any] | None:
         loop = self._resolve_correction_loop(workflow_id)
