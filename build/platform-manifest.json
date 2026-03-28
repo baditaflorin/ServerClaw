@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.56",
-  "platform_version": "0.130.43",
-  "generated_at": "2026-03-28T22:00:05Z",
-  "next_refresh_at": "2026-03-28T23:00:05Z",
+  "repo_version": "0.177.57",
+  "platform_version": "0.130.44",
+  "generated_at": "2026-03-28T22:54:15Z",
+  "next_refresh_at": "2026-03-28T23:54:15Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3685,7 +3685,7 @@
         "id": "monitoring-stack",
         "title": "Monitoring Stack Runbook",
         "agent_trust_required": "T3",
-        "steps": 20,
+        "steps": 21,
         "path": "docs/runbooks/monitoring-stack.md",
         "workflow_ids": [
           "converge-monitoring"
@@ -4062,10 +4062,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.55",
+    "last_version": "0.177.56",
     "deployed_at": "2026-03-28",
-    "summary": "accepted ADRs 0264 through 0273 to turn repeated gate bypasses, recovery repairs, restore failures, security drift, and public-endpoint mismatches into governed guardrails across validation, builder snapshots, waiver policy, bootstrap preflight, vulnerability budgets, Docker publication, backup coverage, restore warm-up, and DNS plus certificate admission",
-    "release_notes_url": "docs/release-notes/0.177.56.md"
+    "summary": "implemented ADR 0250 by adding repo-managed Loki Canary ingestion and queryability assurance on monitoring-lv3, scraping its metrics in Prometheus, surfacing the signal in Grafana, and alerting on missing or non-queryable canary entries",
+    "release_notes_url": "docs/release-notes/0.177.57.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

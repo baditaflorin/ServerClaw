@@ -1,3 +1,29 @@
+# Role Task File: monitoring_vm/tasks/verify.yml
+# Purpose: Verify the monitoring VM runtime, dashboards, datasources, and Loki Canary query path after converge.
+# Use case: Imported at the end of the monitoring VM role to fail fast on broken local observability state.
+#
+# Inputs (required):
+#   - monitoring_* role defaults: Provide service URLs, credentials, and dashboard selectors for verification.
+#
+# Inputs (optional):
+#   - monitoring_loki_canary_log_selector (str, optional): Overrides the Loki selector used for canary query validation.
+#
+# Outputs:
+#   - Confirms Grafana, Prometheus, blackbox exporter, and Loki Canary are healthy and queryable.
+#
+# Idempotency: Fully idempotent
+#              Read-only verification tasks against the converged monitoring stack.
+#
+# Dependencies:
+#   - ADR 0011: Defines the managed monitoring VM surfaces that must stay healthy.
+#   - ADR 0250: Adds the Loki Canary scrape and log query verification path.
+#   - Requires: monitoring VM services already converged before these checks run.
+#
+# Related ADRs: 0011, 0250
+# Related Runbooks: docs/runbooks/monitoring-stack.md, docs/runbooks/log-queryability-canary.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
 ---
 - name: Verify Grafana health endpoint responds
   ansible.builtin.uri:
@@ -125,6 +151,18 @@
   changed_when: false
   no_log: true
 
+- name: Verify LV3 log canary dashboard is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_log_canary_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_verify_log_canary_dashboard
+  changed_when: false
+  no_log: true
+
 - name: Verify public Grafana dashboard URLs redirect unauthenticated viewers to login
   ansible.builtin.uri:
     url: "{{ monitoring_grafana_public_url }}/d/{{ monitoring_grafana_dashboard_uid }}/{{ monitoring_grafana_dashboard_uid }}"
@@ -179,6 +217,64 @@
     monitoring_verify_prometheus_rules.status != 200
     or 'slo_recording_rules' not in (monitoring_verify_prometheus_rules.content | default(''))
     or 'slo_alert_rules' not in (monitoring_verify_prometheus_rules.content | default(''))
+
+- name: Verify Loki Canary metrics endpoint responds
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ monitoring_loki_canary_metrics_port }}/metrics"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: monitoring_verify_loki_canary_metrics
+  retries: 20
+  delay: 3
+  until: >
+    monitoring_verify_loki_canary_metrics.status == 200
+    and 'loki_canary_entries_total' in (monitoring_verify_loki_canary_metrics.content | default(''))
+  changed_when: false
+
+- name: Verify Prometheus scrapes the Loki Canary target
+  ansible.builtin.uri:
+    url: "{{ monitoring_prometheus_url }}/api/v1/query?query={{ 'up{job=\"loki-canary\"}' | urlencode }}"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: monitoring_verify_loki_canary_scrape
+  retries: 20
+  delay: 3
+  until: >
+    monitoring_verify_loki_canary_scrape.status == 200
+    and (monitoring_verify_loki_canary_scrape.json.data.result | length) > 0
+    and ((monitoring_verify_loki_canary_scrape.json.data.result[0].value[1] | float) >= 1)
+  changed_when: false
+  failed_when: >
+    monitoring_verify_loki_canary_scrape.status != 200
+    or (monitoring_verify_loki_canary_scrape.json.data.result | length) == 0
+    or ((monitoring_verify_loki_canary_scrape.json.data.result[0].value[1] | float) < 1)
+
+- name: Verify Loki Canary log stream is queryable from Loki
+  ansible.builtin.command:
+    argv:
+      - curl
+      - -fsSG
+      - "{{ monitoring_loki_http_url }}/loki/api/v1/query_range"
+      - --data-urlencode
+      - "query={{ monitoring_loki_canary_log_selector }}"
+      - --data-urlencode
+      - limit=5
+      - --data-urlencode
+      - "start={{ ((ansible_date_time.epoch | int) - 900) * 1000000000 }}"
+      - --data-urlencode
+      - "end={{ (ansible_date_time.epoch | int) * 1000000000 }}"
+  register: monitoring_verify_loki_canary_query
+  retries: 20
+  delay: 6
+  until: >
+    monitoring_verify_loki_canary_query.rc == 0
+    and (((monitoring_verify_loki_canary_query.stdout | from_json).data.result | default([])) | length) > 0
+  changed_when: false
+  failed_when: >
+    monitoring_verify_loki_canary_query.rc != 0
+    or (((monitoring_verify_loki_canary_query.stdout | from_json).data.result | default([])) | length) == 0
 
 - name: Verify VM detail dashboards are provisioned
   ansible.builtin.uri:

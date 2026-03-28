@@ -7914,3 +7914,73 @@ workstreams:
       included_in_repo_version: 0.177.28
       latest_receipts:
         public_edge_publication: 2026-03-28-adr-0021-shared-edge-certificate-repair-mainline-live-apply
+
+  - id: ws-0250-live-apply
+    adr: "0250"
+    title: ADR 0250 live apply from latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0250-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0250-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0250-live-apply.md
+    depends_on:
+      - adr-0011-monitoring
+      - adr-0052-loki-logs
+      - adr-0097-alerting-routing
+      - adr-0244-runtime-assurance-matrix
+    conflicts_with: []
+    shared_surfaces:
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/
+      - config/alertmanager/rules/platform.yml
+      - config/grafana/dashboards/log-canary-overview.json
+      - docs/adr/0250-log-ingestion-and-queryability-canaries-via-loki-canary.md
+      - docs/runbooks/log-queryability-canary.md
+      - docs/runbooks/monitoring-stack.md
+      - docs/workstreams/ws-0250-live-apply.md
+      - receipts/live-applies/2026-03-28-adr-0250-log-queryability-canary-live-apply.json
+      - tests/test_monitoring_vm_role.py
+      - docs/adr/.index.yaml
+      - workstreams.yaml
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: monitoring_stack_role
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
+            - tests/test_monitoring_vm_role.py
+          mode: shared_contract
+          contract: monitoring-stack-role-v1
+        - id: alertmanager_runtime_verify
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/alertmanager_runtime/tasks/verify.yml
+            - tests/test_alertmanager_runtime_role.py
+          mode: shared_contract
+          contract: monitoring-alertmanager-verify-v1
+        - id: adr_0250_live_apply
+          paths:
+            - docs/workstreams/ws-0250-live-apply.md
+            - docs/adr/0250-log-ingestion-and-queryability-canaries-via-loki-canary.md
+            - config/alertmanager/rules/platform.yml
+            - config/grafana/dashboards/log-canary-overview.json
+            - docs/runbooks/log-queryability-canary.md
+            - docs/runbooks/monitoring-stack.md
+            - receipts/live-applies/2026-03-28-adr-0250-log-queryability-canary-live-apply.json
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0250 by adding repo-managed Loki Canary ingestion and queryability assurance on monitoring-lv3, scraping its metrics in Prometheus, surfacing the signal in Grafana, and alerting on missing or non-queryable canary entries
+      release_bump: patch
+      included_in_repo_version: 0.177.57
+      latest_receipts:
+        monitoring: 2026-03-28-adr-0250-log-queryability-canary-live-apply
+        log_queryability_canary: 2026-03-28-adr-0250-log-queryability-canary-live-apply

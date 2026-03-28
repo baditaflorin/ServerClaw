@@ -1,3 +1,29 @@
+# Role Task File: alertmanager_runtime/tasks/verify.yml
+# Purpose: Verify Alertmanager health and Prometheus rule visibility after alert routing changes are converged.
+# Use case: Imported after the alertmanager runtime role flushes handlers so monitoring alerts are confirmed live.
+#
+# Inputs (required):
+#   - alertmanager_runtime_url (str, required): Local Alertmanager base URL used for health and readiness checks.
+#
+# Inputs (optional):
+#   - None.
+#
+# Outputs:
+#   - Confirms Alertmanager is healthy and the Loki Canary alert rules are visible to Prometheus.
+#
+# Idempotency: Fully idempotent
+#              Read-only verification tasks against the live monitoring stack.
+#
+# Dependencies:
+#   - ADR 0097: Defines the alert routing baseline for the platform.
+#   - ADR 0250: Adds the Loki Canary alert rule group that must be loaded after copy and reload.
+#   - Requires: alertmanager_runtime has already rendered configuration and Prometheus rules.
+#
+# Related ADRs: 0097, 0250
+# Related Runbooks: docs/runbooks/log-queryability-canary.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
 ---
 - name: Verify Alertmanager health endpoint responds
   ansible.builtin.uri:
@@ -20,3 +46,16 @@
   delay: 3
   until: alertmanager_runtime_ready.status == 200
   changed_when: false
+
+- name: Verify Prometheus Loki Canary rules are loaded
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:9090/api/v1/rules"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: alertmanager_runtime_loki_canary_rules
+  changed_when: false
+  failed_when: >
+    alertmanager_runtime_loki_canary_rules.status != 200
+    or 'lv3-log-canary' not in (alertmanager_runtime_loki_canary_rules.content | default(''))
+    or 'LokiCanaryTargetDown' not in (alertmanager_runtime_loki_canary_rules.content | default(''))
