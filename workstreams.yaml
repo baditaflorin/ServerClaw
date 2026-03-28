@@ -213,7 +213,7 @@ workstreams:
   - id: ws-0226-live-apply
     adr: "0226"
     title: Live apply ADR 0226 systemd host-resident control-loop supervision
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0226-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0226-live-apply
@@ -258,7 +258,12 @@ workstreams:
             - receipts/live-applies/2026-03-28-adr-0226-host-control-loops-live-apply.json
           mode: exclusive
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0226 by installing the repo-managed systemd service, timer, and path baseline for host-resident control loops on proxmox_florin and verifying both manual and path-triggered reconcile passes
+      release_bump: patch
+      latest_receipts:
+        host_control_loops: 2026-03-28-adr-0226-host-control-loops-live-apply
   - id: ws-0210-live-apply
     adr: "0210"
     title: Live apply canonical publication models over adapter-shaped vendor fields
