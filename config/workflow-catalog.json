@@ -2140,6 +2140,55 @@
         "escalation_action": "abort_silently"
       }
     },
+    "weekly-https-tls-assurance": {
+      "description": "Run the ADR 0249 HTTPS/TLS assurance scan, store a receipt, and keep deeper TLS posture evidence alongside the recurring blackbox probes.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "https-tls-assurance",
+        "command": "make https-tls-assurance ENV=production"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/https-tls-assurance.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/prometheus/file_sd/https_tls_targets.yml",
+        "config/prometheus/rules/https_tls_alerts.yml",
+        "config/windmill/scripts/https-tls-assurance.py",
+        "config/workflow-catalog.json",
+        "docs/runbooks/https-tls-assurance.md",
+        "receipts/https-tls-assurance",
+        "scripts/generate_https_tls_assurance.py",
+        "scripts/https_tls_assurance.py",
+        "scripts/https_tls_assurance_targets.py"
+      ],
+      "outputs": [
+        "A timestamped HTTPS/TLS assurance receipt covering the declared HTTPS surface set with raw testssl artifacts and classified TLS findings."
+      ],
+      "verification_commands": [
+        "python3 -m py_compile scripts/https_tls_assurance_targets.py scripts/generate_https_tls_assurance.py scripts/https_tls_assurance.py config/windmill/scripts/https-tls-assurance.py",
+        "python3 scripts/generate_https_tls_assurance.py --check",
+        "python3 scripts/https_tls_assurance.py --env production --skip-testssl --print-report-json",
+        "uv run --with pytest --with pyyaml pytest -q tests/test_https_tls_assurance_targets.py tests/test_monitoring_vm_role.py"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 3600,
+        "max_steps": 200,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 0,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
+    },
     "audit-token-inventory": {
       "description": "Run the ADR 0141 token inventory audit against the canonical token policy and emit a receipt plus ledger event.",
       "lifecycle_status": "active",

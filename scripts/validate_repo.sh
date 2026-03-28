@@ -499,6 +499,7 @@ validate_health_probes() {
 validate_alert_rules() {
   echo "Alert rule validation"
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_slo_rules.py" --check >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_https_tls_assurance.py" --check >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_alert_rules.py"
 }
 

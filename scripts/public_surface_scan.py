@@ -474,6 +474,7 @@ def classify_testssl_findings(
 ) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
     seen: set[tuple[str, str]] = set()
+    target_name = str(target.get("finding_target") or target.get("display_name") or target["fqdn"])
     for item in raw_findings:
         item = require_mapping(item, f"testssl[{target['fqdn']}]")
         finding_text = str(item.get("finding", "")).strip()
@@ -507,7 +508,7 @@ def classify_testssl_findings(
                 scan_id=scan_id,
                 severity=severity,
                 component="tls",
-                target=target["fqdn"],
+                target=target_name,
                 finding_id=f"tls.{item_id}",
                 summary=summary,
                 observed=finding_text or item_id,
@@ -533,7 +534,8 @@ def run_testssl_scans(
     results: dict[str, dict[str, Any]] = {}
     findings: list[dict[str, Any]] = []
     for target in targets:
-        output_name = f"{slugify_hostname(target['fqdn'])}.json"
+        scan_slug = str(target.get("scan_slug") or target["fqdn"])
+        output_name = f"{slugify_hostname(scan_slug)}.json"
         output_path = raw_dir / output_name
         command = [
             "docker",
@@ -553,8 +555,11 @@ def run_testssl_scans(
             "--cipher-per-proto",
             "--headers",
             "--vulnerabilities",
-            target["url"],
         ]
+        ip_override = str(target.get("testssl_ip") or "").strip()
+        if ip_override:
+            command.extend(["--ip", ip_override])
+        command.append(str(target.get("testssl_url") or target["url"]))
         started = time.monotonic()
         try:
             completed = subprocess.run(

@@ -124,6 +124,22 @@ def test_loki_canary_service_template_uses_push_mode_with_default_stream_labels(
     assert defaults["monitoring_loki_canary_log_selector"] == '{name="loki-canary",stream="stdout"}'
 
 
+def test_prometheus_template_scrapes_https_tls_blackbox_targets() -> None:
+    template = (REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "prometheus.yml.j2").read_text()
+
+    assert "job_name: https-tls-blackbox" in template
+    assert "{{ monitoring_prometheus_https_tls_targets_file }}" in template
+    assert "__param_hostname" in template
+
+
+def test_blackbox_template_defines_follow_redirect_tls_modules() -> None:
+    template = (REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "blackbox.yml.j2").read_text()
+
+    assert "http_2xx_follow_redirects" in template
+    assert "http_2xx_insecure_tls" in template
+    assert "http_2xx_follow_redirects_insecure_tls" in template
+
+
 def test_dashboard_templates_do_not_use_bare_jinja_null_literals() -> None:
     for template in (PLATFORM_DASHBOARD_TEMPLATE, MAIL_DASHBOARD_TEMPLATE, VM_DASHBOARD_TEMPLATE):
         assert " null" not in template.read_text()

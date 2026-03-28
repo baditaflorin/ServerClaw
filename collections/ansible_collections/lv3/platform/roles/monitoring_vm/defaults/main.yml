@@ -122,6 +122,10 @@ monitoring_prometheus_slo_alerts_file: /etc/prometheus/rules/slo-alerts.yml
 monitoring_prometheus_slo_alerts_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/slo_alerts.yml"
 monitoring_prometheus_slo_targets_file: /etc/prometheus/file_sd/slo-targets.yml
 monitoring_prometheus_slo_targets_source_file: "{{ monitoring_repo_root }}/config/prometheus/file_sd/slo_targets.yml"
+monitoring_prometheus_https_tls_alerts_file: /etc/prometheus/rules/https-tls-alerts.yml
+monitoring_prometheus_https_tls_alerts_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/https_tls_alerts.yml"
+monitoring_prometheus_https_tls_targets_file: /etc/prometheus/file_sd/https-tls-targets.yml
+monitoring_prometheus_https_tls_targets_source_file: "{{ monitoring_repo_root }}/config/prometheus/file_sd/https_tls_targets.yml"
 monitoring_prometheus_retention_time: 15d
 monitoring_prometheus_enable_features:
   - exemplar-storage

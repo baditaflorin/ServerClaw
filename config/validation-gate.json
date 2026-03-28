@@ -62,10 +62,10 @@
     ]
   },
   "alert-rule-validation": {
-    "description": "Regenerate SLO burn-rate rules and enforce severity plus runbook annotations on committed alert rules.",
+    "description": "Regenerate SLO and HTTPS/TLS Prometheus rules and enforce severity plus runbook annotations on committed alert rules.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/python:3.12.10",
-    "command": "python scripts/generate_slo_rules.py --check >/dev/null && python scripts/validate_alert_rules.py",
+    "command": "python scripts/generate_slo_rules.py --check >/dev/null && python scripts/generate_https_tls_assurance.py --check >/dev/null && python scripts/validate_alert_rules.py",
     "working_dir": "/workspace",
     "timeout_seconds": 120
   },
