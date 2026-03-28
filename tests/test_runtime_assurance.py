@@ -198,3 +198,99 @@ def test_build_runtime_assurance_report_matches_browser_and_log_receipts(tmp_pat
     log_dimension = next(item for item in entry["dimensions"] if item["id"] == "log_queryability")
     assert browser_dimension["status"] == "pass"
     assert log_dimension["status"] == "pass"
+
+
+def test_build_runtime_assurance_report_ignores_metadata_and_unreadable_receipts(tmp_path: Path) -> None:
+    write_json(
+        tmp_path / "receipts" / "live-applies" / "2026-03-29-ops-portal-runtime-assurance.json",
+        {
+            "receipt_id": "receipt-ops-portal-runtime-assurance",
+            "summary": "Applied ops_portal production browser smoke and logs verification",
+            "workflow_id": "live-apply-service service=ops_portal env=production",
+            "recorded_on": "2026-03-29T10:15:00Z",
+            "verification": [
+                {"check": "smoke test", "observed": "Smoke test passed", "result": "pass"},
+                {"check": "browser journey", "observed": "Playwright sign-in and logout completed", "result": "pass"},
+                {"check": "log query", "observed": "Grafana logs query through Loki succeeded", "result": "pass"},
+            ],
+            "notes": [
+                "Playwright sign-in and logout completed for ops_portal.",
+                "Grafana logs query through Loki succeeded for ops_portal.",
+            ],
+        },
+    )
+    (tmp_path / "receipts" / "live-applies" / "._2026-03-29-ops-portal-runtime-assurance.json").write_bytes(
+        b"\x00\x05\x16\x07AppleDouble-binary-sidecar"
+    )
+    (tmp_path / "receipts" / "live-applies" / "2026-03-29-broken-runtime-assurance.json").write_bytes(
+        b'{"receipt_id":"broken","summary":"\xa3not-utf8"}'
+    )
+
+    report = build_runtime_assurance_report(
+        repo_root=tmp_path,
+        catalog=matrix_catalog(),
+        service_catalog={
+            "services": [
+                {
+                    "id": "ops_portal",
+                    "name": "Platform Operations Portal",
+                    "lifecycle_status": "active",
+                    "exposure": "edge-published",
+                    "public_url": "https://ops.lv3.org",
+                    "runbook": "docs/runbooks/platform-operations-portal.md",
+                    "adr": "0244",
+                    "environments": {
+                        "production": {
+                            "status": "active",
+                            "url": "https://ops.lv3.org",
+                            "subdomain": "ops.lv3.org",
+                        }
+                    },
+                }
+            ]
+        },
+        environment_topology={
+            "schema_version": "1.0.0",
+            "environments": [{"id": "production", "name": "Production", "status": "active"}],
+        },
+        publication_registry={
+            "schema_version": "2.0.0",
+            "publications": [
+                {
+                    "fqdn": "ops.lv3.org",
+                    "service_id": "ops_portal",
+                    "environment": "production",
+                    "status": "active",
+                    "publication": {
+                        "delivery_model": "shared-edge",
+                        "access_model": "platform-sso",
+                        "audience": "operator",
+                    },
+                    "adapter": {
+                        "tls": {
+                            "provider": "letsencrypt",
+                            "cert_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem",
+                        }
+                    },
+                }
+            ],
+        },
+        health_payload={
+            "services": [
+                {
+                    "service_id": "ops_portal",
+                    "status": "healthy",
+                    "composite_status": "healthy",
+                    "reason": "Portal runtime answered the governed health composite.",
+                    "computed_at": "2026-03-29T10:20:00Z",
+                }
+            ]
+        },
+    )
+
+    assert report["summary"] == {"total": 1, "pass": 1, "degraded": 0, "failed": 0, "unknown": 0}
+    entry = report["entries"][0]
+    browser_dimension = next(item for item in entry["dimensions"] if item["id"] == "browser_journey")
+    log_dimension = next(item for item in entry["dimensions"] if item["id"] == "log_queryability")
+    assert browser_dimension["status"] == "pass"
+    assert log_dimension["status"] == "pass"

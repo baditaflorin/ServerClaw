@@ -647,6 +647,9 @@ steps:
             ],
         },
     )
+    (tmp_path / "receipts" / "live-applies" / "._2026-03-23-windmill-runtime-assurance.json").write_bytes(
+        b"\x00\x05\x16\x07AppleDouble-binary-sidecar"
+    )
     graph_dsn = prepare_graph_db(tmp_path / "graph.sqlite3")
     world_state_dsn = prepare_world_state_db(tmp_path / "world-state.sqlite3")
     write_json(

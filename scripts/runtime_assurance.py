@@ -296,7 +296,14 @@ def collect_receipt_evidence(repo_root: Path, service_catalog: dict[str, Any]) -
     matchers = build_service_matchers(service_catalog)
     receipts: list[dict[str, Any]] = []
     for path in sorted((repo_root / "receipts" / "live-applies").rglob("*.json"), reverse=True):
-        payload = load_json(path)
+        relative_path = path.relative_to(repo_root)
+        # Worktree syncs from macOS can leave AppleDouble sidecars like `._foo.json`.
+        if any(part.startswith("._") for part in relative_path.parts) or relative_path.name == ".DS_Store":
+            continue
+        try:
+            payload = load_json(path)
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError):
+            continue
         if not isinstance(payload, dict):
             continue
         verification = payload.get("verification", [])
