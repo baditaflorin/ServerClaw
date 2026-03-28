@@ -57,14 +57,17 @@ After a successful converge, these controller-local files should exist:
 Run these checks after converge:
 
 1. `make syntax-check-nomad`
-2. `make live-apply-service service=nomad env=production`
-3. `NOMAD_ADDR=https://100.64.0.1:8013 NOMAD_CACERT=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tls/nomad-agent-ca.pem NOMAD_TOKEN="$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tokens/bootstrap-management.token)" nomad node status`
+2. `curl -sS https://100.64.0.1:8013/v1/status/leader --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tls/nomad-agent-ca.pem -H "X-Nomad-Token: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tokens/bootstrap-management.token)"`
+3. `curl -sS https://100.64.0.1:8013/v1/nodes --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tls/nomad-agent-ca.pem -H "X-Nomad-Token: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tokens/bootstrap-management.token)" | jq -r '.[] | "\(.Name)\t\(.Status)\t\(.NodeClass)"'`
 4. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'sudo systemctl status lv3-nomad --no-pager && sudo /usr/local/bin/lv3-nomad job status lv3-nomad-smoke-service'`
-5. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.30 'curl -fsS http://127.0.0.1:18180/'`
+5. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.30 'curl -fsS http://10.10.10.30:18180/'`
+6. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'sudo cat /var/lib/nomad/verification/lv3-nomad-smoke-batch/last-run.log'`
+7. `make live-apply-service service=nomad env=production`
 
 ## Notes
 
 - Nomad remains private-only in this rollout. There is no public DNS record or public edge publication for the scheduler.
 - The `lv3-nomad` systemd unit intentionally runs as `root` so the agent can read the root-owned TLS key and use the Docker driver reliably on the client nodes.
 - The controller-local bootstrap token is the branch-safe source of truth; if the local token is missing but the mirrored server token still exists, rerun the playbook to restore it automatically.
-- The smoke service is pinned to the build client and the dispatchable batch smoke job is pinned to the runtime client so both client classes are exercised on every live apply.
+- The smoke service is pinned to the build client and is verified through the build node's advertised address `10.10.10.30:18180`, not `127.0.0.1`.
+- The dispatchable batch smoke job is pinned to the runtime client and writes a durable verification marker to `/var/lib/nomad/verification/lv3-nomad-smoke-batch/last-run.log` so the post-dispatch proof does not depend on ephemeral allocation log state.

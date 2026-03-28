@@ -22,6 +22,7 @@
         )
       | length
     ) == 0
+  changed_when: false
 
 - name: Assert the expected Nomad nodes are ready
   ansible.builtin.assert:
@@ -58,6 +59,7 @@
       | list
       | length
     ) >= 1
+  changed_when: false
 
 - name: Verify the smoke service content from the build host
   ansible.builtin.uri:
@@ -133,6 +135,7 @@
       | list
       | length
     ) >= 1
+  changed_when: false
 
 - name: Record the completed smoke batch allocation id
   ansible.builtin.set_fact:
