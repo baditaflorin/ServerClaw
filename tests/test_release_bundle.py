@@ -203,7 +203,38 @@ def test_download_asset_retries_transient_http_404(tmp_path: Path, monkeypatch) 
     assert observed_sleeps == [1.0, 2.0]
 
 
-def test_fetch_release_assets_prefers_attachment_detail_download_urls(tmp_path: Path, monkeypatch) -> None:
+def test_download_asset_candidates_falls_back_to_secondary_url(tmp_path: Path, monkeypatch) -> None:
+    destination = tmp_path / "bundle.tar.gz"
+    observed_urls: list[str] = []
+
+    def fake_api_request(method: str, url: str, *, token: str, **_: object) -> tuple[int, bytes]:
+        observed_urls.append(url)
+        if url.endswith("/attachments/19"):
+            raise RuntimeError(f"{method} {url} failed with HTTP 404: Not found")
+        return 200, b"bundle-bytes"
+
+    monkeypatch.setattr(release_bundle, "api_request", fake_api_request)
+    monkeypatch.setattr(release_bundle.time, "sleep", lambda seconds: None)
+
+    release_bundle.download_asset_candidates(
+        [
+            "http://10.10.10.20:3003/attachments/19",
+            "http://10.10.10.20:3003/ops/proxmox_florin_server/releases/download/tag/bundle.tar.gz",
+        ],
+        token="token",
+        destination=destination,
+    )
+
+    assert destination.read_bytes() == b"bundle-bytes"
+    assert observed_urls == [
+        "http://10.10.10.20:3003/attachments/19",
+        "http://10.10.10.20:3003/ops/proxmox_florin_server/releases/download/tag/bundle.tar.gz",
+    ]
+
+
+def test_fetch_release_assets_prefers_attachment_detail_download_urls_with_release_download_fallback(
+    tmp_path: Path, monkeypatch
+) -> None:
     release = {
         "id": 7,
         "assets": [
@@ -223,11 +254,11 @@ def test_fetch_release_assets_prefers_attachment_detail_download_urls(tmp_path: 
         },
     )
 
-    def fake_download_asset(url: str, *, token: str, destination: Path) -> None:
-        downloaded_urls.append(url)
+    def fake_download_asset_candidates(urls: list[str], *, token: str, destination: Path, **_: object) -> None:
+        downloaded_urls.extend(urls)
         destination.write_text("payload")
 
-    monkeypatch.setattr(release_bundle, "download_asset", fake_download_asset)
+    monkeypatch.setattr(release_bundle, "download_asset_candidates", fake_download_asset_candidates)
 
     release_bundle.fetch_release_assets_by_tag(
         gitea_url="http://10.10.10.20:3003",
@@ -239,6 +270,9 @@ def test_fetch_release_assets_prefers_attachment_detail_download_urls(tmp_path: 
 
     assert downloaded_urls == [
         "http://10.10.10.20:3003/attachments/19",
+        "http://10.10.10.20:3003/releases/download/bad",
         "http://10.10.10.20:3003/attachments/21",
+        "http://10.10.10.20:3003/releases/download/bad-sha",
         "http://10.10.10.20:3003/attachments/20",
+        "http://10.10.10.20:3003/releases/download/bad-sigstore",
     ]

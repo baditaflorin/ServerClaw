@@ -73,6 +73,8 @@ SIGSTORE_BUNDLE_SUFFIX = ".sigstore.json"
 ASSET_CONTENT_TYPE = "application/octet-stream"
 SEMVER_PATTERN = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
 DEFAULT_HTTP_TIMEOUT_SECONDS = 30.0
+DEFAULT_ASSET_DOWNLOAD_WAIT_SECONDS = 600.0
+TRANSIENT_DOWNLOAD_STATUS_CODES = {404, 408, 409, 423, 425, 429, 500, 502, 503, 504}
 
 
 @dataclass(frozen=True)
@@ -518,23 +520,78 @@ def extract_manifest(bundle_path: Path) -> dict[str, Any]:
         return json.loads(manifest_file.read().decode("utf-8"))
 
 
-def download_asset(url: str, *, token: str, destination: Path) -> None:
+def is_retryable_download_error(error: RuntimeError) -> bool:
+    status_match = re.search(r"HTTP (\d+)", str(error))
+    status_code = int(status_match.group(1)) if status_match else None
+    return status_code in TRANSIENT_DOWNLOAD_STATUS_CODES
+
+
+def asset_download_urls(*, asset: dict[str, Any], asset_detail: dict[str, Any], gitea_url: str) -> list[str]:
+    candidates: list[str] = []
+    seen: set[str] = set()
+    for source in (asset_detail, asset):
+        for key in ("browser_download_url", "url"):
+            value = source.get(key)
+            if not isinstance(value, str) or not value:
+                continue
+            candidate = normalize_asset_url(value, gitea_url=gitea_url)
+            path = urllib.parse.urlsplit(candidate).path
+            if "/attachments/" not in path and "/releases/download/" not in path:
+                continue
+            if candidate in seen:
+                continue
+            candidates.append(candidate)
+            seen.add(candidate)
+    if not candidates:
+        raise ValueError(f"release asset '{asset.get('name', 'unknown')}' does not expose a download URL")
+    return candidates
+
+
+def download_asset_candidates(
+    urls: list[str],
+    *,
+    token: str,
+    destination: Path,
+    max_wait_seconds: float = DEFAULT_ASSET_DOWNLOAD_WAIT_SECONDS,
+) -> None:
+    if not urls:
+        raise ValueError("expected at least one asset download URL")
     delay_seconds = 1.0
-    for attempt in range(1, 12):
-        try:
-            _status, payload = api_request("GET", url, token=token)
-            destination.write_bytes(payload)
-            return
-        except urllib.error.URLError:
-            if attempt == 11:
-                raise
-        except RuntimeError as exc:
-            status_match = re.search(r"HTTP (\d+)", str(exc))
-            status_code = int(status_match.group(1)) if status_match else None
-            if attempt == 11 or status_code not in {404, 408, 409, 423, 425, 429, 500, 502, 503, 504}:
-                raise
+    deadline = time.monotonic() + max_wait_seconds
+    last_error: Exception | None = None
+    while True:
+        for url in urls:
+            try:
+                _status, payload = api_request("GET", url, token=token)
+                destination.write_bytes(payload)
+                return
+            except urllib.error.URLError as exc:
+                last_error = exc
+            except RuntimeError as exc:
+                if not is_retryable_download_error(exc):
+                    raise
+                last_error = exc
+        if last_error is None:
+            raise RuntimeError("release asset download failed without reporting an error")
+        if time.monotonic() >= deadline:
+            raise last_error
         time.sleep(delay_seconds)
         delay_seconds = min(delay_seconds * 2, 30.0)
+
+
+def download_asset(
+    url: str,
+    *,
+    token: str,
+    destination: Path,
+    max_wait_seconds: float = DEFAULT_ASSET_DOWNLOAD_WAIT_SECONDS,
+) -> None:
+    download_asset_candidates(
+        [url],
+        token=token,
+        destination=destination,
+        max_wait_seconds=max_wait_seconds,
+    )
 
 
 def normalize_asset_url(asset_url: str, *, gitea_url: str) -> str:
@@ -595,12 +652,12 @@ def fetch_release_assets_by_tag(
                 release_id=release_id,
                 attachment_id=int(attachment_id),
             )
-        asset_url = asset_detail.get("browser_download_url") or asset_detail.get("url") or asset.get("browser_download_url") or asset.get("url")
-        if not isinstance(asset_url, str) or not asset_url:
-            raise ValueError(f"release asset '{asset_name}' does not expose a download URL")
-        asset_url = normalize_asset_url(asset_url, gitea_url=gitea_url)
         asset_path = destination_dir / asset_name
-        download_asset(asset_url, token=token, destination=asset_path)
+        download_asset_candidates(
+            asset_download_urls(asset=asset, asset_detail=asset_detail, gitea_url=gitea_url),
+            token=token,
+            destination=asset_path,
+        )
         downloaded[label] = asset_path
     for label, asset_name in optional_names.items():
         asset = by_name.get(asset_name)
@@ -616,12 +673,12 @@ def fetch_release_assets_by_tag(
                 release_id=release_id,
                 attachment_id=int(attachment_id),
             )
-        asset_url = asset_detail.get("browser_download_url") or asset_detail.get("url") or asset.get("browser_download_url") or asset.get("url")
-        if not isinstance(asset_url, str) or not asset_url:
-            raise ValueError(f"release asset '{asset_name}' does not expose a download URL")
-        asset_url = normalize_asset_url(asset_url, gitea_url=gitea_url)
         asset_path = destination_dir / asset_name
-        download_asset(asset_url, token=token, destination=asset_path)
+        download_asset_candidates(
+            asset_download_urls(asset=asset, asset_detail=asset_detail, gitea_url=gitea_url),
+            token=token,
+            destination=asset_path,
+        )
         downloaded[label] = asset_path
     if "sigstore_bundle" not in downloaded and "signature" not in downloaded:
         raise FileNotFoundError(
