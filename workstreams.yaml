@@ -756,6 +756,83 @@ workstreams:
       changelog_entry: records ADR 0242 exact-main evidence on the current mainline by preserving the verified Shepherd-tour rollout, refreshed release surfaces, and operator-access onboarding truth while the live platform baseline remains 0.130.44
       release_bump: patch
       included_in_repo_version: 0.177.58
+  - id: ws-0239-live-apply
+    adr: "0239"
+    title: Live apply browser-local search experience via Pagefind
+    status: in-progress
+    owner: codex
+    branch: codex/ws-0239-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0239-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0239-live-apply.md
+    depends_on:
+      - adr-0094-developer-portal
+      - adr-0121-local-search-and-indexing-fabric
+      - adr-0135-developer-portal-sensitivity-classification
+      - adr-0137-robots-and-crawl-policy
+      - adr-0138-published-artifact-secret-scanning
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0239-live-apply.md
+      - docs/adr/0239-browser-local-search-experience-via-pagefind.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/deployment-history-portal.md
+      - docs/runbooks/developer-portal.md
+      - docs/site-generated/architecture/dependency-graph.md
+      - Makefile
+      - mkdocs.yml
+      - requirements/docs.txt
+      - scripts/generate_docs_site.py
+      - scripts/build_docs_portal.py
+      - scripts/validate_repo.sh
+      - docs/theme-overrides/**
+      - tests/test_docs_site.py
+      - receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0239_live_apply
+          paths:
+            - docs/workstreams/ws-0239-live-apply.md
+            - docs/adr/0239-browser-local-search-experience-via-pagefind.md
+            - docs/runbooks/deployment-history-portal.md
+            - docs/runbooks/developer-portal.md
+            - Makefile
+            - mkdocs.yml
+            - requirements/docs.txt
+            - scripts/generate_docs_site.py
+            - scripts/build_docs_portal.py
+            - scripts/validate_repo.sh
+            - docs/theme-overrides/**
+            - tests/test_docs_site.py
+          mode: exclusive
+        - id: adr_metadata_index
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: generated_portals_contract
+          paths:
+            - docs/site-generated/architecture/dependency-graph.md
+          mode: shared_contract
+          contract: generated-portals-v1
+        - id: live_apply_evidence
+          paths:
+            - receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json
+          mode: shared_contract
+          contract: live-apply-receipts-v1
+    ready_to_merge: false
+    live_applied: false
+    canonical_truth:
+      changelog_entry: implements ADR 0239 by publishing a Pagefind-backed
+        browser-local search experience for docs.lv3.org, including section,
+        audience, service, capability, sensitivity, and tag facets from the
+        generated portal corpus
+      release_bump: patch
   - id: ws-0241-live-apply
     adr: "0241"
     title: Live apply ADR 0241 rich content and inline knowledge editing via Tiptap
