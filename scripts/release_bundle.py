@@ -72,6 +72,7 @@ SIGNATURE_SUFFIX = ".sig"
 SIGSTORE_BUNDLE_SUFFIX = ".sigstore.json"
 ASSET_CONTENT_TYPE = "application/octet-stream"
 SEMVER_PATTERN = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
+DEFAULT_HTTP_TIMEOUT_SECONDS = 30.0
 
 
 @dataclass(frozen=True)
@@ -260,6 +261,7 @@ def api_request(
     binary_payload: bytes | None = None,
     content_type: str = "application/json",
     accepted_statuses: tuple[int, ...] = (200, 201, 204),
+    timeout_seconds: float = DEFAULT_HTTP_TIMEOUT_SECONDS,
 ) -> tuple[int, bytes]:
     headers = {}
     if token:
@@ -273,7 +275,7 @@ def api_request(
         headers["Content-Type"] = content_type
     request = urllib.request.Request(url, data=payload, method=method, headers=headers)
     try:
-        with urllib.request.urlopen(request) as response:  # noqa: S310
+        with urllib.request.urlopen(request, timeout=timeout_seconds) as response:  # noqa: S310
             body = response.read()
             status = response.getcode()
     except urllib.error.HTTPError as exc:
