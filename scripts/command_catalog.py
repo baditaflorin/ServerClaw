@@ -431,12 +431,13 @@ def evaluate_approval(
         break_glass=break_glass,
     )
     decision = evaluate_command_approval_policy(payload, repo_root=Path(__file__).resolve().parents[1])
+    entrypoint_target = workflow["preferred_entrypoint"].get("target")
     return {
         "approved": bool(decision["approved"]),
         "reasons": list(decision["reasons"]),
         "workflow_id": str(decision["workflow_id"]),
         "entrypoint": str(decision["entrypoint"]),
-        "entrypoint_target": str(workflow["preferred_entrypoint"]["target"]),
+        "entrypoint_target": str(entrypoint_target) if entrypoint_target is not None else None,
         "receipt_required": bool(decision["receipt_required"]),
     }
 
