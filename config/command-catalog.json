@@ -2344,7 +2344,7 @@
       }
     },
     "run-restore-verification": {
-      "description": "Run the ADR 0099 restore-verification workflow so PBS backups are restored into short-lived staging VMs and validated before the next disaster-recovery event forces the first real restore.",
+      "description": "Run the ADR 0099 restore-verification workflow so PBS backups are restored into short-lived staging VMs and validated with both smoke tests and ADR 0190 synthetic transaction replay before the next disaster-recovery event forces the first real restore.",
       "workflow_id": "restore-verification",
       "scope": "proxmox_host",
       "approval_policy": "standard_live_change",
@@ -2371,7 +2371,7 @@
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the dated restore-verification receipt, the selected backup dates, any failed smoke tests, and the cleanup outcome for VMIDs 900 to 909."
+        "notes": "Record the dated restore-verification receipt, the selected backup dates, any failed smoke tests, the synthetic replay success rate and latency summary, and the cleanup outcome for VMIDs 900 to 909."
       },
       "failure_guidance": {
         "stop_conditions": [

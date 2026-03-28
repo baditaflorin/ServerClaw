@@ -2,12 +2,19 @@
 
 ADR 0099 adds a repository-managed restore verification workflow that restores the highest-risk PBS-protected guests into the staging bridge, runs smoke tests, writes a receipt, and tears the restored VMs down unconditionally.
 
+ADR 0190 extends the `docker-runtime-lv3` portion of that flow with a privacy-safe synthetic transaction replay so recovery validation records request success rate and latency distribution instead of only single-shot smoke checks.
+
 ## Entry Points
 
 - local run: `make restore-verification`
-- direct script: `python3 scripts/restore_verification.py`
+- direct script: `uv run --with pyyaml python scripts/restore_verification.py`
+- standalone replay: `python3 scripts/synthetic_transaction_replay.py --target restore-docker-runtime --dry-run`
 - Windmill worker wrapper: `python3 config/windmill/scripts/restore-verification.py`
 - receipts: `receipts/restore-verifications/*.json`
+
+For focused recovery drills or ADR-local replays, scope the run to one or more guests:
+
+- `make restore-verification RESTORE_ARGS='--targets docker-runtime-lv3 --selection-strategy latest --ssh-timeout-seconds 900'`
 
 ## Targets
 
@@ -31,9 +38,12 @@ Each restore uses the staging bridge and IP assignments already defined for the 
 4. Rewire the restored guest to `vmbr20`, keep the original MAC, refresh cloud-init, and boot it.
 5. Wait for SSH through the Proxmox jump path.
 6. Run guest-local smoke tests.
-7. Write one JSON receipt under `receipts/restore-verifications/`.
-8. Emit the mutation-audit event and optional NATS plus Mattermost notifications.
-9. Destroy the restored VMs even when an earlier step fails.
+7. Replay the ADR 0190 synthetic control-plane transactions on the restored `docker-runtime-lv3` target after warm-up completes.
+8. Write one JSON receipt under `receipts/restore-verifications/`.
+9. Emit the mutation-audit event and optional NATS plus Mattermost notifications.
+10. Destroy the restored VMs even when an earlier step fails.
+
+If the restored guest boots but never exposes an SSH banner through the fixture bridge in time, the workflow now falls back to Proxmox guest-agent (`qga`) execution for the guest-local smoke commands and synthetic replay. That keeps the rehearsal governed and repeatable without ad hoc host-side shelling into the restored VM.
 
 ## Smoke Tests
 
@@ -49,6 +59,7 @@ Each restore uses the staging bridge and IP assignments already defined for the 
 - NetBox readiness endpoint from the local guest
 - Windmill readiness endpoint from the local guest
 - OpenBao readiness endpoint as a non-blocking observation
+- repeated synthetic control-plane reads for Keycloak discovery, NetBox login, Windmill API version, and OpenBao health with per-request latency capture
 
 ### backup-lv3
 
@@ -75,9 +86,10 @@ If `--publish-nats` is set, the workflow emits:
 
 ## Verification
 
-- `python3 -m py_compile scripts/restore_verification.py scripts/smoke_tests/postgres_smoke.py scripts/smoke_tests/docker_runtime_smoke.py scripts/smoke_tests/backup_vm_smoke.py config/windmill/scripts/restore-verification.py`
-- `uv run --with pytest --with pyyaml pytest tests/test_restore_verification.py tests/test_restore_verification_windmill.py -q`
-- `python3 scripts/restore_verification.py --help`
+- `python3 -m py_compile scripts/restore_verification.py scripts/synthetic_transaction_replay.py scripts/smoke_tests/postgres_smoke.py scripts/smoke_tests/docker_runtime_smoke.py scripts/smoke_tests/backup_vm_smoke.py config/windmill/scripts/restore-verification.py`
+- `uv run --with pytest --with pyyaml pytest tests/test_restore_verification.py tests/test_restore_verification_windmill.py tests/test_synthetic_transaction_replay.py -q`
+- `python3 scripts/synthetic_transaction_replay.py --target restore-docker-runtime --dry-run`
+- `uv run --with pyyaml python scripts/restore_verification.py --help`
 
 ## Live Rollout Notes
 

@@ -82,7 +82,7 @@ workstreams:
   - id: ws-0185-live-apply
     adr: "0185"
     title: Branch-scoped ephemeral preview environments
-    status: live_applied
+    status: merged
     owner: codex
     branch: codex/ws-0185-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply
@@ -713,7 +713,7 @@ workstreams:
   - id: adr-0029-backup-vm
     adr: "0029"
     title: Dedicated backup VM with local PBS
-    status: ready
+    status: implemented
     owner: codex
     branch: codex/adr-0026-backup-vm
     worktree_path: ../proxmox_florin_server-backup-vm
@@ -2731,7 +2731,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0189 governed network-impairment matrix rendering and hardened the mirrored Windmill worker checkout so repo-managed Python jobs no longer trip stale editable-build metadata before startup
       release_bump: patch
-      included_in_repo_version: 0.177.20
+      included_in_repo_version: 0.177.21
       latest_receipts:
         network_impairment_matrix: 2026-03-27-adr-0189-network-impairment-matrix-live-apply
 
@@ -4667,6 +4667,38 @@ workstreams:
       latest_receipts:
         failure_domain_policy: 2026-03-27-adr-0184-failure-domain-labels-live-apply
 
+  - id: ws-0188-live-apply
+    adr: "0188"
+    title: Failover rehearsal gate live apply
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0188-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-ws-0188-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/worktree-ws-0188-live-apply/docs/workstreams/ws-0188-live-apply.md
+    depends_on:
+      - adr-0098-postgres-ha
+      - adr-0099-restore-verification
+      - adr-0179-service-redundancy-tier-matrix
+    conflicts_with: []
+    shared_surfaces:
+      - config/service-redundancy-catalog.json
+      - docs/schema/service-redundancy-catalog.schema.json
+      - scripts/service_redundancy.py
+      - docs/runbooks/service-redundancy-tier-matrix.md
+      - docs/runbooks/postgres-failover.md
+      - docs/runbooks/service-capability-catalog.md
+      - tests/test_service_redundancy.py
+      - receipts/live-applies/
+      - workstreams.yaml
+    ready_to_merge: false
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0188 failover rehearsal gating so redundancy reporting now distinguishes declared tiers from currently proven tiers and the unproven PostgreSQL warm-standby path is surfaced as implemented `R0`
+      release_bump: patch
+      included_in_repo_version: 0.177.20
+      latest_receipts:
+        service_redundancy: 2026-03-27-adr-0188-failover-rehearsal-gate-live-apply
+
   - id: ws-0191-live-apply
     adr: "0191"
     title: Immutable guest replacement for stateful and edge services
@@ -4741,6 +4773,61 @@ workstreams:
       included_in_repo_version: 0.177.13
       latest_receipts:
         immutable_guest_replacement: 2026-03-27-adr-0191-immutable-guest-replacement-live-apply
+
+  - id: ws-0190-live-apply
+    adr: "0190"
+    title: ADR 0190 live apply from latest origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0190-live-apply
+    worktree_path: .worktrees/ws-0190-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0190-live-apply.md
+    depends_on:
+      - adr-0099-backup-restore-verification
+      - adr-0105-capacity-model
+      - adr-0171-controlled-fault-injection
+      - adr-0181-off-host-witness-replication
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/restore_verification.py
+      - scripts/synthetic_transaction_replay.py
+      - config/synthetic-transaction-catalog.json
+      - docs/runbooks/backup-restore-verification.md
+      - docs/runbooks/synthetic-transaction-replay.md
+      - receipts/restore-verifications/
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0190_replay_surface
+          paths:
+            - config/synthetic-transaction-catalog.json
+            - scripts/synthetic_transaction_replay.py
+            - scripts/restore_verification.py
+            - tests/test_synthetic_transaction_replay.py
+            - tests/test_restore_verification.py
+            - docs/runbooks/backup-restore-verification.md
+            - docs/runbooks/synthetic-transaction-replay.md
+            - docs/workstreams/ws-0190-live-apply.md
+            - docs/adr/0190-synthetic-transaction-replay-for-capacity-and-recovery-validation.md
+          mode: exclusive
+        - id: restore_verification_workflow_contract
+          paths:
+            - Makefile
+            - config/workflow-catalog.json
+            - config/command-catalog.json
+          mode: shared_contract
+          contract: restore-verification-workflow-v2
+    ready_to_merge: false
+    live_applied: false
+    canonical_truth:
+      changelog_entry: implemented ADR 0190 synthetic transaction replay for restore verification, including the governed replay catalog, guest-agent restore fallback, and committed live-apply evidence for the current restore-health gap
+      release_bump: patch
+      included_in_repo_version: 0.177.21
 
   - id: ws-0202-live-apply
     adr: "0202"

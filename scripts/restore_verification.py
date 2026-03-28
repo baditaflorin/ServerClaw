@@ -34,6 +34,7 @@ from drift_lib import (
 )
 from mutation_audit import build_event, emit_event_best_effort
 from smoke_tests import backup_vm_smoke, docker_runtime_smoke, postgres_smoke
+import synthetic_transaction_replay
 
 
 DEFAULT_RECEIPT_DIR = repo_path("receipts", "restore-verifications")
@@ -161,6 +162,19 @@ def peak_restore_capacity(targets: list[RestoreTarget]) -> ResourceAmount:
         disk_gb=max(target.resources.disk_gb for target in targets),
     )
 
+def select_restore_targets(selected_names: list[str] | None = None) -> list[RestoreTarget]:
+    targets = load_restore_targets()
+    if not selected_names:
+        return targets
+    requested = {item.strip() for item in selected_names if item.strip()}
+    if not requested:
+        return targets
+    filtered = [target for target in targets if target.vm_name in requested]
+    missing = sorted(requested - {target.vm_name for target in filtered})
+    if missing:
+        raise ValueError(f"unknown restore-verification target(s): {', '.join(missing)}")
+    return filtered
+
 
 def run_host_command(context: dict[str, Any], command: str) -> CommandOutcome:
     argv = build_host_ssh_command(context, command)
@@ -222,15 +236,58 @@ def run_restored_guest_command(context: dict[str, Any], ip_address: str, command
     )
 
 
-def wait_for_ssh(context: dict[str, Any], ip_address: str, *, timeout_seconds: int) -> int:
+def run_restored_guest_agent_command(
+    context: dict[str, Any],
+    target_vmid: int,
+    command: str,
+    *,
+    timeout_seconds: int = 30,
+) -> CommandOutcome:
+    outcome = run_host_command(
+        context,
+        f"sudo qm guest exec {target_vmid} --timeout {timeout_seconds} -- /bin/bash -lc {shlex.quote(command)}",
+    )
+    if outcome.returncode != 0:
+        return CommandOutcome(
+            command=command,
+            returncode=outcome.returncode,
+            stdout=outcome.stdout,
+            stderr=outcome.stderr,
+        )
+    payload = json.loads(outcome.stdout or "{}")
+    return CommandOutcome(
+        command=command,
+        returncode=int(payload.get("exitcode", 1)),
+        stdout=str(payload.get("out-data", "")).strip(),
+        stderr=str(payload.get("err-data", "")).strip(),
+    )
+
+
+def guest_agent_ready(context: dict[str, Any], target_vmid: int) -> bool:
+    return run_host_command(context, f"sudo qm agent {target_vmid} ping").returncode == 0
+
+
+def wait_for_guest_access(
+    context: dict[str, Any],
+    target: RestoreTarget,
+    *,
+    timeout_seconds: int,
+) -> tuple[str, int]:
     started = time.monotonic()
     deadline = started + timeout_seconds
+    ip_address = target.ip_cidr.split("/", 1)[0]
     while time.monotonic() < deadline:
         outcome = run_restored_guest_command(context, ip_address, "true")
         if outcome.returncode == 0:
-            return int(time.monotonic() - started)
+            return "ssh", int(time.monotonic() - started)
+        if guest_agent_ready(context, target.target_vmid):
+            qga_outcome = run_restored_guest_agent_command(context, target.target_vmid, "true")
+            if qga_outcome.returncode == 0:
+                return "qga", int(time.monotonic() - started)
         time.sleep(5)
-    raise RuntimeError(f"SSH did not become ready for restored guest {ip_address}")
+    raise RuntimeError(
+        f"Neither SSH nor qga became ready for restored guest {target.vm_name} ({ip_address})"
+    )
 
 
 def list_backups_for_vmid(context: dict[str, Any], source_vmid: int) -> list[dict[str, Any]]:
@@ -389,12 +446,18 @@ def execute_smoke_tests(
     context: dict[str, Any],
     target: RestoreTarget,
     *,
+    execution_mode: str,
     docker_wait_seconds: int,
 ) -> list[dict[str, Any]]:
     ip_address = context["restored_guests"][target.vm_name]
-    command_runner: Callable[[str], CommandOutcome] = lambda command: run_restored_guest_command(
-        context, ip_address, command
-    )
+    if execution_mode == "ssh":
+        command_runner: Callable[[str], CommandOutcome] = lambda command: run_restored_guest_command(
+            context, ip_address, command
+        )
+    elif execution_mode == "qga":
+        command_runner = lambda command: run_restored_guest_agent_command(context, target.target_vmid, command)
+    else:
+        raise ValueError(f"unsupported execution mode: {execution_mode}")
 
     if target.smoke_kind == "postgres":
         return postgres_smoke.run_smoke_tests(command_runner)
@@ -420,14 +483,60 @@ def overall_from_tests(tests: list[dict[str, Any]]) -> str:
     return "fail" if required_failures else "pass"
 
 
+def execute_synthetic_replay(
+    context: dict[str, Any],
+    target: RestoreTarget,
+    *,
+    execution_mode: str,
+) -> dict[str, Any] | None:
+    if target.vm_name != "docker-runtime-lv3":
+        return None
+    ip_address = context["restored_guests"][target.vm_name]
+    if execution_mode == "ssh":
+        command_runner: Callable[[str], CommandOutcome] = lambda command: run_restored_guest_command(
+            context, ip_address, command
+        )
+    elif execution_mode == "qga":
+        command_runner = lambda command: run_restored_guest_agent_command(context, target.target_vmid, command)
+    else:
+        raise ValueError(f"unsupported execution mode: {execution_mode}")
+    report = synthetic_transaction_replay.run_target_profile(
+        "restore-docker-runtime",
+        execute_command=command_runner,
+    )
+    report["target_address"] = ip_address
+    report["execution_mode"] = execution_mode
+    return report
+
+
+def build_synthetic_replay_test(replay_report: dict[str, Any]) -> dict[str, Any]:
+    latency = replay_report.get("latency_ms", {})
+    return {
+        "name": "synthetic_transaction_replay",
+        "status": "pass" if replay_report.get("overall") == "pass" else "fail",
+        "required": True,
+        "success_rate": replay_report.get("success_rate"),
+        "p50_latency_ms": latency.get("p50"),
+        "p95_latency_ms": latency.get("p95"),
+        "max_latency_ms": latency.get("max"),
+        "window": replay_report.get("window_assessment", {}).get("window"),
+        "summary": replay_report.get("summary"),
+    }
+
+
 def build_target_result(
     *,
     target: RestoreTarget,
     backup: dict[str, Any],
     restore_duration_seconds: int,
     boot_time_seconds: int,
+    execution_mode: str,
     tests: list[dict[str, Any]],
+    synthetic_replay: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    combined_tests = list(tests)
+    if synthetic_replay is not None:
+        combined_tests.append(build_synthetic_replay_test(synthetic_replay))
     return {
         "vm": target.vm_name,
         "source_vmid": target.source_vmid,
@@ -439,8 +548,11 @@ def build_target_result(
         "restore_ip": target.ip_cidr.split("/", 1)[0],
         "restore_duration_seconds": restore_duration_seconds,
         "boot_time_seconds": boot_time_seconds,
-        "tests": tests,
-        "overall": overall_from_tests(tests),
+        "execution_mode": execution_mode,
+        "smoke_tests": tests,
+        "synthetic_replay": synthetic_replay,
+        "tests": combined_tests,
+        "overall": overall_from_tests(combined_tests),
     }
 
 
@@ -638,6 +750,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--environment", default="production")
     parser.add_argument("--lookback-days", type=int, default=7)
     parser.add_argument("--selection-strategy", default="random", choices=sorted(ALLOWED_SELECTION_STRATEGIES))
+    parser.add_argument(
+        "--targets",
+        help="Comma-separated target guest names to replay, for example docker-runtime-lv3 or postgres-lv3,docker-runtime-lv3.",
+    )
     parser.add_argument("--seed", type=int)
     parser.add_argument("--ssh-timeout-seconds", type=int, default=300)
     parser.add_argument("--docker-wait-seconds", type=int, default=90)
@@ -654,7 +770,8 @@ def main(argv: list[str] | None = None) -> int:
         context = load_controller_context()
         rng = random.Random(args.seed if args.seed is not None else utc_now().toordinal())
         results: list[dict[str, Any]] = []
-        targets = load_restore_targets()
+        selected_names = args.targets.split(",") if args.targets else None
+        targets = select_restore_targets(selected_names)
         capacity_verdict = check_capacity_class_request(
             load_capacity_model(),
             requester_class="restore-verification",
@@ -666,7 +783,6 @@ def main(argv: list[str] | None = None) -> int:
                 "restore verification capacity admission rejected: "
                 + "; ".join(capacity_verdict["reasons"])
             )
-
         for target in targets:
             selected_backup: dict[str, Any] | None = None
             try:
@@ -679,15 +795,21 @@ def main(argv: list[str] | None = None) -> int:
                 )
                 restore_duration_seconds = restore_backup(context, target, selected_backup)
                 configure_restored_vm(context, target)
-                boot_time_seconds = wait_for_ssh(
+                execution_mode, boot_time_seconds = wait_for_guest_access(
                     context,
-                    target.ip_cidr.split("/", 1)[0],
+                    target,
                     timeout_seconds=args.ssh_timeout_seconds,
                 )
                 tests = execute_smoke_tests(
                     context,
                     target,
+                    execution_mode=execution_mode,
                     docker_wait_seconds=args.docker_wait_seconds,
+                )
+                synthetic_replay = execute_synthetic_replay(
+                    context,
+                    target,
+                    execution_mode=execution_mode,
                 )
                 results.append(
                     build_target_result(
@@ -695,7 +817,9 @@ def main(argv: list[str] | None = None) -> int:
                         backup=selected_backup,
                         restore_duration_seconds=restore_duration_seconds,
                         boot_time_seconds=boot_time_seconds,
+                        execution_mode=execution_mode,
                         tests=tests,
+                        synthetic_replay=synthetic_replay,
                     )
                 )
             except Exception as exc:  # noqa: BLE001
