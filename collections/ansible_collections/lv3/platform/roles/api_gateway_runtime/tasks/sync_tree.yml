@@ -1,3 +1,9 @@
+# Purpose: Stage, copy, and expand one declared API gateway source tree onto the target runtime host.
+# Use case: Included by the API gateway role when packaged workflow dependencies must mirror repo content on-host.
+# Inputs: One `api_gateway_tree_sync_spec` item describing the source path, archive root, destination, and archive location.
+# Outputs: Refreshes the selected destination tree on the guest from the controller-side repository contents.
+# Idempotency: Partially idempotent because the archive expansion path rewrites the staged destination tree by design.
+# Dependencies: ADR 0165, ADR 0092, and ADR 0197.
 ---
 - name: Stage and expand the {{ api_gateway_tree_sync_spec.name }}
   block:
@@ -55,12 +61,12 @@
         mode: "0600"
 
     - name: Expand the staged archive on the guest for {{ api_gateway_tree_sync_spec.name }}
-      ansible.builtin.unarchive:
-        src: "{{ api_gateway_tree_sync_spec.remote_archive }}"
-        dest: "{{ api_gateway_tree_sync_spec.dest_parent }}"
-        remote_src: true
-        owner: root
-        group: root
+      ansible.builtin.shell: |
+        set -euo pipefail
+        tar -xzf "{{ api_gateway_tree_sync_spec.remote_archive }}" -C "{{ api_gateway_tree_sync_spec.dest_parent }}"
+      args:
+        executable: /bin/bash
+      changed_when: true
   always:
     - name: Remove the staged archive from the guest for {{ api_gateway_tree_sync_spec.name }}
       ansible.builtin.file:

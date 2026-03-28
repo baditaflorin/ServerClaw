@@ -1491,6 +1491,47 @@
         ]
       }
     },
+    "converge-dify": {
+      "description": "Converge the Dify visual workflow canvas on docker-runtime-lv3, publish it at agents.lv3.org, and verify governed tool sync plus smoke workflow export.",
+      "workflow_id": "converge-dify",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to publish agents.lv3.org and expand the shared edge certificate."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-dify passes",
+        "make validate passes before the apply",
+        "The edge-auth boundary, governed tool exposure, and branch-local Qdrant sidecar limitation are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, public health verification, admin bootstrap verification, governed tool sync result, and exported smoke workflow artifact path."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if PostgreSQL, the Dify runtime, the API gateway tool route, or shared-edge publication verification fails.",
+          "Stop if agents.lv3.org becomes reachable outside the intended edge-auth boundary or if the governed tool sync starts returning unauthorized responses."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Dify and edge configuration from version control before retrying.",
+          "Do not compensate for a broken rollout by hand-editing Dify bootstrap state, datasets, or edge routes outside the repo."
+        ]
+      }
+    },
     "converge-n8n": {
       "description": "Converge n8n with PostgreSQL persistence and publish it at n8n.lv3.org while keeping the editor behind edge auth and public webhooks reachable.",
       "workflow_id": "converge-n8n",

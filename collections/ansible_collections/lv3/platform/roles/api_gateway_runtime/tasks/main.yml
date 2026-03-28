@@ -1,3 +1,9 @@
+# Purpose: Converge the API gateway runtime files, packaged repo surfaces, and supporting local artifacts.
+# Use case: Run during API gateway deploys and updates, including governed tool bridge changes for Dify.
+# Inputs: API gateway paths, build sources, tree sync specs, and Keycloak/openbao/runtime settings.
+# Outputs: Creates the on-host API gateway runtime tree and prepares synced sources and configuration.
+# Idempotency: Partially idempotent because some downstream sync and container restart steps intentionally refresh deployed state.
+# Dependencies: ADR 0165, ADR 0092, ADR 0175, and ADR 0197.
 ---
 - name: Validate API gateway runtime inputs
   ansible.builtin.assert:
@@ -38,7 +44,19 @@
       mode: "0755"
     - path: "{{ api_gateway_service_dir }}"
       mode: "0755"
+    - path: "{{ api_gateway_service_dir }}/.githooks"
+      mode: "0755"
+    - path: "{{ api_gateway_service_dir }}/.github"
+      mode: "0755"
+    - path: "{{ api_gateway_service_dir }}/.github/workflows"
+      mode: "0755"
     - path: "{{ api_gateway_service_dir }}/api_gateway"
+      mode: "0755"
+    - path: "{{ api_gateway_service_dir }}/inventory"
+      mode: "0755"
+    - path: "{{ api_gateway_service_dir }}/inventory/host_vars"
+      mode: "0755"
+    - path: "{{ api_gateway_service_dir }}/versions"
       mode: "0755"
     - path: "{{ api_gateway_config_dir }}"
       mode: "0755"
@@ -142,17 +160,36 @@
       WORKDIR /app
       COPY requirements.txt ./requirements.txt
       RUN pip install --no-cache-dir -r requirements.txt
+      COPY .githooks ./.githooks
+      COPY Makefile ./Makefile
+      COPY .github ./.github
+      COPY .pre-commit-config.yaml ./.pre-commit-config.yaml
+      COPY README.md ./README.md
+      COPY ansible.cfg ./ansible.cfg
       COPY controller_automation_toolkit.py ./controller_automation_toolkit.py
       COPY canonical_errors.py ./canonical_errors.py
       COPY api_gateway_catalog.py ./api_gateway_catalog.py
       COPY maintenance_window_tool.py ./maintenance_window_tool.py
       COPY slo_tracking.py ./slo_tracking.py
       COPY api_gateway ./api_gateway
+      COPY collections ./collections
       COPY docs ./docs
+      COPY inventory ./inventory
+      COPY migrations ./migrations
+      COPY molecule ./molecule
+      COPY packer ./packer
       COPY platform ./platform
+      COPY playbooks ./playbooks
       COPY receipts ./receipts
+      COPY requirements ./requirements
+      COPY roles ./roles
       COPY scripts ./scripts
       COPY search_fabric ./search_fabric
+      COPY tests ./tests
+      COPY tofu ./tofu
+      COPY versions ./versions
+      COPY windmill ./windmill
+      COPY workstreams.yaml ./workstreams.yaml
       EXPOSE 8080
       CMD ["uvicorn", "api_gateway.main:app", "--host", "0.0.0.0", "--port", "8080"]
 

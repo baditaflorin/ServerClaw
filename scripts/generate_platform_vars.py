@@ -47,6 +47,7 @@ PORT_KEYS = (
     "searxng_port",
     "searxng_host_proxy_port",
     "langfuse_port",
+    "dify_port",
     "outline_port",
     "dozzle_http_port",
     "dozzle_agent_port",
@@ -328,6 +329,9 @@ def build_service_urls(
     elif service_id == "langfuse":
         urls["internal"] = service_url("http", private_ip, ports["langfuse_port"])
         port_map["internal"] = ports["langfuse_port"]
+    elif service_id == "dify":
+        urls["internal"] = service_url("http", private_ip, ports["dify_port"])
+        port_map["internal"] = ports["dify_port"]
     elif service_id == "plane":
         urls["internal"] = service_url("http", private_ip, ports["plane_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["plane_host_proxy_port"])

@@ -1,3 +1,9 @@
+# Purpose: Define default paths, sync sources, and topology inputs for the repo-managed API gateway runtime.
+# Use case: Loaded whenever the API gateway role converges the packaged workflow bridge and related runtime assets.
+# Inputs: Inventory-derived topology, image catalog entries, local artifact roots, and sync tree definitions.
+# Outputs: Supplies stable defaults consumed by the API gateway runtime tasks and templates.
+# Idempotency: Fully idempotent because this file only declares role defaults.
+# Dependencies: ADR 0165, ADR 0092, ADR 0175, and ADR 0197.
 ---
 api_gateway_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('api_gateway') }}"
 api_gateway_repo_root: "{{ inventory_dir | dirname }}"
@@ -24,11 +30,41 @@ api_gateway_shared_local_root: >-
     ~ '/.local'
   }}
 api_gateway_tree_sync_specs:
+  - name: ansible collection tree required by packaged workflow implementation refs
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: collections
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/collections-sync.tar.gz"
+  - name: inventory tree required by packaged workflow implementation refs
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: inventory
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/inventory-sync.tar.gz"
+  - name: migrations tree required by packaged workflow implementation refs
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: migrations
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/migrations-sync.tar.gz"
+  - name: molecule tree required by packaged workflow implementation refs
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: molecule
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/molecule-sync.tar.gz"
+  - name: packer tree required by packaged workflow implementation refs
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: packer
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/packer-sync.tar.gz"
   - name: platform package for gateway graph support
     archive_root: "{{ api_gateway_repo_root }}"
     source: platform
     dest_parent: "{{ api_gateway_service_dir }}"
     remote_archive: "{{ api_gateway_site_dir }}/platform-sync.tar.gz"
+  - name: playbooks tree required by packaged workflow implementation refs
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: playbooks
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/playbooks-sync.tar.gz"
   - name: shared search fabric package for gateway search routes
     archive_root: "{{ api_gateway_repo_root }}/scripts"
     source: search_fabric
@@ -55,6 +91,31 @@ api_gateway_tree_sync_specs:
     source: receipts
     dest_parent: "{{ api_gateway_service_dir }}"
     remote_archive: "{{ api_gateway_site_dir }}/receipts-sync.tar.gz"
+  - name: requirements tree required by packaged workflow implementation refs
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: requirements
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/requirements-sync.tar.gz"
+  - name: roles tree required by packaged workflow implementation refs
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: roles
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/roles-sync.tar.gz"
+  - name: tests tree required by packaged workflow implementation refs
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: tests
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/tests-sync.tar.gz"
+  - name: tofu tree required by packaged workflow implementation refs
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: tofu
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/tofu-sync.tar.gz"
+  - name: windmill tree required by packaged workflow implementation refs
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: windmill
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/windmill-sync.tar.gz"
 api_gateway_gateway_catalog_src: "{{ api_gateway_repo_root }}/config/api-gateway-catalog.json"
 api_gateway_service_catalog_src: "{{ api_gateway_repo_root }}/config/service-capability-catalog.json"
 api_gateway_error_registry_src: "{{ api_gateway_repo_root }}/config/error-codes.yaml"
@@ -67,7 +128,21 @@ api_gateway_timeout_hierarchy_src: "{{ api_gateway_repo_root }}/config/timeout-h
 api_gateway_platform_vars_src: "{{ api_gateway_repo_root }}/inventory/group_vars/platform.yml"
 api_gateway_drift_receipts_glob: "{{ api_gateway_repo_root }}/receipts/drift-reports/*.json"
 api_gateway_platform_context_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt
+api_gateway_dify_tools_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/tools-api-key.txt
+api_gateway_dify_tools_api_key_header: X-LV3-Dify-Api-Key
 api_gateway_sources:
+  - src: "{{ api_gateway_repo_root }}/.githooks/pre-push"
+    dest: .githooks/pre-push
+  - src: "{{ api_gateway_repo_root }}/.github/workflows/validate.yml"
+    dest: .github/workflows/validate.yml
+  - src: "{{ api_gateway_repo_root }}/.pre-commit-config.yaml"
+    dest: .pre-commit-config.yaml
+  - src: "{{ api_gateway_repo_root }}/Makefile"
+    dest: Makefile
+  - src: "{{ api_gateway_repo_root }}/README.md"
+    dest: README.md
+  - src: "{{ api_gateway_repo_root }}/ansible.cfg"
+    dest: ansible.cfg
   - src: "{{ api_gateway_repo_root }}/scripts/controller_automation_toolkit.py"
     dest: controller_automation_toolkit.py
   - src: "{{ api_gateway_repo_root }}/scripts/api_gateway_catalog.py"
@@ -82,9 +157,25 @@ api_gateway_sources:
     dest: api_gateway/main.py
   - src: "{{ api_gateway_repo_root }}/requirements/api-gateway.txt"
     dest: requirements.txt
+  - src: "{{ api_gateway_repo_root }}/inventory/host_vars/proxmox_florin.yml"
+    dest: inventory/host_vars/proxmox_florin.yml
+  - src: "{{ api_gateway_repo_root }}/versions/stack.yaml"
+    dest: versions/stack.yaml
+  - src: "{{ api_gateway_repo_root }}/workstreams.yaml"
+    dest: workstreams.yaml
 api_gateway_config_sources:
   - src: "{{ api_gateway_gateway_catalog_src }}"
     dest: api-gateway-catalog.json
+  - src: "{{ api_gateway_repo_root }}/config/agent-tool-registry.json"
+    dest: agent-tool-registry.json
+  - src: "{{ api_gateway_repo_root }}/config/api-publication.json"
+    dest: api-publication.json
+  - src: "{{ api_gateway_repo_root }}/config/command-catalog.json"
+    dest: command-catalog.json
+  - src: "{{ api_gateway_repo_root }}/config/workflow-defaults.yaml"
+    dest: workflow-defaults.yaml
+  - src: "{{ api_gateway_repo_root }}/config/execution-lanes.yaml"
+    dest: execution-lanes.yaml
   - src: "{{ api_gateway_service_catalog_src }}"
     dest: service-capability-catalog.json
   - src: "{{ api_gateway_error_registry_src }}"
@@ -147,3 +238,9 @@ api_gateway_nats_password: >-
 api_gateway_deploy_webhook_url: ""
 api_gateway_secret_rotation_webhook_url: ""
 api_gateway_include_upstream_openapi: false
+api_gateway_dify_tools_api_key: >-
+  {{
+    lookup('ansible.builtin.file', api_gateway_dify_tools_api_key_local_file, errors='ignore')
+    | default('', true)
+    | trim
+  }}

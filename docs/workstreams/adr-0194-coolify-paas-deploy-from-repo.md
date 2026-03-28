@@ -83,5 +83,5 @@ Live apply completed on 2026-03-28 and was then replayed from merged mainline on
 ## Mainline Integration
 
 - Protected main-only files were updated on `codex/ws-0194-main-merge`, including `VERSION`, `changelog.md`, `README.md`, and `versions/stack.yaml`.
-- The canonical release versions for this implementation are now `0.177.28` in-repo and `0.130.35` on-platform.
+- The canonical release versions for this implementation are now `0.177.30` in-repo and `0.130.35` on-platform.
 - The branch-local receipt remains useful historical evidence for the first direct workstream apply, but the mainline receipt is the source of truth for merge-safe canonical state.

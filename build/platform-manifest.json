@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.28",
+  "repo_version": "0.177.30",
   "platform_version": "0.130.35",
-  "generated_at": "2026-03-28T09:22:49Z",
-  "next_refresh_at": "2026-03-28T10:22:49Z",
+  "generated_at": "2026-03-28T09:56:57Z",
+  "next_refresh_at": "2026-03-28T10:56:57Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -81,6 +81,17 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://apps.lv3.org",
+        "last_live_apply": "2026-03-28T00:00:00Z"
+      },
+      "dify": {
+        "service_name": "Dify",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://agents.lv3.org",
         "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "docker_build": {
@@ -897,6 +908,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-coolify.md"
+      },
+      {
+        "id": "converge-dify",
+        "description": "Converge Dify on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at agents.lv3.org, and verify the governed tool-sync and workflow export path.",
+        "tags": [
+          "converge-dify",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 350,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-dify.md"
       },
       {
         "id": "converge-docker-runtime",
@@ -3124,6 +3161,16 @@
         ]
       },
       {
+        "id": "configure-dify",
+        "title": "Configure Dify",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-dify.md",
+        "workflow_ids": [
+          "converge-dify"
+        ]
+      },
+      {
         "id": "configure-docker-runtime",
         "title": "Configure Docker Runtime Runbook",
         "agent_trust_required": "T3",
@@ -3825,10 +3872,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.27",
+    "last_version": "0.177.29",
     "deployed_at": "2026-03-28",
-    "summary": "repaired shared edge publication playbooks so service-specific converges always load the canonical platform topology before rebuilding the shared certificate SAN set, preventing `wiki.lv3.org` and `draw.lv3.org` from dropping out of live publication replayed the shared edge from merged `main`, re-expanded the live certificate, and re-verified the governed Outline surface at `wiki.lv3.org`",
-    "release_notes_url": "docs/release-notes/0.177.28.md"
+    "summary": "integrated ADR 0194 into the latest `origin/main` by carrying the verified Coolify repo-deploy lane forward on top of the newer mainline, preserving the protected dashboard publication, wildcard app ingress, and governed `lv3 deploy-repo` path as canonical repo truth",
+    "release_notes_url": "docs/release-notes/0.177.30.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

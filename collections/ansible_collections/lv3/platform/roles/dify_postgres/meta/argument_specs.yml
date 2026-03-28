@@ -1,0 +1,20 @@
+# Purpose: Declare the required inputs for the Dify PostgreSQL role so automation and docs share one contract.
+# Use case: Evaluated by Ansible role argument validation before the Dify database tasks run.
+# Inputs: Dify database name, Dify database role name, and the controller-local password artifact path.
+# Outputs: Enforces the role interface and documents the required variables for operators and automation.
+# Idempotency: Fully idempotent because this file only declares argument metadata.
+# Dependencies: ADR 0165, ADR 0030, and ADR 0197.
+---
+argument_specs:
+  main:
+    short_description: Provision the PostgreSQL role and database for Dify.
+    options:
+      dify_database_name:
+        type: str
+        required: true
+      dify_database_user:
+        type: str
+        required: true
+      dify_database_password_local_file:
+        type: str
+        required: true

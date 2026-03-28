@@ -153,6 +153,7 @@ platform_ports:
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
+  dify_port: 8094
   outline_port: 3006
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
@@ -208,6 +209,7 @@ platform_port_assignments:
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
+  dify_port: 8094
   outline_port: 3006
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
@@ -1343,6 +1345,34 @@ platform_service_topology:
     urls:
       public: https://langfuse.lv3.org
       internal: http://10.10.10.20:3002
+  dify:
+    service_name: dify
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: agents.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: agents
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8094
+    service_id: dify
+    ports:
+      internal: 8094
+    urls:
+      public: https://agents.lv3.org
+      internal: http://10.10.10.20:8094
   plane:
     service_name: plane
     owning_vm: docker-runtime-lv3
@@ -1886,6 +1916,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: langfuse
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: agents
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -2475,6 +2509,34 @@ public_edge_service_topology:
     urls:
       public: https://langfuse.lv3.org
       internal: http://10.10.10.20:3002
+  dify:
+    service_name: dify
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: agents.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: agents
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8094
+    service_id: dify
+    ports:
+      internal: 8094
+    urls:
+      public: https://agents.lv3.org
+      internal: http://10.10.10.20:8094
   plane:
     service_name: plane
     owning_vm: docker-runtime-lv3
@@ -3081,6 +3143,7 @@ netbox_server_port: 8082
 searxng_port: 8881
 searxng_host_proxy_port: 80
 langfuse_port: 3002
+dify_port: 8094
 outline_port: 3006
 dozzle_http_port: 8089
 dozzle_agent_port: 7007
