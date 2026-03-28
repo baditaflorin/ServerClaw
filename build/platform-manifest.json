@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.36",
   "platform_version": "0.130.37",
-  "generated_at": "2026-03-28T12:23:36Z",
-  "next_refresh_at": "2026-03-28T13:23:36Z",
+  "generated_at": "2026-03-28T12:45:59Z",
+  "next_refresh_at": "2026-03-28T13:45:59Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3477,7 +3477,7 @@
         "id": "configure-windmill",
         "title": "Configure Windmill",
         "agent_trust_required": "T3",
-        "steps": 20,
+        "steps": 21,
         "path": "docs/runbooks/configure-windmill.md",
         "workflow_ids": [
           "converge-windmill"

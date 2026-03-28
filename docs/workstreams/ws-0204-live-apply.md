@@ -32,6 +32,7 @@
 - `docs/runbooks/configure-windmill.md`
 - `docs/runbooks/validate-repository-automation.md`
 - `config/correction-loops.json`
+- `config/ansible-role-idempotency.yml`
 - `docs/schema/correction-loop-catalog.schema.json`
 - `config/merge-eligible-files.yaml`
 - `collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml`
