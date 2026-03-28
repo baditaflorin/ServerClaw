@@ -23,6 +23,27 @@ make pre-push-gate
 
 See [docs/runbooks/validation-gate.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/validation-gate.md) for the hook installation, bypass, and post-merge workflow details.
 
+ADR 0229 adds the private Gitea server-side replay of that gate plus the
+runner-backed branch validation workflow:
+
+```bash
+export GITEA_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-token.txt)"
+export GITEA_BASIC_AUTH="$(printf '%s:%s' 'ops-gitea' "${GITEA_TOKEN}" | base64)"
+
+git -c http.extraHeader="Authorization: Basic ${GITEA_BASIC_AUTH}" \
+  push http://100.64.0.1:3009/ops/proxmox_florin_server.git \
+  HEAD:refs/heads/codex/validation-smoke
+
+curl -sS \
+  -H "Authorization: token ${GITEA_TOKEN}" \
+  "http://100.64.0.1:3009/api/v1/repos/ops/proxmox_florin_server/actions/runs?limit=5" | \
+  jq '{workflow_runs: [.workflow_runs[] | {id, status, conclusion, head_branch, head_sha}]}'
+```
+
+That push path only creates the branch ref after the server-side validation gate
+passes. The subsequent workflow run executes `.gitea/workflows/validate.yml` on
+runner `docker-build-lv3`.
+
 ## What The Pipeline Checks
 
 - all managed playbooks pass Ansible syntax check
@@ -57,6 +78,8 @@ See [docs/runbooks/validation-gate.md](/Users/live/Documents/GITHUB_PROJECTS/pro
 - validation collections are cached under `.ansible/validation/collections`
 - lint-oriented stages operate on tracked repository files so unrelated local work-in-progress does not fail the repo gate
 - CI runs the same contract through `make validate`
+- the private Gitea push gate replays the heavier validation contract remotely on `docker-build-lv3` before accepting a pushed ref
+- successful branch pushes to private Gitea trigger `.gitea/workflows/validate.yml` on the same `docker-build-lv3` runner, giving a server-resident confirmation of the repo state that actually crossed the git boundary
 
 ADR 0083 adds an alternative containerised execution path for the heavier lint and validation commands:
 

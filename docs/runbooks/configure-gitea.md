@@ -46,6 +46,31 @@ test -s /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea
 ansible docker-build-lv3 -i inventory/hosts.yml -b -m command -a "docker ps --filter name=lv3-gitea-runner --format {{.Names}}"
 ```
 
+5. Confirm the Gitea admin API sees the runner online:
+
+```bash
+export GITEA_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-token.txt)"
+curl -sS \
+  -H "Authorization: token ${GITEA_TOKEN}" \
+  http://100.64.0.1:3009/api/v1/admin/actions/runners | \
+  jq '{total_count, runners: [.runners[] | {name, status, busy, labels: [.labels[].name]}]}'
+```
+
+6. Confirm a branch push is accepted by the private repo gate and produces a successful Actions run:
+
+```bash
+export GITEA_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-token.txt)"
+export GITEA_BASIC_AUTH="$(printf '%s:%s' 'ops-gitea' "${GITEA_TOKEN}" | base64)"
+git -c http.extraHeader="Authorization: Basic ${GITEA_BASIC_AUTH}" \
+  push http://100.64.0.1:3009/ops/proxmox_florin_server.git \
+  HEAD:refs/heads/codex/gitea-runner-smoke
+
+curl -sS \
+  -H "Authorization: token ${GITEA_TOKEN}" \
+  "http://100.64.0.1:3009/api/v1/repos/ops/proxmox_florin_server/actions/runs?limit=1" | \
+  jq '{workflow_runs: [.workflow_runs[] | {id, status, conclusion, head_branch, head_sha}]}'
+```
+
 ## Smoke-Test Repository Creation
 
 Use the mirrored admin token to create a repository under the managed `ops` org:
@@ -73,3 +98,5 @@ The canonical repository hook is installed under:
 
 - `git.lv3.org` is private-only. Do not add an NGINX edge publication for it.
 - The bootstrap admin and runner registration tokens are mirrored locally for controlled operator workflows; keep `.local/gitea/` outside commits.
+- The private git push path enforces the server-side validation gate before a ref is accepted. A rejected push can fail before any Actions workflow is created.
+- The Gitea git SSH endpoint on port `2222` uses Gitea account keys, not the Proxmox host bootstrap key. For controlled automation from the operator workstation, the mirrored `ops-gitea` admin token over HTTP basic auth is the documented fallback.

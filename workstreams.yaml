@@ -7585,7 +7585,7 @@ workstreams:
   - id: ws-0229-live-apply
     adr: "0229"
     title: Gitea Actions runners live apply from latest origin/main
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0229-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0229-live-apply
@@ -7598,6 +7598,7 @@ workstreams:
     conflicts_with: []
     shared_surfaces:
       - docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md
+      - docs/adr/.index.yaml
       - docs/workstreams/ws-0229-live-apply.md
       - docs/diagrams/agent-coordination-map.excalidraw
       - docs/runbooks/configure-gitea.md
@@ -7620,6 +7621,7 @@ workstreams:
         - id: adr_0229_runner_surface
           paths:
             - docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md
+            - docs/adr/.index.yaml
             - docs/workstreams/ws-0229-live-apply.md
             - docs/diagrams/agent-coordination-map.excalidraw
             - docs/runbooks/configure-gitea.md
@@ -7636,5 +7638,21 @@ workstreams:
             - receipts/live-applies/**
           mode: shared_contract
           contract: live-apply-receipts-v1
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: re-verified ADR 0229 Gitea Actions runners from the latest merged mainline by replaying `make converge-gitea`, passing the private Gitea server-side push gate, and completing a branch `validate` workflow on runner `docker-build-lv3`
+      release_bump: patch
+      included_in_repo_version: 0.177.38
+      latest_receipts:
+        gitea_actions_runners: 2026-03-28-adr-0229-gitea-actions-runners-live-apply
+      live_apply_verification:
+        runner:
+          runner_id: 1
+          runner_name: docker-build-lv3
+          status: online
+        workflow_run:
+          run_id: 20
+          head_branch: codex/ws-0229-live-apply
+          head_sha: b83d26083261b05782e9ccde2abf78f6d232d20c
+          conclusion: success

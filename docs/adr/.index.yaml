@@ -3850,7 +3850,7 @@ adr_index:
   - adr: 0229
     title: Gitea Actions Runners For On-Platform Validation And Release Preparation
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -3863,6 +3863,7 @@ adr_index:
       - preparation
     summary: We will use Gitea Actions runners (actrunner) as the default on-platform
     filename: 0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md
+    implemented_version: 0.165.0
   - adr: '0230'
     title: Policy Decisions Via Open Policy Agent And Conftest
     status: Accepted

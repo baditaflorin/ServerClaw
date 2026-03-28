@@ -2,13 +2,13 @@
 
 - ADR: [ADR 0229](../adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md)
 - Title: on-platform Gitea Actions runner convergence, verification, and merge-safe documentation
-- Status: in-progress
+- Status: live_applied
 - Branch: `codex/ws-0229-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0229-live-apply`
 - Owner: codex
 - Depends On: `adr-0083-docker-based-check-runner`, `adr-0143-gitea`, `adr-0168-automated-validation-gate`, `adr-0224-server-resident-operations-architecture-bundle`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md`, `docs/runbooks/configure-gitea.md`, `docs/diagrams/agent-coordination-map.excalidraw`, `.gitea/workflows/validate.yml`, `playbooks/gitea.yml`, `collections/ansible_collections/lv3/platform/roles/gitea_runner/`, `collections/ansible_collections/lv3/platform/roles/gitea_runtime/`, `tests/test_gitea_runtime_role.py`, `receipts/live-applies/`, `workstreams.yaml`
+- Shared Surfaces: `docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md`, `docs/adr/.index.yaml`, `docs/runbooks/configure-gitea.md`, `docs/runbooks/validate-repository-automation.md`, `docs/diagrams/agent-coordination-map.excalidraw`, `.gitea/workflows/validate.yml`, `playbooks/gitea.yml`, `collections/ansible_collections/lv3/platform/roles/gitea_runner/`, `collections/ansible_collections/lv3/platform/roles/gitea_runtime/`, `tests/test_gitea_runtime_role.py`, `receipts/live-applies/`, `workstreams.yaml`
 
 ## Scope
 
@@ -27,6 +27,7 @@
 
 - `docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md`
 - `docs/workstreams/ws-0229-live-apply.md`
+- `docs/adr/.index.yaml`
 - `docs/diagrams/agent-coordination-map.excalidraw`
 - `docs/runbooks/configure-gitea.md`
 - `docs/runbooks/validate-repository-automation.md`
@@ -62,13 +63,23 @@
 
 ## Live Apply Outcome
 
-- in progress
+- `make converge-gitea` replayed successfully from the rebased `origin/main` base commit `af6a219b`, finishing with `proxmox_florin ok=36 changed=4`, `postgres-lv3 ok=24 changed=0`, `docker-runtime-lv3 ok=224 changed=1`, and `docker-build-lv3 ok=102 changed=10`
+- the live replay refreshed real state on `docker-build-lv3`: guest firewall policy, Docker daemon configuration, Docker bridge forward-compat nftables rules, BuildKit unit state, and the managed buildx builder were all re-converged before the runner assertion passed
+- the Gitea admin API confirmed runner `1` named `docker-build-lv3` online with labels `self-hosted`, `linux`, `amd64`, and `docker`
+- the first private Gitea push attempt surfaced two actionable gate failures in the branch: `workstreams.yaml` needed `status: in_progress`, and the generated coordination diagram needed refresh after claiming `ws-0229-live-apply`
+- after those fixes, the second private Gitea push passed the full server-side gate, including `ansible-lint`, `ansible-syntax`, `schema-validation`, `dependency-graph`, `service-completeness`, `type-check`, `yaml-lint`, `security-scan`, `packer-validate`, and `tofu-validate`
+- Gitea recorded workflow run `20` for `codex/ws-0229-live-apply` with `event: push`, `head_sha: b83d26083261b05782e9ccde2abf78f6d232d20c`, `status: completed`, and `conclusion: success`
+- run `20` executed job `validate` on runner `docker-build-lv3` (`runner_id: 1`), starting at `2026-03-28T16:21:39Z` and completing at `2026-03-28T16:21:42Z`
+- ADR 0229 itself is now marked implemented retroactively to the earlier ADR 0143 rollout, because the capability first became true in repo version `0.165.0` and platform version `0.130.15` on `2026-03-26`; this workstream re-verified it from repo version context `0.177.38` and platform version context `0.130.38`
 
 ## Mainline Integration Outcome
 
 - pending final verified integration step
+- remaining for merge to `main`: rebase again onto the latest `origin/main`, update `VERSION` and `changelog.md` for the merge-to-`main` commit, and decide whether any README or `versions/stack.yaml` changes are unnecessary because the runner capability was already true on the integrated platform before this documentation-only workstream
 
 ## Notes For The Next Assistant
 
 - pull from `origin/main` again before any final merge-to-`main` step because concurrent agents are updating shared integration files
+- the private Gitea git endpoint accepted the branch only after the server-side validation gate passed; use that accepted push plus workflow run `20` as the canonical branch-local automation proof
+- the host bootstrap SSH key did not authenticate to the Gitea git endpoint on port `2222`, so the branch smoke push used HTTP basic auth with the mirrored `ops-gitea` admin token instead
 - if the platform is already converged before replay, still capture fresh evidence from the latest merged mainline candidate rather than treating stale runtime state as sufficient
