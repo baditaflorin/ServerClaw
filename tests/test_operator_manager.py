@@ -7,6 +7,7 @@ import pytest
 import yaml
 
 import operator_manager
+from platform.operator_access import TailscaleApiAdapter
 
 
 TEST_KEY = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer test@example"
@@ -343,11 +344,13 @@ def test_quarterly_review_flags_stale_operator(
 def test_live_backend_skips_tailscale_remove_when_not_configured(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    backend = operator_manager.LiveBackend(actor_class="operator", actor_id="tester")
-    monkeypatch.setattr(operator_manager, "load_tailscale_api_key", lambda: None)
-    monkeypatch.setattr(operator_manager, "load_tailscale_tailnet", lambda: None)
+    adapter = TailscaleApiAdapter(
+        api_key_loader=lambda: None,
+        tailnet_loader=lambda: None,
+        invite_endpoint_loader=lambda: "",
+    )
 
-    payload = backend._tailscale_remove(
+    payload = adapter.remove(
         {
             "tailscale": {
                 "login_email": "alice@example.com",
