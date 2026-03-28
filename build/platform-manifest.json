@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.46",
   "platform_version": "0.130.41",
-  "generated_at": "2026-03-28T18:53:07Z",
-  "next_refresh_at": "2026-03-28T19:53:07Z",
+  "generated_at": "2026-03-28T19:29:38Z",
+  "next_refresh_at": "2026-03-28T20:29:38Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -726,6 +726,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-edge-publication.md"
+      },
+      {
+        "id": "configure-host-control-loops",
+        "description": "Install the ADR 0226 host-resident control-loop baseline on proxmox_florin, including the managed systemd service, timer, path unit, and verification state paths.",
+        "tags": [
+          "configure-host-control-loops",
+          "host-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 120,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-host-control-loops.md"
       },
       {
         "id": "configure-ingress",
@@ -3274,6 +3300,16 @@
         "path": "docs/runbooks/configure-homepage.md",
         "workflow_ids": [
           "converge-homepage"
+        ]
+      },
+      {
+        "id": "configure-host-control-loops",
+        "title": "Configure Host Control Loops",
+        "agent_trust_required": "T3",
+        "steps": 5,
+        "path": "docs/runbooks/configure-host-control-loops.md",
+        "workflow_ids": [
+          "configure-host-control-loops"
         ]
       },
       {
