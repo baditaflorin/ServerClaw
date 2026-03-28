@@ -120,6 +120,15 @@
       "adr": "0152"
     },
     {
+      "id": "realtime",
+      "service": "realtime",
+      "name": "Netdata Realtime Metrics",
+      "vm": "monitoring-lv3",
+      "tier": 1,
+      "category": "observability",
+      "adr": "0196"
+    },
+    {
       "id": "langfuse",
       "service": "langfuse",
       "name": "Langfuse",
@@ -492,6 +501,18 @@
       "to": "nginx_edge",
       "type": "hard",
       "description": "The unified dashboard is published at home.lv3.org through the shared NGINX edge and is not exposed directly on the public internet."
+    },
+    {
+      "from": "realtime",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Public operator access to realtime.lv3.org depends on the shared Keycloak-backed edge auth path, but the private Netdata parent remains reachable on monitoring-lv3."
+    },
+    {
+      "from": "realtime",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public operator access to realtime.lv3.org depends on the shared NGINX edge publication while the private Netdata parent remains reachable on the guest network."
     },
     {
       "from": "langfuse",

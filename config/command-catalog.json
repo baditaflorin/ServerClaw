@@ -314,6 +314,40 @@
         ]
       }
     },
+    "network-impairment-matrix": {
+      "description": "Render the ADR 0189 network impairment matrix from the governed Windmill worker checkout.",
+      "workflow_id": "network-impairment-matrix",
+      "scope": "guest_runtime",
+      "approval_policy": "operator_approved",
+      "inputs": [
+        {
+          "name": "NETWORK_IMPAIRMENT_MATRIX_ARGS",
+          "kind": "operator_parameter",
+          "required": false,
+          "source": "Makefile",
+          "description": "Optional target-class, service, or report-file selectors passed through the repo-managed make target."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes before updating or rendering the ADR 0189 matrix",
+        "Operators review the selected target class and confirm the run stays on the safe diagnostic path rather than a live network impairment",
+        "The docker-runtime-lv3 Windmill worker is reachable if the selected run should write and verify the live report"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the selected target class, the generated JSON report path, and the verified Windmill script path."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the matrix fails validation against the service catalog or fault-scenario catalog.",
+          "Stop if the live worker checkout is missing the released matrix script or the Windmill script path cannot be verified."
+        ],
+        "rollback_guidance": [
+          "Replay the Windmill runtime from the released checkout before retrying the matrix run.",
+          "Do not treat a missing or stale matrix report as permission to run ad hoc network impairments on production."
+        ]
+      }
+    },
     "nightly-integration-tests": {
       "description": "Run the ADR 0111 nightly integration suite, including the NetBox rotation mutation check when the worker is provisioned for it.",
       "workflow_id": "nightly-integration-tests",
@@ -1773,6 +1807,47 @@
         "rollback_guidance": [
           "Restore the last known-good Dozzle runtime and edge publication state before retrying.",
           "Do not leave behind ad hoc compose, firewall, or NGINX changes after a failed rollout."
+        ]
+      }
+    },
+    "converge-realtime": {
+      "description": "Converge the Netdata parent-plus-children realtime metrics surface, Prometheus scrape path, and authenticated realtime.lv3.org publication.",
+      "workflow_id": "converge-realtime",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to publish realtime.lv3.org and expand the shared edge certificate."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-realtime passes",
+        "make validate passes before the apply",
+        "The Netdata child topology, Prometheus scrape surface, and shared-edge publication boundary are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, Prometheus netdata_info verification, the authenticated edge redirect, and the final receipt id for realtime.lv3.org."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the Netdata parent, any declared child stream, Prometheus scrape path, or shared edge publication fails to converge.",
+          "Stop if the rollout would expose realtime.lv3.org outside the intended authenticated edge or private guest-network recovery path."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Netdata runtime, Prometheus scrape configuration, and edge publication state before retrying.",
+          "Do not leave behind ad hoc package repositories, DNS changes, or NGINX edits after a failed rollout."
         ]
       }
     },

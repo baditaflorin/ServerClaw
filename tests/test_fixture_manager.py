@@ -19,6 +19,7 @@ def fixture_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     (repo_root / "receipts" / "fixtures").mkdir(parents=True)
     (repo_root / ".local" / "keys").mkdir(parents=True)
     (repo_root / "tofu" / "modules" / "proxmox-fixture").mkdir(parents=True)
+    (repo_root / "tofu" / "modules" / "proxmox-vm-destroyable").mkdir(parents=True)
 
     (repo_root / "config" / "controller-local-secrets.json").write_text(
         json.dumps(
@@ -73,8 +74,8 @@ def fixture_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
                         "kind": "ephemeral_pool",
                         "status": "reserved",
                         "vmid_range": {"start": 910, "end": 979},
-                        "max_concurrent_vms": 3,
-                        "reserved": {"ram_gb": 20, "vcpu": 8, "disk_gb": 216},
+                        "max_concurrent_vms": 5,
+                        "reserved": {"ram_gb": 20, "vcpu": 8, "disk_gb": 100},
                         "notes": "fixture test pool",
                     }
                 ],
@@ -163,6 +164,7 @@ def fixture_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     )
     monkeypatch.setattr(fixture_manager, "GROUP_VARS_PATH", repo_root / "inventory" / "group_vars" / "all.yml")
     monkeypatch.setattr(fixture_manager, "HOST_VARS_PATH", repo_root / "inventory" / "host_vars" / "proxmox_florin.yml")
+    monkeypatch.setattr(fixture_manager.seed_data_snapshots, "seed_classes", lambda catalog=None: ["tiny", "standard", "recovery"])
     return repo_root
 
 
@@ -174,6 +176,17 @@ def test_fixture_up_writes_active_receipt(fixture_repo: Path, monkeypatch: pytes
     )
     monkeypatch.setattr(fixture_manager, "apply_fixture", lambda runtime_dir, endpoint, api_token, **kwargs: None)
     monkeypatch.setattr(fixture_manager, "wait_for_ssh", lambda receipt, timeout_seconds=300: None)
+    def fake_stage_seed_snapshot(receipt, seed_class=None, snapshot_id=None):
+        receipt["seed_class"] = seed_class or "tiny"
+        receipt["seed_snapshot_id"] = snapshot_id or "tiny-snapshot"
+        receipt["seed_snapshot_remote_dir"] = "/var/lib/lv3-seed-data/tiny"
+        return {
+            "seed_class": receipt["seed_class"],
+            "snapshot_id": receipt["seed_snapshot_id"],
+            "remote_dir": receipt["seed_snapshot_remote_dir"],
+        }
+
+    monkeypatch.setattr(fixture_manager, "stage_seed_snapshot", fake_stage_seed_snapshot)
     monkeypatch.setattr(fixture_manager, "wait_for_cloud_init", lambda receipt: None)
     monkeypatch.setattr(fixture_manager, "prepare_guest_for_converge", lambda receipt: None)
     monkeypatch.setattr(fixture_manager, "converge_roles", lambda receipt, skip_roles=False: None)
@@ -188,6 +201,7 @@ def test_fixture_up_writes_active_receipt(fixture_repo: Path, monkeypatch: pytes
     assert "expires_at" in receipt
     assert receipt["owner"] == "codex"
     assert receipt["purpose"] == "adr-0106-test"
+    assert receipt["seed_snapshot_id"] == "tiny-snapshot"
     assert receipt["lease_purpose"] == "fixture"
     assert receipt["pool_id"] == "docker-host"
     assert any(tag.startswith("ephemeral-codex-adr-0106-test-") for tag in receipt["ephemeral_tags"])
@@ -226,6 +240,37 @@ def test_load_ephemeral_pool_accepts_reservation_shape(
     assert pool["vmid_range"] == [910, 979]
     assert pool["reserved_ram_gb"] == 20
     assert pool["reserved_vcpu"] == 8
+
+
+def test_load_ephemeral_pool_accepts_current_reservations_shape(fixture_repo: Path) -> None:
+    pool = fixture_manager.load_ephemeral_pool()
+
+    assert pool == {
+        "vmid_range": [910, 979],
+        "max_concurrent_vms": 5,
+        "reserved_ram_gb": 20,
+        "reserved_vcpu": 8,
+        "reserved_disk_gb": 100,
+        "capacity_class": "preview_burst",
+        "notes": "fixture test pool",
+    }
+
+
+def test_tofu_endpoint_rewrites_loopback_for_docker_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(fixture_manager.shutil, "which", lambda command: None if command == "tofu" else "/usr/bin/docker")
+
+    assert (
+        fixture_manager.tofu_endpoint("https://127.0.0.1:18006/api2/json")
+        == "https://host.docker.internal:18006/api2/json"
+    )
+
+
+def test_default_fixture_context_prefers_private_jump_host_override(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("LV3_PROXMOX_HOST_ADDR", "100.64.0.1")
+
+    context = fixture_manager.default_fixture_context()
+
+    assert context["jump_host"] == "100.64.0.1"
 
 
 def test_fixture_down_archives_and_removes_receipt(fixture_repo: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -382,6 +427,32 @@ def test_build_runtime_main_targets_fixture_module(fixture_repo: Path) -> None:
     assert "agent_enabled = false" in rendered
     assert 'agent_timeout = "10s"' in rendered
     assert 'value = "10.20.10.100"' in rendered
+
+
+def test_stage_seed_snapshot_updates_receipt(monkeypatch: pytest.MonkeyPatch) -> None:
+    receipt = {
+        "receipt_id": "ops-base-20260327T120000Z",
+        "seed_class": "tiny",
+        "context": {"jump_user": "ops", "jump_host": "65.108.75.123", "ci_user": "ops"},
+        "definition": {"ssh_user": "ops"},
+        "ip_address": "10.20.10.120",
+    }
+    monkeypatch.setattr(fixture_manager, "ssh_base_argv", lambda receipt, timeout_seconds=5: ["ssh", "fixture"])
+    monkeypatch.setattr(fixture_manager.seed_data_snapshots, "guest_stage_root", lambda: "/var/lib/lv3-seed-data")
+    monkeypatch.setattr(
+        fixture_manager.seed_data_snapshots,
+        "stage_snapshot_to_remote_dir",
+        lambda seed_class, ssh_base, remote_dir, snapshot_name=None: {
+            "seed_class": seed_class,
+            "snapshot_id": snapshot_name or "tiny-abc123",
+            "remote_dir": remote_dir,
+        },
+    )
+
+    staged = fixture_manager.stage_seed_snapshot(receipt)
+
+    assert staged["snapshot_id"] == "tiny-abc123"
+    assert receipt["seed_snapshot_remote_dir"] == "/var/lib/lv3-seed-data/ops-base-20260327T120000Z"
 
 
 def test_tofu_module_source_path_uses_workspace_mount_when_host_tofu_is_missing(monkeypatch: pytest.MonkeyPatch) -> None:

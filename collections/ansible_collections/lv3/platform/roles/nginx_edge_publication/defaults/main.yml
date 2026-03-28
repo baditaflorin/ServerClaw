@@ -110,6 +110,14 @@ public_edge_security_headers_overrides:
       'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
       connect-src 'self' https://tasks.lv3.org wss://tasks.lv3.org;
       worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+  realtime.lv3.org:
+    content_security_policy: >-
+      default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:;
+      style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:;
+      font-src 'self' data:; connect-src 'self' https://realtime.lv3.org ws://realtime.lv3.org
+      wss://realtime.lv3.org; worker-src 'self' blob:; child-src 'self' blob:;
+      manifest-src 'self'
   logs.lv3.org:
     content_security_policy: >-
       default-src 'self' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net https://*.duckdb.org;
@@ -169,6 +177,8 @@ public_edge_authenticated_sites:
       - /webhook-test/
       - /webhook-waiting/
   logs.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+  realtime.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
   home.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180

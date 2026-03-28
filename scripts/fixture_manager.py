@@ -29,6 +29,7 @@ from typing import Any
 
 import vmid_allocator
 from mutation_audit import build_event, emit_event_best_effort
+import seed_data_snapshots
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -178,7 +179,24 @@ def load_ephemeral_pool() -> dict[str, Any]:
     payload = load_capacity_model()
     legacy_pool = payload.get("ephemeral_pool")
     if isinstance(legacy_pool, dict):
-        return legacy_pool
+        vmid_range = legacy_pool.get("vmid_range")
+        if (
+            isinstance(vmid_range, list)
+            and len(vmid_range) == 2
+            and all(isinstance(value, int) for value in vmid_range)
+        ):
+            normalized_vmid_range = [int(value) for value in vmid_range]
+        else:
+            raise ValueError(f"{CAPACITY_MODEL_PATH} ephemeral_pool.vmid_range must be a two-item integer list")
+        return {
+            "vmid_range": normalized_vmid_range,
+            "max_concurrent_vms": int(legacy_pool["max_concurrent_vms"]),
+            "reserved_ram_gb": int(legacy_pool["reserved_ram_gb"]),
+            "reserved_vcpu": int(legacy_pool["reserved_vcpu"]),
+            "reserved_disk_gb": int(legacy_pool["reserved_disk_gb"]),
+            "capacity_class": str(legacy_pool.get("capacity_class", "preview_burst")),
+            "notes": str(legacy_pool.get("notes", "")),
+        }
 
     reservations = payload.get("reservations")
     if not isinstance(reservations, list):
@@ -340,7 +358,8 @@ def default_fixture_context() -> dict[str, str]:
         "nameserver": yaml_scalar(GROUP_VARS_PATH, "proxmox_guest_nameserver", "1.1.1.1"),
         "search_domain": yaml_scalar(GROUP_VARS_PATH, "proxmox_guest_searchdomain", "lv3.org"),
         "jump_user": yaml_scalar(GROUP_VARS_PATH, "proxmox_host_admin_user", "ops"),
-        "jump_host": jump_host,
+        "jump_host": os.environ.get("LV3_PROXMOX_HOST_ADDR", "").strip()
+        or jump_host,
     }
 
 
@@ -841,7 +860,11 @@ def proxmox_api_request(
     elif method == "DELETE" and params:
         url = f"{url}?{urllib.parse.urlencode(params)}"
     request = urllib.request.Request(url, data=data, headers=headers, method=method)
-    with urllib.request.urlopen(request, timeout=10, context=insecure_proxmox_ssl_context(endpoint)) as response:
+    if context is None:
+        context = insecure_proxmox_ssl_context(endpoint)
+    if context is None and vmid_allocator.proxmox_api_insecure(endpoint):
+        context = ssl._create_unverified_context()
+    with urllib.request.urlopen(request, timeout=10, context=context) as response:
         payload = json.loads(response.read().decode("utf-8"))
     return payload.get("data")
 
@@ -962,9 +985,13 @@ def tofu_command(runtime_dir: Path, *args: str, env: dict[str, str] | None = Non
         "-e",
         "TF_VAR_proxmox_api_token",
         "-v",
+        f"{REPO_ROOT}:/workspace",
+        "-v",
         f"{REPO_ROOT}:{REPO_ROOT}",
+        "-v",
+        f"{runtime_dir}:/runtime",
         "-w",
-        str(runtime_dir),
+        "/runtime",
     ]
     effective_env = env or os.environ
     for key in PROXMOX_ENV_KEYS:
@@ -977,45 +1004,118 @@ def tofu_command(runtime_dir: Path, *args: str, env: dict[str, str] | None = Non
     return command
 
 
-def apply_fixture(runtime_dir: Path, endpoint: str, api_token: str) -> None:
-    env = os.environ.copy()
-    env["TF_VAR_proxmox_endpoint"] = endpoint
-    env["TF_VAR_proxmox_api_token"] = api_token
-    ensure_command(
-        run_command(tofu_command(runtime_dir, "init", "-backend=false", "-input=false", env=env), cwd=runtime_dir, env=env),
-        "tofu init",
-    )
-    ensure_command(
-        run_command(
-            tofu_command(runtime_dir, "apply", "-auto-approve", "-input=false", "-lock-timeout=60s", env=env),
-            cwd=runtime_dir,
-            env=env,
-        ),
-        "tofu apply",
-    )
+def tofu_endpoint(endpoint: str) -> str:
+    if shutil.which("tofu"):
+        return endpoint
+    parsed = urllib.parse.urlsplit(endpoint)
+    if parsed.hostname not in {"127.0.0.1", "localhost"}:
+        return endpoint
+    port = f":{parsed.port}" if parsed.port else ""
+    rewritten = parsed._replace(netloc=f"host.docker.internal{port}")
+    return urllib.parse.urlunsplit(rewritten)
 
 
-def destroy_fixture(runtime_dir: Path, endpoint: str, api_token: str) -> None:
-    if not runtime_dir.exists():
-        return
-    env = os.environ.copy()
-    env["TF_VAR_proxmox_endpoint"] = endpoint
-    env["TF_VAR_proxmox_api_token"] = api_token
-    ensure_command(
-        run_command(tofu_command(runtime_dir, "init", "-backend=false", "-input=false", env=env), cwd=runtime_dir, env=env),
-        "tofu init",
-    )
-    ensure_command(
-        run_command(
-            tofu_command(runtime_dir, "destroy", "-auto-approve", "-input=false", "-lock-timeout=60s", env=env),
-            cwd=runtime_dir,
-            env=env,
-        ),
-        "tofu destroy",
-    )
+def proxmox_host_ssh_argv(receipt: dict[str, Any], remote_command: str, *, timeout_seconds: int = 60) -> list[str]:
+    key_path = bootstrap_private_key()
+    jump_user = receipt["context"]["jump_user"]
+    jump_host = receipt["context"]["jump_host"]
+    return [
+        "ssh",
+        "-i",
+        str(key_path),
+        "-o",
+        "IdentitiesOnly=yes",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        f"ConnectTimeout={timeout_seconds}",
+        "-o",
+        "StrictHostKeyChecking=accept-new",
+        "-o",
+        "UserKnownHostsFile=/dev/null",
+        f"{jump_user}@{jump_host}",
+        remote_command,
+    ]
 
 
-def ssh_argv(receipt: dict[str, Any], remote_command: str, *, timeout_seconds: int = 5) -> list[str]:
+def run_proxmox_host_command(receipt: dict[str, Any], script: str, *, timeout_seconds: int = 300) -> None:
+    result = run_command(proxmox_host_ssh_argv(receipt, script, timeout_seconds=timeout_seconds))
+    ensure_command(result, "proxmox host command")
+
+
+def apply_fixture(runtime_dir: Path, endpoint: str, api_token: str, *, receipt: dict[str, Any] | None = None) -> None:
+    if receipt is None:
+        raise ValueError("apply_fixture requires the fixture receipt")
+
+    definition = receipt["definition"]
+    context = receipt["context"]
+    resources = definition["resources"]
+    network = definition["network"]
+    name = f"{definition['fixture_id']}-{receipt['vm_id']}"
+    tags = ";".join(str(tag) for tag in receipt["ephemeral_tags"] + definition.get("tags", []) + [name])
+    description = f"ephemeral fixture {definition['fixture_id']}"
+    net0 = f"virtio={receipt['mac_address']},bridge={network['bridge']},firewall=0"
+    ipconfig0 = f"ip={network['ip_cidr']},gw={network['gateway']}"
+    ssh_key = bootstrap_public_key()
+    template_id = template_vmid(definition["template"])
+    ci_user = definition.get("ssh_user", context["ci_user"])
+
+    script = "\n".join(
+        [
+            "set -euo pipefail",
+            f"tmpfile=$(mktemp /tmp/lv3-fixture-{receipt['vm_id']}-keys.XXXXXX)",
+            'cleanup() { rm -f "$tmpfile"; }',
+            "trap cleanup EXIT",
+            "cat >\"$tmpfile\" <<'EOF'",
+            ssh_key,
+            "EOF",
+            (
+                "sudo qm clone "
+                f"{template_id} {receipt['vm_id']} "
+                f"--name {shlex.quote(name)} "
+                "--full 1 "
+                f"--target {shlex.quote(context['node_name'])} "
+                f"--storage {shlex.quote(context['datastore_id'])}"
+            ),
+            (
+                "sudo qm set "
+                f"{receipt['vm_id']} "
+                f"--description {shlex.quote(description)} "
+                f"--cores {int(resources['cores'])} "
+                f"--memory {int(resources['memory_mb'])} "
+                "--scsihw virtio-scsi-single "
+                "--onboot 1 "
+                "--agent enabled=0 "
+                f"--nameserver {shlex.quote(context['nameserver'])} "
+                f"--searchdomain {shlex.quote(context['search_domain'])} "
+                f"--ciuser {shlex.quote(ci_user)} "
+                f"--ipconfig0 {shlex.quote(ipconfig0)} "
+                f"--net0 {shlex.quote(net0)} "
+                f"--tags {shlex.quote(tags)} "
+                '--sshkeys "$tmpfile"'
+            ),
+            f"sudo qm resize {receipt['vm_id']} scsi0 {int(resources['disk_gb'])}G",
+            f"sudo qm cloudinit update {receipt['vm_id']}",
+            f"sudo qm start {receipt['vm_id']}",
+        ]
+    )
+    run_proxmox_host_command(receipt, script, timeout_seconds=300)
+
+
+def destroy_fixture(runtime_dir: Path, endpoint: str, api_token: str, *, receipt: dict[str, Any] | None = None) -> None:
+    if receipt is None:
+        raise ValueError("destroy_fixture requires the fixture receipt")
+    script = "\n".join(
+        [
+            "set -euo pipefail",
+            f"sudo qm stop {receipt['vm_id']} >/dev/null 2>&1 || true",
+            f"sudo qm destroy {receipt['vm_id']} --destroy-unreferenced-disks 1 --purge 1 || true",
+        ]
+    )
+    run_proxmox_host_command(receipt, script, timeout_seconds=300)
+
+
+def ssh_base_argv(receipt: dict[str, Any], *, timeout_seconds: int = 5) -> list[str]:
     key_path = bootstrap_private_key()
     jump_user = receipt["context"]["jump_user"]
     jump_host = receipt["context"]["jump_host"]
@@ -1038,8 +1138,11 @@ def ssh_argv(receipt: dict[str, Any], remote_command: str, *, timeout_seconds: i
         "-o",
         f"ProxyCommand={proxy}",
         f"{ssh_user}@{receipt['ip_address']}",
-        remote_command,
     ]
+
+
+def ssh_argv(receipt: dict[str, Any], remote_command: str, *, timeout_seconds: int = 5) -> list[str]:
+    return [*ssh_base_argv(receipt, timeout_seconds=timeout_seconds), remote_command]
 
 
 def wait_for_ssh(receipt: dict[str, Any], timeout_seconds: int = 300) -> None:
@@ -1189,6 +1292,29 @@ def verify_fixture(receipt: dict[str, Any], definition: dict[str, Any]) -> dict[
     return {"ok": all(check["ok"] for check in checks), "checks": checks}
 
 
+def stage_seed_snapshot(
+    receipt: dict[str, Any],
+    *,
+    seed_class: str | None = None,
+    snapshot_id: str | None = None,
+) -> dict[str, Any] | None:
+    selected_seed_class = seed_class or receipt.get("seed_class")
+    if not selected_seed_class:
+        return None
+    stage_root = seed_data_snapshots.guest_stage_root()
+    remote_dir = f"{stage_root.rstrip('/')}/{receipt['receipt_id']}"
+    staged = seed_data_snapshots.stage_snapshot_to_remote_dir(
+        selected_seed_class,
+        ssh_base_argv(receipt),
+        remote_dir=remote_dir,
+        snapshot_name=snapshot_id or receipt.get("seed_snapshot_id"),
+    )
+    receipt["seed_class"] = staged["seed_class"]
+    receipt["seed_snapshot_id"] = staged["snapshot_id"]
+    receipt["seed_snapshot_remote_dir"] = staged["remote_dir"]
+    return staged
+
+
 def capture_ssh_fingerprint(receipt: dict[str, Any]) -> str:
     if not shutil.which("ssh-keyscan") or not shutil.which("ssh-keygen"):
         return ""
@@ -1228,6 +1354,8 @@ def build_receipt(
     purpose: str,
     policy: str,
     lifetime_minutes: int,
+    seed_class: str | None = None,
+    seed_snapshot_id: str | None = None,
     lease_purpose: str = DEFAULT_LEASE_PURPOSE,
     pool: EphemeralPoolConfig | None = None,
     status: str = "provisioning",
@@ -1274,6 +1402,8 @@ def build_receipt(
         "pool_state": pool_state,
         "definition": definition,
         "context": context,
+        "seed_class": seed_class or definition.get("default_seed_class"),
+        "seed_snapshot_id": seed_snapshot_id,
     }
     refresh_receipt_tags(receipt)
     return receipt
@@ -1309,11 +1439,12 @@ def cold_provision_receipt(
 ) -> dict[str, Any]:
     runtime_dir = ensure_runtime_files(receipt)
     try:
-        apply_fixture(runtime_dir, endpoint, api_token)
+        apply_fixture(runtime_dir, endpoint, api_token, receipt=receipt)
         wait_for_ssh(receipt)
         wait_for_cloud_init(receipt)
         prepare_guest_for_converge(receipt)
         converge_roles(receipt, skip_roles=skip_roles)
+        stage_seed_snapshot(receipt)
         verification = {"ok": True, "checks": []} if skip_verify else verify_fixture(receipt, receipt["definition"])
         if not verification["ok"]:
             raise RuntimeError(f"Fixture verification failed for {receipt['receipt_id']}")
@@ -1322,7 +1453,7 @@ def cold_provision_receipt(
         return receipt
     except Exception:
         try:
-            destroy_fixture(runtime_dir, endpoint, api_token)
+            destroy_fixture(runtime_dir, endpoint, api_token, receipt=receipt)
         except Exception:
             pass
         receipt["status"] = "failed"
@@ -1442,6 +1573,8 @@ def lease_prewarmed_fixture(
     endpoint: str,
     api_token: str,
     skip_verify: bool,
+    seed_class: str | None = None,
+    seed_snapshot_id: str | None = None,
 ) -> dict[str, Any]:
     resources = filter_ephemeral_cluster_vms(fetch_cluster_resources(endpoint, api_token))
     resource = cluster_resource_by_vmid(resources, int(receipt["vm_id"]))
@@ -1449,6 +1582,7 @@ def lease_prewarmed_fixture(
         raise RuntimeError(f"Warm fixture vmid {receipt['vm_id']} no longer exists on the cluster")
     start_cluster_vm(endpoint, api_token, resource)
     wait_for_ssh(receipt)
+    stage_seed_snapshot(receipt, seed_class=seed_class, snapshot_id=seed_snapshot_id)
     verification = receipt.get("verification", {"ok": False, "checks": []})
     if not skip_verify:
         verification = verify_fixture(receipt, receipt["definition"])
@@ -1509,6 +1643,8 @@ def fixture_up(
     lease_purpose: str = DEFAULT_LEASE_PURPOSE,
     skip_roles: bool = False,
     skip_verify: bool = False,
+    seed_class: str | None = None,
+    seed_snapshot_id: str | None = None,
 ) -> dict[str, Any]:
     fixture_name = fixture_name or DEFAULT_FIXTURE_PROFILE
     fixture_path = resolve_fixture_path(fixture_name)
@@ -1545,6 +1681,8 @@ def fixture_up(
                 endpoint=endpoint,
                 api_token=api_token,
                 skip_verify=skip_verify,
+                seed_class=seed_class,
+                seed_snapshot_id=seed_snapshot_id,
             )
         definition = apply_pool_member_definition(
             definition,
@@ -1568,6 +1706,8 @@ def fixture_up(
             purpose=resolved_purpose,
             policy=policy,
             lifetime_minutes=lifetime_minutes,
+            seed_class=seed_class,
+            seed_snapshot_id=seed_snapshot_id,
             lease_purpose=lease_purpose,
             pool=pool,
             status="provisioning",
@@ -1995,6 +2135,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     create.add_argument("--json", action="store_true")
     create.add_argument("--skip-role-converge", action="store_true")
     create.add_argument("--skip-verify", action="store_true")
+    create.add_argument("--seed-class", choices=seed_data_snapshots.seed_classes())
+    create.add_argument("--seed-snapshot-id")
 
     destroy = subparsers.add_parser("destroy", aliases=["down"])
     destroy.add_argument("fixture_name", nargs="?")
@@ -2035,6 +2177,8 @@ def main(argv: list[str] | None = None) -> int:
                 lease_purpose=args.lease_purpose,
                 skip_roles=args.skip_role_converge,
                 skip_verify=args.skip_verify,
+                seed_class=args.seed_class,
+                seed_snapshot_id=args.seed_snapshot_id,
             )
             if args.json:
                 print(json.dumps(payload, indent=2, sort_keys=True))

@@ -30,6 +30,7 @@ platform_port_assignments:
   monitoring_tempo_http_port: 3200
   monitoring_otlp_grpc_port: 4317
   monitoring_otlp_http_port: 4318
+  netdata_port: 19999
   mail_platform_gateway_port: 8081
   mail_platform_internal_submission_port: 1587
   ntfy_port: 2586
@@ -572,6 +573,7 @@ network_policy:
           ports:
             - 8086
             - 3100
+            - 19999
           description: Guest telemetry and log shipping
         - source: docker-runtime-lv3
           protocol: tcp
@@ -587,7 +589,13 @@ network_policy:
           protocol: tcp
           ports:
             - 3000
-          description: Reverse proxy access to Grafana
+            - 19999
+          description: Reverse proxy access to Grafana and Netdata
+        - source: host
+          protocol: tcp
+          ports:
+            - 19999
+          description: Proxmox host Netdata streaming and operator verification
         - source: postgres-lv3
           protocol: tcp
           ports:
@@ -679,6 +687,9 @@ network_policy:
 backup_vm_vmid: 160
 backup_vm_name: backup-lv3
 backup_vm_ipv4: 10.10.10.60
+backup_vm_api_port: 8007
+backup_vm_datastore_name: proxmox
+backup_vm_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-backup/backup-lv3-token.json
 
 postgres_ha:
   scope: postgres-ha
@@ -805,6 +816,29 @@ lv3_service_topology:
       blocked_exact_paths:
         - path: /api/health
           status: 404
+  realtime:
+    service_name: realtime
+    owning_vm: monitoring-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: realtime.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: realtime
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      server_sent_events: true
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.netdata_port }}"
   headscale:
     service_name: headscale
     owning_vm: proxmox_florin

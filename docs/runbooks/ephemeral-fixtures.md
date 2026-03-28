@@ -20,6 +20,8 @@ ADR 0088 adds disposable Proxmox VMs for integration tests, real-role Molecule r
 
 ```bash
 make fixture-up FIXTURE=docker-host PURPOSE=adr-0186-smoke OWNER=codex LEASE_PURPOSE=preview LIFETIME_HOURS=1 EPHEMERAL_POLICY=integration-test
+python3 scripts/fixture_manager.py create ops-base --purpose adr-0187-seed-check --policy integration-test --seed-class tiny
+TF_VAR_proxmox_endpoint=https://127.0.0.1:18006/api2/json LV3_PROXMOX_API_INSECURE=true LV3_PROXMOX_HOST_ADDR=100.64.0.1 python3 scripts/fixture_manager.py create seed-staging-smoke --purpose adr-0187-seed-check --policy integration-test --seed-class tiny
 make fixture-list
 make fixture-pool-status
 make fixture-pool-reconcile
@@ -40,8 +42,9 @@ lv3 fixture destroy --vmid 910 --dry-run
 5. Apply the generated OpenTofu runtime in `.local/fixtures/runtime/<receipt-id>/` only for cold or refill members
 6. Wait for SSH through the Proxmox host jump path
 7. Converge the declared roles unless `--skip-role-converge` is used
-8. Run the declared verification checks unless `--skip-verify` is used
-9. Write an active lease receipt under `receipts/fixtures/<receipt-id>.json`
+8. Stage the requested ADR 0187 seed snapshot under `/var/lib/lv3-seed-data/<receipt-id>/` when `--seed-class` is set
+9. Run the declared verification checks unless `--skip-verify` is used
+10. Write an active lease receipt under `receipts/fixtures/<receipt-id>.json`
 
 `fixture-pool-reconcile` will:
 
@@ -55,6 +58,16 @@ lv3 fixture destroy --vmid 910 --dry-run
 `fixture-down` destroys the matching active receipt when one exists, and can also destroy a governed ephemeral VM directly by `VMID` when only the Proxmox-side VM remains.
 
 `fixture-list` prints fixture name, VMID, owner, purpose, IP, remaining lifetime, and current health. When Proxmox access is available it reads the cluster state for the governed ephemeral range instead of only reading local receipts.
+
+When the local controller cannot reach the Proxmox API endpoint directly but can still SSH to the private management address, establish an SSH tunnel such as `ssh -N -L 18006:127.0.0.1:8006 ops@100.64.0.1` and run fixture commands with:
+
+```bash
+TF_VAR_proxmox_endpoint=https://127.0.0.1:18006/api2/json
+LV3_PROXMOX_API_INSECURE=true
+LV3_PROXMOX_HOST_ADDR=100.64.0.1
+```
+
+`fixture_manager.py` and `vmid_allocator.py` now honor that tunneled endpoint for controller-side API calls, and the Docker OpenTofu fallback automatically rewrites loopback endpoints to `host.docker.internal` inside the container runtime.
 
 ## Runtime State
 

@@ -78,6 +78,19 @@
     ]
   },
   {
+    "name": "Realtime Metrics Private",
+    "type": "http",
+    "url": "http://10.10.10.40:19999/api/v1/info",
+    "description": "Private Netdata parent healthcheck on monitoring-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
     "name": "Langfuse Public Health",
     "type": "http",
     "url": "https://langfuse.lv3.org/api/public/health",

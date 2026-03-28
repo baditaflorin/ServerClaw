@@ -1,0 +1,28 @@
+---
+# Playbook: realtime.yml
+# Purpose: Import the collection-backed Netdata realtime streaming playbook from the repo root.
+# Use case: Use this stable repo path for syntax checks, converge entrypoints, and live-apply workflows.
+#
+# Inputs (required):
+#   - proxmox_guest_ssh_connection_mode (str, required): Guest SSH routing mode for the scoped Ansible runner.
+#
+# Inputs (optional):
+#   - bypass_promotion (bool, optional, default=false): Explicit break-glass flag for latest-main live apply flows.
+#
+# Outputs:
+#   - The collection playbook at collections/ansible_collections/lv3/platform/playbooks/realtime.yml is executed from the canonical repo path.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - ADR 0196: Netdata real-time streaming metrics.
+#   - Requires: The collection playbook and its referenced roles exist.
+#   - Role: lv3.platform.netdata_runtime — invoked by the imported collection playbook.
+#
+# Related ADRs: 0196
+# Related Runbooks: docs/runbooks/configure-netdata.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-27
+
+- import_playbook: ../collections/ansible_collections/lv3/platform/playbooks/realtime.yml

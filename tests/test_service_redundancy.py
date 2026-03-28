@@ -383,3 +383,49 @@ def test_rehearsal_gate_downgrades_to_lower_fresh_tier() -> None:
 
     assert result["implemented_tier"] == "R1"
     assert result["status"] == "downgraded"
+
+
+def test_rag_context_alias_resolves_to_platform_context_api() -> None:
+    catalog = {
+        "platform": {
+            "failure_domain_count": 1,
+            "max_supported_tier": "R2",
+            "notes": ["single-host test platform"],
+            "rehearsal_gate": {
+                "tiers": {
+                    "R1": {"exercise": "restore_to_preview", "freshness_window_days": 90},
+                    "R2": {"exercise": "standby_switchover_or_promotion", "freshness_window_days": 30},
+                    "R3": {"exercise": "cross_domain_failover", "freshness_window_days": 30},
+                }
+            },
+        },
+        "services": {
+            "platform_context_api": {
+                "tier": "R0",
+                "recovery_objective": {"rto_minutes": 5, "rpo_minutes": 0},
+                "backup_sources": ["git_repository"],
+                "standby": {
+                    "kind": "none",
+                    "location": "none",
+                    "failover_trigger": "rerun converge",
+                    "failback_method": "rerun converge",
+                },
+            }
+        },
+    }
+
+    plan = service_redundancy.build_live_apply_plan(catalog, service_id="rag-context")
+
+    assert plan == [
+        {
+            "service_id": "platform_context_api",
+            "declared_tier": "R0",
+            "effective_tier": "R0",
+            "implemented_tier": "R0",
+            "rehearsal_gate_status": "not_required",
+            "rehearsal_summary": "No rehearsal is required for R0 services.",
+            "live_apply_mode": "primary_only",
+            "standby_kind": "none",
+            "standby_location": "none",
+        }
+    ]

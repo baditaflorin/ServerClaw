@@ -11,6 +11,7 @@ ADR 0190 extends the `docker-runtime-lv3` portion of that flow with a privacy-sa
 - standalone replay: `python3 scripts/synthetic_transaction_replay.py --target restore-docker-runtime --dry-run`
 - Windmill worker wrapper: `python3 config/windmill/scripts/restore-verification.py`
 - receipts: `receipts/restore-verifications/*.json`
+- optional ADR 0187 seed staging: `python3 scripts/restore_verification.py --seed-class standard`
 
 For focused recovery drills or ADR-local replays, scope the run to one or more guests:
 
@@ -37,13 +38,14 @@ Each restore uses the staging bridge and IP assignments already defined for the 
 3. Restore the backup into VMIDs `900` to `902`.
 4. Rewire the restored guest to `vmbr20`, keep the original MAC, refresh cloud-init, and boot it.
 5. Wait for SSH through the Proxmox jump path.
-6. Run guest-local smoke tests.
-7. Replay the ADR 0190 synthetic control-plane transactions on the restored `docker-runtime-lv3` target after warm-up completes.
-8. Write one JSON receipt under `receipts/restore-verifications/`.
-9. Emit the mutation-audit event and optional NATS plus Mattermost notifications.
-10. Destroy the restored VMs even when an earlier step fails.
+6. Optionally stage an ADR 0187 seed snapshot under `/var/lib/lv3-seed-data/restore-verification/<vm-name>/`.
+7. Run guest-local smoke tests.
+8. Replay the ADR 0190 synthetic control-plane transactions on the restored `docker-runtime-lv3` target after warm-up completes.
+9. Write one JSON receipt under `receipts/restore-verifications/`.
+10. Emit the mutation-audit event and optional NATS plus Mattermost notifications.
+11. Destroy the restored VMs even when an earlier step fails.
 
-If the restored guest boots but never exposes an SSH banner through the fixture bridge in time, the workflow now falls back to Proxmox guest-agent (`qga`) execution for the guest-local smoke commands and synthetic replay. That keeps the rehearsal governed and repeatable without ad hoc host-side shelling into the restored VM.
+If the restored guest boots but never exposes an SSH banner through the fixture bridge in time, the workflow falls back to Proxmox guest-agent (`qga`) execution for the guest-local smoke commands and synthetic replay. That keeps the rehearsal governed and repeatable without ad hoc host-side shelling into the restored VM.
 
 ## Smoke Tests
 

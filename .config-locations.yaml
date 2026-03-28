@@ -6,11 +6,11 @@
 #          modifying any configuration.
 # Usage:   Find the section matching your concern; read 'use_for' and
 #          'update_when' before touching any file.
-# Updated: 2026-03-26
+# Updated: 2026-03-28
 # ============================================================================
 
 schema_version: 1
-last_updated: "2026-03-26"
+last_updated: "2026-03-28"
 
 agent_quick_reference:
   find_config: "Check this file → find your concern section → read 'use_for'"
@@ -201,6 +201,27 @@ inventory:
 # ============================================================================
 
 automation:
+
+  config/seed-data-catalog.json:
+    purpose: Canonical contract for anonymized seed-data snapshot classes and storage paths
+    owner: human
+    format: JSON
+    use_for: Building deterministic tiny/standard/recovery seed snapshots and resolving the managed backup-lv3 store
+    update_when: Adjusting seed classes, dataset volumes, or storage locations
+    validation: "uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate"
+
+  config/network-impairment-matrix.yaml:
+    purpose: Canonical ADR 0189 matrix of governed latency, loss, and outage profiles for preview and staging fault drills
+    owner: human
+    format: YAML
+    use_for: Declaring named network impairment scenarios, scope, and allowed execution surfaces
+    update_when: Adding or changing governed impairment profiles, preview/staging eligibility, or scenario metadata
+    validation: "uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate"
+    related_files:
+      - "platform/faults/network_impairment_matrix.py: typed loader and execution helpers"
+      - "scripts/network_impairment_matrix.py: CLI and repo-surface validation"
+      - "config/windmill/scripts/network-impairment-matrix.py: mirrored worker entrypoint"
+      - "docs/runbooks/network-impairment-matrix.md: operator procedure"
 
   playbooks/site.yml:
     purpose: Main site playbook — full host bootstrap from bare Debian 13

@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.21",
-  "platform_version": "0.130.32",
-  "generated_at": "2026-03-28T01:30:57Z",
-  "next_refresh_at": "2026-03-28T02:30:57Z",
+  "repo_version": "0.177.27",
+  "platform_version": "0.130.34",
+  "generated_at": "2026-03-28T08:27:41Z",
+  "next_refresh_at": "2026-03-28T09:27:41Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -48,7 +48,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://10.10.10.60:8007",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "changelog_portal": {
         "service_name": "Deployment History Portal",
@@ -139,7 +139,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://grafana.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
       "headscale": {
@@ -381,6 +381,18 @@
         "lifecycle_status": "active",
         "primary_url": "https://proxmox.lv3.org",
         "last_live_apply": "2026-03-28T00:00:00Z"
+      },
+      "realtime": {
+        "service_name": "Netdata Realtime Metrics",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://realtime.lv3.org",
+        "last_live_apply": "2026-03-28T00:00:00Z",
+        "slo_status": "unknown"
       },
       "searxng": {
         "service_name": "SearXNG",
@@ -1437,6 +1449,32 @@
         "runbook": "docs/runbooks/rag-platform-context.md"
       },
       {
+        "id": "converge-realtime",
+        "description": "Converge the Netdata parent-plus-children realtime metrics surface across monitoring-lv3, the Proxmox host, and the managed guest nodes, then publish realtime.lv3.org through the shared authenticated edge.",
+        "tags": [
+          "converge-realtime",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 350,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 5,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-netdata.md"
+      },
+      {
         "id": "converge-searxng",
         "description": "Deploy the private SearXNG runtime on docker-runtime-lv3, publish its tailnet-only hostname through the Proxmox host proxy, and re-render Open WebUI to use the local search endpoint.",
         "tags": [
@@ -1996,6 +2034,31 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/config-merge-protocol.md"
+      },
+      {
+        "id": "network-impairment-matrix",
+        "description": "Render the ADR 0189 network impairment matrix for one target class from the live Windmill worker checkout and write a JSON report.",
+        "tags": [
+          "diagnostic",
+          "guest-live",
+          "network-impairment-matrix",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "diagnostic",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 600,
+          "max_steps": 40,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/network-impairment-matrix.md"
       },
       {
         "id": "nightly-integration-tests",
@@ -2888,7 +2951,7 @@
         "id": "backup-restore-verification",
         "title": "Backup Restore Verification",
         "agent_trust_required": "T2",
-        "steps": 10,
+        "steps": 11,
         "path": "docs/runbooks/backup-restore-verification.md",
         "workflow_ids": [
           "restore-verification"
@@ -3116,6 +3179,16 @@
         ]
       },
       {
+        "id": "configure-netdata",
+        "title": "Configure Netdata",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-netdata.md",
+        "workflow_ids": [
+          "converge-realtime"
+        ]
+      },
+      {
         "id": "configure-ntfy",
         "title": "Configure Ntfy",
         "agent_trust_required": "T3",
@@ -3333,7 +3406,7 @@
         "id": "ephemeral-fixtures",
         "title": "Ephemeral Fixtures",
         "agent_trust_required": "T3",
-        "steps": 13,
+        "steps": 14,
         "path": "docs/runbooks/ephemeral-fixtures.md",
         "workflow_ids": [
           "ephemeral-pool-reconcile",
@@ -3422,6 +3495,16 @@
         "path": "docs/runbooks/monitoring-stack.md",
         "workflow_ids": [
           "converge-monitoring"
+        ]
+      },
+      {
+        "id": "network-impairment-matrix",
+        "title": "Network Impairment Matrix",
+        "agent_trust_required": "T2",
+        "steps": 6,
+        "path": "docs/runbooks/network-impairment-matrix.md",
+        "workflow_ids": [
+          "network-impairment-matrix"
         ]
       },
       {
@@ -3520,7 +3603,7 @@
         "id": "rag-platform-context",
         "title": "RAG Platform Context",
         "agent_trust_required": "T3",
-        "steps": 11,
+        "steps": 12,
         "path": "docs/runbooks/rag-platform-context.md",
         "workflow_ids": [
           "converge-rag-context"
@@ -3657,10 +3740,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.20",
+    "last_version": "0.177.25",
     "deployed_at": "2026-03-28",
-    "summary": "integrated ADR 0186 by adding governed prewarmed fixture pools, warm-handoff leases, and the asynchronous Windmill reconciler for local ephemeral capacity implemented ADR 0190 synthetic transaction replay for restore verification, including the governed replay catalog, guest-agent restore fallback, and committed live-apply evidence for the current restore-health gap",
-    "release_notes_url": "docs/release-notes/0.177.21.md"
+    "summary": "integrated ADR 0198 by switching platform-context retrieval to local Ollama semantic embeddings, grounding operator and LLM query paths with cited vector matches, and hardening the governed `rag-context` live-apply wrapper across alias-aware service checks added bounded degraded-index recovery during governed live apply so the semantic platform-context collection self-heals legacy `384` to Ollama `768` vector-dimension drift without forcing a synchronous full mirrored-corpus rebuild",
+    "release_notes_url": "docs/release-notes/0.177.26.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -3737,20 +3820,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0183-auxiliary-cloud-failure-domain-for-witness-recovery-and-burst-capacity.md"
-    },
-    {
-      "adr": "0187",
-      "title": "Anonymized Seed Data Snapshots for Repeatable Tests",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0187-anonymized-seed-data-snapshots-for-repeatable-tests.md"
-    },
-    {
-      "adr": "0189",
-      "title": "Network Impairment Test Matrix for Staging and Previews",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0189-network-impairment-test-matrix-for-staging-and-previews.md"
     }
   ]
 }

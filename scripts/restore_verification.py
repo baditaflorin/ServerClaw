@@ -35,6 +35,7 @@ from drift_lib import (
 from mutation_audit import build_event, emit_event_best_effort
 from smoke_tests import backup_vm_smoke, docker_runtime_smoke, postgres_smoke
 import synthetic_transaction_replay
+import seed_data_snapshots
 
 
 DEFAULT_RECEIPT_DIR = repo_path("receipts", "restore-verifications")
@@ -290,6 +291,28 @@ def wait_for_guest_access(
     )
 
 
+def build_restored_guest_ssh_base_command(context: dict[str, Any], ip_address: str) -> list[str]:
+    return build_restored_guest_ssh_command(context, ip_address, "true")[:-1]
+
+
+def stage_seed_snapshot(
+    context: dict[str, Any],
+    target: RestoreTarget,
+    *,
+    seed_class: str,
+    snapshot_id: str | None = None,
+) -> dict[str, Any]:
+    ip_address = target.ip_cidr.split("/", 1)[0]
+    stage_root = seed_data_snapshots.guest_stage_root()
+    remote_dir = f"{stage_root.rstrip('/')}/restore-verification/{target.vm_name}"
+    return seed_data_snapshots.stage_snapshot_to_remote_dir(
+        seed_class,
+        build_restored_guest_ssh_base_command(context, ip_address),
+        remote_dir=remote_dir,
+        snapshot_name=snapshot_id,
+    )
+
+
 def list_backups_for_vmid(context: dict[str, Any], source_vmid: int) -> list[dict[str, Any]]:
     outcome = require_host_command(
         context,
@@ -533,11 +556,12 @@ def build_target_result(
     execution_mode: str,
     tests: list[dict[str, Any]],
     synthetic_replay: dict[str, Any] | None = None,
+    seed_snapshot: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     combined_tests = list(tests)
     if synthetic_replay is not None:
         combined_tests.append(build_synthetic_replay_test(synthetic_replay))
-    return {
+    payload = {
         "vm": target.vm_name,
         "source_vmid": target.source_vmid,
         "target_vmid": target.target_vmid,
@@ -554,6 +578,11 @@ def build_target_result(
         "tests": combined_tests,
         "overall": overall_from_tests(combined_tests),
     }
+    if seed_snapshot:
+        payload["seed_class"] = seed_snapshot["seed_class"]
+        payload["seed_snapshot_id"] = seed_snapshot["snapshot_id"]
+        payload["seed_snapshot_remote_dir"] = seed_snapshot["remote_dir"]
+    return payload
 
 
 def build_failure_result(target: RestoreTarget, backup: dict[str, Any] | None, error: str) -> dict[str, Any]:
@@ -761,6 +790,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--actor-id", default="restore-verification")
     parser.add_argument("--publish-nats", action="store_true")
     parser.add_argument("--print-report-json", action="store_true")
+    parser.add_argument("--seed-class", choices=seed_data_snapshots.seed_classes())
+    parser.add_argument("--seed-snapshot-id")
     return parser
 
 
@@ -800,6 +831,14 @@ def main(argv: list[str] | None = None) -> int:
                     target,
                     timeout_seconds=args.ssh_timeout_seconds,
                 )
+                staged_seed = None
+                if args.seed_class:
+                    staged_seed = stage_seed_snapshot(
+                        context,
+                        target,
+                        seed_class=args.seed_class,
+                        snapshot_id=args.seed_snapshot_id,
+                    )
                 tests = execute_smoke_tests(
                     context,
                     target,
@@ -820,6 +859,7 @@ def main(argv: list[str] | None = None) -> int:
                         execution_mode=execution_mode,
                         tests=tests,
                         synthetic_replay=synthetic_replay,
+                        seed_snapshot=staged_seed,
                     )
                 )
             except Exception as exc:  # noqa: BLE001

@@ -95,6 +95,11 @@ platform_host:
         listen_port: 8020
         upstream_host: 10.10.10.20
         upstream_port: 3004
+      - name: plane
+        listen_address: 100.64.0.1
+        listen_port: 8011
+        upstream_host: 10.10.10.20
+        upstream_port: 8093
       - name: open-webui
         listen_address: 100.64.0.1
         listen_port: 8008
@@ -125,6 +130,7 @@ platform_ports:
   monitoring_tempo_http_port: 3200
   monitoring_otlp_grpc_port: 4317
   monitoring_otlp_http_port: 4318
+  netdata_port: 19999
   mail_platform_gateway_port: 8081
   ntfy_port: 2586
   openbao_http_port: 8201
@@ -143,8 +149,6 @@ platform_ports:
   searxng_host_proxy_port: 80
   langfuse_port: 3002
   outline_port: 3006
-  plane_port: 8093
-  plane_host_proxy_port: 8011
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
   excalidraw_port: 3095
@@ -158,6 +162,8 @@ platform_ports:
   platform_context_host_proxy_port: 8010
   homepage_port: 3090
   ops_portal_port: 8092
+  plane_port: 8093
+  plane_host_proxy_port: 8011
   ntopng_http_port: 3000
   ntopng_proxy_port: 3001
   portainer_https_port: 9443
@@ -176,6 +182,7 @@ platform_port_assignments:
   monitoring_tempo_http_port: 3200
   monitoring_otlp_grpc_port: 4317
   monitoring_otlp_http_port: 4318
+  netdata_port: 19999
   mail_platform_gateway_port: 8081
   ntfy_port: 2586
   openbao_http_port: 8201
@@ -194,8 +201,6 @@ platform_port_assignments:
   searxng_host_proxy_port: 80
   langfuse_port: 3002
   outline_port: 3006
-  plane_port: 8093
-  plane_host_proxy_port: 8011
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
   excalidraw_port: 3095
@@ -209,6 +214,8 @@ platform_port_assignments:
   platform_context_host_proxy_port: 8010
   homepage_port: 3090
   ops_portal_port: 8092
+  plane_port: 8093
+  plane_host_proxy_port: 8011
   ntopng_http_port: 3000
   ntopng_proxy_port: 3001
   portainer_https_port: 9443
@@ -843,6 +850,35 @@ platform_service_topology:
       tempo: http://10.10.10.40:3200
       otlp_grpc: http://10.10.10.40:4317
       otlp_http: http://10.10.10.40:4318/v1/traces
+  realtime:
+    service_name: realtime
+    owning_vm: monitoring-lv3
+    private_ip: 10.10.10.40
+    public_hostname: realtime.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: realtime
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      server_sent_events: true
+      upstream: http://10.10.10.40:19999
+    service_id: realtime
+    ports:
+      internal: 19999
+    urls:
+      public: https://realtime.lv3.org
+      internal: http://10.10.10.40:19999
   headscale:
     service_name: headscale
     owning_vm: proxmox_florin
@@ -1670,6 +1706,10 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: realtime
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: headscale
       type: A
       value: 65.108.75.123
@@ -1699,6 +1739,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: langfuse
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: tasks
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -1789,6 +1833,7 @@ platform_management_allowed_tcp_ports:
   - 8080
   - 8005
   - 8008
+  - 8011
   - 8066
   - 8010
   - 9444
@@ -1864,6 +1909,35 @@ public_edge_service_topology:
       tempo: http://10.10.10.40:3200
       otlp_grpc: http://10.10.10.40:4317
       otlp_http: http://10.10.10.40:4318/v1/traces
+  realtime:
+    service_name: realtime
+    owning_vm: monitoring-lv3
+    private_ip: 10.10.10.40
+    public_hostname: realtime.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: realtime
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      server_sent_events: true
+      upstream: http://10.10.10.40:19999
+    service_id: realtime
+    ports:
+      internal: 19999
+    urls:
+      public: https://realtime.lv3.org
+      internal: http://10.10.10.40:19999
   headscale:
     service_name: headscale
     owning_vm: proxmox_florin
@@ -2762,6 +2836,7 @@ proxmox_management_allowed_tcp_ports:
   - 8080
   - 8005
   - 8008
+  - 8011
   - 8066
   - 8010
   - 9444
@@ -2776,6 +2851,7 @@ monitoring_prometheus_port: 9090
 monitoring_tempo_http_port: 3200
 monitoring_otlp_grpc_port: 4317
 monitoring_otlp_http_port: 4318
+netdata_port: 19999
 mail_platform_gateway_port: 8081
 ntfy_port: 2586
 openbao_http_port: 8201

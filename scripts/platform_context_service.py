@@ -27,6 +27,7 @@ from slo_tracking import build_slo_status_entries, default_grafana_url, default_
 
 DEFAULT_COLLECTION = "platform_context"
 DEFAULT_DIMENSION = 384
+OLLAMA_EMBED_BATCH_SIZE = 32
 HTTP_LOGGER = get_logger("platform_context_api", "http", name="lv3.platform_context.http")
 SERVICE_LOGGER = get_logger("platform_context_api", "service", name="lv3.platform_context.service")
 
@@ -105,16 +106,28 @@ class OllamaEmbedder:
             return [[float(value) for value in embedding]]
         raise RuntimeError("Ollama embedding response did not contain embeddings")
 
-    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+    def _embed_batch(self, texts: list[str]) -> list[list[float]]:
         if not texts:
             return []
         payload = {"model": self.model_name, "input": texts}
         try:
             response = self._request("/api/embed", payload)
-        except RuntimeError:
-            legacy_response = [self._request("/api/embeddings", {"model": self.model_name, "prompt": text}) for text in texts]
-            return [self._extract_embeddings(item)[0] for item in legacy_response]
-        return self._extract_embeddings(response)
+            return self._extract_embeddings(response)
+        except Exception:
+            if len(texts) == 1:
+                legacy_response = self._request("/api/embeddings", {"model": self.model_name, "prompt": texts[0]})
+                return [self._extract_embeddings(legacy_response)[0]]
+            midpoint = max(1, len(texts) // 2)
+            return self._embed_batch(texts[:midpoint]) + self._embed_batch(texts[midpoint:])
+
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        if not texts:
+            return []
+        embeddings: list[list[float]] = []
+        for start in range(0, len(texts), OLLAMA_EMBED_BATCH_SIZE):
+            batch = texts[start : start + OLLAMA_EMBED_BATCH_SIZE]
+            embeddings.extend(self._embed_batch(batch))
+        return embeddings
 
     def embed_query(self, text: str) -> list[float]:
         return self.embed_documents([text])[0]

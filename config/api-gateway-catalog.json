@@ -180,6 +180,17 @@
       "healthcheck_path": "/api/ping"
     },
     {
+      "id": "realtime",
+      "name": "Realtime Metrics",
+      "upstream": "http://10.10.10.40:19999",
+      "gateway_prefix": "/v1/realtime",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-read",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/api/v1/info"
+    },
+    {
       "id": "uptime_kuma",
       "name": "Uptime Kuma",
       "upstream": "http://10.10.10.20:3001",

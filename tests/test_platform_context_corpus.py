@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from platform_context_corpus import build_chunks, build_manifest
+from platform_context_corpus import build_chunks, build_manifest, filter_chunks_by_source_paths
 
 
 def write(path: Path, content: str) -> None:
@@ -66,3 +66,25 @@ def test_build_chunks_includes_error_codes_and_dependency_catalogs(tmp_path: Pat
     chunk_kinds = {(chunk["source_path"], chunk["document_kind"]) for chunk in chunks}
     assert ("config/error-codes.yaml", "error_code_catalog") in chunk_kinds
     assert ("config/dependency-graph.json", "catalog") in chunk_kinds
+
+
+def test_filter_chunks_by_source_paths_accepts_exact_paths_and_directory_prefixes(tmp_path: Path) -> None:
+    write(
+        tmp_path / "docs" / "adr" / "0042-step-ca.md",
+        "# ADR 0042\n\n## Decision\nstep-ca issues SSH certificates.\n",
+    )
+    write(tmp_path / "docs" / "runbooks" / "rag-platform-context.md", "# Runbook\n\n## Verify\nQuery it.\n")
+    write(tmp_path / "config" / "command-catalog.json", '{"commands":{"query-platform-context":{"description":"d"}}}')
+    write(tmp_path / "config" / "workflow-catalog.json", '{"workflows":{}}')
+    write(tmp_path / "config" / "agent-tool-registry.json", '{"tools":[]}')
+    write(tmp_path / "versions" / "stack.yaml", "platform_version: 1.0.0\n")
+    write(tmp_path / "VERSION", "1.0.0\n")
+    write(tmp_path / "changelog.md", "# Changelog\n")
+
+    chunks = build_chunks(tmp_path)
+    filtered = filter_chunks_by_source_paths(chunks, ["docs/adr/0042-step-ca.md", "config"])
+
+    source_paths = {chunk["source_path"] for chunk in filtered}
+    assert "docs/adr/0042-step-ca.md" in source_paths
+    assert "config/command-catalog.json" in source_paths
+    assert "docs/runbooks/rag-platform-context.md" not in source_paths

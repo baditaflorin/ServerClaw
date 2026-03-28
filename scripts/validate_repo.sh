@@ -204,7 +204,7 @@ validate_retry_guard() {
 
 validate_data_models() {
   echo "Repository data model validation"
-  uvx --from pyyaml python "$REPO_ROOT/scripts/ansible_scope_runner.py" validate >/dev/null
+  uv run --with pyyaml python3 "$REPO_ROOT/scripts/ansible_scope_runner.py" validate >/dev/null
   uv run --with pyyaml python "$REPO_ROOT/scripts/validate_timeout_hierarchy.py" >/dev/null
   python3 "$REPO_ROOT/scripts/check_hardcoded_timeouts.py" >/dev/null
   uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/validate_repository_data_models.py" --validate >/dev/null
@@ -365,7 +365,7 @@ _validate_workstream_entry() {
 
   local entry_count
   entry_count=$(grep -Ec "branch:[[:space:]]*\"?$current_branch\"?$" "$workstreams_file" 2>/dev/null || true)
-  entry_count=${entry_count:-0}
+  entry_count="${entry_count:-0}"
 
   if [[ "$entry_count" -eq 0 ]]; then
     echo "WARNING: Branch '$current_branch' not found in workstreams.yaml (ADR 0167)" >&2
@@ -380,10 +380,10 @@ _validate_adr_index_current() {
 
   adr_changes=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
     grep -c '^docs/adr/0[0-9]' || true)
-  adr_changes=${adr_changes:-0}
+  adr_changes="${adr_changes:-0}"
   index_updated=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
     grep -c '^docs/adr/\.index\.yaml' || true)
-  index_updated=${index_updated:-0}
+  index_updated="${index_updated:-0}"
 
   if [[ "$adr_changes" -gt 0 ]] && [[ "$index_updated" -eq 0 ]]; then
     # Check if index exists at all
@@ -405,10 +405,10 @@ _validate_config_registry_updated() {
 
   new_config_files=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
     grep -cE '^(config/|inventory/|versions)' || true)
-  new_config_files=${new_config_files:-0}
+  new_config_files="${new_config_files:-0}"
   registry_updated=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
     grep -c '^\.config-locations\.yaml' || true)
-  registry_updated=${registry_updated:-0}
+  registry_updated="${registry_updated:-0}"
 
   if [[ "$new_config_files" -gt 3 ]] && [[ "$registry_updated" -eq 0 ]]; then
     echo "WARNING: Config files changed but .config-locations.yaml not updated (ADR 0166)" >&2

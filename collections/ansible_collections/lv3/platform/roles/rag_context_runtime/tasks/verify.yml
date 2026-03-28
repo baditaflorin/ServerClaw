@@ -1,4 +1,32 @@
 ---
+# Purpose: Verify that the platform-context API is healthy, protected, and able to return cited vector-backed results after converge.
+# Use case: Included after rag_context_runtime convergence to prove the live semantic RAG runtime is working end to end.
+#
+# Inputs (required):
+#   - platform_context_internal_port (int, required): Local API listener port.
+#   - platform_context_private_url (str, required): Guest-local API URL.
+#   - platform_context_api_token (str, required): API bearer token for protected verification calls.
+#   - platform_context_verification_question (str, required): Query used to verify retrieval.
+#
+# Inputs (optional):
+#   - platform_context_verify_rebuild_local (bool, optional): Whether to run the full local rebuild inline.
+#   - platform_context_seed_when_degraded (bool, optional): Whether to run the bounded seed repair path.
+#
+# Outputs:
+#   - Read-only health/auth/query verification results and an optional bounded repair action when the vector index is degraded.
+#
+# Idempotency: Fully idempotent
+#              Verification calls are read-only aside from the explicitly guarded bounded repair path.
+#
+# Dependencies:
+#   - ADR 0198: Requires semantic RAG verification after converge.
+#   - Role: rag_context_runtime — verifies the converged platform-context runtime.
+#
+# Related ADRs: 0165, 0198
+# Related Runbooks: docs/runbooks/rag-platform-context.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
 - name: Wait for the platform context API to listen locally
   ansible.builtin.wait_for:
     host: 127.0.0.1
@@ -37,6 +65,7 @@
   ansible.builtin.uri:
     url: "{{ platform_context_private_url }}/v1/admin/rebuild-local"
     method: POST
+    timeout: 900
     headers:
       Authorization: "Bearer {{ platform_context_api_token }}"
     body_format: json
@@ -46,16 +75,26 @@
   register: platform_context_rebuild
   changed_when: false
   no_log: true
+  when: platform_context_verify_rebuild_local | bool
+
+- name: Note when live apply skips the inline local corpus rebuild
+  ansible.builtin.debug:
+    msg: >-
+      Skipping inline local corpus rebuild during live apply; production rebuilds run as an
+      explicit maintenance action because the expanded semantic corpus exceeds the safe
+      synchronous rebuild budget on docker-runtime-lv3.
+  when: not (platform_context_verify_rebuild_local | bool)
 
 - name: Verify the platform context query endpoint
   ansible.builtin.uri:
     url: "{{ platform_context_private_url }}/v1/context/query"
     method: POST
+    timeout: 180
     headers:
       Authorization: "Bearer {{ platform_context_api_token }}"
     body_format: json
     body:
-      question: how does step-ca issue SSH certificates
+      question: "{{ platform_context_verification_question }}"
       top_k: 3
     status_code: 200
     return_content: true
@@ -63,10 +102,82 @@
   changed_when: false
   no_log: true
 
+- name: Record whether the live platform context query already has healthy vector retrieval
+  ansible.builtin.set_fact:
+    platform_context_query_is_healthy: >-
+      {{
+        (platform_context_query.json.retrieval_backend | default('')) == 'vector'
+        and ((platform_context_query.json.matches | default([])) | length) > 0
+        and ((platform_context_query.json.matches[0].source_path | default('')) | length) > 0
+      }}
+
+- name: Repair a degraded platform context vector index with a bounded controller-side seed rebuild
+  ansible.builtin.command:
+    cmd: >-
+      python3 {{ platform_context_local_rebuild_script | quote }}
+      --repo-root {{ platform_context_repo_root | quote }}
+      --api-url {{ platform_context_controller_url | quote }}
+      --api-token-file {{ platform_context_api_token_local_file | quote }}
+      {% for path in platform_context_seed_sources %}
+      --include-path {{ path | quote }}
+      {% endfor %}
+  args:
+    chdir: "{{ platform_context_repo_root }}"
+  delegate_to: localhost
+  become: false
+  register: platform_context_seed_rebuild
+  changed_when: true
+  when:
+    - not (platform_context_verify_rebuild_local | bool)
+    - platform_context_seed_when_degraded | bool
+    - not (platform_context_query_is_healthy | bool)
+
+- name: Re-verify the platform context query endpoint after seed repair
+  ansible.builtin.uri:
+    url: "{{ platform_context_private_url }}/v1/context/query"
+    method: POST
+    timeout: 180
+    headers:
+      Authorization: "Bearer {{ platform_context_api_token }}"
+    body_format: json
+    body:
+      question: "{{ platform_context_verification_question }}"
+      top_k: 3
+    status_code: 200
+    return_content: true
+  register: platform_context_query_repaired
+  changed_when: false
+  no_log: true
+  when:
+    - platform_context_seed_rebuild is defined
+    - not (platform_context_query_is_healthy | bool)
+
+- name: Choose the verified platform context query payload
+  ansible.builtin.set_fact:
+    platform_context_verified_query: >-
+      {{
+        platform_context_query_repaired
+        if (
+          platform_context_query_repaired is defined
+          and not (platform_context_query_is_healthy | bool)
+        )
+        else platform_context_query
+      }}
+
+- name: Note when verification had to repair a degraded vector collection
+  ansible.builtin.debug:
+    msg: >-
+      The live vector collection was degraded during verification, so the role repaired it with a
+      bounded controller-side semantic seed rebuild. Run the full repo-grounded rebuild as a
+      separate maintenance action when you need the entire mirrored corpus refreshed.
+  when:
+    - platform_context_seed_rebuild is defined
+    - not (platform_context_query_is_healthy | bool)
+
 - name: Assert the platform context query returned cited results
   ansible.builtin.assert:
     that:
-      - platform_context_query.json.retrieval_backend == "vector"
-      - (platform_context_query.json.matches | default([])) | length > 0
-      - (platform_context_query.json.matches[0].source_path | default('')) | length > 0
+      - platform_context_verified_query.json.retrieval_backend == "vector"
+      - (platform_context_verified_query.json.matches | default([])) | length > 0
+      - (platform_context_verified_query.json.matches[0].source_path | default('')) | length > 0
     fail_msg: "Platform context API responded, but the query did not return cited matches."

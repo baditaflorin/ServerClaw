@@ -33,6 +33,7 @@ from data_catalog import load_data_catalog, validate_data_catalog
 from failure_domain_policy import validate_failure_domain_policy
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
 from platform.circuit import load_circuit_policies
+from platform.faults import load_network_impairment_matrix
 from platform.interface_contracts import validate_contracts
 from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
 from mutation_audit import load_mutation_audit_schema, validate_mutation_audit_schema
@@ -71,6 +72,7 @@ UPTIME_MONITORS_PATH = repo_path("config", "uptime-kuma", "monitors.json")
 HEALTH_PROBE_CATALOG_PATH = repo_path("config", "health-probe-catalog.json")
 CERTIFICATE_CATALOG_PATH = repo_path("config", "certificate-catalog.json")
 SECRET_CATALOG_PATH = repo_path("config", "secret-catalog.json")
+SEED_DATA_CATALOG_PATH = repo_path("config", "seed-data-catalog.json")
 TOKEN_POLICY_PATH = repo_path("config", "token-policy.yaml")
 TOKEN_INVENTORY_PATH = repo_path("config", "token-inventory.yaml")
 IMAGE_CATALOG_PATH = repo_path("config", "image-catalog.json")
@@ -1136,6 +1138,47 @@ def validate_secret_catalog(secret_manifest: dict[str, Any]) -> None:
 
         require_str(secret.get("event_subject"), f"{path}.event_subject")
         require_str(secret.get("glitchtip_component"), f"{path}.glitchtip_component")
+
+
+def validate_seed_data_catalog(secret_manifest: dict[str, Any]) -> None:
+    payload = require_mapping(load_json(SEED_DATA_CATALOG_PATH), str(SEED_DATA_CATALOG_PATH))
+    require_str(payload.get("schema_version"), f"{SEED_DATA_CATALOG_PATH}.schema_version")
+    controller_secret_id = require_identifier(
+        payload.get("controller_secret_id"),
+        f"{SEED_DATA_CATALOG_PATH}.controller_secret_id",
+    )
+    manifest_secrets = require_mapping(secret_manifest.get("secrets"), "secret_manifest.secrets")
+    if controller_secret_id not in manifest_secrets:
+        raise ValueError(
+            f"{SEED_DATA_CATALOG_PATH}.controller_secret_id references unknown controller-local secret '{controller_secret_id}'"
+        )
+    require_str(payload.get("local_snapshot_root"), f"{SEED_DATA_CATALOG_PATH}.local_snapshot_root")
+    require_str(payload.get("guest_stage_root"), f"{SEED_DATA_CATALOG_PATH}.guest_stage_root")
+    remote_store = require_mapping(payload.get("remote_store"), f"{SEED_DATA_CATALOG_PATH}.remote_store")
+    require_identifier(remote_store.get("host"), f"{SEED_DATA_CATALOG_PATH}.remote_store.host")
+    require_str(remote_store.get("base_path"), f"{SEED_DATA_CATALOG_PATH}.remote_store.base_path")
+    require_str(remote_store.get("directory_mode"), f"{SEED_DATA_CATALOG_PATH}.remote_store.directory_mode")
+    databases = require_list(payload.get("managed_postgres_databases"), f"{SEED_DATA_CATALOG_PATH}.managed_postgres_databases")
+    if not databases:
+        raise ValueError(f"{SEED_DATA_CATALOG_PATH}.managed_postgres_databases must not be empty")
+    for index, item in enumerate(databases):
+        require_identifier(item, f"{SEED_DATA_CATALOG_PATH}.managed_postgres_databases[{index}]")
+
+    classes = require_mapping(payload.get("classes"), f"{SEED_DATA_CATALOG_PATH}.classes")
+    if not classes:
+        raise ValueError(f"{SEED_DATA_CATALOG_PATH}.classes must not be empty")
+    expected_datasets = {"identities", "sessions", "workflow_runs", "messages", "assets", "audit_events"}
+    for class_name, class_payload in classes.items():
+        require_identifier(class_name, f"{SEED_DATA_CATALOG_PATH}.classes key '{class_name}'")
+        class_payload = require_mapping(class_payload, f"{SEED_DATA_CATALOG_PATH}.classes.{class_name}")
+        require_str(class_payload.get("description"), f"{SEED_DATA_CATALOG_PATH}.classes.{class_name}.description")
+        datasets = require_mapping(class_payload.get("datasets"), f"{SEED_DATA_CATALOG_PATH}.classes.{class_name}.datasets")
+        if set(datasets.keys()) != expected_datasets:
+            raise ValueError(
+                f"{SEED_DATA_CATALOG_PATH}.classes.{class_name}.datasets must define exactly {sorted(expected_datasets)}"
+            )
+        for dataset_name, count in datasets.items():
+            require_int(count, f"{SEED_DATA_CATALOG_PATH}.classes.{class_name}.datasets.{dataset_name}", 1)
 
 
 def validate_token_policy() -> set[str]:
@@ -2427,6 +2470,7 @@ def validate_repository_data_models() -> int:
     validate_failure_domain_policy()
     validate_slo_catalog_assets()
     validate_secret_catalog(secret_manifest)
+    validate_seed_data_catalog(secret_manifest)
     token_classes = validate_token_policy()
     validate_token_inventory(token_classes, workflow_catalog)
     validate_circuit_policies()
@@ -2434,6 +2478,7 @@ def validate_repository_data_models() -> int:
     validate_workstreams_release_policy()
     validate_workstream_canonical_truth_metadata()
     validate_workstream_live_apply_contracts()
+    load_network_impairment_matrix()
     validate_interface_contracts()
     validate_merge_eligible_files_contract()
     validate_triage_rule_contracts()

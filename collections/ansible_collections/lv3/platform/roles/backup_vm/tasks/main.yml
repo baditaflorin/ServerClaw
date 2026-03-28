@@ -1,4 +1,35 @@
 ---
+# Purpose: Install and configure the managed Proxmox Backup Server guest, datastore, automation identity, and seed snapshot storage.
+# Use case: Run when converging backup-lv3 so the platform has a repo-managed PBS endpoint and snapshot staging root.
+#
+# Inputs (required):
+#   - backup_vm_repo_file (path, required): PBS repository definition path.
+#   - backup_vm_datastore_name (str, required): Managed datastore name.
+#   - backup_vm_datastore_disk_device (path, required): Datastore disk device.
+#   - backup_vm_datastore_mountpoint (path, required): Managed datastore mountpoint.
+#   - backup_vm_api_user (str, required): Managed PBS automation user.
+#   - backup_vm_api_token_local_file (path, required): Controller-local token JSON path.
+#
+# Inputs (optional):
+#   - backup_vm_seed_snapshot_store_path (path, optional): Root directory for seed snapshot storage.
+#   - backup_vm_seed_snapshot_classes (list[str], optional): Seed snapshot class directories.
+#
+# Outputs:
+#   - Installed PBS packages, a configured datastore, managed automation credentials, and seed snapshot directories.
+#
+# Idempotency: Fully idempotent
+#              Datastore, user, token, and directory steps are guarded by read-before-write checks and reused artifacts.
+#
+# Dependencies:
+#   - ADR 0029: Defines the managed backup VM and datastore.
+#   - ADR 0187: Adds the seed snapshot storage contract.
+#   - Role: backup_vm — converges the live PBS guest.
+#
+# Related ADRs: 0029, 0165, 0187
+# Related Runbooks: docs/runbooks/backup-restore-verification.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
 - name: Validate backup VM role inputs
   ansible.builtin.assert:
     that:
@@ -162,6 +193,23 @@
     name: proxmox-backup-proxy
     enabled: true
     state: started
+
+- name: Ensure the managed seed snapshot store root exists
+  ansible.builtin.file:
+    path: "{{ backup_vm_seed_snapshot_store_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ backup_vm_seed_snapshot_store_mode }}"
+
+- name: Ensure managed seed snapshot class directories exist
+  ansible.builtin.file:
+    path: "{{ backup_vm_seed_snapshot_store_path }}/{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ backup_vm_seed_snapshot_store_mode }}"
+  loop: "{{ backup_vm_seed_snapshot_classes }}"
 
 - name: Read the current PBS users
   ansible.builtin.command: proxmox-backup-manager user list --output-format json

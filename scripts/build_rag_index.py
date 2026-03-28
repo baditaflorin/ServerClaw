@@ -8,7 +8,7 @@ import urllib.request
 from pathlib import Path
 
 from controller_automation_toolkit import REPO_ROOT, emit_cli_error
-from platform_context_corpus import build_chunks, build_manifest
+from platform_context_corpus import build_chunks, build_manifest_from_chunks, filter_chunks_by_source_paths
 
 
 DEFAULT_TOKEN_FILE = Path(
@@ -52,6 +52,12 @@ def main() -> int:
     parser.add_argument("--overlap-chars", type=int, default=240, help="Chunk overlap in characters.")
     parser.add_argument("--dry-run", action="store_true", help="Build and summarize the chunk set without uploading.")
     parser.add_argument(
+        "--include-path",
+        action="append",
+        default=[],
+        help="Limit the uploaded chunk set to the given repo-relative path or directory prefix. Repeat as needed.",
+    )
+    parser.add_argument(
         "--write-manifest",
         help="Optional path to write the computed chunk manifest JSON.",
     )
@@ -59,8 +65,14 @@ def main() -> int:
 
     try:
         repo_root = Path(args.repo_root).resolve()
-        manifest = build_manifest(repo_root, max_chars=args.max_chars, overlap_chars=args.overlap_chars)
         chunks = build_chunks(repo_root, max_chars=args.max_chars, overlap_chars=args.overlap_chars)
+        chunks = filter_chunks_by_source_paths(chunks, args.include_path)
+        manifest = build_manifest_from_chunks(
+            chunks,
+            repo_root=repo_root,
+            max_chars=args.max_chars,
+            overlap_chars=args.overlap_chars,
+        )
         if args.write_manifest:
             Path(args.write_manifest).write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
 

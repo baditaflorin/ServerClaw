@@ -3,7 +3,7 @@ from pathlib import Path
 import httpx
 
 import platform_context_service
-from platform_context_service import PlatformContextService, ServiceConfig, TokenHashEmbedder
+from platform_context_service import OLLAMA_EMBED_BATCH_SIZE, OllamaEmbedder, PlatformContextService, ServiceConfig, TokenHashEmbedder
 
 
 def write(path: Path, content: str) -> None:
@@ -265,6 +265,57 @@ def test_platform_context_query_falls_back_to_keyword_search(tmp_path: Path, mon
     assert payload["retrieval_backend"] == "keyword-fallback"
     assert payload["matches"]
     assert any("SSH certificates" in match["content"] for match in payload["matches"])
+
+
+def test_ollama_embedder_batches_document_requests() -> None:
+    observed_batches: list[list[str]] = []
+
+    class RecordingOllamaEmbedder(OllamaEmbedder):
+        def _request(self, path: str, payload: dict[str, object]) -> dict[str, object]:
+            assert path == "/api/embed"
+            batch = list(payload["input"])
+            observed_batches.append(batch)
+            return {"embeddings": [[float(index)] for index, _ in enumerate(batch, start=len(observed_batches) * 100)]}
+
+    texts = [f"chunk-{index}" for index in range(OLLAMA_EMBED_BATCH_SIZE + 5)]
+    embedder = RecordingOllamaEmbedder("http://ollama.invalid", "nomic-embed-text")
+
+    embeddings = embedder.embed_documents(texts)
+
+    assert len(observed_batches) == 2
+    assert observed_batches[0] == texts[:OLLAMA_EMBED_BATCH_SIZE]
+    assert observed_batches[1] == texts[OLLAMA_EMBED_BATCH_SIZE:]
+    assert len(embeddings) == len(texts)
+
+
+def test_ollama_embedder_splits_failed_batches_until_singletons() -> None:
+    attempted_batches: list[list[str]] = []
+    legacy_prompts: list[str] = []
+
+    class SplittingOllamaEmbedder(OllamaEmbedder):
+        def _request(self, path: str, payload: dict[str, object]) -> dict[str, object]:
+            if path == "/api/embed":
+                batch = list(payload["input"])
+                attempted_batches.append(batch)
+                if len(batch) > 1:
+                    raise TimeoutError("batch too large")
+                raise RuntimeError("single-item batch uses legacy fallback")
+            if path == "/api/embeddings":
+                prompt = str(payload["prompt"])
+                legacy_prompts.append(prompt)
+                return {"embedding": [float(len(prompt))]}
+            raise AssertionError(path)
+
+    texts = ["alpha", "beta", "gamma", "delta"]
+    embedder = SplittingOllamaEmbedder("http://ollama.invalid", "nomic-embed-text")
+
+    embeddings = embedder.embed_documents(texts)
+
+    assert attempted_batches[0] == texts
+    assert ["alpha", "beta"] in attempted_batches
+    assert ["gamma", "delta"] in attempted_batches
+    assert legacy_prompts == texts
+    assert embeddings == [[5.0], [4.0], [5.0], [5.0]]
 
 
 def test_build_config_uses_corpus_root_for_default_observability_paths(tmp_path: Path, monkeypatch) -> None:

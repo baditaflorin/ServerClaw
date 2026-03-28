@@ -306,6 +306,35 @@
       }
     },
     {
+      "id": "realtime",
+      "name": "Netdata Realtime Metrics",
+      "description": "Authenticated Netdata parent dashboard for live host and guest metrics streamed into monitoring-lv3.",
+      "category": "observability",
+      "lifecycle_status": "active",
+      "vm": "monitoring-lv3",
+      "vmid": 140,
+      "internal_url": "http://10.10.10.40:19999",
+      "public_url": "https://realtime.lv3.org",
+      "subdomain": "realtime.lv3.org",
+      "exposure": "edge-published",
+      "health_probe_id": "realtime",
+      "adr": "0196",
+      "runbook": "docs/runbooks/configure-netdata.md",
+      "tags": [
+        "metrics",
+        "netdata",
+        "observability",
+        "realtime"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://realtime.lv3.org",
+          "subdomain": "realtime.lv3.org"
+        }
+      }
+    },
+    {
       "id": "keycloak",
       "name": "Keycloak",
       "description": "Shared SSO and OIDC broker for operator-facing and approved agent-facing applications.",

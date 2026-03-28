@@ -1,13 +1,13 @@
-# Release 0.177.21
+# Release 0.177.26
 
 - Date: 2026-03-28
 
 ## Summary
-- integrated ADR 0186 by adding governed prewarmed fixture pools, warm-handoff leases, and the asynchronous Windmill reconciler for local ephemeral capacity
-- implemented ADR 0190 synthetic transaction replay for restore verification, including the governed replay catalog, guest-agent restore fallback, and committed live-apply evidence for the current restore-health gap
+- integrated ADR 0198 by switching platform-context retrieval to local Ollama semantic embeddings, grounding operator and LLM query paths with cited vector matches, and hardening the governed `rag-context` live-apply wrapper across alias-aware service checks
+- added bounded degraded-index recovery during governed live apply so the semantic platform-context collection self-heals legacy `384` to Ollama `768` vector-dimension drift without forcing a synchronous full mirrored-corpus rebuild
 
 ## Platform Impact
-- integrates ADR 0186 prewarmed fixture pools and the already-pending ADR 0190 synthetic transaction replay into the mainline repository release without a new live-from-main platform version bump
+- this release is intended to promote the platform to `0.130.34` once the latest-`main` governed `rag-context` replay verifies healthy semantic vector retrieval on `docker-runtime-lv3`
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

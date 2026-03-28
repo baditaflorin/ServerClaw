@@ -7,11 +7,11 @@
 
 schema_version: 1
 generated: '2026-03-28'
-total_adrs: 205
+total_adrs: 216
 implementation_status_summary:
-  Implemented: 193
+  Implemented: 196
   Partial: 3
-  Not Implemented: 8
+  Not Implemented: 16
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -55,6 +55,7 @@ concerns:
     - '0151'
     - '0165'
     - '0176'
+    - '0204'
   bootstrap:
     - '0001'
     - '0003'
@@ -82,6 +83,7 @@ concerns:
     - 0188
     - 0190
     - 0192
+    - '0213'
   documentation:
     - '0074'
     - 0081
@@ -112,6 +114,7 @@ concerns:
     - '0052'
     - '0053'
     - '0146'
+    - 0196
   networking:
     - '0015'
     - '0021'
@@ -181,6 +184,14 @@ concerns:
     - 0193
     - 0199
     - '0202'
+    - '0205'
+    - '0206'
+    - '0207'
+    - 0208
+    - 0209
+    - '0210'
+    - '0211'
+    - '0212'
   release:
     - 0008
     - '0110'
@@ -3236,8 +3247,8 @@ adr_index:
     implemented_version: 0.177.21
   - adr: 0187
     title: Anonymized Seed Data Snapshots for Repeatable Tests
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Accepted
+    implementation_status: Implemented
     date: '2026-03-27'
     concern: testing
     keywords:
@@ -3249,6 +3260,7 @@ adr_index:
       - tests
     summary: We will maintain anonymized seed data snapshots for repeatable preview, restore, and failover tests.
     filename: 0187-anonymized-seed-data-snapshots-for-repeatable-tests.md
+    implemented_version: 0.177.24
   - adr: 0188
     title: Failover Rehearsal Gate for Redundancy Tiers
     status: Implemented
@@ -3267,8 +3279,8 @@ adr_index:
     implemented_version: 0.177.20
   - adr: 0189
     title: Network Impairment Test Matrix for Staging and Previews
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Implemented
+    implementation_status: Implemented
     date: '2026-03-27'
     concern: networking
     keywords:
@@ -3280,6 +3292,7 @@ adr_index:
       - previews
     summary: We will define a network impairment test matrix for preview, fixture, standby, and recovery environments.
     filename: 0189-network-impairment-test-matrix-for-staging-and-previews.md
+    implemented_version: 0.177.22
   - adr: 0190
     title: Synthetic Transaction Replay for Capacity and Recovery Validation
     status: Implemented
@@ -3343,7 +3356,21 @@ adr_index:
       - board
     summary: We will run a self-hosted Plane task board on docker-runtime-lv3 and treat it as a repo-managed service.
     filename: 0193-plane-kanban-task-board.md
-    implemented_version: 0.177.12
+    implemented_version: 0.177.27
+  - adr: 0196
+    title: Netdata Realtime Streaming Metrics
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: monitoring
+    keywords:
+      - netdata
+      - realtime
+      - streaming
+      - metrics
+    summary: We deploy Netdata as a parent-plus-children topology for real-time metrics.
+    filename: 0196-netdata-realtime-streaming-metrics.md
+    implemented_version: 0.177.25
   - adr: 0198
     title: Qdrant Vector Search for Semantic Platform RAG
     status: Implemented
@@ -3360,7 +3387,7 @@ adr_index:
     summary: We will make the platform-context retrieval path semantic by default while preserving the existing private-first
       operati
     filename: 0198-qdrant-vector-search-semantic-rag.md
-    implemented_version: 0.177.12
+    implemented_version: 0.177.26
   - adr: 0199
     title: Outline Living Knowledge Wiki
     status: Accepted
@@ -3390,3 +3417,140 @@ adr_index:
     summary: We will add a repo-managed Excalidraw publication at draw.lv3.org and commit a
     filename: 0202-excalidraw-auto-generated-architecture-diagrams.md
     implemented_version: 0.177.16
+  - adr: '0204'
+    title: Self-Correcting Automation Loops
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: automation
+    keywords:
+      - self-correcting
+      - automation
+      - loops
+    summary: We will treat self-correction as an explicit architecture concern.
+    filename: 0204-self-correcting-automation-loops.md
+  - adr: '0205'
+    title: Capability Contracts Before Product Selection
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - capability
+      - contracts
+      - before
+      - product
+      - selection
+    summary: We will define the capability contract before selecting or changing a product on
+    filename: 0205-capability-contracts-before-product-selection.md
+  - adr: '0206'
+    title: Ports And Adapters For External Integrations
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - ports
+      - adapters
+      - external
+      - integrations
+    summary: We will use ports and adapters for all critical external integrations.
+    filename: 0206-ports-and-adapters-for-external-integrations.md
+  - adr: '0207'
+    title: Anti-Corruption Layers At Provider Boundaries
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - anti-corruption
+      - layers
+      - at
+      - provider
+      - boundaries
+    summary: Every critical external integration must define an anti-corruption layer at the
+    filename: 0207-anti-corruption-layers-at-provider-boundaries.md
+  - adr: 0208
+    title: Dependency Direction And Composition Roots
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - dependency
+      - direction
+      - composition
+      - roots
+    summary: We will enforce a dependency rule with explicit composition roots.
+    filename: 0208-dependency-direction-and-composition-roots.md
+  - adr: 0209
+    title: Use-Case Services And Thin Delivery Adapters
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - use-case
+      - services
+      - thin
+      - delivery
+      - adapters
+    summary: When a platform capability is exposed through multiple delivery surfaces, the
+    filename: 0209-use-case-services-and-thin-delivery-adapters.md
+  - adr: '0210'
+    title: Canonical Domain Models Over Vendor Schemas
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - canonical
+      - domain
+      - models
+      - over
+      - vendor
+      - schemas
+    summary: The repository will prefer canonical domain models over vendor-native schemas
+    filename: 0210-canonical-domain-models-over-vendor-schemas.md
+  - adr: '0211'
+    title: Shared Policy Packs And Rule Registries
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - shared
+      - policy
+      - packs
+      - rule
+      - registries
+    summary: We will centralize shared platform policies into reusable policy packs or rule
+    filename: 0211-shared-policy-packs-and-rule-registries.md
+  - adr: '0212'
+    title: Replaceability Scorecards And Vendor Exit Plans
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - replaceability
+      - scorecards
+      - vendor
+      - exit
+      - plans
+    summary: Every critical product ADR must include a replaceability scorecard and a vendor
+    filename: 0212-replaceability-scorecards-and-vendor-exit-plans.md
+  - adr: '0213'
+    title: Architecture Fitness Functions In The Validation Gate
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - architecture
+      - fitness
+      - functions
+      - validation
+      - gate
+    summary: We will add architecture fitness functions to the repository validation gate.
+    filename: 0213-architecture-fitness-functions-in-the-validation-gate.md

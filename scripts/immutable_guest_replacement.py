@@ -10,6 +10,7 @@ from typing import Any, Final
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 
 import service_redundancy
+from service_id_resolver import resolve_service_id
 
 try:
     import jsonschema
@@ -235,23 +236,28 @@ def build_guest_plan(catalog: dict[str, Any], guest_name: str) -> dict[str, Any]
 
 
 def build_service_plan(catalog: dict[str, Any], service_id: str) -> dict[str, Any]:
+    canonical_service_id = resolve_service_id(service_id)
     service_catalog_index = service_redundancy.load_service_catalog_index()
-    if service_id not in service_catalog_index:
+    if canonical_service_id not in service_catalog_index:
         raise ValueError(f"unknown service: {service_id}")
 
     redundancy_catalog = service_redundancy.load_redundancy_catalog()
     redundancy_services = require_mapping(redundancy_catalog.get("services"), "config/service-redundancy-catalog.json.services")
-    service = require_mapping(service_catalog_index[service_id], f"service {service_id}")
-    redundancy = require_mapping(redundancy_services[service_id], f"redundancy {service_id}")
-    guest_name = require_str(service.get("vm"), f"service {service_id}.vm")
-    tier = require_enum(redundancy.get("tier"), f"service {service_id}.tier", set(service_redundancy.TIER_ORDER))
+    service = require_mapping(service_catalog_index[canonical_service_id], f"service {canonical_service_id}")
+    redundancy = require_mapping(redundancy_services[canonical_service_id], f"redundancy {canonical_service_id}")
+    guest_name = require_str(service.get("vm"), f"service {canonical_service_id}.vm")
+    tier = require_enum(
+        redundancy.get("tier"),
+        f"service {canonical_service_id}.tier",
+        set(service_redundancy.TIER_ORDER),
+    )
 
     plan = {
-        "service_id": service_id,
-        "service_name": require_str(service.get("name"), f"service {service_id}.name"),
+        "service_id": canonical_service_id,
+        "service_name": require_str(service.get("name"), f"service {canonical_service_id}.name"),
         "guest": guest_name,
         "tier": tier,
-        "exposure": require_str(service.get("exposure"), f"service {service_id}.exposure"),
+        "exposure": require_str(service.get("exposure"), f"service {canonical_service_id}.exposure"),
         "immutable_guest_replacement": False,
         "reason": "guest is not governed by ADR 0191 immutable replacement policy",
     }

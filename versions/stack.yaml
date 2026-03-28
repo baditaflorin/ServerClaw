@@ -1,11 +1,12 @@
 schema_version: 1.0.0
-repo_version: 0.177.22
-platform_version: 0.130.32
+repo_version: 0.177.27
+platform_version: 0.130.34
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
     monitoring: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
+    realtime: 2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply
     capacity_model: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
     world_state_materializer: 2026-03-27-adr-0113-world-state-materializer-mainline-live-apply
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
@@ -49,7 +50,7 @@ live_apply_evidence:
     netbox: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
     keycloak: 2026-03-26-adr-0171-fault-injection-live-apply
     n8n: 2026-03-26-adr-0151-n8n-live-apply
-    platform_context: 2026-03-26-adr-0166-canonical-error-response-live-apply
+    platform_context: 2026-03-28-adr-0198-semantic-rag-mainline-live-apply
     ntopng: 2026-03-22-adr-0059-ntopng-live-apply
     open_webui: 2026-03-25-adr-0145-open-webui-ollama-connector-live-apply
     remote_build_gateway: 2026-03-26-adr-0156-agent-session-workspace-isolation-live-apply
@@ -68,9 +69,11 @@ live_apply_evidence:
     excalidraw: 2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply
     failure_domain_policy: 2026-03-27-adr-0184-failure-domain-labels-live-apply
     outline: 2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply
+    network_impairment_matrix: 2026-03-27-adr-0189-network-impairment-matrix-live-apply
     plane: 2026-03-27-adr-0193-plane-live-apply
     service_redundancy: 2026-03-27-adr-0188-failover-rehearsal-gate-live-apply
     fixture_pools: 2026-03-28-adr-0186-prewarmed-fixture-pools-live-apply
+    seed_data_snapshots: 2026-03-28-adr-0187-anonymized-seed-data-snapshots-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -808,11 +811,11 @@ observed_state:
     container_running: true
     qdrant_container_running: true
     healthcheck_verified: true
-    rebuild_verified: true
+    rebuild_verified: false
     query_verified: true
-    embedding_backend: token-hash
-    indexed_chunk_count: 1010
-    corpus_source_count: 160
+    embedding_backend: ollama
+    indexed_chunk_count: 29
+    corpus_source_count: 4
   mattermost:
     runtime_vm: 10.10.10.20
     postgres_backend_vm: 10.10.10.50
@@ -952,8 +955,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.21
+    current: 0.177.26
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.32
+    current: 0.130.34
     meaning: intended platform release for the actual server configuration
