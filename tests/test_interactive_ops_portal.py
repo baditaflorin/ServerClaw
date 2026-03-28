@@ -306,6 +306,54 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
         json.dumps(
             {
                 "workflows": {
+                    "gate-status": {
+                        "description": "Show validation-gate status.",
+                        "lifecycle_status": "active",
+                        "live_impact": "repo_only",
+                        "owner_runbook": "docs/runbooks/validation-gate.md",
+                        "human_navigation": {
+                            "launcher": {
+                                "enabled": True,
+                                "label": "Validation Gate Status",
+                                "description": "Open the shared validation-gate status launcher path.",
+                                "purpose": "observe",
+                                "personas": ["operator", "observer"],
+                                "href": "/#runbooks",
+                            }
+                        },
+                    },
+                    "continuous-drift-detection": {
+                        "description": "Show drift status.",
+                        "lifecycle_status": "active",
+                        "live_impact": "guest_live",
+                        "owner_runbook": "docs/runbooks/drift-detection.md",
+                        "human_navigation": {
+                            "launcher": {
+                                "enabled": True,
+                                "label": "Drift Status",
+                                "description": "Open the drift panel.",
+                                "purpose": "observe",
+                                "personas": ["observer", "operator"],
+                                "href": "/#drift",
+                            }
+                        },
+                    },
+                    "converge-ops-portal": {
+                        "description": "Converge the ops portal.",
+                        "lifecycle_status": "active",
+                        "live_impact": "guest_live",
+                        "owner_runbook": "docs/runbooks/platform-operations-portal.md",
+                        "human_navigation": {
+                            "launcher": {
+                                "enabled": True,
+                                "label": "Converge Ops Portal",
+                                "description": "Open the governed portal deployment path.",
+                                "purpose": "administer",
+                                "personas": ["administrator", "operator"],
+                                "href": "/#runbooks",
+                            }
+                        },
+                    },
                     "rotate-secret": {
                         "description": "Rotate one service secret.",
                         "lifecycle_status": "active",
@@ -318,6 +366,41 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
                         "live_impact": "repo_only",
                     },
                 }
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (data_root / "config" / "persona-catalog.json").write_text(
+        json.dumps(
+            {
+                "personas": [
+                    {
+                        "id": "operator",
+                        "name": "Operator",
+                        "description": "Default runtime operator.",
+                        "default": True,
+                        "focus_purposes": ["operate", "observe", "learn"],
+                        "default_favorites": ["service:grafana", "workflow:gate-status"],
+                    },
+                    {
+                        "id": "observer",
+                        "name": "Observer",
+                        "description": "Monitoring and drift review.",
+                        "default": False,
+                        "focus_purposes": ["observe", "operate", "administer"],
+                        "default_favorites": ["workflow:continuous-drift-detection"],
+                    },
+                    {
+                        "id": "administrator",
+                        "name": "Administrator",
+                        "description": "Identity and platform administration.",
+                        "default": False,
+                        "focus_purposes": ["administer", "operate", "observe"],
+                        "default_favorites": ["workflow:converge-ops-portal"],
+                    },
+                ]
             },
             indent=2,
         )
@@ -365,6 +448,7 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
         session_secret="test-secret",
         static_api_token="test-token",
         service_catalog_path=data_root / "config" / "service-capability-catalog.json",
+        persona_catalog_path=data_root / "config" / "persona-catalog.json",
         publication_registry_path=data_root / "config" / "subdomain-exposure-registry.json",
         workflow_catalog_path=data_root / "config" / "workflow-catalog.json",
         changelog_path=data_root / "changelog.md",
@@ -392,6 +476,9 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "agent/observation-loop" in response.text
     assert "Search Fabric" in response.text
     assert "Runbook Launcher" in response.text
+    assert "Application Launcher" in response.text
+    assert "Validation Gate Status" in response.text
+    assert "Drift Status" in response.text
     assert "Recent Live Applies" in response.text
     assert "shared-edge / platform-sso" in response.text
     assert "ops.lv3.org · operator · shared-edge · platform-sso" in response.text
@@ -410,6 +497,57 @@ def test_dashboard_uses_same_origin_static_stylesheet(portal_client: tuple[TestC
 
     assert response.status_code == 200
     assert '<link rel="stylesheet" href="/static/portal.css">' in response.text
+
+
+def test_launcher_favorite_toggle_adds_favorites_copy(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, _gateway = portal_client
+
+    baseline = client.get("/partials/launcher")
+    assert baseline.status_code == 200
+    assert baseline.text.count("Add Keycloak to favorites") == 1
+
+    response = client.post("/actions/launcher/favorites/service:keycloak", data={"query": ""})
+
+    assert response.status_code == 200
+    assert response.text.count("Remove Keycloak from favorites") == 2
+    refreshed = client.get("/partials/launcher")
+    assert refreshed.text.count("Remove Keycloak from favorites") == 2
+
+
+def test_launcher_redirect_records_recent_destination(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, _gateway = portal_client
+
+    before = client.get("/partials/launcher")
+    assert "Recent Destinations" not in before.text
+
+    redirect = client.get("/launcher/go/service:keycloak", follow_redirects=False)
+
+    assert redirect.status_code == 303
+    assert redirect.headers["location"] == "https://sso.lv3.org"
+
+    after = client.get("/partials/launcher")
+    assert "Recent Destinations" in after.text
+    assert after.text.count("Add Keycloak to favorites") == 2
+
+
+def test_launcher_persona_switch_updates_selection(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, _gateway = portal_client
+
+    response = client.post("/actions/launcher/persona/administrator", data={"query": ""})
+
+    assert response.status_code == 200
+    assert "Identity and platform administration." in response.text
+    assert "Converge Ops Portal" in response.text
+
+
+def test_launcher_search_filters_results(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, _gateway = portal_client
+
+    response = client.get("/partials/launcher", params={"query": "drift"})
+
+    assert response.status_code == 200
+    assert "Drift Status" in response.text
+    assert "Keycloak" not in response.text
 
 
 def test_health_check_action_returns_fragment(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
