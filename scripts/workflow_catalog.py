@@ -14,6 +14,12 @@ from controller_automation_toolkit import (
     load_yaml,
     parse_make_targets,
 )
+from correction_loops import (
+    CORRECTION_LOOP_CATALOG_PATH,
+    load_correction_loop_catalog,
+    resolve_workflow_correction_loop,
+    validate_correction_loop_catalog,
+)
 
 ALLOWED_ENTRYPOINT_KINDS = {"make_target"}
 ALLOWED_LIVE_IMPACTS = {
@@ -433,6 +439,22 @@ def show_workflow(catalog: dict, workflow_id: str) -> int:
     for command in workflow["verification_commands"]:
         print(f"  - {command}")
 
+    if CORRECTION_LOOP_CATALOG_PATH.exists():
+        correction_catalog = load_correction_loop_catalog()
+        correction_loop = resolve_workflow_correction_loop(correction_catalog, workflow_id)
+        if correction_loop is not None:
+            print("Correction loop:")
+            print(f"  - id: {correction_loop['id']}")
+            print(f"  - invariant: {correction_loop['invariant']}")
+            print(f"  - verification: {correction_loop['verification']['source']}")
+            print(f"  - escalation: {correction_loop['escalation']['target']}")
+            if correction_loop.get("retry_budget_cycles") is not None:
+                print(f"  - retry_budget_cycles: {correction_loop['retry_budget_cycles']}")
+            print("  - repair actions:")
+            for action in correction_loop["repair_actions"]:
+                approval = "approval" if action["requires_approval"] else "auto"
+                print(f"    {action['kind']} [{approval}]: {action['summary']}")
+
     return 0
 
 
@@ -450,6 +472,9 @@ def main() -> int:
         validate_secret_manifest(secret_manifest)
         catalog = load_workflow_catalog()
         validate_workflow_catalog(catalog, secret_manifest)
+        if CORRECTION_LOOP_CATALOG_PATH.exists():
+            correction_catalog = load_correction_loop_catalog()
+            validate_correction_loop_catalog(correction_catalog, catalog)
     except (OSError, json.JSONDecodeError, ValueError) as exc:
         return emit_cli_error("Workflow catalog", exc)
 

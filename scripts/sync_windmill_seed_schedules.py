@@ -180,7 +180,7 @@ def sync_schedule(
                     spec=spec,
                     timeout_s=request_timeout_s,
                 )
-                return {"path": spec["path"], "attempts": attempt, "status": "updated"}
+                return {"path": spec["path"], "attempts": attempts, "status": "updated"}
             create_schedule(
                 base_url=base_url,
                 workspace=workspace,

@@ -279,7 +279,12 @@ def load_recent_deployments(service: dict[str, Any], *, lookback_hours: int = DE
     cutoff = utc_now() - dt.timedelta(hours=lookback_hours)
     deployments: list[dict[str, Any]] = []
     for path in sorted(LIVE_APPLY_RECEIPTS_DIR.rglob("*.json")):
-        payload = load_json(path)
+        try:
+            payload = load_json(path)
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError):
+            continue
+        if not isinstance(payload, dict):
+            continue
         applied_at = parse_timestamp(payload.get("recorded_on") or payload.get("applied_on"))
         if applied_at is None or applied_at < cutoff:
             continue

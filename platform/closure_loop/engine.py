@@ -12,7 +12,7 @@ from typing import Any, Callable
 
 from platform.agent import AgentCoordinationStore
 from platform.ledger import LedgerWriter
-from platform.ledger._common import REPO_ROOT, load_module_from_repo
+from platform.ledger._common import REPO_ROOT, ensure_scripts_on_path, load_module_from_repo
 from platform.world_state._db import parse_timestamp
 from platform.world_state.client import WorldStateClient, WorldStateError
 
@@ -128,6 +128,9 @@ class ClosureLoop:
         self._world_state_client = world_state_client or WorldStateClient(self._repo_root)
         self._coordination_store = coordination_store or AgentCoordinationStore(self._repo_root)
         self._clock = clock
+        self._correction_loop_catalog_loaded = False
+        self._correction_loop_catalog: dict[str, Any] | None = None
+        self._correction_loop_module: Any | None = None
 
     def start(
         self,
@@ -159,6 +162,7 @@ class ClosureLoop:
             "verification_result": None,
             "resolution": None,
             "escalation_reason": None,
+            "correction_loop": self._correction_loop_snapshot("platform-observation-loop"),
             "trigger_payload": payload,
             "cycle_count": 0,
             "operator_approved": False,
@@ -383,6 +387,49 @@ class ClosureLoop:
         workflows = payload.get("workflows", {})
         return workflows if isinstance(workflows, dict) else {}
 
+    def _load_correction_loop_catalog(self) -> dict[str, Any] | None:
+        if self._correction_loop_catalog_loaded:
+            return self._correction_loop_catalog
+        catalog_path = self._repo_root / "config" / "correction-loops.json"
+        if not catalog_path.exists():
+            self._correction_loop_catalog_loaded = True
+            self._correction_loop_catalog = None
+            return None
+        script_path = self._repo_root / "scripts" / "correction_loops.py"
+        if not script_path.exists():
+            ensure_scripts_on_path()
+            script_path = REPO_ROOT / "scripts" / "correction_loops.py"
+        if not script_path.exists():
+            self._correction_loop_catalog_loaded = True
+            self._correction_loop_catalog = None
+            return None
+        self._correction_loop_module = load_module_from_repo(
+            script_path,
+            "lv3_closure_loop_correction_loops",
+        )
+        self._correction_loop_catalog = self._correction_loop_module.load_correction_loop_catalog(path=catalog_path)
+        self._correction_loop_catalog_loaded = True
+        return self._correction_loop_catalog
+
+    def _resolve_correction_loop(self, workflow_id: str) -> dict[str, Any] | None:
+        catalog = self._load_correction_loop_catalog()
+        if catalog is None or self._correction_loop_module is None:
+            return None
+        return self._correction_loop_module.resolve_workflow_correction_loop(catalog, workflow_id)
+
+    def _correction_loop_snapshot(self, workflow_id: str) -> dict[str, Any] | None:
+        loop = self._resolve_correction_loop(workflow_id)
+        if loop is None:
+            return None
+        return {
+            "loop_id": loop["id"],
+            "workflow_id": workflow_id,
+            "verification_source": loop["verification"]["source"],
+            "escalation_target": loop["escalation"]["target"],
+            "retry_budget_cycles": loop.get("retry_budget_cycles"),
+            "repair_action_kinds": [action["kind"] for action in loop["repair_actions"]],
+        }
+
     def _load_agent_policies(self) -> dict[str, Any]:
         path = self._repo_root / "config" / "agent-policies.yaml"
         if not path.exists():
@@ -505,6 +552,11 @@ class ClosureLoop:
         return False
 
     def _max_retriage_cycles(self, service_id: str) -> int:
+        observation_loop = self._resolve_correction_loop("platform-observation-loop")
+        if isinstance(observation_loop, dict):
+            configured = observation_loop.get("retry_budget_cycles")
+            if isinstance(configured, int):
+                return max(0, min(configured, 5))
         catalog = json.loads((self._repo_root / "config" / "service-capability-catalog.json").read_text(encoding="utf-8"))
         services = catalog.get("services", [])
         if not isinstance(services, list):

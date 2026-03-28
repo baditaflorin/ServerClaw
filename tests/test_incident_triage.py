@@ -160,6 +160,25 @@ def test_build_report_prefers_recent_deployment_rule(monkeypatch, tmp_path: Path
     assert report["signal_set"]["deployment_actor"] == "codex/adr-0113-workstream"
 
 
+def test_build_report_ignores_unreadable_receipts(monkeypatch, tmp_path: Path) -> None:
+    configure_repo(monkeypatch, tmp_path)
+    invalid_receipt = tmp_path / "receipts" / "live-applies" / "2026-03-24-invalid.json"
+    invalid_receipt.write_bytes(b'{"receipt_id":"broken","\xa3":1}\n')
+
+    report = incident_triage.build_report(
+        {
+            "service_id": "netbox",
+            "alert_name": "netbox_health_probe_failed",
+            "status": "firing",
+            "logs": [{"line": "ERROR startup failed", "labels": {"level": "error"}}],
+            "certificate": {"tls_cert_expiry_days": 14},
+        }
+    )
+
+    assert report["hypotheses"][0]["id"] == "recent-deployment-regression"
+    assert report["signal_set"]["recent_deployment_within_2h"] is True
+
+
 def test_build_report_runs_allowlisted_auto_check(monkeypatch, tmp_path: Path) -> None:
     configure_repo(monkeypatch, tmp_path)
 
