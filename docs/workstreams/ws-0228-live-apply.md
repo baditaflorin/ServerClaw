@@ -45,6 +45,7 @@
 - `docs/runbooks/drift-detection.md`
 - `docs/runbooks/capacity-model.md`
 - `docs/runbooks/integration-test-suite.md`
+- `docs/diagrams/agent-coordination-map.excalidraw`
 - `docs/adr/0228-windmill-as-the-default-browser-and-api-operations-surface.md`
 - `docs/adr/.index.yaml`
 - `docs/workstreams/ws-0228-live-apply.md`
@@ -92,6 +93,7 @@
 - the proxied Windmill API on `http://100.64.0.1:8005` returned `CE v1.662.0`, the seeded metadata GETs for `f/lv3/post_merge_gate` and `f/lv3/maintenance_window` succeeded, `f/lv3/weekly_capacity_report` succeeded with `metrics_source: disabled`, `f/lv3/audit_token_inventory` succeeded with `7` healthy tokens, and dry-run `f/lv3/token_exposure_response` succeeded for `local-platform-cli`
 - the canonical branch-local evidence for this replay is receipt `2026-03-28-adr-0228-windmill-default-operations-surface-live-apply`
 - the full repo validation path was also exercised from this worktree with `make validate`; it progressed through syntax, lint, data-model, dependency, and status-document checks before stopping at the expected protected canonical-truth guard for stale `README.md`
+- the first branch push attempt also surfaced one generated-surface dependency from the remote pre-push gate: `docs/diagrams/agent-coordination-map.excalidraw` needed regeneration after the `workstreams.yaml` updates, so the workstream now includes that generated coordination map in its declared surface
 
 ## Mainline Integration
 

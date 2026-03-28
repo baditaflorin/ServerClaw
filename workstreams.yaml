@@ -8180,6 +8180,7 @@ workstreams:
       - docs/runbooks/drift-detection.md
       - docs/runbooks/capacity-model.md
       - docs/runbooks/integration-test-suite.md
+      - docs/diagrams/agent-coordination-map.excalidraw
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
@@ -8212,6 +8213,7 @@ workstreams:
             - docs/runbooks/drift-detection.md
             - docs/runbooks/capacity-model.md
             - docs/runbooks/integration-test-suite.md
+            - docs/diagrams/agent-coordination-map.excalidraw
             - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
             - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
             - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
