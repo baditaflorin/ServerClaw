@@ -1,4 +1,31 @@
 ---
+# Playbook: vaultwarden.yml
+# Purpose: Converge Vaultwarden host proxying, PostgreSQL access, and runtime state for the repo-managed password vault surface.
+# Use case: Run during Vaultwarden deployment, upgrade, or recovery when the password vault must match repo truth.
+#
+# Inputs (required):
+#   - proxmox_guest_ssh_connection_mode (string, required): SSH path used by the runtime and postgres guest plays.
+#
+# Inputs (optional):
+#   - vaultwarden_runtime_verify_publication (boolean, optional, default=true): Keep public verification enabled after convergence.
+#
+# Outputs:
+#   - The host proxy, PostgreSQL access policy, Vaultwarden runtime, and published edge endpoint are reconciled to repo state.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - ADR 0153: Vaultwarden provides the managed password vault surface.
+#   - Requires: postgres-lv3, docker-runtime-lv3, and the shared edge components to already exist.
+#   - Role: lv3.platform.vaultwarden_postgres - provisions the Vaultwarden database and role.
+#   - Role: lv3.platform.vaultwarden_runtime - converges the Vaultwarden runtime and publication flow.
+#
+# Related ADRs: 0153, 0197
+# Related Runbooks: docs/runbooks/configure-vaultwarden.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
+
 - name: Converge the Tailscale operator proxy for Vaultwarden
   hosts: proxmox_hosts
   become: true
@@ -21,6 +48,7 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.postgres_vm
     - role: lv3.platform.vaultwarden_postgres
 

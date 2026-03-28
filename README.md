@@ -124,6 +124,7 @@ ADR 0102 security posture reporting is now live on production: the Windmill-comp
 The repository now also ships ADR 0142 public-surface security scanning: `make public-surface-security-scan ENV=production` writes structured receipts under `receipts/security-scan/`, uses `testssl.sh` and `nuclei` container runners for the live public HTTP or HTTPS surface, and can publish high or critical findings on `platform.security.*`; the live weekly schedule still requires apply from `main`.
 The repository now also ships ADR 0129 runbook automation: structured YAML, JSON, and Markdown-front-matter runbooks can execute through `lv3 runbook`, persist resumable run state under `.local/runbooks/runs/`, and reuse the current Windmill plus mutation-audit surfaces.
 The repository now also ships ADR 0209 use-case services and thin delivery adapters live on production: the API gateway and ops portal now expose the same shared structured runbook service already used by the CLI and Windmill wrapper, and the 2026-03-28 latest-main replay re-verified `validation-gate-status` end to end through the worker checkout, `api.lv3.org` gateway contract, and the interactive `ops.lv3.org` runbook launcher.
+The repository now also ships ADR 0197 Dify visual workflow canvas fully live on production: `https://agents.lv3.org/healthz` now returns `200`, governed Dify tool calls through `https://api.lv3.org/v1/dify-tools/get-platform-status` re-verified from the latest-main replay, and the linked-worktree smoke export plus Langfuse trace path completed successfully on 2026-03-28.
 The repository now also ships ADR 0231 local secret delivery live on production: `docker-runtime-lv3` now serves the control-plane backup path through a repo-managed OpenBao Agent plus systemd credentials, the legacy `/etc/lv3/control-plane-recovery/openbao-backup-token.json` artifact is gone, and the 2026-03-28 replay re-verified a fresh backup generation plus restore drill on `backup-lv3`.
 The repository now also ships ADR 0137 crawl policy automation live on production: the shared public edge serves a universal `robots.txt`, emits `X-Robots-Tag: noindex, nofollow` across published hostnames, adds robots meta tags to repository-generated HTML surfaces, and includes `lv3.org` in the shared edge certificate definition.
 The repository now also ships the first ADR 0166 canonical error rollout live on production: `config/error-codes.yaml` and `scripts/canonical_errors.py` now normalize repo-managed gateway and platform-context failures behind one trace-id-backed error envelope, and the 2026-03-26 live replay from `main` verified the canonical `AUTH_TOKEN_MISSING` response on both `https://api.lv3.org/v1/health` and `http://100.64.0.1:8010/v1/platform-summary`.
@@ -134,8 +135,8 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.46` |
-| Platform version | `0.130.41` |
+| Repository version | `0.177.48` |
+| Platform version | `0.130.42` |
 | Observed check date | `2026-03-28` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -209,7 +210,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `coolify_apps` | `2026-03-28-adr-0194-coolify-paas-deploy-from-repo-mainline-live-apply` |
 | `deadlock_detector` | `2026-03-26-adr-0162-deadlock-detector-live-apply` |
 | `dependency_graph_runtime` | `2026-03-26-adr-0117-dependency-graph-live-apply` |
-| `dify` | `2026-03-28-adr-0197-dify-live-apply` |
+| `dify` | `2026-03-28-adr-0197-dify-mainline-live-apply` |
 | `docker_runtime` | `2026-03-22-adr-0023-docker-runtime-live-apply` |
 | `dozzle` | `2026-03-26-adr-0150-dozzle-live-apply` |
 | `excalidraw` | `2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply` |
@@ -893,6 +894,16 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0231: Local Secret Delivery Via OpenBao Agent And Systemd Credentials](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials.md)
 - [ADR 0232: Nomad For Durable Batch And Long-Running Internal Jobs](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0232-nomad-for-durable-batch-and-long-running-internal-jobs.md)
 - [ADR 0233: Signed Release Bundles Via Gitea Releases And Cosign](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0233-signed-release-bundles-via-gitea-releases-and-cosign.md)
+- [ADR 0234: Shared Human App Shell And Navigation Via PatternFly](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0234-shared-human-app-shell-and-navigation-via-patternfly.md)
+- [ADR 0235: Cross-Application Launcher And Favorites Via PatternFly Application Launcher](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher.md)
+- [ADR 0236: Server-State And Mutation Feedback Via TanStack Query](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0236-server-state-and-mutation-feedback-via-tanstack-query.md)
+- [ADR 0237: Schema-First Human Forms Via React Hook Form And Zod](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0237-schema-first-human-forms-via-react-hook-form-and-zod.md)
+- [ADR 0238: Data-Dense Operator Grids Via AG Grid Community](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0238-data-dense-operator-grids-via-ag-grid-community.md)
+- [ADR 0239: Browser-Local Search Experience Via Pagefind](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0239-browser-local-search-experience-via-pagefind.md)
+- [ADR 0240: Operator Visualization Panels Via Apache ECharts](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0240-operator-visualization-panels-via-apache-echarts.md)
+- [ADR 0241: Rich Content And Inline Knowledge Editing Via Tiptap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0241-rich-content-and-inline-knowledge-editing-via-tiptap.md)
+- [ADR 0242: Guided Human Onboarding Via Shepherd Tours](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0242-guided-human-onboarding-via-shepherd-tours.md)
+- [ADR 0243: Component Stories, Accessibility, And UI Contracts Via Storybook, Playwright, And Axe-Core](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -1064,6 +1075,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream WS-0211: Shared Policy Packs And Rule Registries Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0211-shared-policy-packs-and-rule-registries.md)
 - [Workstream ADR 0214: HA And Replication Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0214-ha-replication-architecture-bundle.md)
 - [Workstream ADR 0224: Server-Resident Operations Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0224-server-resident-operations-architecture-bundle.md)
+- [Workstream ADR 0234: Human User Experience Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md)
 - [Workstream ws-0021-edge-cert-repair: Shared Edge Certificate Expansion Repair](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0021-edge-cert-repair.md)
 - [Workstream ws-0101-live-apply: ADR 0101 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0101-live-apply.md)
 - [Workstream ws-0105-live-apply: Live Apply ADR 0105 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0105-live-apply.md)
@@ -1114,8 +1126,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.46` |
-| Platform version | `0.130.41` |
+| Repository version | `0.177.48` |
+| Platform version | `0.130.42` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1325,7 +1337,6 @@ This repository is intentionally opinionated:
 | `0194` | Coolify PaaS deploy from repo | `merged` | [adr-0194-coolify-paas-deploy-from-repo.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0194-coolify-paas-deploy-from-repo.md) |
 | `0194` | Integrate ADR 0194 live apply into origin/main | `merged` | [ws-0194-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0194-main-merge.md) |
 | `0196` | ADR 0196 live apply from latest origin/main | `merged` | [ws-0196-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0196-live-apply.md) |
-| `0197` | Dify visual workflow canvas live apply | `merged` | [ws-0197-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0197-live-apply.md) |
 | `0199` | Outline living knowledge wiki | `merged` | [adr-0199-outline-living-knowledge-wiki.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0199-live-apply/docs/workstreams/adr-0199-outline-living-knowledge-wiki.md) |
 | `0202` | Excalidraw auto generated architecture diagrams | `live_applied` | [adr-0202-excalidraw-auto-generated-architecture-diagrams.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md) |
 | `0204` | Architecture governance bundle for self-correction, clean boundaries, and vendor replaceability | `merged` | [adr-0204-architecture-governance.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0204-architecture-governance.md) |
@@ -1351,6 +1362,7 @@ This repository is intentionally opinionated:
 | `0229` | Integrate ADR 0229 live apply into origin/main | `merged` | [ws-0229-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0229-main-merge.md) |
 | `0231` | Live apply ADR 0231 local secret delivery via OpenBao Agent and systemd credentials | `live_applied` | [ws-0231-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0231-live-apply.md) |
 | `0231` | Integrate ADR 0231 live apply into origin/main | `merged` | [ws-0231-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0231-main-merge.md) |
+| `0234` | Human user experience architecture bundle | `merged` | [adr-0234-human-user-experience-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

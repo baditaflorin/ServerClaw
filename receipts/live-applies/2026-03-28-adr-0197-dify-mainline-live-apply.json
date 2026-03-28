@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-28-adr-0197-dify-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-28",
+  "recorded_on": "2026-03-28",
+  "recorded_at": "2026-03-28T19:20:10Z",
+  "recorded_by": "codex",
+  "source_commit": "e5bf1aead51007e558ef65e8f9f5ac4094d7f5ff",
+  "repo_version_context": "0.177.48",
+  "platform_version_context": "0.130.42",
+  "workflow_id": "adr-0197-dify-mainline-live-apply",
+  "adr": "0197",
+  "summary": "Integrated ADR 0197 into current main by replaying the repo-managed Dify runtime and public edge, re-verifying the governed Dify tool bridge through api.lv3.org, and preserving packaged API gateway runbook compatibility plus linked-worktree smoke tracing on production.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "public Dify health",
+      "address": "https://agents.lv3.org/healthz"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "governed Dify tools bridge",
+      "address": "https://api.lv3.org/v1/dify-tools/get-platform-status"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "private Dify tunnel",
+      "address": "http://127.0.0.1:18094"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused worktree-safe regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml --with requests pytest tests/test_dify_smoke.py tests/test_runbook_use_cases.py tests/test_runbook_executor.py tests/test_postgres_vm_access_policy.py -q` returned `14 passed in 0.49s` after rebasing ADR 0197 onto current `origin/main`."
+    },
+    {
+      "check": "Rebased Dify converge replay",
+      "result": "pass",
+      "observed": "`make converge-dify` completed successfully from `codex/ws-0197-main-finish`, with the final recap reporting `docker-runtime-lv3 ok=111 changed=0 failed=0`, `nginx-lv3 ok=38 changed=4 failed=0`, and `postgres-lv3 ok=43 changed=4 failed=0`."
+    },
+    {
+      "check": "Rebased API gateway converge replay",
+      "result": "pass",
+      "observed": "`make converge-api-gateway` completed successfully from the same rebased worktree, with the final recap reporting `docker-runtime-lv3 ok=234 changed=106 failed=0` while packaging the restored runbook compatibility surfaces into the runtime bundle."
+    },
+    {
+      "check": "Public Dify edge publication",
+      "result": "pass",
+      "observed": "`dig +short agents.lv3.org` returned `65.108.75.123`, and `curl -fsS -D - https://agents.lv3.org/healthz` returned `HTTP/2 200` with `{\"step\":\"finished\",\"setup_at\":\"2026-03-28T00:11:21\"}`."
+    },
+    {
+      "check": "Public API gateway auth boundary",
+      "result": "pass",
+      "observed": "`curl -fsS -D - https://api.lv3.org/v1/health` returned the expected canonical `HTTP/2 401` auth envelope instead of the earlier broken public edge behavior."
+    },
+    {
+      "check": "Governed Dify tool bridge",
+      "result": "pass",
+      "observed": "`curl -fsS -D - -X POST https://api.lv3.org/v1/dify-tools/get-platform-status -H \"Content-Type: application/json\" -H \"X-LV3-Dify-Api-Key: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/tools-api-key.txt)\" -d '{}'` returned `HTTP/2 200` after the replay."
+    },
+    {
+      "check": "Linked-worktree smoke verification",
+      "result": "pass",
+      "observed": "The private tunnel `curl -fsS -D - http://127.0.0.1:18094/healthz` returned `HTTP/1.1 200`, and `uv run --with requests --with pyyaml python3 scripts/dify_smoke.py --base-url http://127.0.0.1:18094 --admin-email baditaflorin@gmail.com --admin-password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/admin-password.txt --init-password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/init-password.txt --tools-api-key-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/tools-api-key.txt --export-path platform/dify-workflows/lv3-dify-smoke.yml` completed with `tool_count: 11`, `trace_configured: true`, and exported `platform/dify-workflows/lv3-dify-smoke.yml`."
+    }
+  ],
+  "evidence_refs": [
+    "VERSION",
+    "README.md",
+    "RELEASE.md",
+    "changelog.md",
+    "versions/stack.yaml",
+    "docs/adr/0197-dify-visual-llm-workflow-canvas.md",
+    "docs/runbooks/configure-dify.md",
+    "docs/workstreams/ws-0197-live-apply.md",
+    "docs/release-notes/0.177.48.md",
+    "platform/dify-workflows/lv3-dify-smoke.yml",
+    "platform/use_cases/__init__.py",
+    "platform/use_cases/runbooks.py",
+    "scripts/dify_smoke.py",
+    "tests/test_dify_smoke.py",
+    "tests/test_runbook_use_cases.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This mainline receipt supersedes the earlier branch-local receipt `2026-03-28-adr-0197-dify-live-apply`, which correctly captured the original Hetzner DNS write brownout but no longer reflects current platform truth.",
+    "The latest-main replay was performed from the isolated worktree `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0197-main-finish` on branch `codex/ws-0197-main-finish` after rebasing ADR 0197 onto current `origin/main`.",
+    "The replay preserved the Dify internal port move from `8093` to `8094` so the existing Plane proxy on `docker-runtime-lv3` remains untouched while Dify stays healthy.",
+    "The packaged API gateway runtime already contained newer ADR 0209 use-case service structure on current main, so the compatibility repair intentionally preserved that richer implementation while adding legacy `delivery_surface` handling, the `portal` alias mapping, and the optional `repo_root` argument on `WindmillWorkflowRunner`."
+  ]
+}

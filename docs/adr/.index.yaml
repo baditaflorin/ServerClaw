@@ -3435,7 +3435,7 @@ adr_index:
     summary: 'Deploy Dify on docker-runtime-lv3 at agents.lv3.org behind the shared Keycloak-backed edge authentication flow.
       Connect '
     filename: 0197-dify-visual-llm-workflow-canvas.md
-    implemented_version: 0.177.29
+    implemented_version: 0.177.48
   - adr: 0198
     title: Qdrant Vector Search for Semantic Platform RAG
     status: Implemented

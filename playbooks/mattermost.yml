@@ -1,4 +1,31 @@
 ---
+# Playbook: mattermost.yml
+# Purpose: Converge Mattermost host proxying, PostgreSQL access, and runtime state for the repo-managed collaboration surface.
+# Use case: Run during Mattermost deployment, upgrade, or recovery when chat infrastructure must match repo truth.
+#
+# Inputs (required):
+#   - proxmox_guest_ssh_connection_mode (string, required): SSH path used by the runtime and postgres guest plays.
+#
+# Inputs (optional):
+#   - mattermost_runtime_verify_publication (boolean, optional, default=true): Keep public verification enabled after convergence.
+#
+# Outputs:
+#   - The host proxy, PostgreSQL access policy, Mattermost runtime, and published collaboration endpoint are reconciled to repo state.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - ADR 0150: Mattermost provides the platform collaboration surface.
+#   - Requires: postgres-lv3, docker-runtime-lv3, and the shared edge components to already exist.
+#   - Role: lv3.platform.mattermost_postgres - provisions the Mattermost database and role.
+#   - Role: lv3.platform.mattermost_runtime - converges the Mattermost runtime and publication flow.
+#
+# Related ADRs: 0150, 0197
+# Related Runbooks: docs/runbooks/configure-mattermost.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
+
 - name: Converge the Tailscale operator proxy for Mattermost
   hosts: proxmox_hosts
   become: true
@@ -21,6 +48,7 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.postgres_vm
     - role: lv3.platform.mattermost_postgres
 
