@@ -25,6 +25,9 @@
     method: GET
     status_code: 200
   register: ops_portal_verify_health
+  retries: 20
+  delay: 3
+  until: ops_portal_verify_health.status == 200
   changed_when: false
 
 - name: Verify the ops portal root page renders locally
@@ -33,4 +36,7 @@
     method: GET
     status_code: 200
   register: ops_portal_verify_root
+  retries: 20
+  delay: 3
+  until: ops_portal_verify_root.status == 200
   changed_when: false

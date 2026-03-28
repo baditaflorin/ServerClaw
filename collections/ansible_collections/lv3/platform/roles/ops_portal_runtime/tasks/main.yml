@@ -104,6 +104,16 @@
     group: root
     mode: "0644"
 
+- name: Remove stale ops portal service sources before sync
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ ops_portal_service_dir }}/ops_portal"
+    - "{{ ops_portal_service_dir }}/search_fabric"
+    - "{{ ops_portal_service_dir }}/publication_contract.py"
+    - "{{ ops_portal_service_dir }}/requirements.txt"
+
 - name: Sync the ops portal application sources
   ansible.builtin.copy:
     src: "{{ ops_portal_repo_root }}/scripts/ops_portal/"
