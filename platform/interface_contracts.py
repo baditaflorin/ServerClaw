@@ -4,9 +4,8 @@ import re
 from pathlib import Path
 from typing import Any
 
-from command_catalog import load_command_catalog
-from controller_automation_toolkit import load_yaml, parse_make_targets, repo_path
-from workflow_catalog import load_workflow_catalog
+from platform.catalogs import load_command_catalog, load_workflow_catalog
+from platform.repo import load_yaml, parse_make_targets, repo_path
 
 
 CONTRACTS_DIR = repo_path("config", "contracts")

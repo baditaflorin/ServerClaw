@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.39",
-  "platform_version": "0.130.38",
-  "generated_at": "2026-03-28T16:12:47Z",
-  "next_refresh_at": "2026-03-28T17:12:47Z",
+  "repo_version": "0.177.41",
+  "platform_version": "0.130.39",
+  "generated_at": "2026-03-28T17:14:41Z",
+  "next_refresh_at": "2026-03-28T18:14:41Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3908,10 +3908,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.38",
+    "last_version": "0.177.40",
     "deployed_at": "2026-03-28",
-    "summary": "integrated ADR 0211 by promoting the shared policy registry into main and re-verifying the governed headscale live-apply path from merged main",
-    "release_notes_url": "docs/release-notes/0.177.39.md"
+    "summary": "implemented ADR 0225 by installing a durable server-resident ansible-pull reconcile loop on proxmox_florin, bootstrapping a least-privilege Gitea pull identity, and verifying host-local receipts through the private Gitea source",
+    "release_notes_url": "docs/release-notes/0.177.41.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

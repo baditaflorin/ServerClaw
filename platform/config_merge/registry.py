@@ -13,6 +13,7 @@ from typing import Any, Callable
 import yaml
 
 from platform.events import build_envelope
+from platform.events.publisher import publish_nats_events
 
 from ._db import connection_kind, managed_connection, placeholder, rows_to_dicts
 from .catalog import MERGE_ELIGIBLE_PATH, MergeEligibleFileSpec, load_merge_eligible_catalog
@@ -22,16 +23,7 @@ def _default_nats_publisher(subject: str, payload: dict[str, Any]) -> None:
     nats_url = os.environ.get("LV3_NATS_URL", "").strip()
     if not nats_url:
         return
-    repo_root = Path(__file__).resolve().parents[2]
-    drift_lib_path = repo_root / "scripts" / "drift_lib.py"
-    import importlib.util
-
-    spec = importlib.util.spec_from_file_location("lv3_config_merge_drift_lib", drift_lib_path)
-    if spec is None or spec.loader is None:  # pragma: no cover - defensive import guard
-        return
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    module.publish_nats_events(
+    publish_nats_events(
         [{"subject": subject, "payload": payload}],
         nats_url=nats_url,
         credentials=None,

@@ -32,6 +32,18 @@ The bootstrap run will:
 - mirror that token to `proxmox_florin`
 - install the managed checkout path, askpass helper, wrapper, and systemd timer
 
+## Source Publication
+
+The host-local service pulls only from the private Gitea repository at
+`http://100.64.0.1:3009/ops/proxmox_florin_server.git`.
+
+- For routine production runs, trigger the service only after the relevant
+  merged `main` content has been published into that private repo.
+- For branch-local verification before final main integration, publish an
+  explicit internal snapshot or staging ref into the private repo first;
+  bootstrapping the host alone does not change the source tree that
+  `ansible-pull` will fetch.
+
 ## Verify The Live Host
 
 1. Confirm the managed systemd units exist and the timer is active:
@@ -73,3 +85,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 - The host-local receipts live under
   `/var/lib/lv3/server-resident-reconciliation/receipts/` so the git checkout
   stays clean between timer runs.
+- Gitea 1.25.5 accepts admin-token auth for user lifecycle calls, but the
+  service-account access-token endpoints require basic auth as that restricted
+  user. The bootstrap flow therefore resets the restricted user's password only
+  when it needs to mint or rotate the mirrored read token.

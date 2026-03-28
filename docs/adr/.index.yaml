@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-28'
 total_adrs: 238
 implementation_status_summary:
-  Implemented: 203
+  Implemented: 206
   Partial: 4
-  Not Implemented: 30
+  Not Implemented: 27
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3529,8 +3529,8 @@ adr_index:
     filename: 0207-anti-corruption-layers-at-provider-boundaries.md
   - adr: 0208
     title: Dependency Direction And Composition Roots
-    status: Accepted
-    implementation_status: Not Implemented
+    status: Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -3540,6 +3540,7 @@ adr_index:
       - roots
     summary: We will enforce a dependency rule with explicit composition roots.
     filename: 0208-dependency-direction-and-composition-roots.md
+    implemented_version: 0.177.40
   - adr: 0209
     title: Use-Case Services And Thin Delivery Adapters
     status: Accepted
@@ -3585,7 +3586,7 @@ adr_index:
       - registries
     summary: We will centralize shared platform policies into reusable policy packs or rule
     filename: 0211-shared-policy-packs-and-rule-registries.md
-    implemented_version: 0.177.33
+    implemented_version: 0.177.39
   - adr: '0212'
     title: Replaceability Scorecards And Vendor Exit Plans
     status: Accepted
@@ -3788,7 +3789,7 @@ adr_index:
   - adr: '0225'
     title: Server-Resident Reconciliation Via Ansible Pull
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -3798,6 +3799,7 @@ adr_index:
       - pull
     summary: We will use ansible-pull as the default server-resident reconcile
     filename: 0225-server-resident-reconciliation-via-ansible-pull.md
+    implemented_version: 0.177.41
   - adr: '0226'
     title: Systemd Units, Timers, And Paths For Host-Resident Control Loops
     status: Accepted

@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 import asyncio
-import importlib.util
 import json
 import os
 import re
-import sys
 import threading
 import uuid
 from dataclasses import dataclass, field
@@ -13,6 +11,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Callable
 
+from platform.events.publisher import publish_nats_events
 from platform.world_state._db import isoformat, parse_timestamp, utc_now
 
 
@@ -98,18 +97,7 @@ def _default_event_publisher(subject: str, payload: dict[str, Any]) -> None:
     if not nats_url:
         return
     repo_root = Path(__file__).resolve().parents[2]
-    drift_lib_path = repo_root / "scripts" / "drift_lib.py"
-    if not drift_lib_path.exists():
-        return
-
-    module_name = "lv3_agent_coordination_drift_lib"
-    spec = importlib.util.spec_from_file_location(module_name, drift_lib_path)
-    if spec is None or spec.loader is None:  # pragma: no cover - defensive
-        return
-    module = importlib.util.module_from_spec(spec)
-    sys.modules.setdefault(module_name, module)
-    spec.loader.exec_module(module)
-    module.publish_nats_events(  # pragma: no cover - network side effect
+    publish_nats_events(  # pragma: no cover - network side effect
         [{"subject": subject, "payload": payload}],
         nats_url=nats_url,
         credentials=_resolve_nats_credentials(repo_root),

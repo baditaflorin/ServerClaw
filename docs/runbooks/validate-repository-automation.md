@@ -36,6 +36,7 @@ See [docs/runbooks/validation-gate.md](/Users/live/Documents/GITHUB_PROJECTS/pro
 - canonical repository data models pass schema validation
 - architecture fitness functions verify the governed replaceability scorecards and vendor exit plans for critical product ADRs
 - the ADR 0204 correction-loop catalog covers every governed mutating workflow exactly once
+- reusable `platform/` modules do not import outward into `scripts/` composition roots or dynamically load script-only helpers
 - generated status documents are current for their canonical inputs
 - the workflow catalog, command catalog, control-plane lane catalog, and controller-local secret manifest cross-reference cleanly
 - the API publication catalog classifies every governed API and webhook surface
@@ -70,9 +71,16 @@ make validate-shell
 make validate-json
 make validate-data-models
 make validate-architecture-fitness
+make validate-dependency-direction
+make validate-architecture-fitness
 make validate-health-probes
 make validate-generated-docs
 ```
+
+`make validate-dependency-direction` enforces ADR 0208. It scans `platform/`
+modules and fails when reusable code imports from `scripts/`, mutates
+`sys.path` to reach script-only helpers, or dynamically loads script files
+instead of receiving those dependencies from a composition root.
 
 `make validate-role-argument-specs` enforces the ADR 0062 contract for role interfaces. It checks role directories that are new or changed relative to `origin/main`, plus any staged, unstaged, or untracked role changes in the current worktree, and fails if a touched role is missing `meta/argument_specs.yml`.
 

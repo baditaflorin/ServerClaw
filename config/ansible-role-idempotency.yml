@@ -255,6 +255,9 @@ roles:
   searxng_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  server_resident_reconciliation:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   secret_fact:
     policy: enforced
     reason: Runs in a local two-pass playbook against a repo-managed HTTP fixture.
