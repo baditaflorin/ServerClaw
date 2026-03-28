@@ -20,6 +20,7 @@ This runbook documents the repo-managed onboarding path introduced by ADR 0108.
   - `LV3_MATTERMOST_WEBHOOK`
 - `viewer` operators do not receive SSH access and therefore do not need an SSH public key; `admin` and `operator` still do.
 - `make converge-windmill` now mirrors the ADR 0108 operator-manager bootstrap secrets and optional environment values into the Windmill worker runtime so the browser-first path can use the same live credentials and optional hooks as the controller path without a worker-local `.local/` checkout.
+- Controller-local live runs should override `LV3_OPENBAO_URL` to a forwarded loopback automation endpoint such as `http://127.0.0.1:18201`; the shared service catalog still points OpenBao at the private mTLS listener on `https://100.64.0.1:8200`, while `operator_manager.py` uses the non-mTLS automation listener on `127.0.0.1:8201`.
 
 ## Roster-First Flow
 
@@ -101,3 +102,4 @@ make sync-operators
 - The current implementation keeps bootstrap passwords out of git and returns them only in the command result.
 - Tailscale invite creation is intentionally endpoint-configurable because the invite endpoint has shifted across API revisions.
 - step-ca registration and revocation use explicit command templates so the repo can stay authoritative without hard-coding one deployment-specific wrapper.
+- As of ADR 0206, product-specific integration code for the controller and Windmill operator-access path lives under `platform/operator_access/`, while `scripts/operator_manager.py` remains the composition root and orchestration layer.

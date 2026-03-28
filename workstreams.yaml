@@ -14,6 +14,56 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0206-live-apply
+    adr: "0206"
+    title: Live apply ADR 0206 ports and adapters for external integrations
+    status: in-progress
+    owner: codex
+    branch: codex/ws-0206-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0206-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-live-apply.md
+    depends_on:
+      - adr-0108-operator-onboarding-and-offboarding
+      - adr-0122-windmill-operator-access-admin
+      - adr-0208-dependency-direction-and-composition-roots
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0206-live-apply.md
+      - docs/adr/0206-ports-and-adapters-for-external-integrations.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/operator-onboarding.md
+      - docs/runbooks/operator-offboarding.md
+      - scripts/operator_manager.py
+      - platform/operator_access/
+      - tests/test_operator_manager.py
+      - tests/test_operator_access_adapters.py
+      - receipts/live-applies/2026-03-28-adr-0206-ports-and-adapters-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0206_live_apply
+          paths:
+            - docs/workstreams/ws-0206-live-apply.md
+            - docs/adr/0206-ports-and-adapters-for-external-integrations.md
+            - docs/adr/.index.yaml
+            - docs/runbooks/operator-onboarding.md
+            - docs/runbooks/operator-offboarding.md
+            - scripts/operator_manager.py
+            - platform/operator_access/**
+            - tests/test_operator_manager.py
+            - tests/test_operator_access_adapters.py
+            - receipts/live-applies/2026-03-28-adr-0206-ports-and-adapters-live-apply.json
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false
+    canonical_truth:
+      changelog_entry: implements ADR 0206 on the live operator access workflow by routing Keycloak, OpenBao, Tailscale, Mattermost, and step-ca through explicit ports and adapters
+      release_bump: patch
   - id: ws-0214-ha-replication-adrs
     adr: "0214"
     title: HA and replication architecture bundle for production and staging
