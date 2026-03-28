@@ -24,6 +24,17 @@ TASKS_PATH = (
     / "tasks"
     / "main.yml"
 )
+VERIFY_TASKS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "api_gateway_runtime"
+    / "tasks"
+    / "verify.yml"
+)
 COMPOSE_TEMPLATE_PATH = (
     REPO_ROOT
     / "collections"
@@ -69,6 +80,8 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "dest: command-catalog.json" in defaults
     assert "dest: workflow-defaults.yaml" in defaults
     assert "dest: execution-lanes.yaml" in defaults
+    assert "api_gateway_runtime_assurance_matrix_src" in defaults
+    assert "dest: runtime-assurance-matrix.json" in defaults
     assert "api_gateway_database_name: windmill" in defaults
     assert "api_gateway_database_user: windmill_admin" in defaults
     assert "api_gateway_windmill_service_topology" in defaults
@@ -147,6 +160,7 @@ def test_windmill_runtime_templates_export_graph_world_state_and_ledger_dsns() -
 def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
     tasks = TASKS_PATH.read_text(encoding="utf-8")
+    verify_tasks = VERIFY_TASKS_PATH.read_text(encoding="utf-8")
     requirements = REQUIREMENTS_PATH.read_text(encoding="utf-8")
 
     assert "scripts/maintenance_window_tool.py" in defaults
@@ -181,6 +195,8 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "Remove stale managed API gateway config bundle entries" in tasks
     assert "ansible.builtin.meta: reset_connection" in tasks
     assert "Check whether the API gateway container sees the runtime config bundle" in tasks
+    assert "/v1/platform/runtime-assurance" in verify_tasks
+    assert "runtime assurance endpoint returns a report envelope" in verify_tasks
     assert "{{ api_gateway_service_dir }}/.githooks" in tasks
     assert "COPY Makefile ./Makefile" in tasks
     assert "COPY .githooks ./.githooks" in tasks

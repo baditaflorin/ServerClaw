@@ -73,3 +73,23 @@
   register: api_gateway_platform_services_check
   when: api_gateway_verify_client_secret_stat.stat.exists
   changed_when: false
+
+- name: Verify the authenticated runtime assurance endpoint succeeds with a real bearer token
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ api_gateway_internal_port }}/v1/platform/runtime-assurance"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ api_gateway_verify_access_token }}"
+    status_code: 200
+  register: api_gateway_runtime_assurance_check
+  when: api_gateway_verify_client_secret_stat.stat.exists
+  changed_when: false
+
+- name: Assert the runtime assurance endpoint returns a report envelope
+  ansible.builtin.assert:
+    that:
+      - api_gateway_runtime_assurance_check.json.generated_at is defined
+      - api_gateway_runtime_assurance_check.json.summary is defined
+      - api_gateway_runtime_assurance_check.json.entries is defined
+    fail_msg: "API gateway runtime assurance verification did not return the expected report envelope."
+  when: api_gateway_verify_client_secret_stat.stat.exists

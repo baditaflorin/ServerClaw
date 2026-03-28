@@ -2693,6 +2693,7 @@ def validate_repository_data_models() -> int:
     validate_capacity_model_schema()
     validate_capacity_model()
     validate_persona_catalog()
+    validate_runtime_assurance_matrix_data()
     validate_preview_environment_profiles()
     validate_ephemeral_pool_catalog()
     validate_restore_readiness_profiles()

@@ -683,6 +683,9 @@ class GatewayClient:
     async def fetch_service_health(self, service_id: str, token: str | None = None) -> dict[str, Any]:
         return await self._request("GET", f"/v1/platform/health/{service_id}", token=token)
 
+    async def fetch_runtime_assurance(self, token: str | None = None) -> dict[str, Any]:
+        return await self._request("GET", "/v1/platform/runtime-assurance", token=token)
+
     async def trigger_deploy(
         self,
         service_id: str,
@@ -943,6 +946,81 @@ def normalize_health(payload: dict[str, Any], services: list[dict[str, Any]]) ->
                 "detail": str(payload.get("detail") or payload.get("message") or "No detail"),
             }
     return health_map
+
+
+def normalize_runtime_assurance(payload: dict[str, Any] | None, services: list[dict[str, Any]]) -> dict[str, Any]:
+    service_lookup = {str(service.get("id")): service for service in services if isinstance(service, dict)}
+    if not isinstance(payload, dict):
+        return {
+            "summary": {"total": 0, "pass": 0, "degraded": 0, "failed": 0, "unknown": 0},
+            "entries": [],
+            "generated_at": None,
+        }
+
+    raw_entries = payload.get("entries")
+    entries = raw_entries if isinstance(raw_entries, list) else []
+    normalized_entries: list[dict[str, Any]] = []
+    for item in entries:
+        if not isinstance(item, dict):
+            continue
+        service_id = str(item.get("service_id", "unknown"))
+        service = service_lookup.get(service_id, {})
+        dimensions = item.get("dimensions")
+        if not isinstance(dimensions, list):
+            dimensions = []
+        exceptions = [
+            dimension
+            for dimension in dimensions
+            if isinstance(dimension, dict) and dimension.get("status") not in {"pass", "n_a"}
+        ]
+        exception_titles = [str(dimension.get("title", dimension.get("id", "dimension"))) for dimension in exceptions[:3]]
+        normalized_entries.append(
+            {
+                "service_id": service_id,
+                "service_name": str(item.get("service_name") or service.get("name") or service_id),
+                "environment": str(item.get("environment", "unknown")),
+                "profile_id": str(item.get("profile_id", "unknown")),
+                "profile_title": str(item.get("profile_title", item.get("profile_id", "unknown"))),
+                "overall_status": str(item.get("overall_status", "unknown")),
+                "summary": item.get("summary") if isinstance(item.get("summary"), dict) else {},
+                "primary_url": item.get("primary_url") or service.get("public_url") or service.get("internal_url"),
+                "runbook": item.get("runbook") or service.get("runbook"),
+                "adr": item.get("adr") or service.get("adr"),
+                "exception_dimensions": exceptions,
+                "exception_titles": exception_titles,
+            }
+        )
+
+    status_rank = {"failed": 0, "degraded": 1, "unknown": 2, "pass": 3}
+    normalized_entries.sort(
+        key=lambda item: (
+            status_rank.get(item["overall_status"], 4),
+            item["environment"],
+            item["service_name"],
+        )
+    )
+
+    summary = payload.get("summary")
+    if not isinstance(summary, dict):
+        summary = {
+            "total": len(normalized_entries),
+            "pass": sum(1 for item in normalized_entries if item["overall_status"] == "pass"),
+            "degraded": sum(1 for item in normalized_entries if item["overall_status"] == "degraded"),
+            "failed": sum(1 for item in normalized_entries if item["overall_status"] == "failed"),
+            "unknown": sum(1 for item in normalized_entries if item["overall_status"] == "unknown"),
+        }
+
+    return {
+        "summary": {
+            "total": int(summary.get("total", len(normalized_entries))),
+            "pass": int(summary.get("pass", 0)),
+            "degraded": int(summary.get("degraded", 0)),
+            "failed": int(summary.get("failed", 0)),
+            "unknown": int(summary.get("unknown", 0)),
+        },
+        "entries": normalized_entries,
+        "generated_at": payload.get("generated_at"),
+    }
 
 
 def build_capability_contract_models(
@@ -1545,6 +1623,12 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     except Exception as exc:  # noqa: BLE001
         runbook_payload = {"warning": str(exc), "runbooks": []}
     try:
+        runtime_assurance_payload = await gateway.fetch_runtime_assurance(
+            token=read_api_token(session, request.app.state.settings),
+        )
+    except Exception as exc:  # noqa: BLE001
+        runtime_assurance_payload = {"warning": str(exc), "entries": []}
+    try:
         coordination_payload = await gateway.fetch_agent_coordination(
             token=read_api_token(session, request.app.state.settings),
         )
@@ -1552,6 +1636,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         coordination_payload = {"warning": str(exc)}
 
     health = normalize_health(health_payload, services)
+    runtime_assurance = normalize_runtime_assurance(runtime_assurance_payload, services)
     coordination = normalize_agent_coordination(coordination_payload)
     raw_runbooks = runbook_payload.get("runbooks") if isinstance(runbook_payload, dict) else []
     runbooks = raw_runbooks if isinstance(raw_runbooks, list) else []
@@ -1596,6 +1681,10 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "drift_report": drift_report,
         "drift_summary": drift_summary,
         "health_warning": health_payload.get("warning") if isinstance(health_payload, dict) else None,
+        "runtime_assurance": runtime_assurance,
+        "runtime_assurance_warning": (
+            runtime_assurance_payload.get("warning") if isinstance(runtime_assurance_payload, dict) else None
+        ),
         "coordination_warning": coordination_payload.get("warning") if isinstance(coordination_payload, dict) else None,
         "runbook_warning": runbook_payload.get("warning") if isinstance(runbook_payload, dict) else None,
         "coordination": coordination,
@@ -1671,6 +1760,11 @@ def create_app(
     async def agents_partial(request: Request) -> HTMLResponse:
         context = await build_dashboard_context(request)
         return templates.TemplateResponse(request=request, name="partials/agents.html", context=context)
+
+    @app.get("/partials/runtime-assurance", response_class=HTMLResponse)
+    async def runtime_assurance_partial(request: Request) -> HTMLResponse:
+        context = await build_dashboard_context(request)
+        return templates.TemplateResponse(request=request, name="partials/runtime_assurance.html", context=context)
 
     @app.get("/partials/runbooks", response_class=HTMLResponse)
     async def runbooks_partial(request: Request) -> HTMLResponse:

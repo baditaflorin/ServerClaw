@@ -52,6 +52,23 @@
     </div>
   </section>
 
+  <section id="runtime-assurance" class="pf-v5-c-page__main-section portal-section">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Runtime Assurance</p>
+        <h2>Per-service and per-environment verification posture</h2>
+      </div>
+    </div>
+    <div
+      id="runtime-assurance-panel"
+      class="shell-live-panel"
+      hx-get="/partials/runtime-assurance"
+      hx-trigger="load, every 60s"
+      hx-swap="innerHTML">
+      {% include "partials/runtime_assurance.html" %}
+    </div>
+  </section>
+
   <section id="drift" class="pf-v5-c-page__main-section portal-section">
     <div class="section-head">
       <div>

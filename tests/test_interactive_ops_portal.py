@@ -42,6 +42,7 @@ def test_ops_portal_package_import_works_in_container_layout() -> None:
 class FakeGatewayClient:
     def __init__(self) -> None:
         self.platform_health_tokens: list[str | None] = []
+        self.runtime_assurance_tokens: list[str | None] = []
         self.agent_coordination_tokens: list[str | None] = []
         self.runbook_fetch_tokens: list[str | None] = []
         self.service_health_calls: list[dict[str, object]] = []
@@ -106,6 +107,48 @@ class FakeGatewayClient:
                     ],
                 },
             ]
+        }
+
+    async def fetch_runtime_assurance(self, token: str | None = None) -> dict[str, object]:
+        self.runtime_assurance_tokens.append(token)
+        return {
+            "generated_at": "2026-03-25T09:05:00Z",
+            "summary": {"total": 2, "pass": 1, "degraded": 1, "failed": 0, "unknown": 0},
+            "entries": [
+                {
+                    "service_id": "grafana",
+                    "service_name": "Grafana",
+                    "environment": "production",
+                    "profile_id": "edge_browser_surface",
+                    "profile_title": "Edge Browser Surface",
+                    "overall_status": "pass",
+                    "summary": {"required": 5, "best_effort": 2, "unknown": 0},
+                    "primary_url": "https://grafana.lv3.org",
+                    "runbook": "docs/runbooks/monitoring-stack.md",
+                    "adr": "0011",
+                    "dimensions": [],
+                },
+                {
+                    "service_id": "ops_portal",
+                    "service_name": "Platform Operations Portal",
+                    "environment": "production",
+                    "profile_id": "edge_browser_surface",
+                    "profile_title": "Edge Browser Surface",
+                    "overall_status": "degraded",
+                    "summary": {"required": 5, "best_effort": 2, "unknown": 0},
+                    "primary_url": "https://ops.lv3.org",
+                    "runbook": "docs/runbooks/ops-portal-down.md",
+                    "adr": "0093",
+                    "dimensions": [
+                        {
+                            "id": "browser_journey",
+                            "title": "Browser Journey",
+                            "status": "degraded",
+                            "reason": "Latest operator sign-in receipt recorded only a partial logout proof.",
+                        }
+                    ],
+                },
+            ],
         }
 
     async def fetch_agent_coordination(self, token: str | None = None) -> dict[str, object]:
@@ -611,7 +654,10 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Scoreboard and rollup by active service and environment" in response.text
     assert "Deployment Console" in response.text
     assert "Agent Coordination" in response.text
+    assert "Runtime Assurance" in response.text
     assert "agent/observation-loop" in response.text
+    assert "Edge Browser Surface" in response.text
+    assert "Latest operator sign-in receipt recorded only a partial logout proof." in response.text
     assert "Search Fabric" in response.text
     assert "Runbook Launcher" in response.text
     assert "Application Launcher" in response.text
@@ -628,6 +674,7 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Session states at a glance" in response.text
     assert "Recent rollout tempo" in response.text
     assert gateway.platform_health_tokens == ["test-token"]
+    assert gateway.runtime_assurance_tokens == ["test-token"]
     assert gateway.agent_coordination_tokens == ["test-token"]
     assert gateway.runbook_fetch_tokens == ["test-token"]
 
@@ -907,6 +954,22 @@ def test_runbooks_partial_surfaces_gateway_warning(portal_client: tuple[TestClie
     assert "Runbook launcher data is degraded" in response.text
     assert "runbook index unavailable" in response.text
     assert gateway.runbook_fetch_tokens == ["test-token"]
+
+
+def test_runtime_assurance_partial_surfaces_gateway_warning(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, gateway = portal_client
+
+    async def degraded_runtime_assurance(token: str | None = None) -> dict[str, object]:
+        gateway.runtime_assurance_tokens.append(token)
+        raise RuntimeError("runtime assurance snapshot unavailable")
+
+    gateway.fetch_runtime_assurance = degraded_runtime_assurance  # type: ignore[method-assign]
+
+    response = client.get("/partials/runtime-assurance")
+
+    assert response.status_code == 200
+    assert "Runtime assurance data is degraded: runtime assurance snapshot unavailable" in response.text
+    assert gateway.runtime_assurance_tokens == ["test-token"]
 
 
 def test_normalize_health_accepts_service_id_list_payload() -> None:
