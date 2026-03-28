@@ -6,10 +6,11 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VALIDATION_CACHE_DIR="${LV3_VALIDATION_CACHE_DIR:-$REPO_ROOT/.ansible/validation}"
 ANSIBLE_COLLECTIONS_DIR="${LV3_ANSIBLE_COLLECTIONS_DIR:-$VALIDATION_CACHE_DIR/collections}"
 ANSIBLE_COLLECTIONS_SHA_FILE="${LV3_ANSIBLE_COLLECTIONS_SHA_FILE:-$VALIDATION_CACHE_DIR/requirements.sha}"
-ANSIBLE_PLAYBOOK_CMD=(uvx --from ansible-core ansible-playbook)
-ANSIBLE_GALAXY_CMD=(uvx --from ansible-core ansible-galaxy)
-ANSIBLE_LINT_CMD=(uvx --from ansible-lint ansible-lint)
-YAMLLINT_CMD=(uvx --from yamllint yamllint)
+UV_CMD=(uv)
+ANSIBLE_PLAYBOOK_CMD=()
+ANSIBLE_GALAXY_CMD=()
+ANSIBLE_LINT_CMD=()
+YAMLLINT_CMD=()
 
 export ANSIBLE_CONFIG="$REPO_ROOT/ansible.cfg"
 export ANSIBLE_COLLECTIONS_PATH="$REPO_ROOT/collections:$ANSIBLE_COLLECTIONS_DIR"
@@ -32,6 +33,38 @@ require_command() {
   fi
 }
 
+ensure_uv() {
+  if command -v uv >/dev/null 2>&1; then
+    return 0
+  fi
+
+  python3 -m pip install --user --quiet uv >/dev/null
+  UV_CMD=(python3 -m uv)
+}
+
+configure_validation_commands() {
+  ensure_uv
+  ANSIBLE_PLAYBOOK_CMD=("${UV_CMD[@]}" tool run --from ansible-core ansible-playbook)
+  ANSIBLE_GALAXY_CMD=("${UV_CMD[@]}" tool run --from ansible-core ansible-galaxy)
+  ANSIBLE_LINT_CMD=("${UV_CMD[@]}" tool run --from ansible-lint ansible-lint)
+  YAMLLINT_CMD=("${UV_CMD[@]}" tool run --from yamllint yamllint)
+}
+
+run_uv_python() {
+  local packages=()
+
+  while [[ $# -gt 0 ]]; do
+    if [[ "$1" == "--" ]]; then
+      shift
+      break
+    fi
+    packages+=(--with "$1")
+    shift
+  done
+
+  "${UV_CMD[@]}" run "${packages[@]}" python3 "$@"
+}
+
 tracked_files() {
   git -C "$REPO_ROOT" ls-files -- "$@"
 }
@@ -47,6 +80,8 @@ load_lines_into_array() {
     eval "$target_name+=( $quoted )"
   done
 }
+
+configure_validation_commands
 
 install_collections() {
   local requirements_file="$REPO_ROOT/collections/requirements.yml"
@@ -99,7 +134,7 @@ validate_ansible_syntax() {
 
 validate_generated_vars() {
   echo "Generated platform vars validation"
-  uvx --from pyyaml python "$REPO_ROOT/scripts/generate_platform_vars.py" --check >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_platform_vars.py" --check >/dev/null
 }
 
 validate_yaml() {
@@ -143,7 +178,7 @@ validate_ansible_lint() {
 
 validate_ansible_idempotency() {
   echo "Ansible role idempotency policy"
-  uv run --with pyyaml python "$REPO_ROOT/scripts/ansible_role_idempotency.py"
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/ansible_role_idempotency.py"
 }
 
 validate_role_argument_specs() {
@@ -204,20 +239,20 @@ validate_retry_guard() {
 
 validate_data_models() {
   echo "Repository data model validation"
-  uv run --with pyyaml python3 "$REPO_ROOT/scripts/ansible_scope_runner.py" validate >/dev/null
-  uv run --with pyyaml python "$REPO_ROOT/scripts/validate_timeout_hierarchy.py" >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/ansible_scope_runner.py" validate >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_timeout_hierarchy.py" >/dev/null
   python3 "$REPO_ROOT/scripts/check_hardcoded_timeouts.py" >/dev/null
-  uv run --with pyyaml python "$REPO_ROOT/scripts/provider_boundary_catalog.py" --validate >/dev/null
-  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/validate_repository_data_models.py" --validate >/dev/null
-  uvx --from pyyaml python "$REPO_ROOT/scripts/execution_lanes.py" --validate >/dev/null
-  uvx --from pyyaml python "$REPO_ROOT/scripts/operator_manager.py" validate >/dev/null
-  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/data_catalog.py" --validate >/dev/null
-  uv run --with jsonschema python "$REPO_ROOT/scripts/validate_dependency_graph.py" >/dev/null
-  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/service_catalog.py" --validate >/dev/null
-  uvx --from pyyaml python "$REPO_ROOT/scripts/environment_topology.py" --validate >/dev/null
-  uvx --from pyyaml python "$REPO_ROOT/scripts/subdomain_catalog.py" --validate >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/provider_boundary_catalog.py" --validate >/dev/null
+  run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/validate_repository_data_models.py" --validate >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/execution_lanes.py" --validate >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/operator_manager.py" validate >/dev/null
+  run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/data_catalog.py" --validate >/dev/null
+  run_uv_python jsonschema -- "$REPO_ROOT/scripts/validate_dependency_graph.py" >/dev/null
+  run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/service_catalog.py" --validate >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/environment_topology.py" --validate >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/subdomain_catalog.py" --validate >/dev/null
   python3 "$REPO_ROOT/scripts/validate_service_completeness.py" --validate >/dev/null
-  uv run --with pyyaml python "$REPO_ROOT/scripts/agent_tool_registry.py" --export-mcp >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/agent_tool_registry.py" --export-mcp >/dev/null
   python3 "$REPO_ROOT/scripts/mutation_audit.py" --validate-schema >/dev/null
 }
 
@@ -228,22 +263,22 @@ validate_architecture_fitness() {
 
 validate_workstream_surfaces() {
   echo "Workstream surface ownership validation"
-  uv run --with pyyaml python "$REPO_ROOT/scripts/workstream_surface_ownership.py" --validate-registry >/dev/null
-  uv run --with pyyaml python "$REPO_ROOT/scripts/workstream_surface_ownership.py" --validate-branch --base-ref origin/main >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/workstream_surface_ownership.py" --validate-registry >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/workstream_surface_ownership.py" --validate-branch --base-ref origin/main >/dev/null
 }
 
 validate_generated_docs() {
   echo "Generated status document validation"
-  uvx --from pyyaml python "$REPO_ROOT/scripts/canonical_truth.py" --check >/dev/null
-  uvx --from pyyaml python "$REPO_ROOT/scripts/generate_status_docs.py" --check >/dev/null
-  uv run --with jsonschema python "$REPO_ROOT/scripts/generate_dependency_diagram.py" --check >/dev/null
-  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/generate_diagrams.py" --check >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/canonical_truth.py" --check >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_status_docs.py" --check >/dev/null
+  run_uv_python jsonschema -- "$REPO_ROOT/scripts/generate_dependency_diagram.py" --check >/dev/null
+  run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/generate_diagrams.py" --check >/dev/null
 }
 
 validate_generated_portals() {
   echo "Generated portal validation"
-  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/generate_ops_portal.py" --check >/dev/null
-  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/generate_changelog_portal.py" --check >/dev/null
+  run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/generate_ops_portal.py" --check >/dev/null
+  run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/generate_changelog_portal.py" --check >/dev/null
   make -C "$REPO_ROOT" docs >/dev/null
 }
 
@@ -293,8 +328,8 @@ validate_health_probes() {
 
 validate_alert_rules() {
   echo "Alert rule validation"
-  uv run --with pyyaml python "$REPO_ROOT/scripts/generate_slo_rules.py" --check >/dev/null
-  uv run --with pyyaml python "$REPO_ROOT/scripts/validate_alert_rules.py"
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_slo_rules.py" --check >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_alert_rules.py"
 }
 
 validate_tofu() {

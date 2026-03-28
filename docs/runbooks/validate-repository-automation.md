@@ -43,8 +43,9 @@ See [docs/runbooks/validation-gate.md](/Users/live/Documents/GITHUB_PROJECTS/pro
 
 ## Tooling Model
 
-- validation uses `uvx` to run `ansible-core`, `ansible-lint`, and `yamllint`
-- validation uses `uvx --from pyyaml python ...` for the repository data-model validator
+- validation bootstraps `uv` automatically when the host only has `python3` and not a preinstalled `uv` or `uvx` binary
+- validation uses `uv tool run --from ...` for `ansible-core`, `ansible-lint`, and `yamllint`
+- validation runs repo Python validators through `uv run --with ... python3 ...` so the build-server path and local fallback use the same interpreter contract
 - required Ansible collections are installed from [collections/requirements.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/requirements.yml)
 - validation collections are cached under `.ansible/validation/collections`
 - lint-oriented stages operate on tracked repository files so unrelated local work-in-progress does not fail the repo gate

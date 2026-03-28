@@ -270,6 +270,8 @@ remote_docker_env_args() {
   local args=()
   local name=""
   local dynamic_name=""
+  local safe_directories=()
+  local safe_directory=""
   for name in \
     COMMAND \
     IMAGE \
@@ -298,6 +300,16 @@ remote_docker_env_args() {
   if [[ -n "$BUILD_SERVER_APT_PROXY_URL" ]]; then
     args+=("-e" "APT_PROXY_URL=$BUILD_SERVER_APT_PROXY_URL")
   fi
+  safe_directories=("$RUNNER_WORKDIR")
+  if [[ "$RUNNER_WORKDIR" != "/workspace" ]]; then
+    safe_directories+=("/workspace")
+  fi
+  args+=("-e" "GIT_CONFIG_COUNT=${#safe_directories[@]}")
+  for name in "${!safe_directories[@]}"; do
+    safe_directory="${safe_directories[$name]}"
+    args+=("-e" "GIT_CONFIG_KEY_${name}=safe.directory")
+    args+=("-e" "GIT_CONFIG_VALUE_${name}=${safe_directory}")
+  done
   printf "%s\n" "${args[@]}"
 }
 

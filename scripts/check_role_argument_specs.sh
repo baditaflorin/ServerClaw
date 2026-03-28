@@ -36,8 +36,13 @@ collect_candidate_roles() {
 main() {
   local missing=0
   local role_dir
+  local changed_roles=()
+  local line
 
-  mapfile -t changed_roles < <(collect_candidate_roles)
+  while IFS= read -r line; do
+    [[ -n "$line" ]] || continue
+    changed_roles+=("$line")
+  done < <(collect_candidate_roles)
 
   if [[ ${#changed_roles[@]} -eq 0 ]]; then
     echo "Role argument specs: no new or changed roles to check"

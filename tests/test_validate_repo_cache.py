@@ -3,6 +3,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 VALIDATE_REPO_SCRIPT = REPO_ROOT / "scripts" / "validate_repo.sh"
+CHECK_ROLE_ARGUMENT_SPECS_SCRIPT = REPO_ROOT / "scripts" / "check_role_argument_specs.sh"
 
 
 def test_validate_repo_supports_shared_ansible_collection_cache() -> None:
@@ -47,3 +48,11 @@ def test_validate_repo_supports_architecture_fitness_stage() -> None:
 
     assert "architecture-fitness" in script
     assert "scripts/replaceability_scorecards.py" in script
+
+
+def test_check_role_argument_specs_avoids_bash4_only_mapfile() -> None:
+    script = CHECK_ROLE_ARGUMENT_SPECS_SCRIPT.read_text()
+
+    assert "changed_roles=()" in script
+    assert "while IFS= read -r line;" in script
+    assert "mapfile" not in script

@@ -219,6 +219,8 @@ def test_remote_exec_uses_docker_runner_metadata(tmp_path: Path) -> None:
     assert "/opt/builds/.ansible/collections:/opt/builds/.ansible/collections" in completed.stderr
     assert "LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha" in completed.stderr
     assert f"{REMOTE_WORKSPACE_ROOT}:/workspace" in completed.stderr
+    assert "GIT_CONFIG_KEY_0=safe.directory" in completed.stderr
+    assert "GIT_CONFIG_VALUE_0=/workspace" in completed.stderr
     assert "docker run" in completed.ssh_log.read_text()  # type: ignore[attr-defined]
     assert "--checksum" in completed.rsync_log.read_text()  # type: ignore[attr-defined]
 
