@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.35",
+  "repo_version": "0.177.36",
   "platform_version": "0.130.37",
-  "generated_at": "2026-03-28T12:13:16Z",
-  "next_refresh_at": "2026-03-28T13:13:16Z",
+  "generated_at": "2026-03-28T12:29:47Z",
+  "next_refresh_at": "2026-03-28T13:29:47Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3872,10 +3872,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.34",
+    "last_version": "0.177.35",
     "deployed_at": "2026-03-28",
-    "summary": "integrated ADR 0210 by separating canonical publication semantics from delivery-adapter fields in the shared subdomain registry, surfacing that contract in the live ops portal, and hardening the live publication audit to record TLS probe drift without aborting",
-    "release_notes_url": "docs/release-notes/0.177.35.md"
+    "summary": "integrated ADR 0211 by promoting the shared policy registry into main and re-verifying the governed headscale live-apply path from merged main",
+    "release_notes_url": "docs/release-notes/0.177.36.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

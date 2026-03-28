@@ -307,7 +307,7 @@ workstreams:
     canonical_truth:
       changelog_entry: integrated ADR 0210 by separating canonical publication semantics from delivery-adapter fields in the shared subdomain registry, surfacing that contract in the live ops portal, and hardening the live publication audit to record TLS probe drift without aborting
       release_bump: patch
-      included_in_repo_version: 0.177.35
+      included_in_repo_version: 0.177.36
       latest_receipts:
         canonical_publication_models: 2026-03-28-adr-0210-canonical-domain-models-live-apply
   - id: ws-0214-ha-replication-adrs
@@ -467,7 +467,7 @@ workstreams:
     canonical_truth:
       changelog_entry: integrated ADR 0211 by promoting the shared policy registry into main and re-verifying the governed headscale live-apply path from merged main
       release_bump: patch
-      included_in_repo_version: 0.177.35
+      included_in_repo_version: 0.177.36
       latest_receipts:
         shared_policy_packs: 2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply
 
@@ -6532,7 +6532,7 @@ workstreams:
     canonical_truth:
       changelog_entry: centralized shared redundancy, capacity-class, and placement rules into one machine-checkable registry so validation, live-apply preflights, and docs consume the same canonical policy pack
       release_bump: patch
-      included_in_repo_version: 0.177.35
+      included_in_repo_version: 0.177.36
 
   - id: ws-0021-edge-cert-repair
     adr: "0021"
