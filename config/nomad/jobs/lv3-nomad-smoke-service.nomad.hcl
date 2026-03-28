@@ -47,6 +47,7 @@ job "lv3-nomad-smoke-service" {
 
       service {
         name = "lv3-nomad-smoke-service"
+        provider = "nomad"
         port = "http"
         tags = ["repo-managed", "adr-0232", "smoke"]
       }

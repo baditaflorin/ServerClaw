@@ -22,8 +22,9 @@ job "lv3-nomad-smoke-batch" {
         command = "sh"
         args = [
           "-lc",
-          "echo \"$NOMAD_META_message\" && date -Iseconds",
+          "mkdir -p /verification && printf '%s\n' \"$NOMAD_META_message\" > /verification/last-run.log && date -Iseconds >> /verification/last-run.log && cat /verification/last-run.log",
         ]
+        volumes = ["/var/lib/nomad/verification/lv3-nomad-smoke-batch:/verification"]
       }
 
       resources {

@@ -22,7 +22,7 @@ def test_nomad_playbook_covers_controller_proxy_server_clients_and_bootstrap() -
 
     assert play_names == [
         "Prepare controller-local Nomad bootstrap artifacts",
-        "Converge the Tailscale operator proxy for Nomad",
+        "Converge the Proxmox firewall and Tailscale operator proxy for Nomad",
         "Converge the Nomad server on the monitoring guest",
         "Converge the Nomad clients on the runtime and build guests",
         "Bootstrap Nomad ACLs and verify repo-managed smoke jobs",
@@ -34,6 +34,13 @@ def test_nomad_playbook_covers_controller_proxy_server_clients_and_bootstrap() -
     include_task = controller_play["tasks"][0]
     assert include_task["ansible.builtin.include_role"]["name"] == "lv3.platform.nomad_cluster_bootstrap"
     assert include_task["ansible.builtin.include_role"]["tasks_from"] == "controller_artifacts.yml"
+
+    host_roles = [role["role"] for role in playbook[1]["roles"]]
+    assert host_roles == [
+        "lv3.platform.proxmox_network",
+        "lv3.platform.proxmox_tailscale_proxy",
+        "lv3.platform.proxmox_security",
+    ]
 
     server_roles = [role["role"] for role in playbook[2]["roles"]]
     assert server_roles == [

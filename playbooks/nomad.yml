@@ -49,7 +49,7 @@
         name: lv3.platform.nomad_cluster_bootstrap
         tasks_from: controller_artifacts.yml
 
-- name: Converge the Tailscale operator proxy for Nomad
+- name: Converge the Proxmox firewall and Tailscale operator proxy for Nomad
   hosts: proxmox_hosts
   become: true
   gather_facts: true
@@ -61,6 +61,7 @@
     - service-nomad
 
   roles:
+    - role: lv3.platform.proxmox_network
     - role: lv3.platform.proxmox_tailscale_proxy
     - role: lv3.platform.proxmox_security
       vars:

@@ -61,7 +61,7 @@
 
 - name: Verify the smoke service content from the build host
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ nomad_cluster_bootstrap_smoke_service_port }}/"
+    url: "http://{{ nomad_cluster_bootstrap_build_ip }}:{{ nomad_cluster_bootstrap_smoke_service_port }}/"
     method: GET
     status_code:
       - 200
@@ -77,6 +77,23 @@
     that:
       - nomad_cluster_bootstrap_smoke_service_expected_text in nomad_cluster_bootstrap_smoke_service_http.content
     fail_msg: "The repo-managed Nomad smoke service did not return the expected content."
+
+- name: Ensure the smoke batch verification directory exists on the runtime host
+  ansible.builtin.file:
+    path: "{{ nomad_cluster_bootstrap_smoke_batch_output_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  delegate_to: "{{ nomad_cluster_bootstrap_runtime_host }}"
+  become: true
+
+- name: Remove the previous smoke batch verification file
+  ansible.builtin.file:
+    path: "{{ nomad_cluster_bootstrap_smoke_batch_output_file }}"
+    state: absent
+  delegate_to: "{{ nomad_cluster_bootstrap_runtime_host }}"
+  become: true
 
 - name: Dispatch the smoke batch job
   ansible.builtin.shell: |
@@ -132,18 +149,16 @@
         )
       }}
 
-- name: Read the smoke batch allocation logs
-  ansible.builtin.command:
-    argv:
-      - /usr/local/bin/lv3-nomad
-      - alloc
-      - logs
-      - "{{ nomad_cluster_bootstrap_batch_alloc_id }}"
-  register: nomad_cluster_bootstrap_batch_logs
+- name: Read the smoke batch verification file from the runtime host
+  ansible.builtin.slurp:
+    src: "{{ nomad_cluster_bootstrap_smoke_batch_output_file }}"
+  delegate_to: "{{ nomad_cluster_bootstrap_runtime_host }}"
+  become: true
+  register: nomad_cluster_bootstrap_batch_output_file_data
   changed_when: false
 
-- name: Assert the smoke batch logs contain the verification marker
+- name: Assert the smoke batch verification file contains the expected marker
   ansible.builtin.assert:
     that:
-      - nomad_cluster_bootstrap_smoke_batch_message in nomad_cluster_bootstrap_batch_logs.stdout
-    fail_msg: "The dispatched Nomad smoke batch job logs did not contain the expected verification marker."
+      - nomad_cluster_bootstrap_smoke_batch_message in (nomad_cluster_bootstrap_batch_output_file_data.content | b64decode)
+    fail_msg: "The dispatched Nomad smoke batch job did not write the expected verification marker to the runtime host."

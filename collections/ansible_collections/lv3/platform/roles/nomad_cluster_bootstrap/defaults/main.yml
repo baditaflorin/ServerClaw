@@ -19,11 +19,11 @@ nomad_cluster_bootstrap_server_host: "{{ playbook_execution_host_patterns.monito
 nomad_cluster_bootstrap_runtime_host: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
 nomad_cluster_bootstrap_build_host: "{{ playbook_execution_host_patterns.docker_build[playbook_execution_env] }}"
 nomad_cluster_bootstrap_server_ip: "{{ hostvars[nomad_cluster_bootstrap_server_host].ansible_host }}"
+nomad_cluster_bootstrap_build_ip: "{{ hostvars[nomad_cluster_bootstrap_build_host].nomad_cluster_advertise_address | default(hostvars[nomad_cluster_bootstrap_build_host].ansible_host) }}"
 nomad_cluster_bootstrap_proxy_ip: "{{ hostvars['proxmox_florin'].ansible_host }}"
 nomad_cluster_bootstrap_region: global
 nomad_cluster_bootstrap_certificate_days: 365
 nomad_cluster_bootstrap_expected_nodes:
-  - "{{ nomad_cluster_bootstrap_server_host }}"
   - "{{ nomad_cluster_bootstrap_runtime_host }}"
   - "{{ nomad_cluster_bootstrap_build_host }}"
 nomad_cluster_bootstrap_smoke_service_job_name: lv3-nomad-smoke-service
@@ -35,3 +35,5 @@ nomad_cluster_bootstrap_smoke_batch_job_name: lv3-nomad-smoke-batch
 nomad_cluster_bootstrap_smoke_batch_job_file_local: "{{ nomad_cluster_bootstrap_repo_root }}/config/nomad/jobs/lv3-nomad-smoke-batch.nomad.hcl"
 nomad_cluster_bootstrap_smoke_batch_job_file_remote: "{{ nomad_cluster_bootstrap_remote_job_dir }}/lv3-nomad-smoke-batch.nomad.hcl"
 nomad_cluster_bootstrap_smoke_batch_message: adr-0232-live-apply batch verification
+nomad_cluster_bootstrap_smoke_batch_output_dir: /var/lib/nomad/verification/lv3-nomad-smoke-batch
+nomad_cluster_bootstrap_smoke_batch_output_file: "{{ nomad_cluster_bootstrap_smoke_batch_output_dir }}/last-run.log"
