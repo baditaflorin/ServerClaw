@@ -7235,6 +7235,56 @@ workstreams:
           correction_loop_id: runtime_self_correction_watchers
           state: ESCALATED_FOR_APPROVAL
 
+  - id: ws-0225-live-apply
+    adr: "0225"
+    title: Server-resident reconciliation via ansible-pull live apply
+    status: in-progress
+    owner: codex
+    branch: codex/ws-0225-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0225-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0225-live-apply.md
+    depends_on:
+      - adr-0143-gitea
+      - adr-0165-workflow-idempotency
+      - adr-0168-idempotency-ci
+      - adr-0224-server-resident-operations-architecture-bundle
+    conflicts_with: []
+    shared_surfaces:
+      - docs/adr/0225-server-resident-reconciliation-via-ansible-pull.md
+      - docs/workstreams/ws-0225-live-apply.md
+      - docs/runbooks/server-resident-reconciliation.md
+      - playbooks/server-resident-reconciliation.yml
+      - collections/ansible_collections/lv3/platform/roles/server_resident_reconciliation/**
+      - receipts/live-applies/2026-03-28-adr-0225-server-resident-reconciliation-via-ansible-pull-live-apply.json
+      - receipts/live-applies/evidence/2026-03-28-adr-0225-*
+      - tests/test_server_resident_reconciliation.py
+      - docs/adr/.index.yaml
+      - workstreams.yaml
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0225_repo_surface
+          paths:
+            - docs/adr/0225-server-resident-reconciliation-via-ansible-pull.md
+            - docs/workstreams/ws-0225-live-apply.md
+            - docs/runbooks/server-resident-reconciliation.md
+            - playbooks/server-resident-reconciliation.yml
+            - collections/ansible_collections/lv3/platform/roles/server_resident_reconciliation/**
+            - tests/test_server_resident_reconciliation.py
+            - docs/adr/.index.yaml
+          mode: exclusive
+        - id: adr_0225_live_evidence
+          paths:
+            - receipts/live-applies/2026-03-28-adr-0225-server-resident-reconciliation-via-ansible-pull-live-apply.json
+            - receipts/live-applies/evidence/2026-03-28-adr-0225-*
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false
+
   - id: ws-0021-edge-cert-repair
     adr: "0021"
     title: Repair shared edge certificate expansion during service-specific converges

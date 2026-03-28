@@ -1,0 +1,43 @@
+---
+# Playbook: server-resident-reconciliation.yml
+# Purpose: Bootstrap and maintain the Proxmox host's server-resident ansible-pull reconcile loop.
+# Use case: Run from a controller to install the durable pull loop or run locally through ansible-pull to keep that loop converged.
+#
+# Inputs (required):
+#   - server_resident_reconciliation_bootstrap_gitea_access (bool, required): Whether the controller run should create or recover the low-privilege Gitea read token before mirroring it to the host.
+#
+# Inputs (optional):
+#   - ansible_ssh_private_key_file (path, optional): SSH key used by controller-driven bootstrap runs to reach proxmox_florin.
+#
+# Outputs:
+#   - Installs a managed checkout, askpass helper, wrapper script, and systemd timer for host-local ansible-pull runs.
+#
+# Idempotency: Fully idempotent
+#              Re-running the playbook keeps the host-local checkout path, token mirror, wrapper, and timer aligned with repo state.
+#
+# Dependencies:
+#   - ADR 0143: Gitea provides the private merged-repo source consumed by ansible-pull.
+#   - ADR 0165: This playbook carries the required metadata header for new playbooks.
+#   - ADR 0225: Server-resident reconciliation via ansible-pull is the capability being implemented.
+#   - Role: lv3.platform.server_resident_reconciliation — renders the managed ansible-pull runtime and optional Gitea bootstrap path.
+#
+# Related ADRs: 0143, 0165, 0224, 0225
+# Related Runbooks: docs/runbooks/server-resident-reconciliation.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
+
+- name: Bootstrap and maintain server-resident reconciliation on the Proxmox host
+  hosts: proxmox_florin
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure the target host is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "server-resident-reconciliation currently supports Debian targets only."
+
+  roles:
+    - role: lv3.platform.server_resident_reconciliation
