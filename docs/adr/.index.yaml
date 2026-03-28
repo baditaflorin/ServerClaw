@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-28'
 total_adrs: 258
 implementation_status_summary:
-  Implemented: 212
+  Implemented: 213
   Partial: 4
-  Not Implemented: 41
+  Not Implemented: 40
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3937,7 +3937,7 @@ adr_index:
   - adr: '0233'
     title: Signed Release Bundles Via Gitea Releases And Cosign
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -3949,6 +3949,7 @@ adr_index:
       - cosign
     summary: We will package server-consumable control inputs as signed release bundles
     filename: 0233-signed-release-bundles-via-gitea-releases-and-cosign.md
+    implemented_version: 0.177.52
   - adr: '0234'
     title: Shared Human App Shell And Navigation Via PatternFly
     status: Accepted

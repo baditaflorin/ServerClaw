@@ -2,10 +2,10 @@
 
 - ADR: [ADR 0233](../adr/0233-signed-release-bundles-via-gitea-releases-and-cosign.md)
 - Title: Integrate ADR 0233 signed release bundles into `origin/main`
-- Status: in_progress
-- Included In Repo Version: N/A
+- Status: merged
+- Included In Repo Version: 0.177.52
 - Platform Version Observed During Merge: 0.130.42
-- Release Date: N/A
+- Release Date: 2026-03-28
 - Branch: `codex/ws-0233-main-merge`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0233-main-merge`
 - Owner: codex
@@ -27,7 +27,7 @@ release cut, and push the integrated result to `main`.
 - `VERSION`
 - `changelog.md`
 - `docs/release-notes/README.md`
-- `docs/release-notes/0.177.50.md`
+- `docs/release-notes/0.177.52.md`
 - `versions/stack.yaml`
 - `build/platform-manifest.json`
 - `docs/diagrams/agent-coordination-map.excalidraw`
@@ -50,16 +50,21 @@ release cut, and push the integrated result to `main`.
 
 ## Plan
 
-- finish merging the `ws-0233-live-apply` branch onto `origin/main@7161c2df`
-- replay the live Gitea bundle publishing and verification path from this
-  merged-main candidate
-- cut the next repository release, update the protected canonical-truth files,
-  and record both the isolated live-apply and merged-main receipts
+- merge the verified ADR 0233 runtime surfaces onto the latest `origin/main`
+- refresh the protected release and canonical-truth files for release `0.177.52`
+- carry both the isolated-worktree and merged-main-equivalent live-apply receipts into the final integration branch before pushing `main`
 
 ## Verification
 
-- pending merged-main replay
+- `git fetch origin` confirmed the integration branch stayed current with `origin/main` before the release recut
+- `python3 -m py_compile scripts/release_bundle.py tests/test_release_bundle.py tests/test_gitea_runtime_role.py` passed
+- `uv run --with pytest --with pyyaml pytest -q tests/test_release_bundle.py tests/test_gitea_runtime_role.py` returned `19 passed in 0.28s`
+- `make syntax-check-gitea`, `./scripts/validate_repo.sh agent-standards`, `uv run --with jsonschema --with pyyaml python scripts/validate_dependency_graph.py`, `uv run --with jsonschema --with pyyaml python scripts/generate_dependency_diagram.py --check`, `uv run --with pyyaml python scripts/generate_diagrams.py --check`, and `git diff --check` all passed on the candidate before the final release metadata landed
+- the rebased candidate replayed `make converge-gitea`, seeded `RELEASE_BUNDLE_REPO_TOKEN`, passed the private Gitea push gate, completed `release-bundle` workflow run `68` plus `validate` run `69`, and succeeded on direct controller-side `verify-release`
+- the final integration cut release `0.177.52`, regenerated the ADR index, README status fragments, platform manifest, and diagrams, then re-ran the repository validation and automation checks before the push to `origin/main`
 
 ## Outcome
 
-- pending integration
+- release `0.177.52` integrates ADR 0233 into `main` by carrying forward the verified private Gitea release-bundle publication path, the durable repository-token secret seeding, and controller-side Cosign verification against private release assets
+- the repository truth and live platform truth now align on signed release bundles as an implemented capability, with canonical receipt `2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply` mapped under `signed_release_bundles`
+- platform version `0.130.43` records the merged-main-equivalent verification replay even though the successful publication and verification proof ran from the dedicated integration worktree before the final fast-forward to `origin/main`

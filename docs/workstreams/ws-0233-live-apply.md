@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0233](../adr/0233-signed-release-bundles-via-gitea-releases-and-cosign.md)
 - Title: Live apply signed control-plane release bundles via Gitea Releases and Cosign
-- Status: in_progress
-- Implemented In Repo Version: N/A
-- Live Applied In Platform Version: N/A
-- Implemented On: N/A
-- Live Applied On: N/A
+- Status: live_applied
+- Implemented In Repo Version: 0.177.52
+- Live Applied In Platform Version: 0.130.43
+- Implemented On: 2026-03-28
+- Live Applied On: 2026-03-28
 - Branch: `codex/ws-0233-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0233-live-apply`
 - Owner: codex
@@ -47,16 +47,39 @@
 
 ## Verification
 
-- pending implementation
+- `python3 -m py_compile scripts/release_bundle.py tests/test_release_bundle.py tests/test_gitea_runtime_role.py`
+- `uv run --with pytest --with pyyaml pytest -q tests/test_release_bundle.py tests/test_gitea_runtime_role.py` returned `19 passed in 0.28s`
+- `make syntax-check-gitea` and `./scripts/validate_repo.sh agent-standards`
+- `make converge-gitea`
+- authenticated Gitea API verification that repo secret `RELEASE_BUNDLE_REPO_TOKEN` exists beside the Cosign signing secrets
+- branch push to the private Gitea remote that completed `release-bundle` workflow run `68` (`publish` job `85`, `verify` job `86`) and `validate` workflow run `69`
+- controller-side `python3 scripts/release_bundle.py verify-release ... --release-tag bundle-branch-codex-ws-0233-main-merge-2fb56c14b62a ...` using the committed public key and a local Cosign binary
 
-## Outcome
+## Live Apply Outcome
 
-- pending implementation
+- `make converge-gitea` completed successfully from the isolated latest-`origin/main` integration worktree with final recap `docker-build-lv3 ok=100 changed=5 failed=0`, `docker-runtime-lv3 ok=227 changed=2 failed=0`, `postgres-lv3 ok=24 changed=0 failed=0`, and `proxmox_florin ok=36 changed=4 failed=0`
+- the managed Gitea bootstrap path now seeds repository secret `RELEASE_BUNDLE_REPO_TOKEN` from the mirrored admin token so private release assets can be replayed by both publish and verify workflows
+- a private push of branch head `2fb56c14b62a73d0de47cb367a78c987dfd257c5` passed the full server-side gate and produced successful Gitea workflow runs `68` and `69` on the self-hosted runner path
+- prerelease tag `bundle-branch-codex-ws-0233-main-merge-2fb56c14b62a` now carries the bundle tarball, checksum, and Sigstore bundle assets in private Gitea Releases
+- direct controller-side replay of `verify-release` against that private release succeeded and reported bundle SHA-256 `da9139777eadf4d0a6f4b520decc40781fb13282486ef67326217990e6223a8f`
+
+## Mainline Integration Outcome
+
+- merged to `main` in repository version `0.177.52`
+- bumped the live platform version to `0.130.43` after recording the merged-main-equivalent release-bundle receipt and carrying the verified signed-bundle evidence into canonical `main`
+- updated `VERSION`, `changelog.md`, `RELEASE.md`, `docs/release-notes/0.177.52.md`, `README.md`, `versions/stack.yaml`, `build/platform-manifest.json`, and the ADR metadata only during the final mainline integration step
+
+## Live Evidence
+
+- branch-local live-apply receipt: `receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-live-apply.json`
+- merged-main-equivalent live-apply receipt: `receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply.json`
+- published prerelease tag: `bundle-branch-codex-ws-0233-main-merge-2fb56c14b62a`
+- private release URL: `http://git.lv3.org:3009/ops/proxmox_florin_server/releases/tag/bundle-branch-codex-ws-0233-main-merge-2fb56c14b62a`
 
 ## Mainline Integration
 
-- this workstream intentionally leaves `VERSION`, release sections in `changelog.md`, `versions/stack.yaml`, and the top-level README status summary untouched until a final mainline integration step
+- this workstream intentionally left `VERSION`, release sections in `changelog.md`, `versions/stack.yaml`, and the top-level README status summary untouched until the final mainline integration step that is now complete
 
-## Notes For The Next Assistant
+## Merge-To-Main Notes
 
-- the live Gitea repository `main` currently trails `origin/main`; branch-safe verification should prefer a dedicated workstream branch ref in Gitea unless this session also owns the final repo sync
+- remaining for merge to `main`: none

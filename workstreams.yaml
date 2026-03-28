@@ -278,7 +278,7 @@ workstreams:
   - id: ws-0233-live-apply
     adr: "0233"
     title: Live apply signed release bundles via Gitea Releases and Cosign
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0233-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0233-live-apply
@@ -305,6 +305,8 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/bootstrap-gitea.sh.j2
       - tests/test_release_bundle.py
       - tests/test_gitea_runtime_role.py
+      - receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-live-apply.json
+      - receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply.json
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -329,13 +331,28 @@ workstreams:
             - collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/bootstrap-gitea.sh.j2
             - tests/test_release_bundle.py
             - tests/test_gitea_runtime_role.py
+            - receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-live-apply.json
+            - receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply.json
           mode: exclusive
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0233 by publishing signed control-plane release bundles from private Gitea Releases, seeding a durable repository token for private asset replay, and verifying bundle provenance with Cosign before runtime consumption
+      release_bump: patch
+      included_in_repo_version: 0.177.52
+      latest_receipts:
+        signed_release_bundles: 2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply
+      live_apply_verification:
+        release_tag: bundle-branch-codex-ws-0233-main-merge-2fb56c14b62a
+        head_sha: 2fb56c14b62a73d0de47cb367a78c987dfd257c5
+        workflow_runs:
+          publish_verify_run_id: 68
+          validate_run_id: 69
+        bundle_sha256: da9139777eadf4d0a6f4b520decc40781fb13282486ef67326217990e6223a8f
   - id: ws-0233-main-merge
     adr: "0233"
     title: Integrate ADR 0233 signed release bundles into origin/main
-    status: in_progress
+    status: merged
     owner: codex
     branch: codex/ws-0233-main-merge
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0233-main-merge
@@ -351,7 +368,7 @@ workstreams:
       - VERSION
       - changelog.md
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.50.md
+      - docs/release-notes/0.177.52.md
       - versions/stack.yaml
       - build/platform-manifest.json
       - docs/diagrams/agent-coordination-map.excalidraw
@@ -392,7 +409,7 @@ workstreams:
             - VERSION
             - changelog.md
             - docs/release-notes/README.md
-            - docs/release-notes/0.177.50.md
+            - docs/release-notes/0.177.52.md
             - versions/stack.yaml
             - build/platform-manifest.json
             - docs/diagrams/agent-coordination-map.excalidraw
@@ -424,8 +441,12 @@ workstreams:
             - receipts/live-applies/2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply.json
           mode: shared_contract
           contract: live-apply-receipts-v1
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
+    canonical_truth:
+      changelog_entry: integrated ADR 0233 into main by carrying the verified private Gitea release-bundle publication path, durable repository-token secret seeding, and Cosign verification evidence onto the protected release surfaces
+      release_bump: patch
+      included_in_repo_version: 0.177.52
   - id: ws-0231-live-apply
     adr: "0231"
     title: Live apply ADR 0231 local secret delivery via OpenBao Agent and systemd credentials
