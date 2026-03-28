@@ -229,6 +229,58 @@
         "escalation_action": "abort_silently"
       }
     },
+    "stage-smoke-suites": {
+      "description": "Run the repo-managed ADR 0251 smoke suites for a declared service and environment using the shared integration-suite engine.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "stage-smoke-suites",
+        "command": "make stage-smoke-suites STAGE_SMOKE_ARGS='--service <service> --environment <environment>'"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/integration-test-suite.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/service-capability-catalog.json",
+        "config/stage-smoke-suites.json",
+        "config/windmill/scripts/stage-smoke-suites.py",
+        "docs/adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md",
+        "docs/runbooks/environment-promotion-pipeline.md",
+        "docs/runbooks/integration-test-suite.md",
+        "scripts/integration_suite.py",
+        "scripts/stage_smoke_suites.py",
+        "tests/test_integration_suite.py",
+        "tests/test_stage_smoke_suites.py",
+        "tests/integration/test_authentication.py",
+        "tests/integration/test_deployment.py",
+        "tests/integration/test_platform_api.py"
+      ],
+      "outputs": [
+        "An aggregate JSON report describing the declared smoke suites that ran for the selected service and environment.",
+        "Per-suite integration-suite reports written beside the aggregate report for receipt and promotion evidence."
+      ],
+      "verification_commands": [
+        "python3 scripts/stage_smoke_suites.py --validate",
+        "python3 scripts/stage_smoke_suites.py --service windmill --environment production",
+        "python3 config/windmill/scripts/stage-smoke-suites.py --repo-path /srv/proxmox_florin_server --service windmill --environment production"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 200,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
+    },
     "nightly-integration-tests": {
       "description": "Run the ADR 0111 nightly integration suite, post the summary to Mattermost, and emit GlitchTip failures when checks regress.",
       "lifecycle_status": "active",

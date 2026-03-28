@@ -200,6 +200,18 @@
           "type": "string",
           "minLength": 1
         },
+        "stage_ready": {
+          "type": "boolean"
+        },
+        "smoke_suite_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$"
+          },
+          "uniqueItems": true
+        },
         "notes": {
           "type": "string"
         },

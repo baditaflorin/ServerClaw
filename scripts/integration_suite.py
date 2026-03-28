@@ -18,14 +18,6 @@ from environment_catalog import environment_choices, primary_environment
 
 DEFAULT_REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_REPORT_DIR = ".local/integration-tests"
-SERVICE_IDS = (
-    "keycloak",
-    "grafana",
-    "netbox",
-    "openbao",
-    "postgres",
-    "windmill",
-)
 MODE_MARKERS = {
     "gate": "integration and not mutation and not destructive",
     "nightly": "integration and not destructive",
@@ -145,6 +137,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="Treat an unavailable integration environment as a failure instead of a skip.",
     )
+    parser.add_argument(
+        "--target",
+        action="append",
+        default=[],
+        help="Pytest path or node id to run. Repeat to target a subset instead of all integration tests.",
+    )
+    parser.add_argument(
+        "--required-service-id",
+        action="append",
+        default=[],
+        help="Service ids expected by the targeted smoke run. Repeat as needed.",
+    )
     return parser.parse_args(argv or sys.argv[1:])
 
 
@@ -194,7 +198,8 @@ def resolve_service_url(catalog: dict[str, Any], service_id: str, environment: s
 def resolve_targets(repo_root: Path, environment: str) -> SuiteTargets:
     catalog = load_service_catalog(repo_root)
     return SuiteTargets(
-        gateway_url=env_override("LV3_INTEGRATION_GATEWAY_URL"),
+        gateway_url=env_override("LV3_INTEGRATION_GATEWAY_URL")
+        or resolve_service_url(catalog, "api_gateway", environment),
         keycloak_url=env_override("LV3_INTEGRATION_KEYCLOAK_URL")
         or resolve_service_url(catalog, "keycloak", environment),
         grafana_url=env_override("LV3_INTEGRATION_GRAFANA_URL")
@@ -236,6 +241,8 @@ def build_skipped_payload(
     repo_root: Path,
     targets: SuiteTargets,
     reason: str,
+    selection: list[str] | None = None,
+    required_service_ids: list[str] | None = None,
 ) -> dict[str, Any]:
     return {
         "status": "skipped",
@@ -244,6 +251,8 @@ def build_skipped_payload(
         "executed_at": iso_now(),
         "repo_root": str(repo_root.resolve()),
         "reason": reason,
+        "selection": list(selection or []),
+        "required_service_ids": list(required_service_ids or []),
         "targets": targets.as_dict(),
         "summary": {
             "passed": 0,
@@ -255,10 +264,18 @@ def build_skipped_payload(
     }
 
 
-def prepare_environment(mode: str, environment: str, repo_root: Path, targets: SuiteTargets) -> None:
+def prepare_environment(
+    mode: str,
+    environment: str,
+    repo_root: Path,
+    targets: SuiteTargets,
+    required_service_ids: list[str] | None = None,
+) -> None:
     os.environ.setdefault("LV3_INTEGRATION_ENVIRONMENT", environment)
     os.environ.setdefault("LV3_INTEGRATION_REPO_ROOT", str(repo_root.resolve()))
     os.environ.setdefault("LV3_INTEGRATION_ENABLE_NETWORK_TESTS", "1")
+    if required_service_ids:
+        os.environ["LV3_INTEGRATION_REQUIRED_SERVICE_IDS"] = ",".join(required_service_ids)
     if mode == "gate":
         os.environ.setdefault("LV3_RUN_SECRET_ROTATION_TEST", "0")
         os.environ.setdefault("LV3_ENABLE_FAILOVER_TEST", "0")
@@ -288,13 +305,19 @@ def prepare_environment(mode: str, environment: str, repo_root: Path, targets: S
         os.environ.setdefault("LV3_INTEGRATION_WINDMILL_URL", targets.windmill_url)
 
 
-def run_pytest(repo_root: Path, mode: str, extra_args: list[str]) -> tuple[int, SuiteReporter, float]:
+def run_pytest(
+    repo_root: Path,
+    mode: str,
+    extra_args: list[str],
+    selection: list[str] | None = None,
+) -> tuple[int, SuiteReporter, float]:
     import pytest
 
     reporter = SuiteReporter()
     started = time.monotonic()
+    selected_targets = list(selection or []) or [str(repo_root / "tests" / "integration")]
     pytest_args = [
-        str(repo_root / "tests" / "integration"),
+        *selected_targets,
         "-rA",
         "-m",
         MODE_MARKERS[mode],
@@ -313,6 +336,8 @@ def build_result_payload(
     reporter: SuiteReporter,
     duration_seconds: float,
     targets: SuiteTargets,
+    selection: list[str],
+    required_service_ids: list[str],
 ) -> dict[str, Any]:
     summary = reporter.summary()
     status = "failed" if exit_code != 0 or summary["failed"] else "passed"
@@ -324,6 +349,8 @@ def build_result_payload(
         "repo_root": str(repo_root.resolve()),
         "marker_expression": MODE_MARKERS[mode],
         "duration_seconds": round(duration_seconds, 3),
+        "selection": selection,
+        "required_service_ids": required_service_ids,
         "targets": targets.as_dict(),
         "summary": summary,
         "tests": sorted(reporter.results.values(), key=lambda item: item["nodeid"]),
@@ -338,7 +365,11 @@ def run_suite(
     extra_args: list[str] | None = None,
     fail_on_missing_targets: bool = False,
     report_file: Path | None = None,
+    selection: list[str] | None = None,
+    required_service_ids: list[str] | None = None,
 ) -> tuple[int, dict[str, Any]]:
+    selected = list(selection or [])
+    required = list(required_service_ids or [])
     targets = resolve_targets(repo_root, environment)
     if not targets_available(targets):
         payload = build_skipped_payload(
@@ -350,12 +381,19 @@ def run_suite(
                 f"no active {environment} integration endpoints found in config/service-capability-catalog.json "
                 "and no LV3_INTEGRATION_* overrides were supplied"
             ),
+            selection=selected,
+            required_service_ids=required,
         )
         write_report(report_path(repo_root, report_file, mode, environment), payload)
         return (1 if fail_on_missing_targets else 0), payload
 
-    prepare_environment(mode, environment, repo_root, targets)
-    exit_code, reporter, duration_seconds = run_pytest(repo_root, mode, list(extra_args or []))
+    prepare_environment(mode, environment, repo_root, targets, required_service_ids=required)
+    exit_code, reporter, duration_seconds = run_pytest(
+        repo_root,
+        mode,
+        list(extra_args or []),
+        selection=selected,
+    )
     payload = build_result_payload(
         repo_root=repo_root,
         mode=mode,
@@ -364,6 +402,8 @@ def run_suite(
         reporter=reporter,
         duration_seconds=duration_seconds,
         targets=targets,
+        selection=selected,
+        required_service_ids=required,
     )
     write_report(report_path(repo_root, report_file, mode, environment), payload)
     return (0 if payload["status"] == "passed" else 1), payload
@@ -378,6 +418,8 @@ def main(argv: list[str] | None = None) -> int:
         extra_args=args.pytest_arg,
         fail_on_missing_targets=args.fail_on_missing_targets,
         report_file=args.report_file,
+        selection=args.target,
+        required_service_ids=args.required_service_id,
     )
     print(json.dumps(payload, indent=2, sort_keys=True))
     return exit_code
