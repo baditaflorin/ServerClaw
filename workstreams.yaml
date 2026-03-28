@@ -2663,6 +2663,62 @@ workstreams:
     ready_to_merge: false
     live_applied: true
 
+  - id: ws-0187-live-apply
+    adr: "0187"
+    title: ADR 0187 live apply from latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0187-live-apply
+    worktree_path: .worktrees/ws-0187-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0187-live-apply.md
+    depends_on:
+      - adr-0088-ephemeral-fixtures
+      - adr-0099-backup-restore-verification
+      - adr-0185-branch-scoped-ephemeral-preview-environments
+    conflicts_with: []
+    shared_surfaces:
+      - config/seed-data-catalog.json
+      - scripts/seed_data_snapshots.py
+      - scripts/fixture_manager.py
+      - scripts/restore_verification.py
+      - collections/ansible_collections/lv3/platform/roles/backup_vm/
+      - docs/runbooks/seed-data-snapshots.md
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0187_live_apply_surface
+          paths:
+            - config/seed-data-catalog.json
+            - config/controller-local-secrets.json
+            - config/ansible-execution-scopes.yaml
+            - scripts/seed_data_snapshots.py
+            - scripts/fixture_manager.py
+            - scripts/restore_verification.py
+            - scripts/validate_repository_data_models.py
+            - scripts/validate_repo.sh
+            - tests/test_seed_data_snapshots.py
+            - tests/test_fixture_manager.py
+            - tests/test_restore_verification.py
+            - collections/ansible_collections/lv3/platform/roles/backup_vm/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/backup_vm/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/backup_vm/tasks/verify.yml
+            - collections/ansible_collections/lv3/platform/roles/backup_vm/meta/argument_specs.yml
+            - collections/ansible_collections/lv3/platform/roles/backup_vm/README.md
+            - docs/runbooks/seed-data-snapshots.md
+            - docs/runbooks/ephemeral-fixtures.md
+            - docs/runbooks/backup-restore-verification.md
+            - docs/workstreams/ws-0187-live-apply.md
+            - docs/adr/0187-anonymized-seed-data-snapshots-for-repeatable-tests.md
+            - receipts/live-applies/*
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: true
+
   - id: adr-0106-ephemeral-lifecycle
     adr: "0106"
     title: Ephemeral environment lifecycle and teardown policy

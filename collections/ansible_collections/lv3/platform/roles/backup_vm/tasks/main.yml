@@ -163,6 +163,23 @@
     enabled: true
     state: started
 
+- name: Ensure the managed seed snapshot store root exists
+  ansible.builtin.file:
+    path: "{{ backup_vm_seed_snapshot_store_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ backup_vm_seed_snapshot_store_mode }}"
+
+- name: Ensure managed seed snapshot class directories exist
+  ansible.builtin.file:
+    path: "{{ backup_vm_seed_snapshot_store_path }}/{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ backup_vm_seed_snapshot_store_mode }}"
+  loop: "{{ backup_vm_seed_snapshot_classes }}"
+
 - name: Read the current PBS users
   ansible.builtin.command: proxmox-backup-manager user list --output-format json
   register: backup_vm_users

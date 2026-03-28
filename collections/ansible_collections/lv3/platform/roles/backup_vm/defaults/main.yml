@@ -16,3 +16,9 @@ backup_vm_api_token_id: pve
 backup_vm_api_token_comment: Proxmox VE host backup token
 backup_vm_api_token_local_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-backup
 backup_vm_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-backup/backup-lv3-token.json
+backup_vm_seed_snapshot_store_path: /var/lib/lv3/seed-data-snapshots
+backup_vm_seed_snapshot_store_mode: "0750"
+backup_vm_seed_snapshot_classes:
+  - tiny
+  - standard
+  - recovery

@@ -217,6 +217,22 @@ restore-verification:
 synthetic-transaction-replay:
 	python3 $(REPO_ROOT)/scripts/synthetic_transaction_replay.py $(SYNTHETIC_REPLAY_ARGS)
 
+## Seed snapshots (ADR 0187)
+seed-snapshot-build:
+	@test -n "$(SEED_CLASS)" || (echo "set SEED_CLASS=<tiny|standard|recovery>"; exit 1)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/seed_data_snapshots.py build --seed-class "$(SEED_CLASS)"
+
+seed-snapshot-list:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/seed_data_snapshots.py list $(if $(SEED_CLASS),--seed-class "$(SEED_CLASS)")
+
+seed-snapshot-verify:
+	@test -n "$(SEED_CLASS)" || (echo "set SEED_CLASS=<tiny|standard|recovery>"; exit 1)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/seed_data_snapshots.py verify --seed-class "$(SEED_CLASS)" $(if $(SNAPSHOT_ID),--snapshot-id "$(SNAPSHOT_ID)")
+
+seed-snapshot-publish:
+	@test -n "$(SEED_CLASS)" || (echo "set SEED_CLASS=<tiny|standard|recovery>"; exit 1)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/seed_data_snapshots.py publish --seed-class "$(SEED_CLASS)" $(if $(SNAPSHOT_ID),--snapshot-id "$(SNAPSHOT_ID)")
+
 ## Platform CLI (ADR 0090)
 install-cli:
 	@if command -v pipx >/dev/null 2>&1; then \

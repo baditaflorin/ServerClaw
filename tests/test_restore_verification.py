@@ -247,3 +247,38 @@ def test_main_records_failure_receipt_and_cleans_up(monkeypatch, tmp_path: Path)
     assert len(receipt_files) == 1
     payload = json.loads(receipt_files[0].read_text())
     assert payload["results"][0]["overall"] == "fail"
+
+
+def test_build_target_result_records_seed_snapshot() -> None:
+    target = rv.RestoreTarget(
+        vm_name="postgres-lv3",
+        source_vmid=150,
+        target_vmid=900,
+        bridge="vmbr20",
+        ip_cidr="10.20.10.110/24",
+        gateway="10.20.10.1",
+        mac_address="BC:24:11:2A:2E:CA",
+        smoke_kind="postgres",
+        resources=rv.ResourceAmount(ram_gb=4, vcpu=2, disk_gb=48),
+    )
+    backup = {
+        "volid": "lv3-backup-pbs:backup/qemu/150/2026-03-22T02:30:00Z",
+        "timestamp": rv.extract_backup_timestamp("lv3-backup-pbs:backup/qemu/150/2026-03-22T02:30:00Z"),
+    }
+
+    result = rv.build_target_result(
+        target=target,
+        backup=backup,
+        restore_duration_seconds=20,
+        boot_time_seconds=15,
+        execution_mode="ssh",
+        tests=[{"name": "restore_workflow", "status": "pass", "required": True}],
+        seed_snapshot={
+            "seed_class": "tiny",
+            "snapshot_id": "tiny-abc123",
+            "remote_dir": "/var/lib/lv3-seed-data/restore-verification/postgres-lv3",
+        },
+    )
+
+    assert result["seed_class"] == "tiny"
+    assert result["seed_snapshot_id"] == "tiny-abc123"

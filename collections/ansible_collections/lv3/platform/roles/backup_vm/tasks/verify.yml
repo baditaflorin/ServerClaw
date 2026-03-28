@@ -28,3 +28,29 @@
           | length
         ) == 1
     fail_msg: "Managed PBS datastore {{ backup_vm_datastore_name }} is not readable."
+
+- name: Verify the managed seed snapshot store root exists
+  ansible.builtin.stat:
+    path: "{{ backup_vm_seed_snapshot_store_path }}"
+  register: backup_vm_seed_snapshot_store_root
+
+- name: Assert the managed seed snapshot store root exists
+  ansible.builtin.assert:
+    that:
+      - backup_vm_seed_snapshot_store_root.stat.exists
+      - backup_vm_seed_snapshot_store_root.stat.isdir
+    fail_msg: "Managed seed snapshot store root {{ backup_vm_seed_snapshot_store_path }} is not present."
+
+- name: Verify the managed seed snapshot class directories exist
+  ansible.builtin.stat:
+    path: "{{ backup_vm_seed_snapshot_store_path }}/{{ item }}"
+  loop: "{{ backup_vm_seed_snapshot_classes }}"
+  register: backup_vm_seed_snapshot_class_dirs
+
+- name: Assert the managed seed snapshot class directories exist
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+      - item.stat.isdir
+    fail_msg: "Managed seed snapshot class directory {{ item.stat.path | default('unknown') }} is not present."
+  loop: "{{ backup_vm_seed_snapshot_class_dirs.results }}"

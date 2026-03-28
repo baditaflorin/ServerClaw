@@ -672,6 +672,9 @@ network_policy:
 backup_vm_vmid: 160
 backup_vm_name: backup-lv3
 backup_vm_ipv4: 10.10.10.60
+backup_vm_api_port: 8007
+backup_vm_datastore_name: proxmox
+backup_vm_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-backup/backup-lv3-token.json
 
 postgres_ha:
   scope: postgres-ha

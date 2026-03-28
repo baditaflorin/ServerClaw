@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-28'
 total_adrs: 204
 implementation_status_summary:
-  Implemented: 190
+  Implemented: 191
   Partial: 3
-  Not Implemented: 10
+  Not Implemented: 9
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3234,8 +3234,8 @@ adr_index:
     filename: 0186-prewarmed-fixture-pools-and-lease-based-ephemeral-capacity.md
   - adr: 0187
     title: Anonymized Seed Data Snapshots for Repeatable Tests
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Accepted
+    implementation_status: Implemented
     date: '2026-03-27'
     concern: testing
     keywords:
