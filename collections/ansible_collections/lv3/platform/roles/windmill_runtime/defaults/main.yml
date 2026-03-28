@@ -8,6 +8,7 @@
 
 windmill_workspace_id: lv3
 windmill_workspace_name: LV3
+windmill_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('windmill') }}"
 windmill_site_dir: /opt/windmill
 windmill_secret_dir: /etc/lv3/windmill
 windmill_compose_file: "{{ windmill_site_dir }}/docker-compose.yml"
@@ -24,7 +25,6 @@ windmill_runtime_packages:
   - openssl
   - python3-psycopg
   - tar
-windmill_service_topology: "{{ hostvars[inventory_hostname].platform_service_topology }}"
 windmill_server_port: "{{ windmill_service_topology | platform_service_port('windmill', 'internal') }}"
 windmill_host_proxy_port: "{{ windmill_service_topology | platform_service_port('windmill', 'controller') }}"
 windmill_server_network_mode: host
@@ -115,6 +115,8 @@ windmill_private_base_url: "{{ windmill_service_topology | platform_service_url(
 windmill_base_url: "{{ windmill_service_topology | platform_service_url('windmill', 'controller') }}"
 windmill_runtime_api_base_url: "http://127.0.0.1:{{ windmill_server_port }}"
 windmill_worker_api_base_url: "http://windmill_server:8000"
+windmill_healthcheck_script_path: f/lv3/windmill_healthcheck
+windmill_validation_gate_status_script_path: f/lv3/gate-status
 windmill_seed_job_timeout_seconds: 120
 windmill_worker_checkout_repo_root_local_dir: "{{ playbook_dir }}/.."
 windmill_worker_repo_checkout_host_path: /srv/proxmox_florin_server
@@ -147,6 +149,9 @@ windmill_worker_repo_secret_files:
     src: "{{ windmill_controller_local_root }}/openbao/init.json"
     mode: "0600"
 windmill_worker_checkout_checksum_file: "{{ windmill_site_dir }}/worker-checkout.sha256"
+windmill_worker_checkout_integrity_files:
+  - scripts/gate_status.py
+  - config/windmill/scripts/gate-status.py
 windmill_worker_checkout_sync_paths:
   - ansible.cfg
   - callback_plugins
@@ -214,6 +219,11 @@ windmill_integration_test_runner_username: test-runner@lv3.org
 windmill_integration_test_runner_password_local_file: >-
   {{ windmill_controller_repo_common_root }}/.local/integration-tests/test-runner-password.txt
 windmill_seed_scripts:
+  - path: f/lv3/gate-status
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/gate-status.py"
+    language: python3
+    summary: Validation gate status
+    description: Repo-managed Windmill wrapper that returns the latest repository validation gate status as structured JSON.
   - path: f/lv3/windmill_healthcheck
     local_file: "{{ inventory_dir }}/../config/windmill/scripts/lv3-healthcheck.py"
     language: python3

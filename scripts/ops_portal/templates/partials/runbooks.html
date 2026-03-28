@@ -1,3 +1,7 @@
+{% if runbook_warning %}
+<div class="banner warning">Runbook launcher data is degraded: {{ runbook_warning }}</div>
+{% endif %}
+
 <div class="runbook-grid">
   {% for runbook in runbooks %}
   <article class="panel runbook-card">

@@ -51,7 +51,7 @@ If the logs show `Acquisition timeout while waiting for new connection`, the JDB
 1. Re-apply the portal runtime:
 
 ```bash
-ansible-playbook playbooks/ops-portal.yml
+make converge-ops-portal
 ```
 
 2. If the runtime is healthy locally but the public hostname fails, re-apply the edge:

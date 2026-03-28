@@ -1,0 +1,17 @@
+id: validation-gate-status
+title: Inspect validation gate status
+automation:
+  eligible: true
+  description: Show the current validation-gate summary through the shared runbook service.
+  delivery_surfaces:
+    - api_gateway
+    - cli
+    - ops_portal
+    - windmill
+steps:
+  - id: summarize-gate
+    type: diagnostic
+    workflow_id: gate-status
+    params: {}
+    success_condition: "result != None"
+    on_failure: escalate
