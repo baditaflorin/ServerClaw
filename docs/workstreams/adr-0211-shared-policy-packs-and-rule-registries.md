@@ -3,7 +3,7 @@
 - ADR: [ADR 0211](../adr/0211-shared-policy-packs-and-rule-registries.md)
 - Title: Centralize repeated platform policy rules into one machine-checked registry and replay the governed automation paths from an isolated latest-main worktree
 - Status: merged
-- Implemented In Repo Version: 0.177.33
+- Implemented In Repo Version: 0.177.35
 - Live Applied In Platform Version: 0.130.37
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
@@ -73,12 +73,12 @@
 - The duplicated redundancy, capacity-class, and placement enums were removed from the affected schemas and docs in favor of the shared registry, so `service_redundancy.py`, `standby_capacity.py`, `capacity_report.py`, `failure_domain_policy.py`, `environment_topology.py`, and `validate_repository_data_models.py` all resolve policy from the same source.
 - The focused regression suite passed with `27 passed in 0.40s`, and repository data-model validation passed after the refactor.
 - The initial fresh-worktree `headscale` replay exposed one real automation gap: `lv3.platform.nginx_edge_publication` expects `build/changelog-portal/` and `build/docs-portal/` to exist even in a brand-new worktree. Running `make generate-ops-portal generate-changelog-portal docs` populated those artifacts from committed automation, and the immediate replay then completed successfully with `localhost ok=16 changed=0 failed=0`, `nginx-lv3 ok=72 changed=5 failed=0`, and `proxmox_florin ok=42 changed=0 failed=0`.
-- The merged-main integration cut release `0.177.33`, replayed the same governed `headscale` path from `codex/ws-0211-main-merge`, and completed successfully with `localhost ok=16 changed=0 failed=0`, `nginx-lv3 ok=71 changed=4 failed=0`, and `proxmox_florin ok=42 changed=0 failed=0`.
+- After absorbing the concurrent ADR 0206 `0.177.34` mainline integration, ADR 0211 was recut as release `0.177.35`, replayed the same governed `headscale` path from `codex/ws-0211-main-merge`, and completed successfully with `localhost ok=16 changed=0 failed=0`, `nginx-lv3 ok=71 changed=4 failed=0`, and `proxmox_florin ok=42 changed=0 failed=0`.
 - The final edge verification passed with `https://headscale.lv3.org/health` returning `HTTP 200` from both the branch-local and merged-main replays, confirming the shared policy registry changes did not regress the governed live-apply path or the public edge publication for the selected safe service target.
-- The final integrated validation bundle passed end to end: `./scripts/validate_repo.sh data-models generated-docs generated-portals agent-standards` and the expanded regression slice covering the shared policy registry plus dependency-graph generation contract (`33 passed in 2.24s`).
+- The final integrated validation bundle passed end to end: `./scripts/validate_repo.sh data-models generated-docs generated-portals agent-standards` and the expanded regression slice covering the shared policy registry plus dependency-graph generation contract (`33 passed` on the rebased `0.177.35` candidate).
 - During that final verification, the repository automation was tightened so `scripts/generate_dependency_diagram.py` and `scripts/generate_docs_site.py` now share the same dependency-graph page format, and `docs/diagrams/agent-coordination-map.excalidraw` was refreshed to keep generated-doc validation deterministic.
-- The canonical platform versions for ADR 0211 are now `0.177.33` in-repo and `0.130.37` on-platform, with the merged-main receipt `receipts/live-applies/2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply.json` as the source of truth for the final integration state.
+- The canonical platform versions for ADR 0211 are now `0.177.35` in-repo and `0.130.37` on-platform, with the merged-main receipt `receipts/live-applies/2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply.json` as the source of truth for the final integration state.
 
 ## Remaining For Merge To `main`
 
-- None. The protected integration files were updated during the merged-main `0.177.33` release step, and the canonical live platform version was advanced to `0.130.37` after the verified replay.
+- None. The protected integration files were updated during the merged-main `0.177.35` release step, and the canonical live platform version was advanced to `0.130.37` after the verified replay.

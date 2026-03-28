@@ -365,9 +365,9 @@ workstreams:
     ready_to_merge: true
     live_applied: true
     canonical_truth:
-      changelog_entry: integrated ADR 0211 by promoting the shared policy registry into release 0.177.33 and re-verifying the governed headscale live-apply path from merged main
+      changelog_entry: integrated ADR 0211 by promoting the shared policy registry into main and re-verifying the governed headscale live-apply path from merged main
       release_bump: patch
-      included_in_repo_version: 0.177.33
+      included_in_repo_version: 0.177.35
       latest_receipts:
         shared_policy_packs: 2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply
 
@@ -6430,7 +6430,7 @@ workstreams:
     canonical_truth:
       changelog_entry: centralized shared redundancy, capacity-class, and placement rules into one machine-checkable registry so validation, live-apply preflights, and docs consume the same canonical policy pack
       release_bump: patch
-      included_in_repo_version: 0.177.33
+      included_in_repo_version: 0.177.35
 
   - id: ws-0021-edge-cert-repair
     adr: "0021"

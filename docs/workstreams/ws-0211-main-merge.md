@@ -56,9 +56,9 @@ Carry the verified ADR 0211 workstream into the latest `origin/main`, refresh th
 
 ## Result
 
-- Release `0.177.33` was cut from the merged candidate, updating the protected integration files and marking `ws-0211-live-apply` as included in that repo release.
+- After absorbing the concurrent ADR 0206 `0.177.34` mainline integration, ADR 0211 was recut as release `0.177.35`, updating the protected integration files and marking `ws-0211-live-apply` as included in that repo release.
 - The merged-main `headscale` replay completed successfully with `localhost ok=16 changed=0 failed=0`, `nginx-lv3 ok=71 changed=4 failed=0`, and `proxmox_florin ok=42 changed=0 failed=0`.
 - The public health path `https://headscale.lv3.org/health` still returned `HTTP 200` after the merged-main replay, preserving the shared edge security headers and crawl policy.
-- The full repository automation bundle now passes from the integrated main-merge worktree: `./scripts/validate_repo.sh data-models generated-docs generated-portals agent-standards`, plus the expanded regression slice `tests/test_dependency_graph.py` and the ADR 0211 policy-registry tests (`33 passed in 2.24s`).
+- The full repository automation bundle now passes from the integrated main-merge worktree: `./scripts/validate_repo.sh data-models generated-docs generated-portals agent-standards`, plus the expanded regression slice `tests/test_dependency_graph.py` and the ADR 0211 policy-registry tests (`33 passed` on the rebased `0.177.35` candidate).
 - Final merge verification also harmonized the dependency-graph page renderer used by `scripts/generate_dependency_diagram.py` and `scripts/generate_docs_site.py`, then refreshed `docs/diagrams/agent-coordination-map.excalidraw`, so generated-doc and generated-portal validation now agree on the same committed artifacts.
-- The branch-local receipt remains preserved for history, while `receipts/live-applies/2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply.json` is the canonical evidence for the integrated `main` state.
+- The branch-local receipt remains preserved for history, while `receipts/live-applies/2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply.json` is the canonical evidence for the integrated `0.177.35` mainline state.
