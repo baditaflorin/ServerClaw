@@ -2,10 +2,12 @@
 
 - ADR: [ADR 0204](../adr/0204-self-correcting-automation-loops.md)
 - Title: Governed correction-loop contracts plus live observation-loop replay
-- Status: live_applied
+- Status: merged
 - Branch: `codex/ws-0204-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0204-live-apply`
 - Owner: codex
+- Included In Repo Version: `0.177.37`
+- Platform Version Observed During Merge: `0.130.37`
 - Depends On: `adr-0204-architecture-governance`, `adr-0126-observation-to-action-closure-loop`, `adr-0172-watchdog-escalation-and-stale-job-self-healing`
 - Conflicts With: none
 - Shared Surfaces: `config/correction-loops.json`, `scripts/correction_loops.py`, `platform/closure_loop/`, `config/windmill/scripts/platform-observation-loop.py`, `scripts/live_apply_receipts.py`, `scripts/workflow_catalog.py`, `scripts/command_catalog.py`, `scripts/validate_repository_data_models.py`, `docs/runbooks/`, `workstreams.yaml`
@@ -77,14 +79,21 @@
 - the live observation loop persists and reports its correction-loop id on production
 - the live-apply receipt records the correction-loop evidence clearly and calls out any remaining main-integration work
 
-## Outcome
+## Live Apply Outcome
 
 - branch-local live apply succeeded on 2026-03-28 and the authenticated Windmill observation replay now returns `status: ok` with `correction_loop_id: runtime_self_correction_watchers`
 - the durable worker closure-loop state persisted the governed correction-loop snapshot for run `71ec1385-9d52-471d-8fbf-e1fbcec6c6ca` with `retry_budget_cycles: 3`
-- merge-to-main still remains: integrate the latest `origin/main`, rerun the repo gates, replay from merged main if required for protected truth updates, and only then update `VERSION`, `changelog.md`, `README.md`, and `versions/stack.yaml`
+
+## Mainline Integration Outcome
+
+- merged to `main` in repository version `0.177.37`
+- updated `VERSION`, `changelog.md`, `README.md`, `versions/stack.yaml`, ADR metadata, and the workstream registry only during the final mainline integration step
+- preserved the current mainline platform version `0.130.37` because ADR 0204 first became true on platform version `0.130.35` before this release cut
+- the rebased branch passed the focused ADR 0204 validation slice plus the full build-server `pre-push-gate`; local `make validate` still stops on the pre-existing `ansible-lint` warning set already present on `origin/main`
+- remaining for merge to `main`: none
 
 ## Notes For The Next Assistant
 
+- the ADR 0204 live apply and the protected mainline integration are both complete
 - keep selector coverage unambiguous; the catalog is designed to fail validation on overlap so new workflows must be assigned deliberately
 - treat `config/correction-loops.json` as the canonical contract, not the wrapper output or receipt schema
-- if the Windmill replay succeeds before the final main merge, record that in the ADR and receipt but still leave protected integration files for the merged-main step
