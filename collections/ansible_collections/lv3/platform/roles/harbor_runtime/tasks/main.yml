@@ -222,10 +222,14 @@
   args:
     chdir: "{{ harbor_installer_dir }}"
   register: harbor_compose_down
+  failed_when: false
   changed_when: >-
     'Stopping' in harbor_compose_down.stdout
+    or 'Stopping' in harbor_compose_down.stderr
     or 'Removing' in harbor_compose_down.stdout
+    or 'Removing' in harbor_compose_down.stderr
     or 'Network' in harbor_compose_down.stdout
+    or 'Network' in harbor_compose_down.stderr
   when: harbor_compose_assets_changed or not harbor_runtime_healthy_before_reconcile
 
 - name: Remove stale Harbor containers after the compose reset
