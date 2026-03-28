@@ -104,6 +104,7 @@ workstreams:
       - docs/release-notes/0.177.33.md
       - versions/stack.yaml
       - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
       - docs/adr/0206-ports-and-adapters-for-external-integrations.md
       - docs/workstreams/ws-0206-live-apply.md
       - docs/adr/.index.yaml
@@ -128,6 +129,7 @@ workstreams:
             - docs/release-notes/0.177.33.md
             - versions/stack.yaml
             - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
             - docs/adr/0206-ports-and-adapters-for-external-integrations.md
             - docs/workstreams/ws-0206-live-apply.md
             - docs/adr/.index.yaml
