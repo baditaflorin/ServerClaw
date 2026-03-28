@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.46",
   "platform_version": "0.130.41",
-  "generated_at": "2026-03-28T18:53:07Z",
-  "next_refresh_at": "2026-03-28T19:53:07Z",
+  "generated_at": "2026-03-28T19:14:44Z",
+  "next_refresh_at": "2026-03-28T20:14:44Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3240,7 +3240,7 @@
         "id": "configure-gitea",
         "title": "Configure Gitea",
         "agent_trust_required": "T3",
-        "steps": 6,
+        "steps": 7,
         "path": "docs/runbooks/configure-gitea.md",
         "workflow_ids": [
           "converge-gitea"
