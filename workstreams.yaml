@@ -467,7 +467,7 @@ workstreams:
     canonical_truth:
       changelog_entry: integrated ADR 0211 by promoting the shared policy registry into main and re-verifying the governed headscale live-apply path from merged main
       release_bump: patch
-      included_in_repo_version: 0.177.38
+      included_in_repo_version: 0.177.39
       latest_receipts:
         shared_policy_packs: 2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply
 
@@ -828,7 +828,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0209 by extracting a shared runbook use-case service and converging thin gateway and ops-portal adapters around the same delivery contract
       release_bump: patch
-      included_in_repo_version: 0.177.38
+      included_in_repo_version: 0.177.39
       latest_receipts:
         api_gateway: 2026-03-28-adr-0209-use-case-services-live-apply
         ops_portal: 2026-03-28-adr-0209-use-case-services-live-apply
@@ -6649,7 +6649,7 @@ workstreams:
     canonical_truth:
       changelog_entry: centralized shared redundancy, capacity-class, and placement rules into one machine-checkable registry so validation, live-apply preflights, and docs consume the same canonical policy pack
       release_bump: patch
-      included_in_repo_version: 0.177.38
+      included_in_repo_version: 0.177.39
 
   - id: ws-0212-live-apply
     adr: "0212"
