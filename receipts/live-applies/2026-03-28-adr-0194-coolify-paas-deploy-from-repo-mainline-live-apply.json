@@ -5,8 +5,8 @@
   "applied_on": "2026-03-28",
   "recorded_on": "2026-03-28",
   "recorded_by": "codex",
-  "source_commit": "2a99afaaaa15893bee50098dc96dccbd5f5d8a66",
-  "repo_version_context": "0.177.28",
+  "source_commit": "093af3536504460e98084f363ca1c899bf2214a1",
+  "repo_version_context": "0.177.30",
   "platform_version_context": "0.130.35",
   "workflow_id": "adr-0194-coolify-paas-deploy-from-repo-mainline-live-apply",
   "adr": "0194",
@@ -39,12 +39,12 @@
     {
       "check": "Focused Coolify regression slice",
       "result": "pass",
-      "observed": "`uv run --with pytest --with pyyaml --with jsonschema python -m pytest tests/test_coolify_playbook.py tests/test_coolify_runtime_role.py tests/test_coolify_tool.py tests/test_generate_platform_vars.py tests/test_nginx_edge_publication_role.py tests/test_lv3_cli.py tests/test_service_topology_filters.py tests/test_subdomain_catalog.py tests/test_subdomain_exposure_audit.py tests/test_edge_publication_playbooks.py -q` passed with `97 passed in 2.70s`."
+      "observed": "`uv run --with pytest --with pyyaml --with jsonschema python -m pytest tests/test_coolify_playbook.py tests/test_coolify_runtime_role.py tests/test_coolify_tool.py tests/test_generate_platform_vars.py tests/test_nginx_edge_publication_role.py tests/test_lv3_cli.py tests/test_service_topology_filters.py tests/test_subdomain_catalog.py tests/test_subdomain_exposure_audit.py tests/test_edge_publication_playbooks.py -q` passed with `98 passed in 2.45s` after aligning the authenticated-edge expectations with the ADR 0197 mainline merge."
     },
     {
       "check": "Merged-main Coolify live apply",
       "result": "pass",
-      "observed": "`make converge-coolify` completed successfully from merged `origin/main` commit `2a99afaa` with `coolify-lv3 ok=115 changed=7 failed=0`, `nginx-lv3 ok=71 changed=5 failed=0`, and `proxmox_florin ok=43 changed=5 failed=0`."
+      "observed": "`make converge-coolify` completed successfully from merged `origin/main` commit `093af353` with `coolify-lv3 ok=115 changed=7 failed=0`, `nginx-lv3 ok=71 changed=5 failed=0`, and `proxmox_florin ok=43 changed=5 failed=0`."
     },
     {
       "check": "Private controller registration and auth artifacts",
@@ -54,7 +54,7 @@
     {
       "check": "Repo-backed deployment automation",
       "result": "pass",
-      "observed": "`python3 scripts/coolify_tool.py deploy-repo --repo https://github.com/coollabsio/coolify-examples --branch main --base-directory /static --app-name repo-smoke --build-pack static --subdomain repo-smoke --wait --timeout 900` finished successfully with deployment `b112g5up48c9ffekzpmwfw50` for application `r4z9zeqpci7uykiw3bj08hrf`."
+      "observed": "`python3 scripts/coolify_tool.py deploy-repo --repo https://github.com/coollabsio/coolify-examples --branch main --base-directory /static --app-name repo-smoke --build-pack static --subdomain repo-smoke --wait --timeout 900` finished successfully with deployment `klmsg3ybgvp7xwnk8op3cdlp` for application `r4z9zeqpci7uykiw3bj08hrf`."
     },
     {
       "check": "Public edge verification",
@@ -64,7 +64,7 @@
     {
       "check": "Mainline validation gates",
       "result": "pass",
-      "observed": "`./scripts/validate_repo.sh agent-standards`, `bash -n scripts/validate_repo.sh`, `python3 scripts/generate_status_docs.py --check`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `uv run --with pyyaml python scripts/subdomain_exposure_audit.py --check-registry`, `uv run --with jsonschema python scripts/generate_dependency_diagram.py --check`, `uv run --with pyyaml --with jsonschema python scripts/platform_manifest.py --check`, and `git diff --check` all passed on the merged-main candidate."
+      "observed": "`./scripts/validate_repo.sh agent-standards`, `bash -n scripts/validate_repo.sh`, `python3 scripts/generate_status_docs.py --check`, `python3 scripts/generate_diagrams.py --check`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `uv run --with pyyaml python scripts/subdomain_exposure_audit.py --check-registry`, `uv run --with jsonschema python scripts/generate_dependency_diagram.py --check`, `uv run --with pyyaml --with jsonschema python scripts/platform_manifest.py --check`, and `git diff --check` all passed on the merged-main candidate."
     }
   ],
   "evidence_refs": [
@@ -95,7 +95,7 @@
     "receipts/live-applies/2026-03-28-adr-0194-coolify-paas-deploy-from-repo-live-apply.json"
   ],
   "notes": [
-    "This mainline receipt supersedes the branch-local `2026-03-28-adr-0194-coolify-paas-deploy-from-repo-live-apply` receipt as the canonical platform-version bump evidence and records the final merged-main replay from commit `2a99afaa`.",
+    "This mainline receipt supersedes the branch-local `2026-03-28-adr-0194-coolify-paas-deploy-from-repo-live-apply` receipt as the canonical platform-version bump evidence and records the final merged-main replay from commit `093af353`.",
     "The merged-main replay preserved the replay-safety fixes added after the first workstream apply: explicit platform vars loading in `playbooks/coolify.yml` and topology-independent URL defaults in `coolify_runtime`.",
     "The wildcard application lane is verified through `repo-smoke.apps.lv3.org`; `apps.lv3.org` intentionally remains `404` until an apex application is assigned."
   ]

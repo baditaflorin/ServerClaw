@@ -37,6 +37,6 @@ Carry the verified ADR 0194 Coolify live-apply branch into the latest `origin/ma
 
 ## Result
 
-- Merged-main replay completed from commit `2a99afaa` with `coolify-lv3 ok=115 changed=7 failed=0`, `nginx-lv3 ok=71 changed=5 failed=0`, and `proxmox_florin ok=43 changed=5 failed=0`.
-- Governed verification succeeded end to end: `python3 scripts/coolify_tool.py whoami`, a fresh `deploy-repo` smoke deployment with deployment `b112g5up48c9ffekzpmwfw50`, and direct edge probes for `coolify.lv3.org`, `repo-smoke.apps.lv3.org`, and `apps.lv3.org`.
-- Mainline validation gates passed after the final evidence refresh, including the focused `97 passed` pytest slice and the repository automation checks.
+- Merged-main replay completed from commit `093af353` with `coolify-lv3 ok=115 changed=7 failed=0`, `nginx-lv3 ok=71 changed=5 failed=0`, and `proxmox_florin ok=43 changed=5 failed=0`.
+- Governed verification succeeded end to end: `python3 scripts/coolify_tool.py whoami`, a fresh `deploy-repo` smoke deployment with deployment `klmsg3ybgvp7xwnk8op3cdlp`, and direct edge probes for `coolify.lv3.org`, `repo-smoke.apps.lv3.org`, and `apps.lv3.org`.
+- Mainline validation gates passed after the final evidence refresh, including the focused `98 passed in 2.45s` pytest slice, agent-standards validation, repository data-model validation, generated artifact checks, and `git diff --check`.

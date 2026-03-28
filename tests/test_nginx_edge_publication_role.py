@@ -69,6 +69,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertEqual(
             sorted(protected_sites),
             [
+                "agents.lv3.org",
                 "changelog.lv3.org",
                 "coolify.lv3.org",
                 "docs.lv3.org",
@@ -82,6 +83,8 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
                 "tasks.lv3.org",
             ],
         )
+        self.assertEqual(protected_sites["agents.lv3.org"]["unauthenticated_paths"], ["/healthz"])
+        self.assertEqual(protected_sites["agents.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
         self.assertNotIn("unauthenticated_paths", protected_sites["coolify.lv3.org"])
         self.assertNotIn("unauthenticated_paths", protected_sites["draw.lv3.org"])
         self.assertNotIn("unauthenticated_paths", protected_sites["langfuse.lv3.org"])

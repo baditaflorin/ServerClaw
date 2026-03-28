@@ -72,11 +72,11 @@ Live apply completed on 2026-03-28 and was then replayed from merged mainline on
 - `make converge-coolify` completed successfully and converged the Proxmox guest, private controller path, and NGINX edge publication.
 - `coolify-proxy` is now present on `coolify-lv3` and binds guest ports `80`, `443`, and `8080`, while the Coolify dashboard remains on `8000`.
 - `python3 scripts/coolify_tool.py whoami` confirmed the private controller path, public dashboard URL, and the registered local deployment server as reachable and usable.
-- `python3 scripts/coolify_tool.py deploy-repo ... --app-name repo-smoke --subdomain repo-smoke --wait` completed successfully on the merged-main replay with deployment `b112g5up48c9ffekzpmwfw50`.
+- `python3 scripts/coolify_tool.py deploy-repo ... --app-name repo-smoke --subdomain repo-smoke --wait` completed successfully on the merged-main replay with deployment `klmsg3ybgvp7xwnk8op3cdlp`.
 - Direct edge probes with `--resolve` confirmed `coolify.lv3.org` returned the expected auth-boundary `302` and `repo-smoke.apps.lv3.org` returned `200`.
 - `apps.lv3.org` currently returns `404`, which is expected until an apex application is assigned.
-- The merged-main replay from commit `2a99afaa` completed with `coolify-lv3 ok=115 changed=7 failed=0`, `nginx-lv3 ok=71 changed=5 failed=0`, and `proxmox_florin ok=43 changed=5 failed=0`.
-- The post-replay validation suite passed, including the focused `97 passed` pytest slice, `./scripts/validate_repo.sh agent-standards`, repository data-model validation, the exposure-registry check, the dependency-diagram check, the platform-manifest check, and `git diff --check`.
+- The merged-main replay from commit `093af353` completed with `coolify-lv3 ok=115 changed=7 failed=0`, `nginx-lv3 ok=71 changed=5 failed=0`, and `proxmox_florin ok=43 changed=5 failed=0`.
+- The post-replay validation suite passed, including the focused `98 passed in 2.45s` pytest slice, `./scripts/validate_repo.sh agent-standards`, repository data-model validation, the exposure-registry check, the dependency-diagram check, the platform-manifest check, the generated-status and diagram checks, `bash -n scripts/validate_repo.sh`, and `git diff --check`.
 - The mainline receipt `receipts/live-applies/2026-03-28-adr-0194-coolify-paas-deploy-from-repo-mainline-live-apply.json` is now the canonical platform-version evidence, while the earlier branch-local receipt remains preserved for workstream history.
 - The merged-main replay also carried the replay-safety fixes discovered after the first branch apply: explicit platform vars loading in `playbooks/coolify.yml` and topology-independent URL defaults in `coolify_runtime`.
 
