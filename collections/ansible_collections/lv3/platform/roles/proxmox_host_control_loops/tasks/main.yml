@@ -83,6 +83,14 @@
     group: root
     mode: "0644"
 
+- name: Clear any stale failed state for the host control-loop service
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - reset-failed
+      - "{{ proxmox_host_control_loops_service_name }}"
+  changed_when: false
+
 - name: Ensure the host control-loop timer is enabled and active
   ansible.builtin.include_role:
     name: lv3.platform.common
