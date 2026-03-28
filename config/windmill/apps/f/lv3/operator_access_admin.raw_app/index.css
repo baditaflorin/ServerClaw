@@ -102,6 +102,11 @@ textarea {
   grid-template-columns: minmax(0, 1.2fr) minmax(360px, 0.8fr);
 }
 
+.mainColumn {
+  display: grid;
+  gap: 20px;
+}
+
 .tourCard {
   margin-bottom: 24px;
 }
@@ -181,6 +186,50 @@ textarea {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.toolbarGroup {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.toolbarGroupFill {
+  margin-left: auto;
+}
+
+.toolbarButton {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: white;
+  color: var(--ink);
+  padding: 9px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.toolbarButton:hover {
+  transform: translateY(-1px);
+}
+
+.toolbarButton.isActive {
+  background: rgba(165, 65, 28, 0.12);
+  border-color: rgba(165, 65, 28, 0.3);
+  color: var(--accent);
+}
+
+.toolbarButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toolbarSelect {
+  min-width: 220px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: white;
 }
 
 .button,
@@ -295,6 +344,16 @@ textarea {
   color: var(--ink);
 }
 
+.pillWarning {
+  background: rgba(165, 65, 28, 0.12);
+  color: var(--accent);
+}
+
+.pillSuccess {
+  background: rgba(35, 98, 58, 0.12);
+  color: var(--ok);
+}
+
 .sidebar {
   display: grid;
   gap: 20px;
@@ -392,6 +451,163 @@ textarea {
   background: rgba(28, 26, 22, 0.06);
 }
 
+.noteMeta {
+  margin-bottom: 18px;
+}
+
+.editorToolbar {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.notesWorkspace {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+}
+
+.notesPane,
+.sourcePane {
+  display: grid;
+  gap: 12px;
+}
+
+.workspaceHeader h3 {
+  margin: 0;
+  font-family: "IBM Plex Serif", "Georgia", serif;
+}
+
+.workspaceHeader p {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.editorSurface {
+  min-height: 380px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: white;
+  padding: 16px;
+}
+
+.richTextContent {
+  min-height: 344px;
+  outline: none;
+  line-height: 1.6;
+}
+
+.richTextContent p,
+.richTextContent ul,
+.richTextContent ol,
+.richTextContent blockquote,
+.richTextContent pre,
+.richTextContent table {
+  margin: 0 0 14px;
+}
+
+.richTextContent h1,
+.richTextContent h2,
+.richTextContent h3 {
+  margin: 0 0 12px;
+  font-family: "IBM Plex Serif", "Georgia", serif;
+}
+
+.richTextContent h1 {
+  font-size: 1.7rem;
+}
+
+.richTextContent h2 {
+  font-size: 1.35rem;
+}
+
+.richTextContent h3 {
+  font-size: 1.1rem;
+}
+
+.richTextContent pre {
+  background: #17130f;
+  color: #f8f3e8;
+  padding: 14px 16px;
+  border-radius: 14px;
+  overflow: auto;
+}
+
+.richTextContent code {
+  background: rgba(28, 26, 22, 0.08);
+  border-radius: 6px;
+  padding: 2px 5px;
+}
+
+.richTextContent table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.richTextContent th,
+.richTextContent td {
+  border: 1px solid var(--line);
+  padding: 10px 12px;
+  vertical-align: top;
+}
+
+.richTextContent th {
+  background: rgba(28, 26, 22, 0.05);
+}
+
+.richTextContent ul[data-type="taskList"] {
+  list-style: none;
+  padding: 0;
+}
+
+.richTextContent ul[data-type="taskList"] li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.markdownTextarea {
+  width: 100%;
+  min-height: 380px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #fffdf9;
+  color: var(--ink);
+  resize: vertical;
+  font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+  line-height: 1.5;
+}
+
+.editorFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.emptyState {
+  border: 1px dashed rgba(28, 26, 22, 0.18);
+  border-radius: 18px;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.emptyState h3 {
+  margin: 0 0 8px;
+  font-family: "IBM Plex Serif", "Georgia", serif;
+}
+
+.emptyState p {
+  margin: 0;
+  color: var(--muted);
+}
+
 .lv3TourTarget {
   box-shadow: 0 0 0 4px rgba(165, 65, 28, 0.14);
   border-radius: 20px;
@@ -474,6 +690,10 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .notesWorkspace {
+    grid-template-columns: 1fr;
+  }
+
   .tourCardHeader {
     flex-direction: column;
   }
@@ -500,7 +720,20 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .editorFooter {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   .tourActions {
     grid-template-columns: 1fr;
+  }
+
+  .toolbarGroupFill {
+    margin-left: 0;
+  }
+
+  .toolbarSelect {
+    min-width: 100%;
   }
 }

@@ -38,6 +38,7 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "f/lv3/quarterly_access_review",
         "f/lv3/operator_roster",
         "f/lv3/operator_inventory",
+        "f/lv3/operator_update_notes",
     }.issubset(script_paths)
     assert "f/lv3/operator_access_admin" in raw_app_paths
     assert defaults["windmill_bootstrap_identity_email"] == "superadmin_secret@windmill.dev"
@@ -166,6 +167,8 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert package["dependencies"]["react"] == "19.0.0"
     assert package["dependencies"]["shepherd.js"] == "15.2.2"
     assert package["dependencies"]["windmill-client"] == "^1"
+    assert package["dependencies"]["@tiptap/react"] == "3.21.0"
+    assert package["dependencies"]["@tiptap/markdown"] == "3.21.0"
     assert "Operator Access Admin" in app_source
     assert "Task-specific Shepherd tours for first-run operators" in app_source
     assert 'data-tour-target="tour-launcher"' in app_source
@@ -190,7 +193,8 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     offboard_script = (REPO_ROOT / "config/windmill/scripts/operator-offboard.py").read_text()
     sync_script = (REPO_ROOT / "config/windmill/scripts/sync-operators.py").read_text()
     inventory_script = (REPO_ROOT / "config/windmill/scripts/operator-inventory.py").read_text()
-    for script_source in (roster_script, onboard_script, offboard_script, sync_script, inventory_script):
+    update_notes_script = (REPO_ROOT / "config/windmill/scripts/operator-update-notes.py").read_text()
+    for script_source in (roster_script, onboard_script, offboard_script, sync_script, inventory_script, update_notes_script):
         assert "\"uv\"" in script_source
         assert "\"run\"" in script_source
         assert "\"--no-project\"" in script_source
@@ -200,6 +204,11 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert "backend.offboard_operator" in app_source
     assert "backend.sync_operators" in app_source
     assert "backend.operator_inventory" in app_source
+    assert "backend.update_operator_notes" in app_source
+    assert "EditorContent" in app_source
+    assert "toggleTaskList" in app_source
+    assert "insertTable" in app_source
+    assert "insertOperatorMention" in app_source
 
     expected_backend_refs = {
         "list_operators.yaml": "f/lv3/operator_roster",
@@ -207,6 +216,7 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
         "offboard_operator.yaml": "f/lv3/operator_offboard",
         "sync_operators.yaml": "f/lv3/sync_operators",
         "operator_inventory.yaml": "f/lv3/operator_inventory",
+        "update_operator_notes.yaml": "f/lv3/operator_update_notes",
     }
     for file_name, expected_path in expected_backend_refs.items():
         payload = yaml.safe_load((app_dir / "backend" / file_name).read_text())
@@ -362,6 +372,39 @@ def test_operator_onboard_wrapper_sets_openbao_url_without_runtime_env(tmp_path:
     env = module.build_subprocess_env(repo_root)
 
     assert env["LV3_OPENBAO_URL"] == "http://lv3-openbao:8201"
+
+
+def test_operator_update_notes_wrapper_uses_temp_markdown_file(tmp_path: Path, monkeypatch) -> None:
+    repo_root = tmp_path / "repo"
+    workflow = repo_root / "scripts" / "operator_manager.py"
+    workflow.parent.mkdir(parents=True)
+    workflow.write_text("# stub\n", encoding="utf-8")
+    module = load_module(REPO_ROOT / "config/windmill/scripts/operator-update-notes.py", "operator_update_notes_wrapper")
+    captured = {}
+
+    def fake_run(command, cwd, env, text, capture_output, check):
+        notes_file = Path(command[command.index("--notes-file") + 1])
+        captured["command"] = command
+        captured["notes_payload"] = notes_file.read_text(encoding="utf-8")
+        return subprocess.CompletedProcess(command, 0, stdout=json.dumps({"status": "ok"}), stderr="")
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    payload = module.main(operator_id="alice-example", notes_markdown="## Shift handoff\n\n- [ ] Review alerts", repo_path=str(repo_root))
+
+    assert payload["status"] == "ok"
+    assert captured["command"][:9] == [
+        "uv",
+        "run",
+        "--no-project",
+        "--with",
+        "pyyaml",
+        "python",
+        str(workflow),
+        "--emit-json",
+        "update-notes",
+    ]
+    assert captured["notes_payload"] == "## Shift handoff\n\n- [ ] Review alerts"
 
 
 def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
