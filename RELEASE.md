@@ -3,10 +3,10 @@
 - Date: 2026-03-28
 
 ## Summary
-- implements ADR 0206 on the live operator access workflow by routing Keycloak, OpenBao, Tailscale, Mattermost, and step-ca through explicit ports and adapters
+- accepted ADRs 0224 through 0233 to define a production-oriented server-resident operations model, moving more routine control-plane work away from the Codex chat client and into mature tools such as Ansible Pull, systemd, Windmill, Gitea Actions runners, OPA, OpenBao Agent, Nomad, and signed release bundles
 
 ## Platform Impact
-- no live platform version bump; this release records the merged ADR 0206 operator-access ports/adapters replay and the verified OpenBao operator-entity repair already live on platform 0.130.35
+- no platform version bump; this is a repo-only architecture release that defines how the server should increasingly operate from inside the platform boundary rather than from a live authoring session.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)
