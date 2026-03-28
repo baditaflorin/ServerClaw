@@ -22,16 +22,25 @@ jobs:
       - name: Install cosign
         run: |
           set -euo pipefail
-          COSIGN_VERSION="v3.0.2"
-          curl -fsSL \
-            -o "$PWD/.tmp/bin/cosign" \
-            "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64"
+          export COSIGN_VERSION="v3.0.2"
+          python3 - <<'PY'
+          import os
+          import stat
+          import urllib.request
+          from pathlib import Path
+
+          version = os.environ["COSIGN_VERSION"]
+          url = f"https://github.com/sigstore/cosign/releases/download/{version}/cosign-linux-amd64"
+          destination = Path(".tmp/bin/cosign")
+          destination.write_bytes(urllib.request.urlopen(url).read())
+          destination.chmod(destination.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+          PY
           chmod 0755 "$PWD/.tmp/bin/cosign"
 
       - name: Install test dependencies
         run: |
           set -euo pipefail
-          python3 -m pip install --user pytest pyyaml
+          python3 -m pip install --user pytest pyyaml jsonschema
 
       - name: Validate release bundle contract
         run: |
@@ -105,10 +114,19 @@ jobs:
       - name: Install cosign
         run: |
           set -euo pipefail
-          COSIGN_VERSION="v3.0.2"
-          curl -fsSL \
-            -o "$PWD/.tmp/bin/cosign" \
-            "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64"
+          export COSIGN_VERSION="v3.0.2"
+          python3 - <<'PY'
+          import os
+          import stat
+          import urllib.request
+          from pathlib import Path
+
+          version = os.environ["COSIGN_VERSION"]
+          url = f"https://github.com/sigstore/cosign/releases/download/{version}/cosign-linux-amd64"
+          destination = Path(".tmp/bin/cosign")
+          destination.write_bytes(urllib.request.urlopen(url).read())
+          destination.chmod(destination.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+          PY
           chmod 0755 "$PWD/.tmp/bin/cosign"
 
       - name: Verify published bundle
