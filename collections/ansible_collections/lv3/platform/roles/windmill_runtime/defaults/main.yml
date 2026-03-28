@@ -185,7 +185,6 @@ windmill_worker_repo_secret_files:
     src: "{{ windmill_controller_local_root }}/openbao/init.json"
     mode: "0600"
 windmill_worker_checkout_checksum_file: "{{ windmill_site_dir }}/worker-checkout.sha256"
-windmill_worker_checkout_manifest_remote_file: "{{ windmill_site_dir }}/worker-checkout-files.txt"
 windmill_worker_checkout_integrity_files:
   - Makefile
   - scripts/policy_checks.py
@@ -292,7 +291,6 @@ windmill_operator_manager_env:
   LV3_STEP_CA_SSH_REVOKE_COMMAND: "{{ lookup('ansible.builtin.env', 'LV3_STEP_CA_SSH_REVOKE_COMMAND') | default('', true) }}"
   LV3_MATTERMOST_WEBHOOK: "{{ lookup('ansible.builtin.env', 'LV3_MATTERMOST_WEBHOOK') | default('', true) }}"
 windmill_seed_app_repo_root_local_dir: "{{ inventory_dir }}/../config/windmill/apps"
-windmill_seed_app_sync_dir: "{{ windmill_site_dir }}/seed-apps"
 windmill_mutation_audit_dir: "{{ platform_log_dir }}"
 windmill_mutation_audit_file: "{{ mutation_audit_log_file }}"
 windmill_integration_test_runner_username: test-runner@lv3.org

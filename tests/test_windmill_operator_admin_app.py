@@ -90,7 +90,6 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "roles",
     }.issubset(set(defaults["windmill_worker_checkout_sync_paths"]))
     assert defaults["windmill_worker_checkout_checksum_file"] == "{{ windmill_site_dir }}/worker-checkout.sha256"
-    assert defaults["windmill_worker_checkout_manifest_remote_file"] == "{{ windmill_site_dir }}/worker-checkout-files.txt"
     assert "windmill_worker_checkout_prune_preserve_paths" in defaults_text
     assert "windmill_worker_repo_mutable_files" in defaults_text
     assert "windmill_worker_runtime_writable_directories" in defaults_text
@@ -158,8 +157,10 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
 
 def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> None:
     app_dir = REPO_ROOT / "config/windmill/apps/f/lv3/operator_access_admin.raw_app"
+    lock_path = REPO_ROOT / "config/windmill/apps/wmill-lock.yaml"
     app_config = yaml.safe_load((app_dir / "raw_app.yaml").read_text())
     package = json.loads((app_dir / "package.json").read_text())
+    lock_config = yaml.safe_load(lock_path.read_text())
     app_source = (app_dir / "App.tsx").read_text()
     tour_source = (app_dir / "touring.ts").read_text()
 
@@ -169,6 +170,8 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert package["dependencies"]["windmill-client"] == "^1"
     assert package["dependencies"]["@tiptap/react"] == "3.21.0"
     assert package["dependencies"]["@tiptap/markdown"] == "3.21.0"
+    assert lock_config["version"] == "v2"
+    assert "f/lv3/operator_access_admin.raw_app+__app_hash" in lock_config["locks"]
     assert "Operator Access Admin" in app_source
     assert "Task-specific Shepherd tours for first-run operators" in app_source
     assert 'data-tour-target="tour-launcher"' in app_source
@@ -461,6 +464,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "--exclude='*/._*'" in tasks
     assert "--exclude='.DS_Store'" in tasks
     assert "--exclude='*/.DS_Store'" in tasks
+    assert "--dereference" in tasks
     assert "changed_when: false" in tasks
     assert "Expand the staged Windmill worker checkout on the guest" in tasks
     assert "Find stale macOS metadata files in the Windmill worker checkout" in tasks
@@ -499,14 +503,20 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "windmill_worker_checkout_integrity_mismatch" in tasks
     assert "windmill_worker_checkout_sync_paths" in tasks
     assert "Create a local manifest path for the Windmill worker checkout contents" in tasks
+    assert "Create a guest staging archive path for the Windmill worker checkout" in tasks
+    assert "Create a guest manifest path for the Windmill worker checkout contents" in tasks
     assert "Render the local manifest for the Windmill worker checkout contents" in tasks
     assert "Copy the staged Windmill worker checkout manifest to the guest" in tasks
     assert "Prune stale immutable files from the Windmill worker checkout" in tasks
     assert "Removed stale immutable files from the Windmill worker checkout" in tasks
     assert "Remove the remote manifest for the Windmill worker checkout contents" in tasks
     assert "Remove the local manifest for the Windmill worker checkout contents" in tasks
-    assert "windmill_worker_checkout_manifest_remote_file" in tasks
+    assert "windmill_worker_checkout_archive_remote.path" in tasks
+    assert "windmill_worker_checkout_manifest_remote.path" in tasks
     assert "windmill_worker_checkout_prune_preserve_paths" in tasks
+    assert "Create a temporary Windmill seed app sync directory" in tasks
+    assert "Remove the temporary Windmill seed app sync directory" in tasks
+    assert "windmill_seed_app_sync_dir.path" in tasks
     assert "scripts/windmill_run_wait_result.py" in tasks
     assert "--payload-json" in tasks
     assert "--timeout {{ windmill_seed_job_timeout_seconds }}" in tasks
