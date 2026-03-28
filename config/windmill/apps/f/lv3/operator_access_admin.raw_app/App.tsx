@@ -1,5 +1,14 @@
-import React, { FormEvent, useEffect, useMemo, useState } from "react";
+import React, { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import type { Tour } from "shepherd.js";
 import { backend } from "./wmill";
+import {
+  readTourProgress,
+  startOperatorAccessTour,
+  tourIntentLabel,
+  writeTourProgress,
+  type TourIntent,
+  type TourProgress,
+} from "./touring";
 import "./index.css";
 
 type OperatorRecord = {
@@ -75,6 +84,11 @@ type SyncFormState = {
   dry_run: boolean;
 };
 
+type TourLaunchOptions = {
+  autoPrompted?: boolean;
+  resume?: boolean;
+};
+
 const initialOnboardState: OnboardFormState = {
   name: "",
   email: "",
@@ -138,12 +152,26 @@ function App() {
   const [actionPayload, setActionPayload] = useState<ActionPayload | null>(null);
   const [inventoryPayload, setInventoryPayload] = useState<InventoryPayload | null>(null);
   const [inventoryLoading, setInventoryLoading] = useState(false);
+  const [tourProgress, setTourProgress] = useState<TourProgress>(() => readTourProgress());
+  const [tourRunning, setTourRunning] = useState(false);
+  const tourRef = useRef<Tour | null>(null);
 
   const operators = roster?.operators ?? [];
   const selectedOperator = useMemo(
     () => operators.find((item) => item.id === selectedOperatorId) ?? null,
     [operators, selectedOperatorId],
   );
+  const canResumeTour = Boolean(
+    tourProgress.lastIntent && tourProgress.lastStepId && tourProgress.lastOutcome === "dismissed",
+  );
+  const lastTourTimestamp = tourProgress.lastCompletedAt ?? tourProgress.lastDismissedAt;
+  const tourStatusLabel = tourRunning
+    ? "Tour Running"
+    : tourProgress.lastOutcome === "completed"
+      ? "Completed"
+      : tourProgress.lastOutcome === "dismissed"
+        ? "Paused"
+        : "Ready";
 
   async function refreshRoster() {
     setRosterLoading(true);
@@ -197,6 +225,50 @@ function App() {
       void loadInventory(selectedOperatorId);
     }
   }, [selectedOperatorId]);
+
+  useEffect(() => {
+    return () => {
+      if (!tourRef.current) {
+        return;
+      }
+      tourRef.current.hide();
+      tourRef.current.steps.forEach((step) => step.destroy());
+      tourRef.current = null;
+    };
+  }, []);
+
+  function launchTour(intent: TourIntent, options: TourLaunchOptions = {}) {
+    if (tourRunning) {
+      return;
+    }
+    const shouldMarkAutoPrompted = options.autoPrompted || tourProgress.autoPrompted;
+    if (options.autoPrompted && !tourProgress.autoPrompted) {
+      setTourProgress(writeTourProgress({ autoPrompted: true }));
+    }
+    if (tourRef.current) {
+      tourRef.current.steps.forEach((step) => step.destroy());
+      tourRef.current = null;
+    }
+    tourRef.current = startOperatorAccessTour({
+      intent,
+      autoPrompted: shouldMarkAutoPrompted,
+      resumeFromStepId: options.resume ? tourProgress.lastStepId : null,
+      context: {
+        intendedRole: intent === "onboard_viewer" ? "viewer" : onboard.role === "admin" ? "admin" : "operator",
+        selectedOperatorName: selectedOperator?.name ?? null,
+        selectedOperatorStatus: selectedOperator?.status ?? null,
+        hasOperators: operators.length > 0,
+      },
+      onProgress: setTourProgress,
+      onRunningChange: setTourRunning,
+    });
+  }
+
+  useEffect(() => {
+    if (!rosterLoading && !rosterError && !tourProgress.autoPrompted && !tourRunning) {
+      launchTour("first_run", { autoPrompted: true });
+    }
+  }, [rosterLoading, rosterError, tourProgress.autoPrompted, tourRunning]);
 
   async function executeAction(title: string, runner: () => Promise<ActionPayload>, refresh = true) {
     setActionLoading(true);
@@ -268,8 +340,61 @@ function App() {
         </div>
       </section>
 
+      <section className="heroCard tourCard" data-tour-target="tour-launcher">
+        <div className="tourCardHeader">
+          <div>
+            <span className="eyebrow">Guided Onboarding</span>
+            <h2>Task-specific Shepherd tours for first-run operators</h2>
+            <p>
+              Start a walkthrough for the exact workflow you need. Tours are dismissible, resumable in this browser,
+              and linked to the canonical runbooks rather than duplicating policy in UI copy.
+            </p>
+          </div>
+          <div className="tourMeta">
+            <span
+              className={`pill ${
+                tourRunning ? "pillActive" : tourProgress.lastOutcome === "dismissed" ? "pillPaused" : "pillRole"
+              }`}
+            >
+              {tourStatusLabel}
+            </span>
+            {tourProgress.lastIntent ? <span className="muted">Last tour: {tourIntentLabel(tourProgress.lastIntent)}</span> : null}
+            {lastTourTimestamp ? <span className="muted">Updated {formatDate(lastTourTimestamp)}</span> : null}
+          </div>
+        </div>
+        <div className="tourActions">
+          <button className="button" onClick={() => launchTour("first_run")} disabled={tourRunning}>
+            Start First-Run Tour
+          </button>
+          {canResumeTour && tourProgress.lastIntent ? (
+            <button className="buttonGhost" onClick={() => launchTour(tourProgress.lastIntent!, { resume: true })} disabled={tourRunning}>
+              Resume {tourIntentLabel(tourProgress.lastIntent)}
+            </button>
+          ) : null}
+          <button className="buttonGhost" onClick={() => launchTour("onboard_privileged")} disabled={tourRunning}>
+            Onboard Admin Or Operator
+          </button>
+          <button className="buttonGhost" onClick={() => launchTour("onboard_viewer")} disabled={tourRunning}>
+            Onboard Viewer
+          </button>
+          <button className="buttonGhost" onClick={() => launchTour("offboard")} disabled={tourRunning}>
+            Off-board Operator
+          </button>
+          <button className="buttonGhost" onClick={() => launchTour("inventory")} disabled={tourRunning}>
+            Review Inventory
+          </button>
+        </div>
+        <p className="tourFootnote">
+          Need the full operating procedure?{" "}
+          <a className="inlineLink" href="https://docs.lv3.org/runbooks/windmill-operator-access-admin/" target="_blank" rel="noreferrer">
+            Open the operator admin runbook
+          </a>
+          .
+        </p>
+      </section>
+
       <div className="layout">
-        <section className="panel">
+        <section className="panel" data-tour-target="roster-panel">
           <div className="panelHeader">
             <div>
               <h2>Roster</h2>
@@ -344,7 +469,7 @@ function App() {
 
         <aside className="sidebar">
           <div className="forms">
-            <form className="panel" onSubmit={handleOnboardSubmit}>
+            <form className="panel" onSubmit={handleOnboardSubmit} data-tour-target="onboard-form">
               <div className="panelHeader">
                 <div>
                   <h3>Onboard Operator</h3>
@@ -365,7 +490,7 @@ function App() {
                     required
                   />
                 </div>
-                <div className="formField">
+                <div className="formField" data-tour-target="role-field">
                   <label>Role</label>
                   <select
                     value={onboard.role}
@@ -400,7 +525,7 @@ function App() {
                     placeholder="optional override"
                   />
                 </div>
-                <div className="formField formFieldWide">
+                <div className="formField formFieldWide" data-tour-target="ssh-key-field">
                   <label>SSH Public Key {sshRequired ? "(required)" : "(optional for viewer)"}</label>
                   <textarea
                     value={onboard.ssh_key}
@@ -433,7 +558,7 @@ function App() {
               </div>
             </form>
 
-            <form className="panel" onSubmit={handleOffboardSubmit}>
+            <form className="panel" onSubmit={handleOffboardSubmit} data-tour-target="offboard-form">
               <div className="panelHeader">
                 <div>
                   <h3>Off-board Operator</h3>
@@ -523,7 +648,7 @@ function App() {
             </form>
           </div>
 
-          <section className="resultPanel">
+          <section className="resultPanel" data-tour-target="action-result-panel">
             <div className="panelHeader">
               <div>
                 <h3>Latest Result</h3>
@@ -533,7 +658,7 @@ function App() {
             <pre>{actionPayload ? prettyJson(actionPayload) : "Run an action to inspect the structured result here."}</pre>
           </section>
 
-          <section className="resultPanel">
+          <section className="resultPanel" data-tour-target="inventory-panel">
             <div className="panelHeader">
               <div>
                 <h3>Selected Operator Inventory</h3>

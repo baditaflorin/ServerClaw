@@ -1704,6 +1704,39 @@
     mode: preserve
   when: (windmill_seed_raw_apps | default([])) | length > 0
 
+- name: Install repo-managed Windmill raw app frontend dependencies
+  vars:
+    mutation_audit_action: sync.windmill_raw_app_dependencies
+    mutation_audit_target: "{{ item.path }}"
+    mutation_audit_emit_on_success: true
+  ansible.builtin.command:
+    argv:
+      - docker
+      - run
+      - --rm
+      - --network
+      - host
+      - -v
+      - "{{ windmill_seed_app_sync_dir }}:/workspace"
+      - "{{ windmill_image }}"
+      - sh
+      - -lc
+      - >-
+        cd /workspace/{{ item.relative_dir }}
+        && if [ -f package.json ] && [ ! -f package-lock.json ]; then
+          echo "missing package-lock.json for {{ item.path }}" >&2;
+          exit 1;
+        elif [ -f package-lock.json ]; then
+          npm ci --no-audit --no-fund;
+        fi
+  loop: "{{ windmill_seed_raw_apps | default([]) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  changed_when: false
+  when: (windmill_seed_raw_apps | default([])) | length > 0
+  tags:
+    - mutation
+
 - name: Sync repo-managed Windmill raw apps
   vars:
     mutation_audit_action: sync.windmill_raw_apps
