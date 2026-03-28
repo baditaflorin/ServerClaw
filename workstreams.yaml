@@ -936,7 +936,7 @@ workstreams:
         host_control_loops: 2026-03-28-adr-0226-host-control-loops-mainline-live-apply
   - id: ws-0226-main-merge
     adr: "0226"
-    title: Integrate ADR 0226 host control loops into origin/main
+    title: Finalize ADR 0226 exact-main evidence on origin/main
     status: merged
     owner: codex
     branch: codex/ws-0226-main-merge
@@ -953,7 +953,7 @@ workstreams:
       - VERSION
       - changelog.md
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.52.md
+      - docs/release-notes/0.177.55.md
       - versions/stack.yaml
       - build/platform-manifest.json
       - docs/diagrams/agent-coordination-map.excalidraw
@@ -988,7 +988,7 @@ workstreams:
             - VERSION
             - changelog.md
             - docs/release-notes/README.md
-            - docs/release-notes/0.177.52.md
+            - docs/release-notes/0.177.55.md
             - versions/stack.yaml
             - build/platform-manifest.json
             - docs/diagrams/agent-coordination-map.excalidraw
@@ -1017,9 +1017,9 @@ workstreams:
     ready_to_merge: true
     live_applied: false
     canonical_truth:
-      changelog_entry: integrates ADR 0226 into main by carrying the repaired host control-loop systemd baseline, the canonical mainline replay receipt, and the protected release truth surfaces on top of the 0.177.52 exact-main integration
+      changelog_entry: records ADR 0226 exact-main evidence on the current mainline by preserving the repaired host control-loop systemd baseline, the canonical mainline replay receipt, and the shared release-truth surfaces while the current live platform baseline remains 0.130.43
       release_bump: patch
-      included_in_repo_version: 0.177.52
+      included_in_repo_version: 0.177.55
   - id: ws-0224-live-apply
     adr: "0224"
     title: Live apply ADR 0224 server-resident operations as the default control model
