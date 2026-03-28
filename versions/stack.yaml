@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.177.32
+repo_version: 0.177.33
 platform_version: 0.130.36
 
 live_apply_evidence:
@@ -61,7 +61,7 @@ live_apply_evidence:
     searxng: 2026-03-26-adr-0148-searxng-live-apply
     ops_portal: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
     ollama: 2026-03-27-adr-0176-inventory-sharding-mainline-live-apply
-    operator_access: 2026-03-27-adr-0108-operator-onboarding-mainline-live-apply
+    operator_access: 2026-03-28-adr-0206-ports-and-adapters-live-apply
     preview_environment: 2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z
     staging_environment: 2026-03-27-adr-0183-staging-live-apply
     immutable_guest_replacement: 2026-03-27-adr-0191-immutable-guest-replacement-live-apply
@@ -77,6 +77,17 @@ live_apply_evidence:
     fixture_pools: 2026-03-28-adr-0186-prewarmed-fixture-pools-live-apply
     seed_data_snapshots: 2026-03-28-adr-0187-anonymized-seed-data-snapshots-mainline-live-apply
     dify: 2026-03-28-adr-0197-dify-live-apply
+    openbao_operator_entity: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+    keycloak_operator_access: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+    operator_access_review: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+    operator_access_ports: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+    openbao_operator_policy: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+    operator_access_inventory: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+    operator_access_composition_root: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+    operator_access_runbooks: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+    operator_access_validation: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+    operator_access_workflows: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+    operator_access_quarterly_review: 2026-03-28-adr-0206-ports-and-adapters-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -982,7 +993,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.32
+    current: 0.177.33
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.36

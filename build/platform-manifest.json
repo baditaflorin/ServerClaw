@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.32",
+  "repo_version": "0.177.33",
   "platform_version": "0.130.36",
-  "generated_at": "2026-03-28T10:56:06Z",
-  "next_refresh_at": "2026-03-28T11:56:06Z",
+  "generated_at": "2026-03-28T11:46:36Z",
+  "next_refresh_at": "2026-03-28T12:46:36Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3872,10 +3872,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.31",
+    "last_version": "0.177.32",
     "deployed_at": "2026-03-28",
-    "summary": "replayed ADR 0193 from the latest `origin/main`, hardened the Plane controller defaults against topology drift, and re-verified the private controller lane plus authenticated `tasks.lv3.org` publication on merged main",
-    "release_notes_url": "docs/release-notes/0.177.32.md"
+    "summary": "implements ADR 0206 on the live operator access workflow by routing Keycloak, OpenBao, Tailscale, Mattermost, and step-ca through explicit ports and adapters",
+    "release_notes_url": "docs/release-notes/0.177.33.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

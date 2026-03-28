@@ -68,6 +68,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implements ADR 0206 on the live operator access workflow by routing Keycloak, OpenBao, Tailscale, Mattermost, and step-ca through explicit ports and adapters
       release_bump: patch
+      included_in_repo_version: 0.177.33
       latest_receipts:
         operator_access: 2026-03-28-adr-0206-ports-and-adapters-live-apply
         openbao_operator_entity: 2026-03-28-adr-0206-ports-and-adapters-live-apply
@@ -81,6 +82,58 @@ workstreams:
         operator_access_validation: 2026-03-28-adr-0206-ports-and-adapters-live-apply
         operator_access_workflows: 2026-03-28-adr-0206-ports-and-adapters-live-apply
         operator_access_quarterly_review: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+  - id: ws-0206-main-merge
+    adr: "0206"
+    title: Integrate ADR 0206 live apply into origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0206-main-merge
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0206-main-merge
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-main-merge.md
+    depends_on:
+      - ws-0206-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0206-main-merge.md
+      - README.md
+      - VERSION
+      - changelog.md
+      - RELEASE.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.33.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/adr/0206-ports-and-adapters-for-external-integrations.md
+      - docs/workstreams/ws-0206-live-apply.md
+      - docs/adr/.index.yaml
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws_0206_main_merge_doc
+          paths:
+            - docs/workstreams/ws-0206-main-merge.md
+          mode: exclusive
+        - id: adr_0206_mainline_truth
+          paths:
+            - README.md
+            - VERSION
+            - changelog.md
+            - RELEASE.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.33.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/adr/0206-ports-and-adapters-for-external-integrations.md
+            - docs/workstreams/ws-0206-live-apply.md
+            - docs/adr/.index.yaml
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
   - id: ws-0214-ha-replication-adrs
     adr: "0214"
     title: HA and replication architecture bundle for production and staging

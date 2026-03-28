@@ -3501,7 +3501,7 @@ adr_index:
       - integrations
     summary: We will use ports and adapters for all critical external integrations.
     filename: 0206-ports-and-adapters-for-external-integrations.md
-    implemented_version: 0.130.35
+    implemented_version: 0.177.33
   - adr: '0207'
     title: Anti-Corruption Layers At Provider Boundaries
     status: Accepted

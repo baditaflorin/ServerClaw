@@ -3,7 +3,7 @@
 - ADR: [ADR 0206](../adr/0206-ports-and-adapters-for-external-integrations.md)
 - Title: Live apply the ports-and-adapters architecture on the repo-managed operator access workflow
 - Status: live_applied
-- Implemented In Repo Version: N/A
+- Implemented In Repo Version: 0.177.33
 - Live Applied In Platform Version: 0.130.35
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
@@ -60,10 +60,10 @@
 
 ## Mainline Integration
 
-- protected integration files remain intentionally unchanged on this workstream branch: `VERSION`, release sections in `changelog.md`, canonical observed state in `versions/stack.yaml`, and the top-level README integrated status summary
-- merge-to-main still needs the official repo-version attribution for ADR 0206 plus any canonical-truth updates that the final integrated replay decides to record
+- release `0.177.33` now carries the official repo-version attribution for ADR 0206 on `main`
+- the integrated mainline truth now records `versions/stack.yaml` repo version `0.177.33` and maps `operator_access` plus the related ADR 0206 capability receipts to `2026-03-28-adr-0206-ports-and-adapters-live-apply`, while the platform version correctly remains `0.130.36` because no additional mainline live replay was required
 - the structured live receipt for this branch replay is `2026-03-28-adr-0206-ports-and-adapters-live-apply`
 
 ## Notes For The Next Assistant
 
-- this workstream intentionally avoids `VERSION`, release sections in `changelog.md`, `versions/stack.yaml`, and the top-level integrated `README.md` status summary until a final main integration step is performed
+- this workstream's code and live evidence are now integrated on `main` in repo version `0.177.33`
