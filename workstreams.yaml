@@ -2788,6 +2788,12 @@ workstreams:
           mode: exclusive
     ready_to_merge: false
     live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0187 anonymized seed data snapshots for repeatable tests, adding deterministic tiny/standard/recovery publication, fixture and restore staging hooks, and verified merged-main publication on `backup-lv3`
+      release_bump: patch
+      included_in_repo_version: 0.177.22
+      latest_receipts:
+        seed_data_snapshots: 2026-03-28-adr-0187-anonymized-seed-data-snapshots-mainline-live-apply
 
   - id: adr-0106-ephemeral-lifecycle
     adr: "0106"

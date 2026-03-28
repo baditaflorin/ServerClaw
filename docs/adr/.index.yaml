@@ -3248,6 +3248,7 @@ adr_index:
       - tests
     summary: We will maintain anonymized seed data snapshots for repeatable preview, restore, and failover tests.
     filename: 0187-anonymized-seed-data-snapshots-for-repeatable-tests.md
+    implemented_version: 0.177.22
   - adr: 0188
     title: Failover Rehearsal Gate for Redundancy Tiers
     status: Implemented

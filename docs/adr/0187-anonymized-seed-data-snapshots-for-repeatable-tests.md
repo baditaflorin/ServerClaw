@@ -2,8 +2,8 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: not yet (branch-local on `codex/ws-0187-live-apply`; merge to `main` pending)
-- Implemented In Platform Version: not yet (branch-local live evidence recorded on 2026-03-28; integrated `main` verification pending)
+- Implemented In Repo Version: 0.177.22
+- Implemented In Platform Version: 0.130.33
 - Implemented On: 2026-03-28
 - Date: 2026-03-27
 
@@ -68,8 +68,8 @@ Previews, restore drills, and failover rehearsals should declare which seed clas
 
 ## Implementation Notes
 
-- Branch-local implementation adds the deterministic seed catalog, local build and publish tooling, backup-vm snapshot-store management, fixture staging hooks, and restore-verification staging hooks.
-- Production live apply on 2026-03-28 verified the managed snapshot store on `backup-lv3` plus published and checksum-verified the `tiny`, `standard`, and `recovery` snapshots there.
-- The remaining live verification gap is not the ADR 0187 seed content itself but two pre-existing automation surfaces outside this ADR's core change:
-  - `fixture_manager.py create ops-base` is blocked live because template `lv3-ops-base` (`9003`) is not currently present on the Proxmox host.
-  - The restore-verification path restores and boots target VMs, but restored-guest SSH readiness remains slow enough that the full workflow did not complete within the live-apply session.
+- The implemented surface adds the deterministic seed catalog, local build and publish tooling, backup-vm snapshot-store management, fixture seed staging hooks, and restore-verification seed staging hooks.
+- The merged-main live apply on 2026-03-28 re-converged `backup-lv3` from the latest integrated branch state and remotely verified the published `tiny-4fc40ef2f916`, `standard-c81d5e556889`, and `recovery-7028dc9df835` snapshots under `/var/lib/lv3/seed-data-snapshots/`.
+- Two adjacent live automation gaps remain outside ADR 0187's implemented core:
+  - `fixture_manager.py create ops-base` is still blocked live because template `lv3-ops-base` (`9003`) is declared in repo metadata but not currently present on the Proxmox host.
+  - The restore-verification path restores and boots target VMs, but restored-guest SSH readiness remains slow enough that the full workflow does not yet complete within the current live-apply session window.
