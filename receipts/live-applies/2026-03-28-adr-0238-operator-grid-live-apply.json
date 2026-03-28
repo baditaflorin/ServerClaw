@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-28-adr-0238-operator-grid-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-28",
+  "recorded_on": "2026-03-28",
+  "recorded_at": "2026-03-28T23:35:47Z",
+  "recorded_by": "codex",
+  "source_commit": "6898f2452015a6a40e7c0742aa29399cd39784c0",
+  "repo_version_context": "0.177.56",
+  "platform_version_context": "0.130.43",
+  "workflow_id": "adr-0238-operator-grid-live-apply",
+  "adr": "0238",
+  "summary": "Applied ADR 0238 on the live Windmill operator access surface by replacing the roster table with AG Grid Community, tying raw-app seeding to the active worktree, retry-hardening the guest-side raw-app Docker sync path, replaying the Windmill converge from the isolated ws-0238 worktree, and re-verifying the live app, roster job, and schedule contracts end to end.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Windmill operator proxy",
+      "address": "http://100.64.0.1:8005"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused repo validation and raw app compile",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml python -m pytest tests/test_windmill_operator_admin_app.py tests/test_config_merge_windmill.py tests/test_world_state_repo_surfaces.py -q` passed with `46 passed in 5.86s`, the focused rerun `uv run --with pytest --with pyyaml python -m pytest tests/test_windmill_operator_admin_app.py tests/test_config_merge_windmill.py -q` passed with `42 passed in 1.28s`, and the isolated raw-app bundle check `tmpdir=\"$(mktemp -d)\" && mkdir -p \"$tmpdir/f/lv3\" && rsync -a config/windmill/apps/f/lv3/operator_access_admin.raw_app/ \"$tmpdir/f/lv3/operator_access_admin.raw_app/\" && cd \"$tmpdir/f/lv3/operator_access_admin.raw_app\" && npm ci && npx tsc --noEmit` completed successfully."
+    },
+    {
+      "check": "Windmill workflow automation and validation gates",
+      "result": "pass",
+      "observed": "`make syntax-check-windmill` passed, `make preflight WORKFLOW=converge-windmill` passed with the expected local Windmill secrets present, and `./scripts/validate_repo.sh workstream-surfaces agent-standards yaml json role-argument-specs ansible-syntax data-models` passed after the ws-0238 ownership manifest was expanded to include the Windmill role, schedule helper, and runbook surfaces touched during the live apply."
+    },
+    {
+      "check": "Replayed Windmill converge from the isolated ws-0238 worktree",
+      "result": "pass",
+      "observed": "The narrowed replay from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0238-live-apply` completed successfully with `docker-runtime-lv3 ok=106 changed=21 failed=0` after setting `windmill_worker_checkout_repo_root_local_dir` to the worktree root and letting `windmill_seed_app_repo_root_local_dir` follow the same checkout. The successful run copied the repo-managed app sync root, installed raw-app dependencies, pushed the raw app, converged schedules, and passed the seeded Windmill healthcheck plus validation-gate checks."
+    },
+    {
+      "check": "Live AG Grid operator app payload",
+      "result": "pass",
+      "observed": "`GET /api/w/lv3/apps/get/p/f/lv3/operator_access_admin` returned the private app path `f/lv3/operator_access_admin`, and the stored `/App.tsx` payload contains the AG Grid markers `AgGridReact`, `themeQuartz.withParams`, `quickFilterText={deferredQuickFilterText}`, and `includeHiddenColumnsInQuickFilter={true}`."
+    },
+    {
+      "check": "Live roster and schedule contracts",
+      "result": "pass",
+      "observed": "`POST /api/w/lv3/jobs/run_wait_result/p/f/lv3/operator_roster` returned `status: ok` with `operator_count: 1` and the expected sanitized operator keys. `GET /api/w/lv3/schedules/get/f/lv3/scheduler_watchdog_loop_every_10s` returned `enabled: true`, `is_flow: false`, `script_path: f/lv3/scheduler_watchdog_loop`, and the repo-managed summary and description. `GET /api/w/lv3/schedules/get/f/lv3/world_state/refresh_container_inventory_every_minute` returned `enabled: true`, the repo-managed summary and description, `script_path: f/lv3/world_state/refresh_container_inventory`, and the corrected runtime `dsn` args instead of the earlier manual probe placeholders."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0238-data-dense-operator-grids-via-ag-grid-community.md",
+    "docs/workstreams/ws-0238-live-apply.md",
+    "docs/runbooks/configure-windmill.md",
+    "docs/runbooks/windmill-operator-access-admin.md",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/meta/argument_specs.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
+    "config/windmill/apps/f/lv3/operator_access_admin.raw_app/App.tsx",
+    "config/windmill/apps/f/lv3/operator_access_admin.raw_app/index.css",
+    "config/windmill/apps/f/lv3/operator_access_admin.raw_app/package.json",
+    "config/windmill/apps/f/lv3/operator_access_admin.raw_app/package-lock.json",
+    "scripts/sync_windmill_seed_schedules.py",
+    "tests/test_config_merge_windmill.py",
+    "tests/test_windmill_operator_admin_app.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "The initial live replay exposed a stale raw-app source-path bug: `/opt/windmill/seed-apps/f/lv3/operator_access_admin.raw_app/package.json` still reflected the older TanStack dependency set because `windmill_seed_app_repo_root_local_dir` was still anchored to the shared checkout. This workstream fixed that by deriving the raw-app staging root from `windmill_worker_checkout_repo_root_local_dir`.",
+    "The first replay after the source-root repair then hit a transient guest-side Docker failure during `docker run ... npm ci` with `error waiting for container: unexpected EOF`. A direct repro succeeded immediately afterward, and the role now retries both the raw-app dependency install and `wmill sync push` before failing the converge.",
+    "Before the schedule helper repair landed, `f/lv3/scheduler_watchdog_loop_every_10s` had to be re-enabled once through the Windmill API so the runtime matched the repo intent. The successful helper-based converge now preserves that `enabled: true` contract without the earlier raw SQL flag patching.",
+    "A one-time API probe temporarily wrote placeholder summary and `dsn` values onto `f/lv3/world_state/refresh_container_inventory_every_minute` while testing the update endpoint against a late-arriving script target. The successful replay restored the repo-managed schedule summary, description, `script_path`, and real runtime `dsn` value."
+  ]
+}
