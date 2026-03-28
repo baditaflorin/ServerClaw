@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-28",
+  "recorded_on": "2026-03-28",
+  "recorded_by": "codex",
+  "source_commit": "4c8f508a3db6b94d0231c41290a930a92cb9ce07",
+  "repo_version_context": "0.177.32",
+  "platform_version_context": "0.130.36",
+  "workflow_id": "adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply",
+  "adr": "0207",
+  "summary": "Implemented ADR 0207 on the workstream branch by translating the Hetzner DNS roles into canonical DNS facts, hardening the validation gateway portability, and proving the live provider boundary on an idempotent ops.lv3.org reconcile.",
+  "targets": [
+    {
+      "kind": "controller_artifacts",
+      "name": "ws-0207-live-apply-worktree",
+      "address": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0207-live-apply"
+    },
+    {
+      "kind": "provider",
+      "name": "hetzner-dns",
+      "address": "https://dns.hetzner.com/api/v1"
+    },
+    {
+      "kind": "hostname",
+      "name": "ops.lv3.org",
+      "address": "65.108.75.123"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused provider-boundary regression slice",
+      "result": "pass",
+      "observed": "uv run --with pytest --with pyyaml python -m pytest tests/test_provider_boundary_catalog.py tests/test_hetzner_dns_record_role.py tests/test_hetzner_dns_records_role.py tests/test_plane_client.py tests/test_remote_exec.py tests/test_validate_repo_cache.py -q passed with 28 passed in 18.27s on the workstream branch before the later mainline rebase."
+    },
+    {
+      "check": "Repository validation slices",
+      "result": "pass",
+      "observed": "./scripts/validate_repo.sh generated-vars data-models alert-rules, ./scripts/validate_repo.sh data-models agent-standards, python3 scripts/check_ad_hoc_retry.py, ./scripts/check_role_argument_specs.sh, bash -n scripts/validate_repo.sh scripts/remote_exec.sh, and git diff --check all passed after the validation harness was updated to bootstrap uv, prefer python3, and avoid Bash 4-only mapfile usage."
+    },
+    {
+      "check": "Live Hetzner DNS boundary reconcile",
+      "result": "pass",
+      "observed": "The catalog-backed playbooks/provision-subdomain.yml flow was run through scripts/ansible_scope_runner.py for ops.lv3.org; the live Hetzner DNS role translated the raw zone and record payloads into canonical facts, selected one canonical managed match, skipped both create and update, and finished ok=19 changed=0 skipped=2 failed=0."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0207-anti-corruption-layers-at-provider-boundaries.md",
+    "docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md",
+    "config/provider-boundary-catalog.yaml",
+    "scripts/check_role_argument_specs.sh",
+    "scripts/provider_boundary_catalog.py",
+    "scripts/remote_exec.sh",
+    "scripts/validate_repo.sh",
+    "collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml",
+    "docs/runbooks/subdomain-governance.md",
+    "docs/runbooks/validate-repository-automation.md",
+    "docs/runbooks/validation-gate.md",
+    "tests/test_provider_boundary_catalog.py",
+    "tests/test_hetzner_dns_record_role.py",
+    "tests/test_hetzner_dns_records_role.py",
+    "tests/test_plane_client.py",
+    "tests/test_remote_exec.py",
+    "tests/test_validate_repo_cache.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This branch-local receipt captures the first verified live apply from codex/ws-0207-live-apply; the final merged-main replay will supersede it as the canonical platform-version receipt.",
+    "An earlier database.lv3.org reconcile reached the canonical translation and match-selection steps but exposed that the record was absent in the live Hetzner zone, so the idempotent evidence path was re-run against the already-governed ops.lv3.org hostname instead of mixing ADR 0207 proof with a separate DNS create-policy question."
+  ]
+}
