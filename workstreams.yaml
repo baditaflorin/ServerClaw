@@ -8333,3 +8333,64 @@ workstreams:
           contract: adr-0228-windmill-default-operations-surface-v1
     ready_to_merge: true
     live_applied: true
+
+  - id: ws-0228-main-merge
+    adr: "0228"
+    title: Integrate ADR 0228 live apply into origin/main
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0228-main-merge
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0228-main-merge
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0228-main-merge.md
+    depends_on:
+      - ws-0228-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0228-main-merge.md
+      - VERSION
+      - changelog.md
+      - RELEASE.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.50.md
+      - versions/stack.yaml
+      - README.md
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/adr/0228-windmill-as-the-default-browser-and-api-operations-surface.md
+      - docs/workstreams/ws-0228-live-apply.md
+      - docs/runbooks/windmill-default-operations-surface.md
+      - docs/adr/.index.yaml
+      - receipts/live-applies/2026-03-28-adr-0228-windmill-default-operations-surface-live-apply.json
+      - receipts/live-applies/2026-03-28-adr-0228-windmill-default-operations-surface-mainline-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws_0228_main_merge_doc
+          paths:
+            - docs/workstreams/ws-0228-main-merge.md
+          mode: exclusive
+        - id: adr_0228_mainline_truth
+          paths:
+            - VERSION
+            - changelog.md
+            - RELEASE.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.50.md
+            - versions/stack.yaml
+            - README.md
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/adr/0228-windmill-as-the-default-browser-and-api-operations-surface.md
+            - docs/workstreams/ws-0228-live-apply.md
+            - docs/runbooks/windmill-default-operations-surface.md
+            - docs/adr/.index.yaml
+            - receipts/live-applies/2026-03-28-adr-0228-windmill-default-operations-surface-live-apply.json
+            - receipts/live-applies/2026-03-28-adr-0228-windmill-default-operations-surface-mainline-live-apply.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
