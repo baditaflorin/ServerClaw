@@ -14,6 +14,86 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0244-runtime-assurance-adrs
+    adr: "0244"
+    title: Runtime assurance architecture bundle
+    status: merged
+    owner: codex
+    branch: codex/ws-0244-runtime-assurance-adrs
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0244-runtime-assurance-adrs
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0244-runtime-assurance-architecture-bundle.md
+    depends_on:
+      - adr-0064-health-probes
+      - adr-0123-uptime-contracts
+      - adr-0133-portal-auth-default
+      - adr-0142-public-surface-scan
+      - adr-0169-structured-logs
+      - adr-0190-synthetic-replay
+      - adr-0214-prod-staging-cells
+    conflicts_with: []
+    shared_surfaces:
+      - docs/adr/0244-runtime-assurance-matrix-per-service-and-environment.md
+      - docs/adr/0245-declared-to-live-service-attestation.md
+      - docs/adr/0246-startup-readiness-liveness-and-degraded-state-semantics.md
+      - docs/adr/0247-authenticated-browser-journey-verification-via-playwright.md
+      - docs/adr/0248-session-and-logout-authority-across-keycloak-oauth2-proxy-and-apps.md
+      - docs/adr/0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md
+      - docs/adr/0250-log-ingestion-and-queryability-canaries-via-loki-canary.md
+      - docs/adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md
+      - docs/adr/0252-route-and-dns-publication-assertion-ledger.md
+      - docs/adr/0253-unified-runtime-assurance-scoreboard-and-rollup.md
+      - docs/workstreams/adr-0244-runtime-assurance-architecture-bundle.md
+      - docs/adr/.index.yaml
+      - workstreams.yaml
+      - VERSION
+      - changelog.md
+      - RELEASE.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.51.md
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - build/platform-manifest.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: runtime_assurance_bundle
+          paths:
+            - docs/adr/0244-runtime-assurance-matrix-per-service-and-environment.md
+            - docs/adr/0245-declared-to-live-service-attestation.md
+            - docs/adr/0246-startup-readiness-liveness-and-degraded-state-semantics.md
+            - docs/adr/0247-authenticated-browser-journey-verification-via-playwright.md
+            - docs/adr/0248-session-and-logout-authority-across-keycloak-oauth2-proxy-and-apps.md
+            - docs/adr/0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md
+            - docs/adr/0250-log-ingestion-and-queryability-canaries-via-loki-canary.md
+            - docs/adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md
+            - docs/adr/0252-route-and-dns-publication-assertion-ledger.md
+            - docs/adr/0253-unified-runtime-assurance-scoreboard-and-rollup.md
+            - docs/workstreams/adr-0244-runtime-assurance-architecture-bundle.md
+            - docs/adr/.index.yaml
+          mode: exclusive
+        - id: integration_release_surfaces
+          paths:
+            - VERSION
+            - changelog.md
+            - RELEASE.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.51.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - build/platform-manifest.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: accepted ADRs 0244 through 0253 to define a runtime
+        assurance model for large multi-stage service estates covering
+        declared-to-live attestation, richer health semantics, login and
+        logout verification, HTTPS and TLS posture, log-path canaries, smoke
+        gates, route truth, and one operator-facing assurance rollup
+      release_bump: patch
+      included_in_repo_version: 0.177.51
   - id: ws-0234-human-ux-adrs
     adr: "0234"
     title: Human user experience architecture bundle

@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.50",
+  "repo_version": "0.177.51",
   "platform_version": "0.130.42",
-  "generated_at": "2026-03-28T20:38:00Z",
-  "next_refresh_at": "2026-03-28T21:38:00Z",
+  "generated_at": "2026-03-28T20:44:06Z",
+  "next_refresh_at": "2026-03-28T21:44:06Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4026,10 +4026,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.49",
+    "last_version": "0.177.50",
     "deployed_at": "2026-03-28",
-    "summary": "fixed the `generated-portals` validation path so MkDocs now builds against a freshly generated docs tree instead of the stale gitignored `docs/site-generated` placeholder directory",
-    "release_notes_url": "docs/release-notes/0.177.50.md"
+    "summary": "accepted ADRs 0244 through 0253 to define a stage-aware runtime-assurance",
+    "release_notes_url": "docs/release-notes/0.177.51.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
