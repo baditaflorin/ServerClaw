@@ -20,19 +20,22 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
 try:
-    from scripts.publication_contract import registry_entries
-except ImportError:  # pragma: no cover - packaged import path
     from publication_contract import registry_entries
+except ImportError:  # pragma: no cover - repo checkout import path
+    from scripts.publication_contract import registry_entries
 
 try:
     from search_fabric.collectors import available_collections
-except ImportError:  # pragma: no cover - packaged import path
+except ImportError:  # pragma: no cover - repo checkout import path
     from scripts.search_fabric.collectors import available_collections
 
 try:
-    from runtime_assurance import build_runtime_assurance_models
-except ImportError:  # pragma: no cover - packaged import path
-    from scripts.ops_portal.runtime_assurance import build_runtime_assurance_models
+    from .runtime_assurance import build_runtime_assurance_models
+except ImportError:  # pragma: no cover - direct module or repo checkout import path
+    try:
+        from runtime_assurance import build_runtime_assurance_models
+    except ImportError:  # pragma: no cover - repo checkout import path
+        from scripts.ops_portal.runtime_assurance import build_runtime_assurance_models
 
 
 def utc_now() -> datetime:

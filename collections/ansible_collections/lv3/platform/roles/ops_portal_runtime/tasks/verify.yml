@@ -19,6 +19,13 @@
       - ops_portal_verify_running.stdout_lines | select('equalto', ops_portal_container_name) | list | length == 1
     fail_msg: "Ops portal container is not running."
 
+- name: Wait for the ops portal listener
+  ansible.builtin.wait_for:
+    host: "{{ ops_portal_verify_address }}"
+    port: "{{ ops_portal_internal_port }}"
+    delay: 0
+    timeout: 180
+
 - name: Verify the ops portal health endpoint responds locally
   ansible.builtin.uri:
     url: "http://{{ ops_portal_verify_address }}:{{ ops_portal_internal_port }}/health"
@@ -26,6 +33,9 @@
     status_code: 200
   register: ops_portal_verify_health
   changed_when: false
+  retries: 18
+  delay: 5
+  until: ops_portal_verify_health.status == 200
 
 - name: Verify the ops portal root page renders locally
   ansible.builtin.uri:
@@ -34,6 +44,9 @@
     status_code: 200
   register: ops_portal_verify_root
   changed_when: false
+  retries: 12
+  delay: 5
+  until: ops_portal_verify_root.status == 200
 
 - name: Verify the runtime assurance scoreboard partial renders locally
   ansible.builtin.uri:
@@ -43,6 +56,9 @@
     return_content: true
   register: ops_portal_verify_overview
   changed_when: false
+  retries: 18
+  delay: 5
+  until: ops_portal_verify_overview.status == 200
 
 - name: Assert the runtime assurance scoreboard is present
   ansible.builtin.assert:
