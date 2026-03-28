@@ -298,7 +298,9 @@ validate_generated_portals() {
   echo "Generated portal validation"
   run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/generate_ops_portal.py" --check >/dev/null
   run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/generate_changelog_portal.py" --check >/dev/null
-  make -C "$REPO_ROOT" docs >/dev/null
+  "${UV_CMD[@]}" run --with-requirements "$REPO_ROOT/requirements/docs.txt" \
+    mkdocs build --strict --config-file "$REPO_ROOT/mkdocs.yml" --site-dir "$REPO_ROOT/build/docs-portal" \
+    >/dev/null
 }
 
 validate_health_probes() {

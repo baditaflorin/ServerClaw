@@ -65,6 +65,14 @@ def test_validate_repo_json_stage_skips_missing_remote_artifacts() -> None:
     assert "continue" in script
 
 
+def test_validate_repo_generated_portals_stage_does_not_require_make() -> None:
+    script = VALIDATE_REPO_SCRIPT.read_text()
+
+    assert 'run --with-requirements "$REPO_ROOT/requirements/docs.txt"' in script
+    assert "mkdocs build --strict" in script
+    assert 'make -C "$REPO_ROOT" docs' not in script
+
+
 def test_check_role_argument_specs_avoids_bash4_only_mapfile() -> None:
     script = CHECK_ROLE_ARGUMENT_SPECS_SCRIPT.read_text()
 
@@ -77,4 +85,5 @@ def test_check_role_argument_specs_handles_missing_merge_base_history() -> None:
     script = CHECK_ROLE_ARGUMENT_SPECS_SCRIPT.read_text()
 
     assert "changed_from_base" in script
+    assert "rev-parse --verify --quiet origin/main >/dev/null 2>/dev/null" in script
     assert "2>/dev/null" in script
