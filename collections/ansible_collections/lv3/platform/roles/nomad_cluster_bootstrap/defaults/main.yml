@@ -1,0 +1,37 @@
+---
+nomad_cluster_bootstrap_repo_root: "{{ lookup('ansible.builtin.env', 'PWD') }}"
+nomad_cluster_bootstrap_local_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad
+nomad_cluster_bootstrap_local_tls_dir: "{{ nomad_cluster_bootstrap_local_dir }}/tls"
+nomad_cluster_bootstrap_local_tokens_dir: "{{ nomad_cluster_bootstrap_local_dir }}/tokens"
+nomad_cluster_bootstrap_local_ca_key_file: "{{ nomad_cluster_bootstrap_local_tls_dir }}/nomad-agent-ca-key.pem"
+nomad_cluster_bootstrap_local_ca_cert_file: "{{ nomad_cluster_bootstrap_local_tls_dir }}/nomad-agent-ca.pem"
+nomad_cluster_bootstrap_local_ca_serial_file: "{{ nomad_cluster_bootstrap_local_tls_dir }}/nomad-agent-ca.srl"
+nomad_cluster_bootstrap_local_server_key_file: "{{ nomad_cluster_bootstrap_local_tls_dir }}/server-key.pem"
+nomad_cluster_bootstrap_local_server_cert_file: "{{ nomad_cluster_bootstrap_local_tls_dir }}/server.pem"
+nomad_cluster_bootstrap_local_client_key_file: "{{ nomad_cluster_bootstrap_local_tls_dir }}/client-key.pem"
+nomad_cluster_bootstrap_local_client_cert_file: "{{ nomad_cluster_bootstrap_local_tls_dir }}/client.pem"
+nomad_cluster_bootstrap_management_token_local_file: "{{ nomad_cluster_bootstrap_local_tokens_dir }}/bootstrap-management.token"
+nomad_cluster_bootstrap_management_token_remote_file: /etc/lv3/nomad/bootstrap-management.token
+nomad_cluster_bootstrap_remote_ca_cert_file: /etc/lv3/nomad/tls/nomad-agent-ca.pem
+nomad_cluster_bootstrap_remote_job_dir: /etc/lv3/nomad/jobs
+nomad_cluster_bootstrap_server_local_url: https://127.0.0.1:4646
+nomad_cluster_bootstrap_server_host: "{{ playbook_execution_host_patterns.monitoring[playbook_execution_env] }}"
+nomad_cluster_bootstrap_runtime_host: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+nomad_cluster_bootstrap_build_host: "{{ playbook_execution_host_patterns.docker_build[playbook_execution_env] }}"
+nomad_cluster_bootstrap_server_ip: "{{ hostvars[nomad_cluster_bootstrap_server_host].ansible_host }}"
+nomad_cluster_bootstrap_proxy_ip: "{{ hostvars['proxmox_florin'].ansible_host }}"
+nomad_cluster_bootstrap_region: global
+nomad_cluster_bootstrap_certificate_days: 365
+nomad_cluster_bootstrap_expected_nodes:
+  - "{{ nomad_cluster_bootstrap_server_host }}"
+  - "{{ nomad_cluster_bootstrap_runtime_host }}"
+  - "{{ nomad_cluster_bootstrap_build_host }}"
+nomad_cluster_bootstrap_smoke_service_job_name: lv3-nomad-smoke-service
+nomad_cluster_bootstrap_smoke_service_job_file_local: "{{ nomad_cluster_bootstrap_repo_root }}/config/nomad/jobs/lv3-nomad-smoke-service.nomad.hcl"
+nomad_cluster_bootstrap_smoke_service_job_file_remote: "{{ nomad_cluster_bootstrap_remote_job_dir }}/lv3-nomad-smoke-service.nomad.hcl"
+nomad_cluster_bootstrap_smoke_service_port: 18180
+nomad_cluster_bootstrap_smoke_service_expected_text: lv3 nomad smoke service
+nomad_cluster_bootstrap_smoke_batch_job_name: lv3-nomad-smoke-batch
+nomad_cluster_bootstrap_smoke_batch_job_file_local: "{{ nomad_cluster_bootstrap_repo_root }}/config/nomad/jobs/lv3-nomad-smoke-batch.nomad.hcl"
+nomad_cluster_bootstrap_smoke_batch_job_file_remote: "{{ nomad_cluster_bootstrap_remote_job_dir }}/lv3-nomad-smoke-batch.nomad.hcl"
+nomad_cluster_bootstrap_smoke_batch_message: adr-0232-live-apply batch verification

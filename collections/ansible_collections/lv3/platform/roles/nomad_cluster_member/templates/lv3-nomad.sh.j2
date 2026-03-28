@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+
+export NOMAD_ADDR="${NOMAD_ADDR:-https://127.0.0.1:{{ nomad_cluster_http_port }}}"
+export NOMAD_CACERT="${NOMAD_CACERT:-{{ nomad_cluster_ca_cert_file }}}"
+
+if [ -z "${NOMAD_TOKEN:-}" ] && [ -s "{{ nomad_cluster_bootstrap_token_remote_file }}" ]; then
+  NOMAD_TOKEN="$(cat "{{ nomad_cluster_bootstrap_token_remote_file }}")"
+  export NOMAD_TOKEN
+fi
+
+exec /usr/local/bin/nomad "$@"

@@ -31,4 +31,5 @@ def test_role_argument_spec_declares_proxy_inputs() -> None:
 def test_host_inventory_proxy_ports_reference_platform_port_assignments() -> None:
     host_vars_text = HOST_VARS.read_text()
     assert "listen_port: \"{{ platform_port_assignments.windmill_host_proxy_port }}\"" in host_vars_text
+    assert "listen_port: \"{{ platform_port_assignments.nomad_host_proxy_port }}\"" in host_vars_text
     assert "listen_port: \"{{ platform_port_assignments.platform_context_host_proxy_port }}\"" in host_vars_text
