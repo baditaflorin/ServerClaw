@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0227](../adr/0227-bounded-command-execution-via-systemd-run-and-approved-wrappers.md)
 - Title: Live apply bounded governed command execution through `systemd-run` on the server-resident runtime
-- Status: live_applied
-- Implemented In Repo Version: not yet
-- Live Applied In Platform Version: 0.130.38
+- Status: merged
+- Implemented In Repo Version: 0.177.46
+- Live Applied In Platform Version: 0.130.41
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
 - Branch: `codex/ws-0227-live-apply`
@@ -12,7 +12,7 @@
 - Owner: codex
 - Depends On: `adr-0048-command-catalog`, `adr-0170-platform-wide-timeout-hierarchy`, `adr-0224-server-resident-operations-as-the-default-control-model`, `adr-0226-systemd-units-timers-and-paths-for-host-resident-control-loops`
 - Conflicts With: none
-- Shared Surfaces: `config/command-catalog.json`, `config/agent-tool-registry.json`, `scripts/agent_tool_registry.py`, `scripts/command_catalog.py`, `scripts/governed_command.py`, `scripts/governed_command_runtime.py`, `scripts/controller_automation_toolkit.py`, `scripts/maintenance_window_tool.py`, `scripts/platform_observation_tool.py`, `scripts/fault_injection.py`, `collections/ansible_collections/lv3/platform/roles/windmill_runtime/`, `docs/runbooks/command-catalog-and-approval-gates.md`, `docs/runbooks/bounded-command-execution.md`, `docs/adr/0227-bounded-command-execution-via-systemd-run-and-approved-wrappers.md`, `docs/adr/.index.yaml`, `tests/test_agent_tool_registry.py`, `tests/test_controller_automation_toolkit.py`, `tests/test_governed_command.py`, `tests/test_governed_command_runtime.py`, `receipts/live-applies/2026-03-28-adr-0227-bounded-command-execution-live-apply.json`, `workstreams.yaml`
+- Shared Surfaces: `config/command-catalog.json`, `config/agent-tool-registry.json`, `scripts/agent_tool_registry.py`, `scripts/command_catalog.py`, `scripts/governed_command.py`, `scripts/governed_command_runtime.py`, `scripts/controller_automation_toolkit.py`, `scripts/maintenance_window_tool.py`, `scripts/platform_observation_tool.py`, `scripts/fault_injection.py`, `platform/repo.py`, `collections/ansible_collections/lv3/platform/roles/windmill_runtime/`, `docs/runbooks/command-catalog-and-approval-gates.md`, `docs/runbooks/bounded-command-execution.md`, `docs/adr/0227-bounded-command-execution-via-systemd-run-and-approved-wrappers.md`, `docs/adr/.index.yaml`, `tests/test_agent_tool_registry.py`, `tests/test_controller_automation_toolkit.py`, `tests/test_governed_command.py`, `tests/test_governed_command_runtime.py`, `receipts/live-applies/2026-03-28-adr-0227-bounded-command-execution-live-apply.json`, `receipts/live-applies/2026-03-28-adr-0227-bounded-command-execution-mainline-live-apply.json`, `workstreams.yaml`
 
 ## Scope
 
@@ -63,14 +63,21 @@
 - the successful end-to-end replay returned unit `lv3-governed-network-impairment-matrix-79b10a86f237`, receipt `/srv/proxmox_florin_server/.local/governed-command/receipts/lv3-governed-network-impairment-matrix-79b10a86f237.json`, and report `/srv/proxmox_florin_server/.local/network-impairment-matrix/latest.json` with `status: planned` and `entry_count: 4`
 - the first replay exposed pre-existing root-owned execution-lane registry files on `docker-runtime-lv3`; the branch fixed the role contract to manage those files as mutable runtime surfaces, and the live guest required one one-time repair `sudo chmod 0666 /srv/proxmox_florin_server/.local/state/execution-lanes/registry.json /srv/proxmox_florin_server/.local/state/execution-lanes/registry.lock` before the final successful governed replay
 
+## Mainline Integration Outcome
+
+- merged to `main` in repository version `0.177.46`
+- bumped the live platform version to `0.130.41` after replaying `make converge-windmill` from the rebased merged-main-equivalent candidate and re-verifying the governed `network-impairment-matrix` path
+- the merged-main governed replay returned unit `lv3-governed-network-impairment-matrix-9dbb73e9a6e9`, receipt `/srv/proxmox_florin_server/.local/governed-command/receipts/lv3-governed-network-impairment-matrix-9dbb73e9a6e9.json`, and report `/srv/proxmox_florin_server/.local/network-impairment-matrix/latest.json` with `status: planned` and `entry_count: 4`
+- the rebased mainline candidate also repaired the shared YAML fallback regression introduced by the `platform.repo` helper refactor so controller automation still treats `tag:platform-operator` and `https://...` list entries as scalars
+
 ## Live Evidence
 
 - branch-local live-apply receipt: `receipts/live-applies/2026-03-28-adr-0227-bounded-command-execution-live-apply.json`
+- merged-main-equivalent live-apply receipt: `receipts/live-applies/2026-03-28-adr-0227-bounded-command-execution-mainline-live-apply.json`
 - successful runtime receipt on `docker-runtime-lv3`: `/srv/proxmox_florin_server/.local/governed-command/receipts/lv3-governed-network-impairment-matrix-79b10a86f237.json`
 - successful runtime stdout log: `/srv/proxmox_florin_server/.local/governed-command/logs/lv3-governed-network-impairment-matrix-79b10a86f237.stdout.log`
 - successful runtime stderr log: `/srv/proxmox_florin_server/.local/governed-command/logs/lv3-governed-network-impairment-matrix-79b10a86f237.stderr.log`
 
 ## Merge-To-Main Notes
 
-- this branch still leaves the protected integration files for the final mainline step: `VERSION`, `changelog.md`, the top-level `README.md` summary blocks, `docs/release-notes/*`, and `versions/stack.yaml`
-- the final merge should carry forward the branch-local receipt, bump the repo version on `main`, cut release notes, and only bump `platform_version` after replaying or explicitly re-verifying the merged-main state
+- remaining for merge to `main`: none

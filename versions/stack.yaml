@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.45
-platform_version: 0.130.40
+repo_version: 0.177.46
+platform_version: 0.130.41
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -42,7 +42,7 @@ live_apply_evidence:
     short_lived_credentials_and_mtls: 2026-03-22-adr-0047-short-lived-credentials-live-apply
     control_plane_lanes: 2026-03-22-adr-0045-control-plane-communication-lanes-live-apply
     identity_taxonomy: 2026-03-22-adr-0046-identity-classes-live-apply
-    command_catalog: 2026-03-22-adr-0048-command-catalog-live-apply
+    command_catalog: 2026-03-28-adr-0227-bounded-command-execution-mainline-live-apply
     config_merge: 2026-03-26-adr-0158-config-merge-live-apply
     control_plane_recovery: 2026-03-28-adr-0231-local-secret-delivery-live-apply
     control_metadata_witness: 2026-03-27-adr-0181-control-metadata-witness-live-apply
@@ -95,6 +95,7 @@ live_apply_evidence:
     provider_boundaries: 2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply
     server_resident_reconciliation: 2026-03-28-adr-0225-server-resident-reconciliation-via-ansible-pull-live-apply
     gitea_actions_runners: 2026-03-28-adr-0229-gitea-actions-runners-live-apply
+    bounded_command_execution: 2026-03-28-adr-0227-bounded-command-execution-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -1000,8 +1001,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.45
+    current: 0.177.46
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.40
+    current: 0.130.41
     meaning: intended platform release for the actual server configuration
