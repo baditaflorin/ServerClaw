@@ -41,6 +41,11 @@ from operator_manager import ROSTER_PATH, validate_operator_roster
 from platform.execution_lanes import load_execution_lane_catalog
 from promotion_pipeline import validate_promotion_receipts
 from public_surface_scan import load_public_surface_scan_policy
+from shared_policy_packs import (
+    SHARED_POLICY_PACKS_PATH,
+    SHARED_POLICY_PACKS_SCHEMA_PATH,
+    load_shared_policy_packs,
+)
 from validate_ephemeral_vmid import validate_ephemeral_vmid_ranges
 from generate_slo_rules import outputs_match as slo_outputs_match
 from immutable_guest_replacement import load_guest_replacement_catalog, validate_guest_replacement_catalog
@@ -303,6 +308,7 @@ def validate_no_scaffold_placeholders() -> None:
         repo_path("config", "service-redundancy-catalog.json"): load_json(
             repo_path("config", "service-redundancy-catalog.json")
         ),
+        SHARED_POLICY_PACKS_PATH: load_json(SHARED_POLICY_PACKS_PATH),
         repo_path("config", "api-gateway-catalog.json"): load_json(
             repo_path("config", "api-gateway-catalog.json")
         ),
@@ -1410,6 +1416,24 @@ def validate_capacity_model_schema() -> None:
     for field in ("$schema", "schema_version", "host", "guests", "reservations"):
         if field not in properties:
             raise ValueError(f"docs/schema/capacity-model.schema.json.properties must include '{field}'")
+
+
+def validate_shared_policy_packs() -> None:
+    load_shared_policy_packs()
+
+
+def validate_shared_policy_packs_schema() -> None:
+    schema = require_mapping(load_json(SHARED_POLICY_PACKS_SCHEMA_PATH), str(SHARED_POLICY_PACKS_SCHEMA_PATH))
+    require_str(schema.get("$schema"), "docs/schema/shared-policy-packs.schema.json.$schema")
+    require_str(schema.get("$id"), "docs/schema/shared-policy-packs.schema.json.$id")
+    require_str(schema.get("title"), "docs/schema/shared-policy-packs.schema.json.title")
+    properties = require_mapping(
+        schema.get("properties"),
+        "docs/schema/shared-policy-packs.schema.json.properties",
+    )
+    for field in ("$schema", "schema_version", "packs"):
+        if field not in properties:
+            raise ValueError(f"docs/schema/shared-policy-packs.schema.json.properties must include '{field}'")
 
 
 def validate_ephemeral_pool_catalog() -> None:
@@ -2534,6 +2558,8 @@ def validate_repository_data_models() -> int:
     validate_changelog_redaction_contract()
     validate_platform_finding_schema()
     validate_maintenance_window_schema()
+    validate_shared_policy_packs_schema()
+    validate_shared_policy_packs()
     validate_capacity_model_schema()
     validate_capacity_model()
     validate_preview_environment_profiles()

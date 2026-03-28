@@ -95,7 +95,8 @@
               },
               "placement_class": {
                 "type": "string",
-                "enum": ["preview", "fixture"]
+                "minLength": 1,
+                "description": "Validated against config/shared-policy-packs.json."
               },
               "anti_affinity_group": {
                 "type": "string",
@@ -123,7 +124,7 @@
                 "type": "array",
                 "items": {
                   "type": "string",
-                  "enum": ["standby", "recovery"]
+                  "minLength": 1
                 },
                 "uniqueItems": true
               }

@@ -6146,6 +6146,84 @@ workstreams:
       release_bump: patch
       included_in_repo_version: 0.177.23
 
+  - id: ws-0211-live-apply
+    adr: "0211"
+    title: Shared policy packs and rule registries live apply
+    status: ready
+    owner: codex
+    branch: codex/ws-0211-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0211-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0211-shared-policy-packs-and-rule-registries.md
+    depends_on:
+      - adr-0179-service-redundancy-tier-matrix
+      - adr-0180-standby-capacity-reservation-and-placement-rules
+      - adr-0184-failure-domain-labels-and-anti-affinity-policy
+      - adr-0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads
+    conflicts_with: []
+    shared_surfaces:
+      - config/shared-policy-packs.json
+      - docs/schema/shared-policy-packs.schema.json
+      - scripts/shared_policy_packs.py
+      - scripts/service_redundancy.py
+      - scripts/standby_capacity.py
+      - scripts/capacity_report.py
+      - scripts/failure_domain_policy.py
+      - scripts/environment_topology.py
+      - scripts/validate_repository_data_models.py
+      - docs/schema/service-redundancy-catalog.schema.json
+      - docs/schema/capacity-model.schema.json
+      - docs/schema/environment-topology.schema.json
+      - docs/runbooks/capacity-model.md
+      - docs/runbooks/capacity-classes.md
+      - docs/runbooks/service-redundancy-tier-matrix.md
+      - docs/runbooks/failure-domain-policy.md
+      - docs/adr/0211-shared-policy-packs-and-rule-registries.md
+      - docs/workstreams/adr-0211-shared-policy-packs-and-rule-registries.md
+      - docs/adr/.index.yaml
+      - receipts/live-applies/
+      - tests/test_shared_policy_packs.py
+      - workstreams.yaml
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: shared_policy_pack_registry
+          paths:
+            - config/shared-policy-packs.json
+            - docs/schema/shared-policy-packs.schema.json
+            - scripts/shared_policy_packs.py
+            - docs/workstreams/adr-0211-shared-policy-packs-and-rule-registries.md
+            - receipts/live-applies/**
+            - tests/test_shared_policy_packs.py
+          mode: exclusive
+        - id: shared_policy_registry_contract
+          paths:
+            - scripts/service_redundancy.py
+            - scripts/standby_capacity.py
+            - scripts/capacity_report.py
+            - scripts/failure_domain_policy.py
+            - scripts/environment_topology.py
+            - scripts/validate_repository_data_models.py
+            - docs/schema/service-redundancy-catalog.schema.json
+            - docs/schema/capacity-model.schema.json
+            - docs/schema/environment-topology.schema.json
+            - docs/runbooks/capacity-model.md
+            - docs/runbooks/capacity-classes.md
+            - docs/runbooks/service-redundancy-tier-matrix.md
+            - docs/runbooks/failure-domain-policy.md
+            - docs/adr/0211-shared-policy-packs-and-rule-registries.md
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: shared-policy-registry-v1
+    ready_to_merge: false
+    live_applied: false
+    canonical_truth:
+      changelog_entry: centralized shared redundancy, capacity-class, and placement rules into one machine-checkable registry so validation, live-apply preflights, and docs consume the same canonical policy pack
+      release_bump: patch
+
   - id: ws-0021-edge-cert-repair
     adr: "0021"
     title: Repair shared edge certificate expansion during service-specific converges

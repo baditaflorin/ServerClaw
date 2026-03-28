@@ -7,6 +7,7 @@ import sys
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
+from shared_policy_packs import load_shared_policy_packs
 
 
 ENVIRONMENT_TOPOLOGY_PATH = repo_path("config", "environment-topology.json")
@@ -17,8 +18,9 @@ HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 ALLOWED_ENVIRONMENT_STATUSES = {"active", "planned"}
 ALLOWED_TOPOLOGY_MODELS = {"single-node-shared-edge"}
 ALLOWED_BINDING_STATUSES = {"active", "planned"}
-ALLOWED_ENVIRONMENT_PLACEMENT_CLASSES = {"preview", "fixture"}
-ALLOWED_RESERVED_CAPACITY_EXCLUSIONS = {"standby", "recovery"}
+SHARED_POLICIES = load_shared_policy_packs()
+ALLOWED_ENVIRONMENT_PLACEMENT_CLASSES = SHARED_POLICIES.environment_placement_classes
+ALLOWED_RESERVED_CAPACITY_EXCLUSIONS = SHARED_POLICIES.reserved_capacity_exclusions
 ENVIRONMENT_ID_PATTERN = re.compile(r"^[a-z][a-z0-9_-]*$")
 
 
