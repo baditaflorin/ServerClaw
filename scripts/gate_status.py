@@ -15,13 +15,14 @@ DEFAULT_POST_MERGE_RUN = Path(".local/validation-gate/post-merge-last-run.json")
 DEFAULT_BYPASS_DIR = Path("receipts/gate-bypasses")
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Show repository validation gate status.")
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     parser.add_argument("--last-run", type=Path, default=DEFAULT_LAST_RUN)
     parser.add_argument("--post-merge-run", type=Path, default=DEFAULT_POST_MERGE_RUN)
     parser.add_argument("--bypass-dir", type=Path, default=DEFAULT_BYPASS_DIR)
-    return parser.parse_args()
+    parser.add_argument("--format", choices=("text", "json"), default="text")
+    return parser.parse_args(argv)
 
 
 def load_optional_json(path: Path) -> dict[str, Any] | None:
@@ -40,6 +41,41 @@ def latest_bypass_receipt(directory: Path) -> tuple[Path, dict[str, Any]] | None
     return latest, json.loads(latest.read_text(encoding="utf-8"))
 
 
+def build_status_payload(
+    *,
+    manifest_path: Path,
+    last_run_path: Path,
+    post_merge_run_path: Path,
+    bypass_dir: Path,
+) -> dict[str, Any]:
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    last_run = load_optional_json(last_run_path)
+    post_merge_run = load_optional_json(post_merge_run_path)
+    bypass = latest_bypass_receipt(bypass_dir)
+
+    payload = {
+        "manifest_path": str(manifest_path),
+        "enabled_checks": [
+            {
+                "id": check_id,
+                "severity": config.get("severity", "error"),
+                "description": config.get("description", ""),
+            }
+            for check_id, config in sorted(manifest.items())
+        ],
+        "last_run": last_run,
+        "post_merge_run": post_merge_run,
+        "latest_bypass": None,
+    }
+    if bypass is not None:
+        path, bypass_payload = bypass
+        payload["latest_bypass"] = {
+            "path": str(path),
+            "payload": bypass_payload,
+        }
+    return payload
+
+
 def print_run_summary(label: str, payload: dict[str, Any] | None) -> None:
     if payload is None:
         print(f"{label}: none recorded")
@@ -50,30 +86,40 @@ def print_run_summary(label: str, payload: dict[str, Any] | None) -> None:
     )
 
 
-def main() -> int:
-    args = parse_args()
-    manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
-    last_run = load_optional_json(args.last_run)
-    post_merge_run = load_optional_json(args.post_merge_run)
-    bypass = latest_bypass_receipt(args.bypass_dir)
-
-    print(f"Validation gate manifest: {args.manifest}")
+def print_status_text(payload: dict[str, Any]) -> None:
+    print(f"Validation gate manifest: {payload['manifest_path']}")
     print("Enabled checks:")
-    for check_id in sorted(manifest):
-        config = manifest[check_id]
-        print(f"  - {check_id} [{config.get('severity', 'error')}]: {config.get('description', '')}")
+    for check in payload["enabled_checks"]:
+        print(f"  - {check['id']} [{check['severity']}]: {check['description']}")
 
-    print_run_summary("Last gate run", last_run)
-    print_run_summary("Last post-merge gate run", post_merge_run)
+    print_run_summary("Last gate run", payload.get("last_run"))
+    print_run_summary("Last post-merge gate run", payload.get("post_merge_run"))
 
-    if bypass is None:
+    latest_bypass = payload.get("latest_bypass")
+    if latest_bypass is None:
         print("Latest bypass receipt: none recorded")
     else:
-        path, payload = bypass
+        path = latest_bypass["path"]
+        bypass_payload = latest_bypass["payload"]
         print(
             "Latest bypass receipt: "
-            f"{path} ({payload.get('bypass', 'unknown')} at {payload.get('created_at', 'unknown')})"
+            f"{path} ({bypass_payload.get('bypass', 'unknown')} at {bypass_payload.get('created_at', 'unknown')})"
         )
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
+
+    payload = build_status_payload(
+        manifest_path=args.manifest,
+        last_run_path=args.last_run,
+        post_merge_run_path=args.post_merge_run,
+        bypass_dir=args.bypass_dir,
+    )
+    if args.format == "json":
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        print_status_text(payload)
 
     return 0
 

@@ -93,3 +93,22 @@ Two network details are now part of the live publication contract:
 - `docker-runtime-lv3` must allow TCP `8091` from `nginx-lv3` in both the Proxmox VM firewall and the in-guest nftables policy so `sso.lv3.org` and `oauth2-proxy` can reach Keycloak
 
 If cloud access to `https://ops.lv3.org` regresses, verify those two conditions before changing the portal or Keycloak configuration again.
+
+## Structured Runbook Launcher
+
+The interactive portal runbook panel now loads its entries from the platform API gateway instead of maintaining a separate local workflow-only list.
+
+Operator flow:
+
+1. Open `https://ops.lv3.org`.
+2. Use the **Runbook Launcher** panel.
+3. Pick one runbook that explicitly opts into the `ops_portal` delivery surface.
+4. Submit JSON parameters if the runbook requires them.
+
+The safest verification path is the repo-managed [`validation-gate-status.yaml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/validation-gate-status.yaml) runbook, which is read-only and returns the current validation-gate summary through the shared runbook service.
+
+Portal operators do not need to know how the workflow is wired underneath:
+
+- the portal parses JSON parameters and forwards them as a thin adapter
+- the API gateway enforces auth and resolves the shared runbook contract
+- the shared use-case service owns runbook lookup, surface allowlists, templating, workflow sequencing, and persisted run records

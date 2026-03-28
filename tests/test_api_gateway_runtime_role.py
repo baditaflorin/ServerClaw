@@ -71,6 +71,10 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "dest: execution-lanes.yaml" in defaults
     assert "api_gateway_database_name: windmill" in defaults
     assert "api_gateway_database_user: windmill_admin" in defaults
+    assert "api_gateway_windmill_service_topology" in defaults
+    assert "api_gateway_windmill_base_url" in defaults
+    assert "api_gateway_windmill_service_topology.private_ip" in defaults
+    assert "windmill_server_port" in defaults
     assert "rev-parse --path-format=absolute --git-common-dir" in defaults
     assert 'api_gateway_database_password_local_file: "{{ api_gateway_shared_local_root }}/windmill/database-password.txt"' in defaults
     assert "api_gateway_graph_dsn" in defaults
@@ -172,7 +176,9 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "preserve_destination_root: true" in defaults
     assert "api_gateway_runtime_config_probe_path: /app/config/ledger-event-types.yaml" in defaults
     assert "Sync the staged repo trees required by the API gateway runtime" in tasks
+    assert "Ensure nested parent directories for managed API gateway source files exist" in tasks
     assert "ansible.builtin.include_tasks: sync_tree.yml" in tasks
+    assert "Remove stale managed API gateway config bundle entries" in tasks
     assert "ansible.builtin.meta: reset_connection" in tasks
     assert "Check whether the API gateway container sees the runtime config bundle" in tasks
     assert "{{ api_gateway_service_dir }}/.githooks" in tasks

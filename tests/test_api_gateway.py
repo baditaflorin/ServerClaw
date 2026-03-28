@@ -22,6 +22,7 @@ if str(SCRIPTS_DIR) not in sys.path:
 
 import api_gateway.main as gateway_main  # noqa: E402
 from api_gateway.main import GatewayConfig, GatewayRuntime, NatsEventEmitter, create_app  # noqa: E402
+from platform.use_cases.runbooks import RunbookRunStore, RunbookUseCaseService  # noqa: E402
 
 
 def test_resolve_repo_root_supports_packaged_layout(tmp_path: Path) -> None:
@@ -266,6 +267,12 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
             "workflows": {
                 "deploy-and-promote": {"description": "deploy service"},
                 "rotate-secret": {"description": "rotate secret"},
+                "gate-status": {
+                    "description": "show validation gate status",
+                    "execution_class": "diagnostic",
+                    "live_impact": "repo_only",
+                    "lifecycle_status": "active",
+                },
             }
         },
     )
@@ -445,6 +452,24 @@ circuits:
         tmp_path / "docs" / "runbooks" / "postgres-failover.md",
         "# Postgres Failover\n\nHandle the failover path.\n",
     )
+    write_yaml(
+        tmp_path / "docs" / "runbooks" / "validation-gate-status.yaml",
+        """id: validation-gate-status
+title: Inspect validation gate status
+automation:
+  eligible: true
+  description: Show the current validation-gate summary through the shared runbook service.
+  delivery_surfaces:
+    - api_gateway
+steps:
+  - id: summarize-gate
+    type: diagnostic
+    workflow_id: gate-status
+    params: {}
+    success_condition: "result != None"
+    on_failure: escalate
+""",
+    )
     write_json(
         tmp_path / "receipts" / "drift-reports" / "2026-03-23-test.json",
         {"summary": {"status": "warn", "warn_count": 1, "critical_count": 0}},
@@ -483,6 +508,9 @@ circuits:
         nats_password=None,
         deploy_webhook_url=None,
         secret_rotation_webhook_url=None,
+        windmill_base_url=upstream_base,
+        windmill_token="windmill-superadmin",
+        runbook_runs_dir=tmp_path / "data" / "runbooks" / "runs",
         circuit_policy_path=tmp_path / "config" / "circuit-policies.yaml",
         degradation_state_path=tmp_path / "data" / "degradation-state.json",
         nats_outbox_path=tmp_path / "data" / "nats-outbox.jsonl",
@@ -619,6 +647,21 @@ def test_gateway_enters_and_surfaces_keycloak_degraded_mode(tmp_path: Path) -> N
             await runtime.http_client.aclose()
             runtime.http_client = runtime_client
             runtime.verifier._client = runtime_client
+            runtime._runbook_service = RunbookUseCaseService(
+                repo_root=config.repo_root,
+                workflow_runner=type(
+                    "FakeRunner",
+                    (),
+                    {
+                        "run_workflow": staticmethod(
+                            lambda workflow_id, payload, timeout_seconds=None: (
+                                windmill_calls.append(workflow_id) or {"summary": "gate ok", "checks": []}
+                            )
+                        )
+                    },
+                )(),
+                store=RunbookRunStore(config.runbook_runs_dir),
+            )
             app.state.runtime = runtime
             try:
                 transport_app = httpx.ASGITransport(app=app)
@@ -779,6 +822,21 @@ def test_gateway_deploy_forwards_trace_id_to_webhook(tmp_path: Path) -> None:
             await runtime.http_client.aclose()
             runtime.http_client = runtime_client
             runtime.verifier._client = runtime_client
+            runtime._runbook_service = RunbookUseCaseService(
+                repo_root=config.repo_root,
+                workflow_runner=type(
+                    "FakeRunner",
+                    (),
+                    {
+                        "run_workflow": staticmethod(
+                            lambda workflow_id, payload, timeout_seconds=None: (
+                                windmill_calls.append(workflow_id) or {"summary": "gate ok", "checks": []}
+                            )
+                        )
+                    },
+                )(),
+                store=RunbookRunStore(config.runbook_runs_dir),
+            )
             app.state.runtime = runtime
             try:
                 transport_app = httpx.ASGITransport(app=app)
@@ -790,6 +848,121 @@ def test_gateway_deploy_forwards_trace_id_to_webhook(tmp_path: Path) -> None:
                     )
                     assert response.status_code == 202
                     assert received_payloads[0]["trace_id"] == "trace-webhook-123"
+            finally:
+                await runtime.close()
+
+    import asyncio
+
+    asyncio.run(run())
+
+
+def test_gateway_runbook_routes_use_shared_service(tmp_path: Path) -> None:
+    windmill_calls: list[str] = []
+
+    def upstream(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "jwks.test":
+            return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+        if request.url.path.startswith("/api/w/lv3/jobs/run_wait_result/p/"):
+            windmill_calls.append(request.url.path)
+            return httpx.Response(200, json={"summary": "gate ok", "checks": []})
+        return httpx.Response(200, json={"status": "ok"})
+
+    transport = httpx.MockTransport(upstream)
+    config, token = make_repo(tmp_path, "http://upstream.test")
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            runtime._runbook_service = RunbookUseCaseService(
+                repo_root=config.repo_root,
+                workflow_runner=type(
+                    "FakeRunner",
+                    (),
+                    {
+                        "run_workflow": staticmethod(
+                            lambda workflow_id, payload, timeout_seconds=None: (
+                                windmill_calls.append(workflow_id) or {"summary": "gate ok", "checks": []}
+                            )
+                        )
+                    },
+                )(),
+                store=RunbookRunStore(config.runbook_runs_dir),
+            )
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    listing = await client.get(
+                        "/v1/platform/runbooks",
+                        headers={"Authorization": f"Bearer {token}"},
+                    )
+                    assert listing.status_code == 200
+                    assert listing.json()["runbooks"][0]["id"] == "validation-gate-status"
+
+                    execute = await client.post(
+                        "/v1/platform/runbooks/execute",
+                        headers={"Authorization": f"Bearer {token}"},
+                        json={"runbook_id": "validation-gate-status"},
+                    )
+                    assert execute.status_code == 200
+                    payload = execute.json()
+                    assert payload["status"] == "completed"
+                    assert payload["runbook_id"] == "validation-gate-status"
+
+                    status = await client.get(
+                        f"/v1/platform/runbooks/{payload['run_id']}",
+                        headers={"Authorization": f"Bearer {token}"},
+                    )
+                    assert status.status_code == 200
+                    assert status.json()["status"] == "completed"
+                    assert windmill_calls == ["gate-status"]
+            finally:
+                await runtime.close()
+
+    import asyncio
+
+    asyncio.run(run())
+
+
+def test_gateway_runbook_routes_enforce_delivery_surface_allowlist(tmp_path: Path) -> None:
+    def upstream(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "jwks.test":
+            return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+        return httpx.Response(200, json={"status": "ok"})
+
+    transport = httpx.MockTransport(upstream)
+    config, token = make_repo(tmp_path, "http://upstream.test")
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            runtime._runbook_service = RunbookUseCaseService(
+                repo_root=config.repo_root,
+                workflow_runner=type(
+                    "FakeRunner",
+                    (),
+                    {"run_workflow": staticmethod(lambda workflow_id, payload, timeout_seconds=None: {"status": "ok"})},
+                )(),
+                store=RunbookRunStore(config.runbook_runs_dir),
+            )
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    response = await client.post(
+                        "/v1/platform/runbooks/execute",
+                        headers={"Authorization": f"Bearer {token}"},
+                        json={"runbook_id": "validation-gate-status", "delivery_surface": "ops_portal"},
+                    )
+                    assert response.status_code == 403
             finally:
                 await runtime.close()
 

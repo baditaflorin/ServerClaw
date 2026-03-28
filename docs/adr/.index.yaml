@@ -3544,7 +3544,7 @@ adr_index:
   - adr: 0209
     title: Use-Case Services And Thin Delivery Adapters
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -3555,6 +3555,7 @@ adr_index:
       - adapters
     summary: When a platform capability is exposed through multiple delivery surfaces, the
     filename: 0209-use-case-services-and-thin-delivery-adapters.md
+    implemented_version: 0.177.38
   - adr: '0210'
     title: Canonical Domain Models Over Vendor Schemas
     status: Accepted
