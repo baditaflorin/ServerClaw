@@ -5,12 +5,12 @@
   "applied_on": "2026-03-28",
   "recorded_on": "2026-03-28",
   "recorded_by": "codex",
-  "source_commit": "a3f805e6eb33f77e5f443249c891a36224c451e2",
-  "repo_version_context": "0.177.39",
+  "source_commit": "40b5a622423d6be18882fae1ac264b630978d5ab",
+  "repo_version_context": "0.177.40",
   "platform_version_context": "0.130.38",
   "workflow_id": "adr-0229-gitea-actions-runners-live-apply",
   "adr": "0229",
-  "summary": "Replayed the rebased `0.177.39` Gitea stack and self-hosted Actions runner from branch head `a3f805e6`, recovered a transient Keycloak/PostgreSQL admin API interruption during the first attempt, then completed a clean rerun and preserved the earlier successful private Git push gate plus branch workflow evidence on runner docker-build-lv3.",
+  "summary": "Replayed the latest-origin-main `0.177.40` Gitea stack and self-hosted Actions runner from branch head `40b5a622`, completed a clean current-base convergence with the dedicated runner still online, and preserved the rebased branch push-gate plus workflow evidence on runner docker-build-lv3 for merge-safe automation proof.",
   "targets": [
     {
       "kind": "host",
@@ -45,17 +45,17 @@
     {
       "check": "Focused Gitea runner repo slice and branch validation surfaces",
       "result": "pass",
-      "observed": "`uv run --with pytest --with pyyaml python -m pytest -q tests/test_gitea_runtime_role.py` passed with `8 passed in 0.18s`; `./scripts/validate_repo.sh agent-standards` passed; `uv run --with pyyaml --with jsonschema python3 scripts/validate_repository_data_models.py --validate` passed; `python3 scripts/generate_diagrams.py --check` passed after refreshing `docs/diagrams/agent-coordination-map.excalidraw`; and `uv run --with pyyaml --with jsonschema python3 scripts/platform_manifest.py --check` passed after rewriting `build/platform-manifest.json`."
+      "observed": "`uv run --with pytest --with pyyaml python -m pytest -q tests/test_gitea_runtime_role.py` passed with `8 passed in 0.12s`; `./scripts/validate_repo.sh agent-standards` passed; `uv run --with pyyaml --with jsonschema python3 scripts/validate_repository_data_models.py --validate` passed; `python3 scripts/generate_diagrams.py --check` passed; and `uv run --with pyyaml --with jsonschema python3 scripts/platform_manifest.py --check` passed from the final `0.177.40` branch state."
     },
     {
       "check": "Merged-main Gitea replay",
       "result": "pass",
-      "observed": "`make converge-gitea` completed successfully from rebased branch head `a3f805e6` with `proxmox_florin ok=36 changed=4 failed=0`, `postgres-lv3 ok=24 changed=0 failed=0`, `docker-runtime-lv3 ok=224 changed=1 failed=0`, and `docker-build-lv3 ok=100 changed=5 failed=0`."
+      "observed": "`make converge-gitea` completed successfully from current branch head `40b5a622` with `proxmox_florin ok=36 changed=4 failed=0`, `postgres-lv3 ok=24 changed=0 failed=0`, `docker-runtime-lv3 ok=224 changed=0 failed=0`, and `docker-build-lv3 ok=100 changed=5 failed=0`."
     },
     {
-      "check": "Transient Keycloak admin recovery during rebased replay",
+      "check": "Transient Keycloak admin recovery history",
       "result": "pass",
-      "observed": "The first rebased replay attempt failed in `lv3.platform.keycloak_runtime` while creating the operations portal OAuth client because the local token endpoint returned `HTTP 500`. Keycloak logs on `docker-runtime-lv3` showed PostgreSQL broken-pipe and terminated-connection errors, a direct admin token probe immediately returned `HTTP 200`, and the next full replay completed cleanly without changing repo automation."
+      "observed": "An earlier `0.177.39` rebased replay failed in `lv3.platform.keycloak_runtime` while creating the operations portal OAuth client because the local token endpoint returned `HTTP 500`. Keycloak logs on `docker-runtime-lv3` showed PostgreSQL broken-pipe and terminated-connection errors, a direct admin token probe immediately returned `HTTP 200`, and the final `0.177.40` replay completed cleanly without reproducing the fault or changing repo automation."
     },
     {
       "check": "Runner registration and runtime state",
@@ -70,7 +70,7 @@
     {
       "check": "Runner-backed branch workflow",
       "result": "pass",
-      "observed": "Gitea recorded workflow run `20` for `head_branch: codex/ws-0229-live-apply` and `head_sha: b83d26083261b05782e9ccde2abf78f6d232d20c`; the run finished with `status: completed` and `conclusion: success`. Job `20` named `validate` ran on `runner_id: 1` / `runner_name: docker-build-lv3`, started at `2026-03-28T16:21:39Z`, and completed at `2026-03-28T16:21:42Z`."
+      "observed": "Gitea recorded workflow run `29` for `head_branch: codex/ws-0229-live-apply` and `head_sha: 40c1501ba05368ca2c203dd66ed84015aa7a5bfd`; the run finished with `status: completed` and `conclusion: success`. Job `33` named `validate` ran on `runner_id: 1` / `runner_name: docker-build-lv3`, started at `2026-03-28T17:01:49Z`, and completed at `2026-03-28T17:01:52Z`."
     },
     {
       "check": "Gate troubleshooting loop",
@@ -102,7 +102,7 @@
     "workstreams.yaml"
   ],
   "notes": [
-    "ADR 0229 is marked implemented retroactively because the first repo and platform versions where the runner capability became true were already recorded by ADR 0143 (`0.165.0` / `0.130.15` on `2026-03-26`); this receipt records the fresh rebased replay and branch-level automation proof from `0.177.39` / `0.130.38`.",
+    "ADR 0229 is marked implemented retroactively because the first repo and platform versions where the runner capability became true were already recorded by ADR 0143 (`0.165.0` / `0.130.15` on `2026-03-26`); this receipt records the fresh current-base replay from `0.177.40` / `0.130.38` plus the latest successful rebased branch automation proof captured before the final merge step.",
     "The private Gitea git SSH endpoint on port `2222` did not accept the Proxmox host bootstrap key; the documented smoke push used the mirrored `ops-gitea` admin token over HTTP basic auth instead.",
     "This branch intentionally does not update `README.md`, `VERSION`, `changelog.md`, or `versions/stack.yaml` yet because the integrated platform truth already described the live runner capability before the branch-local verification replay."
   ]

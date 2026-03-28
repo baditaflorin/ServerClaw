@@ -7645,7 +7645,7 @@ workstreams:
     canonical_truth:
       changelog_entry: re-verified ADR 0229 Gitea Actions runners from the latest merged mainline by replaying `make converge-gitea`, passing the private Gitea server-side push gate, and completing a branch `validate` workflow on runner `docker-build-lv3`
       release_bump: patch
-      included_in_repo_version: 0.177.39
+      included_in_repo_version: 0.177.40
       latest_receipts:
         gitea_actions_runners: 2026-03-28-adr-0229-gitea-actions-runners-live-apply
       live_apply_verification:
@@ -7654,7 +7654,7 @@ workstreams:
           runner_name: docker-build-lv3
           status: online
         workflow_run:
-          run_id: 20
+          run_id: 29
           head_branch: codex/ws-0229-live-apply
-          head_sha: b83d26083261b05782e9ccde2abf78f6d232d20c
+          head_sha: 40c1501ba05368ca2c203dd66ed84015aa7a5bfd
           conclusion: success

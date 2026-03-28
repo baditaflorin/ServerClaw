@@ -64,15 +64,15 @@
 
 ## Live Apply Outcome
 
-- the rebased branch now sits on repo version `0.177.39`, and `make converge-gitea` completed successfully from branch head `a3f805e6`, finishing with `proxmox_florin ok=36 changed=4`, `postgres-lv3 ok=24 changed=0`, `docker-runtime-lv3 ok=224 changed=1`, and `docker-build-lv3 ok=100 changed=5`
-- before that successful replay, the first rebased attempt hit a transient Keycloak admin token `HTTP 500` while PostgreSQL connections were being reset under Keycloak; a direct token probe on `docker-runtime-lv3` immediately recovered and the second replay completed cleanly without repo code changes
+- the final current-base replay sits on repo version `0.177.40`, and `make converge-gitea` completed successfully from branch head `40b5a622`, finishing with `proxmox_florin ok=36 changed=4`, `postgres-lv3 ok=24 changed=0`, `docker-runtime-lv3 ok=224 changed=0`, and `docker-build-lv3 ok=100 changed=5`
+- an earlier rebased replay on `0.177.39` hit a transient Keycloak admin token `HTTP 500` while PostgreSQL connections were being reset under Keycloak; the final `0.177.40` replay did not reproduce that fault and all Keycloak OAuth client tasks completed cleanly without repo code changes
 - the rebased branch also required refreshing two generated validation surfaces before the remote push gate would accept it: `docs/diagrams/agent-coordination-map.excalidraw` and `build/platform-manifest.json`
 - the Gitea admin API confirmed runner `1` named `docker-build-lv3` online with labels `self-hosted`, `linux`, `amd64`, and `docker`
 - the first private Gitea push attempt surfaced two actionable gate failures in the branch: `workstreams.yaml` needed `status: in_progress`, and the generated coordination diagram needed refresh after claiming `ws-0229-live-apply`
 - after those fixes, the second private Gitea push passed the full server-side gate, including `ansible-lint`, `ansible-syntax`, `schema-validation`, `dependency-graph`, `service-completeness`, `type-check`, `yaml-lint`, `security-scan`, `packer-validate`, and `tofu-validate`
-- Gitea recorded workflow run `20` for `codex/ws-0229-live-apply` with `event: push`, `head_sha: b83d26083261b05782e9ccde2abf78f6d232d20c`, `status: completed`, and `conclusion: success`
-- run `20` executed job `validate` on runner `docker-build-lv3` (`runner_id: 1`), starting at `2026-03-28T16:21:39Z` and completing at `2026-03-28T16:21:42Z`
-- ADR 0229 itself is now marked implemented retroactively to the earlier ADR 0143 rollout, because the capability first became true in repo version `0.165.0` and platform version `0.130.15` on `2026-03-26`; this workstream re-verified it from repo version context `0.177.39` and platform version context `0.130.38`
+- earlier branch-local automation proof on the rebased workstream recorded Gitea workflow run `29` for `codex/ws-0229-live-apply` with `event: push`, `head_sha: 40c1501ba05368ca2c203dd66ed84015aa7a5bfd`, `status: completed`, and `conclusion: success`
+- run `29` executed job `validate` on runner `docker-build-lv3` (`runner_id: 1`), starting at `2026-03-28T17:01:49Z` and completing at `2026-03-28T17:01:52Z`
+- ADR 0229 itself is now marked implemented retroactively to the earlier ADR 0143 rollout, because the capability first became true in repo version `0.165.0` and platform version `0.130.15` on `2026-03-26`; this workstream re-verified it from repo version context `0.177.40` and platform version context `0.130.38`
 
 ## Mainline Integration Outcome
 
