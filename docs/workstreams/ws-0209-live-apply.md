@@ -12,7 +12,7 @@
 - Owner: codex
 - Depends On: `adr-0129-runbook-automation-executor`, `adr-0204-architecture-governance`
 - Conflicts With: none
-- Shared Surfaces: `platform/use_cases/`, `scripts/runbook_executor.py`, `scripts/api_gateway/main.py`, `scripts/ops_portal/app.py`, `collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/`, `config/workflow-catalog.json`, `config/command-catalog.json`, `docs/runbooks/`, `docs/diagrams/agent-coordination-map.excalidraw`, `tests/`, `receipts/live-applies/`
+- Shared Surfaces: `platform/use_cases/`, `scripts/runbook_executor.py`, `scripts/api_gateway/main.py`, `scripts/ops_portal/app.py`, `collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/`, `config/workflow-catalog.json`, `config/command-catalog.json`, `build/platform-manifest.json`, `docs/runbooks/`, `docs/diagrams/agent-coordination-map.excalidraw`, `tests/`, `receipts/live-applies/`
 
 ## Scope
 
@@ -38,6 +38,7 @@
 - `Makefile`
 - `config/workflow-catalog.json`
 - `config/command-catalog.json`
+- `build/platform-manifest.json`
 - `docs/runbooks/runbook-automation-executor.md`
 - `docs/runbooks/platform-operations-portal.md`
 - `docs/runbooks/ops-portal-down.md`
