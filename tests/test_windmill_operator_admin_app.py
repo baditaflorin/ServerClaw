@@ -71,6 +71,7 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "mkdocs.yml",
         "migrations",
         "playbooks",
+        "policy",
         "platform",
         "receipts",
         "scripts",

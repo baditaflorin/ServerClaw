@@ -193,6 +193,7 @@ windmill_worker_checkout_sync_paths:
   - mkdocs.yml
   - migrations
   - playbooks
+  - policy
   - platform
   - receipts
   - versions

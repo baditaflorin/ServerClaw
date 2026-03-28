@@ -43,6 +43,7 @@ from dependency_graph import (
     load_dependency_graph,
 )
 from platform.logging import get_logger, set_context
+from platform.policy.engine import evaluate_promotion_gate_policy
 from slo_tracking import build_slo_status_entries, default_prometheus_url, find_budget_breaches
 from standby_capacity import evaluate_service_standby
 from workflow_catalog import (
@@ -318,21 +319,36 @@ def check_promotion_gate(
 
     capacity_model = load_capacity_model()
     capacity_approved, capacity_reasons = check_capacity_gate(capacity_model)
-    reasons.extend(capacity_reasons)
     standby_gate = evaluate_service_standby(service_id, catalog={"services": list(service_index.values())}, model=capacity_model)
-    reasons.extend(standby_gate["reasons"])
 
     slo_gate = evaluate_slo_gate()
-    if not slo_gate["checked"]:
-        reasons.append(f"SLO gate could not evaluate: {slo_gate['reason']}")
-    elif slo_gate["blocking"]:
-        reasons.append(
-            "SLO error budget below 10%: "
-            + ", ".join(
+    policy_input = {
+        "service_id": service_id,
+        "approval": approval,
+        "staging_receipt": {
+            "age_hours": age.total_seconds() / 3600.0,
+            "verification_passed": stage_health["passed"],
+        },
+        "blocking_findings": {"count": len(blocking_findings)},
+        "capacity_gate": {
+            "approved": capacity_approved,
+            "reasons": capacity_reasons,
+        },
+        "standby_gate": {
+            "approved": standby_gate["approved"],
+            "reasons": standby_gate["reasons"],
+        },
+        "slo_gate": {
+            "checked": slo_gate["checked"],
+            "reason": slo_gate.get("reason") or "",
+            "blocking_budget_messages": [
                 f"{entry['id']} ({entry['metrics']['budget_remaining']:.2%} remaining)"
                 for entry in slo_gate["blocking"]
-            )
-        )
+            ],
+        },
+    }
+    policy_decision = evaluate_promotion_gate_policy(policy_input, repo_root=REPO_ROOT)
+    reasons = list(policy_decision["reasons"])
 
     return {
         "service": service_id,
@@ -347,7 +363,7 @@ def check_promotion_gate(
         },
         "standby_gate": standby_gate,
         "slo_gate": slo_gate,
-        "gate_decision": "approved" if not reasons else "rejected",
+        "gate_decision": str(policy_decision["gate_decision"]),
         "reasons": reasons,
     }
 

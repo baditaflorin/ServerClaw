@@ -19,7 +19,7 @@ export ANSIBLE_COLLECTIONS_PATH="$REPO_ROOT/collections:$ANSIBLE_COLLECTIONS_DIR
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|compose-runtime-envs|retry-guard|dependency-direction|data-models|architecture-fitness|workstream-surfaces|generated-docs|generated-portals|health-probes|alert-rules|tofu|agent-standards]...
+  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|compose-runtime-envs|retry-guard|dependency-direction|data-models|policy|architecture-fitness|workstream-surfaces|generated-docs|generated-portals|health-probes|alert-rules|tofu|agent-standards]...
 
 Examples:
   scripts/validate_repo.sh
@@ -377,6 +377,11 @@ validate_data_models() {
   "$PYTHON_BIN" "$REPO_ROOT/scripts/mutation_audit.py" --validate-schema >/dev/null
 }
 
+validate_policy() {
+  echo "ADR 0230 policy validation"
+  python3 "$REPO_ROOT/scripts/policy_checks.py" --validate >/dev/null
+}
+
 validate_architecture_fitness() {
   echo "Architecture fitness validation"
   "$PYTHON_BIN" "$REPO_ROOT/scripts/replaceability_scorecards.py" --validate >/dev/null
@@ -622,6 +627,7 @@ for stage in "$@"; do
       validate_alert_rules
       validate_tofu
       validate_data_models
+      validate_policy
       validate_architecture_fitness
       validate_workstream_surfaces
       validate_generated_docs
@@ -663,6 +669,9 @@ for stage in "$@"; do
       ;;
     data-models)
       validate_data_models
+      ;;
+    policy)
+      validate_policy
       ;;
     architecture-fitness)
       validate_architecture_fitness

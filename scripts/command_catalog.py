@@ -4,7 +4,13 @@ import argparse
 import json
 import os
 import sys
+from pathlib import Path
 from typing import Final
+
+if str(Path(__file__).resolve().parents[1]) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+    del sys.modules["platform"]
 
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 from correction_loops import (
@@ -21,6 +27,7 @@ from workflow_catalog import (
     validate_secret_manifest,
     validate_workflow_catalog,
 )
+from platform.policy.engine import evaluate_command_approval_policy
 
 
 COMMAND_CATALOG_PATH = repo_path("config", "command-catalog.json")
@@ -360,6 +367,40 @@ def emit_approval_audit_event(
     emit_event_best_effort(event, context=f"command approval '{command_id}'", stderr=sys.stderr)
 
 
+def build_approval_policy_input(
+    *,
+    command_catalog: dict,
+    workflow_catalog: dict,
+    command_id: str,
+    requester_class: str,
+    approver_classes: list[str],
+    preflight_passed: bool,
+    validation_passed: bool,
+    receipt_planned: bool,
+    self_approve: bool,
+    break_glass: bool,
+) -> dict[str, object]:
+    contract = command_catalog["commands"].get(command_id)
+    if contract is None:
+        raise ValueError(f"Unknown command contract: {command_id}")
+
+    workflow = workflow_catalog["workflows"][contract["workflow_id"]]
+    policy = command_catalog["approval_policies"][contract["approval_policy"]]
+    return {
+        "command_id": command_id,
+        "requester_class": requester_class,
+        "approver_classes": approver_classes,
+        "preflight_passed": preflight_passed,
+        "validation_passed": validation_passed,
+        "receipt_planned": receipt_planned,
+        "self_approve": self_approve,
+        "break_glass": break_glass,
+        "contract": contract,
+        "workflow": workflow,
+        "policy": policy,
+    }
+
+
 def evaluate_approval(
     command_catalog: dict,
     workflow_catalog: dict,
@@ -376,54 +417,27 @@ def evaluate_approval(
     contract = command_catalog["commands"].get(command_id)
     if contract is None:
         raise ValueError(f"Unknown command contract: {command_id}")
-
     workflow = workflow_catalog["workflows"][contract["workflow_id"]]
-    policy = command_catalog["approval_policies"][contract["approval_policy"]]
-    reasons: list[str] = []
-
-    if workflow["lifecycle_status"] != "active":
-        reasons.append(
-            f"workflow '{contract['workflow_id']}' is '{workflow['lifecycle_status']}', not active"
-        )
-
-    if requester_class not in ALLOWED_IDENTITY_CLASSES:
-        reasons.append(f"requester_class must be one of {sorted(ALLOWED_IDENTITY_CLASSES)}")
-    elif requester_class not in policy["allowed_requester_classes"]:
-        reasons.append(
-            f"requester_class '{requester_class}' is not allowed by policy '{contract['approval_policy']}'"
-        )
-
-    if len(approver_classes) < policy["minimum_approvals"]:
-        reasons.append(
-            f"policy '{contract['approval_policy']}' requires at least {policy['minimum_approvals']} approval(s)"
-        )
-
-    for approver_class in approver_classes:
-        if approver_class not in ALLOWED_IDENTITY_CLASSES:
-            reasons.append(f"approver_class '{approver_class}' must be one of {sorted(ALLOWED_IDENTITY_CLASSES)}")
-        elif approver_class not in policy["allowed_approver_classes"]:
-            reasons.append(
-                f"approver_class '{approver_class}' is not allowed by policy '{contract['approval_policy']}'"
-            )
-
-    if self_approve and not policy["allow_self_approval"]:
-        reasons.append(f"policy '{contract['approval_policy']}' does not allow self approval")
-    if break_glass and not policy["allow_break_glass"]:
-        reasons.append(f"policy '{contract['approval_policy']}' does not allow break-glass execution")
-    if policy["require_preflight"] and not preflight_passed:
-        reasons.append("preflight has not been marked passed")
-    if policy["require_validation"] and not validation_passed:
-        reasons.append("repository validation has not been marked passed")
-    if policy["require_receipt_plan"] and not receipt_planned:
-        reasons.append("receipt planning has not been marked complete")
-
+    payload = build_approval_policy_input(
+        command_catalog=command_catalog,
+        workflow_catalog=workflow_catalog,
+        command_id=command_id,
+        requester_class=requester_class,
+        approver_classes=approver_classes,
+        preflight_passed=preflight_passed,
+        validation_passed=validation_passed,
+        receipt_planned=receipt_planned,
+        self_approve=self_approve,
+        break_glass=break_glass,
+    )
+    decision = evaluate_command_approval_policy(payload, repo_root=Path(__file__).resolve().parents[1])
     return {
-        "approved": not reasons,
-        "reasons": reasons,
-        "workflow_id": contract["workflow_id"],
-        "entrypoint": workflow["preferred_entrypoint"]["command"],
-        "entrypoint_target": workflow["preferred_entrypoint"]["target"],
-        "receipt_required": contract["evidence"]["live_apply_receipt_required"],
+        "approved": bool(decision["approved"]),
+        "reasons": list(decision["reasons"]),
+        "workflow_id": str(decision["workflow_id"]),
+        "entrypoint": str(decision["entrypoint"]),
+        "entrypoint_target": str(workflow["preferred_entrypoint"]["target"]),
+        "receipt_required": bool(decision["receipt_required"]),
     }
 
 
