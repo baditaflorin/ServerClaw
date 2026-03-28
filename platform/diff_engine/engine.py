@@ -8,9 +8,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from platform.catalogs import service_entries, workflow_entries
 from platform.world_state.client import WorldStateClient
-
-from scripts.risk_scorer.context import service_catalog, workflow_catalog
 
 from .registry import DiffAdapterRegistry
 from .schema import ChangedObject, SemanticDiff, unknown_object
@@ -61,8 +60,8 @@ class DiffEngine:
         world_state: WorldStateClient | None = None,
     ) -> SemanticDiff:
         payload = intent.as_dict() if hasattr(intent, "as_dict") else dict(intent)
-        workflow = workflow_catalog(self.repo_root).get(payload["workflow_id"], {})
-        services = service_catalog(self.repo_root)
+        workflow = workflow_entries(self.repo_root).get(payload["workflow_id"], {})
+        services = service_entries(self.repo_root)
         service_id = payload.get("target_service_id")
         service = services.get(service_id) if isinstance(service_id, str) else None
         surfaces = infer_surfaces(payload, workflow if isinstance(workflow, dict) else {}, service)

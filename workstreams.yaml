@@ -6895,3 +6895,146 @@ workstreams:
       included_in_repo_version: 0.177.28
       latest_receipts:
         public_edge_publication: 2026-03-28-adr-0021-shared-edge-certificate-repair-mainline-live-apply
+
+  - id: ws-0208-live-apply
+    adr: "0208"
+    title: Dependency direction and composition roots live apply
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0208-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0208-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0208-live-apply.md
+    depends_on:
+      - adr-0204-architecture-governance
+      - adr-0206-ports-and-adapters-for-external-integrations
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/adr/0208-dependency-direction-and-composition-roots.md
+      - docs/workstreams/ws-0208-live-apply.md
+      - docs/runbooks/validate-repository-automation.md
+      - docs/adr/.index.yaml
+      - config/validation-gate.json
+      - Makefile
+      - scripts/validate_repo.sh
+      - scripts/validate_dependency_direction.py
+      - scripts/controller_automation_toolkit.py
+      - scripts/repo_package_loader.py
+      - scripts/session_workspace.py
+      - scripts/run_namespace.py
+      - scripts/parse_ansible_drift.py
+      - scripts/lv3_cli.py
+      - config/windmill/scripts/platform-observation-loop.py
+      - platform/repo.py
+      - platform/catalogs.py
+      - platform/package_loader.py
+      - platform/session_workspace.py
+      - platform/run_namespace.py
+      - platform/ansible_drift.py
+      - platform/events/publisher.py
+      - platform/correction_loops.py
+      - platform/maintenance/
+      - platform/slo.py
+      - platform/ansible/execution_scopes.py
+      - platform/agent/
+      - platform/closure_loop/engine.py
+      - platform/config_merge/registry.py
+      - platform/diff_engine/
+      - platform/goal_compiler/compiler.py
+      - platform/graph/client.py
+      - platform/health/composite.py
+      - platform/interface_contracts.py
+      - platform/ledger/
+      - platform/live_apply/merge_train.py
+      - platform/scheduler/watchdog.py
+      - platform/world_state/workers.py
+      - tests/test_validate_dependency_direction.py
+      - tests/test_dependency_direction_gate.py
+      - tests/test_health_composite.py
+      - tests/test_lv3_cli.py
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_contract
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: adr_metadata_contract
+          paths:
+            - docs/adr/0208-dependency-direction-and-composition-roots.md
+          mode: shared_contract
+          contract: adr-metadata-v1
+        - id: lv3_cli_composition_root_contract
+          paths:
+            - scripts/lv3_cli.py
+          mode: shared_contract
+          contract: lv3-cli-composition-root-v1
+        - id: repo_validation_pipeline_contract
+          paths:
+            - config/validation-gate.json
+            - docs/runbooks/validate-repository-automation.md
+            - scripts/validate_dependency_direction.py
+            - scripts/validate_repo.sh
+          mode: shared_contract
+          contract: repo-validation-pipeline-v1
+        - id: makefile_validation_contract
+          paths:
+            - Makefile
+          mode: shared_contract
+          contract: makefile-validation-targets-v1
+        - id: dependency_direction_repo_surface
+          paths:
+            - docs/workstreams/ws-0208-live-apply.md
+            - platform/repo.py
+            - platform/catalogs.py
+            - platform/package_loader.py
+            - platform/session_workspace.py
+            - platform/run_namespace.py
+            - platform/ansible_drift.py
+            - platform/events/publisher.py
+            - platform/correction_loops.py
+            - platform/maintenance/**
+            - platform/slo.py
+            - platform/ansible/execution_scopes.py
+            - platform/agent/**
+            - platform/closure_loop/engine.py
+            - platform/config_merge/registry.py
+            - platform/diff_engine/**
+            - platform/goal_compiler/compiler.py
+            - platform/graph/client.py
+            - platform/health/composite.py
+            - platform/interface_contracts.py
+            - platform/ledger/**
+            - platform/live_apply/merge_train.py
+            - platform/scheduler/watchdog.py
+            - platform/world_state/workers.py
+            - scripts/controller_automation_toolkit.py
+            - scripts/repo_package_loader.py
+            - scripts/session_workspace.py
+            - scripts/run_namespace.py
+            - scripts/parse_ansible_drift.py
+            - config/windmill/scripts/platform-observation-loop.py
+            - tests/test_validate_dependency_direction.py
+            - tests/test_dependency_direction_gate.py
+            - tests/test_health_composite.py
+            - tests/test_lv3_cli.py
+          mode: exclusive
+        - id: live_apply_evidence
+          paths:
+            - receipts/live-applies/2026-03-28-adr-0208-dependency-direction-and-composition-roots-live-apply.json
+          mode: shared_contract
+          contract: live-apply-receipts-v1
+        - id: integration_truth
+          paths:
+            - VERSION
+            - changelog.md
+            - README.md
+            - versions/stack.yaml
+          mode: generated
+    ready_to_merge: true
+    live_applied: true

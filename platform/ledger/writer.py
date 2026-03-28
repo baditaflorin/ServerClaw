@@ -8,11 +8,12 @@ import uuid
 from pathlib import Path
 from typing import Any, Callable
 
+from platform.events.publisher import publish_nats_events
+
 from ._common import (
     REPO_ROOT,
     dumps_jsonb,
     load_event_type_registry,
-    load_module_from_repo,
     normalize_event_row,
     normalize_timestamp,
     resolve_connection,
@@ -23,8 +24,7 @@ def _default_nats_publisher(subject: str, payload: dict[str, Any]) -> None:
     nats_url = os.environ.get("LV3_LEDGER_NATS_URL", "").strip() or os.environ.get("LV3_NATS_URL", "").strip()
     if not nats_url:
         return
-    drift_lib = load_module_from_repo(REPO_ROOT / "scripts" / "drift_lib.py", "lv3_ledger_drift_lib")
-    drift_lib.publish_nats_events(
+    publish_nats_events(
         [{"subject": subject, "payload": payload}],
         nats_url=nats_url,
         credentials=None,

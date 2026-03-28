@@ -3529,8 +3529,8 @@ adr_index:
     filename: 0207-anti-corruption-layers-at-provider-boundaries.md
   - adr: 0208
     title: Dependency Direction And Composition Roots
-    status: Accepted
-    implementation_status: Not Implemented
+    status: Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:

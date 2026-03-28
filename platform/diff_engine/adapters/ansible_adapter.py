@@ -7,8 +7,8 @@ import uuid
 from pathlib import Path
 from typing import Any, Callable
 
-from scripts.parse_ansible_drift import parse_ansible_output
-from scripts.run_namespace import ensure_run_namespace, resolve_run_namespace
+from platform.ansible_drift import parse_ansible_output
+from platform.run_namespace import ensure_run_namespace, resolve_run_namespace
 
 from ..schema import ChangedObject, unknown_object
 
