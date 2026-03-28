@@ -22,6 +22,17 @@ def test_build_platform_vars_includes_langfuse_publication_topology() -> None:
     assert platform_vars["outline_port"] == 3006
 
 
+def test_build_platform_vars_includes_dify_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    dify = platform_vars["platform_service_topology"]["dify"]
+
+    assert dify["public_hostname"] == "agents.lv3.org"
+    assert dify["dns"]["name"] == "agents"
+    assert dify["ports"]["internal"] == 8094
+    assert dify["urls"]["public"] == "https://agents.lv3.org"
+    assert dify["urls"]["internal"] == "http://10.10.10.20:8094"
+
+
 def test_build_service_urls_supports_private_gitea_proxy_and_root_url() -> None:
     ports = {
         "gitea_http_port": 3003,

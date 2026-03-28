@@ -890,6 +890,87 @@ def test_gateway_request_events_do_not_block_platform_reads(tmp_path: Path) -> N
     asyncio.run(run())
 
 
+def test_gateway_dify_tools_route_requires_valid_api_key(tmp_path: Path) -> None:
+    config, _token = make_repo(tmp_path, "http://upstream.test")
+    config = GatewayConfig(
+        **{
+            **config.__dict__,
+            "dify_tools_api_key": "expected-dify-key",
+        }
+    )
+    app = create_app(config)
+
+    async def run() -> None:
+        runtime = GatewayRuntime(config)
+        app.state.runtime = runtime
+        transport_app = httpx.ASGITransport(app=app)
+        try:
+            async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                missing = await client.post("/v1/dify-tools/get-platform-status", json={})
+                assert missing.status_code == 401
+                assert missing.json()["error"]["code"] == "AUTH_TOKEN_MISSING"
+
+                wrong = await client.post(
+                    "/v1/dify-tools/get-platform-status",
+                    headers={"X-LV3-Dify-Api-Key": "wrong-key"},
+                    json={},
+                )
+                assert wrong.status_code == 401
+                assert wrong.json()["error"]["code"] == "AUTH_TOKEN_INVALID"
+        finally:
+            await runtime.close()
+
+    asyncio.run(run())
+
+
+def test_gateway_dify_tools_route_dispatches_and_returns_structured_content(tmp_path: Path) -> None:
+    config, _token = make_repo(tmp_path, "http://upstream.test")
+    config = GatewayConfig(
+        **{
+            **config.__dict__,
+            "dify_tools_api_key": "expected-dify-key",
+        }
+    )
+    app = create_app(config)
+
+    async def run() -> None:
+        runtime = GatewayRuntime(config)
+        app.state.runtime = runtime
+        transport_app = httpx.ASGITransport(app=app)
+        try:
+            with patch.object(gateway_main, "load_agent_tool_registry", return_value=({"tools": []}, {})), patch.object(
+                gateway_main,
+                "call_tool",
+                return_value=(
+                    {
+                        "tool": "get-platform-status",
+                        "structuredContent": {"status": "ok", "source": "dify"},
+                        "content": [],
+                        "isError": False,
+                    },
+                    {"outcome": "success"},
+                ),
+            ) as call_tool_mock:
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    response = await client.post(
+                        "/v1/dify-tools/get-platform-status",
+                        headers={"X-LV3-Dify-Api-Key": "expected-dify-key"},
+                        json={"include_details": True},
+                    )
+                    assert response.status_code == 200
+                    assert response.json() == {"status": "ok", "source": "dify"}
+                    call_tool_mock.assert_called_once_with(
+                        {"tools": []},
+                        "get-platform-status",
+                        {"include_details": True},
+                        actor_class="service_identity",
+                    )
+        finally:
+            await runtime.close()
+
+    asyncio.run(run())
+
+
 def test_gateway_retries_safe_proxy_reads(tmp_path: Path) -> None:
     upstream_calls = {"count": 0}
 

@@ -1,0 +1,213 @@
+services:
+  openbao-agent:
+    image: {{ dify_openbao_agent_image }}
+    container_name: {{ dify_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ dify_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ dify_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ dify_env_file | dirname }}:{{ dify_env_file | dirname }}
+
+  api:
+    image: {{ dify_api_image }}
+    container_name: {{ dify_api_container_name }}
+    restart: unless-stopped
+    environment:
+      MODE: api
+    env_file:
+      - {{ dify_env_file }}
+    depends_on:
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+      openbao-agent:
+        condition: service_healthy
+    volumes:
+      - {{ dify_storage_dir }}:/app/api/storage
+    networks:
+      - default
+      - ssrf_proxy_network
+
+  worker:
+    image: {{ dify_api_image }}
+    container_name: {{ dify_worker_container_name }}
+    restart: unless-stopped
+    environment:
+      MODE: worker
+    env_file:
+      - {{ dify_env_file }}
+    depends_on:
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+      openbao-agent:
+        condition: service_healthy
+    volumes:
+      - {{ dify_storage_dir }}:/app/api/storage
+    networks:
+      - default
+      - ssrf_proxy_network
+
+  worker_beat:
+    image: {{ dify_api_image }}
+    container_name: {{ dify_worker_beat_container_name }}
+    restart: unless-stopped
+    environment:
+      MODE: beat
+    env_file:
+      - {{ dify_env_file }}
+    depends_on:
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+      openbao-agent:
+        condition: service_healthy
+    networks:
+      - default
+      - ssrf_proxy_network
+
+  web:
+    image: {{ dify_web_image }}
+    container_name: {{ dify_web_container_name }}
+    restart: unless-stopped
+    env_file:
+      - {{ dify_env_file }}
+
+  redis:
+    image: {{ dify_redis_image }}
+    container_name: {{ dify_redis_container_name }}
+    restart: unless-stopped
+    user: "{{ dify_redis_uid }}:{{ dify_redis_gid }}"
+    env_file:
+      - {{ dify_env_file }}
+    command:
+      - redis-server
+      - --requirepass
+      - {{ dify_redis_password }}
+      - --appendonly
+      - "yes"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - redis-cli -a "{{ dify_redis_password }}" ping | grep -q PONG
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - {{ dify_redis_dir }}:/data
+
+  qdrant:
+    image: {{ dify_qdrant_image }}
+    container_name: {{ dify_qdrant_container_name }}
+    restart: unless-stopped
+    environment:
+      QDRANT__SERVICE__API_KEY: {{ dify_qdrant_api_key }}
+    volumes:
+      - {{ dify_qdrant_dir }}:/qdrant/storage
+
+  sandbox:
+    image: {{ dify_sandbox_image }}
+    container_name: {{ dify_sandbox_container_name }}
+    restart: unless-stopped
+    env_file:
+      - {{ dify_env_file }}
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - -f
+        - http://localhost:{{ dify_sandbox_port }}/health
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - {{ dify_sandbox_dir }}/dependencies:/dependencies
+      - {{ dify_sandbox_dir }}/conf:/conf
+    networks:
+      - ssrf_proxy_network
+
+  plugin_daemon:
+    image: {{ dify_plugin_daemon_image }}
+    container_name: {{ dify_plugin_daemon_container_name }}
+    restart: unless-stopped
+    env_file:
+      - {{ dify_env_file }}
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+    volumes:
+      - {{ dify_plugin_dir }}:/app/storage
+
+  ssrf_proxy:
+    image: {{ dify_ssrf_proxy_image }}
+    container_name: {{ dify_ssrf_proxy_container_name }}
+    restart: unless-stopped
+    env_file:
+      - {{ dify_env_file }}
+    volumes:
+      - {{ dify_ssrf_proxy_dir }}/squid.conf.template:/etc/squid/squid.conf.template:ro
+      - {{ dify_ssrf_proxy_dir }}/docker-entrypoint.sh:/docker-entrypoint-mount.sh:ro
+    entrypoint:
+      - sh
+      - -c
+      - >-
+        cp /docker-entrypoint-mount.sh /docker-entrypoint.sh &&
+        sed -i 's/\r$//' /docker-entrypoint.sh &&
+        chmod +x /docker-entrypoint.sh &&
+        /docker-entrypoint.sh
+    networks:
+      - default
+      - ssrf_proxy_network
+
+  nginx:
+    image: {{ dify_nginx_image }}
+    container_name: {{ dify_nginx_container_name }}
+    restart: unless-stopped
+    env_file:
+      - {{ dify_env_file }}
+    depends_on:
+      api:
+        condition: service_started
+      web:
+        condition: service_started
+    ports:
+      - "{{ dify_port }}:{{ dify_nginx_port }}"
+    volumes:
+      - {{ dify_nginx_dir }}/nginx.conf.template:/etc/nginx/nginx.conf.template:ro
+      - {{ dify_nginx_dir }}/proxy.conf.template:/etc/nginx/proxy.conf.template:ro
+      - {{ dify_nginx_conf_dir }}:/etc/nginx/conf.d
+      - {{ dify_nginx_dir }}/docker-entrypoint.sh:/docker-entrypoint-mount.sh:ro
+    entrypoint:
+      - sh
+      - -c
+      - >-
+        cp /docker-entrypoint-mount.sh /docker-entrypoint.sh &&
+        sed -i 's/\r$//' /docker-entrypoint.sh &&
+        chmod +x /docker-entrypoint.sh &&
+        /docker-entrypoint.sh
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider http://127.0.0.1/healthz || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 18
+
+networks:
+  ssrf_proxy_network: {}

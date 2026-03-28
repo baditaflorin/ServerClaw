@@ -23,6 +23,212 @@
         "converge-dozzle"
       ]
     },
+    "dify_api_runtime": {
+      "kind": "runtime",
+      "service_id": "dify",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "dify-api",
+      "registry_ref": "docker.io/langgenius/dify-api",
+      "tag": "1.13.3",
+      "digest": "sha256:d1c73b3be4ba3212d4119c77e15230215e8bcf760ed64f80cfea121c277e1108",
+      "ref": "docker.io/langgenius/dify-api:1.13.3@sha256:d1c73b3be4ba3212d4119c77e15230215e8bcf760ed64f80cfea121c277e1108",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-28",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-28-dify-api-runtime.json",
+      "exception": {
+        "reason": "The pinned upstream Dify API image reports critical and high Trivy findings in bundled Debian, Node.js, and embedded utility binaries; keep it digest-pinned and review on the next image rotation window.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-28",
+        "review_by": "2026-04-11"
+      },
+      "consumers": [
+        "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-dify"
+      ]
+    },
+    "dify_nginx_runtime": {
+      "kind": "runtime",
+      "service_id": "dify",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "dify-nginx",
+      "registry_ref": "docker.io/library/nginx",
+      "tag": "1.29.1-alpine",
+      "digest": "sha256:42a516af16b852e33b7682d5ef8acbd5d13fe08fecadc7ed98605ba5e3b26ab8",
+      "ref": "docker.io/library/nginx:1.29.1-alpine@sha256:42a516af16b852e33b7682d5ef8acbd5d13fe08fecadc7ed98605ba5e3b26ab8",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-28",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-28-dify-nginx-runtime.json",
+      "exception": {
+        "reason": "The pinned upstream NGINX alpine image still reports critical and high Trivy findings in bundled Alpine packages; keep it digest-pinned and review at the next image refresh.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-28",
+        "review_by": "2026-04-11"
+      },
+      "consumers": [
+        "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-dify"
+      ]
+    },
+    "dify_plugin_daemon_runtime": {
+      "kind": "runtime",
+      "service_id": "dify",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "dify-plugin-daemon",
+      "registry_ref": "docker.io/langgenius/dify-plugin-daemon",
+      "tag": "0.5.3-local",
+      "digest": "sha256:0bf7734135702a719701646a0fd9d7ad8b20b7d9cfb8eaedc8a890cf682d55bc",
+      "ref": "docker.io/langgenius/dify-plugin-daemon:0.5.3-local@sha256:0bf7734135702a719701646a0fd9d7ad8b20b7d9cfb8eaedc8a890cf682d55bc",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-28",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-28-dify-plugin-daemon-runtime.json",
+      "exception": {
+        "reason": "The pinned upstream Dify plugin daemon image reports critical and high Trivy findings in bundled Debian and Python components; keep it digest-pinned and review on the next image rotation window.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-28",
+        "review_by": "2026-04-11"
+      },
+      "consumers": [
+        "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-dify"
+      ]
+    },
+    "dify_qdrant_runtime": {
+      "kind": "runtime",
+      "service_id": "dify",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "dify-qdrant",
+      "registry_ref": "docker.io/qdrant/qdrant",
+      "tag": "v1.8.3",
+      "digest": "sha256:15bd3cee31b369f0598a286c830dff9177cd5ec98d81332e4b1d76abb39b6889",
+      "ref": "docker.io/qdrant/qdrant:v1.8.3@sha256:15bd3cee31b369f0598a286c830dff9177cd5ec98d81332e4b1d76abb39b6889",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-28",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-28-dify-qdrant-runtime.json",
+      "exception": {
+        "reason": "The pinned upstream Qdrant image reports critical and high Trivy findings in bundled Ubuntu packages and Rust-linked components; keep it digest-pinned and review on the next image rotation window.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-28",
+        "review_by": "2026-04-11"
+      },
+      "consumers": [
+        "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-dify"
+      ]
+    },
+    "dify_redis_runtime": {
+      "kind": "runtime",
+      "service_id": "dify",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "dify-redis",
+      "registry_ref": "docker.io/library/redis",
+      "tag": "6.2.20-alpine",
+      "digest": "sha256:77697a75da9f94e9357b61fcaf8345f69e3d9d32e9d15032c8415c21263977dc",
+      "ref": "docker.io/library/redis:6.2.20-alpine@sha256:77697a75da9f94e9357b61fcaf8345f69e3d9d32e9d15032c8415c21263977dc",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-28",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-28-dify-redis-runtime.json",
+      "exception": {
+        "reason": "The pinned upstream Redis alpine image reports critical and high Trivy findings in bundled Alpine packages; keep it digest-pinned and review on the next image rotation window.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-28",
+        "review_by": "2026-04-11"
+      },
+      "consumers": [
+        "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-dify"
+      ]
+    },
+    "dify_sandbox_runtime": {
+      "kind": "runtime",
+      "service_id": "dify",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "dify-sandbox",
+      "registry_ref": "docker.io/langgenius/dify-sandbox",
+      "tag": "0.2.14",
+      "digest": "sha256:a56b9ca13d7aed8344a511cfc219aeaf12d589fa84f25d88875181285e69f560",
+      "ref": "docker.io/langgenius/dify-sandbox:0.2.14@sha256:a56b9ca13d7aed8344a511cfc219aeaf12d589fa84f25d88875181285e69f560",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-28",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-28-dify-sandbox-runtime.json",
+      "consumers": [
+        "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-dify"
+      ]
+    },
+    "dify_ssrf_proxy_runtime": {
+      "kind": "runtime",
+      "service_id": "dify",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "dify-ssrf-proxy",
+      "registry_ref": "docker.io/ubuntu/squid",
+      "tag": "6.6-24.04_beta",
+      "digest": "sha256:6a097f68bae708cedbabd6188d68c7e2e7a38cedd05a176e1cc0ba29e3bbe029",
+      "ref": "docker.io/ubuntu/squid:6.6-24.04_beta@sha256:6a097f68bae708cedbabd6188d68c7e2e7a38cedd05a176e1cc0ba29e3bbe029",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-28",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-28-dify-ssrf-proxy-runtime.json",
+      "consumers": [
+        "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-dify"
+      ]
+    },
+    "dify_web_runtime": {
+      "kind": "runtime",
+      "service_id": "dify",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "dify-web",
+      "registry_ref": "docker.io/langgenius/dify-web",
+      "tag": "1.13.3",
+      "digest": "sha256:f3f7d124cb0264162e74cd528de5f5472acfa14d75e7d2a54b167a3b8b99beb5",
+      "ref": "docker.io/langgenius/dify-web:1.13.3@sha256:f3f7d124cb0264162e74cd528de5f5472acfa14d75e7d2a54b167a3b8b99beb5",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-28",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-28-dify-web-runtime.json",
+      "consumers": [
+        "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-dify"
+      ]
+    },
     "homepage_runtime": {
       "kind": "runtime",
       "service_id": "homepage",

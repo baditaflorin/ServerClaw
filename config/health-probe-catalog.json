@@ -31,9 +31,6 @@
         },
         "validate_tls": false
       },
-      "tls_certificate_ids": [
-        "nginx-edge-public"
-      ],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -132,6 +129,52 @@
       "uptime_kuma": {
         "enabled": false,
         "reason": "Alertmanager is private-only and its operator value is already covered by role verification on monitoring-lv3."
+      }
+    },
+    "dify": {
+      "service_name": "dify",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "dify_runtime",
+      "verify_file": "roles/dify_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Dify edge health endpoint responds on the docker-runtime listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://10.10.10.20:8094/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The Dify setup-status endpoint responds and reports the bootstrap step state.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://10.10.10.20:8094/console/api/setup",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Dify Public",
+          "type": "http",
+          "url": "https://agents.lv3.org/healthz",
+          "description": "Dify publication through the shared NGINX edge and oauth2-proxy gate.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
       }
     },
     "gitea": {

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import hmac
 import hashlib
 import importlib.util
 import json
@@ -32,7 +33,7 @@ REPO_ROOT = _resolve_repo_root()
 import httpx
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
-from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
+from fastapi import Body, Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
@@ -68,6 +69,7 @@ def _load_repo_platform_package() -> None:
 _load_repo_platform_package()
 
 from api_gateway_catalog import load_api_gateway_catalog
+from agent_tool_registry import call_tool, load_agent_tool_registry
 from canonical_errors import ErrorRegistry
 GRAPH_RUNTIME_IMPORT_ERROR: str | None = None
 
@@ -221,6 +223,8 @@ class GatewayConfig:
     world_state_dsn: str | None = None
     clock_skew_seconds: int = 30
     keycloak_retry_after_seconds: int = 30
+    dify_tools_api_key: str | None = None
+    dify_tools_api_key_header: str = "X-LV3-Dify-Api-Key"
 
 
 class KeycloakJWTVerifier:
@@ -866,6 +870,8 @@ def build_config() -> GatewayConfig:
         openapi_include_upstreams=os.environ.get("LV3_GATEWAY_INCLUDE_UPSTREAM_OPENAPI", "false").lower()
         in {"1", "true", "yes"},
         keycloak_retry_after_seconds=int(os.environ.get("LV3_GATEWAY_KEYCLOAK_RETRY_AFTER_SECONDS", "30")),
+        dify_tools_api_key=os.environ.get("LV3_DIFY_TOOLS_API_KEY") or None,
+        dify_tools_api_key_header=os.environ.get("LV3_DIFY_TOOLS_API_KEY_HEADER", "X-LV3-Dify-Api-Key"),
     )
 
 
@@ -905,6 +911,29 @@ async def require_identity(request: Request) -> dict[str, Any]:
         "roles": extract_roles(claims),
         "subject": subject_from_claims(claims),
         "token": token,
+    }
+    set_context(actor_id=identity["subject"])
+    request.state.identity = identity
+    return identity
+
+
+def require_dify_tools_identity(request: Request) -> dict[str, Any]:
+    runtime: GatewayRuntime = request.app.state.runtime
+    expected_api_key = (runtime.config.dify_tools_api_key or "").strip()
+    if not expected_api_key:
+        raise HTTPException(status_code=503, detail="dify tools api key is not configured")
+
+    header_name = runtime.config.dify_tools_api_key_header
+    provided_api_key = request.headers.get(header_name, "").strip()
+    if not provided_api_key:
+        raise HTTPException(status_code=401, detail="missing dify tools api key")
+    if not hmac.compare_digest(provided_api_key, expected_api_key):
+        raise HTTPException(status_code=401, detail="invalid dify tools api key")
+
+    identity = {
+        "claims": {"sub": "service/dify"},
+        "roles": {"service-automation"},
+        "subject": "service/dify",
     }
     set_context(actor_id=identity["subject"])
     request.state.identity = identity
@@ -967,6 +996,21 @@ def canonical_error_from_http_exception(request: Request, exc: HTTPException) ->
             retry_after = None
 
     if exc.status_code == 401:
+        if "dify tools api key" in detail_lower:
+            header = "X-LV3-Dify-Api-Key"
+            if "missing" in detail_lower:
+                return (
+                    "AUTH_TOKEN_MISSING",
+                    "Dify tools API key is required for this endpoint.",
+                    {"header": header},
+                    retry_after,
+                )
+            return (
+                "AUTH_TOKEN_INVALID",
+                "Dify tools API key could not be validated.",
+                {"header": header, "reason": "token_validation"},
+                retry_after,
+            )
         if "missing bearer token" in detail_lower:
             return (
                 "AUTH_TOKEN_MISSING",
@@ -1541,6 +1585,38 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
 
         await emit_request_event(request, identity=identity, status_code=202, started_at=started_at)
         return response_payload
+
+    @app.post("/v1/dify-tools/{tool_name}")
+    async def dify_tools_call(
+        tool_name: str,
+        request: Request,
+        body: dict[str, Any] = Body(default_factory=dict),
+    ) -> Any:
+        started_at = time.perf_counter()
+        identity = require_dify_tools_identity(request)
+        try:
+            registry, _workflow_catalog = await asyncio.to_thread(load_agent_tool_registry)
+        except (OSError, ValueError, RuntimeError, json.JSONDecodeError) as exc:
+            raise HTTPException(status_code=503, detail=f"agent tool registry unavailable: {exc}") from exc
+
+        try:
+            result, _audit_event = await asyncio.to_thread(
+                call_tool,
+                registry,
+                tool_name,
+                body,
+                actor_class="service_identity",
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+        if result.get("isError"):
+            payload = result.get("structuredContent") or {"error": "tool handler failed"}
+            await emit_request_event(request, identity=identity, status_code=502, started_at=started_at)
+            return JSONResponse(status_code=502, content=payload)
+
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return result.get("structuredContent", {})
 
     @app.get("/v1/openapi.json")
     async def gateway_openapi(

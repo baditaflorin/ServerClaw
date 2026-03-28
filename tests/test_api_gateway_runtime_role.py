@@ -64,12 +64,19 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "dest: ledger-event-types.yaml" in defaults
     assert "api_gateway_event_taxonomy_src" in defaults
     assert "dest: event-taxonomy.yaml" in defaults
+    assert "dest: agent-tool-registry.json" in defaults
+    assert "dest: api-publication.json" in defaults
+    assert "dest: command-catalog.json" in defaults
+    assert "dest: workflow-defaults.yaml" in defaults
+    assert "dest: execution-lanes.yaml" in defaults
     assert "api_gateway_database_name: windmill" in defaults
     assert "api_gateway_database_user: windmill_admin" in defaults
     assert "rev-parse --path-format=absolute --git-common-dir" in defaults
     assert 'api_gateway_database_password_local_file: "{{ api_gateway_shared_local_root }}/windmill/database-password.txt"' in defaults
     assert "api_gateway_graph_dsn" in defaults
     assert 'api_gateway_world_state_dsn: "{{ api_gateway_graph_dsn }}"' in defaults
+    assert "/.local/dify/tools-api-key.txt" in defaults
+    assert "api_gateway_dify_tools_api_key_header: X-LV3-Dify-Api-Key" in defaults
 
 
 def test_api_gateway_compose_mounts_config_into_app_root() -> None:
@@ -83,6 +90,8 @@ def test_api_gateway_compose_mounts_config_into_app_root() -> None:
     assert "{{ api_gateway_config_dir }}:/app/config:ro" in compose_template
     assert "LV3_GATEWAY_GRAPH_DSN={{ api_gateway_graph_dsn }}" in env_template
     assert "LV3_GATEWAY_WORLD_STATE_DSN={{ api_gateway_world_state_dsn }}" in env_template
+    assert "LV3_DIFY_TOOLS_API_KEY={{ api_gateway_dify_tools_api_key }}" in env_template
+    assert "LV3_DIFY_TOOLS_API_KEY_HEADER={{ api_gateway_dify_tools_api_key_header }}" in env_template
 
 
 def test_windmill_runtime_templates_export_graph_world_state_and_ledger_dsns() -> None:
@@ -139,19 +148,56 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "scripts/maintenance_window_tool.py" in defaults
     assert "scripts/slo_tracking.py" in defaults
     assert "api_gateway_tree_sync_specs" in defaults
+    assert ".githooks/pre-push" in defaults
+    assert ".github/workflows/validate.yml" in defaults
+    assert ".pre-commit-config.yaml" in defaults
+    assert "README.md" in defaults
+    assert "ansible.cfg" in defaults
+    assert "workstreams.yaml" in defaults
+    assert 'remote_archive: "{{ api_gateway_site_dir }}/collections-sync.tar.gz"' in defaults
+    assert 'remote_archive: "{{ api_gateway_site_dir }}/inventory-sync.tar.gz"' in defaults
+    assert 'remote_archive: "{{ api_gateway_site_dir }}/migrations-sync.tar.gz"' in defaults
+    assert 'remote_archive: "{{ api_gateway_site_dir }}/molecule-sync.tar.gz"' in defaults
+    assert 'remote_archive: "{{ api_gateway_site_dir }}/packer-sync.tar.gz"' in defaults
+    assert 'remote_archive: "{{ api_gateway_site_dir }}/playbooks-sync.tar.gz"' in defaults
     assert 'remote_archive: "{{ api_gateway_site_dir }}/scripts-sync.tar.gz"' in defaults
     assert 'remote_archive: "{{ api_gateway_site_dir }}/config-sync.tar.gz"' in defaults
     assert 'remote_archive: "{{ api_gateway_site_dir }}/docs-sync.tar.gz"' in defaults
     assert 'remote_archive: "{{ api_gateway_site_dir }}/receipts-sync.tar.gz"' in defaults
+    assert 'remote_archive: "{{ api_gateway_site_dir }}/requirements-sync.tar.gz"' in defaults
+    assert 'remote_archive: "{{ api_gateway_site_dir }}/roles-sync.tar.gz"' in defaults
+    assert 'remote_archive: "{{ api_gateway_site_dir }}/tests-sync.tar.gz"' in defaults
+    assert 'remote_archive: "{{ api_gateway_site_dir }}/tofu-sync.tar.gz"' in defaults
+    assert 'remote_archive: "{{ api_gateway_site_dir }}/windmill-sync.tar.gz"' in defaults
     assert "preserve_destination_root: true" in defaults
     assert "api_gateway_runtime_config_probe_path: /app/config/ledger-event-types.yaml" in defaults
     assert "Sync the staged repo trees required by the API gateway runtime" in tasks
     assert "ansible.builtin.include_tasks: sync_tree.yml" in tasks
     assert "ansible.builtin.meta: reset_connection" in tasks
     assert "Check whether the API gateway container sees the runtime config bundle" in tasks
+    assert "{{ api_gateway_service_dir }}/.githooks" in tasks
+    assert "COPY Makefile ./Makefile" in tasks
+    assert "COPY .githooks ./.githooks" in tasks
+    assert "COPY .github ./.github" in tasks
+    assert "COPY .pre-commit-config.yaml ./.pre-commit-config.yaml" in tasks
+    assert "COPY README.md ./README.md" in tasks
+    assert "COPY ansible.cfg ./ansible.cfg" in tasks
     assert "COPY maintenance_window_tool.py ./maintenance_window_tool.py" in tasks
     assert "COPY slo_tracking.py ./slo_tracking.py" in tasks
+    assert "COPY collections ./collections" in tasks
     assert "COPY docs ./docs" in tasks
+    assert "COPY inventory ./inventory" in tasks
+    assert "COPY migrations ./migrations" in tasks
+    assert "COPY molecule ./molecule" in tasks
+    assert "COPY packer ./packer" in tasks
+    assert "COPY playbooks ./playbooks" in tasks
     assert "COPY receipts ./receipts" in tasks
+    assert "COPY requirements ./requirements" in tasks
+    assert "COPY roles ./roles" in tasks
     assert "COPY scripts ./scripts" in tasks
+    assert "COPY tests ./tests" in tasks
+    assert "COPY tofu ./tofu" in tasks
+    assert "COPY versions ./versions" in tasks
+    assert "COPY windmill ./windmill" in tasks
+    assert "COPY workstreams.yaml ./workstreams.yaml" in tasks
     assert "psycopg[binary]==" in requirements

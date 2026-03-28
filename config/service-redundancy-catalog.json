@@ -128,6 +128,23 @@
         "failback_method": "Restore or rebuild docker-runtime-lv3, then replay the required service converges from git."
       }
     },
+    "dify": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Dify or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Dify converge from git."
+      }
+    },
     "docs_portal": {
       "tier": "R1",
       "recovery_objective": {

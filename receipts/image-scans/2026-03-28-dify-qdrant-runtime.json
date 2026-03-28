@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "dify_qdrant_runtime",
+  "image_ref": "docker.io/qdrant/qdrant:v1.8.3@sha256:15bd3cee31b369f0598a286c830dff9177cd5ec98d81332e4b1d76abb39b6889",
+  "scanner": "trivy",
+  "scanner_image": "local/homebrew/trivy:0.69.3",
+  "scanned_on": "2026-03-28",
+  "summary": {
+    "critical": 4,
+    "high": 46
+  },
+  "targets_with_findings": [
+    {
+      "target": "docker.io/qdrant/qdrant:v1.8.3@sha256:15bd3cee31b369f0598a286c830dff9177cd5ec98d81332e4b1d76abb39b6889 (debian 12.5)",
+      "class": "os-pkgs",
+      "type": "debian",
+      "critical": 3,
+      "high": 28
+    },
+    {
+      "target": "Node.js",
+      "class": "lang-pkgs",
+      "type": "node-pkg",
+      "critical": 1,
+      "high": 18
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-28-dify-qdrant-runtime.trivy.json"
+}

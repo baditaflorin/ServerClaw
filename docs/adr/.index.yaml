@@ -55,6 +55,7 @@ concerns:
     - '0151'
     - '0165'
     - '0176'
+    - 0197
     - '0204'
   bootstrap:
     - '0001'
@@ -3371,6 +3372,23 @@ adr_index:
     summary: We deploy Netdata as a parent-plus-children topology for real-time metrics.
     filename: 0196-netdata-realtime-streaming-metrics.md
     implemented_version: 0.177.25
+  - adr: 0197
+    title: Dify - Visual LLM Workflow and Agent Canvas
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: automation
+    keywords:
+      - dify
+      - visual
+      - llm
+      - workflow
+      - agent
+      - canvas
+    summary: 'Deploy Dify on docker-runtime-lv3 at agents.lv3.org behind the shared Keycloak-backed edge authentication flow.
+      Connect '
+    filename: 0197-dify-visual-llm-workflow-canvas.md
+    implemented_version: 0.177.12
   - adr: 0198
     title: Qdrant Vector Search for Semantic Platform RAG
     status: Implemented

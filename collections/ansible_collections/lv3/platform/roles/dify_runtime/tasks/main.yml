@@ -1,0 +1,376 @@
+# Purpose: Converge the full Dify application stack, secrets, compose assets, and local controller artifacts.
+# Use case: Run when deploying or updating Dify on `docker-runtime-lv3` from repo-managed automation.
+# Inputs: Runtime paths, image refs, topology URLs, mirrored PostgreSQL password, and OpenBao helper settings.
+# Outputs: Installs the Dify runtime tree, renders compose configuration, mirrors secrets, and starts the stack.
+# Idempotency: Partially idempotent because one-time secret generation and compose restarts occur only when runtime inputs change.
+# Dependencies: ADR 0165, ADR 0043, ADR 0044, ADR 0146, and ADR 0197.
+---
+- name: Validate Dify runtime inputs
+  ansible.builtin.assert:
+    that:
+      - dify_site_dir | length > 0
+      - dify_secret_dir | length > 0
+      - dify_compose_file | length > 0
+      - dify_env_file | length > 0
+      - dify_port | int > 0
+      - dify_public_base_url | length > 0
+      - dify_database_password_local_file | length > 0
+      - dify_api_image | length > 0
+      - dify_web_image | length > 0
+      - dify_nginx_image | length > 0
+      - dify_redis_image | length > 0
+      - dify_qdrant_image | length > 0
+    fail_msg: >-
+      dify_runtime requires runtime paths, pinned image refs, the mirrored database password,
+      and public URL topology data.
+
+- name: Ensure the Dify database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ dify_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: dify_database_password_local
+
+- name: Fail if the Dify database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ dify_database_password_local_file }} is missing on the control machine.
+      Run the Dify PostgreSQL converge first so the runtime can connect to postgres-lv3.
+  when: not dify_database_password_local.stat.exists
+
+- name: Ensure the Dify runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - openssl
+      - python3
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Dify runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ dify_site_dir }}"
+      mode: "0755"
+    - path: "{{ dify_data_dir }}"
+      mode: "0755"
+    - path: "{{ dify_storage_dir }}"
+      owner: "1001"
+      group: "1001"
+      mode: "0755"
+    - path: "{{ dify_qdrant_dir }}"
+      mode: "0755"
+    - path: "{{ dify_redis_dir }}"
+      owner: "{{ dify_redis_uid }}"
+      group: "{{ dify_redis_gid }}"
+      mode: "0750"
+    - path: "{{ dify_plugin_dir }}"
+      mode: "0755"
+    - path: "{{ dify_sandbox_dir }}"
+      mode: "0755"
+    - path: "{{ dify_sandbox_dir }}/dependencies"
+      mode: "0755"
+    - path: "{{ dify_sandbox_dir }}/conf"
+      mode: "0755"
+    - path: "{{ dify_nginx_dir }}"
+      mode: "0755"
+    - path: "{{ dify_nginx_conf_dir }}"
+      mode: "0755"
+    - path: "{{ dify_ssrf_proxy_dir }}"
+      mode: "0755"
+    - path: "{{ dify_secret_dir }}"
+      mode: "0700"
+
+- name: Generate the Dify runtime secrets
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item.path }}" ]; then
+      umask 077
+      {{ item.command }} > "{{ item.path }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop:
+    - path: "{{ dify_init_password_remote_file }}"
+      command: "openssl rand -hex 12"
+    - path: "{{ dify_admin_password_remote_file }}"
+      command: "openssl rand -hex 12"
+    - path: "{{ dify_secret_key_remote_file }}"
+      command: "openssl rand -base64 42 | tr -d '\\n'"
+    - path: "{{ dify_redis_password_remote_file }}"
+      command: "openssl rand -base64 24 | tr -d '\\n'"
+    - path: "{{ dify_qdrant_api_key_remote_file }}"
+      command: "openssl rand -hex 16"
+    - path: "{{ dify_sandbox_api_key_remote_file }}"
+      command: "openssl rand -hex 16"
+    - path: "{{ dify_plugin_daemon_key_remote_file }}"
+      command: "openssl rand -base64 32 | tr -d '\\n'"
+    - path: "{{ dify_plugin_inner_api_key_remote_file }}"
+      command: "openssl rand -base64 32 | tr -d '\\n'"
+    - path: "{{ dify_tools_api_key_remote_file }}"
+      command: "openssl rand -hex 16"
+  register: dify_secret_generation
+  changed_when: "'changed' in dify_secret_generation.stdout"
+  no_log: true
+
+- name: Read the Dify runtime secrets
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  register: dify_secret_reads
+  loop:
+    - "{{ dify_init_password_remote_file }}"
+    - "{{ dify_admin_password_remote_file }}"
+    - "{{ dify_secret_key_remote_file }}"
+    - "{{ dify_redis_password_remote_file }}"
+    - "{{ dify_qdrant_api_key_remote_file }}"
+    - "{{ dify_sandbox_api_key_remote_file }}"
+    - "{{ dify_plugin_daemon_key_remote_file }}"
+    - "{{ dify_plugin_inner_api_key_remote_file }}"
+    - "{{ dify_tools_api_key_remote_file }}"
+  no_log: true
+
+- name: Record the Dify runtime secrets
+  ansible.builtin.set_fact:
+    dify_init_password: "{{ dify_secret_reads.results[0].content | b64decode | trim }}"
+    dify_admin_password: "{{ dify_secret_reads.results[1].content | b64decode | trim }}"
+    dify_secret_key: "{{ dify_secret_reads.results[2].content | b64decode | trim }}"
+    dify_redis_password: "{{ dify_secret_reads.results[3].content | b64decode | trim }}"
+    dify_qdrant_api_key: "{{ dify_secret_reads.results[4].content | b64decode | trim }}"
+    dify_sandbox_api_key: "{{ dify_secret_reads.results[5].content | b64decode | trim }}"
+    dify_plugin_daemon_key: "{{ dify_secret_reads.results[6].content | b64decode | trim }}"
+    dify_plugin_inner_api_key: "{{ dify_secret_reads.results[7].content | b64decode | trim }}"
+    dify_tools_api_key: "{{ dify_secret_reads.results[8].content | b64decode | trim }}"
+    dify_database_password: "{{ lookup('ansible.builtin.file', dify_database_password_local_file) | trim }}"
+    dify_runtime_secret_payload:
+      DB_PASSWORD: "{{ lookup('ansible.builtin.file', dify_database_password_local_file) | trim }}"
+      INIT_PASSWORD: "{{ dify_secret_reads.results[0].content | b64decode | trim }}"
+      ADMIN_PASSWORD: "{{ dify_secret_reads.results[1].content | b64decode | trim }}"
+      SECRET_KEY: "{{ dify_secret_reads.results[2].content | b64decode | trim }}"
+      REDIS_PASSWORD: "{{ dify_secret_reads.results[3].content | b64decode | trim }}"
+      QDRANT_API_KEY: "{{ dify_secret_reads.results[4].content | b64decode | trim }}"
+      SANDBOX_API_KEY: "{{ dify_secret_reads.results[5].content | b64decode | trim }}"
+      PLUGIN_DAEMON_KEY: "{{ dify_secret_reads.results[6].content | b64decode | trim }}"
+      PLUGIN_DIFY_INNER_API_KEY: "{{ dify_secret_reads.results[7].content | b64decode | trim }}"
+      TOOLS_API_KEY: "{{ dify_secret_reads.results[8].content | b64decode | trim }}"
+  no_log: true
+
+- name: Ensure the local Dify artifact directory exists
+  ansible.builtin.file:
+    path: "{{ dify_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the Dify bootstrap secrets to the control machine
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.content }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  loop:
+    - dest: "{{ dify_init_password_local_file }}"
+      content: "{{ dify_init_password }}"
+    - dest: "{{ dify_admin_password_local_file }}"
+      content: "{{ dify_admin_password }}"
+    - dest: "{{ dify_secret_key_local_file }}"
+      content: "{{ dify_secret_key }}"
+    - dest: "{{ dify_redis_password_local_file }}"
+      content: "{{ dify_redis_password }}"
+    - dest: "{{ dify_qdrant_api_key_local_file }}"
+      content: "{{ dify_qdrant_api_key }}"
+    - dest: "{{ dify_sandbox_api_key_local_file }}"
+      content: "{{ dify_sandbox_api_key }}"
+    - dest: "{{ dify_plugin_daemon_key_local_file }}"
+      content: "{{ dify_plugin_daemon_key }}"
+    - dest: "{{ dify_plugin_inner_api_key_local_file }}"
+      content: "{{ dify_plugin_inner_api_key }}"
+    - dest: "{{ dify_tools_api_key_local_file }}"
+      content: "{{ dify_tools_api_key }}"
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for Dify
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: dify
+    common_openbao_compose_env_agent_dir: "{{ dify_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ dify_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ dify_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ dify_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ dify_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ dify_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ dify_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ dify_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ dify_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ dify_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ dify_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: dify.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ dify_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ dify_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ dify_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ dify_legacy_env_file }}"
+  no_log: true
+
+- name: Render the Dify environment file
+  ansible.builtin.template:
+    src: dify.env.j2
+    dest: "{{ dify_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the Dify compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ dify_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the Dify nginx templates
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - src: nginx.conf.template.j2
+      dest: "{{ dify_nginx_dir }}/nginx.conf.template"
+      mode: "0644"
+    - src: proxy.conf.template.j2
+      dest: "{{ dify_nginx_dir }}/proxy.conf.template"
+      mode: "0644"
+    - src: default.conf.template.j2
+      dest: "{{ dify_nginx_conf_dir }}/default.conf.template"
+      mode: "0644"
+    - src: nginx-docker-entrypoint.sh.j2
+      dest: "{{ dify_nginx_dir }}/docker-entrypoint.sh"
+      mode: "0755"
+
+- name: Render the Dify SSRF proxy templates
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - src: squid.conf.template.j2
+      dest: "{{ dify_ssrf_proxy_dir }}/squid.conf.template"
+      mode: "0644"
+    - src: ssrf-docker-entrypoint.sh.j2
+      dest: "{{ dify_ssrf_proxy_dir }}/docker-entrypoint.sh"
+      mode: "0755"
+
+- name: Render the Dify sandbox configuration
+  ansible.builtin.template:
+    src: sandbox-config.yaml.j2
+    dest: "{{ dify_sandbox_dir }}/conf/config.yaml"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Dify images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ dify_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ dify_site_dir }}"
+  register: dify_pull
+  changed_when: >-
+    'Pulling' in dify_pull.stdout
+    or 'Downloaded newer image' in dify_pull.stdout
+    or 'Pull complete' in dify_pull.stdout
+
+- name: Start the Dify runtime and recover Docker bridge-chain failures
+  block:
+    - name: Start the Dify runtime
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ dify_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ dify_site_dir }}"
+      register: dify_up
+      changed_when: >-
+        'Creating' in dify_up.stdout
+        or 'Recreating' in dify_up.stdout
+        or 'Starting' in dify_up.stdout
+
+    - name: Wait for Dify to listen locally
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ dify_port }}"
+        delay: 0
+        timeout: 240
+  rescue:
+    - name: Flag Docker bridge-chain failures during Dify startup
+      ansible.builtin.set_fact:
+        dify_docker_bridge_chain_missing: >-
+          {{
+            'No chain/target/match by that name' in (dify_up.stderr | default(''))
+            or 'Unable to enable ACCEPT OUTGOING rule' in (dify_up.stderr | default(''))
+          }}
+
+    - name: Surface unexpected Dify startup failures
+      ansible.builtin.fail:
+        msg: "{{ dify_up.stderr | default(dify_up.msg | default('Dify compose up failed')) }}"
+      when: not dify_docker_bridge_chain_missing
+
+    - name: Restart Docker when bridge chains are missing before retrying Dify startup
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: dify_docker_bridge_chain_missing
+
+    - name: Retry Dify startup after Docker bridge-chain recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ dify_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ dify_site_dir }}"
+      register: dify_up_retry
+      changed_when: true
+      when: dify_docker_bridge_chain_missing
+
+- name: Run the Dify role verification tasks
+  ansible.builtin.import_tasks: verify.yml

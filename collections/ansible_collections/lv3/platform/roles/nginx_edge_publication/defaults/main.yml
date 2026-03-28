@@ -103,6 +103,13 @@ public_edge_security_headers_overrides:
       'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
       connect-src 'self' https://n8n.lv3.org wss://n8n.lv3.org;
       worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+  agents.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
+      'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
+      connect-src 'self' https://agents.lv3.org wss://agents.lv3.org;
+      worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
   tasks.lv3.org:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
@@ -164,6 +171,10 @@ public_edge_authenticated_sites:
     auth_proxy_upstream: http://127.0.0.1:4180
   draw.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
+  agents.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+    unauthenticated_paths:
+      - /healthz
   langfuse.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
   tasks.lv3.org:

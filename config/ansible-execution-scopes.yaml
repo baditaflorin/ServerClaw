@@ -17,6 +17,12 @@ playbooks:
     shared_surfaces:
       - service:control-plane-recovery
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/dify.yml:
+    playbook_id: dify
+    mutation_scope: platform
+    shared_surfaces:
+      - service:dify
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/database-dns.yml:
     playbook_id: database-dns
     mutation_scope: platform

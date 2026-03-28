@@ -2412,6 +2412,72 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-dify": {
+      "description": "Converge Dify on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at agents.lv3.org, and verify the governed tool-sync and workflow export path.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-dify",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-dify"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "dify_database_password",
+          "dify_init_password",
+          "dify_admin_password",
+          "dify_secret_key",
+          "dify_redis_password",
+          "dify_qdrant_api_key",
+          "dify_sandbox_api_key",
+          "dify_plugin_daemon_key",
+          "dify_plugin_inner_api_key",
+          "dify_tools_api_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-dify"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-dify.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/dify.yml",
+        "playbooks/services/dify.yml",
+        "collections/ansible_collections/lv3/platform/roles/dify_postgres",
+        "collections/ansible_collections/lv3/platform/roles/dify_runtime",
+        "collections/ansible_collections/lv3/platform/roles/api_gateway_runtime",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication",
+        "inventory/host_vars/proxmox_florin.yml",
+        "scripts/dify_api.py",
+        "scripts/sync_tools_to_dify.py",
+        "scripts/dify_smoke.py",
+        "platform/dify-workflows/"
+      ],
+      "outputs": [
+        "A repo-managed Dify runtime on docker-runtime-lv3 with PostgreSQL persistence on postgres-lv3, the public agents.lv3.org hostname through the shared authenticated edge, governed LV3 tools exposed through the API gateway, and an exported smoke workflow artifact."
+      ],
+      "verification_commands": [
+        "make syntax-check-dify",
+        "curl -fsS https://agents.lv3.org/healthz",
+        "uv run --with requests --with pyyaml python3 scripts/dify_smoke.py --base-url https://agents.lv3.org --admin-email baditaflorin@gmail.com --admin-password-file .local/dify/admin-password.txt --init-password-file .local/dify/init-password.txt --tools-api-key-file .local/dify/tools-api-key.txt --export-path platform/dify-workflows/lv3-dify-smoke.yml --sync-tools"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 350,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-n8n": {
       "description": "Converge n8n on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress.",
       "lifecycle_status": "active",

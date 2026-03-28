@@ -166,6 +166,60 @@
       }
     },
     {
+      "id": "dify",
+      "name": "Dify",
+      "description": "Visual LLM workflow and agent canvas with governed LV3 tool sync and trace export support.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8094",
+      "public_url": "https://agents.lv3.org",
+      "subdomain": "agents.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Dify Public",
+      "health_probe_id": "dify",
+      "secret_catalog_ids": [
+        "dify_database_password",
+        "dify_init_password",
+        "dify_admin_password",
+        "dify_secret_key",
+        "dify_redis_password",
+        "dify_qdrant_api_key",
+        "dify_sandbox_api_key",
+        "dify_plugin_daemon_key",
+        "dify_plugin_inner_api_key",
+        "dify_tools_api_key"
+      ],
+      "image_catalog_ids": [
+        "dify_api_runtime",
+        "dify_web_runtime",
+        "dify_redis_runtime",
+        "dify_qdrant_runtime",
+        "dify_sandbox_runtime",
+        "dify_plugin_daemon_runtime",
+        "dify_nginx_runtime",
+        "dify_ssrf_proxy_runtime"
+      ],
+      "adr": "0197",
+      "runbook": "docs/runbooks/configure-dify.md",
+      "tags": [
+        "agents",
+        "llm",
+        "workflow",
+        "canvas",
+        "edge-authenticated"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://agents.lv3.org",
+          "subdomain": "agents.lv3.org",
+          "notes": "Branch-local rollout uses a Dify-local Qdrant sidecar until ADR 0198 lands on main."
+        }
+      }
+    },
+    {
       "id": "gitea",
       "name": "Gitea",
       "description": "Private self-hosted Git service with Keycloak SSO, repo bootstrap automation, and a dedicated Actions runner on docker-build-lv3.",

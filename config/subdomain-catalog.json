@@ -53,6 +53,14 @@
       "notes": "Reserved for a future governed API gateway surface."
     },
     {
+      "prefix": "agents",
+      "owner_adr": "0197",
+      "allowed_fqdns": [
+        "agents.lv3.org"
+      ],
+      "notes": "Reserved for the Dify visual workflow canvas edge surface."
+    },
+    {
       "prefix": "smtp",
       "owner_adr": "0041",
       "notes": "Reserved for mail submission and transport naming."
@@ -112,6 +120,23 @@
         "cert_path": "/etc/letsencrypt/live/lv3-edge/",
         "auto_renew": true
       }
+    },
+    {
+      "fqdn": "agents.lv3.org",
+      "service_id": "dify",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0197",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
     },
     {
       "fqdn": "database.lv3.org",

@@ -151,6 +151,7 @@ Template VM: `9000` `debian13-cloud-template`
 ### Published Service Inventory
 | Hostname | Service | Exposure | Owner |
 | --- | --- | --- | --- |
+| `agents.lv3.org` | `dify` | `edge-published` | `docker-runtime-lv3` |
 | `api.lv3.org` | `api-gateway` | `edge-published` | `docker-runtime-lv3` |
 | `build.lv3.org` | `docker-build` | `informational-only` | `docker-build-lv3` |
 | `database.lv3.org` | `postgres` | `private-only` | `postgres-lv3` |
@@ -194,6 +195,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `control_plane_recovery` | `2026-03-27-adr-0181-control-metadata-witness-live-apply` |
 | `deadlock_detector` | `2026-03-26-adr-0162-deadlock-detector-live-apply` |
 | `dependency_graph_runtime` | `2026-03-26-adr-0117-dependency-graph-live-apply` |
+| `dify` | `2026-03-28-adr-0197-dify-live-apply` |
 | `docker_runtime` | `2026-03-22-adr-0023-docker-runtime-live-apply` |
 | `dozzle` | `2026-03-26-adr-0150-dozzle-live-apply` |
 | `excalidraw` | `2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply` |
@@ -466,6 +468,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Backup VM](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-backup-vm.md)
 - [Configure Build Artifact Cache](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-build-artifact-cache.md)
 - [Configure Control-Plane Recovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-control-plane-recovery.md)
+- [Configure Dify](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-dify.md)
 - [Configure Docker Build VM](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-docker-build-vm.md)
 - [Configure Docker Runtime Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-docker-runtime.md)
 - [Configure Dozzle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-dozzle.md)
@@ -820,6 +823,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0192: Separate Capacity Classes for Standby, Recovery, and Preview Workloads](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads.md)
 - [ADR 0193: Plane Kanban Task Board](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0193-plane-kanban-task-board.md)
 - [ADR 0196: Netdata Realtime Streaming Metrics](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0196-netdata-realtime-streaming-metrics.md)
+- [ADR 0197: Dify - Visual LLM Workflow and Agent Canvas](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0197-dify-visual-llm-workflow-canvas.md)
 - [ADR 0198: Qdrant Vector Search for Semantic Platform RAG](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0198-qdrant-vector-search-semantic-rag.md)
 - [ADR 0199: Outline Living Knowledge Wiki](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0199-outline-living-knowledge-wiki.md)
 - [ADR 0202: Excalidraw Auto Generated Architecture Diagrams](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0202-excalidraw-auto-generated-architecture-diagrams.md)
@@ -1012,6 +1016,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0192-live-apply: Live Apply ADR 0192 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0192-live-apply.md)
 - [Workstream ws-0193-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0193-main-merge.md)
 - [Workstream ws-0196-live-apply: Live Apply ADR 0196 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0196-live-apply.md)
+- [Workstream WS-0197: Dify Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0197-live-apply.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
