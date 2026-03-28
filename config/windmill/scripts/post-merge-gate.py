@@ -12,9 +12,19 @@ LOCAL_FALLBACK_STAGES = [
     "role-argument-specs",
     "json",
     "alert-rules",
-    "data-models",
     "generated-docs",
     "generated-portals",
+]
+LOCAL_PROVIDER_BOUNDARY_COMMAND = [
+    "python3",
+    "-m",
+    "uv",
+    "run",
+    "--with",
+    "pyyaml",
+    "python3",
+    "scripts/provider_boundary_catalog.py",
+    "--validate",
 ]
 RUNNER_IMAGE_ERROR_MARKERS = (
     "unsupported manifest media type",
@@ -37,7 +47,15 @@ def _runner_image_pull_failed(stdout: str, stderr: str) -> bool:
     return any(marker in combined for marker in RUNNER_IMAGE_ERROR_MARKERS)
 
 
-def _fallback_status_payload(*, repo_root: Path, manifest_path: Path, status: str, returncode: int, duration_seconds: float) -> dict:
+def _fallback_status_payload(
+    *,
+    repo_root: Path,
+    manifest_path: Path,
+    status: str,
+    returncode: int,
+    duration_seconds: float,
+    commands: list[dict[str, object]],
+) -> dict:
     return {
         "status": status,
         "source": "windmill-post-merge-local-fallback",
@@ -53,6 +71,7 @@ def _fallback_status_payload(*, repo_root: Path, manifest_path: Path, status: st
                 "returncode": returncode,
                 "duration_seconds": round(duration_seconds, 2),
                 "docker_command": [],
+                "commands": commands,
             }
         ],
         "requested_checks": ["local-fallback"],
@@ -60,25 +79,51 @@ def _fallback_status_payload(*, repo_root: Path, manifest_path: Path, status: st
 
 
 def _run_local_fallback(repo_root: Path, manifest_path: Path, status_path: Path) -> dict:
-    command = ["./scripts/validate_repo.sh", *LOCAL_FALLBACK_STAGES]
+    commands = [
+        ["./scripts/validate_repo.sh", *LOCAL_FALLBACK_STAGES],
+        LOCAL_PROVIDER_BOUNDARY_COMMAND,
+    ]
     started = time.monotonic()
-    result = _run(command, cwd=repo_root)
+    command_results: list[dict[str, object]] = []
+    combined_stdout: list[str] = []
+    combined_stderr: list[str] = []
+    returncode = 0
+
+    for command in commands:
+        result = _run(command, cwd=repo_root)
+        rendered_command = " ".join(shlex.quote(part) for part in command)
+        command_results.append(
+            {
+                "command": rendered_command,
+                "returncode": result.returncode,
+            }
+        )
+        if result.stdout.strip():
+            combined_stdout.append(f"$ {rendered_command}\n{result.stdout.strip()}")
+        if result.stderr.strip():
+            combined_stderr.append(f"$ {rendered_command}\n{result.stderr.strip()}")
+        if result.returncode != 0:
+            returncode = result.returncode
+            break
+
     duration_seconds = time.monotonic() - started
     fallback_status = _fallback_status_payload(
         repo_root=repo_root,
         manifest_path=manifest_path,
-        status="passed" if result.returncode == 0 else "failed",
-        returncode=result.returncode,
+        status="passed" if returncode == 0 else "failed",
+        returncode=returncode,
         duration_seconds=duration_seconds,
+        commands=command_results,
     )
     status_path.parent.mkdir(parents=True, exist_ok=True)
     status_path.write_text(json.dumps(fallback_status, indent=2) + "\n", encoding="utf-8")
     payload = {
-        "status": "ok" if result.returncode == 0 else "error",
-        "command": " ".join(shlex.quote(part) for part in command),
-        "returncode": result.returncode,
-        "stdout": result.stdout.strip(),
-        "stderr": result.stderr.strip(),
+        "status": "ok" if returncode == 0 else "error",
+        "command": " && ".join(entry["command"] for entry in command_results),
+        "commands": command_results,
+        "returncode": returncode,
+        "stdout": "\n\n".join(combined_stdout).strip(),
+        "stderr": "\n\n".join(combined_stderr).strip(),
         "fallback_used": True,
         "gate_status": fallback_status,
     }

@@ -54,7 +54,7 @@ def test_post_merge_gate_falls_back_to_validate_repo_when_runner_images_fail(tmp
 
     def fake_run(command, *, cwd):
         calls.append(command)
-        if command[0] == "python3":
+        if len(command) > 1 and command[0] == "python3" and command[1].endswith("run_gate.py"):
             return FakeCompletedProcess(
                 returncode=1,
                 stdout="Unable to find image 'registry.lv3.org/check-runner/python:3.12.10' locally",
@@ -72,8 +72,14 @@ def test_post_merge_gate_falls_back_to_validate_repo_when_runner_images_fail(tmp
     assert "primary_gate_error" in payload
     assert calls[0][0] == "python3"
     assert calls[1][0] == "./scripts/validate_repo.sh"
+    assert calls[2][:3] == ["python3", "-m", "uv"]
+    assert calls[2][-2:] == ["scripts/provider_boundary_catalog.py", "--validate"]
+    assert len(payload["commands"]) == 2
 
     status_path = repo_root / ".local" / "validation-gate" / "post-merge-last-run.json"
     status_payload = json.loads(status_path.read_text(encoding="utf-8"))
     assert status_payload["status"] == "passed"
     assert status_payload["source"] == "windmill-post-merge-local-fallback"
+    assert status_payload["checks"][0]["commands"][1]["command"].endswith(
+        "scripts/provider_boundary_catalog.py --validate"
+    )

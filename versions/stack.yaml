@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.36
-platform_version: 0.130.37
+repo_version: 0.177.37
+platform_version: 0.130.38
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -89,6 +89,7 @@ live_apply_evidence:
     operator_access_workflows: 2026-03-28-adr-0206-ports-and-adapters-live-apply
     operator_access_quarterly_review: 2026-03-28-adr-0206-ports-and-adapters-live-apply
     canonical_publication_models: 2026-03-28-adr-0210-canonical-domain-models-live-apply
+    provider_boundaries: 2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -994,8 +995,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.36
+    current: 0.177.37
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.37
+    current: 0.130.38
     meaning: intended platform release for the actual server configuration

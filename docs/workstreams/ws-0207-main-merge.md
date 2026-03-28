@@ -3,8 +3,8 @@
 - ADR: [ADR 0207](../adr/0207-anti-corruption-layers-at-provider-boundaries.md)
 - Title: Integrate the verified ADR 0207 live apply into `origin/main`
 - Status: ready
-- Branch: `codex/ws-0207-main-merge`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0207-main-merge`
+- Branch: `codex/ws-0207-main-recut`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0207-main-recut`
 - Owner: codex
 - Depends On: `ws-0207-live-apply`
 
@@ -16,4 +16,4 @@
 
 ## Verification
 
-- in progress on `codex/ws-0207-main-merge`
+- release candidate prep in progress on `codex/ws-0207-main-recut`

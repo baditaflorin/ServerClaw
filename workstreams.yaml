@@ -222,7 +222,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0207 by translating Hetzner DNS provider payloads into canonical DNS facts at the boundary and by enforcing that contract in both the repository validation path and the live post-merge validation gate
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.37
       latest_receipts:
         provider_boundaries: 2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply
   - id: ws-0207-main-merge
@@ -230,8 +230,8 @@ workstreams:
     title: Integrate ADR 0207 live apply into origin/main
     status: ready
     owner: codex
-    branch: codex/ws-0207-main-merge
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0207-main-merge
+    branch: codex/ws-0207-main-recut
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0207-main-recut
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0207-main-merge.md
     depends_on:
       - ws-0207-live-apply
@@ -332,7 +332,7 @@ workstreams:
             - docs/diagrams/agent-coordination-map.excalidraw
           mode: shared_contract
           contract: integration-release-v1
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
   - id: ws-0224-server-resident-ops-adrs
     adr: "0224"
