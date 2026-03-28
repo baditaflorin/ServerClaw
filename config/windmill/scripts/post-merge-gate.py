@@ -16,8 +16,6 @@ LOCAL_FALLBACK_STAGES = [
     "generated-portals",
 ]
 LOCAL_PROVIDER_BOUNDARY_COMMAND = [
-    "python3",
-    "-m",
     "uv",
     "run",
     "--with",

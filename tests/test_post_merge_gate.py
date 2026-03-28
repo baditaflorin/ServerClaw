@@ -72,7 +72,7 @@ def test_post_merge_gate_falls_back_to_validate_repo_when_runner_images_fail(tmp
     assert "primary_gate_error" in payload
     assert calls[0][0] == "python3"
     assert calls[1][0] == "./scripts/validate_repo.sh"
-    assert calls[2][:3] == ["python3", "-m", "uv"]
+    assert calls[2][:3] == ["uv", "run", "--with"]
     assert calls[2][-2:] == ["scripts/provider_boundary_catalog.py", "--validate"]
     assert len(payload["commands"]) == 2
 
