@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -156,6 +157,7 @@ def run_remote_exec(
     *args: str,
     extra_env: dict[str, str] | None = None,
     ssh_options: list[str] | None = None,
+    local_command: str = 'printf local-fallback > "$REMOTE_EXEC_MARKER"',
 ) -> subprocess.CompletedProcess[str]:
     ssh_log = tmp_path / "ssh.log"
     rsync_log = tmp_path / "rsync.log"
@@ -169,7 +171,7 @@ def run_remote_exec(
     build_config(
         config_path,
         workspace_root="/opt/builds/proxmox_florin_server",
-        local_command="printf local-fallback > \"$REMOTE_EXEC_MARKER\"",
+        local_command=local_command,
         ssh_options=ssh_options,
     )
     build_manifest(manifest_path)
@@ -219,6 +221,8 @@ def test_remote_exec_uses_docker_runner_metadata(tmp_path: Path) -> None:
     assert "/opt/builds/.ansible/collections:/opt/builds/.ansible/collections" in completed.stderr
     assert "LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha" in completed.stderr
     assert f"{REMOTE_WORKSPACE_ROOT}:/workspace" in completed.stderr
+    assert "GIT_CONFIG_KEY_0=safe.directory" in completed.stderr
+    assert "GIT_CONFIG_VALUE_0=/workspace" in completed.stderr
     assert "docker run" in completed.ssh_log.read_text()  # type: ignore[attr-defined]
     assert "--checksum" in completed.rsync_log.read_text()  # type: ignore[attr-defined]
 
@@ -247,6 +251,19 @@ def test_remote_exec_falls_back_locally_when_sync_fails(tmp_path: Path) -> None:
     assert completed.returncode == 0
     assert "remote sync failed" in completed.stderr
     assert completed.marker.read_text() == "local-fallback"  # type: ignore[attr-defined]
+
+
+def test_remote_exec_exports_validate_python_bin_for_local_fallback(tmp_path: Path) -> None:
+    completed = run_remote_exec(
+        tmp_path,
+        "remote-lint",
+        "--local-fallback",
+        extra_env={"REMOTE_EXEC_SSH_FAIL": "1"},
+        local_command='printf %s "${LV3_VALIDATE_PYTHON_BIN:-}" > "$REMOTE_EXEC_MARKER"',
+    )
+
+    assert completed.returncode == 0
+    assert completed.marker.read_text() == (shutil.which("python3") or "")  # type: ignore[attr-defined]
 
 
 def test_remote_exec_falls_back_locally_when_remote_command_fails(tmp_path: Path) -> None:

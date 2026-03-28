@@ -32,6 +32,7 @@ def configure_paths(module, repo_root: Path) -> None:
     module.VERSION_PATH = repo_root / "VERSION"
     module.STACK_PATH = repo_root / "versions" / "stack.yaml"
     module.SERVICE_CATALOG_PATH = repo_root / "config" / "service-capability-catalog.json"
+    module.CAPABILITY_CONTRACT_CATALOG_PATH = repo_root / "config" / "capability-contract-catalog.json"
     module.STATIC_CONFIG_PATH = repo_root / "config" / "manifest-static.yaml"
     module.SCHEMA_PATH = repo_root / "docs" / "schema" / "platform-manifest.schema.json"
     module.ADR_DIR = repo_root / "docs" / "adr"
@@ -121,6 +122,7 @@ agentic_architecture:
     - Observation loop (ADR 0071)
 data_sources:
   service_catalog: config/service-capability-catalog.json
+  capability_contract_catalog: config/capability-contract-catalog.json
   workflow_catalog: config/workflow-catalog.json
 """.strip()
         + "\n",
@@ -153,6 +155,64 @@ data_sources:
                         "public_url": "https://grafana.lv3.org",
                         "environments": {"production": {"status": "active", "url": "https://grafana.lv3.org"}},
                     },
+                ]
+            },
+            indent=2,
+        )
+        + "\n",
+    )
+    write(
+        tmp_path / "config" / "capability-contract-catalog.json",
+        json.dumps(
+            {
+                "$schema": "docs/schema/capability-contract-catalog.schema.json",
+                "schema_version": "1.0.0",
+                "capabilities": [
+                    {
+                        "id": "service_inventory",
+                        "name": "Service Inventory",
+                        "summary": "Track topology through a replaceable contract.",
+                        "scope": "critical_shared_surface",
+                        "owner": "platform",
+                        "review_cadence": "quarterly",
+                        "required_outcomes": ["Track topology."],
+                        "service_guarantees": ["Stable sync contract."],
+                        "canonical_inputs": [
+                            {
+                                "name": "topology",
+                                "description": "Canonical topology input."
+                            }
+                        ],
+                        "canonical_outputs": [
+                            {
+                                "name": "inventory",
+                                "description": "Queryable inventory output."
+                            }
+                        ],
+                        "security_expectations": ["Scoped automation access."],
+                        "audit_expectations": ["Sync activity is attributable."],
+                        "observability_requirements": ["Health endpoint."],
+                        "portability_constraints": ["Portable topology terms."],
+                        "migration_expectations": {
+                            "export_formats": ["inventory export"],
+                            "import_requirements": ["Replacement can import topology."],
+                            "fallback_behaviour": "The repo remains canonical during migration."
+                        },
+                        "failure_modes": [
+                            {
+                                "mode": "inventory unavailable",
+                                "acceptable_degradation": "Browsable UI is unavailable.",
+                                "operator_response": "Use repo topology until recovery."
+                            }
+                        ],
+                        "current_selection": {
+                            "product_name": "NetBox",
+                            "service_id": "netbox",
+                            "selection_adr": "0054",
+                            "runbook": "docs/runbooks/configure-netbox.md",
+                            "notes": "Selected for browsable IPAM."
+                        }
+                    }
                 ]
             },
             indent=2,
@@ -281,6 +341,8 @@ def test_build_manifest_generates_schema_compliant_payload(tmp_path: Path) -> No
     assert manifest["recent_changes"]["last_version"] == "1.1.0"
     assert manifest["health"]["services"]["netbox"]["status"] == "healthy"
     assert manifest["capabilities"]["available_workflows"][0]["id"] == "converge-netbox"
+    assert manifest["capabilities"]["capability_contracts"]["summary"]["selected"] == 1
+    assert manifest["capabilities"]["capability_contracts"]["items"][0]["service_id"] == "netbox"
     assert manifest["agents"]["registered"][0]["agent_id"] == "agent/observation-loop"
     assert manifest["known_gaps"][0]["adr"] == "0128"
 

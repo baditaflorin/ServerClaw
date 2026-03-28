@@ -93,6 +93,8 @@ scripts/remote_exec.sh remote-lint --local-fallback
 
 Fallback mode intentionally runs the repo-defined local command, not the remote Docker path.
 
+When that local command re-enters the repo through `bash -lc`, the gateway now exports `LV3_VALIDATE_PYTHON_BIN` from the invoking shell when it can. `scripts/validate_repo.sh` then resolves its direct Python validators against that Python 3.10+ interpreter so local fallback does not silently regress to the login shell's default `python3`.
+
 ## Rsync Safety Contract
 
 The remote workspace root is ephemeral and never authoritative.
@@ -120,6 +122,8 @@ Review `.rsync-exclude` before adding any new local secret material.
 | rsync fails before SSH starts | missing `rsync` locally or remotely | install `rsync` on both ends |
 | command runs remotely but not in Docker | runner manifest missing for that label | add `config/check-runner-manifest.json` in ADR 0083 or keep using shell mode |
 | local fallback runs unexpectedly | SSH connectivity probe failed | inspect key permissions, host reachability, and `ConnectTimeout=5` behavior |
+| local fallback fails on `int | None` or another modern type annotation | the login shell resolved an older Python for direct validators | export `LV3_VALIDATE_PYTHON_BIN=/absolute/path/to/python3.10+` and rerun |
+| `rsync` fails to set times under `build/docs-portal/*` | the remote workspace contains files whose mtimes `ops` cannot update | let the wrapper complete through local fallback, or clean the remote session workspace before retrying if you specifically need a fresh build-server proof |
 | secrets appear in remote dry-run output | `.rsync-exclude` is incomplete | stop and update `.rsync-exclude` before re-running |
 
 ## Notes

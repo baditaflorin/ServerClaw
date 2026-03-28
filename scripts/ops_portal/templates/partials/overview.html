@@ -33,7 +33,77 @@
     <p class="muted">No active maintenance windows.</p>
     {% endif %}
   </section>
+
+  <section class="panel summary-panel">
+    <h3>Capability Contracts</h3>
+    {% if capability_contract_summary.total %}
+    <div class="stat-block">
+      <span class="label">Selected</span>
+      <strong>{{ capability_contract_summary.selected }}/{{ capability_contract_summary.total }}</strong>
+    </div>
+    <div class="stat-block">
+      <span class="label">Contract Only</span>
+      <strong>{{ capability_contract_summary.contract_only }}</strong>
+    </div>
+    <div class="stat-block">
+      <span class="label">Export Ready</span>
+      <strong>{{ capability_contract_summary.export_ready }}</strong>
+    </div>
+    {% else %}
+    <p class="muted">No capability contracts synced into this runtime yet.</p>
+    {% endif %}
+  </section>
 </div>
+
+<section class="panel">
+  <div class="section-head">
+    <div>
+      <p class="section-kicker">Capability Contracts</p>
+      <h2>Contract-first product choices on critical shared surfaces</h2>
+    </div>
+    <div class="section-meta">
+      <span class="pill">{{ capability_contract_summary.selected }} selected</span>
+      <span class="pill">{{ capability_contract_summary.export_ready }} export-ready</span>
+    </div>
+  </div>
+  {% if capability_contracts %}
+  <ul class="compact-list">
+    {% for contract in capability_contracts %}
+    <li>
+      <strong>{{ contract.name }}</strong>
+      <span>
+        {% if contract.selected_product %}
+        {{ contract.selected_product }}
+        {% if contract.service_name %}
+        via {{ contract.service_name }}
+        {% endif %}
+        {% else %}
+        Contract only
+        {% endif %}
+        · {{ contract.review_cadence }} review · {{ contract.export_format_count }} export path(s)
+      </span>
+      {% if contract.summary %}
+      <span class="muted">{{ contract.summary }}</span>
+      {% endif %}
+      <div class="link-row">
+        {% if contract.selection_adr %}
+        <a href="{{ docs_base_url }}/adr/{{ contract.selection_adr }}" target="_blank" rel="noreferrer">ADR {{ contract.selection_adr }}</a>
+        {% endif %}
+        {% if contract.runbook %}
+        <a href="{{ docs_base_url }}/{{ contract.runbook }}" target="_blank" rel="noreferrer">Runbook</a>
+        {% endif %}
+        {% if contract.service_url %}
+        <a href="{{ contract.service_url }}" target="_blank" rel="noreferrer">Service</a>
+        {% endif %}
+      </div>
+      <span class="muted">Fallback: {{ contract.fallback_behaviour }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="muted">No capability contracts are available in this portal runtime.</p>
+  {% endif %}
+</section>
 
 <div class="service-grid">
   {% for service in services %}

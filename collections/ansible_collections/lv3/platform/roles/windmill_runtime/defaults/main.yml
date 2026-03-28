@@ -149,27 +149,65 @@ windmill_worker_repo_secret_files:
     src: "{{ windmill_controller_local_root }}/openbao/init.json"
     mode: "0600"
 windmill_worker_checkout_checksum_file: "{{ windmill_site_dir }}/worker-checkout.sha256"
+windmill_worker_checkout_manifest_remote_file: "{{ windmill_site_dir }}/worker-checkout-files.txt"
 windmill_worker_checkout_integrity_files:
   - scripts/gate_status.py
   - config/windmill/scripts/gate-status.py
 windmill_worker_checkout_sync_paths:
+  - README.md
+  - VERSION
   - ansible.cfg
   - callback_plugins
+  - changelog.md
   - collections
   - config
   - docs
   - filter_plugins
   - inventory
   - Makefile
+  - mkdocs.yml
   - migrations
   - playbooks
   - platform
   - receipts
+  - versions
   - pytest.ini
   - requirements
+  - roles
   - scripts
   - tests
+  - workstreams.yaml
   - windmill
+windmill_worker_checkout_prune_preserve_paths: >-
+  {{
+    (
+      windmill_worker_repo_mutable_directories
+      | map(attribute='path')
+      | list
+      + windmill_worker_repo_mutable_files
+      | map(attribute='path')
+      | list
+      + windmill_worker_runtime_writable_directories
+      | map(attribute='path')
+      | list
+      + windmill_worker_repo_secret_directories
+      | map(attribute='path')
+      | list
+      + windmill_worker_repo_secret_files
+      | map(attribute='path')
+      | list
+      + [
+        windmill_worker_proxmox_api_token_payload_dir,
+        windmill_worker_proxmox_api_token_payload_file,
+        windmill_worker_superadmin_secret_dir,
+        windmill_worker_superadmin_secret_file,
+      ]
+    )
+    | map('regex_replace', '^' ~ (windmill_worker_repo_checkout_host_path | regex_escape) ~ '/?', '')
+    | reject('equalto', '')
+    | unique
+    | list
+  }}
 windmill_worker_runtime_writable_directories:
   - path: "{{ windmill_worker_repo_checkout_host_path }}/receipts/fixtures"
     mode: "1777"

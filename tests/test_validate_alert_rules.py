@@ -36,3 +36,28 @@ groups:
     errors = validate_alert_rules.validate_rule_files(rules_dir)
     assert len(errors) == 1
     assert "runbook_url" in errors[0]
+
+
+def test_validate_alert_rules_ignores_appledouble_sidecars(tmp_path: Path):
+    rules_dir = tmp_path / "rules"
+    rules_dir.mkdir()
+    (rules_dir / "._broken.yml").write_bytes(b"\xa3not-utf8")
+    (rules_dir / "valid.yml").write_text(
+        """
+groups:
+  - name: valid
+    rules:
+      - alert: ValidAlert
+        expr: up == 0
+        labels:
+          severity: critical
+        annotations:
+          runbook_url: docs/runbooks/example.md
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    errors = validate_alert_rules.validate_rule_files(rules_dir)
+
+    assert errors == []

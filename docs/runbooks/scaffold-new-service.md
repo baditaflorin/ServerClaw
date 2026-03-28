@@ -4,6 +4,8 @@
 
 The ADR 0107 formal operator workflow now lives in [add-a-new-service.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-extension-model/docs/runbooks/add-a-new-service.md). Use this runbook as the lower-level reference for the generator itself.
 
+The scaffold does not create capability contracts for you. ADR 0205 requires the capability contract to exist before a new critical shared product is selected, so update `config/capability-contract-catalog.json` first when the new service becomes the shared product for identity, workflow execution, secrets, topology, or another critical platform capability.
+
 ## Usage
 
 ```bash

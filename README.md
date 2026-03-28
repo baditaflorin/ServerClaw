@@ -111,6 +111,7 @@ The repository now also ships ADR 0148 private web search live on production: th
 The repository now also ships ADR 0165 workflow idempotency: `platform.idempotency`, scheduler-side cached result replay, closure-loop trigger scoping, `execution.idempotent_hit` ledger events, and `lv3 intent status <intent_id>` provide deterministic duplicate suppression for platform-managed workflows; the live Windmill converge from `main` on 2026-03-25 now applies and verifies the shared `platform.idempotency_records` schema on `postgres-lv3`.
 The repository now also ships ADR 0119 budgeted workflow scheduling live on production: the latest-main Windmill replay on 2026-03-27 re-verified bootstrap-session auth fallback, worker token propagation, the dispatcher and lane scheduler, and both watchdog seed paths plus their enabled schedules on `docker-runtime-lv3`.
 The repository now also ships ADR 0204 self-correcting automation loops: the committed correction-loop catalog governs every mutating workflow exactly once, and the 2026-03-28 Windmill observation replay verified `runtime_self_correction_watchers` end to end with the bounded retry budget persisted in durable closure-loop state.
+The repository now also ships ADR 0207 anti-corruption layers at provider boundaries: the Hetzner DNS roles translate provider payloads into canonical DNS facts before shared logic consumes them, and the March 28, 2026 latest-main verification proved the same guard through the authoritative build-server validation path, the final local-fallback `remote-validate` replay, and the worker-safe Windmill post-merge fallback.
 The repository now also ships ADR 0146 Langfuse observability live on production: `https://langfuse.lv3.org` is published through the shared NGINX edge, the seeded `lv3-agent-observability` project is reachable through the public API, and the 2026-03-26 smoke verification ingested a trace that resolved successfully in the Langfuse UI.
 The repository now also ships ADR 0193 Plane task-board automation live on production: `https://tasks.lv3.org` is published through the shared NGINX edge with oauth2-proxy and Keycloak auth, the private controller path is available at `http://100.64.0.1:8011`, and the governed wrapper plus ADR sync path now keep the `lv3-platform` / `ADR` Plane project aligned with repository decision state.
 The repository now also ships ADR 0194 Coolify repo-deploy automation live on production: `coolify-lv3` hosts the repo-managed PaaS control plane, `https://coolify.lv3.org` is published behind the shared oauth2-proxy and Keycloak edge, `https://apps.lv3.org` plus `*.apps.lv3.org` route through the shared edge to the Coolify proxy, and the 2026-03-28 merged-main replay re-verified the governed `lv3 deploy-repo` flow with `repo-smoke.apps.lv3.org`.
@@ -131,7 +132,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.41` |
+| Repository version | `0.177.43` |
 | Platform version | `0.130.39` |
 | Observed check date | `2026-03-28` |
 | Observed OS | `Debian 13` |
@@ -192,6 +193,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `budgeted_workflow_scheduler` | `2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply` |
 | `build_telemetry` | `2026-03-22-adr-0028-build-telemetry-live-apply` |
 | `canonical_publication_models` | `2026-03-28-adr-0210-canonical-domain-models-live-apply` |
+| `capability_contracts` | `2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply` |
 | `capacity_classes` | `2026-03-27-adr-0192-capacity-classes-live-apply` |
 | `capacity_model` | `2026-03-27-adr-0105-capacity-model-mainline-live-apply` |
 | `certificate_lifecycle` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
@@ -252,6 +254,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
 | `preview_environment` | `2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z` |
+| `provider_boundaries` | `2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply` |
 | `public_edge_publication` | `2026-03-28-adr-0021-shared-edge-certificate-repair-mainline-live-apply` |
 | `realtime` | `2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply` |
 | `remote_build_gateway` | `2026-03-26-adr-0156-agent-session-workspace-isolation-live-apply` |
@@ -478,6 +481,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Break-Glass References](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/break-glass.md)
 - [Budgeted Workflow Scheduler](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/budgeted-workflow-scheduler.md)
 - [Canonical Truth Assembly](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/canonical-truth-assembly.md)
+- [Capability Contract Catalog](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/capability-contract-catalog.md)
 - [Capacity Classes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/capacity-classes.md)
 - [Capacity Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/capacity-model.md)
 - [Certificate Expired](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/cert-expired.md)
@@ -1050,6 +1054,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0199: Outline Living Knowledge Wiki](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0199-outline-living-knowledge-wiki.md)
 - [Workstream ADR 0202: Excalidraw Auto Generated Architecture Diagrams](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md)
 - [Workstream ADR 0204: Architecture Governance Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0204-architecture-governance.md)
+- [Workstream ADR 0205: Capability Contracts Before Product Selection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0205-capability-contracts-before-product-selection.md)
+- [Workstream ADR 0207: Anti-Corruption Layers At Provider Boundaries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md)
 - [Workstream WS-0211: Shared Policy Packs And Rule Registries Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0211-shared-policy-packs-and-rule-registries.md)
 - [Workstream ADR 0214: HA And Replication Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0214-ha-replication-architecture-bundle.md)
 - [Workstream ADR 0224: Server-Resident Operations Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0224-server-resident-operations-architecture-bundle.md)
@@ -1070,8 +1076,10 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0196-live-apply: Live Apply ADR 0196 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0196-live-apply.md)
 - [Workstream WS-0197: Dify Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0197-live-apply.md)
 - [Workstream WS-0204: Self-Correcting Automation Loops Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0204-live-apply.md)
+- [Workstream ws-0205-main-final](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0205-main-final.md)
 - [Workstream WS-0206: Ports And Adapters Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-live-apply.md)
 - [Workstream WS-0206 Main Merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-main-merge.md)
+- [Workstream WS-0207 Main Merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0207-main-merge.md)
 - [Workstream ws-0208-live-apply: Dependency Direction And Composition Roots](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0208-live-apply.md)
 - [Workstream ws-0208-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0208-main-merge.md)
 - [Workstream WS-0209: Runbook Use-Case Service Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0209-live-apply.md)
@@ -1096,7 +1104,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.41` |
+| Repository version | `0.177.43` |
 | Platform version | `0.130.39` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1312,8 +1320,12 @@ This repository is intentionally opinionated:
 | `0202` | Excalidraw auto generated architecture diagrams | `live_applied` | [adr-0202-excalidraw-auto-generated-architecture-diagrams.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md) |
 | `0204` | Architecture governance bundle for self-correction, clean boundaries, and vendor replaceability | `merged` | [adr-0204-architecture-governance.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0204-architecture-governance.md) |
 | `0204` | Self-correcting automation loops live apply | `merged` | [ws-0204-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0204-live-apply.md) |
+| `0205` | Live apply capability contracts before product selection | `merged` | [adr-0205-capability-contracts-before-product-selection.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0205-capability-contracts-before-product-selection.md) |
+| `0205` | Integrate ADR 0205 live apply into origin/main | `merged` | [ws-0205-main-final.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0205-main-final.md) |
 | `0206` | Live apply ADR 0206 ports and adapters for external integrations | `live_applied` | [ws-0206-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-live-apply.md) |
 | `0206` | Integrate ADR 0206 live apply into origin/main | `merged` | [ws-0206-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-main-merge.md) |
+| `0207` | Anti-corruption layers at provider boundaries live apply | `live_applied` | [adr-0207-anti-corruption-layers-at-provider-boundaries.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md) |
+| `0207` | Integrate ADR 0207 live apply into origin/main | `merged` | [ws-0207-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0207-main-merge.md) |
 | `0208` | Dependency direction and composition roots live apply | `live_applied` | [ws-0208-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0208-live-apply.md) |
 | `0208` | Integrate ADR 0208 live apply into origin/main | `merged` | [ws-0208-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0208-main-merge.md) |
 | `0209` | Shared runbook use-case service with thin CLI, API gateway, Windmill, and ops portal adapters | `live_applied` | [ws-0209-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0209-live-apply.md) |

@@ -1,0 +1,39 @@
+schema_version: "1.0.0"
+
+provider_boundaries:
+  - boundary_id: hetzner_dns_single_record
+    provider: hetzner_dns
+    concern: single_record_lifecycle
+    criticality: critical
+    implementation_paths:
+      - collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/tasks/main.yml
+    translation_tasks:
+      - Translate Hetzner DNS zone provider payload into canonical zone facts
+      - Translate Hetzner DNS record provider payload into canonical record facts
+    raw_pattern_counts:
+      hetzner_dns_zone_query.json.zones: 1
+      hetzner_dns_records_query.json.records: 1
+    canonical_patterns:
+      - dns_provider_boundary_zone_candidates
+      - dns_provider_boundary_zone
+      - dns_provider_boundary_existing_records
+      - dns_provider_boundary_matching_records
+
+  - boundary_id: hetzner_dns_zone_records
+    provider: hetzner_dns
+    concern: zone_batch_record_lifecycle
+    criticality: critical
+    implementation_paths:
+      - collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml
+    translation_tasks:
+      - Translate Hetzner DNS zone provider payload into canonical zone facts
+      - Translate Hetzner DNS record provider payload into canonical record facts
+    raw_pattern_counts:
+      hetzner_dns_zone_lookup.json.zones: 1
+      hetzner_dns_records_lookup.json.records: 1
+    canonical_patterns:
+      - dns_provider_boundary_zone_candidates
+      - dns_provider_boundary_zone
+      - dns_provider_boundary_existing_records
+      - dns_provider_boundary_matching_records

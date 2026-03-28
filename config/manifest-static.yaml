@@ -55,6 +55,7 @@ agentic_architecture:
     - Maintenance suppression (ADR 0080)
     - Release and promotion controls (ADR 0073 / ADR 0110)
 data_sources:
+  capability_contract_catalog: config/capability-contract-catalog.json
   service_catalog: config/service-capability-catalog.json
   workflow_catalog: config/workflow-catalog.json
   stack_state: versions/stack.yaml

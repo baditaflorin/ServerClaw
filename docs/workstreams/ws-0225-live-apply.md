@@ -3,7 +3,7 @@
 - ADR: [ADR 0225](../adr/0225-server-resident-reconciliation-via-ansible-pull.md)
 - Title: Bootstrap a durable Proxmox-host ansible-pull reconcile loop from the merged control repo
 - Status: live_applied
-- Implemented In Repo Version: 0.177.41
+- Implemented In Repo Version: 0.177.43
 - Live Applied In Platform Version: 0.130.39
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
@@ -48,28 +48,29 @@
 
 ## Verification
 
-- `uv run --with pytest --with pyyaml pytest -q tests/test_server_resident_reconciliation.py` passed with `6 passed in 0.06s`
+- `uv run --with pytest --with pyyaml pytest -q tests/test_server_resident_reconciliation.py` passed with `7 passed in 0.06s`
 - `ansible-playbook -i inventory/hosts.yml playbooks/server-resident-reconciliation.yml --syntax-check` passed from the isolated worktree
-- `./scripts/validate_repo.sh agent-standards` passed before the final terminal workstream status flip
-- controller-driven bootstrap apply succeeded from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0225-live-apply` after repairing the Gitea search query and switching service-account token lifecycle calls to basic auth
-- the private Gitea repo published synthetic snapshot commit `488c6656b1bae1b5ddede2163f1e395f2126483a` for source commit `b8d2aaf0da18dea9dbab286377006b93459b2ac3`
-- `sudo systemctl start lv3-server-resident-reconciliation.service` completed successfully on `proxmox_florin`, the managed timer stayed active, `/srv/proxmox_florin_server` checked out `488c6656b1bae1b5ddede2163f1e395f2126483a`, and `/var/lib/lv3/server-resident-reconciliation/receipts/latest.json` recorded `status: ok`
+- `./scripts/validate_repo.sh data-models architecture-fitness generated-docs agent-standards` passed after the ADR index and generated truth surfaces were refreshed
+- the first controller-driven bootstrap apply succeeded from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0225-live-apply` after repairing the Gitea search query and switching service-account token lifecycle calls to basic auth, and the later latest-main replay from source commit `08ef5c90d8df239c3be00ef6b98a4fbb47b26cb4` rendered a dedicated local `ansible-pull` inventory to fix repeated host-local runs
+- the private Gitea repo published final synthetic snapshot commit `e24e0cf31d5cf1e7ae9298571f1a196ebdffdbce` for source commit `08ef5c90d8df239c3be00ef6b98a4fbb47b26cb4`
+- on `2026-03-28T17:26:50Z`, `sudo systemctl start lv3-server-resident-reconciliation.service` completed successfully on `proxmox_florin`, the managed timer stayed active, `/srv/proxmox_florin_server` checked out `e24e0cf31d5cf1e7ae9298571f1a196ebdffdbce`, the working tree stayed clean, and `/var/lib/lv3/server-resident-reconciliation/receipts/latest.json` recorded `status: ok`, `exit_code: 0`, and `inventory_path: /var/lib/lv3/server-resident-reconciliation/ansible-pull-inventory.yml`
 - the focused post-flip ADR 0225 checks remained green, while full `make validate` still hit pre-existing `ansible-lint` warnings outside ADR 0225
 
 ## Outcome
 
 - `proxmox_florin` now carries a durable server-resident checkout under `/srv/proxmox_florin_server`, a managed `GIT_ASKPASS` helper, and `lv3-server-resident-reconciliation.service` plus `.timer`
+- repeated `ansible-pull` replays now use a managed local inventory under `/var/lib/lv3/server-resident-reconciliation/ansible-pull-inventory.yml`, so the checkout step targets `localhost` while the playbook still limits itself to `proxmox_florin`
 - the bootstrap path now mints or rotates the low-privilege `lv3-reconcile` Gitea read token without leaving the controller-admin artifact on the host after bootstrap
 - each host-local run now writes a bounded JSON receipt under `/var/lib/lv3/server-resident-reconciliation/receipts/`, which keeps reconciliation evidence outside the managed git checkout
 
 ## Mainline Integration
 
-- release `0.177.41` now carries the official repo-version attribution for ADR 0225 on `main`
-- the integrated canonical truth now records `versions/stack.yaml` repo version `0.177.41`, platform version `0.130.39`, and capability receipt `server_resident_reconciliation: 2026-03-28-adr-0225-server-resident-reconciliation-via-ansible-pull-live-apply`
-- this workstream became the final verified integration step, so the protected integration files were updated on the same branch after live verification: `README.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/0.177.41.md`, and `versions/stack.yaml`
+- release `0.177.43` now carries the official repo-version attribution for ADR 0225 on the rebased latest-main integration candidate
+- the integrated canonical truth now records `versions/stack.yaml` repo version `0.177.43`, while the final platform-version bump still waits on one more host replay from that exact rebased candidate
+- the protected integration files were recut on top of the latest `origin/main`: `README.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/0.177.43.md`, and `versions/stack.yaml`
 
 ## Notes For The Next Assistant
 
 - keep the recurring `ansible-pull` path independent of controller-only admin artifacts after bootstrap
 - the host trusts the private Gitea repo rather than GitHub directly, so branch-local verification needs a published internal Gitea snapshot or other approved staging ref before `systemctl start lv3-server-resident-reconciliation.service` can prove the pull path end to end
-- `make validate` passed while this branch still mapped to an active workstream; after the final `workstreams.yaml` flip to terminal `live_applied`, `scripts/workstream_surface_ownership.py --validate-branch` is expected to reject the branch by design
+- `scripts/workstream_surface_ownership.py --validate-branch` is expected to reject this branch once `workstreams.yaml` records the terminal `live_applied` status; the focused ADR 0225 validation slice stays green, and the remaining `make validate` failure is the pre-existing repo-wide `ansible-lint` warning baseline outside this workstream
