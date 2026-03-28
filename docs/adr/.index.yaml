@@ -7,11 +7,11 @@
 
 schema_version: 1
 generated: '2026-03-28'
-total_adrs: 238
+total_adrs: 248
 implementation_status_summary:
-  Implemented: 212
+  Implemented: 211
   Partial: 4
-  Not Implemented: 21
+  Not Implemented: 32
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -104,6 +104,7 @@ concerns:
     - '0135'
     - 0148
     - 0198
+    - 0239
   host-os:
     - '0002'
     - '0004'
@@ -118,6 +119,7 @@ concerns:
     - '0046'
     - '0133'
     - '0150'
+    - '0243'
   monitoring:
     - '0041'
     - '0052'
@@ -210,6 +212,14 @@ concerns:
     - '0226'
     - '0227'
     - '0232'
+    - '0234'
+    - '0235'
+    - '0236'
+    - '0237'
+    - 0238
+    - '0240'
+    - '0241'
+    - '0242'
   release:
     - 0008
     - '0110'
@@ -3805,7 +3815,7 @@ adr_index:
   - adr: '0226'
     title: Systemd Units, Timers, And Paths For Host-Resident Control Loops
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Not Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -3818,7 +3828,6 @@ adr_index:
       - loops
     summary: We will use systemd as the canonical host-resident supervisor for platform
     filename: 0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
-    implemented_version: 0.130.38
   - adr: '0227'
     title: Bounded Command Execution Via Systemd-Run And Approved Wrappers
     status: Accepted
@@ -3929,3 +3938,151 @@ adr_index:
       - cosign
     summary: We will package server-consumable control inputs as signed release bundles
     filename: 0233-signed-release-bundles-via-gitea-releases-and-cosign.md
+  - adr: '0234'
+    title: Shared Human App Shell And Navigation Via PatternFly
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - shared
+      - human
+      - app
+      - shell
+      - navigation
+      - patternfly
+    summary: We will use PatternFly as the default open source app-shell and design
+    filename: 0234-shared-human-app-shell-and-navigation-via-patternfly.md
+  - adr: '0235'
+    title: Cross-Application Launcher And Favorites Via PatternFly Application Launcher
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - cross-application
+      - launcher
+      - favorites
+      - patternfly
+      - application
+      - launcher
+    summary: We will standardize on the PatternFly Application Launcher as the default
+    filename: 0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher.md
+  - adr: '0236'
+    title: Server-State And Mutation Feedback Via TanStack Query
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - server-state
+      - mutation
+      - feedback
+      - tanstack
+      - query
+    summary: We will use TanStack Query as the default server-state and mutation-feedback
+    filename: 0236-server-state-and-mutation-feedback-via-tanstack-query.md
+  - adr: '0237'
+    title: Schema-First Human Forms Via React Hook Form And Zod
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - schema-first
+      - human
+      - forms
+      - react
+      - hook
+      - form
+      - zod
+    summary: We will build first-party structured forms with React Hook Form for form
+    filename: 0237-schema-first-human-forms-via-react-hook-form-and-zod.md
+  - adr: 0238
+    title: Data-Dense Operator Grids Via AG Grid Community
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - data-dense
+      - operator
+      - grids
+      - ag
+      - grid
+      - community
+    summary: We will use AG Grid Community as the default open source grid library for
+    filename: 0238-data-dense-operator-grids-via-ag-grid-community.md
+  - adr: 0239
+    title: Browser-Local Search Experience Via Pagefind
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: documentation
+    keywords:
+      - browser-local
+      - search
+      - experience
+      - pagefind
+    summary: We will use Pagefind as the default browser-local search layer for static or
+    filename: 0239-browser-local-search-experience-via-pagefind.md
+  - adr: '0240'
+    title: Operator Visualization Panels Via Apache ECharts
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - operator
+      - visualization
+      - panels
+      - apache
+      - echarts
+    summary: We will use Apache ECharts as the default charting and lightweight
+    filename: 0240-operator-visualization-panels-via-apache-echarts.md
+  - adr: '0241'
+    title: Rich Content And Inline Knowledge Editing Via Tiptap
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - rich
+      - content
+      - inline
+      - knowledge
+      - editing
+      - tiptap
+    summary: We will use Tiptap as the default rich-content editor framework for
+    filename: 0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
+  - adr: '0242'
+    title: Guided Human Onboarding Via Shepherd Tours
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - guided
+      - human
+      - onboarding
+      - shepherd
+      - tours
+    summary: We will use Shepherd.js for guided first-run tours, contextual onboarding,
+    filename: 0242-guided-human-onboarding-via-shepherd-tours.md
+  - adr: '0243'
+    title: Component Stories, Accessibility, And UI Contracts Via Storybook, Playwright, And Axe-Core
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: identity
+    keywords:
+      - component
+      - stories
+      - accessibility
+      - ui
+      - contracts
+      - storybook
+      - playwright
+      - axe-core
+    summary: We will use Storybook for component stories and docs, Playwright for
+    filename: 0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core.md

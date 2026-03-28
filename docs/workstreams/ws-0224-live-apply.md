@@ -7,8 +7,8 @@
 - Live Applied In Platform Version: N/A
 - Implemented On: N/A
 - Live Applied On: N/A
-- Branch: `codex/ws-0224-live-apply-r2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0224-live-apply-r2`
+- Branch: `codex/ws-0224-live-apply-r3`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0224-live-apply-r3`
 - Owner: codex
 - Depends On: `adr-0143-gitea`, `adr-0204-self-correcting-automation-loops`, `adr-0225-server-resident-reconciliation-via-ansible-pull`, `adr-0226-systemd-units-timers-and-paths-for-host-resident-control-loops`, `adr-0227-bounded-command-execution-via-systemd-run-and-approved-wrappers`, `adr-0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation`, `adr-0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials`
 - Conflicts With: none
