@@ -69,6 +69,7 @@
 
 ## Live Evidence
 
+- branch-local live-apply receipt: `receipts/live-applies/2026-03-28-adr-0240-operator-visualization-panels-live-apply.json`
 - branch-local guest health: `curl -fsS http://127.0.0.1:8092/health` returned `{"status":"ok"}` and `docker ps --filter name=ops-portal --format "{{.Image}} {{.Status}}"` reported `lv3-ops-portal:latest Up ... (healthy)`
 - mirrored topology input: `/opt/ops-portal/data/config/dependency-graph.json`
 - served chart runtime: `curl -fsS http://127.0.0.1:8092/static/portal.js | sed -n '1,12p'`

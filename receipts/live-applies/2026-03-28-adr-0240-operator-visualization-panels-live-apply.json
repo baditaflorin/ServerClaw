@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-28-adr-0240-operator-visualization-panels-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-28",
+  "recorded_on": "2026-03-28",
+  "recorded_at": "2026-03-28T21:59:16Z",
+  "recorded_by": "codex",
+  "source_commit": "f3223e95ce1836e9f233256001bade9ba23c236f",
+  "repo_version_context": "0.177.53",
+  "platform_version_context": "0.130.42",
+  "workflow_id": "adr-0240-operator-visualization-panels-live-apply",
+  "adr": "0240",
+  "summary": "Applied ADR 0240 on the live interactive ops portal by adding Apache ECharts-backed health, topology, coordination, and rollout panels, mirroring the canonical dependency graph into the runtime, and re-verifying the local and edge operator entrypoints from the isolated worktree.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Ops portal internal listener",
+      "address": "http://127.0.0.1:8092"
+    },
+    {
+      "kind": "public_surface",
+      "name": "ops.lv3.org",
+      "address": "https://ops.lv3.org"
+    },
+    {
+      "kind": "runtime_artifact",
+      "name": "Mirrored dependency graph",
+      "address": "/opt/ops-portal/data/config/dependency-graph.json"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused portal validation slice",
+      "result": "pass",
+      "observed": "`python3 -m py_compile scripts/ops_portal/app.py`, `uv run --with pytest --with pyyaml --with jsonschema --with-requirements requirements/ops-portal.txt python -m pytest -q tests/test_interactive_ops_portal.py`, `uv run --with pytest --with pyyaml --with jsonschema --with-requirements requirements/ops-portal.txt python -m pytest -q tests/test_ops_portal.py`, `make syntax-check-ops-portal`, `make validate-data-models`, and `./scripts/validate_repo.sh agent-standards` all passed from the isolated worktree before the live replay."
+    },
+    {
+      "check": "Branch-local ops portal converge",
+      "result": "pass",
+      "observed": "`make converge-ops-portal` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0240-live-apply` with `docker-runtime-lv3 ok=99 changed=4 failed=0`."
+    },
+    {
+      "check": "Guest-local runtime health and assets",
+      "result": "pass",
+      "observed": "Over the Proxmox jump path to `ops@10.10.10.20`, `curl -fsS http://127.0.0.1:8092/health` returned `{\"status\":\"ok\"}`, `docker ps --filter name=ops-portal --format \"{{.Image}} {{.Status}}\"` reported `lv3-ops-portal:latest Up ... (healthy)`, `/opt/ops-portal/data/config/dependency-graph.json` existed, and `curl -fsS http://127.0.0.1:8092/static/portal.js | sed -n '1,12p'` returned the new chart bootstrap script."
+    },
+    {
+      "check": "Guest-local chart panels and inline ECharts options",
+      "result": "pass",
+      "observed": "`curl -fsS http://127.0.0.1:8092/partials/overview` included `Current service-state distribution`, `Ops portal dependency map`, `overview-health-mix-chart`, and `overview-dependency-focus-chart`; `curl -fsS http://127.0.0.1:8092/partials/agents` included `Session states at a glance` and `agent-coordination-status-chart`; and `curl -fsS http://127.0.0.1:8092/partials/changelog` included `Recent rollout tempo` and `live-apply-timeline-chart`."
+    },
+    {
+      "check": "Published edge auth path",
+      "result": "pass",
+      "observed": "`curl -k -I https://ops.lv3.org` returned `302` to `https://ops.lv3.org/oauth2/sign_in?rd=https://ops.lv3.org/`, preserved the expected hardening headers, and advertised `content-security-policy: ... script-src 'self' 'unsafe-inline' https://unpkg.com; ...`, which allows the committed ECharts runtime source."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0240-operator-visualization-panels-via-apache-echarts.md",
+    "docs/workstreams/ws-0240-live-apply.md",
+    "docs/runbooks/ops-portal-down.md",
+    "scripts/ops_portal/app.py",
+    "scripts/ops_portal/static/portal.css",
+    "scripts/ops_portal/static/portal.js",
+    "scripts/ops_portal/templates/base.html",
+    "scripts/ops_portal/templates/partials/overview.html",
+    "scripts/ops_portal/templates/partials/agents.html",
+    "scripts/ops_portal/templates/partials/changelog.html",
+    "collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml",
+    "tests/test_interactive_ops_portal.py",
+    "receipts/live-applies/2026-03-28-adr-0240-operator-visualization-panels-live-apply.json",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "The live replay happened before this receipt was committed, but the deployable portal sources in commit `f3223e95ce1836e9f233256001bade9ba23c236f` match the replayed branch state; this receipt commit only records evidence and branch-local metadata.",
+    "The guest-local coordination chart rendered zero active sessions at verification time because no agent sessions were currently published, not because the panel failed to initialize.",
+    "Canonical repo-version and platform-version bumps still require the merged-main integration step and a replay from `main` per repository policy."
+  ]
+}
