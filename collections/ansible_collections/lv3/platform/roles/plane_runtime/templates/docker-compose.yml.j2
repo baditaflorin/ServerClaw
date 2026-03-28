@@ -1,0 +1,213 @@
+services:
+  openbao-agent:
+    image: {{ plane_openbao_agent_image }}
+    container_name: {{ plane_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ plane_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ plane_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ plane_env_file | dirname }}:{{ plane_env_file | dirname }}
+
+  web:
+    image: {{ plane_frontend_image }}
+    container_name: {{ plane_web_container_name }}
+    restart: unless-stopped
+    env_file:
+      - {{ plane_env_file }}
+    depends_on:
+      api:
+        condition: service_started
+      worker:
+        condition: service_started
+
+  space:
+    image: {{ plane_space_image }}
+    container_name: {{ plane_space_container_name }}
+    restart: unless-stopped
+    env_file:
+      - {{ plane_env_file }}
+    depends_on:
+      api:
+        condition: service_started
+      worker:
+        condition: service_started
+      web:
+        condition: service_started
+
+  admin:
+    image: {{ plane_admin_image }}
+    container_name: {{ plane_admin_container_name }}
+    restart: unless-stopped
+    env_file:
+      - {{ plane_env_file }}
+    depends_on:
+      api:
+        condition: service_started
+      web:
+        condition: service_started
+
+  live:
+    image: {{ plane_live_image }}
+    container_name: {{ plane_live_container_name }}
+    restart: unless-stopped
+    env_file:
+      - {{ plane_env_file }}
+    depends_on:
+      api:
+        condition: service_started
+      web:
+        condition: service_started
+
+  api:
+    image: {{ plane_backend_image }}
+    container_name: {{ plane_api_container_name }}
+    restart: unless-stopped
+    command: ./bin/docker-entrypoint-api.sh
+    env_file:
+      - {{ plane_env_file }}
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+      migrator:
+        condition: service_started
+      plane-redis:
+        condition: service_started
+      plane-mq:
+        condition: service_started
+      plane-minio:
+        condition: service_started
+    volumes:
+      - {{ plane_log_dir }}/api:/code/plane/logs
+
+  migrator:
+    image: {{ plane_backend_image }}
+    container_name: {{ plane_migrator_container_name }}
+    restart: on-failure
+    command: ./bin/docker-entrypoint-migrator.sh
+    env_file:
+      - {{ plane_env_file }}
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+      plane-redis:
+        condition: service_started
+    volumes:
+      - {{ plane_migrator_log_dir }}:/code/plane/logs
+
+  worker:
+    image: {{ plane_backend_image }}
+    container_name: {{ plane_worker_container_name }}
+    restart: unless-stopped
+    command: ./bin/docker-entrypoint-worker.sh
+    env_file:
+      - {{ plane_env_file }}
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+      migrator:
+        condition: service_started
+      api:
+        condition: service_started
+      plane-redis:
+        condition: service_started
+      plane-mq:
+        condition: service_started
+      plane-minio:
+        condition: service_started
+    volumes:
+      - {{ plane_log_dir }}/worker:/code/plane/logs
+
+  beat-worker:
+    image: {{ plane_backend_image }}
+    container_name: {{ plane_beat_worker_container_name }}
+    restart: unless-stopped
+    command: ./bin/docker-entrypoint-beat.sh
+    env_file:
+      - {{ plane_env_file }}
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+      migrator:
+        condition: service_started
+      api:
+        condition: service_started
+      plane-redis:
+        condition: service_started
+      plane-mq:
+        condition: service_started
+      plane-minio:
+        condition: service_started
+    volumes:
+      - {{ plane_log_dir }}/beat-worker:/code/plane/logs
+
+  plane-redis:
+    image: {{ plane_valkey_image }}
+    container_name: {{ plane_valkey_container_name }}
+    restart: unless-stopped
+    command:
+      - valkey-server
+      - --save
+      - ""
+    volumes:
+      - {{ plane_valkey_data_dir }}:/data
+
+  plane-mq:
+    image: {{ plane_rabbitmq_image }}
+    container_name: {{ plane_rabbitmq_container_name }}
+    hostname: plane-mq
+    restart: unless-stopped
+    env_file:
+      - {{ plane_env_file }}
+    environment:
+      RABBITMQ_DEFAULT_USER: plane
+      RABBITMQ_DEFAULT_PASS: {{ plane_rabbitmq_password }}
+      RABBITMQ_DEFAULT_VHOST: plane
+    volumes:
+      - {{ plane_rabbitmq_data_dir }}:/var/lib/rabbitmq
+
+  plane-minio:
+    image: {{ plane_minio_image }}
+    container_name: {{ plane_minio_container_name }}
+    restart: unless-stopped
+    command:
+      - server
+      - /data
+      - --console-address
+      - ":9001"
+    env_file:
+      - {{ plane_env_file }}
+    volumes:
+      - {{ plane_minio_data_dir }}:/data
+
+  proxy:
+    image: {{ plane_proxy_image }}
+    container_name: {{ plane_proxy_container_name }}
+    restart: unless-stopped
+    env_file:
+      - {{ plane_env_file }}
+    depends_on:
+      web:
+        condition: service_started
+      api:
+        condition: service_started
+      space:
+        condition: service_started
+      admin:
+        condition: service_started
+      live:
+        condition: service_started
+    ports:
+      - "{{ plane_internal_port }}:80"

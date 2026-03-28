@@ -143,11 +143,23 @@ playbooks:
     shared_surfaces:
       - service:portainer
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/plane.yml:
+    playbook_id: plane
+    mutation_scope: platform
+    shared_surfaces:
+      - service:plane
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/postgres-vm.yml:
     playbook_id: postgres-vm
     mutation_scope: platform
     shared_surfaces:
       - service:postgres-vm
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/proxmox-staging-bridge.yml:
+    playbook_id: proxmox-staging-bridge
+    mutation_scope: host
+    shared_surfaces:
+      - service:proxmox-staging-bridge
       - inventory/host_vars/proxmox_florin.yml
   playbooks/provision-subdomain.yml:
     playbook_id: provision-subdomain

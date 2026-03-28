@@ -18,8 +18,8 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.template = TEMPLATE_PATH.read_text()
         self.static_template = STATIC_TEMPLATE_PATH.read_text()
 
-    def test_defaults_enable_pinned_dns_hetzner_acme(self) -> None:
-        self.assertEqual(self.defaults["public_edge_acme_challenge_method"], "dns-hetzner")
+    def test_defaults_use_webroot_acme_with_pinned_hetzner_support(self) -> None:
+        self.assertEqual(self.defaults["public_edge_acme_challenge_method"], "webroot")
         self.assertEqual(self.defaults["public_edge_control_plane_host"], "{{ groups['proxmox_hosts'][0] }}")
         self.assertEqual(
             self.defaults["proxmox_guests"],
@@ -68,7 +68,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertNotIn("ops.lv3.org", extra_hostnames)
         self.assertEqual(
             sorted(protected_sites),
-            ["changelog.lv3.org", "docs.lv3.org", "draw.lv3.org", "home.lv3.org", "langfuse.lv3.org", "logs.lv3.org", "n8n.lv3.org", "ops.lv3.org"],
+            ["changelog.lv3.org", "docs.lv3.org", "draw.lv3.org", "home.lv3.org", "langfuse.lv3.org", "logs.lv3.org", "n8n.lv3.org", "ops.lv3.org", "tasks.lv3.org"],
         )
         self.assertNotIn("unauthenticated_paths", protected_sites["draw.lv3.org"])
         self.assertNotIn("unauthenticated_paths", protected_sites["langfuse.lv3.org"])
@@ -82,6 +82,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertNotIn("unauthenticated_paths", protected_sites["changelog.lv3.org"])
         self.assertNotIn("unauthenticated_paths", protected_sites["logs.lv3.org"])
         self.assertNotIn("unauthenticated_paths", protected_sites["home.lv3.org"])
+        self.assertEqual(protected_sites["tasks.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
 
     def test_tasks_include_dns_hetzner_plugin_and_credentials_flow(self) -> None:
         task_names = {task["name"] for task in self.tasks}
@@ -139,12 +140,14 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("draw.lv3.org", security_overrides)
         self.assertIn("grafana.lv3.org", security_overrides)
         self.assertIn("logs.lv3.org", security_overrides)
+        self.assertIn("tasks.lv3.org", security_overrides)
         self.assertIn("wss://draw.lv3.org", security_overrides["draw.lv3.org"]["content_security_policy"])
         self.assertIn("'unsafe-eval'", security_overrides["grafana.lv3.org"]["content_security_policy"])
         self.assertIn("wss://n8n.lv3.org", security_overrides["n8n.lv3.org"]["content_security_policy"])
         self.assertIn("https://fonts.googleapis.com", security_overrides["docs.lv3.org"]["content_security_policy"])
         self.assertIn("https://cdn.jsdelivr.net", security_overrides["logs.lv3.org"]["content_security_policy"])
         self.assertIn("https://unpkg.com", security_overrides["ops.lv3.org"]["content_security_policy"])
+        self.assertIn("wss://tasks.lv3.org", security_overrides["tasks.lv3.org"]["content_security_policy"])
 
     def test_template_supports_root_proxy_path_override(self) -> None:
         self.assertIn("site.root_proxy_path is defined", self.template)

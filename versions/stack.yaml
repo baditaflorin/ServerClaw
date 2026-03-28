@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.177.21
+repo_version: 0.177.22
 platform_version: 0.130.32
 
 live_apply_evidence:
@@ -68,6 +68,7 @@ live_apply_evidence:
     excalidraw: 2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply
     failure_domain_policy: 2026-03-27-adr-0184-failure-domain-labels-live-apply
     outline: 2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply
+    plane: 2026-03-27-adr-0193-plane-live-apply
     service_redundancy: 2026-03-27-adr-0188-failover-rehearsal-gate-live-apply
     fixture_pools: 2026-03-28-adr-0186-prewarmed-fixture-pools-live-apply
 desired_state:

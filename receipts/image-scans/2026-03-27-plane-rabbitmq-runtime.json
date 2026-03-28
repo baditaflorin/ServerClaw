@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "plane_rabbitmq_runtime",
+  "image_ref": "docker.io/library/rabbitmq:3.13.6-management-alpine@sha256:567378bee7c4b7401bc5165e3ff406c4481ae3cbd9daed4ad3c2821bd97ae3f4",
+  "scanner": "trivy",
+  "scanner_image": "binary:trivy-0.69.3-macOS-ARM64",
+  "scanned_on": "2026-03-27",
+  "summary": {
+    "critical": 6,
+    "high": 47
+  },
+  "targets_with_findings": [
+    {
+      "target": "alpine 3.20.2",
+      "class": "os-pkgs",
+      "type": "alpine",
+      "critical": 6,
+      "high": 47
+    }
+  ]
+}

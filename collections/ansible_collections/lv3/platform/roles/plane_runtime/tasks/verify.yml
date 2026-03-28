@@ -1,0 +1,102 @@
+---
+# Purpose: Verify that the converged Plane runtime is healthy and that controller-local bootstrap access works end to end.
+# Use case: Included after Plane convergence to prove the health endpoint, admin auth, project bootstrap, and issue list all work.
+#
+# Inputs (required):
+#   - plane_internal_base_url (str, required): Internal Plane health-check base URL.
+#   - plane_healthcheck_path (str, required): Health endpoint path.
+#   - plane_admin_auth_local_file (path, required): Controller-local Plane auth file.
+#   - plane_bootstrap_workspace_slug (str, required): Seeded Plane workspace slug.
+#   - plane_bootstrap_project_identifier (str, required): Seeded Plane project identifier.
+#
+# Inputs (optional):
+#   - none
+#
+# Outputs:
+#   - Read-only verification results for health, admin identity, project listing, and issue listing.
+#
+# Idempotency: Fully idempotent
+#              This task file performs read-only checks and does not mutate runtime state.
+#
+# Dependencies:
+#   - ADR 0193: Requires controller-local Plane verification after deployment.
+#   - Requires: plane_runtime main tasks have rendered the stack and bootstrap auth.
+#   - Role: plane_runtime — verifies the converged Plane service.
+#
+# Related ADRs: 0165, 0193
+# Related Runbooks: docs/runbooks/configure-plane.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
+- name: Verify the Plane local health endpoint
+  ansible.builtin.uri:
+    url: "{{ plane_internal_base_url }}{{ plane_healthcheck_path }}"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: plane_verify_health
+  retries: 30
+  delay: 5
+  until:
+    - plane_verify_health.status == 200
+  changed_when: false
+
+- name: Verify the Plane controller auth identity
+  ansible.builtin.command:
+    argv:
+      - uv
+      - run
+      - --with
+      - pyyaml
+      - python
+      - "{{ playbook_dir }}/../scripts/plane_tool.py"
+      - --auth-file
+      - "{{ plane_admin_auth_local_file }}"
+      - whoami
+  delegate_to: localhost
+  become: false
+  register: plane_verify_whoami
+  changed_when: false
+  no_log: true
+
+- name: Verify the Plane bootstrap project exists
+  ansible.builtin.command:
+    argv:
+      - uv
+      - run
+      - --with
+      - pyyaml
+      - python
+      - "{{ playbook_dir }}/../scripts/plane_tool.py"
+      - --auth-file
+      - "{{ plane_admin_auth_local_file }}"
+      - list-projects
+      - --workspace
+      - "{{ plane_bootstrap_workspace_slug }}"
+  delegate_to: localhost
+  become: false
+  register: plane_verify_projects
+  changed_when: false
+  no_log: true
+
+- name: Verify the Plane issue list is reachable
+  ansible.builtin.command:
+    argv:
+      - uv
+      - run
+      - --with
+      - pyyaml
+      - python
+      - "{{ playbook_dir }}/../scripts/plane_tool.py"
+      - --auth-file
+      - "{{ plane_admin_auth_local_file }}"
+      - list-issues
+      - --workspace
+      - "{{ plane_bootstrap_workspace_slug }}"
+      - --project
+      - "{{ plane_bootstrap_project_identifier }}"
+  delegate_to: localhost
+  become: false
+  register: plane_verify_issues
+  changed_when: false
+  no_log: true

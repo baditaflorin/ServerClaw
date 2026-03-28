@@ -631,6 +631,196 @@
       "apply_targets": [
         "converge-windmill"
       ]
+    },
+    "plane_frontend_runtime": {
+      "kind": "runtime",
+      "service_id": "plane",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "plane-web",
+      "registry_ref": "artifacts.plane.so/makeplane/plane-frontend",
+      "tag": "v1.2.3",
+      "digest": "sha256:0aee32a4936ea115e53c442af98577fde8ea4620678d4b22d3467a5ffb67e228",
+      "ref": "artifacts.plane.so/makeplane/plane-frontend:v1.2.3@sha256:0aee32a4936ea115e53c442af98577fde8ea4620678d4b22d3467a5ffb67e228",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-27",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-27-plane-frontend-runtime.json",
+      "exception": {
+        "reason": "The approved upstream Plane frontend digest for v1.2.3 still reports critical findings; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-27",
+        "review_by": "2026-04-10"
+      },
+      "consumers": [
+        "roles/plane_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-plane"
+      ]
+    },
+    "plane_space_runtime": {
+      "kind": "runtime",
+      "service_id": "plane",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "plane-space",
+      "registry_ref": "artifacts.plane.so/makeplane/plane-space",
+      "tag": "v1.2.3",
+      "digest": "sha256:bc5eb16a2d903650f0e7f5f63d8f9fda591d41a6c676f8d69901178c8686971c",
+      "ref": "artifacts.plane.so/makeplane/plane-space:v1.2.3@sha256:bc5eb16a2d903650f0e7f5f63d8f9fda591d41a6c676f8d69901178c8686971c",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-27",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-27-plane-space-runtime.json",
+      "exception": {
+        "reason": "The approved upstream Plane space digest for v1.2.3 still reports critical findings; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-27",
+        "review_by": "2026-04-10"
+      },
+      "consumers": [
+        "roles/plane_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-plane"
+      ]
+    },
+    "plane_admin_runtime": {
+      "kind": "runtime",
+      "service_id": "plane",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "plane-admin",
+      "registry_ref": "artifacts.plane.so/makeplane/plane-admin",
+      "tag": "v1.2.3",
+      "digest": "sha256:a5784ed41c95ce50ed8bdbe6128d458868ee792d92371c27b01cf74cddacb3a5",
+      "ref": "artifacts.plane.so/makeplane/plane-admin:v1.2.3@sha256:a5784ed41c95ce50ed8bdbe6128d458868ee792d92371c27b01cf74cddacb3a5",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-27",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-27-plane-admin-runtime.json",
+      "exception": {
+        "reason": "The approved upstream Plane admin digest for v1.2.3 still reports critical findings; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-27",
+        "review_by": "2026-04-10"
+      },
+      "consumers": [
+        "roles/plane_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-plane"
+      ]
+    },
+    "plane_live_runtime": {
+      "kind": "runtime",
+      "service_id": "plane",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "plane-live",
+      "registry_ref": "artifacts.plane.so/makeplane/plane-live",
+      "tag": "v1.2.3",
+      "digest": "sha256:a8f6ea4fb9de661c38cc03ae9e03aeb0b2bf688d29d55f8876949054db7b450e",
+      "ref": "artifacts.plane.so/makeplane/plane-live:v1.2.3@sha256:a8f6ea4fb9de661c38cc03ae9e03aeb0b2bf688d29d55f8876949054db7b450e",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-27",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-27-plane-live-runtime.json",
+      "exception": {
+        "reason": "The approved upstream Plane live digest for v1.2.3 still reports critical findings; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-27",
+        "review_by": "2026-04-10"
+      },
+      "consumers": [
+        "roles/plane_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-plane"
+      ]
+    },
+    "plane_backend_runtime": {
+      "kind": "runtime",
+      "service_id": "plane",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "plane-api",
+      "registry_ref": "artifacts.plane.so/makeplane/plane-backend",
+      "tag": "v1.2.3",
+      "digest": "sha256:6005402cb27bb34627efdcf8090a67f4cf541d032a9c51afb55908fcc64e4773",
+      "ref": "artifacts.plane.so/makeplane/plane-backend:v1.2.3@sha256:6005402cb27bb34627efdcf8090a67f4cf541d032a9c51afb55908fcc64e4773",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-27",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-27-plane-backend-runtime.json",
+      "consumers": [
+        "roles/plane_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-plane"
+      ]
+    },
+    "plane_proxy_runtime": {
+      "kind": "runtime",
+      "service_id": "plane",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "plane-proxy",
+      "registry_ref": "artifacts.plane.so/makeplane/plane-proxy",
+      "tag": "v1.2.3",
+      "digest": "sha256:f3199f7a2b35a6e46227210cf085c249bc7370f0770784321d3079b4080a178d",
+      "ref": "artifacts.plane.so/makeplane/plane-proxy:v1.2.3@sha256:f3199f7a2b35a6e46227210cf085c249bc7370f0770784321d3079b4080a178d",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-27",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-27-plane-proxy-runtime.json",
+      "exception": {
+        "reason": "The approved upstream Plane proxy digest for v1.2.3 still reports critical findings; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-27",
+        "review_by": "2026-04-10"
+      },
+      "consumers": [
+        "roles/plane_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-plane"
+      ]
+    },
+    "plane_rabbitmq_runtime": {
+      "kind": "runtime",
+      "service_id": "plane",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "plane-rabbitmq",
+      "registry_ref": "docker.io/library/rabbitmq",
+      "tag": "3.13.6-management-alpine",
+      "digest": "sha256:567378bee7c4b7401bc5165e3ff406c4481ae3cbd9daed4ad3c2821bd97ae3f4",
+      "ref": "docker.io/library/rabbitmq:3.13.6-management-alpine@sha256:567378bee7c4b7401bc5165e3ff406c4481ae3cbd9daed4ad3c2821bd97ae3f4",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-27",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-27-plane-rabbitmq-runtime.json",
+      "exception": {
+        "reason": "The approved RabbitMQ digest for the Plane queue still reports critical findings; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-27",
+        "review_by": "2026-04-10"
+      },
+      "consumers": [
+        "roles/plane_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-plane"
+      ]
     }
   }
 }

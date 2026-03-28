@@ -89,3 +89,15 @@ def test_build_service_urls_resolves_excalidraw_internal_url() -> None:
         "public": "https://draw.lv3.org",
         "internal": "http://10.10.10.20:3095",
     }
+
+
+def test_build_platform_vars_includes_plane_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    plane = platform_vars["platform_service_topology"]["plane"]
+
+    assert plane["public_hostname"] == "tasks.lv3.org"
+    assert plane["dns"]["name"] == "tasks"
+    assert plane["ports"]["internal"] == 8093
+    assert plane["ports"]["controller"] == 8011
+    assert plane["urls"]["public"] == "https://tasks.lv3.org"
+    assert plane["urls"]["controller"] == "http://100.64.0.1:8011"

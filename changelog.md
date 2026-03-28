@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 
 ## Unreleased
 
+- integrated ADR 0193 by publishing the repo-managed Plane task board at `tasks.lv3.org`, wiring the governed controller wrapper and ADR sync path, and verifying both the private controller lane and authenticated public edge
+
 ## Latest Release
 
 - [0.177.21 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.21.md)

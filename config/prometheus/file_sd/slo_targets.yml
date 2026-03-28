@@ -124,3 +124,10 @@
     slo_id: windmill-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
+- targets:
+    - https://tasks.lv3.org/
+  labels:
+    service_id: plane
+    slo_id: plane-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects

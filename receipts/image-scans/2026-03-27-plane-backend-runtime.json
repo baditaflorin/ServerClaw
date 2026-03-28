@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "plane_backend_runtime",
+  "image_ref": "artifacts.plane.so/makeplane/plane-backend:v1.2.3@sha256:6005402cb27bb34627efdcf8090a67f4cf541d032a9c51afb55908fcc64e4773",
+  "scanner": "trivy",
+  "scanner_image": "binary:trivy-0.69.3-macOS-ARM64",
+  "scanned_on": "2026-03-27",
+  "summary": {
+    "critical": 0,
+    "high": 4
+  },
+  "targets_with_findings": [
+    {
+      "target": "alpine 3.22.0",
+      "class": "os-pkgs",
+      "type": "alpine",
+      "critical": 0,
+      "high": 2
+    },
+    {
+      "target": "Python",
+      "class": "lang-pkgs",
+      "type": "pip",
+      "critical": 0,
+      "high": 2
+    }
+  ]
+}

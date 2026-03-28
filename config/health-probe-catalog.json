@@ -147,7 +147,9 @@
         "delay_seconds": 5,
         "url": "http://10.10.10.20:3003/api/healthz",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "command",
@@ -173,7 +175,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 10,
-          "accepted_statuscodes": ["200-299"]
+          "accepted_statuscodes": [
+            "200-299"
+          ]
         }
       }
     },
@@ -239,7 +243,9 @@
         "delay_seconds": 5,
         "url": "http://10.10.10.20:3090/",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -249,7 +255,9 @@
         "delay_seconds": 5,
         "url": "http://10.10.10.20:3090/",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "uptime_kuma": {
         "enabled": true,
@@ -262,7 +270,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 5,
-          "accepted_statuscodes": ["200-399"]
+          "accepted_statuscodes": [
+            "200-399"
+          ]
         }
       }
     },
@@ -319,7 +329,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:3002/api/public/health",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -329,7 +341,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:3002/auth/sign-in",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "uptime_kuma": {
         "enabled": true,
@@ -342,7 +356,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 5,
-          "accepted_statuscodes": ["200-299"]
+          "accepted_statuscodes": [
+            "200-299"
+          ]
         }
       }
     },
@@ -675,7 +691,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:8089/healthcheck",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -685,7 +703,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:8089/healthcheck",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "uptime_kuma": {
         "enabled": true,
@@ -698,7 +718,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 10,
-          "accepted_statuscodes": ["200-299"]
+          "accepted_statuscodes": [
+            "200-299"
+          ]
         }
       }
     },
@@ -1143,7 +1165,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:8881/",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -1153,7 +1177,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:8881/search?q=proxmox%20ve&format=json",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "uptime_kuma": {
         "enabled": false,
@@ -1580,6 +1606,52 @@
           "maxredirects": 10,
           "accepted_statuscodes": [
             "200-299"
+          ]
+        }
+      }
+    },
+    "plane": {
+      "service_name": "plane",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "plane_runtime",
+      "verify_file": "roles/plane_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Plane proxy root responds on the local runtime listener.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8093/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The Plane instance API answers locally after the proxy, API, and worker services finish startup.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8093/api/instances/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Plane Public",
+          "type": "http",
+          "url": "https://tasks.lv3.org/",
+          "description": "Public Plane board published through the shared NGINX edge and authenticated by the repo-managed oauth2-proxy flow.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-399"
           ]
         }
       }

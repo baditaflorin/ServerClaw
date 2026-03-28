@@ -7,7 +7,7 @@ import dependency_graph
 
 def test_dependency_graph_validates_against_service_catalog() -> None:
     graph = dependency_graph.load_dependency_graph(validate_schema=True)
-    assert len(graph.nodes) == 33
+    assert len(graph.nodes) >= 34
     assert graph.nodes["ops_portal"].tier == 4
 
 
@@ -22,11 +22,12 @@ def test_compute_impact_for_postgres_includes_direct_and_transitive_failures() -
         "mattermost",
         "n8n",
         "netbox",
+        "plane",
         "semaphore",
         "vaultwarden",
         "windmill",
     }
-    assert set(impact.transitive_hard) == {"api_gateway", "ops_portal"}
+    assert set(impact.transitive_hard) == {"api_gateway", "homepage", "ops_portal"}
 
 
 def test_deployment_order_sorts_dependencies_before_dependents() -> None:

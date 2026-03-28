@@ -60,6 +60,8 @@ PORT_KEYS = (
     "platform_context_host_proxy_port",
     "homepage_port",
     "ops_portal_port",
+    "plane_port",
+    "plane_host_proxy_port",
     "ntopng_http_port",
     "ntopng_proxy_port",
     "portainer_https_port",
@@ -322,6 +324,11 @@ def build_service_urls(
     elif service_id == "langfuse":
         urls["internal"] = service_url("http", private_ip, ports["langfuse_port"])
         port_map["internal"] = ports["langfuse_port"]
+    elif service_id == "plane":
+        urls["internal"] = service_url("http", private_ip, ports["plane_port"])
+        urls["controller"] = service_url("http", tailscale_ipv4, ports["plane_host_proxy_port"])
+        port_map["internal"] = ports["plane_port"]
+        port_map["controller"] = ports["plane_host_proxy_port"]
     elif service_id == "dozzle":
         urls["internal"] = service_url("http", private_ip, ports["dozzle_http_port"])
         port_map["internal"] = ports["dozzle_http_port"]
@@ -532,6 +539,7 @@ def build_platform_vars(
     gitea_service = service_topology["gitea"]
     netbox_service = service_topology["netbox"]
     open_webui_service = service_topology["open_webui"]
+    plane_service = service_topology["plane"]
     api_gateway_service = service_topology["api_gateway"]
     headscale_service = service_topology["headscale"]
     openbao_service = service_topology["openbao"]
@@ -634,6 +642,7 @@ def build_platform_vars(
             resolved_ports["headscale_http_port"],
             resolved_ports["windmill_host_proxy_port"],
             resolved_ports["open_webui_host_proxy_port"],
+            resolved_ports["plane_host_proxy_port"],
             resolved_ports["mattermost_host_proxy_port"],
             resolved_ports["platform_context_host_proxy_port"],
             resolved_ports["portainer_host_proxy_port"],
@@ -653,6 +662,10 @@ def build_platform_vars(
         "netbox_controller_url": netbox_service["urls"]["controller"],
         "open_webui_host_proxy_port": resolved_ports["open_webui_host_proxy_port"],
         "open_webui_controller_url": open_webui_service["urls"]["controller"],
+        "plane_port": resolved_ports["plane_port"],
+        "plane_host_proxy_port": resolved_ports["plane_host_proxy_port"],
+        "plane_private_base_url": plane_service["urls"]["internal"],
+        "plane_controller_url": plane_service["urls"]["controller"],
         "api_gateway_internal_port": resolved_ports["api_gateway_internal_port"],
         "api_gateway_public_url": api_gateway_service["urls"]["public"],
         "api_gateway_internal_url": api_gateway_service["urls"]["internal"],
@@ -695,6 +708,7 @@ def build_platform_vars(
             resolved_ports["headscale_http_port"],
             resolved_ports["windmill_host_proxy_port"],
             resolved_ports["open_webui_host_proxy_port"],
+            resolved_ports["plane_host_proxy_port"],
             resolved_ports["mattermost_host_proxy_port"],
             resolved_ports["platform_context_host_proxy_port"],
             resolved_ports["portainer_host_proxy_port"],
