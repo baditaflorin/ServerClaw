@@ -1,0 +1,29 @@
+---
+# Playbook: services/harbor.yml
+# Purpose: Provide a leaf service import for Harbor so repo automation can syntax-check and target the service cleanly.
+# Use case: Used by generated or scoped automation paths that operate on one service leaf playbook at a time.
+#
+# Inputs (required):
+#   - None.
+#
+# Inputs (optional):
+#   - Same optional inputs as playbooks/harbor.yml.
+#
+# Outputs:
+#   - Imports the top-level Harbor converge playbook.
+#
+# Idempotency: Fully idempotent
+#              This file is a pure import wrapper around the top-level playbook.
+#
+# Dependencies:
+#   - ADR 0201: Harbor with CVE scanning.
+#   - Role: harbor_runtime — implemented in the imported playbook.
+#
+# Related ADRs: 0201
+# Related Runbooks: docs/runbooks/configure-harbor.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
+# =============================================================================
+
+- import_playbook: ../harbor.yml

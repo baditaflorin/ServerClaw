@@ -33,6 +33,17 @@ def test_build_platform_vars_includes_dify_publication_topology() -> None:
     assert dify["urls"]["internal"] == "http://10.10.10.20:8094"
 
 
+def test_build_platform_vars_includes_harbor_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    harbor = platform_vars["platform_service_topology"]["harbor"]
+
+    assert harbor["public_hostname"] == "registry.lv3.org"
+    assert harbor["dns"]["name"] == "registry"
+    assert harbor["ports"]["internal"] == 8095
+    assert harbor["urls"]["public"] == "https://registry.lv3.org"
+    assert harbor["urls"]["internal"] == "http://10.10.10.20:8095"
+
+
 def test_build_service_urls_supports_private_gitea_proxy_and_root_url() -> None:
     ports = {
         "gitea_http_port": 3003,

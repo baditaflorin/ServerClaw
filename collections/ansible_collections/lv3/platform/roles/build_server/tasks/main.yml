@@ -81,6 +81,13 @@
   delay: 5
   until: build_server_buildkit_socket.rc == 0
 
+- name: Ensure the BuildKit socket is accessible to the build operator
+  ansible.builtin.file:
+    path: "{{ build_server_buildkit_socket_file }}"
+    owner: root
+    group: "{{ build_server_ops_group }}"
+    mode: "0660"
+
 - name: Verify Docker buildx is available on the build server
   ansible.builtin.command:
     argv:
@@ -89,6 +96,8 @@
       - version
   register: build_server_buildx_version
   changed_when: false
+  become: true
+  become_user: "{{ build_server_ops_user }}"
 
 - name: Check whether the managed buildx builder already exists
   ansible.builtin.command:
@@ -100,6 +109,8 @@
   register: build_server_buildx_builder
   changed_when: false
   failed_when: false
+  become: true
+  become_user: "{{ build_server_ops_user }}"
 
 - name: Remove the managed buildx builder before refreshing it
   ansible.builtin.command:
@@ -113,6 +124,8 @@
     - build_server_buildkit_config.changed or build_server_buildkit_unit.changed
   register: build_server_buildx_remove
   changed_when: build_server_buildx_remove.rc == 0
+  become: true
+  become_user: "{{ build_server_ops_user }}"
 
 - name: Create the managed buildx builder
   ansible.builtin.command:
@@ -130,6 +143,8 @@
     - build_server_buildx_builder.rc != 0 or build_server_buildkit_config.changed or build_server_buildkit_unit.changed
   register: build_server_buildx_create
   changed_when: build_server_buildx_create.rc == 0
+  become: true
+  become_user: "{{ build_server_ops_user }}"
 
 - name: Bootstrap the managed buildx builder
   ansible.builtin.command:
@@ -141,6 +156,8 @@
       - --bootstrap
   register: build_server_buildx_bootstrap
   changed_when: false
+  become: true
+  become_user: "{{ build_server_ops_user }}"
 
 - name: Ensure the pip cache Docker volume exists
   ansible.builtin.command:

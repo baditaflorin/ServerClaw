@@ -273,6 +273,52 @@
         }
       }
     },
+    "harbor": {
+      "service_name": "harbor",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "harbor_runtime",
+      "verify_file": "roles/harbor_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "Harbor answers the local ping endpoint on the private runtime port.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8095/api/v2.0/ping",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The public Harbor registry endpoint answers the authenticated API ping through the shared edge.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "https://registry.lv3.org/api/v2.0/ping",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Harbor Registry Public",
+          "type": "http",
+          "url": "https://registry.lv3.org/api/v2.0/ping",
+          "description": "Harbor ping endpoint published through the shared NGINX edge.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
     "homepage": {
       "service_name": "homepage",
       "owning_vm": "docker-runtime-lv3",

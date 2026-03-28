@@ -27,6 +27,16 @@ docker_runtime_engine_packages:
 
 docker_runtime_admin_users:
   - "{{ proxmox_guest_ci_user }}"
+docker_runtime_public_edge_ipv4: "{{ hostvars['proxmox_florin'].proxmox_public_edge_ipv4 }}"
+docker_runtime_public_edge_host_aliases: >-
+  {{
+    (
+      hostvars['proxmox_florin'].platform_service_topology
+      | service_topology_edge_sites
+      | map(attribute='hostname')
+      | list
+    ) | unique | sort
+  }}
 
 docker_runtime_daemon_config:
   live-restore: true
@@ -34,6 +44,13 @@ docker_runtime_daemon_config:
   log-opts:
     max-size: "10m"
     max-file: "5"
+  default-address-pools:
+    - base: 172.16.0.0/12
+      size: 24
+    - base: 192.168.0.0/16
+      size: 24
+    - base: 10.200.0.0/16
+      size: 24
 docker_runtime_require_nat_chain: true
 docker_runtime_nftables_config_file: /etc/nftables.conf
 docker_runtime_container_forward_compat_enabled: true
