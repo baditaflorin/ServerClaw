@@ -9,7 +9,7 @@ schema_version: 1
 generated: '2026-03-28'
 total_adrs: 204
 implementation_status_summary:
-  Implemented: 188
+  Implemented: 189
   Partial: 3
   Not Implemented: 11
   Deprecated: 1
@@ -3356,7 +3356,7 @@ adr_index:
       - wiki
     summary: We will deploy Outline on docker-runtime-lv3 and publish it at https://wiki.lv3.org.
     filename: 0199-outline-living-knowledge-wiki.md
-    implemented_version: 0.130.31
+    implemented_version: 0.177.19
   - adr: '0202'
     title: Excalidraw Auto Generated Architecture Diagrams
     status: Accepted

@@ -28,6 +28,8 @@ On `main`, run:
 HETZNER_DNS_API_TOKEN=... make live-apply-service service=outline env=production
 ```
 
+This is the required path for the authoritative platform-version bump because `make live-apply-service` updates the canonical truth surfaces after the merged-main replay.
+
 On a workstream branch where protected integration files must remain untouched, run the service playbook directly:
 
 ```bash
@@ -104,3 +106,8 @@ python3 scripts/sync_docs_to_outline.py verify --base-url https://wiki.lv3.org
 ```
 
 The verify command asserts that the required collections exist and that the repo-managed landing docs were published successfully. A successful sync keeps the top-level collection set at `ADRs`, `Runbooks`, `Incident Postmortems`, `Agent Findings`, and `Architecture`.
+
+## Mainline replay notes
+
+- The authenticated Keycloak admin API is warmed immediately after restart so the first realm-management query does not race the container startup path.
+- The merged-main replay may retry the public `https://wiki.lv3.org/_health` probe briefly after the edge certificate expands to include `wiki.lv3.org`; a short retry window is expected during the NGINX reload.

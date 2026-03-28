@@ -1,10 +1,10 @@
 # ADR 0199: Outline Living Knowledge Wiki
 
 - Status: Accepted
-- Implementation Status: Live-applied on workstream branch
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: 0.130.31
-- Implemented On: 2026-03-27
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.177.19
+- Implemented In Platform Version: 0.130.32
+- Implemented On: 2026-03-28
 - Date: 2026-03-27
 
 ## Context

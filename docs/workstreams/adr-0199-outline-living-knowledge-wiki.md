@@ -32,7 +32,8 @@
 
 ## Outcome
 
-- live apply completed and verified on `2026-03-27`
-- `wiki.lv3.org` is healthy, published through the shared edge, and the managed Outline surface now contains exactly the five governed top-level collections with one landing page each
-- the bootstrap path now uses the durable `outline.automation` Keycloak identity, removes the default `Welcome` collection, and deduplicates managed landing docs during sync
-- merge-to-main still must update the integrated top-level `README.md` summary, bump `VERSION`, update `changelog.md`, and update `versions/stack.yaml` only when the final mainline integration and mainline live apply happen
+- latest-main integration shipped in repo version `0.177.19`, and the merged `origin/main` replay completed and verified on `2026-03-28`
+- `wiki.lv3.org` is healthy, published through the shared edge, and the managed Outline surface contains exactly the five governed top-level collections: `ADRs`, `Agent Findings`, `Architecture`, `Incident Postmortems`, and `Runbooks`
+- the bootstrap path uses the durable `outline.automation` Keycloak identity, removes the default `Welcome` collection, and deduplicates managed landing docs during sync
+- the final live replay also hardened the Keycloak runtime path by reconciling the named users through the authenticated admin API and warming the first authenticated admin query after restart before realm reconciliation
+- remaining for merge to `main`: none
