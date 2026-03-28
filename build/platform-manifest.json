@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.44",
   "platform_version": "0.130.40",
-  "generated_at": "2026-03-28T18:19:14Z",
-  "next_refresh_at": "2026-03-28T19:19:14Z",
+  "generated_at": "2026-03-28T18:13:34Z",
+  "next_refresh_at": "2026-03-28T19:13:34Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4028,7 +4028,7 @@
   "recent_changes": {
     "last_version": "0.177.43",
     "deployed_at": "2026-03-28",
-    "summary": "integrated ADR 0229 by carrying the verified Gitea Actions runner evidence into main after replaying the latest-main Gitea convergence, passing the private push gate, and recording workflow run 36 on docker-build-lv3",
+    "summary": "integrates ADR 0231 into main by replacing the control-plane backup service's plaintext OpenBao token and baked-in Windmill DSN with host-native OpenBao Agent delivery through systemd credentials",
     "release_notes_url": "docs/release-notes/0.177.44.md"
   },
   "agentic_architecture": {

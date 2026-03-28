@@ -123,6 +123,7 @@ ADR 0102 security posture reporting is now live on production: the Windmill-comp
 The repository now also ships ADR 0142 public-surface security scanning: `make public-surface-security-scan ENV=production` writes structured receipts under `receipts/security-scan/`, uses `testssl.sh` and `nuclei` container runners for the live public HTTP or HTTPS surface, and can publish high or critical findings on `platform.security.*`; the live weekly schedule still requires apply from `main`.
 The repository now also ships ADR 0129 runbook automation: structured YAML, JSON, and Markdown-front-matter runbooks can execute through `lv3 runbook`, persist resumable run state under `.local/runbooks/runs/`, and reuse the current Windmill plus mutation-audit surfaces.
 The repository now also ships ADR 0209 use-case services and thin delivery adapters live on production: the API gateway and ops portal now expose the same shared structured runbook service already used by the CLI and Windmill wrapper, and the 2026-03-28 latest-main replay re-verified `validation-gate-status` end to end through the worker checkout, `api.lv3.org` gateway contract, and the interactive `ops.lv3.org` runbook launcher.
+The repository now also ships ADR 0231 local secret delivery live on production: `docker-runtime-lv3` now serves the control-plane backup path through a repo-managed OpenBao Agent plus systemd credentials, the legacy `/etc/lv3/control-plane-recovery/openbao-backup-token.json` artifact is gone, and the 2026-03-28 replay re-verified a fresh backup generation plus restore drill on `backup-lv3`.
 The repository now also ships ADR 0137 crawl policy automation live on production: the shared public edge serves a universal `robots.txt`, emits `X-Robots-Tag: noindex, nofollow` across published hostnames, adds robots meta tags to repository-generated HTML surfaces, and includes `lv3.org` in the shared edge certificate definition.
 The repository now also ships the first ADR 0166 canonical error rollout live on production: `config/error-codes.yaml` and `scripts/canonical_errors.py` now normalize repo-managed gateway and platform-context failures behind one trace-id-backed error envelope, and the 2026-03-26 live replay from `main` verified the canonical `AUTH_TOKEN_MISSING` response on both `https://api.lv3.org/v1/health` and `http://100.64.0.1:8010/v1/platform-summary`.
 
@@ -201,7 +202,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `config_merge` | `2026-03-26-adr-0158-config-merge-live-apply` |
 | `control_metadata_witness` | `2026-03-27-adr-0181-control-metadata-witness-live-apply` |
 | `control_plane_lanes` | `2026-03-22-adr-0045-control-plane-communication-lanes-live-apply` |
-| `control_plane_recovery` | `2026-03-27-adr-0181-control-metadata-witness-live-apply` |
+| `control_plane_recovery` | `2026-03-28-adr-0231-local-secret-delivery-live-apply` |
 | `coolify` | `2026-03-28-adr-0194-coolify-paas-deploy-from-repo-mainline-live-apply` |
 | `coolify_apps` | `2026-03-28-adr-0194-coolify-paas-deploy-from-repo-mainline-live-apply` |
 | `deadlock_detector` | `2026-03-26-adr-0162-deadlock-detector-live-apply` |
@@ -1090,6 +1091,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream WS-0225: Server-Resident Reconciliation Via Ansible Pull Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0225-live-apply.md)
 - [Workstream ws-0229-live-apply: ADR 0229 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0229-live-apply.md)
 - [Workstream ws-0229-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0229-main-merge.md)
+- [Workstream WS-0231: Local Secret Delivery Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0231-live-apply.md)
+- [Workstream ws-0231-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0231-main-merge.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -1341,6 +1344,8 @@ This repository is intentionally opinionated:
 | `0225` | Server-resident reconciliation via ansible-pull live apply | `live_applied` | [ws-0225-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0225-live-apply.md) |
 | `0229` | Gitea Actions runners live apply from latest origin/main | `live_applied` | [ws-0229-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0229-live-apply.md) |
 | `0229` | Integrate ADR 0229 live apply into origin/main | `merged` | [ws-0229-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0229-main-merge.md) |
+| `0231` | Live apply ADR 0231 local secret delivery via OpenBao Agent and systemd credentials | `live_applied` | [ws-0231-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0231-live-apply.md) |
+| `0231` | Integrate ADR 0231 live apply into origin/main | `merged` | [ws-0231-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0231-main-merge.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

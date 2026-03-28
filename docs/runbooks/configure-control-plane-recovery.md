@@ -32,7 +32,7 @@ make converge-control-plane-recovery
 2. Configures `backup-lv3` as the control-plane recovery store.
 3. Installs a dedicated non-human SSH landing user for runtime archive delivery.
 4. Configures `docker-runtime-lv3` to export scheduled control-plane backups.
-5. Creates a scoped OpenBao backup token used only for managed Raft snapshots.
+5. Creates a scoped OpenBao AppRole plus agent-managed systemd credentials used only for managed Raft snapshots and the Windmill backup database DSN.
 6. Builds a controller-local recovery bundle and mirrors it into `backup-lv3`.
 7. Enables a scheduled restore drill on `backup-lv3`.
 8. After the restore drill passes, builds a git-backed witness bundle from the repo checkout and publishes one immutable off-host generation.
@@ -53,6 +53,18 @@ Check the backup timer on `docker-runtime-lv3`:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p" ops@10.10.10.20 'sudo systemctl status lv3-control-plane-backup.timer --no-pager'
+```
+
+Check the OpenBao Agent credential delivery unit on `docker-runtime-lv3`:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p" ops@10.10.10.20 'sudo systemctl status lv3-control-plane-backup-openbao-agent.service --no-pager'
+```
+
+Confirm the host-native credential source files exist and the legacy token artifact is gone:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p" ops@10.10.10.20 'sudo ls -l /run/lv3-systemd-credentials/control-plane-backup && sudo test ! -e /etc/lv3/control-plane-recovery/openbao-backup-token.json'
 ```
 
 Check the restore-drill timer on `backup-lv3`:
@@ -104,6 +116,7 @@ Set these controller-side environment variables before `make converge-control-pl
 - The controller bundle includes repo-managed recovery references needed to reconnect to the live control plane.
 - The root break-glass SSH private key remains an external dependency and is intentionally not copied into the archived bundle.
 - Treat `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519` as a separately preserved recovery secret.
+- The durable AppRole bootstrap files under `/etc/lv3/control-plane-recovery/openbao-agent/` are intentionally narrow, low-privilege bootstrap material for the host-local OpenBao Agent and should remain root-only (`0600`).
 
 ## Restore Orientation
 

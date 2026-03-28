@@ -8,7 +8,30 @@ target_host="{{ control_plane_recovery_runtime_backup_target_host }}"
 target_user="{{ control_plane_recovery_runtime_backup_target_user }}"
 target_dir="{{ control_plane_recovery_runtime_backup_target_dir }}"
 ssh_key="{{ control_plane_recovery_runtime_config_dir }}/docker-runtime-backup.id_ed25519"
-openbao_token_file="{{ control_plane_recovery_runtime_openbao_backup_token_remote_file }}"
+
+fail() {
+  echo "control-plane-backup: $*" >&2
+  exit 1
+}
+
+require_file() {
+  local path="$1"
+  [[ -e "${path}" ]] || fail "required path missing: ${path}"
+}
+
+read_credential() {
+  local path="$1"
+  require_file "${path}"
+  tr -d '\n' < "${path}"
+}
+
+credential_dir="${CREDENTIALS_DIRECTORY:-}"
+[[ -n "${credential_dir}" ]] || fail "systemd credentials are unavailable; run the managed service unit instead of the raw script"
+
+openbao_token="$(read_credential "${credential_dir}/openbao-token")"
+windmill_db_dsn="$(read_credential "${credential_dir}/windmill-db-dsn")"
+[[ -n "${openbao_token}" ]] || fail "OpenBao token credential is empty"
+[[ -n "${windmill_db_dsn}" ]] || fail "Windmill database credential is empty"
 
 mkdir -p "${run_dir}"
 trap 'rm -rf "${run_dir}"' EXIT
@@ -17,14 +40,14 @@ tar --zstd -cpf "${run_dir}/step-ca.tar.zst" -C / opt/step-ca
 tar --zstd -cpf "${run_dir}/openbao-config.tar.zst" -C / opt/openbao/config opt/openbao/tls opt/openbao/policies opt/openbao/docker-compose.yml
 
 curl -fsS \
-  -H "X-Vault-Token: $(jq -r '.token' "${openbao_token_file}")" \
+  -H "X-Vault-Token: ${openbao_token}" \
   "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/storage/raft/snapshot" \
   > "${run_dir}/openbao-raft.snap"
 
 pg_dump \
   --format=custom \
   --file "${run_dir}/windmill-db.dump" \
-  "{{ control_plane_recovery_windmill_backup_database_dsn }}"
+  "${windmill_db_dsn}"
 tar --zstd -cpf "${run_dir}/windmill-files.tar.zst" -C / opt/windmill etc/lv3/windmill
 tar --zstd -cpf "${run_dir}/mail-platform.tar.zst" -C / opt/mail-platform etc/lv3/mail-platform
 
