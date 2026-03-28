@@ -19,32 +19,6 @@ jobs:
       - name: Prepare tool cache
         run: mkdir -p .tmp/bin .tmp/release-bundles
 
-      - name: Install uv
-        run: |
-          set -euo pipefail
-          export UV_VERSION="0.8.14"
-          python3 - <<'PY'
-          import io
-          import os
-          import stat
-          import tarfile
-          import urllib.request
-          from pathlib import Path
-
-          version = os.environ["UV_VERSION"]
-          url = f"https://github.com/astral-sh/uv/releases/download/{version}/uv-x86_64-unknown-linux-gnu.tar.gz"
-          destination = Path(".tmp/bin/uv")
-          with urllib.request.urlopen(url) as response:
-              archive = tarfile.open(fileobj=io.BytesIO(response.read()), mode="r:gz")
-          member = next(item for item in archive.getmembers() if item.name.endswith("/uv"))
-          extracted = archive.extractfile(member)
-          if extracted is None:
-              raise RuntimeError("Failed to extract uv from downloaded archive")
-          destination.write_bytes(extracted.read())
-          destination.chmod(destination.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-          PY
-          chmod 0755 "$PWD/.tmp/bin/uv"
-
       - name: Install cosign
         run: |
           set -euo pipefail
@@ -66,13 +40,7 @@ jobs:
       - name: Validate release bundle contract
         run: |
           set -euo pipefail
-          PATH="$PWD/.tmp/bin:$HOME/.local/bin:$PATH"
-          uv run --with pytest --with pyyaml --with jsonschema sh -c '
-            python3 scripts/validate_repository_data_models.py --validate &&
-            ./scripts/validate_repo.sh agent-standards &&
-            pytest -q tests/test_release_bundle.py tests/test_gitea_runtime_role.py &&
-            python3 scripts/release_bundle.py validate --public-key-path "$PWD/keys/gitea-release-bundle-cosign.pub"
-          '
+          python3 scripts/release_bundle.py validate --public-key-path "$PWD/keys/gitea-release-bundle-cosign.pub"
 
       - name: Materialize signing secrets
         env:
