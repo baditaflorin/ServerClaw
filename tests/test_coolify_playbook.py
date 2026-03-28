@@ -38,6 +38,8 @@ def test_coolify_playbook_covers_vm_provision_guest_runtime_and_edge() -> None:
         "lv3.platform.public_edge_oidc_auth",
         "lv3.platform.nginx_edge_publication",
     ]
+    expected_vars_file = "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
+    assert [play["vars_files"] for play in playbook] == [[expected_vars_file]] * 4
 
 
 def test_coolify_service_wrapper_imports_the_canonical_playbook() -> None:
