@@ -21,6 +21,7 @@ runner_token_file="{{ gitea_runner_registration_token_remote_file }}"
 hook_template="{{ gitea_prereceive_hook_template }}"
 release_bundle_private_key_secret_name="{{ gitea_release_bundle_cosign_private_key_secret_name }}"
 release_bundle_password_secret_name="{{ gitea_release_bundle_cosign_password_secret_name }}"
+release_bundle_repo_token_secret_name="{{ gitea_release_bundle_repo_token_secret_name }}"
 
 exec_gitea() {
   docker exec "${container}" gitea "$@"
@@ -124,6 +125,7 @@ if [[ ! -s "${runner_token_file}" ]]; then
 fi
 
 token="$(tr -d '\r\n' < "${token_file}")"
+export GITEA_RELEASE_BUNDLE_REPO_TOKEN="${token}"
 
 org_status="$(curl -sS -o /tmp/gitea-org.json -w '%{http_code}' \
   -H "Authorization: token ${token}" \
@@ -170,6 +172,14 @@ if ! grep -q "\"name\":\"${release_bundle_password_secret_name}\"" <<<"${repo_ac
     "${release_bundle_password_secret_name}" \
     "GITEA_RELEASE_BUNDLE_COSIGN_PASSWORD" \
     "Cosign password for ADR 0233 signed release bundles"
+  changed=true
+fi
+
+if ! grep -q "\"name\":\"${release_bundle_repo_token_secret_name}\"" <<<"${repo_action_secrets}"; then
+  put_repo_action_secret \
+    "${release_bundle_repo_token_secret_name}" \
+    "GITEA_RELEASE_BUNDLE_REPO_TOKEN" \
+    "Repository token for ADR 0233 release-bundle publish and verification workflows"
   changed=true
 fi
 

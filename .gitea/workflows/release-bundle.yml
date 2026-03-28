@@ -66,7 +66,7 @@ jobs:
       - name: Publish signed bundle release
         id: publish
         env:
-          GITEA_TOKEN: ${{ github.token }}
+          GITEA_TOKEN: ${{ secrets.RELEASE_BUNDLE_REPO_TOKEN }}
         run: |
           set -euo pipefail
           python3 scripts/release_bundle.py publish \
@@ -122,7 +122,7 @@ jobs:
 
       - name: Verify published bundle
         env:
-          GITEA_TOKEN: ${{ github.token }}
+          GITEA_TOKEN: ${{ secrets.RELEASE_BUNDLE_REPO_TOKEN }}
         run: |
           set -euo pipefail
           python3 scripts/release_bundle.py verify-release \

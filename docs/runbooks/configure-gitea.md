@@ -121,7 +121,8 @@ The canonical repository hook is installed under:
 
 - `git.lv3.org` is private-only. Do not add an NGINX edge publication for it.
 - The bootstrap admin and runner registration tokens are mirrored locally for controlled operator workflows; keep `.local/gitea/` outside commits.
+- ADR 0233 also seeds the private repo Actions secret `RELEASE_BUNDLE_REPO_TOKEN` from the mirrored Gitea admin token so server-resident workflows can publish and re-download private release assets during verification.
 - The private git push path enforces the server-side validation gate before a ref is accepted. A rejected push can fail before any Actions workflow is created.
 - The Gitea git SSH endpoint on port `2222` uses Gitea account keys, not the Proxmox host bootstrap key. For controlled automation from the operator workstation, the mirrored `ops-gitea` admin token over HTTP basic auth is the documented fallback.
-- ADR 0233 reuses the managed Gitea bootstrap path to seed the private repo Actions secrets `RELEASE_BUNDLE_COSIGN_PRIVATE_KEY` and `RELEASE_BUNDLE_COSIGN_PASSWORD`.
+- ADR 0233 reuses the managed Gitea bootstrap path to seed the private repo Actions secrets `RELEASE_BUNDLE_COSIGN_PRIVATE_KEY`, `RELEASE_BUNDLE_COSIGN_PASSWORD`, and `RELEASE_BUNDLE_REPO_TOKEN`.
 - The signed bundle build, publish, and verification flow is documented in [signed-release-bundles.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/signed-release-bundles.md).

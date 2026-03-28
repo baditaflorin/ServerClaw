@@ -41,6 +41,9 @@ The `gitea_runtime` bootstrap seeds these private repo Actions secrets when they
 
 - `RELEASE_BUNDLE_COSIGN_PRIVATE_KEY`
 - `RELEASE_BUNDLE_COSIGN_PASSWORD`
+- `RELEASE_BUNDLE_REPO_TOKEN`
+
+`RELEASE_BUNDLE_REPO_TOKEN` is seeded from the managed Gitea admin token mirror so the server-resident publish and verify jobs can download private release assets through the authenticated release endpoints. The ephemeral workflow `github.token` is not sufficient for that private asset replay path.
 
 ## Build And Publish A Bundle Locally
 
@@ -62,7 +65,7 @@ python3 scripts/release_bundle.py publish \
 
 ## Dispatch The Server-Resident Workflow
 
-The repo-managed workflow lives at `.gitea/workflows/release-bundle.yml`.
+The repo-managed workflow lives at `.gitea/workflows/release-bundle.yml` and consumes the seeded `RELEASE_BUNDLE_REPO_TOKEN` secret for both publish and verify steps.
 
 Dispatch it against a branch ref that already exists in the private Gitea repo:
 

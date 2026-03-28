@@ -35,6 +35,7 @@
       - gitea_release_bundle_cosign_public_key_repo_file | length > 0
       - gitea_release_bundle_cosign_private_key_secret_name | length > 0
       - gitea_release_bundle_cosign_password_secret_name | length > 0
+      - gitea_release_bundle_repo_token_secret_name | length > 0
       - gitea_repo_org | length > 0
       - gitea_repo_name | length > 0
     fail_msg: "gitea_runtime requires runtime paths, database credentials, OIDC inputs, and bootstrap artifact paths."

@@ -45,6 +45,7 @@ def test_gitea_bootstrap_script_creates_admin_token_and_runner_token() -> None:
     assert "--raw" in template
     assert "generate-runner-token" in template
     assert "RELEASE_BUNDLE_COSIGN_PRIVATE_KEY" in template
+    assert "RELEASE_BUNDLE_REPO_TOKEN" in template
     assert "/actions/secrets/" in template
 
 
@@ -95,3 +96,4 @@ def test_gitea_defaults_include_release_bundle_signing_paths() -> None:
     assert ".local/gitea/release-bundle-cosign.key" in defaults
     assert ".local/gitea/release-bundle-cosign.password.txt" in defaults
     assert "keys/gitea-release-bundle-cosign.pub" in defaults
+    assert "RELEASE_BUNDLE_REPO_TOKEN" in defaults

@@ -99,6 +99,9 @@ argument_specs:
       gitea_release_bundle_cosign_password_secret_name:
         type: str
         required: true
+      gitea_release_bundle_repo_token_secret_name:
+        type: str
+        required: true
       gitea_webhook_secret_remote_file:
         type: path
         required: true
