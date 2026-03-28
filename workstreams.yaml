@@ -17,7 +17,7 @@ workstreams:
   - id: ws-0231-live-apply
     adr: "0231"
     title: Live apply ADR 0231 local secret delivery via OpenBao Agent and systemd credentials
-    status: in-progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0231-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0231-live-apply
@@ -66,8 +66,14 @@ workstreams:
             - tests/test_compose_runtime_secret_injection.py
             - receipts/live-applies/2026-03-28-adr-0231-local-secret-delivery-live-apply.json
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0231 on the live control-plane recovery path by replacing the backup unit's plaintext OpenBao token and baked-in Windmill DSN with OpenBao Agent delivery through systemd credentials
+      release_bump: patch
+      included_in_repo_version: 0.177.39
+      latest_receipts:
+        control_plane_recovery: 2026-03-28-adr-0231-local-secret-delivery-live-apply
   - id: ws-0206-live-apply
     adr: "0206"
     title: Live apply ADR 0206 ports and adapters for external integrations
