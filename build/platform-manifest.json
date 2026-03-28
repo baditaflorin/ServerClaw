@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.40",
+  "repo_version": "0.177.41",
   "platform_version": "0.130.38",
-  "generated_at": "2026-03-28T16:47:19Z",
-  "next_refresh_at": "2026-03-28T17:47:19Z",
+  "generated_at": "2026-03-28T17:04:25Z",
+  "next_refresh_at": "2026-03-28T18:04:25Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3908,10 +3908,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.39",
+    "last_version": "0.177.40",
     "deployed_at": "2026-03-28",
     "summary": "implemented ADR 0207 by translating Hetzner DNS provider payloads into canonical DNS facts at the boundary and by enforcing that contract in both the repository validation path and the live post-merge validation gate",
-    "release_notes_url": "docs/release-notes/0.177.40.md"
+    "release_notes_url": "docs/release-notes/0.177.41.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

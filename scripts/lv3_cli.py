@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import base64
 import concurrent.futures
+import importlib
 import json
 import os
 import shlex
@@ -103,6 +104,19 @@ class ProbeResult:
 
 def repo_path(*parts: str) -> Path:
     return REPO_ROOT.joinpath(*parts)
+
+
+def load_incident_triage_module(repo_root: Path) -> Any:
+    scripts_dir = repo_root / "scripts"
+    if str(scripts_dir) not in sys.path:
+        sys.path.insert(0, str(scripts_dir))
+    importlib.invalidate_caches()
+    incident_triage_path = scripts_dir / "incident_triage.py"
+    loaded = sys.modules.get("incident_triage")
+    loaded_path = Path(getattr(loaded, "__file__", "")).resolve() if getattr(loaded, "__file__", "") else None
+    if loaded is not None and loaded_path != incident_triage_path.resolve():
+        sys.modules.pop("incident_triage", None)
+    return importlib.import_module("incident_triage")
 
 
 def load_json(path: Path, *, default: Any | None = None) -> Any:
@@ -2404,7 +2418,10 @@ def loop_command(
     actor_id: str | None = None,
 ) -> int:
     try:
-        loop = ClosureLoop(REPO_ROOT)
+        loop = ClosureLoop(
+            REPO_ROOT,
+            triage_report_builder=load_incident_triage_module(REPO_ROOT).build_report,
+        )
         if action == "start":
             if payload_file is not None:
                 payload = load_json(payload_file)

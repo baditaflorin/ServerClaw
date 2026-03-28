@@ -7,7 +7,6 @@ import os
 import socket
 import ssl
 import subprocess
-import sys
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -16,6 +15,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from platform.events import build_envelope
+from platform.maintenance import list_active_windows
 from platform.timeouts import TimeoutContext, default_timeout, resolve_timeout_seconds
 
 from ._db import ConnectionFactory, isoformat, parse_timestamp, utc_now
@@ -531,12 +531,7 @@ def collect_maintenance_windows(repo_root: Path) -> dict[str, Any]:
     if fixture is not None:
         return fixture
 
-    scripts_dir = repo_root / "scripts"
-    if str(scripts_dir) not in sys.path:
-        sys.path.insert(0, str(scripts_dir))
-    import maintenance_window_tool
-
-    windows = maintenance_window_tool.list_active_windows()
+    windows = list_active_windows(repo_root=repo_root)
     active_windows = []
     for key, value in windows.items():
         active_windows.append({"key": key, **value})

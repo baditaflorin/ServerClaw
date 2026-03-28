@@ -1,9 +1,10 @@
 # ADR 0208: Dependency Direction And Composition Roots
 
-- Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Status: Implemented
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.40
+- Implemented In Platform Version: not applicable (repository-only)
+- Implemented On: 2026-03-28
 - Date: 2026-03-28
 
 ## Context

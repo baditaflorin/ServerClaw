@@ -10,7 +10,7 @@
   "platform_version_context": "0.130.38",
   "workflow_id": "adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply",
   "adr": "0207",
-  "summary": "Implemented ADR 0207 on the live-apply workstream, then reverified and merged it on the 0.177.40 mainline release tree by translating Hetzner DNS payloads into canonical facts, hardening worker-safe and login-shell validation portability, pruning stale immutable worker files, and proving the provider boundary through local, authoritative build-server, recut-tree fallback, worker-local, and live DNS paths.",
+  "summary": "Implemented ADR 0207 on the live-apply workstream, then reverified and merged it on the 0.177.41 mainline release tree by translating Hetzner DNS payloads into canonical facts, hardening worker-safe and login-shell validation portability, pruning stale immutable worker files, and proving the provider boundary through local, authoritative build-server, recut-tree fallback, worker-local, and live DNS paths.",
   "targets": [
     {
       "kind": "controller_artifacts",
@@ -32,17 +32,17 @@
     {
       "check": "Focused provider-boundary regression slice",
       "result": "pass",
-      "observed": "uv run --with pytest --with pyyaml python -m pytest tests/test_validate_repo_cache.py tests/test_validate_alert_rules.py tests/test_windmill_operator_admin_app.py tests/test_config_merge_windmill.py tests/test_post_merge_gate.py tests/test_provider_boundary_catalog.py tests/test_hetzner_dns_record_role.py tests/test_hetzner_dns_records_role.py tests/test_plane_client.py tests/test_remote_exec.py tests/test_validation_gate.py tests/test_closure_loop_windmill.py tests/test_config_merge_repo_surfaces.py tests/test_correction_loops.py tests/test_incident_triage.py tests/test_live_apply_receipts.py tests/unit/test_closure_loop.py -q passed with 120 passed in 26.16s on the merged 0.177.40 tree."
+      "observed": "uv run --with pytest --with pyyaml python -m pytest tests/test_validate_repo_cache.py tests/test_validate_alert_rules.py tests/test_windmill_operator_admin_app.py tests/test_config_merge_windmill.py tests/test_post_merge_gate.py tests/test_provider_boundary_catalog.py tests/test_hetzner_dns_record_role.py tests/test_hetzner_dns_records_role.py tests/test_plane_client.py tests/test_remote_exec.py tests/test_validation_gate.py tests/test_closure_loop_windmill.py tests/test_config_merge_repo_surfaces.py tests/test_correction_loops.py tests/test_incident_triage.py tests/test_live_apply_receipts.py tests/unit/test_closure_loop.py tests/test_validate_dependency_direction.py tests/test_dependency_direction_gate.py tests/test_health_composite.py tests/test_lv3_cli.py -q passed with 178 passed in 25.22s on the merged 0.177.41 tree before the final push."
     },
     {
       "check": "Merged-tree repository validation gate",
       "result": "pass",
-      "observed": "./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules data-models generated-docs generated-portals agent-standards returned 0 on the merged 0.177.40 release tree after the canonical truth, platform manifest, ADR index, and generated diagrams were refreshed."
+      "observed": "./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules data-models generated-docs generated-portals agent-standards returned 0 on the merged 0.177.41 release tree after the canonical truth, platform manifest, ADR index, and generated diagrams were refreshed; it still emitted the existing non-blocking .repo-structure.yaml warning."
     },
     {
       "check": "Remote validation manifest across build-server and recut fallback paths",
       "result": "pass",
-      "observed": "make remote-validate first returned 0 as the authoritative build-server validation manifest on the merged 0.177.38 tree after one transient 'fatal: unable to read 240836fb6798e9beddff83d0e72239864622042d' line. After the 0.177.40 recut, the same target hit build-server rsync 'failed to set times' errors under build/docs-portal/*, fell back locally via scripts/remote_exec.sh, and still returned 0 after the full manifest because the login-shell fallback now preserves a Python 3.10+ interpreter for scripts/validate_repo.sh."
+      "observed": "make remote-validate first returned 0 as the authoritative build-server validation manifest on the merged 0.177.38 tree after one transient 'fatal: unable to read 240836fb6798e9beddff83d0e72239864622042d' line. After the 0.177.41 recut, the same target hit build-server rsync 'failed to set times' errors under build/docs-portal/*, fell back locally via scripts/remote_exec.sh, and still returned 0 after the full manifest because the login-shell fallback now preserves a Python 3.10+ interpreter for scripts/validate_repo.sh."
     },
     {
       "check": "Worker-safe repository validation and provider-boundary fallback",
@@ -70,7 +70,7 @@
     "docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md",
     "docs/workstreams/ws-0207-main-merge.md",
     "RELEASE.md",
-    "docs/release-notes/0.177.40.md",
+    "docs/release-notes/0.177.41.md",
     "config/provider-boundary-catalog.yaml",
     "scripts/check_role_argument_specs.sh",
     "scripts/controller_automation_toolkit.py",
@@ -98,10 +98,10 @@
     "workstreams.yaml"
   ],
   "notes": [
-    "The integrated main release now consumes this verified live-apply receipt while recording repo version 0.177.40 and platform version 0.130.38.",
+    "The integrated main release now consumes this verified live-apply receipt while recording repo version 0.177.41 and platform version 0.130.38.",
     "During the mainline re-verification, the worker replay had to pin windmill_worker_checkout_repo_root_local_dir to the active worktree because the default controller path otherwise mirrored the shared top-level checkout instead of the branch under test.",
     "The authoritative merged-tree build-server validation pass printed one transient remote git object lookup failure before continuing, but make remote-validate still exited 0 after the full manifest sweep so it was treated as non-blocking remote workspace ancestry noise rather than a release failure.",
-    "When the final 0.177.40 recut reran make remote-validate, rsync could not set mtimes under build/docs-portal/* on the build-server workspace, so scripts/remote_exec.sh fell back locally; the hardened login-shell fallback still completed the full validation manifest and exited 0.",
+    "When the final 0.177.41 recut reran make remote-validate, rsync could not set mtimes under build/docs-portal/* on the build-server workspace, so scripts/remote_exec.sh fell back locally; the hardened login-shell fallback still completed the full validation manifest and exited 0.",
     "An earlier database.lv3.org reconcile reached the canonical translation and match-selection steps but exposed that the record was absent in the live Hetzner zone, so the idempotent evidence path was re-run against the already-governed ops.lv3.org hostname instead of mixing ADR 0207 proof with a separate DNS create-policy question."
   ]
 }

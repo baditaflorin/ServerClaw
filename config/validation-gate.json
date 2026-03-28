@@ -25,6 +25,14 @@
     "working_dir": "/workspace",
     "timeout_seconds": 120
   },
+  "dependency-direction": {
+    "description": "Reject reusable platform modules that import outward into scripts/ composition roots or dynamically load script-only helpers.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "command": "python scripts/validate_dependency_direction.py >/dev/null",
+    "working_dir": "/workspace",
+    "timeout_seconds": 120
+  },
   "packer-validate": {
     "description": "Validate all Packer templates when the repo carries them; otherwise report a no-op pass.",
     "severity": "error",

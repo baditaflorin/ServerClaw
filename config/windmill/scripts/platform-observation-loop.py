@@ -88,9 +88,13 @@ def main(
 
     agent_module = importlib.import_module("platform.agent")
     closure_loop = importlib.import_module("platform.closure_loop")
+    incident_triage = importlib.import_module("scripts.incident_triage")
     coordination_store = agent_module.AgentCoordinationStore(repo_root)
     context_id = os.environ.get("LV3_CONTEXT_ID", "").strip() or os.environ.get("WM_JOB_ID", "").strip() or str(uuid.uuid4())
-    loop = closure_loop.ClosureLoop(repo_root)
+    loop = closure_loop.ClosureLoop(
+        repo_root,
+        triage_report_builder=incident_triage.build_report,
+    )
     processed: list[dict[str, Any]] = []
     finding_list = findings or []
     with coordination_store.session(

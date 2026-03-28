@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from platform.concurrency import default_state_path, locked_json_state
-from scripts.controller_automation_toolkit import load_json, load_yaml, write_json
+from platform.repo import load_json, load_yaml, write_json
 
 
 MERGE_TRAIN_STATE_ENV = "LV3_LIVE_APPLY_MERGE_TRAIN_STATE_PATH"

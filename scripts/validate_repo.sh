@@ -19,7 +19,7 @@ export ANSIBLE_COLLECTIONS_PATH="$REPO_ROOT/collections:$ANSIBLE_COLLECTIONS_DIR
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|compose-runtime-envs|retry-guard|data-models|architecture-fitness|workstream-surfaces|generated-docs|generated-portals|health-probes|alert-rules|tofu|agent-standards]...
+  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|compose-runtime-envs|retry-guard|dependency-direction|data-models|architecture-fitness|workstream-surfaces|generated-docs|generated-portals|health-probes|alert-rules|tofu|agent-standards]...
 
 Examples:
   scripts/validate_repo.sh
@@ -352,6 +352,11 @@ validate_retry_guard() {
   "$PYTHON_BIN" "$REPO_ROOT/scripts/check_ad_hoc_retry.py" >/dev/null
 }
 
+validate_dependency_direction() {
+  echo "Dependency direction validation"
+  python3 "$REPO_ROOT/scripts/validate_dependency_direction.py" >/dev/null
+}
+
 validate_data_models() {
   echo "Repository data model validation"
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/ansible_scope_runner.py" validate >/dev/null
@@ -611,6 +616,7 @@ for stage in "$@"; do
       validate_json
       validate_compose_runtime_envs
       validate_retry_guard
+      validate_dependency_direction
       validate_health_probes
       validate_alert_rules
       validate_tofu
@@ -650,6 +656,9 @@ for stage in "$@"; do
       ;;
     retry-guard)
       validate_retry_guard
+      ;;
+    dependency-direction)
+      validate_dependency_direction
       ;;
     data-models)
       validate_data_models
