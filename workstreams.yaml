@@ -14,6 +14,92 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0254-serverclaw-adrs
+    adr: "0254"
+    title: ServerClaw architecture bundle
+    status: merged
+    owner: codex
+    branch: codex/ws-0254-serverclaw-adrs
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0254-serverclaw-adrs
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0254-serverclaw-architecture-bundle.md
+    depends_on:
+      - adr-0060-open-webui-workbench
+      - adr-0069-agent-tool-registry
+      - adr-0145-local-ollama
+      - adr-0146-langfuse-observability
+      - adr-0197-dify-canvas
+      - adr-0198-semantic-rag
+      - adr-0205-capability-contracts
+      - adr-0206-ports-and-adapters
+      - adr-0224-server-resident-ops
+      - adr-0232-nomad-jobs
+    conflicts_with: []
+    shared_surfaces:
+      - docs/adr/0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3.md
+      - docs/adr/0255-matrix-synapse-as-the-canonical-serverclaw-conversation-hub.md
+      - docs/adr/0256-mautrix-bridges-for-external-chat-channel-adapters.md
+      - docs/adr/0257-openclaw-compatible-skill-md-packs-and-workspace-precedence-for-serverclaw.md
+      - docs/adr/0258-temporal-as-the-durable-serverclaw-session-orchestrator.md
+      - docs/adr/0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md
+      - docs/adr/0260-nextcloud-as-the-canonical-personal-data-plane-for-serverclaw.md
+      - docs/adr/0261-playwright-browser-runners-for-serverclaw-web-action-and-extraction.md
+      - docs/adr/0262-openfga-and-keycloak-for-delegated-serverclaw-capability-authorization.md
+      - docs/adr/0263-qdrant-postgresql-and-local-search-as-the-serverclaw-memory-substrate.md
+      - docs/workstreams/adr-0254-serverclaw-architecture-bundle.md
+      - docs/adr/.index.yaml
+      - workstreams.yaml
+      - VERSION
+      - changelog.md
+      - RELEASE.md
+      - README.md
+      - versions/stack.yaml
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.53.md
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - build/platform-manifest.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: serverclaw_bundle
+          paths:
+            - docs/adr/0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3.md
+            - docs/adr/0255-matrix-synapse-as-the-canonical-serverclaw-conversation-hub.md
+            - docs/adr/0256-mautrix-bridges-for-external-chat-channel-adapters.md
+            - docs/adr/0257-openclaw-compatible-skill-md-packs-and-workspace-precedence-for-serverclaw.md
+            - docs/adr/0258-temporal-as-the-durable-serverclaw-session-orchestrator.md
+            - docs/adr/0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md
+            - docs/adr/0260-nextcloud-as-the-canonical-personal-data-plane-for-serverclaw.md
+            - docs/adr/0261-playwright-browser-runners-for-serverclaw-web-action-and-extraction.md
+            - docs/adr/0262-openfga-and-keycloak-for-delegated-serverclaw-capability-authorization.md
+            - docs/adr/0263-qdrant-postgresql-and-local-search-as-the-serverclaw-memory-substrate.md
+            - docs/workstreams/adr-0254-serverclaw-architecture-bundle.md
+            - docs/adr/.index.yaml
+          mode: exclusive
+        - id: integration_release_surfaces
+          paths:
+            - VERSION
+            - changelog.md
+            - RELEASE.md
+            - README.md
+            - versions/stack.yaml
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.53.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - build/platform-manifest.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: accepted ADRs 0254 through 0263 to define ServerClaw
+        as a chat-first self-hosted assistant product on LV3 using Matrix,
+        mautrix, OpenClaw-compatible skill packs, Temporal, n8n, Nextcloud,
+        Playwright, OpenFGA, and a PostgreSQL-Qdrant-search memory stack
+      release_bump: patch
+      included_in_repo_version: 0.177.53
   - id: ws-0244-runtime-assurance-adrs
     adr: "0244"
     title: Runtime assurance architecture bundle
