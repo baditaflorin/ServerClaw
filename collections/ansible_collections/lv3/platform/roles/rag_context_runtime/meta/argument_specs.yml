@@ -103,6 +103,27 @@ argument_specs:
         required: true
         description:
           - Embedding vector dimension expected by the Qdrant collection.
+      platform_context_verify_rebuild_local:
+        type: bool
+        required: false
+        description:
+          - Rebuild the full mirrored corpus inline during verification when enabled.
+      platform_context_seed_when_degraded:
+        type: bool
+        required: false
+        description:
+          - Repair a degraded vector collection with a bounded controller-side semantic seed rebuild.
+      platform_context_verification_question:
+        type: str
+        required: false
+        description:
+          - Query used to verify that the live retrieval path returns cited vector results.
+      platform_context_seed_sources:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Repo-relative paths used for bounded semantic seed repair when the live vector index is degraded.
       platform_context_ollama_url:
         type: str
         required: false

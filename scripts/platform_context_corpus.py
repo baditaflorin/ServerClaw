@@ -243,6 +243,44 @@ def build_manifest(
     overlap_chars: int = DEFAULT_OVERLAP_CHARS,
 ) -> dict[str, Any]:
     chunks = build_chunks(repo_root, max_chars=max_chars, overlap_chars=overlap_chars)
+    return build_manifest_from_chunks(
+        chunks,
+        repo_root=repo_root,
+        max_chars=max_chars,
+        overlap_chars=overlap_chars,
+    )
+
+
+def source_path_matches(source_path: str, selected_paths: list[str] | tuple[str, ...]) -> bool:
+    normalized_source_path = source_path.strip("/")
+    for selected_path in selected_paths:
+        normalized_selected_path = selected_path.strip("/")
+        if not normalized_selected_path:
+            continue
+        if (
+            normalized_source_path == normalized_selected_path
+            or normalized_source_path.startswith(f"{normalized_selected_path}/")
+        ):
+            return True
+    return False
+
+
+def filter_chunks_by_source_paths(
+    chunks: list[dict[str, Any]],
+    selected_paths: list[str] | tuple[str, ...],
+) -> list[dict[str, Any]]:
+    if not selected_paths:
+        return chunks
+    return [chunk for chunk in chunks if source_path_matches(str(chunk["source_path"]), selected_paths)]
+
+
+def build_manifest_from_chunks(
+    chunks: list[dict[str, Any]],
+    *,
+    repo_root: Path,
+    max_chars: int = DEFAULT_MAX_CHARS,
+    overlap_chars: int = DEFAULT_OVERLAP_CHARS,
+) -> dict[str, Any]:
     by_kind: dict[str, int] = {}
     sources: set[str] = set()
     for chunk in chunks:

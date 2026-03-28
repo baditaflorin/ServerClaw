@@ -172,3 +172,40 @@ def test_validate_catalog_requires_r2_for_warm_standby(
     catalog = immutable_guest_replacement.load_guest_replacement_catalog()
     with pytest.raises(ValueError, match="warm_standby requires at least one hosted service at redundancy tier R2 or higher"):
         immutable_guest_replacement.validate_guest_replacement_catalog(catalog)
+
+
+def test_rag_context_alias_resolves_to_platform_context_api(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        immutable_guest_replacement.service_redundancy,
+        "load_service_catalog_index",
+        lambda: {
+            "platform_context_api": {
+                "id": "platform_context_api",
+                "name": "Platform Context API",
+                "vm": "docker-runtime-lv3",
+                "exposure": "private-only",
+            }
+        },
+    )
+    monkeypatch.setattr(
+        immutable_guest_replacement.service_redundancy,
+        "load_redundancy_catalog",
+        lambda: {
+            "services": {
+                "platform_context_api": {
+                    "tier": "R0",
+                    "standby": {
+                        "kind": "none",
+                        "location": "none",
+                        "failover_trigger": "rerun converge",
+                        "failback_method": "rerun converge",
+                    },
+                }
+            }
+        },
+    )
+
+    plan = immutable_guest_replacement.build_service_plan({"guests": {}}, "rag-context")
+
+    assert plan["service_id"] == "platform_context_api"
+    assert plan["immutable_guest_replacement"] is False

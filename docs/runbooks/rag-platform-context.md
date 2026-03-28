@@ -49,11 +49,18 @@ cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
 make live-apply-service service=rag-context env=production
 ```
 
-Rebuild the index from the current repo checkout:
+Run the full repo-grounded rebuild from the current repo checkout as an explicit maintenance action:
 
 ```bash
 cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
 python3 scripts/index_platform_knowledge.py --api-url http://100.64.0.1:8010 --api-token-file .local/platform-context/api-token.txt
+```
+
+Build a bounded semantic seed manifest without uploading it:
+
+```bash
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+python3 scripts/index_platform_knowledge.py --dry-run --include-path docs/adr/0198-qdrant-vector-search-semantic-rag.md --include-path docs/runbooks/rag-platform-context.md
 ```
 
 Query the private endpoint directly:
@@ -81,11 +88,12 @@ python3 scripts/index_platform_knowledge.py --dry-run
 
 1. `curl -s http://100.118.189.95:8010/healthz`
 2. `python3 scripts/index_platform_knowledge.py --dry-run`
-3. `python3 scripts/query_platform_context.py --api-url http://100.64.0.1:8010 --question "how does step-ca issue SSH certificates"`
-4. `python3 scripts/lv3_cli.py query-platform-context "how does step-ca issue SSH certificates" --limit 3`
+3. `python3 scripts/query_platform_context.py --api-url http://100.64.0.1:8010 --question "What retrieval backend is active for platform context?"`
+4. `python3 scripts/lv3_cli.py query-platform-context "What retrieval backend is active for platform context?" --limit 3`
 5. Confirm the query response reports `"retrieval_backend": "vector"` during steady-state operation
 6. `curl -s http://100.64.0.1:8010/v1/platform-summary | jq '.error.code'` returns `AUTH_TOKEN_MISSING`
 7. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/platform-context/docker-compose.yml ps && sudo ls -l /opt/platform-context/openbao /run/lv3-secrets/platform-context && sudo test ! -e /opt/platform-context/platform-context.env && curl -fsS http://127.0.0.1:11434/api/version'`
+8. If the managed live apply reports a degraded vector collection, let the role complete its bounded controller-side semantic seed repair and then schedule the full `scripts/index_platform_knowledge.py` rebuild separately when you need the entire mirrored corpus refreshed
 
 ## Open WebUI Integration
 
@@ -111,4 +119,7 @@ This follows the Open WebUI global OpenAPI tool-server model rather than exposin
 - The API token is required for all query and admin endpoints.
 - Protected endpoints now return the canonical error envelope backed by `config/error-codes.yaml`.
 - The current runtime uses the local Ollama `nomic-embed-text` embedding model. Tests may still switch to the deterministic `token-hash` backend, and the service preserves a keyword fallback if vector retrieval is temporarily unavailable.
+- Production live apply skips the inline full mirrored-corpus rebuild because the expanded Ollama semantic corpus exceeds the safe synchronous rebuild budget on `docker-runtime-lv3`.
+- The managed verify path now probes live vector retrieval first and, when the collection is degraded by embedding-dimension drift such as the legacy `384` to Ollama `768` transition, repairs it with a bounded controller-side semantic seed rebuild rooted in ADR 0070, ADR 0145, ADR 0198, and this runbook.
+- Use `python3 scripts/index_platform_knowledge.py --api-url http://100.64.0.1:8010 --api-token-file .local/platform-context/api-token.txt` as the explicit full maintenance rebuild when you need the whole mirrored corpus refreshed.
 - Windmill seeds `f/lv3/rebuild_rag_index` so the deployed control plane can trigger a local-corpus rebuild without re-reading the full repository through chat context.

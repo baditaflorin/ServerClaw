@@ -175,6 +175,7 @@ playbooks:
       - inventory/host_vars/proxmox_florin.yml
   playbooks/rag-context.yml:
     playbook_id: rag-context
+    canonical_service_id: platform_context_api
     mutation_scope: platform
     shared_surfaces:
       - service:rag-context

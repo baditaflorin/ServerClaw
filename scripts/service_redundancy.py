@@ -8,6 +8,7 @@ from datetime import date, datetime, timedelta
 from typing import Any, Final
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
+from service_id_resolver import resolve_service_id
 
 try:
     import jsonschema
@@ -490,9 +491,10 @@ def build_live_apply_plan(
     services = require_mapping(catalog.get("services"), "services")
     service_index = load_service_catalog_index()
     if service_id:
-        if service_id not in services:
+        canonical_service_id = resolve_service_id(service_id)
+        if canonical_service_id not in services:
             raise ValueError(f"unknown service: {service_id}")
-        target_ids = [service_id]
+        target_ids = [canonical_service_id]
     else:
         target_ids = active_service_ids(service_index)
 
@@ -555,21 +557,22 @@ def list_services(catalog: dict[str, Any]) -> int:
 
 
 def show_service(catalog: dict[str, Any], service_id: str) -> int:
+    canonical_service_id = resolve_service_id(service_id)
     services = require_mapping(catalog.get("services"), "services")
-    if service_id not in services:
+    if canonical_service_id not in services:
         print(f"Unknown service: {service_id}", file=sys.stderr)
         return 2
 
     service_catalog_index = load_service_catalog_index()
-    entry = require_mapping(services[service_id], f"services.{service_id}")
-    standby = require_mapping(entry.get("standby"), f"services.{service_id}.standby")
+    entry = require_mapping(services[canonical_service_id], f"services.{canonical_service_id}")
+    standby = require_mapping(entry.get("standby"), f"services.{canonical_service_id}.standby")
     recovery_objective = require_mapping(
         entry.get("recovery_objective"),
-        f"services.{service_id}.recovery_objective",
+        f"services.{canonical_service_id}.recovery_objective",
     )
-    rehearsal_gate = evaluate_rehearsal_gate(catalog, service_id)
-    print(f"Service: {service_id}")
-    print(f"Name: {service_catalog_index[service_id]['name']}")
+    rehearsal_gate = evaluate_rehearsal_gate(catalog, canonical_service_id)
+    print(f"Service: {canonical_service_id}")
+    print(f"Name: {service_catalog_index[canonical_service_id]['name']}")
     print(f"Declared Tier: {entry['tier']}")
     print(f"Implemented Tier: {rehearsal_gate['implemented_tier']}")
     print(f"Rehearsal Gate: {rehearsal_gate['status']}")
