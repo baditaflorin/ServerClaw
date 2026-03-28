@@ -313,9 +313,9 @@
       "reserved": {
         "ram_gb": 20,
         "vcpu": 8,
-        "disk_gb": 100
+        "disk_gb": 216
       },
-      "notes": "Shared peak reservation for ADR 0106 ephemeral fixtures so transient test VMs cannot silently consume production headroom."
+      "notes": "Shared peak reservation for ADR 0106 ephemeral fixtures and ADR 0186 prewarmed fixture spares so transient test VMs and warm-pool refills cannot silently consume production headroom."
     },
     {
       "id": "recovery-drill-pool",

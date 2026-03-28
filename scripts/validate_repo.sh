@@ -418,12 +418,16 @@ _validate_config_registry_updated() {
 _validate_structure_index_updated() {
   local new_dirs structure_updated
 
-  new_dirs=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
-    grep -oE '^[^/]+/' | sort -u | wc -l | tr -d ' ' || true)
-  new_dirs="${new_dirs:-0}"
+  new_dirs=$(
+    (
+      git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
+        grep -oE '^[^/]+/' || true
+    ) | sort -u | wc -l | tr -d ' '
+  )
+  new_dirs=${new_dirs:-0}
   structure_updated=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
     grep -c '^\.repo-structure\.yaml' || true)
-  structure_updated="${structure_updated:-0}"
+  structure_updated=${structure_updated:-0}
 
   if [[ "$new_dirs" -gt 2 ]] && [[ "$structure_updated" -eq 0 ]]; then
     echo "WARNING: New top-level directories detected but .repo-structure.yaml not updated (ADR 0163)" >&2

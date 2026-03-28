@@ -246,6 +246,40 @@
         ]
       }
     },
+    "ephemeral-pool-reconcile": {
+      "description": "Run the ADR 0186 warm-pool reconciler so the declared fixture pools stay prewarmed and local spillover decisions remain explicit.",
+      "workflow_id": "ephemeral-pool-reconcile",
+      "scope": "proxmox_host",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "proxmox_api_token_payload",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side Proxmox API token payload used to enumerate, create, stop, and retag governed warm-pool members."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes before enabling or manually triggering the reconciler",
+        "config/ephemeral-capacity-pools.json addresses do not overlap active long-lived guests or other warm-pool members",
+        "Operators understand that spillover decisions point to ADR 0183 auxiliary capacity rather than silently borrowing standby reservations"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record created warm members, any explicit spillover decisions, and the resulting pool-status snapshot."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if pool catalog validation fails, Proxmox allocation fails, or the reconciler would exceed the governed local lease or address limits.",
+          "Stop if a warm refill would require standby or recovery reservations instead of the declared auxiliary spillover domain."
+        ],
+        "rollback_guidance": [
+          "Disable the schedule, destroy any partially-created warm member receipts, and restore the previous pool catalog before retrying.",
+          "Treat repeated spillover decisions as a capacity-planning signal and adjust ADR 0186 or ADR 0183 data instead of forcing local overcommit."
+        ]
+      }
+    },
     "fault-injection": {
       "description": "Run the ADR 0171 controlled fault-injection subset on docker-runtime-lv3 through the governed repo workflow.",
       "workflow_id": "fault-injection",

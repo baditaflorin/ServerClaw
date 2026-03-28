@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.20",
+  "repo_version": "0.177.21",
   "platform_version": "0.130.32",
-  "generated_at": "2026-03-28T01:05:08Z",
-  "next_refresh_at": "2026-03-28T02:05:08Z",
+  "generated_at": "2026-03-28T01:17:35Z",
+  "next_refresh_at": "2026-03-28T02:17:35Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -1632,6 +1632,31 @@
         "runbook": "docs/runbooks/disaster-recovery.md"
       },
       {
+        "id": "ephemeral-pool-reconcile",
+        "description": "Keep the ADR 0186 prewarmed fixture pools topped up, record spillover decisions, and preserve one warm spare per common fixture profile when local capacity allows.",
+        "tags": [
+          "ephemeral-pool-reconcile",
+          "host-live",
+          "mutation",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_live",
+        "budget": {
+          "max_duration_seconds": 2400,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/ephemeral-fixtures.md"
+      },
+      {
         "id": "ephemeral-vm-reaper",
         "description": "Sweep the governed ADR 0106 ephemeral VM pool, retag unowned temporary VMs with a one-hour grace period, and destroy expired VMs.",
         "tags": [
@@ -3233,9 +3258,10 @@
         "id": "ephemeral-fixtures",
         "title": "Ephemeral Fixtures",
         "agent_trust_required": "T3",
-        "steps": 9,
+        "steps": 13,
         "path": "docs/runbooks/ephemeral-fixtures.md",
         "workflow_ids": [
+          "ephemeral-pool-reconcile",
           "ephemeral-vm-reaper",
           "fixture-expiry-reaper"
         ]
@@ -3556,10 +3582,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.19",
+    "last_version": "0.177.20",
     "deployed_at": "2026-03-28",
-    "summary": "implemented ADR 0188 failover rehearsal gating so redundancy reporting now distinguishes declared tiers from currently proven tiers and the unproven PostgreSQL warm-standby path is surfaced as implemented `R0`",
-    "release_notes_url": "docs/release-notes/0.177.20.md"
+    "summary": "integrated ADR 0186 by adding governed prewarmed fixture pools, warm-handoff leases, and the asynchronous Windmill reconciler for local ephemeral capacity implemented ADR 0190 synthetic transaction replay for restore verification, including the governed replay catalog, guest-agent restore fallback, and committed live-apply evidence for the current restore-health gap",
+    "release_notes_url": "docs/release-notes/0.177.21.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -3636,13 +3662,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0183-auxiliary-cloud-failure-domain-for-witness-recovery-and-burst-capacity.md"
-    },
-    {
-      "adr": "0186",
-      "title": "Prewarmed Fixture Pools and Lease-Based Ephemeral Capacity",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0186-prewarmed-fixture-pools-and-lease-based-ephemeral-capacity.md"
     },
     {
       "adr": "0187",

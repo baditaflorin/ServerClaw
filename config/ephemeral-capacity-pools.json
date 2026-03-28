@@ -1,0 +1,93 @@
+{
+  "$schema": "docs/schema/ephemeral-capacity-pools.schema.json",
+  "schema_version": "1.0.0",
+  "defaults": {
+    "max_local_active_leases": 3,
+    "protected_capacity_class": "ephemeral-burst-local",
+    "spillover_domain": "hetzner-cloud-burst",
+    "warm_lifetime_minutes": 1440
+  },
+  "pools": [
+    {
+      "id": "docker-host",
+      "fixture_id": "docker-host",
+      "warm_count": 1,
+      "refill_target": 1,
+      "max_concurrent_leases": 2,
+      "allowed_lease_purposes": [
+        "fixture",
+        "preview",
+        "recovery-drill",
+        "load-test"
+      ],
+      "allowed_placement_classes": [
+        "fixture",
+        "preview",
+        "recovery"
+      ],
+      "ip_addresses": [
+        "10.20.10.100/24",
+        "10.20.10.101/24",
+        "10.20.10.102/24"
+      ],
+      "placement_domain": "proxmox-local",
+      "spillover_domain": "hetzner-cloud-burst",
+      "protected_capacity_class": "ephemeral-burst-local",
+      "notes": "Keep one prewarmed Docker runtime fixture ready for fast smoke tests and preview bootstraps."
+    },
+    {
+      "id": "postgres-host",
+      "fixture_id": "postgres-host",
+      "warm_count": 1,
+      "refill_target": 1,
+      "max_concurrent_leases": 2,
+      "allowed_lease_purposes": [
+        "fixture",
+        "preview",
+        "recovery-drill",
+        "load-test"
+      ],
+      "allowed_placement_classes": [
+        "fixture",
+        "preview",
+        "recovery"
+      ],
+      "ip_addresses": [
+        "10.20.10.110/24",
+        "10.20.10.111/24",
+        "10.20.10.112/24"
+      ],
+      "placement_domain": "proxmox-local",
+      "spillover_domain": "hetzner-cloud-burst",
+      "protected_capacity_class": "ephemeral-burst-local",
+      "notes": "Keep one prewarmed Postgres test node ready for restore drills and data-path rehearsals."
+    },
+    {
+      "id": "ops-base",
+      "fixture_id": "ops-base",
+      "warm_count": 1,
+      "refill_target": 1,
+      "max_concurrent_leases": 2,
+      "allowed_lease_purposes": [
+        "fixture",
+        "preview",
+        "recovery-drill",
+        "load-test"
+      ],
+      "allowed_placement_classes": [
+        "fixture",
+        "preview",
+        "recovery"
+      ],
+      "ip_addresses": [
+        "10.20.10.120/24",
+        "10.20.10.121/24",
+        "10.20.10.122/24"
+      ],
+      "placement_domain": "proxmox-local",
+      "spillover_domain": "hetzner-cloud-burst",
+      "protected_capacity_class": "ephemeral-burst-local",
+      "notes": "Keep one prewarmed Debian base helper ready for quick admin-path and branch smoke validation."
+    }
+  ]
+}

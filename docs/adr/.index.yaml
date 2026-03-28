@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-28'
 total_adrs: 204
 implementation_status_summary:
-  Implemented: 191
+  Implemented: 193
   Partial: 3
-  Not Implemented: 9
+  Not Implemented: 7
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3218,8 +3218,8 @@ adr_index:
     implemented_version: 0.177.17
   - adr: 0186
     title: Prewarmed Fixture Pools and Lease-Based Ephemeral Capacity
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Accepted
+    implementation_status: Implemented
     date: '2026-03-27'
     concern: ci-cd
     keywords:
@@ -3232,6 +3232,7 @@ adr_index:
     summary: We will manage ephemeral compute as lease-based capacity pools with a small set of prewarmed fixtures per common
       templat
     filename: 0186-prewarmed-fixture-pools-and-lease-based-ephemeral-capacity.md
+    implemented_version: 0.177.21
   - adr: 0187
     title: Anonymized Seed Data Snapshots for Repeatable Tests
     status: Accepted
@@ -3293,6 +3294,7 @@ adr_index:
       - validation
     summary: We will maintain a synthetic transaction replay harness for capacity, failover, and recovery validation.
     filename: 0190-synthetic-transaction-replay-for-capacity-and-recovery-validation.md
+    implemented_version: 0.177.21
   - adr: 0191
     title: Immutable Guest Replacement for Stateful and Edge Services
     status: Implemented

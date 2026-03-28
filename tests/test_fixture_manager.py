@@ -45,7 +45,24 @@ def fixture_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
         + "\n"
     )
     (repo_root / "config" / "vm-template-manifest.json").write_text(
-        json.dumps({"templates": {"lv3-docker-host": {"vmid": 9001, "name": "lv3-docker-host"}}}) + "\n"
+        json.dumps(
+            {
+                "templates": {
+                    "lv3-debian-base": {"vmid": 9000, "name": "lv3-debian-base"},
+                    "lv3-docker-host": {
+                        "vmid": 9001,
+                        "name": "lv3-docker-host",
+                        "source_template": "lv3-debian-base",
+                    },
+                    "lv3-ops-base": {
+                        "vmid": 9003,
+                        "name": "lv3-ops-base",
+                        "source_template": "lv3-debian-base",
+                    },
+                }
+            }
+        )
+        + "\n"
     )
     (repo_root / "config" / "capacity-model.json").write_text(
         json.dumps(
@@ -60,6 +77,36 @@ def fixture_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
                         "max_concurrent_vms": 5,
                         "reserved": {"ram_gb": 20, "vcpu": 8, "disk_gb": 100},
                         "notes": "fixture test pool",
+                    }
+                ],
+            }
+        )
+        + "\n"
+    )
+    (repo_root / "config" / "ephemeral-capacity-pools.json").write_text(
+        json.dumps(
+            {
+                "$schema": "docs/schema/ephemeral-capacity-pools.schema.json",
+                "schema_version": "1.0.0",
+                "defaults": {
+                    "max_local_active_leases": 3,
+                    "protected_capacity_class": "ephemeral-burst-local",
+                    "spillover_domain": "hetzner-cloud-burst",
+                    "warm_lifetime_minutes": 1440,
+                },
+                "pools": [
+                    {
+                        "id": "docker-host",
+                        "fixture_id": "docker-host",
+                        "warm_count": 1,
+                        "refill_target": 1,
+                        "max_concurrent_leases": 2,
+                        "allowed_lease_purposes": ["fixture", "preview", "recovery-drill", "load-test"],
+                        "allowed_placement_classes": ["fixture", "preview", "recovery"],
+                        "ip_addresses": ["10.20.10.100/24", "10.20.10.101/24", "10.20.10.102/24"],
+                        "placement_domain": "proxmox-local",
+                        "spillover_domain": "hetzner-cloud-burst",
+                        "protected_capacity_class": "ephemeral-burst-local",
                     }
                 ],
             }
@@ -110,6 +157,11 @@ def fixture_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     monkeypatch.setattr(fixture_manager, "CONTROLLER_SECRETS_PATH", repo_root / "config" / "controller-local-secrets.json")
     monkeypatch.setattr(fixture_manager, "TEMPLATE_MANIFEST_PATH", repo_root / "config" / "vm-template-manifest.json")
     monkeypatch.setattr(fixture_manager, "CAPACITY_MODEL_PATH", repo_root / "config" / "capacity-model.json")
+    monkeypatch.setattr(
+        fixture_manager,
+        "EPHEMERAL_POOL_CATALOG_PATH",
+        repo_root / "config" / "ephemeral-capacity-pools.json",
+    )
     monkeypatch.setattr(fixture_manager, "GROUP_VARS_PATH", repo_root / "inventory" / "group_vars" / "all.yml")
     monkeypatch.setattr(fixture_manager, "HOST_VARS_PATH", repo_root / "inventory" / "host_vars" / "proxmox_florin.yml")
     monkeypatch.setattr(fixture_manager.seed_data_snapshots, "seed_classes", lambda catalog=None: ["tiny", "standard", "recovery"])
@@ -150,6 +202,8 @@ def test_fixture_up_writes_active_receipt(fixture_repo: Path, monkeypatch: pytes
     assert receipt["owner"] == "codex"
     assert receipt["purpose"] == "adr-0106-test"
     assert receipt["seed_snapshot_id"] == "tiny-snapshot"
+    assert receipt["lease_purpose"] == "fixture"
+    assert receipt["pool_id"] == "docker-host"
     assert any(tag.startswith("ephemeral-codex-adr-0106-test-") for tag in receipt["ephemeral_tags"])
     saved_receipts = list((fixture_repo / "receipts" / "fixtures").glob("*.json"))
     assert len(saved_receipts) == 1
@@ -356,7 +410,7 @@ def test_reap_expired_only_destroys_expired_receipts(fixture_repo: Path, monkeyp
     assert json.loads(reaper_runs[0].read_text())["skipped_vmids"] == [911]
 
 
-def test_build_runtime_main_targets_destroyable_vm_module(fixture_repo: Path) -> None:
+def test_build_runtime_main_targets_fixture_module(fixture_repo: Path) -> None:
     receipt = fixture_manager.build_receipt(
         fixture_manager.load_fixture_definition(fixture_repo / "tests" / "fixtures" / "docker-host-fixture.yml"),
         fixture_repo / "tests" / "fixtures" / "docker-host-fixture.yml",
@@ -368,7 +422,7 @@ def test_build_runtime_main_targets_destroyable_vm_module(fixture_repo: Path) ->
         lifetime_minutes=30,
     )
     rendered = fixture_manager.build_runtime_main(receipt)
-    assert "proxmox-vm-destroyable" in rendered
+    assert "proxmox-fixture" in rendered
     assert '"prevent_destroy"' not in rendered
     assert "agent_enabled = false" in rendered
     assert 'agent_timeout = "10s"' in rendered
@@ -399,6 +453,29 @@ def test_stage_seed_snapshot_updates_receipt(monkeypatch: pytest.MonkeyPatch) ->
 
     assert staged["snapshot_id"] == "tiny-abc123"
     assert receipt["seed_snapshot_remote_dir"] == "/var/lib/lv3-seed-data/ops-base-20260327T120000Z"
+
+
+def test_tofu_module_source_path_uses_workspace_mount_when_host_tofu_is_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(fixture_manager.shutil, "which", lambda name: None if name == "tofu" else "/usr/bin/docker")
+
+    assert fixture_manager.tofu_module_source_path() == "./modules/proxmox-fixture"
+
+
+def test_tofu_command_passes_proxmox_tf_vars_into_docker_container(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(fixture_manager.shutil, "which", lambda name: None if name == "tofu" else "/usr/bin/docker")
+
+    command = fixture_manager.tofu_command(
+        Path("/tmp/runtime"),
+        "apply",
+        env={
+            "TF_VAR_proxmox_endpoint": "https://100.64.0.1:8006/api2/json",
+            "TF_VAR_proxmox_api_token": "token",
+        },
+    )
+
+    assert "-e" in command
+    assert "TF_VAR_proxmox_endpoint=https://100.64.0.1:8006/api2/json" in command
+    assert "TF_VAR_proxmox_api_token=token" in command
 
 
 def test_fixture_list_reads_cluster_ephemeral_metadata(
@@ -465,3 +542,177 @@ def test_reaper_retags_untagged_cluster_vms(fixture_repo: Path, monkeypatch: pyt
     assert payload["warned_vmids"] == [912]
     assert payload["retagged_vmids"] == [912]
     assert any(tag.startswith("ephemeral-expires-") for tag in applied[0])
+
+
+def test_bootstrap_public_key_falls_back_to_ssh_keygen_when_pub_file_is_missing(
+    fixture_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    public_key = fixture_repo / ".local" / "keys" / "bootstrap.pub"
+    public_key.unlink()
+    monkeypatch.setattr(
+        fixture_manager,
+        "run_command",
+        lambda argv, **kwargs: fixture_manager.subprocess.CompletedProcess(
+            argv,
+            0,
+            stdout="ssh-ed25519 AAAADERIVED fixture\n",
+            stderr="",
+        ),
+    )
+
+    assert fixture_manager.bootstrap_public_key() == "ssh-ed25519 AAAADERIVED fixture"
+
+
+def test_proxmox_api_credentials_prefers_env_override(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("TF_VAR_proxmox_endpoint", "https://100.64.0.1:8006/api2/json")
+    monkeypatch.setenv("TF_VAR_proxmox_api_token", "token-value")
+    monkeypatch.setattr(fixture_manager.vmid_allocator, "read_api_credentials", lambda **kwargs: ("ignored", "ignored"))
+
+    assert fixture_manager.proxmox_api_credentials() == ("https://100.64.0.1:8006/api2/json", "token-value")
+
+
+def test_insecure_proxmox_ssl_context_only_for_private_ip_endpoint() -> None:
+    assert fixture_manager.insecure_proxmox_ssl_context("https://100.64.0.1:8006/api2/json") is not None
+    assert fixture_manager.insecure_proxmox_ssl_context("https://proxmox.lv3.org:8006/api2/json") is None
+
+
+def test_select_pool_ip_skips_existing_nonfinal_receipts(fixture_repo: Path) -> None:
+    defaults, pools = fixture_manager.load_ephemeral_pool_catalog()
+    assert defaults.max_local_active_leases == 3
+    pool = pools["docker-host"]
+    receipt = {
+        "receipt_id": "docker-host-existing",
+        "fixture_id": "docker-host",
+        "status": "active",
+        "created_at": "2026-03-23T10:00:00Z",
+        "updated_at": "2026-03-23T10:00:00Z",
+        "definition": {"network": {"ip_cidr": "10.20.10.100/24"}},
+        "vm_id": 910,
+        "pool_id": "docker-host",
+    }
+    (fixture_repo / "receipts" / "fixtures" / "docker-host-existing.json").write_text(json.dumps(receipt) + "\n")
+
+    assert fixture_manager.select_pool_ip_address(pool) == "10.20.10.101/24"
+
+
+def test_resolve_template_vmid_falls_back_to_available_source_template(fixture_repo: Path) -> None:
+    cluster_resources = [
+        {"vmid": 9000, "template": 1},
+    ]
+
+    assert fixture_manager.resolve_template_vmid("lv3-ops-base", cluster_resources) == 9000
+
+
+def test_default_fixture_context_prefers_management_tailscale_jump_host(fixture_repo: Path) -> None:
+    assert fixture_manager.default_fixture_context()["jump_host"] == "100.64.0.1"
+
+
+def test_reconcile_pools_creates_prewarmed_receipts(fixture_repo: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(fixture_manager, "proxmox_api_credentials", lambda: ("https://proxmox.example.invalid:8006/api2/json", "token"))
+    monkeypatch.setattr(
+        fixture_manager,
+        "provision_prewarmed_fixture",
+        lambda fixture_name, **kwargs: {
+            "receipt_id": f"{fixture_name}-warm",
+            "vm_id": 910,
+            "ip_address": kwargs["definition"]["network"]["ip_cidr"].split("/")[0],
+        },
+    )
+
+    payload = fixture_manager.reconcile_pools("docker-host")
+
+    assert payload["created"] == [
+        {
+            "pool_id": "docker-host",
+            "receipt_id": "docker-host-warm",
+            "vm_id": 910,
+            "ip_address": "10.20.10.100",
+        }
+    ]
+    assert payload["status"][0]["pool_id"] == "docker-host"
+
+
+def test_fixture_up_prefers_prewarmed_member(fixture_repo: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    receipt = {
+        "receipt_id": "docker-host-warm",
+        "fixture_id": "docker-host",
+        "status": "prewarmed",
+        "created_at": "2026-03-23T10:00:00Z",
+        "updated_at": "2026-03-23T10:00:00Z",
+        "lifetime_minutes": 1440,
+        "extend_minutes": 0,
+        "owner": "pool-manager",
+        "purpose": "pool-warm-docker-host",
+        "lease_purpose": "fixture",
+        "policy": "extended-fixture",
+        "expires_epoch": 4088510400,
+        "expires_at": "2099-03-23T12:30:00Z",
+        "ephemeral_tags": ["ephemeral-owner-pool-manager"],
+        "runtime_dir": ".local/fixtures/runtime/docker-host-warm",
+        "vm_id": 910,
+        "ip_address": "10.20.10.100",
+        "mac_address": "BC:24:11:00:03:8E",
+        "pool_id": "docker-host",
+        "pool_state": "prewarmed",
+        "definition": fixture_manager.load_fixture_definition(fixture_repo / "tests" / "fixtures" / "docker-host-fixture.yml"),
+        "context": fixture_manager.default_fixture_context(),
+        "verification": {"ok": True, "checks": [{"ok": True}]},
+    }
+    (fixture_repo / "receipts" / "fixtures" / "docker-host-warm.json").write_text(json.dumps(receipt) + "\n")
+    monkeypatch.setattr(fixture_manager, "proxmox_api_credentials", lambda: ("https://proxmox.example.invalid:8006/api2/json", "token"))
+    monkeypatch.setattr(
+        fixture_manager,
+        "fetch_cluster_resources",
+        lambda endpoint, api_token: [{"vmid": 910, "node": "proxmox_florin", "status": "stopped", "type": "qemu", "tags": ""}],
+    )
+    monkeypatch.setattr(fixture_manager, "start_cluster_vm", lambda endpoint, api_token, resource: None)
+    monkeypatch.setattr(fixture_manager, "wait_for_ssh", lambda receipt, timeout_seconds=300: None)
+    monkeypatch.setattr(fixture_manager, "verify_fixture", lambda receipt, definition: {"ok": True, "checks": [{"ok": True}]})
+    monkeypatch.setattr(fixture_manager, "capture_ssh_fingerprint", lambda receipt: "fingerprint")
+    monkeypatch.setattr(fixture_manager, "apply_cluster_vm_tags", lambda endpoint, api_token, resource, tags: None)
+    monkeypatch.setattr(fixture_manager, "emit_ephemeral_event", lambda *args, **kwargs: None)
+
+    payload = fixture_manager.fixture_up("docker-host", purpose="preview-smoke", owner="codex", lease_purpose="preview")
+
+    assert payload["vm_id"] == 910
+    assert payload["allocation_mode"] == "warm-handoff"
+    assert payload["owner"] == "codex"
+    assert payload["lease_purpose"] == "preview"
+    assert payload["status"] == "active"
+
+
+def test_fixture_up_reports_spillover_when_pool_limit_is_reached(
+    fixture_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    for vmid, ip_cidr in ((910, "10.20.10.100/24"), (911, "10.20.10.101/24")):
+        receipt = {
+            "receipt_id": f"docker-host-{vmid}",
+            "fixture_id": "docker-host",
+            "status": "active",
+            "created_at": "2026-03-23T10:00:00Z",
+            "updated_at": "2026-03-23T10:00:00Z",
+            "lifetime_minutes": 60,
+            "extend_minutes": 0,
+            "owner": "codex",
+            "purpose": "busy",
+            "lease_purpose": "fixture",
+            "policy": "adr-development",
+            "expires_epoch": 4088510400,
+            "expires_at": "2099-03-23T12:30:00Z",
+            "ephemeral_tags": [],
+            "runtime_dir": f".local/fixtures/runtime/docker-host-{vmid}",
+            "vm_id": vmid,
+            "ip_address": ip_cidr.split("/")[0],
+            "pool_id": "docker-host",
+            "definition": {"network": {"ip_cidr": ip_cidr}},
+            "context": {},
+        }
+        (fixture_repo / "receipts" / "fixtures" / f"docker-host-{vmid}.json").write_text(json.dumps(receipt) + "\n")
+
+    monkeypatch.setattr(fixture_manager, "proxmox_api_credentials", lambda: ("https://proxmox.example.invalid:8006/api2/json", "token"))
+
+    with pytest.raises(fixture_manager.SpilloverRequiredError) as excinfo:
+        fixture_manager.fixture_up("docker-host", purpose="over-limit", owner="codex")
+
+    assert excinfo.value.pool_id == "docker-host"
+    assert excinfo.value.spillover_domain == "hetzner-cloud-burst"

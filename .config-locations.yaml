@@ -73,6 +73,19 @@ infrastructure_state:
     update_when: Generated on push; do NOT edit manually
     update_by: "scripts/platform_manifest.py --write"
 
+  config/ephemeral-capacity-pools.json:
+    purpose: Canonical lease-based warm-pool catalog for ADR 0186 ephemeral fixtures
+    owner: human
+    format: JSON
+    use_for: Declaring per-fixture warm counts, refill targets, lease ceilings, spillover domains, and pool-local address allocations
+    update_when: Changing governed ephemeral lease and prewarm policy
+    update_by: Agent or human completing ADR 0186 follow-up work
+    validation: "uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate"
+    related_files:
+      - "docs/schema/ephemeral-capacity-pools.schema.json: JSON schema for the pool catalog"
+      - "scripts/fixture_manager.py: pool reconciliation and lease handoff logic"
+      - "docs/runbooks/ephemeral-fixtures.md: operator procedure"
+
   config/preview-environment-profiles.json:
     purpose: Canonical catalog of ADR 0185 branch-scoped preview profiles, network pool, and TTL defaults
     owner: human
