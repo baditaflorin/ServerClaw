@@ -30,6 +30,7 @@ def test_tasks_bootstrap_gitea_access_only_when_requested() -> None:
 
     assert "Bootstrap low-privilege Gitea pull access from the controller" in task_names
     assert "Fail when the recurring reconcile path lacks its host-local Gitea read token" in task_names
+    assert "Render the server-resident reconciliation ansible-pull inventory" in task_names
     assert "Render the server-resident reconciliation wrapper" in task_names
     assert "Enable the server-resident reconciliation timer" in task_names
 
@@ -51,6 +52,15 @@ def test_wrapper_uses_ansible_pull_with_git_askpass_and_local_limit() -> None:
     assert '-l "$inventory_host"' in wrapper
     assert '-c local' in wrapper
     assert 'cp "$receipt_path" "$latest_path"' in wrapper
+
+
+def test_ansible_pull_inventory_supports_local_checkout_and_durable_host_alias() -> None:
+    inventory = (ROLE_ROOT / "templates" / "ansible-pull-inventory.yml.j2").read_text(encoding="utf-8")
+
+    assert "localhost:" in inventory
+    assert "gitea_controller_url:" in inventory
+    assert "{{ server_resident_reconciliation_inventory_host }}:" in inventory
+    assert "ansible_connection: local" in inventory
 
 
 def test_systemd_units_reference_managed_wrapper_and_timer_schedule() -> None:
