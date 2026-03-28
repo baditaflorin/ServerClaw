@@ -1,8 +1,8 @@
 # ADR 0242: Guided Human Onboarding Via Shepherd Tours
 
 - Status: Accepted
-- Implementation Status: Live applied
-- Implemented In Repo Version: pending main integration from latest origin/main `0.177.56`
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.58
 - Implemented In Platform Version: 0.130.43
 - Implemented On: 2026-03-28
 - Date: 2026-03-28

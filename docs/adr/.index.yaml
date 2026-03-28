@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-29'
 total_adrs: 278
 implementation_status_summary:
-  Implemented: 216
+  Implemented: 217
   Partial: 4
-  Not Implemented: 57
+  Not Implemented: 56
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4103,7 +4103,7 @@ adr_index:
       - tours
     summary: We will use Shepherd.js for guided first-run tours, contextual onboarding,
     filename: 0242-guided-human-onboarding-via-shepherd-tours.md
-    implemented_version: 0.177.56
+    implemented_version: 0.177.58
   - adr: '0243'
     title: Component Stories, Accessibility, And UI Contracts Via Storybook, Playwright, And Axe-Core
     status: Accepted

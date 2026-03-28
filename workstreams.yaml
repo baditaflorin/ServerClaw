@@ -351,7 +351,7 @@ workstreams:
   - id: ws-0242-live-apply
     adr: "0242"
     title: Guided human onboarding live apply via Shepherd tours
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0242-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0242-live-apply
@@ -401,6 +401,85 @@ workstreams:
           mode: exclusive
     ready_to_merge: true
     live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0242 by adding Shepherd.js-guided first-run tours to the Windmill operator-access admin surface and hardening raw-app dependency sync with committed lockfiles before converge
+      release_bump: patch
+      included_in_repo_version: 0.177.58
+      latest_receipts:
+        operator_access_guided_onboarding: 2026-03-28-adr-0242-guided-human-onboarding-live-apply
+  - id: ws-0242-main-merge
+    adr: "0242"
+    title: Integrate ADR 0242 guided onboarding into origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0242-main-integration
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0242-main-integration
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0242-main-merge.md
+    depends_on:
+      - ws-0242-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0242-main-merge.md
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.58.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/adr/.index.yaml
+      - docs/adr/0242-guided-human-onboarding-via-shepherd-tours.md
+      - docs/workstreams/ws-0242-live-apply.md
+      - docs/runbooks/configure-windmill.md
+      - docs/runbooks/windmill-operator-access-admin.md
+      - docs/runbooks/operator-onboarding.md
+      - docs/runbooks/operator-offboarding.md
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+      - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
+      - scripts/validate_repo.sh
+      - tests/test_windmill_operator_admin_app.py
+      - receipts/live-applies/2026-03-28-adr-0242-guided-human-onboarding-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0242_main_merge
+          paths:
+            - docs/workstreams/ws-0242-main-merge.md
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.58.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/adr/.index.yaml
+            - docs/adr/0242-guided-human-onboarding-via-shepherd-tours.md
+            - docs/workstreams/ws-0242-live-apply.md
+            - docs/runbooks/configure-windmill.md
+            - docs/runbooks/windmill-operator-access-admin.md
+            - docs/runbooks/operator-onboarding.md
+            - docs/runbooks/operator-offboarding.md
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+            - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
+            - scripts/validate_repo.sh
+            - tests/test_windmill_operator_admin_app.py
+            - receipts/live-applies/2026-03-28-adr-0242-guided-human-onboarding-live-apply.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: records ADR 0242 exact-main evidence on the current mainline by preserving the verified Shepherd-tour rollout, refreshed release surfaces, and operator-access onboarding truth while the live platform baseline remains 0.130.44
+      release_bump: patch
+      included_in_repo_version: 0.177.58
   - id: ws-0230-live-apply
     adr: "0230"
     title: Live apply policy decisions via Open Policy Agent and Conftest

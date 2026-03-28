@@ -3,8 +3,8 @@
 - ADR: [ADR 0242](../adr/0242-guided-human-onboarding-via-shepherd-tours.md)
 - Title: Live apply task-oriented Shepherd tours into the browser-first operator
   access admin surface
-- Status: in-progress (live applied, pending main integration)
-- Implemented In Repo Version: pending main integration from latest origin/main
+- Status: live_applied
+- Implemented In Repo Version: 0.177.58
 - Live Applied In Platform Version: 0.130.43
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
@@ -111,6 +111,17 @@
   `/schemas.ts` and `backend/update_operator_notes.yaml`, and advanced the app
   to version `15`.
 
+## Mainline Integration Outcome
+
+- merged to `main` in repository version `0.177.58`
+- updated `VERSION`, `changelog.md`, `RELEASE.md`, versioned release notes,
+  `versions/stack.yaml`, `README.md`, ADR metadata, and the workstream registry
+  only during the final mainline integration step
+- preserved the current platform version `0.130.44` because the verified live
+  replay already ran from the rebased latest-`origin/main` worktree while the
+  current mainline baseline later advanced with unrelated ADR 0250 monitoring
+  changes before this release cut
+
 ## Live Evidence
 
 - live-apply receipt:
@@ -121,10 +132,7 @@
 
 ## Merge-To-Main Notes
 
-- remaining for merge to `main`: update `VERSION`, `changelog.md`, the top-level
-  `README.md` integrated status summary, `versions/stack.yaml`, and the ADR 0242
-  repo-version metadata from the pending placeholder to the final merged
-  repository version.
+- remaining for merge to `main`: none
 - if another concurrent Windmill replay touches `f/lv3/operator_access_admin`
   before merge, rerun the exact-worktree `wmill sync push` and re-check
   `apps/get/p/f/lv3/operator_access_admin` before touching protected integration
