@@ -2,12 +2,12 @@
 
 - ADR: [ADR 0196](../adr/0196-netdata-realtime-streaming-metrics.md)
 - Title: production live apply for Netdata parent and child streaming metrics plus the authenticated `realtime.lv3.org` surface from the latest `origin/main`
-- Status: live_applied
-- Implemented In Repo Version: 0.177.12
-- Live Applied In Platform Version: 0.130.31
+- Status: merged
+- Implemented In Repo Version: 0.177.25
+- Live Applied In Platform Version: 0.130.32
 - Implemented On: 2026-03-27
 - Live Applied On: 2026-03-27
-- Branch: `codex/ws-0196-live-apply`
+- Branch: `codex/ws-0196-main-merge-v2`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0196-live-apply`
 - Owner: codex
 - Depends On: `adr-0011-monitoring`, `adr-0071-agent-observation-loop`, `adr-0133-portal-authentication-by-default`
@@ -57,11 +57,13 @@
 - the dedicated `converge-realtime` workflow wrapper is now catalogued,
   validated, and proven against production in addition to the generic
   `live-apply-service` path
+- the latest-main merge replay exposed missing `platform.yml` inheritance inside
+  the realtime playbook; adding explicit `vars_files` loading and rerunning
+  `make converge-realtime env=production` restored the live realtime edge vhost
+  and reconfirmed the `302` oauth2 sign-in redirect at `https://realtime.lv3.org/`
 
-## Remaining For Merge To `main`
+## Mainline Integration
 
-- do not change protected integration files on this workstream branch
-- update `VERSION`, the release sections in `changelog.md`, the top-level
-  `README.md` integrated status summary, and
-  `versions/stack.yaml.live_apply_evidence.latest_receipts.realtime` during the
-  final mainline integration step
+- merged to `main` in repository version `0.177.25`
+- the protected integration files and realtime receipt mapping are now recorded
+  on `main`

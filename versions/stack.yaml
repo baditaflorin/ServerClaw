@@ -1,11 +1,12 @@
 schema_version: 1.0.0
-repo_version: 0.177.24
+repo_version: 0.177.25
 platform_version: 0.130.33
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
     monitoring: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
+    realtime: 2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply
     capacity_model: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
     world_state_materializer: 2026-03-27-adr-0113-world-state-materializer-mainline-live-apply
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
@@ -953,7 +954,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.24
+    current: 0.177.25
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.33

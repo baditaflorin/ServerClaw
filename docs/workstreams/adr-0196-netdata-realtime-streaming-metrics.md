@@ -3,10 +3,10 @@
 - ADR: [ADR 0196](../adr/0196-netdata-realtime-streaming-metrics.md)
 - Title: Repo-managed Netdata parent and child streaming metrics with authenticated publication at `realtime.lv3.org`
 - Status: implemented
-- Implemented In Repo Version: 0.177.12
-- Implemented In Platform Version: 0.130.31
+- Implemented In Repo Version: 0.177.25
+- Implemented In Platform Version: 0.130.32
 - Implemented On: 2026-03-27
-- Branch: `codex/ws-0196-live-apply`
+- Branch: `codex/ws-0196-main-merge-v2`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0196-live-apply`
 - Owner: codex
 - Depends On: `adr-0011-monitoring`, `adr-0071-agent-observation-loop`, `adr-0133-portal-authentication-by-default`
@@ -71,11 +71,13 @@
   the parent plus all expected streamed nodes
 - Uptime Kuma bootstrap and ensure-monitors both succeeded with the generated
   realtime monitor contract from the separate worktree
+- the latest-main replay root cause was fixed by explicitly loading
+  `inventory/group_vars/platform.yml` in every realtime play, and the follow-up
+  `make converge-realtime env=production` rerun restored the realtime edge vhost
+  and confirmed the expected oauth2 redirect
 
-## Remaining For Merge To `main`
+## Mainline Integration
 
-- update the protected integration files only during the merge step:
-  `VERSION`, the release sections in `changelog.md`, the top-level `README.md`
-  integrated status summary, and `versions/stack.yaml`
-- add the realtime receipt mapping in `versions/stack.yaml.live_apply_evidence.latest_receipts`
-  during the final mainline integration step
+- merged to `main` in repository version `0.177.25`
+- the canonical live-apply receipt is now tracked in
+  `versions/stack.yaml.live_apply_evidence.latest_receipts.realtime`

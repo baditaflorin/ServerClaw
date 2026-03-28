@@ -2,8 +2,8 @@
 
 - Status: Accepted
 - Implementation Status: Live applied
-- Implemented In Repo Version: 0.177.12
-- Implemented In Platform Version: 0.130.31
+- Implemented In Repo Version: 0.177.25
+- Implemented In Platform Version: 0.130.32
 - Implemented On: 2026-03-27
 - Date: 2026-03-27
 
@@ -104,6 +104,11 @@ The 2026-03-27 rollout verified:
   created the private `Realtime Metrics Private` monitor and
   `make uptime-kuma-manage ACTION=ensure-monitors` reran cleanly from the
   separate worktree
+- a latest-main replay on 2026-03-28 uncovered that the realtime playbook was
+  not inheriting `inventory/group_vars/platform.yml` during live converge; after
+  adding explicit `vars_files` loading to every realtime play and rerunning
+  `make converge-realtime env=production`, `realtime.lv3.org` rendered on the
+  live edge again and returned the expected oauth2 sign-in redirect
 
 The first governed `make provision-subdomain FQDN=realtime.lv3.org env=production`
 attempt hit a transient Hetzner record-creation failure inside a `no_log`

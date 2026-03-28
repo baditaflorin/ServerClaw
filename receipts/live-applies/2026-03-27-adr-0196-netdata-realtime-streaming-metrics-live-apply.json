@@ -3,7 +3,7 @@
   "receipt_id": "2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply",
   "environment": "production",
   "applied_on": "2026-03-27",
-  "recorded_on": "2026-03-27",
+  "recorded_on": "2026-03-28",
   "recorded_by": "codex",
   "source_commit": "e213cce2",
   "repo_version_context": "0.177.12",
@@ -55,7 +55,7 @@
     {
       "check": "Realtime syntax and governed live apply",
       "result": "pass",
-      "observed": "`make live-apply-service service=realtime env=production EXTRA_ARGS='-e bypass_promotion=true'` completed successfully after adding fresh-worktree portal generation, Debian 13 Netdata repository bootstrap, and the monitoring scrape-role replay to the realtime path. The dedicated wrapper `HETZNER_DNS_API_TOKEN=... make converge-realtime env=production` then replayed successfully with `monitoring-lv3 : ok=185 changed=9 failed=0`, `nginx-lv3 : ok=100 changed=3 failed=0`, `proxmox_florin : ok=55 changed=0 failed=0`, `docker-runtime-lv3 : ok=26 changed=2 failed=0`, and `postgres-lv3 : ok=24 changed=0 failed=0`."
+      "observed": "`make live-apply-service service=realtime env=production EXTRA_ARGS='-e bypass_promotion=true'` completed successfully after adding fresh-worktree portal generation, Debian 13 Netdata repository bootstrap, and the monitoring scrape-role replay to the realtime path. The dedicated wrapper `HETZNER_DNS_API_TOKEN=... make converge-realtime env=production` then replayed successfully on 2026-03-27 with `monitoring-lv3 : ok=185 changed=9 failed=0`, `nginx-lv3 : ok=100 changed=3 failed=0`, `proxmox_florin : ok=55 changed=0 failed=0`, `docker-runtime-lv3 : ok=26 changed=2 failed=0`, and `postgres-lv3 : ok=24 changed=0 failed=0`. A latest-main replay on 2026-03-28 exposed missing `inventory/group_vars/platform.yml` inheritance in the realtime playbook; after adding explicit `vars_files` loading and rerunning `make converge-realtime env=production`, the edge vhost rendered again and the public route returned the expected oauth2 redirect."
     },
     {
       "check": "Prometheus Netdata ingestion",
@@ -92,6 +92,6 @@
   "notes": [
     "The first governed `make provision-subdomain FQDN=realtime.lv3.org env=production` attempt failed inside the Hetzner record-creation task while `no_log` was enabled, even though zone lookup and API authentication succeeded.",
     "A direct Hetzner DNS API POST using the same token sourced from `nginx-lv3` created the missing `realtime` A record. The governed playbook was rerun immediately afterward and completed cleanly, including expansion of the shared Let's Encrypt certificate for `realtime.lv3.org`.",
-    "Protected integration files intentionally remain for merge-to-main: `VERSION`, the release sections in `changelog.md`, the top-level `README.md` integrated status summary, and `versions/stack.yaml` receipt mappings."
+    "The final mainline integration moved ADR 0196 into repository version `0.177.25`, added the canonical realtime receipt mapping in `versions/stack.yaml`, and recorded the latest-main replay fix for explicit realtime playbook topology loading."
   ]
 }
