@@ -389,6 +389,18 @@
     mode: "{{ item.mode }}"
   loop: "{{ windmill_worker_repo_mutable_files }}"
 
+- name: Ensure the controller-style compatibility parent exists for the worker checkout
+  ansible.builtin.file:
+    path: "{{ windmill_worker_repo_checkout_compat_root | dirname }}"
+    state: directory
+    mode: "0755"
+
+- name: Ensure the worker checkout is reachable through the controller-style compatibility path
+  ansible.builtin.file:
+    src: "{{ windmill_worker_repo_checkout_host_path }}"
+    dest: "{{ windmill_worker_repo_checkout_compat_root }}"
+    state: link
+
 - name: Ensure the Windmill worker checkout secret directories exist
   ansible.builtin.file:
     path: "{{ item.path }}"

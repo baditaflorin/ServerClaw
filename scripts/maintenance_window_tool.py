@@ -23,7 +23,14 @@ if str(REPO_ROOT) not in sys.path:
 if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
     del sys.modules["platform"]
 
-from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path, write_json
+from controller_automation_toolkit import (
+    emit_cli_error,
+    load_json,
+    load_yaml,
+    repo_path,
+    resolve_repo_local_path,
+    write_json,
+)
 from mutation_audit import build_event, emit_event_best_effort
 
 
@@ -99,7 +106,9 @@ def load_controller_context() -> dict[str, Any]:
     host_vars = load_yaml(HOST_VARS_PATH)
     group_vars = load_yaml(GROUP_VARS_PATH)
     secret_manifest = load_json(SECRET_MANIFEST_PATH)
-    bootstrap_key = Path(secret_manifest["secrets"]["bootstrap_ssh_private_key"]["path"]).expanduser()
+    bootstrap_key = resolve_repo_local_path(
+        secret_manifest["secrets"]["bootstrap_ssh_private_key"]["path"]
+    )
     guests = {guest["name"]: guest["ipv4"] for guest in host_vars["proxmox_guests"]}
     return {
         "host_vars": host_vars,
@@ -125,7 +134,7 @@ def resolve_nats_credentials(context: dict[str, Any] | None = None) -> dict[str,
     secret_manifest = context.get("secret_manifest", {})
     secret_entry = secret_manifest.get("secrets", {}).get("nats_jetstream_admin_password")
     if isinstance(secret_entry, dict) and secret_entry.get("kind") == "file":
-        password_path = Path(secret_entry["path"]).expanduser()
+        password_path = resolve_repo_local_path(secret_entry["path"])
         if password_path.exists():
             return {
                 "user": "jetstream-admin",

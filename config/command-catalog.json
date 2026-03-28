@@ -101,6 +101,10 @@
           "Do not continue with later host mutations until the package path is stable.",
           "Revert by reapplying the last known-good repo state or follow the Proxmox install runbook for host recovery."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 2400
       }
     },
     "configure-network": {
@@ -135,6 +139,10 @@
           "Restore the last known-good network configuration from version control before retrying.",
           "Use documented host access recovery steps instead of ad hoc retries if management access degrades."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
       }
     },
     "packer-template-rebuild": {
@@ -169,6 +177,10 @@
           "Restore the last known-good template and manifest metadata before retrying the rebuild.",
           "Treat partial template publication as a live infrastructure incident and repair it before changing guest consumers."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 7200
       }
     },
     "fixture-expiry-reaper": {
@@ -210,6 +222,10 @@
           "Disable the schedule and inspect the affected receipt plus archived runtime state before retrying cleanup.",
           "Treat partially-destroyed fixtures as infrastructure drift and repair them through scripts/fixture_manager.py before re-enabling automation."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
       }
     },
     "ephemeral-vm-reaper": {
@@ -244,6 +260,10 @@
           "Disable the schedule, inspect the summary receipt, and correct the VM tags or receipt state before re-enabling the workflow.",
           "Treat incorrectly-ranged long-lived VMs as a platform data-model bug and move them back under the managed production or staging ranges."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
       }
     },
     "ephemeral-pool-reconcile": {
@@ -278,6 +298,10 @@
           "Disable the schedule, destroy any partially-created warm member receipts, and restore the previous pool catalog before retrying.",
           "Treat repeated spillover decisions as a capacity-planning signal and adjust ADR 0186 or ADR 0183 data instead of forcing local overcommit."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 2400
       }
     },
     "fault-injection": {
@@ -312,6 +336,10 @@
           "Use the documented ADR 0171 recovery path and repo-managed service converge workflows before attempting another fault run.",
           "Do not continue by layering ad hoc host changes on top of a partially recovered scenario; restore the platform to a known-good repo state first."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
       }
     },
     "network-impairment-matrix": {
@@ -346,6 +374,10 @@
           "Replay the Windmill runtime from the released checkout before retrying the matrix run.",
           "Do not treat a missing or stale matrix report as permission to run ad hoc network impairments on production."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 600
       }
     },
     "nightly-integration-tests": {
@@ -395,6 +427,10 @@
           "Disable the schedule and rerun the suite manually through scripts/integration_suite.py before re-enabling automation.",
           "If the rotation mutation fails, restore the affected service through the repo-managed secret rotation or service converge path before the next nightly window."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 3600
       }
     },
     "subdomain-exposure-audit": {
@@ -429,6 +465,10 @@
           "This workflow is diagnostic only; treat failures as drift or publication issues and repair them through the governed edge publication path before rerunning the audit.",
           "Disable any schedule temporarily if the public catalog is intentionally mid-change and rerun after the publication window closes."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
       }
     },
     "adr-0077-compose-runtime-secrets-live-apply": {
@@ -470,6 +510,10 @@
           "Restore the last known-good compose/runtime secret configuration before retrying the converge.",
           "Treat partial runtime-secret migration as a live service incident and stabilize the docker-runtime applications before layering new mutations on top."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
       }
     },
     "converge-guest-network-policy": {
@@ -504,6 +548,10 @@
           "Restore the last known-good firewall policy from version control before retrying the live converge.",
           "If guest access degrades, repair from the Proxmox host jump path or documented break-glass access before changing application surfaces."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
       }
     },
     "configure-ingress": {
@@ -538,6 +586,10 @@
           "Restore the last known-good ingress rule set before attempting another live change.",
           "Do not layer DNS or edge-publication changes on top of a broken host ingress state."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
       }
     },
     "configure-edge-publication": {
@@ -572,6 +624,10 @@
           "Reapply the last known-good edge configuration from version control.",
           "Keep failed publication attempts out of DNS or user-facing announcements until verification is clean."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
       }
     },
     "configure-tailscale": {
@@ -606,6 +662,10 @@
           "Return to the last known-good Tailscale configuration before further access changes.",
           "Use documented break-glass access only long enough to restore the managed state."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
       }
     },
     "converge-headscale": {
@@ -647,6 +707,10 @@
           "Keep the existing tailnet path active until the Headscale host and one operator workstation are both verified.",
           "If migration fails, reattach the host to the prior control plane before closing the original SSH session."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
       }
     },
     "provision-guests": {
@@ -681,6 +745,10 @@
           "Do not keep partially converged guest identity changes without documenting the repair path.",
           "Restore the prior guest definition or follow the netplan MAC-drift runbook before retrying."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 2400
       }
     },
     "harden-access": {
@@ -715,6 +783,10 @@
           "Restore the last known-good access model from the repo before retrying.",
           "Use the documented break-glass account only to recover the managed access path."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
       }
     },
     "harden-guest-access": {
@@ -749,6 +821,10 @@
           "Restore the prior guest access baseline before additional guest mutations.",
           "Document any guest-specific repair needed instead of masking access drift with root logins."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
       }
     },
     "harden-security": {
@@ -790,6 +866,10 @@
           "Restore the last known-good security config before proceeding with other host changes.",
           "Treat partial firewall or TFA state as an incident to repair, not as a stable endpoint."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
       }
     },
     "provision-api-access": {
@@ -824,6 +904,10 @@
           "Prefer regenerating or reapplying the managed API identity state instead of manual drift.",
           "Revoke partially created credentials if the verification step fails."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
       }
     },
     "converge-monitoring": {
@@ -858,6 +942,10 @@
           "Reapply the last known-good monitoring state from version control before retrying.",
           "Do not mask broken telemetry with manual dashboard edits that are not committed."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
       }
     },
     "converge-ntopng": {
@@ -892,6 +980,10 @@
           "Restore the last known-good host state from version control before retrying.",
           "Keep any emergency package or firewall rollback documented so the repo remains the source of truth."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
       }
     },
     "converge-docker-runtime": {
@@ -926,6 +1018,10 @@
           "Restore the last known-good runtime configuration before further workload changes.",
           "Keep application-level remediation separate from runtime baseline rollback."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
       }
     },
     "converge-postgres-vm": {
@@ -960,6 +1056,10 @@
           "Restore the last known-good PostgreSQL config before retrying.",
           "Do not compensate for failed baseline changes with manual database-side drift."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
       }
     },
     "converge-mail-platform": {
@@ -1008,6 +1108,10 @@
           "Restore the last known-good mail stack state from version control before retrying.",
           "If external mail flow is impaired, revert promptly instead of stacking follow-up changes."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
       }
     },
     "converge-openbao": {
@@ -1056,6 +1160,10 @@
           "Reapply or rotate the managed OpenBao bootstrap state instead of leaving partially initialized secret authority data behind.",
           "Do not route new workloads through OpenBao until the converge and recovery contract verify cleanly."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
       }
     },
     "deploy-uptime-kuma": {
@@ -1097,6 +1205,10 @@
           "Restore the last known-good Uptime Kuma deployment state before retrying.",
           "Keep monitor bootstrap or UI remediation separate from the runtime rollback decision."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
       }
     },
     "converge-step-ca": {
@@ -1131,6 +1243,10 @@
           "Restore the prior SSH trust model before retrying a CA rollout.",
           "Treat partial trust updates as an access incident that must be repaired explicitly."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
       }
     },
     "converge-windmill": {
@@ -1165,6 +1281,10 @@
           "Restore the last known-good Windmill runtime state before retrying.",
           "Keep UI experimentation and manual bootstrap changes out of the rollback path."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
       }
     },
     "converge-coolify": {
@@ -1206,6 +1326,10 @@
           "Restore the last known-good Coolify VM or edge state before retrying.",
           "Avoid manual Coolify UI edits that leave the repo-managed bootstrap and smoke deployment contract undocumented."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
       }
     },
     "rotate-secret-low-risk": {
@@ -1254,6 +1378,10 @@
           "Rerun the same secret id deliberately instead of improvising ad hoc secret writes.",
           "Treat any failure between service mutation and OpenBao persistence as a partial rotation incident that must be reconciled explicitly."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
       }
     },
     "rotate-secret-high-risk": {
@@ -1302,6 +1430,10 @@
           "Reconcile the same secret id through the cataloged workflow instead of writing emergency secret values by hand.",
           "Treat any failed high-risk rotation as an incident with explicit operator follow-up and evidence capture."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
       }
     },
     "converge-control-plane-recovery": {
@@ -1352,6 +1484,10 @@
           "Preserve the prior controller bundle and backup archives until the new drill passes.",
           "Keep the prior off-host witness generation as the active latest pointer until the new archive verifies cleanly."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
       }
     },
     "converge-keycloak": {
@@ -1393,6 +1529,10 @@
           "Restore the last known-good Keycloak and Grafana auth configuration from version control before retrying.",
           "Do not compensate for a broken SSO rollout by hand-editing Grafana or Keycloak state outside the repo."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
       }
     },
     "converge-langfuse": {
@@ -1448,6 +1588,10 @@
           "Restore the last known-good Langfuse and edge configuration from version control before retrying.",
           "Do not compensate for a failed rollout by manually creating projects, users, or API keys in the Langfuse UI."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
       }
     },
     "converge-api-gateway": {
@@ -1489,6 +1633,10 @@
           "Restore the last known-good gateway and edge configuration from version control before retrying.",
           "Do not leave `api.lv3.org` partially published with a broken certificate or mismatched runtime port."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
       }
     },
     "converge-ops-portal": {
@@ -1571,6 +1719,10 @@
           "Restore the last known-good Dify and edge configuration from version control before retrying.",
           "Do not compensate for a broken rollout by hand-editing Dify bootstrap state, datasets, or edge routes outside the repo."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
       }
     },
     "converge-n8n": {
@@ -1612,6 +1764,10 @@
           "Restore the last known-good n8n runtime and edge configuration from version control before retrying.",
           "Do not compensate for a broken rollout by hand-editing the n8n UI or nginx edge configuration outside the repo."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
       }
     },
     "converge-netbox": {
@@ -1646,6 +1802,10 @@
           "Restore the last known-good NetBox runtime state before retrying.",
           "Do not compensate for failed synchronization with manual UI drift that leaves inventory truth ambiguous."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
       }
     },
     "converge-homepage": {
@@ -1680,6 +1840,10 @@
           "Restore the last known-good Homepage runtime and edge configuration before retrying.",
           "Do not leave hand-edited Homepage config files or ad hoc nginx changes behind after a failed rollout."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
       }
     },
     "converge-excalidraw": {
@@ -1721,6 +1885,10 @@
           "Restore the last known-good Excalidraw runtime and edge configuration before retrying.",
           "Do not compensate for a failed rollout with hand-edited frontend assets or ad hoc nginx changes outside the repo."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
       }
     },
     "converge-open-webui": {
@@ -1755,6 +1923,10 @@
           "Restore the last known-good Open WebUI runtime and proxy state before retrying.",
           "Do not leave ad hoc provider configuration or manual UI drift behind after a failed rollout."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
       }
     },
     "converge-searxng": {
@@ -1796,6 +1968,10 @@
           "Restore the last known-good SearXNG runtime and host proxy state before retrying.",
           "Do not leave manual DNS or Open WebUI search configuration drift behind after a failed rollout."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
       }
     },
     "converge-rag-context": {
@@ -1830,6 +2006,10 @@
           "Restore the last known-good platform context runtime before retrying.",
           "Do not leave ad hoc Open WebUI or Windmill integration drift behind after a failed rollout."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
       }
     },
     "converge-gitea": {
@@ -1864,6 +2044,10 @@
           "Restore the last known-good Gitea, runner, and supporting secret state from version control before retrying.",
           "Do not hand-edit Gitea auth sources, repositories, or hook state outside the repo-managed bootstrap path."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
       }
     },
     "converge-ollama": {
@@ -1897,6 +2081,10 @@
           "Restore the last known-good Ollama runtime state before retrying.",
           "Do not leave manually pulled model state or ad hoc compose changes behind after a failed rollout."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 3600
       }
     },
     "converge-dozzle": {
@@ -1931,6 +2119,10 @@
           "Restore the last known-good Dozzle runtime and edge publication state before retrying.",
           "Do not leave behind ad hoc compose, firewall, or NGINX changes after a failed rollout."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
       }
     },
     "converge-realtime": {
@@ -1972,6 +2164,10 @@
           "Restore the last known-good Netdata runtime, Prometheus scrape configuration, and edge publication state before retrying.",
           "Do not leave behind ad hoc package repositories, DNS changes, or NGINX edits after a failed rollout."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
       }
     },
     "converge-ntfy": {
@@ -2006,6 +2202,10 @@
           "Restore the last known-good ntfy runtime state before retrying.",
           "Do not hand-edit topic authentication or container configuration outside the repo-managed workflow."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
       }
     },
     "converge-portainer": {
@@ -2040,6 +2240,10 @@
           "Restore the last known-good Portainer runtime state before retrying.",
           "Do not compensate for a broken converge with undocumented UI changes or ad hoc Docker shell edits."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
       }
     },
     "converge-vaultwarden": {
@@ -2074,6 +2278,10 @@
           "Restore the last known-good Vaultwarden runtime and proxy state before retrying.",
           "Do not compensate for a broken converge with undocumented manual changes inside the admin panel or direct container shell edits."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
       }
     },
     "converge-mattermost": {
@@ -2108,6 +2316,10 @@
           "Restore the last known-good Mattermost runtime and generated webhook manifest before retrying.",
           "Do not hand-fix channel or webhook state in the UI without returning the final contract to git-managed automation."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
       }
     },
     "live-apply-waves": {
@@ -2156,6 +2368,10 @@
           "Resume from a corrected manifest or catalog after the blocking wave is fixed.",
           "Do not bypass the manifest by launching later-wave playbooks manually."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 3600
       }
     },
     "uptime-kuma-manage": {
@@ -2197,6 +2413,10 @@
           "Use the repo-managed ensure-monitors or ensure-status-page path or the last known-good session state to recover.",
           "Avoid manual UI edits that leave monitor state undocumented."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
       }
     },
     "uptime-robot-manage": {
@@ -2245,6 +2465,10 @@
           "Re-run the repo-managed ensure action after correcting the API key or webhook secret.",
           "Avoid manual dashboard edits that leave the external monitoring contract undocumented."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
       }
     },
     "portainer-manage": {
@@ -2286,6 +2510,10 @@
           "Use the repo-managed converge paths to restore desired runtime state after any emergency restart.",
           "Avoid falling back to broad Docker shell access when the governed Portainer wrapper is the intended surface."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
       }
     },
     "coolify-manage": {
@@ -2327,6 +2555,10 @@
           "Use the repo-managed converge path to restore desired Coolify bootstrap state after controller drift.",
           "Avoid compensating with manual UI-authored project or application state that is not represented in the repo."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
       }
     },
     "configure-backup-vm": {
@@ -2361,6 +2593,10 @@
           "Return to the last known-good backup VM state before retrying.",
           "Do not leave partially rotated backup credentials undocumented."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
       }
     },
     "configure-backups": {
@@ -2402,6 +2638,10 @@
           "Do not use this path for live backup configuration in the current platform model.",
           "Move to the PBS-based backup workflow instead of forcing the superseded CIFS path."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
       }
     },
     "database-dns": {
@@ -2436,6 +2676,10 @@
           "Reapply the last known-good DNS state from the repo before retrying.",
           "Keep private database publication changes under the managed playbook instead of manual provider edits."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
       }
     },
     "provision-subdomain": {
@@ -2477,6 +2721,10 @@
           "Reapply the last known-good repo state for the affected hostname before retrying.",
           "Do not create ad hoc DNS or NGINX routes outside the catalog just to satisfy one publication request."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
       }
     },
     "promote-to-production": {
@@ -2525,6 +2773,10 @@
           "Do not continue into production until a fresh staging apply and clean gate pass exist.",
           "If production fails after an approved promotion starts, record the failed evidence and revert with the last known-good repo state through the normal live-apply path."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
       }
     },
     "run-drift-detection": {
@@ -2580,6 +2832,10 @@
           "Do not reconcile directly from shell history; return to the owning repo workflow or runbook for the affected source.",
           "If the drift run itself was noisy because a workstream was missing suppression metadata, fix the workstream registry and rerun before escalating."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
       }
     },
     "run-restore-verification": {
@@ -2621,6 +2877,10 @@
           "Destroy any leftover restore-verification VMIDs immediately before retrying; do not leave ambiguous restored guests running on the host.",
           "Treat repeated restore failures as backup health incidents and investigate the selected PBS recovery points before changing unrelated platform automation."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 5400
       }
     },
     "open-maintenance-window": {
@@ -2683,6 +2943,10 @@
           "Close the maintenance window immediately if the downstream live change is cancelled.",
           "Do not proceed with the planned mutation until the suppression state matches the intended service scope."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
       }
     },
     "close-maintenance-window": {
@@ -2738,6 +3002,10 @@
           "Re-open the correct service-scoped maintenance window if an accidental close happens mid-change.",
           "Prefer a scoped close over FORCE=true unless the active suppression state is already wrong."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
       }
     },
     "operator-onboard": {
@@ -2807,6 +3075,10 @@
           "If onboarding only partially succeeds, rerun the same governed command after correcting the failing secret or endpoint configuration.",
           "Prefer offboarding the partially-created identity rather than deleting audit history by hand in one individual system."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
       }
     },
     "operator-offboard": {
@@ -2862,6 +3134,10 @@
           "If the operator was disabled in one system only, rerun the same governed command after correcting the missing secret or endpoint configuration.",
           "Do not reactivate access manually in one downstream system without restoring the authoritative roster state first."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
       }
     },
     "sync-operators": {
@@ -2910,6 +3186,10 @@
           "Restore the last known-good roster on main and rerun the governed sync if an incorrect roster was merged.",
           "Prefer rerunning the idempotent sync over manual point fixes when only part of the roster applied."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
       }
     },
     "token-exposure-response": {
@@ -2958,6 +3238,10 @@
           "Do not recreate exposed credentials manually outside the governed hook contract.",
           "Treat partial revocation or replacement as a security incident and reconcile it through the documented runbook plus receipts."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
       }
     },
     "rotate-keycloak-client-secret": {
@@ -2992,6 +3276,10 @@
           "Rerun the governed rotation after correcting the hook environment instead of setting ad hoc secrets.",
           "Treat failed secret publication to the dependent service as an explicit incident requiring follow-up before retry."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
       }
     },
     "rotate-windmill-token": {
@@ -3026,6 +3314,10 @@
           "Prefer rerunning the governed hook after fixing the environment rather than minting ad hoc API tokens.",
           "Treat a revoked-but-unpublished replacement token as an operational incident that needs explicit recovery."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
       }
     },
     "merge-config-changes": {
@@ -3060,6 +3352,10 @@
           "Disable the Windmill schedule and resolve the staged conflict rows before retrying the worker.",
           "Repair the tracked registry file from git history if a bad merge was already written into the worker checkout."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 300
       }
     },
     "rotate-grafana-service-token": {
@@ -3094,6 +3390,10 @@
           "Rerun the governed rotation after fixing hook prerequisites instead of issuing unmanaged Grafana tokens.",
           "Keep the replacement workflow and incident trail in receipts rather than patching consumers manually."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
       }
     },
     "converge-semaphore": {
@@ -3128,6 +3428,10 @@
           "Restore the last known-good Semaphore runtime state and controller auth artifacts before retrying.",
           "Do not compensate for a broken converge with undocumented UI-authored projects or ad hoc API tokens."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
       }
     },
     "semaphore-manage": {
@@ -3169,6 +3473,10 @@
           "Use the repo-managed converge path to restore desired Semaphore project state after bootstrap drift.",
           "Avoid minting ad hoc API tokens or editing project state in the UI without returning the final contract to git."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
       }
     },
     "converge-plane": {
@@ -3210,6 +3518,10 @@
           "Restore the last known-good Plane runtime and edge configuration from version control before retrying.",
           "Do not compensate for a failed rollout with undocumented UI-authored workspaces, projects, or API tokens."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
       }
     },
     "plane-manage": {
@@ -3251,7 +3563,24 @@
           "Use the repo-managed converge path to restore desired Plane state after bootstrap drift.",
           "Avoid minting ad hoc API tokens or editing seeded issue state in the UI without returning the final contract to git."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
       }
+    }
+  },
+  "execution_profiles": {
+    "docker_runtime_systemd_make": {
+      "transport": "ssh_systemd_run_make",
+      "runtime_host": "docker-runtime-lv3",
+      "runtime_repo_root": "/srv/proxmox_florin_server",
+      "runtime_compat_repo_root": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server",
+      "effective_user": "ops",
+      "working_directory": "/srv/proxmox_florin_server",
+      "kill_mode": "mixed",
+      "log_directory": "/srv/proxmox_florin_server/.local/governed-command/logs",
+      "receipt_directory": "/srv/proxmox_florin_server/.local/governed-command/receipts"
     }
   }
 }

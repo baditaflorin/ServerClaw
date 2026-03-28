@@ -212,6 +212,47 @@ class AgentToolRegistryTests(unittest.TestCase):
             self.assertEqual(events[0]["tool"], "run-governed-command")
             self.assertEqual(events[0]["outcome"], "rejected")
 
+    def test_execute_call_dry_run_returns_bounded_runtime_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            audit_path = Path(temp_dir) / "audit.jsonl"
+            process = self.run_registry(
+                "--call",
+                "run-governed-command",
+                "--args-json",
+                json.dumps(
+                    {
+                        "command_id": "network-impairment-matrix",
+                        "requester_class": "human_operator",
+                        "approver_classes": ["human_operator"],
+                        "preflight_passed": True,
+                        "validation_passed": True,
+                        "receipt_planned": True,
+                        "parameters": {
+                            "NETWORK_IMPAIRMENT_MATRIX_ARGS": "target_class=staging --approve-risk"
+                        },
+                        "dry_run": True,
+                    }
+                ),
+                env={"LV3_AGENT_TOOL_AUDIT_LOG_PATH": str(audit_path)},
+            )
+            self.assertEqual(process.returncode, 0, process.stderr)
+            payload = json.loads(process.stdout)
+            structured = payload["result"]["structuredContent"]
+            self.assertEqual(structured["command_id"], "network-impairment-matrix")
+            self.assertTrue(structured["approved"])
+            self.assertFalse(structured["executed"])
+            self.assertEqual(structured["runtime_host"], "docker-runtime-lv3")
+            self.assertTrue(structured["unit_name"].startswith("lv3-governed-network-impairment-matrix-"))
+            self.assertEqual(
+                structured["parameters"],
+                {"NETWORK_IMPAIRMENT_MATRIX_ARGS": "target_class=staging --approve-risk"},
+            )
+            self.assertTrue(structured["stdout_log"].endswith(".stdout.log"))
+            self.assertTrue(structured["receipt_path"].endswith(".json"))
+            events = self.read_audit_events(audit_path)
+            self.assertEqual(events[0]["tool"], "run-governed-command")
+            self.assertEqual(events[0]["outcome"], "success")
+
 
 if __name__ == "__main__":
     unittest.main()

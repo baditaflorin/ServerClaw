@@ -27,6 +27,8 @@ COMMAND_CATALOG_PATH = repo_path("config", "command-catalog.json")
 SUPPORTED_SCHEMA_VERSION: Final[str] = "1.0.0"
 ALLOWED_IDENTITY_CLASSES = {"human_operator", "service_identity", "agent", "break_glass"}
 ALLOWED_SCOPES = {"proxmox_host", "guest_runtime", "host_and_guest", "external_service"}
+ALLOWED_EXECUTION_TRANSPORTS = {"ssh_systemd_run_make"}
+ALLOWED_KILL_MODES = {"control-group", "mixed", "process", "none"}
 MUTATION_AUDIT_ACTOR_CLASS_MAP = {
     "human_operator": "operator",
     "service_identity": "service",
@@ -92,6 +94,32 @@ def validate_command_catalog(command_catalog: dict, workflow_catalog: dict, secr
 
     workflows = workflow_catalog["workflows"]
     secret_ids = set(secret_manifest["secrets"].keys())
+    execution_profiles = require_mapping(command_catalog.get("execution_profiles"), "execution_profiles")
+    if not execution_profiles:
+        raise ValueError("execution_profiles must not be empty")
+    for profile_id, profile in execution_profiles.items():
+        profile = require_mapping(profile, f"execution_profiles.{profile_id}")
+        require_str(profile_id, f"execution profile id '{profile_id}'")
+        transport = require_str(profile.get("transport"), f"execution_profiles.{profile_id}.transport")
+        if transport not in ALLOWED_EXECUTION_TRANSPORTS:
+            raise ValueError(
+                f"execution_profiles.{profile_id}.transport must be one of {sorted(ALLOWED_EXECUTION_TRANSPORTS)}"
+            )
+        require_str(profile.get("runtime_host"), f"execution_profiles.{profile_id}.runtime_host")
+        require_str(profile.get("runtime_repo_root"), f"execution_profiles.{profile_id}.runtime_repo_root")
+        require_str(
+            profile.get("runtime_compat_repo_root"),
+            f"execution_profiles.{profile_id}.runtime_compat_repo_root",
+        )
+        require_str(profile.get("effective_user"), f"execution_profiles.{profile_id}.effective_user")
+        require_str(profile.get("working_directory"), f"execution_profiles.{profile_id}.working_directory")
+        kill_mode = require_str(profile.get("kill_mode"), f"execution_profiles.{profile_id}.kill_mode")
+        if kill_mode not in ALLOWED_KILL_MODES:
+            raise ValueError(
+                f"execution_profiles.{profile_id}.kill_mode must be one of {sorted(ALLOWED_KILL_MODES)}"
+            )
+        require_str(profile.get("log_directory"), f"execution_profiles.{profile_id}.log_directory")
+        require_str(profile.get("receipt_directory"), f"execution_profiles.{profile_id}.receipt_directory")
 
     policies = require_mapping(command_catalog.get("approval_policies"), "approval_policies")
     if not policies:
@@ -197,6 +225,18 @@ def validate_command_catalog(command_catalog: dict, workflow_catalog: dict, secr
             for index, item in enumerate(items):
                 require_str(item, f"commands.{command_id}.failure_guidance.{field}[{index}]")
 
+        execution = require_mapping(contract.get("execution"), f"commands.{command_id}.execution")
+        profile_id = require_str(execution.get("profile"), f"commands.{command_id}.execution.profile")
+        if profile_id not in execution_profiles:
+            raise ValueError(
+                f"commands.{command_id}.execution.profile references unknown execution profile '{profile_id}'"
+            )
+        require_int(execution.get("timeout_seconds"), f"commands.{command_id}.execution.timeout_seconds", 1)
+        if workflows[workflow_id]["preferred_entrypoint"]["kind"] != "make_target":
+            raise ValueError(
+                f"commands.{command_id}.workflow_id must use a make_target preferred entrypoint for this execution model"
+            )
+
     missing_contracts = sorted(
         workflow_id
         for workflow_id, workflow in workflows.items()
@@ -259,6 +299,17 @@ def show_command(command_catalog: dict, workflow_catalog: dict, command_id: str)
         print(f"  - stop: {item}")
     for item in contract["failure_guidance"]["rollback_guidance"]:
         print(f"  - rollback: {item}")
+    execution = contract["execution"]
+    profile = command_catalog["execution_profiles"][execution["profile"]]
+    print("Execution:")
+    print(f"  - profile: {execution['profile']}")
+    print(f"  - runtime_host: {profile['runtime_host']}")
+    print(f"  - effective_user: {profile['effective_user']}")
+    print(f"  - working_directory: {profile['working_directory']}")
+    print(f"  - timeout_seconds: {execution['timeout_seconds']}")
+    print(f"  - kill_mode: {profile['kill_mode']}")
+    print(f"  - log_directory: {profile['log_directory']}")
+    print(f"  - receipt_directory: {profile['receipt_directory']}")
     if CORRECTION_LOOP_CATALOG_PATH.exists():
         correction_catalog = load_correction_loop_catalog()
         correction_loop = resolve_workflow_correction_loop(correction_catalog, contract["workflow_id"])
@@ -358,6 +409,7 @@ def evaluate_approval(
         "reasons": reasons,
         "workflow_id": contract["workflow_id"],
         "entrypoint": workflow["preferred_entrypoint"]["command"],
+        "entrypoint_target": workflow["preferred_entrypoint"]["target"],
         "receipt_required": contract["evidence"]["live_apply_receipt_required"],
     }
 

@@ -740,6 +740,78 @@ workstreams:
       changelog_entry: accepted ADRs 0224 through 0233 to move routine platform operation from the Codex chat session into server-resident control loops and mature tools including Ansible Pull, systemd, Windmill, Gitea Actions runners, OPA, OpenBao Agent, Nomad, and signed release bundles
       release_bump: patch
       included_in_repo_version: 0.177.41
+  - id: ws-0227-live-apply
+    adr: "0227"
+    title: Live apply bounded command execution via systemd-run and approved wrappers
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0227-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0227-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0227-live-apply.md
+    depends_on:
+      - adr-0048-command-catalog
+      - adr-0170-platform-wide-timeout-hierarchy
+      - adr-0224-server-resident-operations-as-the-default-control-model
+      - adr-0226-systemd-units-timers-and-paths-for-host-resident-control-loops
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0227-live-apply.md
+      - docs/adr/0227-bounded-command-execution-via-systemd-run-and-approved-wrappers.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/command-catalog-and-approval-gates.md
+      - docs/runbooks/bounded-command-execution.md
+      - config/command-catalog.json
+      - config/agent-tool-registry.json
+      - scripts/agent_tool_registry.py
+      - scripts/command_catalog.py
+      - scripts/governed_command.py
+      - scripts/governed_command_runtime.py
+      - scripts/controller_automation_toolkit.py
+      - scripts/maintenance_window_tool.py
+      - scripts/platform_observation_tool.py
+      - scripts/fault_injection.py
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+      - tests/test_agent_tool_registry.py
+      - tests/test_controller_automation_toolkit.py
+      - tests/test_governed_command.py
+      - tests/test_governed_command_runtime.py
+      - receipts/live-applies/2026-03-28-adr-0227-bounded-command-execution-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0227_live_apply
+          paths:
+            - docs/workstreams/ws-0227-live-apply.md
+            - docs/adr/0227-bounded-command-execution-via-systemd-run-and-approved-wrappers.md
+            - docs/adr/.index.yaml
+            - docs/runbooks/command-catalog-and-approval-gates.md
+            - docs/runbooks/bounded-command-execution.md
+            - config/command-catalog.json
+            - config/agent-tool-registry.json
+            - scripts/agent_tool_registry.py
+            - scripts/command_catalog.py
+            - scripts/governed_command.py
+            - scripts/governed_command_runtime.py
+            - scripts/controller_automation_toolkit.py
+            - scripts/maintenance_window_tool.py
+            - scripts/platform_observation_tool.py
+            - scripts/fault_injection.py
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+            - tests/test_agent_tool_registry.py
+            - tests/test_controller_automation_toolkit.py
+            - tests/test_governed_command.py
+            - tests/test_governed_command_runtime.py
+            - receipts/live-applies/2026-03-28-adr-0227-bounded-command-execution-live-apply.json
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false
   - id: ws-0210-live-apply
     adr: "0210"
     title: Live apply canonical publication models over adapter-shaped vendor fields

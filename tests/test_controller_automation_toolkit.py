@@ -42,3 +42,17 @@ items:
     payload = toolkit._load_yaml_without_pyyaml(payload_path)
 
     assert payload["items"] == [{"id": "sample", "enabled": True}]
+
+
+def test_resolve_repo_local_path_maps_missing_controller_secret_into_repo_local(tmp_path: Path) -> None:
+    repo_root = tmp_path / "runtime"
+    mirrored_secret = repo_root / ".local" / "nats" / "jetstream-admin-password.txt"
+    mirrored_secret.parent.mkdir(parents=True)
+    mirrored_secret.write_text("secret", encoding="utf-8")
+
+    resolved = toolkit.resolve_repo_local_path(
+        "/tmp/nonexistent-controller-root/.local/nats/jetstream-admin-password.txt",
+        repo_root=repo_root,
+    )
+
+    assert resolved == mirrored_secret

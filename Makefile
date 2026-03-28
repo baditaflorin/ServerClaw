@@ -60,7 +60,7 @@ COLLECTION_NAMESPACE ?= lv3
 COLLECTION_NAME ?= platform
 COLLECTION_ROOT := $(REPO_ROOT)/collections/ansible_collections/$(COLLECTION_NAMESPACE)/$(COLLECTION_NAME)
 COLLECTION_DIST_DIR ?= $(REPO_ROOT)/build/collections
-COLLECTION_VERSION := $(shell ruby -ryaml -e 'puts YAML.load_file(ARGV[0]).fetch("version")' "$(COLLECTION_ROOT)/galaxy.yml")
+COLLECTION_VERSION := $(shell python3 -c "import pathlib,re; text=pathlib.Path('$(COLLECTION_ROOT)/galaxy.yml').read_text(); match=re.search(r'^version:\\s*([^\\s]+)\\s*$$', text, re.M); print(match.group(1) if match else '0.0.0')")
 COLLECTION_TARBALL := $(COLLECTION_DIST_DIR)/$(COLLECTION_NAMESPACE)-$(COLLECTION_NAME)-$(COLLECTION_VERSION).tar.gz
 COLLECTION_SERVER ?= internal_galaxy
 COLLECTION_INSTALL_PATH ?= $(REPO_ROOT)/build/collection-install

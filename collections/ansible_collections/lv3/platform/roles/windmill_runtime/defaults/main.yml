@@ -121,6 +121,7 @@ windmill_seed_job_timeout_seconds: 120
 windmill_worker_checkout_repo_root_local_dir: "{{ playbook_dir }}/.."
 windmill_worker_repo_checkout_host_path: /srv/proxmox_florin_server
 windmill_worker_repo_checkout_container_path: /srv/proxmox_florin_server
+windmill_worker_repo_checkout_compat_root: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
 windmill_worker_secret_manifest_path: "{{ playbook_execution_controller_secret_manifest_path }}"
 windmill_worker_secret_mirror_ids:
   - bootstrap_ssh_private_key
@@ -132,6 +133,16 @@ windmill_worker_superadmin_secret_file: "{{ windmill_worker_superadmin_secret_di
 windmill_openbao_runtime_network: openbao_default
 windmill_worker_repo_mutable_directories:
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/state/operator-access"
+    mode: "0777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/fault-injection"
+    mode: "0777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/network-impairment-matrix"
+    mode: "0777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/integration-tests"
+    mode: "0777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/governed-command/logs"
+    mode: "0777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/governed-command/receipts"
     mode: "0777"
 windmill_worker_repo_mutable_files:
   - path: "{{ windmill_worker_repo_checkout_host_path }}/config/operators.yaml"
