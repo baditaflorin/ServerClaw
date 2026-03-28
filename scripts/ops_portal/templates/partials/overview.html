@@ -35,6 +35,22 @@
   </section>
 
   <section class="panel summary-panel">
+    <h3>Runtime Assurance</h3>
+    <div class="stat-block">
+      <span class="label">Portfolio</span>
+      <strong>{{ runtime_assurance_summary.portfolio_state or "unknown" }}</strong>
+    </div>
+    <div class="stat-block">
+      <span class="label">Rows</span>
+      <strong>{{ runtime_assurance_summary.row_count or 0 }}</strong>
+    </div>
+    <div class="stat-block">
+      <span class="label">Attention</span>
+      <strong>{{ runtime_assurance_summary.attention_count or 0 }}</strong>
+    </div>
+  </section>
+
+  <section class="panel summary-panel">
     <h3>Capability Contracts</h3>
     {% if capability_contract_summary.total %}
     <div class="stat-block">
@@ -90,6 +106,93 @@
 <section class="panel">
   <div class="section-head">
     <div>
+      <p class="section-kicker">Runtime Assurance</p>
+      <h2>Scoreboard and rollup by active service and environment</h2>
+      <p class="muted">Unknown proof never counts as healthy. Only required dimensions participate in the overall state.</p>
+    </div>
+    <div class="section-meta">
+      <span class="pill">{{ runtime_assurance_summary.pass_count }} pass</span>
+      <span class="pill">{{ runtime_assurance_summary.degraded_count }} degraded</span>
+      <span class="pill">{{ runtime_assurance_summary.failed_count }} failed</span>
+      <span class="pill">{{ runtime_assurance_summary.unknown_count }} unknown</span>
+    </div>
+  </div>
+  {% if runtime_assurance_rows %}
+  <div class="assurance-summary-grid">
+    <div class="assurance-stat">
+      <span class="label">Healthy Rows</span>
+      <strong>{{ runtime_assurance_summary.pass_count }}</strong>
+    </div>
+    <div class="assurance-stat">
+      <span class="label">Rows Needing Action</span>
+      <strong>{{ runtime_assurance_summary.attention_count }}</strong>
+    </div>
+    <div class="assurance-stat">
+      <span class="label">Current Portfolio State</span>
+      <strong class="status-text {{ runtime_assurance_summary.portfolio_tone }}">{{ runtime_assurance_summary.portfolio_state }}</strong>
+    </div>
+  </div>
+  <div class="table-scroll">
+    <table class="data-table assurance-table">
+      <thead>
+        <tr>
+          <th>Service</th>
+          <th>Overall</th>
+          <th>Existence</th>
+          <th>Runtime</th>
+          <th>Route</th>
+          <th>Auth</th>
+          <th>TLS</th>
+          <th>Logs</th>
+          <th>Smoke</th>
+          <th>Next Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in runtime_assurance_rows %}
+        <tr>
+          <td>
+            <strong>{{ row.service_name }}</strong>
+            <div class="muted">{{ row.environment }} · {{ row.owner_team }}{% if row.vm %} · {{ row.vm }}{% endif %}</div>
+            <div class="muted">{{ row.url or "No declared URL" }}</div>
+            <div class="link-row compact-links">
+              {% if row.runbook %}
+              <a href="{{ docs_base_url }}/{{ row.runbook }}" target="_blank" rel="noreferrer">Runbook</a>
+              {% endif %}
+              {% if row.adr %}
+              <a href="{{ docs_base_url }}/adr/{{ row.adr }}" target="_blank" rel="noreferrer">ADR {{ row.adr }}</a>
+              {% endif %}
+            </div>
+          </td>
+          <td>
+            <span class="status-dot {{ row.overall_tone }}">{{ row.overall_state }}</span>
+            <div class="muted">{{ row.overall_detail }}</div>
+            <div class="muted">{{ row.last_verified_label }}</div>
+          </td>
+          {% for dimension in row.dimensions %}
+          <td>
+            <span class="status-dot {{ dimension.tone }}">{{ dimension.state }}</span>
+            <div class="muted">{{ dimension.last_verified_label }}</div>
+            <div class="cell-detail">{{ dimension.detail }}</div>
+          </td>
+          {% endfor %}
+          <td>
+            <strong>{{ row.next_action_dimension }}</strong>
+            <div class="cell-detail">{{ row.next_action }}</div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="muted">No active service-environment rows are available for the runtime assurance scoreboard.</p>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <div class="section-head">
+    <div>
       <p class="section-kicker">Capability Contracts</p>
       <h2>Contract-first product choices on critical shared surfaces</h2>
     </div>
@@ -137,6 +240,13 @@
   {% endif %}
 </section>
 
+<section class="panel">
+  <div class="section-head">
+    <div>
+      <p class="section-kicker">Service Actions</p>
+      <h2>Per-service controls, links, and recent health detail</h2>
+    </div>
+  </div>
 <div class="service-grid">
   {% for service in services %}
   <article class="service-card">
@@ -254,3 +364,4 @@
   </article>
   {% endfor %}
 </div>
+</section>
