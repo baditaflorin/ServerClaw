@@ -160,14 +160,31 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     app_config = yaml.safe_load((app_dir / "raw_app.yaml").read_text())
     package = json.loads((app_dir / "package.json").read_text())
     app_source = (app_dir / "App.tsx").read_text()
+    tour_source = (app_dir / "touring.ts").read_text()
 
     assert app_config["summary"] == "LV3 operator access admin console"
     assert package["dependencies"]["react"] == "19.0.0"
+    assert package["dependencies"]["shepherd.js"] == "15.2.2"
     assert package["dependencies"]["windmill-client"] == "^1"
     assert "Operator Access Admin" in app_source
+    assert "Task-specific Shepherd tours for first-run operators" in app_source
+    assert 'data-tour-target="tour-launcher"' in app_source
+    assert "startOperatorAccessTour" in app_source
     assert "isRosterPayload" in app_source
     assert "candidate.status === \"ok\" && Array.isArray(candidate.operators)" in app_source
     assert "extractRosterError" in app_source
+    assert 'import "shepherd.js/dist/css/shepherd.css"' in tour_source
+    assert "lv3.operator_access_admin.shepherd.v1" in tour_source
+    assert "resumeFromStepId" in tour_source
+    assert "confirmCancelMessage" in tour_source
+    assert "keyboardNavigation: true" in tour_source
+    assert "exitOnEsc: true" in tour_source
+    assert "useModalOverlay: true" in tour_source
+    assert "canClickTarget: false" in tour_source
+    assert 'const DOCS_BASE_URL = "https://docs.lv3.org";' in tour_source
+    assert 'const ONBOARD_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/operator-onboarding/`;' in tour_source
+    assert 'const OFFBOARD_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/operator-offboarding/`;' in tour_source
+    assert 'const ADMIN_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/windmill-operator-access-admin/`;' in tour_source
     roster_script = (REPO_ROOT / "config/windmill/scripts/operator-roster.py").read_text()
     onboard_script = (REPO_ROOT / "config/windmill/scripts/operator-onboard.py").read_text()
     offboard_script = (REPO_ROOT / "config/windmill/scripts/operator-offboard.py").read_text()

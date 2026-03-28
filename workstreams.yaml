@@ -348,6 +348,49 @@ workstreams:
         Storybook, Playwright, and axe-core
       release_bump: patch
       included_in_repo_version: 0.177.47
+  - id: ws-0242-live-apply
+    adr: "0242"
+    title: Guided human onboarding live apply via Shepherd tours
+    status: in-progress
+    owner: codex
+    branch: codex/ws-0242-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0242-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0242-live-apply.md
+    depends_on:
+      - adr-0108-operator-onboarding-and-offboarding
+      - adr-0122-windmill-operator-access-admin
+      - adr-0234-shared-human-app-shell-and-navigation-via-patternfly
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0242-live-apply.md
+      - docs/adr/0242-guided-human-onboarding-via-shepherd-tours.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/windmill-operator-access-admin.md
+      - docs/runbooks/operator-onboarding.md
+      - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
+      - tests/test_windmill_operator_admin_app.py
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0242_live_apply
+          paths:
+            - docs/workstreams/ws-0242-live-apply.md
+            - docs/adr/0242-guided-human-onboarding-via-shepherd-tours.md
+            - docs/adr/.index.yaml
+            - docs/runbooks/windmill-operator-access-admin.md
+            - docs/runbooks/operator-onboarding.md
+            - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
+            - tests/test_windmill_operator_admin_app.py
+            - receipts/live-applies/
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false
   - id: ws-0230-live-apply
     adr: "0230"
     title: Live apply policy decisions via Open Policy Agent and Conftest

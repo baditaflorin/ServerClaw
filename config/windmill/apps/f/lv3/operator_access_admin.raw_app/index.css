@@ -8,6 +8,7 @@
   --accent: #a5411c;
   --ok: #23623a;
   --danger: #7e1d13;
+  --pause: #7b5607;
   --shadow: 0 18px 50px rgba(28, 26, 22, 0.08);
 }
 
@@ -99,6 +100,58 @@ textarea {
   display: grid;
   gap: 20px;
   grid-template-columns: minmax(0, 1.2fr) minmax(360px, 0.8fr);
+}
+
+.tourCard {
+  margin-bottom: 24px;
+}
+
+.tourCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.tourCardHeader h2 {
+  margin: 6px 0 10px;
+  font-family: "IBM Plex Serif", "Georgia", serif;
+  font-size: clamp(1.55rem, 2.7vw, 2.2rem);
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.tourMeta {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+  text-align: right;
+}
+
+.tourActions {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  margin-top: 20px;
+}
+
+.tourFootnote {
+  margin: 16px 0 0;
+  color: var(--muted);
+}
+
+.inlineLink {
+  color: var(--accent);
+  font-weight: 700;
 }
 
 .panel {
@@ -232,6 +285,11 @@ textarea {
   color: var(--danger);
 }
 
+.pillPaused {
+  background: rgba(123, 86, 7, 0.14);
+  color: var(--pause);
+}
+
 .pillRole {
   background: rgba(28, 26, 22, 0.07);
   color: var(--ink);
@@ -334,10 +392,95 @@ textarea {
   background: rgba(28, 26, 22, 0.06);
 }
 
+.lv3TourTarget {
+  box-shadow: 0 0 0 4px rgba(165, 65, 28, 0.14);
+  border-radius: 20px;
+}
+
+.shepherd-element.lv3TourTooltip {
+  max-width: 420px;
+  border: 1px solid rgba(28, 26, 22, 0.12);
+  border-radius: 24px;
+  background: #fff8f0;
+  box-shadow: 0 26px 60px rgba(28, 26, 22, 0.18);
+}
+
+.shepherd-element.lv3TourTooltip .shepherd-header,
+.shepherd-element.lv3TourTooltip .shepherd-footer,
+.shepherd-element.lv3TourTooltip .shepherd-text {
+  background: transparent;
+}
+
+.shepherd-element.lv3TourTooltip .shepherd-header {
+  padding: 20px 22px 0;
+}
+
+.shepherd-element.lv3TourTooltip .shepherd-title {
+  font-family: "IBM Plex Serif", "Georgia", serif;
+  font-size: 1.25rem;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.shepherd-element.lv3TourTooltip .shepherd-text {
+  padding: 12px 22px 6px;
+  color: var(--ink);
+  line-height: 1.55;
+}
+
+.shepherd-element.lv3TourTooltip .shepherd-text p {
+  margin: 0 0 12px;
+}
+
+.shepherd-element.lv3TourTooltip .shepherd-text p:last-child {
+  margin-bottom: 0;
+}
+
+.shepherd-element.lv3TourTooltip .shepherd-text a {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.shepherd-element.lv3TourTooltip .shepherd-footer {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  padding: 0 22px 20px;
+}
+
+.shepherd-element.lv3TourTooltip .shepherd-button {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: var(--accent);
+  color: white;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.shepherd-element.lv3TourTooltip .shepherd-button.shepherd-button-secondary {
+  background: rgba(28, 26, 22, 0.08);
+  color: var(--ink);
+}
+
+.shepherd-element.lv3TourTooltip .shepherd-cancel-icon {
+  color: var(--muted);
+}
+
 @media (max-width: 1080px) {
   .hero,
   .layout {
     grid-template-columns: 1fr;
+  }
+
+  .tourCardHeader {
+    flex-direction: column;
+  }
+
+  .tourMeta {
+    justify-items: start;
+    text-align: left;
   }
 }
 
@@ -354,6 +497,10 @@ textarea {
   }
 
   .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .tourActions {
     grid-template-columns: 1fr;
   }
 }

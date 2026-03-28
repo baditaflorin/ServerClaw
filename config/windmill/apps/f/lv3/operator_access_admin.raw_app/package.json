@@ -2,6 +2,7 @@
   "dependencies": {
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "shepherd.js": "15.2.2",
     "windmill-client": "^1"
   },
   "devDependencies": {
