@@ -228,6 +228,59 @@
     or 'Downloaded newer image' in platform_context_pull.stdout
     or 'Pull complete' in platform_context_pull.stdout
 
+- name: Wait for Ollama when semantic embeddings use the local Ollama backend
+  ansible.builtin.uri:
+    url: "{{ platform_context_ollama_url }}/api/version"
+    method: GET
+    status_code: 200
+  register: platform_context_ollama_version
+  retries: 24
+  delay: 5
+  until: platform_context_ollama_version.status == 200
+  changed_when: false
+  when: platform_context_embedding_backend == "ollama"
+
+- name: Discover currently available Ollama models for semantic retrieval
+  ansible.builtin.uri:
+    url: "{{ platform_context_ollama_url }}/api/tags"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: platform_context_ollama_tags
+  changed_when: false
+  when: platform_context_embedding_backend == "ollama"
+
+- name: Derive whether the semantic embedding model is already present
+  ansible.builtin.set_fact:
+    platform_context_embedding_model_present: >-
+      {{
+        (
+          platform_context_ollama_tags.json.models | default([])
+          | map(attribute='name')
+          | select('match', '^' ~ platform_context_embedding_model ~ '(:|$)')
+          | list
+          | length
+        ) > 0
+      }}
+  when: platform_context_embedding_backend == "ollama"
+
+- name: Pull the semantic embedding model into Ollama when missing
+  ansible.builtin.uri:
+    url: "{{ platform_context_ollama_url }}/api/pull"
+    method: POST
+    body_format: json
+    body:
+      model: "{{ platform_context_embedding_model }}"
+      stream: false
+    status_code: 200
+    timeout: 3600
+    return_content: true
+  register: platform_context_embedding_model_pull
+  changed_when: true
+  when:
+    - platform_context_embedding_backend == "ollama"
+    - not (platform_context_embedding_model_present | default(false))
+
 - name: Check whether the Docker nat chain exists before recreating published ports
   ansible.builtin.command:
     argv:

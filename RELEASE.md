@@ -1,12 +1,12 @@
-# Release 0.177.10
+# Release 0.177.20
 
-- Date: 2026-03-27
+- Date: 2026-03-28
 
 ## Summary
-- completed ADR 0119 latest-main live apply by hardening Windmill seed sync and replaying the scheduler dispatcher, lane, watchdog, and watchdog-loop paths from the current mainline
+- implemented ADR 0188 failover rehearsal gating so redundancy reporting now distinguishes declared tiers from currently proven tiers and the unproven PostgreSQL warm-standby path is surfaced as implemented `R0`
 
 ## Platform Impact
-- platform_version advances to 0.130.30; ADR 0119 is now verified from main with durable worker checkout refresh, bootstrap-session auth fallback, scheduler token propagation, and the repo-managed scheduler schedules enabled on production Windmill.
+- no live platform version bump; this release publishes ADR 0188 rehearsal-gated redundancy reporting and records the verified PostgreSQL warm-standby gap as implemented R0 until a fresh passing failover rehearsal exists
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

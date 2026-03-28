@@ -1,10 +1,10 @@
 # ADR 0185: Branch-Scoped Ephemeral Preview Environments
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Implemented
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.17
+- Implemented In Platform Version: 0.130.31
+- Implemented On: 2026-03-27
 - Date: 2026-03-27
 
 ## Context
@@ -70,6 +70,18 @@ Previews are the default place to verify:
 
 - Preview environments are for validation, not for permanent shared staging.
 - This ADR does not decide which tests run in previews; later ADRs define replay, impairment, and failover drill usage.
+
+## Implementation Notes
+
+The branch-local live apply completed on 2026-03-27 with preview id `2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z`.
+
+The successful replay verified:
+
+- preview create, validate, and destroy on the governed Proxmox ephemeral pool
+- `ops` access plus Docker service readiness on the preview guest
+- durable evidence under `receipts/preview-environments/` and `receipts/live-applies/preview/`
+
+The live replay also confirmed that `vmbr20` previews depend on the Proxmox host forwarding and masquerading `10.20.10.0/24`. During bring-up, replaying the staged bridge automation restored the missing host nftables rules that were blocking guest package egress.
 
 ## Related ADRs
 

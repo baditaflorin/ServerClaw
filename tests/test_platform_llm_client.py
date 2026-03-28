@@ -64,6 +64,7 @@ def test_client_routes_to_available_ollama_model_and_records_ledger_event(tmp_pa
         request_json=fake_request,
         ledger_writer=ledger,
         monotonic=lambda: next(monotonic_values),
+        platform_context_token_file=tmp_path / "missing-platform-context-token.txt",
     )
 
     response = client.complete("normalize this", use_case="goal_compiler_normalisation", max_tokens=32)
@@ -114,6 +115,7 @@ def test_client_falls_back_to_openai_compatible_endpoint_when_ollama_is_unavaila
         fallback_base_url="https://llm.example.test/v1",
         fallback_model="gpt-4o-mini",
         fallback_api_key="test-token",
+        platform_context_token_file=tmp_path / "missing-platform-context-token.txt",
     )
 
     response = client.complete("normalize this", use_case="goal_compiler_normalisation", max_tokens=16)
@@ -185,6 +187,7 @@ def test_client_fails_fast_after_ollama_circuit_opens(tmp_path: Path) -> None:
         fallback_base_url="https://llm.example.test/v1",
         fallback_model="gpt-4o-mini",
         fallback_api_key="test-token",
+        platform_context_token_file=tmp_path / "missing-platform-context-token.txt",
     )
 
     assert client.complete("normalize this", use_case="goal_compiler_normalisation", max_tokens=16) == "fallback answer"
@@ -194,3 +197,61 @@ def test_client_fails_fast_after_ollama_circuit_opens(tmp_path: Path) -> None:
         ("POST", "https://llm.example.test/v1/chat/completions"),
         ("POST", "https://llm.example.test/v1/chat/completions"),
     ]
+
+
+def test_client_retrieves_platform_context_before_completion(tmp_path: Path) -> None:
+    write(
+        tmp_path / "config" / "ollama-models.yaml",
+        yaml.safe_dump(
+            {
+                "schema_version": "1.0.0",
+                "models": [
+                    {
+                        "name": "llama3.2:3b",
+                        "provider": "ollama",
+                        "use_cases": ["goal_compiler_normalisation"],
+                        "max_context": 8192,
+                        "ram_requirement_gb": 4,
+                        "pull_on_startup": True,
+                    }
+                ],
+            }
+        ),
+    )
+    token_file = tmp_path / ".local" / "platform-context" / "api-token.txt"
+    write(token_file, "test-token\n")
+    captured_prompts: list[str] = []
+
+    def fake_request(method: str, url: str, payload, headers, timeout):
+        if url.endswith("/api/tags"):
+            return {"models": [{"name": "llama3.2:3b"}]}
+        if url.endswith("/v1/context/query"):
+            return {
+                "matches": [
+                    {
+                        "score": 0.91,
+                        "source_path": "docs/adr/0042-step-ca.md",
+                        "adr_number": "0042",
+                        "section_heading": "Decision",
+                        "content": "step-ca issues SSH certificates for humans and services.",
+                    }
+                ]
+            }
+        if url.endswith("/api/generate"):
+            captured_prompts.append(payload["prompt"])
+            return {"response": "deploy netbox", "prompt_eval_count": 12, "eval_count": 4}
+        raise AssertionError(url)
+
+    client = PlatformLLMClient(
+        tmp_path,
+        request_json=fake_request,
+        platform_context_url="http://100.64.0.1:8010",
+        platform_context_token_file=token_file,
+    )
+
+    response = client.complete("normalize this", use_case="goal_compiler_normalisation", max_tokens=32)
+
+    assert response == "deploy netbox"
+    assert captured_prompts
+    assert "Retrieved platform context" in captured_prompts[0]
+    assert "docs/adr/0042-step-ca.md" in captured_prompts[0]

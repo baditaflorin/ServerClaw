@@ -29,6 +29,12 @@ playbooks:
     shared_surfaces:
       - service:docker-runtime
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/excalidraw.yml:
+    playbook_id: excalidraw
+    mutation_scope: platform
+    shared_surfaces:
+      - service:excalidraw
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/gitea.yml:
     playbook_id: gitea
     mutation_scope: platform
@@ -119,6 +125,12 @@ playbooks:
     shared_surfaces:
       - service:open-webui
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/outline.yml:
+    playbook_id: outline
+    mutation_scope: platform
+    shared_surfaces:
+      - service:outline
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/openbao.yml:
     playbook_id: openbao
     mutation_scope: platform
@@ -160,6 +172,12 @@ playbooks:
     mutation_scope: host
     shared_surfaces:
       - service:proxmox-install
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/proxmox-staging-bridge.yml:
+    playbook_id: proxmox-staging-bridge
+    mutation_scope: host
+    shared_surfaces:
+      - service:staging-bridge
       - inventory/host_vars/proxmox_florin.yml
   playbooks/rag-context.yml:
     playbook_id: rag-context

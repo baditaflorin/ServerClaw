@@ -28,9 +28,15 @@ keycloak_operator_first_name: Florin
 keycloak_operator_last_name: Badita
 keycloak_operator_email: baditaflorin@gmail.com
 keycloak_operator_password_remote_file: "{{ keycloak_secret_dir }}/florin.badita-password"
+keycloak_outline_automation_username: outline.automation
+keycloak_outline_automation_first_name: Outline
+keycloak_outline_automation_last_name: Automation
+keycloak_outline_automation_email: outline.automation@lv3.org
+keycloak_outline_automation_password_remote_file: "{{ keycloak_secret_dir }}/outline.automation-password"
 keycloak_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak
 keycloak_bootstrap_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/bootstrap-admin-password.txt
 keycloak_operator_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/florin.badita-password.txt
+keycloak_outline_automation_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline.automation-password.txt
 keycloak_mail_platform_submission_username: server
 keycloak_mail_platform_submission_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/server-mailbox-password.txt
 keycloak_mail_platform_submission_host: lv3-mail-stalwart
@@ -63,6 +69,8 @@ keycloak_api_gateway_client_id: api-gateway
 keycloak_api_gateway_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/api-gateway-client-secret.txt
 keycloak_langfuse_client_id: langfuse
 keycloak_langfuse_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/langfuse-client-secret.txt
+keycloak_outline_client_id: outline
+keycloak_outline_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline-client-secret.txt
 keycloak_grafana_groups:
   admins: grafana-admins
   viewers: grafana-viewers
@@ -103,5 +111,6 @@ keycloak_public_base_url: "https://{{ keycloak_service_topology.public_hostname 
 keycloak_local_admin_url: "http://127.0.0.1:{{ keycloak_local_http_port }}"
 keycloak_grafana_root_url: "https://{{ hostvars['proxmox_florin'].lv3_service_topology.grafana.public_hostname }}"
 keycloak_langfuse_root_url: https://langfuse.lv3.org
+keycloak_outline_root_url: https://wiki.lv3.org
 keycloak_gitea_root_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('gitea', 'public') }}"
 keycloak_ops_portal_root_url: https://ops.lv3.org

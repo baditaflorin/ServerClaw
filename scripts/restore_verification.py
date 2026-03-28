@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path, write_json
+from capacity_report import ResourceAmount, check_capacity_class_request, load_capacity_model
 from drift_lib import (
     build_host_ssh_command,
     isoformat,
@@ -54,6 +55,7 @@ class RestoreTarget:
     gateway: str
     mac_address: str
     smoke_kind: str
+    resources: ResourceAmount
 
 
 @dataclass(frozen=True)
@@ -141,9 +143,24 @@ def load_restore_targets() -> list[RestoreTarget]:
                 gateway=str(fixture["network"]["gateway"]),
                 mac_address=str(guest["macaddr"]),
                 smoke_kind=smoke_map[vm_name],
+                resources=ResourceAmount(
+                    ram_gb=float(fixture["resources"]["memory_mb"]) / 1024.0,
+                    vcpu=float(fixture["resources"]["cores"]),
+                    disk_gb=float(fixture["resources"]["disk_gb"]),
+                ),
             )
         )
     return targets
+
+
+def peak_restore_capacity(targets: list[RestoreTarget]) -> ResourceAmount:
+    if not targets:
+        return ResourceAmount(ram_gb=0.0, vcpu=0.0, disk_gb=0.0)
+    return ResourceAmount(
+        ram_gb=max(target.resources.ram_gb for target in targets),
+        vcpu=max(target.resources.vcpu for target in targets),
+        disk_gb=max(target.resources.disk_gb for target in targets),
+    )
 
 
 def run_host_command(context: dict[str, Any], command: str) -> CommandOutcome:
@@ -668,8 +685,20 @@ def main(argv: list[str] | None = None) -> int:
         context = load_controller_context()
         rng = random.Random(args.seed if args.seed is not None else utc_now().toordinal())
         results: list[dict[str, Any]] = []
+        targets = load_restore_targets()
+        capacity_verdict = check_capacity_class_request(
+            load_capacity_model(),
+            requester_class="restore-verification",
+            requested=peak_restore_capacity(targets),
+            declared_drill=True,
+        )
+        if not capacity_verdict["approved"]:
+            raise RuntimeError(
+                "restore verification capacity admission rejected: "
+                + "; ".join(capacity_verdict["reasons"])
+            )
 
-        for target in load_restore_targets():
+        for target in targets:
             selected_backup: dict[str, Any] | None = None
             try:
                 backups = list_backups_for_vmid(context, target.source_vmid)

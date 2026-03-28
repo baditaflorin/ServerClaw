@@ -4,10 +4,12 @@
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
 import os
 import ssl
 import urllib.request
+from urllib.parse import urlparse
 from pathlib import Path
 from typing import Any
 
@@ -49,12 +51,21 @@ def read_api_credentials(
     )
 
 
-def proxmox_api_insecure() -> bool:
-    return os.environ.get("LV3_PROXMOX_API_INSECURE", "").strip().lower() in {"1", "true", "yes", "on"}
+def proxmox_api_insecure(endpoint: str | None = None) -> bool:
+    if os.environ.get("LV3_PROXMOX_API_INSECURE", "").strip().lower() in {"1", "true", "yes", "on"}:
+        return True
+    if not endpoint:
+        return False
+    parsed = urlparse(endpoint)
+    try:
+        ipaddress.ip_address(parsed.hostname or "")
+    except ValueError:
+        return False
+    return True
 
 
-def proxmox_urlopen(request: urllib.request.Request, *, timeout: int):
-    if proxmox_api_insecure():
+def proxmox_urlopen(request: urllib.request.Request, *, timeout: int, endpoint: str | None = None):
+    if proxmox_api_insecure(endpoint):
         return urllib.request.urlopen(request, timeout=timeout, context=ssl._create_unverified_context())
     return urllib.request.urlopen(request, timeout=timeout)
 
@@ -78,7 +89,7 @@ def fetch_cluster_vmids(endpoint: str, api_token: str) -> set[int]:
         f"{api_root}/cluster/resources?type=vm",
         headers={"Authorization": f"PVEAPIToken={api_token}"},
     )
-    with proxmox_urlopen(request, timeout=10) as response:
+    with proxmox_urlopen(request, timeout=10, endpoint=endpoint) as response:
         payload = json.loads(response.read().decode("utf-8"))
     return parse_cluster_vmids(payload)
 

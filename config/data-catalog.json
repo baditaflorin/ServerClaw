@@ -64,6 +64,21 @@
       "notes": "Dozzle is read-only and does not persist its own datastore; it exposes recent container log buffers from the managed Docker hosts for real-time debugging."
     },
     {
+      "id": "excalidraw-generated-scenes",
+      "service": "excalidraw",
+      "name": "Generated Excalidraw scene set",
+      "class": "internal",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "docs/diagrams/*.excalidraw",
+        "/opt/excalidraw/bootstrap-app.sh"
+      ],
+      "notes": "The committed architecture scene sources are regenerated from repo truth and remain part of normal repository backup scope."
+    },
+    {
       "id": "tempo-traces",
       "service": "grafana",
       "name": "Tempo trace blocks",
@@ -226,6 +241,34 @@
         "/opt/vaultwarden/data"
       ],
       "notes": "Shared operator credentials, recovery codes, and TOTP seeds remain until explicit deletion or rotation removes them from the private vault."
+    },
+    {
+      "id": "outline-attachment-storage",
+      "service": "outline",
+      "name": "Outline attachment storage",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "/opt/outline/data/minio/outline"
+      ],
+      "notes": "S3-compatible MinIO storage holds attachment objects and future uploaded evidence referenced from wiki documents."
+    },
+    {
+      "id": "outline-knowledge-metadata",
+      "service": "outline",
+      "name": "Outline knowledge metadata",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Outline PostgreSQL database"
+      ],
+      "notes": "Outline stores workspace, user, collection, and document metadata that may include operator identities and operational text."
     },
     {
       "id": "live-apply-receipts",

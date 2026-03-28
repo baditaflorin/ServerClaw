@@ -13,6 +13,7 @@ from typing import Any, Callable
 import yaml
 
 from platform.circuit import CircuitOpenError, CircuitRegistry
+from platform.llm.retrieval import PlatformContextRetriever, RetrievalMatch, render_context_block
 
 
 RequestJson = Callable[[str, str, dict[str, Any] | None, dict[str, str] | None, float], dict[str, Any]]
@@ -52,6 +53,9 @@ class PlatformLLMClient:
         timeout_seconds: float = 5.0,
         ledger_writer: Any | None = None,
         actor: str = "service:platform-llm-client",
+        retrieval_top_k: int = 5,
+        platform_context_url: str | None = None,
+        platform_context_token_file: Path | str | None = None,
         request_json: RequestJson | None = None,
         monotonic: Callable[[], float] = time.monotonic,
         circuit_registry: CircuitRegistry | None = None,
@@ -65,10 +69,17 @@ class PlatformLLMClient:
         self.fallback_api_key = fallback_api_key or os.environ.get("LV3_LLM_FALLBACK_API_KEY", "").strip()
         self.timeout_seconds = timeout_seconds
         self.actor = actor
+        self.retrieval_top_k = retrieval_top_k
         self._request_json = request_json or self._default_request_json
         self._monotonic = monotonic
         self.model_catalog = self._load_model_catalog()
         self.ledger_writer = ledger_writer or self._build_default_ledger_writer()
+        self.retriever = PlatformContextRetriever(
+            api_url=platform_context_url,
+            token_file=platform_context_token_file,
+            timeout_seconds=timeout_seconds,
+            request_json=self._request_json,
+        )
         self._circuit_registry = circuit_registry or CircuitRegistry(self.repo_root)
         self._ollama_circuit = (
             self._circuit_registry.sync_breaker("ollama")
@@ -89,13 +100,15 @@ class PlatformLLMClient:
         max_tokens: int = 128,
         temperature: float = 0.0,
     ) -> str:
+        retrieved_matches = self.retrieve(prompt, k=self.retrieval_top_k)
+        augmented_prompt = self._augment_prompt(prompt, retrieved_matches)
         model = self._route(use_case)
         started = self._monotonic()
         if model.provider == "ollama":
-            result = self._ollama_complete(prompt, model.name, max_tokens=max_tokens, temperature=temperature)
+            result = self._ollama_complete(augmented_prompt, model.name, max_tokens=max_tokens, temperature=temperature)
             target_id = "ollama"
         elif model.provider == "openai_compatible":
-            result = self._fallback_complete(prompt, model.name, max_tokens=max_tokens, temperature=temperature)
+            result = self._fallback_complete(augmented_prompt, model.name, max_tokens=max_tokens, temperature=temperature)
             target_id = "external-llm"
         else:
             raise LLMUnavailableError(f"unsupported LLM provider: {model.provider}")
@@ -109,8 +122,15 @@ class PlatformLLMClient:
             prompt_tokens=result.prompt_tokens,
             completion_tokens=result.completion_tokens,
             target_id=target_id,
+            retrieval_match_count=len(retrieved_matches),
         )
         return result.text.strip()
+
+    def retrieve(self, query: str, *, k: int = 5) -> list[RetrievalMatch]:
+        try:
+            return self.retriever.retrieve(query, top_k=k)
+        except Exception:
+            return []
 
     def available_models(self) -> set[str]:
         def fetch_tags() -> dict[str, Any]:
@@ -272,6 +292,7 @@ class PlatformLLMClient:
         prompt_tokens: int,
         completion_tokens: int,
         target_id: str,
+        retrieval_match_count: int,
     ) -> None:
         if self.ledger_writer is None:
             return
@@ -287,6 +308,7 @@ class PlatformLLMClient:
                 "latency_ms": latency_ms,
                 "prompt_tokens": prompt_tokens,
                 "completion_tokens": completion_tokens,
+                "retrieval_match_count": retrieval_match_count,
             },
         )
 
@@ -296,6 +318,13 @@ class PlatformLLMClient:
         from platform.ledger import LedgerWriter
 
         return LedgerWriter()
+
+    @staticmethod
+    def _augment_prompt(prompt: str, matches: list[RetrievalMatch]) -> str:
+        context_block = render_context_block(matches)
+        if not context_block:
+            return prompt
+        return f"{context_block}\n\nUser prompt:\n{prompt}"
 
     @staticmethod
     def _default_request_json(

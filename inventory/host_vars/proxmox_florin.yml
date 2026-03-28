@@ -48,8 +48,11 @@ platform_port_assignments:
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
+  outline_port: 3006
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
+  excalidraw_port: 3095
+  excalidraw_room_port: 3096
   ollama_api_port: 11434
   n8n_port: 5678
   open_webui_port: 8088
@@ -96,6 +99,17 @@ proxmox_public_ingress_tcp_forwards:
   - listen_port: 993
     target_host: 10.10.10.20
     target_port: 993
+platform_failure_domains:
+  - id: host:proxmox_florin
+    kind: host
+    status: active
+    live_label: fd-host-proxmox-florin
+    summary: The current Hetzner dedicated Proxmox host that carries every live primary guest.
+  - id: cloud:hetzner-fsn1
+    kind: cloud
+    status: planned
+    live_label: fd-cloud-hetzner-fsn1
+    summary: Planned auxiliary Hetzner Cloud failure domain for recovery, preview, and burst workloads.
 proxmox_tailscale_tcp_proxies:
   - name: ntopng
     listen_address: "{{ management_tailscale_ipv4 }}"
@@ -180,6 +194,11 @@ proxmox_guests:
       - ingress
       - nginx
       - lv3
+    placement:
+      failure_domain: host:proxmox_florin
+      placement_class: primary
+      anti_affinity_group: edge-publication
+      co_location_exceptions: []
     packages:
       - nginx
   - vmid: 120
@@ -198,6 +217,11 @@ proxmox_guests:
       - docker
       - runtime
       - lv3
+    placement:
+      failure_domain: host:proxmox_florin
+      placement_class: primary
+      anti_affinity_group: runtime-shared
+      co_location_exceptions: []
     packages:
       - docker.io
   - vmid: 130
@@ -215,6 +239,11 @@ proxmox_guests:
       - docker
       - build
       - lv3
+    placement:
+      failure_domain: host:proxmox_florin
+      placement_class: primary
+      anti_affinity_group: build-jobs
+      co_location_exceptions: []
     packages:
       - docker.io
       - git
@@ -236,6 +265,11 @@ proxmox_guests:
       - monitoring
       - grafana
       - lv3
+    placement:
+      failure_domain: host:proxmox_florin
+      placement_class: primary
+      anti_affinity_group: observability-core
+      co_location_exceptions: []
     packages:
       - prometheus-node-exporter
   - vmid: 150
@@ -253,6 +287,11 @@ proxmox_guests:
       - postgres
       - database
       - lv3
+    placement:
+      failure_domain: host:proxmox_florin
+      placement_class: primary
+      anti_affinity_group: postgres-ha
+      co_location_exceptions: []
     packages:
       - acl
       - nftables
@@ -274,6 +313,13 @@ proxmox_guests:
       - database
       - ha
       - lv3
+    placement:
+      failure_domain: host:proxmox_florin
+      placement_class: standby
+      anti_affinity_group: postgres-ha
+      co_location_exceptions:
+        - scope: failure_domain
+          rationale: The platform still has only one active failure domain, so the PostgreSQL standby carries an explicit temporary same-domain waiver until auxiliary capacity is live.
     packages:
       - acl
       - nftables
@@ -298,6 +344,13 @@ proxmox_guests:
       - backup
       - pbs
       - lv3
+    placement:
+      failure_domain: host:proxmox_florin
+      placement_class: recovery
+      anti_affinity_group: control-plane-recovery
+      co_location_exceptions:
+        - scope: failure_domain
+          rationale: Backup and restore automation still share the dedicated host while the auxiliary cloud recovery domain remains planned but not active.
     packages:
       - acl
       - xfsprogs
@@ -366,6 +419,12 @@ network_policy:
           ports:
             - 3090
           description: Reverse proxy access to the Homepage dashboard
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 3095
+            - 3096
+          description: Reverse proxy access to the Excalidraw frontend and collaboration room
         - source: all_guests
           protocol: tcp
           ports:
@@ -442,6 +501,11 @@ network_policy:
         - source: nginx-lv3
           protocol: tcp
           ports:
+            - 3006
+          description: Reverse proxy access to the Outline knowledge wiki
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
             - 8083
           description: Edge access to the unified platform API gateway
         - source: monitoring-lv3
@@ -449,6 +513,12 @@ network_policy:
           ports:
             - 8089
           description: Private monitoring probes for the Dozzle hub
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
+            - 3095
+            - 3096
+          description: Private monitoring probes for the Excalidraw frontend and collaboration room
         - source: docker-build-lv3
           protocol: tcp
           ports:
@@ -1008,6 +1078,28 @@ lv3_service_topology:
       noindex: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.langfuse_port }}"
+  outline:
+    service_name: outline
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: wiki.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: wiki
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port }}"
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3
@@ -1030,6 +1122,30 @@ lv3_service_topology:
       kind: proxy
       server_sent_events: true
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.dozzle_http_port }}"
+  excalidraw:
+    service_name: excalidraw
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: draw.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: draw
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: "http://10.10.10.20:{{ platform_port_assignments.excalidraw_port }}"
+      prefix_proxy_routes:
+        - path: /socket.io/
+          upstream: "http://10.10.10.20:{{ platform_port_assignments.excalidraw_room_port }}"
   open_webui:
     service_name: open-webui
     owning_vm: docker-runtime-lv3

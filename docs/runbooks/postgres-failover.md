@@ -14,8 +14,24 @@ Operate the LV3 Patroni-managed PostgreSQL HA pair behind the `database.lv3.org`
 
 ## Check Cluster State
 
+The live unit file now points Patroni at `/etc/patroni/config.yml`, but the current 2026-03-27 evidence on production shows that file is absent and the service is inactive. Confirm the current runtime first:
+
 ```bash
-ansible -i inventory/hosts.yml postgres_guests -b -m shell -a 'patronictl -c /etc/patroni/patroni.yml list'
+ssh -i .local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -o ProxyCommand="ssh -i .local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p" \
+  ops@10.10.10.50 \
+  'hostname && sudo systemctl is-active patroni keepalived && sudo ls -l /etc/patroni'
+```
+
+If Patroni is healthy and `/etc/patroni/config.yml` exists, list the cluster from either PostgreSQL VM:
+
+```bash
+ssh -i .local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -o ProxyCommand="ssh -i .local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p" \
+  ops@10.10.10.50 \
+  'sudo patronictl -c /etc/patroni/config.yml list'
 ```
 
 Healthy output shows exactly one `Leader` and one `Replica`.
@@ -23,31 +39,32 @@ Healthy output shows exactly one `Leader` and one `Replica`.
 ## Verify The VIP Endpoint
 
 ```bash
-psql "host=database.lv3.org port=5432 dbname=postgres user=ops sslmode=prefer" -Atqc "select not pg_is_in_recovery()"
+ssh -i .local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 \
+  'timeout 5 bash -lc "echo > /dev/tcp/10.10.10.55/5432" && echo vip-open || echo vip-closed'
 ```
 
-- `t`: the VIP is on the current leader
-- `f`: a stale connection or DNS path is being used and needs investigation
+- `vip-open`: the VIP is reachable from the Proxmox host path
+- `vip-closed`: the VIP is not currently published and the rehearsal must stop until the HA path is restored
 
 ## Planned Switchover
 
-Run from either PostgreSQL VM:
+Only continue when Patroni is active on both PostgreSQL VMs, the replica VM exists, and the VIP path is reachable. Run from either PostgreSQL VM:
 
 ```bash
-sudo patronictl -c /etc/patroni/patroni.yml switchover --leader postgres-lv3 --candidate postgres-replica-lv3
+sudo patronictl -c /etc/patroni/config.yml switchover --leader postgres-lv3 --candidate postgres-replica-lv3
 ```
 
 Then verify:
 
 ```bash
-sudo patronictl -c /etc/patroni/patroni.yml list
-psql "host=database.lv3.org port=5432 dbname=postgres user=ops sslmode=prefer" -Atqc "select inet_server_addr(), not pg_is_in_recovery()"
+sudo patronictl -c /etc/patroni/config.yml list
+psql "host=10.10.10.55 port=5432 dbname=postgres user=ops sslmode=prefer" -Atqc "select inet_server_addr(), not pg_is_in_recovery()"
 ```
 
 ## Switch Back
 
 ```bash
-sudo patronictl -c /etc/patroni/patroni.yml switchover --leader postgres-replica-lv3 --candidate postgres-lv3
+sudo patronictl -c /etc/patroni/config.yml switchover --leader postgres-replica-lv3 --candidate postgres-lv3
 ```
 
 ## Unplanned Failover Checks
@@ -67,7 +84,7 @@ sudo patronictl -c /etc/patroni/patroni.yml switchover --leader postgres-replica
 After the failed node returns:
 
 ```bash
-sudo patronictl -c /etc/patroni/patroni.yml reinit postgres-ha postgres-lv3
+sudo patronictl -c /etc/patroni/config.yml reinit postgres-ha postgres-lv3
 ```
 
 Use the current leader as the reinit source if Patroni prompts for it.
@@ -77,3 +94,15 @@ Use the current leader as the reinit source if Patroni prompts for it.
 - If both PostgreSQL VMs are up but no leader exists, check the etcd quorum on all three members.
 - If Patroni is healthy but the VIP does not move, inspect `keepalived` on both PostgreSQL VMs.
 - If services fail to reconnect after failover, verify they are using `database.lv3.org` rather than a pinned node IP.
+
+## Rehearsal Evidence
+
+Every planned failover rehearsal for ADR 0188 must publish:
+
+- trigger and target environment
+- duration and observed RTO
+- data-loss or lag observation
+- dependency health verification results
+- rollback or failback result
+
+Store the evidence in a structured live-apply receipt when the run is part of a governed change, or in a branch-local evidence note referenced from `config/service-redundancy-catalog.json` when the exercise fails before the switchover can begin.

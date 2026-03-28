@@ -65,6 +65,19 @@
     ]
   },
   {
+    "name": "Excalidraw Public",
+    "type": "http",
+    "url": "https://draw.lv3.org",
+    "description": "Private Excalidraw publication through the authenticated shared NGINX edge.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": [
+      "200-399"
+    ]
+  },
+  {
     "name": "Langfuse Public Health",
     "type": "http",
     "url": "https://langfuse.lv3.org/api/public/health",
@@ -95,6 +108,19 @@
     "type": "http",
     "url": "https://ops.lv3.org/health",
     "description": "Interactive ops portal health endpoint published through the NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Outline Public Health",
+    "type": "http",
+    "url": "https://wiki.lv3.org/_health",
+    "description": "Public Outline health endpoint published through the shared NGINX edge VM.",
     "interval": 60,
     "retryInterval": 60,
     "maxretries": 0,

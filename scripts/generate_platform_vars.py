@@ -46,8 +46,11 @@ PORT_KEYS = (
     "searxng_port",
     "searxng_host_proxy_port",
     "langfuse_port",
+    "outline_port",
     "dozzle_http_port",
     "dozzle_agent_port",
+    "excalidraw_port",
+    "excalidraw_room_port",
     "ollama_api_port",
     "n8n_port",
     "open_webui_port",
@@ -322,6 +325,9 @@ def build_service_urls(
     elif service_id == "dozzle":
         urls["internal"] = service_url("http", private_ip, ports["dozzle_http_port"])
         port_map["internal"] = ports["dozzle_http_port"]
+    elif service_id == "excalidraw":
+        urls["internal"] = service_url("http", private_ip, ports["excalidraw_port"])
+        port_map["internal"] = ports["excalidraw_port"]
     elif service_id == "ollama":
         urls["internal"] = service_url("http", private_ip, ports["ollama_api_port"])
         port_map["internal"] = ports["ollama_api_port"]

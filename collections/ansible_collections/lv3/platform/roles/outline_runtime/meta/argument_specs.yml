@@ -1,0 +1,61 @@
+---
+# Purpose: Describe the required runtime variables for the Outline stack.
+
+argument_specs:
+  main:
+    short_description: Converge the Outline runtime, automation token, and collection seed state.
+    options:
+      outline_site_dir:
+        type: path
+        required: true
+      outline_data_dir:
+        type: path
+        required: true
+      outline_secret_dir:
+        type: path
+        required: true
+      outline_compose_file:
+        type: path
+        required: true
+      outline_env_file:
+        type: path
+        required: true
+      outline_image:
+        type: str
+        required: true
+      outline_redis_image:
+        type: str
+        required: true
+      outline_minio_image:
+        type: str
+        required: true
+      outline_internal_port:
+        type: int
+        required: true
+      outline_internal_base_url:
+        type: str
+        required: true
+      outline_public_base_url:
+        type: str
+        required: true
+      outline_database_host:
+        type: str
+        required: true
+      outline_database_name:
+        type: str
+        required: true
+      outline_database_user:
+        type: str
+        required: true
+      outline_database_password_local_file:
+        type: path
+        required: true
+      outline_keycloak_client_secret_local_file:
+        type: path
+        required: true
+      outline_operator_password_local_file:
+        type: path
+        required: true
+      outline_api_token_local_file:
+        type: path
+        required: true

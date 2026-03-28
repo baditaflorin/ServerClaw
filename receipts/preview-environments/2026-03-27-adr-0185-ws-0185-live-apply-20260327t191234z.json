@@ -1,0 +1,206 @@
+{
+  "auto_destroy_policy": {
+    "policy": "integration-test",
+    "reaper": "adr-0106-ephemeral-environment-lifecycle"
+  },
+  "branch": "codex/ws-0185-live-apply",
+  "created_at": "2026-03-27T19:12:34.573640Z",
+  "destroyed_at": "2026-03-27T19:14:55.131566Z",
+  "expires_at": "2026-03-27T20:12:34.573640Z",
+  "manifest_snapshot": {
+    "generated_at": "2026-03-27T19:12:32Z",
+    "path": "build/platform-manifest.json",
+    "service_count": 0,
+    "version": "1.0.0"
+  },
+  "members": [
+    {
+      "context": {
+        "ci_user": "ops",
+        "cloud_init_datastore_id": "local",
+        "datastore_id": "local",
+        "jump_host": "100.64.0.1",
+        "jump_user": "ops",
+        "nameserver": "1.1.1.1",
+        "node_name": "Debian-trixie-latest-amd64-base",
+        "search_domain": "lv3.org",
+        "template_node_name": "Debian-trixie-latest-amd64-base"
+      },
+      "created_at": "2026-03-27T19:12:34.572471Z",
+      "definition": {
+        "ansible_vars": {
+          "docker_runtime_container_forward_compat_enabled": false
+        },
+        "extend_minutes": 0,
+        "fixture_id": "preview-runtime-smoke-runtime",
+        "lifetime_minutes": 60,
+        "network": {
+          "bridge": "vmbr20",
+          "gateway": "10.20.10.1",
+          "ip_cidr": "10.20.10.130/24"
+        },
+        "resources": {
+          "cores": 2,
+          "disk_gb": 32,
+          "memory_mb": 4096
+        },
+        "roles_under_test": [
+          "lv3.platform.docker_runtime"
+        ],
+        "smoke_checks": [
+          {
+            "command": "id ops >/dev/null",
+            "timeout_seconds": 30
+          }
+        ],
+        "synthetic_checks": [
+          {
+            "command": "systemctl is-active docker",
+            "timeout_seconds": 60
+          },
+          {
+            "command": "docker info >/dev/null",
+            "timeout_seconds": 60
+          }
+        ],
+        "tags": [
+          "ephemeral",
+          "preview",
+          "preview-id-2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z",
+          "preview-slug-ws-0185-live-apply",
+          "preview-profile-runtime-smoke",
+          "preview-member-runtime"
+        ],
+        "template": "lv3-debian-base",
+        "verify": [
+          {
+            "command": "id ops >/dev/null",
+            "timeout_seconds": 30
+          }
+        ],
+        "vmid_range": [
+          910,
+          979
+        ]
+      },
+      "definition_path": "config/preview-environment-profiles.json",
+      "destroyed_at": "2026-03-27T19:14:55.129272Z",
+      "ephemeral_tags": [
+        "ephemeral-live-ws-0185-live-apply-runtime-1774642354",
+        "ephemeral-owner-live",
+        "ephemeral-purpose-ws-0185-live-apply-runtime",
+        "ephemeral-expires-1774642354",
+        "ephemeral-policy-integration-test",
+        "ephemeral"
+      ],
+      "expires_at": "2026-03-27T20:12:34.572471Z",
+      "expires_epoch": 1774642354,
+      "extend_minutes": 0,
+      "fixture_id": "preview-runtime-smoke-runtime",
+      "ip_address": "10.20.10.130",
+      "lifetime_minutes": 60,
+      "mac_address": "BC:24:11:00:03:8E",
+      "member_id": "runtime",
+      "name": "2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z-runtime",
+      "owner": "live",
+      "policy": "integration-test",
+      "purpose": "ws-0185-live-apply-runtime",
+      "receipt_id": "2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z-runtime",
+      "runtime_dir": ".local/preview-environments/runtime/2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z/runtime",
+      "ssh_fingerprint": "",
+      "status": "destroyed",
+      "updated_at": "2026-03-27T19:14:06.595036Z",
+      "verification": {
+        "checks": [
+          {
+            "kind": "command",
+            "ok": true,
+            "stderr": "Warning: Permanently added '10.20.10.130' (ED25519) to the list of known hosts.",
+            "stdout": "",
+            "target": "id ops >/dev/null"
+          }
+        ],
+        "ok": true
+      },
+      "vm_id": 910
+    }
+  ],
+  "network_boundary": {
+    "bridge": "vmbr20",
+    "gateway": "10.20.10.1",
+    "ip_range": [
+      "10.20.10.130",
+      "10.20.10.199"
+    ],
+    "network": "10.20.10.0/24"
+  },
+  "owner": "live",
+  "preview_domain": "ws-0185-live-apply.preview.lv3.org",
+  "preview_id": "2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z",
+  "preview_slug": "ws-0185-live-apply",
+  "profile_description": "Single-node docker runtime preview for branch-local service and automation validation.",
+  "profile_id": "runtime-smoke",
+  "profile_name": "Runtime Smoke",
+  "schema_version": "1.0.0",
+  "service_subset": [
+    "docker_runtime"
+  ],
+  "state_path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply/.local/preview-environments/active/2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z.json",
+  "status": "destroyed",
+  "ttl_hours": 1.0,
+  "updated_at": "2026-03-27T19:14:55.131566Z",
+  "validation": {
+    "smoke": {
+      "ok": true,
+      "phase": "smoke",
+      "results": [
+        {
+          "label": "smoke:runtime:command:1",
+          "member_id": "runtime",
+          "observed": "Warning: Permanently added '10.20.10.130' (ED25519) to the list of known hosts.",
+          "ok": true,
+          "raw": {
+            "kind": "command",
+            "ok": true,
+            "stderr": "Warning: Permanently added '10.20.10.130' (ED25519) to the list of known hosts.",
+            "stdout": "",
+            "target": "id ops >/dev/null"
+          }
+        }
+      ]
+    },
+    "synthetic": {
+      "ok": true,
+      "phase": "synthetic",
+      "results": [
+        {
+          "label": "synthetic:runtime:command:1",
+          "member_id": "runtime",
+          "observed": "active",
+          "ok": true,
+          "raw": {
+            "kind": "command",
+            "ok": true,
+            "stderr": "Warning: Permanently added '10.20.10.130' (ED25519) to the list of known hosts.",
+            "stdout": "active",
+            "target": "systemctl is-active docker"
+          }
+        },
+        {
+          "label": "synthetic:runtime:command:2",
+          "member_id": "runtime",
+          "observed": "Warning: Permanently added '10.20.10.130' (ED25519) to the list of known hosts.",
+          "ok": true,
+          "raw": {
+            "kind": "command",
+            "ok": true,
+            "stderr": "Warning: Permanently added '10.20.10.130' (ED25519) to the list of known hosts.",
+            "stdout": "",
+            "target": "docker info >/dev/null"
+          }
+        }
+      ]
+    }
+  },
+  "workstream": "ws-0185-live-apply"
+}

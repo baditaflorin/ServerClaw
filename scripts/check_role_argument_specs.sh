@@ -15,7 +15,7 @@ role_paths_from_files() {
 
 base_ref() {
   if git -C "$REPO_ROOT" rev-parse --verify --quiet origin/main >/dev/null; then
-    git -C "$REPO_ROOT" merge-base HEAD origin/main
+    git -C "$REPO_ROOT" merge-base HEAD origin/main 2>/dev/null || git -C "$REPO_ROOT" rev-parse HEAD
   else
     git -C "$REPO_ROOT" rev-parse HEAD
   fi

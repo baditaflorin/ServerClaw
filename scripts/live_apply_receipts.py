@@ -15,7 +15,7 @@ from controller_automation_toolkit import (
     emit_cli_error,
     load_json,
 )
-from environment_catalog import configured_environment_ids, receipt_subdirectory_environments
+from environment_catalog import receipt_environment_ids, receipt_subdirectory_environments
 from workflow_catalog import load_workflow_catalog, load_secret_manifest, validate_secret_manifest, validate_workflow_catalog
 
 
@@ -24,7 +24,7 @@ DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 COMMIT_HASH_PATTERN = re.compile(r"^[0-9a-f]{7,64}$")
 LEGACY_WORKFLOW_ID_PATTERN = re.compile(r"^adr-\d{4}-[a-z0-9-]+-live-apply$")
 ALLOWED_RESULTS = {"pass", "partial", "fail"}
-ALLOWED_ENVIRONMENTS = set(configured_environment_ids())
+ALLOWED_ENVIRONMENTS = set(receipt_environment_ids())
 
 
 def load_receipt(path: Path) -> dict:
@@ -41,8 +41,14 @@ def git_metadata_available() -> bool:
     )
 
 
+def git_commit_lookup_available() -> bool:
+    if not git_metadata_available():
+        return False
+    return command_succeeds(["git", "cat-file", "-e", "HEAD^{commit}"])
+
+
 def validate_source_commit(commit: str, path: Path) -> None:
-    if git_metadata_available():
+    if git_commit_lookup_available():
         if not git_commit_exists(commit):
             raise ValueError(f"{path.name}: source_commit '{commit}' is not a valid git commit")
         return

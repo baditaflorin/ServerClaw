@@ -231,6 +231,7 @@ validate_generated_docs() {
   uvx --from pyyaml python "$REPO_ROOT/scripts/canonical_truth.py" --check >/dev/null
   uvx --from pyyaml python "$REPO_ROOT/scripts/generate_status_docs.py" --check >/dev/null
   uv run --with jsonschema python "$REPO_ROOT/scripts/generate_dependency_diagram.py" --check >/dev/null
+  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/generate_diagrams.py" --check >/dev/null
 }
 
 validate_generated_portals() {
@@ -246,6 +247,7 @@ validate_health_probes() {
     alertmanager_runtime
     docker_runtime
     dozzle_runtime
+    excalidraw_runtime
     postgres_vm
     monitoring_vm
     backup_vm

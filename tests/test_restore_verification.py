@@ -43,6 +43,7 @@ def test_build_failure_result_marks_target_failed() -> None:
         gateway="10.20.10.1",
         mac_address="BC:24:11:2A:2E:CA",
         smoke_kind="postgres",
+        resources=rv.ResourceAmount(ram_gb=4, vcpu=2, disk_gb=48),
     )
 
     result = rv.build_failure_result(target, None, "restore failed")
@@ -96,10 +97,21 @@ def test_main_records_failure_receipt_and_cleans_up(monkeypatch, tmp_path: Path)
         gateway="10.20.10.1",
         mac_address="BC:24:11:2A:2E:CA",
         smoke_kind="postgres",
+        resources=rv.ResourceAmount(ram_gb=4, vcpu=2, disk_gb=48),
     )
 
     monkeypatch.setattr(rv, "load_controller_context", lambda: context)
     monkeypatch.setattr(rv, "load_restore_targets", lambda: [target])
+    monkeypatch.setattr(
+        rv,
+        "load_capacity_model",
+        lambda: object(),
+    )
+    monkeypatch.setattr(
+        rv,
+        "check_capacity_class_request",
+        lambda *args, **kwargs: {"approved": True, "reasons": []},
+    )
     monkeypatch.setattr(
         rv,
         "list_backups_for_vmid",
@@ -140,6 +152,7 @@ def test_build_target_result_records_seed_snapshot() -> None:
         gateway="10.20.10.1",
         mac_address="BC:24:11:2A:2E:CA",
         smoke_kind="postgres",
+        resources=rv.ResourceAmount(ram_gb=4, vcpu=2, disk_gb=48),
     )
     backup = {
         "volid": "lv3-backup-pbs:backup/qemu/150/2026-03-22T02:30:00Z",

@@ -6,12 +6,12 @@
 # ============================================================================
 
 schema_version: 1
-generated: '2026-03-27'
-total_adrs: 200
+generated: '2026-03-28'
+total_adrs: 204
 implementation_status_summary:
-  Implemented: 181
+  Implemented: 190
   Partial: 3
-  Not Implemented: 15
+  Not Implemented: 10
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -92,6 +92,7 @@ concerns:
     - '0134'
     - '0135'
     - 0148
+    - 0198
   host-os:
     - '0002'
     - '0004'
@@ -174,8 +175,11 @@ concerns:
     - 0178
     - 0179
     - 0182
+    - 0183
     - 0184
     - 0185
+    - 0199
+    - '0202'
   release:
     - 0008
     - '0110'
@@ -1919,7 +1923,7 @@ adr_index:
     summary: We will implement a Windmill-backed operator onboarding and off-boarding workflow that provisions and revokes
       access acr
     filename: 0108-operator-onboarding-and-offboarding.md
-    implemented_version: 0.105.0
+    implemented_version: 0.177.8
   - adr: 0109
     title: Public Status Page
     status: Accepted
@@ -3169,10 +3173,23 @@ adr_index:
       - submission
     summary: 'Keycloak will:'
     filename: 0183-keycloak-mail-network-internal-submission.md
+  - adr: 0183
+    title: Multi-Environment Live Lanes
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: platform
+    keywords:
+      - multi-environment
+      - live
+      - lanes
+    summary: We will treat environment lanes as a catalog-driven contract and add an explicit activation path for staging.
+    filename: 0183-multi-environment-live-lanes.md
+    implemented_version: 0.177.9
   - adr: 0184
     title: Failure-Domain Labels and Anti-Affinity Policy
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Implemented
+    implementation_status: Implemented
     date: '2026-03-27'
     concern: platform
     keywords:
@@ -3183,10 +3200,11 @@ adr_index:
     summary: We will require failure-domain labels and anti-affinity declarations for all managed primaries, standbys, restore
       target
     filename: 0184-failure-domain-labels-and-anti-affinity-policy.md
+    implemented_version: 0.177.18
   - adr: 0185
     title: Branch-Scoped Ephemeral Preview Environments
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Implemented
+    implementation_status: Implemented
     date: '2026-03-27'
     concern: platform
     keywords:
@@ -3197,6 +3215,7 @@ adr_index:
     summary: 'We will support branch-scoped ephemeral preview environments assembled from the branch''s release manifest and
       destroyed '
     filename: 0185-branch-scoped-ephemeral-preview-environments.md
+    implemented_version: 0.177.17
   - adr: 0186
     title: Prewarmed Fixture Pools and Lease-Based Ephemeral Capacity
     status: Proposed
@@ -3230,8 +3249,8 @@ adr_index:
     filename: 0187-anonymized-seed-data-snapshots-for-repeatable-tests.md
   - adr: 0188
     title: Failover Rehearsal Gate for Redundancy Tiers
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Implemented
+    implementation_status: Implemented
     date: '2026-03-27'
     concern: ci-cd
     keywords:
@@ -3243,6 +3262,7 @@ adr_index:
     summary: We will require scheduled failover or recovery rehearsals for services that claim redundancy tiers above rebuild-only
       re
     filename: 0188-failover-rehearsal-gate-for-redundancy-tiers.md
+    implemented_version: 0.177.20
   - adr: 0189
     title: Network Impairment Test Matrix for Staging and Previews
     status: Proposed
@@ -3275,8 +3295,8 @@ adr_index:
     filename: 0190-synthetic-transaction-replay-for-capacity-and-recovery-validation.md
   - adr: 0191
     title: Immutable Guest Replacement for Stateful and Edge Services
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Implemented
+    implementation_status: Implemented
     date: '2026-03-27'
     concern: vm-topology
     keywords:
@@ -3289,10 +3309,11 @@ adr_index:
     summary: For stateful and edge services at redundancy tier R1 or higher, the default change path will be immutable guest
       replacem
     filename: 0191-immutable-guest-replacement-for-stateful-and-edge-services.md
+    implemented_version: 0.177.13
   - adr: 0192
     title: Separate Capacity Classes for Standby, Recovery, and Preview Workloads
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Implemented
+    implementation_status: Implemented
     date: '2026-03-27'
     concern: ci-cd
     keywords:
@@ -3305,3 +3326,50 @@ adr_index:
       - workloads
     summary: We will classify spare capacity into separate reservation classes with explicit admission rules.
     filename: 0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads.md
+    implemented_version: 0.177.15
+  - adr: 0198
+    title: Qdrant Vector Search for Semantic Platform RAG
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: documentation
+    keywords:
+      - qdrant
+      - vector
+      - search
+      - semantic
+      - platform
+      - rag
+    summary: We will make the platform-context retrieval path semantic by default while preserving the existing private-first
+      operati
+    filename: 0198-qdrant-vector-search-semantic-rag.md
+    implemented_version: 0.177.12
+  - adr: 0199
+    title: Outline Living Knowledge Wiki
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: platform
+    keywords:
+      - outline
+      - living
+      - knowledge
+      - wiki
+    summary: We will deploy Outline on docker-runtime-lv3 and publish it at https://wiki.lv3.org.
+    filename: 0199-outline-living-knowledge-wiki.md
+    implemented_version: 0.177.19
+  - adr: '0202'
+    title: Excalidraw Auto Generated Architecture Diagrams
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: platform
+    keywords:
+      - excalidraw
+      - auto
+      - generated
+      - architecture
+      - diagrams
+    summary: We will add a repo-managed Excalidraw publication at draw.lv3.org and commit a
+    filename: 0202-excalidraw-auto-generated-architecture-diagrams.md
+    implemented_version: 0.177.16

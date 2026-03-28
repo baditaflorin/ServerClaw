@@ -1,0 +1,22 @@
+---
+# Purpose: Describe the required PostgreSQL variables for Outline.
+
+argument_specs:
+  main:
+    short_description: Converge the PostgreSQL backend for Outline.
+    options:
+      outline_database_name:
+        type: str
+        required: true
+      outline_database_user:
+        type: str
+        required: true
+      outline_postgres_secret_dir:
+        type: path
+        required: true
+      outline_postgres_password_file:
+        type: path
+        required: true
+      outline_database_password_local_file:
+        type: path
+        required: true

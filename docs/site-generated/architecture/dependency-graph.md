@@ -7,7 +7,7 @@ Generated from `config/dependency-graph.json`.
 | Tier | Services |
 | --- | --- |
 | `1` | Alertmanager, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Headscale, Mail Platform, NGINX Edge, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Changelog Portal, Developer Portal, Gitea, Keycloak, Langfuse, Mattermost, NetBox, Open WebUI, Public Status Page, Semaphore, Vaultwarden, Windmill, n8n |
+| `2` | Changelog Portal, Developer Portal, Excalidraw, Gitea, Keycloak, Langfuse, Mattermost, NetBox, Open WebUI, Outline, Public Status Page, Semaphore, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway |
 | `4` | Ops Portal |
 
@@ -37,6 +37,7 @@ graph TD
     uptime_kuma["Uptime Kuma\nTier 1"]
     changelog_portal["Changelog Portal\nTier 2"]
     docs_portal["Developer Portal\nTier 2"]
+    excalidraw["Excalidraw\nTier 2"]
     gitea["Gitea\nTier 2"]
     keycloak["Keycloak\nTier 2"]
     langfuse["Langfuse\nTier 2"]
@@ -44,6 +45,7 @@ graph TD
     n8n["n8n\nTier 2"]
     netbox["NetBox\nTier 2"]
     open_webui["Open WebUI\nTier 2"]
+    outline["Outline\nTier 2"]
     status_page["Public Status Page\nTier 2"]
     semaphore["Semaphore\nTier 2"]
     vaultwarden["Vaultwarden\nTier 2"]
@@ -59,6 +61,9 @@ graph TD
     docs_portal -->|hard| nginx_edge
     dozzle -->|soft| keycloak
     dozzle -->|soft| nginx_edge
+    excalidraw -->|hard| docker_runtime
+    excalidraw -->|soft| keycloak
+    excalidraw -->|hard| nginx_edge
     gitea -->|soft| docker_build
     gitea -->|soft| keycloak
     gitea -->|startup_only| openbao
@@ -93,6 +98,10 @@ graph TD
     ops_portal -->|hard| api_gateway
     ops_portal -->|hard| keycloak
     ops_portal -->|hard| nginx_edge
+    outline -->|soft| keycloak
+    outline -->|soft| nginx_edge
+    outline -->|startup_only| openbao
+    outline -->|hard| postgres
     platform_context_api -->|startup_only| openbao
     platform_context_api -->|reads_from| step_ca
     semaphore -->|startup_only| openbao

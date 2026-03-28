@@ -429,7 +429,7 @@ sync_worktree_git_metadata() {
   common_git_dir="$(git -C "$REPO_ROOT" rev-parse --path-format=absolute --git-common-dir)"
 
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" \
-    "mkdir -p $(quote_shell "$remote_git_root/worktree") $(quote_shell "$remote_git_root/common")" \
+    "mkdir -p $(quote_shell "$remote_git_root/worktree") $(quote_shell "$remote_git_root/common") $(quote_shell "$remote_git_root/common/objects/info") $(quote_shell "$remote_git_root/common/objects/pack")" \
     >/dev/null
 
   for worktree_path in "${worktree_paths[@]}"; do
@@ -451,7 +451,9 @@ sync_worktree_git_metadata() {
 
   # Remote validation uses tracked-file and ref metadata; mirroring the entire
   # object database from a shared local worktree is too expensive because this
-  # repo currently carries a large loose-object set.
+  # repo currently carries a large loose-object set. Git still expects the
+  # common object-store directories to exist, so ensure those empty paths are
+  # present even when we intentionally skip object contents.
   for common_path in "${common_paths[@]}"; do
     if [[ ! -e "$common_git_dir/$common_path" ]]; then
       remote_remove_paths "$(quote_shell "$remote_git_root/common/$common_path")"

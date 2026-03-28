@@ -1,0 +1,60 @@
+{
+  "$schema": "docs/schema/preview-environment-profiles.schema.json",
+  "schema_version": "1.0.0",
+  "default_base_domain": "preview.lv3.org",
+  "default_ephemeral_policy": "integration-test",
+  "network_pool": {
+    "bridge": "vmbr20",
+    "gateway": "10.20.10.1",
+    "cidr": 24,
+    "network": "10.20.10.0/24",
+    "ip_range": [
+      "10.20.10.130",
+      "10.20.10.199"
+    ]
+  },
+  "profiles": [
+    {
+      "id": "runtime-smoke",
+      "name": "Runtime Smoke",
+      "description": "Single-node docker runtime preview for branch-local service and automation validation.",
+      "ttl_hours": 1,
+      "service_subset": [
+        "docker_runtime"
+      ],
+      "members": [
+        {
+          "id": "runtime",
+          "template": "lv3-debian-base",
+          "resources": {
+            "cores": 2,
+            "memory_mb": 4096,
+            "disk_gb": 32
+          },
+          "roles_under_test": [
+            "lv3.platform.docker_runtime"
+          ],
+          "ansible_vars": {
+            "docker_runtime_container_forward_compat_enabled": false
+          },
+          "smoke_checks": [
+            {
+              "command": "id ops >/dev/null",
+              "timeout_seconds": 30
+            }
+          ],
+          "synthetic_checks": [
+            {
+              "command": "systemctl is-active docker",
+              "timeout_seconds": 60
+            },
+            {
+              "command": "docker info >/dev/null",
+              "timeout_seconds": 60
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

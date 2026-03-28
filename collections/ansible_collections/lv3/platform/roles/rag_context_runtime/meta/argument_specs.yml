@@ -103,6 +103,11 @@ argument_specs:
         required: true
         description:
           - Embedding vector dimension expected by the Qdrant collection.
+      platform_context_ollama_url:
+        type: str
+        required: false
+        description:
+          - Base URL for the local Ollama runtime used by semantic embeddings.
       platform_context_repo_root:
         type: path
         required: false

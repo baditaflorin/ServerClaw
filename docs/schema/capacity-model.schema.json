@@ -154,6 +154,14 @@
         "budget": {
           "$ref": "#/$defs/resourceTriplet"
         },
+        "capacity_class": {
+          "type": "string",
+          "enum": [
+            "ha_reserved",
+            "recovery_reserved",
+            "preview_burst"
+          ]
+        },
         "disk_paths": {
           "type": "array",
           "items": {
@@ -193,6 +201,14 @@
         },
         "reserved": {
           "$ref": "#/$defs/resourceTriplet"
+        },
+        "capacity_class": {
+          "type": "string",
+          "enum": [
+            "ha_reserved",
+            "recovery_reserved",
+            "preview_burst"
+          ]
         },
         "service_id": {
           "type": "string",

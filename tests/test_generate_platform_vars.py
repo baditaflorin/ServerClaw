@@ -19,6 +19,7 @@ def test_build_platform_vars_includes_langfuse_publication_topology() -> None:
     assert langfuse["ports"]["internal"] == 3002
     assert langfuse["urls"]["public"] == "https://langfuse.lv3.org"
     assert langfuse["urls"]["internal"] == "http://10.10.10.20:3002"
+    assert platform_vars["outline_port"] == 3006
 
 
 def test_build_service_urls_supports_private_gitea_proxy_and_root_url() -> None:
@@ -65,3 +66,26 @@ def test_build_service_urls_resolves_homepage_internal_url() -> None:
 
     assert port_map == {"internal": 3090}
     assert urls == {"internal": "http://10.10.10.20:3090"}
+
+
+def test_build_service_urls_resolves_excalidraw_internal_url() -> None:
+    ports = {"excalidraw_port": 3095}
+    service = {"owning_vm": "docker-runtime-lv3", "public_hostname": "draw.lv3.org"}
+    host_vars = {"management_tailscale_ipv4": "100.118.189.95"}
+    guest_ipv4_by_name = {"docker-runtime-lv3": "10.10.10.20"}
+    stack = {"desired_state": {"host_id": "proxmox_florin"}}
+
+    port_map, urls = generate_platform_vars.build_service_urls(
+        "excalidraw",
+        service,
+        host_vars,
+        guest_ipv4_by_name,
+        ports,
+        stack,
+    )
+
+    assert port_map == {"internal": 3095}
+    assert urls == {
+        "public": "https://draw.lv3.org",
+        "internal": "http://10.10.10.20:3095",
+    }
