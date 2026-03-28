@@ -67,6 +67,8 @@
   hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
   become: true
   gather_facts: true
+  vars_files:
+    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
 
   pre_tasks:
     - name: Run shared preflight checks

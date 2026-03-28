@@ -1,3 +1,14 @@
+---
+sensitivity: INTERNAL
+portal_display: full
+tags:
+  - architecture
+  - dependency-graph
+---
+
+!!! note "Sensitivity: INTERNAL"
+    This page is intended for authenticated operators and internal collaborators.
+
 # Service Dependency Graph
 
 Generated from `config/dependency-graph.json`.

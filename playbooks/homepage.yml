@@ -26,6 +26,8 @@
   hosts: nginx-lv3
   become: true
   gather_facts: true
+  vars_files:
+    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
   vars:
     preflight_wait_for_connection: false
     public_edge_sync_generated_static_dirs: false
