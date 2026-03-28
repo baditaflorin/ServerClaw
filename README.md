@@ -137,7 +137,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.53` |
+| Repository version | `0.177.54` |
 | Platform version | `0.130.43` |
 | Observed check date | `2026-03-28` |
 | Observed OS | `Debian 13` |
@@ -923,6 +923,16 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0251: Stage-Scoped Smoke Suites And Promotion Gates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md)
 - [ADR 0252: Route And DNS Publication Assertion Ledger](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0252-route-and-dns-publication-assertion-ledger.md)
 - [ADR 0253: Unified Runtime Assurance Scoreboard And Rollup](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0253-unified-runtime-assurance-scoreboard-and-rollup.md)
+- [ADR 0254: ServerClaw As A Distinct Self-Hosted Agent Product On LV3](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3.md)
+- [ADR 0255: Matrix Synapse As The Canonical ServerClaw Conversation Hub](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0255-matrix-synapse-as-the-canonical-serverclaw-conversation-hub.md)
+- [ADR 0256: Mautrix Bridges For External Chat Channel Adapters](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0256-mautrix-bridges-for-external-chat-channel-adapters.md)
+- [ADR 0257: OpenClaw-Compatible SKILL.md Packs And Workspace Precedence For ServerClaw](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0257-openclaw-compatible-skill-md-packs-and-workspace-precedence-for-serverclaw.md)
+- [ADR 0258: Temporal As The Durable ServerClaw Session Orchestrator](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0258-temporal-as-the-durable-serverclaw-session-orchestrator.md)
+- [ADR 0259: n8n As The External App Connector Fabric For ServerClaw](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md)
+- [ADR 0260: Nextcloud As The Canonical Personal Data Plane For ServerClaw](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0260-nextcloud-as-the-canonical-personal-data-plane-for-serverclaw.md)
+- [ADR 0261: Playwright Browser Runners For ServerClaw Web Action And Extraction](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0261-playwright-browser-runners-for-serverclaw-web-action-and-extraction.md)
+- [ADR 0262: OpenFGA And Keycloak For Delegated ServerClaw Capability Authorization](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0262-openfga-and-keycloak-for-delegated-serverclaw-capability-authorization.md)
+- [ADR 0263: Qdrant, PostgreSQL, And Local Search As The ServerClaw Memory Substrate](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0263-qdrant-postgresql-and-local-search-as-the-serverclaw-memory-substrate.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -1096,6 +1106,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0224: Server-Resident Operations Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0224-server-resident-operations-architecture-bundle.md)
 - [Workstream ADR 0234: Human User Experience Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md)
 - [Workstream ADR 0244: Runtime Assurance Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0244-runtime-assurance-architecture-bundle.md)
+- [Workstream ADR 0254: ServerClaw Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0254-serverclaw-architecture-bundle.md)
 - [Workstream ws-0021-edge-cert-repair: Shared Edge Certificate Expansion Repair](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0021-edge-cert-repair.md)
 - [Workstream ws-0101-live-apply: ADR 0101 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0101-live-apply.md)
 - [Workstream ws-0105-live-apply: Live Apply ADR 0105 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0105-live-apply.md)
@@ -1151,7 +1162,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.53` |
+| Repository version | `0.177.54` |
 | Platform version | `0.130.43` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1383,6 +1394,7 @@ This repository is intentionally opinionated:
 | `0233` | Integrate ADR 0233 signed release bundles into origin/main | `merged` | [ws-0233-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0233-main-merge.md) |
 | `0234` | Human user experience architecture bundle | `merged` | [adr-0234-human-user-experience-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md) |
 | `0244` | Runtime assurance architecture bundle | `merged` | [adr-0244-runtime-assurance-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0244-runtime-assurance-architecture-bundle.md) |
+| `0254` | ServerClaw architecture bundle | `merged` | [adr-0254-serverclaw-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0254-serverclaw-architecture-bundle.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow
