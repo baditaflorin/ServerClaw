@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-28'
 total_adrs: 204
 implementation_status_summary:
-  Implemented: 189
+  Implemented: 190
   Partial: 3
-  Not Implemented: 11
+  Not Implemented: 10
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3249,8 +3249,8 @@ adr_index:
     filename: 0187-anonymized-seed-data-snapshots-for-repeatable-tests.md
   - adr: 0188
     title: Failover Rehearsal Gate for Redundancy Tiers
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Implemented
+    implementation_status: Implemented
     date: '2026-03-27'
     concern: ci-cd
     keywords:
@@ -3262,6 +3262,7 @@ adr_index:
     summary: We will require scheduled failover or recovery rehearsals for services that claim redundancy tiers above rebuild-only
       re
     filename: 0188-failover-rehearsal-gate-for-redundancy-tiers.md
+    implemented_version: 0.177.20
   - adr: 0189
     title: Network Impairment Test Matrix for Staging and Previews
     status: Proposed
