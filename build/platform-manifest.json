@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.30",
+  "repo_version": "0.177.31",
   "platform_version": "0.130.35",
-  "generated_at": "2026-03-28T10:06:05Z",
-  "next_refresh_at": "2026-03-28T11:06:05Z",
+  "generated_at": "2026-03-28T10:32:53Z",
+  "next_refresh_at": "2026-03-28T11:32:53Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3872,10 +3872,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.29",
+    "last_version": "0.177.30",
     "deployed_at": "2026-03-28",
-    "summary": "integrated ADR 0194 into the latest `origin/main` by carrying the verified Coolify repo-deploy lane forward on top of the newer mainline, preserving the protected dashboard publication, wildcard app ingress, and governed `lv3 deploy-repo` path as canonical repo truth",
-    "release_notes_url": "docs/release-notes/0.177.30.md"
+    "summary": "accepted ADRs 0214 through 0223 to define the target HA and replication",
+    "release_notes_url": "docs/release-notes/0.177.31.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

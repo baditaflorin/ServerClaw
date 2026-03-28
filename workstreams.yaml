@@ -14,6 +14,79 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0214-ha-replication-adrs
+    adr: "0214"
+    title: HA and replication architecture bundle for production and staging
+    status: merged
+    owner: codex
+    branch: codex/ws-0214-ha-replication-adrs
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0214-ha-replication-adrs
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0214-ha-replication-architecture-bundle.md
+    depends_on:
+      - adr-0072-staging-production-topology
+      - adr-0073-promotion-pipeline
+      - adr-0098-postgres-ha
+      - adr-0179-redundancy-tier-matrix
+      - adr-0184-failure-domain-labels
+    conflicts_with: []
+    shared_surfaces:
+      - docs/adr/0214-production-and-staging-cells-as-the-unit-of-high-availability.md
+      - docs/adr/0215-node-role-taxonomy-for-bootstrap-control-state-edge-workload-observability-recovery-and-build.md
+      - docs/adr/0216-service-criticality-rings-for-foundation-core-supporting-and-peripheral-functions.md
+      - docs/adr/0217-one-way-environment-data-flow-and-replication-authority.md
+      - docs/adr/0218-relational-database-replication-and-single-writer-policy.md
+      - docs/adr/0219-data-class-replication-policies-for-queues-object-stores-search-cache-secrets-and-time-series.md
+      - docs/adr/0220-bootstrap-and-recovery-sequencing-for-environment-cells.md
+      - docs/adr/0221-role-based-node-pools-and-placement-boundaries.md
+      - docs/adr/0222-failover-authority-and-service-endpoint-separation.md
+      - docs/adr/0223-canonical-ha-topology-catalog-and-reusable-automation-profiles.md
+      - docs/workstreams/adr-0214-ha-replication-architecture-bundle.md
+      - docs/adr/.index.yaml
+      - workstreams.yaml
+      - VERSION
+      - changelog.md
+      - RELEASE.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.31.md
+      - build/platform-manifest.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ha_replication_bundle
+          paths:
+            - docs/adr/0214-production-and-staging-cells-as-the-unit-of-high-availability.md
+            - docs/adr/0215-node-role-taxonomy-for-bootstrap-control-state-edge-workload-observability-recovery-and-build.md
+            - docs/adr/0216-service-criticality-rings-for-foundation-core-supporting-and-peripheral-functions.md
+            - docs/adr/0217-one-way-environment-data-flow-and-replication-authority.md
+            - docs/adr/0218-relational-database-replication-and-single-writer-policy.md
+            - docs/adr/0219-data-class-replication-policies-for-queues-object-stores-search-cache-secrets-and-time-series.md
+            - docs/adr/0220-bootstrap-and-recovery-sequencing-for-environment-cells.md
+            - docs/adr/0221-role-based-node-pools-and-placement-boundaries.md
+            - docs/adr/0222-failover-authority-and-service-endpoint-separation.md
+            - docs/adr/0223-canonical-ha-topology-catalog-and-reusable-automation-profiles.md
+            - docs/workstreams/adr-0214-ha-replication-architecture-bundle.md
+            - docs/adr/.index.yaml
+          mode: exclusive
+        - id: integration_release_surfaces
+          paths:
+            - VERSION
+            - changelog.md
+            - RELEASE.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.31.md
+            - build/platform-manifest.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: accepted ADRs 0214 through 0223 to define production and staging cells, node-role taxonomy, service criticality rings, one-way data authority, data-class replication policy, bootstrap sequencing, placement boundaries, failover authority, and reusable HA automation profiles
+      release_bump: patch
+      included_in_repo_version: 0.177.31
+
   - id: ws-0194-main-merge
     adr: "0194"
     title: Integrate ADR 0194 live apply into origin/main

@@ -1,12 +1,12 @@
-# Release 0.177.30
+# Release 0.177.31
 
 - Date: 2026-03-28
 
 ## Summary
-- integrated ADR 0194 into the latest `origin/main` by carrying the verified Coolify repo-deploy lane forward on top of the newer mainline, preserving the protected dashboard publication, wildcard app ingress, and governed `lv3 deploy-repo` path as canonical repo truth
+- accepted ADRs 0214 through 0223 to define the target HA and replication architecture across production and staging, including cells, node roles, service criticality rings, single-writer relational policy, non-relational data-class replication rules, bootstrap sequencing, placement boundaries, failover authority, and reusable DRY automation profiles
 
 ## Platform Impact
-- no platform version bump; Coolify remains live on platform version `0.130.35`, and this mainline release records the verified repo-managed rollout on top of the newer Dify-inclusive mainline.
+- no platform version bump; this is a repo-only architecture release that records the target production and staging HA model without changing live infrastructure from `main`.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)
