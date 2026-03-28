@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0194](../adr/0194-coolify-paas-deploy-from-repo.md)
 - Title: Repo-managed Coolify on `coolify-lv3` with private API access, protected dashboard publication, and wildcard app ingress
-- Status: live_applied
+- Status: merged
 - Branch: `codex/ws-0194-live-apply`
 - Worktree: `.worktrees/ws-0194-live-apply`
 - Owner: codex
@@ -67,21 +67,21 @@
 
 ## Outcome
 
-Live apply completed on 2026-03-28.
+Live apply completed on 2026-03-28 and was then replayed from merged mainline on `codex/ws-0194-main-merge`.
 
 - `make converge-coolify` completed successfully and converged the Proxmox guest, private controller path, and NGINX edge publication.
 - `coolify-proxy` is now present on `coolify-lv3` and binds guest ports `80`, `443`, and `8080`, while the Coolify dashboard remains on `8000`.
 - `python3 scripts/coolify_tool.py whoami` confirmed the private controller path, public dashboard URL, and the registered local deployment server as reachable and usable.
-- `python3 scripts/coolify_tool.py deploy-repo ... --app-name repo-smoke --subdomain repo-smoke --wait` completed successfully with deployment `a13akq7v9de7vyqo5u33pz0y`.
+- `python3 scripts/coolify_tool.py deploy-repo ... --app-name repo-smoke --subdomain repo-smoke --wait` completed successfully on the merged-main replay with deployment `m9rpw9ilufx1sw6dcsrw91ki`.
 - Direct edge probes with `--resolve` confirmed `coolify.lv3.org` returned the expected auth-boundary `302` and `repo-smoke.apps.lv3.org` returned `200`.
 - `apps.lv3.org` currently returns `404`, which is expected until an apex application is assigned.
-- `dig +short` from the controller returned no public answers for the Coolify hostnames at verification time, so the branch records successful direct edge verification separately from DNS propagation.
-- `./scripts/validate_repo.sh agent-standards` now passes cleanly after fixing the zero-match arithmetic and branch-registry checks in `scripts/validate_repo.sh`.
-- `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate` still fails on this workstream branch because `versions/stack.yaml` is intentionally protected until the final merge-to-main integration step.
+- The merged-main replay from commit `d4e92450` completed with `coolify-lv3 ok=115 changed=7 failed=0`, `nginx-lv3 ok=71 changed=5 failed=0`, and `proxmox_florin ok=44 changed=8 failed=0`.
+- The post-replay validation suite passed, including the focused `96 passed` pytest slice, `./scripts/validate_repo.sh agent-standards`, repository data-model validation, the exposure-registry check, the dependency-diagram check, the platform-manifest check, and `git diff --check`.
+- The mainline receipt `receipts/live-applies/2026-03-28-adr-0194-coolify-paas-deploy-from-repo-mainline-live-apply.json` is now the canonical platform-version evidence, while the earlier branch-local receipt remains preserved for workstream history.
+- The merged-main replay also carried the replay-safety fixes discovered after the first branch apply: explicit platform vars loading in `playbooks/coolify.yml` and topology-independent URL defaults in `coolify_runtime`.
 
-## Notes For The Next Assistant
+## Mainline Integration
 
-- Do not bump `VERSION`, touch release sections in `changelog.md`, or update `versions/stack.yaml` on this branch.
-- Merge-to-main still needs the protected integration updates: `VERSION`, release notes in `changelog.md`, the top-level integrated status summary in `README.md`, and the canonical observed-state plus platform-version update in `versions/stack.yaml`.
-- Regenerate the shared generated portals from merged `main` during the final integration step instead of carrying forward the branch-local copied `build/docs-portal` and `build/changelog-portal` artifacts.
-- Preserve the live-apply receipt at `receipts/live-applies/2026-03-28-adr-0194-coolify-paas-deploy-from-repo-live-apply.json` when merging so the direct-edge verification and DNS caveats remain attached to the workstream evidence.
+- Protected main-only files were updated on `codex/ws-0194-main-merge`, including `VERSION`, `changelog.md`, `README.md`, and `versions/stack.yaml`.
+- The canonical release versions for this implementation are now `0.177.28` in-repo and `0.130.35` on-platform.
+- The branch-local receipt remains useful historical evidence for the first direct workstream apply, but the mainline receipt is the source of truth for merge-safe canonical state.

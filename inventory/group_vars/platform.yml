@@ -431,6 +431,11 @@ platform_guest_catalog:
         - paas
         - coolify
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: paas-control-plane
+        co_location_exceptions: []
       packages:
         - docker.io
         - git
@@ -637,6 +642,11 @@ platform_guest_catalog:
         - paas
         - coolify
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: paas-control-plane
+        co_location_exceptions: []
       packages:
         - docker.io
         - git
@@ -843,6 +853,11 @@ platform_guest_catalog:
         - paas
         - coolify
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: paas-control-plane
+        co_location_exceptions: []
       packages:
         - docker.io
         - git

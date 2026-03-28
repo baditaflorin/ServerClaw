@@ -7,9 +7,9 @@
 
 schema_version: 1
 generated: '2026-03-28'
-total_adrs: 216
+total_adrs: 217
 implementation_status_summary:
-  Implemented: 196
+  Implemented: 197
   Partial: 3
   Not Implemented: 16
   Deprecated: 1
@@ -182,6 +182,7 @@ concerns:
     - 0184
     - 0185
     - 0193
+    - 0194
     - 0199
     - '0202'
     - '0205'
@@ -3357,6 +3358,22 @@ adr_index:
     summary: We will run a self-hosted Plane task board on docker-runtime-lv3 and treat it as a repo-managed service.
     filename: 0193-plane-kanban-task-board.md
     implemented_version: 0.177.27
+  - adr: 0194
+    title: Coolify PaaS Deploy From Repo
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: platform
+    keywords:
+      - coolify
+      - paas
+      - deploy
+      - from
+      - repo
+    summary: We introduce Coolify as a dedicated repo-managed PaaS guest at coolify-lv3 and expose it through two repo-managed
+      ingres
+    filename: 0194-coolify-paas-deploy-from-repo.md
+    implemented_version: 0.177.28
   - adr: 0196
     title: Netdata Realtime Streaming Metrics
     status: Accepted
