@@ -33,7 +33,7 @@
 - ADR 0099 restore verification now records synthetic replay success rate, latency distribution, validation-window context, and the guest execution mode used for the run
 - the workstream also hardened the recovery path by adding a Proxmox guest-agent fallback when restored guests never expose an SSH banner through `vmbr20`
 - live evidence is committed in `receipts/restore-verifications/2026-03-27-ws0190-attempt1.json`, `receipts/restore-verifications/2026-03-27-ws0190-attempt2-qga.json`, and `receipts/restore-verifications/2026-03-27.json`
-- the repository-side implementation is now merged on `main` after release `0.177.15`, and the next repo release cut will assign ADR 0190 its first `Implemented In Repo Version`
+- the repository-side implementation is now merged on `main` after release `0.177.20`, and the next repo release cut will assign ADR 0190 its first `Implemented In Repo Version`
 
 ## Remaining For Repo Release And Platform Completion
 
