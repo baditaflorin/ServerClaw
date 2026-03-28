@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-28",
+  "recorded_on": "2026-03-28",
+  "recorded_at": "2026-03-28T17:10:33Z",
+  "recorded_by": "codex",
+  "source_commit": "e7fcf162af285572f4fc1c5376025917423eb0f9",
+  "repo_version_context": "0.177.41",
+  "platform_version_context": "0.130.38",
+  "workflow_id": "adr-0205-capability-contracts-before-product-selection-mainline-live-apply",
+  "adr": "0205",
+  "summary": "Integrated ADR 0205 into repo release 0.177.41 on top of the concurrent ADR 0208 mainline, replayed the governed ops-portal production path from the merged-main candidate, and promoted the contract-first capability catalog to canonical live platform state 0.130.39.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "ops.lv3.org health",
+      "address": "https://ops.lv3.org/health"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "ops.lv3.org root",
+      "address": "https://ops.lv3.org/"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused capability-contract regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with jsonschema --with-requirements requirements/ops-portal.txt python -m pytest tests/test_capability_contracts.py tests/test_platform_manifest.py tests/test_interactive_ops_portal.py -q` returned `13 passed in 0.89s` on the integrated candidate."
+    },
+    {
+      "check": "Repository validation and contract checks",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml python scripts/workstream_surface_ownership.py --validate-registry --validate-branch --base-ref origin/main`, `uv run --with pyyaml --with jsonschema python scripts/capability_contracts.py --validate`, and `./scripts/validate_repo.sh data-models generated-portals agent-standards` all passed before the final replay."
+    },
+    {
+      "check": "Merged-main release preparation",
+      "result": "pass",
+      "observed": "`LV3_SKIP_OUTLINE_SYNC=1 python3 scripts/release_manager.py --bump patch --platform-impact \"bump platform version after the ADR 0205 merged-main ops-portal replay confirms the capability-contract catalog is live on top of the ADR 0208 mainline\" --dry-run` reported current `0.177.40` and next `0.177.41`, and the non-dry-run invocation prepared release `0.177.41`."
+    },
+    {
+      "check": "Governed immutable replacement planning",
+      "result": "pass",
+      "observed": "`make immutable-guest-replacement-plan service=ops_portal` selected the ADR 0191 `preview_guest` path with a `180m` rollback window before the production replay."
+    },
+    {
+      "check": "Merged-main ops portal live apply",
+      "result": "pass",
+      "observed": "`make live-apply-service service=ops_portal env=production ALLOW_IN_PLACE_MUTATION=true` completed successfully from `codex/ws-0205-main-final`, with the final recap reporting `docker-runtime-lv3 ok=99 changed=3 failed=0` and the playbook's local runtime health and root-render checks passing."
+    },
+    {
+      "check": "Public edge verification",
+      "result": "pass",
+      "observed": "`curl -fsS https://ops.lv3.org/health` returned `{\"status\":\"ok\"}`, and `curl -sSI https://ops.lv3.org/` returned `HTTP/2 302` redirecting to `https://ops.lv3.org/oauth2/sign_in?rd=https://ops.lv3.org/` with the expected security headers."
+    },
+    {
+      "check": "Capability-contract panel evidence",
+      "result": "pass",
+      "observed": "The earlier same-day merged-main replay captured the deployed overview snippet showing `Capability Contracts`, `Identity Provider`, `Keycloak`, and the `ops.lv3.org · operator · shared-edge · platform-sso` publication line. That snippet is preserved under `receipts/live-applies/evidence/2026-03-28-adr-0205-overview-snippets.txt`; the final receipt write re-verified the public health and auth boundary even though the guest-local SSH jump path did not return from this environment."
+    }
+  ],
+  "evidence_refs": [
+    "VERSION",
+    "README.md",
+    "RELEASE.md",
+    "changelog.md",
+    "versions/stack.yaml",
+    "config/capability-contract-catalog.json",
+    "docs/schema/capability-contract-catalog.schema.json",
+    "docs/schema/platform-manifest.schema.json",
+    "docs/adr/0205-capability-contracts-before-product-selection.md",
+    "docs/workstreams/adr-0205-capability-contracts-before-product-selection.md",
+    "docs/workstreams/ws-0205-main-final.md",
+    "docs/runbooks/capability-contract-catalog.md",
+    "docs/runbooks/platform-manifest.md",
+    "docs/runbooks/platform-operations-portal.md",
+    "scripts/capability_contracts.py",
+    "scripts/platform_manifest.py",
+    "scripts/ops_portal/app.py",
+    "scripts/ops_portal/templates/partials/overview.html",
+    "tests/test_capability_contracts.py",
+    "tests/test_platform_manifest.py",
+    "tests/test_interactive_ops_portal.py",
+    "receipts/live-applies/evidence/2026-03-28-adr-0205-public-health.txt",
+    "receipts/live-applies/evidence/2026-03-28-adr-0205-public-root-head.txt",
+    "receipts/live-applies/evidence/2026-03-28-adr-0205-overview-snippets.txt",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "ADR 0208 landed on origin/main first, so this final ADR 0205 integration was recut as release 0.177.41 on top of origin/main commit `f7991a02cd1b` rather than the earlier 0.177.40 candidate.",
+    "The merged-main replay advanced the canonical live platform version from 0.130.38 to 0.130.39 because the ops portal surface changed on production after the capability-contract panel replay succeeded.",
+    "The final receipt write could re-verify the public edge directly, but the guest-local SSH jump path to docker-runtime-lv3 did not return from this environment; the preserved same-day overview snippet evidence therefore remains part of the branch alongside the fresh public probes."
+  ]
+}

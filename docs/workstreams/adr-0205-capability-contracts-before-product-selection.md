@@ -2,10 +2,10 @@
 
 - ADR: [ADR 0205](../adr/0205-capability-contracts-before-product-selection.md)
 - Title: Contract-first capability catalog with manifest and ops portal visibility
-- Status: ready
-- Implemented In Repo Version: N/A (pending merge to main)
-- Implemented In Platform Version: N/A
-- Implemented On: N/A
+- Status: merged
+- Implemented In Repo Version: 0.177.41
+- Implemented In Platform Version: 0.130.39
+- Implemented On: 2026-03-28
 - Branch: `codex/ws-0205-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0205-live-apply`
 - Owner: codex
@@ -58,13 +58,24 @@
 - `make generate-platform-manifest`
 - `make live-apply-service service=ops_portal env=production`
 
+## Outcome
+
+- The repo now carries one machine-readable capability contract catalog in `config/capability-contract-catalog.json`, with a matching schema, validator, manifest publication path, and ops-portal rendering surface.
+- Operator runbooks now document the contract-first workflow before critical shared product choice, so new service onboarding and manifest updates point at the governed catalog instead of product-first fields.
+- The focused regression slice passed on the rebased merged-main candidate with `13 passed in 0.89s`, and the repository validation path succeeded for `scripts/capability_contracts.py --validate`, workstream ownership validation, and `./scripts/validate_repo.sh data-models generated-portals agent-standards`.
+
+## Mainline Integration
+
+- ADR 0208 landed on `origin/main` first, so ADR 0205 was recut and released as `0.177.41` on top of that newer mainline instead of the earlier `0.177.40` candidate.
+- The governed replay used the ADR 0191 immutable-guest replacement planning path first, confirming `preview_guest` with a `180m` rollback window before the live run.
+- The final merged-main replay `make live-apply-service service=ops_portal env=production ALLOW_IN_PLACE_MUTATION=true` completed with `docker-runtime-lv3 ok=99 changed=3 failed=0`, and the public edge remained healthy with `https://ops.lv3.org/health` returning `{"status":"ok"}` while `https://ops.lv3.org/` still redirected to the existing OAuth sign-in boundary.
+
 ## Merge Criteria
 
 - every committed capability contract captures outcomes, inputs, outputs, security, audit, observability, portability, migration, and failure handling
 - the manifest and interactive ops portal render contract-first capability visibility without breaking existing operator surfaces
 - the workstream records live-apply evidence and clearly notes the protected integration files that still wait for merge-to-main
 
-## Notes For The Next Assistant
+## Remaining For Merge To `main`
 
-- protected integration files remain intentionally deferred on this branch until a merge-to-main step: `VERSION`, release sections in `changelog.md`, `README.md`, and `versions/stack.yaml`
-- if the live apply succeeds but a later main merge is done by another agent, update ADR 0205 with the final repo version and refresh `docs/adr/.index.yaml` again at the end of that merge step
+- None. The protected integration files and canonical live-apply truth were updated during the merged-main `0.177.41` integration step.

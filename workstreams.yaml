@@ -177,16 +177,20 @@ workstreams:
       - docs/runbooks/add-a-new-service.md
       - docs/runbooks/scaffold-new-service.md
       - docs/runbooks/platform-manifest.md
+      - receipts/live-applies/evidence/2026-03-28-adr-0205-*.txt
     ready_to_merge: true
-    live_applied: false
+    live_applied: true
     canonical_truth:
       changelog_entry: implements ADR 0205 with a contract-first catalog for critical shared capabilities, repo validation for product selection inputs, and ops-portal plus manifest visibility for the current contract set
       release_bump: patch
-      latest_receipts: {}
+      included_in_repo_version: 0.177.41
+      latest_receipts:
+        capability_contracts: 2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply
+        ops_portal: 2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply
   - id: ws-0205-main-final
     adr: "0205"
     title: Integrate ADR 0205 live apply into origin/main
-    status: ready
+    status: merged
     owner: codex
     branch: codex/ws-0205-main-final
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0205-main-final
@@ -230,6 +234,7 @@ workstreams:
       - tests/test_interactive_ops_portal.py
       - tests/test_platform_manifest.py
       - receipts/live-applies/2026-03-28-adr-0205-capability-contracts-before-product-selection*.json
+      - receipts/live-applies/evidence/2026-03-28-adr-0205-*.txt
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -273,14 +278,18 @@ workstreams:
             - tests/test_interactive_ops_portal.py
             - tests/test_platform_manifest.py
             - receipts/live-applies/2026-03-28-adr-0205-capability-contracts-before-product-selection*.json
+            - receipts/live-applies/evidence/2026-03-28-adr-0205-*.txt
           mode: shared_contract
           contract: adr-0205-mainline-integration-v1
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
     canonical_truth:
       changelog_entry: integrated ADR 0205 with the contract-first capability catalog, repo validation, platform manifest publication, and verified ops-portal visibility from merged mainline
       release_bump: patch
-      latest_receipts: {}
+      included_in_repo_version: 0.177.41
+      latest_receipts:
+        capability_contracts: 2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply
+        ops_portal: 2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply
   - id: ws-0224-server-resident-ops-adrs
     adr: "0224"
     title: Server-resident operations architecture bundle
@@ -354,7 +363,7 @@ workstreams:
     canonical_truth:
       changelog_entry: accepted ADRs 0224 through 0233 to move routine platform operation from the Codex chat session into server-resident control loops and mature tools including Ansible Pull, systemd, Windmill, Gitea Actions runners, OPA, OpenBao Agent, Nomad, and signed release bundles
       release_bump: patch
-      included_in_repo_version: 0.177.38
+      included_in_repo_version: 0.177.41
   - id: ws-0210-live-apply
     adr: "0210"
     title: Live apply canonical publication models over adapter-shaped vendor fields

@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.40
-platform_version: 0.130.38
+repo_version: 0.177.41
+platform_version: 0.130.39
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -8,6 +8,7 @@ live_apply_evidence:
     monitoring: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
     realtime: 2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply
     capacity_model: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
+    capability_contracts: 2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply
     world_state_materializer: 2026-03-27-adr-0113-world-state-materializer-mainline-live-apply
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
     mutation_ledger: 2026-03-27-adr-0115-mutation-ledger-mainline-live-apply
@@ -60,7 +61,7 @@ live_apply_evidence:
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
     semaphore: 2026-03-25-adr-0149-semaphore-live-apply
     searxng: 2026-03-26-adr-0148-searxng-live-apply
-    ops_portal: 2026-03-28-adr-0209-use-case-services-live-apply
+    ops_portal: 2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply
     ollama: 2026-03-27-adr-0176-inventory-sharding-mainline-live-apply
     operator_access: 2026-03-28-adr-0206-ports-and-adapters-live-apply
     preview_environment: 2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z
@@ -996,8 +997,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.40
+    current: 0.177.41
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.38
+    current: 0.130.39
     meaning: intended platform release for the actual server configuration
