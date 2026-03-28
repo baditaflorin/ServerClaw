@@ -1,4 +1,29 @@
 ---
+# Purpose: Declare the shared defaults for converging the Netdata parent and child streaming runtime.
+# Use case: Used whenever the netdata_runtime role configures the monitoring parent, guest children, and stream API key artifacts.
+#
+# Inputs (required):
+#   - inventory host facts (generated, required): Supply parent/child guest names, ports, and public hostname wiring.
+#
+# Inputs (optional):
+#   - netdata_runtime_parent_retention_time (str, optional, default=1d): Parent retention window.
+#   - netdata_runtime_child_history (int, optional, default=3600): Child in-memory history length.
+#
+# Outputs:
+#   - Default variable values consumed by the netdata_runtime role tasks and verification.
+#
+# Idempotency: Fully idempotent
+#              This file only declares role defaults.
+#
+# Dependencies:
+#   - ADR 0196: Defines the Netdata realtime metrics runtime and publication contract.
+#   - Role: netdata_runtime — converges the parent/child Netdata streaming mesh.
+#
+# Related ADRs: 0165, 0196
+# Related Runbooks: docs/runbooks/configure-netdata.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
 netdata_runtime_parent_inventory_host: monitoring-lv3
 netdata_runtime_child_inventory_hosts:
   - proxmox_florin

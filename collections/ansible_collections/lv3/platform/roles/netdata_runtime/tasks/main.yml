@@ -1,4 +1,33 @@
 ---
+# Purpose: Install and configure the Netdata parent and child agents, managed stream API key, and realtime streaming configuration.
+# Use case: Run when converging monitoring-lv3 and its streamed guests so the shared realtime surface can aggregate live metrics.
+#
+# Inputs (required):
+#   - netdata_runtime_parent_inventory_host (str, required): Parent inventory hostname.
+#   - netdata_runtime_child_inventory_hosts (list[str], required): Child inventory hostnames.
+#   - netdata_runtime_stream_api_key_local_file (path, required): Controller-local stream API key artifact.
+#   - netdata_runtime_stream_api_key_remote_file (path, required): Guest-side stream API key path.
+#   - netdata_runtime_parent_public_url (str, required): Public realtime hostname URL.
+#
+# Inputs (optional):
+#   - netdata_runtime_parent_retention_time (str, optional): Parent retention window.
+#   - netdata_runtime_child_db_mode (str, optional): Child database mode.
+#
+# Outputs:
+#   - Installed Netdata packages, rendered parent/child configs, and mirrored stream API key artifacts.
+#
+# Idempotency: Fully idempotent
+#              Package, config, and stream-key steps reuse managed state and only restart Netdata when rendered inputs change.
+#
+# Dependencies:
+#   - ADR 0196: Defines the Netdata realtime metrics runtime.
+#   - Role: netdata_runtime — converges the live Netdata runtime.
+#
+# Related ADRs: 0165, 0196
+# Related Runbooks: docs/runbooks/configure-netdata.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
 - name: Validate Netdata runtime inputs
   ansible.builtin.assert:
     that:

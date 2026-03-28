@@ -364,5 +364,18 @@
     "accepted_statuscodes": [
       "200-299"
     ]
+  },
+  {
+    "name": "Plane Public",
+    "type": "http",
+    "url": "https://tasks.lv3.org/",
+    "description": "Public Plane board published through the shared NGINX edge and authenticated by the repo-managed oauth2-proxy flow.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-399"
+    ]
   }
 ]

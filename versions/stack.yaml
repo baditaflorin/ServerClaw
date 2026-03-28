@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.26
-platform_version: 0.130.34
+repo_version: 0.177.28
+platform_version: 0.130.35
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -68,8 +68,11 @@ live_apply_evidence:
     capacity_classes: 2026-03-27-adr-0192-capacity-classes-live-apply
     excalidraw: 2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply
     failure_domain_policy: 2026-03-27-adr-0184-failure-domain-labels-live-apply
+    coolify: 2026-03-28-adr-0194-coolify-paas-deploy-from-repo-mainline-live-apply
+    coolify_apps: 2026-03-28-adr-0194-coolify-paas-deploy-from-repo-mainline-live-apply
     outline: 2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply
     network_impairment_matrix: 2026-03-27-adr-0189-network-impairment-matrix-live-apply
+    plane: 2026-03-27-adr-0193-plane-live-apply
     service_redundancy: 2026-03-27-adr-0188-failover-rehearsal-gate-live-apply
     fixture_pools: 2026-03-28-adr-0186-prewarmed-fixture-pools-live-apply
     seed_data_snapshots: 2026-03-28-adr-0187-anonymized-seed-data-snapshots-mainline-live-apply
@@ -99,6 +102,7 @@ desired_state:
     postgres_vm: 10.10.10.50
     postgres_replica_vm: 10.10.10.51
     backup_vm: 10.10.10.60
+    coolify_vm: 10.10.10.70
   guest_provisioning:
     template_vmid: 9000
     template_name: debian13-cloud-template
@@ -110,6 +114,7 @@ desired_state:
       postgres_vm: 150
       postgres_replica_vm: 151
       backup_vm: 160
+      coolify_vm: 170
   traffic_model:
     guest_default_gateway: 10.10.10.1
     guest_outbound_via_host_nat: true
@@ -368,9 +373,11 @@ desired_state:
     edge_vm: 10.10.10.10
     tls_termination: nginx_edge
     published_hostnames:
+      - apps.lv3.org
       - api.lv3.org
       - build.lv3.org
       - changelog.lv3.org
+      - coolify.lv3.org
       - docker.lv3.org
       - docs.lv3.org
       - grafana.lv3.org
@@ -549,6 +556,10 @@ observed_state:
       - vmid: 160
         name: backup-lv3
         ipv4: 10.10.10.60
+        running: true
+      - vmid: 170
+        name: coolify-lv3
+        ipv4: 10.10.10.70
         running: true
     access:
       ssh_proxyjump_via_proxmox_host_working: true
@@ -760,6 +771,18 @@ observed_state:
       - grafana-admins
       - grafana-viewers
       - approved-agent-clients
+  coolify:
+    runtime_vm: 10.10.10.70
+    private_controller_url: http://100.64.0.1:8012
+    public_url: https://coolify.lv3.org
+    apps_public_url: https://apps.lv3.org
+    dashboard_version: 4.0.0-beta.470
+    deployment_server_name: coolify-lv3
+    deployment_server_reachable: true
+    deployment_server_usable: true
+    repo_smoke_app_url: https://repo-smoke.apps.lv3.org
+    repo_smoke_public_http_verified: true
+    apps_apex_default_unassigned: true
   outline:
     runtime_vm: 10.10.10.20
     postgres_backend_vm: 10.10.10.50
@@ -890,7 +913,9 @@ observed_state:
   public_publication:
     edge_configured: true
     edge_tls_certificate_present: true
+    apps_domain_live: true
     api_domain_live: true
+    coolify_domain_live: true
     docs_domain_live: true
     grafana_domain_live: true
     ops_domain_live: true
@@ -901,9 +926,11 @@ observed_state:
     security_headers_audit_passed: true
     security_headers_audited_at: 2026-03-25T06:15:03Z
     published_hostnames:
+      - apps.lv3.org
       - api.lv3.org
       - build.lv3.org
       - changelog.lv3.org
+      - coolify.lv3.org
       - docker.lv3.org
       - docs.lv3.org
       - grafana.lv3.org
@@ -954,8 +981,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.26
+    current: 0.177.28
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.34
+    current: 0.130.35
     meaning: intended platform release for the actual server configuration

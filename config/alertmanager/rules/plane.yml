@@ -1,0 +1,13 @@
+groups:
+  - name: lv3-plane
+    rules:
+      - alert: PlaneDown
+        expr: probe_success{service="plane",probe_kind="readiness"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: plane
+        annotations:
+          summary: Plane is unreachable on the published runtime path.
+          description: The Plane readiness probe on docker-runtime-lv3 has been failing for at least two minutes.
+          runbook_url: https://docs.lv3.org/runbooks/configure-plane/

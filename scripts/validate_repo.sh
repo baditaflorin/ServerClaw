@@ -254,6 +254,7 @@ validate_health_probes() {
     step_ca_runtime
     openbao_runtime
     semaphore_runtime
+    plane_runtime
     windmill_runtime
     mattermost_runtime
     mail_platform_runtime

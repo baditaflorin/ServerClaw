@@ -1,4 +1,32 @@
 ---
+# Purpose: Verify that the platform-context API is healthy, protected, and able to return cited vector-backed results after converge.
+# Use case: Included after rag_context_runtime convergence to prove the live semantic RAG runtime is working end to end.
+#
+# Inputs (required):
+#   - platform_context_internal_port (int, required): Local API listener port.
+#   - platform_context_private_url (str, required): Guest-local API URL.
+#   - platform_context_api_token (str, required): API bearer token for protected verification calls.
+#   - platform_context_verification_question (str, required): Query used to verify retrieval.
+#
+# Inputs (optional):
+#   - platform_context_verify_rebuild_local (bool, optional): Whether to run the full local rebuild inline.
+#   - platform_context_seed_when_degraded (bool, optional): Whether to run the bounded seed repair path.
+#
+# Outputs:
+#   - Read-only health/auth/query verification results and an optional bounded repair action when the vector index is degraded.
+#
+# Idempotency: Fully idempotent
+#              Verification calls are read-only aside from the explicitly guarded bounded repair path.
+#
+# Dependencies:
+#   - ADR 0198: Requires semantic RAG verification after converge.
+#   - Role: rag_context_runtime — verifies the converged platform-context runtime.
+#
+# Related ADRs: 0165, 0198
+# Related Runbooks: docs/runbooks/rag-platform-context.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
 - name: Wait for the platform context API to listen locally
   ansible.builtin.wait_for:
     host: 127.0.0.1

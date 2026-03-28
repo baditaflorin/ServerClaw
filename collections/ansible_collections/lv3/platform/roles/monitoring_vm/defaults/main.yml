@@ -1,4 +1,30 @@
 ---
+# Purpose: Declare the shared defaults for converging the monitoring VM and its Grafana, Loki, Prometheus, Tempo, and InfluxDB surfaces.
+# Use case: Used whenever the monitoring_vm role renders monitoring configuration, dashboards, and managed tokens.
+#
+# Inputs (required):
+#   - repo root and host facts (generated, required): Supply source paths, hostnames, and topology-derived URLs.
+#
+# Inputs (optional):
+#   - monitoring_stack_packages (list[str], optional): Monitoring packages installed on monitoring-lv3.
+#   - monitoring_prometheus_retention_time (str, optional, default=15d): Prometheus retention budget.
+#
+# Outputs:
+#   - Default variable values consumed by the monitoring_vm role.
+#
+# Idempotency: Fully idempotent
+#              This file only declares role defaults.
+#
+# Dependencies:
+#   - ADR 0041: Defines the monitoring stack baseline.
+#   - ADR 0196: Adds the realtime Netdata publication surface to monitoring-stack composition.
+#   - Role: monitoring_vm — converges the monitoring guest and bundled observability services.
+#
+# Related ADRs: 0041, 0165, 0196
+# Related Runbooks: docs/runbooks/deploy-uptime-kuma.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
 monitoring_grafana_repo_key_url: https://apt.grafana.com/gpg-full.key
 monitoring_grafana_repo_keyring: /etc/apt/keyrings/grafana.asc
 monitoring_grafana_repo_file: /etc/apt/sources.list.d/grafana.list

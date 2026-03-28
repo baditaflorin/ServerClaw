@@ -95,6 +95,11 @@ platform_host:
         listen_port: 8020
         upstream_host: 10.10.10.20
         upstream_port: 3004
+      - name: plane
+        listen_address: 100.64.0.1
+        listen_port: 8011
+        upstream_host: 10.10.10.20
+        upstream_port: 8093
       - name: open-webui
         listen_address: 100.64.0.1
         listen_port: 8008
@@ -165,6 +170,8 @@ platform_ports:
   platform_context_host_proxy_port: 8010
   homepage_port: 3090
   ops_portal_port: 8092
+  plane_port: 8093
+  plane_host_proxy_port: 8011
   ntopng_http_port: 3000
   ntopng_proxy_port: 3001
   portainer_https_port: 9443
@@ -218,6 +225,8 @@ platform_port_assignments:
   platform_context_host_proxy_port: 8010
   homepage_port: 3090
   ops_portal_port: 8092
+  plane_port: 8093
+  plane_host_proxy_port: 8011
   ntopng_http_port: 3000
   ntopng_proxy_port: 3001
   portainer_https_port: 9443
@@ -1319,6 +1328,39 @@ platform_service_topology:
     urls:
       public: https://langfuse.lv3.org
       internal: http://10.10.10.20:3002
+  plane:
+    service_name: plane
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: tasks.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: tasks
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8093
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8011
+    service_id: plane
+    ports:
+      internal: 8093
+      controller: 8011
+    urls:
+      public: https://tasks.lv3.org
+      internal: http://10.10.10.20:8093
+      controller: http://100.64.0.1:8011
   outline:
     service_name: outline
     owning_vm: docker-runtime-lv3
@@ -1832,6 +1874,10 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: tasks
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: wiki
       type: A
       value: 65.108.75.123
@@ -1927,6 +1973,7 @@ platform_management_allowed_tcp_ports:
   - 8080
   - 8005
   - 8008
+  - 8011
   - 8066
   - 8010
   - 9444
@@ -2413,6 +2460,39 @@ public_edge_service_topology:
     urls:
       public: https://langfuse.lv3.org
       internal: http://10.10.10.20:3002
+  plane:
+    service_name: plane
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: tasks.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: tasks
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8093
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8011
+    service_id: plane
+    ports:
+      internal: 8093
+      controller: 8011
+    urls:
+      public: https://tasks.lv3.org
+      internal: http://10.10.10.20:8093
+      controller: http://100.64.0.1:8011
   outline:
     service_name: outline
     owning_vm: docker-runtime-lv3
@@ -2915,6 +2995,10 @@ netbox_host_proxy_port: 8004
 netbox_controller_url: http://100.64.0.1:8004
 open_webui_host_proxy_port: 8008
 open_webui_controller_url: http://100.64.0.1:8008
+plane_port: 8093
+plane_host_proxy_port: 8011
+plane_private_base_url: http://10.10.10.20:8093
+plane_controller_url: http://100.64.0.1:8011
 api_gateway_internal_port: 8083
 api_gateway_public_url: https://api.lv3.org
 api_gateway_internal_url: http://10.10.10.20:8083
@@ -2957,6 +3041,7 @@ proxmox_management_allowed_tcp_ports:
   - 8080
   - 8005
   - 8008
+  - 8011
   - 8066
   - 8010
   - 9444

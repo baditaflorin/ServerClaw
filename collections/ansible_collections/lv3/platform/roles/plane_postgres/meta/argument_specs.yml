@@ -1,0 +1,45 @@
+---
+# Purpose: Declare the validated input contract for the plane_postgres role.
+# Use case: Used by Ansible argument validation before the Plane PostgreSQL preparation tasks run.
+#
+# Inputs (required):
+#   - plane_database_name (str, required): Managed Plane database name.
+#   - plane_database_user (str, required): Managed Plane login role.
+#   - plane_database_support_role (str, required): Managed support role granted to the login.
+#   - plane_database_password_local_file (path, required): Controller-local password artifact path.
+#
+# Inputs (optional):
+#   - none
+#
+# Outputs:
+#   - Argument-spec validation metadata for the plane_postgres role.
+#
+# Idempotency: Fully idempotent
+#              This file only declares validation metadata.
+#
+# Dependencies:
+#   - ADR 0193: Defines the Plane PostgreSQL bootstrap contract.
+#   - Requires: plane_postgres role defaults and tasks.
+#   - Role: plane_postgres — validates the role inputs before database preparation.
+#
+# Related ADRs: 0165, 0193
+# Related Runbooks: docs/runbooks/configure-plane.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
+argument_specs:
+  main:
+    short_description: Prepare the Plane PostgreSQL database and login on postgres-lv3.
+    options:
+      plane_database_name:
+        type: str
+        required: true
+      plane_database_user:
+        type: str
+        required: true
+      plane_database_support_role:
+        type: str
+        required: true
+      plane_database_password_local_file:
+        type: path
+        required: true

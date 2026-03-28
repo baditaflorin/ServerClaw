@@ -1,4 +1,29 @@
 ---
+# Purpose: Declare the shared defaults for converging the private platform-context RAG runtime, mirrored corpus, and controller token artifacts.
+# Use case: Used whenever the rag_context_runtime role renders the compose stack, mirrored corpus inputs, and verification endpoints.
+#
+# Inputs (required):
+#   - ansible host facts and repo paths (generated, required): Supply URLs, ports, and mirrored source locations.
+#
+# Inputs (optional):
+#   - platform_context_verify_rebuild_local (bool, optional, default=false): Whether verification should rebuild the full local index inline.
+#   - platform_context_seed_when_degraded (bool, optional, default=true): Whether verification can perform a bounded seed repair.
+#
+# Outputs:
+#   - Default variable values consumed by the rag_context_runtime role.
+#
+# Idempotency: Fully idempotent
+#              This file only declares role defaults.
+#
+# Dependencies:
+#   - ADR 0198: Defines the semantic RAG runtime and verification model.
+#   - Role: rag_context_runtime — converges the live platform-context service.
+#
+# Related ADRs: 0165, 0198
+# Related Runbooks: docs/runbooks/rag-platform-context.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
 platform_context_site_dir: /opt/platform-context
 platform_context_service_dir: "{{ platform_context_site_dir }}/service"
 platform_context_corpus_dir: "{{ platform_context_site_dir }}/corpus"

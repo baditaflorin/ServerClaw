@@ -1,0 +1,69 @@
+---
+# Purpose: Declare the validated input contract for the plane_runtime role.
+# Use case: Used by Ansible argument validation before the Plane runtime converge tasks run.
+#
+# Inputs (required):
+#   - plane_site_dir (path, required): Runtime root directory.
+#   - plane_secret_dir (path, required): Guest-side secret directory.
+#   - plane_compose_file (path, required): Managed compose file path.
+#   - plane_env_file (path, required): Managed runtime environment file path.
+#   - plane_internal_port (int, required): Internal Plane listener port.
+#   - plane_internal_base_url (str, required): Internal health-check base URL.
+#   - plane_controller_url (str, required): Host-controller access URL.
+#   - plane_public_base_url (str, required): Public authenticated base URL.
+#   - plane_database_password_local_file (path, required): Controller-local database password artifact.
+#   - plane_api_token_local_file (path, required): Controller-local Plane API token artifact.
+#
+# Inputs (optional):
+#   - none
+#
+# Outputs:
+#   - Argument-spec validation metadata for the plane_runtime role.
+#
+# Idempotency: Fully idempotent
+#              This file only declares validation metadata.
+#
+# Dependencies:
+#   - ADR 0193: Defines the Plane runtime converge contract.
+#   - Requires: plane_runtime role defaults and tasks.
+#   - Role: plane_runtime — validates inputs before runtime convergence.
+#
+# Related ADRs: 0165, 0193
+# Related Runbooks: docs/runbooks/configure-plane.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
+argument_specs:
+  main:
+    short_description: Converge the Plane runtime on docker-runtime-lv3.
+    options:
+      plane_site_dir:
+        type: path
+        required: true
+      plane_secret_dir:
+        type: path
+        required: true
+      plane_compose_file:
+        type: path
+        required: true
+      plane_env_file:
+        type: path
+        required: true
+      plane_internal_port:
+        type: int
+        required: true
+      plane_internal_base_url:
+        type: str
+        required: true
+      plane_controller_url:
+        type: str
+        required: true
+      plane_public_base_url:
+        type: str
+        required: true
+      plane_database_password_local_file:
+        type: path
+        required: true
+      plane_api_token_local_file:
+        type: path
+        required: true

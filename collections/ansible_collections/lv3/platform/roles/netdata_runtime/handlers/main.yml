@@ -1,4 +1,28 @@
 ---
+# Purpose: Define the service restart handler used by the netdata_runtime role.
+# Use case: Triggered when Netdata configuration or API-key artifacts change during convergence.
+#
+# Inputs (required):
+#   - none
+#
+# Inputs (optional):
+#   - none
+#
+# Outputs:
+#   - Restarts the Netdata service when notified.
+#
+# Idempotency: Fully idempotent
+#              The handler restarts Netdata only when upstream tasks notify it.
+#
+# Dependencies:
+#   - ADR 0196: Defines the Netdata runtime that this handler refreshes.
+#   - Role: netdata_runtime — applies the handler after config changes.
+#
+# Related ADRs: 0165, 0196
+# Related Runbooks: docs/runbooks/configure-netdata.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
 - name: Restart Netdata
   ansible.builtin.systemd:
     name: netdata

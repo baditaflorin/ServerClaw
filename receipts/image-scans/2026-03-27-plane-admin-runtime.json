@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "plane_admin_runtime",
+  "image_ref": "artifacts.plane.so/makeplane/plane-admin:v1.2.3@sha256:a5784ed41c95ce50ed8bdbe6128d458868ee792d92371c27b01cf74cddacb3a5",
+  "scanner": "trivy",
+  "scanner_image": "binary:trivy-0.69.3-macOS-ARM64",
+  "scanned_on": "2026-03-27",
+  "summary": {
+    "critical": 1,
+    "high": 2
+  },
+  "targets_with_findings": [
+    {
+      "target": "alpine 3.23.3",
+      "class": "os-pkgs",
+      "type": "alpine",
+      "critical": 1,
+      "high": 2
+    }
+  ]
+}

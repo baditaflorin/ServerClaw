@@ -697,6 +697,56 @@
       }
     },
     {
+      "id": "plane",
+      "name": "Plane",
+      "description": "Repo-managed Plane workspace for platform kanban tracking and ADR synchronization.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8093",
+      "public_url": "https://tasks.lv3.org",
+      "subdomain": "tasks.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Plane Public",
+      "health_probe_id": "plane",
+      "image_catalog_ids": [
+        "plane_frontend_runtime",
+        "plane_space_runtime",
+        "plane_admin_runtime",
+        "plane_live_runtime",
+        "plane_backend_runtime",
+        "plane_proxy_runtime",
+        "netbox_redis_runtime",
+        "langfuse_minio_runtime",
+        "plane_rabbitmq_runtime"
+      ],
+      "secret_catalog_ids": [
+        "plane_database_password",
+        "plane_secret_key",
+        "plane_live_server_secret_key",
+        "plane_rabbitmq_password",
+        "plane_aws_secret_access_key",
+        "plane_bootstrap_admin_password",
+        "plane_api_token"
+      ],
+      "adr": "0193",
+      "runbook": "docs/runbooks/configure-plane.md",
+      "tags": [
+        "tasks",
+        "kanban",
+        "adr",
+        "automation"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://tasks.lv3.org",
+          "subdomain": "tasks.lv3.org"
+        }
+      }
+    },
+    {
       "id": "searxng",
       "name": "SearXNG",
       "description": "Private metasearch runtime for operator and agent web lookups with a tailnet-only hostname.",

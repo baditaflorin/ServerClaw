@@ -1,0 +1,29 @@
+---
+# Playbook: services/plane.yml
+# Purpose: Provide the stable live-apply service wrapper for Plane.
+# Use case: Run `make live-apply-service service=plane` so the generic service lane can invoke the Plane converge playbook.
+#
+# Inputs (required):
+#   - env (str, required): Environment selector passed by the live-apply wrapper.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH connection strategy.
+#
+# Outputs:
+#   - Imports the canonical Plane converge playbook.
+#
+# Idempotency: Fully idempotent
+#              The wrapper only imports the canonical playbook and adds no extra mutation.
+#
+# Dependencies:
+#   - ADR 0193: Plane Kanban Task Board
+#   - Requires: playbooks/plane.yml
+#   - Role: imported playbook — owns all live mutations
+#
+# Related ADRs: 0193
+# Related Runbooks: docs/runbooks/configure-plane.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-27
+
+- import_playbook: ../plane.yml

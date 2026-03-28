@@ -7,9 +7,9 @@
 
 schema_version: 1
 generated: '2026-03-28'
-total_adrs: 215
+total_adrs: 216
 implementation_status_summary:
-  Implemented: 195
+  Implemented: 196
   Partial: 3
   Not Implemented: 16
   Deprecated: 1
@@ -181,6 +181,7 @@ concerns:
     - 0183
     - 0184
     - 0185
+    - 0193
     - 0199
     - '0202'
     - '0205'
@@ -3259,7 +3260,7 @@ adr_index:
       - tests
     summary: We will maintain anonymized seed data snapshots for repeatable preview, restore, and failover tests.
     filename: 0187-anonymized-seed-data-snapshots-for-repeatable-tests.md
-    implemented_version: 0.177.26
+    implemented_version: 0.177.24
   - adr: 0188
     title: Failover Rehearsal Gate for Redundancy Tiers
     status: Implemented
@@ -3342,6 +3343,20 @@ adr_index:
     summary: We will classify spare capacity into separate reservation classes with explicit admission rules.
     filename: 0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads.md
     implemented_version: 0.177.15
+  - adr: 0193
+    title: Plane Kanban Task Board
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: platform
+    keywords:
+      - plane
+      - kanban
+      - task
+      - board
+    summary: We will run a self-hosted Plane task board on docker-runtime-lv3 and treat it as a repo-managed service.
+    filename: 0193-plane-kanban-task-board.md
+    implemented_version: 0.177.27
   - adr: 0196
     title: Netdata Realtime Streaming Metrics
     status: Accepted

@@ -402,6 +402,34 @@
         "/opt/semaphore/data"
       ],
       "notes": "Task output can contain operator context, playbook names, and limited execution logs, so it should stay private and be retained long enough for incident review."
+    },
+    {
+      "id": "plane-workspace-store",
+      "service": "plane",
+      "name": "Plane workspace and issue store",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Plane PostgreSQL database"
+      ],
+      "notes": "Plane stores project boards, issue metadata, and operator-entered planning content that should remain recoverable across normal backup cycles."
+    },
+    {
+      "id": "plane-object-storage",
+      "service": "plane",
+      "name": "Plane attachment object storage",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "/opt/plane/data/minio"
+      ],
+      "notes": "Plane attachment uploads and exported artifacts are persisted in the local MinIO-backed object store on docker-runtime-lv3."
     }
   ]
 }

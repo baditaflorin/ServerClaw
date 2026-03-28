@@ -1,4 +1,30 @@
 ---
+# Purpose: Verify that the converged Netdata info and allmetrics endpoints respond on the managed realtime runtime.
+# Use case: Included after netdata_runtime convergence to prove the parent service and streamed metrics endpoint are reachable.
+#
+# Inputs (required):
+#   - netdata_runtime_verify_info_url (str, required): Local Netdata info endpoint URL.
+#   - netdata_runtime_verify_allmetrics_url (str, required): Parent allmetrics endpoint URL.
+#   - netdata_runtime_is_parent (bool, required): Whether the current host is the Netdata parent.
+#
+# Inputs (optional):
+#   - none
+#
+# Outputs:
+#   - Read-only verification results for the Netdata info and Prometheus-export endpoints.
+#
+# Idempotency: Fully idempotent
+#              This task file performs read-only endpoint checks.
+#
+# Dependencies:
+#   - ADR 0196: Requires Netdata endpoint verification after converge.
+#   - Role: netdata_runtime — verifies the converged realtime runtime.
+#
+# Related ADRs: 0165, 0196
+# Related Runbooks: docs/runbooks/configure-netdata.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
 - name: Verify the local Netdata info endpoint responds
   ansible.builtin.uri:
     url: "{{ netdata_runtime_verify_info_url }}"

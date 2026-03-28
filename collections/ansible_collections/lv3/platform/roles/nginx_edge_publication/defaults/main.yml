@@ -34,7 +34,7 @@ postgres_ha: "{{ hostvars[public_edge_control_plane_host].postgres_ha }}"
 public_edge_service_topology: "{{ platform_service_topology }}"
 public_edge_certbot_email: baditaflorin@gmail.com
 public_edge_cert_name: lv3-edge
-public_edge_acme_challenge_method: dns-hetzner
+public_edge_acme_challenge_method: webroot
 public_edge_update_apt_cache: false
 public_edge_sync_generated_static_dirs: true
 public_edge_static_root: /var/www/lv3-edge
@@ -42,7 +42,7 @@ public_edge_generated_static_root: /var/www/lv3-generated
 public_edge_acme_root: /var/www/lv3-edge-acme
 public_edge_dns_hetzner_plugin_version: 3.0.0
 public_edge_dns_hetzner_credentials_file: /etc/letsencrypt/hetzner.ini
-public_edge_dns_hetzner_propagation_seconds: 30
+public_edge_dns_hetzner_propagation_seconds: 120
 public_edge_dns_hetzner_virtualenv: /opt/certbot-dns-hetzner
 public_edge_certbot_plugin_path: >-
   {{ public_edge_dns_hetzner_virtualenv }}/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages
@@ -110,6 +110,13 @@ public_edge_security_headers_overrides:
       'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
       connect-src 'self' https://n8n.lv3.org wss://n8n.lv3.org;
       worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+  tasks.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
+      'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
+      connect-src 'self' https://tasks.lv3.org wss://tasks.lv3.org;
+      worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
   realtime.lv3.org:
     content_security_policy: >-
       default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
@@ -167,6 +174,8 @@ public_edge_authenticated_sites:
   draw.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
   langfuse.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+  tasks.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
   n8n.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
