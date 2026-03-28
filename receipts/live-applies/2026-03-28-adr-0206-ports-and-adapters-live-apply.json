@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-28-adr-0206-ports-and-adapters-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-28",
+  "recorded_on": "2026-03-28",
+  "recorded_at": "2026-03-28T11:26:28Z",
+  "recorded_by": "codex",
+  "source_commit": "74cc510ddd7629793d8e41bbb4bbfce015e2c61f",
+  "repo_version_context": "0.177.31",
+  "platform_version_context": "0.130.35",
+  "workflow_id": "adr-0206-ports-and-adapters-live-apply",
+  "adr": "0206",
+  "summary": "Applied ADR 0206 on the live operator-access workflow by refactoring the controller path behind explicit Keycloak, OpenBao, Tailscale, Mattermost, and step-ca ports, replaying the low-risk prerequisite converge against production, and repairing the previously missing OpenBao entity for the active admin operator through the new adapter boundary.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Keycloak public admin API",
+      "address": "https://sso.lv3.org"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "OpenBao loopback automation API",
+      "address": "http://127.0.0.1:18201"
+    },
+    {
+      "kind": "controller_artifacts",
+      "name": "shared controller-local operator secrets",
+      "address": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused adapter regression slice",
+      "result": "pass",
+      "observed": "`python3 -m py_compile scripts/operator_manager.py platform/operator_access/__init__.py platform/operator_access/http.py platform/operator_access/ports.py platform/operator_access/adapters.py tests/test_operator_manager.py tests/test_operator_access_adapters.py` passed, and `uv run --with pytest --with pyyaml pytest -q tests/test_operator_manager.py tests/test_operator_access_adapters.py` passed with `15 passed in 0.16s`."
+    },
+    {
+      "check": "Repo automation and validation contracts",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml python scripts/operator_manager.py validate`, `make workflow-info WORKFLOW=operator-onboard`, `make workflow-info WORKFLOW=operator-offboard`, `make workflow-info WORKFLOW=sync-operators`, `make workflow-info WORKFLOW=quarterly-access-review`, `./scripts/validate_repo.sh agent-standards`, `uv run --with pyyaml python scripts/operator_manager.py --emit-json quarterly-review --dry-run`, and `git diff --check` all completed successfully from the isolated worktree."
+    },
+    {
+      "check": "Live prerequisite converge through the new ports",
+      "result": "pass",
+      "observed": "With `LV3_OPENBAO_URL=http://127.0.0.1:18201` and controller-local Keycloak/OpenBao bootstrap secrets exported from the main checkout, `LiveBackend.ensure_prerequisites()` confirmed the governed Keycloak roles and groups exist and upserted the repo-managed OpenBao operator policies. `curl -fsS http://127.0.0.1:18201/v1/sys/health` returned `initialized: true` and `sealed: false` before the replay."
+    },
+    {
+      "check": "Live drift repair and inventory verification",
+      "result": "pass",
+      "observed": "The first inventory replay for `florin-badita` returned Keycloak `active` but OpenBao `missing`. Running `backend.secret_authority.ensure_entity()` from source commit `74cc510d` created OpenBao entity `125fb8b1-c72c-a320-a537-3d415dda752e`, and the follow-up inventory returned Keycloak `active`, OpenBao `active`, and the expected `platform-admin` policy set. Optional integrations remained graceful: Tailscale reported `unavailable` because `TAILSCALE_TAILNET` is unset, and step-ca remained `unknown` because no controller-local state has been recorded for that operator."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0206-ports-and-adapters-for-external-integrations.md",
+    "docs/workstreams/ws-0206-live-apply.md",
+    "docs/runbooks/operator-onboarding.md",
+    "docs/runbooks/operator-offboarding.md",
+    "scripts/operator_manager.py",
+    "platform/operator_access/__init__.py",
+    "platform/operator_access/http.py",
+    "platform/operator_access/ports.py",
+    "platform/operator_access/adapters.py",
+    "tests/test_operator_manager.py",
+    "tests/test_operator_access_adapters.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "The controller-side replay intentionally avoided `sync` on the active admin operator because that path regenerates a temporary Keycloak password; the workstream instead used the safer prerequisite reconcile plus direct OpenBao entity repair path.",
+    "Controller-local verification used the documented OpenBao loopback automation endpoint on `127.0.0.1:18201` via `LV3_OPENBAO_URL`, because the shared service catalog still publishes OpenBao on the private mTLS listener at `https://100.64.0.1:8200`.",
+    "Protected integration files remain intentionally unchanged on this workstream branch: `VERSION`, release sections in `changelog.md`, canonical observed state in `versions/stack.yaml`, and the top-level README integrated status summary."
+  ]
+}

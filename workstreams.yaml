@@ -17,7 +17,7 @@ workstreams:
   - id: ws-0206-live-apply
     adr: "0206"
     title: Live apply ADR 0206 ports and adapters for external integrations
-    status: in-progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0206-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0206-live-apply
@@ -59,11 +59,24 @@ workstreams:
             - tests/test_operator_access_adapters.py
             - receipts/live-applies/2026-03-28-adr-0206-ports-and-adapters-live-apply.json
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
     canonical_truth:
       changelog_entry: implements ADR 0206 on the live operator access workflow by routing Keycloak, OpenBao, Tailscale, Mattermost, and step-ca through explicit ports and adapters
       release_bump: patch
+      latest_receipts:
+        operator_access: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+        openbao_operator_entity: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+        keycloak_operator_access: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+        operator_access_review: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+        operator_access_ports: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+        openbao_operator_policy: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+        operator_access_inventory: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+        operator_access_composition_root: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+        operator_access_runbooks: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+        operator_access_validation: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+        operator_access_workflows: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+        operator_access_quarterly_review: 2026-03-28-adr-0206-ports-and-adapters-live-apply
   - id: ws-0214-ha-replication-adrs
     adr: "0214"
     title: HA and replication architecture bundle for production and staging
