@@ -1,0 +1,51 @@
+---
+# Purpose: Verify that the converged Harbor runtime is healthy and that the public registry path answers correctly.
+# Use case: Included after Harbor convergence to prove Harbor ping, container presence, and public registry auth behavior.
+#
+# Inputs (required):
+#   - harbor_http_port (int, required): Internal Harbor listener port used for local API checks.
+#   - harbor_installer_dir (path, required): Harbor installer directory used when reading container state.
+#
+# Inputs (optional):
+#   - none
+#
+# Outputs:
+#   - Read-only verification results for Harbor health and expected runtime containers.
+#
+# Idempotency: Fully idempotent
+#              This task file performs read-only checks and does not mutate runtime state.
+#
+# Dependencies:
+#   - ADR 0201: Requires Harbor health and registry verification after deployment.
+#   - Requires: harbor_runtime main tasks have converged Harbor and started the compose stack.
+#   - Role: harbor_runtime — verifies the converged Harbor service.
+#
+# Related ADRs: 0165, 0201
+- name: Verify the Harbor ping endpoint locally
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/ping"
+    method: GET
+    status_code: 200
+  register: harbor_verify_ping
+  changed_when: false
+
+- name: Verify Harbor core containers are running
+  ansible.builtin.command:
+    argv:
+      - docker
+      - ps
+      - --format
+      - "{{ '{{.Names}}' }}"
+  args:
+    chdir: "{{ harbor_installer_dir }}"
+  register: harbor_verify_services
+  changed_when: false
+
+- name: Assert Harbor runtime services include the expected core components
+  ansible.builtin.assert:
+    that:
+      - "'harbor-core' in harbor_verify_services.stdout_lines"
+      - "'harbor-portal' in harbor_verify_services.stdout_lines"
+      - "'registry' in harbor_verify_services.stdout_lines"
+      - "'trivy-adapter' in harbor_verify_services.stdout_lines"
+    fail_msg: "Harbor answered the ping endpoint but one or more core services are not running."

@@ -27,6 +27,17 @@ argument_specs:
         required: true
         description:
           - Local users that should be added to the docker group.
+      docker_runtime_public_edge_ipv4:
+        type: str
+        required: false
+        description:
+          - Internal IPv4 for the shared public edge VM used for guest split-horizon host aliases.
+      docker_runtime_public_edge_host_aliases:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Public edge hostnames that should resolve internally to the shared edge VM from Docker guests.
       docker_runtime_apt_key_url:
         type: str
         required: true

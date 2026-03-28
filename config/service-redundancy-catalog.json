@@ -264,6 +264,23 @@
         "failback_method": "Replay the monitoring stack converge on monitoring-lv3 after the restored guest is healthy."
       }
     },
+    "harbor": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Harbor or its persisted registry state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Harbor converge and registry verification workflow."
+      }
+    },
     "headscale": {
       "tier": "R0",
       "recovery_objective": {
