@@ -5861,3 +5861,46 @@ workstreams:
       changelog_entry: accepted ADRs 0204 through 0213 to govern self-correcting automation, contract-first capability boundaries, ports and adapters, canonical domain models, shared policy registries, and vendor exit planning for future platform work
       release_bump: patch
       included_in_repo_version: 0.177.23
+
+  - id: ws-0021-edge-cert-repair
+    adr: "0021"
+    title: Repair shared edge certificate expansion during service-specific converges
+    status: live_applied
+    owner: codex
+    branch: codex/wiki-edge-cert-fix
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/wiki-edge-cert-fix
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0021-edge-cert-repair.md
+    depends_on:
+      - adr-0021-public-subdomain-publication
+      - adr-0033-declarative-service-topology-catalog
+      - adr-0101-automated-certificate-lifecycle-management
+      - adr-0199-outline-living-knowledge-wiki
+      - adr-0202-excalidraw-auto-generated-architecture-diagrams
+    conflicts_with: []
+    shared_surfaces:
+      - playbooks/outline.yml
+      - playbooks/excalidraw.yml
+      - playbooks/public-edge.yml
+      - playbooks/langfuse.yml
+      - playbooks/homepage.yml
+      - playbooks/keycloak.yml
+      - playbooks/headscale.yml
+      - playbooks/n8n.yml
+      - playbooks/uptime-kuma.yml
+      - collections/ansible_collections/lv3/platform/playbooks/dozzle.yml
+      - collections/ansible_collections/lv3/platform/playbooks/headscale.yml
+      - collections/ansible_collections/lv3/platform/playbooks/keycloak.yml
+      - collections/ansible_collections/lv3/platform/playbooks/n8n.yml
+      - collections/ansible_collections/lv3/platform/playbooks/public-edge.yml
+      - collections/ansible_collections/lv3/platform/playbooks/uptime-kuma.yml
+      - tests/test_edge_publication_playbooks.py
+      - receipts/live-applies/
+      - workstreams.yaml
+    ready_to_merge: false
+    live_applied: true
+    canonical_truth:
+      changelog_entry: repaired shared edge publication playbooks so service-specific converges always load the canonical platform topology before rebuilding the shared certificate SAN set, preventing `wiki.lv3.org` and `draw.lv3.org` from dropping out of live publication
+      release_bump: patch
+      included_in_repo_version: 0.177.28
+      latest_receipts:
+        public_edge_publication: 2026-03-28-adr-0021-shared-edge-certificate-repair-mainline-live-apply

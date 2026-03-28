@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.28",
   "platform_version": "0.130.35",
-  "generated_at": "2026-03-28T09:06:05Z",
-  "next_refresh_at": "2026-03-28T10:06:05Z",
+  "generated_at": "2026-03-28T09:22:49Z",
+  "next_refresh_at": "2026-03-28T10:22:49Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3827,7 +3827,7 @@
   "recent_changes": {
     "last_version": "0.177.27",
     "deployed_at": "2026-03-28",
-    "summary": "integrated ADR 0194 by converging the dedicated Coolify guest, protected dashboard publication, wildcard app ingress, and the governed `lv3 deploy-repo` wrapper with end-to-end repo deployment verification",
+    "summary": "repaired shared edge publication playbooks so service-specific converges always load the canonical platform topology before rebuilding the shared certificate SAN set, preventing `wiki.lv3.org` and `draw.lv3.org` from dropping out of live publication replayed the shared edge from merged `main`, re-expanded the live certificate, and re-verified the governed Outline surface at `wiki.lv3.org`",
     "release_notes_url": "docs/release-notes/0.177.28.md"
   },
   "agentic_architecture": {
