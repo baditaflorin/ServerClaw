@@ -55,6 +55,38 @@
   </section>
 </div>
 
+<div class="chart-grid">
+  <section class="panel chart-panel">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Health Mix</p>
+        <h3>Current service-state distribution</h3>
+      </div>
+      <span class="pill">{{ services|length }} tracked services</span>
+    </div>
+    <div class="chart-canvas" data-echart-target="overview-health-mix-chart"></div>
+    <script id="overview-health-mix-chart" type="application/json">{{ charts.health_mix|tojson }}</script>
+    <p class="muted chart-caption">Healthy, degraded, critical, and unknown services stay in one shared visual language.</p>
+  </section>
+
+  <section class="panel chart-panel">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Topology Focus</p>
+        <h3>Ops portal dependency map</h3>
+      </div>
+      <span class="pill">hard + startup dependencies</span>
+    </div>
+    {% if charts.dependency_focus %}
+    <div class="chart-canvas chart-canvas-tall" data-echart-target="overview-dependency-focus-chart"></div>
+    <script id="overview-dependency-focus-chart" type="application/json">{{ charts.dependency_focus|tojson }}</script>
+    <p class="muted chart-caption">The graph is derived from `config/dependency-graph.json` and highlights the control-plane path behind `ops.lv3.org`.</p>
+    {% else %}
+    <p class="muted">Dependency graph data is not mirrored into this portal runtime yet.</p>
+    {% endif %}
+  </section>
+</div>
+
 <section class="panel">
   <div class="section-head">
     <div>

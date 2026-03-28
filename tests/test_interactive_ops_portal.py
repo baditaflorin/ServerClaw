@@ -6,7 +6,14 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from scripts.ops_portal.app import PortalSettings, create_app, normalize_health
+from scripts.ops_portal.app import (
+    PortalSettings,
+    build_dependency_focus_chart,
+    build_health_mix_chart,
+    build_live_apply_timeline_chart,
+    create_app,
+    normalize_health,
+)
 
 
 class FakeGatewayClient:
@@ -324,6 +331,29 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
         + "\n",
         encoding="utf-8",
     )
+    (data_root / "config" / "dependency-graph.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0.0",
+                "nodes": [
+                    {"id": "ops_portal", "service": "ops_portal", "name": "Ops Portal", "vm": "docker-runtime-lv3", "tier": 4},
+                    {"id": "api_gateway", "service": "api_gateway", "name": "API Gateway", "vm": "docker-runtime-lv3", "tier": 3},
+                    {"id": "keycloak", "service": "keycloak", "name": "Keycloak", "vm": "docker-runtime-lv3", "tier": 2},
+                    {"id": "nginx_edge", "service": "nginx_edge", "name": "NGINX Edge", "vm": "nginx-lv3", "tier": 1},
+                    {"id": "postgres", "service": "postgres", "name": "Postgres", "vm": "postgres-lv3", "tier": 1},
+                ],
+                "edges": [
+                    {"from": "ops_portal", "to": "api_gateway", "type": "hard", "description": "Portal uses the gateway."},
+                    {"from": "ops_portal", "to": "keycloak", "type": "hard", "description": "Portal uses shared auth."},
+                    {"from": "ops_portal", "to": "nginx_edge", "type": "hard", "description": "Portal is published at the edge."},
+                    {"from": "keycloak", "to": "postgres", "type": "hard", "description": "Keycloak stores state in Postgres."},
+                ],
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     (data_root / "changelog.md").write_text(
         "# Changelog\n\n## Unreleased\n- Added the interactive ops portal runtime.\n",
         encoding="utf-8",
@@ -398,6 +428,10 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Capability Contracts" in response.text
     assert "Identity Provider" in response.text
     assert "Keycloak" in response.text
+    assert "Current service-state distribution" in response.text
+    assert "Ops portal dependency map" in response.text
+    assert "Session states at a glance" in response.text
+    assert "Recent rollout tempo" in response.text
     assert gateway.platform_health_tokens == ["test-token"]
     assert gateway.agent_coordination_tokens == ["test-token"]
     assert gateway.runbook_fetch_tokens == ["test-token"]
@@ -410,6 +444,69 @@ def test_dashboard_uses_same_origin_static_stylesheet(portal_client: tuple[TestC
 
     assert response.status_code == 200
     assert '<link rel="stylesheet" href="/static/portal.css">' in response.text
+    assert '<script src="/static/portal.js" defer></script>' in response.text
+    assert 'https://unpkg.com/echarts@5.6.0/dist/echarts.min.js' in response.text
+
+
+def test_build_health_mix_chart_groups_service_tones() -> None:
+    option = build_health_mix_chart(
+        [
+            {"id": "grafana", "status_tone": "ok"},
+            {"id": "ops_portal", "status_tone": "ok"},
+            {"id": "keycloak", "status_tone": "warn"},
+            {"id": "postgres", "status_tone": "danger"},
+        ]
+    )
+
+    series = option["series"][0]["data"]
+    assert {item["name"]: item["value"] for item in series} == {
+        "Healthy": 2,
+        "Needs attention": 1,
+        "Critical": 1,
+    }
+
+
+def test_build_dependency_focus_chart_follows_ops_portal_dependencies() -> None:
+    option = build_dependency_focus_chart(
+        {
+            "nodes": [
+                {"id": "ops_portal", "service": "ops_portal", "name": "Ops Portal", "vm": "docker-runtime-lv3", "tier": 4},
+                {"id": "api_gateway", "service": "api_gateway", "name": "API Gateway", "vm": "docker-runtime-lv3", "tier": 3},
+                {"id": "keycloak", "service": "keycloak", "name": "Keycloak", "vm": "docker-runtime-lv3", "tier": 2},
+                {"id": "postgres", "service": "postgres", "name": "Postgres", "vm": "postgres-lv3", "tier": 1},
+            ],
+            "edges": [
+                {"from": "ops_portal", "to": "api_gateway", "type": "hard", "description": "Portal uses the gateway."},
+                {"from": "api_gateway", "to": "keycloak", "type": "hard", "description": "Gateway trusts Keycloak."},
+                {"from": "keycloak", "to": "postgres", "type": "hard", "description": "Keycloak stores state in Postgres."},
+            ],
+        },
+        [
+            {"id": "ops_portal", "status_tone": "ok", "status": "healthy"},
+            {"id": "api_gateway", "status_tone": "ok", "status": "healthy"},
+            {"id": "keycloak", "status_tone": "warn", "status": "degraded"},
+            {"id": "postgres", "status_tone": "neutral", "status": "unknown"},
+        ],
+    )
+
+    series = option["series"][0]
+    assert {node["id"] for node in series["data"]} == {"ops_portal", "api_gateway", "keycloak", "postgres"}
+    assert len(series["links"]) == 3
+
+
+def test_build_live_apply_timeline_chart_tracks_receipt_and_service_counts() -> None:
+    option = build_live_apply_timeline_chart(
+        [
+            {"recorded_on": "2026-03-23T18:00:00Z", "services": ["ops_portal", "api_gateway"]},
+            {"recorded_on": "2026-03-23T18:30:00Z", "services": ["ops_portal"]},
+            {"recorded_on": "2026-03-24T09:00:00Z", "services": ["grafana"]},
+        ],
+        days=3,
+    )
+
+    assert option["xAxis"]["data"] == ["03-22", "03-23", "03-24"]
+    assert option["series"][0]["data"] == [0, 2, 1]
+    assert option["series"][1]["data"] == [0, 2, 1]
 
 
 def test_health_check_action_returns_fragment(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:

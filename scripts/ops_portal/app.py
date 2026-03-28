@@ -7,7 +7,7 @@ import uuid
 from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -68,6 +68,20 @@ def load_json_file(path: Path, default: Any) -> Any:
 
 def normalize_text(value: str) -> str:
     return " ".join("".join(ch.lower() if ch.isalnum() else " " for ch in value).split())
+
+
+TONE_META = {
+    "ok": {"label": "Healthy", "color": "#2a6f4f"},
+    "warn": {"label": "Needs attention", "color": "#b26a00"},
+    "danger": {"label": "Critical", "color": "#a3302c"},
+    "neutral": {"label": "Unknown", "color": "#314467"},
+}
+
+EDGE_META = {
+    "hard": {"color": "#14213d", "line_type": "solid", "width": 2.6},
+    "startup_only": {"color": "#d97706", "line_type": "dashed", "width": 2.1},
+    "soft": {"color": "#7d8597", "line_type": "dotted", "width": 1.6},
+}
 
 
 @dataclass(frozen=True)
@@ -286,6 +300,18 @@ class PortalRepository:
             )
         return sorted(workflows, key=lambda item: item["id"])
 
+    def load_dependency_graph(self) -> dict[str, Any]:
+        graph_path = self.settings.service_catalog_path.parent / "dependency-graph.json"
+        payload = load_json_file(graph_path, {"nodes": [], "edges": []})
+        if not isinstance(payload, dict):
+            return {"nodes": [], "edges": []}
+        nodes = payload.get("nodes")
+        edges = payload.get("edges")
+        return {
+            "nodes": nodes if isinstance(nodes, list) else [],
+            "edges": edges if isinstance(edges, list) else [],
+        }
+
     def load_maintenance_windows(self) -> list[dict[str, Any]]:
         if self.settings.maintenance_windows_path is None:
             return []
@@ -467,6 +493,293 @@ def status_tone(status: str) -> str:
     if value in {"critical", "down", "error", "failed"}:
         return "danger"
     return "neutral"
+
+
+def build_health_mix_chart(services: list[dict[str, Any]]) -> dict[str, Any]:
+    counts = {tone: 0 for tone in TONE_META}
+    for service in services:
+        tone = str(service.get("status_tone", "neutral"))
+        counts[tone if tone in counts else "neutral"] += 1
+
+    data = [
+        {
+            "name": meta["label"],
+            "value": counts[tone],
+            "itemStyle": {"color": meta["color"]},
+        }
+        for tone, meta in TONE_META.items()
+        if counts[tone] > 0
+    ]
+    if not data:
+        data = [{"name": "Unknown", "value": 1, "itemStyle": {"color": TONE_META["neutral"]["color"]}}]
+
+    return {
+        "aria": {
+            "enabled": True,
+            "description": "Service health mix for the interactive ops portal overview.",
+        },
+        "animation": False,
+        "tooltip": {"trigger": "item"},
+        "legend": {
+            "bottom": 0,
+            "left": "center",
+            "icon": "circle",
+            "textStyle": {"color": "#314467"},
+        },
+        "series": [
+            {
+                "name": "Service health",
+                "type": "pie",
+                "radius": ["54%", "76%"],
+                "center": ["50%", "42%"],
+                "avoidLabelOverlap": True,
+                "label": {"formatter": "{b}\n{c}", "color": "#14213d"},
+                "labelLine": {"length": 14, "length2": 10},
+                "data": data,
+            }
+        ],
+    }
+
+
+def build_coordination_status_chart(coordination: dict[str, Any]) -> dict[str, Any]:
+    summary = coordination.get("summary", {}) if isinstance(coordination, dict) else {}
+    categories = [
+        ("Active", "active", TONE_META["ok"]["color"]),
+        ("Blocked", "blocked", TONE_META["warn"]["color"]),
+        ("Escalated", "escalated", TONE_META["danger"]["color"]),
+        ("Completing", "completing", "#457b9d"),
+    ]
+    return {
+        "aria": {
+            "enabled": True,
+            "description": "Current agent coordination counts by session state.",
+        },
+        "animation": False,
+        "grid": {"left": 42, "right": 18, "top": 18, "bottom": 34},
+        "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
+        "xAxis": {
+            "type": "category",
+            "data": [label for label, _key, _color in categories],
+            "axisLabel": {"color": "#314467"},
+            "axisLine": {"lineStyle": {"color": "#c8c0b3"}},
+        },
+        "yAxis": {
+            "type": "value",
+            "minInterval": 1,
+            "axisLabel": {"color": "#314467"},
+            "splitLine": {"lineStyle": {"color": "rgba(20, 33, 61, 0.1)"}},
+        },
+        "series": [
+            {
+                "type": "bar",
+                "barWidth": "48%",
+                "data": [
+                    {
+                        "value": int(summary.get(key, 0)),
+                        "itemStyle": {"color": color, "borderRadius": [10, 10, 0, 0]},
+                    }
+                    for _label, key, color in categories
+                ],
+            }
+        ],
+    }
+
+
+def build_live_apply_timeline_chart(deployments: list[dict[str, Any]], *, days: int = 14) -> dict[str, Any]:
+    today = utc_now().date()
+    parsed_dates = [parsed.date() for item in deployments if (parsed := parse_timestamp(item.get("recorded_on")))]
+    end_date = max(parsed_dates, default=today)
+    start_date = end_date - timedelta(days=max(days - 1, 0))
+
+    timeline: dict[date, dict[str, Any]] = {}
+    for offset in range(days):
+        current = start_date + timedelta(days=offset)
+        timeline[current] = {"receipts": 0, "services": set()}
+
+    for deployment in deployments:
+        parsed = parse_timestamp(deployment.get("recorded_on"))
+        if parsed is None:
+            continue
+        current = parsed.date()
+        if current not in timeline:
+            continue
+        timeline[current]["receipts"] += 1
+        timeline[current]["services"].update(
+            service_id
+            for service_id in deployment.get("services", [])
+            if isinstance(service_id, str) and service_id
+        )
+
+    labels = [current.strftime("%m-%d") for current in timeline]
+    receipt_counts = [timeline[current]["receipts"] for current in timeline]
+    service_counts = [len(timeline[current]["services"]) for current in timeline]
+
+    return {
+        "aria": {
+            "enabled": True,
+            "description": "Recent live-apply receipt cadence over the last two weeks.",
+        },
+        "animation": False,
+        "grid": {"left": 46, "right": 38, "top": 22, "bottom": 32},
+        "tooltip": {"trigger": "axis"},
+        "legend": {
+            "top": 0,
+            "textStyle": {"color": "#314467"},
+        },
+        "xAxis": {
+            "type": "category",
+            "data": labels,
+            "axisLabel": {"color": "#314467"},
+            "axisLine": {"lineStyle": {"color": "#c8c0b3"}},
+        },
+        "yAxis": [
+            {
+                "type": "value",
+                "name": "Receipts",
+                "minInterval": 1,
+                "axisLabel": {"color": "#314467"},
+                "splitLine": {"lineStyle": {"color": "rgba(20, 33, 61, 0.1)"}},
+            },
+            {
+                "type": "value",
+                "name": "Services",
+                "minInterval": 1,
+                "axisLabel": {"color": "#314467"},
+                "splitLine": {"show": False},
+            },
+        ],
+        "series": [
+            {
+                "name": "Live applies",
+                "type": "bar",
+                "barWidth": "46%",
+                "data": receipt_counts,
+                "itemStyle": {"color": "#d97706", "borderRadius": [8, 8, 0, 0]},
+            },
+            {
+                "name": "Unique services",
+                "type": "line",
+                "yAxisIndex": 1,
+                "smooth": True,
+                "symbolSize": 7,
+                "lineStyle": {"width": 3, "color": "#14213d"},
+                "itemStyle": {"color": "#14213d"},
+                "data": service_counts,
+            },
+        ],
+    }
+
+
+def build_dependency_focus_chart(
+    dependency_graph: dict[str, Any],
+    services: list[dict[str, Any]],
+    *,
+    focus_service: str = "ops_portal",
+) -> dict[str, Any]:
+    nodes = dependency_graph.get("nodes", []) if isinstance(dependency_graph, dict) else []
+    edges = dependency_graph.get("edges", []) if isinstance(dependency_graph, dict) else []
+    node_index = {
+        str(node.get("id")): node
+        for node in nodes
+        if isinstance(node, dict) and isinstance(node.get("id"), str)
+    }
+    if focus_service not in node_index:
+        return {}
+
+    selected = {focus_service}
+    frontier = {focus_service}
+    traversable_edge_types = {"hard", "startup_only"}
+
+    for _depth in range(3):
+        next_frontier: set[str] = set()
+        for edge in edges:
+            if not isinstance(edge, dict):
+                continue
+            if edge.get("type") not in traversable_edge_types:
+                continue
+            source = str(edge.get("from", ""))
+            target = str(edge.get("to", ""))
+            if source in frontier and target in node_index and target not in selected:
+                selected.add(target)
+                next_frontier.add(target)
+        frontier = next_frontier
+        if not frontier:
+            break
+
+    service_index = {
+        str(service.get("id")): service
+        for service in services
+        if isinstance(service, dict) and isinstance(service.get("id"), str)
+    }
+    graph_nodes = []
+    for service_id in sorted(selected, key=lambda item: (int(node_index[item].get("tier", 99)), item)):
+        node = node_index[service_id]
+        service = service_index.get(service_id, {})
+        tone = str(service.get("status_tone", "neutral"))
+        meta = TONE_META.get(tone, TONE_META["neutral"])
+        graph_nodes.append(
+            {
+                "id": service_id,
+                "name": str(node.get("name", service_id)),
+                "value": f"{node.get('vm', 'unknown vm')} · tier {node.get('tier', '?')} · {service.get('status', 'unknown')}",
+                "symbolSize": 66 if service_id == focus_service else 46,
+                "itemStyle": {
+                    "color": meta["color"],
+                    "borderColor": "#14213d",
+                    "borderWidth": 2 if service_id == focus_service else 1,
+                },
+                "label": {"show": True, "color": "#14213d"},
+            }
+        )
+
+    graph_links = []
+    for edge in edges:
+        if not isinstance(edge, dict):
+            continue
+        source = str(edge.get("from", ""))
+        target = str(edge.get("to", ""))
+        edge_type = str(edge.get("type", "soft"))
+        if source not in selected or target not in selected:
+            continue
+        meta = EDGE_META.get(edge_type, EDGE_META["soft"])
+        graph_links.append(
+            {
+                "source": source,
+                "target": target,
+                "value": str(edge.get("description", edge_type)),
+                "lineStyle": {
+                    "color": meta["color"],
+                    "type": meta["line_type"],
+                    "width": meta["width"],
+                    "curveness": 0.12,
+                },
+            }
+        )
+
+    return {
+        "aria": {
+            "enabled": True,
+            "description": "Interactive ops portal dependency focus graph rendered from the canonical dependency graph.",
+        },
+        "animation": False,
+        "tooltip": {"trigger": "item"},
+        "series": [
+            {
+                "type": "graph",
+                "layout": "force",
+                "roam": True,
+                "draggable": True,
+                "force": {"repulsion": 260, "edgeLength": [90, 150]},
+                "edgeSymbol": ["none", "arrow"],
+                "edgeSymbolSize": [0, 9],
+                "emphasis": {"focus": "adjacency"},
+                "lineStyle": {"opacity": 0.82},
+                "label": {"position": "right"},
+                "data": graph_nodes,
+                "links": graph_links,
+            }
+        ],
+    }
 
 
 def build_service_models(
@@ -651,6 +964,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     publications = repository.load_publication_registry()
 
     capability_contracts = repository.load_capability_contract_catalog()
+    dependency_graph = repository.load_dependency_graph()
     maintenance_windows = repository.load_maintenance_windows()
     deployments = repository.recent_deployments(services)
     drift_report = repository.latest_drift_report()
@@ -692,6 +1006,12 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     )
     active_maintenance = [window for window in maintenance_windows if window.get("service_id")]
     drift_summary = drift_report.get("summary", {})
+    chart_models = {
+        "health_mix": build_health_mix_chart(service_models),
+        "coordination_status": build_coordination_status_chart(coordination),
+        "live_apply_timeline": build_live_apply_timeline_chart(deployments),
+        "dependency_focus": build_dependency_focus_chart(dependency_graph, service_models),
+    }
 
     return {
         "request": request,
@@ -711,6 +1031,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "runbook_warning": runbook_payload.get("warning") if isinstance(runbook_payload, dict) else None,
         "coordination": coordination,
         "deployment_events": deployment_console_seed(),
+        "charts": chart_models,
         "generated_at": isoformat(utc_now()),
         "docs_base_url": request.app.state.settings.docs_base_url,
         "search_collections": available_collections(),

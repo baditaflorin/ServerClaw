@@ -8,6 +8,7 @@ Recover the interactive ops portal runtime when `ops.lv3.org` or the local `http
 
 - `https://ops.lv3.org/health` no longer returns `200`
 - the portal renders an NGINX `502` or the login flow completes but the app shell never loads
+- the portal shell loads but the chart panels stay blank or never repaint after section refreshes
 - the login flow redirects to `/oauth2/callback?...error=invalid_scope`
 - the Keycloak login form accepts a submit and then renders `We are sorry... Unexpected error when handling authentication request to identity provider.`
 - password reset or required-action flows claim success but the reset email never arrives
@@ -46,6 +47,13 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 
 If the logs show `Acquisition timeout while waiting for new connection`, the JDBC pool is wedged. If a restart then fails with `No chain/target/match by that name`, Docker's nat chain on `docker-runtime-lv3` is missing and Keycloak must be recreated after Docker itself is restarted.
 
+5. If the shell renders but the ECharts panels stay blank, verify the same-origin
+   runtime assets and mirrored topology file are present inside the container:
+
+```bash
+ssh ops@100.118.189.95 'ssh ops@10.10.10.20 "docker exec ops-portal ls /app/ops_portal/static && ls /opt/ops-portal/data/config/dependency-graph.json"'
+```
+
 ## Recovery
 
 1. Re-apply the portal runtime:
@@ -66,9 +74,15 @@ ansible-playbook playbooks/public-edge.yml
    confirm `/opt/ops-portal/data/config/subdomain-exposure-registry.json` was
    updated with the current repo commit before rebuilding the runtime.
 
-5. If the callback includes `error=invalid_scope`, verify the rendered oauth2-proxy config on `nginx-lv3` does not request a custom `groups` scope. The portal relies on a client-mapped `groups` claim, so the requested scope must stay `openid profile email` unless a real Keycloak client scope named `groups` is added and assigned.
+5. If the chart panels are blank but the shell loads, confirm both
+   `/app/ops_portal/static/portal.js` and
+   `/opt/ops-portal/data/config/dependency-graph.json` exist inside the running
+   container, then re-apply the portal runtime so the mirrored data and assets
+   are rebuilt together.
 
-6. If the auth failure is actually Keycloak, recover the runtime from the Proxmox host through the guest agent:
+6. If the callback includes `error=invalid_scope`, verify the rendered oauth2-proxy config on `nginx-lv3` does not request a custom `groups` scope. The portal relies on a client-mapped `groups` claim, so the requested scope must stay `openid profile email` unless a real Keycloak client scope named `groups` is added and assigned.
+
+7. If the auth failure is actually Keycloak, recover the runtime from the Proxmox host through the guest agent:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
@@ -82,14 +96,14 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   \"qm guest exec 120 -- /bin/sh -lc 'cd /opt/keycloak && docker compose up -d --force-recreate keycloak'\"
 ```
 
-7. Re-verify the IdP and portal redirect path:
+8. Re-verify the IdP and portal redirect path:
 
 ```bash
 curl -I https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
 curl -I https://ops.lv3.org/oauth2/sign_in
 ```
 
-8. If login is healthy but password-reset mail is still broken, verify the realm SMTP path and the private relay on `docker-runtime-lv3`:
+9. If login is healthy but password-reset mail is still broken, verify the realm SMTP path and the private relay on `docker-runtime-lv3`:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \

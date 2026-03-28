@@ -56,6 +56,8 @@ ops_portal_maintenance_windows_file: ""
 ops_portal_file_sources:
   - src: "{{ ops_portal_repo_root }}/config/capability-contract-catalog.json"
     dest: "{{ ops_portal_data_dir }}/config/capability-contract-catalog.json"
+  - src: "{{ ops_portal_repo_root }}/config/dependency-graph.json"
+    dest: "{{ ops_portal_data_dir }}/config/dependency-graph.json"
   - src: "{{ ops_portal_repo_root }}/config/service-capability-catalog.json"
     dest: "{{ ops_portal_data_dir }}/config/service-capability-catalog.json"
   - src: "{{ ops_portal_repo_root }}/config/subdomain-exposure-registry.json"

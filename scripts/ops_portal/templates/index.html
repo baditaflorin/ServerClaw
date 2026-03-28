@@ -100,25 +100,4 @@
     </div>
   </section>
 </main>
-
-<script>
-  const consoleLog = document.getElementById("deployment-console-log");
-  const stream = new EventSource("/events/deployments");
-
-  function appendConsoleLine(payload) {
-    const timestamp = payload.ts || new Date().toISOString();
-    const message = payload.message || JSON.stringify(payload);
-    if (consoleLog.textContent.includes("Connecting to deployment stream")) {
-      consoleLog.textContent = "";
-    }
-    consoleLog.textContent += `[${timestamp}] ${message}\n`;
-    consoleLog.scrollTop = consoleLog.scrollHeight;
-  }
-
-  stream.addEventListener("heartbeat", () => {});
-  stream.addEventListener("log", (event) => appendConsoleLine(JSON.parse(event.data)));
-  stream.addEventListener("deploy", (event) => appendConsoleLine(JSON.parse(event.data)));
-  stream.addEventListener("secret", (event) => appendConsoleLine(JSON.parse(event.data)));
-  stream.addEventListener("runbook", (event) => appendConsoleLine(JSON.parse(event.data)));
-</script>
 {% endblock %}
