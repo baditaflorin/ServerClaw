@@ -71,7 +71,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implements ADR 0231 on the live control-plane recovery path by replacing the backup unit's plaintext OpenBao token and baked-in Windmill DSN with OpenBao Agent delivery through systemd credentials
       release_bump: patch
-      included_in_repo_version: 0.177.44
+      included_in_repo_version: 0.177.45
       latest_receipts:
         control_plane_recovery: 2026-03-28-adr-0231-local-secret-delivery-live-apply
   - id: ws-0231-main-merge
@@ -93,7 +93,7 @@ workstreams:
       - VERSION
       - changelog.md
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.44.md
+      - docs/release-notes/0.177.45.md
       - versions/stack.yaml
       - build/platform-manifest.json
       - docs/diagrams/agent-coordination-map.excalidraw
@@ -129,7 +129,7 @@ workstreams:
             - VERSION
             - changelog.md
             - docs/release-notes/README.md
-            - docs/release-notes/0.177.44.md
+            - docs/release-notes/0.177.45.md
             - versions/stack.yaml
             - build/platform-manifest.json
             - docs/diagrams/agent-coordination-map.excalidraw
@@ -161,7 +161,7 @@ workstreams:
     canonical_truth:
       changelog_entry: integrates ADR 0231 into main by replacing the control-plane backup service's plaintext OpenBao token and baked-in Windmill DSN with host-native OpenBao Agent delivery through systemd credentials
       release_bump: patch
-      included_in_repo_version: 0.177.44
+      included_in_repo_version: 0.177.45
   - id: ws-0206-live-apply
     adr: "0206"
     title: Live apply ADR 0206 ports and adapters for external integrations
@@ -7902,7 +7902,7 @@ workstreams:
       - changelog.md
       - RELEASE.md
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.44.md
+      - docs/release-notes/0.177.45.md
       - versions/stack.yaml
       - README.md
       - build/platform-manifest.json
@@ -7930,7 +7930,7 @@ workstreams:
             - changelog.md
             - RELEASE.md
             - docs/release-notes/README.md
-            - docs/release-notes/0.177.44.md
+            - docs/release-notes/0.177.45.md
             - versions/stack.yaml
             - README.md
             - build/platform-manifest.json
@@ -7947,4 +7947,4 @@ workstreams:
     canonical_truth:
       changelog_entry: integrated ADR 0229 by carrying the verified Gitea Actions runner evidence into main after replaying the latest-main Gitea convergence, passing the private push gate, and recording workflow run 36 on docker-build-lv3
       release_bump: patch
-      included_in_repo_version: 0.177.44
+      included_in_repo_version: 0.177.45

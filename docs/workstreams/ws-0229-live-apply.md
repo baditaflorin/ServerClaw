@@ -76,7 +76,7 @@
 
 ## Mainline Integration Outcome
 
-- release `0.177.44` carries this refreshed ADR 0229 verification replay into `origin/main` after concurrent ADR 0225 work advanced the mainline to repo version `0.177.43` and platform version `0.130.40`
+- release `0.177.45` carries this refreshed ADR 0229 verification replay into `origin/main` after concurrent ADR 0231 work advanced the mainline to repo version `0.177.44` while platform version remained `0.130.40`
 - the final integration keeps platform version `0.130.40` unchanged because the Gitea Actions runner capability was already live; the merge updates repo truth, receipts, release history, and canonical generated surfaces to match the verified `0.177.42` source replay and workflow run `36`
 
 ## Notes For The Next Assistant

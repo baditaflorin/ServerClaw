@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.44",
+  "repo_version": "0.177.45",
   "platform_version": "0.130.40",
-  "generated_at": "2026-03-28T18:13:34Z",
-  "next_refresh_at": "2026-03-28T19:13:34Z",
+  "generated_at": "2026-03-28T18:28:46Z",
+  "next_refresh_at": "2026-03-28T19:28:46Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4026,10 +4026,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.43",
+    "last_version": "0.177.44",
     "deployed_at": "2026-03-28",
     "summary": "integrates ADR 0231 into main by replacing the control-plane backup service's plaintext OpenBao token and baked-in Windmill DSN with host-native OpenBao Agent delivery through systemd credentials",
-    "release_notes_url": "docs/release-notes/0.177.44.md"
+    "release_notes_url": "docs/release-notes/0.177.45.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
