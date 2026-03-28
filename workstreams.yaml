@@ -6149,7 +6149,7 @@ workstreams:
   - id: ws-0211-live-apply
     adr: "0211"
     title: Shared policy packs and rule registries live apply
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/ws-0211-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0211-live-apply
@@ -6218,8 +6218,8 @@ workstreams:
             - docs/adr/.index.yaml
           mode: shared_contract
           contract: shared-policy-registry-v1
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
     canonical_truth:
       changelog_entry: centralized shared redundancy, capacity-class, and placement rules into one machine-checkable registry so validation, live-apply preflights, and docs consume the same canonical policy pack
       release_bump: patch

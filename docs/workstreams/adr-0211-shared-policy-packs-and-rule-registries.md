@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0211](../adr/0211-shared-policy-packs-and-rule-registries.md)
 - Title: Centralize repeated platform policy rules into one machine-checked registry and replay the governed automation paths from an isolated latest-main worktree
-- Status: ready
-- Implemented In Repo Version: N/A
-- Live Applied In Platform Version: N/A
-- Implemented On: N/A
-- Live Applied On: N/A
+- Status: live_applied
+- Implemented In Repo Version: not yet
+- Live Applied In Platform Version: not yet
+- Implemented On: 2026-03-28
+- Live Applied On: 2026-03-28
 - Branch: `codex/ws-0211-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0211-live-apply`
 - Owner: codex
@@ -58,8 +58,25 @@
 - `uv run --with pytest --with jsonschema --with pyyaml pytest -q tests/test_shared_policy_packs.py tests/test_capacity_report.py tests/test_service_redundancy.py tests/test_standby_capacity.py tests/test_failure_domain_policy.py`
 - `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
 - `./scripts/validate_repo.sh data-models generated-docs generated-portals agent-standards`
-- `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 make live-apply-service service=homepage env=production EXTRA_ARGS='-e bypass_promotion=true'`
+- `uvx --from pyyaml python scripts/interface_contracts.py --check-live-apply service:headscale`
+- `uv run --with pyyaml python scripts/standby_capacity.py --service headscale`
+- `uv run --with pyyaml --with jsonschema python scripts/service_redundancy.py --check-live-apply --service headscale`
+- `uv run --with pyyaml --with jsonschema python scripts/immutable_guest_replacement.py --check-live-apply --service headscale`
+- `python3 scripts/promotion_pipeline.py --emit-bypass-event --service headscale --actor-id "${USER:-unknown}" --correlation-id "break-glass:service:headscale:$(date -u +%Y%m%dT%H%M%SZ)"`
+- `ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=ws0211headscale2 scripts/run_with_namespace.sh uvx --from pyyaml python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --playbook playbooks/services/headscale.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e bypass_promotion=true`
+- `curl -fsS -o /dev/null -w '%{http_code}\n' https://headscale.lv3.org/health`
+- `curl -Ik https://headscale.lv3.org/health`
 
 ## Outcome
 
-Pending implementation and live verification.
+- The canonical policy registry now lives in `config/shared-policy-packs.json`, with `docs/schema/shared-policy-packs.schema.json` and `scripts/shared_policy_packs.py` defining the machine-checked contract consumed by the affected validators and reports.
+- The duplicated redundancy, capacity-class, and placement enums were removed from the affected schemas and docs in favor of the shared registry, so `service_redundancy.py`, `standby_capacity.py`, `capacity_report.py`, `failure_domain_policy.py`, `environment_topology.py`, and `validate_repository_data_models.py` all resolve policy from the same source.
+- The focused regression suite passed with `27 passed in 0.40s`, and repository data-model validation passed after the refactor.
+- The initial fresh-worktree `headscale` replay exposed one real automation gap: `lv3.platform.nginx_edge_publication` expects `build/changelog-portal/` and `build/docs-portal/` to exist even in a brand-new worktree. Running `make generate-ops-portal generate-changelog-portal docs` populated those artifacts from committed automation, and the immediate replay then completed successfully with `localhost ok=16 changed=0 failed=0`, `nginx-lv3 ok=72 changed=5 failed=0`, and `proxmox_florin ok=42 changed=0 failed=0`.
+- The final edge verification passed with `https://headscale.lv3.org/health` returning `HTTP 200`, confirming the shared policy registry changes did not regress the governed live-apply path or the public edge publication for the selected safe service target.
+
+## Remaining For Merge To `main`
+
+- Protected integration files still need the dedicated mainline step: `VERSION`, `changelog.md`, `README.md`, and `versions/stack.yaml` remain intentionally unchanged on this workstream branch.
+- `./scripts/validate_repo.sh generated-docs` still reports stale canonical truth on this branch, currently pointing at `changelog.md`; that is expected until the main-only integration step writes the protected release and platform-version files together.
+- The branch-local live-apply receipt `receipts/live-applies/2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-live-apply.json` is ready for merge-safe history, and the later merged-main replay should add the canonical mainline receipt beside it.

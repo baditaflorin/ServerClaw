@@ -1,9 +1,10 @@
 # ADR 0211: Shared Policy Packs And Rule Registries
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: not yet
+- Implemented In Platform Version: not yet
+- Implemented On: 2026-03-28
 - Date: 2026-03-28
 
 ## Context
@@ -67,3 +68,10 @@ back to the governing source rather than becoming a second hand-edited truth.
 - ADR 0064: Health probe contracts
 - ADR 0179: Service redundancy tier matrix
 - ADR 0180: Standby capacity reservation and placement rules
+
+## Implementation Notes
+
+- `config/shared-policy-packs.json` is now the canonical machine-checkable registry for the shared redundancy tiers, capacity classes, and placement policy labels that previously drifted across schemas, validators, and runbooks.
+- The shared-policy registry is consumed directly by the standby-capacity, service-redundancy, failure-domain, environment-topology, and repository-data-model validation entry points so the same policy pack drives both repository validation and live-apply preflights.
+- The branch-local live apply on 2026-03-28 replayed the governed `headscale` service path from an isolated latest-`origin/main` worktree, verified the public `https://headscale.lv3.org/health` endpoint with `HTTP 200`, and recorded the evidence in `receipts/live-applies/2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-live-apply.json`.
+- Protected integration files still remain main-only, so the canonical repo/platform versions for ADR 0211 are assigned during the later merged-main integration step instead of on this workstream branch.
