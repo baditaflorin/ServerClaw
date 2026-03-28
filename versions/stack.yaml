@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.48
-platform_version: 0.130.41
+repo_version: 0.177.50
+platform_version: 0.130.42
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -42,7 +42,7 @@ live_apply_evidence:
     short_lived_credentials_and_mtls: 2026-03-22-adr-0047-short-lived-credentials-live-apply
     control_plane_lanes: 2026-03-22-adr-0045-control-plane-communication-lanes-live-apply
     identity_taxonomy: 2026-03-22-adr-0046-identity-classes-live-apply
-    command_catalog: 2026-03-28-adr-0227-bounded-command-execution-mainline-live-apply
+    command_catalog: 2026-03-28-adr-0230-policy-decisions-live-apply
     config_merge: 2026-03-26-adr-0158-config-merge-live-apply
     control_plane_recovery: 2026-03-28-adr-0231-local-secret-delivery-live-apply
     control_metadata_witness: 2026-03-27-adr-0181-control-metadata-witness-live-apply
@@ -78,7 +78,7 @@ live_apply_evidence:
     service_redundancy: 2026-03-27-adr-0188-failover-rehearsal-gate-live-apply
     fixture_pools: 2026-03-28-adr-0186-prewarmed-fixture-pools-live-apply
     seed_data_snapshots: 2026-03-28-adr-0187-anonymized-seed-data-snapshots-mainline-live-apply
-    dify: 2026-03-28-adr-0197-dify-live-apply
+    dify: 2026-03-28-adr-0197-dify-mainline-live-apply
     shared_policy_packs: 2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply
     openbao_operator_entity: 2026-03-28-adr-0206-ports-and-adapters-live-apply
     keycloak_operator_access: 2026-03-28-adr-0206-ports-and-adapters-live-apply
@@ -97,6 +97,9 @@ live_apply_evidence:
     gitea_actions_runners: 2026-03-28-adr-0229-gitea-actions-runners-live-apply
     bounded_command_execution: 2026-03-28-adr-0227-bounded-command-execution-mainline-live-apply
     host_control_loops: 2026-03-28-adr-0226-host-control-loops-live-apply
+    server_resident_operations: 2026-03-28-adr-0224-server-resident-operations-default-control-live-apply
+    policy_validation: 2026-03-28-adr-0230-policy-decisions-live-apply
+    promotion_pipeline: 2026-03-28-adr-0230-policy-decisions-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -1002,8 +1005,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.48
+    current: 0.177.50
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.41
+    current: 0.130.42
     meaning: intended platform release for the actual server configuration

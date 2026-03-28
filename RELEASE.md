@@ -1,4 +1,4 @@
-# Release 0.177.48
+# Release 0.177.50
 
 - Date: 2026-03-28
 
@@ -7,7 +7,7 @@
 - implemented ADR 0226 by installing the repo-managed systemd service, timer, and path baseline for host-resident control loops on proxmox_florin and verifying both manual and path-triggered reconcile passes
 
 ## Platform Impact
-- platform version 0.130.42 will record the first exact-main verification of ADR 0224 server-resident operations as the default control model while integrating the already-live ADR 0226 host control-loop baseline into the merged repository
+- ADR 0224 and ADR 0226 are now carried in merged repository truth while the verified live platform version remains 0.130.42 because the exact-main replay re-proves the existing host-resident control model without introducing a newer platform contract
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

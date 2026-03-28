@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.48",
-  "platform_version": "0.130.41",
-  "generated_at": "2026-03-28T20:11:18Z",
-  "next_refresh_at": "2026-03-28T21:11:18Z",
+  "repo_version": "0.177.50",
+  "platform_version": "0.130.42",
+  "generated_at": "2026-03-28T20:39:39Z",
+  "next_refresh_at": "2026-03-28T21:39:39Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3539,7 +3539,7 @@
         "id": "configure-windmill",
         "title": "Configure Windmill",
         "agent_trust_required": "T3",
-        "steps": 21,
+        "steps": 23,
         "path": "docs/runbooks/configure-windmill.md",
         "workflow_ids": [
           "converge-windmill"
@@ -3590,7 +3590,7 @@
         "id": "environment-promotion-pipeline",
         "title": "Environment Promotion Pipeline",
         "agent_trust_required": "T3",
-        "steps": 18,
+        "steps": 20,
         "path": "docs/runbooks/environment-promotion-pipeline.md",
         "workflow_ids": [
           "deploy-and-promote"
@@ -4062,10 +4062,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.47",
+    "last_version": "0.177.49",
     "deployed_at": "2026-03-28",
     "summary": "verifies ADR 0224 from the latest mainline by carrying the host-resident supervisor baseline into repo truth and re-proving that reconciliation, supervision, validation, and approval now run through server-resident platform surfaces implemented ADR 0226 by installing the repo-managed systemd service, timer, and path baseline for host-resident control loops on proxmox_florin and verifying both manual and path-triggered reconcile passes",
-    "release_notes_url": "docs/release-notes/0.177.48.md"
+    "release_notes_url": "docs/release-notes/0.177.50.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

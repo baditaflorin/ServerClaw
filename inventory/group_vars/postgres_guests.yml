@@ -1,3 +1,10 @@
 ---
 postgres_vm_client_allowed_sources_extra:
-  - "{{ platform_guest_catalog.by_name['docker-runtime-lv3'].ipv4 }}/32"
+  - >-
+    {{
+      platform_guest_catalog.by_name[
+        playbook_execution_host_patterns.docker_runtime[playbook_execution_env]
+      ].ipv4
+    }}/32
+  - 172.16.0.0/12
+  - 192.168.0.0/16

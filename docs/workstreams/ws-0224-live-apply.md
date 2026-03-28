@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0224](../adr/0224-server-resident-operations-as-the-default-control-model.md)
 - Title: Verify and integrate the default server-resident control model from the latest `origin/main`
-- Status: in_progress
-- Implemented In Repo Version: N/A
-- Live Applied In Platform Version: N/A
-- Implemented On: N/A
-- Live Applied On: N/A
+- Status: live_applied
+- Implemented In Repo Version: 0.177.48
+- Live Applied In Platform Version: 0.130.42
+- Implemented On: 2026-03-28
+- Live Applied On: 2026-03-28
 - Branch: `codex/ws-0224-live-apply-r3`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0224-live-apply-r3`
 - Owner: codex
@@ -41,13 +41,15 @@
 
 ## Verification
 
-- `uv run --with pytest pytest -q tests/test_proxmox_host_control_loops_role.py tests/test_server_resident_reconciliation.py`
-- `./scripts/validate_repo.sh workstream-surfaces agent-standards yaml json role-argument-specs ansible-syntax data-models`
-- exact-main replay of the private Gitea source followed by `systemctl start lv3-server-resident-reconciliation.service`
-- exact-main replay of `make configure-host-control-loops`
-- host verification of `lv3-host-control-loop-reconcile.service`, `.timer`, and `.path`
+- `uv run --with pytest pytest -q tests/test_proxmox_host_control_loops_role.py tests/test_server_resident_reconciliation.py` passed with `10 passed in 0.09s`, and `./scripts/validate_repo.sh workstream-surfaces agent-standards yaml json role-argument-specs ansible-syntax data-models` passed on the active validation commit `7b4462fe17c4bcf1bc458a2dea4e261c86104e11`.
+- Private Gitea accepted branch head `8b6db7e83aef863792da7e8cf99a4e59b8286c07`; workflow run `56` / run number `52` finished with `status: completed` and `conclusion: success`, and job `70` named `validate` ran on runner `docker-build-lv3`.
+- Private Gitea `main` fast-forwarded from `5b121f700d0f1cd372ef85f24288691fb8a88e0c` to snapshot `64417a8866bcc103ea3b5815359a6e5027504831` published for source commit `8b6db7e83aef863792da7e8cf99a4e59b8286c07`; the same remote gate passed `alert-rule-validation`, `ansible-lint`, `ansible-syntax`, `artifact-secret-scan`, `dependency-direction`, `dependency-graph`, `integration-tests`, `packer-validate`, `schema-validation`, `security-scan`, `service-completeness`, `tofu-validate`, `type-check`, and `yaml-lint`.
+- `sudo systemctl start lv3-server-resident-reconciliation.service` completed successfully on `proxmox_florin`; `/srv/proxmox_florin_server` checked out `64417a8866bcc103ea3b5815359a6e5027504831`, the working tree stayed clean, and `/var/lib/lv3/server-resident-reconciliation/receipts/latest.json` recorded `status: ok`, `exit_code: 0`, `duration_seconds: 12`, and `source_commit: 64417a8866bcc103ea3b5815359a6e5027504831`.
+- Writing `ws-0224-path-20260328T201750Z` to `/var/lib/lv3-host-control-loops/requests/reconcile.request` was consumed immediately; `latest.json` recorded `trigger: path_request` at `2026-03-28T20:17:51Z` with history file `/var/lib/lv3-host-control-loops/runs/20260328T201751Z.json`.
+- `sudo systemctl start lv3-host-control-loop-reconcile.service` immediately after the exact-main replay recorded `trigger: scheduled_or_manual` at `2026-03-28T20:17:59Z`; the service finished `Result=success ActiveState=inactive`, and both the timer and path units remained `active/waiting`.
 
-## Notes For The Next Assistant
+## Outcome
 
-- keep this workstream `in_progress` until the exact-main replay and final branch validation are complete; the terminal status flip belongs at the end of the verified integration step
-- the host trusts the private Gitea repo rather than GitHub directly, so the final proof must publish the integrated candidate into the private Gitea source before replaying the server-resident pull path
+- Release `0.177.48` records ADR 0224 as implemented in repository truth and platform version `0.130.42` as the first exact-main proof that routine reconciliation, validation, and bounded host execution no longer depend on an open Codex session.
+- ADR 0226 is now integrated into the same repository release while the first-live host-control-loop platform version remains `0.130.38`.
+- The exact-main host replay used source commit `8b6db7e83aef863792da7e8cf99a4e59b8286c07` via private Gitea snapshot `64417a8866bcc103ea3b5815359a6e5027504831`; the remaining same-turn branch edits after that replay are ADR-local metadata, release truth, and receipt surfaces only.
