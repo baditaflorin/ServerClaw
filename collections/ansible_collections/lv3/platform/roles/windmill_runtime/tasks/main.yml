@@ -389,6 +389,75 @@
     mode: "{{ item.mode }}"
   loop: "{{ windmill_worker_repo_mutable_files }}"
 
+- name: Ensure the controller-style compatibility parent exists for the worker checkout
+  ansible.builtin.file:
+    path: "{{ windmill_worker_repo_checkout_compat_root | dirname }}"
+    state: directory
+    mode: "0755"
+
+- name: Check whether the controller-style compatibility path already exists
+  ansible.builtin.stat:
+    path: "{{ windmill_worker_repo_checkout_compat_root }}"
+  register: windmill_worker_repo_checkout_compat_path
+
+- name: Validate any legacy controller-style compatibility directory is already mirrored into the worker checkout
+  ansible.builtin.shell: |
+    set -euo pipefail
+    compat_root="{{ windmill_worker_repo_checkout_compat_root }}"
+    runtime_root="{{ windmill_worker_repo_checkout_host_path }}"
+
+    while IFS= read -r entry; do
+      rel_path="${entry#"$compat_root/"}"
+      runtime_entry="$runtime_root/$rel_path"
+      if [ ! -e "$runtime_entry" ]; then
+        echo "missing:$rel_path"
+        exit 1
+      fi
+
+      if [ -f "$entry" ] && [ -f "$runtime_entry" ]; then
+        cmp -s "$entry" "$runtime_entry" || {
+          echo "mismatch:$rel_path"
+          exit 1
+        }
+        continue
+      fi
+
+      if [ -L "$entry" ] && [ -L "$runtime_entry" ]; then
+        [ "$(readlink "$entry")" = "$(readlink "$runtime_entry")" ] || {
+          echo "mismatch-link:$rel_path"
+          exit 1
+        }
+        continue
+      fi
+
+      echo "unsupported:$rel_path"
+      exit 1
+    done < <(find "$compat_root" -mindepth 1 \( -type f -o -type l \) | sort)
+
+    echo safe
+  args:
+    executable: /bin/bash
+  register: windmill_worker_repo_checkout_compat_validation
+  changed_when: false
+  when:
+    - windmill_worker_repo_checkout_compat_path.stat.exists | default(false)
+    - windmill_worker_repo_checkout_compat_path.stat.isdir | default(false)
+
+- name: Remove a legacy controller-style compatibility directory once it is mirrored into the worker checkout
+  ansible.builtin.file:
+    path: "{{ windmill_worker_repo_checkout_compat_root }}"
+    state: absent
+  when:
+    - windmill_worker_repo_checkout_compat_path.stat.exists | default(false)
+    - windmill_worker_repo_checkout_compat_path.stat.isdir | default(false)
+    - windmill_worker_repo_checkout_compat_validation.stdout_lines | default([]) | last == "safe"
+
+- name: Ensure the worker checkout is reachable through the controller-style compatibility path
+  ansible.builtin.file:
+    src: "{{ windmill_worker_repo_checkout_host_path }}"
+    dest: "{{ windmill_worker_repo_checkout_compat_root }}"
+    state: link
+
 - name: Ensure the Windmill worker checkout secret directories exist
   ansible.builtin.file:
     path: "{{ item.path }}"

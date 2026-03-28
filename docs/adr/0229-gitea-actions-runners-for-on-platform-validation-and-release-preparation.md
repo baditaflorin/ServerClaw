@@ -1,9 +1,10 @@
 # ADR 0229: Gitea Actions Runners For On-Platform Validation And Release Preparation
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.165.0
+- Implemented In Platform Version: 0.130.15
+- Implemented On: 2026-03-26
 - Date: 2026-03-28
 
 ## Context

@@ -1,12 +1,13 @@
-# Release 0.177.43
+# Release 0.177.48
 
 - Date: 2026-03-28
 
 ## Summary
-- implemented ADR 0225 by installing a durable server-resident ansible-pull reconcile loop on proxmox_florin, bootstrapping a least-privilege Gitea pull identity, and verifying host-local receipts through the private Gitea source
+- verifies ADR 0224 from the latest mainline by carrying the host-resident supervisor baseline into repo truth and re-proving that reconciliation, supervision, validation, and approval now run through server-resident platform surfaces
+- implemented ADR 0226 by installing the repo-managed systemd service, timer, and path baseline for host-resident control loops on proxmox_florin and verifying both manual and path-triggered reconcile passes
 
 ## Platform Impact
-- bump platform version after the ADR 0225 merged-main server-resident reconcile replay confirms the private Gitea-backed ansible-pull loop is live from the final integrated commit on proxmox_florin
+- platform version 0.130.42 will record the first exact-main verification of ADR 0224 server-resident operations as the default control model while integrating the already-live ADR 0226 host control-loop baseline into the merged repository
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

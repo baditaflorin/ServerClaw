@@ -22,3 +22,26 @@ common_wait_port_port: 0
 common_wait_port_delay: 0
 common_wait_port_timeout: 120
 common_wait_port_state: started
+
+common_openbao_systemd_credentials_service_name: ""
+common_openbao_systemd_credentials_agent_dir: ""
+common_openbao_systemd_credentials_credential_dir: ""
+common_openbao_systemd_credentials_credential_file: ""
+common_openbao_systemd_credentials_token_file: ""
+common_openbao_systemd_credentials_secret_path: ""
+common_openbao_systemd_credentials_secret_payload: {}
+common_openbao_systemd_credentials_policy_name: ""
+common_openbao_systemd_credentials_policy_rules: ""
+common_openbao_systemd_credentials_approle_name: ""
+common_openbao_systemd_credentials_agent_config_file: ""
+common_openbao_systemd_credentials_agent_template_file: ""
+common_openbao_systemd_credentials_agent_template_local_file: ""
+common_openbao_systemd_credentials_agent_template_src: ""
+common_openbao_systemd_credentials_agent_template_content: ""
+common_openbao_systemd_credentials_role_id_file: ""
+common_openbao_systemd_credentials_secret_id_file: ""
+common_openbao_systemd_credentials_image: ""
+common_openbao_systemd_credentials_container_entrypoint: /bin/vault
+common_openbao_systemd_credentials_agent_service_name: ""
+common_openbao_systemd_credentials_container_name: ""
+common_openbao_systemd_credentials_openbao_address: ""

@@ -25,7 +25,14 @@ if str(REPO_ROOT) not in sys.path:
 if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
     del sys.modules["platform"]
 
-from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path, write_json
+from controller_automation_toolkit import (
+    emit_cli_error,
+    load_json,
+    load_yaml,
+    repo_path,
+    resolve_repo_local_path,
+    write_json,
+)
 from maintenance_window_tool import list_active_windows_best_effort, suppress_findings_for_maintenance
 from platform.events import build_envelope
 from tls_cert_probe import collect_certificate_results
@@ -120,7 +127,9 @@ def load_observation_context() -> dict[str, Any]:
     host_vars = load_yaml(HOST_VARS_PATH)
     group_vars = load_yaml(GROUP_VARS_PATH)
     secret_manifest = load_json(SECRET_MANIFEST_PATH)
-    bootstrap_key = Path(secret_manifest["secrets"]["bootstrap_ssh_private_key"]["path"]).expanduser()
+    bootstrap_key = resolve_repo_local_path(
+        secret_manifest["secrets"]["bootstrap_ssh_private_key"]["path"]
+    )
 
     guests = {
         guest["name"]: guest["ipv4"]
@@ -688,7 +697,7 @@ def check_secret_ages(context: dict[str, Any], run_id: str) -> dict[str, Any]:
             continue
 
         if manifest_entry["kind"] == "file":
-            secret_path = Path(manifest_entry["path"]).expanduser()
+            secret_path = resolve_repo_local_path(manifest_entry["path"])
             detail["path"] = str(secret_path)
             if not secret_path.exists():
                 detail["status"] = "missing_local_file"
@@ -928,7 +937,7 @@ def maybe_read_secret_path(secret_manifest: dict[str, Any], secret_id: str) -> s
     secret = secret_manifest["secrets"].get(secret_id)
     if secret is None or secret.get("kind") != "file":
         return None
-    path = Path(secret["path"]).expanduser()
+    path = resolve_repo_local_path(secret["path"])
     if not path.exists():
         return None
     return path.read_text().strip()

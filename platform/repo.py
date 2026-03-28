@@ -63,7 +63,7 @@ def _strip_inline_comment(value: str) -> str:
     return value.rstrip()
 
 
-def _split_key_value(content: str) -> tuple[str, str | None]:
+def _find_mapping_separator(content: str) -> int | None:
     in_single = False
     in_double = False
     for index, char in enumerate(content):
@@ -72,9 +72,17 @@ def _split_key_value(content: str) -> tuple[str, str | None]:
         elif char == '"' and not in_single:
             in_double = not in_double
         elif char == ":" and not in_single and not in_double:
-            key = content[:index].strip()
-            value = content[index + 1 :].strip()
-            return key, value
+            if index == len(content) - 1 or content[index + 1].isspace():
+                return index
+    return None
+
+
+def _split_key_value(content: str) -> tuple[str, str | None]:
+    separator_index = _find_mapping_separator(content)
+    if separator_index is not None:
+        key = content[:separator_index].strip()
+        value = content[separator_index + 1 :].strip()
+        return key, value
     raise ValueError(f"Unsupported YAML line (missing ':'): {content}")
 
 
@@ -167,7 +175,7 @@ def _load_yaml_without_pyyaml(path: Path) -> Any:
                     item = None
                 items.append(item)
                 continue
-            if ":" in item_content:
+            if _find_mapping_separator(item_content) is not None:
                 key, value = _split_key_value(item_content)
                 mapping: dict[str, Any] = {}
                 if value:

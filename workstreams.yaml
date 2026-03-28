@@ -14,6 +14,234 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0234-human-ux-adrs
+    adr: "0234"
+    title: Human user experience architecture bundle
+    status: merged
+    owner: codex
+    branch: codex/ws-0234-human-ux-adrs
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0234-human-ux-adrs
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md
+    depends_on:
+      - adr-0093-interactive-ops-portal
+      - adr-0094-developer-portal
+      - adr-0133-portal-authentication-by-default
+      - adr-0152-homepage
+      - adr-0193-plane
+      - adr-0199-outline
+      - adr-0209-use-case-services
+    conflicts_with: []
+    shared_surfaces:
+      - docs/adr/0234-shared-human-app-shell-and-navigation-via-patternfly.md
+      - docs/adr/0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher.md
+      - docs/adr/0236-server-state-and-mutation-feedback-via-tanstack-query.md
+      - docs/adr/0237-schema-first-human-forms-via-react-hook-form-and-zod.md
+      - docs/adr/0238-data-dense-operator-grids-via-ag-grid-community.md
+      - docs/adr/0239-browser-local-search-experience-via-pagefind.md
+      - docs/adr/0240-operator-visualization-panels-via-apache-echarts.md
+      - docs/adr/0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
+      - docs/adr/0242-guided-human-onboarding-via-shepherd-tours.md
+      - docs/adr/0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core.md
+      - docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md
+      - docs/adr/.index.yaml
+      - workstreams.yaml
+      - VERSION
+      - changelog.md
+      - RELEASE.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.47.md
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - build/platform-manifest.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: human_ux_bundle
+          paths:
+            - docs/adr/0234-shared-human-app-shell-and-navigation-via-patternfly.md
+            - docs/adr/0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher.md
+            - docs/adr/0236-server-state-and-mutation-feedback-via-tanstack-query.md
+            - docs/adr/0237-schema-first-human-forms-via-react-hook-form-and-zod.md
+            - docs/adr/0238-data-dense-operator-grids-via-ag-grid-community.md
+            - docs/adr/0239-browser-local-search-experience-via-pagefind.md
+            - docs/adr/0240-operator-visualization-panels-via-apache-echarts.md
+            - docs/adr/0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
+            - docs/adr/0242-guided-human-onboarding-via-shepherd-tours.md
+            - docs/adr/0243-component-stories-accessibility-and-ui-contracts-via-storybook-playwright-and-axe-core.md
+            - docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md
+            - docs/adr/.index.yaml
+          mode: exclusive
+        - id: integration_release_surfaces
+          paths:
+            - VERSION
+            - changelog.md
+            - RELEASE.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.47.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - build/platform-manifest.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: accepted ADRs 0234 through 0243 to define a coherent
+        human-first UX layer for the monolithic platform using mature open
+        source tools including PatternFly, TanStack Query, React Hook Form,
+        Zod, AG Grid Community, Pagefind, Apache ECharts, Tiptap, Shepherd.js,
+        Storybook, Playwright, and axe-core
+      release_bump: patch
+      included_in_repo_version: 0.177.47
+  - id: ws-0231-live-apply
+    adr: "0231"
+    title: Live apply ADR 0231 local secret delivery via OpenBao Agent and systemd credentials
+    status: ready
+    owner: codex
+    branch: codex/ws-0231-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0231-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0231-live-apply.md
+    depends_on:
+      - adr-0043-openbao
+      - adr-0051-control-plane-backup-recovery-and-break-glass
+      - adr-0077-compose-runtime-secrets-injection
+      - adr-0224-server-resident-operations-as-the-default-control-model
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0231-live-apply.md
+      - docs/adr/0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/configure-control-plane-recovery.md
+      - collections/ansible_collections/lv3/platform/roles/common/README.md
+      - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+      - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.hcl.j2
+      - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.service.j2
+      - collections/ansible_collections/lv3/platform/roles/control_plane_recovery/**
+      - tests/test_compose_runtime_secret_injection.py
+      - receipts/live-applies/2026-03-28-adr-0231-local-secret-delivery-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0231_live_apply
+          paths:
+            - docs/workstreams/ws-0231-live-apply.md
+            - docs/adr/0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials.md
+            - docs/adr/.index.yaml
+            - docs/runbooks/configure-control-plane-recovery.md
+            - collections/ansible_collections/lv3/platform/roles/common/README.md
+            - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+            - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.hcl.j2
+            - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.service.j2
+            - collections/ansible_collections/lv3/platform/roles/control_plane_recovery/**
+            - tests/test_compose_runtime_secret_injection.py
+            - receipts/live-applies/2026-03-28-adr-0231-local-secret-delivery-live-apply.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: implements ADR 0231 on the live control-plane recovery path by replacing the backup unit's plaintext OpenBao token and baked-in Windmill DSN with OpenBao Agent delivery through systemd credentials
+      release_bump: patch
+      included_in_repo_version: 0.177.45
+      latest_receipts:
+        control_plane_recovery: 2026-03-28-adr-0231-local-secret-delivery-live-apply
+  - id: ws-0231-main-merge
+    adr: "0231"
+    title: Integrate ADR 0231 live apply into origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0231-main-merge
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0231-main-merge
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0231-main-merge.md
+    depends_on:
+      - ws-0231-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0231-main-merge.md
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.45.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/adr/.index.yaml
+      - docs/adr/0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials.md
+      - docs/runbooks/configure-control-plane-recovery.md
+      - docs/workstreams/ws-0231-live-apply.md
+      - collections/ansible_collections/lv3/platform/roles/common/README.md
+      - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+      - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.hcl.j2
+      - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.service.j2
+      - collections/ansible_collections/lv3/platform/roles/control_plane_recovery/**
+      - platform/ansible/plane.py
+      - tests/test_compose_runtime_secret_injection.py
+      - receipts/live-applies/2026-03-28-adr-0231-local-secret-delivery-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws_0231_main_merge_doc
+          paths:
+            - docs/workstreams/ws-0231-main-merge.md
+          mode: exclusive
+        - id: adr_0231_mainline_truth
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.45.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: exclusive
+        - id: adr_0231_main_merge_surfaces
+          paths:
+            - docs/adr/.index.yaml
+            - docs/adr/0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials.md
+            - docs/runbooks/configure-control-plane-recovery.md
+            - docs/workstreams/ws-0231-live-apply.md
+            - collections/ansible_collections/lv3/platform/roles/common/README.md
+            - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+            - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.hcl.j2
+            - collections/ansible_collections/lv3/platform/roles/common/templates/openbao-agent-systemd-credentials.service.j2
+            - collections/ansible_collections/lv3/platform/roles/control_plane_recovery/**
+            - platform/ansible/plane.py
+            - tests/test_compose_runtime_secret_injection.py
+          mode: shared_contract
+          contract: adr-0231-main-merge-v1
+        - id: live_apply_evidence
+          paths:
+            - receipts/live-applies/2026-03-28-adr-0231-local-secret-delivery-live-apply.json
+          mode: shared_contract
+          contract: live-apply-receipts-v1
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: integrates ADR 0231 into main by replacing the control-plane backup service's plaintext OpenBao token and baked-in Windmill DSN with host-native OpenBao Agent delivery through systemd credentials
+      release_bump: patch
+      included_in_repo_version: 0.177.45
   - id: ws-0206-live-apply
     adr: "0206"
     title: Live apply ADR 0206 ports and adapters for external integrations
@@ -136,388 +364,6 @@ workstreams:
           mode: exclusive
     ready_to_merge: true
     live_applied: false
-  - id: ws-0205-live-apply
-    adr: "0205"
-    title: Live apply capability contracts before product selection
-    status: merged
-    owner: codex
-    branch: codex/ws-0205-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0205-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0205-capability-contracts-before-product-selection.md
-    depends_on:
-      - adr-0075-service-capability-catalog
-      - adr-0093-interactive-ops-portal
-      - adr-0132-self-describing-platform-manifest
-      - adr-0204-architecture-governance
-    conflicts_with: []
-    shared_surfaces:
-      - workstreams.yaml
-      - docs/workstreams/adr-0205-capability-contracts-before-product-selection.md
-      - docs/adr/0205-capability-contracts-before-product-selection.md
-      - docs/adr/.index.yaml
-      - config/capability-contract-catalog.json
-      - docs/schema/capability-contract-catalog.schema.json
-      - scripts/capability_contracts.py
-      - tests/test_capability_contracts.py
-      - scripts/platform_manifest.py
-      - docs/schema/platform-manifest.schema.json
-      - tests/test_platform_manifest.py
-      - build/platform-manifest.json
-      - scripts/ops_portal/app.py
-      - scripts/ops_portal/templates/partials/overview.html
-      - tests/test_interactive_ops_portal.py
-      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
-      - Makefile
-      - scripts/validate_repo.sh
-      - scripts/validate_repository_data_models.py
-      - config/validation-gate.json
-      - config/manifest-static.yaml
-      - .config-locations.yaml
-      - docs/runbooks/capability-contract-catalog.md
-      - docs/runbooks/add-a-new-service.md
-      - docs/runbooks/scaffold-new-service.md
-      - docs/runbooks/platform-manifest.md
-      - receipts/live-applies/evidence/2026-03-28-adr-0205-*.txt
-    ready_to_merge: true
-    live_applied: true
-    canonical_truth:
-      changelog_entry: implements ADR 0205 with a contract-first catalog for critical shared capabilities, repo validation for product selection inputs, and ops-portal plus manifest visibility for the current contract set
-      release_bump: patch
-      included_in_repo_version: 0.177.41
-      latest_receipts:
-        capability_contracts: 2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply
-        ops_portal: 2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply
-  - id: ws-0205-main-final
-    adr: "0205"
-    title: Integrate ADR 0205 live apply into origin/main
-    status: merged
-    owner: codex
-    branch: codex/ws-0205-main-final
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0205-main-final
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0205-main-final.md
-    depends_on:
-      - ws-0205-live-apply
-    conflicts_with: []
-    shared_surfaces:
-      - workstreams.yaml
-      - docs/workstreams/ws-0205-main-final.md
-      - README.md
-      - RELEASE.md
-      - VERSION
-      - changelog.md
-      - docs/release-notes/README.md
-      - docs/release-notes/*.md
-      - versions/stack.yaml
-      - build/platform-manifest.json
-      - docs/adr/0205-capability-contracts-before-product-selection.md
-      - docs/workstreams/adr-0205-capability-contracts-before-product-selection.md
-      - docs/adr/.index.yaml
-      - .config-locations.yaml
-      - Makefile
-      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
-      - config/capability-contract-catalog.json
-      - config/manifest-static.yaml
-      - config/validation-gate.json
-      - docs/runbooks/add-a-new-service.md
-      - docs/runbooks/capability-contract-catalog.md
-      - docs/runbooks/platform-manifest.md
-      - docs/runbooks/scaffold-new-service.md
-      - docs/schema/capability-contract-catalog.schema.json
-      - docs/schema/platform-manifest.schema.json
-      - scripts/capability_contracts.py
-      - scripts/ops_portal/app.py
-      - scripts/ops_portal/templates/partials/overview.html
-      - scripts/platform_manifest.py
-      - scripts/validate_repo.sh
-      - scripts/validate_repository_data_models.py
-      - tests/test_capability_contracts.py
-      - tests/test_interactive_ops_portal.py
-      - tests/test_platform_manifest.py
-      - receipts/live-applies/2026-03-28-adr-0205-capability-contracts-before-product-selection*.json
-      - receipts/live-applies/evidence/2026-03-28-adr-0205-*.txt
-    ownership_manifest:
-      owned_surfaces:
-        - id: workstream_registry
-          paths:
-            - workstreams.yaml
-          mode: shared_contract
-          contract: workstream-registry-v1
-        - id: adr_0205_mainline_contract_surface
-          paths:
-            - docs/workstreams/ws-0205-main-final.md
-            - README.md
-            - RELEASE.md
-            - VERSION
-            - changelog.md
-            - docs/release-notes/README.md
-            - docs/release-notes/*.md
-            - versions/stack.yaml
-            - build/platform-manifest.json
-            - docs/adr/0205-capability-contracts-before-product-selection.md
-            - docs/workstreams/adr-0205-capability-contracts-before-product-selection.md
-            - docs/adr/.index.yaml
-            - .config-locations.yaml
-            - Makefile
-            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
-            - config/capability-contract-catalog.json
-            - config/manifest-static.yaml
-            - config/validation-gate.json
-            - docs/runbooks/add-a-new-service.md
-            - docs/runbooks/capability-contract-catalog.md
-            - docs/runbooks/platform-manifest.md
-            - docs/runbooks/scaffold-new-service.md
-            - docs/schema/capability-contract-catalog.schema.json
-            - docs/schema/platform-manifest.schema.json
-            - scripts/capability_contracts.py
-            - scripts/ops_portal/app.py
-            - scripts/ops_portal/templates/partials/overview.html
-            - scripts/platform_manifest.py
-            - scripts/validate_repo.sh
-            - scripts/validate_repository_data_models.py
-            - tests/test_capability_contracts.py
-            - tests/test_interactive_ops_portal.py
-            - tests/test_platform_manifest.py
-            - receipts/live-applies/2026-03-28-adr-0205-capability-contracts-before-product-selection*.json
-            - receipts/live-applies/evidence/2026-03-28-adr-0205-*.txt
-          mode: shared_contract
-          contract: adr-0205-mainline-integration-v1
-    ready_to_merge: true
-    live_applied: true
-    canonical_truth:
-      changelog_entry: integrated ADR 0205 with the contract-first capability catalog, repo validation, platform manifest publication, and verified ops-portal visibility from merged mainline
-      release_bump: patch
-      included_in_repo_version: 0.177.41
-      latest_receipts:
-        capability_contracts: 2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply
-        ops_portal: 2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply
-  - id: ws-0207-live-apply
-    adr: "0207"
-    title: Anti-corruption layers at provider boundaries live apply
-    status: live_applied
-    owner: codex
-    branch: codex/ws-0207-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0207-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md
-    depends_on:
-      - adr-0206-ports-and-adapters-for-external-integrations
-      - adr-0210-canonical-domain-models-over-vendor-schemas
-      - adr-0213-architecture-fitness-functions-in-the-validation-gate
-    conflicts_with: []
-    shared_surfaces:
-      - workstreams.yaml
-      - docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md
-      - docs/adr/0207-anti-corruption-layers-at-provider-boundaries.md
-      - docs/adr/.index.yaml
-      - config/provider-boundary-catalog.yaml
-      - config/ansible-role-idempotency.yml
-      - .config-locations.yaml
-      - scripts/check_role_argument_specs.sh
-      - scripts/controller_automation_toolkit.py
-      - scripts/provider_boundary_catalog.py
-      - scripts/remote_exec.sh
-      - scripts/validate_repo.sh
-      - config/validation-gate.json
-      - collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/
-      - collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/
-      - platform/ansible/plane.py
-      - docs/runbooks/remote-build-gateway.md
-      - docs/runbooks/subdomain-governance.md
-      - docs/runbooks/validate-repository-automation.md
-      - docs/runbooks/validation-gate.md
-      - tests/test_plane_client.py
-      - tests/test_remote_exec.py
-      - tests/test_provider_boundary_catalog.py
-      - tests/test_hetzner_dns_record_role.py
-      - tests/test_hetzner_dns_records_role.py
-      - tests/test_post_merge_gate.py
-      - tests/test_validate_repo_cache.py
-      - tests/test_windmill_operator_admin_app.py
-      - config/windmill/scripts/post-merge-gate.py
-      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
-      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
-      - receipts/live-applies/2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply.json
-    ownership_manifest:
-      owned_surfaces:
-        - id: workstream_registry
-          paths:
-            - workstreams.yaml
-          mode: shared_contract
-          contract: workstream-registry-v1
-        - id: adr_0207_provider_boundary_repo_surface
-          paths:
-            - docs/adr/0207-anti-corruption-layers-at-provider-boundaries.md
-            - docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md
-            - docs/adr/.index.yaml
-            - config/provider-boundary-catalog.yaml
-            - .config-locations.yaml
-            - scripts/provider_boundary_catalog.py
-            - collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/**
-            - collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/**
-            - docs/runbooks/subdomain-governance.md
-            - platform/ansible/plane.py
-            - config/windmill/scripts/post-merge-gate.py
-            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
-            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
-            - tests/test_plane_client.py
-            - tests/test_post_merge_gate.py
-            - tests/test_provider_boundary_catalog.py
-            - tests/test_hetzner_dns_record_role.py
-            - tests/test_hetzner_dns_records_role.py
-            - tests/test_windmill_operator_admin_app.py
-            - receipts/live-applies/2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply.json
-          mode: exclusive
-        - id: validation_gate_contract
-          paths:
-            - scripts/check_role_argument_specs.sh
-            - scripts/controller_automation_toolkit.py
-            - scripts/remote_exec.sh
-            - scripts/validate_repo.sh
-            - config/validation-gate.json
-            - docs/runbooks/remote-build-gateway.md
-            - docs/runbooks/validate-repository-automation.md
-            - docs/runbooks/validation-gate.md
-            - tests/test_remote_exec.py
-            - tests/test_validate_repo_cache.py
-          mode: shared_contract
-          contract: plane-validation-v1
-        - id: plane_validation_surfaces
-          paths:
-            - config/ansible-role-idempotency.yml
-          mode: shared_contract
-          contract: plane-validation-v1
-    ready_to_merge: true
-    live_applied: true
-    canonical_truth:
-      changelog_entry: implemented ADR 0207 by translating Hetzner DNS provider payloads into canonical DNS facts at the boundary and by enforcing that contract in both the repository validation path and the live post-merge validation gate
-      release_bump: patch
-      included_in_repo_version: 0.177.42
-      latest_receipts:
-        provider_boundaries: 2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply
-  - id: ws-0207-main-merge
-    adr: "0207"
-    title: Integrate ADR 0207 live apply into origin/main
-    status: merged
-    owner: codex
-    branch: codex/ws-0207-main-recut
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0207-main-recut
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0207-main-merge.md
-    depends_on:
-      - ws-0207-live-apply
-    conflicts_with: []
-    shared_surfaces:
-      - workstreams.yaml
-      - docs/workstreams/ws-0207-main-merge.md
-      - .config-locations.yaml
-      - config/provider-boundary-catalog.yaml
-      - config/ansible-role-idempotency.yml
-      - config/validation-gate.json
-      - collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/
-      - collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/
-      - docs/runbooks/remote-build-gateway.md
-      - docs/runbooks/subdomain-governance.md
-      - docs/runbooks/validate-repository-automation.md
-      - docs/runbooks/validation-gate.md
-      - scripts/check_role_argument_specs.sh
-      - scripts/controller_automation_toolkit.py
-      - scripts/provider_boundary_catalog.py
-      - scripts/remote_exec.sh
-      - scripts/validate_repo.sh
-      - platform/ansible/plane.py
-      - tests/test_plane_client.py
-      - tests/test_provider_boundary_catalog.py
-      - tests/test_hetzner_dns_record_role.py
-      - tests/test_hetzner_dns_records_role.py
-      - tests/test_post_merge_gate.py
-      - tests/test_remote_exec.py
-      - tests/test_validate_repo_cache.py
-      - tests/test_windmill_operator_admin_app.py
-      - config/windmill/scripts/post-merge-gate.py
-      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
-      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
-      - README.md
-      - VERSION
-      - changelog.md
-      - RELEASE.md
-      - docs/release-notes/README.md
-      - versions/stack.yaml
-      - build/platform-manifest.json
-      - docs/diagrams/agent-coordination-map.excalidraw
-      - docs/adr/0207-anti-corruption-layers-at-provider-boundaries.md
-      - docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md
-      - docs/adr/.index.yaml
-      - receipts/live-applies/2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply.json
-    ownership_manifest:
-      owned_surfaces:
-        - id: workstream_registry
-          paths:
-            - workstreams.yaml
-          mode: shared_contract
-          contract: workstream-registry-v1
-        - id: ws_0207_main_merge_doc
-          paths:
-            - docs/workstreams/ws-0207-main-merge.md
-          mode: exclusive
-        - id: adr_0207_provider_boundary_mainline_surface
-          paths:
-            - .config-locations.yaml
-            - config/provider-boundary-catalog.yaml
-            - collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/**
-            - collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/**
-            - docs/runbooks/subdomain-governance.md
-            - docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md
-            - platform/ansible/plane.py
-            - scripts/provider_boundary_catalog.py
-            - config/windmill/scripts/post-merge-gate.py
-            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
-            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
-            - tests/test_plane_client.py
-            - tests/test_post_merge_gate.py
-            - tests/test_provider_boundary_catalog.py
-            - tests/test_hetzner_dns_record_role.py
-            - tests/test_hetzner_dns_records_role.py
-            - tests/test_windmill_operator_admin_app.py
-            - receipts/live-applies/2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply.json
-          mode: exclusive
-        - id: adr_0207_architecture_contract
-          paths:
-            - docs/adr/0207-anti-corruption-layers-at-provider-boundaries.md
-            - docs/adr/.index.yaml
-          mode: shared_contract
-          contract: architecture-governance-v1
-        - id: validation_gate_contract
-          paths:
-            - scripts/check_role_argument_specs.sh
-            - scripts/controller_automation_toolkit.py
-            - scripts/remote_exec.sh
-            - scripts/validate_repo.sh
-            - config/validation-gate.json
-            - docs/runbooks/remote-build-gateway.md
-            - docs/runbooks/validate-repository-automation.md
-            - docs/runbooks/validation-gate.md
-            - tests/test_remote_exec.py
-            - tests/test_validate_repo_cache.py
-          mode: shared_contract
-          contract: plane-validation-v1
-        - id: plane_validation_surfaces
-          paths:
-            - config/ansible-role-idempotency.yml
-          mode: shared_contract
-          contract: plane-validation-v1
-        - id: adr_0207_mainline_truth
-          paths:
-            - README.md
-            - VERSION
-            - changelog.md
-            - RELEASE.md
-            - docs/release-notes/README.md
-            - docs/release-notes/*.md
-            - versions/stack.yaml
-            - build/platform-manifest.json
-            - docs/diagrams/agent-coordination-map.excalidraw
-          mode: shared_contract
-          contract: integration-release-v1
-    ready_to_merge: true
-    live_applied: false
   - id: ws-0224-server-resident-ops-adrs
     adr: "0224"
     title: Server-resident operations architecture bundle
@@ -591,7 +437,147 @@ workstreams:
     canonical_truth:
       changelog_entry: accepted ADRs 0224 through 0233 to move routine platform operation from the Codex chat session into server-resident control loops and mature tools including Ansible Pull, systemd, Windmill, Gitea Actions runners, OPA, OpenBao Agent, Nomad, and signed release bundles
       release_bump: patch
-      included_in_repo_version: 0.177.41
+      included_in_repo_version: 0.177.33
+  - id: ws-0226-live-apply
+    adr: "0226"
+    title: Live apply ADR 0226 systemd host-resident control-loop supervision
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0226-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0226-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0226-live-apply.md
+    depends_on:
+      - adr-0204-self-correcting-automation-loops
+      - adr-0220-bootstrap-and-recovery-sequencing-for-environment-cells
+      - adr-0224-server-resident-operations-as-the-default-control-model
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0226-live-apply.md
+      - docs/adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/configure-host-control-loops.md
+      - Makefile
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - playbooks/proxmox-install.yml
+      - collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/**
+      - tests/test_proxmox_host_control_loops_role.py
+      - receipts/live-applies/2026-03-28-adr-0226-host-control-loops-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0226_live_apply
+          paths:
+            - docs/workstreams/ws-0226-live-apply.md
+            - docs/adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
+            - docs/adr/.index.yaml
+            - docs/runbooks/configure-host-control-loops.md
+            - Makefile
+            - config/workflow-catalog.json
+            - config/command-catalog.json
+            - playbooks/proxmox-install.yml
+            - collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/**
+            - tests/test_proxmox_host_control_loops_role.py
+            - receipts/live-applies/2026-03-28-adr-0226-host-control-loops-live-apply.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0226 by installing the repo-managed systemd service, timer, and path baseline for host-resident control loops on proxmox_florin and verifying both manual and path-triggered reconcile passes
+      release_bump: patch
+      included_in_repo_version: 0.177.48
+      latest_receipts:
+        host_control_loops: 2026-03-28-adr-0226-host-control-loops-live-apply
+  - id: ws-0224-live-apply
+    adr: "0224"
+    title: Live apply ADR 0224 server-resident operations as the default control model
+    status: ready
+    owner: codex
+    branch: codex/ws-0224-live-apply-r3
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0224-live-apply-r3
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0224-live-apply.md
+    depends_on:
+      - adr-0143-gitea
+      - adr-0204-self-correcting-automation-loops
+      - adr-0225-server-resident-reconciliation-via-ansible-pull
+      - adr-0226-systemd-units-timers-and-paths-for-host-resident-control-loops
+      - adr-0227-bounded-command-execution-via-systemd-run-and-approved-wrappers
+      - adr-0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation
+      - adr-0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0224-live-apply.md
+      - docs/workstreams/ws-0226-live-apply.md
+      - docs/adr/0224-server-resident-operations-as-the-default-control-model.md
+      - docs/adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/server-resident-reconciliation.md
+      - docs/runbooks/configure-host-control-loops.md
+      - Makefile
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - playbooks/proxmox-install.yml
+      - collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/**
+      - tests/test_proxmox_host_control_loops_role.py
+      - receipts/live-applies/**
+      - README.md
+      - VERSION
+      - changelog.md
+      - RELEASE.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0224_live_apply
+          paths:
+            - docs/workstreams/ws-0224-live-apply.md
+            - docs/workstreams/ws-0226-live-apply.md
+            - docs/adr/0224-server-resident-operations-as-the-default-control-model.md
+            - docs/adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
+            - docs/adr/.index.yaml
+            - docs/runbooks/server-resident-reconciliation.md
+            - docs/runbooks/configure-host-control-loops.md
+            - Makefile
+            - config/workflow-catalog.json
+            - config/command-catalog.json
+            - playbooks/proxmox-install.yml
+            - collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops/**
+            - tests/test_proxmox_host_control_loops_role.py
+            - receipts/live-applies/**
+          mode: shared_contract
+          contract: adr-0224-live-apply-v1
+        - id: integration_release_surfaces
+          paths:
+            - README.md
+            - VERSION
+            - changelog.md
+            - RELEASE.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: verifies ADR 0224 from the latest mainline by carrying the host-resident supervisor baseline into repo truth and re-proving that reconciliation, supervision, validation, and approval now run through server-resident platform surfaces
+      release_bump: patch
+      included_in_repo_version: 0.177.48
   - id: ws-0210-live-apply
     adr: "0210"
     title: Live apply canonical publication models over adapter-shaped vendor fields
@@ -7235,83 +7221,6 @@ workstreams:
           correction_loop_id: runtime_self_correction_watchers
           state: ESCALATED_FOR_APPROVAL
 
-  - id: ws-0225-live-apply
-    adr: "0225"
-    title: Server-resident reconciliation via ansible-pull live apply
-    status: live_applied
-    owner: codex
-    branch: codex/ws-0225-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0225-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0225-live-apply.md
-    depends_on:
-      - adr-0143-gitea
-      - adr-0165-workflow-idempotency
-      - adr-0168-idempotency-ci
-      - adr-0224-server-resident-operations-architecture-bundle
-    conflicts_with: []
-    shared_surfaces:
-      - README.md
-      - VERSION
-      - changelog.md
-      - config/ansible-role-idempotency.yml
-      - docs/adr/0225-server-resident-reconciliation-via-ansible-pull.md
-      - docs/release-notes/README.md
-      - docs/release-notes/0.177.43.md
-      - docs/workstreams/ws-0225-live-apply.md
-      - docs/runbooks/server-resident-reconciliation.md
-      - docs/diagrams/agent-coordination-map.excalidraw
-      - playbooks/server-resident-reconciliation.yml
-      - build/platform-manifest.json
-      - collections/ansible_collections/lv3/platform/roles/server_resident_reconciliation/**
-      - receipts/live-applies/2026-03-28-adr-0225-server-resident-reconciliation-via-ansible-pull-live-apply.json
-      - receipts/live-applies/evidence/2026-03-28-adr-0225-*
-      - tests/test_server_resident_reconciliation.py
-      - docs/adr/.index.yaml
-      - versions/stack.yaml
-      - workstreams.yaml
-    ownership_manifest:
-      owned_surfaces:
-        - id: workstream_registry
-          paths:
-            - workstreams.yaml
-          mode: shared_contract
-          contract: workstream-registry-v1
-        - id: adr_0225_repo_surface
-          paths:
-            - docs/adr/0225-server-resident-reconciliation-via-ansible-pull.md
-            - docs/workstreams/ws-0225-live-apply.md
-            - docs/runbooks/server-resident-reconciliation.md
-            - playbooks/server-resident-reconciliation.yml
-            - collections/ansible_collections/lv3/platform/roles/server_resident_reconciliation/**
-            - tests/test_server_resident_reconciliation.py
-            - docs/adr/.index.yaml
-          mode: exclusive
-        - id: adr_0225_mainline_truth
-          paths:
-            - README.md
-            - VERSION
-            - changelog.md
-            - config/ansible-role-idempotency.yml
-            - docs/release-notes/README.md
-            - docs/release-notes/0.177.43.md
-            - docs/diagrams/agent-coordination-map.excalidraw
-            - build/platform-manifest.json
-            - versions/stack.yaml
-          mode: exclusive
-        - id: adr_0225_live_evidence
-          paths:
-            - receipts/live-applies/2026-03-28-adr-0225-server-resident-reconciliation-via-ansible-pull-live-apply.json
-            - receipts/live-applies/evidence/2026-03-28-adr-0225-*
-          mode: exclusive
-    ready_to_merge: true
-    live_applied: true
-    canonical_truth:
-      changelog_entry: implemented ADR 0225 by installing a durable server-resident ansible-pull reconcile loop on proxmox_florin, bootstrapping a least-privilege Gitea pull identity, and verifying host-local receipts through the private Gitea source
-      release_bump: patch
-      included_in_repo_version: 0.177.43
-      latest_receipts:
-        server_resident_reconciliation: 2026-03-28-adr-0225-server-resident-reconciliation-via-ansible-pull-live-apply
-
   - id: ws-0021-edge-cert-repair
     adr: "0021"
     title: Repair shared edge certificate expansion during service-specific converges
@@ -7354,307 +7263,3 @@ workstreams:
       included_in_repo_version: 0.177.28
       latest_receipts:
         public_edge_publication: 2026-03-28-adr-0021-shared-edge-certificate-repair-mainline-live-apply
-
-  - id: ws-0208-live-apply
-    adr: "0208"
-    title: Dependency direction and composition roots live apply
-    status: live_applied
-    owner: codex
-    branch: codex/ws-0208-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0208-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0208-live-apply.md
-    depends_on:
-      - adr-0204-architecture-governance
-      - adr-0206-ports-and-adapters-for-external-integrations
-    conflicts_with: []
-    shared_surfaces:
-      - workstreams.yaml
-      - docs/adr/0208-dependency-direction-and-composition-roots.md
-      - docs/workstreams/ws-0208-live-apply.md
-      - docs/runbooks/validate-repository-automation.md
-      - docs/adr/.index.yaml
-      - config/validation-gate.json
-      - Makefile
-      - scripts/validate_repo.sh
-      - scripts/validate_dependency_direction.py
-      - scripts/controller_automation_toolkit.py
-      - scripts/repo_package_loader.py
-      - scripts/session_workspace.py
-      - scripts/run_namespace.py
-      - scripts/parse_ansible_drift.py
-      - scripts/lv3_cli.py
-      - config/windmill/scripts/platform-observation-loop.py
-      - platform/repo.py
-      - platform/catalogs.py
-      - platform/package_loader.py
-      - platform/session_workspace.py
-      - platform/run_namespace.py
-      - platform/ansible_drift.py
-      - platform/events/
-      - platform/correction_loops.py
-      - platform/mutation_audit.py
-      - platform/maintenance/
-      - platform/slo.py
-      - platform/ansible/execution_scopes.py
-      - platform/agent/
-      - platform/closure_loop/engine.py
-      - platform/config_merge/registry.py
-      - platform/diff_engine/
-      - platform/goal_compiler/compiler.py
-      - platform/graph/client.py
-      - platform/health/composite.py
-      - platform/interface_contracts.py
-      - platform/use_cases/runbooks.py
-      - platform/ledger/
-      - platform/live_apply/merge_train.py
-      - platform/scheduler/watchdog.py
-      - platform/world_state/workers.py
-      - tests/test_validate_dependency_direction.py
-      - tests/test_dependency_direction_gate.py
-      - tests/test_health_composite.py
-      - tests/test_lv3_cli.py
-    ownership_manifest:
-      owned_surfaces:
-        - id: workstream_registry
-          paths:
-            - workstreams.yaml
-          mode: shared_contract
-          contract: workstream-registry-v1
-        - id: adr_index_contract
-          paths:
-            - docs/adr/.index.yaml
-          mode: shared_contract
-          contract: adr-index-v1
-        - id: adr_metadata_contract
-          paths:
-            - docs/adr/0208-dependency-direction-and-composition-roots.md
-          mode: shared_contract
-          contract: adr-metadata-v1
-        - id: lv3_cli_composition_root_contract
-          paths:
-            - scripts/lv3_cli.py
-          mode: shared_contract
-          contract: lv3-cli-composition-root-v1
-        - id: repo_validation_pipeline_contract
-          paths:
-            - config/validation-gate.json
-            - docs/runbooks/validate-repository-automation.md
-            - scripts/validate_dependency_direction.py
-            - scripts/validate_repo.sh
-          mode: shared_contract
-          contract: repo-validation-pipeline-v1
-        - id: makefile_validation_contract
-          paths:
-            - Makefile
-          mode: shared_contract
-          contract: makefile-validation-targets-v1
-        - id: dependency_direction_repo_surface
-          paths:
-            - docs/workstreams/ws-0208-live-apply.md
-            - platform/repo.py
-            - platform/catalogs.py
-            - platform/package_loader.py
-            - platform/session_workspace.py
-            - platform/run_namespace.py
-            - platform/ansible_drift.py
-            - platform/events/**
-            - platform/correction_loops.py
-            - platform/mutation_audit.py
-            - platform/maintenance/**
-            - platform/slo.py
-            - platform/ansible/execution_scopes.py
-            - platform/agent/**
-            - platform/closure_loop/engine.py
-            - platform/config_merge/registry.py
-            - platform/diff_engine/**
-            - platform/goal_compiler/compiler.py
-            - platform/graph/client.py
-            - platform/health/composite.py
-            - platform/interface_contracts.py
-            - platform/use_cases/runbooks.py
-            - platform/ledger/**
-            - platform/live_apply/merge_train.py
-            - platform/scheduler/watchdog.py
-            - platform/world_state/workers.py
-            - scripts/controller_automation_toolkit.py
-            - scripts/repo_package_loader.py
-            - scripts/session_workspace.py
-            - scripts/run_namespace.py
-            - scripts/parse_ansible_drift.py
-            - config/windmill/scripts/platform-observation-loop.py
-            - tests/test_validate_dependency_direction.py
-            - tests/test_dependency_direction_gate.py
-            - tests/test_health_composite.py
-            - tests/test_lv3_cli.py
-          mode: exclusive
-        - id: live_apply_evidence
-          paths:
-            - receipts/live-applies/2026-03-28-adr-0208-dependency-direction-and-composition-roots-live-apply.json
-          mode: shared_contract
-          contract: live-apply-receipts-v1
-        - id: integration_truth
-          paths:
-            - VERSION
-            - changelog.md
-            - README.md
-            - versions/stack.yaml
-          mode: generated
-    ready_to_merge: false
-    live_applied: true
-    canonical_truth:
-      changelog_entry: implemented ADR 0208 by moving reusable helpers under `platform/`, enforcing inward dependency-direction validation, and wiring explicit composition roots at the CLI and Windmill observation-loop edges
-      release_bump: patch
-      included_in_repo_version: 0.177.40
-
-  - id: ws-0208-main-merge
-    adr: "0208"
-    title: Integrate ADR 0208 live apply into origin/main
-    status: merged
-    owner: codex
-    branch: codex/ws-0208-main-merge
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0208-main-merge
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0208-main-merge.md
-    depends_on:
-      - ws-0208-live-apply
-    conflicts_with: []
-    shared_surfaces:
-      - workstreams.yaml
-      - docs/workstreams/ws-0208-main-merge.md
-      - README.md
-      - RELEASE.md
-      - VERSION
-      - changelog.md
-      - docs/release-notes/README.md
-      - docs/release-notes/0.177.40.md
-      - versions/stack.yaml
-      - build/platform-manifest.json
-      - docs/diagrams/agent-coordination-map.excalidraw
-      - docs/site-generated/architecture/dependency-graph.md
-      - docs/adr/0208-dependency-direction-and-composition-roots.md
-      - docs/workstreams/ws-0208-live-apply.md
-      - docs/adr/.index.yaml
-      - docs/runbooks/validate-repository-automation.md
-      - config/validation-gate.json
-      - Makefile
-      - config/windmill/scripts/platform-observation-loop.py
-      - platform/repo.py
-      - platform/catalogs.py
-      - platform/package_loader.py
-      - platform/session_workspace.py
-      - platform/run_namespace.py
-      - platform/ansible_drift.py
-      - platform/events/
-      - platform/correction_loops.py
-      - platform/mutation_audit.py
-      - platform/maintenance/
-      - platform/slo.py
-      - platform/ansible/execution_scopes.py
-      - platform/agent/
-      - platform/closure_loop/engine.py
-      - platform/config_merge/registry.py
-      - platform/diff_engine/
-      - platform/goal_compiler/compiler.py
-      - platform/graph/client.py
-      - platform/health/composite.py
-      - platform/interface_contracts.py
-      - platform/use_cases/runbooks.py
-      - platform/ledger/
-      - platform/live_apply/merge_train.py
-      - platform/scheduler/watchdog.py
-      - platform/world_state/workers.py
-      - scripts/controller_automation_toolkit.py
-      - scripts/repo_package_loader.py
-      - scripts/session_workspace.py
-      - scripts/run_namespace.py
-      - scripts/parse_ansible_drift.py
-      - scripts/lv3_cli.py
-      - scripts/validate_dependency_direction.py
-      - scripts/validate_repo.sh
-      - tests/test_validate_dependency_direction.py
-      - tests/test_dependency_direction_gate.py
-      - tests/test_health_composite.py
-      - tests/test_lv3_cli.py
-      - receipts/live-applies/2026-03-28-adr-0208-dependency-direction-and-composition-roots-live-apply.json
-    ownership_manifest:
-      owned_surfaces:
-        - id: workstream_registry
-          paths:
-            - workstreams.yaml
-          mode: shared_contract
-          contract: workstream-registry-v1
-        - id: ws_0208_main_merge_doc
-          paths:
-            - docs/workstreams/ws-0208-main-merge.md
-          mode: exclusive
-        - id: adr_0208_mainline_truth
-          paths:
-            - README.md
-            - RELEASE.md
-            - VERSION
-            - changelog.md
-            - docs/release-notes/README.md
-            - docs/release-notes/0.177.40.md
-            - versions/stack.yaml
-            - build/platform-manifest.json
-            - docs/diagrams/agent-coordination-map.excalidraw
-            - docs/site-generated/architecture/dependency-graph.md
-          mode: exclusive
-        - id: dependency_direction_main_merge
-          paths:
-            - docs/adr/0208-dependency-direction-and-composition-roots.md
-            - docs/workstreams/ws-0208-live-apply.md
-            - docs/adr/.index.yaml
-            - docs/runbooks/validate-repository-automation.md
-            - config/validation-gate.json
-            - Makefile
-            - config/windmill/scripts/platform-observation-loop.py
-            - platform/repo.py
-            - platform/catalogs.py
-            - platform/package_loader.py
-            - platform/session_workspace.py
-            - platform/run_namespace.py
-            - platform/ansible_drift.py
-            - platform/events/**
-            - platform/correction_loops.py
-            - platform/mutation_audit.py
-            - platform/maintenance/**
-            - platform/slo.py
-            - platform/ansible/execution_scopes.py
-            - platform/agent/**
-            - platform/closure_loop/engine.py
-            - platform/config_merge/registry.py
-            - platform/diff_engine/**
-            - platform/goal_compiler/compiler.py
-            - platform/graph/client.py
-            - platform/health/composite.py
-            - platform/interface_contracts.py
-            - platform/use_cases/runbooks.py
-            - platform/ledger/**
-            - platform/live_apply/merge_train.py
-            - platform/scheduler/watchdog.py
-            - platform/world_state/workers.py
-            - scripts/controller_automation_toolkit.py
-            - scripts/repo_package_loader.py
-            - scripts/session_workspace.py
-            - scripts/run_namespace.py
-            - scripts/parse_ansible_drift.py
-            - scripts/lv3_cli.py
-            - scripts/validate_dependency_direction.py
-            - scripts/validate_repo.sh
-            - tests/test_validate_dependency_direction.py
-            - tests/test_dependency_direction_gate.py
-            - tests/test_health_composite.py
-            - tests/test_lv3_cli.py
-          mode: shared_contract
-          contract: dependency-direction-main-merge-v1
-        - id: live_apply_evidence
-          paths:
-            - receipts/live-applies/2026-03-28-adr-0208-dependency-direction-and-composition-roots-live-apply.json
-          mode: shared_contract
-          contract: live-apply-receipts-v1
-    ready_to_merge: true
-    live_applied: false
-    canonical_truth:
-      changelog_entry: integrated ADR 0208 into main by enforcing inward dependency direction for reusable platform code and preserving explicit composition roots at the runtime edges
-      release_bump: patch
-      included_in_repo_version: 0.177.40

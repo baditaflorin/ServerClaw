@@ -15,7 +15,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from controller_automation_toolkit import write_json
+from controller_automation_toolkit import resolve_repo_local_path, write_json
 from platform.faults import DockerSocketClient, FaultInjector, is_first_sunday_utc, load_scenario_catalog
 from platform.ledger import LedgerWriter
 
@@ -31,7 +31,7 @@ def maybe_read_secret_path(repo_root: Path, secret_id: str) -> str | None:
     secret = payload.get("secrets", {}).get(secret_id)
     if secret is None or secret.get("kind") != "file":
         return None
-    secret_path = Path(secret["path"]).expanduser()
+    secret_path = resolve_repo_local_path(secret["path"], repo_root=repo_root)
     if not secret_path.exists():
         return None
     return secret_path.read_text(encoding="utf-8").strip()

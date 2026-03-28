@@ -6,6 +6,7 @@ Available task entrypoints:
 
 - `assert_vars` validates required variables and optional extra assertions
 - `directory_tree` creates one or more directories with shared owner/group/mode defaults
+- `openbao_systemd_credentials` installs an OpenBao Agent plus systemd-credential bundle for host-native services
 - `systemd_unit` enables and starts a systemd unit with optional active-state verification
 - `wait_port` waits for a TCP listener with shared timeout defaults
 
