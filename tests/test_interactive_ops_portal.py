@@ -24,8 +24,57 @@ class FakeGatewayClient:
         self.platform_health_tokens.append(token)
         return {
             "services": [
-                {"service_id": "grafana", "status": "healthy", "detail": "Dashboards are green"},
-                {"service_id": "ops_portal", "status": "healthy", "detail": "Portal runtime is ready"},
+                {
+                    "service_id": "grafana",
+                    "status": "healthy",
+                    "composite_status": "healthy",
+                    "reason": "healthy probe result",
+                    "detail": "Dashboards are green",
+                    "computed_at": "2026-03-25T09:00:00Z",
+                    "signals": [
+                        {
+                            "name": "health_probe",
+                            "value": "healthy",
+                            "score": 1.0,
+                            "weight": 0.4,
+                            "reason": "healthy probe result",
+                        }
+                    ],
+                },
+                {
+                    "service_id": "keycloak",
+                    "status": "degraded",
+                    "composite_status": "degraded",
+                    "reason": "open incident inc-1",
+                    "detail": "Identity is degraded but still reachable",
+                    "computed_at": "2026-03-25T09:00:00Z",
+                    "signals": [
+                        {
+                            "name": "health_probe",
+                            "value": "degraded",
+                            "score": 0.5,
+                            "weight": 0.4,
+                            "reason": "service probe is degraded",
+                        }
+                    ],
+                },
+                {
+                    "service_id": "ops_portal",
+                    "status": "healthy",
+                    "composite_status": "healthy",
+                    "reason": "healthy probe result",
+                    "detail": "Portal runtime is ready",
+                    "computed_at": "2026-03-25T09:00:00Z",
+                    "signals": [
+                        {
+                            "name": "health_probe",
+                            "value": "healthy",
+                            "score": 1.0,
+                            "weight": 0.4,
+                            "reason": "healthy probe result",
+                        }
+                    ],
+                },
             ]
         }
 
@@ -341,6 +390,30 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
         + "\n",
         encoding="utf-8",
     )
+    (data_root / "receipts" / "live-applies" / "2026-03-24-grafana-runtime-assurance.json").write_text(
+        json.dumps(
+            {
+                "receipt_id": "receipt-grafana-runtime-assurance",
+                "environment": "production",
+                "summary": "Verified Grafana browser login, logout, HTTPS certificate posture, Loki queryability, and smoke flow.",
+                "workflow_id": "converge-grafana",
+                "recorded_on": "2026-03-24T18:00:00Z",
+                "recorded_by": "ops",
+                "verification": [
+                    {"check": "Browser login", "result": "pass"},
+                    {"check": "TLS posture", "result": "pass"},
+                    {"check": "Loki queryability", "result": "pass"},
+                ],
+                "notes": [
+                    "Playwright login and logout both passed.",
+                    "HTTPS and TLS certificate checks passed.",
+                    "Loki queryability is healthy."
+                ],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     (data_root / "receipts" / "drift-reports" / "latest.json").write_text(
         json.dumps(
             {
@@ -387,6 +460,8 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert response.status_code == 200
     assert "Interactive Ops Portal" in response.text
     assert "Platform Overview" in response.text
+    assert "Runtime Assurance" in response.text
+    assert "Scoreboard and rollup by active service and environment" in response.text
     assert "Deployment Console" in response.text
     assert "Agent Coordination" in response.text
     assert "agent/observation-loop" in response.text
@@ -401,6 +476,22 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert gateway.platform_health_tokens == ["test-token"]
     assert gateway.agent_coordination_tokens == ["test-token"]
     assert gateway.runbook_fetch_tokens == ["test-token"]
+
+
+def test_runtime_assurance_scoreboard_renders_service_rows(
+    portal_client: tuple[TestClient, FakeGatewayClient],
+) -> None:
+    client, _gateway = portal_client
+
+    response = client.get("/partials/overview")
+
+    assert response.status_code == 200
+    assert "Healthy Rows" in response.text
+    assert "Rows Needing Action" in response.text
+    assert "Grafana" in response.text
+    assert "Keycloak" in response.text
+    assert "production" in response.text
+    assert "lv3-platform" in response.text
 
 
 def test_dashboard_uses_same_origin_static_stylesheet(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:

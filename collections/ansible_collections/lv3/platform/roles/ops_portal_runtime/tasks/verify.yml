@@ -34,3 +34,19 @@
     status_code: 200
   register: ops_portal_verify_root
   changed_when: false
+
+- name: Verify the runtime assurance scoreboard partial renders locally
+  ansible.builtin.uri:
+    url: "http://{{ ops_portal_verify_address }}:{{ ops_portal_internal_port }}/partials/overview"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: ops_portal_verify_overview
+  changed_when: false
+
+- name: Assert the runtime assurance scoreboard is present
+  ansible.builtin.assert:
+    that:
+      - "'Runtime Assurance' in ops_portal_verify_overview.content"
+      - "'Scoreboard and rollup by active service and environment' in ops_portal_verify_overview.content"
+    fail_msg: "Ops portal overview rendered without the runtime assurance scoreboard."
