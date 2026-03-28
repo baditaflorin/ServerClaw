@@ -21,8 +21,11 @@ def load_module(path: Path, module_name: str):
 
 
 def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
+    defaults_text = (
+        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml"
+    ).read_text()
     defaults = yaml.safe_load(
-        (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
+        defaults_text
     )
 
     script_paths = {entry["path"] for entry in defaults["windmill_seed_scripts"]}
@@ -55,21 +58,36 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "config/windmill/scripts/gate-status.py",
     ]
     assert {
+        "README.md",
+        "VERSION",
         "ansible.cfg",
         "callback_plugins",
+        "changelog.md",
         "collections",
         "config",
         "docs",
         "filter_plugins",
         "inventory",
+        "mkdocs.yml",
         "migrations",
         "playbooks",
         "platform",
         "receipts",
         "scripts",
+        "versions",
         "windmill",
+        "workstreams.yaml",
+        "roles",
     }.issubset(set(defaults["windmill_worker_checkout_sync_paths"]))
     assert defaults["windmill_worker_checkout_checksum_file"] == "{{ windmill_site_dir }}/worker-checkout.sha256"
+    assert defaults["windmill_worker_checkout_manifest_remote_file"] == "{{ windmill_site_dir }}/worker-checkout-files.txt"
+    assert "windmill_worker_checkout_prune_preserve_paths" in defaults_text
+    assert "windmill_worker_repo_mutable_files" in defaults_text
+    assert "windmill_worker_runtime_writable_directories" in defaults_text
+    assert "windmill_worker_repo_secret_directories" in defaults_text
+    assert "windmill_worker_repo_secret_files" in defaults_text
+    assert "windmill_worker_proxmox_api_token_payload_dir" in defaults_text
+    assert "windmill_worker_superadmin_secret_file" in defaults_text
     assert defaults["windmill_worker_superadmin_secret_dir"] == "{{ windmill_worker_repo_checkout_host_path }}/.local/windmill"
     assert defaults["windmill_worker_superadmin_secret_file"] == "{{ windmill_worker_superadmin_secret_dir }}/superadmin-secret.txt"
     assert defaults["windmill_runtime_api_base_url"] == "http://127.0.0.1:{{ windmill_server_port }}"
@@ -337,8 +355,13 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "BASE_INTERNAL_URL" in tasks
     assert "windmill_runtime_api_base_url" in tasks
     assert "Build the local staging archive for the Windmill worker checkout" in tasks
+    assert "--exclude='._*'" in tasks
+    assert "--exclude='*/._*'" in tasks
+    assert "--exclude='.DS_Store'" in tasks
     assert "changed_when: false" in tasks
     assert "Expand the staged Windmill worker checkout on the guest" in tasks
+    assert "Find AppleDouble artifacts in the Windmill worker checkout" in tasks
+    assert "Remove AppleDouble artifacts from the Windmill worker checkout" in tasks
     assert "Find stale Python bytecode files in the Windmill worker checkout" in tasks
     assert "Remove stale Python bytecode files from the Windmill worker checkout" in tasks
     assert "Find stale Python bytecode cache directories in the Windmill worker checkout" in tasks
@@ -370,6 +393,15 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Flag the Windmill worker checkout for refresh when integrity sentinels drift" in tasks
     assert "windmill_worker_checkout_integrity_mismatch" in tasks
     assert "windmill_worker_checkout_sync_paths" in tasks
+    assert "Create a local manifest path for the Windmill worker checkout contents" in tasks
+    assert "Render the local manifest for the Windmill worker checkout contents" in tasks
+    assert "Copy the staged Windmill worker checkout manifest to the guest" in tasks
+    assert "Prune stale immutable files from the Windmill worker checkout" in tasks
+    assert "Removed stale immutable files from the Windmill worker checkout" in tasks
+    assert "Remove the remote manifest for the Windmill worker checkout contents" in tasks
+    assert "Remove the local manifest for the Windmill worker checkout contents" in tasks
+    assert "windmill_worker_checkout_manifest_remote_file" in tasks
+    assert "windmill_worker_checkout_prune_preserve_paths" in tasks
     assert "scripts/windmill_run_wait_result.py" in tasks
     assert "--payload-json" in tasks
     assert "--timeout {{ windmill_seed_job_timeout_seconds }}" in tasks

@@ -1,9 +1,10 @@
 # ADR 0207: Anti-Corruption Layers At Provider Boundaries
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.177.42
+- Implemented In Platform Version: 0.130.38
+- Implemented On: 2026-03-28
 - Date: 2026-03-28
 
 ## Context

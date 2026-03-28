@@ -350,6 +350,234 @@ workstreams:
       latest_receipts:
         capability_contracts: 2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply
         ops_portal: 2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply
+  - id: ws-0207-live-apply
+    adr: "0207"
+    title: Anti-corruption layers at provider boundaries live apply
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0207-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0207-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md
+    depends_on:
+      - adr-0206-ports-and-adapters-for-external-integrations
+      - adr-0210-canonical-domain-models-over-vendor-schemas
+      - adr-0213-architecture-fitness-functions-in-the-validation-gate
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md
+      - docs/adr/0207-anti-corruption-layers-at-provider-boundaries.md
+      - docs/adr/.index.yaml
+      - config/provider-boundary-catalog.yaml
+      - config/ansible-role-idempotency.yml
+      - .config-locations.yaml
+      - scripts/check_role_argument_specs.sh
+      - scripts/controller_automation_toolkit.py
+      - scripts/provider_boundary_catalog.py
+      - scripts/remote_exec.sh
+      - scripts/validate_repo.sh
+      - config/validation-gate.json
+      - collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/
+      - collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/
+      - platform/ansible/plane.py
+      - docs/runbooks/remote-build-gateway.md
+      - docs/runbooks/subdomain-governance.md
+      - docs/runbooks/validate-repository-automation.md
+      - docs/runbooks/validation-gate.md
+      - tests/test_plane_client.py
+      - tests/test_remote_exec.py
+      - tests/test_provider_boundary_catalog.py
+      - tests/test_hetzner_dns_record_role.py
+      - tests/test_hetzner_dns_records_role.py
+      - tests/test_post_merge_gate.py
+      - tests/test_validate_repo_cache.py
+      - tests/test_windmill_operator_admin_app.py
+      - config/windmill/scripts/post-merge-gate.py
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+      - receipts/live-applies/2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0207_provider_boundary_repo_surface
+          paths:
+            - docs/adr/0207-anti-corruption-layers-at-provider-boundaries.md
+            - docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md
+            - docs/adr/.index.yaml
+            - config/provider-boundary-catalog.yaml
+            - .config-locations.yaml
+            - scripts/provider_boundary_catalog.py
+            - collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/**
+            - collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/**
+            - docs/runbooks/subdomain-governance.md
+            - platform/ansible/plane.py
+            - config/windmill/scripts/post-merge-gate.py
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+            - tests/test_plane_client.py
+            - tests/test_post_merge_gate.py
+            - tests/test_provider_boundary_catalog.py
+            - tests/test_hetzner_dns_record_role.py
+            - tests/test_hetzner_dns_records_role.py
+            - tests/test_windmill_operator_admin_app.py
+            - receipts/live-applies/2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply.json
+          mode: exclusive
+        - id: validation_gate_contract
+          paths:
+            - scripts/check_role_argument_specs.sh
+            - scripts/controller_automation_toolkit.py
+            - scripts/remote_exec.sh
+            - scripts/validate_repo.sh
+            - config/validation-gate.json
+            - docs/runbooks/remote-build-gateway.md
+            - docs/runbooks/validate-repository-automation.md
+            - docs/runbooks/validation-gate.md
+            - tests/test_remote_exec.py
+            - tests/test_validate_repo_cache.py
+          mode: shared_contract
+          contract: plane-validation-v1
+        - id: plane_validation_surfaces
+          paths:
+            - config/ansible-role-idempotency.yml
+          mode: shared_contract
+          contract: plane-validation-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0207 by translating Hetzner DNS provider payloads into canonical DNS facts at the boundary and by enforcing that contract in both the repository validation path and the live post-merge validation gate
+      release_bump: patch
+      included_in_repo_version: 0.177.42
+      latest_receipts:
+        provider_boundaries: 2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply
+  - id: ws-0207-main-merge
+    adr: "0207"
+    title: Integrate ADR 0207 live apply into origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0207-main-recut
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0207-main-recut
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0207-main-merge.md
+    depends_on:
+      - ws-0207-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0207-main-merge.md
+      - .config-locations.yaml
+      - config/provider-boundary-catalog.yaml
+      - config/ansible-role-idempotency.yml
+      - config/validation-gate.json
+      - collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/
+      - collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/
+      - docs/runbooks/remote-build-gateway.md
+      - docs/runbooks/subdomain-governance.md
+      - docs/runbooks/validate-repository-automation.md
+      - docs/runbooks/validation-gate.md
+      - scripts/check_role_argument_specs.sh
+      - scripts/controller_automation_toolkit.py
+      - scripts/provider_boundary_catalog.py
+      - scripts/remote_exec.sh
+      - scripts/validate_repo.sh
+      - platform/ansible/plane.py
+      - tests/test_plane_client.py
+      - tests/test_provider_boundary_catalog.py
+      - tests/test_hetzner_dns_record_role.py
+      - tests/test_hetzner_dns_records_role.py
+      - tests/test_post_merge_gate.py
+      - tests/test_remote_exec.py
+      - tests/test_validate_repo_cache.py
+      - tests/test_windmill_operator_admin_app.py
+      - config/windmill/scripts/post-merge-gate.py
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+      - README.md
+      - VERSION
+      - changelog.md
+      - RELEASE.md
+      - docs/release-notes/README.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/adr/0207-anti-corruption-layers-at-provider-boundaries.md
+      - docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md
+      - docs/adr/.index.yaml
+      - receipts/live-applies/2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws_0207_main_merge_doc
+          paths:
+            - docs/workstreams/ws-0207-main-merge.md
+          mode: exclusive
+        - id: adr_0207_provider_boundary_mainline_surface
+          paths:
+            - .config-locations.yaml
+            - config/provider-boundary-catalog.yaml
+            - collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/**
+            - collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/**
+            - docs/runbooks/subdomain-governance.md
+            - docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md
+            - platform/ansible/plane.py
+            - scripts/provider_boundary_catalog.py
+            - config/windmill/scripts/post-merge-gate.py
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+            - tests/test_plane_client.py
+            - tests/test_post_merge_gate.py
+            - tests/test_provider_boundary_catalog.py
+            - tests/test_hetzner_dns_record_role.py
+            - tests/test_hetzner_dns_records_role.py
+            - tests/test_windmill_operator_admin_app.py
+            - receipts/live-applies/2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply.json
+          mode: exclusive
+        - id: adr_0207_architecture_contract
+          paths:
+            - docs/adr/0207-anti-corruption-layers-at-provider-boundaries.md
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: architecture-governance-v1
+        - id: validation_gate_contract
+          paths:
+            - scripts/check_role_argument_specs.sh
+            - scripts/controller_automation_toolkit.py
+            - scripts/remote_exec.sh
+            - scripts/validate_repo.sh
+            - config/validation-gate.json
+            - docs/runbooks/remote-build-gateway.md
+            - docs/runbooks/validate-repository-automation.md
+            - docs/runbooks/validation-gate.md
+            - tests/test_remote_exec.py
+            - tests/test_validate_repo_cache.py
+          mode: shared_contract
+          contract: plane-validation-v1
+        - id: plane_validation_surfaces
+          paths:
+            - config/ansible-role-idempotency.yml
+          mode: shared_contract
+          contract: plane-validation-v1
+        - id: adr_0207_mainline_truth
+          paths:
+            - README.md
+            - VERSION
+            - changelog.md
+            - RELEASE.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: integration-release-v1
+    ready_to_merge: true
+    live_applied: false
   - id: ws-0224-server-resident-ops-adrs
     adr: "0224"
     title: Server-resident operations architecture bundle
