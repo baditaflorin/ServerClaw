@@ -50,7 +50,69 @@ def write_repo_basics(repo_root: Path) -> None:
         + "\n",
         encoding="utf-8",
     )
+    (repo_root / "config" / "correction-loops.json").write_text(
+        json.dumps(
+            {
+                "$schema": "docs/schema/correction-loop-catalog.schema.json",
+                "schema_version": "1.0.0",
+                "required_workflow_ids": ["platform-observation-loop"],
+                "loops": [
+                    {
+                        "id": "runtime_self_correction_watchers",
+                        "description": "Observation loop contract.",
+                        "applies_to": {"workflow_ids": ["platform-observation-loop"]},
+                        "invariant": "Loop state stays durable and bounded.",
+                        "observation_sources": ["runs.json"],
+                        "diagnosis_taxonomy": [
+                            "transient_failure",
+                            "contract_drift",
+                            "dependency_outage",
+                            "stale_input",
+                            "irreversible_data_loss_risk",
+                        ],
+                        "repair_actions": [
+                            {
+                                "kind": "no_op",
+                                "summary": "Already healthy.",
+                                "requires_approval": False,
+                                "destructive": False,
+                            },
+                            {
+                                "kind": "reconcile",
+                                "summary": "Replay the bounded loop tick.",
+                                "requires_approval": False,
+                                "destructive": False,
+                            },
+                            {
+                                "kind": "escalate",
+                                "summary": "Escalate when the loop hits a safety boundary.",
+                                "requires_approval": True,
+                                "destructive": False,
+                            },
+                        ],
+                        "verification": {
+                            "source": "service_health",
+                            "success_signal": "The loop records a resolved run.",
+                        },
+                        "escalation": {
+                            "boundary": "Re-triage budget exhausted.",
+                            "target": "operator",
+                            "runbook": "docs/runbooks/observation-to-action-closure-loop.md",
+                        },
+                        "retry_budget_cycles": 3,
+                    }
+                ],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     (repo_root / "config" / "controller-local-secrets.json").write_text(json.dumps({"secrets": {}}) + "\n", encoding="utf-8")
+    (repo_root / "docs" / "runbooks").mkdir(parents=True, exist_ok=True)
+    (repo_root / "docs" / "runbooks" / "observation-to-action-closure-loop.md").write_text(
+        "# Observation to action\n",
+        encoding="utf-8",
+    )
 
 
 def test_auto_check_run_resolves_and_stops_on_verification_pass(tmp_path: Path) -> None:
@@ -71,6 +133,7 @@ def test_auto_check_run_resolves_and_stops_on_verification_pass(tmp_path: Path) 
 
     assert run["current_state"] == "RESOLVED"
     assert run["resolved_at"] is not None
+    assert run["correction_loop"]["loop_id"] == "runtime_self_correction_watchers"
     assert [item["to_state"] for item in run["history"]] == [
         "TRIAGED",
         "PROPOSING",
@@ -127,6 +190,7 @@ def test_failed_verification_retries_then_blocks(tmp_path: Path) -> None:
 
     assert run["current_state"] == "BLOCKED"
     assert run["cycle_count"] == 3
+    assert run["correction_loop"]["retry_budget_cycles"] == 3
     assert triage_calls["count"] == 4
     assert run["history"][-1]["to_state"] == "BLOCKED"
 

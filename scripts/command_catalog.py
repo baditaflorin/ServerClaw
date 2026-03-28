@@ -7,6 +7,12 @@ import sys
 from typing import Final
 
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
+from correction_loops import (
+    CORRECTION_LOOP_CATALOG_PATH,
+    load_correction_loop_catalog,
+    resolve_workflow_correction_loop,
+    validate_correction_loop_catalog,
+)
 from mutation_audit import build_event, emit_event_best_effort
 from workflow_catalog import (
     ALLOWED_LIVE_IMPACTS,
@@ -253,6 +259,15 @@ def show_command(command_catalog: dict, workflow_catalog: dict, command_id: str)
         print(f"  - stop: {item}")
     for item in contract["failure_guidance"]["rollback_guidance"]:
         print(f"  - rollback: {item}")
+    if CORRECTION_LOOP_CATALOG_PATH.exists():
+        correction_catalog = load_correction_loop_catalog()
+        correction_loop = resolve_workflow_correction_loop(correction_catalog, contract["workflow_id"])
+        if correction_loop is not None:
+            print("Correction loop:")
+            print(f"  - id: {correction_loop['id']}")
+            print(f"  - invariant: {correction_loop['invariant']}")
+            print(f"  - verification: {correction_loop['verification']['source']}")
+            print(f"  - escalation: {correction_loop['escalation']['boundary']}")
     return 0
 
 
@@ -460,6 +475,9 @@ def main() -> int:
         validate_secret_manifest(secret_manifest)
         workflow_catalog = load_workflow_catalog()
         validate_workflow_catalog(workflow_catalog, secret_manifest)
+        if CORRECTION_LOOP_CATALOG_PATH.exists():
+            correction_catalog = load_correction_loop_catalog()
+            validate_correction_loop_catalog(correction_catalog, workflow_catalog)
         command_catalog = load_command_catalog()
         validate_command_catalog(command_catalog, workflow_catalog, secret_manifest)
     except (OSError, json.JSONDecodeError, ValueError) as exc:

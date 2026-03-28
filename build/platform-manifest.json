@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.36",
+  "repo_version": "0.177.37",
   "platform_version": "0.130.37",
-  "generated_at": "2026-03-28T12:23:36Z",
-  "next_refresh_at": "2026-03-28T13:23:36Z",
+  "generated_at": "2026-03-28T12:59:20Z",
+  "next_refresh_at": "2026-03-28T13:59:20Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3477,7 +3477,7 @@
         "id": "configure-windmill",
         "title": "Configure Windmill",
         "agent_trust_required": "T3",
-        "steps": 20,
+        "steps": 21,
         "path": "docs/runbooks/configure-windmill.md",
         "workflow_ids": [
           "converge-windmill"
@@ -3872,10 +3872,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.35",
+    "last_version": "0.177.36",
     "deployed_at": "2026-03-28",
-    "summary": "implemented ADR 0212 by governing critical integrated product ADRs with aligned the dependency-graph and generated-diagram validation paths so the",
-    "release_notes_url": "docs/release-notes/0.177.36.md"
+    "summary": "implemented ADR 0204 by adding a governed correction-loop catalog, enforcing exact workflow coverage in repo validation, and wiring the live observation loop to persist and report its bounded self-correction contract",
+    "release_notes_url": "docs/release-notes/0.177.37.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

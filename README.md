@@ -110,6 +110,7 @@ The repository now also ships ADR 0151 n8n automation live on production: the re
 The repository now also ships ADR 0148 private web search live on production: the repo-managed SearXNG runtime is active on `docker-runtime-lv3`, the Proxmox host publishes the private operator and agent entrypoint on `http://100.64.0.1`, `search.lv3.org` resolves to that tailnet proxy, and Open WebUI now uses the local SearXNG JSON endpoint for governed web search after the 2026-03-26 live apply.
 The repository now also ships ADR 0165 workflow idempotency: `platform.idempotency`, scheduler-side cached result replay, closure-loop trigger scoping, `execution.idempotent_hit` ledger events, and `lv3 intent status <intent_id>` provide deterministic duplicate suppression for platform-managed workflows; the live Windmill converge from `main` on 2026-03-25 now applies and verifies the shared `platform.idempotency_records` schema on `postgres-lv3`.
 The repository now also ships ADR 0119 budgeted workflow scheduling live on production: the latest-main Windmill replay on 2026-03-27 re-verified bootstrap-session auth fallback, worker token propagation, the dispatcher and lane scheduler, and both watchdog seed paths plus their enabled schedules on `docker-runtime-lv3`.
+The repository now also ships ADR 0204 self-correcting automation loops: the committed correction-loop catalog governs every mutating workflow exactly once, and the 2026-03-28 Windmill observation replay verified `runtime_self_correction_watchers` end to end with the bounded retry budget persisted in durable closure-loop state.
 The repository now also ships ADR 0146 Langfuse observability live on production: `https://langfuse.lv3.org` is published through the shared NGINX edge, the seeded `lv3-agent-observability` project is reachable through the public API, and the 2026-03-26 smoke verification ingested a trace that resolved successfully in the Langfuse UI.
 The repository now also ships ADR 0193 Plane task-board automation live on production: `https://tasks.lv3.org` is published through the shared NGINX edge with oauth2-proxy and Keycloak auth, the private controller path is available at `http://100.64.0.1:8011`, and the governed wrapper plus ADR sync path now keep the `lv3-platform` / `ADR` Plane project aligned with repository decision state.
 The repository now also ships ADR 0194 Coolify repo-deploy automation live on production: `coolify-lv3` hosts the repo-managed PaaS control plane, `https://coolify.lv3.org` is published behind the shared oauth2-proxy and Keycloak edge, `https://apps.lv3.org` plus `*.apps.lv3.org` route through the shared edge to the Coolify proxy, and the 2026-03-28 merged-main replay re-verified the governed `lv3 deploy-repo` flow with `repo-smoke.apps.lv3.org`.
@@ -129,7 +130,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.36` |
+| Repository version | `0.177.37` |
 | Platform version | `0.130.37` |
 | Observed check date | `2026-03-28` |
 | Observed OS | `Debian 13` |
@@ -258,6 +259,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `secret_rotation` | `2026-03-23-adr-0065-secret-rotation-live-apply` |
 | `security_posture_reporting` | `2026-03-26-adr-0102-security-posture-live-apply` |
 | `seed_data_snapshots` | `2026-03-28-adr-0187-anonymized-seed-data-snapshots-mainline-live-apply` |
+| `self_correcting_automation_loops` | `2026-03-28-adr-0204-self-correcting-automation-loops-live-apply` |
 | `semaphore` | `2026-03-25-adr-0149-semaphore-live-apply` |
 | `service_redundancy` | `2026-03-27-adr-0188-failover-rehearsal-gate-live-apply` |
 | `shared_policy_packs` | `2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply` |
@@ -267,7 +269,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
 | `vaultwarden` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
-| `windmill` | `2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply` |
+| `windmill` | `2026-03-28-adr-0204-self-correcting-automation-loops-live-apply` |
 | `world_state_materializer` | `2026-03-27-adr-0113-world-state-materializer-mainline-live-apply` |
 <!-- END GENERATED: platform-status -->
 
@@ -1064,6 +1066,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0194-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0194-main-merge.md)
 - [Workstream ws-0196-live-apply: Live Apply ADR 0196 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0196-live-apply.md)
 - [Workstream WS-0197: Dify Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0197-live-apply.md)
+- [Workstream WS-0204: Self-Correcting Automation Loops Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0204-live-apply.md)
 - [Workstream WS-0206: Ports And Adapters Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-live-apply.md)
 - [Workstream WS-0206 Main Merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-main-merge.md)
 - [Workstream ws-0210-live-apply: ADR 0210 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0210-live-apply.md)
@@ -1086,7 +1089,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.36` |
+| Repository version | `0.177.37` |
 | Platform version | `0.130.37` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1301,6 +1304,7 @@ This repository is intentionally opinionated:
 | `0199` | Outline living knowledge wiki | `merged` | [adr-0199-outline-living-knowledge-wiki.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0199-live-apply/docs/workstreams/adr-0199-outline-living-knowledge-wiki.md) |
 | `0202` | Excalidraw auto generated architecture diagrams | `live_applied` | [adr-0202-excalidraw-auto-generated-architecture-diagrams.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md) |
 | `0204` | Architecture governance bundle for self-correction, clean boundaries, and vendor replaceability | `merged` | [adr-0204-architecture-governance.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0204-architecture-governance.md) |
+| `0204` | Self-correcting automation loops live apply | `merged` | [ws-0204-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0204-live-apply.md) |
 | `0206` | Live apply ADR 0206 ports and adapters for external integrations | `live_applied` | [ws-0206-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-live-apply.md) |
 | `0206` | Integrate ADR 0206 live apply into origin/main | `merged` | [ws-0206-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-main-merge.md) |
 | `0210` | Live apply canonical publication models over adapter-shaped vendor fields | `merged` | [ws-0210-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0210-live-apply.md) |

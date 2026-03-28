@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-28'
 total_adrs: 238
 implementation_status_summary:
-  Implemented: 201
+  Implemented: 202
   Partial: 4
-  Not Implemented: 32
+  Not Implemented: 31
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3475,7 +3475,7 @@ adr_index:
   - adr: '0204'
     title: Self-Correcting Automation Loops
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: automation
     keywords:
@@ -3484,6 +3484,7 @@ adr_index:
       - loops
     summary: We will treat self-correction as an explicit architecture concern.
     filename: 0204-self-correcting-automation-loops.md
+    implemented_version: 0.130.35
   - adr: '0205'
     title: Capability Contracts Before Product Selection
     status: Accepted
