@@ -1,4 +1,4 @@
-# Release 0.177.35
+# Release 0.177.36
 
 - Date: 2026-03-28
 
@@ -7,7 +7,7 @@
 - aligned the dependency-graph and generated-diagram validation paths so the docs-site and pre-push gate now agree on the governed generated artifacts
 
 ## Platform Impact
-- no platform version bump; the docs-governance rollout was already live-verified on platform version `0.130.36`, and this release records that verified state on `main` without introducing a second live apply.
+- no additional platform version bump; the docs-governance rollout was already live-verified on platform version `0.130.36`, and this release records that verified state on `main` while preserving the current canonical platform version `0.130.37`.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

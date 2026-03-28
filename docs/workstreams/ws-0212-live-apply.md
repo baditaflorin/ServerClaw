@@ -92,9 +92,9 @@
 
 ## Mainline Integration Outcome
 
-- merged to `main` in repository version `0.177.35`
+- merged to `main` in repository version `0.177.36`
 - updated `VERSION`, `changelog.md`, `RELEASE.md`, and versioned release notes only during the final mainline integration step
-- updated `versions/stack.yaml` on `main` to record the canonical `docs_portal` live-apply receipt while keeping platform version `0.130.36`
+- updated `versions/stack.yaml` on `main` to record the canonical `docs_portal` live-apply receipt while preserving the current mainline platform version `0.130.37`
 
 ## Notes For The Next Assistant
 
