@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-28'
 total_adrs: 238
 implementation_status_summary:
-  Implemented: 209
+  Implemented: 210
   Partial: 4
-  Not Implemented: 24
+  Not Implemented: 23
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3821,7 +3821,7 @@ adr_index:
   - adr: '0227'
     title: Bounded Command Execution Via Systemd-Run And Approved Wrappers
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -3833,6 +3833,7 @@ adr_index:
       - wrappers
     summary: We will execute routine governed commands through repo-managed wrappers that
     filename: 0227-bounded-command-execution-via-systemd-run-and-approved-wrappers.md
+    implemented_version: 0.130.38
   - adr: 0228
     title: Windmill As The Default Browser-And-API Operations Surface
     status: Accepted
