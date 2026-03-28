@@ -564,7 +564,7 @@ workstreams:
   - id: ws-0198-live-apply
     adr: "0198"
     title: Qdrant vector search semantic platform RAG
-    status: merged
+    status: implemented
     owner: codex
     branch: "codex/ws-0198-live-apply"
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0198-live-apply
@@ -655,7 +655,7 @@ workstreams:
   - id: adr-0149-semaphore
     adr: "0149"
     title: Semaphore for Ansible job management UI and API
-    status: merged
+    status: implemented
     owner: codex
     branch: codex/adr-0149-semaphore
     worktree_path: ../proxmox_florin_server-adr-0149
@@ -676,6 +676,46 @@ workstreams:
       - config/workflow-catalog.json
       - config/command-catalog.json
       - config/dependency-graph.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: semaphore_runtime_repo_surface
+          paths:
+            - docs/adr/0149-semaphore-for-ansible-job-management-ui-and-api.md
+            - docs/workstreams/adr-0149-semaphore.md
+            - docs/runbooks/configure-semaphore.md
+            - playbooks/semaphore.yml
+            - playbooks/semaphore-self.yml
+            - platform/ansible/semaphore.py
+            - scripts/semaphore_bootstrap.py
+            - scripts/semaphore_tool.py
+            - collections/ansible_collections/lv3/platform/roles/semaphore_postgres/**
+            - collections/ansible_collections/lv3/platform/roles/semaphore_runtime/**
+          mode: exclusive
+        - id: proxmox_host_vars_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+          mode: shared_contract
+          contract: proxmox-host-vars-v1
+        - id: workflow_catalog_contract
+          paths:
+            - config/workflow-catalog.json
+          mode: shared_contract
+          contract: workflow-catalog-v1
+        - id: command_catalog_contract
+          paths:
+            - config/command-catalog.json
+          mode: shared_contract
+          contract: command-catalog-v1
+        - id: dependency_graph_contract
+          paths:
+            - config/dependency-graph.json
+          mode: shared_contract
+          contract: dependency-graph-catalog-v1
     ready_to_merge: false
     live_applied: true
 
@@ -2863,7 +2903,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0187 anonymized seed data snapshots for repeatable tests, adding deterministic tiny/standard/recovery publication, fixture and restore staging hooks, and verified merged-main publication on `backup-lv3`
       release_bump: patch
-      included_in_repo_version: 0.177.23
+      included_in_repo_version: 0.177.24
       latest_receipts:
         seed_data_snapshots: 2026-03-28-adr-0187-anonymized-seed-data-snapshots-mainline-live-apply
 
@@ -4827,7 +4867,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0188 failover rehearsal gating so redundancy reporting now distinguishes declared tiers from currently proven tiers and the unproven PostgreSQL warm-standby path is surfaced as implemented `R0`
       release_bump: patch
-      included_in_repo_version: 0.177.20
+      included_in_repo_version: 0.177.23
       latest_receipts:
         service_redundancy: 2026-03-27-adr-0188-failover-rehearsal-gate-live-apply
 
@@ -4997,3 +5037,83 @@ workstreams:
       included_in_repo_version: 0.177.16
       latest_receipts:
         excalidraw: 2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply
+
+  - id: adr-0204-architecture-governance
+    adr: "0204"
+    title: Architecture governance bundle for self-correction, clean boundaries, and vendor replaceability
+    status: implemented
+    owner: codex
+    branch: codex/adr-0204-architecture-governance
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0204-architecture-governance
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0204-architecture-governance.md
+    depends_on:
+      - adr-0030-role-interface-contracts
+      - adr-0062-role-composability
+      - adr-0175-cross-workstream-interface-contracts
+    conflicts_with: []
+    shared_surfaces:
+      - docs/adr/0204-self-correcting-automation-loops.md
+      - docs/adr/0205-capability-contracts-before-product-selection.md
+      - docs/adr/0206-ports-and-adapters-for-external-integrations.md
+      - docs/adr/0207-anti-corruption-layers-at-provider-boundaries.md
+      - docs/adr/0208-dependency-direction-and-composition-roots.md
+      - docs/adr/0209-use-case-services-and-thin-delivery-adapters.md
+      - docs/adr/0210-canonical-domain-models-over-vendor-schemas.md
+      - docs/adr/0211-shared-policy-packs-and-rule-registries.md
+      - docs/adr/0212-replaceability-scorecards-and-vendor-exit-plans.md
+      - docs/adr/0213-architecture-fitness-functions-in-the-validation-gate.md
+      - docs/workstreams/adr-0204-architecture-governance.md
+      - docs/adr/.index.yaml
+      - config/ansible-role-idempotency.yml
+      - VERSION
+      - changelog.md
+      - RELEASE.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.23.md
+      - versions/stack.yaml
+      - README.md
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/diagrams/service-dependency-graph.excalidraw
+      - build/platform-manifest.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: architecture_governance_bundle
+          paths:
+            - docs/adr/0204-self-correcting-automation-loops.md
+            - docs/adr/0205-capability-contracts-before-product-selection.md
+            - docs/adr/0206-ports-and-adapters-for-external-integrations.md
+            - docs/adr/0207-anti-corruption-layers-at-provider-boundaries.md
+            - docs/adr/0208-dependency-direction-and-composition-roots.md
+            - docs/adr/0209-use-case-services-and-thin-delivery-adapters.md
+            - docs/adr/0210-canonical-domain-models-over-vendor-schemas.md
+            - docs/adr/0211-shared-policy-packs-and-rule-registries.md
+            - docs/adr/0212-replaceability-scorecards-and-vendor-exit-plans.md
+            - docs/adr/0213-architecture-fitness-functions-in-the-validation-gate.md
+            - docs/workstreams/adr-0204-architecture-governance.md
+            - docs/adr/.index.yaml
+            - config/ansible-role-idempotency.yml
+          mode: exclusive
+        - id: integration_release_surfaces
+          paths:
+            - VERSION
+            - changelog.md
+            - RELEASE.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.23.md
+            - versions/stack.yaml
+            - README.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/diagrams/service-dependency-graph.excalidraw
+            - build/platform-manifest.json
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false
+    canonical_truth:
+      changelog_entry: accepted ADRs 0204 through 0213 to govern self-correcting automation, contract-first capability boundaries, ports and adapters, canonical domain models, shared policy registries, and vendor exit planning for future platform work
+      release_bump: patch
+      included_in_repo_version: 0.177.23

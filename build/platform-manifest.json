@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.22",
-  "platform_version": "0.130.32",
-  "generated_at": "2026-03-28T01:26:02Z",
-  "next_refresh_at": "2026-03-28T02:26:02Z",
+  "repo_version": "0.177.24",
+  "platform_version": "0.130.33",
+  "generated_at": "2026-03-28T01:57:28Z",
+  "next_refresh_at": "2026-03-28T02:57:28Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -48,7 +48,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://10.10.10.60:8007",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "changelog_portal": {
         "service_name": "Deployment History Portal",
@@ -2849,7 +2849,7 @@
         "id": "backup-restore-verification",
         "title": "Backup Restore Verification",
         "agent_trust_required": "T2",
-        "steps": 10,
+        "steps": 11,
         "path": "docs/runbooks/backup-restore-verification.md",
         "workflow_ids": [
           "restore-verification"
@@ -3283,7 +3283,7 @@
         "id": "ephemeral-fixtures",
         "title": "Ephemeral Fixtures",
         "agent_trust_required": "T3",
-        "steps": 13,
+        "steps": 14,
         "path": "docs/runbooks/ephemeral-fixtures.md",
         "workflow_ids": [
           "ephemeral-pool-reconcile",
@@ -3617,10 +3617,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.21",
+    "last_version": "0.177.23",
     "deployed_at": "2026-03-28",
-    "summary": "implemented ADR 0189 governed network-impairment matrix rendering and hardened the mirrored Windmill worker checkout so repo-managed Python jobs no longer trip stale editable-build metadata before startup",
-    "release_notes_url": "docs/release-notes/0.177.22.md"
+    "summary": "implemented ADR 0187 anonymized seed data snapshots for repeatable tests, adding deterministic tiny/standard/recovery publication, fixture and restore staging hooks, and verified merged-main publication on `backup-lv3`",
+    "release_notes_url": "docs/release-notes/0.177.24.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -3697,13 +3697,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0183-auxiliary-cloud-failure-domain-for-witness-recovery-and-burst-capacity.md"
-    },
-    {
-      "adr": "0187",
-      "title": "Anonymized Seed Data Snapshots for Repeatable Tests",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0187-anonymized-seed-data-snapshots-for-repeatable-tests.md"
     }
   ]
 }

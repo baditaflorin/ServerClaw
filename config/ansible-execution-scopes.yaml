@@ -161,12 +161,6 @@ playbooks:
     shared_surfaces:
       - service:public-edge
       - inventory/host_vars/proxmox_florin.yml
-  playbooks/proxmox-staging-bridge.yml:
-    playbook_id: proxmox-staging-bridge
-    mutation_scope: host
-    shared_surfaces:
-      - service:proxmox-staging-bridge
-      - inventory/host_vars/proxmox_florin.yml
   playbooks/proxmox-install.yml:
     playbook_id: proxmox-install
     mutation_scope: host

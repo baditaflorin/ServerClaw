@@ -58,6 +58,9 @@ roles:
   etcd_cluster_member:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  excalidraw_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   gitea_postgres:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.

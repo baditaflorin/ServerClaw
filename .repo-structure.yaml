@@ -22,7 +22,7 @@ quick_start_for_agents:
   step_2: "Read AGENTS.md for working rules, conventions, and handoff protocol"
   step_3: "Read this file (.repo-structure.yaml) to navigate directories"
   step_4: "Read .config-locations.yaml to find where specific configs live"
-  step_5: "Read docs/adr/.index.yaml to search all 170+ decisions by keyword"
+  step_5: "Read docs/adr/.index.yaml to search all 210+ decisions by keyword"
   step_6: "Check workstreams.yaml for parallel work already in flight"
   note: >
     Do NOT glob-explore the tree. All key paths are listed below.
@@ -72,7 +72,7 @@ directories:
 
   docs/adr:
     purpose: Architecture Decision Records — every major design decision
-    contains: "0001.md through 0172.md; .index.yaml for machine-readable search"
+    contains: "0001.md through 0213.md; .index.yaml for machine-readable search"
     concern: governance, architecture
     keywords: [decisions, architecture, history, rationale, consequences, adr]
     for_agents: >

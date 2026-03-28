@@ -7,11 +7,11 @@
 
 schema_version: 1
 generated: '2026-03-28'
-total_adrs: 204
+total_adrs: 214
 implementation_status_summary:
   Implemented: 194
   Partial: 3
-  Not Implemented: 6
+  Not Implemented: 16
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -55,6 +55,7 @@ concerns:
     - '0151'
     - '0165'
     - '0176'
+    - '0204'
   bootstrap:
     - '0001'
     - '0003'
@@ -82,6 +83,7 @@ concerns:
     - 0188
     - 0190
     - 0192
+    - '0213'
   documentation:
     - '0074'
     - 0081
@@ -180,6 +182,14 @@ concerns:
     - 0185
     - 0199
     - '0202'
+    - '0205'
+    - '0206'
+    - '0207'
+    - 0208
+    - 0209
+    - '0210'
+    - '0211'
+    - '0212'
   release:
     - 0008
     - '0110'
@@ -3248,7 +3258,7 @@ adr_index:
       - tests
     summary: We will maintain anonymized seed data snapshots for repeatable preview, restore, and failover tests.
     filename: 0187-anonymized-seed-data-snapshots-for-repeatable-tests.md
-    implemented_version: 0.177.23
+    implemented_version: 0.177.24
   - adr: 0188
     title: Failover Rehearsal Gate for Redundancy Tiers
     status: Implemented
@@ -3377,3 +3387,140 @@ adr_index:
     summary: We will add a repo-managed Excalidraw publication at draw.lv3.org and commit a
     filename: 0202-excalidraw-auto-generated-architecture-diagrams.md
     implemented_version: 0.177.16
+  - adr: '0204'
+    title: Self-Correcting Automation Loops
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: automation
+    keywords:
+      - self-correcting
+      - automation
+      - loops
+    summary: We will treat self-correction as an explicit architecture concern.
+    filename: 0204-self-correcting-automation-loops.md
+  - adr: '0205'
+    title: Capability Contracts Before Product Selection
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - capability
+      - contracts
+      - before
+      - product
+      - selection
+    summary: We will define the capability contract before selecting or changing a product on
+    filename: 0205-capability-contracts-before-product-selection.md
+  - adr: '0206'
+    title: Ports And Adapters For External Integrations
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - ports
+      - adapters
+      - external
+      - integrations
+    summary: We will use ports and adapters for all critical external integrations.
+    filename: 0206-ports-and-adapters-for-external-integrations.md
+  - adr: '0207'
+    title: Anti-Corruption Layers At Provider Boundaries
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - anti-corruption
+      - layers
+      - at
+      - provider
+      - boundaries
+    summary: Every critical external integration must define an anti-corruption layer at the
+    filename: 0207-anti-corruption-layers-at-provider-boundaries.md
+  - adr: 0208
+    title: Dependency Direction And Composition Roots
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - dependency
+      - direction
+      - composition
+      - roots
+    summary: We will enforce a dependency rule with explicit composition roots.
+    filename: 0208-dependency-direction-and-composition-roots.md
+  - adr: 0209
+    title: Use-Case Services And Thin Delivery Adapters
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - use-case
+      - services
+      - thin
+      - delivery
+      - adapters
+    summary: When a platform capability is exposed through multiple delivery surfaces, the
+    filename: 0209-use-case-services-and-thin-delivery-adapters.md
+  - adr: '0210'
+    title: Canonical Domain Models Over Vendor Schemas
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - canonical
+      - domain
+      - models
+      - over
+      - vendor
+      - schemas
+    summary: The repository will prefer canonical domain models over vendor-native schemas
+    filename: 0210-canonical-domain-models-over-vendor-schemas.md
+  - adr: '0211'
+    title: Shared Policy Packs And Rule Registries
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - shared
+      - policy
+      - packs
+      - rule
+      - registries
+    summary: We will centralize shared platform policies into reusable policy packs or rule
+    filename: 0211-shared-policy-packs-and-rule-registries.md
+  - adr: '0212'
+    title: Replaceability Scorecards And Vendor Exit Plans
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - replaceability
+      - scorecards
+      - vendor
+      - exit
+      - plans
+    summary: Every critical product ADR must include a replaceability scorecard and a vendor
+    filename: 0212-replaceability-scorecards-and-vendor-exit-plans.md
+  - adr: '0213'
+    title: Architecture Fitness Functions In The Validation Gate
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - architecture
+      - fitness
+      - functions
+      - validation
+      - gate
+    summary: We will add architecture fitness functions to the repository validation gate.
+    filename: 0213-architecture-fitness-functions-in-the-validation-gate.md
