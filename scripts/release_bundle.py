@@ -504,6 +504,20 @@ def download_asset(url: str, *, token: str, destination: Path) -> None:
     destination.write_bytes(payload)
 
 
+def normalize_asset_url(asset_url: str, *, gitea_url: str) -> str:
+    parsed_asset = urllib.parse.urlsplit(asset_url)
+    parsed_base = urllib.parse.urlsplit(gitea_url.rstrip("/"))
+    if not parsed_asset.scheme or not parsed_asset.netloc:
+        return asset_url
+    if not parsed_base.scheme or not parsed_base.netloc:
+        return asset_url
+    if parsed_asset.scheme == parsed_base.scheme and parsed_asset.netloc == parsed_base.netloc:
+        return asset_url
+    return urllib.parse.urlunsplit(
+        (parsed_base.scheme, parsed_base.netloc, parsed_asset.path, parsed_asset.query, parsed_asset.fragment)
+    )
+
+
 def fetch_release_assets_by_tag(
     *,
     gitea_url: str,
@@ -540,6 +554,7 @@ def fetch_release_assets_by_tag(
         asset_url = asset.get("browser_download_url") or asset.get("url")
         if not isinstance(asset_url, str) or not asset_url:
             raise ValueError(f"release asset '{asset_name}' does not expose a download URL")
+        asset_url = normalize_asset_url(asset_url, gitea_url=gitea_url)
         asset_path = destination_dir / asset_name
         download_asset(asset_url, token=token, destination=asset_path)
         downloaded[label] = asset_path
@@ -550,6 +565,7 @@ def fetch_release_assets_by_tag(
         asset_url = asset.get("browser_download_url") or asset.get("url")
         if not isinstance(asset_url, str) or not asset_url:
             raise ValueError(f"release asset '{asset_name}' does not expose a download URL")
+        asset_url = normalize_asset_url(asset_url, gitea_url=gitea_url)
         asset_path = destination_dir / asset_name
         download_asset(asset_url, token=token, destination=asset_path)
         downloaded[label] = asset_path

@@ -174,3 +174,9 @@ def test_verify_bundle_prefers_sigstore_bundle_when_present(tmp_path: Path, monk
         str(sigstore_bundle_path),
         str(bundle_path),
     ]
+
+
+def test_normalize_asset_url_reuses_explicit_gitea_host() -> None:
+    asset_url = "http://git.lv3.org:3009/api/v1/repos/ops/proxmox_florin_server/releases/1/assets/2"
+    normalized = release_bundle.normalize_asset_url(asset_url, gitea_url="http://100.64.0.1:3009")
+    assert normalized == "http://100.64.0.1:3009/api/v1/repos/ops/proxmox_florin_server/releases/1/assets/2"
