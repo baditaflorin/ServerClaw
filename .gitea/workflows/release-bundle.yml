@@ -7,6 +7,9 @@ on:
       - "codex/**"
   workflow_dispatch:
 
+env:
+  LV3_GITEA_CONTROLLER_URL: http://100.64.0.1:3009
+
 jobs:
   publish:
     runs-on: self-hosted
@@ -126,7 +129,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 scripts/release_bundle.py verify-release \
-            --gitea-url "${{ github.server_url }}" \
+            --gitea-url "${LV3_GITEA_CONTROLLER_URL}" \
             --repository "${{ github.repository }}" \
             --release-tag "${{ needs.publish.outputs.release_tag }}" \
             --output-dir "$PWD/.tmp/release-verify" \
