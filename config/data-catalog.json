@@ -370,6 +370,34 @@
       "notes": "Outline stores workspace, user, collection, and document metadata that may include operator identities and operational text."
     },
     {
+      "id": "nextcloud-personal-files",
+      "service": "nextcloud",
+      "name": "Nextcloud personal files and DAV payloads",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "break_glass",
+      "pii_risk": "high",
+      "locations": [
+        "/opt/nextcloud/data/html/data"
+      ],
+      "notes": "User-owned files, attachments, calendar bodies, contacts, and task payloads remain under user-directed retention and must stay recoverable."
+    },
+    {
+      "id": "nextcloud-account-metadata",
+      "service": "nextcloud",
+      "name": "Nextcloud account and sharing metadata",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "break_glass",
+      "pii_risk": "high",
+      "locations": [
+        "Nextcloud PostgreSQL database"
+      ],
+      "notes": "Account records, shares, app state, and file metadata define the canonical personal data plane and must remain restorable with the runtime filesystem."
+    },
+    {
       "id": "plane-object-storage",
       "service": "plane",
       "name": "Plane attachment object storage",

@@ -3074,6 +3074,64 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-nextcloud": {
+      "description": "Converge Nextcloud on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish cloud.lv3.org with DAV redirects and large-upload support.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-nextcloud",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-nextcloud"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "nextcloud_database_password",
+          "nextcloud_admin_password",
+          "nextcloud_redis_password"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-nextcloud"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-nextcloud.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/nextcloud.yml",
+        "playbooks/services/nextcloud.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/nextcloud.yml",
+        "collections/ansible_collections/lv3/platform/roles/nextcloud_postgres",
+        "collections/ansible_collections/lv3/platform/roles/nextcloud_runtime",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/uptime-kuma/monitors.json"
+      ],
+      "outputs": [
+        "A repo-managed Nextcloud runtime on docker-runtime-lv3 with PostgreSQL metadata, Redis-backed locking, cron execution, and the public cloud.lv3.org DAV surface through the shared edge."
+      ],
+      "verification_commands": [
+        "make syntax-check-nextcloud",
+        "curl -fsS https://cloud.lv3.org/status.php",
+        "curl -fsSI https://cloud.lv3.org/.well-known/caldav",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8084/status.php'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker exec --user www-data nextcloud-app php occ background:status'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 350,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-netbox": {
       "description": "Converge private NetBox on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish the host-side Tailscale proxy, and synchronize canonical repo inventory into the API.",
       "lifecycle_status": "active",

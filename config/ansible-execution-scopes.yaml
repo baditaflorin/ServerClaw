@@ -132,6 +132,12 @@ playbooks:
     shared_surfaces:
       - service:n8n
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/nextcloud.yml:
+    playbook_id: nextcloud
+    mutation_scope: platform
+    shared_surfaces:
+      - service:nextcloud
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/netbox.yml:
     playbook_id: netbox
     mutation_scope: platform
@@ -277,6 +283,12 @@ playbooks:
     mutation_scope: platform
     shared_surfaces:
       - service:harbor
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/nextcloud.yml:
+    playbook_id: nextcloud
+    mutation_scope: platform
+    shared_surfaces:
+      - service:nextcloud
       - inventory/host_vars/proxmox_florin.yml
   playbooks/services/docker-runtime-observability.yml:
     playbook_id: docker-runtime-observability

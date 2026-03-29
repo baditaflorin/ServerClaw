@@ -139,6 +139,7 @@ server {
 {% set protected_site = public_edge_authenticated_sites[site.hostname] if site.hostname in public_edge_authenticated_sites else none %}
 {% set proxy_hide_headers = site.proxy_hide_headers | default([]) %}
 {% set blocked_exact_paths = site.blocked_exact_paths | default([]) %}
+{% set exact_redirects = site.exact_redirects | default([]) %}
 {% set server_sent_events = site.server_sent_events | default(false) %}
 {% set prefix_proxy_routes = site.prefix_proxy_routes | default([]) %}
 {% set client_max_body_size = site.client_max_body_size | default(none) %}
@@ -171,6 +172,11 @@ server {
         try_files $uri =404;
     }
 
+{% for redirect in exact_redirects %}
+    location = {{ redirect.path }} {
+        return {{ redirect.status | default(301) }} {{ redirect.target }};
+    }
+{% endfor %}
 {% if public_edge_tls_enabled or protected_site %}
     location / {
         return 308 https://$host$request_uri;
@@ -289,6 +295,11 @@ server {
     chunked_transfer_encoding on;
 {% endif %}
 
+{% for redirect in exact_redirects %}
+    location = {{ redirect.path }} {
+        return {{ redirect.status | default(301) }} {{ redirect.target }};
+    }
+{% endfor %}
 {% if protected_site %}
     location = {{ public_edge_session_authority.shared_logout_path }} {
         auth_request /oauth2/auth;

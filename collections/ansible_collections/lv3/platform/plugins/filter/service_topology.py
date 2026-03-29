@@ -71,6 +71,7 @@ def service_topology_edge_sites(catalog):
                 "blocked_exact_paths",
                 "chunked_transfer_encoding",
                 "client_max_body_size",
+                "exact_redirects",
                 "prefix_proxy_routes",
                 "proxy_hide_headers",
                 "proxy_read_timeout_seconds",

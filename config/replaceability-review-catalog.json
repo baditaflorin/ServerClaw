@@ -87,6 +87,17 @@
         "docs/adr/0046-identity-classes-for-humans-services-and-agents.md",
         "docs/runbooks/configure-headscale.md"
       ]
+    },
+    {
+      "adr": "0260",
+      "capability_id": "personal_data_plane",
+      "product_id": "nextcloud",
+      "critical_surface": "canonical_personal_files_and_dav_data",
+      "capability_definition_refs": [
+        "docs/adr/0206-ports-and-adapters-for-external-integrations.md",
+        "docs/adr/0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md",
+        "docs/runbooks/configure-nextcloud.md"
+      ]
     }
   ]
 }

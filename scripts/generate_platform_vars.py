@@ -61,6 +61,7 @@ PORT_KEYS = (
     "excalidraw_room_port",
     "ollama_api_port",
     "n8n_port",
+    "nextcloud_port",
     "coolify_dashboard_port",
     "coolify_proxy_port",
     "coolify_proxy_tls_port",
@@ -421,6 +422,9 @@ def build_service_urls(
     elif service_id == "n8n":
         urls["internal"] = service_url("http", private_ip, ports["n8n_port"])
         port_map["internal"] = ports["n8n_port"]
+    elif service_id == "nextcloud":
+        urls["internal"] = service_url("http", private_ip, ports["nextcloud_port"])
+        port_map["internal"] = ports["nextcloud_port"]
     elif service_id == "coolify":
         urls["internal"] = service_url("http", private_ip, ports["coolify_dashboard_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["coolify_host_proxy_port"])

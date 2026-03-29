@@ -1016,6 +1016,64 @@
         }
       }
     },
+    "nextcloud": {
+      "service_name": "nextcloud",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "nextcloud_runtime",
+      "verify_file": "roles/nextcloud_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Nextcloud startup completes once the local status endpoint reports an installed runtime on the private listener.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8084/status.php",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The local Nextcloud status endpoint responds on docker-runtime-lv3.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8084/status.php",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The public Nextcloud status endpoint renders through the shared NGINX edge with DAV publication in place.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "https://cloud.lv3.org/status.php",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Nextcloud Public Status",
+          "type": "http",
+          "url": "https://cloud.lv3.org/status.php",
+          "description": "Public Nextcloud status endpoint published through the shared NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
     "netbox": {
       "service_name": "netbox",
       "owning_vm": "docker-runtime-lv3",

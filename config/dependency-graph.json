@@ -210,6 +210,15 @@
       "adr": "0151"
     },
     {
+      "id": "nextcloud",
+      "service": "nextcloud",
+      "name": "Nextcloud",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "data",
+      "adr": "0260"
+    },
+    {
       "id": "netbox",
       "service": "netbox",
       "name": "NetBox",
@@ -729,6 +738,24 @@
       "to": "postgres",
       "type": "hard",
       "description": "n8n stores workflow, credential, and execution state in Postgres."
+    },
+    {
+      "from": "nextcloud",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Nextcloud stores account, sharing, file, and app metadata in Postgres."
+    },
+    {
+      "from": "nextcloud",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Nextcloud receives its mirrored database, Redis, and admin bootstrap secrets through the OpenBao agent before startup."
+    },
+    {
+      "from": "nextcloud",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public reachability for cloud.lv3.org and DAV discovery redirects depends on the shared NGINX edge publication path."
     },
     {
       "from": "netbox",

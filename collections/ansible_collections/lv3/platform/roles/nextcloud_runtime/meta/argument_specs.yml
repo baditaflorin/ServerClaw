@@ -1,0 +1,77 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the Nextcloud runtime, bootstrap personal data plane secrets, and enforce DAV-ready proxy settings.
+    options:
+      nextcloud_site_dir:
+        type: path
+        required: true
+      nextcloud_data_dir:
+        type: path
+        required: true
+      nextcloud_redis_data_dir:
+        type: path
+        required: true
+      nextcloud_secret_dir:
+        type: path
+        required: true
+      nextcloud_compose_file:
+        type: path
+        required: true
+      nextcloud_env_file:
+        type: path
+        required: true
+      nextcloud_container_name:
+        type: str
+        required: true
+      nextcloud_cron_container_name:
+        type: str
+        required: true
+      nextcloud_redis_container_name:
+        type: str
+        required: true
+      nextcloud_port:
+        type: int
+        required: true
+      nextcloud_image:
+        type: str
+        required: true
+      nextcloud_redis_image:
+        type: str
+        required: true
+      nextcloud_internal_base_url:
+        type: str
+        required: true
+      nextcloud_public_base_url:
+        type: str
+        required: true
+      nextcloud_public_hostname:
+        type: str
+        required: true
+      nextcloud_database_host:
+        type: str
+        required: true
+      nextcloud_database_name:
+        type: str
+        required: true
+      nextcloud_database_user:
+        type: str
+        required: true
+      nextcloud_database_password_local_file:
+        type: path
+        required: true
+      nextcloud_admin_password_local_file:
+        type: path
+        required: true
+      nextcloud_redis_password_local_file:
+        type: path
+        required: true
+      nextcloud_admin_password_remote_file:
+        type: path
+        required: true
+      nextcloud_redis_password_remote_file:
+        type: path
+        required: true
+      nextcloud_admin_user:
+        type: str
+        required: true

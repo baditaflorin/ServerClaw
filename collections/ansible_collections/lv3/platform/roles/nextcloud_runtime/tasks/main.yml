@@ -1,0 +1,471 @@
+---
+# Purpose: Converge the Nextcloud runtime, bootstrap local secrets, and enforce the repo-managed DAV publication contract.
+# Use case: Run during Nextcloud deployment, upgrade, or replay on docker-runtime-lv3 once PostgreSQL, OpenBao, and the shared edge exist.
+#
+# Inputs (required):
+#   - nextcloud_site_dir (path, required): Runtime root directory.
+#   - nextcloud_secret_dir (path, required): Guest-side secret directory for the bootstrap passwords.
+#   - nextcloud_public_hostname (str, required): Published Nextcloud hostname.
+#   - nextcloud_public_base_url (str, required): Public URL used for overwrite and verification settings.
+#   - nextcloud_port (int, required): Internal Nextcloud listener port on docker-runtime-lv3.
+#   - nextcloud_admin_user (str, required): Bootstrap admin username mirrored by the repo.
+#
+# Inputs (optional):
+#   - nextcloud_php_memory_limit (str, optional, default=1024M): PHP memory limit inside the official container.
+#   - nextcloud_php_upload_limit (str, optional, default=16G): Upload size limit aligned with the shared edge publication policy.
+#
+# Outputs:
+#   - Managed Nextcloud, Redis, and cron containers with OpenBao-backed runtime env injection, mirrored bootstrap credentials, and verified local health.
+#
+# Idempotency: Conditionally idempotent
+#              Generated secrets are reused, compose replay is repeatable, and OCC configuration is reasserted on every converge without replacing user content.
+#
+# Dependencies:
+#   - ADR 0260: Defines Nextcloud as the canonical personal data plane.
+#   - Requires: PostgreSQL credentials, OpenBao init payload, and a reachable docker-runtime host.
+#   - Task file: verify.yml — performs the post-start local verification flow.
+#
+# Related ADRs: 0077, 0165, 0260
+
+- name: Validate Nextcloud runtime inputs
+  ansible.builtin.assert:
+    that:
+      - nextcloud_site_dir | length > 0
+      - nextcloud_data_dir | length > 0
+      - nextcloud_redis_data_dir | length > 0
+      - nextcloud_secret_dir | length > 0
+      - nextcloud_compose_file | length > 0
+      - nextcloud_env_file | length > 0
+      - nextcloud_image | length > 0
+      - nextcloud_redis_image | length > 0
+      - nextcloud_container_name | length > 0
+      - nextcloud_cron_container_name | length > 0
+      - nextcloud_redis_container_name | length > 0
+      - nextcloud_port | int > 0
+      - nextcloud_internal_base_url | length > 0
+      - nextcloud_public_base_url | length > 0
+      - nextcloud_public_hostname | length > 0
+      - nextcloud_database_host | length > 0
+      - nextcloud_database_name | length > 0
+      - nextcloud_database_user | length > 0
+      - nextcloud_database_password_local_file | length > 0
+      - nextcloud_admin_user | length > 0
+      - nextcloud_admin_password_local_file | length > 0
+      - nextcloud_redis_password_local_file | length > 0
+    fail_msg: >-
+      nextcloud_runtime requires compose paths, images, service URLs, PostgreSQL credentials,
+      and admin or Redis bootstrap settings.
+
+- name: Ensure the Nextcloud database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ nextcloud_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: nextcloud_database_password_local
+
+- name: Fail if the Nextcloud database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ nextcloud_database_password_local_file }} is missing on the control machine.
+      Run the Nextcloud PostgreSQL converge first so the runtime can connect to postgres-lv3.
+  when: not nextcloud_database_password_local.stat.exists
+
+- name: Ensure the Nextcloud runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - curl
+      - openssl
+      - python3-requests
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Nextcloud directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ nextcloud_site_dir }}"
+      owner: root
+      group: root
+      mode: "0755"
+    - path: "{{ nextcloud_data_dir }}"
+      owner: "33"
+      group: "33"
+      mode: "0755"
+    - path: "{{ nextcloud_redis_data_dir }}"
+      owner: "999"
+      group: "999"
+      mode: "0750"
+    - path: "{{ nextcloud_secret_dir }}"
+      owner: root
+      group: root
+      mode: "0700"
+
+- name: Generate the Nextcloud admin password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ nextcloud_admin_password_remote_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 | tr -d '\n' > "{{ nextcloud_admin_password_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: nextcloud_admin_password_generation
+  changed_when: "'changed' in nextcloud_admin_password_generation.stdout"
+  no_log: true
+
+- name: Generate the Nextcloud Redis password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ nextcloud_redis_password_remote_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 | tr -d '\n' > "{{ nextcloud_redis_password_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: nextcloud_redis_password_generation
+  changed_when: "'changed' in nextcloud_redis_password_generation.stdout"
+  no_log: true
+
+- name: Read the Nextcloud admin password
+  ansible.builtin.slurp:
+    src: "{{ nextcloud_admin_password_remote_file }}"
+  register: nextcloud_admin_password_raw
+  no_log: true
+
+- name: Read the Nextcloud Redis password
+  ansible.builtin.slurp:
+    src: "{{ nextcloud_redis_password_remote_file }}"
+  register: nextcloud_redis_password_raw
+  no_log: true
+
+- name: Record the Nextcloud runtime secrets
+  ansible.builtin.set_fact:
+    nextcloud_admin_password: "{{ nextcloud_admin_password_raw.content | b64decode | trim }}"
+    nextcloud_redis_password: "{{ nextcloud_redis_password_raw.content | b64decode | trim }}"
+    nextcloud_runtime_secret_payload:
+      POSTGRES_PASSWORD: "{{ lookup('ansible.builtin.file', nextcloud_database_password_local_file) | trim }}"
+      NEXTCLOUD_ADMIN_PASSWORD: "{{ nextcloud_admin_password_raw.content | b64decode | trim }}"
+      REDIS_HOST_PASSWORD: "{{ nextcloud_redis_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Ensure the local Nextcloud artifact directory exists
+  ansible.builtin.file:
+    path: "{{ nextcloud_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the Nextcloud bootstrap secrets to the control machine
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.content }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  loop:
+    - dest: "{{ nextcloud_admin_password_local_file }}"
+      content: "{{ nextcloud_admin_password }}"
+    - dest: "{{ nextcloud_redis_password_local_file }}"
+      content: "{{ nextcloud_redis_password }}"
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for Nextcloud
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: nextcloud
+    common_openbao_compose_env_agent_dir: "{{ nextcloud_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ nextcloud_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ nextcloud_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ nextcloud_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ nextcloud_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ nextcloud_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ nextcloud_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ nextcloud_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ nextcloud_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ nextcloud_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ nextcloud_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: nextcloud.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ nextcloud_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ nextcloud_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ nextcloud_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ nextcloud_legacy_env_file }}"
+  no_log: true
+
+- name: Render the Nextcloud environment file
+  ansible.builtin.template:
+    src: nextcloud.env.j2
+    dest: "{{ nextcloud_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the Nextcloud compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ nextcloud_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Nextcloud images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ nextcloud_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ nextcloud_site_dir }}"
+  register: nextcloud_pull
+  changed_when: >-
+    'Pulling' in nextcloud_pull.stdout
+    or 'Downloaded newer image' in nextcloud_pull.stdout
+    or 'Pull complete' in nextcloud_pull.stdout
+
+- name: Start the Nextcloud runtime
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ nextcloud_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ nextcloud_site_dir }}"
+  register: nextcloud_compose_up
+  changed_when: >-
+    'Creating' in nextcloud_compose_up.stdout
+    or 'Starting' in nextcloud_compose_up.stdout
+    or 'Recreating' in nextcloud_compose_up.stdout
+    or 'Running' in nextcloud_compose_up.stdout
+
+- name: Wait for Nextcloud local status
+  ansible.builtin.uri:
+    url: "{{ nextcloud_internal_base_url }}/status.php"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: nextcloud_status_probe
+  retries: 60
+  delay: 5
+  until: nextcloud_status_probe.status == 200
+  changed_when: false
+
+- name: Wait until Nextcloud reports it is installed
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - --user
+      - www-data
+      - "{{ nextcloud_container_name }}"
+      - php
+      - occ
+      - status
+      - --output=json
+  register: nextcloud_occ_status
+  retries: 30
+  delay: 5
+  until: >-
+    nextcloud_occ_status.rc == 0
+    and ((nextcloud_occ_status.stdout | from_json).installed | default(false))
+  changed_when: false
+  no_log: true
+
+- name: Ensure Nextcloud uses cron for background jobs
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - --user
+      - www-data
+      - "{{ nextcloud_container_name }}"
+      - php
+      - occ
+      - background:cron
+  register: nextcloud_background_cron
+  changed_when: false
+
+- name: Ensure Nextcloud trusted domains include the public hostname
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - --user
+      - www-data
+      - "{{ nextcloud_container_name }}"
+      - php
+      - occ
+      - config:system:set
+      - trusted_domains
+      - "1"
+      - --value={{ nextcloud_public_hostname }}
+  changed_when: false
+
+- name: Ensure Nextcloud trusted proxies include the edge private IP
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - --user
+      - www-data
+      - "{{ nextcloud_container_name }}"
+      - php
+      - occ
+      - config:system:set
+      - trusted_proxies
+      - "0"
+      - --value={{ nextcloud_trusted_proxies[0] }}
+  changed_when: false
+
+- name: Ensure Nextcloud overwrites the public host
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - --user
+      - www-data
+      - "{{ nextcloud_container_name }}"
+      - php
+      - occ
+      - config:system:set
+      - overwritehost
+      - --value={{ nextcloud_public_hostname }}
+  changed_when: false
+
+- name: Ensure Nextcloud overwrites the public protocol
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - --user
+      - www-data
+      - "{{ nextcloud_container_name }}"
+      - php
+      - occ
+      - config:system:set
+      - overwriteprotocol
+      - --value={{ nextcloud_overwrite_protocol }}
+  changed_when: false
+
+- name: Ensure Nextcloud overwrites the public CLI URL
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - --user
+      - www-data
+      - "{{ nextcloud_container_name }}"
+      - php
+      - occ
+      - config:system:set
+      - overwrite.cli.url
+      - --value={{ nextcloud_public_base_url }}
+  changed_when: false
+
+- name: Ensure Nextcloud uses Redis for file locking
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - --user
+      - www-data
+      - "{{ nextcloud_container_name }}"
+      - php
+      - occ
+      - config:system:set
+      - memcache.locking
+      - --value=\\OC\\Memcache\\Redis
+  changed_when: false
+
+- name: Ensure Nextcloud uses Redis for distributed cache
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - --user
+      - www-data
+      - "{{ nextcloud_container_name }}"
+      - php
+      - occ
+      - config:system:set
+      - memcache.distributed
+      - --value=\\OC\\Memcache\\Redis
+  changed_when: false
+
+- name: Ensure Nextcloud Redis host is configured
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - --user
+      - www-data
+      - "{{ nextcloud_container_name }}"
+      - php
+      - occ
+      - config:system:set
+      - redis
+      - host
+      - --value={{ nextcloud_redis_container_name }}
+  changed_when: false
+
+- name: Ensure Nextcloud Redis port is configured
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - --user
+      - www-data
+      - "{{ nextcloud_container_name }}"
+      - php
+      - occ
+      - config:system:set
+      - redis
+      - port
+      - --value=6379
+  changed_when: false
+
+- name: Ensure Nextcloud Redis password is configured
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - --user
+      - www-data
+      - "{{ nextcloud_container_name }}"
+      - php
+      - occ
+      - config:system:set
+      - redis
+      - password
+      - --value={{ nextcloud_redis_password }}
+  changed_when: false
+  no_log: true
+
+- name: Run the Nextcloud verification tasks
+  ansible.builtin.import_tasks: verify.yml

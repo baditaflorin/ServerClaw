@@ -70,3 +70,23 @@ We will use **Nextcloud** as the canonical personal data plane for ServerClaw.
 ## References
 
 - <https://docs.nextcloud.com/server/latest/admin_manual/>
+
+## Replaceability Scorecard
+
+- Capability Definition: `personal_data_plane` as defined by ADR 0206 typed integration boundaries, ADR 0259 connector portability expectations, and the Nextcloud runbook.
+- Contract Fit: strong for user-owned files, attachments, and DAV-backed calendars, contacts, and tasks behind standard protocols instead of a vendor-specific assistant storage API.
+- Data Export / Import: WebDAV tree exports, DAV collections, PostgreSQL metadata backups, and filesystem snapshots can be migrated into another standards-based personal data plane without changing the surrounding repo-managed topology contracts.
+- Migration Complexity: medium because user accounts, sync clients, sharing state, background jobs, and large-upload publication settings must move together to avoid data drift or client breakage.
+- Proprietary Surface Area: medium because sharing semantics, app settings, and admin workflows are product-shaped even though the durable data stays reachable through portable DAV and filesystem contracts.
+- Approved Exceptions: Nextcloud-native admin UI, sharing policy, and application settings are accepted while the repo keeps canonical DNS, runtime topology, secret ownership, and live-apply evidence outside the product.
+- Fallback / Downgrade: read-only WebDAV export plus filesystem and PostgreSQL restore on a replacement personal-data plane can preserve durable access while richer sharing and task semantics are rebuilt.
+- Observability / Audit Continuity: `status.php` health, OCC verification, shared edge probes, uptime monitoring, and live-apply receipts provide the continuity surface during migration or downgrade.
+
+## Vendor Exit Plan
+
+- Reevaluation Triggers: sustained upstream security concerns, broken DAV interoperability, unacceptable large-upload handling, or an inability to preserve user-owned exports through repo-managed automation.
+- Portable Artifacts: WebDAV file trees, DAV objects, PostgreSQL dumps, controller-local bootstrap credentials, health-probe contracts, service topology records, and live-apply receipts.
+- Migration Path: stand up the replacement personal-data plane in parallel, export files plus DAV data, replay health and sync smoke checks, cut public DNS and client configuration by wave, then retire Nextcloud after a bounded read-only overlap window.
+- Alternative Product: Seafile plus Radicale.
+- Owner: platform collaboration.
+- Review Cadence: quarterly.

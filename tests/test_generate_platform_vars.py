@@ -44,6 +44,21 @@ def test_build_platform_vars_includes_harbor_publication_topology() -> None:
     assert harbor["urls"]["internal"] == "http://10.10.10.20:8095"
 
 
+def test_build_platform_vars_includes_nextcloud_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    nextcloud = platform_vars["platform_service_topology"]["nextcloud"]
+
+    assert nextcloud["public_hostname"] == "cloud.lv3.org"
+    assert nextcloud["dns"]["name"] == "cloud"
+    assert nextcloud["ports"]["internal"] == 8084
+    assert nextcloud["urls"]["public"] == "https://cloud.lv3.org"
+    assert nextcloud["urls"]["internal"] == "http://10.10.10.20:8084"
+    assert nextcloud["edge"]["exact_redirects"] == [
+        {"path": "/.well-known/carddav", "location": "/remote.php/dav/", "status": 301},
+        {"path": "/.well-known/caldav", "location": "/remote.php/dav/", "status": 301},
+    ]
+
+
 def test_build_platform_vars_includes_shared_session_authority_contract() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     authority = platform_vars["platform_session_authority"]
