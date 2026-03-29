@@ -38,6 +38,10 @@ PORT_KEYS = (
     "semaphore_host_proxy_port",
     "windmill_server_port",
     "windmill_host_proxy_port",
+    "nomad_server_port",
+    "nomad_rpc_port",
+    "nomad_serf_port",
+    "nomad_host_proxy_port",
     "mattermost_server_port",
     "mattermost_host_proxy_port",
     "gitea_http_port",
@@ -301,6 +305,11 @@ def build_service_urls(
         urls["controller"] = service_url("http", tailscale_ipv4, ports["windmill_host_proxy_port"])
         port_map["internal"] = ports["windmill_server_port"]
         port_map["controller"] = ports["windmill_host_proxy_port"]
+    elif service_id == "nomad":
+        urls["internal"] = service_url("https", private_ip, ports["nomad_server_port"])
+        urls["controller"] = service_url("https", tailscale_ipv4, ports["nomad_host_proxy_port"])
+        port_map["internal"] = ports["nomad_server_port"]
+        port_map["controller"] = ports["nomad_host_proxy_port"]
     elif service_id == "mattermost":
         urls["internal"] = service_url("http", private_ip, ports["mattermost_server_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["mattermost_host_proxy_port"])
@@ -574,6 +583,7 @@ def build_platform_vars(
     semaphore_service = service_topology["semaphore"]
     uptime_kuma_service = service_topology["uptime_kuma"]
     windmill_service = service_topology["windmill"]
+    nomad_service = service_topology["nomad"]
     host_id = require_string(stack["desired_state"]["host_id"], "versions/stack.yaml.desired_state.host_id")
     postgres_ha = require_mapping(host_vars.get("postgres_ha"), "host_vars.postgres_ha")
     postgres_primary_inventory_host = require_string(postgres_ha.get("initial_primary"), "host_vars.postgres_ha.initial_primary")
@@ -664,6 +674,7 @@ def build_platform_vars(
             resolved_ports["semaphore_host_proxy_port"],
             resolved_ports["headscale_http_port"],
             resolved_ports["windmill_host_proxy_port"],
+            resolved_ports["nomad_host_proxy_port"],
             resolved_ports["open_webui_host_proxy_port"],
             resolved_ports["plane_host_proxy_port"],
             resolved_ports["mattermost_host_proxy_port"],
@@ -720,6 +731,8 @@ def build_platform_vars(
         "step_ca_controller_url": step_ca_service["urls"]["controller"],
         "windmill_host_proxy_port": resolved_ports["windmill_host_proxy_port"],
         "windmill_controller_url": windmill_service["urls"]["controller"],
+        "nomad_host_proxy_port": resolved_ports["nomad_host_proxy_port"],
+        "nomad_controller_url": nomad_service["urls"]["controller"],
         "monitoring_loki_push_api_url": monitoring_service["urls"]["loki_push"],
         "proxmox_management_allowed_tcp_ports": [
             resolved_ports["ntopng_proxy_port"],
@@ -730,6 +743,7 @@ def build_platform_vars(
             resolved_ports["semaphore_host_proxy_port"],
             resolved_ports["headscale_http_port"],
             resolved_ports["windmill_host_proxy_port"],
+            resolved_ports["nomad_host_proxy_port"],
             resolved_ports["open_webui_host_proxy_port"],
             resolved_ports["plane_host_proxy_port"],
             resolved_ports["mattermost_host_proxy_port"],

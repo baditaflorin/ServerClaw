@@ -1,0 +1,6 @@
+---
+- name: Restart lv3 nomad
+  ansible.builtin.systemd:
+    name: "{{ nomad_cluster_service_name }}"
+    state: restarted
+    daemon_reload: true

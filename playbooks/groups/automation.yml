@@ -1,3 +1,34 @@
+# Playbook: groups/automation.yml
+# Purpose: Aggregate the private server-resident automation services that should converge together as one automation group.
+# Use case: Run the grouped automation live-apply path when repository-managed control-plane helpers such as Gitea, Nomad, or Windmill need a coordinated reconcile.
+#
+# Inputs (required):
+#   - bootstrap_ssh_private_key (controller secret, required): Controller-side SSH key used through the Proxmox jump path by the imported service playbooks.
+#
+# Inputs (optional):
+#   - env (string, optional, default=production): Target deployment environment.
+#   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): Guest SSH path used by scoped runs.
+#
+# Outputs:
+#   - The imported Gitea, Nomad, and Windmill service playbooks are executed as the `automation` service group.
+#
+# Idempotency: Partially idempotent
+#              This wrapper is idempotent, but it imports service playbooks that may contain one-time bootstrap steps.
+#
+# Dependencies:
+#   - ADR 0143: Gitea for self-hosted Git and CI.
+#   - ADR 0232: Nomad for durable batch and long-running internal jobs.
+#   - Requires: The imported service playbooks and their target guests already exist.
+#   - Playbook: playbooks/services/gitea.yml — converges the private Gitea service.
+#   - Playbook: playbooks/services/nomad.yml — converges the private Nomad scheduler.
+#   - Playbook: playbooks/services/windmill.yml — converges the private Windmill runtime.
+#
+# Related ADRs: 0044, 0143, 0224, 0232
+# Related Runbooks: docs/runbooks/configure-gitea.md, docs/runbooks/configure-nomad.md, docs/runbooks/configure-windmill.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
 ---
 - import_playbook: ../services/gitea.yml
+- import_playbook: ../services/nomad.yml
 - import_playbook: ../services/windmill.yml
