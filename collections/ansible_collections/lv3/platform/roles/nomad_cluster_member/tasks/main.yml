@@ -1,0 +1,225 @@
+---
+- name: Validate Nomad cluster member inputs
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: assert_vars
+  vars:
+    common_assert_vars_required:
+      - nomad_cluster_version
+      - nomad_cluster_download_url
+      - nomad_cluster_packages
+      - nomad_cluster_config_dir
+      - nomad_cluster_tls_dir
+      - nomad_cluster_data_dir
+      - nomad_cluster_service_name
+      - nomad_cluster_service_file
+      - nomad_cluster_http_port
+      - nomad_cluster_rpc_port
+      - nomad_cluster_serf_port
+      - nomad_cluster_server_rpc_addresses
+      - nomad_cluster_local_ca_cert_file
+      - nomad_cluster_local_server_cert_file
+      - nomad_cluster_local_server_key_file
+      - nomad_cluster_local_client_cert_file
+      - nomad_cluster_local_client_key_file
+    common_assert_vars_expressions:
+      - nomad_cluster_http_port | int > 0
+      - nomad_cluster_rpc_port | int > 0
+      - nomad_cluster_serf_port | int > 0
+      - nomad_cluster_server | bool or nomad_cluster_client | bool
+    common_assert_vars_fail_msg: >-
+      nomad_cluster_member requires the pinned binary settings, TLS artifacts, and one or more agent roles.
+
+- name: Select the controller-local member TLS files
+  ansible.builtin.set_fact:
+    nomad_cluster_local_member_cert_file: >-
+      {{
+        nomad_cluster_local_server_cert_file
+        if (nomad_cluster_server | bool)
+        else nomad_cluster_local_client_cert_file
+      }}
+    nomad_cluster_local_member_key_file: >-
+      {{
+        nomad_cluster_local_server_key_file
+        if (nomad_cluster_server | bool)
+        else nomad_cluster_local_client_key_file
+      }}
+
+- name: Ensure the controller-local Nomad CA certificate exists
+  ansible.builtin.stat:
+    path: "{{ nomad_cluster_local_ca_cert_file }}"
+  delegate_to: localhost
+  become: false
+  register: nomad_cluster_local_ca_cert
+
+- name: Fail when the controller-local Nomad CA certificate is missing
+  ansible.builtin.fail:
+    msg: >-
+      {{ nomad_cluster_local_ca_cert_file }} is missing on the control machine.
+      Run the Nomad controller-artifact preparation path before converging agents.
+  when: not nomad_cluster_local_ca_cert.stat.exists
+
+- name: Ensure the controller-local Nomad member certificate exists
+  ansible.builtin.stat:
+    path: "{{ nomad_cluster_local_member_cert_file }}"
+  delegate_to: localhost
+  become: false
+  register: nomad_cluster_local_member_cert
+
+- name: Fail when the controller-local Nomad member certificate is missing
+  ansible.builtin.fail:
+    msg: >-
+      {{ nomad_cluster_local_member_cert_file }} is missing on the control machine.
+      Run the Nomad controller-artifact preparation path before converging agents.
+  when: not nomad_cluster_local_member_cert.stat.exists
+
+- name: Ensure the controller-local Nomad member key exists
+  ansible.builtin.stat:
+    path: "{{ nomad_cluster_local_member_key_file }}"
+  delegate_to: localhost
+  become: false
+  register: nomad_cluster_local_member_key
+
+- name: Fail when the controller-local Nomad member key is missing
+  ansible.builtin.fail:
+    msg: >-
+      {{ nomad_cluster_local_member_key_file }} is missing on the control machine.
+      Run the Nomad controller-artifact preparation path before converging agents.
+  when: not nomad_cluster_local_member_key.stat.exists
+
+- name: Install Nomad prerequisite packages
+  ansible.builtin.apt:
+    name: "{{ nomad_cluster_packages }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Nomad group exists
+  ansible.builtin.group:
+    name: "{{ nomad_cluster_group }}"
+    state: present
+
+- name: Ensure the Nomad user exists
+  ansible.builtin.user:
+    name: "{{ nomad_cluster_user }}"
+    group: "{{ nomad_cluster_group }}"
+    shell: /usr/sbin/nologin
+    system: true
+    create_home: false
+    home: "{{ nomad_cluster_data_dir }}"
+
+- name: Check the installed Nomad version
+  ansible.builtin.command: nomad version
+  register: nomad_cluster_version_check
+  changed_when: false
+  failed_when: false
+
+- name: Install the pinned Nomad binary
+  ansible.builtin.shell: |
+    set -euo pipefail
+    workdir="$(mktemp -d)"
+    trap 'rm -rf "$workdir"' EXIT
+    cd "$workdir"
+    curl -fsSLo nomad.zip "{{ nomad_cluster_download_url }}"
+    unzip -qo nomad.zip
+    install -m 0755 nomad /usr/local/bin/nomad
+  args:
+    executable: /bin/bash
+  when: >-
+    nomad_cluster_version_check.rc != 0
+    or ('v' ~ nomad_cluster_version) not in (nomad_cluster_version_check.stdout | default(''))
+  changed_when: true
+
+- name: Ensure Nomad directories exist
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: directory_tree
+  vars:
+    common_directory_tree_paths:
+      - path: "{{ nomad_cluster_config_dir }}"
+        owner: root
+        group: root
+        mode: "0755"
+      - path: "{{ nomad_cluster_tls_dir }}"
+        owner: root
+        group: root
+        mode: "0700"
+      - path: "{{ nomad_cluster_data_dir }}"
+        owner: "{{ nomad_cluster_user }}"
+        group: "{{ nomad_cluster_group }}"
+        mode: "0750"
+      - path: "{{ nomad_cluster_plugin_dir }}"
+        owner: "{{ nomad_cluster_user }}"
+        group: "{{ nomad_cluster_group }}"
+        mode: "0750"
+      - path: "{{ nomad_cluster_log_dir }}"
+        owner: "{{ nomad_cluster_user }}"
+        group: "{{ nomad_cluster_group }}"
+        mode: "0750"
+
+- name: Install the Nomad CA certificate
+  ansible.builtin.copy:
+    dest: "{{ nomad_cluster_ca_cert_file }}"
+    content: "{{ lookup('ansible.builtin.file', nomad_cluster_local_ca_cert_file) }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart lv3 nomad
+
+- name: Install the Nomad member certificate
+  ansible.builtin.copy:
+    dest: "{{ nomad_cluster_member_cert_file }}"
+    content: "{{ lookup('ansible.builtin.file', nomad_cluster_local_member_cert_file) }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart lv3 nomad
+
+- name: Install the Nomad member key
+  ansible.builtin.copy:
+    dest: "{{ nomad_cluster_member_key_file }}"
+    content: "{{ lookup('ansible.builtin.file', nomad_cluster_local_member_key_file) }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+  notify: Restart lv3 nomad
+
+- name: Render the Nomad agent configuration
+  ansible.builtin.template:
+    src: nomad.hcl.j2
+    dest: "{{ nomad_cluster_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart lv3 nomad
+
+- name: Render the Nomad systemd unit
+  ansible.builtin.template:
+    src: lv3-nomad.service.j2
+    dest: "{{ nomad_cluster_service_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart lv3 nomad
+
+- name: Render the local Nomad CLI wrapper
+  ansible.builtin.template:
+    src: lv3-nomad.sh.j2
+    dest: "{{ nomad_cluster_cli_wrapper_file }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Ensure the Nomad service is enabled and running
+  ansible.builtin.systemd:
+    name: "{{ nomad_cluster_service_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: Flush Nomad handlers before verification
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify the Nomad agent
+  ansible.builtin.import_tasks: verify.yml

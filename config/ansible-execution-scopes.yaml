@@ -108,6 +108,12 @@ playbooks:
     shared_surfaces:
       - service:mail-platform
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/nomad.yml:
+    playbook_id: nomad
+    mutation_scope: platform
+    shared_surfaces:
+      - service:nomad
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/mattermost.yml:
     playbook_id: mattermost
     mutation_scope: platform

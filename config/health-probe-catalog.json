@@ -48,6 +48,39 @@
         }
       }
     },
+    "nomad": {
+      "service_name": "nomad",
+      "owning_vm": "monitoring-lv3",
+      "role": "nomad_cluster_bootstrap",
+      "verify_file": "roles/nomad_cluster_bootstrap/tasks/verify.yml",
+      "liveness": {
+        "kind": "systemd",
+        "description": "The lv3-nomad systemd unit is active on monitoring-lv3.",
+        "timeout_seconds": 30,
+        "retries": 1,
+        "delay_seconds": 0,
+        "unit": "lv3-nomad",
+        "expected_state": "active"
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "The local Nomad CLI wrapper can query the joined node set through the mirrored TLS and ACL contract.",
+        "timeout_seconds": 30,
+        "retries": 6,
+        "delay_seconds": 5,
+        "argv": [
+          "/usr/local/bin/lv3-nomad",
+          "node",
+          "status",
+          "-json"
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Nomad stays private-only behind the Proxmox Tailscale TCP proxy and is verified directly by the repo-managed cluster bootstrap path."
+      }
+    },
     "grafana": {
       "service_name": "grafana",
       "owning_vm": "monitoring-lv3",

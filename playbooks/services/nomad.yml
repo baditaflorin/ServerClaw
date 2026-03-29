@@ -1,0 +1,4 @@
+# depends_on:
+#   - playbooks/nomad.yml
+---
+- import_playbook: ../nomad.yml

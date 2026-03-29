@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.65",
   "platform_version": "0.130.46",
-  "generated_at": "2026-03-29T02:14:41Z",
-  "next_refresh_at": "2026-03-29T03:14:41Z",
+  "generated_at": "2026-03-29T02:21:18Z",
+  "next_refresh_at": "2026-03-29T03:21:18Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -26,7 +26,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.40:9093",
-        "last_live_apply": "2026-03-28T00:00:00Z"
+        "last_live_apply": "2026-03-29T00:00:00Z"
       },
       "api_gateway": {
         "service_name": "Platform API Gateway",
@@ -172,7 +172,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://grafana.lv3.org",
-        "last_live_apply": "2026-03-28T00:00:00Z",
+        "last_live_apply": "2026-03-29T00:00:00Z",
         "slo_status": "unknown"
       },
       "harbor": {
@@ -290,6 +290,17 @@
         "primary_url": "https://nginx.lv3.org",
         "last_live_apply": "2026-03-29T00:00:00Z",
         "slo_status": "unknown"
+      },
+      "nomad": {
+        "service_name": "Nomad",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://100.64.0.1:8013",
+        "last_live_apply": "2026-03-29T00:00:00Z"
       },
       "ntfy": {
         "service_name": "ntfy",
@@ -436,7 +447,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://realtime.lv3.org",
-        "last_live_apply": "2026-03-28T00:00:00Z",
+        "last_live_apply": "2026-03-29T00:00:00Z",
         "slo_status": "unknown"
       },
       "searxng": {
@@ -1364,6 +1375,32 @@
         "runbook": "docs/runbooks/configure-netbox.md"
       },
       {
+        "id": "converge-nomad",
+        "description": "Converge the private Nomad scheduler on monitoring-lv3 plus the runtime and build clients, including controller-local TLS and ACL bootstrap artifacts and repo-managed smoke jobs.",
+        "tags": [
+          "converge-nomad",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 4,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-nomad.md"
+      },
+      {
         "id": "converge-ntfy",
         "description": "Deploy the private ntfy paging gateway on docker-runtime-lv3 and persist the repo-managed credential used by Alertmanager critical routing.",
         "tags": [
@@ -1807,7 +1844,7 @@
       },
       {
         "id": "database-dns",
-        "description": "Publish the current private database.lv3.org DNS record toward the Proxmox host Tailscale proxy while the PostgreSQL HA VIP remains unapplied live.",
+        "description": "Publish the private database.lv3.org DNS record toward the Patroni-managed PostgreSQL VIP.",
         "tags": [
           "database-dns",
           "external-live",
@@ -1829,7 +1866,7 @@
           "max_rollback_depth": 1,
           "escalation_action": "notify_and_abort"
         },
-        "runbook": "docs/runbooks/configure-postgres-vm.md"
+        "runbook": "docs/runbooks/postgres-failover.md"
       },
       {
         "id": "deploy-and-promote",
@@ -2771,32 +2808,6 @@
         "runbook": "docs/runbooks/token-lifecycle-management.md"
       },
       {
-        "id": "route-dns-assertion-ledger",
-        "description": "Reconcile the ADR 0252 route and DNS assertion ledger drift set across the Hetzner zone, including apex publication truth, tailnet-only DNS targets, and stale record retirements.",
-        "tags": [
-          "external-live",
-          "mutation",
-          "preflight",
-          "route-dns-assertion-ledger",
-          "validated"
-        ],
-        "risk_class": "HIGH",
-        "automation_eligible": true,
-        "agent_trust_required": "T3",
-        "execution_class": "mutation",
-        "live_impact": "external_live",
-        "budget": {
-          "max_duration_seconds": 1200,
-          "max_steps": 250,
-          "max_concurrent_instances": 1,
-          "max_touched_hosts": 1,
-          "max_restarts": 0,
-          "max_rollback_depth": 1,
-          "escalation_action": "notify_and_abort"
-        },
-        "runbook": "docs/runbooks/subdomain-exposure-audit.md"
-      },
-      {
         "id": "run-triage",
         "description": "Run the ADR 0114 rule-based incident triage engine for one alert payload, write the report, and optionally post the summary to Mattermost.",
         "tags": [
@@ -2925,7 +2936,7 @@
       },
       {
         "id": "subdomain-exposure-audit",
-        "description": "Run the ADR 0139 subdomain exposure registry plus ADR 0252 route and DNS publication audit, check public DNS, private routes, TLS, and edge auth behavior, and store one receipt.",
+        "description": "Run the ADR 0139 subdomain exposure registry audit, check live DNS and edge auth behavior, and store one receipt.",
         "tags": [
           "diagnostic",
           "guest-live",
@@ -3457,6 +3468,16 @@
         ]
       },
       {
+        "id": "configure-nomad",
+        "title": "Configure Nomad",
+        "agent_trust_required": "T3",
+        "steps": 13,
+        "path": "docs/runbooks/configure-nomad.md",
+        "workflow_ids": [
+          "converge-nomad"
+        ]
+      },
+      {
         "id": "configure-ntfy",
         "title": "Configure Ntfy",
         "agent_trust_required": "T3",
@@ -3535,8 +3556,7 @@
         "steps": 0,
         "path": "docs/runbooks/configure-postgres-vm.md",
         "workflow_ids": [
-          "converge-postgres-vm",
-          "database-dns"
+          "converge-postgres-vm"
         ]
       },
       {
@@ -3829,6 +3849,16 @@
         ]
       },
       {
+        "id": "postgres-failover",
+        "title": "PostgreSQL Failover Runbook",
+        "agent_trust_required": "T3",
+        "steps": 4,
+        "path": "docs/runbooks/postgres-failover.md",
+        "workflow_ids": [
+          "database-dns"
+        ]
+      },
+      {
         "id": "provision-guests",
         "title": "Provision Guests Runbook",
         "agent_trust_required": "T3",
@@ -3911,11 +3941,10 @@
       {
         "id": "subdomain-exposure-audit",
         "title": "Subdomain Exposure Audit",
-        "agent_trust_required": "T3",
-        "steps": 6,
+        "agent_trust_required": "T2",
+        "steps": 4,
         "path": "docs/runbooks/subdomain-exposure-audit.md",
         "workflow_ids": [
-          "route-dns-assertion-ledger",
           "subdomain-exposure-audit"
         ]
       },
@@ -4130,7 +4159,7 @@
   "recent_changes": {
     "last_version": "0.177.64",
     "deployed_at": "2026-03-29",
-    "summary": "implemented ADR 0201 by converging Harbor with Trivy scanning, Keycloak-backed operator login, and a repo-managed check-runner publication path through registry.lv3.org",
+    "summary": "implements ADR 0232 by adding the private Nomad scheduler, controller-local TLS and ACL bootstrap, Proxmox proxy and firewall wiring, and repo-managed smoke jobs for durable batch and long-running internal workloads",
     "release_notes_url": "docs/release-notes/0.177.65.md"
   },
   "agentic_architecture": {
