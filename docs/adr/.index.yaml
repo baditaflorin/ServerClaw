@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-29'
 total_adrs: 304
 implementation_status_summary:
-  Implemented: 233
+  Implemented: 234
   Partial: 7
-  Not Implemented: 63
+  Not Implemented: 62
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4649,7 +4649,7 @@ adr_index:
       - concordance
     summary: We will require public endpoint admission control that proves concordance
     filename: 0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md
-    implemented_version: 0.177.76
+    implemented_version: 0.177.77
   - adr: '0274'
     title: Governed Base Image Mirrors And Warm Caches For Repo Deployments
     status: Accepted

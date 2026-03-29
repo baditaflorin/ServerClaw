@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-03-29",
   "recorded_on": "2026-03-29",
-  "recorded_at": "2026-03-29T12:29:23Z",
+  "recorded_at": "2026-03-29T12:49:32Z",
   "recorded_by": "codex",
-  "source_commit": "ca87632b5f459bc471c2405af3a8c691e5132b78",
-  "repo_version_context": "0.177.76",
+  "source_commit": "e3de9561c1e55a190be8f20176a68c9c2fe97e39",
+  "repo_version_context": "0.177.77",
   "platform_version_context": "0.130.52",
   "workflow_id": "adr-0273-public-endpoint-admission-control-mainline-live-apply",
   "adr": "0273",
-  "summary": "Integrated ADR 0273 on synchronized main release 0.177.76 by replaying exact-main public endpoint admission control across the shared edge and route-ledger publication paths, re-verifying direct HTTP and TLS evidence, and establishing platform version 0.130.52 without introducing new public DNS or certificate drift.",
+  "summary": "Integrated ADR 0273 on synchronized main release 0.177.77 by replaying exact-main public endpoint admission control across the shared edge and route-ledger publication paths, re-verifying direct HTTP and TLS evidence, and establishing platform version 0.130.52 without introducing new public DNS or certificate drift.",
   "targets": [
     {
       "kind": "host",
@@ -45,7 +45,7 @@
     {
       "check": "Latest origin/main baseline and protected release cut",
       "result": "pass",
-      "observed": "`git fetch origin --prune` confirmed the synchronized mainline baseline at commit `2da64d1c36ebca0f1aea4a0e3c65f762d0da2ae1`; the rebased exact-main ADR 0273 replay source was commit `ca87632b5f459bc471c2405af3a8c691e5132b78` on top of that merged head, preserving the protected release cut from repository version `0.177.75` to `0.177.76` while carrying platform version `0.130.52` for this public-endpoint admission rollout."
+      "observed": "`git fetch origin --prune` confirmed the synchronized mainline baseline at commit `90c3b26f93fbfe6ffdaecd74fdc422cfcf10281f`; the exact-main ADR 0273 replay source was commit `e3de9561c1e55a190be8f20176a68c9c2fe97e39` on top of that head, and the protected release cut advanced repository version `0.177.76` to `0.177.77` while carrying platform version `0.130.52` for this public-endpoint admission rollout."
     },
     {
       "check": "Repo automation and validation sweep",
@@ -55,12 +55,12 @@
     {
       "check": "Exact-main route-ledger replay",
       "result": "pass",
-      "observed": "After rebasing the validated ADR 0273 release tree onto `2da64d1c36ebca0f1aea4a0e3c65f762d0da2ae1`, `make route-dns-assertion-ledger env=production` completed successfully with final recap `localhost : ok=56 changed=0 unreachable=0 failed=0 skipped=24 rescued=0 ignored=0`, proving the new admission gate keeps the already-aligned public DNS state idempotent on the latest main release."
+      "observed": "From release commit `e3de9561c1e55a190be8f20176a68c9c2fe97e39` on `origin/main` baseline `90c3b26f93fbfe6ffdaecd74fdc422cfcf10281f`, `make route-dns-assertion-ledger env=production` completed successfully with final recap `localhost : ok=56 changed=0 unreachable=0 failed=0 skipped=24 rescued=0 ignored=0`, proving the new admission gate keeps the already-aligned public DNS state idempotent on the latest main release."
     },
     {
       "check": "Exact-main shared-edge replay",
       "result": "pass",
-      "observed": "After rebasing the validated ADR 0273 release tree onto `2da64d1c36ebca0f1aea4a0e3c65f762d0da2ae1`, `make configure-edge-publication env=production` completed successfully with final recap `nginx-lv3 : ok=61 changed=3 unreachable=0 failed=0 skipped=14 rescued=0 ignored=0`; the exact-main run rebuilt the docs and changelog portals, published the generated static directories, revalidated the shared-edge certificate inputs, and completed all HTTP and HTTPS probe checks before finishing."
+      "observed": "From release commit `e3de9561c1e55a190be8f20176a68c9c2fe97e39` on `origin/main` baseline `90c3b26f93fbfe6ffdaecd74fdc422cfcf10281f`, `make configure-edge-publication env=production` completed successfully with final recap `nginx-lv3 : ok=61 changed=3 unreachable=0 failed=0 skipped=14 rescued=0 ignored=0`; the exact-main run rebuilt the docs and changelog portals, published the generated static directories, revalidated the shared-edge certificate inputs, and completed all HTTP and HTTPS probe checks before finishing."
     },
     {
       "check": "Direct HTTPS and SAN verification",
@@ -70,7 +70,7 @@
     {
       "check": "Final public exposure audit",
       "result": "partial",
-      "observed": "`make subdomain-exposure-audit` wrote audit run `0f4855aa-095d-434d-887b-2f8343e0716c` at `2026-03-29T12:28:10.484477Z` into `receipts/subdomain-exposure-audit/20260329T122810Z.json`; the ADR 0273 concordance checks passed on the rebased latest-main tree, while the audit still reported only the pre-existing `git.lv3.org` warnings `active_subdomain_missing_expected_public_resolution` and `active_catalog_subdomain_missing_from_zone`."
+      "observed": "`make subdomain-exposure-audit` wrote audit run `b24e6187-104c-4c0a-a65b-d723019b9d24` at `2026-03-29T12:49:00.258027Z` into `receipts/subdomain-exposure-audit/20260329T124900Z.json`; the ADR 0273 concordance checks passed on release `0.177.77`, while the audit still reported only the pre-existing `git.lv3.org` warnings `active_subdomain_missing_expected_public_resolution` and `active_catalog_subdomain_missing_from_zone`."
     }
   ],
   "evidence_refs": [
@@ -86,7 +86,7 @@
     "docs/workstreams/adr-0273-public-endpoint-admission-control.md",
     "docs/runbooks/configure-edge-publication.md",
     "docs/runbooks/subdomain-exposure-audit.md",
-    "docs/release-notes/0.177.76.md",
+    "docs/release-notes/0.177.77.md",
     "docs/release-notes/README.md",
     "config/certificate-catalog.json",
     "Makefile",
@@ -96,13 +96,13 @@
     "tests/test_subdomain_exposure_audit.py",
     "tests/test_edge_publication_makefile.py",
     "tests/test_validate_repo_cache.py",
-    "receipts/subdomain-exposure-audit/20260329T122810Z.json",
+    "receipts/subdomain-exposure-audit/20260329T124900Z.json",
     "receipts/live-applies/2026-03-29-adr-0273-public-endpoint-admission-control-live-apply.json"
   ],
   "notes": [
     "This receipt supersedes the earlier branch-local receipt `2026-03-29-adr-0273-public-endpoint-admission-control-live-apply` as the canonical source for the merged mainline state because it records the synchronized replay from the protected release cut on top of the newest available origin/main baseline.",
-    "After origin/main advanced to `2da64d1c36ebca0f1aea4a0e3c65f762d0da2ae1`, the exact-main route-ledger and shared-edge replays were rerun from the rebased `0.177.76` tree and the final audit proof was refreshed at `receipts/subdomain-exposure-audit/20260329T122810Z.json`.",
-    "The route-ledger replay remained fully idempotent on the integrated tree, while the shared-edge replay made three safe changes on `nginx-lv3` while re-publishing the generated docs and changelog portals for release 0.177.76.",
+    "After origin/main advanced to `90c3b26f93fbfe6ffdaecd74fdc422cfcf10281f`, the exact-main route-ledger and shared-edge replays were rerun from release `0.177.77` and the final audit proof was refreshed at `receipts/subdomain-exposure-audit/20260329T124900Z.json`.",
+    "The route-ledger replay remained fully idempotent on the integrated tree, while the shared-edge replay made three safe changes on `nginx-lv3` while re-publishing the generated docs and changelog portals for release 0.177.77.",
     "The live platform already satisfied ADR 0273's public-hostname and certificate concordance contract before this exact-main replay; platform version 0.130.52 records the synchronized mainline verification of that contract together with the protected release surfaces."
   ]
 }

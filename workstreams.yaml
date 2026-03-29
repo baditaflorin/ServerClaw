@@ -750,7 +750,7 @@ workstreams:
       - versions/stack.yaml
       - build/platform-manifest.json
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.76.md
+      - docs/release-notes/0.177.77.md
       - docs/workstreams/adr-0273-public-endpoint-admission-control.md
       - docs/adr/0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md
       - docs/adr/.index.yaml
@@ -805,7 +805,7 @@ workstreams:
             - versions/stack.yaml
             - build/platform-manifest.json
             - docs/release-notes/README.md
-            - docs/release-notes/0.177.76.md
+            - docs/release-notes/0.177.77.md
             - docs/diagrams/agent-coordination-map.excalidraw
           mode: exclusive
     ready_to_merge: true
