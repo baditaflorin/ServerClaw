@@ -10,6 +10,9 @@ This runbook keeps the service uptime contract aligned across:
 - the world-state `service_health` surface
 - the platform API `GET /v1/platform/health`
 
+ADR 0246 extends the contract from binary health into four runtime semantics:
+`startup`, `ready`, `degraded`, and `failed`.
+
 ## Source Of Truth
 
 The canonical uptime source is `config/health-probe-catalog.json`.
@@ -50,13 +53,15 @@ curl -H "Authorization: Bearer <token>" https://api.lv3.org/v1/platform/health/w
 When a service health surface changes:
 
 1. Update `config/health-probe-catalog.json`.
-2. Update `config/service-capability-catalog.json` if the monitor binding or service metadata changed.
+2. Update `config/service-capability-catalog.json` when the service gains or changes `degradation_modes`.
 3. Regenerate `config/uptime-kuma/monitors.json`.
-4. Run the targeted uptime and API tests.
+4. Run the targeted uptime, world-state, and API tests.
 5. Run repository data-model validation.
 
 ## Notes
 
-- The world-state collector prefers readiness probes, then liveness probes, then catalog URL fallback when a probe cannot be executed from the worker.
+- The world-state collector now records per-phase probe results plus a derived `runtime_state` when it can execute the relevant phases from the worker.
+- The observation loop and post-verify path use the same runtime-state classification so startup is visible without paging it as a hard failure immediately.
+- Active degraded modes come from `config/service-capability-catalog.json` and the live degradation state file under `.local/state/degradation/`.
 - `command` and `systemd` contracts remain valid convergence checks even when the world-state path cannot execute them directly.
 - Internal platform health is no longer limited to the smaller set of services exposed through the API gateway proxy catalog.

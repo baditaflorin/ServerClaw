@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "services": {
     "nginx_edge": {
       "service_name": "nginx-edge",
@@ -136,6 +136,18 @@
       "owning_vm": "docker-runtime-lv3",
       "role": "dify_runtime",
       "verify_file": "roles/dify_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Dify startup completes once the setup-status endpoint responds on the private listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://10.10.10.20:8094/console/api/setup",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
       "liveness": {
         "kind": "http",
         "description": "The Dify edge health endpoint responds on the docker-runtime listener.",
@@ -229,6 +241,18 @@
       "owning_vm": "docker-runtime-lv3",
       "role": "keycloak_runtime",
       "verify_file": "roles/keycloak_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Keycloak startup completes once local realm discovery responds with the managed issuer metadata.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:18080/realms/lv3/.well-known/openid-configuration",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
       "liveness": {
         "kind": "http",
         "description": "The Keycloak management liveness endpoint responds on the loopback management port.",
@@ -456,6 +480,18 @@
       "owning_vm": "docker-runtime-lv3",
       "role": "langfuse_runtime",
       "verify_file": "roles/langfuse_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Langfuse startup completes once the local sign-in page renders after the web and worker services settle.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:3002/auth/sign-in",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
       "liveness": {
         "kind": "http",
         "description": "The Langfuse public health endpoint responds on the local runtime listener.",
@@ -502,6 +538,18 @@
       "owning_vm": "docker-runtime-lv3",
       "role": "api_gateway_runtime",
       "verify_file": "roles/api_gateway_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Gateway startup completes once the authenticated aggregate health endpoint is routing requests.",
+        "timeout_seconds": 90,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8083/v1/health",
+        "method": "GET",
+        "expected_status": [
+          401
+        ]
+      },
       "liveness": {
         "kind": "http",
         "description": "The local API gateway health endpoint responds on docker-runtime-lv3.",
@@ -594,6 +642,18 @@
       "owning_vm": "docker-runtime-lv3",
       "role": "outline_runtime",
       "verify_file": "roles/outline_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Outline startup completes once the shared-edge health endpoint renders through the OIDC publication path.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "https://wiki.lv3.org/_health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
       "liveness": {
         "kind": "http",
         "description": "The local Outline health endpoint responds on the runtime listener.",
@@ -1234,6 +1294,18 @@
       "owning_vm": "docker-runtime-lv3",
       "role": "netbox_runtime",
       "verify_file": "roles/netbox_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "NetBox startup completes once the repo-managed API token can read the users API.",
+        "timeout_seconds": 300,
+        "retries": 30,
+        "delay_seconds": 10,
+        "url": "http://127.0.0.1:8082/api/users/users/?limit=1",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
       "liveness": {
         "kind": "http",
         "description": "The NetBox login page responds on the local runtime listener.",
@@ -1280,6 +1352,18 @@
       "owning_vm": "docker-runtime-lv3",
       "role": "open_webui_runtime",
       "verify_file": "roles/open_webui_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Open WebUI startup completes once the repo-managed admin sign-in path succeeds locally.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8088/api/v1/auths/signin",
+        "method": "POST",
+        "expected_status": [
+          200
+        ]
+      },
       "liveness": {
         "kind": "http",
         "description": "The Open WebUI root page responds on the local listener.",
@@ -1398,6 +1482,18 @@
       "owning_vm": "docker-runtime-lv3",
       "role": "n8n_runtime",
       "verify_file": "roles/n8n_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "n8n startup completes once the local readiness endpoint reports a ready runtime after bootstrap.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:5678/healthz/readiness",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
       "liveness": {
         "kind": "http",
         "description": "The n8n health endpoint responds on the local listener.",
@@ -1444,6 +1540,18 @@
       "owning_vm": "docker-runtime-lv3",
       "role": "rag_context_runtime",
       "verify_file": "roles/rag_context_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Platform-context startup completes once the private OpenAPI document is served locally.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8010/openapi.json",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
       "liveness": {
         "kind": "http",
         "description": "The platform-context health endpoint responds on the local listener.",
@@ -1490,6 +1598,18 @@
       "owning_vm": "docker-runtime-lv3",
       "role": "openbao_runtime",
       "verify_file": "roles/openbao_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "OpenBao startup completes once the local health endpoint reports the active node as ready.",
+        "timeout_seconds": 60,
+        "retries": 30,
+        "delay_seconds": 2,
+        "url": "http://127.0.0.1:8201/v1/sys/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
       "liveness": {
         "kind": "http",
         "description": "OpenBao exposes the local seal-status endpoint.",
