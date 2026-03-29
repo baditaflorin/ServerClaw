@@ -76,11 +76,13 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert "Sync the shared search fabric files" in tasks
     assert "Sync the ops portal service build inputs explicitly" in tasks
     assert '{{ ops_portal_repo_root }}/scripts/publication_contract.py' in tasks
+    assert '{{ ops_portal_repo_root }}/scripts/stage_smoke.py' in tasks
     assert '{{ ops_portal_repo_root }}/requirements/ops-portal.txt' in tasks
     assert "Sync the ops portal directory-backed data sources" in tasks
     assert 'directory_mode: "0755"' in tasks
     assert "Remove stale ops portal build-context ignore and metadata files" in tasks
     assert "{{ ops_portal_build_context_dir }}/._publication_contract.py" in tasks
+    assert "{{ ops_portal_build_context_dir }}/._stage_smoke.py" in tasks
     assert "Remove stale ops portal build-context entries before sync" in tasks
     assert "Sync the clean ops portal Docker build-context directories" in tasks
     assert "Sync the clean ops portal Docker build-context root files" in tasks
@@ -90,6 +92,7 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert 'src: "{{ ops_portal_service_dir }}/search_fabric/"' in tasks
     assert 'dest: "{{ ops_portal_build_context_dir }}/search_fabric/"' in tasks
     assert "{{ ops_portal_build_context_dir }}/publication_contract.py" in tasks
+    assert "{{ ops_portal_build_context_dir }}/stage_smoke.py" in tasks
     assert "{{ ops_portal_build_context_dir }}/requirements.txt" in tasks
     assert "{{ ops_portal_build_context_dir }}/Dockerfile" in tasks
     assert "Discover macOS metadata files in the synced ops portal data tree" in tasks
@@ -104,6 +107,7 @@ def test_ops_portal_dockerfile_depends_on_synced_helper_files() -> None:
 
     assert "COPY requirements.txt ./requirements.txt" in dockerfile
     assert "COPY publication_contract.py ./publication_contract.py" in dockerfile
+    assert "COPY stage_smoke.py ./stage_smoke.py" in dockerfile
     assert "COPY ops_portal ./ops_portal" in dockerfile
     assert "COPY search_fabric ./search_fabric" in dockerfile
 

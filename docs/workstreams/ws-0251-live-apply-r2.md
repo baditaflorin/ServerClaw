@@ -91,6 +91,11 @@
 - 2026-03-29 focused validation passed from this worktree:
   `44 passed in 23.61s` across the stage-smoke, promotion-pipeline,
   service-catalog, runtime-assurance, and interactive ops-portal slices
+- 2026-03-29 the live ops-portal replay exposed one packaging gap in the
+  branch-local runtime role: `scripts/stage_smoke.py` was imported by the
+  portal image but was not copied into the synced service tree or Docker build
+  context; this branch now copies and packages the helper explicitly and adds
+  image-layout regression coverage for that import path
 - 2026-03-29 repo validation passed for
   `scripts/policy_checks.py --validate`,
   `scripts/promotion_pipeline.py --validate`,
@@ -106,6 +111,17 @@
   `receipts/live-applies/evidence/2026-03-29-adr-0251-windmill-live-apply.txt`
   and drift diagnosis:
   `receipts/live-applies/evidence/2026-03-29-adr-0251-windmill-worker-drift.txt`
+- 2026-03-29 the scoped `ops_portal` rerun proved the packaging fix by passing
+  the container, listener, root-page, launcher, and runtime-assurance partial
+  render checks before failing the final non-degraded assertion after the live
+  API gateway on `docker-runtime-lv3` drifted back away from current
+  `origin/main`; transcripts:
+  `receipts/live-applies/evidence/2026-03-29-adr-0251-ops-portal-live-apply.txt`,
+  `receipts/live-applies/evidence/2026-03-29-adr-0251-ops-portal-live-apply-rerun.txt`,
+  recovery proof:
+  `receipts/live-applies/evidence/2026-03-29-adr-0251-api-gateway-drift-recovery.txt`,
+  and recurrence proof:
+  `receipts/live-applies/evidence/2026-03-29-adr-0251-api-gateway-drift-recur.txt`
 
 ## Live Apply Blocker
 
@@ -123,14 +139,25 @@
   shared Windmill worker checkout on `docker-runtime-lv3`; the role expanded a
   staged archive during this run, but the verified guest hashes no longer
   matched the ADR 0251 worktree by the time the Windmill gate-status script ran
+- the live API gateway on `docker-runtime-lv3` is also subject to the same
+  shared-host drift: it was first recovered to the current repo and current
+  `origin/main` hash `ce9f9ff50a64f2edbad20eced497f25efa5d5baffc2d181169c7025841b35853`,
+  then later reverted to
+  `acc8a2750d95323ca8337265064e082d1f0ae0e8c6fc63ca4a2b3dae116242f7`,
+  which removes `/v1/platform/runtime-assurance` from the live gateway and
+  forces the ops portal back onto the degraded fallback banner during final
+  verification
 
 ## Remaining Steps
 
 - fetch and rebase onto the latest `origin/main` before any final integration:
-  during this run the worktree moved from `f3da817d` to `9416fec6`
-- re-run the exact `windmill` and `ops_portal` live applies from an
-  uncontended latest-main checkout and verify the guest hashes immediately
-  after each replay
+  during this run the worktree moved again and `origin/main` is now
+  `a4f8e6cc894c59e8fb744cc5be9691b96c44702a` (`v0.177.81`) as of
+  2026-03-29
+- re-run `api-gateway`, then the exact `ops_portal` and `windmill` live applies
+  from an uncontended latest-main checkout and verify the guest hashes
+  immediately after each replay so the shared host cannot drift between apply
+  and proof
 - update ADR 0251 metadata, refresh `docs/adr/.index.yaml`, and mark
   `workstreams.yaml` `live_applied: true` only after the live hashes and public
   behavior match the final merged tree

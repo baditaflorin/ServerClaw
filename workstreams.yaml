@@ -444,6 +444,12 @@ workstreams:
         the updated operator workflow surfaces
       release_bump: patch
       included_in_repo_version: null
+      latest_receipts:
+        windmill_attempt: 2026-03-29-adr-0251-windmill-live-apply
+        windmill_worker_drift: 2026-03-29-adr-0251-windmill-worker-drift
+        ops_portal_attempt: 2026-03-29-adr-0251-ops-portal-live-apply-rerun
+        api_gateway_drift_recovery: 2026-03-29-adr-0251-api-gateway-drift-recovery
+        api_gateway_drift_recur: 2026-03-29-adr-0251-api-gateway-drift-recur
   - id: ws-0224-repo-intake
     adr: "0224"
     title: Self-service repo intake and agent-assisted app deployments

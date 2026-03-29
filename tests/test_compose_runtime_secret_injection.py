@@ -154,3 +154,4 @@ def test_ops_portal_image_includes_publication_contract_helper() -> None:
     app_text = (REPO_ROOT / "scripts" / "ops_portal" / "app.py").read_text()
     assert "from publication_contract import registry_entries" in app_text
     assert "COPY publication_contract.py ./publication_contract.py" in dockerfile_text
+    assert "COPY stage_smoke.py ./stage_smoke.py" in dockerfile_text
