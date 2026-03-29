@@ -240,6 +240,7 @@ def test_operator_admin_raw_app_lockfile_and_runtime_sync_contract() -> None:
     assert "- name: Install repo-managed Windmill raw app frontend dependencies" in runtime_tasks
     assert "missing package-lock.json for {{ item.path }}" in runtime_tasks
     assert "npm ci --no-audit --no-fund" in runtime_tasks
+    assert '"{{ windmill_seed_app_sync_dir.path }}:/workspace"' in runtime_tasks
     assert runtime_tasks.index("- name: Install repo-managed Windmill raw app frontend dependencies") < runtime_tasks.index(
         "- name: Sync repo-managed Windmill raw apps"
     )
