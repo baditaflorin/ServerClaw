@@ -1,0 +1,115 @@
+{
+  "active_publications_tracked": 30,
+  "audit_run_id": "c932496d-36e3-412a-8db2-24008c69f7bb",
+  "audited_at": "2026-03-28T22:24:54.277069Z",
+  "dns_records_checked": 30,
+  "findings": [
+    {
+      "check": "dns_resolution",
+      "detail": "Expected DNS resolution to include ['100.64.0.1']; observed ['100.118.189.95'].",
+      "finding": "active_subdomain_missing_expected_public_resolution",
+      "severity": "WARN",
+      "subdomain": "database.lv3.org"
+    },
+    {
+      "check": "dns_resolution",
+      "detail": "Expected DNS resolution to include ['100.64.0.1']; observed ['<missing>'].",
+      "finding": "active_subdomain_missing_expected_public_resolution",
+      "severity": "WARN",
+      "subdomain": "git.lv3.org"
+    },
+    {
+      "check": "dns_resolution",
+      "detail": "Expected DNS resolution to include ['100.64.0.1']; observed ['<missing>'].",
+      "finding": "active_subdomain_missing_expected_public_resolution",
+      "severity": "WARN",
+      "subdomain": "vault.lv3.org"
+    },
+    {
+      "check": "private_route_probe",
+      "detail": "Failed to connect to the declared private route target 100.64.0.1:5432: [Errno 61] Connection refused",
+      "finding": "private_route_unreachable",
+      "severity": "CRITICAL",
+      "subdomain": "database.lv3.org"
+    },
+    {
+      "check": "tls_certificate",
+      "detail": "TLS identity verification failed: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'mail.lv3.org'. (_ssl.c:1032)",
+      "finding": "certificate_hostname_mismatch",
+      "severity": "CRITICAL",
+      "subdomain": "mail.lv3.org"
+    },
+    {
+      "check": "tls_certificate",
+      "detail": "TLS probe failed: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1032)",
+      "finding": "tls_probe_failed",
+      "severity": "CRITICAL",
+      "subdomain": "vault.lv3.org"
+    },
+    {
+      "check": "hetzner_zone",
+      "detail": "Hetzner DNS exposes CNAME mail.your-server.de. for autoconfig.lv3.org, but the hostname is missing from the catalog.",
+      "finding": "undeclared_subdomain_present_in_zone",
+      "severity": "CRITICAL",
+      "subdomain": "autoconfig.lv3.org"
+    },
+    {
+      "check": "hetzner_zone",
+      "detail": "Expected [('A', '100.64.0.1')] from the catalog; observed [('A', '100.118.189.95')] in Hetzner DNS. Missing [('A', '100.64.0.1')]. Unexpected [('A', '100.118.189.95')].",
+      "finding": "zone_record_differs_from_catalog",
+      "severity": "WARN",
+      "subdomain": "database.lv3.org"
+    },
+    {
+      "check": "hetzner_zone",
+      "detail": "Expected [('A', '65.108.75.123')] from the catalog; observed [('A', '65.108.75.123'), ('AAAA', '2a01:4f8:d0a:27bd::2')] in Hetzner DNS. Unexpected [('AAAA', '2a01:4f8:d0a:27bd::2')].",
+      "finding": "zone_record_differs_from_catalog",
+      "severity": "WARN",
+      "subdomain": "lv3.org"
+    },
+    {
+      "check": "hetzner_zone",
+      "detail": "Hetzner DNS exposes A 65.108.75.123 for notify.lv3.org, but the hostname is missing from the catalog.",
+      "finding": "undeclared_subdomain_present_in_zone",
+      "severity": "CRITICAL",
+      "subdomain": "notify.lv3.org"
+    },
+    {
+      "check": "hetzner_zone",
+      "detail": "Hetzner DNS exposes A 65.108.75.123 for registry.lv3.org, but the hostname is missing from the catalog.",
+      "finding": "undeclared_subdomain_present_in_zone",
+      "severity": "CRITICAL",
+      "subdomain": "registry.lv3.org"
+    },
+    {
+      "check": "hetzner_zone",
+      "detail": "Hetzner DNS exposes AAAA 2a01:4f8:d0a:27bd::2 for www.lv3.org, but the hostname is missing from the catalog.",
+      "finding": "undeclared_subdomain_present_in_zone",
+      "severity": "CRITICAL",
+      "subdomain": "www.lv3.org"
+    },
+    {
+      "check": "hetzner_zone",
+      "detail": "Catalog marks the hostname active, but no corresponding A/AAAA/CNAME record exists in Hetzner DNS.",
+      "finding": "active_catalog_subdomain_missing_from_zone",
+      "severity": "WARN",
+      "subdomain": "git.lv3.org"
+    },
+    {
+      "check": "hetzner_zone",
+      "detail": "Catalog marks the hostname active, but no corresponding A/AAAA/CNAME record exists in Hetzner DNS.",
+      "finding": "active_catalog_subdomain_missing_from_zone",
+      "severity": "WARN",
+      "subdomain": "vault.lv3.org"
+    }
+  ],
+  "hetzner_zone_records_checked": 49,
+  "nginx_vhosts_checked": 25,
+  "private_routes_checked": 4,
+  "publications_in_catalog": 34,
+  "registry_path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0252-live-apply/config/subdomain-exposure-registry.json",
+  "severity_counts": {
+    "CRITICAL": 7,
+    "WARN": 7
+  }
+}

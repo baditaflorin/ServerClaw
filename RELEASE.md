@@ -3,10 +3,10 @@
 - Date: 2026-03-29
 
 ## Summary
-- records ADR 0228 exact-main evidence on the current mainline by verifying Windmill as the default browser-first and API-first operations surface, hardening seeded script and raw-app synchronization on CE v1.662.0, and refreshing the protected canonical truth after the exact-main replay
+- implemented ADR 0224 by extending the governed Coolify lane with private-repo Docker Compose intake, wildcard app DNS publication, HTTPS wildcard edge routing, and Docker pull hardening that keeps education-wemeshup serving the full 1056-activity catalog from main
 
 ## Platform Impact
-- platform version advances to 0.130.47 after the exact-main ADR 0228 replay re-verifies the seeded Windmill operations surface, representative governed workflows, and raw-app dependency synchronization on top of the 0.130.46 baseline
+- records ADR 0252 route and DNS publication assertion ledger on main while preserving the current integrated platform baseline at 0.130.46; the ADR first became true on platform 0.130.43 during the verified live apply
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

@@ -58,7 +58,7 @@ platform_host:
       - name: postgres-lv3
         listen_address: 100.64.0.1
         listen_port: 5432
-        upstream_host: 10.10.10.55
+        upstream_host: 10.10.10.50
         upstream_port: 5432
       - name: windmill
         listen_address: 100.64.0.1
@@ -1184,6 +1184,16 @@ platform_service_topology:
       type: A
       target: 65.108.75.123
       ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: static
+      slug: mail
+      title: LV3 Mail
+      description: The managed LV3 mail service accepts SMTP and IMAPS traffic on
+        the published mail hostname without exposing a browser-facing mailbox UI.
+      meta: Use the declared mail protocols on ports 587 and 993 instead of expecting
+        a public web application at this hostname.
     service_id: mail_platform
     ports:
       private_api: 8081
@@ -1915,7 +1925,7 @@ platform_service_topology:
       visibility: tailnet
       name: database
       type: A
-      target: 10.10.10.55
+      target: 100.64.0.1
       ttl: 60
     service_id: postgres
     ports:
@@ -2081,7 +2091,7 @@ platform_dns_records:
       ttl: 60
     - name: database
       type: A
-      value: 10.10.10.55
+      value: 100.64.0.1
       ttl: 60
 platform_management_allowed_tcp_ports:
   - 3001
@@ -2403,6 +2413,16 @@ public_edge_service_topology:
       type: A
       target: 65.108.75.123
       ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: static
+      slug: mail
+      title: LV3 Mail
+      description: The managed LV3 mail service accepts SMTP and IMAPS traffic on
+        the published mail hostname without exposing a browser-facing mailbox UI.
+      meta: Use the declared mail protocols on ports 587 and 993 instead of expecting
+        a public web application at this hostname.
     service_id: mail_platform
     ports:
       private_api: 8081
@@ -3134,7 +3154,7 @@ public_edge_service_topology:
       visibility: tailnet
       name: database
       type: A
-      target: 10.10.10.55
+      target: 100.64.0.1
       ttl: 60
     service_id: postgres
     ports:

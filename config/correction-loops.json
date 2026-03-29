@@ -83,6 +83,7 @@
           "open-maintenance-window",
           "plane-manage",
           "portainer-manage",
+          "route-dns-assertion-ledger",
           "semaphore-manage",
           "uptime-kuma-manage",
           "uptime-robot-manage"

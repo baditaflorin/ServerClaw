@@ -13,11 +13,40 @@
         "access_model": "platform-sso",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "edge_oidc",
+        "route_target": {
+          "service_id": "dify",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.dify_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": true,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -58,11 +87,40 @@
         "access_model": "upstream-auth",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "upstream_auth",
+        "route_target": {
+          "service_id": "api_gateway",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.api_gateway_internal_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -100,11 +158,40 @@
         "access_model": "open",
         "audience": "public"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "public",
+        "auth_requirement": "none",
+        "route_target": {
+          "service_id": "coolify_apps",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:443",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -145,11 +232,40 @@
         "access_model": "open",
         "audience": "public"
       },
+      "assertions": {
+        "publication_class": "informational-only",
+        "environment": "production",
+        "audience": "public",
+        "auth_requirement": "none",
+        "route_target": {
+          "service_id": "docker_build",
+          "kind": "static",
+          "source": "service_topology",
+          "target": "65.108.75.123",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -190,11 +306,40 @@
         "access_model": "platform-sso",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "edge_oidc",
+        "route_target": {
+          "service_id": "changelog_portal",
+          "kind": "static_dir",
+          "source": "public_edge_extra_sites",
+          "target": "65.108.75.123",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": true,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -230,11 +375,40 @@
         "access_model": "platform-sso",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "edge_oidc",
+        "route_target": {
+          "service_id": "coolify",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.coolify_dashboard_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": true,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -273,11 +447,40 @@
         "access_model": "private-network",
         "audience": "private-network"
       },
+      "assertions": {
+        "publication_class": "private-only",
+        "environment": "production",
+        "audience": "private-network",
+        "auth_requirement": "private_network",
+        "route_target": {
+          "service_id": "postgres",
+          "kind": "dns-only",
+          "source": "dns-only",
+          "target": "100.64.0.1",
+          "target_port": 5432
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": true,
+        "tls": false
+      },
       "adapter": {
         "dns": {
           "target": "100.64.0.1",
           "target_port": 5432,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "100.64.0.1"
+            }
+          ],
+          "managed": true,
+          "visibility": "tailnet",
+          "zone_expected": true
         },
         "routing": {
           "mode": "dns-only",
@@ -310,11 +513,40 @@
         "access_model": "open",
         "audience": "public"
       },
+      "assertions": {
+        "publication_class": "informational-only",
+        "environment": "production",
+        "audience": "public",
+        "auth_requirement": "none",
+        "route_target": {
+          "service_id": "docker_runtime",
+          "kind": "static",
+          "source": "service_topology",
+          "target": "65.108.75.123",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -355,11 +587,40 @@
         "access_model": "platform-sso",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "edge_oidc",
+        "route_target": {
+          "service_id": "docs_portal",
+          "kind": "static_dir",
+          "source": "public_edge_extra_sites",
+          "target": "65.108.75.123",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": true,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -395,11 +656,40 @@
         "access_model": "platform-sso",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "edge_oidc",
+        "route_target": {
+          "service_id": "excalidraw",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://10.10.10.20:{{ platform_port_assignments.excalidraw_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": true,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -443,11 +733,40 @@
         "access_model": "private-network",
         "audience": "private-network"
       },
+      "assertions": {
+        "publication_class": "private-only",
+        "environment": "production",
+        "audience": "private-network",
+        "auth_requirement": "private_network",
+        "route_target": {
+          "service_id": "gitea",
+          "kind": "tailscale-tcp-proxy",
+          "source": "tailscale-tcp-proxy",
+          "target": "100.64.0.1",
+          "target_port": 3009
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": true,
+        "tls": false
+      },
       "adapter": {
         "dns": {
           "target": "100.64.0.1",
           "target_port": 3009,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "100.64.0.1"
+            }
+          ],
+          "managed": true,
+          "visibility": "tailnet",
+          "zone_expected": true
         },
         "routing": {
           "mode": "dns-only",
@@ -480,11 +799,40 @@
         "access_model": "upstream-auth",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "upstream_auth",
+        "route_target": {
+          "service_id": "grafana",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}:3000",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -533,11 +881,40 @@
         "access_model": "upstream-auth",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "staging",
+        "audience": "operator",
+        "auth_requirement": "upstream_auth",
+        "route_target": {
+          "service_id": "grafana",
+          "kind": "dns-only",
+          "source": "dns-only",
+          "target": "65.108.75.123",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": false
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "dns-only",
@@ -571,11 +948,40 @@
         "access_model": "upstream-auth",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "upstream_auth",
+        "route_target": {
+          "service_id": "headscale",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://{{ hostvars['proxmox_florin'].proxmox_internal_ipv4 }}:{{ hostvars['proxmox_florin'].platform_port_assignments.headscale_http_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -613,11 +1019,40 @@
         "access_model": "platform-sso",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "edge_oidc",
+        "route_target": {
+          "service_id": "homepage",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://10.10.10.20:{{ platform_port_assignments.homepage_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": true,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -655,11 +1090,40 @@
         "access_model": "platform-sso",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "edge_oidc",
+        "route_target": {
+          "service_id": "langfuse",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.langfuse_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": true,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -698,11 +1162,40 @@
         "access_model": "platform-sso",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "edge_oidc",
+        "route_target": {
+          "service_id": "dozzle",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.dozzle_http_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": true,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -731,6 +1224,75 @@
       "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
     },
     {
+      "fqdn": "lv3.org",
+      "service_id": "nginx_edge",
+      "environment": "production",
+      "status": "active",
+      "owner_adr": "0021",
+      "publication": {
+        "delivery_model": "informational-edge",
+        "access_model": "open",
+        "audience": "public"
+      },
+      "assertions": {
+        "publication_class": "informational-only",
+        "environment": "production",
+        "audience": "public",
+        "auth_requirement": "none",
+        "route_target": {
+          "service_id": "nginx_edge",
+          "kind": "redirect",
+          "source": "public_edge_apex",
+          "target": "nginx.lv3.org",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "public_edge_apex",
+          "kind": "redirect"
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "nginx_edge",
+        "repo_route_metadata": {
+          "redirect_target_hostname": "nginx.lv3.org"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": true,
+      "notes": "The apex hostname is governed as a crawl-suppressed informational redirect to the shared NGINX edge entrypoint."
+    },
+    {
       "fqdn": "mail.lv3.org",
       "service_id": "mail_platform",
       "environment": "production",
@@ -741,24 +1303,60 @@
         "access_model": "open",
         "audience": "public"
       },
+      "assertions": {
+        "publication_class": "informational-only",
+        "environment": "production",
+        "audience": "public",
+        "auth_requirement": "none",
+        "route_target": {
+          "service_id": "mail_platform",
+          "kind": "static",
+          "source": "service_topology",
+          "target": "65.108.75.123",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
-          "mode": "dns-only",
-          "source": "dns-only",
-          "kind": null
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "static"
         },
         "edge_auth": {
           "provider": "none",
           "unauthenticated_paths": [],
           "unauthenticated_prefix_paths": []
         },
-        "repo_route_service_id": null,
-        "repo_route_metadata": {},
+        "repo_route_service_id": "mail_platform",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "slug": "mail",
+          "title": "LV3 Mail",
+          "description": "The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.",
+          "meta": "Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname."
+        },
         "tls": {
           "provider": "letsencrypt",
           "cert_path": "/etc/letsencrypt/live/lv3-edge/",
@@ -766,7 +1364,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": null
+      "notes": "Published as an informational HTTPS surface on the shared edge while the live mail service itself is reached over SMTP submission and IMAPS."
     },
     {
       "fqdn": "n8n.lv3.org",
@@ -779,11 +1377,40 @@
         "access_model": "platform-sso",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "edge_oidc",
+        "route_target": {
+          "service_id": "n8n",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.n8n_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": true,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -827,11 +1454,40 @@
         "access_model": "open",
         "audience": "public"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "public",
+        "auth_requirement": "none",
+        "route_target": {
+          "service_id": "nginx_edge",
+          "kind": "static",
+          "source": "service_topology",
+          "target": "65.108.75.123",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -872,11 +1528,40 @@
         "access_model": "platform-sso",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "edge_oidc",
+        "route_target": {
+          "service_id": "ops_portal",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://10.10.10.20:{{ platform_port_assignments.ops_portal_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": true,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -916,11 +1601,40 @@
         "access_model": "platform-sso",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "staging",
+        "audience": "operator",
+        "auth_requirement": "edge_oidc",
+        "route_target": {
+          "service_id": "ops_portal",
+          "kind": "dns-only",
+          "source": "dns-only",
+          "target": "65.108.75.123",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": false
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "dns-only",
@@ -954,11 +1668,40 @@
         "access_model": "upstream-auth",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "informational-only",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "upstream_auth",
+        "route_target": {
+          "service_id": "proxmox_ui",
+          "kind": "static",
+          "source": "service_topology",
+          "target": "65.108.75.123",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -1001,11 +1744,40 @@
         "access_model": "platform-sso",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "edge_oidc",
+        "route_target": {
+          "service_id": "realtime",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.netdata_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": true,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -1045,11 +1817,40 @@
         "access_model": "open",
         "audience": "public"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "public",
+        "auth_requirement": "none",
+        "route_target": {
+          "service_id": "harbor",
+          "kind": "proxy",
+          "source": "public_edge_extra_sites",
+          "target": "http://10.10.10.20:{{ platform_port_assignments.harbor_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -1090,11 +1891,40 @@
         "access_model": "private-network",
         "audience": "private-network"
       },
+      "assertions": {
+        "publication_class": "private-only",
+        "environment": "production",
+        "audience": "private-network",
+        "auth_requirement": "private_network",
+        "route_target": {
+          "service_id": "searxng",
+          "kind": "tailscale-tcp-proxy",
+          "source": "tailscale-tcp-proxy",
+          "target": "100.64.0.1",
+          "target_port": 80
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": true,
+        "tls": false
+      },
       "adapter": {
         "dns": {
           "target": "100.64.0.1",
           "target_port": 80,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "100.64.0.1"
+            }
+          ],
+          "managed": true,
+          "visibility": "tailnet",
+          "zone_expected": true
         },
         "routing": {
           "mode": "dns-only",
@@ -1127,11 +1957,40 @@
         "access_model": "upstream-auth",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "upstream_auth",
+        "route_target": {
+          "service_id": "keycloak",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://10.10.10.20:8091",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -1169,11 +2028,40 @@
         "access_model": "upstream-auth",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "staging",
+        "audience": "operator",
+        "auth_requirement": "upstream_auth",
+        "route_target": {
+          "service_id": "keycloak",
+          "kind": "dns-only",
+          "source": "dns-only",
+          "target": "65.108.75.123",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": false
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "dns-only",
@@ -1207,11 +2095,40 @@
         "access_model": "open",
         "audience": "public"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "public",
+        "auth_requirement": "none",
+        "route_target": {
+          "service_id": "status_page",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:3001",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -1250,11 +2167,40 @@
         "access_model": "platform-sso",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "edge_oidc",
+        "route_target": {
+          "service_id": "plane",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.plane_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": true,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -1293,11 +2239,40 @@
         "access_model": "upstream-auth",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "upstream_auth",
+        "route_target": {
+          "service_id": "uptime_kuma",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:3001",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -1335,11 +2310,40 @@
         "access_model": "upstream-auth",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "staging",
+        "audience": "operator",
+        "auth_requirement": "upstream_auth",
+        "route_target": {
+          "service_id": "uptime_kuma",
+          "kind": "dns-only",
+          "source": "dns-only",
+          "target": "65.108.75.123",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": false
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "dns-only",
@@ -1373,11 +2377,40 @@
         "access_model": "private-network",
         "audience": "private-network"
       },
+      "assertions": {
+        "publication_class": "private-only",
+        "environment": "production",
+        "audience": "private-network",
+        "auth_requirement": "private_network",
+        "route_target": {
+          "service_id": "vaultwarden",
+          "kind": "tailscale-tcp-proxy",
+          "source": "tailscale-tcp-proxy",
+          "target": "100.64.0.1",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": true,
+        "tls": true
+      },
       "adapter": {
         "dns": {
-          "target": "100.118.189.95",
+          "target": "100.64.0.1",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "100.64.0.1"
+            }
+          ],
+          "managed": true,
+          "visibility": "tailnet",
+          "zone_expected": true
         },
         "routing": {
           "mode": "dns-only",
@@ -1411,11 +2444,40 @@
         "access_model": "upstream-auth",
         "audience": "operator"
       },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "upstream_auth",
+        "route_target": {
+          "service_id": "outline",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
       "adapter": {
         "dns": {
           "target": "65.108.75.123",
           "target_port": 443,
-          "record_type": "A"
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
         },
         "routing": {
           "mode": "edge",
@@ -1445,9 +2507,9 @@
     }
   ],
   "summary": {
-    "catalog_total": 34,
-    "active_total": 30,
-    "active_public_total": 26,
+    "catalog_total": 35,
+    "active_total": 31,
+    "active_public_total": 27,
     "active_private_total": 4,
     "planned_total": 4,
     "shared_edge_total": 26,

@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-29'
 total_adrs: 281
 implementation_status_summary:
-  Implemented: 226
+  Implemented: 227
   Partial: 6
-  Not Implemented: 48
+  Not Implemented: 47
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4283,7 +4283,7 @@ adr_index:
   - adr: '0252'
     title: Route And DNS Publication Assertion Ledger
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: networking
     keywords:
@@ -4294,6 +4294,7 @@ adr_index:
       - ledger
     summary: We will maintain a route and DNS publication assertion ledger for all
     filename: 0252-route-and-dns-publication-assertion-ledger.md
+    implemented_version: 0.177.68
   - adr: '0253'
     title: Unified Runtime Assurance Scoreboard And Rollup
     status: Accepted
