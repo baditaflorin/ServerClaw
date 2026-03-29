@@ -88,7 +88,7 @@ def test_validate_repo_json_stage_skips_missing_remote_artifacts() -> None:
 def test_validate_repo_generated_portals_stage_does_not_require_make() -> None:
     script = VALIDATE_REPO_SCRIPT.read_text()
 
-    assert 'run --with-requirements "$REPO_ROOT/requirements/docs.txt"' in script
+    assert 'run_python_with_requirements "$REPO_ROOT/requirements/docs.txt"' in script
     assert "build_docs_portal.py" in script
     assert '--generated-dir "$generated_docs_dir"' in script
     assert 'generated_portal_output_dir="$(mktemp -d "${TMPDIR:-/tmp}/lv3-docs-portal.XXXXXX")"' in script

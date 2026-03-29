@@ -151,6 +151,33 @@ run_uv_python() {
   "$REPO_ROOT/scripts/run_python_with_packages.sh" "${packages[@]}" -- "$@"
 }
 
+run_python_with_requirements() {
+  local requirements_file="$1"
+  shift
+
+  resolve_python_bin
+  ensure_uv
+  if [[ "$HAS_UV" == true ]]; then
+    "${UV_CMD[@]}" run --with-requirements "$requirements_file" python3 "$@"
+    return 0
+  fi
+
+  local pip_args=(
+    -m
+    pip
+    install
+    --quiet
+    --disable-pip-version-check
+    -r
+    "$requirements_file"
+  )
+  if "$PYTHON_BIN" -m pip --help 2>/dev/null | grep -q -- "--break-system-packages"; then
+    pip_args=( -m pip install --quiet --disable-pip-version-check --break-system-packages -r "$requirements_file" )
+  fi
+  "$PYTHON_BIN" "${pip_args[@]}"
+  "$PYTHON_BIN" "$@"
+}
+
 tracked_files() {
   if git -C "$REPO_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     git -C "$REPO_ROOT" ls-files -- "$@"
@@ -489,8 +516,8 @@ validate_generated_portals() {
   generated_docs_dir="$(mktemp -d "${TMPDIR:-/tmp}/lv3-docs-site.XXXXXX")"
   generated_portal_output_dir="$(mktemp -d "${TMPDIR:-/tmp}/lv3-docs-portal.XXXXXX")"
   trap 'rm -rf "$generated_docs_dir" "$generated_portal_output_dir"' RETURN
-  "${UV_CMD[@]}" run --with-requirements "$REPO_ROOT/requirements/docs.txt" \
-    python3 "$REPO_ROOT/scripts/build_docs_portal.py" --generated-dir "$generated_docs_dir" --output-dir "$generated_portal_output_dir" \
+  run_python_with_requirements "$REPO_ROOT/requirements/docs.txt" \
+    "$REPO_ROOT/scripts/build_docs_portal.py" --generated-dir "$generated_docs_dir" --output-dir "$generated_portal_output_dir" \
     >/dev/null
 }
 
