@@ -40,7 +40,7 @@ workstreams:
       - changelog.md
       - versions/stack.yaml
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.87.md
+      - docs/release-notes/0.177.88.md
       - build/platform-manifest.json
       - .config-locations.yaml
       - config/build-server.json
@@ -103,7 +103,7 @@ workstreams:
             - changelog.md
             - versions/stack.yaml
             - docs/release-notes/README.md
-            - docs/release-notes/0.177.87.md
+            - docs/release-notes/0.177.88.md
             - build/platform-manifest.json
           mode: exclusive
         - id: validation_runner_contract_catalog
