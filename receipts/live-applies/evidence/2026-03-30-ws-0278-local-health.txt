@@ -1,0 +1,1 @@
+docker-runtime-lv3 | CHANGED | rc=0 | (stdout) {"status":"up","details":{"chromium":{"status":"up","timestamp":"2026-03-29T22:51:23.422895563Z"},"libreoffice":{"status":"up","timestamp":"2026-03-29T22:51:23.422778752Z"}}}
