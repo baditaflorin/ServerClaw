@@ -13,6 +13,7 @@ if str(SCRIPTS_DIR) not in sys.path:
 
 import generate_docs_site as docs_site  # noqa: E402
 import generate_dependency_diagram as dependency_diagram  # noqa: E402
+import build_docs_portal as docs_portal  # noqa: E402
 
 
 class DocsSiteTests(unittest.TestCase):
@@ -36,11 +37,18 @@ class DocsSiteTests(unittest.TestCase):
             self.assertIn("sensitivity: INTERNAL", keycloak_md)
             self.assertIn("sensitivity: PUBLIC", api_md)
             self.assertIn("portal_display: full", keycloak_md)
+            self.assertIn("pagefind_section: services", keycloak_md)
+            self.assertIn("pagefind_service: keycloak", keycloak_md)
+            self.assertIn("pagefind_audience:", keycloak_md)
+            self.assertIn("pagefind_section: api", api_md)
             subdomains_md = (temp_dir / "reference" / "subdomains.md").read_text(encoding="utf-8")
             self.assertIn("edge_oidc", subdomains_md)
             self.assertIn("upstream_auth", subdomains_md)
             dependency_graph_md = (temp_dir / "architecture" / "dependency-graph.md").read_text(encoding="utf-8")
-            self.assertEqual(dependency_graph_md, dependency_diagram.render())
+            self.assertIn("pagefind_section: architecture", dependency_graph_md)
+            self.assertIn("# Service Dependency Graph", dependency_graph_md)
+            self.assertIn("```mermaid", dependency_graph_md)
+            self.assertEqual(dependency_graph_md.count("portal_display: full"), 1)
         finally:
             shutil.rmtree(temp_dir)
 
@@ -63,6 +71,31 @@ class DocsSiteTests(unittest.TestCase):
             docs_site.validate_site(temp_dir)
         finally:
             shutil.rmtree(temp_dir)
+
+    def test_docs_portal_build_writes_pagefind_bundle(self) -> None:
+        generated_dir = Path(tempfile.mkdtemp(prefix="docs-site-generated-"))
+        output_dir = Path(tempfile.mkdtemp(prefix="docs-portal-build-"))
+        try:
+            docs_portal.build_docs_portal(
+                generated_dir=generated_dir,
+                output_dir=output_dir,
+                openapi_url=None,
+                pagefind_root_selector="article",
+            )
+
+            self.assertTrue((output_dir / "pagefind" / "pagefind-entry.json").exists())
+            self.assertTrue((output_dir / "pagefind" / "pagefind-ui.js").exists())
+            index_html = (output_dir / "index.html").read_text(encoding="utf-8")
+            dependency_graph_html = (output_dir / "architecture" / "dependency-graph" / "index.html").read_text(
+                encoding="utf-8"
+            )
+            self.assertIn("pagefind/pagefind-ui.js", index_html)
+            self.assertIn('data-pagefind-filter="section"', index_html)
+            self.assertIn('id="pagefind-search"', index_html)
+            self.assertNotIn("portal_display: full", dependency_graph_html)
+        finally:
+            shutil.rmtree(generated_dir)
+            shutil.rmtree(output_dir)
 
     def test_build_portal_document_defaults_to_internal_sensitivity(self) -> None:
         temp_dir = Path(tempfile.mkdtemp(prefix="docs-site-test-"))
@@ -108,9 +141,15 @@ class DocsSiteTests(unittest.TestCase):
     def test_mkdocs_build_uses_global_robots_override(self) -> None:
         mkdocs_config = (REPO_ROOT / "mkdocs.yml").read_text(encoding="utf-8")
         override_template = (REPO_ROOT / "docs" / "theme-overrides" / "main.html").read_text(encoding="utf-8")
+        header_override = (REPO_ROOT / "docs" / "theme-overrides" / "partials" / "header.html").read_text(encoding="utf-8")
+        search_override = (REPO_ROOT / "docs" / "theme-overrides" / "partials" / "search.html").read_text(encoding="utf-8")
 
         self.assertIn("custom_dir: docs/theme-overrides", mkdocs_config)
+        self.assertNotIn("\n  - search\n", mkdocs_config)
         self.assertIn('<meta name="robots" content="noindex, nofollow">', override_template)
+        self.assertIn("pagefind/pagefind-ui.js", override_template)
+        self.assertIn('for="__search"', header_override)
+        self.assertIn('id="pagefind-search"', search_override)
 
 
 if __name__ == "__main__":

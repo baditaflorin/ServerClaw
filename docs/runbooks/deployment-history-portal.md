@@ -94,6 +94,8 @@ curl -Ik https://changelog.lv3.org/
 
 Expected result: `HTTP/2 302` to `/oauth2/sign_in` for an unauthenticated request.
 
+The shared edge publication lane also refreshes `build/docs-portal/`, so `make deploy-changelog-portal` remains self-contained even when the docs portal build directory is absent locally.
+
 ## Deployment Boundary
 
 This workstream implements the generated site, the governed history query tool, and edge publication wiring for `changelog.lv3.org`.

@@ -1,12 +1,12 @@
-# Release 0.177.59
+# Release 0.177.62
 
 - Date: 2026-03-29
 
 ## Summary
-- implements the live interactive runtime assurance scoreboard and service-environment rollup for the ops portal, combining live health, publication truth, and receipt-backed evidence into one operator-facing trust surface while hardening the live ops-portal sync, build, and scoreboard verification path for containerized apply
+- records ADR 0239 exact-main evidence on the current mainline by preserving the verified Pagefind browser-local docs search rollout, refreshed release surfaces, and the current platform baseline after the exact-main replay
 
 ## Platform Impact
-- no live platform version bump; this release records the verified ADR 0253 runtime assurance scoreboard rollout while the current mainline platform baseline remains 0.130.44
+- platform version advances to 0.130.45 after the exact-main ADR 0239 replay re-verifies Pagefind-backed browser-local docs search on docs.lv3.org while preserving the authenticated edge contract on top of the 0.130.44 baseline
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

@@ -20,7 +20,6 @@ theme:
       accent: amber
 
 plugins:
-  - search
   - swagger-ui-tag:
       validatorUrl: "none"
       filter_files:

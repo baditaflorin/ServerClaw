@@ -351,6 +351,7 @@ class ScaffoldServiceTests(unittest.TestCase):
             self.assertEqual(subdomain_entry["target_port"], 8181)
 
             health_catalog = json.loads((root / "config" / "health-probe-catalog.json").read_text())
+            self.assertIn("startup", health_catalog["services"]["test_echo"])
             self.assertFalse(health_catalog["services"]["test_echo"]["uptime_kuma"]["enabled"])
             self.assertIn("TODO", health_catalog["services"]["test_echo"]["uptime_kuma"]["reason"])
 
