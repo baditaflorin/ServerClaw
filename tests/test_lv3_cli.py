@@ -310,6 +310,38 @@ all:
         )
         + "\n"
     )
+    (tmp_path / "config" / "repo-deploy-catalog.json").write_text(
+        json.dumps(
+            {
+                "$schema": "docs/schema/repo-deploy-catalog.schema.json",
+                "schema_version": "1.0.0",
+                "profiles": [
+                    {
+                        "id": "education-wemeshup-production",
+                        "description": "Deploy the production education application.",
+                        "repo": "git@github.com:baditaflorin/education_wemeshup.git",
+                        "branch": "main",
+                        "source": "private-deploy-key",
+                        "app_name": "education-wemeshup",
+                        "project": "LV3 Apps",
+                        "environment": "production",
+                        "build_pack": "dockercompose",
+                        "ports": "80",
+                        "llm_assistance": "prohibited",
+                        "docker_compose_location": "/compose.yaml",
+                        "compose_domains": [
+                            {
+                                "service": "catalog-web",
+                                "domain": "education-wemeshup.apps.lv3.org",
+                            }
+                        ],
+                    }
+                ],
+            },
+            indent=2,
+        )
+        + "\n"
+    )
     (tmp_path / "config" / "disaster-recovery-targets.json").write_text(
         json.dumps(
             {
@@ -528,6 +560,44 @@ def test_deploy_repo_dry_run_prints_retry_args_when_overridden(
     assert exit_code == 0
     assert "--max-deploy-attempts 5" in captured.out
     assert "--retry-delay 2" in captured.out
+
+
+def test_deploy_repo_profile_dry_run_prints_named_profile_route(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(
+        [
+            "deploy-repo-profile",
+            "education-wemeshup-production",
+            "--wait",
+            "--dry-run",
+        ]
+    )
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "repo deploy profile catalog" in captured.out
+    assert "make deploy-repo-profile PROFILE=education-wemeshup-production" in captured.out
+    assert "--wait" in captured.out
+
+
+def test_deploy_repo_profile_dry_run_prints_override_args(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(
+        [
+            "deploy-repo-profile",
+            "education-wemeshup-production",
+            "--branch",
+            "release-candidate",
+            "--timeout",
+            "1800",
+            "--dry-run",
+        ]
+    )
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "--branch release-candidate" in captured.out
+    assert "--timeout 1800" in captured.out
 
 
 def test_open_dry_run_uses_catalog_url(

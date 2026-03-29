@@ -960,7 +960,12 @@ uptime-robot-manage:
 coolify-manage:
 	$(MAKE) preflight WORKFLOW=coolify-manage
 	@test -n "$(ACTION)" || (echo "set ACTION=<whoami|list-applications|deploy-repo>"; exit 1)
-	python3 $(REPO_ROOT)/scripts/coolify_tool.py $(ACTION) $(COOLIFY_ARGS)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/coolify_tool.py $(ACTION) $(COOLIFY_ARGS)
+
+deploy-repo-profile:
+	$(MAKE) preflight WORKFLOW=deploy-repo-profile
+	@test -n "$(PROFILE)" || (echo "set PROFILE=<repo-deploy-profile-id>"; exit 1)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/repo_deploy_profiles.py deploy "$(PROFILE)" $(DEPLOY_PROFILE_ARGS)
 
 portainer-manage:
 	$(MAKE) preflight WORKFLOW=portainer-manage

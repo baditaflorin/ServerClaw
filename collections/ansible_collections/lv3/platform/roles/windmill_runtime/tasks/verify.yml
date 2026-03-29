@@ -29,7 +29,11 @@
     WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"
     WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
   register: windmill_verify_healthcheck
+  retries: 3
+  delay: 10
+  until: windmill_verify_healthcheck.rc == 0
   changed_when: false
+  failed_when: false
   no_log: true
 
 - name: Assert the Windmill seeded healthcheck result
@@ -56,7 +60,11 @@
     WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"
     WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
   register: windmill_verify_validation_gate_status
+  retries: 3
+  delay: 10
+  until: windmill_verify_validation_gate_status.rc == 0
   changed_when: false
+  failed_when: false
   no_log: true
 
 - name: Assert the Windmill validation gate status result
@@ -101,7 +109,7 @@
     url: "{{ windmill_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/{{ item | urlencode }}"
     method: GET
     headers:
-      Authorization: "Bearer {{ windmill_bootstrap_session_token }}"
+      Authorization: "Bearer {{ windmill_runtime_api_token }}"
     status_code:
       - 200
       - 404
