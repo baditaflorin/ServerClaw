@@ -1,0 +1,164 @@
+---
+- name: Validate Nomad bootstrap controller artifact inputs
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: assert_vars
+  vars:
+    common_assert_vars_required:
+      - nomad_cluster_bootstrap_local_tls_dir
+      - nomad_cluster_bootstrap_local_ca_key_file
+      - nomad_cluster_bootstrap_local_ca_cert_file
+      - nomad_cluster_bootstrap_local_server_key_file
+      - nomad_cluster_bootstrap_local_server_cert_file
+      - nomad_cluster_bootstrap_local_client_key_file
+      - nomad_cluster_bootstrap_local_client_cert_file
+      - nomad_cluster_bootstrap_server_ip
+      - nomad_cluster_bootstrap_proxy_ip
+      - nomad_cluster_bootstrap_region
+    common_assert_vars_expressions:
+      - nomad_cluster_bootstrap_certificate_days | int > 0
+    common_assert_vars_fail_msg: >-
+      nomad_cluster_bootstrap.controller_artifacts requires the local TLS file paths and server addressing facts.
+
+- name: Ensure Nomad controller-local directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ lookup('ansible.builtin.env', 'USER') | default('live', true) }}"
+    group: staff
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ nomad_cluster_bootstrap_local_dir }}"
+      mode: "0700"
+    - path: "{{ nomad_cluster_bootstrap_local_tls_dir }}"
+      mode: "0700"
+    - path: "{{ nomad_cluster_bootstrap_local_tokens_dir }}"
+      mode: "0700"
+
+- name: Generate the Nomad TLS certificate authority when missing
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ nomad_cluster_bootstrap_local_ca_key_file }}" ] || [ ! -s "{{ nomad_cluster_bootstrap_local_ca_cert_file }}" ]; then
+      umask 077
+      openssl genrsa -out "{{ nomad_cluster_bootstrap_local_ca_key_file }}" 4096 >/dev/null 2>&1
+      openssl req -x509 -new -nodes \
+        -key "{{ nomad_cluster_bootstrap_local_ca_key_file }}" \
+        -sha256 \
+        -days "{{ nomad_cluster_bootstrap_certificate_days }}" \
+        -out "{{ nomad_cluster_bootstrap_local_ca_cert_file }}" \
+        -subj "/CN=LV3 Nomad Agent CA" >/dev/null 2>&1
+      rm -f "{{ nomad_cluster_bootstrap_local_ca_serial_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: nomad_cluster_bootstrap_ca_generation
+  changed_when: "'changed' in nomad_cluster_bootstrap_ca_generation.stdout"
+  no_log: true
+
+- name: Render the Nomad server OpenSSL profile
+  ansible.builtin.copy:
+    dest: "{{ nomad_cluster_bootstrap_local_tls_dir }}/server-openssl.cnf"
+    mode: "0600"
+    content: |
+      [req]
+      distinguished_name = req_distinguished_name
+      prompt = no
+      req_extensions = v3_req
+
+      [req_distinguished_name]
+      CN = server.{{ nomad_cluster_bootstrap_region }}.nomad
+
+      [v3_req]
+      basicConstraints = CA:FALSE
+      keyUsage = critical, digitalSignature, keyEncipherment
+      extendedKeyUsage = serverAuth, clientAuth
+      subjectAltName = @alt_names
+
+      [alt_names]
+      DNS.1 = server.{{ nomad_cluster_bootstrap_region }}.nomad
+      DNS.2 = localhost
+      IP.1 = 127.0.0.1
+      IP.2 = {{ nomad_cluster_bootstrap_server_ip }}
+      IP.3 = {{ nomad_cluster_bootstrap_proxy_ip }}
+
+- name: Render the Nomad client OpenSSL profile
+  ansible.builtin.copy:
+    dest: "{{ nomad_cluster_bootstrap_local_tls_dir }}/client-openssl.cnf"
+    mode: "0600"
+    content: |
+      [req]
+      distinguished_name = req_distinguished_name
+      prompt = no
+      req_extensions = v3_req
+
+      [req_distinguished_name]
+      CN = client.{{ nomad_cluster_bootstrap_region }}.nomad
+
+      [v3_req]
+      basicConstraints = CA:FALSE
+      keyUsage = critical, digitalSignature, keyEncipherment
+      extendedKeyUsage = serverAuth, clientAuth
+      subjectAltName = @alt_names
+
+      [alt_names]
+      DNS.1 = client.{{ nomad_cluster_bootstrap_region }}.nomad
+
+- name: Generate the Nomad server TLS certificate when missing
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ nomad_cluster_bootstrap_local_server_key_file }}" ] || [ ! -s "{{ nomad_cluster_bootstrap_local_server_cert_file }}" ]; then
+      umask 077
+      openssl genrsa -out "{{ nomad_cluster_bootstrap_local_server_key_file }}" 4096 >/dev/null 2>&1
+      openssl req -new \
+        -key "{{ nomad_cluster_bootstrap_local_server_key_file }}" \
+        -out "{{ nomad_cluster_bootstrap_local_tls_dir }}/server.csr" \
+        -config "{{ nomad_cluster_bootstrap_local_tls_dir }}/server-openssl.cnf" >/dev/null 2>&1
+      openssl x509 -req \
+        -in "{{ nomad_cluster_bootstrap_local_tls_dir }}/server.csr" \
+        -CA "{{ nomad_cluster_bootstrap_local_ca_cert_file }}" \
+        -CAkey "{{ nomad_cluster_bootstrap_local_ca_key_file }}" \
+        -CAcreateserial \
+        -CAserial "{{ nomad_cluster_bootstrap_local_ca_serial_file }}" \
+        -out "{{ nomad_cluster_bootstrap_local_server_cert_file }}" \
+        -days "{{ nomad_cluster_bootstrap_certificate_days }}" \
+        -sha256 \
+        -extensions v3_req \
+        -extfile "{{ nomad_cluster_bootstrap_local_tls_dir }}/server-openssl.cnf" >/dev/null 2>&1
+      rm -f "{{ nomad_cluster_bootstrap_local_tls_dir }}/server.csr"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: nomad_cluster_bootstrap_server_cert_generation
+  changed_when: "'changed' in nomad_cluster_bootstrap_server_cert_generation.stdout"
+  no_log: true
+
+- name: Generate the Nomad client TLS certificate when missing
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ nomad_cluster_bootstrap_local_client_key_file }}" ] || [ ! -s "{{ nomad_cluster_bootstrap_local_client_cert_file }}" ]; then
+      umask 077
+      openssl genrsa -out "{{ nomad_cluster_bootstrap_local_client_key_file }}" 4096 >/dev/null 2>&1
+      openssl req -new \
+        -key "{{ nomad_cluster_bootstrap_local_client_key_file }}" \
+        -out "{{ nomad_cluster_bootstrap_local_tls_dir }}/client.csr" \
+        -config "{{ nomad_cluster_bootstrap_local_tls_dir }}/client-openssl.cnf" >/dev/null 2>&1
+      openssl x509 -req \
+        -in "{{ nomad_cluster_bootstrap_local_tls_dir }}/client.csr" \
+        -CA "{{ nomad_cluster_bootstrap_local_ca_cert_file }}" \
+        -CAkey "{{ nomad_cluster_bootstrap_local_ca_key_file }}" \
+        -CAserial "{{ nomad_cluster_bootstrap_local_ca_serial_file }}" \
+        -out "{{ nomad_cluster_bootstrap_local_client_cert_file }}" \
+        -days "{{ nomad_cluster_bootstrap_certificate_days }}" \
+        -sha256 \
+        -extensions v3_req \
+        -extfile "{{ nomad_cluster_bootstrap_local_tls_dir }}/client-openssl.cnf" >/dev/null 2>&1
+      rm -f "{{ nomad_cluster_bootstrap_local_tls_dir }}/client.csr"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: nomad_cluster_bootstrap_client_cert_generation
+  changed_when: "'changed' in nomad_cluster_bootstrap_client_cert_generation.stdout"
+  no_log: true

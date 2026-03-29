@@ -70,6 +70,34 @@ def test_build_service_urls_supports_private_gitea_proxy_and_root_url() -> None:
     }
 
 
+def test_build_service_urls_supports_private_nomad_controller_url() -> None:
+    ports = {
+        "nomad_server_port": 4646,
+        "nomad_host_proxy_port": 8013,
+    }
+    service = {
+        "owning_vm": "monitoring-lv3",
+    }
+    host_vars = {"management_tailscale_ipv4": "100.64.0.1"}
+    guest_ipv4_by_name = {"monitoring-lv3": "10.10.10.40"}
+    stack = {"desired_state": {"host_id": "proxmox_florin"}}
+
+    port_map, urls = generate_platform_vars.build_service_urls(
+        "nomad",
+        service,
+        host_vars,
+        guest_ipv4_by_name,
+        ports,
+        stack,
+    )
+
+    assert port_map == {"internal": 4646, "controller": 8013}
+    assert urls == {
+        "internal": "https://10.10.10.40:4646",
+        "controller": "https://100.64.0.1:8013",
+    }
+
+
 def test_build_service_urls_resolves_homepage_internal_url() -> None:
     ports = {"homepage_port": 3090}
     service = {"owning_vm": "docker-runtime-lv3"}

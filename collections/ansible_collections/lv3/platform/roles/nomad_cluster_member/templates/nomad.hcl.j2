@@ -1,0 +1,74 @@
+region     = "{{ nomad_cluster_region }}"
+datacenter = "{{ nomad_cluster_datacenter }}"
+name       = "{{ nomad_cluster_node_name }}"
+data_dir   = "{{ nomad_cluster_data_dir }}"
+bind_addr  = "{{ nomad_cluster_bind_address }}"
+log_level  = "{{ nomad_cluster_log_level }}"
+
+ports {
+  http = {{ nomad_cluster_http_port }}
+  rpc  = {{ nomad_cluster_rpc_port }}
+  serf = {{ nomad_cluster_serf_port }}
+}
+
+advertise {
+  http = "{{ nomad_cluster_advertise_address }}"
+  rpc  = "{{ nomad_cluster_advertise_address }}"
+  serf = "{{ nomad_cluster_advertise_address }}"
+}
+
+acl {
+  enabled = {{ nomad_cluster_acl_enabled | ternary("true", "false") }}
+}
+
+tls {
+  http                  = true
+  rpc                   = true
+  verify_server_hostname = true
+  verify_https_client   = {{ nomad_cluster_tls_verify_https_client | ternary("true", "false") }}
+  ca_file               = "{{ nomad_cluster_ca_cert_file }}"
+  cert_file             = "{{ nomad_cluster_member_cert_file }}"
+  key_file              = "{{ nomad_cluster_member_key_file }}"
+}
+
+telemetry {
+  publish_allocation_metrics = {{ nomad_cluster_telemetry_publish_allocation_metrics | ternary("true", "false") }}
+  publish_node_metrics       = {{ nomad_cluster_telemetry_publish_node_metrics | ternary("true", "false") }}
+}
+
+ui {
+  enabled = {{ nomad_cluster_ui_enabled | ternary("true", "false") }}
+}
+
+{% if nomad_cluster_server | bool %}
+server {
+  enabled          = true
+  bootstrap_expect = {{ nomad_cluster_bootstrap_expect }}
+}
+{% endif %}
+
+{% if nomad_cluster_client | bool %}
+client {
+  enabled    = true
+  node_class = "{{ nomad_cluster_node_class }}"
+  servers = [{% for address in nomad_cluster_server_rpc_addresses %}"{{ address }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+
+{% if nomad_cluster_node_meta %}
+  meta {
+{% for key, value in nomad_cluster_node_meta.items() %}
+    {{ key }} = "{{ value }}"
+{% endfor %}
+  }
+{% endif %}
+}
+
+plugin "docker" {
+  config {
+    allow_privileged = {{ nomad_cluster_docker_allow_privileged | ternary("true", "false") }}
+
+    volumes {
+      enabled = {{ nomad_cluster_docker_volumes_enabled | ternary("true", "false") }}
+    }
+  }
+}
+{% endif %}

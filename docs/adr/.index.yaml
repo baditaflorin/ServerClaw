@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-29'
 total_adrs: 279
 implementation_status_summary:
-  Implemented: 223
+  Implemented: 224
   Partial: 4
-  Not Implemented: 51
+  Not Implemented: 50
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3960,7 +3960,7 @@ adr_index:
   - adr: '0232'
     title: Nomad For Durable Batch And Long-Running Internal Jobs
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -3972,6 +3972,7 @@ adr_index:
       - jobs
     summary: We will adopt Nomad as the future distributed scheduler for internal jobs
     filename: 0232-nomad-for-durable-batch-and-long-running-internal-jobs.md
+    implemented_version: 0.177.65
   - adr: '0233'
     title: Signed Release Bundles Via Gitea Releases And Cosign
     status: Accepted

@@ -1,0 +1,173 @@
+---
+# Playbook: nomad.yml
+# Purpose: Converge the private Nomad scheduler control plane, client agents, and repo-managed smoke jobs for ADR 0232.
+# Use case: Run for ADR 0232 live apply and later reconciles of the durable internal job scheduler.
+#
+# Inputs (required):
+#   - bootstrap_ssh_private_key (controller secret, required): Controller-side SSH key used through the Proxmox jump path.
+#
+# Inputs (optional):
+#   - env (string, optional, default=production): Target deployment environment.
+#   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): Guest SSH path used by scoped runs.
+#
+# Outputs:
+#   - Repo-managed Nomad TLS and ACL bootstrap artifacts exist under .local/nomad on the controller.
+#   - monitoring-lv3 runs the private Nomad server and docker-runtime-lv3 plus docker-build-lv3 run Nomad clients.
+#   - The Proxmox host exposes the private Nomad API through the Tailscale TCP proxy catalog.
+#   - Repo-managed long-running and dispatchable smoke jobs are registered and verified end to end.
+#
+# Idempotency: Partially idempotent
+#              Agent convergence is idempotent. ACL bootstrap artifacts are only created once and then replayed from the mirrored controller-local token.
+#
+# Dependencies:
+#   - ADR 0232: Nomad for durable batch and long-running internal jobs.
+#   - Requires: Existing Proxmox host access, monitoring-lv3, docker-runtime-lv3, and docker-build-lv3 guests.
+#   - Role: lv3.platform.nomad_cluster_bootstrap — generates controller-local TLS artifacts, bootstraps ACLs, and verifies smoke jobs.
+#   - Role: lv3.platform.nomad_cluster_member — installs and configures the Nomad agent on server and client nodes.
+#
+# Related ADRs: 0044, 0179, 0184, 0224
+# Related Runbooks: docs/runbooks/configure-nomad.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
+
+- name: Prepare controller-local Nomad bootstrap artifacts
+  hosts: localhost
+  connection: local
+  become: false
+  gather_facts: false
+  vars_files:
+    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
+  tags:
+    - tier-0
+    - automation
+    - service-nomad
+
+  tasks:
+    - name: Generate Nomad controller-local artifacts
+      ansible.builtin.include_role:
+        name: lv3.platform.nomad_cluster_bootstrap
+        tasks_from: controller_artifacts.yml
+
+- name: Converge the Proxmox firewall and Tailscale operator proxy for Nomad
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
+  tags:
+    - tier-1
+    - automation
+    - service-nomad
+
+  roles:
+    - role: lv3.platform.proxmox_network
+    - role: lv3.platform.proxmox_tailscale_proxy
+    - role: lv3.platform.proxmox_security
+      vars:
+        proxmox_security_manage_acme: false
+
+- name: Converge the Nomad server on the monitoring guest
+  hosts: "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
+  tags:
+    - tier-2
+    - automation
+    - service-nomad
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_host_patterns.monitoring[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.nomad_cluster_member
+      vars:
+        nomad_cluster_server: true
+        nomad_cluster_client: false
+
+- name: Converge the Nomad clients on the runtime and build guests
+  hosts: >-
+    {{
+      (
+        'docker-runtime-staging-lv3:docker-build-staging-lv3'
+        if (env | default('production')) == 'staging'
+        else 'docker-runtime-lv3:docker-build-lv3'
+      )
+    }}
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
+  tags:
+    - tier-2
+    - automation
+    - service-nomad
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_host_patterns.monitoring[playbook_execution_env] }}"
+          - "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+          - "{{ playbook_execution_host_patterns.docker_build[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.nomad_cluster_member
+      vars:
+        nomad_cluster_server: false
+        nomad_cluster_client: true
+        nomad_cluster_node_class: "{{ 'build' if 'build' in inventory_hostname else 'runtime' }}"
+        nomad_cluster_node_meta:
+          workload_pool: "{{ 'build' if 'build' in inventory_hostname else 'runtime' }}"
+
+- name: Bootstrap Nomad ACLs and verify repo-managed smoke jobs
+  hosts: "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
+  tags:
+    - tier-2
+    - automation
+    - service-nomad
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.nomad
+        playbook_execution_audit_target: nomad
+        required_hosts:
+          - "{{ playbook_execution_host_patterns.monitoring[playbook_execution_env] }}"
+          - "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+          - "{{ playbook_execution_host_patterns.docker_build[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.nomad_cluster_bootstrap
+
+  post_tasks:
+    - name: Run shared post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: nomad
+        playbook_execution_post_verify_audit_action: playbook.verify.nomad
+
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: nomad

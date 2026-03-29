@@ -40,6 +40,10 @@ platform_port_assignments:
   semaphore_host_proxy_port: 8020
   windmill_server_port: 8000
   windmill_host_proxy_port: 8005
+  nomad_server_port: 4646
+  nomad_rpc_port: 4647
+  nomad_serf_port: 4648
+  nomad_host_proxy_port: 8013
   mattermost_server_port: 8065
   mattermost_host_proxy_port: 8066
   gitea_http_port: 3003
@@ -134,6 +138,11 @@ proxmox_tailscale_tcp_proxies:
     listen_port: "{{ platform_port_assignments.windmill_host_proxy_port }}"
     upstream_host: 10.10.10.20
     upstream_port: 8000
+  - name: nomad
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: "{{ platform_port_assignments.nomad_host_proxy_port }}"
+    upstream_host: 10.10.10.40
+    upstream_port: "{{ platform_port_assignments.nomad_server_port }}"
   - name: mattermost
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.mattermost_host_proxy_port }}"
@@ -580,6 +589,11 @@ network_policy:
           ports:
             - 2586
           description: Alertmanager access to the private ntfy paging gateway
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
+            - 4647
+          description: Nomad server RPC to docker-runtime-lv3
     docker-build-lv3:
       allow_container_forwarding: true
       allowed_inbound:
@@ -593,6 +607,11 @@ network_policy:
           ports:
             - 7007
           description: Dozzle hub access to the docker-build agent
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
+            - 4647
+          description: Nomad server RPC to docker-build-lv3
     monitoring-lv3:
       allowed_inbound:
         - source: management
@@ -600,6 +619,11 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: host
+          protocol: tcp
+          ports:
+            - 4646
+          description: Proxmox host Tailscale controller proxy access to the Nomad API
         - source: host
           protocol: tcp
           ports:
@@ -646,6 +670,16 @@ network_policy:
             - 2379
             - 2380
           description: etcd quorum traffic from the replica PostgreSQL member
+        - source: docker-runtime-lv3
+          protocol: tcp
+          ports:
+            - 4647
+          description: Nomad client RPC from docker-runtime-lv3
+        - source: docker-build-lv3
+          protocol: tcp
+          ports:
+            - 4647
+          description: Nomad client RPC from docker-build-lv3
     coolify-lv3:
       allow_container_forwarding: true
       allowed_inbound:
@@ -1106,6 +1140,17 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ windmill_controller_url }}"
+  nomad:
+    service_name: nomad
+    owning_vm: monitoring-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: "{{ nomad_controller_url }}"
   gitea:
     service_name: gitea
     owning_vm: docker-runtime-lv3

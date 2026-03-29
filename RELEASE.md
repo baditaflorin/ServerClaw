@@ -1,12 +1,12 @@
-# Release 0.177.64
+# Release 0.177.65
 
 - Date: 2026-03-29
 
 ## Summary
-- records ADR 0240 exact-main evidence on the current mainline by preserving the verified Apache ECharts operator visualization rollout, refreshed release surfaces, and the current ops-portal platform baseline after the mainline replay
+- implements ADR 0232 by adding the private Nomad scheduler, controller-local TLS and ACL bootstrap, Proxmox proxy and firewall wiring, and repo-managed smoke jobs for durable batch and long-running internal workloads
 
 ## Platform Impact
-- platform version advances to 0.130.46 after the exact-main ADR 0240 replay re-verifies the Apache ECharts-backed operator visualization panels on ops.lv3.org while preserving the authenticated edge contract on top of the 0.130.45 baseline
+- release 0.177.65 records the verified ADR 0232 Nomad replay from the latest origin/main while the live platform baseline remains 0.130.44
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

@@ -451,6 +451,23 @@
         "failback_method": "Restore nginx-lv3 and replay the ingress and edge-publication converges from git."
       }
     },
+    "nomad": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 60,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_140"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "monitoring-lv3",
+        "failover_trigger": "Restore monitoring-lv3 when the Nomad server or its local Raft state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild monitoring-lv3, then replay the Nomad converge and smoke-job verification from git."
+      }
+    },
     "ntfy": {
       "tier": "R1",
       "recovery_objective": {

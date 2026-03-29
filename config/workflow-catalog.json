@@ -1535,6 +1535,63 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-nomad": {
+      "description": "Converge the private Nomad scheduler on monitoring-lv3 plus the runtime and build clients, including controller-local TLS and ACL bootstrap artifacts and repo-managed smoke jobs.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-nomad",
+        "command": "make converge-nomad"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "nomad_acl_management_token",
+          "nomad_tls_ca_key",
+          "nomad_tls_server_key",
+          "nomad_tls_client_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-nomad"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-nomad.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/groups/automation.yml",
+        "playbooks/nomad.yml",
+        "playbooks/services/nomad.yml",
+        "collections/ansible_collections/lv3/platform/roles/nomad_cluster_member/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/nomad_cluster_bootstrap/tasks/main.yml",
+        "config/nomad/jobs/lv3-nomad-smoke-service.nomad.hcl",
+        "config/nomad/jobs/lv3-nomad-smoke-batch.nomad.hcl",
+        "inventory/host_vars/proxmox_florin.yml",
+        "scripts/generate_platform_vars.py"
+      ],
+      "outputs": [
+        "A private Nomad API published on the Proxmox Tailscale proxy, a Nomad server on monitoring-lv3, Nomad clients on docker-runtime-lv3 and docker-build-lv3, and repo-managed smoke jobs verified across both client classes."
+      ],
+      "verification_commands": [
+        "make syntax-check-nomad",
+        "make converge-nomad",
+        "NOMAD_ADDR=https://100.64.0.1:8013 NOMAD_CACERT=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tls/nomad-agent-ca.pem NOMAD_TOKEN=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tokens/bootstrap-management.token) nomad node status"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-windmill": {
       "description": "Converge Windmill on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and expose the operator-only Tailscale proxy on the Proxmox host.",
       "lifecycle_status": "active",
