@@ -1011,6 +1011,7 @@ function App() {
             the data-dense AG Grid roster, task-specific guided tours, and bounded rich notes while
             keeping every mutation on the same repo-managed backend path.
           </p>
+          <p className="muted">Mutations now invalidate TanStack Query cache entries instead of forcing a full-page refresh.</p>
         </div>
         <div className="heroStats">
           <div className="heroCard stat">
