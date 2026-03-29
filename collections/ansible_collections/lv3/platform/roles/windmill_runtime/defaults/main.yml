@@ -122,9 +122,16 @@ windmill_bootstrap_identity_login_type: password
 windmill_private_base_url: "http://{{ windmill_service_topology.private_ip }}:{{ windmill_server_port }}"
 windmill_base_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
 windmill_runtime_api_base_url: "http://127.0.0.1:{{ windmill_server_port }}"
-windmill_worker_api_base_url: "http://windmill_server:8000"
+windmill_worker_network_mode: "{{ windmill_server_network_mode }}"
+windmill_worker_api_base_url: >-
+  {%- if windmill_worker_network_mode == 'host' -%}
+  http://127.0.0.1:{{ windmill_server_port }}
+  {%- else -%}
+  http://windmill_server:8000
+  {%- endif -%}
 windmill_healthcheck_script_path: f/lv3/windmill_healthcheck
 windmill_validation_gate_status_script_path: f/lv3/gate-status
+windmill_stage_smoke_suites_script_path: f/lv3/stage-smoke-suites
 windmill_default_operations_surface_script_paths:
   - f/lv3/post_merge_gate
   - f/lv3/nightly_integration_tests
@@ -143,6 +150,12 @@ windmill_default_operations_surface_script_paths:
   - f/lv3/packer_template_rebuild
   - f/lv3/fixture_expiry_reaper
   - f/lv3/maintenance_window
+windmill_runtime_api_wait_retries: 18
+windmill_runtime_api_wait_delay_seconds: 5
+windmill_worker_container_wait_retries: 48
+windmill_worker_container_wait_delay_seconds: 5
+windmill_worker_registration_retries: 18
+windmill_worker_registration_delay_seconds: 5
 windmill_seed_job_timeout_seconds: 120
 windmill_worker_checkout_repo_root_local_dir: >-
   {{
@@ -183,6 +196,8 @@ windmill_worker_repo_mutable_directories:
     mode: "0777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/integration-tests"
     mode: "0777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/stage-smoke-suites"
+    mode: "0777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/governed-command/logs"
     mode: "0777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/governed-command/receipts"
@@ -217,9 +232,12 @@ windmill_worker_checkout_integrity_files:
   - scripts/policy_toolchain.py
   - scripts/command_catalog.py
   - scripts/gate_status.py
+  - scripts/stage_smoke_suites.py
   - config/windmill/scripts/gate-status.py
   - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+  - config/windmill/scripts/stage-smoke-suites.py
 windmill_worker_checkout_sync_paths:
+  - .gitea
   - README.md
   - VERSION
   - ansible.cfg
@@ -337,6 +355,11 @@ windmill_seed_scripts:
     language: python3
     summary: LV3 Windmill healthcheck
     description: Repo-managed verification script for Windmill runtime and worker execution.
+  - path: f/lv3/stage-smoke-suites
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/stage-smoke-suites.py"
+    language: python3
+    summary: ADR 0251 stage smoke suites
+    description: Repo-managed wrapper that runs the declared stage-scoped smoke suites for one service and environment through the shared integration-suite engine.
   - path: f/lv3/scheduler_watchdog_loop
     local_file: "{{ windmill_seed_script_root_local_dir }}/scheduler-watchdog-loop.py"
     language: python3
@@ -467,6 +490,11 @@ windmill_seed_scripts:
     language: python3
     summary: ADR 0105 weekly capacity report
     description: Repo-managed Windmill wrapper that renders the weekly platform capacity summary payload from the committed model.
+  - path: f/lv3/backup_coverage_ledger
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/backup-coverage-ledger.py"
+    language: python3
+    summary: ADR 0271 backup coverage ledger
+    description: Repo-managed Windmill wrapper that records current Proxmox backup coverage, writes a receipt, and surfaces uncovered governed assets.
   - path: f/lv3/collection_publish
     local_file: "{{ inventory_dir }}/../config/windmill/scripts/collection-publish.py"
     language: python3

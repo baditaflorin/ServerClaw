@@ -5,6 +5,7 @@ import http.client
 import json
 import os
 import subprocess
+import time
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -816,15 +817,25 @@ def test_run_wait_result_helper_writes_polled_result(
         ],
     )
     monkeypatch.setenv("WINDMILL_TOKEN", "managed-secret")
+    monkeypatch.setenv("WINDMILL_BOOTSTRAP_SECRET", "bootstrap-secret")
 
     captured: dict[str, object] = {}
 
     class FakeClient:
-        def __init__(self, *, base_url: str, token: str, workspace: str, request_timeout_seconds: int) -> None:
+        def __init__(
+            self,
+            *,
+            base_url: str,
+            token: str,
+            workspace: str,
+            bootstrap_secret: str,
+            request_timeout_seconds: int,
+        ) -> None:
             captured["client_init"] = {
                 "base_url": base_url,
                 "token": token,
                 "workspace": workspace,
+                "bootstrap_secret": bootstrap_secret,
                 "request_timeout_seconds": request_timeout_seconds,
             }
 
@@ -853,6 +864,7 @@ def test_run_wait_result_helper_writes_polled_result(
             "base_url": "http://windmill.internal",
             "token": "managed-secret",
             "workspace": "lv3",
+            "bootstrap_secret": "bootstrap-secret",
             "request_timeout_seconds": 120,
         },
         "run": {
@@ -862,6 +874,74 @@ def test_run_wait_result_helper_writes_polled_result(
             "poll_interval_seconds": 0.25,
         },
     }
+
+
+def test_run_wait_result_helper_polls_completed_result_for_hash_submissions(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    module = load_module("run_wait_result_helper_hash_fallback", RUN_WAIT_RESULT_HELPER_PATH)
+    monkeypatch.setattr(
+        module.sys,
+        "argv",
+        [
+            "windmill_run_wait_result.py",
+            "--base-url",
+            "http://windmill.internal",
+            "--workspace",
+            "lv3",
+            "--path",
+            "f/lv3/windmill_healthcheck",
+            "--timeout",
+            "30",
+        ],
+    )
+    monkeypatch.setenv("WINDMILL_TOKEN", "session-token")
+    monkeypatch.setattr(time, "sleep", lambda _: None)
+
+    class FakeResponse:
+        def __init__(self, body: str, *, status: int = 200) -> None:
+            self._body = body.encode("utf-8")
+            self.status = status
+
+        def read(self) -> bytes:
+            return self._body
+
+        def close(self) -> None:
+            return None
+
+        def __enter__(self) -> "FakeResponse":
+            return self
+
+        def __exit__(self, exc_type, exc, tb) -> None:
+            return None
+
+    calls: list[str] = []
+    poll_count = {"value": 0}
+
+    def fake_urlopen(request, timeout=120):
+        calls.append(request.full_url)
+        if request.full_url.endswith("/api/w/lv3/scripts/get/p/f%2Flv3%2Fwindmill_healthcheck"):
+            return FakeResponse('{"hash":"hash-123"}')
+        if request.full_url.endswith("/api/w/lv3/jobs/run/h/hash-123"):
+            return FakeResponse('"job-123"')
+        if request.full_url.endswith("/api/w/lv3/jobs_u/completed/get_result_maybe/job-123?get_started=true"):
+            poll_count["value"] += 1
+            if poll_count["value"] == 1:
+                return FakeResponse('{"completed":false,"started":false,"result":null}')
+            return FakeResponse('{"completed":true,"success":true,"result":{"status":"ok"}}')
+        raise AssertionError(f"unexpected request {request.full_url}")
+
+    monkeypatch.setattr(module.urllib.request, "urlopen", fake_urlopen)
+
+    assert module.main() == 0
+    assert json.loads(capsys.readouterr().out) == {"status": "ok"}
+    assert calls == [
+        "http://windmill.internal/api/w/lv3/scripts/get/p/f%2Flv3%2Fwindmill_healthcheck",
+        "http://windmill.internal/api/w/lv3/jobs/run/h/hash-123",
+        "http://windmill.internal/api/w/lv3/jobs_u/completed/get_result_maybe/job-123?get_started=true",
+        "http://windmill.internal/api/w/lv3/jobs_u/completed/get_result_maybe/job-123?get_started=true",
+    ]
 
 
 def test_sync_helper_retries_with_bootstrap_login_on_401(monkeypatch: pytest.MonkeyPatch) -> None:

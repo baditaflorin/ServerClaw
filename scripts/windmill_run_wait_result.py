@@ -43,12 +43,14 @@ def main() -> int:
     if not token:
         print("WINDMILL_TOKEN is required", file=sys.stderr)
         return 2
+    bootstrap_secret = os.environ.get("WINDMILL_BOOTSTRAP_SECRET", "").strip() or token
 
     payload = json.loads(args.payload_json)
     client = HttpWindmillClient(
         base_url=args.base_url,
         token=token,
         workspace=args.workspace,
+        bootstrap_secret=bootstrap_secret,
         request_timeout_seconds=args.timeout,
     )
     try:

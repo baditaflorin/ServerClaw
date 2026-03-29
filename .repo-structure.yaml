@@ -157,6 +157,7 @@ directories:
       Read .config-locations.yaml for which file controls which behaviour.
     key_files:
       "network-impairment-matrix.yaml": "ADR 0189 governed preview/staging network impairment catalog"
+      "stage-smoke-suites.json": "ADR 0251 catalog of stage-scoped smoke suites mapped to service/environment bindings"
 
   policy:
     purpose: Shared Rego policy bundles and tests for OPA and Conftest
@@ -180,6 +181,7 @@ directories:
     key_files:
       "network_impairment_matrix.py": "ADR 0189 CLI and validation helper for governed network impairment scenarios"
       "policy_checks.py": "ADR 0230 validator for the shared OPA and Conftest policy bundle and toolchain"
+      "stage_smoke_suites.py": "ADR 0251 validator and runner for stage-scoped smoke suite catalogs and receipt-ready evidence"
 
   tests:
     purpose: Test suites for automated validation

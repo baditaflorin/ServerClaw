@@ -5,7 +5,7 @@ import os
 import subprocess
 from contextlib import contextmanager
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from platform.datetime_compat import UTC, datetime, timedelta
 from hashlib import sha1
 from pathlib import Path
 from typing import Any, Iterator

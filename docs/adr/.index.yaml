@@ -9,8 +9,8 @@ schema_version: 1
 generated: '2026-03-29'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 243
-  Partial: 9
+  Implemented: 244
+  Partial: 8
   Not Implemented: 71
   Deprecated: 1
 concerns:
@@ -4320,7 +4320,7 @@ adr_index:
   - adr: '0251'
     title: Stage-Scoped Smoke Suites And Promotion Gates
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -4331,7 +4331,7 @@ adr_index:
       - gates
     summary: We will require stage-scoped smoke suites for active services and wire them
     filename: 0251-stage-scoped-smoke-suites-and-promotion-gates.md
-    implemented_version: 0.177.84
+    implemented_version: 0.177.86
   - adr: '0252'
     title: Route And DNS Publication Assertion Ledger
     status: Accepted

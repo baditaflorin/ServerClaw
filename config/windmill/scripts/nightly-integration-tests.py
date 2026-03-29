@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
 import subprocess
@@ -63,6 +64,10 @@ def execute_suite(repo_root: Path, environment: str, report_file: Path) -> dict[
     if str(scripts_dir) not in sys.path:
         sys.path.insert(0, str(scripts_dir))
 
+    overrides = load_integration_env_overrides(repo_root)
+    for name, value in overrides.items():
+        os.environ.setdefault(name, value)
+
     import integration_suite
 
     try:
@@ -97,10 +102,27 @@ def execute_suite(repo_root: Path, environment: str, report_file: Path) -> dict[
         text=True,
         capture_output=True,
         check=False,
+        env={**os.environ, **overrides},
     )
     if report_file.exists():
         return json.loads(report_file.read_text(encoding="utf-8"))
     raise RuntimeError(completed.stderr.strip() or completed.stdout.strip() or "nightly integration suite failed")
+
+
+def load_integration_env_overrides(repo_root: Path) -> dict[str, str]:
+    helper_path = repo_root / "config" / "windmill" / "scripts" / "windmill_integration_env.py"
+    if not helper_path.exists():
+        return {}
+    spec = importlib.util.spec_from_file_location("lv3_windmill_integration_env", helper_path)
+    if spec is None or spec.loader is None:
+        return {}
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    resolver = getattr(module, "integration_env_overrides", None)
+    if not callable(resolver):
+        return {}
+    overrides = resolver(repo_root)
+    return overrides if isinstance(overrides, dict) else {}
 
 
 def publish_notifications(repo_root: Path, payload: dict[str, Any]) -> None:

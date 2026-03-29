@@ -118,12 +118,12 @@ def require_environment_bindings(
     public_url: str | None,
     internal_url: str | None,
     subdomain: str | None,
-) -> dict[str, dict[str, str]]:
+) -> dict[str, dict[str, Any]]:
     bindings = require_mapping(value, path)
     if "production" not in bindings:
         raise ValueError(f"{path} must declare a production binding")
 
-    normalized: dict[str, dict[str, str]] = {}
+    normalized: dict[str, dict[str, Any]] = {}
     for env_id, binding in bindings.items():
         if env_id not in ALLOWED_ENVIRONMENTS:
             raise ValueError(f"{path}.{env_id} must be one of {sorted(ALLOWED_ENVIRONMENTS)}")
@@ -139,6 +139,16 @@ def require_environment_bindings(
             normalized_binding["subdomain"] = require_str(
                 binding.get("subdomain"), f"{path}.{env_id}.subdomain"
             )
+        if "stage_ready" in binding:
+            normalized_binding["stage_ready"] = require_bool(
+                binding.get("stage_ready"),
+                f"{path}.{env_id}.stage_ready",
+            )
+        if "smoke_suite_ids" in binding:
+            normalized_binding["smoke_suite_ids"] = require_string_list(
+                binding.get("smoke_suite_ids"),
+                f"{path}.{env_id}.smoke_suite_ids",
+            )
         if "notes" in binding:
             normalized_binding["notes"] = require_str(binding.get("notes"), f"{path}.{env_id}.notes")
         if "smoke_suites" in binding:
@@ -146,6 +156,11 @@ def require_environment_bindings(
                 binding.get("smoke_suites"),
                 f"{path}.{env_id}.smoke_suites",
             )
+
+        if normalized_binding.get("stage_ready") and status != "active":
+            raise ValueError(f"{path}.{env_id}.stage_ready requires an active environment binding")
+        if normalized_binding.get("stage_ready") and not normalized_binding.get("smoke_suite_ids"):
+            raise ValueError(f"{path}.{env_id}.stage_ready requires at least one smoke suite id")
 
         if env_id == "production":
             expected_url = public_url or internal_url
@@ -186,6 +201,12 @@ def require_int(value: Any, path: str, minimum: int = 1) -> int:
         raise ValueError(f"{path} must be an integer")
     if value < minimum:
         raise ValueError(f"{path} must be >= {minimum}")
+    return value
+
+
+def require_bool(value: Any, path: str) -> bool:
+    if not isinstance(value, bool):
+        raise ValueError(f"{path} must be a boolean")
     return value
 
 

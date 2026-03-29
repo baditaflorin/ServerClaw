@@ -13,16 +13,14 @@ import uuid
 import urllib.error
 import urllib.request
 from contextlib import contextmanager
-from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
-    del sys.modules["platform"]
+from script_bootstrap import ensure_repo_root_on_path
 
+REPO_ROOT = ensure_repo_root_on_path(__file__)
+
+from platform.datetime_compat import UTC, datetime, timedelta
 from controller_automation_toolkit import (
     emit_cli_error,
     load_json,
