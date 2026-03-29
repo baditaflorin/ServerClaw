@@ -297,10 +297,38 @@
               | lower
             )
           }}
+        api_gateway_docker_builder_status_stream_unavailable: >-
+          {{
+            'failed to receive status' in
+            (
+              ansible_failed_result.stderr
+              | default(ansible_failed_result.msg | default(''))
+              | lower
+            )
+            and
+            (
+              'rpc error: code = unavailable' in
+              (
+                ansible_failed_result.stderr
+                | default(ansible_failed_result.msg | default(''))
+                | lower
+              )
+              or 'error reading from server: eof' in
+              (
+                ansible_failed_result.stderr
+                | default(ansible_failed_result.msg | default(''))
+                | lower
+              )
+            )
+          }}
+
+    - name: Record whether the API gateway startup failure is recoverable
+      ansible.builtin.set_fact:
         api_gateway_docker_recoverable_start_failure: >-
           {{
             api_gateway_docker_nat_missing
             or api_gateway_docker_builder_database_missing
+            or api_gateway_docker_builder_status_stream_unavailable
           }}
 
     - name: Surface unexpected API gateway startup failures

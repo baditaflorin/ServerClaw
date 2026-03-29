@@ -247,7 +247,10 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "Check whether the API gateway container sees the runtime config bundle" in tasks
     assert "database not open" in tasks
     assert "api_gateway_docker_builder_database_missing" in tasks
+    assert "failed to receive status" in tasks
+    assert "api_gateway_docker_builder_status_stream_unavailable" in tasks
     assert "api_gateway_docker_recoverable_start_failure" in tasks
+    assert "Record whether the API gateway startup failure is recoverable" in tasks
     assert "Restart Docker to restore the container engine before retrying the API gateway start" in tasks
     assert "Retry the API gateway stack start after Docker engine recovery" in tasks
     assert "/v1/platform/runtime-assurance" in verify_tasks
