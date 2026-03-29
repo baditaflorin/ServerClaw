@@ -416,24 +416,7 @@ class WindmillWorkflowRunner:
         )
 
     def run_workflow(self, workflow_id: str, payload: dict[str, Any], *, timeout_seconds: int | None = None) -> Any:
-        submission = self._client.submit_workflow(workflow_id, payload, timeout_seconds=timeout_seconds)
-        if submission.get("completed"):
-            return submission.get("result")
-
-        job_id = submission.get("job_id") or submission.get("id")
-        if not isinstance(job_id, str) or not job_id.strip():
-            raise RuntimeError(f"Windmill submit_workflow returned no job id: {submission!r}")
-
-        deadline = time.monotonic() + float(timeout_seconds or 30)
-        while time.monotonic() < deadline:
-            status = self._client.get_job(job_id)
-            if status.get("type") == "CompletedJob" or status.get("success") is not None:
-                if status.get("success") is False:
-                    details = status.get("result") or status.get("logs") or status
-                    raise RuntimeError(f"Windmill job {job_id} failed: {details!r}")
-                return status.get("result")
-            time.sleep(2)
-        raise TimeoutError(f"Windmill job {job_id} did not complete within {timeout_seconds or 30} seconds")
+        return self._client.run_workflow_wait_result(workflow_id, payload, timeout_seconds=timeout_seconds)
 
 
 class RunbookUseCaseService:

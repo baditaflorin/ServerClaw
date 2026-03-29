@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This runbook documents the browser-first operator administration surface introduced by ADR 0122 and the guided in-app onboarding added for ADR 0242.
+This runbook documents the browser-first operator administration surface introduced by ADR 0122, the data-dense AG Grid roster from ADR 0238, the bounded rich-notes editing from ADR 0241, and the guided in-app onboarding added for ADR 0242.
 
 It wraps the existing ADR 0108 backend so operators can:
 
@@ -14,18 +14,20 @@ It wraps the existing ADR 0108 backend so operators can:
 - edit bounded rich operator notes through the ADR 0241 Tiptap surface while still storing markdown in `config/operators.yaml`
 - launch or resume task-specific guided tours for those workflows
 
+The roster uses **AG Grid Community** for the data-dense operator view, so operators can sort, filter, page, pin or resize columns, and move through the selection with the keyboard instead of relying on a hand-built HTML table.
+
 ## Location
 
 - Windmill workspace: `lv3`
 - Raw app path: `f/lv3/operator_access_admin`
-- Windmill base URL: `http://100.118.189.95:8005`
-- Direct app route: `http://100.118.189.95:8005/apps/get/p/f/lv3/operator_access_admin`
+- Windmill base URL: `http://100.64.0.1:8005`
+- Direct app route: `http://100.64.0.1:8005/apps/get/p/f/lv3/operator_access_admin`
 
 The app is private to the Windmill workspace. It is not published anonymously.
 
 ## Access
 
-- login page: `http://100.118.189.95:8005/user/login`
+- login page: `http://100.64.0.1:8005/user/login`
 - bootstrap email: `superadmin_secret@windmill.dev`
 - bootstrap password source: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt`
 
@@ -82,16 +84,18 @@ Tour behavior:
 
 1. Open Windmill and launch `f/lv3/operator_access_admin`.
 2. Let the first-run tour start automatically, or choose `Onboard Admin Or Operator` or `Onboard Viewer` from `Guided Onboarding`.
-3. Confirm the target role and complete the required form fields.
-4. Submit the create action.
-5. Record the returned bootstrap password securely.
-6. Direct the new operator to sign in through Keycloak, rotate the bootstrap password, and complete TOTP enrollment.
+3. Use the roster `Quick Filter` when you need to narrow by operator name, role, status, group, or notes before creating or reviewing access.
+4. Use the AG Grid column controls to pin or resize columns when you need hidden metadata such as groups, Tailscale login, or notes.
+5. Confirm the target role and complete the required form fields.
+6. Submit the create action.
+7. Record the returned bootstrap password securely.
+8. Direct the new operator to sign in through Keycloak, rotate the bootstrap password, and complete TOTP enrollment.
 
 ## Off-boarding Flow
 
 1. Open the same app.
 2. Start `Off-board Operator` from `Guided Onboarding` if you want the step-by-step walkthrough.
-3. Select the target operator from the roster.
+3. Use the AG Grid roster to select the target operator or narrow the view with `Quick Filter`.
 4. Optionally record a reason.
 5. Submit the off-board action.
 6. Refresh the roster and, when needed, inspect the per-operator inventory result.
@@ -100,7 +104,7 @@ Tour behavior:
 
 Use `Review Inventory` from `Guided Onboarding` when you want a focused verification pass after onboarding, reconciliation, or off-boarding.
 
-The panel reads the current live state for the selected operator and is the fastest post-mutation confidence check in the app.
+The panel reads the current live state for the selected operator and is the fastest post-mutation confidence check in the app. The AG Grid row selection drives both this panel and the off-boarding form, so keep the selected row aligned with the operator you intend to verify.
 
 ## Repo Validation
 
@@ -118,20 +122,17 @@ python3 -m py_compile scripts/operator_manager.py config/windmill/scripts/operat
 ANSIBLE_CONFIG=ansible.cfg ANSIBLE_COLLECTIONS_PATH=collections uvx --from ansible-core ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --syntax-check
 ```
 
-To verify the Tiptap bundle itself from a clean environment without polluting the repo checkout:
+To verify the combined AG Grid and Tiptap raw-app bundle itself from a clean environment without polluting the repo checkout:
 
 ```bash
-tmpdir=$(mktemp -d) \
-  && rsync -a --exclude node_modules config/windmill/apps/f/lv3/operator_access_admin.raw_app/ "$tmpdir/" \
-  && cd "$tmpdir" \
-  && npm install --ignore-scripts --package-lock=false \
-  && npx tsc --noEmit
+tmpdir="$(mktemp -d)" && mkdir -p "$tmpdir/f/lv3" && rsync -a config/windmill/apps/f/lv3/operator_access_admin.raw_app/ "$tmpdir/f/lv3/operator_access_admin.raw_app/" && cd "$tmpdir/f/lv3/operator_access_admin.raw_app" && npm ci && npx tsc --noEmit
 ```
 
 ## Notes
 
 - The bootstrap password is intentionally shown once in the onboarding result and is not written to git.
 - The app depends on the worker checkout being mounted at `/srv/proxmox_florin_server`; the Windmill runtime now bind-mounts that host checkout into both worker pools.
+- The AG Grid roster keeps the browser experience dense, but the actual access mutations still flow only through the repo-governed ADR 0108 scripts.
 - The app is a Windmill-private admin surface; `ops.lv3.org` remains a separate portal.
 - ADR 0241 keeps the stored source format as markdown even though the editor is rich text, so repo diffs, sync workflows, and later migrations stay inspectable.
 - Raw-app dependency changes must refresh `config/windmill/apps/wmill-lock.yaml` with `wmill generate-metadata` before the next live Windmill sync, or the remote bundle step can fail with unresolved package imports.

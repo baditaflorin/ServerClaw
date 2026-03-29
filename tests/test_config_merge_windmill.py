@@ -226,6 +226,7 @@ def test_schedule_sync_helper_retries_connection_reset_during_update(
     }
     attempts = {"count": 0}
 
+    monkeypatch.setattr(module, "script_exists", lambda **kwargs: True)
     monkeypatch.setattr(module, "schedule_exists", lambda **kwargs: True)
 
     def fake_update_schedule(**kwargs):
@@ -246,6 +247,101 @@ def test_schedule_sync_helper_retries_connection_reset_during_update(
     )
 
     assert payload == {"path": "f/lv3/quarterly_access_review_every_monday_0900", "attempts": 2, "status": "updated"}
+
+
+def test_schedule_payload_keeps_enabled_and_script_binding() -> None:
+    module = load_module("schedule_sync_helper_payload", SCHEDULE_SYNC_HELPER_PATH)
+    spec = {
+        "path": "f/lv3/scheduler_watchdog_loop_every_10s",
+        "schedule": "*/10 * * * * *",
+        "timezone": "Europe/Bucharest",
+        "script_path": "f/lv3/scheduler_watchdog_loop",
+        "summary": "ADR 0172 scheduler watchdog loop",
+        "description": "Repo-managed schedule payload test",
+        "enabled": True,
+    }
+
+    assert module.schedule_payload(spec) == {
+        "schedule": "*/10 * * * * *",
+        "timezone": "Europe/Bucharest",
+        "script_path": "f/lv3/scheduler_watchdog_loop",
+        "is_flow": False,
+        "args": {},
+        "enabled": True,
+        "summary": "ADR 0172 scheduler watchdog loop",
+        "description": "Repo-managed schedule payload test",
+        "no_flow_overlap": True,
+    }
+
+
+def test_schedule_sync_helper_retries_until_script_target_is_visible(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = load_module("schedule_sync_helper_waits_for_script", SCHEDULE_SYNC_HELPER_PATH)
+    spec = {
+        "path": "f/lv3/world_state/refresh_container_inventory_every_minute",
+        "schedule": "0 * * * * *",
+        "timezone": "Europe/Bucharest",
+        "script_path": "f/lv3/world_state/refresh_container_inventory",
+        "summary": "ADR 0113 container inventory world-state refresh",
+        "description": "Repo-managed schedule sync test",
+    }
+    attempts = {"count": 0}
+
+    def fake_script_exists(**kwargs):
+        attempts["count"] += 1
+        return attempts["count"] >= 2
+
+    monkeypatch.setattr(module, "script_exists", fake_script_exists)
+    monkeypatch.setattr(module, "schedule_exists", lambda **kwargs: True)
+    monkeypatch.setattr(module, "update_schedule", lambda **kwargs: None)
+
+    payload = module.sync_schedule(
+        base_url="http://windmill.internal",
+        workspace="lv3",
+        token="token",
+        spec=spec,
+        max_attempts=3,
+        settle_interval_s=0.0,
+        request_timeout_s=5.0,
+    )
+
+    assert payload == {
+        "path": "f/lv3/world_state/refresh_container_inventory_every_minute",
+        "attempts": 2,
+        "status": "updated",
+    }
+
+
+def test_schedule_sync_helper_treats_missing_script_update_error_as_retryable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = load_module("schedule_sync_helper_missing_script_retry", SCHEDULE_SYNC_HELPER_PATH)
+
+    def fake_request_json_or_text(**kwargs):
+        raise module.SyncError(
+            "POST schedules/update/f%2Flv3%2Fworld_state%2Frefresh_container_inventory_every_minute "
+            "returned 404: Not found: script not found at name "
+            "f/lv3/world_state/refresh_container_inventory (lib.rs:1154)"
+        )
+
+    monkeypatch.setattr(module, "request_json_or_text", fake_request_json_or_text)
+
+    with pytest.raises(module.RetryableSyncError, match="script not found at name"):
+        module.update_schedule(
+            base_url="http://windmill.internal",
+            workspace="lv3",
+            token="token",
+            spec={
+                "path": "f/lv3/world_state/refresh_container_inventory_every_minute",
+                "schedule": "0 * * * * *",
+                "timezone": "Europe/Bucharest",
+                "script_path": "f/lv3/world_state/refresh_container_inventory",
+                "summary": "summary",
+                "description": "desc",
+            },
+            timeout_s=5.0,
+        )
 
 
 def test_schedule_sync_helper_uses_configured_http_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -659,7 +755,7 @@ def test_run_wait_result_helper_requires_token(monkeypatch: pytest.MonkeyPatch, 
     assert "WINDMILL_TOKEN is required" in capsys.readouterr().err
 
 
-def test_run_wait_result_helper_retries_with_bootstrap_login(
+def test_run_wait_result_helper_writes_polled_result(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     module = load_module("run_wait_result_helper_retry", RUN_WAIT_RESULT_HELPER_PATH)
@@ -674,61 +770,59 @@ def test_run_wait_result_helper_retries_with_bootstrap_login(
             "lv3",
             "--path",
             "f/lv3/windmill_healthcheck",
+            "--payload-json",
+            '{"probe":"manual-run"}',
+            "--poll-interval",
+            "0.25",
         ],
     )
     monkeypatch.setenv("WINDMILL_TOKEN", "managed-secret")
 
-    class FakeResponse:
-        def __init__(self, body: str) -> None:
-            self._body = body.encode("utf-8")
+    captured: dict[str, object] = {}
 
-        def read(self) -> bytes:
-            return self._body
+    class FakeClient:
+        def __init__(self, *, base_url: str, token: str, workspace: str, request_timeout_seconds: int) -> None:
+            captured["client_init"] = {
+                "base_url": base_url,
+                "token": token,
+                "workspace": workspace,
+                "request_timeout_seconds": request_timeout_seconds,
+            }
 
-        def close(self) -> None:
-            return None
+        def run_workflow_wait_result(
+            self,
+            workflow_id: str,
+            payload: dict[str, object],
+            *,
+            timeout_seconds: int | None = None,
+            poll_interval_seconds: float = 1.0,
+        ) -> dict[str, object]:
+            captured["run"] = {
+                "workflow_id": workflow_id,
+                "payload": payload,
+                "timeout_seconds": timeout_seconds,
+                "poll_interval_seconds": poll_interval_seconds,
+            }
+            return {"status": "ok", "probe": payload["probe"]}
 
-        def __enter__(self) -> "FakeResponse":
-            return self
-
-        def __exit__(self, exc_type, exc, tb) -> None:
-            return None
-
-    calls: list[str] = []
-
-    def fake_urlopen(request, timeout=120):
-        calls.append(request.full_url)
-        if request.full_url.endswith("/api/auth/login"):
-            return FakeResponse("session-token")
-        auth_header = request.headers.get("Authorization")
-        if auth_header == "Bearer managed-secret":
-            raise module.urllib.error.HTTPError(
-                request.full_url,
-                401,
-                "Unauthorized",
-                hdrs=None,
-                fp=FakeResponse("Unauthorized"),
-            )
-        assert auth_header == "Bearer session-token"
-        if request.full_url.endswith("/scripts/get/p/f%2Flv3%2Fwindmill_healthcheck"):
-            return FakeResponse('{"hash":"hash-123"}')
-        if request.full_url.endswith("/jobs/run/h/hash-123"):
-            return FakeResponse("job-123")
-        if request.full_url.endswith("/jobs_u/get/job-123"):
-            return FakeResponse('{"type":"CompletedJob","success":true,"result":{"status":"ok"}}')
-        raise AssertionError(request.full_url)
-
-    monkeypatch.setattr(module.urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr(module, "HttpWindmillClient", FakeClient)
 
     assert module.main() == 0
-    assert json.loads(capsys.readouterr().out) == {"status": "ok"}
-    assert calls == [
-        "http://windmill.internal/api/w/lv3/scripts/get/p/f%2Flv3%2Fwindmill_healthcheck",
-        "http://windmill.internal/api/auth/login",
-        "http://windmill.internal/api/w/lv3/scripts/get/p/f%2Flv3%2Fwindmill_healthcheck",
-        "http://windmill.internal/api/w/lv3/jobs/run/h/hash-123",
-        "http://windmill.internal/api/w/lv3/jobs_u/get/job-123",
-    ]
+    assert json.loads(capsys.readouterr().out) == {"status": "ok", "probe": "manual-run"}
+    assert captured == {
+        "client_init": {
+            "base_url": "http://windmill.internal",
+            "token": "managed-secret",
+            "workspace": "lv3",
+            "request_timeout_seconds": 120,
+        },
+        "run": {
+            "workflow_id": "f/lv3/windmill_healthcheck",
+            "payload": {"probe": "manual-run"},
+            "timeout_seconds": 120,
+            "poll_interval_seconds": 0.25,
+        },
+    }
 
 
 def test_sync_helper_retries_with_bootstrap_login_on_401(monkeypatch: pytest.MonkeyPatch) -> None:

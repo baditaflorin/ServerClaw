@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-29'
 total_adrs: 279
 implementation_status_summary:
-  Implemented: 225
+  Implemented: 226
   Partial: 4
-  Not Implemented: 49
+  Not Implemented: 48
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3907,7 +3907,7 @@ adr_index:
       - surface
     summary: We will treat Windmill as the default browser-first and API-first operations
     filename: 0228-windmill-as-the-default-browser-and-api-operations-surface.md
-    implemented_version: 0.177.66
+    implemented_version: 0.177.67
   - adr: 0229
     title: Gitea Actions Runners For On-Platform Validation And Release Preparation
     status: Accepted
@@ -4053,7 +4053,7 @@ adr_index:
   - adr: 0238
     title: Data-Dense Operator Grids Via AG Grid Community
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4065,6 +4065,7 @@ adr_index:
       - community
     summary: We will use AG Grid Community as the default open source grid library for
     filename: 0238-data-dense-operator-grids-via-ag-grid-community.md
+    implemented_version: 0.177.66
   - adr: 0239
     title: Browser-Local Search Experience Via Pagefind
     status: Accepted
