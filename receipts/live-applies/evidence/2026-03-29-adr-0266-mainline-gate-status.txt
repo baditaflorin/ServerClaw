@@ -28,9 +28,9 @@ Enabled checks:
   - type-check [error]: Type check the gate orchestration code and the manifest-backed Docker runner surfaces.
   - workstream-surfaces [error]: Validate the current branch against its declared workstream ownership manifest and shared-surface contract.
   - yaml-lint [error]: Run full-repository yamllint across tracked YAML files.
-Last gate run: passed at 2026-03-29T19:20:48.970790+00:00 via build-server on runner build-server-validation
+Last gate run: passed at 2026-03-29T22:10:48.423912+00:00 via build-server on runner build-server-validation
   selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
-Last remote validate run: passed at 2026-03-29T19:17:36.500717+00:00 via build-server-validate on runner build-server-validation
+Last remote validate run: passed at 2026-03-29T22:07:09.413886+00:00 via build-server-validate on runner build-server-validation
   selected lanes: repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit
 Last post-merge gate run: none recorded
 Latest bypass receipt: receipts/gate-bypasses/20260328T220410Z-codex-ws-0264-receipt-driven-resilience-adrs-r3-6b19422-skip-remote-gate.json (skip_remote_gate at 2026-03-28T22:04:10.209226+00:00)

@@ -1,46 +1,34 @@
-{
-  "status": "passed",
-  "source": "build-server",
-  "executed_at": "2026-03-29T19:20:48.970790+00:00",
-  "session_workspace": {
-    "session_id": "ws-0266-main-integration-r2-c85b58674e",
-    "session_slug": "ws-0266-main-integration-r2-c85b58674e",
-    "local_state_root": "/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0266-main-integration-r2-c85b58674e/repo/.lv3-runs/20260329T191806Z-d5e0317fd2ac/repo/.local/session-workspaces/ws-0266-main-integration-r2-c85b58674e",
-    "nats_prefix": "platform.ws.ws-0266-main-integration-r2-c85b58674e",
-    "state_namespace": "ws:ws-0266-main-integration-r2-c85b58674e"
-  },
-  "runner_id": "build-server-validation",
-  "runner_surface": "build_server_remote",
-  "cpu_architecture": "x86_64",
-  "selected_lanes": [
-    "documentation-and-adr",
-    "repository-structure-and-schema",
-    "generated-artifact-and-canonical-truth",
-    "service-syntax-and-unit",
-    "remote-builder",
-    "live-apply-and-promotion"
-  ],
-  "blocking_checks": null,
-  "check_statuses": {
-    "workstream-surfaces": "passed",
-    "agent-standards": "passed",
-    "documentation-index": "passed",
-    "yaml-lint": "passed",
-    "schema-validation": "passed",
-    "policy-validation": "passed",
-    "alert-rule-validation": "passed",
-    "dependency-direction": "passed",
-    "generated-docs": "passed",
-    "generated-portals": "passed",
-    "dependency-graph": "passed",
-    "artifact-secret-scan": "passed",
-    "ansible-syntax": "passed",
-    "ansible-lint": "passed",
-    "type-check": "passed",
-    "service-completeness": "passed",
-    "packer-validate": "passed",
-    "tofu-validate": "passed",
-    "security-scan": "passed",
-    "integration-tests": "passed"
-  }
-}
+status: passed
+source: build-server
+executed_at: 2026-03-29T22:10:48.423912+00:00
+runner_id: build-server-validation
+runner_surface: None
+cpu_architecture: None
+selected_lanes:
+- documentation-and-adr
+- repository-structure-and-schema
+- generated-artifact-and-canonical-truth
+- service-syntax-and-unit
+- remote-builder
+- live-apply-and-promotion
+checks:
+- workstream-surfaces: passed (3.59s)
+- agent-standards: passed (0.92s)
+- documentation-index: passed (2.09s)
+- yaml-lint: passed (11.1s)
+- schema-validation: passed (12.1s)
+- policy-validation: passed (1.81s)
+- alert-rule-validation: passed (1.67s)
+- dependency-direction: passed (2.66s)
+- generated-docs: passed (6.34s)
+- generated-portals: passed (25.5s)
+- dependency-graph: passed (2.29s)
+- artifact-secret-scan: passed (2.21s)
+- ansible-syntax: passed (89.31s)
+- ansible-lint: passed (153.73s)
+- type-check: passed (3.56s)
+- service-completeness: passed (1.17s)
+- packer-validate: passed (5.0s)
+- tofu-validate: passed (1.34s)
+- security-scan: passed (9.18s)
+- integration-tests: passed (1.9s)

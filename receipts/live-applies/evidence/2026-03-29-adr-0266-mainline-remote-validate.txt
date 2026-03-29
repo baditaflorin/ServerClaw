@@ -10,11 +10,11 @@ Validation lane selection
   blocking checks: workstream-surfaces, agent-standards, ansible-syntax, schema-validation, policy-validation, alert-rule-validation, type-check, dependency-graph
 
 CHECK                STATUS DURATION(s)
-agent-standards       passed 0.63
-alert-rule-validation passed 1.09
-ansible-syntax        passed 77.59
-dependency-graph      passed 1.86
-policy-validation     passed 0.84
-schema-validation     passed 10.20
+agent-standards       passed 0.66
+alert-rule-validation passed 1.10
+ansible-syntax        passed 80.33
+dependency-graph      passed 1.84
+policy-validation     passed 0.87
+schema-validation     passed 10.52
 type-check            passed 2.81
-workstream-surfaces   passed 2.16
+workstream-surfaces   passed 2.23
