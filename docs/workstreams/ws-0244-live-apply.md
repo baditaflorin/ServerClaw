@@ -3,7 +3,7 @@
 - ADR: [ADR 0244](../adr/0244-runtime-assurance-matrix-per-service-and-environment.md)
 - Title: Implement and live-apply one service-by-environment runtime assurance matrix using existing health, route, and verification evidence
 - Status: live_applied
-- Implemented In Repo Version: `0.177.79`
+- Implemented In Repo Version: `0.177.80`
 - Live Applied In Platform Version: `0.130.54`
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
@@ -88,7 +88,7 @@
 ## Mainline Integration
 
 - The final protected-surface integration landed through `ws-0244-main-merge`
-  in release `0.177.79`.
+  in release `0.177.80`.
 - On `main`, `versions/stack.yaml` now points both `api_gateway` and
   `ops_portal` at
   `2026-03-29-adr-0244-runtime-assurance-matrix-live-apply`.

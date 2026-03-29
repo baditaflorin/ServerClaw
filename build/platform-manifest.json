@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.79",
+  "repo_version": "0.177.80",
   "platform_version": "0.130.54",
-  "generated_at": "2026-03-29T14:13:02Z",
-  "next_refresh_at": "2026-03-29T15:13:02Z",
+  "generated_at": "2026-03-29T14:34:39Z",
+  "next_refresh_at": "2026-03-29T15:34:39Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -1350,7 +1350,7 @@
       },
       {
         "id": "converge-n8n",
-        "description": "Converge n8n on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress.",
+        "description": "Converge the n8n connector fabric on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress for ServerClaw adapters.",
         "tags": [
           "converge-n8n",
           "guest-live",
@@ -4211,10 +4211,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.78",
+    "last_version": "0.177.79",
     "deployed_at": "2026-03-29",
     "summary": "records ADR 0244 exact-main evidence on the current mainline by preserving the verified service-by-environment runtime assurance matrix, the authenticated gateway plus portal rollup, and the corrected latest-main replay after concurrent live drift and docker-runtime disk-pressure recovery",
-    "release_notes_url": "docs/release-notes/0.177.79.md"
+    "release_notes_url": "docs/release-notes/0.177.80.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

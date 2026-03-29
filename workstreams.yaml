@@ -1087,7 +1087,7 @@ workstreams:
       - VERSION
       - changelog.md
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.79.md
+      - docs/release-notes/0.177.80.md
       - versions/stack.yaml
       - build/platform-manifest.json
       - docs/diagrams/agent-coordination-map.excalidraw
@@ -1110,7 +1110,7 @@ workstreams:
             - VERSION
             - changelog.md
             - docs/release-notes/README.md
-            - docs/release-notes/0.177.79.md
+            - docs/release-notes/0.177.80.md
             - versions/stack.yaml
             - build/platform-manifest.json
             - docs/diagrams/agent-coordination-map.excalidraw
@@ -1592,7 +1592,7 @@ workstreams:
         corrected latest-main replay after concurrent live drift and
         docker-runtime disk-pressure recovery
       release_bump: patch
-      included_in_repo_version: 0.177.79
+      included_in_repo_version: 0.177.80
       latest_receipts:
         api_gateway: 2026-03-29-adr-0244-runtime-assurance-matrix-live-apply
         ops_portal: 2026-03-29-adr-0244-runtime-assurance-matrix-live-apply

@@ -3,7 +3,7 @@
 - ADR: [ADR 0244](../adr/0244-runtime-assurance-matrix-per-service-and-environment.md)
 - Title: Integrate ADR 0244 runtime assurance matrix into `origin/main`
 - Status: merged
-- Included In Repo Version: 0.177.79
+- Included In Repo Version: 0.177.80
 - Platform Version Observed During Merge: 0.130.54
 - Release Date: 2026-03-29
 - Branch: `codex/ws-0244-main-merge-r3`
@@ -26,7 +26,7 @@ for the authenticated API gateway plus ops portal runtime-assurance flow.
 - `VERSION`
 - `changelog.md`
 - `docs/release-notes/README.md`
-- `docs/release-notes/0.177.79.md`
+- `docs/release-notes/0.177.80.md`
 - `versions/stack.yaml`
 - `build/platform-manifest.json`
 - `docs/adr/.index.yaml`
@@ -52,9 +52,9 @@ for the authenticated API gateway plus ops portal runtime-assurance flow.
 ## Verification
 
 - `git fetch origin` kept this worktree current while other workstreams were
-  active; immediately before the protected-surface integration the branch was
-  ahead of `origin/main` by `11` commits and `origin/main` still pointed at
-  release `0.177.78`.
+  active; the first push candidate was based on `origin/main` release
+  `0.177.78`, then the branch was rebased onto the newer `origin/main`
+  release `0.177.79` after ADR 0259 landed during push validation.
 - The exact-main validation slice passed on `codex/ws-0244-main-merge-r3`,
   including the focused runtime-assurance pytest coverage,
   `uv run --with pyyaml --with jsonschema --with nats-py==2.11.0 python3 scripts/runtime_assurance.py --validate --print-report-json`,
@@ -76,14 +76,16 @@ for the authenticated API gateway plus ops portal runtime-assurance flow.
   worktree briefly restored an older `api_gateway/main.py` without
   `/v1/platform/runtime-assurance`; the exact-main replay corrected that live
   drift before release.
-- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py --bump patch --platform-impact "platform version advances to 0.130.54 because current main now carries the ADR 0244 runtime-assurance matrix replay verified end to end on docker-runtime-lv3 through the authenticated API gateway and the interactive ops portal" --released-on 2026-03-29`
-  prepared release `0.177.79` with the single ws-0244 changelog note.
+- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py --bump patch --platform-impact "no platform version bump; current main already records platform version 0.130.54, and this release carries the verified ADR 0244 runtime-assurance matrix replay onto that same live baseline" --released-on 2026-03-29`
+  prepared release `0.177.80` with the single ws-0244 changelog note after
+  the branch was rebased onto current `origin/main`.
 
 ## Outcome
 
-- Release `0.177.79` carries ADR 0244 onto `main`.
-- Platform version `0.130.54` is the first integrated mainline version that
-  records the exact-main runtime-assurance replay as canonical truth.
+- Release `0.177.80` carries ADR 0244 onto `main`.
+- Platform version `0.130.54` remains the integrated mainline baseline and is
+  the first platform version that records the exact-main runtime-assurance
+  replay as canonical truth.
 - The canonical live evidence for both `api_gateway` and `ops_portal` now
   points at
   `receipts/live-applies/2026-03-29-adr-0244-runtime-assurance-matrix-live-apply.json`.
