@@ -116,4 +116,6 @@ WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_flo
 - Scheduled enablement remains owned by each workflow’s safety contract; ADR 0228 makes the Windmill execution surface present by default, not every schedule automatically enabled.
 - Some wrappers are intentionally powerful. The repo-managed wrapper, workflow budget, runbook, and secret contracts remain the governing safety boundary; seeding the script does not bypass those controls.
 - The mirrored worker checkout under `/srv/proxmox_florin_server` is a file mirror rather than a git clone. The Windmill runtime now prunes stale empty directories from that mirror so the worker-safe post-merge fallback does not trip on removed role paths.
+- The live `f/lv3/post_merge_gate` result currently goes green through the documented worker-local fallback whenever the worker cannot pull `registry.lv3.org/check-runner/*` images and Docker returns `502 Bad Gateway`.
+- Because that fallback keeps `generated-portals` enabled, worker-safe portal helpers such as `scripts/generate_ops_portal.py` must stay compatible with the worker's Python `3.11` interpreter.
 - `f/lv3/maintenance_window` is part of the default surface, but the current live NATS publish authorization gap in `docs/runbooks/maintenance-windows.md` still applies.

@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0228-windmill-default-operations-surface-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T06:10:59Z",
+  "recorded_by": "codex",
+  "source_commit": "afb966493ff843c9f8f0a287248f51fe693a9ff5",
+  "repo_version_context": "0.177.71",
+  "platform_version_context": "0.130.49",
+  "workflow_id": "adr-0228-windmill-default-operations-surface-mainline-live-apply",
+  "adr": "0228",
+  "summary": "Integrated ADR 0228 on synchronized main release 0.177.71 by replaying the exact-main Windmill converge from commit afb96649, preserving Windmill as the default browser-first and API-first operations surface on CE v1.662.0, fixing the worker-local Python 3.11 generated-portals fallback, and establishing platform version 0.130.49 after end-to-end verification.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Windmill proxied API",
+      "address": "http://100.64.0.1:8005"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Protected release cut from refreshed mainline",
+      "result": "pass",
+      "observed": "`git fetch origin --prune` confirmed the main-merge worktree already contained the latest published `origin/main`; the protected release cut then advanced repository version `0.177.70` to `0.177.71` and recorded platform impact that establishes live platform version `0.130.49` after this exact-main ADR 0228 replay."
+    },
+    {
+      "check": "Exact-main Windmill replay",
+      "result": "pass",
+      "observed": "`make converge-windmill` completed successfully from branch head `afb96649` with replay log `.local/ws-0228-main/converge-windmill-mainline-r25.log`, including `Verify the Windmill default operations scripts are seeded`, `Assert the Windmill default operations scripts exist`, and final recap `docker-runtime-lv3 ok=248 changed=50`, `postgres-lv3 ok=64 changed=1`, and `proxmox_florin ok=37 changed=4`."
+    },
+    {
+      "check": "Worker-local validation fallback",
+      "result": "pass",
+      "observed": "The direct worker checkout command `./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals` passed from `/srv/proxmox_florin_server` with exit code `0`, proving the Python `3.11` compatibility fix in `scripts/generate_ops_portal.py` and the new empty-state coverage in `tests/test_ops_portal.py` keep the worker-local `generated-portals` fallback green."
+    },
+    {
+      "check": "Integrated repo automation and validation slice",
+      "result": "pass",
+      "observed": "`./scripts/validate_repo.sh agent-standards` passed; `./scripts/validate_repo.sh generated-docs` passed; `./scripts/validate_repo.sh generated-portals` passed; `uv run --with pyyaml --with jsonschema python scripts/live_apply_receipts.py --validate` reported `Live apply receipts OK`; `uv run --with pyyaml --with jsonschema python scripts/platform_manifest.py --check` passed; `uvx --from pyyaml python scripts/generate_status_docs.py --check` reported `Generated status docs OK`; `uv run --with pyyaml --with jsonschema python scripts/generate_diagrams.py --check` reported `Architecture diagrams OK`; `python3.11 -m py_compile scripts/generate_ops_portal.py` passed; `uv run --with pytest --with pyyaml --with jsonschema pytest tests/test_ops_portal.py -q` returned `5 passed`; and `git diff --check` passed."
+    },
+    {
+      "check": "Representative live Windmill workflows",
+      "result": "pass",
+      "observed": "The refreshed mainline proof bundle recorded `CE v1.662.0`, `9` workers, a successful `windmill_healthcheck`, `weekly_capacity_report: ok`, `audit_token_inventory: attention_required` only because `local-platform-cli` expires on `2026-03-31T00:00:00Z`, dry-run `token_exposure_response: completed`, and overall `post_merge_gate: ok`."
+    },
+    {
+      "check": "Post-merge gate fallback nuance",
+      "result": "partial",
+      "observed": "The raw `post_merge_gate` payload still shows the primary Docker-runner validation path failing because the worker receives `502 Bad Gateway` while pulling `registry.lv3.org/check-runner/*` images. The documented worker-local fallback passed, so the seeded `f/lv3/post_merge_gate` workflow still returned top-level `status: ok` on the live control plane."
+    },
+    {
+      "check": "Post-replay server state",
+      "result": "pass",
+      "observed": "The final host snapshot still reports Debian GNU/Linux `13 (trixie)`, kernel `6.17.13-2-pve`, and `pve-manager/9.1.6/71482d1833ded40a`. `lv3-server-resident-reconciliation.service` last exited with `status=0/SUCCESS` on `2026-03-28 23:05:11 CET`, and the timer last went inactive on `2026-03-28 23:26:46 CET`."
+    },
+    {
+      "check": "Branch-scoped workstream surface validator",
+      "result": "partial",
+      "observed": "`./scripts/validate_repo.sh workstream-surfaces` was exercised and failed with `branch 'codex/ws-0228-main-merge' maps to terminal workstream 'ws-0228-main-merge'`. That is the expected guard when the terminal workstream is still being validated from its dedicated non-`main` integration branch just before the final push."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "changelog.md",
+    "versions/stack.yaml",
+    "workstreams.yaml",
+    "docs/adr/0228-windmill-as-the-default-browser-and-api-operations-surface.md",
+    "docs/workstreams/ws-0228-live-apply.md",
+    "docs/workstreams/ws-0228-main-merge.md",
+    "docs/release-notes/0.177.71.md",
+    "docs/runbooks/windmill-default-operations-surface.md",
+    "docs/runbooks/validation-gate.md",
+    "build/platform-manifest.json",
+    "docs/diagrams/agent-coordination-map.excalidraw",
+    "scripts/generate_ops_portal.py",
+    "tests/test_ops_portal.py",
+    "receipts/live-applies/2026-03-28-adr-0228-windmill-default-operations-surface-live-apply.json",
+    "receipts/live-applies/evidence/2026-03-29-adr-0228-mainline-converge-r25.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0228-mainline-worker-validation.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0228-mainline-windmill-proof.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0228-mainline-server-state.txt"
+  ],
+  "notes": [
+    "The isolated-worktree receipt `2026-03-28-adr-0228-windmill-default-operations-surface-live-apply` remains the first-live proof for ADR 0228. This mainline receipt becomes the canonical evidence for integrated release `0.177.71` and platform version `0.130.49`.",
+    "The final exact-main replay repairs one worker-only validation gap that was not visible in the earlier isolated branch proof: `scripts/generate_ops_portal.py` needed Python `3.11`-compatible empty-state rendering so `generated-portals` could parse on the worker-local fallback.",
+    "The only remaining live warning in the representative workflow set is token hygiene for `local-platform-cli`, which `audit_token_inventory` reports as `rotation_due_soon` because the token expires on `2026-03-31T00:00:00Z`.",
+    "The primary Docker-runner validation lane is still blocked on `registry.lv3.org/check-runner/*` pulls returning `502 Bad Gateway` from the worker. ADR 0228 is still considered live-applied here because the intended local fallback completed successfully and the top-level `post_merge_gate` workflow status is `ok`.",
+    "The only validation-path result that remained non-pass on this branch was the expected `workstream-surfaces` terminal-branch guard, which should disappear once this exact commit is published on `origin/main`."
+  ]
+}

@@ -729,7 +729,6 @@ workstreams:
       included_in_repo_version: 0.177.66
       latest_receipts:
         operator_access: 2026-03-28-adr-0238-operator-grid-live-apply
-        windmill: 2026-03-28-adr-0238-operator-grid-live-apply
   - id: ws-0238-main-integration
     adr: "0238"
     title: Integrate ADR 0238 operator grid into origin/main
@@ -2033,7 +2032,6 @@ workstreams:
       included_in_repo_version: 0.177.62
       latest_receipts:
         operator_access: 2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply
-        windmill: 2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply
   - id: ws-0241-main-merge
     adr: "0241"
     title: Integrate ADR 0241 rich content and inline knowledge editing into origin/main
@@ -2830,7 +2828,7 @@ workstreams:
   - id: ws-0228-main-merge
     adr: "0228"
     title: Integrate ADR 0228 live apply into origin/main
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/ws-0228-main-merge
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0228-main-merge
@@ -2848,7 +2846,7 @@ workstreams:
       - VERSION
       - changelog.md
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.70.md
+      - docs/release-notes/0.177.71.md
       - versions/stack.yaml
       - build/platform-manifest.json
       - docs/diagrams/agent-coordination-map.excalidraw
@@ -2875,6 +2873,7 @@ workstreams:
       - platform/scheduler/scheduler.py
       - platform/use_cases/runbooks.py
       - scripts/check_role_argument_specs.sh
+      - scripts/generate_ops_portal.py
       - scripts/lv3_cli.py
       - scripts/windmill_run_wait_result.py
       - config/windmill/scripts/audit-token-inventory.py
@@ -2889,6 +2888,7 @@ workstreams:
       - tests/test_config_merge_windmill.py
       - tests/test_nightly_integration_tests.py
       - tests/test_openbao_runtime_role.py
+      - tests/test_ops_portal.py
       - tests/test_validate_repo_cache.py
       - tests/test_token_lifecycle_windmill.py
       - tests/test_weekly_capacity_report_windmill.py
@@ -2896,6 +2896,10 @@ workstreams:
       - tests/test_windmill_default_operations_surface.py
       - tests/test_windmill_operator_admin_app.py
       - tests/test_world_state_repo_surfaces.py
+      - receipts/live-applies/evidence/2026-03-29-adr-0228-mainline-converge-r25.txt
+      - receipts/live-applies/evidence/2026-03-29-adr-0228-mainline-worker-validation.txt
+      - receipts/live-applies/evidence/2026-03-29-adr-0228-mainline-windmill-proof.txt
+      - receipts/live-applies/evidence/2026-03-29-adr-0228-mainline-server-state.txt
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -2915,7 +2919,7 @@ workstreams:
             - VERSION
             - changelog.md
             - docs/release-notes/README.md
-            - docs/release-notes/0.177.70.md
+            - docs/release-notes/0.177.71.md
             - versions/stack.yaml
             - build/platform-manifest.json
             - docs/diagrams/agent-coordination-map.excalidraw
@@ -2932,10 +2936,12 @@ workstreams:
             - platform/scheduler/scheduler.py
             - platform/use_cases/runbooks.py
             - scripts/check_role_argument_specs.sh
+            - scripts/generate_ops_portal.py
             - scripts/lv3_cli.py
             - scripts/windmill_run_wait_result.py
             - config/windmill/scripts/nightly-integration-tests.py
             - tests/test_config_merge_windmill.py
+            - tests/test_ops_portal.py
             - tests/test_validate_repo_cache.py
             - tests/test_windmill_circuit_clients.py
             - tests/test_windmill_operator_admin_app.py
@@ -2964,6 +2970,10 @@ workstreams:
             - playbooks/openbao.yml
             - receipts/live-applies/2026-03-28-adr-0228-windmill-default-operations-surface-live-apply.json
             - receipts/live-applies/2026-03-29-adr-0228-windmill-default-operations-surface-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-03-29-adr-0228-mainline-converge-r25.txt
+            - receipts/live-applies/evidence/2026-03-29-adr-0228-mainline-worker-validation.txt
+            - receipts/live-applies/evidence/2026-03-29-adr-0228-mainline-windmill-proof.txt
+            - receipts/live-applies/evidence/2026-03-29-adr-0228-mainline-server-state.txt
             - tests/test_ansible_collection_packaging.py
             - tests/test_nightly_integration_tests.py
             - tests/test_openbao_runtime_role.py
@@ -2971,12 +2981,14 @@ workstreams:
             - tests/test_weekly_capacity_report_windmill.py
             - tests/test_windmill_default_operations_surface.py
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
     canonical_truth:
-      changelog_entry: records ADR 0228 exact-main evidence on the current mainline by verifying Windmill as the default browser-first and API-first operations surface, hardening seeded script and raw-app synchronization on CE v1.662.0, and refreshing the protected canonical truth after the exact-main replay
+      changelog_entry: replayed ADR 0228 from exact origin/main, kept Windmill as the default browser-first and API-first operations surface on CE v1.662.0, fixed Python 3.11 compatibility for the worker-local generated-portals fallback, and re-verified the green post-merge gate plus representative seeded workflows
       release_bump: patch
-      included_in_repo_version: 0.177.70
+      included_in_repo_version: 0.177.71
+      latest_receipts:
+        windmill: 2026-03-29-adr-0228-windmill-default-operations-surface-mainline-live-apply
   - id: ws-0224-server-resident-ops-adrs
     adr: "0224"
     title: Server-resident operations architecture bundle

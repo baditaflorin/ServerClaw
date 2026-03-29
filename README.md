@@ -145,8 +145,8 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.70` |
-| Platform version | `0.130.48` |
+| Repository version | `0.177.71` |
+| Platform version | `0.130.49` |
 | Observed check date | `2026-03-29` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -304,7 +304,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
 | `vaultwarden` | `2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-live-apply` |
-| `windmill` | `2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply` |
+| `windmill` | `2026-03-29-adr-0228-windmill-default-operations-surface-mainline-live-apply` |
 | `world_state_materializer` | `2026-03-27-adr-0113-world-state-materializer-mainline-live-apply` |
 <!-- END GENERATED: platform-status -->
 
@@ -1226,8 +1226,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.70` |
-| Platform version | `0.130.48` |
+| Repository version | `0.177.71` |
+| Platform version | `0.130.49` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1456,7 +1456,7 @@ This repository is intentionally opinionated:
 | `0224` | Server-resident operations architecture bundle | `merged` | [adr-0224-server-resident-operations-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0224-server-resident-operations-architecture-bundle.md) |
 | `0226` | Live apply ADR 0226 systemd host-resident control-loop supervision | `live_applied` | [ws-0226-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0226-live-apply.md) |
 | `0226` | Finalize ADR 0226 exact-main evidence on origin/main | `merged` | [ws-0226-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0226-main-merge.md) |
-| `0228` | Integrate ADR 0228 live apply into origin/main | `merged` | [ws-0228-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0228-main-merge.md) |
+| `0228` | Integrate ADR 0228 live apply into origin/main | `live_applied` | [ws-0228-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0228-main-merge.md) |
 | `0230` | Live apply policy decisions via Open Policy Agent and Conftest | `live_applied` | [ws-0230-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0230-live-apply.md) |
 | `0231` | Live apply ADR 0231 local secret delivery via OpenBao Agent and systemd credentials | `live_applied` | [ws-0231-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0231-live-apply.md) |
 | `0231` | Integrate ADR 0231 live apply into origin/main | `merged` | [ws-0231-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0231-main-merge.md) |

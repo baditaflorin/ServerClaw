@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.70
-platform_version: 0.130.48
+repo_version: 0.177.71
+platform_version: 0.130.49
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -31,7 +31,7 @@ live_apply_evidence:
     openbao: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
     vaultwarden: 2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-live-apply
     certificate_lifecycle: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
-    windmill: 2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply
+    windmill: 2026-03-29-adr-0228-windmill-default-operations-surface-mainline-live-apply
     self_correcting_automation_loops: 2026-03-28-adr-0204-self-correcting-automation-loops-live-apply
     budgeted_workflow_scheduler: 2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply
     observation_to_action_closure_loop: 2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply
@@ -1028,8 +1028,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.70
+    current: 0.177.71
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.48
+    current: 0.130.49
     meaning: intended platform release for the actual server configuration

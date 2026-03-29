@@ -92,18 +92,21 @@
 - the final replay log at `.local/ws-0228/converge-windmill-token-wrapper.log` completed successfully with `docker-runtime-lv3 ok=236 changed=43`, `postgres-lv3 ok=63 changed=1`, and `proxmox_florin ok=37 changed=7`, and it included both `Verify the Windmill default operations scripts are seeded` and `Assert the Windmill default operations scripts exist`
 - the proxied Windmill API on `http://100.64.0.1:8005` returned `CE v1.662.0`, the seeded metadata GETs for `f/lv3/post_merge_gate` and `f/lv3/maintenance_window` succeeded, `f/lv3/weekly_capacity_report` succeeded with `metrics_source: disabled`, `f/lv3/audit_token_inventory` succeeded with `7` healthy tokens, and dry-run `f/lv3/token_exposure_response` succeeded for `local-platform-cli`
 - the canonical branch-local evidence for this replay is receipt `2026-03-28-adr-0228-windmill-default-operations-surface-live-apply`
-- the later latest-main merge replay on 2026-03-29 surfaced two additional runtime truths that now belong to the same ADR trail: the live CE v1.662.0 control plane no longer resolves the older path-based `jobs/run_wait_result/p/...` route reliably for these seeded scripts, and the worker mirror needed one more prune pass for stale empty directories so `f/lv3/post_merge_gate` would stop only on the expected protected-file canonical-truth holdback
+- the later latest-main merge replay on 2026-03-29 surfaced three additional runtime truths that now belong to the same ADR trail: the live CE v1.662.0 control plane no longer resolves the older path-based `jobs/run_wait_result/p/...` route reliably for these seeded scripts, the worker mirror needed one more prune pass for stale empty directories so `f/lv3/post_merge_gate` would stop only on the expected protected-file canonical-truth holdback, and the worker-local `generated-portals` fallback required Python `3.11`-compatible empty-state rendering in `scripts/generate_ops_portal.py`
 - the full repo validation path was also exercised from this worktree with `make validate`; it progressed through syntax, lint, data-model, dependency, and status-document checks before stopping at the expected protected canonical-truth guard for stale `README.md`
 - the first branch push attempt also surfaced one generated-surface dependency from the remote pre-push gate: `docs/diagrams/agent-coordination-map.excalidraw` needed regeneration after the `workstreams.yaml` updates, so the workstream now includes that generated coordination map in its declared surface
 
 ## Mainline Integration
 
-- the protected release and canonical-truth surfaces now land on the dedicated mainline integration branch as repository version `0.177.70` and platform version `0.130.48`
-- the remaining exact-main integration steps are to record the final mainline receipt, rerun the repo validation gates after the refreshed truth is mirrored into the worker checkout, push the integrated result to `origin/main`, and verify server-resident reconciliation from the updated main branch
+- the exact-main integration branch finishes ADR 0228 as repository version `0.177.71` and platform version `0.130.49`
+- commit `afb96649` is the canonical merged-main replay source for that result; it keeps the Windmill raw-app and worker-sync hardening from the earlier branch work and adds the Python `3.11` compatibility fix for `scripts/generate_ops_portal.py`
+- replay `r25` completed successfully from that exact merged candidate, the worker-local validation subset passed directly on `docker-runtime-lv3`, and receipt `2026-03-29-adr-0228-windmill-default-operations-surface-mainline-live-apply` now records the integrated proof
+- the live `post_merge_gate` result is now green on mainline, with the expected nuance that the primary Docker-runner path still degrades to the worker-local fallback because the worker receives `502 Bad Gateway` while pulling `registry.lv3.org/check-runner/*`
 
 ## Notes For The Next Assistant
 
-- `./scripts/validate_repo.sh agent-standards` should be run while this workstream still has `status: in_progress`; the final status flip to `live_applied` should happen after that branch-ownership check passes
+- the isolated branch is complete; the canonical exact-main follow-up now lives in `ws-0228-main-merge` and receipt `2026-03-29-adr-0228-windmill-default-operations-surface-mainline-live-apply`
 - `docs/runbooks/windmill-default-operations-surface.md` is the central place for the representative seeded-script and API routes; avoid copying the whole catalog into every feature-specific runbook
 - maintenance-window execution should stay documented as present-but-constrained until the live NATS publish authorization gap in `docs/runbooks/maintenance-windows.md` is closed
 - long-running unrelated Windmill playbooks were still visible on the controller during this workstream; the final token lifecycle wrapper hardening is intentionally defensive against those concurrent repo-checkout permission resets
+- the exact-main receipt leaves one non-blocking follow-up for the next rotation cycle: `audit_token_inventory` reports `local-platform-cli` as `rotation_due_soon` because it expires on `2026-03-31T00:00:00Z`
