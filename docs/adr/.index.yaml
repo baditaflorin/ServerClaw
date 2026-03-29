@@ -7,9 +7,9 @@
 
 schema_version: 1
 generated: '2026-03-29'
-total_adrs: 278
+total_adrs: 279
 implementation_status_summary:
-  Implemented: 221
+  Implemented: 222
   Partial: 4
   Not Implemented: 52
   Deprecated: 1
@@ -210,6 +210,7 @@ concerns:
     - 0193
     - 0194
     - 0199
+    - '0201'
     - '0202'
     - '0205'
     - '0206'
@@ -3497,6 +3498,21 @@ adr_index:
     summary: We will deploy Outline on docker-runtime-lv3 and publish it at https://wiki.lv3.org.
     filename: 0199-outline-living-knowledge-wiki.md
     implemented_version: 0.177.19
+  - adr: '0201'
+    title: Harbor - Vulnerability-Scanning Container Registry
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: platform
+    keywords:
+      - harbor
+      - vulnerability-scanning
+      - container
+      - registry
+    summary: 'Migrate registry.lv3.org from bare Docker registry to Harbor (github.com/goharbor/harbor). Harbor adds: Trivy-powered
+      vu'
+    filename: 0201-harbor-container-registry-with-cve-scanning.md
+    implemented_version: 0.177.63
   - adr: '0202'
     title: Excalidraw Auto Generated Architecture Diagrams
     status: Accepted

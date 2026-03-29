@@ -12,6 +12,7 @@ ANSIBLE_PLAYBOOK_CMD=()
 ANSIBLE_GALAXY_CMD=()
 ANSIBLE_LINT_CMD=()
 YAMLLINT_CMD=()
+HAS_UV=true
 
 export ANSIBLE_CONFIG="$REPO_ROOT/ansible.cfg"
 export ANSIBLE_COLLECTIONS_PATH="$REPO_ROOT/collections:$ANSIBLE_COLLECTIONS_DIR"
@@ -102,20 +103,37 @@ ensure_uv() {
     return 0
   fi
 
-  "$PYTHON_BIN" -m pip install --user --quiet uv >/dev/null
-  UV_CMD=("$PYTHON_BIN" -m uv)
+  HAS_UV=false
+  UV_CMD=()
 }
 
 configure_validation_commands() {
   ensure_uv
-  ANSIBLE_PLAYBOOK_CMD=("${UV_CMD[@]}" tool run --from ansible-core ansible-playbook)
-  ANSIBLE_GALAXY_CMD=("${UV_CMD[@]}" tool run --from ansible-core ansible-galaxy)
-  ANSIBLE_LINT_CMD=("${UV_CMD[@]}" tool run --from ansible-lint ansible-lint)
-  YAMLLINT_CMD=("${UV_CMD[@]}" tool run --from yamllint yamllint)
+  if [[ "$HAS_UV" == true ]]; then
+    ANSIBLE_PLAYBOOK_CMD=("${UV_CMD[@]}" tool run --from ansible-core ansible-playbook)
+    ANSIBLE_GALAXY_CMD=("${UV_CMD[@]}" tool run --from ansible-core ansible-galaxy)
+    ANSIBLE_LINT_CMD=("${UV_CMD[@]}" tool run --from ansible-lint ansible-lint)
+    YAMLLINT_CMD=("${UV_CMD[@]}" tool run --from yamllint yamllint)
+    return 0
+  fi
+
+  require_command ansible-playbook
+  require_command ansible-galaxy
+  require_command ansible-lint
+  require_command yamllint
+  ANSIBLE_PLAYBOOK_CMD=(ansible-playbook)
+  ANSIBLE_GALAXY_CMD=(ansible-galaxy)
+  ANSIBLE_LINT_CMD=(ansible-lint)
+  YAMLLINT_CMD=(yamllint)
 }
 
 run_uv_python() {
   local packages=()
+
+  if [[ "$HAS_UV" != true ]]; then
+    echo "uv is required for this validation stage but is not available in the current runtime." >&2
+    exit 1
+  fi
 
   while [[ $# -gt 0 ]]; do
     if [[ "$1" == "--" ]]; then
@@ -182,17 +200,29 @@ configure_validation_commands
 install_collections() {
   local requirements_file="$REPO_ROOT/collections/requirements.yml"
   local current_sha_file=""
+  local lock_file="${ANSIBLE_COLLECTIONS_SHA_FILE}.lock"
+  local lock_fd=""
 
   [[ -f "$requirements_file" ]] || return 0
 
   mkdir -p "$ANSIBLE_COLLECTIONS_DIR"
   mkdir -p "$(dirname "$ANSIBLE_COLLECTIONS_SHA_FILE")"
+  mkdir -p "$(dirname "$lock_file")"
+
+  if command -v flock >/dev/null 2>&1; then
+    exec {lock_fd}> "$lock_file"
+    flock "$lock_fd"
+  fi
 
   current_sha_file="$(mktemp)"
   sha256sum "$requirements_file" > "$current_sha_file"
   if [[ -s "$ANSIBLE_COLLECTIONS_SHA_FILE" ]] && find "$ANSIBLE_COLLECTIONS_DIR" -mindepth 1 -print -quit | grep -q .; then
     if cmp -s "$current_sha_file" "$ANSIBLE_COLLECTIONS_SHA_FILE"; then
       rm -f "$current_sha_file"
+      if [[ -n "$lock_fd" ]]; then
+        flock -u "$lock_fd"
+        eval "exec ${lock_fd}>&-"
+      fi
       return 0
     fi
   fi
@@ -200,9 +230,14 @@ install_collections() {
   "${ANSIBLE_GALAXY_CMD[@]}" collection install \
     -r "$requirements_file" \
     -p "$ANSIBLE_COLLECTIONS_DIR" \
+    --force-with-deps \
     >/dev/null
   cp "$current_sha_file" "$ANSIBLE_COLLECTIONS_SHA_FILE"
   rm -f "$current_sha_file"
+  if [[ -n "$lock_fd" ]]; then
+    flock -u "$lock_fd"
+    eval "exec ${lock_fd}>&-"
+  fi
 }
 
 validate_ansible_syntax() {

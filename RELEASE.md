@@ -1,12 +1,12 @@
-# Release 0.177.62
+# Release 0.177.63
 
 - Date: 2026-03-29
 
 ## Summary
-- records ADR 0239 exact-main evidence on the current mainline by preserving the verified Pagefind browser-local docs search rollout, refreshed release surfaces, and the current platform baseline after the exact-main replay
+- implemented ADR 0201 by converging Harbor with Trivy scanning, Keycloak-backed operator login, and a repo-managed check-runner publication path through registry.lv3.org
 
 ## Platform Impact
-- platform version advances to 0.130.45 after the exact-main ADR 0239 replay re-verifies Pagefind-backed browser-local docs search on docs.lv3.org while preserving the authenticated edge contract on top of the 0.130.44 baseline
+- no live platform version bump; this release records the verified ADR 0201 Harbor rollout on top of the synchronized 0.177.62 mainline while the current platform baseline remains 0.130.45 after the repaired latest-main replay
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)
