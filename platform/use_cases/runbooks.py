@@ -5,8 +5,6 @@ import json
 import re
 import sys
 import time
-import urllib.parse
-import urllib.request
 import uuid
 from copy import deepcopy
 from datetime import UTC, datetime
@@ -16,6 +14,7 @@ from typing import Any, Protocol
 from platform.circuit import CircuitRegistry, should_count_urllib_exception
 from platform.mutation_audit import build_event, emit_event_best_effort
 from platform.repo import load_json, load_yaml, write_json
+from platform.scheduler import HttpWindmillClient
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -409,35 +408,15 @@ class WindmillWorkflowRunner:
                     "windmill",
                     exception_classifier=should_count_urllib_exception,
                 )
-
-    def run_workflow(self, workflow_id: str, payload: dict[str, Any], *, timeout_seconds: int | None = None) -> Any:
-        script_path = workflow_id if "/" in workflow_id else f"f/{self.workspace}/{workflow_id}"
-        encoded_path = urllib.parse.quote(script_path, safe="")
-        url = f"{self.base_url}/api/w/{self.workspace}/jobs/run_wait_result/p/{encoded_path}"
-        request = urllib.request.Request(
-            url,
-            data=json.dumps(payload).encode("utf-8"),
-            headers={
-                "Authorization": f"Bearer {self.token}",
-                "Content-Type": "application/json",
-            },
-            method="POST",
+        self._client = HttpWindmillClient(
+            base_url=self.base_url,
+            token=self.token,
+            workspace=self.workspace,
+            circuit_breaker=self.circuit_breaker,
         )
 
-        def execute() -> str:
-            with urllib.request.urlopen(request, timeout=timeout_seconds or 30) as response:
-                return response.read().decode("utf-8")
-
-        if self.circuit_breaker is not None:
-            body = self.circuit_breaker.call(execute)
-        else:
-            body = execute()
-        if not body.strip():
-            return None
-        try:
-            return json.loads(body)
-        except json.JSONDecodeError:
-            return body
+    def run_workflow(self, workflow_id: str, payload: dict[str, Any], *, timeout_seconds: int | None = None) -> Any:
+        return self._client.run_workflow_wait_result(workflow_id, payload, timeout_seconds=timeout_seconds)
 
 
 class RunbookUseCaseService:

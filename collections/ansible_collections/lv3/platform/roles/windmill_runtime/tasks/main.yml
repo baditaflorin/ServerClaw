@@ -1686,7 +1686,7 @@
       - --network
       - host
       - -v
-      - "{{ windmill_seed_app_sync_dir }}:/workspace"
+      - "{{ windmill_seed_app_sync_dir.path }}:/workspace"
       - "{{ windmill_image }}"
       - sh
       - -lc
@@ -1701,6 +1701,10 @@
   loop: "{{ windmill_seed_raw_apps | default([]) }}"
   loop_control:
     label: "{{ item.path }}"
+  register: windmill_seed_raw_app_frontend_install
+  retries: 3
+  delay: 5
+  until: windmill_seed_raw_app_frontend_install.rc == 0
   changed_when: false
   when: (windmill_seed_raw_apps | default([])) | length > 0
   tags:
@@ -1748,6 +1752,9 @@
   loop_control:
     label: "{{ item.path }}"
   register: windmill_seed_raw_app_sync
+  retries: 3
+  delay: 5
+  until: windmill_seed_raw_app_sync.rc == 0
   environment:
     WM_WORKSPACE: "{{ windmill_workspace_id }}"
     WM_TOKEN: "{{ windmill_bootstrap_session_token }}"
@@ -1829,7 +1836,6 @@
     label: "{{ item.path }}"
   changed_when: false
   no_log: true
-
 - name: Run the Windmill seeded healthcheck script
   ansible.builtin.shell: >
     python3 {{ (playbook_dir | dirname ~ '/scripts/windmill_run_wait_result.py') | quote }}
