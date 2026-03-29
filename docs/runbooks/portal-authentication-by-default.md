@@ -40,7 +40,7 @@ curl -Ik https://grafana.lv3.org/
 curl -Ik https://home.lv3.org/.well-known/lv3/session/logout
 curl -Ik https://ops.lv3.org/.well-known/lv3/session/proxy-logout
 curl -Ik https://ops.lv3.org/.well-known/lv3/session/logged-out
-uv run python scripts/session_logout_verify.py \
+uv run --with playwright python scripts/session_logout_verify.py \
   --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline.automation-password.txt
 ```
 
@@ -52,6 +52,7 @@ Expected results:
 - `ops.lv3.org/.well-known/lv3/session/proxy-logout` clears the shared proxy cookie and lands on the logged-out page
 - `ops.lv3.org/.well-known/lv3/session/logged-out` returns `200` with `Cache-Control: no-store`
 - `scripts/session_logout_verify.py` verifies end-to-end logout on one edge-protected surface and one app-local surface
+- the Outline portion of that verifier may observe the Keycloak confirmation page before logout completes; that confirmation is the currently declared product gap, and the verifier still proves the final post-logout challenge on both `home.lv3.org` and `wiki.lv3.org`
 
 ## Deployment
 

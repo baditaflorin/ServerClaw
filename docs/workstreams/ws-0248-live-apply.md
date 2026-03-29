@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0248](../adr/0248-session-and-logout-authority-across-keycloak-oauth2-proxy-and-apps.md)
 - Title: Live apply unified browser-session logout authority across Keycloak, oauth2-proxy, and app-local sign-out surfaces
-- Status: in-progress
-- Implemented In Repo Version: N/A
-- Live Applied In Platform Version: N/A
-- Implemented On: N/A
-- Live Applied On: N/A
+- Status: live_applied
+- Implemented In Repo Version: 0.177.63
+- Live Applied In Platform Version: 0.130.45
+- Implemented On: 2026-03-29
+- Live Applied On: 2026-03-29
 - Branch: `codex/ws-0248-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0248-live-apply`
 - Owner: codex
@@ -65,7 +65,68 @@
 - end-to-end browser-session verification on at least one shared edge-protected surface and one app-local logout surface
 - receipt recorded under `receipts/live-applies/`
 
+## Live Apply Outcome
+
+- `git fetch origin main --prune` confirmed this worktree was rebased onto the
+  latest `origin/main` before the final live replay and verification pass.
+- `make live-apply-service service=outline env=production` was exercised and
+  stopped at `make check-canonical-truth` because `README.md` was stale in the
+  isolated worktree and remains a protected shared integration file on
+  workstream branches. That gate failure is recorded as expected branch-local
+  behavior rather than a platform failure.
+- The workstream therefore used the direct service guardrails and scoped runner:
+  `scripts/interface_contracts.py --check-live-apply service:outline`,
+  `scripts/standby_capacity.py --service outline`,
+  `scripts/service_redundancy.py --check-live-apply --service outline`, and
+  `scripts/immutable_guest_replacement.py --check-live-apply --service outline`
+  all ran, with the immutable-guest plan declaring a narrow in-place exception
+  that is recorded in the receipt because ADR 0248 only changes auth/logout
+  wiring on the existing Outline guest.
+- The first `make converge-keycloak env=production` replay failed
+  transiently while reading the Outline automation user groups from the
+  Keycloak admin API. A direct API check immediately after showed the
+  `outline.automation` user and its expected groups were present, and the
+  second replay completed successfully with
+  `docker-runtime-lv3 : ok=153 changed=3 failed=0`, plus the expected
+  `monitoring-lv3`, `nginx-lv3`, `postgres-lv3`, and `proxmox_florin` recaps.
+- The scoped `playbooks/outline.yml` replay completed successfully from the
+  isolated worktree with
+  `docker-runtime-lv3 : ok=209 changed=5 failed=0`,
+  `nginx-lv3 : ok=38 changed=2 failed=0`,
+  `postgres-lv3 : ok=47 changed=0 failed=0`, and
+  `localhost : ok=25 changed=1 failed=0`.
+- `make configure-edge-publication env=production` completed successfully with
+  `nginx-lv3 : ok=63 changed=5 failed=0`, reloading both oauth2-proxy and
+  NGINX after the shared logout and `wiki.lv3.org` publication changes.
+- Live HTTP probes confirmed:
+  `https://home.lv3.org/.well-known/lv3/session/logout -> 302` to the shared
+  oauth2-proxy sign-out path,
+  `https://ops.lv3.org/.well-known/lv3/session/proxy-logout -> 302` to the
+  logged-out landing page,
+  `https://ops.lv3.org/.well-known/lv3/session/logged-out -> 200` with
+  `Cache-Control: no-store`, and `https://wiki.lv3.org/` served the expected
+  Outline-compatible CSP override.
+- `uv run --with playwright python scripts/session_logout_verify.py --password-file .local/keycloak/outline.automation-password.txt`
+  now passes end to end and verified both the shared edge logout path and the
+  real Outline UI logout path. Outline still reaches the Keycloak confirmation
+  page because it cannot provide `id_token_hint`; the verifier now submits that
+  live confirmation form and proves both `home.lv3.org` and `wiki.lv3.org`
+  require fresh Keycloak login afterward.
+
+## Live Evidence
+
+- live-apply receipt:
+  `receipts/live-applies/2026-03-28-adr-0248-session-logout-authority-live-apply.json`
+- live source commit: `7b0bd0230482ef077c17714ad224364badf3171b`
+- live verifier command:
+  `uv run --with playwright python scripts/session_logout_verify.py --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline.automation-password.txt`
+
 ## Merge-To-Main Notes
 
-- branch-local work must not change `VERSION`, `changelog.md`, `README.md`, or `versions/stack.yaml`
-- if the live apply succeeds before merge, update ADR 0248 metadata here and in the ADR, then carry the protected integration-file updates only during the final merge-to-main step
+- this workstream branch intentionally left `VERSION`, `changelog.md`, the
+  top-level `README.md` status summary, and `versions/stack.yaml` untouched
+- remaining for merge to `main`: update the protected release truth surfaces
+  only during the final integration step, and only change `versions/stack.yaml`
+  if the final integrator also performs an exact-main replay that is meant to
+  establish a new first-live platform version beyond the current `0.130.45`
+  baseline

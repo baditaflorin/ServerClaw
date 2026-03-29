@@ -115,6 +115,30 @@ def test_cookie_to_playwright_cookie_preserves_security_attributes() -> None:
     }
 
 
+def test_playwright_cookie_to_cookie_preserves_security_attributes() -> None:
+    cookie = session_logout_verify.playwright_cookie_to_cookie(
+        {
+            "name": "_lv3_ops_portal_proxy",
+            "value": "proxy-session",
+            "domain": ".lv3.org",
+            "path": "/",
+            "secure": True,
+            "expires": 1_900_000_000,
+            "httpOnly": True,
+            "sameSite": "Lax",
+        }
+    )
+
+    assert cookie.name == "_lv3_ops_portal_proxy"
+    assert cookie.value == "proxy-session"
+    assert cookie.domain == ".lv3.org"
+    assert cookie.path == "/"
+    assert cookie.secure is True
+    assert cookie.expires == 1_900_000_000
+    assert cookie.discard is False
+    assert cookie._rest == {"HttpOnly": True, "SameSite": "Lax"}
+
+
 def test_assert_page_requires_keycloak_login_raises_when_form_never_appears() -> None:
     class FakeTimeoutError(Exception):
         pass
@@ -136,59 +160,57 @@ def test_assert_page_requires_keycloak_login_raises_when_form_never_appears() ->
 
 def test_wait_for_logged_out_destination_confirms_keycloak_prompt() -> None:
     expected_url = "https://ops.lv3.org/.well-known/lv3/session/logged-out"
-
-    class FakeTimeoutError(Exception):
-        pass
-
-    class FakeBodyLocator:
-        def __init__(self, page) -> None:  # noqa: ANN001
-            self.page = page
-
-        def inner_text(self, timeout: int) -> str:
-            assert timeout == 1_000
-            if self.page.confirm_clicked:
-                return "You are logged out"
-            return "LV3 CONTROL PLANE\nDo you want to log out?\n"
-
-    class FakeSubmitLocator:
-        def __init__(self, page) -> None:  # noqa: ANN001
-            self.page = page
-
-        @property
-        def first(self):  # noqa: ANN201
-            return self
-
-        def click(self, timeout: int) -> None:
-            assert timeout == 1_000
-            self.page.confirm_clicked = True
-            self.page.url = expected_url
+    calls: list[int] = []
 
     class FakePage:
         def __init__(self) -> None:
             self.url = "https://sso.lv3.org/realms/lv3/protocol/openid-connect/logout?client_id=outline"
-            self.confirm_clicked = False
 
         def locator(self, selector: str):  # noqa: ANN201
-            if selector == "body":
-                return FakeBodyLocator(self)
-            if selector == 'input[type="submit"], button[type="submit"]':
-                return FakeSubmitLocator(self)
-            raise AssertionError(f"unexpected selector: {selector}")
+            assert selector == "body"
+
+            class FakeBodyLocator:
+                def inner_text(self, timeout: int) -> str:
+                    assert timeout == 1_000
+                    return "LV3 CONTROL PLANE\nDo you want to log out?\n"
+
+            return FakeBodyLocator()
 
         def wait_for_timeout(self, timeout: int) -> None:
             assert timeout == 500
 
-    page = FakePage()
+    def fake_submit_keycloak_logout_confirmation(page: object, *, timeout_milliseconds: int):  # type: ignore[no-untyped-def]
+        assert isinstance(page, FakePage)
+        assert timeout_milliseconds == 1_000
+        calls.append(timeout_milliseconds)
+        page.url = expected_url
+        return session_logout_verify.ResponseSnapshot(
+            status_code=200,
+            final_url=expected_url,
+            headers={},
+            body="Signed out",
+        )
 
-    session_logout_verify.wait_for_logged_out_destination(
-        page,
-        expected_url=expected_url,
-        timeout_milliseconds=1_000,
-        playwright_timeout_error=FakeTimeoutError,
+    page = FakePage()
+    monkeypatch = pytest.MonkeyPatch()
+    monkeypatch.setattr(
+        session_logout_verify,
+        "submit_keycloak_logout_confirmation",
+        fake_submit_keycloak_logout_confirmation,
     )
 
-    assert page.confirm_clicked is True
+    try:
+        session_logout_verify.wait_for_logged_out_destination(
+            page,
+            expected_url=expected_url,
+            timeout_milliseconds=1_000,
+            playwright_timeout_error=RuntimeError,
+        )
+    finally:
+        monkeypatch.undo()
+
     assert page.url == expected_url
+    assert calls == [1_000]
 
 
 def test_authenticate_keycloak_session_accepts_existing_sso_session(monkeypatch: pytest.MonkeyPatch) -> None:

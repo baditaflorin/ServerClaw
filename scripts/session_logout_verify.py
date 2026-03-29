@@ -194,6 +194,64 @@ def cookie_to_playwright_cookie(cookie: cookiejar.Cookie) -> dict[str, object]:
     return playwright_cookie
 
 
+def playwright_cookie_to_cookie(cookie: dict[str, object]) -> cookiejar.Cookie:
+    expires = cookie.get("expires")
+    expires_value = int(expires) if expires not in (-1, None) else None
+    return cookiejar.Cookie(
+        version=0,
+        name=str(cookie["name"]),
+        value=str(cookie["value"]),
+        port=None,
+        port_specified=False,
+        domain=str(cookie["domain"]),
+        domain_specified=True,
+        domain_initial_dot=str(cookie["domain"]).startswith("."),
+        path=str(cookie.get("path", "/")),
+        path_specified=True,
+        secure=bool(cookie.get("secure", False)),
+        expires=expires_value,
+        discard=expires_value is None,
+        comment=None,
+        comment_url=None,
+        rest={
+            "HttpOnly": cookie.get("httpOnly", False),
+            "SameSite": cookie.get("sameSite"),
+        },
+        rfc2109=False,
+    )
+
+
+def submit_keycloak_logout_confirmation(
+    page,  # noqa: ANN001 - imported lazily from Playwright
+    *,
+    timeout_milliseconds: int,
+) -> ResponseSnapshot:
+    # Headless Playwright clicks do not reliably advance the Keycloak logout form,
+    # so submit the exact live form over HTTP and then sync the resulting cookie
+    # state back into the browser context before resuming browser assertions.
+    form_state = page.locator("form").evaluate(
+        "form => ({ action: form.action, method: form.method || 'POST', "
+        "body: new URLSearchParams(new FormData(form)).toString() })"
+    )
+    jar = cookiejar.CookieJar()
+    for browser_cookie in page.context.cookies():
+        jar.set_cookie(playwright_cookie_to_cookie(browser_cookie))
+    snapshot = fetch_response(
+        build_opener(jar, follow_redirects=True),
+        form_state["action"],
+        method=str(form_state["method"]).upper(),
+        data=str(form_state["body"]).encode("utf-8"),
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        timeout_seconds=timeout_milliseconds / 1000,
+    )
+    page.context.clear_cookies()
+    remaining_cookies = [cookie_to_playwright_cookie(cookie) for cookie in jar]
+    if remaining_cookies:
+        page.context.add_cookies(remaining_cookies)
+    page.goto(snapshot.final_url, wait_until="domcontentloaded", timeout=timeout_milliseconds)
+    return snapshot
+
+
 def load_playwright_sync_api():
     try:
         from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
@@ -247,7 +305,7 @@ def wait_for_logged_out_destination(
     *,
     expected_url: str,
     timeout_milliseconds: int,
-    playwright_timeout_error,
+    playwright_timeout_error,  # noqa: ANN001
 ) -> None:
     deadline = time.monotonic() + (timeout_milliseconds / 1000)
     while time.monotonic() < deadline:
@@ -256,12 +314,15 @@ def wait_for_logged_out_destination(
             return
         body = page.locator("body").inner_text(timeout=timeout_milliseconds)
         if keycloak_logout_confirmation_present(current_url, body):
-            try:
-                page.locator('input[type="submit"], button[type="submit"]').first.click(
-                    timeout=timeout_milliseconds
+            snapshot = submit_keycloak_logout_confirmation(
+                page,
+                timeout_milliseconds=timeout_milliseconds,
+            )
+            if normalize_url(snapshot.final_url) != normalize_url(expected_url):
+                raise VerificationError(
+                    f"Keycloak logout confirmation should finish on {expected_url}, "
+                    f"landed on {snapshot.final_url}"
                 )
-            except playwright_timeout_error as exc:
-                raise VerificationError("Keycloak logout confirmation did not expose a submit control") from exc
         page.wait_for_timeout(500)
     raise VerificationError(f"Outline logout should finish on {expected_url}, landed on {page.url}")
 
