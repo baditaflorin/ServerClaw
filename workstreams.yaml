@@ -3689,6 +3689,31 @@ workstreams:
             - docs/adr/.index.yaml
           mode: shared_contract
           contract: adr-index-generator-v1
+        - id: adr_0269_shared_runtime_contracts
+          paths:
+            - Makefile
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
+            - config/windmill/scripts/gate-status.py
+            - docs/runbooks/configure-windmill.md
+            - docs/runbooks/environment-promotion-pipeline.md
+            - policy/decisions/release_promotion.rego
+            - policy/tests/release_promotion_test.rego
+            - receipts/ops-portal-snapshot.html
+            - scripts/gate_status.py
+            - scripts/promotion_pipeline.py
+            - tests/test_compose_runtime_secret_injection.py
+            - tests/test_container_image_policy.py
+            - tests/test_openbao_compose_env_helper.py
+            - tests/test_promotion_pipeline.py
+            - tests/test_security_posture_report.py
+            - tests/test_validation_gate.py
+            - tests/test_vulnerability_budget.py
+            - tests/test_windmill_operator_admin_app.py
+          mode: shared_contract
+          contract: adr-0269-shared-runtime-v1
         - id: adr_0269_live_evidence
           paths:
             - receipts/security-reports/20260329T*.json
