@@ -1706,6 +1706,8 @@ workstreams:
       - config/image-catalog.json
       - config/command-catalog.json
       - config/workflow-catalog.json
+      - config/ansible-execution-scopes.yaml
+      - config/ansible-role-idempotency.yml
       - config/prometheus/file_sd/slo_targets.yml
       - config/prometheus/rules/slo_alerts.yml
       - config/prometheus/rules/slo_rules.yml
@@ -1759,12 +1761,14 @@ workstreams:
           contract: runtime-topology-and-entrypoints-v1
         - id: openfga_validation_contract
           paths:
+            - config/ansible-execution-scopes.yaml
+            - config/ansible-role-idempotency.yml
             - config/prometheus/file_sd/slo_targets.yml
             - config/prometheus/rules/slo_alerts.yml
             - config/prometheus/rules/slo_rules.yml
             - config/grafana/dashboards/slo-overview.json
           mode: shared_contract
-          contract: slo-generation-contract-v1
+          contract: repo-validation-and-slo-generation-contract-v1
         - id: openfga_keycloak_runtime_contract
           paths:
             - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml

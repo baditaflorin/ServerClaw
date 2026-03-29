@@ -54,6 +54,8 @@
 - `config/image-catalog.json`
 - `config/command-catalog.json`
 - `config/workflow-catalog.json`
+- `config/ansible-execution-scopes.yaml`
+- `config/ansible-role-idempotency.yml`
 - `config/grafana/dashboards/openfga.json`
 - `config/alertmanager/rules/openfga.yml`
 - `docs/runbooks/configure-openfga.md`
