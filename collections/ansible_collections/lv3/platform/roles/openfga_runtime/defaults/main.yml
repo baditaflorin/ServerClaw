@@ -1,0 +1,33 @@
+---
+openfga_image: "{{ container_image_catalog.images.openfga_runtime.ref }}"
+openfga_container_name: lv3-openfga
+openfga_site_dir: /opt/openfga
+openfga_secret_dir: /etc/lv3/openfga
+openfga_compose_file: "{{ openfga_site_dir }}/docker-compose.yml"
+openfga_env_file: "{{ compose_runtime_secret_root }}/openfga/runtime.env"
+openfga_legacy_env_file: "{{ openfga_site_dir }}/openfga.env"
+openfga_openbao_agent_dir: "{{ openfga_site_dir }}/openbao"
+openfga_openbao_agent_image: "{{ openbao_agent_image }}"
+openfga_openbao_agent_container_name: openfga-openbao-agent
+openfga_openbao_secret_path: services/openfga/runtime-env
+openfga_openbao_policy_name: lv3-service-openfga-runtime
+openfga_openbao_approle_name: openfga-runtime
+openfga_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga
+openfga_database_name: openfga
+openfga_database_user: openfga
+openfga_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+openfga_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/database-password.txt
+openfga_preshared_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/preshared-key.txt
+openfga_internal_http_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.openfga_http_port }}"
+openfga_internal_grpc_port: 8097
+openfga_controller_url: >-
+  http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{
+    hostvars['proxmox_florin'].platform_port_assignments.openfga_host_proxy_port
+  }}
+openfga_local_url: "http://127.0.0.1:{{ openfga_internal_http_port }}"
+openfga_http_addr: "0.0.0.0:{{ openfga_internal_http_port }}"
+openfga_grpc_addr: "127.0.0.1:{{ openfga_internal_grpc_port }}"
+openfga_datastore_uri: >-
+  postgresql://{{ openfga_database_user }}:{{ openfga_database_password }}@{{
+    openfga_database_host
+  }}:5432/{{ openfga_database_name }}?sslmode=disable

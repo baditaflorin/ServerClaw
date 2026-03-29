@@ -505,6 +505,120 @@ groups:
           slo_id: harbor-availability
           service_id: harbor
           indicator: availability
+      - record: slo:openfga_availability:success_ratio_5m
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="openfga-availability"}[5m])
+        labels:
+          slo_id: openfga-availability
+          service_id: openfga
+          indicator: availability
+      - record: slo:openfga_availability:success_ratio_1h
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="openfga-availability"}[1h])
+        labels:
+          slo_id: openfga-availability
+          service_id: openfga
+          indicator: availability
+      - record: slo:openfga_availability:success_ratio_30d
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="openfga-availability"}[30d])
+        labels:
+          slo_id: openfga-availability
+          service_id: openfga
+          indicator: availability
+      - record: slo:openfga_availability:error_rate_5m
+        expr: 1 - slo:openfga_availability:success_ratio_5m
+        labels:
+          slo_id: openfga-availability
+          service_id: openfga
+          indicator: availability
+      - record: slo:openfga_availability:error_rate_1h
+        expr: 1 - slo:openfga_availability:success_ratio_1h
+        labels:
+          slo_id: openfga-availability
+          service_id: openfga
+          indicator: availability
+      - record: slo:openfga_availability:error_rate_30d
+        expr: 1 - slo:openfga_availability:success_ratio_30d
+        labels:
+          slo_id: openfga-availability
+          service_id: openfga
+          indicator: availability
+      - record: slo:openfga_availability:budget_remaining
+        expr: clamp_min(1 - (slo:openfga_availability:error_rate_30d / 0.005000),
+          0)
+        labels:
+          slo_id: openfga-availability
+          service_id: openfga
+          indicator: availability
+      - record: slo:openfga_availability:burn_rate_1h
+        expr: slo:openfga_availability:error_rate_1h / 0.005000
+        labels:
+          slo_id: openfga-availability
+          service_id: openfga
+          indicator: availability
+      - record: slo:openfga_availability:time_to_budget_exhaustion_days
+        expr: (slo:openfga_availability:budget_remaining * 30) / clamp_min(slo:openfga_availability:burn_rate_1h,
+          0.001)
+        labels:
+          slo_id: openfga-availability
+          service_id: openfga
+          indicator: availability
+      - record: slo:openfga_latency:success_ratio_5m
+        expr: avg_over_time((probe_duration_seconds{job="slo-blackbox",slo_id="openfga-latency"}
+          < bool 0.5)[5m:])
+        labels:
+          slo_id: openfga-latency
+          service_id: openfga
+          indicator: latency
+      - record: slo:openfga_latency:success_ratio_1h
+        expr: avg_over_time((probe_duration_seconds{job="slo-blackbox",slo_id="openfga-latency"}
+          < bool 0.5)[1h:])
+        labels:
+          slo_id: openfga-latency
+          service_id: openfga
+          indicator: latency
+      - record: slo:openfga_latency:success_ratio_30d
+        expr: avg_over_time((probe_duration_seconds{job="slo-blackbox",slo_id="openfga-latency"}
+          < bool 0.5)[30d:])
+        labels:
+          slo_id: openfga-latency
+          service_id: openfga
+          indicator: latency
+      - record: slo:openfga_latency:error_rate_5m
+        expr: 1 - slo:openfga_latency:success_ratio_5m
+        labels:
+          slo_id: openfga-latency
+          service_id: openfga
+          indicator: latency
+      - record: slo:openfga_latency:error_rate_1h
+        expr: 1 - slo:openfga_latency:success_ratio_1h
+        labels:
+          slo_id: openfga-latency
+          service_id: openfga
+          indicator: latency
+      - record: slo:openfga_latency:error_rate_30d
+        expr: 1 - slo:openfga_latency:success_ratio_30d
+        labels:
+          slo_id: openfga-latency
+          service_id: openfga
+          indicator: latency
+      - record: slo:openfga_latency:budget_remaining
+        expr: clamp_min(1 - (slo:openfga_latency:error_rate_30d / 0.050000), 0)
+        labels:
+          slo_id: openfga-latency
+          service_id: openfga
+          indicator: latency
+      - record: slo:openfga_latency:burn_rate_1h
+        expr: slo:openfga_latency:error_rate_1h / 0.050000
+        labels:
+          slo_id: openfga-latency
+          service_id: openfga
+          indicator: latency
+      - record: slo:openfga_latency:time_to_budget_exhaustion_days
+        expr: (slo:openfga_latency:budget_remaining * 30) / clamp_min(slo:openfga_latency:burn_rate_1h,
+          0.001)
+        labels:
+          slo_id: openfga-latency
+          service_id: openfga
+          indicator: latency
       - record: slo:langfuse_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="langfuse-availability"}[5m])
         labels:

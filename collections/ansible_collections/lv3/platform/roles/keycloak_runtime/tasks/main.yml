@@ -789,6 +789,52 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
 
+    - name: Ensure the ServerClaw operator CLI client exists
+      community.general.keycloak_client:
+        realm: "{{ keycloak_realm_name }}"
+        client_id: "{{ keycloak_serverclaw_operator_client_id }}"
+        name: ServerClaw Operator CLI
+        description: Repo-managed confidential client for approved ServerClaw operator password-grant flows.
+        enabled: true
+        protocol: openid-connect
+        public_client: false
+        client_authenticator_type: client-secret
+        standard_flow_enabled: false
+        implicit_flow_enabled: false
+        direct_access_grants_enabled: true
+        service_accounts_enabled: false
+        full_scope_allowed: true
+        state: present
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+
+    - name: Ensure the ServerClaw runtime client exists
+      community.general.keycloak_client:
+        realm: "{{ keycloak_realm_name }}"
+        client_id: "{{ keycloak_serverclaw_runtime_client_id }}"
+        name: ServerClaw Runtime
+        description: Repo-managed confidential client for ServerClaw runtime client-credentials flows.
+        enabled: true
+        protocol: openid-connect
+        public_client: false
+        client_authenticator_type: client-secret
+        standard_flow_enabled: false
+        implicit_flow_enabled: false
+        direct_access_grants_enabled: false
+        service_accounts_enabled: true
+        full_scope_allowed: true
+        state: present
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+
     - name: Ensure realm roles are mapped to service account users
       community.general.keycloak_user_rolemapping:
         realm: "{{ keycloak_realm_name }}"
@@ -896,6 +942,32 @@
       register: keycloak_api_gateway_client_secret_info
       no_log: true
 
+    - name: Read the ServerClaw operator CLI client secret
+      community.general.keycloak_clientsecret_info:
+        realm: "{{ keycloak_realm_name }}"
+        client_id: "{{ keycloak_serverclaw_operator_client_id }}"
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+      register: keycloak_serverclaw_operator_client_secret_info
+      no_log: true
+
+    - name: Read the ServerClaw runtime client secret
+      community.general.keycloak_clientsecret_info:
+        realm: "{{ keycloak_realm_name }}"
+        client_id: "{{ keycloak_serverclaw_runtime_client_id }}"
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+      register: keycloak_serverclaw_runtime_client_secret_info
+      no_log: true
+
 - name: Record the Keycloak client secrets
   ansible.builtin.set_fact:
     keycloak_grafana_client_secret: "{{ keycloak_grafana_client_secret_info.clientsecret_info.value }}"
@@ -905,6 +977,8 @@
     keycloak_langfuse_client_secret: "{{ keycloak_langfuse_client_secret_info.clientsecret_info.value }}"
     keycloak_outline_client_secret: "{{ keycloak_outline_client_secret_info.clientsecret_info.value }}"
     keycloak_api_gateway_client_secret: "{{ keycloak_api_gateway_client_secret_info.clientsecret_info.value }}"
+    keycloak_serverclaw_operator_client_secret: "{{ keycloak_serverclaw_operator_client_secret_info.clientsecret_info.value }}"
+    keycloak_serverclaw_runtime_client_secret: "{{ keycloak_serverclaw_runtime_client_secret_info.clientsecret_info.value }}"
   no_log: true
 
 - name: Mirror the Grafana client secret to the control machine
@@ -965,6 +1039,24 @@
   ansible.builtin.copy:
     dest: "{{ keycloak_api_gateway_client_secret_local_file }}"
     content: "{{ keycloak_api_gateway_client_secret }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror the ServerClaw operator CLI client secret to the control machine
+  ansible.builtin.copy:
+    dest: "{{ keycloak_serverclaw_operator_client_secret_local_file }}"
+    content: "{{ keycloak_serverclaw_operator_client_secret }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror the ServerClaw runtime client secret to the control machine
+  ansible.builtin.copy:
+    dest: "{{ keycloak_serverclaw_runtime_client_secret_local_file }}"
+    content: "{{ keycloak_serverclaw_runtime_client_secret }}\n"
     mode: "0600"
   delegate_to: localhost
   become: false
@@ -1414,11 +1506,47 @@
   changed_when: false
   no_log: true
 
-- name: Assert Keycloak endpoints and agent credentials are working
+- name: Request the ServerClaw operator password-grant token
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/realms/{{ keycloak_realm_name }}/protocol/openid-connect/token"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      grant_type: password
+      client_id: "{{ keycloak_serverclaw_operator_client_id }}"
+      client_secret: "{{ keycloak_serverclaw_operator_client_secret }}"
+      username: "{{ keycloak_operator_username }}"
+      password: "{{ keycloak_operator_password }}"
+    return_content: true
+    status_code: 200
+  register: keycloak_serverclaw_operator_token
+  changed_when: false
+  no_log: true
+
+- name: Request the ServerClaw runtime client-credentials token
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/realms/{{ keycloak_realm_name }}/protocol/openid-connect/token"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      grant_type: client_credentials
+      client_id: "{{ keycloak_serverclaw_runtime_client_id }}"
+      client_secret: "{{ keycloak_serverclaw_runtime_client_secret }}"
+    return_content: true
+    status_code: 200
+  register: keycloak_serverclaw_runtime_token
+  changed_when: false
+  no_log: true
+
+- name: Assert Keycloak endpoints and automation credentials are working
   ansible.builtin.assert:
     that:
       - keycloak_realm_openid_config.json.issuer == keycloak_public_base_url ~ '/realms/' ~ keycloak_realm_name
       - (keycloak_agent_token.json.access_token | default('')) | length > 0
       - keycloak_agent_token.json.token_type == 'Bearer'
-    fail_msg: "Keycloak answered locally, but the realm metadata or agent client credentials did not validate."
+      - (keycloak_serverclaw_operator_token.json.access_token | default('')) | length > 0
+      - keycloak_serverclaw_operator_token.json.token_type == 'Bearer'
+      - (keycloak_serverclaw_runtime_token.json.access_token | default('')) | length > 0
+      - keycloak_serverclaw_runtime_token.json.token_type == 'Bearer'
+    fail_msg: "Keycloak answered locally, but the repo-managed ServerClaw credentials or existing agent client credentials did not validate."
   no_log: true

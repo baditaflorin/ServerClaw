@@ -10,6 +10,7 @@ It covers:
 - Keycloak runtime deployment on `docker-runtime-lv3`
 - public DNS and edge publication at `https://sso.lv3.org`
 - repo-managed realm, groups, initial named operator account, and confidential clients
+- repo-managed confidential clients for delegated ServerClaw authorization bootstrap and runtime verification
 - repo-managed post-logout redirect URI contracts for `ops-portal-oauth`, `grafana-oauth`, and `outline`
 - repo-managed realm SMTP settings for password resets and required-action mail through `lv3-mail-stalwart:1587` on the shared mail Docker network, with STARTTLS disabled
 - Grafana OIDC configuration against the shared Keycloak broker
@@ -43,6 +44,8 @@ The workflow manages these live surfaces:
 - confidential OIDC client `grafana-oauth`
 - shared logout authority return paths rooted at `https://ops.lv3.org/.well-known/lv3/session/`
 - confidential agent client `lv3-agent-hub`
+- confidential delegated-auth bootstrap client `serverclaw-operator-cli`
+- confidential delegated-auth runtime client `serverclaw-runtime`
 - Grafana generic OAuth redirect path at `https://grafana.lv3.org/login/generic_oauth`
 
 ## Generated Local Artifacts
@@ -54,6 +57,8 @@ After a successful converge, these controller-local files should exist:
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/florin.badita-password.txt`
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/grafana-client-secret.txt`
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/lv3-agent-hub-client-secret.txt`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-operator-client-secret.txt`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-runtime-client-secret.txt`
 
 Treat the entire `.local/keycloak/` subtree as recovery material and keep it out of git.
 
@@ -68,6 +73,8 @@ Run these checks after converge:
 5. `curl -s --data "grant_type=client_credentials&client_id=lv3-agent-hub&client_secret=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/lv3-agent-hub-client-secret.txt)" https://sso.lv3.org/realms/lv3/protocol/openid-connect/token`
 6. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker exec keycloak-keycloak-1 getent ahostsv4 lv3-mail-stalwart && docker exec keycloak-keycloak-1 /bin/bash -lc '"'"'"'"'"'"'"'"'timeout 15 bash -lc "exec 3<>/dev/tcp/lv3-mail-stalwart/1587"'"'"'"'"'"'"'"'"''`
 7. `uv run --with playwright python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/session_logout_verify.py --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline.automation-password.txt`
+8. `curl -s --data "grant_type=password&client_id=serverclaw-operator-cli&client_secret=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-operator-client-secret.txt)&username=florin.badita&password=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/florin.badita-password.txt)" https://sso.lv3.org/realms/lv3/protocol/openid-connect/token`
+9. `curl -s --data "grant_type=client_credentials&client_id=serverclaw-runtime&client_secret=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-runtime-client-secret.txt)" https://sso.lv3.org/realms/lv3/protocol/openid-connect/token`
 
 ## TOTP Recovery
 

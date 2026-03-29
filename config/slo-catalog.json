@@ -95,6 +95,27 @@
       "description": "Harbor remains reachable through the shared LV3 edge for image pulls, pushes, and operator access."
     },
     {
+      "id": "openfga-availability",
+      "service_id": "openfga",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "http://100.64.0.1:8014/healthz",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The private OpenFGA controller endpoint remains reachable for delegated authorization queries and bootstrap replay."
+    },
+    {
+      "id": "openfga-latency",
+      "service_id": "openfga",
+      "indicator": "latency",
+      "objective_percent": 95.0,
+      "window_days": 30,
+      "target_url": "http://100.64.0.1:8014/healthz",
+      "probe_module": "http_2xx_follow_redirects",
+      "latency_threshold_ms": 500,
+      "description": "The private OpenFGA controller endpoint responds in under 500ms for 95% of probes."
+    },
+    {
       "id": "langfuse-availability",
       "service_id": "langfuse",
       "indicator": "availability",

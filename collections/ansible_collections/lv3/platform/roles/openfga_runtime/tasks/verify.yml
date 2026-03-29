@@ -1,0 +1,29 @@
+---
+- name: Verify OpenFGA responds on the local health endpoint
+  ansible.builtin.uri:
+    url: "{{ openfga_local_url }}/healthz"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: openfga_verify_health
+  changed_when: false
+
+- name: Verify the OpenFGA API enforces the repo-managed preshared key
+  ansible.builtin.uri:
+    url: "{{ openfga_local_url }}/stores"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ openfga_preshared_key }}"
+    return_content: true
+    status_code: 200
+  register: openfga_verify_authenticated_api
+  changed_when: false
+  no_log: true
+
+- name: Assert OpenFGA health and authenticated access are working
+  ansible.builtin.assert:
+    that:
+      - openfga_verify_health.content | trim == 'ok'
+      - openfga_verify_authenticated_api.status == 200
+    fail_msg: "OpenFGA answered locally, but the authenticated API path did not validate."
+  no_log: true

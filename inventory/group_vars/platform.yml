@@ -95,6 +95,11 @@ platform_host:
         listen_port: 8200
         upstream_host: 10.10.10.20
         upstream_port: 8200
+      - name: openfga
+        listen_address: 100.64.0.1
+        listen_port: 8014
+        upstream_host: 10.10.10.20
+        upstream_port: 8096
       - name: semaphore
         listen_address: 100.64.0.1
         listen_port: 8020
@@ -143,6 +148,8 @@ platform_ports:
   netdata_port: 19999
   mail_platform_gateway_port: 8081
   ntfy_port: 2586
+  openfga_http_port: 8096
+  openfga_host_proxy_port: 8014
   openbao_http_port: 8201
   openbao_proxy_port: 8200
   semaphore_server_port: 3004
@@ -205,6 +212,8 @@ platform_port_assignments:
   netdata_port: 19999
   mail_platform_gateway_port: 8081
   ntfy_port: 2586
+  openfga_http_port: 8096
+  openfga_host_proxy_port: 8014
   openbao_http_port: 8201
   openbao_proxy_port: 8200
   semaphore_server_port: 3004
@@ -1835,6 +1844,24 @@ platform_service_topology:
     urls:
       internal: https://10.10.10.20:8200
       controller: https://100.64.0.1:8200
+  openfga:
+    service_name: openfga
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8014
+    service_id: openfga
+    ports:
+      internal: 8096
+      controller: 8014
+    urls:
+      internal: http://10.10.10.20:8096
+      controller: http://100.64.0.1:8014
   ntfy:
     service_name: ntfy
     owning_vm: docker-runtime-lv3
@@ -2110,6 +2137,7 @@ platform_management_allowed_tcp_ports:
   - 8004
   - 9443
   - 8200
+  - 8014
   - 8020
   - 8080
   - 8005
@@ -3075,6 +3103,24 @@ public_edge_service_topology:
     urls:
       internal: https://10.10.10.20:8200
       controller: https://100.64.0.1:8200
+  openfga:
+    service_name: openfga
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8014
+    service_id: openfga
+    ports:
+      internal: 8096
+      controller: 8014
+    urls:
+      internal: http://10.10.10.20:8096
+      controller: http://100.64.0.1:8014
   ntfy:
     service_name: ntfy
     owning_vm: docker-runtime-lv3
@@ -3217,6 +3263,9 @@ hetzner_dns_records: *id001
 platform_postgres_host: database.lv3.org
 openbao_postgres_host: 10.10.10.50
 openbao_controller_url: https://100.64.0.1:8200
+openfga_http_port: 8096
+openfga_host_proxy_port: 8014
+openfga_controller_url: http://100.64.0.1:8014
 semaphore_server_port: 3004
 semaphore_host_proxy_port: 8020
 semaphore_private_base_url: http://10.10.10.20:3004
@@ -3269,6 +3318,7 @@ proxmox_management_allowed_tcp_ports:
   - 8004
   - 9443
   - 8200
+  - 8014
   - 8020
   - 8080
   - 8005

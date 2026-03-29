@@ -1,0 +1,43 @@
+services:
+  openbao-agent:
+    image: {{ openfga_openbao_agent_image }}
+    container_name: {{ openfga_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ openfga_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ openfga_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ openfga_env_file | dirname }}:{{ openfga_env_file | dirname }}
+
+  openfga:
+    image: {{ openfga_image }}
+    container_name: {{ openfga_container_name }}
+    restart: unless-stopped
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+    env_file:
+      - {{ openfga_env_file }}
+    command:
+      - run
+      - --playground-enabled=false
+      - --authn-method=preshared
+      - --authn-preshared-keys=${OPENFGA_PRESHARED_KEY}
+      - --datastore-engine=postgres
+      - --datastore-uri=${OPENFGA_DATASTORE_URI}
+      - --http-addr=${OPENFGA_HTTP_ADDR}
+      - --grpc-addr=${OPENFGA_GRPC_ADDR}
+    ports:
+      - "{{ openfga_internal_http_port }}:{{ openfga_internal_http_port }}"

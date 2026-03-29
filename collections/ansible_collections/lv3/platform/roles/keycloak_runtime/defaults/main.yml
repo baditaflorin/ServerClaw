@@ -68,6 +68,10 @@ keycloak_agent_client_id: lv3-agent-hub
 keycloak_agent_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/lv3-agent-hub-client-secret.txt
 keycloak_api_gateway_client_id: api-gateway
 keycloak_api_gateway_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/api-gateway-client-secret.txt
+keycloak_serverclaw_operator_client_id: serverclaw-operator-cli
+keycloak_serverclaw_operator_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-operator-client-secret.txt
+keycloak_serverclaw_runtime_client_id: serverclaw-runtime
+keycloak_serverclaw_runtime_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-runtime-client-secret.txt
 keycloak_langfuse_client_id: langfuse
 keycloak_langfuse_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/langfuse-client-secret.txt
 keycloak_outline_client_id: outline
@@ -106,6 +110,9 @@ keycloak_group_realm_role_mappings:
       - name: platform-operator
 keycloak_service_account_realm_role_mappings:
   - service_account_user_client_id: "{{ keycloak_agent_client_id }}"
+    roles:
+      - name: platform-read
+  - service_account_user_client_id: "{{ keycloak_serverclaw_runtime_client_id }}"
     roles:
       - name: platform-read
 keycloak_public_base_url: "https://{{ keycloak_service_topology.public_hostname }}"

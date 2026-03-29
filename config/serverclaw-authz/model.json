@@ -1,0 +1,254 @@
+{
+  "schema_version": "1.1",
+  "type_definitions": [
+    {
+      "type": "principal"
+    },
+    {
+      "type": "workspace",
+      "relations": {
+        "owner": {
+          "this": {}
+        },
+        "assistant": {
+          "this": {}
+        }
+      },
+      "metadata": {
+        "relations": {
+          "owner": {
+            "directly_related_user_types": [
+              {
+                "type": "principal"
+              }
+            ]
+          },
+          "assistant": {
+            "directly_related_user_types": [
+              {
+                "type": "assistant"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "assistant",
+      "relations": {
+        "member_of": {
+          "this": {}
+        },
+        "runtime": {
+          "this": {}
+        },
+        "skill": {
+          "this": {}
+        },
+        "actor": {
+          "union": {
+            "child": [
+              {
+                "computedUserset": {
+                  "relation": "runtime"
+                }
+              },
+              {
+                "tupleToUserset": {
+                  "tupleset": {
+                    "relation": "member_of"
+                  },
+                  "computedUserset": {
+                    "relation": "owner"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "metadata": {
+        "relations": {
+          "member_of": {
+            "directly_related_user_types": [
+              {
+                "type": "workspace"
+              }
+            ]
+          },
+          "runtime": {
+            "directly_related_user_types": [
+              {
+                "type": "principal"
+              }
+            ]
+          },
+          "skill": {
+            "directly_related_user_types": [
+              {
+                "type": "skill"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "skill",
+      "relations": {
+        "delegate": {
+          "this": {}
+        },
+        "connector": {
+          "this": {}
+        },
+        "can_execute": {
+          "tupleToUserset": {
+            "tupleset": {
+              "relation": "delegate"
+            },
+            "computedUserset": {
+              "relation": "actor"
+            }
+          }
+        }
+      },
+      "metadata": {
+        "relations": {
+          "delegate": {
+            "directly_related_user_types": [
+              {
+                "type": "assistant"
+              }
+            ]
+          },
+          "connector": {
+            "directly_related_user_types": [
+              {
+                "type": "connector"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "connector",
+      "relations": {
+        "delegate": {
+          "this": {}
+        },
+        "data_scope": {
+          "this": {}
+        },
+        "can_call": {
+          "tupleToUserset": {
+            "tupleset": {
+              "relation": "delegate"
+            },
+            "computedUserset": {
+              "relation": "can_execute"
+            }
+          }
+        }
+      },
+      "metadata": {
+        "relations": {
+          "delegate": {
+            "directly_related_user_types": [
+              {
+                "type": "skill"
+              }
+            ]
+          },
+          "data_scope": {
+            "directly_related_user_types": [
+              {
+                "type": "data_scope"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "data_scope",
+      "relations": {
+        "delegate": {
+          "this": {}
+        },
+        "can_read": {
+          "tupleToUserset": {
+            "tupleset": {
+              "relation": "delegate"
+            },
+            "computedUserset": {
+              "relation": "can_call"
+            }
+          }
+        }
+      },
+      "metadata": {
+        "relations": {
+          "delegate": {
+            "directly_related_user_types": [
+              {
+                "type": "connector"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "channel",
+      "relations": {
+        "assistant_sender": {
+          "this": {}
+        },
+        "assistant_receiver": {
+          "this": {}
+        },
+        "can_send": {
+          "tupleToUserset": {
+            "tupleset": {
+              "relation": "assistant_sender"
+            },
+            "computedUserset": {
+              "relation": "actor"
+            }
+          }
+        },
+        "can_receive": {
+          "tupleToUserset": {
+            "tupleset": {
+              "relation": "assistant_receiver"
+            },
+            "computedUserset": {
+              "relation": "actor"
+            }
+          }
+        }
+      },
+      "metadata": {
+        "relations": {
+          "assistant_sender": {
+            "directly_related_user_types": [
+              {
+                "type": "assistant"
+              }
+            ]
+          },
+          "assistant_receiver": {
+            "directly_related_user_types": [
+              {
+                "type": "assistant"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "conditions": {}
+}

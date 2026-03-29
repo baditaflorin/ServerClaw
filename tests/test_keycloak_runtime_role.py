@@ -24,6 +24,14 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_mail_platform_docker_network_name"] == "mail-platform_default"
     assert defaults["keycloak_langfuse_client_id"] == "langfuse"
     assert defaults["keycloak_langfuse_client_secret_local_file"].endswith("/.local/keycloak/langfuse-client-secret.txt")
+    assert defaults["keycloak_serverclaw_operator_client_id"] == "serverclaw-operator-cli"
+    assert defaults["keycloak_serverclaw_operator_client_secret_local_file"].endswith(
+        "/.local/keycloak/serverclaw-operator-client-secret.txt"
+    )
+    assert defaults["keycloak_serverclaw_runtime_client_id"] == "serverclaw-runtime"
+    assert defaults["keycloak_serverclaw_runtime_client_secret_local_file"].endswith(
+        "/.local/keycloak/serverclaw-runtime-client-secret.txt"
+    )
     assert defaults["keycloak_outline_automation_username"] == "outline.automation"
     assert defaults["keycloak_outline_automation_password_local_file"].endswith("/.local/keycloak/outline.automation-password.txt")
     assert defaults["keycloak_ops_portal_post_logout_redirect_uris"] == [
@@ -263,3 +271,53 @@ def test_role_manages_the_outline_automation_identity() -> None:
     assert automation_user_task["ansible.builtin.uri"]["body"]["username"] == "{{ keycloak_outline_automation_username }}"
     assert automation_user_task["ansible.builtin.uri"]["body"]["requiredActions"] == []
     assert automation_password_task["ansible.builtin.uri"]["body"]["temporary"] is False
+
+
+def test_role_manages_serverclaw_clients_and_verifies_tokens() -> None:
+    tasks = load_tasks()
+    realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
+    operator_client_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Ensure the ServerClaw operator CLI client exists"
+    )
+    runtime_client_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Ensure the ServerClaw runtime client exists"
+    )
+    read_operator_secret_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Read the ServerClaw operator CLI client secret"
+    )
+    read_runtime_secret_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Read the ServerClaw runtime client secret"
+    )
+    mirror_operator_secret_task = next(
+        task for task in tasks if task.get("name") == "Mirror the ServerClaw operator CLI client secret to the control machine"
+    )
+    mirror_runtime_secret_task = next(
+        task for task in tasks if task.get("name") == "Mirror the ServerClaw runtime client secret to the control machine"
+    )
+    operator_token_task = next(
+        task for task in tasks if task.get("name") == "Request the ServerClaw operator password-grant token"
+    )
+    runtime_token_task = next(
+        task for task in tasks if task.get("name") == "Request the ServerClaw runtime client-credentials token"
+    )
+    assert_task = next(task for task in tasks if task.get("name") == "Assert Keycloak endpoints and automation credentials are working")
+
+    assert operator_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_serverclaw_operator_client_id }}"
+    assert operator_client_task["community.general.keycloak_client"]["direct_access_grants_enabled"] is True
+    assert operator_client_task["community.general.keycloak_client"]["service_accounts_enabled"] is False
+    assert runtime_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_serverclaw_runtime_client_id }}"
+    assert runtime_client_task["community.general.keycloak_client"]["service_accounts_enabled"] is True
+    assert read_operator_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == (
+        "{{ keycloak_serverclaw_operator_client_id }}"
+    )
+    assert read_runtime_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == (
+        "{{ keycloak_serverclaw_runtime_client_id }}"
+    )
+    assert mirror_operator_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_serverclaw_operator_client_secret_local_file }}"
+    assert mirror_runtime_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_serverclaw_runtime_client_secret_local_file }}"
+    assert operator_token_task["ansible.builtin.uri"]["body"]["grant_type"] == "password"
+    assert operator_token_task["ansible.builtin.uri"]["body"]["client_id"] == "{{ keycloak_serverclaw_operator_client_id }}"
+    assert runtime_token_task["ansible.builtin.uri"]["body"]["grant_type"] == "client_credentials"
+    assert runtime_token_task["ansible.builtin.uri"]["body"]["client_id"] == "{{ keycloak_serverclaw_runtime_client_id }}"
+    assert "keycloak_serverclaw_operator_token.json.access_token" in str(assert_task["ansible.builtin.assert"]["that"])
+    assert "keycloak_serverclaw_runtime_token.json.access_token" in str(assert_task["ansible.builtin.assert"]["that"])

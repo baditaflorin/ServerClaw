@@ -18,6 +18,21 @@
       "notes": "Secret material is retained until explicit deletion or rotation removes the prior value."
     },
     {
+      "id": "openfga-authorization-graph",
+      "service": "openfga",
+      "name": "OpenFGA authorization graph",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "PostgreSQL openfga database on postgres-lv3",
+        "serverclaw-authz store, authorization models, and tuples"
+      ],
+      "notes": "The delegated authorization graph persists named operator and service-principal relationships until the repo-managed bootstrap contract removes or replaces them."
+    },
+    {
       "id": "tls-private-keys",
       "service": "step_ca",
       "name": "TLS private keys",
