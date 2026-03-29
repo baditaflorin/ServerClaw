@@ -675,6 +675,9 @@
       - 404
   loop: "{{ openbao_policy_contents.results }}"
   register: openbao_current_policies
+  retries: 6
+  delay: 2
+  until: openbao_current_policies.status in [200, 404]
   no_log: true
 
 - name: Upsert OpenBao policies

@@ -93,6 +93,15 @@ def test_openbao_runtime_rechecks_seal_state_before_auth_verification() -> None:
     assert "Wait for OpenBao to become active before" in ensure_unsealed_tasks
 
 
+def test_openbao_runtime_retries_policy_reads_during_startup_recovery() -> None:
+    tasks = TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "- name: Read current OpenBao policies" in tasks
+    assert "retries: 6" in tasks
+    assert "delay: 2" in tasks
+    assert "until: openbao_current_policies.status in [200, 404]" in tasks
+
+
 def test_openbao_playbook_refreshes_secret_ids_from_local_artifacts() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text(encoding="utf-8"))
     refresh_play = next(
