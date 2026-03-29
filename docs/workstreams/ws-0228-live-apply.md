@@ -3,10 +3,10 @@
 - ADR: [ADR 0228](../adr/0228-windmill-as-the-default-browser-and-api-operations-surface.md)
 - Title: Make Windmill the default browser-first and API-first surface for repo-managed operations
 - Status: live_applied
-- Implemented In Repo Version: pending merge-to-main
-- Live Applied In Platform Version: 0.130.42
-- Implemented On: pending merge-to-main
-- Live Applied On: 2026-03-28
+- Implemented In Repo Version: 0.177.66
+- Live Applied In Platform Version: 0.130.47
+- Implemented On: 2026-03-29
+- Live Applied On: 2026-03-29
 - Branch: `codex/ws-0228-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0228-live-apply`
 - Owner: codex
@@ -98,8 +98,8 @@
 
 ## Mainline Integration
 
-- the protected integration files are still intentionally unchanged on this workstream branch: `VERSION`, release sections in `changelog.md`, `versions/stack.yaml`, and the top-level README integrated status summary
-- the final main integration step still needs to update ADR 0228 metadata with the official first merged repo version, carry this receipt and verification into the protected release/canonical-truth files, rerun `make validate` after those canonical truth files are refreshed, and push the merged result to `origin/main`
+- the protected release and canonical-truth surfaces are now being refreshed on the dedicated mainline integration branch so ADR 0228 lands as repository version `0.177.66` and platform version `0.130.47`
+- the remaining exact-main integration steps are to record the final mainline receipt, rerun the repo validation gates after the refreshed truth is mirrored into the worker checkout, push the integrated result to `origin/main`, and verify server-resident reconciliation from the updated main branch
 
 ## Notes For The Next Assistant
 

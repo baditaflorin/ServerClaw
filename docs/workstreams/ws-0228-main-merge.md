@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0228](../adr/0228-windmill-as-the-default-browser-and-api-operations-surface.md)
 - Title: Integrate ADR 0228 live apply into `origin/main`
-- Status: in_progress
-- Included In Repo Version: 0.177.64
-- Platform Version Observed During Merge: 0.130.45
+- Status: merged
+- Included In Repo Version: 0.177.66
+- Platform Version Observed During Merge: 0.130.47
 - Release Date: 2026-03-29
 - Branch: `codex/ws-0228-main-merge`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0228-main-merge`
@@ -27,7 +27,7 @@ fully integrated result to `origin/main`.
 - `changelog.md`
 - `RELEASE.md`
 - `docs/release-notes/README.md`
-- `docs/release-notes/0.177.64.md`
+- `docs/release-notes/0.177.66.md`
 - `versions/stack.yaml`
 - `README.md`
 - `build/platform-manifest.json`
@@ -48,6 +48,6 @@ fully integrated result to `origin/main`.
 
 ## Current State
 
-- latest `origin/main` through commit `7c71a5c8` is merged into this worktree branch, and the Windmill conflict surface is resolved with the live-proved hash-backed seeded-script execution path plus stale worker-empty-directory pruning
-- release `0.177.64` is already prepared on this branch with ADR 0228 as the only new canonical changelog entry, while the current platform baseline still reads `0.130.45`
-- the remaining steps before push are the exact-main Windmill replay, the final ADR/workstream/receipt updates, the `platform_version` bump to `0.130.46`, and the post-merge/server-resident reconciliation verification
+- latest `origin/main` through commit `31f963ae` is merged into this worktree branch, including the intervening ADR 0240 and ADR 0232 mainline release surfaces
+- the exact-main Windmill replay from commit `1130f6b01d0a78ae5b8775d1c89fef01cb7de2e0` now completes successfully with the hash-backed seeded-script path, stale worker-directory pruning, and synchronized raw-app lockfile
+- the protected release and canonical-truth surfaces are being refreshed for repository version `0.177.66` and platform version `0.130.47`; the remaining steps are the final receipt, validation reruns, push to `origin/main`, and server-resident reconciliation verification

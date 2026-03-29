@@ -2208,11 +2208,11 @@ workstreams:
             - tests/test_windmill_default_operations_surface.py
           mode: exclusive
     ready_to_merge: true
-    live_applied: false
+    live_applied: true
     canonical_truth:
-      changelog_entry: records ADR 0228 exact-main evidence by making Windmill the default browser-first and API-first operations surface for governed routines, hardening hash-backed seeded-script execution on CE v1.662.0, and pruning stale worker-checkout directories so post-merge validation can complete from the mirrored runtime checkout
+      changelog_entry: records ADR 0228 exact-main evidence on the current mainline by verifying Windmill as the default browser-first and API-first operations surface, hardening seeded script and raw-app synchronization on CE v1.662.0, and refreshing the protected canonical truth after the exact-main replay
       release_bump: patch
-      included_in_repo_version: 0.177.64
+      included_in_repo_version: 0.177.66
   - id: ws-0224-server-resident-ops-adrs
     adr: "0224"
     title: Server-resident operations architecture bundle

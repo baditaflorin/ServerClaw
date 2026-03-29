@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-29'
 total_adrs: 279
 implementation_status_summary:
-  Implemented: 224
+  Implemented: 225
   Partial: 4
-  Not Implemented: 50
+  Not Implemented: 49
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3895,7 +3895,7 @@ adr_index:
   - adr: 0228
     title: Windmill As The Default Browser-And-API Operations Surface
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: automation
     keywords:
@@ -3907,6 +3907,7 @@ adr_index:
       - surface
     summary: We will treat Windmill as the default browser-first and API-first operations
     filename: 0228-windmill-as-the-default-browser-and-api-operations-surface.md
+    implemented_version: 0.177.66
   - adr: 0229
     title: Gitea Actions Runners For On-Platform Validation And Release Preparation
     status: Accepted
