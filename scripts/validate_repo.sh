@@ -537,6 +537,7 @@ validate_health_probes() {
     plane_runtime
     windmill_runtime
     mattermost_runtime
+    matrix_synapse_runtime
     mail_platform_runtime
     nginx_edge_publication
     ntfy_runtime

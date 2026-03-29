@@ -1,0 +1,455 @@
+---
+# Purpose: Converge the Matrix Synapse runtime, bootstrap secrets, and verification flow on docker-runtime-lv3.
+# Use case: Applied when deploying, upgrading, or recovering the repo-managed Matrix Synapse conversation hub.
+#
+# Inputs (required):
+#   - matrix_synapse_site_dir (path, required): Runtime root directory.
+#   - matrix_synapse_data_dir (path, required): Persistent data directory mounted into the Synapse container.
+#   - matrix_synapse_secret_dir (path, required): Guest-side secret directory.
+#   - matrix_synapse_compose_file (path, required): Managed compose file path.
+#   - matrix_synapse_env_file (path, required): Managed runtime environment file path.
+#   - matrix_synapse_homeserver_config_file (path, required): Managed Synapse config path.
+#   - matrix_synapse_port (int, required): Internal Synapse listener port.
+#   - matrix_synapse_internal_base_url (str, required): Guest-local base URL used for verification.
+#   - matrix_synapse_public_base_url (str, required): Public Matrix base URL.
+#   - matrix_synapse_database_password_local_file (path, required): Controller-local database password artifact.
+#   - matrix_synapse_ops_password_local_file (path, required): Controller-local bootstrap admin password artifact.
+#
+# Inputs (optional):
+#   - matrix_synapse_disable_federation (bool, optional, default=true): Whether the listener stays client-only.
+#   - matrix_synapse_trusted_key_servers (list, optional, default=[matrix.org]): Trusted key servers retained for upstream lookup.
+#
+# Outputs:
+#   - Matrix Synapse deployed on docker-runtime-lv3 with repo-managed config, mirrored bootstrap artifacts, and a verified ops admin login.
+#
+# Idempotency: Fully idempotent
+#              Existing passwords, signing material, and bootstrap users are reused when present; repeat runs only reconcile drift.
+#
+# Dependencies:
+#   - ADR 0255: Matrix Synapse As The Canonical ServerClaw Conversation Hub
+#   - Requires: docker_runtime and the Matrix Synapse PostgreSQL converge to have completed first.
+#   - Uses: the shared OpenBao compose env helper for runtime secret delivery.
+#
+# Related ADRs: 0165, 0255
+# Related Runbooks: docs/runbooks/configure-matrix-synapse.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-29
+- name: Validate Matrix Synapse runtime inputs
+  ansible.builtin.assert:
+    that:
+      - matrix_synapse_site_dir | length > 0
+      - matrix_synapse_data_dir | length > 0
+      - matrix_synapse_secret_dir | length > 0
+      - matrix_synapse_compose_file | length > 0
+      - matrix_synapse_env_file | length > 0
+      - matrix_synapse_homeserver_config_file | length > 0
+      - matrix_synapse_image | length > 0
+      - matrix_synapse_container_name | length > 0
+      - matrix_synapse_server_name | length > 0
+      - matrix_synapse_port | int > 0
+      - matrix_synapse_internal_base_url | length > 0
+      - matrix_synapse_public_base_url | length > 0
+      - matrix_synapse_database_host | length > 0
+      - matrix_synapse_database_name | length > 0
+      - matrix_synapse_database_user | length > 0
+      - matrix_synapse_database_password_local_file | length > 0
+      - matrix_synapse_admin_localpart | length > 0
+      - matrix_synapse_admin_user_id | length > 0
+      - matrix_synapse_ops_password_local_file | length > 0
+      - matrix_synapse_registration_shared_secret_local_file | length > 0
+      - matrix_synapse_signing_key_local_file | length > 0
+    fail_msg: >-
+      matrix_synapse_runtime requires compose paths, service URLs, PostgreSQL credentials,
+      and bootstrap secret artifact paths.
+
+- name: Ensure the Matrix Synapse database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ matrix_synapse_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: matrix_synapse_database_password_local
+
+- name: Fail if the Matrix Synapse database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ matrix_synapse_database_password_local_file }} is missing on the control machine.
+      Run the Matrix Synapse PostgreSQL converge first so the runtime can connect to postgres-lv3.
+  when: not matrix_synapse_database_password_local.stat.exists
+
+- name: Ensure the Matrix Synapse runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Matrix Synapse directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ matrix_synapse_site_dir }}"
+      owner: root
+      group: root
+      mode: "0755"
+    - path: "{{ matrix_synapse_data_dir }}"
+      owner: "{{ matrix_synapse_uid }}"
+      group: "{{ matrix_synapse_gid }}"
+      mode: "0755"
+    - path: "{{ matrix_synapse_secret_dir }}"
+      owner: root
+      group: root
+      mode: "0700"
+
+- name: Generate the Matrix Synapse ops password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ matrix_synapse_ops_password_remote_file }}" ]; then
+      umask 077
+      openssl rand -base64 36 | tr -d '\n' > "{{ matrix_synapse_ops_password_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: matrix_synapse_ops_password_generation
+  changed_when: "'changed' in matrix_synapse_ops_password_generation.stdout"
+  no_log: true
+
+- name: Generate the Matrix Synapse registration shared secret
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ matrix_synapse_registration_shared_secret_remote_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ matrix_synapse_registration_shared_secret_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: matrix_synapse_registration_shared_secret_generation
+  changed_when: "'changed' in matrix_synapse_registration_shared_secret_generation.stdout"
+  no_log: true
+
+- name: Generate the Matrix Synapse form secret
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ matrix_synapse_form_secret_remote_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ matrix_synapse_form_secret_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: matrix_synapse_form_secret_generation
+  changed_when: "'changed' in matrix_synapse_form_secret_generation.stdout"
+  no_log: true
+
+- name: Generate the Matrix Synapse macaroon secret key
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ matrix_synapse_macaroon_secret_key_remote_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ matrix_synapse_macaroon_secret_key_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: matrix_synapse_macaroon_secret_key_generation
+  changed_when: "'changed' in matrix_synapse_macaroon_secret_key_generation.stdout"
+  no_log: true
+
+- name: Read the Matrix Synapse ops password
+  ansible.builtin.slurp:
+    src: "{{ matrix_synapse_ops_password_remote_file }}"
+  register: matrix_synapse_ops_password_raw
+  no_log: true
+
+- name: Read the Matrix Synapse registration shared secret
+  ansible.builtin.slurp:
+    src: "{{ matrix_synapse_registration_shared_secret_remote_file }}"
+  register: matrix_synapse_registration_shared_secret_raw
+  no_log: true
+
+- name: Read the Matrix Synapse form secret
+  ansible.builtin.slurp:
+    src: "{{ matrix_synapse_form_secret_remote_file }}"
+  register: matrix_synapse_form_secret_raw
+  no_log: true
+
+- name: Read the Matrix Synapse macaroon secret key
+  ansible.builtin.slurp:
+    src: "{{ matrix_synapse_macaroon_secret_key_remote_file }}"
+  register: matrix_synapse_macaroon_secret_key_raw
+  no_log: true
+
+- name: Record the Matrix Synapse runtime secrets
+  ansible.builtin.set_fact:
+    matrix_synapse_database_password: "{{ lookup('ansible.builtin.file', matrix_synapse_database_password_local_file) | trim }}"
+    matrix_synapse_ops_password: "{{ matrix_synapse_ops_password_raw.content | b64decode | trim }}"
+    matrix_synapse_registration_shared_secret: >-
+      {{ matrix_synapse_registration_shared_secret_raw.content | b64decode | trim }}
+    matrix_synapse_form_secret: "{{ matrix_synapse_form_secret_raw.content | b64decode | trim }}"
+    matrix_synapse_macaroon_secret_key: >-
+      {{ matrix_synapse_macaroon_secret_key_raw.content | b64decode | trim }}
+    matrix_synapse_runtime_secret_payload:
+      MATRIX_SYNAPSE_DATABASE_PASSWORD: >-
+        {{ lookup('ansible.builtin.file', matrix_synapse_database_password_local_file) | trim }}
+  no_log: true
+
+- name: Ensure the local Matrix Synapse artifact directory exists
+  ansible.builtin.file:
+    path: "{{ matrix_synapse_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the Matrix Synapse bootstrap secrets to the control machine
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.content }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  loop:
+    - dest: "{{ matrix_synapse_ops_password_local_file }}"
+      content: "{{ matrix_synapse_ops_password }}"
+    - dest: "{{ matrix_synapse_registration_shared_secret_local_file }}"
+      content: "{{ matrix_synapse_registration_shared_secret }}"
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for Matrix Synapse
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: matrix-synapse
+    common_openbao_compose_env_agent_dir: "{{ matrix_synapse_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ matrix_synapse_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ matrix_synapse_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ matrix_synapse_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ matrix_synapse_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ matrix_synapse_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ matrix_synapse_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ matrix_synapse_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ matrix_synapse_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ matrix_synapse_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ matrix_synapse_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: matrix-synapse.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ matrix_synapse_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ matrix_synapse_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ matrix_synapse_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ matrix_synapse_legacy_env_file }}"
+  no_log: true
+
+- name: Render the Matrix Synapse environment file
+  ansible.builtin.template:
+    src: matrix-synapse.env.j2
+    dest: "{{ matrix_synapse_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the Matrix Synapse compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ matrix_synapse_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Check whether the Matrix Synapse signing key already exists
+  ansible.builtin.stat:
+    path: "{{ matrix_synapse_signing_key_remote_file }}"
+  register: matrix_synapse_signing_key_stat
+
+- name: Check whether the Matrix Synapse generated log config already exists
+  ansible.builtin.stat:
+    path: "{{ matrix_synapse_log_config_file }}"
+  register: matrix_synapse_log_config_stat
+
+- name: Pre-pull the Matrix Synapse image when bootstrap artifacts are missing
+  ansible.builtin.command:
+    argv:
+      - docker
+      - pull
+      - "{{ matrix_synapse_image }}"
+  register: matrix_synapse_initial_pull
+  retries: 3
+  delay: 15
+  until: matrix_synapse_initial_pull.rc == 0
+  changed_when: >-
+    'Downloaded newer image' in matrix_synapse_initial_pull.stdout
+    or 'Pull complete' in matrix_synapse_initial_pull.stdout
+  when:
+    - not matrix_synapse_signing_key_stat.stat.exists
+      or not matrix_synapse_log_config_stat.stat.exists
+
+- name: Generate the initial Matrix Synapse signing material and log config
+  ansible.builtin.command:
+    argv:
+      - docker
+      - run
+      - --rm
+      - -e
+      - "SYNAPSE_SERVER_NAME={{ matrix_synapse_server_name }}"
+      - -e
+      - "SYNAPSE_REPORT_STATS={{ 'yes' if matrix_synapse_report_stats | bool else 'no' }}"
+      - -v
+      - "{{ matrix_synapse_data_dir }}:/data"
+      - "{{ matrix_synapse_image }}"
+      - generate
+  register: matrix_synapse_generate
+  failed_when: false
+  changed_when: >-
+    'Generating config file' in matrix_synapse_generate.stdout
+    or 'Generating signing key file' in matrix_synapse_generate.stdout
+  when:
+    - not matrix_synapse_signing_key_stat.stat.exists
+      or not matrix_synapse_log_config_stat.stat.exists
+
+- name: Recheck whether the Matrix Synapse signing key exists after bootstrap generation
+  ansible.builtin.stat:
+    path: "{{ matrix_synapse_signing_key_remote_file }}"
+  register: matrix_synapse_signing_key_post_generate_stat
+
+- name: Recheck whether the Matrix Synapse generated log config exists after bootstrap generation
+  ansible.builtin.stat:
+    path: "{{ matrix_synapse_log_config_file }}"
+  register: matrix_synapse_log_config_post_generate_stat
+
+- name: Assert Matrix Synapse bootstrap generation produced the required artifacts
+  ansible.builtin.assert:
+    that:
+      - matrix_synapse_generate.rc == 0
+        or (
+          matrix_synapse_signing_key_post_generate_stat.stat.exists
+          and matrix_synapse_log_config_post_generate_stat.stat.exists
+        )
+    fail_msg: >-
+      Matrix Synapse bootstrap generation did not leave the expected signing key and
+      log config artifacts behind.
+  when:
+    - not matrix_synapse_signing_key_stat.stat.exists
+      or not matrix_synapse_log_config_stat.stat.exists
+
+- name: Render the Matrix Synapse homeserver config
+  ansible.builtin.template:
+    src: homeserver.yaml.j2
+    dest: "{{ matrix_synapse_homeserver_config_file }}"
+    owner: "{{ matrix_synapse_uid }}"
+    group: "{{ matrix_synapse_gid }}"
+    mode: "0600"
+  no_log: true
+
+- name: Pull the Matrix Synapse image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ matrix_synapse_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ matrix_synapse_site_dir }}"
+  register: matrix_synapse_pull
+  retries: 3
+  delay: 15
+  until: matrix_synapse_pull.rc == 0
+  changed_when: >-
+    'Pulling' in matrix_synapse_pull.stdout
+    or 'Downloaded newer image' in matrix_synapse_pull.stdout
+    or 'Pull complete' in matrix_synapse_pull.stdout
+
+- name: Start the Matrix Synapse stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ matrix_synapse_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ matrix_synapse_site_dir }}"
+  register: matrix_synapse_up
+  changed_when: >-
+    'Creating' in matrix_synapse_up.stdout
+    or 'Recreating' in matrix_synapse_up.stdout
+    or 'Starting' in matrix_synapse_up.stdout
+
+- name: Wait for Matrix Synapse to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ matrix_synapse_port }}"
+    delay: 0
+    timeout: 240
+
+- name: Wait for the Matrix Synapse client versions endpoint
+  ansible.builtin.uri:
+    url: "{{ matrix_synapse_internal_base_url }}/_matrix/client/versions"
+    method: GET
+    status_code: 200
+  register: matrix_synapse_versions_ready
+  retries: 24
+  delay: 5
+  until: matrix_synapse_versions_ready.status == 200
+  changed_when: false
+
+- name: Ensure the Matrix Synapse ops admin exists
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ matrix_synapse_container_name }}"
+      - register_new_matrix_user
+      - --exists-ok
+      - -u
+      - "{{ matrix_synapse_admin_localpart }}"
+      - -p
+      - "{{ matrix_synapse_ops_password }}"
+      - -a
+      - -c
+      - /data/homeserver.yaml
+      - http://127.0.0.1:8008
+  register: matrix_synapse_admin_registration
+  changed_when: false
+  retries: 6
+  delay: 10
+  until: matrix_synapse_admin_registration.rc == 0
+  no_log: true
+
+- name: Read the Matrix Synapse signing key
+  ansible.builtin.slurp:
+    src: "{{ matrix_synapse_signing_key_remote_file }}"
+  register: matrix_synapse_signing_key_raw
+  no_log: true
+
+- name: Mirror the Matrix Synapse signing key to the control machine
+  ansible.builtin.copy:
+    dest: "{{ matrix_synapse_signing_key_local_file }}"
+    content: "{{ matrix_synapse_signing_key_raw.content | b64decode }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Import the Matrix Synapse verification flow
+  ansible.builtin.import_tasks: verify.yml

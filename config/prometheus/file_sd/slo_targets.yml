@@ -27,17 +27,17 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - https://registry.lv3.org/api/v2.0/ping
+  labels:
+    service_id: harbor
+    slo_id: harbor-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - https://home.lv3.org
   labels:
     service_id: homepage
     slo_id: homepage-availability
-    indicator: availability
-    probe_module: http_2xx_follow_redirects
-- targets:
-    - http://10.10.10.40:19999/api/v1/info
-  labels:
-    service_id: realtime
-    slo_id: realtime-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
@@ -55,17 +55,17 @@
     indicator: latency
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://registry.lv3.org/api/v2.0/ping
-  labels:
-    service_id: harbor
-    slo_id: harbor-availability
-    indicator: availability
-    probe_module: http_2xx_follow_redirects
-- targets:
     - https://langfuse.lv3.org/api/public/health
   labels:
     service_id: langfuse
     slo_id: langfuse-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - https://matrix.lv3.org/_matrix/client/versions
+  labels:
+    service_id: matrix_synapse
+    slo_id: matrix-synapse-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
@@ -97,10 +97,24 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - https://tasks.lv3.org/
+  labels:
+    service_id: plane
+    slo_id: plane-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - http://10.10.10.20:8010/healthz
   labels:
     service_id: platform_context_api
     slo_id: platform-context-api-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - http://10.10.10.40:19999/api/v1/info
+  labels:
+    service_id: realtime
+    slo_id: realtime-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
@@ -136,12 +150,5 @@
   labels:
     service_id: windmill
     slo_id: windmill-availability
-    indicator: availability
-    probe_module: http_2xx_follow_redirects
-- targets:
-    - https://tasks.lv3.org/
-  labels:
-    service_id: plane
-    slo_id: plane-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
