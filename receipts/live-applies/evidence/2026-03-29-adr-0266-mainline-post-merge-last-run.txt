@@ -1,0 +1,127 @@
+docker-runtime-lv3 | CHANGED | rc=0 >>
+{
+  "status": "passed",
+  "source": "windmill-post-merge-local-fallback",
+  "workspace": "/srv/proxmox_florin_server",
+  "manifest": "/srv/proxmox_florin_server/config/validation-gate.json",
+  "executed_at": "2026-03-29T19:37:24.365664+00:00",
+  "runner": {
+    "capability_contract": {
+      "container_runtime": {
+        "engine": "docker",
+        "supported": true
+      },
+      "cpu_architectures": [
+        "x86_64"
+      ],
+      "description": "Worker-side validation runner for the post-merge gate replay from the live mirrored checkout.",
+      "emulation_support": [],
+      "execution_surface": "windmill_worker",
+      "network_reachability_class": "private_worker_checkout",
+      "required_tools": [
+        "docker",
+        "git",
+        "python3",
+        "tar",
+        "uv"
+      ],
+      "scratch_cleanup_guarantee": "worker-local validation writes under the mirrored checkout and falls back to a bounded local subset when registry-backed runner pulls are unavailable",
+      "supported_validation_lanes": [
+        "workstream-surfaces",
+        "agent-standards",
+        "documentation-index",
+        "generated-docs",
+        "generated-portals",
+        "ansible-syntax",
+        "schema-validation",
+        "policy-validation",
+        "alert-rule-validation",
+        "type-check",
+        "dependency-direction",
+        "dependency-graph",
+        "integration-tests",
+        "security-scan",
+        "artifact-secret-scan",
+        "service-completeness",
+        "tofu-validate",
+        "packer-validate"
+      ]
+    },
+    "environment_attestation": {
+      "attested_at": "2026-03-29T19:37:24.355983+00:00",
+      "container_runtime": {
+        "available": true,
+        "engine": "docker",
+        "error": "Command '['/usr/bin/docker', 'info', '--format', '{{.ServerVersion}}']' timed out after 5 seconds",
+        "path": "/usr/bin/docker",
+        "server_reachable": false,
+        "supported": true
+      },
+      "cpu_architecture": "x86_64",
+      "emulation_support": [],
+      "hostname": "docker-runtime-lv3",
+      "network_reachability_class": "private_worker_checkout",
+      "platform": "linux",
+      "scratch_space": {
+        "cleanup_guarantee": "worker-local validation writes under the mirrored checkout and falls back to a bounded local subset when registry-backed runner pulls are unavailable",
+        "exists": true,
+        "free_bytes": 9439993856,
+        "workspace": "/srv/proxmox_florin_server"
+      },
+      "tooling": {
+        "docker": {
+          "available": true,
+          "path": "/usr/bin/docker",
+          "version": "Docker version 29.3.1, build c2be9cc"
+        },
+        "git": {
+          "available": true,
+          "path": "/usr/bin/git",
+          "version": "git version 2.47.3"
+        },
+        "python3": {
+          "available": true,
+          "path": "/usr/bin/python3",
+          "version": "Python 3.13.5"
+        },
+        "tar": {
+          "available": true,
+          "path": "/usr/bin/tar",
+          "version": "tar (GNU tar) 1.35"
+        },
+        "uv": {
+          "available": true,
+          "path": "/usr/local/bin/uv",
+          "version": "uv 0.9.21"
+        }
+      }
+    },
+    "execution_surface": "windmill_worker",
+    "id": "windmill-post-merge-worker",
+    "lane_evaluations": {}
+  },
+  "checks": [
+    {
+      "id": "local-fallback",
+      "severity": "error",
+      "description": "Run the worker-local validate_repo fallback when runner images are unavailable on the worker host.",
+      "status": "passed",
+      "returncode": 0,
+      "duration_seconds": 25.92,
+      "docker_command": [],
+      "commands": [
+        {
+          "command": "./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals",
+          "returncode": 0
+        },
+        {
+          "command": "uv run --with pyyaml python3 scripts/provider_boundary_catalog.py --validate",
+          "returncode": 0
+        }
+      ]
+    }
+  ],
+  "requested_checks": [
+    "local-fallback"
+  ]
+}

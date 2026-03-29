@@ -82,6 +82,10 @@ from workstream_surface_ownership import validate_registry as validate_workstrea
 from platform.config_merge import validate_merge_eligible_catalog
 from preview_environment import load_profile_catalog, validate_profile_catalog
 from repo_deploy_profiles import load_repo_deploy_catalog, validate_repo_deploy_catalog
+from validation_runner_contracts import (
+    load_contract_catalog as load_validation_runner_contract_catalog,
+    validate_contract_catalog as validate_validation_runner_contract_catalog,
+)
 
 
 STACK_PATH = repo_path("versions", "stack.yaml")
@@ -119,6 +123,7 @@ CHANGELOG_REDACTION_PATH = repo_path("config", "changelog-redaction.yaml")
 AGENT_POLICIES_PATH = repo_path("config", "agent-policies.yaml")
 CIRCUIT_POLICIES_PATH = repo_path("config", "circuit-policies.yaml")
 MERGE_ELIGIBLE_FILES_PATH = repo_path("config", "merge-eligible-files.yaml")
+VALIDATION_RUNNER_CONTRACTS_PATH = repo_path("config", "validation-runner-contracts.json")
 
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -1882,6 +1887,11 @@ def validate_workstream_live_apply_contracts() -> None:
             else:
                 require_str(step.get("path"), f"{step_path}.path")
 
+
+def validate_validation_runner_contracts() -> None:
+    catalog = load_validation_runner_contract_catalog(VALIDATION_RUNNER_CONTRACTS_PATH)
+    validate_validation_runner_contract_catalog(catalog)
+
 def validate_interface_contracts() -> None:
     validate_contracts()
 
@@ -2703,6 +2713,7 @@ def validate_repository_data_models() -> int:
     validate_workstreams_release_policy()
     validate_workstream_canonical_truth_metadata()
     validate_workstream_live_apply_contracts()
+    validate_validation_runner_contracts()
     load_network_impairment_matrix()
     validate_interface_contracts()
     validate_merge_eligible_files_contract()
