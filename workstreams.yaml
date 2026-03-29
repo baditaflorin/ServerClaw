@@ -970,6 +970,34 @@ workstreams:
         Playwright, OpenFGA, and a PostgreSQL-Qdrant-search memory stack
       release_bump: patch
       included_in_repo_version: 0.177.59
+  - id: ws-0259-live-apply
+    adr: "0259"
+    title: Live apply n8n as the external app connector fabric for ServerClaw
+    status: in_progress
+    owner: codex
+    branch: codex/adr-0259-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0259-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0259-live-apply.md
+    depends_on:
+      - adr-0151-n8n
+      - adr-0206-ports-and-adapters
+      - adr-0254-serverclaw
+      - adr-0258-temporal
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0259-live-apply.md
+      - docs/adr/0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/configure-n8n.md
+      - config/service-capability-catalog.json
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - tests/test_validate_service_catalog.py
+      - tests/test_n8n_metadata.py
+      - receipts/live-applies/
+    ready_to_merge: false
+    live_applied: false
   - id: ws-0244-runtime-assurance-adrs
     adr: "0244"
     title: Runtime assurance architecture bundle

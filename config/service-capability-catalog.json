@@ -768,7 +768,7 @@
     {
       "id": "n8n",
       "name": "n8n",
-      "description": "Repo-managed webhook and API integration automation runtime with a public edge hostname and PostgreSQL-backed persistence.",
+      "description": "Repo-managed external app connector fabric and webhook automation runtime for ServerClaw, with a public edge hostname and PostgreSQL-backed persistence.",
       "category": "automation",
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
@@ -793,14 +793,16 @@
         "automation",
         "webhooks",
         "integrations",
-        "workflows"
+        "workflows",
+        "serverclaw",
+        "connector-fabric"
       ],
       "environments": {
         "production": {
           "status": "active",
           "url": "https://n8n.lv3.org",
           "subdomain": "n8n.lv3.org",
-          "notes": "The editor is protected by the shared oauth2-proxy and Keycloak edge flow while selected webhook paths remain intentionally public."
+          "notes": "The editor is protected by the shared oauth2-proxy and Keycloak edge flow while selected webhook paths remain intentionally public for governed ServerClaw connector calls."
         }
       }
     },

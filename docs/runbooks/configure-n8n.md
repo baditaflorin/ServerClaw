@@ -2,7 +2,13 @@
 
 ## Purpose
 
-This runbook converges the repo-managed `n8n` runtime on `docker-runtime-lv3`, provisions its PostgreSQL backend on `postgres-lv3`, and publishes `n8n.lv3.org` through the shared NGINX edge.
+This runbook converges the repo-managed `n8n` runtime on `docker-runtime-lv3`,
+provisions its PostgreSQL backend on `postgres-lv3`, and publishes
+`n8n.lv3.org` through the shared NGINX edge.
+
+ADR 0259 uses this same runtime as the external app connector fabric for
+ServerClaw. The live surface here is the adapter plane for third-party SaaS,
+not the home for long-lived assistant reasoning or session orchestration.
 
 ## Managed Surfaces
 
@@ -11,6 +17,9 @@ This runbook converges the repo-managed `n8n` runtime on `docker-runtime-lv3`, p
 - playbook: `playbooks/n8n.yml`
 - public hostname: `https://n8n.lv3.org`
 - controller-local artifacts: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/n8n/`
+- ServerClaw boundary: thin adapters call `n8n` through governed webhooks,
+  queues, or API routes while session state and approvals stay in other
+  runtimes such as Temporal
 
 ## Preconditions
 
@@ -40,6 +49,18 @@ Public health:
 
 ```bash
 curl -fsS https://n8n.lv3.org/healthz
+```
+
+Protected editor redirect:
+
+```bash
+curl -sSI https://n8n.lv3.org/
+```
+
+Public webhook prefix without the browser auth redirect:
+
+```bash
+curl -sSI https://n8n.lv3.org/webhook-test/serverclaw-connector-smoke
 ```
 
 Guest-local readiness:
@@ -75,6 +96,16 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 
 This split is deliberate. Human operators use the protected editor path, while machine callers must reach webhook endpoints without browser SSO.
 
+## ServerClaw Connector Boundary
+
+- Keep vendor credential exchange, webhook handling, field mapping, and
+  vendor-specific translation in `n8n`.
+- Keep long-lived assistant state, approvals, timers, and reasoning in the
+  ServerClaw runtimes outside `n8n`, such as Temporal and the governed tool
+  layer.
+- Prefer thin workflows with stable inbound and outbound contracts over large
+  low-visibility canvases that hide business logic.
+
 ## Controller-Local Artifacts
 
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/n8n/database-password.txt`
@@ -88,6 +119,10 @@ These files are generated and mirrored by the repo-managed roles. They are not c
 Do not wire automatic workflow import into converge.
 
 Upstream `n8n import:workflow` can deactivate workflows on import. Keep workflow import and export as an explicit operator step until the platform has a safer repo-to-runtime promotion path for n8n content.
+
+Do not use workflow import to smuggle long-lived assistant logic into `n8n`.
+If a flow starts owning conversation state, approvals, or timer-heavy session
+logic, move that behavior back into the governed ServerClaw runtime boundary.
 
 ## Optional API Key Bootstrap
 

@@ -50,6 +50,13 @@ class ValidateServiceCatalogTest(unittest.TestCase):
         self.assertIn("Runbook: docs/runbooks/configure-api-gateway.md", output)
         self.assertIn("Degradation modes:", output)
 
+    def test_n8n_service_entry_describes_serverclaw_connector_role(self) -> None:
+        catalog = service_catalog.load_service_catalog()
+        n8n = next(item for item in catalog["services"] if item["id"] == "n8n")
+
+        self.assertIn("ServerClaw", n8n["description"])
+        self.assertIn("connector-fabric", n8n["tags"])
+
 
 if __name__ == "__main__":
     unittest.main()
