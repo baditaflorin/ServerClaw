@@ -4482,7 +4482,7 @@ adr_index:
   - adr: '0262'
     title: OpenFGA And Keycloak For Delegated ServerClaw Capability Authorization
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: security
     keywords:

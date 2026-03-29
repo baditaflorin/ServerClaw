@@ -1010,6 +1010,42 @@
       }
     },
     {
+      "id": "openfga",
+      "name": "OpenFGA",
+      "description": "Private delegated authorization graph for ServerClaw workspace, assistant, skill, connector, and data-scope capability checks.",
+      "category": "access",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://100.64.0.1:8014",
+      "exposure": "private-only",
+      "health_probe_id": "openfga",
+      "image_catalog_ids": [
+        "openfga_runtime"
+      ],
+      "secret_catalog_ids": [
+        "openfga_database_password",
+        "openfga_preshared_key",
+        "keycloak_serverclaw_runtime_client_secret"
+      ],
+      "adr": "0262",
+      "runbook": "docs/runbooks/configure-openfga.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-openfga/lv3-openfga",
+      "tags": [
+        "authorization",
+        "delegation",
+        "private",
+        "serverclaw"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://100.64.0.1:8014",
+          "notes": "Published through the Proxmox host Tailscale proxy and guarded by the repo-managed bearer-key contract."
+        }
+      }
+    },
+    {
       "id": "changelog_portal",
       "name": "Deployment History Portal",
       "description": "Generated portal for browsing live applies, promotions, and mutation audit history.",

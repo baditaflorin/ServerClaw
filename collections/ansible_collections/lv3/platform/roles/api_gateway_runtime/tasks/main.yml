@@ -219,7 +219,6 @@
       COPY packer ./packer
       COPY platform ./platform
       COPY playbooks ./playbooks
-      COPY receipts ./receipts
       COPY requirements ./requirements
       COPY roles ./roles
       COPY scripts ./scripts

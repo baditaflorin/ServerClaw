@@ -442,6 +442,51 @@
   changed_when: false
   no_log: true
 
+- name: Allow the Keycloak admin API to settle after the first authenticated probe
+  ansible.builtin.pause:
+    seconds: "{{ keycloak_startup_probe_delay }}"
+  changed_when: false
+
+- name: Reconfirm the Keycloak bootstrap admin token endpoint after the settle window
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      grant_type: password
+      client_id: admin-cli
+      username: "{{ keycloak_bootstrap_admin_username }}"
+      password: "{{ keycloak_bootstrap_admin_password }}"
+    return_content: true
+    status_code:
+      - 200
+      - 400
+      - 401
+      - 500
+  register: keycloak_bootstrap_admin_token_probe_confirmed
+  retries: "{{ keycloak_startup_probe_retries }}"
+  delay: "{{ keycloak_startup_probe_delay }}"
+  until: keycloak_bootstrap_admin_token_probe_confirmed.status == 200
+  changed_when: false
+  no_log: true
+
+- name: Reconfirm an authenticated Keycloak admin realm query after the settle window
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ keycloak_bootstrap_admin_token_probe_confirmed.json.access_token }}"
+    return_content: true
+    status_code:
+      - 200
+      - 404
+  register: keycloak_admin_realm_probe_confirmed
+  retries: "{{ keycloak_startup_probe_retries }}"
+  delay: "{{ keycloak_startup_probe_delay }}"
+  until: keycloak_admin_realm_probe_confirmed.status in [200, 404]
+  changed_when: false
+  no_log: true
+
 - name: Verify Keycloak resolves the internal mail-platform relay host
   ansible.builtin.command:
     argv:
@@ -493,6 +538,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_realm_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_realm_reconcile is succeeded
 
     - name: Ensure the Keycloak realm groups exist
       community.general.keycloak_group:
@@ -509,6 +558,10 @@
       loop: "{{ keycloak_realm_groups }}"
       loop_control:
         label: "{{ item.name }}"
+      register: keycloak_realm_groups_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_realm_groups_reconcile is succeeded
 
     - name: Ensure the Keycloak realm roles exist
       community.general.keycloak_role:
@@ -527,6 +580,10 @@
       loop: "{{ keycloak_realm_roles }}"
       loop_control:
         label: "{{ item.name }}"
+      register: keycloak_realm_roles_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_realm_roles_reconcile is succeeded
 
     - name: Ensure realm roles are mapped to Keycloak groups
       community.general.keycloak_realm_rolemapping:
@@ -543,6 +600,10 @@
       loop: "{{ keycloak_group_realm_role_mappings }}"
       loop_control:
         label: "{{ item.group_name }}"
+      register: keycloak_group_role_mappings_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_group_role_mappings_reconcile is succeeded
 
     - name: Ensure the Grafana OAuth client exists
       community.general.keycloak_client:
@@ -584,6 +645,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_grafana_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_grafana_client_reconcile is succeeded
 
     - name: Ensure the operations portal OAuth client exists
       community.general.keycloak_client:
@@ -625,6 +690,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_ops_portal_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_ops_portal_client_reconcile is succeeded
 
     - name: Ensure the Gitea OAuth client exists
       community.general.keycloak_client:
@@ -668,6 +737,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_gitea_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_gitea_client_reconcile is succeeded
 
     - name: Ensure the agent service client exists
       community.general.keycloak_client:
@@ -691,6 +764,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_agent_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_agent_client_reconcile is succeeded
 
     - name: Ensure the Langfuse OAuth client exists
       community.general.keycloak_client:
@@ -724,6 +801,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_langfuse_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_langfuse_client_reconcile is succeeded
 
     - name: Ensure the Outline OAuth client exists
       community.general.keycloak_client:
@@ -765,6 +846,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_outline_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_outline_client_reconcile is succeeded
 
     - name: Ensure the API gateway client exists
       community.general.keycloak_client:
@@ -788,6 +873,64 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_api_gateway_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_api_gateway_client_reconcile is succeeded
+
+    - name: Ensure the obsolete ServerClaw operator CLI direct-grant client is absent
+      community.general.keycloak_client:
+        realm: "{{ keycloak_realm_name }}"
+        client_id: serverclaw-operator-cli
+        name: ServerClaw Operator CLI
+        description: Removed because the named operator remains MFA-first and is not a repo-managed direct-grant automation identity.
+        enabled: false
+        protocol: openid-connect
+        public_client: false
+        client_authenticator_type: client-secret
+        standard_flow_enabled: false
+        implicit_flow_enabled: false
+        direct_access_grants_enabled: false
+        service_accounts_enabled: false
+        full_scope_allowed: false
+        state: absent
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+      register: keycloak_serverclaw_operator_cli_client_absent
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_serverclaw_operator_cli_client_absent is succeeded
+
+    - name: Ensure the ServerClaw runtime client exists
+      community.general.keycloak_client:
+        realm: "{{ keycloak_realm_name }}"
+        client_id: "{{ keycloak_serverclaw_runtime_client_id }}"
+        name: ServerClaw Runtime
+        description: Repo-managed confidential client for ServerClaw runtime client-credentials flows.
+        enabled: true
+        protocol: openid-connect
+        public_client: false
+        client_authenticator_type: client-secret
+        standard_flow_enabled: false
+        implicit_flow_enabled: false
+        direct_access_grants_enabled: false
+        service_accounts_enabled: true
+        full_scope_allowed: true
+        state: present
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+      register: keycloak_serverclaw_runtime_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_serverclaw_runtime_client_reconcile is succeeded
 
     - name: Ensure realm roles are mapped to service account users
       community.general.keycloak_user_rolemapping:
@@ -804,6 +947,10 @@
       loop: "{{ keycloak_service_account_realm_role_mappings }}"
       loop_control:
         label: "{{ item.service_account_user_client_id }}"
+      register: keycloak_service_account_role_mappings_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_service_account_role_mappings_reconcile is succeeded
 
     - name: Read the Grafana client secret
       community.general.keycloak_clientsecret_info:
@@ -815,7 +962,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
-      register: keycloak_grafana_client_secret_info
+      register: keycloak_grafana_client_secret_read
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_grafana_client_secret_read is succeeded
       no_log: true
 
     - name: Read the operations portal client secret
@@ -828,7 +978,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
-      register: keycloak_ops_portal_client_secret_info
+      register: keycloak_ops_portal_client_secret_read
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_ops_portal_client_secret_read is succeeded
       no_log: true
 
     - name: Read the Gitea client secret
@@ -841,7 +994,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
-      register: keycloak_gitea_client_secret_info
+      register: keycloak_gitea_client_secret_read
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_gitea_client_secret_read is succeeded
       no_log: true
 
     - name: Read the agent client secret
@@ -854,7 +1010,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
-      register: keycloak_agent_client_secret_info
+      register: keycloak_agent_client_secret_read
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_agent_client_secret_read is succeeded
       no_log: true
 
     - name: Read the Langfuse client secret
@@ -867,7 +1026,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
-      register: keycloak_langfuse_client_secret_info
+      register: keycloak_langfuse_client_secret_read
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_langfuse_client_secret_read is succeeded
       no_log: true
 
     - name: Read the Outline client secret
@@ -880,7 +1042,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
-      register: keycloak_outline_client_secret_info
+      register: keycloak_outline_client_secret_read
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_outline_client_secret_read is succeeded
       no_log: true
 
     - name: Read the API gateway client secret
@@ -893,18 +1058,38 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
-      register: keycloak_api_gateway_client_secret_info
+      register: keycloak_api_gateway_client_secret_read
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_api_gateway_client_secret_read is succeeded
+      no_log: true
+
+    - name: Read the ServerClaw runtime client secret
+      community.general.keycloak_clientsecret_info:
+        realm: "{{ keycloak_realm_name }}"
+        client_id: "{{ keycloak_serverclaw_runtime_client_id }}"
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+      register: keycloak_serverclaw_runtime_client_secret_read
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_serverclaw_runtime_client_secret_read is succeeded
       no_log: true
 
 - name: Record the Keycloak client secrets
   ansible.builtin.set_fact:
-    keycloak_grafana_client_secret: "{{ keycloak_grafana_client_secret_info.clientsecret_info.value }}"
-    keycloak_ops_portal_client_secret: "{{ keycloak_ops_portal_client_secret_info.clientsecret_info.value }}"
-    keycloak_gitea_client_secret: "{{ keycloak_gitea_client_secret_info.clientsecret_info.value }}"
-    keycloak_agent_client_secret: "{{ keycloak_agent_client_secret_info.clientsecret_info.value }}"
-    keycloak_langfuse_client_secret: "{{ keycloak_langfuse_client_secret_info.clientsecret_info.value }}"
-    keycloak_outline_client_secret: "{{ keycloak_outline_client_secret_info.clientsecret_info.value }}"
-    keycloak_api_gateway_client_secret: "{{ keycloak_api_gateway_client_secret_info.clientsecret_info.value }}"
+    keycloak_grafana_client_secret: "{{ keycloak_grafana_client_secret_read.clientsecret_info.value }}"
+    keycloak_ops_portal_client_secret: "{{ keycloak_ops_portal_client_secret_read.clientsecret_info.value }}"
+    keycloak_gitea_client_secret: "{{ keycloak_gitea_client_secret_read.clientsecret_info.value }}"
+    keycloak_agent_client_secret: "{{ keycloak_agent_client_secret_read.clientsecret_info.value }}"
+    keycloak_langfuse_client_secret: "{{ keycloak_langfuse_client_secret_read.clientsecret_info.value }}"
+    keycloak_outline_client_secret: "{{ keycloak_outline_client_secret_read.clientsecret_info.value }}"
+    keycloak_api_gateway_client_secret: "{{ keycloak_api_gateway_client_secret_read.clientsecret_info.value }}"
+    keycloak_serverclaw_runtime_client_secret: "{{ keycloak_serverclaw_runtime_client_secret_read.clientsecret_info.value }}"
   no_log: true
 
 - name: Mirror the Grafana client secret to the control machine
@@ -970,10 +1155,27 @@
   become: false
   no_log: true
 
+- name: Remove the stale ServerClaw operator CLI client secret from the control machine
+  ansible.builtin.file:
+    path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-operator-client-secret.txt
+    state: absent
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the ServerClaw runtime client secret to the control machine
+  ansible.builtin.copy:
+    dest: "{{ keycloak_serverclaw_runtime_client_secret_local_file }}"
+    content: "{{ keycloak_serverclaw_runtime_client_secret }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
 - name: Request a Keycloak admin token for repo-managed user reconciliation
   ansible.builtin.uri:
     url: "{{ keycloak_repo_user_admin_url }}/realms/master/protocol/openid-connect/token"
     method: POST
+    timeout: "{{ keycloak_admin_connection_timeout }}"
     body_format: form-urlencoded
     body:
       grant_type: password
@@ -1053,6 +1255,35 @@
       - keycloak_grafana_admin_group_id | length > 0
     fail_msg: "The repo-managed Keycloak admin groups must exist before reconciling operator identities."
   no_log: true
+
+- name: Refresh the repo-managed Keycloak admin headers before reconciling the named operator
+  block:
+    - name: Request a fresh Keycloak admin token for the named operator reconciliation
+      ansible.builtin.uri:
+        url: "{{ keycloak_repo_user_admin_url }}/realms/master/protocol/openid-connect/token"
+        method: POST
+        timeout: "{{ keycloak_admin_connection_timeout }}"
+        body_format: form-urlencoded
+        body:
+          grant_type: password
+          client_id: admin-cli
+          username: "{{ keycloak_bootstrap_admin_username }}"
+          password: "{{ keycloak_bootstrap_admin_password }}"
+        return_content: true
+        status_code: 200
+      register: keycloak_repo_user_admin_token_for_operator
+      retries: "{{ keycloak_repo_user_reconciliation_retries }}"
+      delay: "{{ keycloak_repo_user_reconciliation_delay }}"
+      until: >-
+        keycloak_repo_user_admin_token_for_operator.status == 200
+        and (keycloak_repo_user_admin_token_for_operator.json.access_token | default('') | length) > 0
+      no_log: true
+
+    - name: Record the refreshed repo-managed Keycloak admin headers for the named operator reconciliation
+      ansible.builtin.set_fact:
+        keycloak_repo_user_admin_headers:
+          Authorization: "Bearer {{ keycloak_repo_user_admin_token_for_operator.json.access_token }}"
+      no_log: true
 
 - name: Look up the named operator in Keycloak
   ansible.builtin.uri:
@@ -1224,6 +1455,35 @@
   delay: "{{ keycloak_repo_user_reconciliation_delay }}"
   until: keycloak_operator_grafana_group_membership.status == 204
   no_log: true
+
+- name: Refresh the repo-managed Keycloak admin headers before reconciling the Outline automation user
+  block:
+    - name: Request a fresh Keycloak admin token for the Outline automation reconciliation
+      ansible.builtin.uri:
+        url: "{{ keycloak_repo_user_admin_url }}/realms/master/protocol/openid-connect/token"
+        method: POST
+        timeout: "{{ keycloak_admin_connection_timeout }}"
+        body_format: form-urlencoded
+        body:
+          grant_type: password
+          client_id: admin-cli
+          username: "{{ keycloak_bootstrap_admin_username }}"
+          password: "{{ keycloak_bootstrap_admin_password }}"
+        return_content: true
+        status_code: 200
+      register: keycloak_repo_user_admin_token_for_outline_automation
+      retries: "{{ keycloak_repo_user_reconciliation_retries }}"
+      delay: "{{ keycloak_repo_user_reconciliation_delay }}"
+      until: >-
+        keycloak_repo_user_admin_token_for_outline_automation.status == 200
+        and (keycloak_repo_user_admin_token_for_outline_automation.json.access_token | default('') | length) > 0
+      no_log: true
+
+    - name: Record the refreshed repo-managed Keycloak admin headers for the Outline automation reconciliation
+      ansible.builtin.set_fact:
+        keycloak_repo_user_admin_headers:
+          Authorization: "Bearer {{ keycloak_repo_user_admin_token_for_outline_automation.json.access_token }}"
+      no_log: true
 
 - name: Look up the Outline automation user in Keycloak
   ansible.builtin.uri:
@@ -1403,6 +1663,7 @@
   ansible.builtin.uri:
     url: "{{ keycloak_local_admin_url }}/realms/{{ keycloak_realm_name }}/protocol/openid-connect/token"
     method: POST
+    timeout: "{{ keycloak_admin_connection_timeout }}"
     body_format: form-urlencoded
     body:
       grant_type: client_credentials
@@ -1412,13 +1673,37 @@
     status_code: 200
   register: keycloak_agent_token
   changed_when: false
+  retries: "{{ keycloak_admin_reconciliation_retries }}"
+  delay: "{{ keycloak_admin_reconciliation_delay }}"
+  until: keycloak_agent_token.status == 200
   no_log: true
 
-- name: Assert Keycloak endpoints and agent credentials are working
+- name: Request the ServerClaw runtime client-credentials token
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/realms/{{ keycloak_realm_name }}/protocol/openid-connect/token"
+    method: POST
+    timeout: "{{ keycloak_admin_connection_timeout }}"
+    body_format: form-urlencoded
+    body:
+      grant_type: client_credentials
+      client_id: "{{ keycloak_serverclaw_runtime_client_id }}"
+      client_secret: "{{ keycloak_serverclaw_runtime_client_secret }}"
+    return_content: true
+    status_code: 200
+  register: keycloak_serverclaw_runtime_token
+  changed_when: false
+  retries: "{{ keycloak_admin_reconciliation_retries }}"
+  delay: "{{ keycloak_admin_reconciliation_delay }}"
+  until: keycloak_serverclaw_runtime_token.status == 200
+  no_log: true
+
+- name: Assert Keycloak endpoints and automation credentials are working
   ansible.builtin.assert:
     that:
       - keycloak_realm_openid_config.json.issuer == keycloak_public_base_url ~ '/realms/' ~ keycloak_realm_name
       - (keycloak_agent_token.json.access_token | default('')) | length > 0
       - keycloak_agent_token.json.token_type == 'Bearer'
-    fail_msg: "Keycloak answered locally, but the realm metadata or agent client credentials did not validate."
+      - (keycloak_serverclaw_runtime_token.json.access_token | default('')) | length > 0
+      - keycloak_serverclaw_runtime_token.json.token_type == 'Bearer'
+    fail_msg: "Keycloak answered locally, but the repo-managed runtime or existing agent client credentials did not validate."
   no_log: true
