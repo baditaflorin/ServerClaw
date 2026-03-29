@@ -10,6 +10,7 @@ The Outline workflow converges:
 - the Outline runtime, Redis cache, and MinIO attachment store on `docker-runtime-lv3`
 - the public hostname `wiki.lv3.org` on the shared NGINX edge
 - the dedicated Keycloak OIDC client used by the Outline sign-in flow
+- the shared logout handoff from Outline to Keycloak and then to the shared `oauth2-proxy` cookie-cleanup endpoint on `ops.lv3.org`
 - the controller-local Outline API token and the initial living knowledge collections
 
 ## Preconditions
@@ -70,6 +71,8 @@ The role performs the first Outline admin bootstrap without browser interaction 
 4. pruning the default `Welcome` collection after bootstrap
 5. syncing the living collection landing pages and indexes while deleting duplicate managed landing docs if they drift in
 
+Outline logout remains app-local first, but the repo-managed `OIDC_LOGOUT_URI` now hands the browser to Keycloak with a declared post-logout return path through `https://ops.lv3.org/.well-known/lv3/session/proxy-logout` so shared edge cookies are cleared before the final logged-out landing page.
+
 ## Syncing knowledge surfaces
 
 To refresh the living knowledge docs on demand:
@@ -91,6 +94,7 @@ Repository and syntax checks:
 ```bash
 python3 scripts/validate_service_completeness.py --service outline
 uv run --with pytest python -m pytest tests/test_outline_runtime_role.py tests/test_outline_playbook.py tests/test_outline_sync.py tests/test_keycloak_runtime_role.py tests/test_release_manager.py tests/test_generate_platform_vars.py
+uv run --with pyyaml --with jsonschema python -m unittest tests.test_grafana_sso_role tests.test_session_logout_verify
 ./scripts/validate_repo.sh agent-standards
 ./scripts/validate_repo.sh generated-portals
 uvx --from pyyaml python scripts/interface_contracts.py --check-live-apply service:outline

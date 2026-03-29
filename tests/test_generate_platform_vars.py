@@ -44,6 +44,20 @@ def test_build_platform_vars_includes_harbor_publication_topology() -> None:
     assert harbor["urls"]["internal"] == "http://10.10.10.20:8095"
 
 
+def test_build_platform_vars_includes_shared_session_authority_contract() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    authority = platform_vars["platform_session_authority"]
+
+    assert authority["authority_hostname"] == "ops.lv3.org"
+    assert authority["ops_portal_client_id"] == "ops-portal-oauth"
+    assert authority["keycloak_logout_url"] == "https://sso.lv3.org/realms/lv3/protocol/openid-connect/logout"
+    assert authority["oauth2_proxy_sign_out_url"] == "https://ops.lv3.org/oauth2/sign_out"
+    assert authority["shared_logout_path"] == "/.well-known/lv3/session/logout"
+    assert authority["shared_proxy_cleanup_path"] == "/.well-known/lv3/session/proxy-logout"
+    assert authority["shared_logged_out_path"] == "/.well-known/lv3/session/logged-out"
+    assert authority["shared_logged_out_url"] == "https://ops.lv3.org/.well-known/lv3/session/logged-out"
+
+
 def test_build_service_urls_supports_private_gitea_proxy_and_root_url() -> None:
     ports = {
         "gitea_http_port": 3003,
@@ -151,6 +165,7 @@ def test_build_platform_vars_includes_plane_publication_topology() -> None:
     assert plane["ports"]["controller"] == 8011
     assert plane["urls"]["public"] == "https://tasks.lv3.org"
     assert plane["urls"]["controller"] == "http://100.64.0.1:8011"
+
 
 def test_build_service_urls_resolves_realtime_internal_url() -> None:
     ports = {"netdata_port": 19999}

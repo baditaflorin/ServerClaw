@@ -85,6 +85,9 @@ PORT_KEYS = (
 
 MANAGEMENT_IPV4_TOKEN = "{{ management_ipv4 }}"
 MANAGEMENT_TAILSCALE_IPV4_TOKEN = "{{ management_tailscale_ipv4 }}"
+SESSION_AUTHORITY_SHARED_LOGOUT_PATH = "/.well-known/lv3/session/logout"
+SESSION_AUTHORITY_SHARED_PROXY_CLEANUP_PATH = "/.well-known/lv3/session/proxy-logout"
+SESSION_AUTHORITY_SHARED_LOGGED_OUT_PATH = "/.well-known/lv3/session/logged-out"
 
 
 def yaml_dump(payload: Any) -> str:
@@ -552,6 +555,43 @@ def build_tcp_proxies(host_vars: dict[str, Any], ports: dict[str, int]) -> list[
     return resolved
 
 
+def build_platform_session_authority(service_topology: dict[str, Any]) -> dict[str, str]:
+    keycloak_service = require_mapping(
+        service_topology.get("keycloak"),
+        "platform_service_topology.keycloak",
+    )
+    ops_portal_service = require_mapping(
+        service_topology.get("ops_portal"),
+        "platform_service_topology.ops_portal",
+    )
+    keycloak_public_url = require_string(
+        require_mapping(keycloak_service.get("urls"), "platform_service_topology.keycloak.urls").get("public"),
+        "platform_service_topology.keycloak.urls.public",
+    )
+    ops_portal_public_url = require_string(
+        require_mapping(
+            ops_portal_service.get("urls"),
+            "platform_service_topology.ops_portal.urls",
+        ).get("public"),
+        "platform_service_topology.ops_portal.urls.public",
+    )
+    return {
+        "authority_hostname": require_string(
+            ops_portal_service.get("public_hostname"),
+            "platform_service_topology.ops_portal.public_hostname",
+        ),
+        "ops_portal_client_id": "ops-portal-oauth",
+        "keycloak_logout_url": f"{keycloak_public_url}/realms/lv3/protocol/openid-connect/logout",
+        "oauth2_proxy_sign_out_url": f"{ops_portal_public_url}/oauth2/sign_out",
+        "shared_logout_path": SESSION_AUTHORITY_SHARED_LOGOUT_PATH,
+        "shared_logout_url": f"{ops_portal_public_url}{SESSION_AUTHORITY_SHARED_LOGOUT_PATH}",
+        "shared_proxy_cleanup_path": SESSION_AUTHORITY_SHARED_PROXY_CLEANUP_PATH,
+        "shared_proxy_cleanup_url": f"{ops_portal_public_url}{SESSION_AUTHORITY_SHARED_PROXY_CLEANUP_PATH}",
+        "shared_logged_out_path": SESSION_AUTHORITY_SHARED_LOGGED_OUT_PATH,
+        "shared_logged_out_url": f"{ops_portal_public_url}{SESSION_AUTHORITY_SHARED_LOGGED_OUT_PATH}",
+    }
+
+
 def build_platform_vars(
     stack: dict[str, Any] | None = None,
     host_vars: dict[str, Any] | None = None,
@@ -563,6 +603,7 @@ def build_platform_vars(
     resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
     guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
     service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+    session_authority = build_platform_session_authority(service_topology)
     dns_records = build_dns_records(service_topology, host_vars)
     tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
     monitoring_service = service_topology["grafana"]
@@ -664,6 +705,7 @@ def build_platform_vars(
         "platform_port_assignments": copy.deepcopy(resolved_ports),
         "platform_guest_catalog": guest_catalog,
         "platform_service_topology": service_topology,
+        "platform_session_authority": session_authority,
         "platform_dns_records": dns_records,
         "platform_management_allowed_tcp_ports": [
             resolved_ports["ntopng_proxy_port"],
