@@ -2294,6 +2294,44 @@
         "timeout_seconds": 1500
       }
     },
+    "converge-gotenberg": {
+      "description": "Converge the private Gotenberg document-to-PDF runtime on docker-runtime-lv3 and refresh the governed API gateway route for authenticated callers.",
+      "workflow_id": "converge-gotenberg",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-gotenberg passes",
+        "make validate passes before the apply",
+        "The private-only network boundary, synchronous render budget, and authenticated API gateway route are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the health endpoint, Chromium HTML render verification, LibreOffice conversion verification, and one authenticated API gateway route check."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the Gotenberg runtime fails to start, either render path fails verification, or the guest firewall would expose the API beyond the intended private boundary.",
+          "Stop if the shared API gateway route cannot proxy authenticated health or render traffic after the runtime converges."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Gotenberg runtime and API gateway config bundle before retrying.",
+          "Do not leave behind manual container, firewall, or API gateway drift outside the repo-managed playbook path."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
     "converge-ollama": {
       "description": "Converge the private Ollama runtime and repo-managed startup model catalog on docker-runtime-lv3.",
       "workflow_id": "converge-ollama",

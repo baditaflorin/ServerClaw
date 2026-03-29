@@ -3738,6 +3738,59 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-gotenberg": {
+      "description": "Deploy the private Gotenberg runtime on docker-runtime-lv3 and refresh the shared API gateway route used for authenticated PDF rendering requests.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-gotenberg",
+        "command": "make converge-gotenberg"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-gotenberg"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-gotenberg.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/gotenberg.yml",
+        "playbooks/services/gotenberg.yml",
+        "roles/gotenberg_runtime",
+        "roles/api_gateway_runtime",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/api-gateway-catalog.json",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json"
+      ],
+      "outputs": [
+        "A private Gotenberg runtime on docker-runtime-lv3 with Chromium and LibreOffice render paths verified locally, plus an authenticated /v1/gotenberg route on the shared platform API gateway."
+      ],
+      "verification_commands": [
+        "make syntax-check-gotenberg",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:3007/health'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'html=$(mktemp --suffix=.html); pdf=$(mktemp); trap '\"'\"'rm -f \"$html\" \"$pdf\"'\"'\"' EXIT; printf \"<html><body><h1>LV3 Gotenberg workflow verification</h1></body></html>\" >\"$html\"; curl -fsS -o \"$pdf\" -F files=@\"$html\" http://127.0.0.1:3007/forms/chromium/convert/html; head -c 4 \"$pdf\" | grep -q %PDF'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'txt=$(mktemp --suffix=.txt); pdf=$(mktemp); trap '\"'\"'rm -f \"$txt\" \"$pdf\"'\"'\"' EXIT; printf \"LV3 Gotenberg workflow verification\\n\" >\"$txt\"; curl -fsS -o \"$pdf\" -F \"files=@${txt};filename=verification.txt;type=text/plain\" http://127.0.0.1:3007/forms/libreoffice/convert; head -c 4 \"$pdf\" | grep -q %PDF'",
+        "LV3_TOKEN=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt) && curl -fsS -H \"Authorization: Bearer $LV3_TOKEN\" https://api.lv3.org/v1/gotenberg/health"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 280,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-rag-context": {
       "description": "Deploy the private platform context API with Qdrant on docker-runtime-lv3, publish it through the Proxmox host Tailscale proxy, and seed the initial retrieval corpus.",
       "lifecycle_status": "active",

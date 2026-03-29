@@ -1,0 +1,16 @@
+---
+gotenberg_runtime_site_dir: /opt/gotenberg
+gotenberg_runtime_compose_file: "{{ gotenberg_runtime_site_dir }}/docker-compose.yml"
+gotenberg_runtime_container_name: gotenberg
+gotenberg_runtime_container_port: 3000
+gotenberg_runtime_image: "{{ container_image_catalog.images.gotenberg_runtime.ref }}"
+gotenberg_runtime_port: "{{ platform_service_topology | platform_service_port('gotenberg', 'internal') }}"
+gotenberg_runtime_internal_base_url: "{{ platform_service_topology | platform_service_url('gotenberg', 'internal') }}"
+gotenberg_runtime_local_base_url: "http://127.0.0.1:{{ gotenberg_runtime_port }}"
+gotenberg_runtime_healthcheck_path: /health
+gotenberg_runtime_memory_limit: 4g
+gotenberg_runtime_cpu_limit: "2.0"
+gotenberg_runtime_chromium_auto_start: true
+gotenberg_runtime_libreoffice_auto_start: true
+gotenberg_runtime_verify_html_title: LV3 Gotenberg Verification
+gotenberg_runtime_verify_text_filename: verification.txt
