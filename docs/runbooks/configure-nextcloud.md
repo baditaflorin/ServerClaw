@@ -65,7 +65,7 @@ Guest-local status:
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
-  -J ops@100.64.0.1 \
+  -J ops@65.108.75.123 \
   ops@10.10.10.20 \
   'curl -fsS http://127.0.0.1:8084/status.php'
 ```
@@ -75,9 +75,9 @@ Guest-local cron mode:
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
-  -J ops@100.64.0.1 \
+  -J ops@65.108.75.123 \
   ops@10.10.10.20 \
-  'docker exec --user www-data nextcloud-app php occ background:status'
+  'docker exec --user www-data nextcloud-app php occ config:app:get core backgroundjobs_mode'
 ```
 
 Guest-local bootstrap admin query:
@@ -85,7 +85,7 @@ Guest-local bootstrap admin query:
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
-  -J ops@100.64.0.1 \
+  -J ops@65.108.75.123 \
   ops@10.10.10.20 \
   'docker exec --user www-data nextcloud-app php occ user:info ops --output=json'
 ```

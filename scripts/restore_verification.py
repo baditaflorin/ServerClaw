@@ -735,7 +735,6 @@ def execute_profiled_smoke_tests(
                 code="platform:restore_warm_up_execution_failed",
                 retry_class=RetryClass.FATAL,
             ) from exc
-
         network_dependency_ready = tests_pass_named(latest_tests, profile.network_dependency_checks)
         service_warm_up_ready = overall_from_tests(latest_tests) == "pass"
         attempts.append(

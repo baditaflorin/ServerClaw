@@ -75,3 +75,9 @@ argument_specs:
       nextcloud_admin_user:
         type: str
         required: true
+      nextcloud_occ_command_retries:
+        type: int
+        required: false
+      nextcloud_occ_command_delay_seconds:
+        type: int
+        required: false

@@ -174,7 +174,7 @@ server {
 
 {% for redirect in exact_redirects %}
     location = {{ redirect.path }} {
-        return {{ redirect.status | default(301) }} {{ redirect.target }};
+        return {{ redirect.status | default(301) }} {{ redirect.target | default(redirect.location) }};
     }
 {% endfor %}
 {% if public_edge_tls_enabled or protected_site %}
@@ -297,7 +297,7 @@ server {
 
 {% for redirect in exact_redirects %}
     location = {{ redirect.path }} {
-        return {{ redirect.status | default(301) }} {{ redirect.target }};
+        return {{ redirect.status | default(301) }} {{ redirect.target | default(redirect.location) }};
     }
 {% endfor %}
 {% if protected_site %}

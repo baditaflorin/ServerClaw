@@ -37,3 +37,5 @@ nextcloud_trusted_proxies:
 nextcloud_php_memory_limit: 1024M
 nextcloud_php_upload_limit: 16G
 nextcloud_overwrite_protocol: https
+nextcloud_occ_command_retries: 5
+nextcloud_occ_command_delay_seconds: 5

@@ -17,6 +17,11 @@ common_systemd_unit_daemon_reload: false
 common_systemd_unit_verify_active: false
 common_systemd_unit_expected_active_state: active
 
+common_docker_bridge_chains_service_name: docker
+common_docker_bridge_chains_require_nat_chain: true
+common_docker_bridge_chains_retries: 10
+common_docker_bridge_chains_delay: 2
+
 common_wait_port_host: 127.0.0.1
 common_wait_port_port: 0
 common_wait_port_delay: 0

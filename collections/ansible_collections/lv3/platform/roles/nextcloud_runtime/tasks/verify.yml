@@ -33,6 +33,9 @@
       - "{{ nextcloud_admin_user }}"
       - --output=json
   register: nextcloud_verify_admin
+  retries: "{{ nextcloud_occ_command_retries | int }}"
+  delay: "{{ nextcloud_occ_command_delay_seconds | int }}"
+  until: nextcloud_verify_admin.rc == 0
   changed_when: false
   no_log: true
 
@@ -53,12 +56,17 @@
       - "{{ nextcloud_container_name }}"
       - php
       - occ
-      - background:status
+      - config:app:get
+      - core
+      - backgroundjobs_mode
   register: nextcloud_verify_background_jobs
+  retries: "{{ nextcloud_occ_command_retries | int }}"
+  delay: "{{ nextcloud_occ_command_delay_seconds | int }}"
+  until: nextcloud_verify_background_jobs.rc == 0
   changed_when: false
 
 - name: Assert the Nextcloud background job mode is cron
   ansible.builtin.assert:
     that:
-      - "'cron' in nextcloud_verify_background_jobs.stdout | lower"
+      - nextcloud_verify_background_jobs.stdout | trim == 'cron'
     fail_msg: "Nextcloud background jobs are not configured for the managed cron runner."

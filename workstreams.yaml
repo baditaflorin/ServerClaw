@@ -35,6 +35,7 @@ workstreams:
       - inventory/host_vars/proxmox_florin.yml
       - inventory/group_vars/platform.yml
       - scripts/generate_platform_vars.py
+      - scripts/restore_verification.py
       - config/ansible-execution-scopes.yaml
       - config/ansible-role-idempotency.yml
       - config/service-capability-catalog.json
@@ -44,6 +45,7 @@ workstreams:
       - config/controller-local-secrets.json
       - config/data-catalog.json
       - config/dependency-graph.json
+      - config/service-redundancy-catalog.json
       - config/slo-catalog.json
       - config/service-completeness.json
       - config/workflow-catalog.json
@@ -52,12 +54,18 @@ workstreams:
       - config/replaceability-review-catalog.json
       - config/image-catalog.json
       - config/grafana/dashboards/nextcloud.json
+      - config/grafana/dashboards/slo-overview.json
       - config/alertmanager/rules/nextcloud.yml
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/slo_rules.yml
       - config/uptime-kuma/monitors.json
       - Makefile
       - playbooks/nextcloud.yml
       - playbooks/services/nextcloud.yml
+      - collections/ansible_collections/lv3/platform/playbooks/nextcloud.yml
       - collections/ansible_collections/lv3/platform/playbooks/services/nextcloud.yml
+      - collections/ansible_collections/lv3/platform/plugins/filter/service_topology.py
       - collections/ansible_collections/lv3/platform/roles/nextcloud_postgres/**
       - collections/ansible_collections/lv3/platform/roles/nextcloud_runtime/**
       - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/**
@@ -84,7 +92,7 @@ workstreams:
           paths:
             - docs/adr/.index.yaml
           mode: shared_contract
-          contract: adr-index-generator-v1
+          contract: adr-index-v1
         - id: nextcloud_repo_surface
           paths:
             - docs/workstreams/ws-0260-live-apply.md
@@ -92,6 +100,7 @@ workstreams:
             - docs/runbooks/configure-nextcloud.md
             - playbooks/nextcloud.yml
             - playbooks/services/nextcloud.yml
+            - collections/ansible_collections/lv3/platform/playbooks/nextcloud.yml
             - collections/ansible_collections/lv3/platform/playbooks/services/nextcloud.yml
             - collections/ansible_collections/lv3/platform/roles/nextcloud_postgres/**
             - collections/ansible_collections/lv3/platform/roles/nextcloud_runtime/**
@@ -109,6 +118,7 @@ workstreams:
             - inventory/host_vars/proxmox_florin.yml
             - inventory/group_vars/platform.yml
             - scripts/generate_platform_vars.py
+            - scripts/restore_verification.py
             - config/ansible-execution-scopes.yaml
             - config/ansible-role-idempotency.yml
             - config/service-capability-catalog.json
@@ -118,6 +128,7 @@ workstreams:
             - config/controller-local-secrets.json
             - config/data-catalog.json
             - config/dependency-graph.json
+            - config/service-redundancy-catalog.json
             - config/slo-catalog.json
             - config/service-completeness.json
             - config/workflow-catalog.json
@@ -125,8 +136,14 @@ workstreams:
             - config/capability-contract-catalog.json
             - config/replaceability-review-catalog.json
             - config/image-catalog.json
+            - config/grafana/dashboards/slo-overview.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/slo_rules.yml
             - config/uptime-kuma/monitors.json
             - Makefile
+            - collections/ansible_collections/lv3/platform/plugins/filter/service_topology.py
+            - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2
             - tests/test_generate_platform_vars.py
             - tests/test_nginx_edge_publication_role.py
             - tests/test_service_topology_filters.py

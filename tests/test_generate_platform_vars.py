@@ -1,6 +1,19 @@
 import generate_platform_vars
 
 
+def iter_strings(value):
+    if isinstance(value, dict):
+        for item in value.values():
+            yield from iter_strings(item)
+        return
+    if isinstance(value, list):
+        for item in value:
+            yield from iter_strings(item)
+        return
+    if isinstance(value, str):
+        yield value
+
+
 def test_resolve_tcp_proxy_port_supports_platform_port_assignments_templates() -> None:
     ports = {"platform_context_host_proxy_port": 8010}
     resolved = generate_platform_vars.resolve_tcp_proxy_port(
@@ -168,6 +181,39 @@ def test_build_service_urls_resolves_excalidraw_internal_url() -> None:
         "public": "https://draw.lv3.org",
         "internal": "http://10.10.10.20:3095",
     }
+
+
+def test_build_service_urls_resolves_outline_internal_url() -> None:
+    ports = {"outline_port": 3006}
+    service = {"owning_vm": "docker-runtime-lv3", "public_hostname": "wiki.lv3.org"}
+    host_vars = {"management_tailscale_ipv4": "100.118.189.95"}
+    guest_ipv4_by_name = {"docker-runtime-lv3": "10.10.10.20"}
+    stack = {"desired_state": {"host_id": "proxmox_florin"}}
+
+    port_map, urls = generate_platform_vars.build_service_urls(
+        "outline",
+        service,
+        host_vars,
+        guest_ipv4_by_name,
+        ports,
+        stack,
+    )
+
+    assert port_map == {"internal": 3006}
+    assert urls == {
+        "public": "https://wiki.lv3.org",
+        "internal": "http://10.10.10.20:3006",
+    }
+
+
+def test_build_platform_vars_renders_service_topology_without_unresolved_templates() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    service_topology = platform_vars["platform_service_topology"]
+
+    assert all("{{" not in value and "}}" not in value for value in iter_strings(service_topology))
+    assert service_topology["headscale"]["private_ip"] == platform_vars["platform_host"]["network"]["internal_ipv4"]
+    assert service_topology["outline"]["edge"]["upstream"] == service_topology["outline"]["urls"]["internal"]
+    assert service_topology["excalidraw"]["edge"]["prefix_proxy_routes"][0]["upstream"] == "http://10.10.10.20:3096"
 
 
 def test_build_platform_vars_includes_plane_publication_topology() -> None:

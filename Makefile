@@ -859,6 +859,8 @@ converge-n8n:
 
 converge-nextcloud:
 	$(MAKE) preflight WORKFLOW=converge-nextcloud
+	$(MAKE) generate-edge-static-sites
+	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/nextcloud.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
 converge-nomad:

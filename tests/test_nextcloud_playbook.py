@@ -5,6 +5,7 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "nextcloud.yml"
+MAKEFILE_PATH = REPO_ROOT / "Makefile"
 
 
 def test_nextcloud_dns_stage_converges_only_the_nextcloud_subdomain_record() -> None:
@@ -31,6 +32,7 @@ def test_nextcloud_playbook_converges_postgres_runtime_and_edge_roles() -> None:
     postgres_roles = [role["role"] for role in plays[1]["roles"]]
     runtime_roles = [role["role"] for role in plays[2]["roles"]]
     edge_roles = [role["role"] for role in plays[3]["roles"]]
+    verify_tasks = plays[4]["tasks"]
 
     assert postgres_roles == [
         "lv3.platform.linux_guest_firewall",
@@ -43,3 +45,16 @@ def test_nextcloud_playbook_converges_postgres_runtime_and_edge_roles() -> None:
         "lv3.platform.nextcloud_runtime",
     ]
     assert edge_roles == ["lv3.platform.nginx_edge_publication"]
+    assert "post_tasks" not in plays[2]
+    assert plays[4]["hosts"] == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+    assert [task["name"] for task in verify_tasks] == [
+        "Run shared Nextcloud post-verify checks",
+        "Run shared completion notifications",
+    ]
+
+
+def test_converge_nextcloud_target_stages_edge_static_sites_before_live_apply() -> None:
+    makefile = MAKEFILE_PATH.read_text()
+    converge_block = makefile.split("converge-nextcloud:\n", 1)[1].split("\n\n", 1)[0]
+
+    assert "$(MAKE) generate-edge-static-sites" in converge_block

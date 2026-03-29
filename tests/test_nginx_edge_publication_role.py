@@ -212,7 +212,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("site.proxy_read_timeout_seconds | default(300)", self.template)
         self.assertIn("site.proxy_send_timeout_seconds | default(proxy_read_timeout_seconds)", self.template)
         self.assertIn("location = {{ redirect.path }} {", self.template)
-        self.assertIn("return {{ redirect.status | default(301) }} {{ redirect.target }};", self.template)
+        self.assertIn("return {{ redirect.status | default(301) }} {{ redirect.target | default(redirect.location) }};", self.template)
         self.assertIn("proxy_hide_header {{ header_name }};", self.template)
         self.assertIn("protected_site.unauthenticated_prefix_paths | default([])", self.template)
         self.assertIn("location ^~ {{ path }} {", self.template)

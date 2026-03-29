@@ -23,6 +23,8 @@ def test_runtime_defaults_pin_public_hostname_and_local_artifacts() -> None:
     assert defaults["nextcloud_database_host"] == "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
     assert defaults["nextcloud_admin_password_local_file"].endswith("/.local/nextcloud/admin-password.txt")
     assert defaults["nextcloud_redis_password_local_file"].endswith("/.local/nextcloud/redis-password.txt")
+    assert defaults["nextcloud_occ_command_retries"] == 5
+    assert defaults["nextcloud_occ_command_delay_seconds"] == 5
 
 
 def test_runtime_uses_openbao_secret_injection_for_database_admin_and_redis_passwords() -> None:
@@ -53,7 +55,29 @@ def test_verify_tasks_check_status_admin_and_background_job_mode() -> None:
         "{{ nextcloud_admin_user }}",
         "--output=json",
     ]
-    assert background_task["ansible.builtin.command"]["argv"][-2:] == ["occ", "background:status"]
+    assert admin_task["retries"] == "{{ nextcloud_occ_command_retries | int }}"
+    assert admin_task["delay"] == "{{ nextcloud_occ_command_delay_seconds | int }}"
+    assert admin_task["until"] == "nextcloud_verify_admin.rc == 0"
+    assert background_task["ansible.builtin.command"]["argv"][-4:] == [
+        "occ",
+        "config:app:get",
+        "core",
+        "backgroundjobs_mode",
+    ]
+    assert background_task["retries"] == "{{ nextcloud_occ_command_retries | int }}"
+    assert background_task["delay"] == "{{ nextcloud_occ_command_delay_seconds | int }}"
+    assert background_task["until"] == "nextcloud_verify_background_jobs.rc == 0"
+
+
+def test_runtime_occ_mutations_retry_when_docker_exec_is_transiently_unavailable() -> None:
+    tasks = load_tasks(ROLE_TASKS)
+    trusted_domains_task = next(task for task in tasks if task.get("name") == "Ensure Nextcloud trusted domains include the public hostname")
+    redis_password_task = next(task for task in tasks if task.get("name") == "Ensure Nextcloud Redis password is configured")
+
+    assert trusted_domains_task["retries"] == "{{ nextcloud_occ_command_retries | int }}"
+    assert trusted_domains_task["delay"] == "{{ nextcloud_occ_command_delay_seconds | int }}"
+    assert trusted_domains_task["until"] == "nextcloud_trusted_domains_result.rc == 0"
+    assert redis_password_task["until"] == "nextcloud_redis_password_result.rc == 0"
 
 
 def test_postgres_role_provisions_named_database_and_role() -> None:
