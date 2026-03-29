@@ -11,6 +11,7 @@ The recovery anchor is `backup-lv3` (VM `160`). Recover that VM first from off-s
 - platform RTO: `< 4h`
 - platform RPO: `< 24h`
 - readiness report: `make dr-status`
+- backup coverage evidence: `make backup-coverage-ledger`
 - release-readiness view: `lv3 release status`
 
 ## Preconditions
@@ -114,6 +115,13 @@ Show the repo-managed DR posture:
 make dr-status
 ```
 
+Refresh the ADR 0271 coverage ledger if the recovery exercise changed backup
+coverage on the live host:
+
+```bash
+make backup-coverage-ledger
+```
+
 Show release-readiness including the DR review criterion:
 
 ```bash
@@ -143,4 +151,10 @@ When these are set, `make configure-backup-vm` also converges:
 
 ## Current Gap
 
-As of the 2026-03-27 replay from `main`, ADR 0181 witness publication is live: `converge-control-plane-recovery` now republishes and re-verifies the off-host witness archive during the restore-drill workflow, and the latest durable witness receipt is `receipts/witness-replication/20260327T103801Z-dca744432518-control-metadata-witness.json`. The remaining DR gap is the optional second copy of `backup-lv3` itself, which still depends on the `PROXMOX_DR_OFFSITE_*` credentials when a separate off-site backup target is desired.
+As of the ADR 0271 rollout, the backup coverage ledger makes the remaining
+host-loss gap explicit instead of leaving it in prose: `backup-lv3` stays
+`uncovered` until `lv3-backup-offsite` exists live and carries fresh VM `160`
+evidence. ADR 0181 witness publication is already live, so the remaining DR gap
+is specifically the optional second copy of `backup-lv3`, which still depends
+on the `PROXMOX_DR_OFFSITE_*` credentials when a separate off-site backup target
+is desired.

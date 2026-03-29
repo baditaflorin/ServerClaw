@@ -1,9 +1,10 @@
 # ADR 0272: Restore Readiness Ladders And Stateful Warm-Up Verification Profiles
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.75
+- Implemented In Platform Version: 0.130.51
+- Implemented On: 2026-03-29
 - Date: 2026-03-28
 
 ## Context
@@ -61,6 +62,23 @@ We will verify restores through **readiness ladders** and
 - This ADR governs restore verification semantics after backup selection.
 - It does not replace backup coverage policy or general production health
   semantics.
+
+## Live Apply Notes
+
+- The governed profile catalog now drives restore-readiness budgets for the
+  protected service classes, so restore receipts record the highest completed
+  stage, the warm-up attempts used, and whether synthetic replay was eligible.
+- The exact-main replay recorded in
+  `receipts/restore-verifications/2026-03-29.json` verified the new semantics
+  on the live platform from the newest `origin/main` baseline: `postgres-lv3`
+  failed at `restore_completed` during the PBS restore step,
+  `docker-runtime-lv3` failed at `restore_completed` during `pbs-restore`, and
+  `backup-lv3` failed at `restore_completed` because no PBS backups were
+  available for selection.
+- The canonical integrated live-apply evidence is
+  `receipts/live-applies/2026-03-29-adr-0272-restore-readiness-mainline-live-apply.json`,
+  which records the latest-main replay, the repo validation sweep, and the
+  post-run cleanup proof for the temporary restore VMIDs.
 
 ## Related ADRs
 

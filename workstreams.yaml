@@ -93,6 +93,72 @@ workstreams:
         cache VM from ADR 0296 as a later live-apply step
       release_bump: patch
       included_in_repo_version: 0.177.73
+  - id: ws-0272-live-apply
+    adr: "0272"
+    title: Restore readiness ladders and stateful warm-up verification profiles
+    status: live_applied
+    owner: codex
+    branch: codex/adr-0272-restore-readiness-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0272-restore-readiness
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0272-live-apply.md
+    depends_on:
+      - adr-0099-backup-restore-verification
+      - adr-0190-synthetic-transaction-replay
+      - adr-0246-startup-readiness-liveness-and-degraded-state-semantics
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0272-live-apply.md
+      - docs/adr/0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/backup-restore-verification.md
+      - .config-locations.yaml
+      - config/restore-readiness-profiles.json
+      - docs/schema/restore-readiness-profiles.schema.json
+      - scripts/restore_verification.py
+      - scripts/validate_repository_data_models.py
+      - config/workflow-catalog.json
+      - tests/test_restore_verification.py
+      - receipts/restore-verifications/
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: adr_0272_docs
+          paths:
+            - docs/workstreams/ws-0272-live-apply.md
+            - docs/adr/0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md
+            - docs/runbooks/backup-restore-verification.md
+            - .config-locations.yaml
+          mode: exclusive
+        - id: adr_0272_restore_automation
+          paths:
+            - config/restore-readiness-profiles.json
+            - docs/schema/restore-readiness-profiles.schema.json
+            - scripts/restore_verification.py
+            - scripts/validate_repository_data_models.py
+            - config/workflow-catalog.json
+            - tests/test_restore_verification.py
+            - receipts/restore-verifications/
+            - receipts/live-applies/
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0272 by adding governed restore-readiness ladders, per-service warm-up profiles, ladder-aware restore receipts, and verified live restore evidence for the protected guests
+      release_bump: patch
+      included_in_repo_version: 0.177.75
+      latest_receipts:
+        restore_verification: 2026-03-29-adr-0272-restore-readiness-mainline-live-apply
   - id: ws-0224-repo-intake
     adr: "0224"
     title: Self-service repo intake and agent-assisted app deployments
@@ -10473,3 +10539,50 @@ workstreams:
       latest_receipts:
         monitoring: 2026-03-28-adr-0250-log-queryability-canary-live-apply
         log_queryability_canary: 2026-03-28-adr-0250-log-queryability-canary-live-apply
+  - id: ws-0271-live-apply
+    adr: "0271"
+    title: Backup coverage assertion ledger live apply
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0271-backup-coverage-ledger
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0271-backup-coverage-ledger
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0271-live-apply.md
+    depends_on:
+      - adr-0029-dedicated-backup-vm
+      - adr-0099-backup-restore-verification
+      - adr-0100-disaster-recovery-playbook
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0271-live-apply.md
+      - docs/adr/0271-backup-coverage-assertion-ledger-and-backup-of-backup-policy.md
+      - docs/runbooks/backup-coverage-ledger.md
+      - docs/runbooks/configure-backup-vm.md
+      - docs/runbooks/disaster-recovery.md
+      - .config-locations.yaml
+      - Makefile
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - config/windmill/scripts/backup-coverage-ledger.py
+      - collections/ansible_collections/lv3/platform/roles/proxmox_backups/defaults/main.yml
+      - scripts/backup_coverage_ledger.py
+      - scripts/generate_dr_report.py
+      - tests/test_backup_coverage_ledger.py
+      - tests/test_backup_coverage_ledger_windmill.py
+      - tests/test_disaster_recovery.py
+      - receipts/backup-coverage/**
+      - receipts/live-applies/2026-03-29-adr-0271-backup-coverage-ledger-live-apply.json
+      - receipts/live-applies/2026-03-29-adr-0271-backup-coverage-ledger-mainline-live-apply.json
+      - docs/adr/.index.yaml
+      - README.md
+      - VERSION
+      - changelog.md
+      - versions/stack.yaml
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0271 by adding a receipt-backed backup coverage ledger, extending nightly PBS protection to coolify-lv3 on VM 170, and surfacing the remaining backup-lv3 off-site gap explicitly in disaster recovery readiness
+      release_bump: patch
+      included_in_repo_version: 0.177.75
+      latest_receipts:
+        backup_coverage: 2026-03-29-adr-0271-backup-coverage-ledger-mainline-live-apply

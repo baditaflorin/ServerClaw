@@ -1,9 +1,10 @@
 # ADR 0271: Backup Coverage Assertion Ledger And Backup-Of-Backup Policy
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Live on production from main
+- Implemented In Repo Version: 0.177.75
+- Implemented In Platform Version: 0.130.51
+- Implemented On: 2026-03-29
 - Date: 2026-03-28
 
 ## Context

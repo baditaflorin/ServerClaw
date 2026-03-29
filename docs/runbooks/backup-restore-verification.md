@@ -4,6 +4,8 @@ ADR 0099 adds a repository-managed restore verification workflow that restores t
 
 ADR 0190 extends the `docker-runtime-lv3` portion of that flow with a privacy-safe synthetic transaction replay so recovery validation records request success rate and latency distribution instead of only single-shot smoke checks.
 
+ADR 0272 extends the same workflow with restore-readiness ladders and governed warm-up profiles so receipts record the highest completed recovery stage instead of only a binary final result.
+
 ## Entry Points
 
 - local run: `make restore-verification`
@@ -37,15 +39,42 @@ Each restore uses the staging bridge and IP assignments already defined for the 
 2. Select one backup per target from the last 7 days.
 3. Restore the backup into VMIDs `900` to `902`.
 4. Rewire the restored guest to `vmbr20`, keep the original MAC, refresh cloud-init, and boot it.
-5. Wait for SSH through the Proxmox jump path.
+5. Wait for the guest access path (`ssh` first, then `qga` fallback) to become usable.
 6. Optionally stage an ADR 0187 seed snapshot under `/var/lib/lv3-seed-data/restore-verification/<vm-name>/`.
-7. Run guest-local smoke tests.
-8. Replay the ADR 0190 synthetic control-plane transactions on the restored `docker-runtime-lv3` target after warm-up completes.
-9. Write one JSON receipt under `receipts/restore-verifications/`.
-10. Emit the mutation-audit event and optional NATS plus Mattermost notifications.
-11. Destroy the restored VMs even when an earlier step fails.
+7. Apply the declared restore-readiness profile from `config/restore-readiness-profiles.json`.
+8. Record the readiness ladder stages:
+   - restore completed
+   - guest boot completed
+   - guest access path ready
+   - network and dependency path ready
+   - service-specific warm-up completed
+   - synthetic replay window passed
+9. Run repeated guest-local warm-up checks until the profile passes or its attempt budget is exhausted.
+10. Replay the ADR 0190 synthetic control-plane transactions only when the profile declares synthetic replay and the service-specific warm-up stage has already passed.
+11. Write one JSON receipt under `receipts/restore-verifications/`.
+12. Emit the mutation-audit event and optional NATS plus Mattermost notifications.
+13. Destroy the restored VMs even when an earlier step fails.
 
 If the restored guest boots but never exposes an SSH banner through the fixture bridge in time, the workflow falls back to Proxmox guest-agent (`qga`) execution for the guest-local smoke commands and synthetic replay. That keeps the rehearsal governed and repeatable without ad hoc host-side shelling into the restored VM.
+
+## Restore-Readiness Profiles
+
+The canonical restore-readiness catalog lives at `config/restore-readiness-profiles.json` and is validated against `docs/schema/restore-readiness-profiles.schema.json`.
+
+Current profiles:
+
+- `postgres`: waits briefly for PostgreSQL to settle, treats `postgres_ready` as the network and dependency gate, then requires the schema and dump checks to pass before the warm-up stage is complete.
+- `backup-vm`: waits briefly for PBS to settle, treats `backup_pbs_port` as the network gate, then requires `proxmox-backup-manager datastore list` to pass before the warm-up stage is complete.
+- `docker-runtime`: waits for the restored runtime to settle, retries Keycloak, NetBox, and Windmill local readiness until they all pass or the profile budget is exhausted, then replays the governed `restore-docker-runtime` synthetic transaction window.
+
+Each receipt now records:
+
+- `readiness_profile`
+- `readiness_ladder`
+- `warm_up_attempts`
+- `summary.highest_completed_stage_counts`
+
+That evidence makes it clear whether a restore failed before guest access, during service warm-up, or only after the replay window began.
 
 ## Smoke Tests
 
@@ -90,6 +119,7 @@ If `--publish-nats` is set, the workflow emits:
 
 - `python3 -m py_compile scripts/restore_verification.py scripts/synthetic_transaction_replay.py scripts/smoke_tests/postgres_smoke.py scripts/smoke_tests/docker_runtime_smoke.py scripts/smoke_tests/backup_vm_smoke.py config/windmill/scripts/restore-verification.py`
 - `uv run --with pytest --with pyyaml pytest tests/test_restore_verification.py tests/test_restore_verification_windmill.py tests/test_synthetic_transaction_replay.py -q`
+- `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
 - `python3 scripts/synthetic_transaction_replay.py --target restore-docker-runtime --dry-run`
 - `uv run --with pyyaml python scripts/restore_verification.py --help`
 
