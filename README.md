@@ -147,6 +147,12 @@ client API serves at `https://matrix.lv3.org`, the governed controller path
 stays available at `http://100.64.0.1:8015`, and the 2026-03-29 exact-main
 replay re-verified public login plus the corrected internal-edge HTTPS
 assurance path from `monitoring-lv3`.
+ADR 0260 Nextcloud is now live on production from `main`: `https://cloud.lv3.org/status.php`
+returns `installed=true`, the published `/.well-known/caldav` and
+`/.well-known/carddav` routes redirect to `https://cloud.lv3.org/remote.php/dav/`,
+and the 2026-03-30 exact-main replay on release `0.177.91` re-verified the
+guest-local `10.10.10.20:8084` runtime together with the shared OpenBao
+publication-recovery path.
 ADR 0295 shared artifact cache plane is now live on production: `docker-build-lv3`
 now serves internal pull-through mirrors on `10.10.10.30:5001-5004`, the
 2026-03-29 exact-main replay re-warmed a repo-derived `41`-image seed set, and
@@ -173,7 +179,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.91` |
-| Platform version | `0.130.60` |
+| Platform version | `0.130.61` |
 | Observed check date | `2026-03-29` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -282,7 +288,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `n8n` | `2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply` |
 | `netbox` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `network_impairment_matrix` | `2026-03-27-adr-0189-network-impairment-matrix-live-apply` |
-| `nextcloud` | `2026-03-29-adr-0260-nextcloud-personal-data-plane-mainline-live-apply` |
+| `nextcloud` | `2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply` |
 | `nomad_scheduler` | `2026-03-29-adr-0232-nomad-mainline-live-apply` |
 | `notification_profiles` | `2026-03-22-adr-0050-notification-profiles-live-apply` |
 | `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
@@ -1354,7 +1360,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.91` |
-| Platform version | `0.130.60` |
+| Platform version | `0.130.61` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |

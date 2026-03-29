@@ -2,46 +2,63 @@
 
 - ADR: [ADR 0260](../adr/0260-nextcloud-as-the-canonical-personal-data-plane-for-serverclaw.md)
 - Title: Nextcloud personal data plane live apply from latest `origin/main`
-- Status: live_applied
+- Status: `live_applied`
 - Branch: `codex/ws-0260-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0260-live-apply`
 - Owner: codex
+- Included In Repo Version: 0.177.91
+- Canonical Mainline Receipt: `receipts/live-applies/2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply.json`
 - Depends On: `adr-0206-ports-and-adapters-for-external-integrations`, `adr-0259-n8n-as-the-external-app-connector-fabric-for-serverclaw`
 - Conflicts With: none
-- Shared Surfaces: `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `scripts/restore_verification.py`, `collections/ansible_collections/lv3/platform/playbooks/nextcloud.yml`, `collections/ansible_collections/lv3/platform/plugins/filter/service_topology.py`, `collections/ansible_collections/lv3/platform/roles/nextcloud_postgres`, `collections/ansible_collections/lv3/platform/roles/nextcloud_runtime`, `collections/ansible_collections/lv3/platform/roles/nginx_edge_publication`, `config/ansible-execution-scopes.yaml`, `config/ansible-role-idempotency.yml`, `config/service-capability-catalog.json`, `config/subdomain-catalog.json`, `config/health-probe-catalog.json`, `config/secret-catalog.json`, `config/controller-local-secrets.json`, `config/image-catalog.json`, `config/dependency-graph.json`, `config/service-redundancy-catalog.json`, `config/data-catalog.json`, `config/slo-catalog.json`, `config/service-completeness.json`, `config/workflow-catalog.json`, `config/command-catalog.json`, `config/capability-contract-catalog.json`, `config/replaceability-review-catalog.json`, `config/grafana/dashboards/nextcloud.json`, `config/grafana/dashboards/slo-overview.json`, `config/alertmanager/rules/nextcloud.yml`, `config/prometheus/file_sd/slo_targets.yml`, `config/prometheus/rules/slo_alerts.yml`, `config/prometheus/rules/slo_rules.yml`, `config/uptime-kuma/monitors.json`, `Makefile`, `docs/runbooks/`, `receipts/image-scans/`, `receipts/live-applies/`, `workstreams.yaml`
 
-## Scope
+## Purpose
 
-- deploy Nextcloud on `docker-runtime-lv3` as the canonical personal data plane for files, WebDAV, CalDAV, and CardDAV
-- provision a dedicated PostgreSQL backend on `postgres-lv3`
-- publish `cloud.lv3.org` through the shared `nginx-lv3` edge with large-upload and DAV redirect support
-- capture repo-managed controller-local bootstrap artifacts and runtime secret injection for the service
-- verify public and guest-local health, DAV redirect behavior, background cron mode, and repo automation contracts from the latest synchronized `origin/main`
+Implement ADR 0260 by making Nextcloud the repo-managed personal data plane on
+`docker-runtime-lv3`, publishing `cloud.lv3.org` through the shared NGINX edge,
+and preserving enough branch-local state that a later exact-main replay can
+promote the service onto the protected `main` surfaces safely.
 
-## Non-Goals
+## Branch-Local Delivery
 
-- bumping `VERSION`, release sections in `changelog.md`, `versions/stack.yaml`, or the top-level integrated `README.md` before the final merge-to-`main` step
-- introducing a second identity provider or replacing app-native Nextcloud login with shared edge OIDC
-- redesigning the broader backup policy beyond the already-declared runtime filesystem and PostgreSQL protection model
+- `d10f8e008` added the repo-managed Nextcloud runtime, PostgreSQL backend,
+  edge publication, health probes, catalogs, and image-scan evidence.
+- `f796d47fd` hardened the earlier replay path.
+- `30d8109d8` and `bb26d6658` made the runtime recover stale compose networks
+  and missing Docker bridge chains instead of requiring manual Docker cleanup.
+- `fa3314228` and `fa41c419f` extended the shared OpenBao compose-env helper so
+  downstream consumers like Nextcloud can recover a detached local
+  `lv3-openbao` publication before runtime secret injection.
 
-## Planned Verification
+## Verification
 
-- `uv run --with pyyaml python3 scripts/generate_adr_index.py --write`
-- `python3 -m pytest -q tests/test_nextcloud_playbook.py tests/test_nextcloud_runtime_role.py tests/test_generate_platform_vars.py tests/test_nginx_edge_publication_role.py tests/test_service_topology_filters.py tests/test_postgres_vm_access_policy.py`
-- `make syntax-check-nextcloud`
-- `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
-- `python3 scripts/container_image_policy.py --validate`
-- `python3 scripts/service_completeness.py --service nextcloud`
-- `make generate-uptime-kuma-monitors`
-- `make converge-nextcloud`
-- `curl -fsS https://cloud.lv3.org/status.php`
-- `curl -fsSI https://cloud.lv3.org/.well-known/caldav`
-- `curl -fsSI https://cloud.lv3.org/.well-known/carddav`
-- `ansible docker-runtime-lv3 --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -m shell -a 'curl -fsS http://127.0.0.1:8084/status.php'`
-- `ansible docker-runtime-lv3 --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -m shell -a 'docker exec --user www-data nextcloud-app php occ config:app:get core backgroundjobs_mode'`
-- `ansible docker-runtime-lv3 --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -m shell -a 'docker exec --user www-data nextcloud-app php occ user:info ops --output=json'`
+- The first synchronized mainline proof on 2026-03-29 is preserved in
+  `receipts/live-applies/2026-03-29-adr-0260-nextcloud-personal-data-plane-mainline-live-apply.json`,
+  but it became non-canonical once `origin/main` advanced to release `0.177.90`.
+- The authoritative exact-main replay moved to release `0.177.91` from
+  integration source commit `9db57048717121e6a0d933d44e87ac3835551baf` after
+  refreshing this work onto `origin/main` commit
+  `f965aa3101fa2cd2260a8e6fda165f366365ed80`.
+- `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=nextcloud env=production`
+  completed successfully on that synchronized tree with final recap
+  `docker-runtime-lv3 ok=156 changed=4 failed=0 skipped=32`,
+  `nginx-lv3 ok=38 changed=4 failed=0 skipped=7`,
+  `postgres-lv3 ok=52 changed=0 failed=0 skipped=14`, and
+  `localhost ok=18 changed=0 failed=0 skipped=3`.
+- Public verification after the replay returned `installed=true` from
+  `https://cloud.lv3.org/status.php`, and both `/.well-known/caldav` plus
+  `/.well-known/carddav` returned `HTTP/2 301` with
+  `location: https://cloud.lv3.org/remote.php/dav/`.
+- Guest-local verification through the managed Proxmox jump path returned the
+  same `status.php` payload from `http://10.10.10.20:8084/status.php`, kept
+  `backgroundjobs_mode=cron`, confirmed `ops` as the enabled admin user, and
+  showed the published `0.0.0.0:8084->80/tcp` listener on `nextcloud-app`.
+- Follow-up container-health inspection confirmed both `nextcloud-redis` and
+  `nextcloud-openbao-agent` reached `Status: healthy` after the replay.
 
-## Notes
+## Outcome
 
-- The branch-local work can add all ADR-local, workstream-local, and service-local state needed for a safe merge.
-- The final exact-main replay completed on 2026-03-29 from `codex/ws-0260-main-integration` at commit `01cb6cc3e3eec452fda4be04809216714492b5e5`, after merging the latest realistic `origin/main` release baseline `34559f5910c50f3ffe0cea2cd6701efc08302ffc`.
+- ADR 0260 is now implemented on integrated repo version `0.177.91` and live
+  platform version `0.130.61`.
+- `receipts/live-applies/2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply.json`
+  supersedes the earlier 2026-03-29 mainline receipt as the canonical proof
+  for `nextcloud`.

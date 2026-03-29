@@ -110,6 +110,7 @@ These files are generated and mirrored by the repo-managed roles. They are not c
 - CalDAV and CardDAV clients must use the published `/.well-known/caldav` and `/.well-known/carddav` redirects rather than hard-coding internal DAV paths.
 - Background jobs must remain in `cron` mode because the repo-managed cron sidecar is the supported automation path.
 - The governed Nextcloud workflow now repairs stale compose-network state before restart and restores missing Docker bridge filter chains before the runtime verification step, so a missing `0.0.0.0:8084` listener or broken container egress should be handled by rerunning the managed path rather than by manual Docker surgery.
+- The shared OpenBao compose-env helper now also recovers a detached local `lv3-openbao` publication before it rewrites the Nextcloud runtime env, so a dead `http://127.0.0.1:8201` bootstrap path after Docker drift should be fixed by rerunning the managed Nextcloud workflow instead of hand-recreating OpenBao.
 - If the host loses the `DOCKER` or `DOCKER-FORWARD` nftables chains after an out-of-band Docker restart or firewall drift, rerun `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=nextcloud env=production` on `main` so the repo-managed bridge-chain recovery and publication assurance checks restore the canonical state.
 
 ## Rollback

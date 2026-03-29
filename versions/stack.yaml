@@ -1,6 +1,6 @@
 schema_version: 1.0.0
 repo_version: 0.177.91
-platform_version: 0.130.60
+platform_version: 0.130.61
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -54,6 +54,7 @@ live_apply_evidence:
     netbox: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
     keycloak: 2026-03-26-adr-0171-fault-injection-live-apply
     n8n: 2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply
+    nextcloud: 2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply
     platform_context: 2026-03-28-adr-0198-semantic-rag-mainline-live-apply
     ntopng: 2026-03-22-adr-0059-ntopng-live-apply
     open_webui: 2026-03-25-adr-0145-open-webui-ollama-connector-live-apply
@@ -119,7 +120,6 @@ live_apply_evidence:
     validation_gate: 2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply
     matrix_synapse: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
     stage_smoke_suites: 2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
-    nextcloud: 2026-03-29-adr-0260-nextcloud-personal-data-plane-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -1041,5 +1041,5 @@ release_tracks:
     current: 0.177.91
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.60
+    current: 0.130.61
     meaning: intended platform release for the actual server configuration
