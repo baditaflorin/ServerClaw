@@ -24,7 +24,7 @@ from public_surface_scan import (
 DEFAULT_RECEIPT_DIR = repo_path("receipts", "https-tls-assurance")
 DEFAULT_ARTIFACTS_ROOT = repo_path(".local", "https-tls-assurance")
 DEFAULT_TESTSSL_IMAGE = "ghcr.io/testssl/testssl.sh:latest"
-DEFAULT_TIMEOUT_SECONDS = 60
+DEFAULT_TIMEOUT_SECONDS = 120
 
 
 def relative_repo_path(path: Path) -> str:
