@@ -4276,7 +4276,7 @@ adr_index:
   - adr: 0249
     title: HTTPS And TLS Assurance Via Blackbox Exporter And testssl.sh
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: security
     keywords:
@@ -4289,6 +4289,7 @@ adr_index:
       - sh
     summary: We will use Prometheus Blackbox Exporter for recurring protocol-level probe
     filename: 0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md
+    implemented_version: 0.177.81
   - adr: '0250'
     title: Log Ingestion And Queryability Canaries Via Loki Canary
     status: Accepted

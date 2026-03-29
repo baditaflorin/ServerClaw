@@ -1,0 +1,5 @@
+  594 /etc/prometheus/file_sd/https-tls-targets.yml
+ 1509 /etc/prometheus/rules/https-tls-alerts.yml
+ 2103 total
+-rw-r--r-- 1 root prometheus 16639 Mar 29 14:29 /etc/prometheus/file_sd/https-tls-targets.yml
+-rw-r--r-- 1 root prometheus 65667 Mar 29 14:29 /etc/prometheus/rules/https-tls-alerts.yml

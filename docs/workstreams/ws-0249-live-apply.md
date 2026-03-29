@@ -3,10 +3,10 @@
 - ADR: [ADR 0249](../adr/0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md)
 - Title: live apply HTTPS and TLS assurance through Prometheus blackbox probes and periodic `testssl.sh` scans
 - Status: live_applied
-- Implemented In Repo Version: 0.177.54
-- Live Applied In Platform Version: 0.130.43
-- Implemented On: 2026-03-28
-- Live Applied On: 2026-03-28
+- Implemented In Repo Version: 0.177.81
+- Live Applied In Platform Version: 0.130.55
+- Implemented On: 2026-03-29
+- Live Applied On: 2026-03-29
 - Branch: `codex/ws-0249-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0249-live-apply`
 - Owner: codex
@@ -27,18 +27,19 @@
 
 ## Verification
 
-- `python3 -m py_compile scripts/https_tls_assurance.py config/windmill/scripts/https-tls-assurance.py`
-- `uv run --with pytest --with pyyaml pytest -q tests/test_https_tls_assurance_windmill_wrapper.py tests/test_https_tls_assurance_targets.py tests/test_monitoring_vm_role.py tests/test_guest_observability_role.py tests/test_guest_log_shipping_playbook.py tests/test_loki_log_agent_role.py` returned `19 passed in 0.36s`
+- `python3 -m py_compile scripts/https_tls_assurance_targets.py scripts/generate_https_tls_assurance.py scripts/https_tls_assurance.py config/windmill/scripts/https-tls-assurance.py`
+- `uv run --with pytest --with pyyaml pytest -q tests/test_https_tls_assurance_targets.py tests/test_https_tls_assurance_windmill_wrapper.py tests/test_monitoring_vm_role.py tests/test_guest_observability_role.py tests/test_guest_log_shipping_playbook.py tests/test_loki_log_agent_role.py` returned `22 passed in 0.50s`
 - `make validate-generated-https-tls-assurance`
 - `make syntax-check-monitoring`
 - `./scripts/validate_repo.sh alert-rules agent-standards`
 - `make preflight WORKFLOW=converge-monitoring`
 - `make converge-monitoring`
-- SSH verification on `monitoring-lv3` confirmed the Prometheus HTTPS/TLS targets file, alert rules file, active monitoring services, 31 active `https-tls-blackbox` targets, and 93 loaded `https_tls_assurance` rules
-- `make https-tls-assurance ENV=production` recorded branch-local receipts for both the accepted 60-second timeout budget and the rejected 120-second experiment
+- SSH verification on `proxmox_florin` and `monitoring-lv3` confirmed kernel `6.17.13-2-pve`, `pve-manager/9.1.6`, active monitoring services, the Prometheus HTTPS/TLS targets file, the alert rules file, 33 active `https-tls-blackbox` targets, and 99 loaded `https_tls_assurance` rules
+- `uv run --with pyyaml python scripts/https_tls_assurance.py --env production --skip-testssl --print-report-json` recorded clean discovery receipt `20260329T151822Z` with `33` discovered targets
+- `make https-tls-assurance ENV=production` recorded receipt `20260329T151359Z` with `33` targets in `677.4` seconds, status `warn`, `11` medium `tls.scan_timeout` findings, and no high or critical findings
 
 ## Notes For The Next Assistant
 
-- The branch-local live apply is complete and recorded in `receipts/live-applies/2026-03-28-adr-0249-https-tls-assurance-live-apply.json`.
-- The protected integration files still need to wait for the final merge-to-main step on the latest `origin/main`.
-- The 2026-03-28 timeout comparison showed that raising `testssl.sh` from 60 seconds to 120 seconds increased timeout findings from 16 to 26 surfaces and nearly doubled total runtime, so this branch intentionally keeps the 60-second default.
+- The canonical merge-to-main receipt is `receipts/live-applies/2026-03-29-adr-0249-https-tls-assurance-mainline-live-apply.json`; the older 2026-03-28 branch-local receipt remains as historical comparison evidence.
+- While the 2026-03-29 `testssl.sh` replay was running, `origin/main` advanced by ADR-only commits `49952dc7` and `c0acb8a8`; this workstream was rebased onto them without another live replay because those commits only changed ADR documents and the generated ADR index.
+- The 2026-03-29 60-second production replay completed faster and with fewer timeouts than the earlier 2026-03-28 comparison baseline, so this branch keeps the 60-second default.
