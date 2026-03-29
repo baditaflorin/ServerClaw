@@ -260,3 +260,125 @@ def test_assure_docker_publication_allows_listener_warmup_after_partial_compose_
     assert result["ok"] is True
     assert result["compose_recreated"] is False
     assert result["summary"] == "docker publication primitives recovered; listener warm-up deferred to readiness verification"
+
+
+class PostComposeChainLossRunner:
+    def __init__(self) -> None:
+        self.compose_attempts = 0
+        self.docker_restarts = 0
+
+    def __call__(self, argv: list[str], cwd: str | None) -> tool.CommandResult:
+        if argv == ["hostname", "-I"]:
+            return tool.CommandResult(argv=argv, returncode=0, stdout="10.10.10.20", stderr="", cwd=cwd)
+        if argv[:3] == ["docker", "info", "--format"]:
+            return tool.CommandResult(argv=argv, returncode=0, stdout="28.0.4", stderr="", cwd=cwd)
+        if argv[:4] == ["iptables", "-t", "nat", "-S"]:
+            chain_present = self.compose_attempts == 0 or self.docker_restarts > 0
+            return tool.CommandResult(
+                argv=argv,
+                returncode=0 if chain_present else 1,
+                stdout="-N DOCKER" if chain_present else "",
+                stderr="",
+                cwd=cwd,
+            )
+        if argv[:4] == ["iptables", "-t", "filter", "-S"]:
+            chain_present = self.compose_attempts == 0 or self.docker_restarts > 0
+            return tool.CommandResult(
+                argv=argv,
+                returncode=0 if chain_present else 1,
+                stdout="-N DOCKER-FORWARD" if chain_present else "",
+                stderr="",
+                cwd=cwd,
+            )
+        if argv == ["systemctl", "restart", "docker"]:
+            self.docker_restarts += 1
+            return tool.CommandResult(argv=argv, returncode=0, stdout="", stderr="", cwd=cwd)
+        if argv[:2] == ["docker", "compose"]:
+            self.compose_attempts += 1
+            return tool.CommandResult(
+                argv=argv,
+                returncode=0 if self.compose_attempts > 1 else 1,
+                stdout="recreated" if self.compose_attempts > 1 else "",
+                stderr="Container harbor-log failed to start" if self.compose_attempts == 1 else "",
+                cwd=cwd,
+            )
+        if argv[:3] == ["docker", "network", "inspect"]:
+            return tool.CommandResult(argv=argv, returncode=0, stdout="[]", stderr="", cwd=cwd)
+        if argv[:2] == ["docker", "inspect"]:
+            payload = [
+                {
+                    "HostConfig": {
+                        "NetworkMode": "bridge",
+                        "PortBindings": {
+                            "8080/tcp": [
+                                {"HostIp": "", "HostPort": "8095"},
+                                {"HostIp": "10.10.10.20", "HostPort": "8095"},
+                            ]
+                        },
+                    },
+                    "Config": {
+                        "Labels": {
+                            "com.docker.compose.project": "harbor",
+                            "com.docker.compose.project.working_dir": "/opt/harbor",
+                            "com.docker.compose.project.config_files": "docker-compose.yml",
+                        }
+                    },
+                    "NetworkSettings": {
+                        "Ports": {},
+                        "Networks": {"harbor_harbor": {}},
+                    },
+                }
+            ]
+            return tool.CommandResult(argv=argv, returncode=0, stdout=json.dumps(payload), stderr="", cwd=cwd)
+        raise AssertionError(f"Unexpected command: {argv}")
+
+
+def test_assure_docker_publication_recovers_when_compose_recreate_drops_docker_chains() -> None:
+    runner = PostComposeChainLossRunner()
+    service_probe = {
+        "liveness": {
+            "kind": "http",
+            "url": "http://127.0.0.1:8095/api/v2.0/ping",
+            "method": "GET",
+            "timeout_seconds": 10,
+        },
+        "readiness": {
+            "kind": "http",
+            "url": "https://registry.lv3.org/api/v2.0/ping",
+            "method": "GET",
+            "timeout_seconds": 10,
+            "docker_publication": {
+                "container_name": "nginx",
+                "bindings": [{"host": "10.10.10.20", "port": 8095}],
+                "required_networks": ["harbor_harbor"],
+            },
+        },
+    }
+
+    def listener_checker(host: str, port: int, timeout: float) -> bool:
+        del timeout
+        return runner.compose_attempts > 1 and (host, port) in {
+            ("127.0.0.1", 8095),
+            ("10.10.10.20", 8095),
+        }
+
+    result = tool.assure_docker_publication(
+        service_id="harbor",
+        service_probe=service_probe,
+        contract=service_probe["readiness"]["docker_publication"],
+        heal=True,
+        allow_listener_warmup_after_heal=True,
+        command_runner=runner,
+        listener_checker=listener_checker,
+    )
+
+    assert result["ok"] is True
+    assert result["healed"] is True
+    assert result["compose_recreated"] is True
+    assert [action["action"] for action in result["actions"]] == [
+        "compose_force_recreate",
+        "restart_docker",
+        "wait_for_docker",
+        "compose_force_recreate",
+    ]
+    assert result["summary"] == "docker publication contract is satisfied"

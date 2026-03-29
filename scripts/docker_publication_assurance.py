@@ -461,6 +461,24 @@ def _restart_docker(command_runner: CommandRunner) -> CommandResult:
     return command_runner(["systemctl", "restart", "docker"], None)
 
 
+def _record_docker_restart_and_wait(
+    *,
+    report: dict[str, Any],
+    contract: dict[str, Any],
+    actions: list[dict[str, Any]],
+    command_runner: CommandRunner,
+) -> bool:
+    restart_result = _restart_docker(command_runner)
+    actions.append({"action": "restart_docker", "result": _command_record(restart_result)})
+    waited = _wait_for_docker_chain_state(
+        require_nat_chain=bool(contract.get("require_nat_chain", report["network_mode"] != "host")),
+        require_forward_chain=bool(contract.get("require_forward_chain", report["network_mode"] != "host")),
+        command_runner=command_runner,
+    )
+    actions.append({"action": "wait_for_docker", "result": waited})
+    return restart_result.returncode == 0
+
+
 def _recreate_compose_project(
     *,
     compose_working_directory: str | None,
@@ -505,15 +523,12 @@ def assure_docker_publication(
 
     if heal and _has_blocking_issues(before, strict_listeners=True):
         if before["container_present"] and (before["issues"]["missing_nat_chain"] or before["issues"]["missing_forward_chain"]):
-            restart_result = _restart_docker(command_runner)
-            actions.append({"action": "restart_docker", "result": _command_record(restart_result)})
-            healed = restart_result.returncode == 0 or healed
-            waited = _wait_for_docker_chain_state(
-                require_nat_chain=bool(contract.get("require_nat_chain", before["network_mode"] != "host")),
-                require_forward_chain=bool(contract.get("require_forward_chain", before["network_mode"] != "host")),
+            healed = _record_docker_restart_and_wait(
+                report=before,
+                contract=contract,
+                actions=actions,
                 command_runner=command_runner,
-            )
-            actions.append({"action": "wait_for_docker", "result": waited})
+            ) or healed
 
         intermediate = _run_checks(
             service_id=service_id,
@@ -546,6 +561,47 @@ def assure_docker_publication(
             listener_timeout=listener_timeout,
         )
 
+        if compose_recreate_attempted and after["container_present"] and (
+            after["issues"]["missing_nat_chain"] or after["issues"]["missing_forward_chain"]
+        ):
+            healed = _record_docker_restart_and_wait(
+                report=after,
+                contract=contract,
+                actions=actions,
+                command_runner=command_runner,
+            ) or healed
+
+            recovery = _run_checks(
+                service_id=service_id,
+                service_probe=service_probe,
+                contract=contract,
+                local_ipv4s=local_ipv4s,
+                command_runner=command_runner,
+                listener_checker=listener_checker,
+                listener_timeout=listener_timeout,
+            )
+
+            if recovery["container_present"] and _has_blocking_issues(recovery, strict_listeners=True):
+                recreate_result = _recreate_compose_project(
+                    compose_working_directory=recovery["compose_working_directory"],
+                    compose_files=recovery["compose_files"],
+                    command_runner=command_runner,
+                )
+                actions.append({"action": "compose_force_recreate", "result": _command_record(recreate_result)})
+                compose_recreated = recreate_result.returncode == 0 or compose_recreated
+                healed = recreate_result.returncode == 0 or healed
+                recovery = _run_checks(
+                    service_id=service_id,
+                    service_probe=service_probe,
+                    contract=contract,
+                    local_ipv4s=local_ipv4s,
+                    command_runner=command_runner,
+                    listener_checker=listener_checker,
+                    listener_timeout=listener_timeout,
+                )
+
+            after = recovery
+
     strict_listeners_after = not (
         heal and allow_listener_warmup_after_heal and (compose_recreated or compose_recreate_attempted)
     )
@@ -561,9 +617,12 @@ def assure_docker_publication(
         summary_bits.append("bridge networks missing")
     if after["issues"]["missing_port_bindings"]:
         summary_bits.append("port bindings missing")
-    if strict_listeners_after and after["issues"]["missing_listeners"]:
-        summary_bits.append("listeners missing")
-    if heal and not strict_listeners_after and after["issues"]["missing_listeners"]:
+    if after["issues"]["missing_listeners"]:
+        if heal and not strict_listeners_after and not summary_bits:
+            summary = "docker publication primitives recovered; listener warm-up deferred to readiness verification"
+        else:
+            summary_bits.append("listeners missing")
+    if after["issues"]["missing_listeners"] and heal and not strict_listeners_after and not summary_bits:
         summary = "docker publication primitives recovered; listener warm-up deferred to readiness verification"
     elif not summary_bits:
         summary = "docker publication contract is satisfied"
