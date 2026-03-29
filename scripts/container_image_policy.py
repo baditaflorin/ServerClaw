@@ -41,6 +41,16 @@ def require_str(value: Any, path: str) -> str:
     return value
 
 
+def require_string_list(value: Any, path: str) -> list[str]:
+    items = require_list(value, path)
+    if not items:
+        raise ValueError(f"{path} must not be empty")
+    output: list[str] = []
+    for index, item in enumerate(items):
+        output.append(require_str(item, f"{path}[{index}]"))
+    return output
+
+
 def require_date(value: Any, path: str) -> str:
     value = require_str(value, path)
     if not DATE_PATTERN.match(value):
@@ -63,6 +73,17 @@ def require_digest(value: Any, path: str) -> str:
 
 def load_image_catalog() -> dict:
     return load_json(IMAGE_CATALOG_PATH)
+
+
+def validate_exception_metadata(exception: dict, path: str) -> None:
+    require_str(exception.get("owner"), f"{path}.owner")
+    require_str(exception.get("justification"), f"{path}.justification")
+    require_string_list(exception.get("compensating_controls"), f"{path}.compensating_controls")
+    approved_on = require_date(exception.get("approved_on"), f"{path}.approved_on")
+    expires_on = require_date(exception.get("expires_on"), f"{path}.expires_on")
+    require_str(exception.get("remediation_plan"), f"{path}.remediation_plan")
+    if expires_on < approved_on:
+        raise ValueError(f"{path}.expires_on must be on or after approved_on")
 
 
 def validate_image_catalog(catalog: dict) -> None:
@@ -139,25 +160,20 @@ def validate_image_catalog(catalog: dict) -> None:
 
         exception = optional_mapping(entry.get("exception"), f"images.{image_id}.exception")
         critical_count = receipt["summary"]["critical"]
-        if critical_count == 0:
+        if exception is None:
+            if critical_count > 0:
+                raise ValueError(f"images.{image_id}.exception is required when critical findings are present")
             if scan_status != "pass_no_critical":
                 raise ValueError(
-                    f"images.{image_id}.scan_status must be 'pass_no_critical' when critical findings are zero"
+                    f"images.{image_id}.scan_status must be 'pass_no_critical' when no active exception is recorded"
                 )
-            if exception is not None:
-                raise ValueError(f"images.{image_id}.exception must be omitted when critical findings are zero")
             continue
 
+        validate_exception_metadata(exception, f"images.{image_id}.exception")
         if scan_status != "exception_open":
             raise ValueError(
-                f"images.{image_id}.scan_status must be 'exception_open' when critical findings are present"
+                f"images.{image_id}.scan_status must be 'exception_open' when an exception is recorded"
             )
-        if exception is None:
-            raise ValueError(f"images.{image_id}.exception is required when critical findings are present")
-        require_str(exception.get("reason"), f"images.{image_id}.exception.reason")
-        require_str(exception.get("owner"), f"images.{image_id}.exception.owner")
-        require_date(exception.get("approved_on"), f"images.{image_id}.exception.approved_on")
-        require_date(exception.get("review_by"), f"images.{image_id}.exception.review_by")
 
 
 def validate_scan_receipt(receipt: dict, path: Path, image_id: str, ref: str) -> None:

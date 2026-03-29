@@ -52,8 +52,12 @@ FQDN ?=
 WRITE ?= false
 APPLY ?= false
 EXCEPTION_REASON ?=
+EXCEPTION_JUSTIFICATION ?=
 EXCEPTION_OWNER ?=
 EXCEPTION_REVIEW_BY ?=
+EXCEPTION_EXPIRES_ON ?=
+EXCEPTION_CONTROLS_JSON ?=
+EXCEPTION_REMEDIATION_PLAN ?=
 SECRET_ID ?=
 ROTATION_ARGS ?=
 COLLECTION_NAMESPACE ?= lv3
@@ -339,7 +343,7 @@ check-image-freshness:
 
 upgrade-container-image:
 	@test -n "$(IMAGE_ID)" || (echo "set IMAGE_ID=<image-id>"; exit 1)
-	$(REPO_ROOT)/scripts/upgrade_container_image.py --image-id "$(IMAGE_ID)" $(if $(IMAGE_TAG),--tag "$(IMAGE_TAG)",) $(if $(filter true,$(WRITE)),--write,) $(if $(filter true,$(APPLY)),--apply,) $(if $(EXCEPTION_REASON),--exception-reason "$(EXCEPTION_REASON)",) $(if $(EXCEPTION_OWNER),--exception-owner "$(EXCEPTION_OWNER)",) $(if $(EXCEPTION_REVIEW_BY),--exception-review-by "$(EXCEPTION_REVIEW_BY)",)
+	$(REPO_ROOT)/scripts/upgrade_container_image.py --image-id "$(IMAGE_ID)" $(if $(IMAGE_TAG),--tag "$(IMAGE_TAG)",) $(if $(filter true,$(WRITE)),--write,) $(if $(filter true,$(APPLY)),--apply,) $(if $(EXCEPTION_JUSTIFICATION),--exception-justification "$(EXCEPTION_JUSTIFICATION)",) $(if $(EXCEPTION_REASON),--exception-reason "$(EXCEPTION_REASON)",) $(if $(EXCEPTION_OWNER),--exception-owner "$(EXCEPTION_OWNER)",) $(if $(EXCEPTION_EXPIRES_ON),--exception-expires-on "$(EXCEPTION_EXPIRES_ON)",) $(if $(EXCEPTION_REVIEW_BY),--exception-review-by "$(EXCEPTION_REVIEW_BY)",) $(if $(EXCEPTION_CONTROLS_JSON),--exception-controls-json '$(EXCEPTION_CONTROLS_JSON)',) $(if $(EXCEPTION_REMEDIATION_PLAN),--exception-remediation-plan "$(EXCEPTION_REMEDIATION_PLAN)",)
 
 pin-image:
 	@test -n "$(IMAGE)" || (echo "set IMAGE=<registry/repository:tag>"; exit 1)
@@ -1131,6 +1135,7 @@ live-apply-group:
 	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])bypass_promotion=true([[:space:]]|$$)'; then \
 		python3 $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "group:$(group)" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:group:$(group):$$(date -u +%Y%m%dT%H%M%SZ)"; \
 	fi
+	@if [ "$(env)" = "production" ]; then python3 $(REPO_ROOT)/scripts/vulnerability_budget.py --all; fi
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/groups/$(group).yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 
@@ -1142,6 +1147,7 @@ live-apply-service:
 	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])bypass_promotion=true([[:space:]]|$$)'; then \
 		python3 $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "$(service)" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:service:$(service):$$(date -u +%Y%m%dT%H%M%SZ)"; \
 	fi
+	@if [ "$(env)" = "production" ]; then python3 $(REPO_ROOT)/scripts/vulnerability_budget.py --service "$(service)"; fi
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/standby_capacity.py --service "$(service)"
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply --service "$(service)"
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/immutable_guest_replacement.py --check-live-apply --service "$(service)" $(if $(filter true,$(ALLOW_IN_PLACE_MUTATION)),--allow-in-place-mutation,)
@@ -1154,6 +1160,7 @@ live-apply-site:
 	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])bypass_promotion=true([[:space:]]|$$)'; then \
 		python3 $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "site" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:site:$$(date -u +%Y%m%dT%H%M%SZ)"; \
 	fi
+	@if [ "$(env)" = "production" ]; then python3 $(REPO_ROOT)/scripts/vulnerability_budget.py --all; fi
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/site.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 

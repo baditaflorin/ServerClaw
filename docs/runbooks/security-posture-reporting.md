@@ -35,6 +35,9 @@ uv run --with ansible-core --with pyyaml --with nats-py python scripts/security_
 The workflow:
 
 1. runs `playbooks/tasks/security-scan.yml` against the repo-managed Lynis targets
+   derived from the active production service catalog (`proxmox_florin`,
+   `docker-runtime-lv3`, `docker-build-lv3`, `backup-lv3`, `coolify-lv3`,
+   `postgres-lv3`, `nginx-lv3`, and `monitoring-lv3`)
 2. fetches each `report.dat` file into `.local/security-posture/lynis/`
 3. parses and suppresses known-acceptable Lynis findings
 4. SSHes to `docker-runtime-lv3` and `docker-build-lv3` and runs `scripts/trivy_scan_running_images.sh`
@@ -106,6 +109,8 @@ python3 scripts/security_posture_report.py --env production --print-report-json
 Confirm:
 
 - the newest file under `receipts/security-reports/` is valid JSON
-- each expected host has a hardening index
+- each expected active production host has a hardening index
 - each Docker host contributed image scan data
 - the ops portal shows the latest security receipt summary
+- `python3 scripts/vulnerability_budget.py --all` passes when no active
+  exceptions have expired

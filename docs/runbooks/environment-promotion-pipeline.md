@@ -25,6 +25,8 @@ Before running the promotion workflow, confirm:
 6. no open `critical` ADR 0071 finding exists for the service in `.local/platform-observation/latest/findings.json`
 7. at least one human operator approval is recorded for the `promote-to-production` command contract
 8. the shared policy bundle validates cleanly: `python3 scripts/policy_checks.py --validate`
+9. the ADR 0269 vulnerability gate passes for the target service:
+   `python3 scripts/vulnerability_budget.py --service <service-id>`
 
 ## Entrypoints
 
@@ -40,6 +42,8 @@ The promotion workflow manages these repo surfaces:
 
 - `scripts/promotion_pipeline.py`
 - `scripts/stage_smoke_suites.py`
+- `scripts/vulnerability_budget.py`
+- `config/vulnerability-budget-policy.json`
 - `policy/decisions/release_promotion.rego`
 - `scripts/policy_checks.py`
 - `receipts/live-applies/staging/`
@@ -52,7 +56,7 @@ The promotion workflow manages these repo surfaces:
 ## Promotion Flow
 
 1. `make validate` runs on the branch being promoted.
-2. The promotion gate validates the staged receipt path, freshness, verification outcomes, required stage smoke suites, command-catalog approval, capacity headroom, standby policy, and SLO state through one shared OPA decision input.
+2. The promotion gate validates the staged receipt path, freshness, verification outcomes, required stage smoke suites, command-catalog approval, vulnerability budgets, capacity headroom, standby policy, and SLO state through one shared OPA decision input.
 3. If the gate passes, `make live-apply-service service=<service-id> env=production` runs through the existing service playbook path.
 4. A production live-apply receipt is written under `receipts/live-applies/`, optionally carrying the staged `smoke_suites` evidence that justified the promotion.
 5. A promotion receipt is written under `receipts/promotions/` linking the staging evidence, `stage_smoke_gate` result, and the production mutation.
@@ -62,6 +66,7 @@ The promotion workflow manages these repo surfaces:
 Run these checks after implementing or changing the promotion flow:
 
 1. `python3 scripts/promotion_pipeline.py --validate`
+2. `python3 scripts/vulnerability_budget.py --service grafana`
 2. `python3 scripts/policy_checks.py --validate`
 3. `python3 scripts/stage_smoke_suites.py --validate`
 4. `python3 -m unittest discover -s tests -p 'test_promotion_pipeline.py'`

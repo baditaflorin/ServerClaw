@@ -43,10 +43,15 @@
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-03-28-dify-api-runtime.json",
       "exception": {
-        "reason": "The pinned upstream Dify API image reports critical and high Trivy findings in bundled Debian, Node.js, and embedded utility binaries; keep it digest-pinned and review on the next image rotation window.",
         "owner": "Platform operations",
+        "justification": "The pinned upstream Dify API image reports critical and high Trivy findings in bundled Debian, Node.js, and embedded utility binaries; keep it digest-pinned and review on the next image rotation window.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
+        ],
         "approved_on": "2026-03-28",
-        "review_by": "2026-04-11"
+        "expires_on": "2026-04-11",
+        "remediation_plan": "Re-scan and refresh dify_api_runtime with make upgrade-container-image IMAGE_ID=dify_api_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
@@ -71,10 +76,15 @@
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-03-28-dify-nginx-runtime.json",
       "exception": {
-        "reason": "The pinned upstream NGINX alpine image still reports critical and high Trivy findings in bundled Alpine packages; keep it digest-pinned and review at the next image refresh.",
         "owner": "Platform operations",
+        "justification": "The pinned upstream NGINX alpine image still reports critical and high Trivy findings in bundled Alpine packages; keep it digest-pinned and review at the next image refresh.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
+        ],
         "approved_on": "2026-03-28",
-        "review_by": "2026-04-11"
+        "expires_on": "2026-04-11",
+        "remediation_plan": "Re-scan and refresh dify_nginx_runtime with make upgrade-container-image IMAGE_ID=dify_nginx_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
@@ -99,10 +109,15 @@
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-03-28-dify-plugin-daemon-runtime.json",
       "exception": {
-        "reason": "The pinned upstream Dify plugin daemon image reports critical and high Trivy findings in bundled Debian and Python components; keep it digest-pinned and review on the next image rotation window.",
         "owner": "Platform operations",
+        "justification": "The pinned upstream Dify plugin daemon image reports critical and high Trivy findings in bundled Debian and Python components; keep it digest-pinned and review on the next image rotation window.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
+        ],
         "approved_on": "2026-03-28",
-        "review_by": "2026-04-11"
+        "expires_on": "2026-04-11",
+        "remediation_plan": "Re-scan and refresh dify_plugin_daemon_runtime with make upgrade-container-image IMAGE_ID=dify_plugin_daemon_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
@@ -127,10 +142,15 @@
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-03-28-dify-qdrant-runtime.json",
       "exception": {
-        "reason": "The pinned upstream Qdrant image reports critical and high Trivy findings in bundled Ubuntu packages and Rust-linked components; keep it digest-pinned and review on the next image rotation window.",
         "owner": "Platform operations",
+        "justification": "The pinned upstream Qdrant image reports critical and high Trivy findings in bundled Ubuntu packages and Rust-linked components; keep it digest-pinned and review on the next image rotation window.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
+        ],
         "approved_on": "2026-03-28",
-        "review_by": "2026-04-11"
+        "expires_on": "2026-04-11",
+        "remediation_plan": "Re-scan and refresh dify_qdrant_runtime with make upgrade-container-image IMAGE_ID=dify_qdrant_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
@@ -155,10 +175,15 @@
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-03-28-dify-redis-runtime.json",
       "exception": {
-        "reason": "The pinned upstream Redis alpine image reports critical and high Trivy findings in bundled Alpine packages; keep it digest-pinned and review on the next image rotation window.",
         "owner": "Platform operations",
+        "justification": "The pinned upstream Redis alpine image reports critical and high Trivy findings in bundled Alpine packages; keep it digest-pinned and review on the next image rotation window.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
+        ],
         "approved_on": "2026-03-28",
-        "review_by": "2026-04-11"
+        "expires_on": "2026-04-11",
+        "remediation_plan": "Re-scan and refresh dify_redis_runtime with make upgrade-container-image IMAGE_ID=dify_redis_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
@@ -293,10 +318,15 @@
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-03-25-homepage-runtime.json",
       "exception": {
-        "reason": "The current official Homepage image still reports critical and high Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
         "owner": "Platform operations",
+        "justification": "The current official Homepage image still reports critical and high Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
+        ],
         "approved_on": "2026-03-25",
-        "review_by": "2026-04-08"
+        "expires_on": "2026-04-08",
+        "remediation_plan": "Re-scan and refresh homepage_runtime with make upgrade-container-image IMAGE_ID=homepage_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "roles/homepage_runtime/templates/docker-compose.yml.j2",
@@ -343,10 +373,15 @@
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-03-25-langfuse-minio-runtime.json",
       "exception": {
-        "reason": "The pinned upstream MinIO image still reports critical Trivy findings in bundled Go binaries; keep it digest-pinned and review on the next image rotation window.",
         "owner": "Platform operations",
+        "justification": "The pinned upstream MinIO image still reports critical Trivy findings in bundled Go binaries; keep it digest-pinned and review on the next image rotation window.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
+        ],
         "approved_on": "2026-03-25",
-        "review_by": "2026-04-08"
+        "expires_on": "2026-04-08",
+        "remediation_plan": "Re-scan and refresh langfuse_minio_runtime with make upgrade-container-image IMAGE_ID=langfuse_minio_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "roles/langfuse_runtime/templates/docker-compose.yml.j2",
@@ -371,10 +406,15 @@
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-03-25-langfuse-redis-runtime.json",
       "exception": {
-        "reason": "The pinned upstream Redis image still reports critical Trivy findings in bundled OS and Go binary components; keep it digest-pinned and re-evaluate on the next image review.",
         "owner": "Platform operations",
+        "justification": "The pinned upstream Redis image still reports critical Trivy findings in bundled OS and Go binary components; keep it digest-pinned and re-evaluate on the next image review.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
+        ],
         "approved_on": "2026-03-25",
-        "review_by": "2026-04-08"
+        "expires_on": "2026-04-08",
+        "remediation_plan": "Re-scan and refresh langfuse_redis_runtime with make upgrade-container-image IMAGE_ID=langfuse_redis_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "roles/langfuse_runtime/templates/docker-compose.yml.j2",
@@ -399,10 +439,15 @@
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-03-25-langfuse-runtime.json",
       "exception": {
-        "reason": "The pinned upstream Langfuse web image still reports critical Trivy findings in the bundled migrate binary; keep it digest-pinned and re-evaluate on the next image review.",
         "owner": "Platform operations",
+        "justification": "The pinned upstream Langfuse web image still reports critical Trivy findings in the bundled migrate binary; keep it digest-pinned and re-evaluate on the next image review.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
+        ],
         "approved_on": "2026-03-25",
-        "review_by": "2026-04-08"
+        "expires_on": "2026-04-08",
+        "remediation_plan": "Re-scan and refresh langfuse_runtime with make upgrade-container-image IMAGE_ID=langfuse_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "roles/langfuse_runtime/templates/docker-compose.yml.j2",
@@ -596,10 +641,15 @@
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-03-25-n8n-runtime.json",
       "exception": {
-        "reason": "The current official upstream n8n image reports critical and high findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
         "owner": "Platform operations",
+        "justification": "The current official upstream n8n image reports critical and high findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
+        ],
         "approved_on": "2026-03-25",
-        "review_by": "2026-04-08"
+        "expires_on": "2026-04-08",
+        "remediation_plan": "Re-scan and refresh n8n_runtime with make upgrade-container-image IMAGE_ID=n8n_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "roles/n8n_runtime/templates/docker-compose.yml.j2",
@@ -740,10 +790,15 @@
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-03-22-open-webui-runtime.json",
       "exception": {
-        "reason": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
         "owner": "Platform operations",
+        "justification": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service remains private-only on mesh or guest-network addresses while the upstream image is being remediated."
+        ],
         "approved_on": "2026-03-22",
-        "review_by": "2026-04-05"
+        "expires_on": "2026-04-05",
+        "remediation_plan": "Re-scan and refresh open_webui_runtime with make upgrade-container-image IMAGE_ID=open_webui_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "roles/open_webui_runtime/templates/docker-compose.yml.j2",
@@ -768,10 +823,15 @@
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-03-22-openbao-runtime.json",
       "exception": {
-        "reason": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
         "owner": "Platform operations",
+        "justification": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service remains private-only on mesh or guest-network addresses while the upstream image is being remediated."
+        ],
         "approved_on": "2026-03-22",
-        "review_by": "2026-04-05"
+        "expires_on": "2026-04-05",
+        "remediation_plan": "Re-scan and refresh openbao_runtime with make upgrade-container-image IMAGE_ID=openbao_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "roles/openbao_runtime/templates/docker-compose.yml.j2",
@@ -818,10 +878,15 @@
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-03-27-outline-runtime.json",
       "exception": {
-        "reason": "The pinned upstream Outline image still reports critical Trivy findings in Debian 12 packages and bundled Node dependencies; keep it digest-pinned and re-evaluate on the next image review.",
         "owner": "Platform operations",
+        "justification": "The pinned upstream Outline image still reports critical Trivy findings in Debian 12 packages and bundled Node dependencies; keep it digest-pinned and re-evaluate on the next image review.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
+        ],
         "approved_on": "2026-03-27",
-        "review_by": "2026-04-10"
+        "expires_on": "2026-04-10",
+        "remediation_plan": "Re-scan and refresh outline_runtime with make upgrade-container-image IMAGE_ID=outline_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "roles/outline_runtime/templates/docker-compose.yml.j2",
@@ -1120,10 +1185,15 @@
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-03-22-portainer-runtime.json",
       "exception": {
-        "reason": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
         "owner": "Platform operations",
+        "justification": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service remains private-only on mesh or guest-network addresses while the upstream image is being remediated."
+        ],
         "approved_on": "2026-03-22",
-        "review_by": "2026-04-05"
+        "expires_on": "2026-04-05",
+        "remediation_plan": "Re-scan and refresh portainer_runtime with make upgrade-container-image IMAGE_ID=portainer_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "roles/portainer_runtime/templates/docker-compose.yml.j2",
@@ -1192,10 +1262,15 @@
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-03-25-semaphore-runtime.json",
       "exception": {
-        "reason": "The current official upstream image still reports high or critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
         "owner": "Platform operations",
+        "justification": "The current official upstream image still reports high or critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service remains private-only on mesh or guest-network addresses while the upstream image is being remediated."
+        ],
         "approved_on": "2026-03-25",
-        "review_by": "2026-04-08"
+        "expires_on": "2026-04-08",
+        "remediation_plan": "Re-scan and refresh semaphore_runtime with make upgrade-container-image IMAGE_ID=semaphore_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "roles/semaphore_runtime/templates/docker-compose.yml.j2",
@@ -1220,10 +1295,15 @@
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-03-22-step-ca-runtime.json",
       "exception": {
-        "reason": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
         "owner": "Platform operations",
+        "justification": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service remains private-only on mesh or guest-network addresses while the upstream image is being remediated."
+        ],
         "approved_on": "2026-03-22",
-        "review_by": "2026-04-05"
+        "expires_on": "2026-04-05",
+        "remediation_plan": "Re-scan and refresh step_ca_runtime with make upgrade-container-image IMAGE_ID=step_ca_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "roles/step_ca_runtime/templates/docker-compose.yml.j2",
@@ -1270,10 +1350,15 @@
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-03-22-uptime-kuma-runtime.json",
       "exception": {
-        "reason": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
         "owner": "Platform operations",
+        "justification": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
+        ],
         "approved_on": "2026-03-22",
-        "review_by": "2026-04-05"
+        "expires_on": "2026-04-05",
+        "remediation_plan": "Re-scan and refresh uptime_kuma_runtime with make upgrade-container-image IMAGE_ID=uptime_kuma_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "roles/uptime_kuma_runtime/templates/docker-compose.yml.j2",
@@ -1320,10 +1405,15 @@
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-03-22-windmill-extra-runtime.json",
       "exception": {
-        "reason": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
         "owner": "Platform operations",
+        "justification": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service remains private-only on mesh or guest-network addresses while the upstream image is being remediated."
+        ],
         "approved_on": "2026-03-22",
-        "review_by": "2026-04-05"
+        "expires_on": "2026-04-05",
+        "remediation_plan": "Re-scan and refresh windmill_extra_runtime with make upgrade-container-image IMAGE_ID=windmill_extra_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "roles/windmill_runtime/templates/windmill-runtime.env.j2",
@@ -1348,10 +1438,15 @@
       "scan_status": "exception_open",
       "scan_receipt": "receipts/image-scans/2026-03-22-windmill-runtime.json",
       "exception": {
-        "reason": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
         "owner": "Platform operations",
+        "justification": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
+          "The service remains private-only on mesh or guest-network addresses while the upstream image is being remediated."
+        ],
         "approved_on": "2026-03-22",
-        "review_by": "2026-04-05"
+        "expires_on": "2026-04-05",
+        "remediation_plan": "Re-scan and refresh windmill_runtime with make upgrade-container-image IMAGE_ID=windmill_runtime WRITE=true APPLY=true before the exception expires."
       },
       "consumers": [
         "roles/windmill_runtime/templates/windmill-runtime.env.j2",

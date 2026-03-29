@@ -46,6 +46,7 @@ from platform.logging import get_logger, set_context
 from platform.policy.engine import evaluate_promotion_gate_policy
 from slo_tracking import build_slo_status_entries, default_prometheus_url, find_budget_breaches
 from standby_capacity import evaluate_service_standby
+from vulnerability_budget import evaluate_service_vulnerability_gate
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -403,6 +404,7 @@ def check_promotion_gate(
     if blocking_findings:
         reasons.append(f"open critical findings exist for service '{service_id}'")
 
+    vulnerability_gate = evaluate_service_vulnerability_gate(service_id)
     capacity_model = load_capacity_model()
     capacity_approved, capacity_reasons = check_capacity_gate(capacity_model)
     standby_gate = evaluate_service_standby(service_id, catalog={"services": list(service_index.values())}, model=capacity_model)
@@ -423,6 +425,10 @@ def check_promotion_gate(
             "reasons": smoke_gate["reasons"],
         },
         "blocking_findings": {"count": len(blocking_findings)},
+        "vulnerability_gate": {
+            "approved": vulnerability_gate["approved"],
+            "reasons": vulnerability_gate["reasons"],
+        },
         "capacity_gate": {
             "approved": capacity_approved,
             "reasons": capacity_reasons,
@@ -461,6 +467,7 @@ def check_promotion_gate(
         "smoke_gate": smoke_gate,
         "approval": approval,
         "blocking_findings": blocking_findings,
+        "vulnerability_gate": vulnerability_gate,
         "capacity_gate": {
             "approved": capacity_approved,
             "reasons": capacity_reasons,

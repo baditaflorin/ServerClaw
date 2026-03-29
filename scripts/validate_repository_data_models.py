@@ -72,6 +72,11 @@ from slo_tracking import (
 )
 from service_completeness import load_context as load_service_completeness_context
 from service_redundancy import load_redundancy_catalog, validate_redundancy_catalog
+from vulnerability_budget import (
+    load_policy as load_vulnerability_budget_policy,
+    load_service_index as load_vulnerability_budget_service_index,
+    validate_policy as validate_vulnerability_budget_policy,
+)
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -2716,6 +2721,11 @@ def validate_repository_data_models() -> int:
     command_catalog = load_command_catalog()
     validate_command_catalog(command_catalog, workflow_catalog, secret_manifest)
     validate_container_image_catalog(load_image_catalog())
+    validate_vulnerability_budget_policy(
+        load_vulnerability_budget_policy(),
+        service_index=load_vulnerability_budget_service_index(),
+        image_catalog=load_image_catalog(),
+    )
     validate_error_registry()
     api_gateway_catalog, _ = load_api_gateway_catalog()
     validate_api_gateway_catalog(api_gateway_catalog)

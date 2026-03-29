@@ -147,6 +147,21 @@ infrastructure_state:
       - "scripts/restore_verification.py: restore ladder execution and receipt generation"
       - "docs/runbooks/backup-restore-verification.md: operator procedure"
 
+  config/vulnerability-budget-policy.json:
+    purpose: Canonical ADR 0269 vulnerability budgets, freshness windows, service-profile overrides, and host exception metadata
+    owner: human
+    format: JSON
+    use_for: Governing production promotion and live-apply admission against fresh host and image security evidence
+    update_when: Changing vulnerability thresholds, freshness windows, identity overrides, or structured host exceptions
+    update_by: Agent or human implementing ADR 0269 follow-up work
+    validation: "python3 scripts/vulnerability_budget.py --validate"
+    related_files:
+      - "config/image-catalog.json: Structured image exception metadata and scan receipt references"
+      - "receipts/security-reports/: Latest host scan evidence"
+      - "receipts/image-scans/: Latest image scan evidence"
+      - "docs/schema/vulnerability-budget-policy.schema.json: Schema for the ADR 0269 policy document"
+      - "docs/runbooks/vulnerability-budget-gates.md: Operator procedure"
+
   receipts/preview-environments/:
     purpose: Durable branch-local evidence for completed preview create/validate/destroy cycles
     owner: automation

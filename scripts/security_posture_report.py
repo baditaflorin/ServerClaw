@@ -38,12 +38,16 @@ DEFAULT_PLAYBOOK = repo_path("playbooks", "tasks", "security-scan.yml")
 DEFAULT_INVENTORY = repo_path("inventory", "hosts.yml")
 DEFAULT_LYNIS_DIR = repo_path(".local", "security-posture", "lynis")
 DEFAULT_TRIVY_SCRIPT = repo_path("scripts", "trivy_scan_running_images.sh")
+SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
 DEFAULT_ENVIRONMENT = primary_environment()
 ENVIRONMENT_CHOICES = environment_choices()
 DEFAULT_LYNIS_HOSTS = {
     "production": [
         "proxmox_florin",
+        "docker-build-lv3",
         "docker-runtime-lv3",
+        "backup-lv3",
+        "coolify-lv3",
         "postgres-lv3",
         "nginx-lv3",
         "monitoring-lv3",
@@ -60,6 +64,25 @@ DEFAULT_TRIVY_HOSTS = {
     "production": ["docker-runtime-lv3", "docker-build-lv3"],
     "staging": ["docker-runtime-staging-lv3", "docker-build-staging-lv3"],
 }
+
+
+def default_lynis_hosts(environment: str) -> list[str]:
+    if environment != "production":
+        return DEFAULT_LYNIS_HOSTS[environment]
+
+    payload = load_json(SERVICE_CATALOG_PATH)
+    hosts = {
+        str(service["vm"])
+        for service in payload.get("services", [])
+        if isinstance(service, dict)
+        and isinstance(service.get("vm"), str)
+        and (
+            not isinstance(service.get("environments"), dict)
+            or not isinstance(service["environments"].get("production"), dict)
+            or service["environments"]["production"].get("status") == "active"
+        )
+    }
+    return sorted(hosts) if hosts else DEFAULT_LYNIS_HOSTS[environment]
 
 
 def run_ansible_security_scan(
@@ -412,7 +435,7 @@ def main(argv: list[str] | None = None) -> int:
                 inventory=args.inventory,
                 playbook=args.playbook,
                 output_dir=args.lynis_dir,
-                hosts=DEFAULT_LYNIS_HOSTS[args.env],
+                hosts=default_lynis_hosts(args.env),
                 bootstrap_key=context["bootstrap_key"],
                 jump_host_addr=context["host_addr"],
             )
