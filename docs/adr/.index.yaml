@@ -9,7 +9,7 @@ schema_version: 1
 generated: '2026-03-29'
 total_adrs: 279
 implementation_status_summary:
-  Implemented: 222
+  Implemented: 223
   Partial: 4
   Not Implemented: 51
   Deprecated: 1
@@ -4091,7 +4091,7 @@ adr_index:
       - echarts
     summary: We will use Apache ECharts as the default charting and lightweight
     filename: 0240-operator-visualization-panels-via-apache-echarts.md
-    implemented_version: 0.177.63
+    implemented_version: 0.177.64
   - adr: '0241'
     title: Rich Content And Inline Knowledge Editing Via Tiptap
     status: Accepted

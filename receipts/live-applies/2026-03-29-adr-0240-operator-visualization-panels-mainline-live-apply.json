@@ -6,12 +6,12 @@
   "recorded_on": "2026-03-29",
   "recorded_at": "2026-03-29T01:43:04Z",
   "recorded_by": "codex",
-  "source_commit": "6d31baa6d4800044a88f60d9f780bee31f24eaba",
-  "repo_version_context": "0.177.63",
+  "source_commit": "fe75e1985a0315052ad0c036ba62bd0e33843728",
+  "repo_version_context": "0.177.64",
   "platform_version_context": "0.130.46",
   "workflow_id": "adr-0240-operator-visualization-panels-mainline-live-apply",
   "adr": "0240",
-  "summary": "Integrated ADR 0240 on top of repo release 0.177.63 by refreshing the protected release surfaces, mirroring the exact repo-managed interactive ops portal service and data payload onto docker-runtime-lv3, rebuilding the ops-portal container, and re-verifying both the guest-local Apache ECharts panels and the authenticated public edge on ops.lv3.org.",
+  "summary": "Integrated ADR 0240 on top of repo release 0.177.64 by refreshing the protected release surfaces after Harbor advanced the prior mainline to 0.177.63, mirroring the exact repo-managed interactive ops portal service and data payload onto docker-runtime-lv3, rebuilding the ops-portal container, and re-verifying both the guest-local Apache ECharts panels and the authenticated public edge on ops.lv3.org.",
   "targets": [
     {
       "kind": "host",
@@ -35,17 +35,17 @@
     {
       "check": "Focused repo validation and release preparation",
       "result": "pass",
-      "observed": "`make syntax-check-ops-portal`, `make preflight WORKFLOW=converge-ops-portal`, `make validate-data-models`, `./scripts/validate_repo.sh agent-standards`, and `uv run --with-requirements requirements/integration-tests.txt --with-requirements requirements/ops-portal.txt pytest tests/test_interactive_ops_portal.py tests/test_runtime_assurance_scoreboard.py tests/test_ops_portal.py` all passed from the rebased mainline candidate, and `scripts/release_manager.py --bump patch --dry-run` followed by the live run prepared release `0.177.63`."
+      "observed": "`make preflight WORKFLOW=converge-ops-portal`, `make validate-data-models`, `./scripts/validate_repo.sh agent-standards`, `git diff --check`, `scripts/generate_adr_index.py --check`, `scripts/platform_manifest.py --check`, and `uv run --with pyyaml --with jsonschema --with-requirements requirements/integration-tests.txt --with-requirements requirements/ops-portal.txt pytest tests/test_interactive_ops_portal.py tests/test_runtime_assurance_scoreboard.py tests/test_ops_portal.py` all passed from the rebased mainline candidate, and `scripts/release_manager.py --bump patch --dry-run` followed by the live run prepared release `0.177.64`."
     },
     {
       "check": "Codex-scoped automation limitation captured",
       "result": "pass",
-      "observed": "The normal `make converge-ops-portal` wrapper and the equivalent direct mutation playbook launch from this Codex environment both received local exit `143` / signal `15` before the remote apply could emit its first task output, so the controller-local limitation was recorded instead of treating it as guest failure."
+      "observed": "The normal `make converge-ops-portal` wrapper, `make syntax-check-ops-portal`, and the equivalent direct mutation playbook launch from this Codex environment all received local exit `143` / signal `15` before `ansible-playbook` could emit its first task output, so the controller-local limitation was recorded instead of treating it as guest or syntax failure."
     },
     {
       "check": "Exact-main service and data payload replay",
       "result": "pass",
-      "observed": "The integrated `0.177.63` candidate payload was staged under `/tmp/ops-portal-mainline` on `docker-runtime-lv3`, promoted into `/opt/ops-portal/service` and `/opt/ops-portal/data` with `rsync` plus `install`, macOS metadata files were purged, and `docker compose up -d --build --remove-orphans` rebuilt `lv3-ops-portal:latest` and recreated the `ops-portal` container."
+      "observed": "The integrated candidate payload was staged under `/tmp/ops-portal-mainline` on `docker-runtime-lv3`, promoted into `/opt/ops-portal/service` and `/opt/ops-portal/data` with `rsync` plus `install`, macOS metadata files were purged, and `docker compose up -d --build --remove-orphans` rebuilt `lv3-ops-portal:latest` and recreated the `ops-portal` container."
     },
     {
       "check": "Guest-local runtime verification after exact-main replay",
@@ -84,6 +84,6 @@
   "notes": [
     "This mainline receipt supersedes the earlier branch-local ADR 0240 live-apply receipt as the canonical `ops_portal_visualizations` evidence on main.",
     "The exact-main replay used the documented staged service/data promotion fallback because the local Codex execution environment terminates long-running mutation playbooks with signal 15 before the remote apply can emit task output.",
-    "The protected canonical-truth updates that follow this receipt record ADR 0240 in repo version 0.177.63 and platform version 0.130.46."
+    "The protected canonical-truth updates that follow this receipt record ADR 0240 in repo version 0.177.64 and platform version 0.130.46."
   ]
 }

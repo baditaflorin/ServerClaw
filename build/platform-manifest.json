@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.63",
-  "platform_version": "0.130.45",
-  "generated_at": "2026-03-29T01:36:05Z",
-  "next_refresh_at": "2026-03-29T02:36:05Z",
+  "repo_version": "0.177.64",
+  "platform_version": "0.130.46",
+  "generated_at": "2026-03-29T01:55:19Z",
+  "next_refresh_at": "2026-03-29T02:55:19Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4110,10 +4110,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.62",
+    "last_version": "0.177.63",
     "deployed_at": "2026-03-29",
-    "summary": "implemented ADR 0201 by converging Harbor with Trivy scanning, Keycloak-backed operator login, and a repo-managed check-runner publication path through registry.lv3.org",
-    "release_notes_url": "docs/release-notes/0.177.63.md"
+    "summary": "records ADR 0240 exact-main evidence on the current mainline by preserving the verified Apache ECharts operator visualization rollout, refreshed release surfaces, and the current ops-portal platform baseline after the mainline replay",
+    "release_notes_url": "docs/release-notes/0.177.64.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

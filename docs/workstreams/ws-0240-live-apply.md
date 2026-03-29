@@ -3,7 +3,7 @@
 - ADR: [ADR 0240](../adr/0240-operator-visualization-panels-via-apache-echarts.md)
 - Title: Live apply Apache ECharts-backed operator visualization panels in the interactive ops portal
 - Status: live_applied
-- Implemented In Repo Version: 0.177.63
+- Implemented In Repo Version: 0.177.64
 - Live Applied In Platform Version: `0.130.44`
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
@@ -64,7 +64,7 @@
 
 ## Mainline Integration Outcome
 
-- release `0.177.63` carries ADR 0240 onto `main`
+- release `0.177.64` carries ADR 0240 onto `main`
 - the exact-main replay from the integrated `0.177.63` candidate is recorded in
   `receipts/live-applies/2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply.json`
 - the current platform baseline after the exact-main replay is `0.130.46`
@@ -94,5 +94,5 @@
 
 ## Merge-To-Main Notes
 
-- completed in release `0.177.63`; no additional ADR 0240 merge-to-main work
+- completed in release `0.177.64`; no additional ADR 0240 merge-to-main work
   remains beyond future maintenance replays

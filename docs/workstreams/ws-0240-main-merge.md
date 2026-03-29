@@ -3,7 +3,7 @@
 - ADR: [ADR 0240](../adr/0240-operator-visualization-panels-via-apache-echarts.md)
 - Title: Integrate ADR 0240 operator visualization panels into `origin/main`
 - Status: merged
-- Included In Repo Version: 0.177.63
+- Included In Repo Version: 0.177.64
 - Platform Version Observed During Merge: 0.130.46
 - Release Date: 2026-03-29
 - Branch: `codex/ws-0240-main-merge`
@@ -14,7 +14,8 @@
 ## Purpose
 
 Carry the verified ADR 0240 Apache ECharts rollout onto the latest
-`origin/main`, cut release `0.177.63`, re-apply the exact integrated
+`origin/main` after Harbor advanced the mainline to `0.177.63`, cut release
+`0.177.64`, re-apply the exact integrated
 interactive ops portal payload on `docker-runtime-lv3`, and refresh the
 protected canonical-truth surfaces once the public edge is re-verified.
 
@@ -27,7 +28,7 @@ protected canonical-truth surfaces once the public edge is re-verified.
 - `VERSION`
 - `changelog.md`
 - `docs/release-notes/README.md`
-- `docs/release-notes/0.177.63.md`
+- `docs/release-notes/0.177.64.md`
 - `versions/stack.yaml`
 - `build/platform-manifest.json`
 - `docs/adr/.index.yaml`
@@ -46,10 +47,10 @@ protected canonical-truth surfaces once the public edge is re-verified.
   baseline after `origin/main` advanced with ADR 0239 post-merge replay and the
   generated dependency-graph refresh
 - `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py --bump patch --platform-impact "platform version advances to 0.130.46 after the exact-main ADR 0240 replay re-verifies the Apache ECharts-backed operator visualization panels on ops.lv3.org while preserving the authenticated edge contract on top of the 0.130.45 baseline" --dry-run`
-  reported `Current version: 0.177.62`, `Next version: 0.177.63`, and
+  reported `Current version: 0.177.63`, `Next version: 0.177.64`, and
   `Unreleased notes: 1`
 - `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py --bump patch --platform-impact "platform version advances to 0.130.46 after the exact-main ADR 0240 replay re-verifies the Apache ECharts-backed operator visualization panels on ops.lv3.org while preserving the authenticated edge contract on top of the 0.130.45 baseline"`
-  prepared release `0.177.63`
+  prepared release `0.177.64`
 - `make syntax-check-ops-portal`, `make preflight WORKFLOW=converge-ops-portal`,
   `make validate-data-models`, `./scripts/validate_repo.sh agent-standards`,
   and `uv run --with-requirements requirements/integration-tests.txt --with-requirements requirements/ops-portal.txt pytest tests/test_interactive_ops_portal.py tests/test_runtime_assurance_scoreboard.py tests/test_ops_portal.py`
@@ -75,7 +76,7 @@ protected canonical-truth surfaces once the public edge is re-verified.
 
 ## Outcome
 
-- release `0.177.63` carries ADR 0240 onto `main`
+- release `0.177.64` carries ADR 0240 onto `main`
 - the current live platform baseline after the exact-main replay is `0.130.46`
 - the canonical merged-main evidence is recorded under
   `receipts/live-applies/2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply.json`
