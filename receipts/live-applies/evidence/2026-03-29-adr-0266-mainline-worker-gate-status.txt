@@ -1,0 +1,305 @@
+docker-runtime-lv3 | CHANGED | rc=0 >>
+{
+  "gate_status": {
+    "enabled_checks": [
+      {
+        "description": "Enforce the ADR 0163 through ADR 0168 agent handoff, ADR index, and workstream registration standards.",
+        "id": "agent-standards",
+        "severity": "error"
+      },
+      {
+        "description": "Regenerate SLO and HTTPS/TLS Prometheus rules and enforce severity plus runbook annotations on committed alert rules.",
+        "id": "alert-rule-validation",
+        "severity": "error"
+      },
+      {
+        "description": "Run the repo-managed ansible-lint policy against playbooks and the packaged collection.",
+        "id": "ansible-lint",
+        "severity": "error"
+      },
+      {
+        "description": "Syntax check every tracked playbook outside the shared playbook task includes.",
+        "id": "ansible-syntax",
+        "severity": "error"
+      },
+      {
+        "description": "Scan published receipts and generated publication artifacts for secrets with the repo-managed gitleaks rules.",
+        "id": "artifact-secret-scan",
+        "severity": "error"
+      },
+      {
+        "description": "Reject reusable platform modules that import outward into scripts/ composition roots or dynamically load script-only helpers.",
+        "id": "dependency-direction",
+        "severity": "error"
+      },
+      {
+        "description": "Validate the service dependency graph schema, cross references, generated Mermaid markdown, and generated Excalidraw architecture scenes.",
+        "id": "dependency-graph",
+        "severity": "error"
+      },
+      {
+        "description": "Verify that the generated ADR index is current for documentation and workstream changes.",
+        "id": "documentation-index",
+        "severity": "error"
+      },
+      {
+        "description": "Regenerate the canonical generated documentation surfaces and fail if committed status docs drift.",
+        "id": "generated-docs",
+        "severity": "error"
+      },
+      {
+        "description": "Regenerate the portal build outputs and fail if committed publication artifacts drift.",
+        "id": "generated-portals",
+        "severity": "error"
+      },
+      {
+        "description": "Run the ADR 0111 non-destructive integration suite against staging if active, or record a repo-managed skip if no integration target is currently available.",
+        "id": "integration-tests",
+        "severity": "error"
+      },
+      {
+        "description": "Validate all Packer templates when the repo carries them; otherwise report a no-op pass.",
+        "id": "packer-validate",
+        "severity": "error"
+      },
+      {
+        "description": "Run the ADR 0230 shared OPA and Conftest policy checks against command approval, promotion eligibility, runner admission, and service-boundary invariants.",
+        "id": "policy-validation",
+        "severity": "error"
+      },
+      {
+        "description": "Validate canonical repository data models, provider-boundary anti-corruption guards, capability-contract catalogs, the committed platform manifest artifact, operator roster schema, cross references, and receipt schemas.",
+        "id": "schema-validation",
+        "severity": "error"
+      },
+      {
+        "description": "Run the repository filesystem through the pinned Trivy security scan policy.",
+        "id": "security-scan",
+        "severity": "error"
+      },
+      {
+        "description": "Enforce the ADR 0107 extension checklist for non-grandfathered services.",
+        "id": "service-completeness",
+        "severity": "error"
+      },
+      {
+        "description": "Validate OpenTofu configuration if the repo carries a tofu root; otherwise report a no-op pass.",
+        "id": "tofu-validate",
+        "severity": "error"
+      },
+      {
+        "description": "Type check the gate orchestration code and the manifest-backed Docker runner surfaces.",
+        "id": "type-check",
+        "severity": "error"
+      },
+      {
+        "description": "Validate the current branch against its declared workstream ownership manifest and shared-surface contract.",
+        "id": "workstream-surfaces",
+        "severity": "error"
+      },
+      {
+        "description": "Run full-repository yamllint across tracked YAML files.",
+        "id": "yaml-lint",
+        "severity": "error"
+      }
+    ],
+    "enabled_lanes": [
+      {
+        "checks": [
+          "documentation-index"
+        ],
+        "id": "documentation-and-adr",
+        "title": "Documentation and ADR lane"
+      },
+      {
+        "checks": [
+          "yaml-lint",
+          "schema-validation",
+          "policy-validation",
+          "alert-rule-validation",
+          "dependency-direction"
+        ],
+        "id": "repository-structure-and-schema",
+        "title": "Repository structure and schema lane"
+      },
+      {
+        "checks": [
+          "generated-docs",
+          "generated-portals",
+          "dependency-graph",
+          "artifact-secret-scan"
+        ],
+        "id": "generated-artifact-and-canonical-truth",
+        "title": "Generated artifact and canonical-truth lane"
+      },
+      {
+        "checks": [
+          "ansible-syntax",
+          "ansible-lint",
+          "type-check",
+          "service-completeness"
+        ],
+        "id": "service-syntax-and-unit",
+        "title": "Service-specific syntax and unit lane"
+      },
+      {
+        "checks": [
+          "packer-validate",
+          "tofu-validate",
+          "security-scan"
+        ],
+        "id": "remote-builder",
+        "title": "Remote builder lane"
+      },
+      {
+        "checks": [
+          "integration-tests"
+        ],
+        "id": "live-apply-and-promotion",
+        "title": "Live-apply and promotion lane"
+      }
+    ],
+    "lane_catalog_path": "/srv/proxmox_florin_server/config/validation-lanes.yaml",
+    "last_run": null,
+    "latest_bypass": {
+      "path": "/srv/proxmox_florin_server/receipts/gate-bypasses/20260328T220410Z-codex-ws-0264-receipt-driven-resilience-adrs-r3-6b19422-skip-remote-gate.json",
+      "payload": {
+        "branch": "codex/ws-0264-receipt-driven-resilience-adrs-r3",
+        "bypass": "skip_remote_gate",
+        "commit": "6b19422d54441943dc44c234b97d5d4ce623cc56",
+        "created_at": "2026-03-28T22:04:10.209226+00:00",
+        "reason": "remote pre-push gate stalled during repeated build-server SSH handoff to 10.10.10.30 while the release 0.177.56 resilience ADR bundle had already passed local agent-standards, data-model, generated-doc, canonical-truth, ADR-index, and platform-manifest checks",
+        "source": "manual-main-push"
+      }
+    },
+    "manifest_path": "/srv/proxmox_florin_server/config/validation-gate.json",
+    "post_merge_run": {
+      "checks": [
+        {
+          "commands": [
+            {
+              "command": "./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals",
+              "returncode": 0
+            },
+            {
+              "command": "uv run --with pyyaml python3 scripts/provider_boundary_catalog.py --validate",
+              "returncode": 0
+            }
+          ],
+          "description": "Run the worker-local validate_repo fallback when runner images are unavailable on the worker host.",
+          "docker_command": [],
+          "duration_seconds": 25.92,
+          "id": "local-fallback",
+          "returncode": 0,
+          "severity": "error",
+          "status": "passed"
+        }
+      ],
+      "executed_at": "2026-03-29T19:37:24.365664+00:00",
+      "manifest": "/srv/proxmox_florin_server/config/validation-gate.json",
+      "requested_checks": [
+        "local-fallback"
+      ],
+      "runner": {
+        "capability_contract": {
+          "container_runtime": {
+            "engine": "docker",
+            "supported": true
+          },
+          "cpu_architectures": [
+            "x86_64"
+          ],
+          "description": "Worker-side validation runner for the post-merge gate replay from the live mirrored checkout.",
+          "emulation_support": [],
+          "execution_surface": "windmill_worker",
+          "network_reachability_class": "private_worker_checkout",
+          "required_tools": [
+            "docker",
+            "git",
+            "python3",
+            "tar",
+            "uv"
+          ],
+          "scratch_cleanup_guarantee": "worker-local validation writes under the mirrored checkout and falls back to a bounded local subset when registry-backed runner pulls are unavailable",
+          "supported_validation_lanes": [
+            "workstream-surfaces",
+            "agent-standards",
+            "documentation-index",
+            "generated-docs",
+            "generated-portals",
+            "ansible-syntax",
+            "schema-validation",
+            "policy-validation",
+            "alert-rule-validation",
+            "type-check",
+            "dependency-direction",
+            "dependency-graph",
+            "integration-tests",
+            "security-scan",
+            "artifact-secret-scan",
+            "service-completeness",
+            "tofu-validate",
+            "packer-validate"
+          ]
+        },
+        "environment_attestation": {
+          "attested_at": "2026-03-29T19:37:24.355983+00:00",
+          "container_runtime": {
+            "available": true,
+            "engine": "docker",
+            "error": "Command '['/usr/bin/docker', 'info', '--format', '{{.ServerVersion}}']' timed out after 5 seconds",
+            "path": "/usr/bin/docker",
+            "server_reachable": false,
+            "supported": true
+          },
+          "cpu_architecture": "x86_64",
+          "emulation_support": [],
+          "hostname": "docker-runtime-lv3",
+          "network_reachability_class": "private_worker_checkout",
+          "platform": "linux",
+          "scratch_space": {
+            "cleanup_guarantee": "worker-local validation writes under the mirrored checkout and falls back to a bounded local subset when registry-backed runner pulls are unavailable",
+            "exists": true,
+            "free_bytes": 9439993856,
+            "workspace": "/srv/proxmox_florin_server"
+          },
+          "tooling": {
+            "docker": {
+              "available": true,
+              "path": "/usr/bin/docker",
+              "version": "Docker version 29.3.1, build c2be9cc"
+            },
+            "git": {
+              "available": true,
+              "path": "/usr/bin/git",
+              "version": "git version 2.47.3"
+            },
+            "python3": {
+              "available": true,
+              "path": "/usr/bin/python3",
+              "version": "Python 3.13.5"
+            },
+            "tar": {
+              "available": true,
+              "path": "/usr/bin/tar",
+              "version": "tar (GNU tar) 1.35"
+            },
+            "uv": {
+              "available": true,
+              "path": "/usr/local/bin/uv",
+              "version": "uv 0.9.21"
+            }
+          }
+        },
+        "execution_surface": "windmill_worker",
+        "id": "windmill-post-merge-worker",
+        "lane_evaluations": {}
+      },
+      "source": "windmill-post-merge-local-fallback",
+      "status": "passed",
+      "workspace": "/srv/proxmox_florin_server"
+    },
+    "remote_validate_run": null
+  },
+  "status": "ok"
+}

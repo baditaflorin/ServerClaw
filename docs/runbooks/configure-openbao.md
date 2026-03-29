@@ -120,13 +120,16 @@ curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local
 
 ## Recovery Notes From The 2026-03-26 Live Apply
 
-As of the `2026-03-29` replay, `make converge-openbao` automatically recovers the recurring Docker publish regression by rechecking the guest `DOCKER` and `DOCKER-FORWARD` chains, restarting Docker when they are missing, removing an empty detached `openbao_default` network when Docker has lost the endpoint attachment, and recreating the named `lv3-openbao` container before `docker compose up`.
+As of the `2026-03-29` replay, `make converge-openbao` automatically recovers the recurring Docker publish regression by rechecking the guest `DOCKER` and `DOCKER-FORWARD` chains, restarting Docker when they are missing, waiting for the chain rechecks to settle after that restart, and recreating the named `lv3-openbao` container before `docker compose up`.
 
-If Docker still has not recreated those chains immediately after the restart,
-the role now logs that degraded preflight state and still continues into
-`docker compose up`. The decisive guard is no longer the pre-start iptables
-check by itself, but whether the runtime can actually rebind `:8200`, answer on
-`127.0.0.1:8201`, and pass the subsequent seal-status verification.
+The same replay also hardened the post-unseal verification path: after a restart-and-unseal cycle, the role now retries the controller AppRole PostgreSQL dynamic credential request for a short bounded window because OpenBao can briefly close loopback HTTP requests while the database backend resumes.
+
+That recovery path now also removes an empty detached `openbao_default` network
+when Docker has lost the endpoint attachment. If Docker still has not recreated
+those chains after the bounded recheck window, the role logs that degraded
+preflight state and still continues into `docker compose up`; the decisive guard
+is whether the runtime can actually rebind `:8200`, answer on `127.0.0.1:8201`,
+and pass the subsequent seal-status plus AppRole verification steps.
 
 If a future rerun still leaves the guest runtime broken, the failure usually presents as `docker compose up` failing to bind `:8200` with an iptables DNAT error and `docker inspect lv3-openbao` showing an empty `NetworkSettings.Networks` object.
 

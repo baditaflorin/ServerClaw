@@ -30,18 +30,19 @@ def test_gate_status_wrapper_reads_repo_status_payload(tmp_path: Path) -> None:
     (repo_root / "receipts" / "gate-bypasses").mkdir(parents=True)
     (repo_root / ".local" / "validation-gate").mkdir(parents=True)
     (repo_root / "scripts" / "gate_status.py").write_text(
-        (
-            "import json\n"
-            "import sys\n"
-            "payload = {\n"
-            "    'manifest_path': sys.argv[sys.argv.index('--manifest') + 1],\n"
-            "    'enabled_checks': [],\n"
-            "    'last_run': {'status': 'passed'},\n"
-            "    'post_merge_run': None,\n"
-            "    'latest_bypass': None,\n"
-            "}\n"
-            "print(json.dumps(payload))\n"
-        ),
+        """
+def build_status_payload(*, manifest_path, last_run_path, remote_validate_run_path, post_merge_run_path, bypass_dir):
+    return {
+        "manifest_path": str(manifest_path),
+        "enabled_checks": [],
+        "last_run": {"status": "passed"},
+        "remote_validate_run": {"status": "passed"},
+        "post_merge_run": None,
+        "latest_bypass": None,
+        "bypass_dir": str(bypass_dir),
+    }
+""".strip()
+        + "\n",
         encoding="utf-8",
     )
 
@@ -52,52 +53,98 @@ def test_gate_status_wrapper_reads_repo_status_payload(tmp_path: Path) -> None:
     assert payload["gate_status"]["last_run"] == {"status": "passed"}
 
 
-def test_gate_status_wrapper_uses_absolute_repo_paths(tmp_path: Path) -> None:
-    module = load_module("gate_status_windmill_absolute_paths", WRAPPER_PATH)
+def test_gate_status_wrapper_adds_scripts_dir_to_python_path(tmp_path: Path) -> None:
+    module = load_module("gate_status_windmill_import_path", WRAPPER_PATH)
     repo_root = tmp_path
     (repo_root / "scripts").mkdir(parents=True)
-    (repo_root / "config").mkdir(parents=True)
-    (repo_root / ".local" / "validation-gate").mkdir(parents=True)
-    (repo_root / "receipts" / "gate-bypasses").mkdir(parents=True)
-    (repo_root / "config" / "validation-gate.json").write_text("{}", encoding="utf-8")
-    (repo_root / "scripts" / "gate_status.py").write_text(
-        (
-            "import json\n"
-            "import sys\n"
-            "print(json.dumps({'argv': sys.argv[1:]}))\n"
-        ),
+    (repo_root / "scripts" / "gate_bypass_waivers.py").write_text(
+        """
+def summarize_receipts(*, directory):
+    return {
+        "totals": {"all_receipts": 2, "legacy_receipts": 0, "compliant_receipts": 2, "open_waivers": 1, "expired_waivers": 0, "invalid_receipts": 0},
+        "latest_receipt": {"path": str(directory / "latest.json")},
+        "open_waivers": [{"path": str(directory / "open.json")}],
+        "expiring_soon": [],
+        "warnings": [],
+        "release_blockers": [],
+        "invalid_receipts": [],
+    }
+""".strip()
+        + "\n",
         encoding="utf-8",
     )
+    (repo_root / "scripts" / "gate_status.py").write_text(
+        """
+import gate_bypass_waivers
+
+def build_status_payload(*, manifest_path, last_run_path, post_merge_run_path, bypass_dir):
+    return {
+        "manifest_path": str(manifest_path),
+        "waiver_summary": gate_bypass_waivers.summarize_receipts(directory=bypass_dir),
+    }
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    (repo_root / "receipts" / "gate-bypasses").mkdir(parents=True)
 
     payload = module.main(repo_path=str(repo_root))
-    argv = payload["gate_status"]["argv"]
 
     assert payload["status"] == "ok"
-    assert argv[argv.index("--manifest") + 1] == str(repo_root / "config" / "validation-gate.json")
-    assert argv[argv.index("--last-run") + 1] == str(repo_root / ".local" / "validation-gate" / "last-run.json")
-    assert argv[argv.index("--post-merge-run") + 1] == str(
-        repo_root / ".local" / "validation-gate" / "post-merge-last-run.json"
-    )
-    assert argv[argv.index("--bypass-dir") + 1] == str(repo_root / "receipts" / "gate-bypasses")
+    assert payload["gate_status"]["waiver_summary"]["totals"]["all_receipts"] == 2
+    assert payload["gate_status"]["waiver_summary"]["open_waivers"] == [
+        {"path": str(repo_root / "receipts" / "gate-bypasses" / "open.json")}
+    ]
 
 
-def test_gate_status_wrapper_returns_structured_error_on_command_failure(tmp_path: Path) -> None:
-    module = load_module("gate_status_windmill_command_failure", WRAPPER_PATH)
+def test_gate_status_wrapper_falls_back_when_waiver_helper_is_missing(tmp_path: Path) -> None:
+    module = load_module("gate_status_windmill_missing_waiver_helper", WRAPPER_PATH)
     repo_root = tmp_path
     (repo_root / "scripts").mkdir(parents=True)
-    (repo_root / "config").mkdir(parents=True)
-    (repo_root / ".local" / "validation-gate").mkdir(parents=True)
-    (repo_root / "receipts" / "gate-bypasses").mkdir(parents=True)
-    (repo_root / "config" / "validation-gate.json").write_text("{}", encoding="utf-8")
     (repo_root / "scripts" / "gate_status.py").write_text(
-        "import sys\n"
-        "sys.stderr.write('boom\\n')\n"
-        "raise SystemExit(1)\n",
+        """
+import gate_bypass_waivers
+
+def build_status_payload(*, manifest_path, last_run_path, post_merge_run_path, bypass_dir):
+    return {
+        "manifest_path": str(manifest_path),
+        "waiver_summary": gate_bypass_waivers.summarize_receipts(directory=bypass_dir),
+    }
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    (repo_root / "receipts" / "gate-bypasses").mkdir(parents=True)
+
+    payload = module.main(repo_path=str(repo_root))
+
+    assert payload["status"] == "ok"
+    assert payload["gate_status"]["waiver_summary"]["totals"] == {
+        "all_receipts": 0,
+        "legacy_receipts": 0,
+        "compliant_receipts": 0,
+        "open_waivers": 0,
+        "expired_waivers": 0,
+        "invalid_receipts": 0,
+    }
+    assert payload["gate_status"]["waiver_summary"]["release_blockers"] == []
+
+
+def test_gate_status_wrapper_returns_structured_error_when_payload_build_fails(tmp_path: Path) -> None:
+    module = load_module("gate_status_windmill_payload_failure", WRAPPER_PATH)
+    repo_root = tmp_path
+    (repo_root / "scripts").mkdir(parents=True)
+    (repo_root / "scripts" / "gate_status.py").write_text(
+        """
+def build_status_payload(*, manifest_path, last_run_path, post_merge_run_path, bypass_dir):
+    raise RuntimeError("boom")
+""".strip()
+        + "\n",
         encoding="utf-8",
     )
 
     payload = module.main(repo_path=str(repo_root))
 
     assert payload["status"] == "error"
-    assert payload["returncode"] == 1
-    assert payload["stderr"] == "boom"
+    assert payload["exception"] == "RuntimeError"
+    assert payload["reason"] == "boom"

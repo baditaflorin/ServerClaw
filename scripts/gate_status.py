@@ -32,6 +32,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MANIFEST = REPO_ROOT / "config" / "validation-gate.json"
 DEFAULT_LANE_CATALOG = REPO_ROOT / "config" / "validation-lanes.yaml"
 DEFAULT_LAST_RUN = REPO_ROOT / ".local" / "validation-gate" / "last-run.json"
+DEFAULT_REMOTE_VALIDATE_RUN = REPO_ROOT / ".local" / "validation-gate" / "remote-validate-last-run.json"
 DEFAULT_POST_MERGE_RUN = REPO_ROOT / ".local" / "validation-gate" / "post-merge-last-run.json"
 DEFAULT_BYPASS_DIR = REPO_ROOT / "receipts" / "gate-bypasses"
 
@@ -40,6 +41,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Show repository validation gate status.")
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     parser.add_argument("--last-run", type=Path, default=DEFAULT_LAST_RUN)
+    parser.add_argument("--remote-validate-run", type=Path, default=DEFAULT_REMOTE_VALIDATE_RUN)
     parser.add_argument("--post-merge-run", type=Path, default=DEFAULT_POST_MERGE_RUN)
     parser.add_argument("--bypass-dir", type=Path, default=DEFAULT_BYPASS_DIR)
     parser.add_argument("--format", choices=("text", "json"), default="text")
@@ -66,12 +68,14 @@ def build_status_payload(
     *,
     manifest_path: Path,
     last_run_path: Path,
+    remote_validate_run_path: Path,
     post_merge_run_path: Path,
     bypass_dir: Path,
     lane_catalog_path: Path | None = None,
 ) -> dict[str, Any]:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     last_run = load_optional_json(last_run_path)
+    remote_validate_run = load_optional_json(remote_validate_run_path)
     post_merge_run = load_optional_json(post_merge_run_path)
     bypass = latest_bypass_receipt(bypass_dir)
     resolved_lane_catalog_path = lane_catalog_path or manifest_path.parent / DEFAULT_LANE_CATALOG.name
@@ -103,6 +107,7 @@ def build_status_payload(
             for check_id, config in sorted(manifest.items())
         ],
         "last_run": last_run,
+        "remote_validate_run": remote_validate_run,
         "post_merge_run": post_merge_run,
         "latest_bypass": None,
     }
@@ -119,9 +124,12 @@ def print_run_summary(label: str, payload: dict[str, Any] | None) -> None:
     if payload is None:
         print(f"{label}: none recorded")
         return
+    runner = payload.get("runner") or {}
+    runner_id = runner.get("id")
+    runner_suffix = f" on runner {runner_id}" if runner_id else ""
     print(
         f"{label}: {payload.get('status', 'unknown')} at {payload.get('executed_at', 'unknown')} "
-        f"via {payload.get('source', 'unknown')}"
+        f"via {payload.get('source', 'unknown')}{runner_suffix}"
     )
     lane_selection = payload.get("lane_selection")
     if isinstance(lane_selection, dict):
@@ -142,6 +150,7 @@ def print_status_text(payload: dict[str, Any]) -> None:
         print(f"  - {check['id']} [{check['severity']}]: {check['description']}")
 
     print_run_summary("Last gate run", payload.get("last_run"))
+    print_run_summary("Last remote validate run", payload.get("remote_validate_run"))
     print_run_summary("Last post-merge gate run", payload.get("post_merge_run"))
 
     latest_bypass = payload.get("latest_bypass")
@@ -162,6 +171,7 @@ def main(argv: list[str] | None = None) -> int:
     payload = build_status_payload(
         manifest_path=args.manifest,
         last_run_path=args.last_run,
+        remote_validate_run_path=args.remote_validate_run,
         post_merge_run_path=args.post_merge_run,
         bypass_dir=args.bypass_dir,
     )

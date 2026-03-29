@@ -43,6 +43,9 @@ fi
 if [[ "$*" == *".local/validation-gate/last-run.json"* ]]; then
   printf '%s' "${REMOTE_EXEC_STATUS_PAYLOAD:-}"
 fi
+if [[ "$*" == *".local/validation-gate/remote-validate-last-run.json"* ]]; then
+  printf '%s' "${REMOTE_EXEC_STATUS_PAYLOAD:-}"
+fi
 """,
     )
 
@@ -99,22 +102,43 @@ def build_config(
         "registry_base": "registry.lv3.org",
         "commands": {
             "remote-lint": {
+                "runner_id": "build-server-validation",
+                "local_fallback_runner_id": "controller-local-validation",
                 "runner_label": "lint-ansible",
+                "validation_lanes": ["yaml-lint", "ansible-lint"],
                 "command": "printf remote-lint",
                 "local_fallback_command": local_command,
             },
             "remote-validate": {
+                "runner_id": "build-server-validation",
+                "local_fallback_runner_id": "controller-local-validation",
                 "runner_label": "validate-schemas",
+                "status_file": ".local/validation-gate/remote-validate-last-run.json",
+                "validation_lanes": [
+                    "ansible-syntax",
+                    "schema-validation",
+                    "policy-validation",
+                    "alert-rule-validation",
+                    "type-check",
+                    "dependency-graph",
+                ],
                 "command": "printf remote-validate",
                 "local_fallback_command": local_command,
             },
             "pre-push-gate": {
+                "runner_id": "build-server-validation",
+                "local_fallback_runner_id": "controller-local-validation",
                 "skip_docker": True,
+                "status_file": ".local/validation-gate/last-run.json",
+                "validation_lanes": "all-validation-gate-checks",
                 "command": "printf remote-pre-push",
                 "local_fallback_command": local_command,
             },
             "remote-packer-validate": {
+                "runner_id": "build-server-validation",
+                "local_fallback_runner_id": "controller-local-validation",
                 "runner_label": "packer-validate",
+                "validation_lanes": ["packer-validate"],
                 "command": "printf remote-packer-validate",
                 "local_fallback_command": local_command,
             },

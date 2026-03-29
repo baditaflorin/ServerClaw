@@ -45,6 +45,49 @@ def write_fake_docker(path: Path) -> None:
     path.chmod(0o755)
 
 
+def write_runner_contracts(
+    path: Path,
+    *,
+    lane_ids: list[str],
+    runner_id: str = "test-runner",
+    supported_lane_ids: list[str] | None = None,
+) -> None:
+    supported_lanes = supported_lane_ids or lane_ids
+    path.write_text(
+        json.dumps(
+            {
+                "$schema": "docs/schema/validation-runner-contracts.schema.json",
+                "schema_version": "1.0.0",
+                "lanes": {
+                    lane_id: {
+                        "description": f"{lane_id} lane",
+                        "requires_container_runtime": True,
+                        "required_tools": ["docker", "python3", "tar"],
+                        "allowed_network_reachability_classes": ["controller_local"],
+                        "allowed_cpu_architectures": ["arm64", "x86_64"],
+                        "require_scratch_cleanup_guarantee": True,
+                    }
+                    for lane_id in lane_ids
+                },
+                "runners": {
+                    runner_id: {
+                        "description": "test runner",
+                        "execution_surface": "controller_local",
+                        "cpu_architectures": ["arm64", "x86_64"],
+                        "emulation_support": [],
+                        "container_runtime": {"engine": "docker", "supported": True},
+                        "required_tools": ["docker", "python3", "tar"],
+                        "network_reachability_class": "controller_local",
+                        "scratch_cleanup_guarantee": "temp workspace",
+                        "supported_validation_lanes": supported_lanes,
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
 def test_run_gate_writes_status_file(tmp_path: Path, capsys) -> None:
     run_gate = load_module("run_gate", "scripts/run_gate.py")
     manifest_path = tmp_path / "validation-gate.json"
@@ -73,7 +116,9 @@ def test_run_gate_writes_status_file(tmp_path: Path, capsys) -> None:
     )
     status_path = tmp_path / "last-run.json"
     fake_docker = tmp_path / "fake-docker"
+    runner_contracts = tmp_path / "validation-runner-contracts.json"
     write_fake_docker(fake_docker)
+    write_runner_contracts(runner_contracts, lane_ids=["alpha", "beta"])
 
     exit_code = run_gate.main(
         [
@@ -87,6 +132,10 @@ def test_run_gate_writes_status_file(tmp_path: Path, capsys) -> None:
             str(status_path),
             "--source",
             "test",
+            "--runner-id",
+            "test-runner",
+            "--runner-contracts",
+            str(runner_contracts),
         ]
     )
     captured = capsys.readouterr()
@@ -96,6 +145,7 @@ def test_run_gate_writes_status_file(tmp_path: Path, capsys) -> None:
     payload = json.loads(status_path.read_text(encoding="utf-8"))
     assert payload["status"] == "passed"
     assert payload["source"] == "test"
+    assert payload["runner"]["id"] == "test-runner"
     assert payload["session_workspace"]["session_slug"]
     assert payload["session_workspace"]["local_state_root"].endswith(
         f".local/session-workspaces/{payload['session_workspace']['session_slug']}"
@@ -185,7 +235,17 @@ def test_run_gate_auto_selects_docs_lane_checks(tmp_path: Path) -> None:
     doc_path.write_text("# ADR test\n", encoding="utf-8")
     status_path = repo_root / ".local" / "validation-gate" / "last-run.json"
     fake_docker = tmp_path / "fake-docker"
+    runner_contracts = tmp_path / "validation-runner-contracts.json"
     write_fake_docker(fake_docker)
+    write_runner_contracts(
+        runner_contracts,
+        lane_ids=[
+            "workstream-surfaces",
+            "agent-standards",
+            "documentation-index",
+            "security-scan",
+        ],
+    )
 
     subprocess.run(["git", "init", str(repo_root)], check=True, capture_output=True, text=True)
     subprocess.run(["git", "-C", str(repo_root), "config", "user.email", "codex@example.com"], check=True)
@@ -215,6 +275,10 @@ def test_run_gate_auto_selects_docs_lane_checks(tmp_path: Path) -> None:
             str(status_path),
             "--base-ref",
             base_branch,
+            "--runner-id",
+            "test-runner",
+            "--runner-contracts",
+            str(runner_contracts),
         ]
     )
 
@@ -226,6 +290,72 @@ def test_run_gate_auto_selects_docs_lane_checks(tmp_path: Path) -> None:
     assert payload["lane_results"][0]["green_path_summary"] == (
         "Documentation passed for 1 changed file(s) via documentation-index."
     )
+    assert payload["runner"]["id"] == "test-runner"
+
+
+def test_run_gate_reports_runner_unavailable_without_crashing(tmp_path: Path, capsys) -> None:
+    run_gate = load_module("run_gate_runner_unavailable", "scripts/run_gate.py")
+    manifest_path = tmp_path / "validation-gate.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "alpha": {
+                    "description": "alpha check",
+                    "severity": "error",
+                    "image": "example/alpha:latest",
+                    "command": "printf alpha",
+                    "working_dir": "/workspace",
+                    "timeout_seconds": 30,
+                },
+                "beta": {
+                    "description": "beta check",
+                    "severity": "error",
+                    "image": "example/beta:latest",
+                    "command": "printf beta",
+                    "working_dir": "/workspace",
+                    "timeout_seconds": 30,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    status_path = tmp_path / "last-run.json"
+    fake_docker = tmp_path / "fake-docker"
+    runner_contracts = tmp_path / "validation-runner-contracts.json"
+    write_fake_docker(fake_docker)
+    write_runner_contracts(
+        runner_contracts,
+        lane_ids=["alpha", "beta"],
+        supported_lane_ids=["beta"],
+    )
+
+    exit_code = run_gate.main(
+        [
+            "--manifest",
+            str(manifest_path),
+            "--workspace",
+            str(tmp_path),
+            "--docker-binary",
+            str(fake_docker),
+            "--status-file",
+            str(status_path),
+            "--source",
+            "test",
+            "--runner-id",
+            "test-runner",
+            "--runner-contracts",
+            str(runner_contracts),
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 1
+    assert "alpha" in captured.out
+    payload = json.loads(status_path.read_text(encoding="utf-8"))
+    assert payload["status"] == "failed"
+    assert [check["id"] for check in payload["checks"]] == ["alpha", "beta"]
+    assert payload["checks"][0]["status"] == "runner_unavailable"
+    assert payload["checks"][1]["status"] == "passed"
 
 
 def test_log_gate_bypass_writes_receipt(tmp_path: Path) -> None:

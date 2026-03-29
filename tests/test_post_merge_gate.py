@@ -109,12 +109,15 @@ def test_post_merge_gate_falls_back_to_validate_repo_when_runner_images_fail(tmp
     ]
     assert calls[3][:3] == ["uv", "run", "--with"]
     assert calls[3][-2:] == ["scripts/provider_boundary_catalog.py", "--validate"]
+    assert calls[4][0] == sys.executable
+    assert calls[4][1].endswith("validation_runner_contracts.py")
     assert len(payload["commands"]) == 2
 
     status_path = repo_root / ".local" / "validation-gate" / "post-merge-last-run.json"
     status_payload = json.loads(status_path.read_text(encoding="utf-8"))
     assert status_payload["status"] == "passed"
     assert status_payload["source"] == "windmill-post-merge-local-fallback"
+    assert status_payload["runner"]["id"] == module.VALIDATION_RUNNER_ID
     assert status_payload["checks"][0]["commands"][1]["command"].endswith(
         "scripts/provider_boundary_catalog.py --validate"
     )

@@ -282,12 +282,18 @@
   register: openbao_docker_nat_chain_recheck
   changed_when: false
   failed_when: openbao_docker_nat_chain_recheck.rc not in [0, 1]
+  retries: "{{ openbao_runtime_chain_recheck_retries }}"
+  delay: "{{ openbao_runtime_chain_recheck_delay_seconds }}"
+  until: openbao_docker_nat_chain_recheck.rc == 0
 
 - name: Recheck Docker forward chain before OpenBao startup
   ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
   register: openbao_docker_forward_chain_recheck
   changed_when: false
   failed_when: openbao_docker_forward_chain_recheck.rc not in [0, 1]
+  retries: "{{ openbao_runtime_chain_recheck_retries }}"
+  delay: "{{ openbao_runtime_chain_recheck_delay_seconds }}"
+  until: openbao_docker_forward_chain_recheck.rc == 0
 
 - name: Record Docker chain readiness before OpenBao startup
   ansible.builtin.set_fact:
@@ -1332,10 +1338,16 @@
     return_content: true
     status_code: 200
   register: openbao_postgres_dynamic_credential
+  retries: 6
+  delay: 2
+  until: openbao_postgres_dynamic_credential.status == 200
+  changed_when: false
+  failed_when: false
 
 - name: Assert that a PostgreSQL dynamic credential was issued
   ansible.builtin.assert:
     that:
+      - openbao_postgres_dynamic_credential.status == 200
       - openbao_postgres_dynamic_credential.json.data.username | default('') | length > 0
       - openbao_postgres_dynamic_credential.json.data.password | default('') | length > 0
     fail_msg: "OpenBao failed to issue a PostgreSQL dynamic credential."

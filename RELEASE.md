@@ -1,12 +1,12 @@
-# Release 0.177.88
+# Release 0.177.89
 
-- Date: 2026-03-29
+- Date: 2026-03-30
 
 ## Summary
-- records ADR 0251 latest-server-state follow-up verification on the newest origin/main by preserving the stage-smoke and promotion-gate live checks, fixing deployment-history portal receipt enumeration for nested evidence JSON, and hardening OpenBao recovery against transient Docker chain loss before the exact-main replay
+- extends ADR 0224 by adding named repo-deploy profiles, a governed deploy-repo-profile operator path, and the verified 2026-03-30 education_wemeshup upstream refresh so production can be updated from upstream main without retyping raw Coolify arguments
 
 ## Platform Impact
-- platform version advances to 0.130.60 after the exact-main ADR 0251 follow-up re-verifies durable stage-smoke and promotion-gate health, fixes deployment-history portal receipt enumeration for nested evidence JSON, and hardens OpenBao recovery against transient Docker chain loss on the live server baseline
+- no live platform version bump; this release adds named repo-deploy profiles for governed upstream app refreshes and records the 2026-03-30 education_wemeshup production refresh on the existing 0.130.59 platform baseline
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

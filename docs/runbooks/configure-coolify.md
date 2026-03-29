@@ -101,6 +101,18 @@ python3 scripts/lv3_cli.py deploy-repo \
   --dry-run
 ```
 
+Named profile deployment for the current production education app:
+
+```bash
+make deploy-repo-profile PROFILE=education-wemeshup-production DEPLOY_PROFILE_ARGS='--wait'
+```
+
+Equivalent named-profile CLI:
+
+```bash
+python3 scripts/lv3_cli.py deploy-repo-profile education-wemeshup-production --wait
+```
+
 App reachability:
 
 ```bash
@@ -181,15 +193,32 @@ python3 scripts/lv3_cli.py deploy-repo \
   --wait
 ```
 
+Preferred named-profile path for repeat deployments:
+
+```bash
+make deploy-repo-profile PROFILE=education-wemeshup-production DEPLOY_PROFILE_ARGS='--wait'
+```
+
+```bash
+python3 scripts/lv3_cli.py deploy-repo-profile education-wemeshup-production --wait
+```
+
+Named repo-deploy profiles live in `config/repo-deploy-catalog.json`. This is
+the current bridge between the generic governed deploy contract and the future
+browser intake path: operators trigger a profile by id, while the repo remains
+the source of truth for repo URL, branch, build pack, compose domains, image
+bundle, and verification expectations.
+
 For the future browser-driven path, use the existing ADR 0093 ops portal and
 ADR 0092 gateway as the intake surface. The portal form should submit the same
 catalog-backed `deploy-repo` contract instead of inventing a second deployment
 engine or depending on an assistant session.
 
-The missing hardening gap exposed by repeated public-registry flakeouts is now
-tracked separately in ADR 0274. The operator/browser surface is already
-covered by existing ADRs; the next supply-path step is cache-first base-image
-warming for the approved deployment catalog.
+The missing hardening gap exposed by repeated public-registry flakeouts is
+already codified by ADR 0274. The operator/browser surface is covered by ADR
+0224; the next supply-path step is cache-first base-image warming for the
+approved deployment catalog and image bundles declared in
+`config/repo-deploy-catalog.json`.
 
 ## Rollback
 

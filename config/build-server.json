@@ -25,35 +25,62 @@
   "collection_root": "collections/ansible_collections/lv3/platform",
   "commands": {
     "remote-lint": {
+      "runner_id": "build-server-validation",
+      "local_fallback_runner_id": "controller-local-validation",
       "runner_label": "lint-ansible",
+      "validation_lanes": ["yaml-lint", "ansible-lint"],
       "command": "command -v yamllint >/dev/null 2>&1 || python3 -m pip install --break-system-packages --quiet yamllint==1.37.1; command -v ansible-lint >/dev/null 2>&1 || python3 -m pip install --break-system-packages --quiet ansible-lint==24.12.2; export ANSIBLE_CONFIG=/workspace/ansible.cfg; export ANSIBLE_COLLECTIONS_PATH=/workspace/collections${LV3_ANSIBLE_COLLECTIONS_DIR:+:$LV3_ANSIBLE_COLLECTIONS_DIR}; find . -path ./.git -prune -o -type f \\( -name '*.yml' -o -name '*.yaml' \\) -print0 | xargs -0 yamllint -c .yamllint && ANSIBLE_LINT_NODEPS=1 ansible-lint playbooks collections/ansible_collections/lv3/platform",
       "local_fallback_command": "./scripts/validate_repo.sh yaml ansible-lint"
     },
     "remote-validate": {
+      "runner_id": "build-server-validation",
+      "local_fallback_runner_id": "controller-local-validation",
       "runner_label": "validate-schemas",
       "skip_docker": true,
+      "status_file": ".local/validation-gate/remote-validate-last-run.json",
+      "validation_lanes": [
+        "ansible-syntax",
+        "schema-validation",
+        "policy-validation",
+        "alert-rule-validation",
+        "type-check",
+        "dependency-graph"
+      ],
       "command": "mkdir -p .local/validation-gate /opt/builds/.policy-toolchain && LV3_ANSIBLE_COLLECTIONS_DIR=/opt/builds/.ansible/collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha LV3_PACKER_PLUGIN_CACHE_DIR=/opt/builds/.packer.d LV3_POLICY_TOOLCHAIN_ROOT=/opt/builds/.policy-toolchain python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/remote-validate-last-run.json --source build-server-validate ansible-syntax schema-validation policy-validation alert-rule-validation type-check dependency-graph",
       "local_fallback_command": "mkdir -p .local/validation-gate .local/packer-plugin-cache .ansible/validation/collections .local/policy-toolchain && LV3_ANSIBLE_COLLECTIONS_DIR=.ansible/validation/collections LV3_PACKER_PLUGIN_CACHE_DIR=.local/packer-plugin-cache LV3_POLICY_TOOLCHAIN_ROOT=.local/policy-toolchain python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/remote-validate-last-run.json --source local-validate ansible-syntax schema-validation policy-validation alert-rule-validation type-check dependency-graph"
     },
     "pre-push-gate": {
+      "runner_id": "build-server-validation",
+      "local_fallback_runner_id": "controller-local-validation",
       "skip_docker": true,
+      "status_file": ".local/validation-gate/last-run.json",
+      "validation_lanes": "all-validation-gate-checks",
       "command": "mkdir -p .local/validation-gate .local/trivy-cache /opt/builds/.policy-toolchain && LV3_ANSIBLE_COLLECTIONS_DIR=/opt/builds/.ansible/collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha LV3_PACKER_PLUGIN_CACHE_DIR=/opt/builds/.packer.d LV3_TRIVY_CACHE_DIR=.local/trivy-cache LV3_POLICY_TOOLCHAIN_ROOT=/opt/builds/.policy-toolchain python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/last-run.json --source build-server",
       "local_fallback_command": "mkdir -p .local/validation-gate .local/trivy-cache .local/packer-plugin-cache .ansible/validation/collections .local/policy-toolchain && LV3_ANSIBLE_COLLECTIONS_DIR=.ansible/validation/collections LV3_PACKER_PLUGIN_CACHE_DIR=.local/packer-plugin-cache LV3_TRIVY_CACHE_DIR=.local/trivy-cache LV3_POLICY_TOOLCHAIN_ROOT=.local/policy-toolchain python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/last-run.json --source local-fallback"
     },
     "remote-pre-push": {
+      "runner_id": "build-server-validation",
+      "local_fallback_runner_id": "controller-local-validation",
       "skip_docker": true,
+      "status_file": ".local/validation-gate/last-run.json",
+      "validation_lanes": "all-validation-gate-checks",
       "command": "mkdir -p .local/validation-gate .local/trivy-cache /opt/builds/.policy-toolchain && LV3_ANSIBLE_COLLECTIONS_DIR=/opt/builds/.ansible/collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha LV3_PACKER_PLUGIN_CACHE_DIR=/opt/builds/.packer.d LV3_TRIVY_CACHE_DIR=.local/trivy-cache LV3_POLICY_TOOLCHAIN_ROOT=/opt/builds/.policy-toolchain python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/last-run.json --source build-server",
       "local_fallback_command": "mkdir -p .local/validation-gate .local/trivy-cache .local/packer-plugin-cache .ansible/validation/collections .local/policy-toolchain && LV3_ANSIBLE_COLLECTIONS_DIR=.ansible/validation/collections LV3_PACKER_PLUGIN_CACHE_DIR=.local/packer-plugin-cache LV3_TRIVY_CACHE_DIR=.local/trivy-cache LV3_POLICY_TOOLCHAIN_ROOT=.local/policy-toolchain python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/last-run.json --source local-fallback"
     },
     "remote-packer-build": {
+      "runner_id": "build-server-validation",
+      "local_fallback_runner_id": "controller-local-validation",
       "runner_label": "packer-validate",
       "skip_docker": true,
       "command": "test -n \"$IMAGE\" || { echo \"set IMAGE=<name>\" >&2; exit 1; }; ./scripts/build_packer_template.sh \"$IMAGE\"",
       "local_fallback_command": "test -n \"$IMAGE\" || { echo \"set IMAGE=<name>\" >&2; exit 1; }; ./scripts/build_packer_template.sh \"$IMAGE\""
     },
     "remote-packer-validate": {
+      "runner_id": "build-server-validation",
+      "local_fallback_runner_id": "controller-local-validation",
       "runner_label": "packer-validate",
       "skip_docker": true,
+      "validation_lanes": ["packer-validate"],
       "command": "./scripts/validate_packer_templates.sh",
       "local_fallback_command": "./scripts/validate_packer_templates.sh"
     },
