@@ -17,7 +17,7 @@ workstreams:
   - id: ws-0295-live-apply
     adr: "0295"
     title: Live apply the shared artifact cache plane from latest origin/main
-    status: in-progress
+    status: in_progress
     owner: codex
     branch: codex/ws-0295-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0295-live-apply
