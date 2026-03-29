@@ -227,7 +227,7 @@ workstreams:
         scheduling, and recorded build handoff evidence across the remote build
         server, controller fallback, and worker post-merge paths
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.88
   - id: ws-0295-live-apply
     adr: "0295"
     title: Live apply the shared artifact cache plane from latest origin/main
