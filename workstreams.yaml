@@ -696,7 +696,7 @@ workstreams:
       - VERSION
       - changelog.md
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.76.md
+      - docs/release-notes/0.177.77.md
       - versions/stack.yaml
       - build/platform-manifest.json
       - receipts/live-applies/2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply.json
@@ -720,7 +720,7 @@ workstreams:
             - VERSION
             - changelog.md
             - docs/release-notes/README.md
-            - docs/release-notes/0.177.76.md
+            - docs/release-notes/0.177.77.md
             - versions/stack.yaml
             - build/platform-manifest.json
             - receipts/live-applies/2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply.json
@@ -815,7 +815,7 @@ workstreams:
         DNS, and certificate-plan concordance into an enforced admission gate for
         edge and route-ledger replays
       release_bump: patch
-      included_in_repo_version: 0.177.76
+      included_in_repo_version: 0.177.77
       latest_receipts:
         public_endpoint_admission_control: 2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply
         public_edge_publication: 2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply

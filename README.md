@@ -145,7 +145,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.76` |
+| Repository version | `0.177.77` |
 | Platform version | `0.130.51` |
 | Observed check date | `2026-03-29` |
 | Observed OS | `Debian 13` |
@@ -281,12 +281,12 @@ Template VM: `9000` `debian13-cloud-template`
 | `preview_environment` | `2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z` |
 | `promotion_pipeline` | `2026-03-28-adr-0230-policy-decisions-live-apply` |
 | `provider_boundaries` | `2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply` |
-| `public_edge_publication` | `2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply` |
+| `public_edge_publication` | `2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply` |
 | `public_endpoint_admission_control` | `2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply` |
 | `realtime` | `2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply` |
 | `remote_build_gateway` | `2026-03-26-adr-0156-agent-session-workspace-isolation-live-apply` |
 | `restore_verification` | `2026-03-29-adr-0272-restore-readiness-mainline-live-apply` |
-| `route_dns_assertion_ledger` | `2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply` |
+| `route_dns_assertion_ledger` | `2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
 | `runtime_state_semantics` | `2026-03-28-adr-0246-runtime-state-semantics-live-apply` |
 | `searxng` | `2026-03-26-adr-0148-searxng-live-apply` |
@@ -1264,7 +1264,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.76` |
+| Repository version | `0.177.77` |
 | Platform version | `0.130.51` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |

@@ -6,6 +6,8 @@ Detailed per-change deployment history is generated separately in the deployment
 
 ## Releases
 
+- [0.177.77](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.77.md)
+
 - [0.177.76](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.76.md)
 
 - [0.177.75](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.75.md)

@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.76",
+  "repo_version": "0.177.77",
   "platform_version": "0.130.51",
-  "generated_at": "2026-03-29T12:27:03Z",
-  "next_refresh_at": "2026-03-29T13:27:03Z",
+  "generated_at": "2026-03-29T12:44:55Z",
+  "next_refresh_at": "2026-03-29T13:44:55Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4211,10 +4211,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.75",
+    "last_version": "0.177.76",
     "deployed_at": "2026-03-29",
-    "summary": "records ADR 0252 exact-main evidence on the current mainline by refreshing the latest route, edge, and Vaultwarden receipts and documenting the HTTP/1.1 Vaultwarden verification form while the integrated platform baseline remains 0.130.51 and the original first-implementation truth stays anchored at repo version 0.177.68 on platform version 0.130.43",
-    "release_notes_url": "docs/release-notes/0.177.76.md"
+    "summary": "implemented ADR 0273 by turning public hostname, edge route, DNS, and certificate-plan concordance into an enforced admission gate for edge and route-ledger replays",
+    "release_notes_url": "docs/release-notes/0.177.77.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
