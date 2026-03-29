@@ -3634,6 +3634,7 @@ workstreams:
       - tests/test_container_image_policy.py
       - tests/test_promotion_pipeline.py
       - tests/test_security_posture_report.py
+      - receipts/live-applies/2026-03-29-adr-0269-vulnerability-budget-gates-mainline-live-apply.json
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -3666,8 +3667,9 @@ workstreams:
             - tests/test_container_image_policy.py
             - tests/test_promotion_pipeline.py
             - tests/test_security_posture_report.py
+            - receipts/live-applies/2026-03-29-adr-0269-vulnerability-budget-gates-mainline-live-apply.json
           mode: exclusive
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: true
   - id: ws-0253-live-apply
     adr: "0253"
