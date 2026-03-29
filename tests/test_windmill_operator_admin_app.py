@@ -486,8 +486,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "scripts/sync_windmill_seed_schedules.py" in tasks
     assert "--path {{ windmill_healthcheck_script_path | quote }}" in tasks
     assert '. "{{ windmill_env_file }}"' not in tasks
-    assert "Converge repo-managed Windmill schedule enabled flags" not in tasks
-    assert 'psql "${database_url}"' not in tasks
+    assert "Converge repo-managed Windmill schedule enabled flags" in tasks
+    assert 'psql "${database_url}"' in tasks
     assert "become: true" in tasks
     assert "Sync repo-managed Windmill raw apps" in tasks
     assert "Install repo-managed Windmill raw app frontend dependencies" in tasks

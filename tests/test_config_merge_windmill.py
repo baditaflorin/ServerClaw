@@ -755,7 +755,7 @@ def test_run_wait_result_helper_requires_token(monkeypatch: pytest.MonkeyPatch, 
     assert "WINDMILL_TOKEN is required" in capsys.readouterr().err
 
 
-def test_run_wait_result_helper_retries_with_bootstrap_login(
+def test_run_wait_result_helper_writes_polled_result(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     module = load_module("run_wait_result_helper_retry", RUN_WAIT_RESULT_HELPER_PATH)
@@ -770,53 +770,59 @@ def test_run_wait_result_helper_retries_with_bootstrap_login(
             "lv3",
             "--path",
             "f/lv3/windmill_healthcheck",
+            "--payload-json",
+            '{"probe":"manual-run"}',
+            "--poll-interval",
+            "0.25",
         ],
     )
     monkeypatch.setenv("WINDMILL_TOKEN", "managed-secret")
 
-    class FakeResponse:
-        def __init__(self, body: str) -> None:
-            self._body = body.encode("utf-8")
+    captured: dict[str, object] = {}
 
-        def read(self) -> bytes:
-            return self._body
+    class FakeClient:
+        def __init__(self, *, base_url: str, token: str, workspace: str, request_timeout_seconds: int) -> None:
+            captured["client_init"] = {
+                "base_url": base_url,
+                "token": token,
+                "workspace": workspace,
+                "request_timeout_seconds": request_timeout_seconds,
+            }
 
-        def close(self) -> None:
-            return None
+        def run_workflow_wait_result(
+            self,
+            workflow_id: str,
+            payload: dict[str, object],
+            *,
+            timeout_seconds: int | None = None,
+            poll_interval_seconds: float = 1.0,
+        ) -> dict[str, object]:
+            captured["run"] = {
+                "workflow_id": workflow_id,
+                "payload": payload,
+                "timeout_seconds": timeout_seconds,
+                "poll_interval_seconds": poll_interval_seconds,
+            }
+            return {"status": "ok", "probe": payload["probe"]}
 
-        def __enter__(self) -> "FakeResponse":
-            return self
-
-        def __exit__(self, exc_type, exc, tb) -> None:
-            return None
-
-    calls: list[str] = []
-
-    def fake_urlopen(request, timeout=120):
-        calls.append(request.full_url)
-        if request.full_url.endswith("/api/auth/login"):
-            return FakeResponse("session-token")
-        auth_header = request.headers.get("Authorization")
-        if auth_header == "Bearer managed-secret":
-            raise module.urllib.error.HTTPError(
-                request.full_url,
-                401,
-                "Unauthorized",
-                hdrs=None,
-                fp=FakeResponse("Unauthorized"),
-            )
-        assert auth_header == "Bearer session-token"
-        return FakeResponse('{"status":"ok"}')
-
-    monkeypatch.setattr(module.urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr(module, "HttpWindmillClient", FakeClient)
 
     assert module.main() == 0
-    assert json.loads(capsys.readouterr().out) == {"status": "ok"}
-    assert calls == [
-        "http://windmill.internal/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fwindmill_healthcheck",
-        "http://windmill.internal/api/auth/login",
-        "http://windmill.internal/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fwindmill_healthcheck",
-    ]
+    assert json.loads(capsys.readouterr().out) == {"status": "ok", "probe": "manual-run"}
+    assert captured == {
+        "client_init": {
+            "base_url": "http://windmill.internal",
+            "token": "managed-secret",
+            "workspace": "lv3",
+            "request_timeout_seconds": 120,
+        },
+        "run": {
+            "workflow_id": "f/lv3/windmill_healthcheck",
+            "payload": {"probe": "manual-run"},
+            "timeout_seconds": 120,
+            "poll_interval_seconds": 0.25,
+        },
+    }
 
 
 def test_sync_helper_retries_with_bootstrap_login_on_401(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -1686,7 +1686,7 @@
       - --network
       - host
       - -v
-      - "{{ windmill_seed_app_sync_dir }}:/workspace"
+      - "{{ windmill_seed_app_sync_dir.path }}:/workspace"
       - "{{ windmill_image }}"
       - sh
       - -lc

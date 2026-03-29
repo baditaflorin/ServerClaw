@@ -4064,7 +4064,7 @@ adr_index:
       - community
     summary: We will use AG Grid Community as the default open source grid library for
     filename: 0238-data-dense-operator-grids-via-ag-grid-community.md
-    implemented_version: 0.177.56
+    implemented_version: 0.177.63
   - adr: 0239
     title: Browser-Local Search Experience Via Pagefind
     status: Accepted
