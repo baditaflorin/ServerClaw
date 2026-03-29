@@ -1,0 +1,17 @@
+---
+mailpit_service_topology: "{{ platform_service_topology | platform_service('mailpit') }}"
+mailpit_site_dir: /opt/dev-tools/mailpit
+mailpit_compose_file: "{{ mailpit_site_dir }}/docker-compose.yml"
+mailpit_container_name: mailpit
+mailpit_image: "{{ container_image_catalog.images.mailpit_runtime.ref }}"
+mailpit_http_port: "{{ mailpit_service_topology.ports.internal }}"
+mailpit_smtp_port: "{{ mailpit_service_topology.ports.smtp }}"
+mailpit_bind_host: "{{ ansible_host }}"
+mailpit_loopback_bind_host: 127.0.0.1
+mailpit_api_url: "{{ mailpit_service_topology.urls.internal }}/api/v1"
+mailpit_disable_version_check: true
+mailpit_docker_network_name: dev-tools_default
+mailpit_test_from_address: mailpit-probe@lv3.org
+mailpit_test_to_address: dev-mail@lv3.org
+mailpit_test_subject_prefix: LV3 Mailpit probe
+mailpit_test_body: Mailpit captured the repo-managed SMTP probe.

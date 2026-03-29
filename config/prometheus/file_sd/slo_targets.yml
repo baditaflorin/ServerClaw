@@ -62,6 +62,13 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - http://10.10.10.20:8025/api/v1/info
+  labels:
+    service_id: mailpit
+    slo_id: mailpit-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - https://matrix.lv3.org/_matrix/client/versions
   labels:
     service_id: matrix_synapse

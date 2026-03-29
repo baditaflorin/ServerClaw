@@ -176,6 +176,20 @@
       "notes": "Security scan evidence should remain available across one full patching and review cycle."
     },
     {
+      "id": "mailpit-captured-messages",
+      "service": "mailpit",
+      "name": "Mailpit captured message cache",
+      "class": "internal",
+      "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Mailpit in-memory message store on docker-runtime-lv3"
+      ],
+      "notes": "Mailpit intentionally keeps intercepted staging and development messages in ephemeral in-memory storage so assertion traffic is inspectable but lost on restart."
+    },
+    {
       "id": "langfuse-object-storage",
       "service": "langfuse",
       "name": "Langfuse event and media object storage",

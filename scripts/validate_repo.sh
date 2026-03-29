@@ -539,6 +539,7 @@ validate_health_probes() {
     mattermost_runtime
     matrix_synapse_runtime
     mail_platform_runtime
+    mailpit_runtime
     nginx_edge_publication
     ntfy_runtime
     uptime_kuma_runtime

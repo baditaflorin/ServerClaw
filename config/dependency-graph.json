@@ -183,6 +183,15 @@
       "adr": "0041"
     },
     {
+      "id": "mailpit",
+      "service": "mailpit",
+      "name": "Mailpit",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "communication",
+      "adr": "0282"
+    },
+    {
       "id": "matrix_synapse",
       "service": "matrix_synapse",
       "name": "Matrix Synapse",
@@ -624,6 +633,12 @@
       "to": "nginx_edge",
       "type": "hard",
       "description": "The unified dashboard is published at home.lv3.org through the shared NGINX edge and is not exposed directly on the public internet."
+    },
+    {
+      "from": "keycloak",
+      "to": "mailpit",
+      "type": "soft",
+      "description": "Staging and non-production Keycloak runs can relay SMTP through Mailpit for assertion-level mail verification without sending real email."
     },
     {
       "from": "keycloak",

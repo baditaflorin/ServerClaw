@@ -426,6 +426,28 @@
         "converge-mail-platform"
       ]
     },
+    "mailpit_runtime": {
+      "kind": "runtime",
+      "service_id": "mailpit",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "mailpit",
+      "registry_ref": "docker.io/axllent/mailpit",
+      "tag": "v1.29.5",
+      "digest": "sha256:0d7b9c8ed469f400087d9abf1df5b7c7c88b33ae7b8b381ea5a2b153ef27aacf",
+      "ref": "docker.io/axllent/mailpit:v1.29.5@sha256:0d7b9c8ed469f400087d9abf1df5b7c7c88b33ae7b8b381ea5a2b153ef27aacf",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-30-mailpit-runtime.json",
+      "consumers": [
+        "roles/mailpit_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-mailpit"
+      ]
+    },
     "matrix_synapse_runtime": {
       "kind": "runtime",
       "service_id": "matrix_synapse",

@@ -14,6 +14,131 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0282-live-apply
+    adr: "0282"
+    title: Live apply Mailpit as the SMTP development mail interceptor from latest origin/main
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0282-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0282-live-apply.md
+    depends_on:
+      - adr-0041-dockerized-mail-platform-for-server-delivery-api-and-observability
+      - adr-0107-platform-extension-model
+      - adr-0165-workflow-idempotency
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0282-live-apply.md
+      - docs/adr/0282-mailpit-as-the-smtp-development-mail-interceptor.md
+      - docs/runbooks/configure-mailpit.md
+      - docs/runbooks/configure-mail-platform.md
+      - inventory/group_vars/all.yml
+      - inventory/group_vars/staging.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - collections/ansible_collections/lv3/platform/playbooks/mailpit.yml
+      - collections/ansible_collections/lv3/platform/roles/mailpit_runtime/
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/
+      - playbooks/mailpit.yml
+      - playbooks/services/mailpit.yml
+      - playbooks/mail-platform-verify.yml
+      - collections/ansible_collections/lv3/platform/playbooks/mail-platform-verify.yml
+      - config/ansible-execution-scopes.yaml
+      - config/command-catalog.json
+      - config/data-catalog.json
+      - config/dependency-graph.json
+      - config/health-probe-catalog.json
+      - config/image-catalog.json
+      - config/service-capability-catalog.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      - config/slo-catalog.json
+      - config/workflow-catalog.json
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/slo_rules.yml
+      - config/grafana/dashboards/slo-overview.json
+      - Makefile
+      - scripts/generate_platform_vars.py
+      - scripts/validate_repo.sh
+      - tests/test_keycloak_runtime_role.py
+      - tests/test_mailpit_playbook.py
+      - tests/test_mailpit_runtime_role.py
+      - tests/test_mail_platform_verify_playbook.py
+      - receipts/image-scans/
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0282_mailpit_surface
+          paths:
+            - docs/workstreams/ws-0282-live-apply.md
+            - docs/adr/0282-mailpit-as-the-smtp-development-mail-interceptor.md
+            - docs/runbooks/configure-mailpit.md
+            - docs/runbooks/configure-mail-platform.md
+            - inventory/group_vars/staging.yml
+            - collections/ansible_collections/lv3/platform/playbooks/mailpit.yml
+            - collections/ansible_collections/lv3/platform/roles/mailpit_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/meta/argument_specs.yml
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/templates/docker-compose.yml.j2
+            - playbooks/mailpit.yml
+            - playbooks/services/mailpit.yml
+            - playbooks/mail-platform-verify.yml
+            - collections/ansible_collections/lv3/platform/playbooks/mail-platform-verify.yml
+            - tests/test_keycloak_runtime_role.py
+            - tests/test_mailpit_playbook.py
+            - tests/test_mailpit_runtime_role.py
+            - tests/test_mail_platform_verify_playbook.py
+            - receipts/image-scans/2026-03-30-mailpit-runtime.json
+            - receipts/image-scans/2026-03-30-mailpit-runtime.trivy.json
+            - receipts/live-applies/**
+          mode: exclusive
+        - id: topology_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/all.yml
+            - inventory/group_vars/platform.yml
+            - scripts/generate_platform_vars.py
+          mode: shared_contract
+          contract: platform-topology-v1
+        - id: ansible_scope_catalog_contract
+          paths:
+            - config/ansible-execution-scopes.yaml
+          mode: shared_contract
+          contract: ansible-execution-scope-catalog-v1
+        - id: mailpit_service_catalog_contract
+          paths:
+            - config/service-capability-catalog.json
+            - config/health-probe-catalog.json
+            - config/image-catalog.json
+            - config/dependency-graph.json
+            - config/slo-catalog.json
+            - config/data-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/workflow-catalog.json
+            - config/command-catalog.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/grafana/dashboards/slo-overview.json
+          mode: shared_contract
+          contract: service-catalogs-v1
+        - id: mailpit_repository_automation_contract
+          paths:
+            - Makefile
+            - scripts/validate_repo.sh
+          mode: shared_contract
+          contract: repository-automation-v1
+    ready_to_merge: false
+    live_applied: false
   - id: ws-0266-validation-runner-capability-contracts
     adr: "0266"
     title: Validation runner capability contracts and environment attestation

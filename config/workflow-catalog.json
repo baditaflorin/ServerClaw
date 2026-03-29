@@ -1527,6 +1527,59 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-mailpit": {
+      "description": "Deploy the private Mailpit SMTP interceptor on docker-runtime-lv3 for staging and development mail capture plus REST-API assertions.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-mailpit",
+        "command": "make converge-mailpit"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-mailpit"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-mailpit.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/mailpit.yml",
+        "playbooks/services/mailpit.yml",
+        "roles/mailpit_runtime",
+        "playbooks/mail-platform-verify.yml",
+        "inventory/group_vars/all.yml",
+        "inventory/group_vars/staging.yml",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json"
+      ],
+      "outputs": [
+        "A private Mailpit runtime on docker-runtime-lv3 with guest-network HTTP and SMTP listeners plus repo-managed SMTP capture verification."
+      ],
+      "verification_commands": [
+        "make syntax-check-mailpit",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8025/api/v1/info'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 - <<'\"'\"'PY'\"'\"'\nimport json\nimport smtplib\nimport urllib.request\nfrom email.message import EmailMessage\nsubject = \"LV3 workflow Mailpit verification\"\nurllib.request.urlopen(urllib.request.Request(\"http://127.0.0.1:8025/api/v1/messages\", method=\"DELETE\"), timeout=30).read()\nmessage = EmailMessage()\nmessage[\"From\"] = \"workflow-check@lv3.org\"\nmessage[\"To\"] = \"mailpit-workflow@lv3.org\"\nmessage[\"Subject\"] = subject\nmessage.set_content(\"Workflow verification through Mailpit\")\nwith smtplib.SMTP(\"127.0.0.1\", 1025, timeout=15) as client:\n    client.send_message(message)\npayload = json.loads(urllib.request.urlopen(\"http://127.0.0.1:8025/api/v1/messages\", timeout=30).read().decode(\"utf-8\"))\nassert any(item.get(\"Subject\") == subject for item in payload.get(\"messages\", []))\nprint(\"verified\")\nPY'",
+        "ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/mail-platform-verify.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e env=staging --syntax-check"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-openbao": {
       "description": "Deploy private OpenBao on docker-runtime-lv3, seed scoped secrets, configure Transit, and enable PostgreSQL dynamic credentials.",
       "lifecycle_status": "active",

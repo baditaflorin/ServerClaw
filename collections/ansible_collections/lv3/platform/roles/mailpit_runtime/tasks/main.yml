@@ -1,0 +1,179 @@
+---
+- name: Validate Mailpit runtime inputs
+  ansible.builtin.assert:
+    that:
+      - mailpit_site_dir | length > 0
+      - mailpit_compose_file | length > 0
+      - mailpit_container_name | length > 0
+      - mailpit_image | length > 0
+      - mailpit_http_port | int > 0
+      - mailpit_smtp_port | int > 0
+      - mailpit_bind_host | length > 0
+      - mailpit_loopback_bind_host | length > 0
+      - mailpit_api_url | length > 0
+      - mailpit_docker_network_name | length > 0
+    fail_msg: >-
+      mailpit_runtime requires runtime paths, listener ports, a pinned image,
+      and the shared Docker network name used by non-production workloads.
+
+- name: Ensure the Mailpit runtime directory exists
+  ansible.builtin.file:
+    path: "{{ mailpit_site_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the Mailpit compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ mailpit_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: mailpit_compose_template
+
+- name: Pull the Mailpit image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ mailpit_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ mailpit_site_dir }}"
+  register: mailpit_pull
+  changed_when: >-
+    'Pulling' in mailpit_pull.stdout
+    or 'Downloaded newer image' in mailpit_pull.stdout
+    or 'Pull complete' in mailpit_pull.stdout
+
+- name: Check whether the Docker nat chain exists before recreating Mailpit published ports
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: mailpit_docker_nat_chain
+  changed_when: false
+  failed_when: false
+
+- name: Restore Docker networking when the nat chain is missing before Mailpit startup
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: mailpit_docker_nat_chain.rc != 0
+
+- name: Recheck the Docker nat chain before Mailpit startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: mailpit_docker_nat_chain_recheck
+  changed_when: false
+  failed_when: mailpit_docker_nat_chain_recheck.rc not in [0, 1]
+  retries: 10
+  delay: 2
+  until: mailpit_docker_nat_chain_recheck.rc == 0
+  when: mailpit_docker_nat_chain.rc != 0
+
+- name: Wait for the Docker daemon to answer after networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - info
+      - --format
+      - '{{ "{{.ServerVersion}}" }}'
+  register: mailpit_docker_info
+  changed_when: false
+  retries: 10
+  delay: 2
+  until: mailpit_docker_info.rc == 0
+  when: mailpit_docker_nat_chain.rc != 0
+
+- name: Assert Docker nat chain is present before Mailpit startup
+  ansible.builtin.assert:
+    that:
+      - mailpit_docker_nat_chain.rc == 0 or mailpit_docker_nat_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; Mailpit published ports will fail."
+
+- name: Check whether the current Mailpit info endpoint is healthy before startup
+  ansible.builtin.uri:
+    url: "{{ mailpit_api_url }}/info"
+    method: GET
+    status_code: 200
+  register: mailpit_info_probe
+  changed_when: false
+  failed_when: false
+
+- name: Record whether the Mailpit startup needs a force recreate
+  ansible.builtin.set_fact:
+    mailpit_force_recreate: >-
+      {{
+        mailpit_docker_nat_chain.rc != 0
+        or (mailpit_info_probe.status | default(0)) != 200
+        or mailpit_compose_template.changed
+        or mailpit_pull.changed
+      }}
+
+- name: Force-recreate the Mailpit stack when runtime inputs changed
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ mailpit_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+      - --force-recreate
+  args:
+    chdir: "{{ mailpit_site_dir }}"
+  register: mailpit_up
+  changed_when: >-
+    'Creating' in mailpit_up.stdout
+    or 'Recreating' in mailpit_up.stdout
+    or 'Starting' in mailpit_up.stdout
+  when: mailpit_force_recreate
+
+- name: Start the Mailpit stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ mailpit_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ mailpit_site_dir }}"
+  register: mailpit_up
+  changed_when: >-
+    'Creating' in mailpit_up.stdout
+    or 'Recreating' in mailpit_up.stdout
+    or 'Starting' in mailpit_up.stdout
+  when: not mailpit_force_recreate
+
+- name: Wait for the Mailpit HTTP listener
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ mailpit_http_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Wait for the Mailpit SMTP listener
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ mailpit_smtp_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Verify the Mailpit runtime
+  ansible.builtin.import_tasks: verify.yml
