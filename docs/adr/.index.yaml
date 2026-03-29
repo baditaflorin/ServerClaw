@@ -4078,7 +4078,7 @@ adr_index:
   - adr: '0241'
     title: Rich Content And Inline Knowledge Editing Via Tiptap
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4090,6 +4090,7 @@ adr_index:
       - tiptap
     summary: We will use Tiptap as the default rich-content editor framework for
     filename: 0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
+    implemented_version: 0.177.61
   - adr: '0242'
     title: Guided Human Onboarding Via Shepherd Tours
     status: Accepted

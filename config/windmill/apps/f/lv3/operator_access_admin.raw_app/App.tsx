@@ -1,4 +1,14 @@
 import React, { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import type { Editor } from "@tiptap/react";
+import { EditorContent, useEditor } from "@tiptap/react";
+import { Markdown } from "@tiptap/markdown";
+import { Table } from "@tiptap/extension-table";
+import TableCell from "@tiptap/extension-table-cell";
+import TableHeader from "@tiptap/extension-table-header";
+import TableRow from "@tiptap/extension-table-row";
+import TaskItem from "@tiptap/extension-task-item";
+import TaskList from "@tiptap/extension-task-list";
+import StarterKit from "@tiptap/starter-kit";
 import type { Tour } from "shepherd.js";
 import { backend } from "./wmill";
 import {
@@ -89,6 +99,13 @@ type TourLaunchOptions = {
   resume?: boolean;
 };
 
+type ToolbarButtonProps = {
+  label: string;
+  onClick: () => void;
+  active?: boolean;
+  disabled?: boolean;
+};
+
 const initialOnboardState: OnboardFormState = {
   name: "",
   email: "",
@@ -111,6 +128,19 @@ const initialSyncState: SyncFormState = {
   operator_id: "",
   dry_run: false,
 };
+
+function ToolbarButton({ label, onClick, active = false, disabled = false }: ToolbarButtonProps) {
+  return (
+    <button
+      type="button"
+      className={`toolbarButton ${active ? "isActive" : ""}`}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {label}
+    </button>
+  );
+}
 
 function prettyJson(value: unknown): string {
   return JSON.stringify(value, null, 2);
@@ -139,11 +169,23 @@ function isRosterPayload(payload: unknown): payload is RosterPayload {
   return candidate.status === "ok" && Array.isArray(candidate.operators);
 }
 
+function setEditorMarkdown(editor: Editor | null, markdown: string) {
+  if (!editor) {
+    return;
+  }
+  if (editor.getMarkdown() === markdown) {
+    return;
+  }
+  editor.commands.setContent(markdown, { contentType: "markdown" });
+}
+
 function App() {
   const [roster, setRoster] = useState<RosterPayload | null>(null);
   const [rosterLoading, setRosterLoading] = useState(true);
   const [rosterError, setRosterError] = useState("");
   const [selectedOperatorId, setSelectedOperatorId] = useState("");
+  const [mentionTarget, setMentionTarget] = useState("");
+  const [notesMarkdown, setNotesMarkdown] = useState("");
   const [onboard, setOnboard] = useState<OnboardFormState>(initialOnboardState);
   const [offboard, setOffboard] = useState<OffboardFormState>(initialOffboardState);
   const [syncForm, setSyncForm] = useState<SyncFormState>(initialSyncState);
@@ -165,6 +207,8 @@ function App() {
     tourProgress.lastIntent && tourProgress.lastStepId && tourProgress.lastOutcome === "dismissed",
   );
   const lastTourTimestamp = tourProgress.lastCompletedAt ?? tourProgress.lastDismissedAt;
+  const selectedOperatorNotes = selectedOperator?.notes ?? "";
+  const notesDirty = notesMarkdown !== selectedOperatorNotes;
   const tourStatusLabel = tourRunning
     ? "Tour Running"
     : tourProgress.lastOutcome === "completed"
@@ -172,6 +216,39 @@ function App() {
       : tourProgress.lastOutcome === "dismissed"
         ? "Paused"
         : "Ready";
+
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [
+      StarterKit.configure({
+        heading: {
+          levels: [1, 2, 3],
+        },
+      }),
+      Markdown,
+      TaskList,
+      TaskItem.configure({
+        nested: true,
+      }),
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
+    ],
+    content: "",
+    contentType: "markdown",
+    editorProps: {
+      attributes: {
+        class: "richTextContent",
+      },
+    },
+    onUpdate({ editor: currentEditor }) {
+      const nextMarkdown = currentEditor.getMarkdown();
+      setNotesMarkdown((current) => (current === nextMarkdown ? current : nextMarkdown));
+    },
+  });
 
   async function refreshRoster() {
     setRosterLoading(true);
@@ -225,6 +302,15 @@ function App() {
       void loadInventory(selectedOperatorId);
     }
   }, [selectedOperatorId]);
+
+  useEffect(() => {
+    setNotesMarkdown(selectedOperatorNotes);
+    setMentionTarget(selectedOperator?.id ?? "");
+  }, [selectedOperator?.id, selectedOperatorNotes]);
+
+  useEffect(() => {
+    setEditorMarkdown(editor, notesMarkdown);
+  }, [editor, notesMarkdown]);
 
   useEffect(() => {
     return () => {
@@ -287,6 +373,39 @@ function App() {
     }
   }
 
+  function selectOperator(nextId: string) {
+    if (nextId !== selectedOperatorId && notesDirty && !window.confirm("Discard unsaved note edits for the current operator?")) {
+      return false;
+    }
+    setSelectedOperatorId(nextId);
+    setOffboard((current) => ({ ...current, operator_id: nextId }));
+    return true;
+  }
+
+  function toggleLink() {
+    if (!editor) {
+      return;
+    }
+    const activeHref = String(editor.getAttributes("link").href ?? "");
+    const href = window.prompt("Enter a link URL. Leave blank to remove the current link.", activeHref || "https://");
+    if (href === null) {
+      return;
+    }
+    const normalized = href.trim();
+    if (!normalized) {
+      editor.chain().focus().unsetLink().run();
+      return;
+    }
+    editor.chain().focus().extendMarkRange("link").setLink({ href: normalized }).run();
+  }
+
+  function insertOperatorMention(targetOperatorId: string) {
+    if (!editor || !targetOperatorId) {
+      return;
+    }
+    editor.chain().focus().insertContent(`@${targetOperatorId} `).run();
+  }
+
   async function handleOnboardSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     await executeAction("Operator onboarding result", async () => {
@@ -311,6 +430,21 @@ function App() {
     await executeAction("Operator roster reconciliation result", async () => backend.sync_operators(syncForm) as Promise<ActionPayload>);
   }
 
+  async function handleSaveNotes() {
+    if (!selectedOperatorId) {
+      return;
+    }
+    await executeAction(
+      "Operator notes update result",
+      async () =>
+        (backend.update_operator_notes({
+          operator_id: selectedOperatorId,
+          notes_markdown: notesMarkdown,
+          dry_run: false,
+        }) as Promise<ActionPayload>),
+    );
+  }
+
   const sshRequired = onboard.role !== "viewer";
 
   return (
@@ -320,8 +454,8 @@ function App() {
           <h1>Operator Access Admin</h1>
           <p>
             Browser-first access control for ADR 0108. This console wraps the repo-managed onboarding,
-            off-boarding, inventory, and roster reconciliation workflows instead of creating a second
-            provisioning path.
+            off-boarding, inventory, roster reconciliation, and bounded rich notes workflows instead of
+            creating a second provisioning path.
           </p>
         </div>
         <div className="heroStats">
@@ -394,78 +528,191 @@ function App() {
       </section>
 
       <div className="layout">
-        <section className="panel" data-tour-target="roster-panel">
-          <div className="panelHeader">
-            <div>
-              <h2>Roster</h2>
-              <p>Current human operators from the repo-authoritative `config/operators.yaml` roster.</p>
+        <div className="mainColumn">
+          <section className="panel" data-tour-target="roster-panel">
+            <div className="panelHeader">
+              <div>
+                <h2>Roster</h2>
+                <p>Current human operators from the repo-authoritative `config/operators.yaml` roster.</p>
+              </div>
+              <div className="toolbar">
+                <button className="buttonGhost" onClick={() => void refreshRoster()} disabled={rosterLoading || actionLoading}>
+                  {rosterLoading ? "Refreshing…" : "Refresh"}
+                </button>
+              </div>
             </div>
-            <div className="toolbar">
-              <button className="buttonGhost" onClick={() => void refreshRoster()} disabled={rosterLoading || actionLoading}>
-                {rosterLoading ? "Refreshing…" : "Refresh"}
-              </button>
-            </div>
-          </div>
 
-          {rosterError ? <div className="banner bannerError">{rosterError}</div> : null}
-          {!rosterError ? (
-            <div className="banner bannerInfo">
-              Bootstrap passwords are returned once on successful onboarding. Store them securely and expect the
-              new operator to rotate them and enroll TOTP at first sign-in.
-            </div>
-          ) : null}
+            {rosterError ? <div className="banner bannerError">{rosterError}</div> : null}
+            {!rosterError ? (
+              <div className="banner bannerInfo">
+                Bootstrap passwords are returned once on successful onboarding. Store them securely and expect the
+                new operator to rotate them and enroll TOTP at first sign-in.
+              </div>
+            ) : null}
 
-          <div className="tableWrap">
-            <table className="rosterTable">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                  <th>Keycloak</th>
-                  <th>SSH</th>
-                  <th>Onboarded</th>
-                </tr>
-              </thead>
-              <tbody>
-                {operators.map((operator) => (
-                  <tr
-                    key={operator.id}
-                    className={operator.id === selectedOperatorId ? "isSelected" : ""}
-                    onClick={() => {
-                      setSelectedOperatorId(operator.id);
-                      setOffboard((current) => ({ ...current, operator_id: operator.id }));
-                    }}
-                  >
-                    <td>
-                      <strong>{operator.name}</strong>
-                      <div className="muted">{operator.email}</div>
-                    </td>
-                    <td>
-                      <span className="pill pillRole">{operator.role}</span>
-                    </td>
-                    <td>
-                      <span className={`pill ${operator.status === "active" ? "pillActive" : "pillInactive"}`}>
-                        {operator.status}
-                      </span>
-                    </td>
-                    <td>
-                      <div>{operator.keycloak_username}</div>
-                      <div className="muted">{operator.realm_roles.join(", ") || "n/a"}</div>
-                    </td>
-                    <td>{operator.ssh_enabled ? "enabled" : "not required"}</td>
-                    <td>{formatDate(operator.onboarded_at)}</td>
-                  </tr>
-                ))}
-                {!operators.length && !rosterLoading ? (
+            <div className="tableWrap">
+              <table className="rosterTable">
+                <thead>
                   <tr>
-                    <td colSpan={6}>No operators found in the roster.</td>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Keycloak</th>
+                    <th>SSH</th>
+                    <th>Onboarded</th>
                   </tr>
-                ) : null}
-              </tbody>
-            </table>
-          </div>
-        </section>
+                </thead>
+                <tbody>
+                  {operators.map((operator) => (
+                    <tr
+                      key={operator.id}
+                      className={operator.id === selectedOperatorId ? "isSelected" : ""}
+                      onClick={() => {
+                        void selectOperator(operator.id);
+                      }}
+                    >
+                      <td>
+                        <strong>{operator.name}</strong>
+                        <div className="muted">{operator.email}</div>
+                      </td>
+                      <td>
+                        <span className="pill pillRole">{operator.role}</span>
+                      </td>
+                      <td>
+                        <span className={`pill ${operator.status === "active" ? "pillActive" : "pillInactive"}`}>
+                          {operator.status}
+                        </span>
+                      </td>
+                      <td>
+                        <div>{operator.keycloak_username}</div>
+                        <div className="muted">{operator.realm_roles.join(", ") || "n/a"}</div>
+                      </td>
+                      <td>{operator.ssh_enabled ? "enabled" : "not required"}</td>
+                      <td>{formatDate(operator.onboarded_at)}</td>
+                    </tr>
+                  ))}
+                  {!operators.length && !rosterLoading ? (
+                    <tr>
+                      <td colSpan={6}>No operators found in the roster.</td>
+                    </tr>
+                  ) : null}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="panel">
+            <div className="panelHeader">
+              <div>
+                <h2>Rich Notes</h2>
+                <p>
+                  ADR 0241 bounded knowledge editor powered by Tiptap. Notes stay markdown-backed in
+                  `config/operators.yaml` while the rich editor handles headings, task items, tables, links,
+                  and mention-style person references.
+                </p>
+              </div>
+              <div className="toolbar">
+                <button className="buttonGhost" type="button" onClick={() => setNotesMarkdown(selectedOperatorNotes)} disabled={!notesDirty || actionLoading}>
+                  Reset
+                </button>
+                <button className="button" type="button" onClick={() => void handleSaveNotes()} disabled={!selectedOperatorId || !notesDirty || actionLoading}>
+                  {actionLoading ? "Saving…" : "Save Notes"}
+                </button>
+              </div>
+            </div>
+
+            {selectedOperator ? (
+              <>
+                <div className="inventoryMeta noteMeta">
+                  <span className="pill pillRole">{selectedOperator.name}</span>
+                  <span className={`pill ${selectedOperator.status === "active" ? "pillActive" : "pillInactive"}`}>
+                    {selectedOperator.status}
+                  </span>
+                  <span className="pill">{selectedOperator.role}</span>
+                  <span className="pill">{selectedOperator.keycloak_username || "no username"}</span>
+                  <span className="pill">{selectedOperator.notes ? "Notes present" : "No saved notes"}</span>
+                  <span className="pill">Reviewed {formatDate(selectedOperator.last_reviewed_at)}</span>
+                </div>
+
+                <div className="editorToolbar">
+                  <div className="toolbarGroup">
+                    <ToolbarButton label="H1" onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()} active={editor?.isActive("heading", { level: 1 }) ?? false} disabled={!editor} />
+                    <ToolbarButton label="H2" onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()} active={editor?.isActive("heading", { level: 2 }) ?? false} disabled={!editor} />
+                    <ToolbarButton label="Bold" onClick={() => editor?.chain().focus().toggleBold().run()} active={editor?.isActive("bold") ?? false} disabled={!editor} />
+                    <ToolbarButton label="Italic" onClick={() => editor?.chain().focus().toggleItalic().run()} active={editor?.isActive("italic") ?? false} disabled={!editor} />
+                  </div>
+                  <div className="toolbarGroup">
+                    <ToolbarButton label="Bullets" onClick={() => editor?.chain().focus().toggleBulletList().run()} active={editor?.isActive("bulletList") ?? false} disabled={!editor} />
+                    <ToolbarButton label="Ordered" onClick={() => editor?.chain().focus().toggleOrderedList().run()} active={editor?.isActive("orderedList") ?? false} disabled={!editor} />
+                    <ToolbarButton label="Tasks" onClick={() => editor?.chain().focus().toggleTaskList().run()} active={editor?.isActive("taskList") ?? false} disabled={!editor} />
+                    <ToolbarButton label="Code" onClick={() => editor?.chain().focus().toggleCodeBlock().run()} active={editor?.isActive("codeBlock") ?? false} disabled={!editor} />
+                    <ToolbarButton label="Link" onClick={toggleLink} active={editor?.isActive("link") ?? false} disabled={!editor} />
+                    <ToolbarButton label="Table" onClick={() => editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()} disabled={!editor} />
+                  </div>
+                  <div className="toolbarGroup toolbarGroupFill">
+                    <select
+                      className="toolbarSelect"
+                      value={mentionTarget}
+                      onChange={(event) => setMentionTarget(event.target.value)}
+                    >
+                      <option value="">Insert person mention...</option>
+                      {operators.map((operator) => (
+                        <option key={operator.id} value={operator.id}>
+                          {operator.name}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      className="toolbarButton"
+                      onClick={() => insertOperatorMention(mentionTarget)}
+                      disabled={!editor || !mentionTarget}
+                    >
+                      Mention
+                    </button>
+                  </div>
+                </div>
+
+                <div className="notesWorkspace">
+                  <div className="notesPane">
+                    <div className="workspaceHeader">
+                      <h3>Rich Editor</h3>
+                      <p>Inline formatting is rendered live while markdown remains the stored source of truth.</p>
+                    </div>
+                    <div className="editorSurface">
+                      <EditorContent editor={editor} />
+                    </div>
+                  </div>
+
+                  <div className="sourcePane">
+                    <div className="workspaceHeader">
+                      <h3>Markdown Source</h3>
+                      <p>Paste or edit markdown directly to import and export the same note content.</p>
+                    </div>
+                    <textarea
+                      className="markdownTextarea"
+                      value={notesMarkdown}
+                      onChange={(event) => setNotesMarkdown(event.target.value)}
+                      placeholder={"## Shift handoff\n\n- [ ] Review alerts\n- Link relevant runbooks\n- Mention @operator-id"}
+                    />
+                  </div>
+                </div>
+
+                <div className="editorFooter">
+                  <span className="muted">Stored note length: {notesMarkdown.trim().length} character(s)</span>
+                  <span className={`pill ${notesDirty ? "pillWarning" : "pillSuccess"}`}>
+                    {notesDirty ? "Unsaved changes" : "Saved"}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <div className="emptyState">
+                <h3>Select an operator</h3>
+                <p>Choose one roster entry to open the bounded rich-content editor for that operator.</p>
+              </div>
+            )}
+          </section>
+        </div>
 
         <aside className="sidebar">
           <div className="forms">
@@ -572,8 +819,7 @@ function App() {
                     value={offboard.operator_id}
                     onChange={(event) => {
                       const nextId = event.target.value;
-                      setOffboard({ ...offboard, operator_id: nextId });
-                      setSelectedOperatorId(nextId);
+                      void selectOperator(nextId);
                     }}
                     required
                   >

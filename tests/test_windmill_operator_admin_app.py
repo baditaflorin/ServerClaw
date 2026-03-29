@@ -38,6 +38,7 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "f/lv3/quarterly_access_review",
         "f/lv3/operator_roster",
         "f/lv3/operator_inventory",
+        "f/lv3/operator_update_notes",
     }.issubset(script_paths)
     assert "f/lv3/operator_access_admin" in raw_app_paths
     assert defaults["windmill_bootstrap_identity_email"] == "superadmin_secret@windmill.dev"
@@ -89,7 +90,6 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "roles",
     }.issubset(set(defaults["windmill_worker_checkout_sync_paths"]))
     assert defaults["windmill_worker_checkout_checksum_file"] == "{{ windmill_site_dir }}/worker-checkout.sha256"
-    assert defaults["windmill_worker_checkout_manifest_remote_file"] == "{{ windmill_site_dir }}/worker-checkout-files.txt"
     assert "windmill_worker_checkout_prune_preserve_paths" in defaults_text
     assert "windmill_worker_repo_mutable_files" in defaults_text
     assert "windmill_worker_runtime_writable_directories" in defaults_text
@@ -157,8 +157,10 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
 
 def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> None:
     app_dir = REPO_ROOT / "config/windmill/apps/f/lv3/operator_access_admin.raw_app"
+    lock_path = REPO_ROOT / "config/windmill/apps/wmill-lock.yaml"
     app_config = yaml.safe_load((app_dir / "raw_app.yaml").read_text())
     package = json.loads((app_dir / "package.json").read_text())
+    lock_config = yaml.safe_load(lock_path.read_text())
     app_source = (app_dir / "App.tsx").read_text()
     tour_source = (app_dir / "touring.ts").read_text()
 
@@ -166,6 +168,10 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert package["dependencies"]["react"] == "19.0.0"
     assert package["dependencies"]["shepherd.js"] == "15.2.2"
     assert package["dependencies"]["windmill-client"] == "^1"
+    assert package["dependencies"]["@tiptap/react"] == "3.21.0"
+    assert package["dependencies"]["@tiptap/markdown"] == "3.21.0"
+    assert lock_config["version"] == "v2"
+    assert "f/lv3/operator_access_admin.raw_app+__app_hash" in lock_config["locks"]
     assert "Operator Access Admin" in app_source
     assert "Task-specific Shepherd tours for first-run operators" in app_source
     assert 'data-tour-target="tour-launcher"' in app_source
@@ -190,7 +196,8 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     offboard_script = (REPO_ROOT / "config/windmill/scripts/operator-offboard.py").read_text()
     sync_script = (REPO_ROOT / "config/windmill/scripts/sync-operators.py").read_text()
     inventory_script = (REPO_ROOT / "config/windmill/scripts/operator-inventory.py").read_text()
-    for script_source in (roster_script, onboard_script, offboard_script, sync_script, inventory_script):
+    update_notes_script = (REPO_ROOT / "config/windmill/scripts/operator-update-notes.py").read_text()
+    for script_source in (roster_script, onboard_script, offboard_script, sync_script, inventory_script, update_notes_script):
         assert "\"uv\"" in script_source
         assert "\"run\"" in script_source
         assert "\"--no-project\"" in script_source
@@ -200,6 +207,11 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert "backend.offboard_operator" in app_source
     assert "backend.sync_operators" in app_source
     assert "backend.operator_inventory" in app_source
+    assert "backend.update_operator_notes" in app_source
+    assert "EditorContent" in app_source
+    assert "toggleTaskList" in app_source
+    assert "insertTable" in app_source
+    assert "insertOperatorMention" in app_source
 
     expected_backend_refs = {
         "list_operators.yaml": "f/lv3/operator_roster",
@@ -207,6 +219,7 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
         "offboard_operator.yaml": "f/lv3/operator_offboard",
         "sync_operators.yaml": "f/lv3/sync_operators",
         "operator_inventory.yaml": "f/lv3/operator_inventory",
+        "update_operator_notes.yaml": "f/lv3/operator_update_notes",
     }
     for file_name, expected_path in expected_backend_refs.items():
         payload = yaml.safe_load((app_dir / "backend" / file_name).read_text())
@@ -364,6 +377,39 @@ def test_operator_onboard_wrapper_sets_openbao_url_without_runtime_env(tmp_path:
     assert env["LV3_OPENBAO_URL"] == "http://lv3-openbao:8201"
 
 
+def test_operator_update_notes_wrapper_uses_temp_markdown_file(tmp_path: Path, monkeypatch) -> None:
+    repo_root = tmp_path / "repo"
+    workflow = repo_root / "scripts" / "operator_manager.py"
+    workflow.parent.mkdir(parents=True)
+    workflow.write_text("# stub\n", encoding="utf-8")
+    module = load_module(REPO_ROOT / "config/windmill/scripts/operator-update-notes.py", "operator_update_notes_wrapper")
+    captured = {}
+
+    def fake_run(command, cwd, env, text, capture_output, check):
+        notes_file = Path(command[command.index("--notes-file") + 1])
+        captured["command"] = command
+        captured["notes_payload"] = notes_file.read_text(encoding="utf-8")
+        return subprocess.CompletedProcess(command, 0, stdout=json.dumps({"status": "ok"}), stderr="")
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    payload = module.main(operator_id="alice-example", notes_markdown="## Shift handoff\n\n- [ ] Review alerts", repo_path=str(repo_root))
+
+    assert payload["status"] == "ok"
+    assert captured["command"][:9] == [
+        "uv",
+        "run",
+        "--no-project",
+        "--with",
+        "pyyaml",
+        "python",
+        str(workflow),
+        "--emit-json",
+        "update-notes",
+    ]
+    assert captured["notes_payload"] == "## Shift handoff\n\n- [ ] Review alerts"
+
+
 def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     tasks = (
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml"
@@ -418,6 +464,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "--exclude='*/._*'" in tasks
     assert "--exclude='.DS_Store'" in tasks
     assert "--exclude='*/.DS_Store'" in tasks
+    assert "--dereference" in tasks
     assert "changed_when: false" in tasks
     assert "Expand the staged Windmill worker checkout on the guest" in tasks
     assert "Find stale macOS metadata files in the Windmill worker checkout" in tasks
@@ -456,14 +503,20 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "windmill_worker_checkout_integrity_mismatch" in tasks
     assert "windmill_worker_checkout_sync_paths" in tasks
     assert "Create a local manifest path for the Windmill worker checkout contents" in tasks
+    assert "Create a guest staging archive path for the Windmill worker checkout" in tasks
+    assert "Create a guest manifest path for the Windmill worker checkout contents" in tasks
     assert "Render the local manifest for the Windmill worker checkout contents" in tasks
     assert "Copy the staged Windmill worker checkout manifest to the guest" in tasks
     assert "Prune stale immutable files from the Windmill worker checkout" in tasks
     assert "Removed stale immutable files from the Windmill worker checkout" in tasks
     assert "Remove the remote manifest for the Windmill worker checkout contents" in tasks
     assert "Remove the local manifest for the Windmill worker checkout contents" in tasks
-    assert "windmill_worker_checkout_manifest_remote_file" in tasks
+    assert "windmill_worker_checkout_archive_remote.path" in tasks
+    assert "windmill_worker_checkout_manifest_remote.path" in tasks
     assert "windmill_worker_checkout_prune_preserve_paths" in tasks
+    assert "Create a temporary Windmill seed app sync directory" in tasks
+    assert "Remove the temporary Windmill seed app sync directory" in tasks
+    assert "windmill_seed_app_sync_dir.path" in tasks
     assert "scripts/windmill_run_wait_result.py" in tasks
     assert "--payload-json" in tasks
     assert "--timeout {{ windmill_seed_job_timeout_seconds }}" in tasks
