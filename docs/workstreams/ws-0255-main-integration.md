@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0255](../adr/0255-matrix-synapse-as-the-canonical-serverclaw-conversation-hub.md)
 - Title: Integrate ADR 0255 exact-main replay onto `origin/main`
-- Status: `ready_for_merge`
+- Status: `merged`
 - Included In Repo Version: 0.177.85
 - Platform Version Observed During Integration: 0.130.58
 - Release Date: 2026-03-29
