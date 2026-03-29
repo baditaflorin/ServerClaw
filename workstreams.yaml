@@ -14,6 +14,70 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0224-repo-intake
+    adr: "0224"
+    title: Self-service repo intake and agent-assisted app deployments
+    status: ready
+    owner: codex
+    branch: codex/ws-0224-repo-intake
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0224-repo-intake
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md
+    depends_on:
+      - adr-0156-agent-session-workspace-isolation
+      - adr-0185-branch-scoped-ephemeral-preview-environments
+      - adr-0194-coolify-paas-deploy-from-repo
+      - adr-0204-self-correcting-automation-loops
+    conflicts_with: []
+    shared_surfaces:
+      - docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md
+      - docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/configure-coolify.md
+      - inventory/group_vars/platform.yml
+      - playbooks/coolify.yml
+      - scripts/generate_platform_vars.py
+      - scripts/coolify_tool.py
+      - scripts/lv3_cli.py
+      - tests/test_generate_platform_vars.py
+      - tests/test_coolify_playbook.py
+      - tests/test_coolify_tool.py
+      - tests/test_lv3_cli.py
+      - workstreams.yaml
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: repo_intake_architecture_docs
+          paths:
+            - docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md
+            - docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md
+          mode: exclusive
+        - id: repo_intake_runtime_wrapper
+          paths:
+            - docs/runbooks/configure-coolify.md
+            - inventory/group_vars/platform.yml
+            - playbooks/coolify.yml
+            - scripts/coolify_tool.py
+            - tests/test_coolify_playbook.py
+            - tests/test_coolify_tool.py
+            - tests/test_lv3_cli.py
+          mode: exclusive
+        - id: repo_intake_platform_contract
+          paths:
+            - scripts/generate_platform_vars.py
+            - tests/test_generate_platform_vars.py
+          mode: shared_contract
+          contract: platform-topology-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+    ready_to_merge: true
+    live_applied: true
   - id: ws-0201-live-apply
     adr: "0201"
     title: Harbor runtime deployment, registry cutover, and repository automation replay
