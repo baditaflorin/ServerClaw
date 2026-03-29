@@ -31,6 +31,7 @@ main replay is re-verified.
 - `docs/release-notes/0.177.62.md`
 - `versions/stack.yaml`
 - `build/platform-manifest.json`
+- `docs/diagrams/agent-coordination-map.excalidraw`
 - `docs/adr/.index.yaml`
 - `docs/adr/0239-browser-local-search-experience-via-pagefind.md`
 - `docs/workstreams/ws-0239-live-apply.md`
