@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0251](../adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md)
 - Title: Live apply stage-scoped smoke suites and promotion gates from the latest `origin/main`
-- Status: live_applied
-- Implemented In Repo Version: 0.177.79
-- Live Applied In Platform Version: 0.130.54
+- Status: merged
+- Included In Repo Version: 0.177.82
+- First Live Applied In Platform Version: 0.130.54
 - Implemented On: 2026-03-29
-- Live Applied On: 2026-03-29
+- First Live Applied On: 2026-03-29
 - Branch: `codex/ws-0251-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply`
 - Owner: codex
@@ -72,11 +72,13 @@
 
 - `uv run --with pytest --with pyyaml pytest -q tests/test_windmill_integration_wrappers.py tests/test_integration_suite.py tests/test_stage_smoke_suites.py tests/test_windmill_playbook.py tests/test_windmill_default_operations_surface.py tests/test_backup_coverage_ledger.py tests/test_backup_coverage_ledger_windmill.py tests/test_disaster_recovery.py` returned `24 passed` after the latest worker-local wrapper and checkout-sync fixes.
 - `uv run --with pytest pytest -q tests/test_windmill_operator_admin_app.py tests/test_windmill_playbook.py tests/test_windmill_default_operations_surface.py` returned `18 passed` after the hidden `.gitea` worker sync fix.
-- `./scripts/validate_repo.sh agent-standards` and `ANSIBLE_HOME=$PWD/.ansible-home-apply ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --syntax-check` both passed from this isolated worktree.
-- `make converge-windmill` succeeded twice from the latest `origin/main`-based branch head, with committed evidence in `receipts/live-applies/evidence/2026-03-29-adr-0251-converge-windmill-rerun-12.txt` and `receipts/live-applies/evidence/2026-03-29-adr-0251-converge-windmill-rerun-13.txt`.
+- `uv run --with pytest pytest -q tests/test_docker_runtime_role.py tests/test_windmill_operator_admin_app.py tests/test_proxmox_tailscale_proxy_role.py` returned `24 passed` after rebasing the branch onto the latest `origin/main` and preserving the Windmill wait-budget, Docker NAT-chain, OpenBao retry, and Tailscale proxy idempotency fixes.
+- `./scripts/validate_repo.sh agent-standards` and `ANSIBLE_HOME=$PWD/.ansible-home-apply ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --syntax-check` both passed from this isolated worktree after the final rebase.
+- `make converge-windmill` succeeded twice from the earlier latest-`origin/main` branch head, with committed evidence in `receipts/live-applies/evidence/2026-03-29-adr-0251-converge-windmill-rerun-12.txt` and `receipts/live-applies/evidence/2026-03-29-adr-0251-converge-windmill-rerun-13.txt`.
 - Controller-side `scripts/windmill_run_wait_result.py` successfully ran `f/lv3/stage-smoke-suites` against the live platform and the returned payload resolved `windmill_url` to the worker-local `http://127.0.0.1:8000` path.
 - Worker-side `python3 scripts/policy_checks.py --validate`, `python3 scripts/command_catalog.py --check-approval --command converge-windmill --requester-class human_operator --approver-classes human_operator --validation-passed --preflight-passed --receipt-planned`, and `python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server` all passed after the worker checkout began mirroring `.gitea/workflows`.
 - A direct helper replay of `f/lv3/windmill_healthcheck` returned `status: ok` with `hostname: docker-runtime-lv3`, proving the current live Windmill runtime is still healthy after the ADR 0251 replay.
+- The latest rebased replay attempts are preserved in `receipts/live-applies/evidence/2026-03-29-adr-0251-converge-windmill-mainline-rerun-14.txt` through `...-17.txt`; they show that the branch-local replay progressed through the new wait-budget and Docker fixes but the final stage-smoke assertion stayed unstable because concurrent main-based worker-checkout refreshes kept removing ADR 0251 files from `/srv/proxmox_florin_server` before `origin/main` carried them.
 
 ## Live Apply Outcome
 
@@ -86,10 +88,10 @@
 
 ## Mainline Integration Outcome
 
-- Release `0.177.79` is the first repository version that records ADR 0251 implemented on `main`.
-- Platform version `0.130.54` is the first verified live platform version with stage-scoped smoke suites enforced in the promotion path and runnable through the live Windmill worker checkout.
-- Protected integration files are updated only during the final `main` integration step, and this workstream no longer leaves any merge-only follow-up behind.
+- Release `0.177.82` is the first repository version that records ADR 0251 implemented on `main`.
+- Platform version `0.130.54` remains the first observed platform version where ADR 0251 became true during the branch-local live apply.
+- The canonical receipt pointers, `README.md` integrated status summary, and `versions/stack.yaml` live-apply surfaces intentionally wait for the post-merge exact-main replay because stable verification depends on `origin/main` containing the ADR 0251 worker-checkout files.
 
 ## Merge-To-Main Notes
 
-- remaining for merge to `main`: none
+- remaining after the first merge commit: push `0.177.82` to `origin/main`, replay `make converge-windmill` from the main-equivalent checkout, verify `f/lv3/stage-smoke-suites` returns a passing structured result without the worker-checkout churn, then update `README.md`, `versions/stack.yaml`, the workstream status, and the canonical receipt pointers in a final exact-main follow-up commit

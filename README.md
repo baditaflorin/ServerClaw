@@ -121,7 +121,6 @@ The repository now also ships ADR 0119 budgeted workflow scheduling live on prod
 The repository now also ships ADR 0204 self-correcting automation loops: the committed correction-loop catalog governs every mutating workflow exactly once, and the 2026-03-28 Windmill observation replay verified `runtime_self_correction_watchers` end to end with the bounded retry budget persisted in durable closure-loop state.
 The repository now also ships ADR 0207 anti-corruption layers at provider boundaries: the Hetzner DNS roles translate provider payloads into canonical DNS facts before shared logic consumes them, and the March 28, 2026 latest-main verification proved the same guard through the authoritative build-server validation path, the final local-fallback `remote-validate` replay, and the worker-safe Windmill post-merge fallback.
 The repository now also ships ADR 0228 live on production: Windmill is the default browser-first and API-first surface for the repo-managed operations catalog, the latest-main replay keeps the representative `post_merge_gate`, `weekly_capacity_report`, `audit_token_inventory`, and `token_exposure_response` workflows seeded on CE v1.662.0, and the raw-app sync path now strips controller-local ignored frontend artifacts before the worker rebuild.
-The repository now also ships ADR 0251 stage-scoped smoke suites and promotion gates live on production: `config/stage-smoke-suites.json` governs the production `windmill` smoke path, staged promotion receipts now require structured passing smoke evidence, and the 2026-03-29 latest-origin/main replay re-verified both the direct `f/lv3/stage-smoke-suites` helper and the worker-local gate validation path on `docker-runtime-lv3`.
 The repository now also ships ADR 0146 Langfuse observability live on production: `https://langfuse.lv3.org` is published through the shared NGINX edge, the seeded `lv3-agent-observability` project is reachable through the public API, and the 2026-03-26 smoke verification ingested a trace that resolved successfully in the Langfuse UI.
 The repository now also ships ADR 0193 Plane task-board automation live on production: `https://tasks.lv3.org` is published through the shared NGINX edge with oauth2-proxy and Keycloak auth, the private controller path is available at `http://100.64.0.1:8011`, and the governed wrapper plus ADR sync path now keep the `lv3-platform` / `ADR` Plane project aligned with repository decision state.
 The repository now also ships ADR 0194 Coolify repo-deploy automation live on production: `coolify-lv3` hosts the repo-managed PaaS control plane, `https://coolify.lv3.org` is published behind the shared oauth2-proxy and Keycloak edge, `https://apps.lv3.org` plus `*.apps.lv3.org` route through the shared edge to the Coolify proxy, and the 2026-03-28 merged-main replay re-verified the governed `lv3 deploy-repo` flow with `repo-smoke.apps.lv3.org`.
@@ -303,7 +302,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
 | `preview_environment` | `2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z` |
-| `promotion_pipeline` | `2026-03-29-adr-0251-stage-smoke-suites-live-apply` |
+| `promotion_pipeline` | `2026-03-28-adr-0230-policy-decisions-live-apply` |
 | `provider_boundaries` | `2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply` |
 | `public_edge_publication` | `2026-03-29-adr-0255-matrix-synapse-mainline-live-apply` |
 | `public_endpoint_admission_control` | `2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply` |
@@ -326,7 +325,6 @@ Template VM: `9000` `debian13-cloud-template`
 | `shared_policy_packs` | `2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply` |
 | `short_lived_credentials_and_mtls` | `2026-03-22-adr-0047-short-lived-credentials-live-apply` |
 | `signed_release_bundles` | `2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply` |
-| `stage_smoke_suites` | `2026-03-29-adr-0251-stage-smoke-suites-live-apply` |
 | `staging_environment` | `2026-03-27-adr-0183-staging-live-apply` |
 | `step_ca` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
