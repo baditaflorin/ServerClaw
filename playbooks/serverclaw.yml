@@ -64,7 +64,12 @@
 
   roles:
     - role: lv3.platform.docker_runtime
-    - role: lv3.platform.keycloak_runtime
+
+  tasks:
+    - name: Reconcile the dedicated ServerClaw Keycloak client
+      ansible.builtin.include_role:
+        name: lv3.platform.keycloak_runtime
+        tasks_from: serverclaw_client.yml
 
 - name: Converge ServerClaw on the Coolify runtime VM
   hosts: "{{ 'coolify-lv3' if (env | default('production')) == 'production' else 'coolify-staging-lv3' }}"
