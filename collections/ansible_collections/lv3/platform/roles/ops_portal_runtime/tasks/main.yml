@@ -225,6 +225,21 @@
   delegate_to: localhost
   become: false
 
+- name: Ensure the synced search fabric file parent directories exist
+  ansible.builtin.file:
+    path: >-
+      {{
+        (
+          ops_portal_service_dir ~ '/search_fabric/' ~
+          (item.path | replace(ops_portal_repo_root ~ '/scripts/search_fabric/', ''))
+        ) | dirname
+      }}
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ search_fabric_source_files.files | sort(attribute='path') }}"
+
 - name: Sync the shared search fabric files
   ansible.builtin.copy:
     content: "{{ lookup('ansible.builtin.file', item.path) }}"
