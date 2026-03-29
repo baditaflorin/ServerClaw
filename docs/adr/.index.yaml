@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-29'
 total_adrs: 278
 implementation_status_summary:
-  Implemented: 218
+  Implemented: 220
   Partial: 4
-  Not Implemented: 55
+  Not Implemented: 53
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4152,7 +4152,7 @@ adr_index:
   - adr: '0246'
     title: Startup, Readiness, Liveness, And Degraded State Semantics
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: release
     keywords:
@@ -4164,6 +4164,7 @@ adr_index:
       - semantics
     summary: 'We will standardize four service-health semantics for runtime assurance:'
     filename: 0246-startup-readiness-liveness-and-degraded-state-semantics.md
+    implemented_version: 0.177.60
   - adr: '0247'
     title: Authenticated Browser Journey Verification Via Playwright
     status: Accepted
@@ -4258,7 +4259,7 @@ adr_index:
   - adr: '0253'
     title: Unified Runtime Assurance Scoreboard And Rollup
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4269,6 +4270,7 @@ adr_index:
       - rollup
     summary: We will publish a unified runtime assurance scoreboard that rolls the
     filename: 0253-unified-runtime-assurance-scoreboard-and-rollup.md
+    implemented_version: 0.177.59
   - adr: '0254'
     title: ServerClaw As A Distinct Self-Hosted Agent Product On LV3
     status: Accepted

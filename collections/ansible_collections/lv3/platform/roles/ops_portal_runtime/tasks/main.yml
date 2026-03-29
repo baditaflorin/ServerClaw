@@ -104,24 +104,61 @@
     group: root
     mode: "0644"
 
-- name: Remove stale ops portal service sources before sync
+- name: Reset the synced ops portal application tree before refresh
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: "{{ ops_portal_service_dir }}/ops_portal"
     state: absent
-  loop:
-    - "{{ ops_portal_service_dir }}/ops_portal"
-    - "{{ ops_portal_service_dir }}/search_fabric"
-    - "{{ ops_portal_service_dir }}/publication_contract.py"
-    - "{{ ops_portal_service_dir }}/requirements.txt"
 
-- name: Sync the ops portal application sources
+- name: Ensure the ops portal application root exists
+  ansible.builtin.file:
+    path: "{{ ops_portal_service_dir }}/ops_portal"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Discover the ops portal application directories on the controller
+  ansible.builtin.find:
+    paths: "{{ ops_portal_repo_root }}/scripts/ops_portal"
+    recurse: true
+    file_type: directory
+    excludes: "__pycache__"
+  register: ops_portal_source_directories
+  delegate_to: localhost
+  become: false
+
+- name: Ensure the synced ops portal application directories exist
+  ansible.builtin.file:
+    path: "{{ ops_portal_service_dir }}/ops_portal/{{ item.path | replace(ops_portal_repo_root ~ '/scripts/ops_portal/', '') }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ ops_portal_source_directories.files | sort(attribute='path') }}"
+  when: item.path != ops_portal_repo_root ~ '/scripts/ops_portal'
+
+- name: Discover the ops portal application files on the controller
+  ansible.builtin.find:
+    paths: "{{ ops_portal_repo_root }}/scripts/ops_portal"
+    recurse: true
+    file_type: file
+    excludes:
+      - "__pycache__"
+      - "*.pyc"
+      - "._*"
+      - ".DS_Store"
+  register: ops_portal_source_files
+  delegate_to: localhost
+  become: false
+
+- name: Sync the ops portal application files
   ansible.builtin.copy:
-    src: "{{ ops_portal_repo_root }}/scripts/ops_portal/"
-    dest: "{{ ops_portal_service_dir }}/ops_portal/"
+    content: "{{ lookup('ansible.builtin.file', item.path) }}"
+    dest: "{{ ops_portal_service_dir }}/ops_portal/{{ item.path | replace(ops_portal_repo_root ~ '/scripts/ops_portal/', '') }}"
     owner: root
     group: root
     mode: "0644"
-    directory_mode: "0755"
+  loop: "{{ ops_portal_source_files.files | sort(attribute='path') }}"
 
 - name: Ensure the ops portal overlay directories exist
   ansible.builtin.file:
@@ -132,39 +169,70 @@
     mode: "0755"
   loop: "{{ ops_portal_runtime_overlay_directories }}"
 
-- name: Overlay the critical ops portal runtime files explicitly
+- name: Sync critical ops portal runtime files explicitly
   ansible.builtin.copy:
-    src: "{{ item.src }}"
+    content: "{{ lookup('ansible.builtin.file', item.src) }}"
     dest: "{{ item.dest }}"
     owner: root
     group: root
     mode: "0644"
   loop: "{{ ops_portal_runtime_file_sources }}"
 
-- name: Sync the shared search fabric package
-  ansible.builtin.copy:
-    src: "{{ ops_portal_repo_root }}/scripts/search_fabric/"
-    dest: "{{ ops_portal_service_dir }}/search_fabric/"
-    owner: root
-    group: root
-    mode: "0644"
-    directory_mode: "0755"
+- name: Reset the synced search fabric package tree before refresh
+  ansible.builtin.file:
+    path: "{{ ops_portal_service_dir }}/search_fabric"
+    state: absent
 
-- name: Sync the shared publication contract helper
-  ansible.builtin.copy:
-    src: "{{ ops_portal_repo_root }}/scripts/publication_contract.py"
-    dest: "{{ ops_portal_service_dir }}/publication_contract.py"
+- name: Ensure the synced search fabric root exists
+  ansible.builtin.file:
+    path: "{{ ops_portal_service_dir }}/search_fabric"
+    state: directory
     owner: root
     group: root
-    mode: "0644"
+    mode: "0755"
 
-- name: Sync the ops portal requirements file
+- name: Discover the search fabric directories on the controller
+  ansible.builtin.find:
+    paths: "{{ ops_portal_repo_root }}/scripts/search_fabric"
+    recurse: true
+    file_type: directory
+    excludes: "__pycache__"
+  register: search_fabric_source_directories
+  delegate_to: localhost
+  become: false
+
+- name: Ensure the synced search fabric directories exist
+  ansible.builtin.file:
+    path: "{{ ops_portal_service_dir }}/search_fabric/{{ item.path | replace(ops_portal_repo_root ~ '/scripts/search_fabric/', '') }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ search_fabric_source_directories.files | sort(attribute='path') }}"
+  when: item.path != ops_portal_repo_root ~ '/scripts/search_fabric'
+
+- name: Discover the search fabric files on the controller
+  ansible.builtin.find:
+    paths: "{{ ops_portal_repo_root }}/scripts/search_fabric"
+    recurse: true
+    file_type: file
+    excludes:
+      - "__pycache__"
+      - "*.pyc"
+      - "._*"
+      - ".DS_Store"
+  register: search_fabric_source_files
+  delegate_to: localhost
+  become: false
+
+- name: Sync the shared search fabric files
   ansible.builtin.copy:
-    src: "{{ ops_portal_repo_root }}/requirements/ops-portal.txt"
-    dest: "{{ ops_portal_service_dir }}/requirements.txt"
+    content: "{{ lookup('ansible.builtin.file', item.path) }}"
+    dest: "{{ ops_portal_service_dir }}/search_fabric/{{ item.path | replace(ops_portal_repo_root ~ '/scripts/search_fabric/', '') }}"
     owner: root
     group: root
     mode: "0644"
+  loop: "{{ search_fabric_source_files.files | sort(attribute='path') }}"
 
 - name: Sync the ops portal file-backed data sources
   ansible.builtin.copy:
@@ -185,6 +253,72 @@
     directory_mode: "0755"
   loop: "{{ ops_portal_directory_sources }}"
 
+- name: Sync the ops portal service build inputs explicitly
+  ansible.builtin.copy:
+    content: "{{ lookup('ansible.builtin.file', item.src) }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - src: "{{ ops_portal_repo_root }}/scripts/publication_contract.py"
+      dest: "{{ ops_portal_service_dir }}/publication_contract.py"
+    - src: "{{ ops_portal_repo_root }}/requirements/ops-portal.txt"
+      dest: "{{ ops_portal_service_dir }}/requirements.txt"
+
+- name: Discover macOS metadata files in the synced ops portal service tree
+  ansible.builtin.find:
+    paths: "{{ ops_portal_service_dir }}"
+    recurse: true
+    file_type: file
+    hidden: true
+    patterns:
+      - "._*"
+      - ".DS_Store"
+  register: ops_portal_service_metadata_files
+
+- name: Remove macOS metadata files from the synced ops portal service tree
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ ops_portal_service_metadata_files.files }}"
+
+- name: Normalize the synced ops portal application tree ownership
+  ansible.builtin.file:
+    path: "{{ ops_portal_service_dir }}/ops_portal"
+    state: directory
+    owner: root
+    group: root
+    recurse: true
+
+- name: Normalize the synced search fabric tree ownership
+  ansible.builtin.file:
+    path: "{{ ops_portal_service_dir }}/search_fabric"
+    state: directory
+    owner: root
+    group: root
+    recurse: true
+
+- name: Gather the synced ops portal build context manifest
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - "{{ ops_portal_service_dir }}/Dockerfile"
+    - "{{ ops_portal_service_dir }}/requirements.txt"
+    - "{{ ops_portal_service_dir }}/publication_contract.py"
+    - "{{ ops_portal_service_dir }}/ops_portal/app.py"
+    - "{{ ops_portal_service_dir }}/search_fabric/__init__.py"
+  register: ops_portal_build_context_manifest
+
+- name: Assert the ops portal build context is complete
+  ansible.builtin.assert:
+    that:
+      - ops_portal_build_context_manifest.results | map(attribute='stat.exists') | min
+    fail_msg: >-
+      Ops portal build context is incomplete. Expected Dockerfile, requirements,
+      publication contract helper, app module, and search fabric package to be
+      present in {{ ops_portal_service_dir }} before docker compose up.
+
 - name: Build and start the ops portal stack
   ansible.builtin.command:
     argv:
@@ -195,10 +329,12 @@
       - up
       - -d
       - --build
+      - --force-recreate
       - --remove-orphans
   args:
     chdir: "{{ ops_portal_site_dir }}"
   register: ops_portal_up
+  failed_when: false
   retries: 3
   delay: 5
   until: ops_portal_up.rc == 0
@@ -207,6 +343,12 @@
     or 'Recreating' in ops_portal_up.stdout
     or 'Starting' in ops_portal_up.stdout
     or 'Building' in ops_portal_up.stdout
+
+- name: Assert the ops portal stack build and start succeeded
+  ansible.builtin.assert:
+    that:
+      - ops_portal_up.rc == 0
+    fail_msg: "{{ ops_portal_up.stderr | default(ops_portal_up.msg | default('ops portal compose up failed')) }}"
 
 - name: Verify ops portal health probes
   ansible.builtin.import_tasks: verify.yml

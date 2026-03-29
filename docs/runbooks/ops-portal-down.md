@@ -55,6 +55,13 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 
 If the logs show `Acquisition timeout while waiting for new connection`, the JDBC pool is wedged. If a restart then fails with `No chain/target/match by that name`, Docker's nat chain on `docker-runtime-lv3` is missing and Keycloak must be recreated after Docker itself is restarted.
 
+6. If the shell loads but charts are blank, verify the same-origin portal
+   bundle and mirrored dependency graph are present:
+
+```bash
+ssh ops@100.118.189.95 'ssh ops@10.10.10.20 "docker exec ops-portal ls /app/ops_portal/static && ls /opt/ops-portal/data/config/dependency-graph.json"'
+```
+
 5. If the shell renders but the ECharts panels stay blank, verify the same-origin
    runtime assets and mirrored topology file are present inside the container:
 
@@ -76,7 +83,7 @@ make converge-ops-portal
 
 3. If a replay is interrupted and the guest still serves stale portal sources,
    compare the repo hashes with the guest-local runtime and then resync the
-   exact service payload before rebuilding:
+   exact service payload through a temporary directory before rebuilding:
 
 ```bash
 sha256sum scripts/ops_portal/app.py scripts/ops_portal/templates/partials/overview.html \
@@ -88,12 +95,29 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   ops@10.10.10.20 \
   'sha256sum /opt/ops-portal/service/ops_portal/app.py /opt/ops-portal/service/ops_portal/templates/partials/overview.html /opt/ops-portal/service/ops_portal/static/portal.css /opt/ops-portal/service/ops_portal/static/portal.js'
 
-COPYFILE_DISABLE=1 tar -C scripts -cf - ops_portal search_fabric publication_contract.py \
-| ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
-    -o IdentitiesOnly=yes \
-    -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p' \
-    ops@10.10.10.20 \
-    'sudo rm -rf /opt/ops-portal/service/ops_portal /opt/ops-portal/service/search_fabric /opt/ops-portal/service/publication_contract.py && sudo mkdir -p /opt/ops-portal/service && sudo tar -C /opt/ops-portal/service -xf -'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p' \
+  ops@10.10.10.20 \
+  'rm -rf /tmp/ops-portal-replay && mkdir -p /tmp/ops-portal-replay'
+
+scp -r \
+  -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p' \
+  scripts/ops_portal scripts/search_fabric scripts/publication_contract.py \
+  ops@10.10.10.20:/tmp/ops-portal-replay/
+
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p' \
+  ops@10.10.10.20 \
+  'sudo rm -rf /opt/ops-portal/service/ops_portal /opt/ops-portal/service/search_fabric /opt/ops-portal/service/publication_contract.py /opt/ops-portal/service/requirements.txt \
+   && sudo mkdir -p /opt/ops-portal/service \
+   && sudo cp -R /tmp/ops-portal-replay/ops_portal /opt/ops-portal/service/ops_portal \
+   && sudo cp -R /tmp/ops-portal-replay/search_fabric /opt/ops-portal/service/search_fabric \
+   && sudo cp /tmp/ops-portal-replay/publication_contract.py /opt/ops-portal/service/publication_contract.py \
+   && sudo find /opt/ops-portal/data -name "._*" -delete'
 
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \

@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -14,6 +17,26 @@ from scripts.ops_portal.app import (
     create_app,
     normalize_health,
 )
+
+
+def test_ops_portal_package_import_works_in_container_layout() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    package_root = repo_root / "scripts"
+    env = os.environ | {"PYTHONPATH": str(package_root)}
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "from ops_portal.app import PortalSettings; print(PortalSettings.__name__)",
+        ],
+        capture_output=True,
+        check=False,
+        env=env,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == "PortalSettings"
 
 
 class FakeGatewayClient:

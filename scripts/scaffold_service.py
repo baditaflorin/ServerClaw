@@ -709,6 +709,16 @@ def update_health_probe_catalog(path: Path, spec: ServiceSpec) -> None:
         "owning_vm": spec.vm,
         "role": spec.role_name,
         "verify_file": f"roles/{spec.role_name}/tasks/verify.yml",
+        "startup": {
+            "kind": "http",
+            "description": f"TODO: replace the scaffolded startup contract for {spec.display_name}.",
+            "timeout_seconds": 60,
+            "retries": 12,
+            "delay_seconds": 5,
+            "url": f"http://127.0.0.1:{spec.port}/health",
+            "method": "GET",
+            "expected_status": [200],
+        },
         "liveness": {
             "kind": "http",
             "description": f"TODO: replace the scaffolded local liveness endpoint contract for {spec.display_name}.",
