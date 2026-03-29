@@ -1,8 +1,5 @@
 services:
   api-gateway:
-    build:
-      context: {{ api_gateway_service_dir }}
-      network: host
     image: {{ api_gateway_image_name }}:latest
     container_name: {{ api_gateway_container_name }}
     restart: unless-stopped

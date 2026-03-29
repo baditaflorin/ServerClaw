@@ -56,6 +56,7 @@ platform_port_assignments:
   searxng_host_proxy_port: 80
   langfuse_port: 3002
   dify_port: 8094
+  browser_runner_port: 8096
   outline_port: 3006
   plane_port: 8093
   plane_host_proxy_port: 8011
@@ -1537,6 +1538,14 @@ lv3_service_topology:
       tls: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.api_gateway_internal_port }}"
+  browser_runner:
+    service_name: browser-runner
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
   platform_context_api:
     service_name: platform-context-api
     owning_vm: docker-runtime-lv3

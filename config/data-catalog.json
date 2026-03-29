@@ -488,6 +488,21 @@
         "Windmill workspace logs"
       ],
       "notes": "Workflow logs can contain operator context and transient execution metadata but do not need indefinite retention."
+    },
+    {
+      "id": "browser-runner-artifacts",
+      "service": "browser_runner",
+      "name": "Browser runner bounded session artifacts",
+      "class": "confidential",
+      "retention_days": 30,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "/opt/browser-runner/data/artifacts",
+        "browser-run-session structured outputs"
+      ],
+      "notes": "Captured screenshots, PDFs, selector text, and downloaded files may contain third-party page content or delegated-session data, so retention stays intentionally short and private."
     }
   ]
 }

@@ -198,6 +198,7 @@
       WORKDIR /app
       COPY requirements.txt ./requirements.txt
       RUN pip install --no-cache-dir -r requirements.txt
+      COPY .gitea ./.gitea
       COPY .githooks ./.githooks
       COPY Makefile ./Makefile
       COPY .github ./.github
@@ -260,6 +261,37 @@
   register: api_gateway_pull
   changed_when: "'Downloaded newer image' in api_gateway_pull.stdout or 'Status: Downloaded newer image' in api_gateway_pull.stdout"
 
+- name: Build the API gateway image
+  ansible.builtin.shell: |
+    set -euo pipefail
+    build_dir="$(mktemp -d /tmp/api-gateway-build.XXXXXX)"
+    log_file="/tmp/api-gateway-build.log"
+    trap 'rm -rf "$build_dir"' EXIT
+    cp -a "{{ api_gateway_service_dir }}/." "$build_dir/"
+    if DOCKER_BUILDKIT=0 docker build --pull=false -t "{{ api_gateway_image_name }}:latest" "$build_dir" >"$log_file" 2>&1; then
+      cat "$log_file"
+    else
+      rc="$?"
+      cat "$log_file"
+      exit "$rc"
+    fi
+  args:
+    chdir: "{{ api_gateway_site_dir }}"
+    executable: /bin/bash
+  register: api_gateway_build
+  retries: 2
+  delay: 5
+  until: api_gateway_build.rc == 0
+  changed_when: >-
+    'writing image' in (api_gateway_build.stdout | lower)
+    or 'writing image' in (api_gateway_build.stderr | lower)
+    or 'naming to' in (api_gateway_build.stdout | lower)
+    or 'naming to' in (api_gateway_build.stderr | lower)
+    or 'exporting to image' in (api_gateway_build.stdout | lower)
+    or 'exporting to image' in (api_gateway_build.stderr | lower)
+    or 'successfully built' in (api_gateway_build.stdout | lower)
+    or 'successfully tagged' in (api_gateway_build.stdout | lower)
+
 - name: Build and start the API gateway stack
   block:
     - name: Build and start the API gateway stack
@@ -271,7 +303,6 @@
           - "{{ api_gateway_compose_file }}"
           - up
           - -d
-          - --build
           - --remove-orphans
       args:
         chdir: "{{ api_gateway_site_dir }}"
@@ -324,7 +355,6 @@
           - "{{ api_gateway_compose_file }}"
           - up
           - -d
-          - --build
           - --remove-orphans
       args:
         chdir: "{{ api_gateway_site_dir }}"
@@ -366,7 +396,6 @@
       - "{{ api_gateway_compose_file }}"
       - up
       - -d
-      - --build
       - --force-recreate
       - --remove-orphans
   args:

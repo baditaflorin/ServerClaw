@@ -78,6 +78,10 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "api_gateway_keycloak_internal_base_url" in defaults
     assert "http://127.0.0.1:18080" in defaults
     assert "api_gateway_keycloak_verify_base_url: http://127.0.0.1:18080" in defaults
+    assert "api_gateway_keycloak_verify_ready_retries: 24" in defaults
+    assert "api_gateway_keycloak_verify_ready_delay: 5" in defaults
+    assert "api_gateway_keycloak_verify_token_retries: 18" in defaults
+    assert "api_gateway_keycloak_verify_token_delay: 5" in defaults
     assert "api_gateway_network_mode: host" in defaults
     assert "api_gateway_keycloak_docker_network: keycloak_default" in defaults
     assert "/realms/lv3/protocol/openid-connect/certs" in defaults
@@ -114,11 +118,13 @@ def test_api_gateway_compose_mounts_config_into_app_root() -> None:
     compose_template = COMPOSE_TEMPLATE_PATH.read_text(encoding="utf-8")
     env_template = ENV_TEMPLATE_PATH.read_text(encoding="utf-8")
 
+    assert "image: {{ api_gateway_image_name }}:latest" in compose_template
     assert "network_mode: {{ api_gateway_network_mode }}" in compose_template
     assert '- "{{ api_gateway_internal_port }}"' in compose_template
     assert "http://127.0.0.1:{{ api_gateway_internal_port }}/healthz" in compose_template
     assert "{{ api_gateway_config_dir }}:/config:ro" in compose_template
     assert "{{ api_gateway_config_dir }}:/app/config:ro" in compose_template
+    assert "build:" not in compose_template
     assert "LV3_GATEWAY_GRAPH_DSN={{ api_gateway_graph_dsn }}" in env_template
     assert "LV3_GATEWAY_WORLD_STATE_DSN={{ api_gateway_world_state_dsn }}" in env_template
     assert "LV3_DIFY_TOOLS_API_KEY={{ api_gateway_dify_tools_api_key }}" in env_template
@@ -188,6 +194,7 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "README.md" in defaults
     assert "ansible.cfg" in defaults
     assert "workstreams.yaml" in defaults
+    assert 'remote_archive: "{{ api_gateway_site_dir }}/gitea-sync.tar.gz"' in defaults
     assert 'remote_archive: "{{ api_gateway_site_dir }}/collections-sync.tar.gz"' in defaults
     assert 'remote_archive: "{{ api_gateway_site_dir }}/inventory-sync.tar.gz"' in defaults
     assert 'remote_archive: "{{ api_gateway_site_dir }}/migrations-sync.tar.gz"' in defaults
@@ -221,6 +228,9 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert 'dest: "{{ api_gateway_service_dir }}/receipts/"' not in tasks
     assert "Remove stale managed API gateway config bundle entries" in tasks
     assert "ansible.builtin.meta: reset_connection" in tasks
+    assert "Build the API gateway image" in tasks
+    assert "mktemp -d /tmp/api-gateway-build." in tasks
+    assert 'DOCKER_BUILDKIT=0 docker build --pull=false -t "{{ api_gateway_image_name }}:latest"' in tasks
     assert "Check whether the API gateway container sees the runtime config bundle" in tasks
     assert "database not open" in tasks
     assert "api_gateway_docker_builder_database_missing" in tasks
@@ -236,9 +246,18 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "Mark the Keycloak verification token request as unavailable" in verify_tasks
     assert "Record the API gateway verification bearer token from the legacy platform context" in verify_tasks
     assert "API gateway verification requires either the Keycloak client secret or the" in verify_tasks
+    assert "Wait for the local Keycloak realm discovery endpoint used by API gateway verification" in verify_tasks
+    assert "/realms/lv3/.well-known/openid-configuration" in verify_tasks
+    assert "api_gateway_keycloak_verify_discovery.json.issuer == api_gateway_keycloak_issuer_url" in verify_tasks
+    assert 'retries: "{{ api_gateway_keycloak_verify_ready_retries }}"' in verify_tasks
+    assert 'delay: "{{ api_gateway_keycloak_verify_ready_delay }}"' in verify_tasks
+    assert 'retries: "{{ api_gateway_keycloak_verify_token_retries }}"' in verify_tasks
+    assert 'delay: "{{ api_gateway_keycloak_verify_token_delay }}"' in verify_tasks
+    assert "until: api_gateway_verify_token_response.status == 200" in verify_tasks
     assert "{{ api_gateway_service_dir }}/.githooks" in tasks
     assert "COPY Makefile ./Makefile" in tasks
     assert "COPY .githooks ./.githooks" in tasks
+    assert "COPY .gitea ./.gitea" in tasks
     assert "COPY .github ./.github" in tasks
     assert "COPY .pre-commit-config.yaml ./.pre-commit-config.yaml" in tasks
     assert "COPY README.md ./README.md" in tasks
@@ -262,6 +281,7 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "COPY versions ./versions" in tasks
     assert "COPY windmill ./windmill" in tasks
     assert "COPY workstreams.yaml ./workstreams.yaml" in tasks
+    assert "--build" not in tasks
     assert "psycopg[binary]==" in requirements
 
 

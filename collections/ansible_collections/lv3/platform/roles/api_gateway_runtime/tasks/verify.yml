@@ -26,6 +26,24 @@
       - (api_gateway_auth_check.json.error.trace_id | default('')) | length > 0
     fail_msg: "API gateway anonymous auth rejection did not return the canonical error envelope."
 
+- name: Wait for the local Keycloak realm discovery endpoint used by API gateway verification
+  ansible.builtin.uri:
+    url: "{{ api_gateway_keycloak_verify_base_url }}/realms/lv3/.well-known/openid-configuration"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: api_gateway_keycloak_verify_discovery
+  retries: "{{ api_gateway_keycloak_verify_ready_retries }}"
+  delay: "{{ api_gateway_keycloak_verify_ready_delay }}"
+  until: api_gateway_keycloak_verify_discovery.status == 200
+  changed_when: false
+
+- name: Assert the local Keycloak discovery document matches the public issuer
+  ansible.builtin.assert:
+    that:
+      - api_gateway_keycloak_verify_discovery.json.issuer == api_gateway_keycloak_issuer_url
+    fail_msg: "API gateway verification reached Keycloak locally, but the discovery issuer does not match the public issuer."
+
 - name: Check whether the controller-local API gateway verification client secret exists
   ansible.builtin.stat:
     path: "{{ api_gateway_verify_client_secret_local_file }}"
@@ -76,6 +94,9 @@
           client_secret: "{{ api_gateway_verify_client_secret_raw.content | b64decode | trim }}"
         status_code: 200
       register: api_gateway_verify_token_response
+      retries: "{{ api_gateway_keycloak_verify_token_retries }}"
+      delay: "{{ api_gateway_keycloak_verify_token_delay }}"
+      until: api_gateway_verify_token_response.status == 200
       no_log: true
       changed_when: false
 

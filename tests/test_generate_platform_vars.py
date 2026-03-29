@@ -33,6 +33,15 @@ def test_build_platform_vars_includes_dify_publication_topology() -> None:
     assert dify["urls"]["internal"] == "http://10.10.10.20:8094"
 
 
+def test_build_platform_vars_includes_browser_runner_private_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    browser_runner = platform_vars["platform_service_topology"]["browser_runner"]
+
+    assert browser_runner["service_name"] == "browser-runner"
+    assert browser_runner["ports"]["internal"] == 8096
+    assert browser_runner["urls"]["internal"] == "http://10.10.10.20:8096"
+
+
 def test_build_platform_vars_includes_harbor_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     harbor = platform_vars["platform_service_topology"]["harbor"]
@@ -153,6 +162,26 @@ def test_build_service_urls_resolves_excalidraw_internal_url() -> None:
         "public": "https://draw.lv3.org",
         "internal": "http://10.10.10.20:3095",
     }
+
+
+def test_build_service_urls_resolves_browser_runner_internal_url() -> None:
+    ports = {"browser_runner_port": 8096}
+    service = {"owning_vm": "docker-runtime-lv3"}
+    host_vars = {"management_tailscale_ipv4": "100.118.189.95"}
+    guest_ipv4_by_name = {"docker-runtime-lv3": "10.10.10.20"}
+    stack = {"desired_state": {"host_id": "proxmox_florin"}}
+
+    port_map, urls = generate_platform_vars.build_service_urls(
+        "browser_runner",
+        service,
+        host_vars,
+        guest_ipv4_by_name,
+        ports,
+        stack,
+    )
+
+    assert port_map == {"internal": 8096}
+    assert urls == {"internal": "http://10.10.10.20:8096"}
 
 
 def test_build_platform_vars_includes_plane_publication_topology() -> None:

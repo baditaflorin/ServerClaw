@@ -54,6 +54,7 @@ PORT_KEYS = (
     "searxng_host_proxy_port",
     "langfuse_port",
     "dify_port",
+    "browser_runner_port",
     "outline_port",
     "dozzle_http_port",
     "dozzle_agent_port",
@@ -401,6 +402,9 @@ def build_service_urls(
     elif service_id == "dify":
         urls["internal"] = service_url("http", private_ip, ports["dify_port"])
         port_map["internal"] = ports["dify_port"]
+    elif service_id == "browser_runner":
+        urls["internal"] = service_url("http", private_ip, ports["browser_runner_port"])
+        port_map["internal"] = ports["browser_runner_port"]
     elif service_id == "harbor":
         urls["internal"] = service_url("http", private_ip, ports["harbor_port"])
         port_map["internal"] = ports["harbor_port"]
