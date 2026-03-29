@@ -291,6 +291,15 @@
       "adr": "0043"
     },
     {
+      "id": "openfga",
+      "service": "openfga",
+      "name": "OpenFGA",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "access",
+      "adr": "0262"
+    },
+    {
       "id": "ops_portal",
       "service": "ops_portal",
       "name": "Ops Portal",
@@ -798,6 +807,24 @@
       "to": "searxng",
       "type": "soft",
       "description": "Open WebUI delegates optional web-search requests to the private SearXNG runtime when the feature is enabled."
+    },
+    {
+      "from": "openfga",
+      "to": "postgres",
+      "type": "hard",
+      "description": "OpenFGA stores authorization stores, models, and relationship tuples in PostgreSQL."
+    },
+    {
+      "from": "openfga",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "OpenFGA reads its mirrored datastore password and preshared API key from the OpenBao-backed runtime secret path before startup."
+    },
+    {
+      "from": "openfga",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "The repo-managed bootstrap verification path checks Keycloak-issued operator and runtime identities alongside the delegated authorization graph."
     },
     {
       "from": "ops_portal",

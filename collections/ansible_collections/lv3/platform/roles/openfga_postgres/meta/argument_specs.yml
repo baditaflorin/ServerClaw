@@ -1,0 +1,41 @@
+# Purpose: Declare the supported input contract for the OpenFGA PostgreSQL helper role.
+# Use case: Loaded by Ansible to validate database bootstrap variables before the role runs.
+# Inputs: OpenFGA database names, secret paths, and controller-local password inputs.
+# Outputs: Provides argument specifications used by Ansible role validation.
+# Idempotency: Fully idempotent because this file only documents the role interface.
+# Dependencies: ADR 0165 and ADR 0262.
+---
+argument_specs:
+  main:
+    short_description: Provision the PostgreSQL role and database required by OpenFGA.
+    options:
+      openfga_database_name:
+        type: str
+        required: true
+        description:
+          - PostgreSQL database name that OpenFGA should own.
+      openfga_database_user:
+        type: str
+        required: true
+        description:
+          - PostgreSQL login role used by OpenFGA.
+      openfga_postgres_secret_dir:
+        type: path
+        required: true
+        description:
+          - Guest-local directory where the generated database password is stored.
+      openfga_postgres_password_file:
+        type: path
+        required: true
+        description:
+          - Guest-local file containing the generated database password.
+      openfga_local_artifact_dir:
+        type: path
+        required: true
+        description:
+          - Controller-local directory used to mirror OpenFGA bootstrap artifacts.
+      openfga_database_password_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file used to mirror the database password.

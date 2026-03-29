@@ -1,3 +1,9 @@
+# Purpose: Verify the deployed API gateway runtime, mounted config bundle, and authenticated operator surfaces.
+# Use case: Run after API gateway converges or during validation to prove the live runtime is healthy and wired correctly.
+# Inputs: API gateway URLs, runtime probe paths, Keycloak verification credentials, and controller-local fallback tokens.
+# Outputs: Confirms health, auth enforcement, bundle mounts, and runtime-assurance responses without mutating service state.
+# Idempotency: Fully idempotent because these tasks only read state and assert expected behavior.
+# Dependencies: ADR 0165, ADR 0092, ADR 0175, ADR 0197, and ADR 0262.
 ---
 - name: Wait for the API gateway health endpoint
   ansible.builtin.uri:

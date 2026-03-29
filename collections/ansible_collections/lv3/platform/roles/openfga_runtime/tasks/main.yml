@@ -1,0 +1,351 @@
+# Purpose: Converge the private OpenFGA runtime, OpenBao-backed secrets, and bootstrap configuration artifacts.
+# Use case: Run during OpenFGA deploys, updates, and exact-main replays for delegated ServerClaw authorization.
+# Inputs: Runtime paths, database credentials, preshared API keys, controller URLs, and OpenBao integration settings.
+# Outputs: Configures the OpenFGA runtime, compose stack, runtime secrets, and bootstrap material on the target host.
+# Idempotency: Partially idempotent because bootstrap assets and runtime secrets may be created or refreshed intentionally.
+# Dependencies: ADR 0165, ADR 0023, ADR 0101, and ADR 0262.
+---
+- name: Validate OpenFGA runtime inputs
+  ansible.builtin.assert:
+    that:
+      - openfga_site_dir | length > 0
+      - openfga_compose_file | length > 0
+      - openfga_env_file | length > 0
+      - openfga_database_name | length > 0
+      - openfga_database_user | length > 0
+      - openfga_database_host | length > 0
+      - openfga_database_password_local_file | length > 0
+      - openfga_preshared_key_local_file | length > 0
+      - openfga_controller_url | length > 0
+    fail_msg: "openfga_runtime requires runtime paths, database credentials, and a preshared API key."
+
+- name: Ensure the OpenFGA database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ openfga_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: openfga_database_password_local
+
+- name: Fail if the OpenFGA database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ openfga_database_password_local_file }} is missing on the control machine.
+      Converge the OpenFGA PostgreSQL role first so the runtime can connect to postgres-lv3.
+  when: not openfga_database_password_local.stat.exists
+
+- name: Ensure the local OpenFGA artifact directory exists
+  ansible.builtin.file:
+    path: "{{ openfga_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the OpenFGA API preshared key
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ openfga_preshared_key_local_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 | tr -d '\n' > "{{ openfga_preshared_key_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: openfga_preshared_key_generation
+  changed_when: "'changed' in openfga_preshared_key_generation.stdout"
+  no_log: true
+
+- name: Record the OpenFGA runtime secrets
+  ansible.builtin.set_fact:
+    openfga_database_password: "{{ lookup('ansible.builtin.file', openfga_database_password_local_file) | trim }}"
+    openfga_preshared_key: "{{ lookup('ansible.builtin.file', openfga_preshared_key_local_file) | trim }}"
+    openfga_runtime_secret_payload:
+      OPENFGA_DATASTORE_URI: >-
+        postgresql://{{ openfga_database_user }}:{{
+          lookup('ansible.builtin.file', openfga_database_password_local_file) | trim | urlencode
+        }}@{{ openfga_database_host }}:5432/{{ openfga_database_name }}?sslmode=disable
+      OPENFGA_PRESHARED_KEY: "{{ lookup('ansible.builtin.file', openfga_preshared_key_local_file) | trim }}"
+      OPENFGA_DATASTORE_ENGINE: postgres
+      OPENFGA_AUTHN_METHOD: preshared
+      OPENFGA_AUTHN_PRESHARED_KEYS: "{{ lookup('ansible.builtin.file', openfga_preshared_key_local_file) | trim }}"
+      OPENFGA_PLAYGROUND_ENABLED: "false"
+      OPENFGA_HTTP_ADDR: "{{ openfga_http_addr }}"
+      OPENFGA_GRPC_ADDR: "{{ openfga_grpc_addr }}"
+  no_log: true
+
+- name: Ensure the OpenFGA site directory exists
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ openfga_site_dir }}"
+      mode: "0755"
+    - path: "{{ openfga_secret_dir }}"
+      mode: "0700"
+
+- name: Prepare OpenBao agent runtime secret injection for OpenFGA
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: openfga
+    common_openbao_compose_env_agent_dir: "{{ openfga_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ openfga_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ openfga_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ openfga_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ openfga_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ openfga_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ openfga_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ openfga_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ openfga_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ openfga_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ openfga_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: openfga.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ openfga_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ openfga_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ openfga_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ openfga_legacy_env_file }}"
+  no_log: true
+
+- name: Render the OpenFGA compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ openfga_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: openfga_compose_template
+
+- name: Pull the OpenFGA image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ openfga_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ openfga_site_dir }}"
+  register: openfga_pull
+  changed_when: >-
+    'Pulling' in openfga_pull.stdout
+    or 'Downloaded newer image' in openfga_pull.stdout
+    or 'Pull complete' in openfga_pull.stdout
+
+- name: Start the OpenFGA OpenBao agent
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ openfga_compose_file }}"
+      - up
+      - -d
+      - openbao-agent
+  args:
+    chdir: "{{ openfga_site_dir }}"
+  register: openfga_openbao_agent_up
+  changed_when: >-
+    'Creating' in openfga_openbao_agent_up.stdout
+    or 'Recreating' in openfga_openbao_agent_up.stdout
+    or 'Starting' in openfga_openbao_agent_up.stdout
+    or 'Running' in openfga_openbao_agent_up.stdout
+
+- name: Wait for the OpenFGA runtime env file
+  ansible.builtin.shell: |
+    set -euo pipefail
+    test -s "{{ openfga_env_file }}"
+    grep -Fqx "OPENFGA_HTTP_ADDR={{ openfga_http_addr }}" "{{ openfga_env_file }}"
+    grep -Fqx "OPENFGA_GRPC_ADDR={{ openfga_grpc_addr }}" "{{ openfga_env_file }}"
+  args:
+    executable: /bin/bash
+  register: openfga_runtime_env_contract
+  retries: 24
+  delay: 5
+  until: openfga_runtime_env_contract.rc == 0
+  changed_when: false
+  no_log: true
+
+- name: Run OpenFGA database migrations
+  ansible.builtin.command:
+    argv:
+      - docker
+      - run
+      - --rm
+      - --network
+      - host
+      - "{{ openfga_image }}"
+      - migrate
+      - --datastore-engine
+      - postgres
+      - --datastore-uri
+      - "{{ openfga_datastore_uri }}"
+  args:
+    chdir: "{{ openfga_site_dir }}"
+  register: openfga_migrate
+  changed_when: true
+  no_log: true
+
+- name: Check whether the Docker nat chain exists before recreating OpenFGA published ports
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: openfga_docker_nat_chain
+  changed_when: false
+  failed_when: false
+
+- name: Restore Docker networking when the nat chain is missing before OpenFGA startup
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: openfga_docker_nat_chain.rc != 0
+
+- name: Recheck the Docker nat chain before OpenFGA startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: openfga_docker_nat_chain_recheck
+  changed_when: false
+  failed_when: openfga_docker_nat_chain_recheck.rc not in [0, 1]
+  retries: 10
+  delay: 2
+  until: openfga_docker_nat_chain_recheck.rc == 0
+  when: openfga_docker_nat_chain.rc != 0
+
+- name: Wait for the Docker daemon to answer after networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - info
+      - --format
+      - '{{ "{{.ServerVersion}}" }}'
+  register: openfga_docker_info
+  changed_when: false
+  retries: 10
+  delay: 2
+  until: openfga_docker_info.rc == 0
+  when: openfga_docker_nat_chain.rc != 0
+
+- name: Assert Docker nat chain is present before OpenFGA startup
+  ansible.builtin.assert:
+    that:
+      - openfga_docker_nat_chain.rc == 0 or openfga_docker_nat_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; OpenFGA published ports will fail."
+
+- name: Check whether the OpenFGA HTTP port is already published locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ openfga_internal_http_port }}"
+    delay: 0
+    timeout: 1
+  register: openfga_local_http_port_probe
+  changed_when: false
+  failed_when: false
+
+- name: Check whether the current OpenFGA health endpoint is healthy before startup
+  ansible.builtin.uri:
+    url: "{{ openfga_local_url }}/healthz"
+    method: GET
+    status_code: 200
+  register: openfga_health_probe
+  changed_when: false
+  failed_when: false
+
+- name: Record whether the OpenFGA startup needs a force recreate
+  ansible.builtin.set_fact:
+    openfga_force_recreate: >-
+      {{
+        openfga_docker_nat_chain.rc != 0
+        or (openfga_local_http_port_probe.failed | default(false))
+        or (openfga_health_probe.status | default(0)) != 200
+      }}
+
+- name: Force-recreate the OpenFGA runtime stack after Docker networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ openfga_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+      - --force-recreate
+  args:
+    chdir: "{{ openfga_site_dir }}"
+  register: openfga_up
+  changed_when: >-
+    'Creating' in openfga_up.stdout
+    or 'Recreating' in openfga_up.stdout
+    or 'Starting' in openfga_up.stdout
+    or 'Running' in openfga_up.stdout
+  failed_when: false
+  retries: 3
+  delay: 5
+  until: openfga_up.rc == 0
+  when: openfga_force_recreate
+
+- name: Assert the OpenFGA force-recreate succeeded
+  ansible.builtin.assert:
+    that:
+      - openfga_up.rc == 0
+    fail_msg: "{{ openfga_up.stderr | default(openfga_up.msg | default('openfga compose force-recreate failed')) }}"
+  when: openfga_force_recreate
+
+- name: Converge the OpenFGA runtime stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ openfga_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ openfga_site_dir }}"
+  register: openfga_up
+  changed_when: >-
+    'Creating' in openfga_up.stdout
+    or 'Recreating' in openfga_up.stdout
+    or 'Starting' in openfga_up.stdout
+    or 'Running' in openfga_up.stdout
+  when: not openfga_force_recreate
+
+- name: Wait for the OpenFGA health endpoint
+  ansible.builtin.uri:
+    url: "{{ openfga_local_url }}/healthz"
+    method: GET
+    status_code: 200
+  register: openfga_health
+  retries: 24
+  delay: 5
+  until: openfga_health.status == 200
+  changed_when: false
+
+- name: Verify the repo-managed OpenFGA runtime contract
+  ansible.builtin.include_tasks: verify.yml

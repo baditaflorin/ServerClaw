@@ -125,6 +125,7 @@ def test_api_gateway_compose_mounts_config_into_app_root() -> None:
     assert "{{ api_gateway_config_dir }}:/config:ro" in compose_template
     assert "{{ api_gateway_config_dir }}:/app/config:ro" in compose_template
     assert "build:" not in compose_template
+    assert "{{ api_gateway_service_dir }}/receipts:/app/receipts:ro" in compose_template
     assert "LV3_GATEWAY_GRAPH_DSN={{ api_gateway_graph_dsn }}" in env_template
     assert "LV3_GATEWAY_WORLD_STATE_DSN={{ api_gateway_world_state_dsn }}" in env_template
     assert "LV3_DIFY_TOOLS_API_KEY={{ api_gateway_dify_tools_api_key }}" in env_template
@@ -219,7 +220,7 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "api_gateway_tree_remote_archive_path" in sync_tree_tasks
     assert "(api_gateway_tree_archive_local.path | basename)" in sync_tree_tasks
     assert 'dest: "{{ api_gateway_tree_remote_archive_path }}"' in sync_tree_tasks
-    assert 'tar -xzf "{{ api_gateway_tree_remote_archive_path }}"' in sync_tree_tasks
+    assert 'tar --no-same-owner --no-same-permissions \\' in sync_tree_tasks
     assert "Remove stale API gateway build-context ignore files" in tasks
     assert "{{ api_gateway_service_dir }}/.dockerignore" in tasks
     assert "Ensure the API gateway receipts build-context tree exists" not in tasks
@@ -246,6 +247,9 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "Mark the Keycloak verification token request as unavailable" in verify_tasks
     assert "Record the API gateway verification bearer token from the legacy platform context" in verify_tasks
     assert "API gateway verification requires either the Keycloak client secret or the" in verify_tasks
+    assert "tar --no-same-owner --no-same-permissions" in sync_tree_tasks
+    assert "api_gateway_keycloak_retry_after_seconds: 30" in defaults
+    assert "Request a Keycloak bearer token for API gateway verification" in verify_tasks
     assert "Wait for the local Keycloak realm discovery endpoint used by API gateway verification" in verify_tasks
     assert "/realms/lv3/.well-known/openid-configuration" in verify_tasks
     assert "api_gateway_keycloak_verify_discovery.json.issuer == api_gateway_keycloak_issuer_url" in verify_tasks
@@ -272,7 +276,6 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "COPY molecule ./molecule" in tasks
     assert "COPY packer ./packer" in tasks
     assert "COPY playbooks ./playbooks" in tasks
-    assert "COPY receipts ./receipts" in tasks
     assert "COPY requirements ./requirements" in tasks
     assert "COPY roles ./roles" in tasks
     assert "COPY scripts ./scripts" in tasks

@@ -53,6 +53,17 @@ def test_build_platform_vars_includes_harbor_publication_topology() -> None:
     assert harbor["urls"]["internal"] == "http://10.10.10.20:8095"
 
 
+def test_build_platform_vars_includes_openfga_private_controller_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    openfga = platform_vars["platform_service_topology"]["openfga"]
+
+    assert openfga["ports"]["internal"] == 8098
+    assert openfga["ports"]["controller"] == 8014
+    assert openfga["urls"]["internal"] == "http://10.10.10.20:8098"
+    assert openfga["urls"]["controller"] == "http://100.64.0.1:8014"
+    assert platform_vars["openfga_controller_url"] == "http://100.64.0.1:8014"
+
+
 def test_build_platform_vars_includes_shared_session_authority_contract() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     authority = platform_vars["platform_session_authority"]

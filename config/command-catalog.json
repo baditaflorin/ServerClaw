@@ -1360,6 +1360,44 @@
         "timeout_seconds": 900
       }
     },
+    "converge-openfga": {
+      "description": "Converge the private OpenFGA runtime, Proxmox host controller proxy, the ServerClaw runtime client plus operator identity binding, and the delegated authorization seed.",
+      "workflow_id": "converge-openfga",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-openfga passes",
+        "make validate passes before the apply",
+        "Keycloak and OpenBao are already converged and their controller-local artifacts are present before the change"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record source commit, host proxy publication, OpenFGA health, authenticated API access, Keycloak token issuance, and delegated authorization verification together."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the Proxmox host proxy, OpenFGA runtime, PostgreSQL backend, token issuance, or delegated authorization bootstrap verification fails.",
+          "Stop if the change would leave the OpenFGA API reachable without the documented bearer-auth contract."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good repo-managed OpenFGA and Keycloak state before retrying instead of hand-editing the live store, model, tuples, or clients.",
+          "Replay the API gateway converge after catalog changes so the private and routed contracts stay aligned."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
+      }
+    },
     "deploy-uptime-kuma": {
       "description": "Converge the Uptime Kuma runtime, DNS, and edge-publication path.",
       "workflow_id": "deploy-uptime-kuma",
