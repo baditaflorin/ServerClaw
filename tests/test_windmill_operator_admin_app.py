@@ -59,11 +59,14 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_seed_app_repo_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
     assert defaults["windmill_worker_checkout_integrity_files"] == [
         "Makefile",
+        "config/validation-gate.json",
+        "config/validation-lanes.yaml",
         "scripts/policy_checks.py",
         "scripts/policy_toolchain.py",
         "scripts/command_catalog.py",
         "scripts/gate_status.py",
         "config/windmill/scripts/gate-status.py",
+        "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
     ]
     assert defaults["windmill_seed_repo_root_local_dir"] == "{{ windmill_worker_checkout_repo_root_local_dir }}"
     assert defaults["windmill_seed_script_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/scripts"
@@ -543,6 +546,9 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "WINDMILL_TOKEN" in tasks
     assert "Sync repo-managed Windmill schedules" in tasks
     assert "scripts/sync_windmill_seed_schedules.py" in tasks
+    assert tasks.count("uv") >= 2
+    assert tasks.count("--with") >= 2
+    assert tasks.count("pyyaml") >= 2
     assert "--path {{ windmill_healthcheck_script_path | quote }}" in tasks
     assert '. "{{ windmill_env_file }}"' not in tasks
     assert "Converge repo-managed Windmill schedule enabled flags" in tasks
@@ -623,6 +629,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Collect controller-side integrity checksums for Windmill worker checkout sentinels" in tasks
     assert "Collect guest-side integrity checksums for Windmill worker checkout sentinels" in tasks
     assert "Flag the Windmill worker checkout for refresh when integrity sentinels drift" in tasks
+    assert "Re-collect guest-side integrity checksums after Windmill worker checkout refresh" in tasks
+    assert "Assert the refreshed Windmill worker checkout integrity sentinels match controller state" in tasks
     assert "windmill_worker_checkout_integrity_mismatch" in tasks
     assert "windmill_worker_checkout_sync_paths" in tasks
     assert "Create a local manifest path for the Windmill worker checkout contents" in tasks

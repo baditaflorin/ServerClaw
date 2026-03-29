@@ -80,6 +80,16 @@ surface_classes:
     required_lanes:
       - documentation-and-adr
       - generated-artifact-and-canonical-truth
+  - surface_id: live_apply_receipts
+    title: Live-apply receipts and evidence payloads
+    paths:
+      - receipts/live-applies/*.json
+      - receipts/live-applies/*.md
+      - receipts/live-applies/evidence/*
+      - receipts/live-applies/evidence/**/*
+    required_lanes:
+      - repository-structure-and-schema
+      - generated-artifact-and-canonical-truth
   - surface_id: repository_catalogs
     title: Repository structure, schemas, and policy catalogs
     paths:

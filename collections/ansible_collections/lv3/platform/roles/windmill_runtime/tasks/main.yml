@@ -593,6 +593,33 @@
   when: windmill_worker_checkout_stale_dirs.stdout | trim | length > 0
   changed_when: false
 
+- name: Re-collect guest-side integrity checksums after Windmill worker checkout refresh
+  ansible.builtin.stat:
+    path: "{{ windmill_worker_repo_checkout_host_path }}/{{ item.item }}"
+    checksum_algorithm: sha256
+  loop: "{{ windmill_worker_checkout_integrity_local.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  register: windmill_worker_checkout_integrity_remote_post_sync
+  when: windmill_worker_checkout_needs_refresh | bool
+
+- name: Assert the refreshed Windmill worker checkout integrity sentinels match controller state
+  ansible.builtin.assert:
+    that:
+      - windmill_worker_checkout_integrity_remote_post_sync.results[item].stat.exists | default(false)
+      - >-
+        (windmill_worker_checkout_integrity_remote_post_sync.results[item].stat.checksum | default(''))
+        ==
+        (windmill_worker_checkout_integrity_local.results[item].stat.checksum | default(''))
+    fail_msg: >-
+      Windmill worker checkout sentinel
+      {{ windmill_worker_checkout_integrity_local.results[item].item }}
+      does not match the controller workspace after sync.
+  loop: "{{ range(0, windmill_worker_checkout_integrity_local.results | length) | list }}"
+  loop_control:
+    label: "{{ windmill_worker_checkout_integrity_local.results[item].item }}"
+  when: windmill_worker_checkout_needs_refresh | bool
+
 - name: Ensure repo-backed Windmill runtime paths stay writable after checkout sync
   ansible.builtin.include_role:
     name: lv3.platform.common
@@ -2037,6 +2064,11 @@
     mutation_audit_emit_on_success: true
   ansible.builtin.command:
     argv:
+      - uv
+      - run
+      - --no-project
+      - --with
+      - pyyaml
       - python3
       - "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_schedules.py"
       - --base-url

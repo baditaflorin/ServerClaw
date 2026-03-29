@@ -8,9 +8,11 @@ from pathlib import Path
 from typing import Any, TypedDict
 
 
-LOCAL_FALLBACK_STAGES = [
+GIT_REQUIRED_FALLBACK_STAGES = [
     "workstream-surfaces",
     "agent-standards",
+]
+WORKER_SAFE_FALLBACK_STAGES = [
     "generated-vars",
     "role-argument-specs",
     "json",
@@ -51,9 +53,23 @@ def _load_gate_status(status_path: Path) -> dict[str, Any] | None:
     return None
 
 
+def _git_checkout_available(repo_root: Path) -> bool:
+    result = _run(["git", "-C", str(repo_root), "rev-parse", "--is-inside-work-tree"], cwd=repo_root)
+    return result.returncode == 0 and result.stdout.strip() == "true"
+
+
 def _runner_image_pull_failed(stdout: str, stderr: str) -> bool:
     combined = f"{stdout}\n{stderr}"
     return any(marker in combined for marker in RUNNER_IMAGE_ERROR_MARKERS)
+
+
+def _gate_status_runner_startup_failed(gate_status: dict[str, Any] | None) -> bool:
+    if not gate_status or gate_status.get("status") == "passed":
+        return False
+    checks = gate_status.get("checks")
+    if not isinstance(checks, list):
+        return False
+    return any(isinstance(check, dict) and check.get("returncode") == 125 for check in checks)
 
 
 def _fallback_status_payload(
@@ -88,8 +104,11 @@ def _fallback_status_payload(
 
 
 def _run_local_fallback(repo_root: Path, manifest_path: Path, status_path: Path) -> dict[str, Any]:
+    fallback_stages = list(WORKER_SAFE_FALLBACK_STAGES)
+    if _git_checkout_available(repo_root):
+        fallback_stages = [*GIT_REQUIRED_FALLBACK_STAGES, *fallback_stages]
     commands = [
-        ["./scripts/validate_repo.sh", *LOCAL_FALLBACK_STAGES],
+        ["./scripts/validate_repo.sh", *fallback_stages],
         LOCAL_PROVIDER_BOUNDARY_COMMAND,
     ]
     started = time.monotonic()
@@ -166,17 +185,22 @@ def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
         "--print-json",
     ]
     result = _run(command, cwd=repo_root)
+    gate_status = _load_gate_status(status_path)
     payload: dict[str, Any] = {
-        "status": "ok" if result.returncode == 0 else "error",
+        "status": "ok"
+        if result.returncode == 0 and (gate_status is None or gate_status.get("status") == "passed")
+        else "error",
         "command": " ".join(shlex.quote(part) for part in command),
         "returncode": result.returncode,
         "stdout": result.stdout.strip(),
         "stderr": result.stderr.strip(),
     }
-    gate_status = _load_gate_status(status_path)
     if gate_status is not None:
         payload["gate_status"] = gate_status
-    if result.returncode != 0 and _runner_image_pull_failed(result.stdout, result.stderr):
+    runner_startup_failed = _runner_image_pull_failed(result.stdout, result.stderr) or _gate_status_runner_startup_failed(
+        gate_status
+    )
+    if payload["status"] == "error" and runner_startup_failed:
         payload["primary_gate_error"] = {
             "command": payload["command"],
             "returncode": result.returncode,

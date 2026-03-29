@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-29'
 total_adrs: 314
 implementation_status_summary:
-  Implemented: 240
+  Implemented: 241
   Partial: 8
-  Not Implemented: 65
+  Not Implemented: 64
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4513,7 +4513,7 @@ adr_index:
   - adr: '0264'
     title: Failure-Domain-Isolated Validation Lanes
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -4522,6 +4522,7 @@ adr_index:
       - lanes
     summary: We will split repository and promotion validation into failure-domain-isolated
     filename: 0264-failure-domain-isolated-validation-lanes.md
+    implemented_version: 0.177.84
   - adr: '0265'
     title: Immutable Validation Snapshots For Remote Builders And Schema Checks
     status: Accepted

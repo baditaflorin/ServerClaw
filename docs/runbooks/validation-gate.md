@@ -77,11 +77,14 @@ The lane-scoped checks are grouped into these blocking lanes:
 
 [scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/parallel_check.py) still performs the container-backed execution once the blocking check set is resolved.
 
+Live-apply receipts under `receipts/live-applies/` are now a declared surface class, so receipt-only updates stay in the repository-structure-and-schema plus generated-artifact-and-canonical-truth lanes instead of widening the gate back to every lane.
+
 ADR 0230 adds `policy-validation`, which runs [scripts/policy_checks.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/policy_checks.py) against the shared `policy/` bundle and verifies the OPA or Conftest toolchain cache under `LV3_POLICY_TOOLCHAIN_ROOT`. That check now participates in the `repository-structure-and-schema` lane across the controller path, the build-server `remote-validate` path, and the worker-side Windmill post-merge gate.
 
 Repo-managed validation installs third-party Ansible collections from the public `release_galaxy` server by default, so local Docker fallback does not depend on resolving the private `galaxy.lv3.org` endpoint just to lint or syntax-check the checkout.
 
 The `schema-validation` stage now also runs [scripts/provider_boundary_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/provider_boundary_catalog.py) so ADR 0207 provider-boundary guards fail the gate if a declared boundary leaks raw provider payload selectors beyond its translation step.
+That stage now uses a longer timeout budget than the lighter Python-only checks so exact-main replays still finish when release, receipt, and canonical-truth changes widen the schema workload on slower fallback paths.
 
 The `integration-tests` stage runs [scripts/integration_suite.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/integration_suite.py) in `gate` mode against the `staging` environment. If the service catalog does not currently expose any active staging endpoints and no `LV3_INTEGRATION_*` overrides are supplied, the check records a structured skip and exits successfully instead of failing the gate.
 
@@ -153,6 +156,7 @@ When the replay starts from a repo-scoped non-primary git worktree, `playbooks/w
 - if the Windmill post-merge gate points at an older mirrored worker tree without the canonical generated-doc inputs, replay `windmill_runtime` first so `/srv/proxmox_florin_server` includes the full worker-safe validation surface before rerunning the gate
 - if `policy-validation` fails on the build server or worker because OPA or Conftest binaries are missing, rerun the same entrypoint after clearing the cached toolchain root and ensure `LV3_POLICY_TOOLCHAIN_ROOT` points at a writable directory
 - if the Windmill worker mirror picked up files from the shared checkout instead of the branch worktree, verify the replay came from the repo worktree and not a temporary playbook path; otherwise rerun `playbooks/windmill.yml` with `-e windmill_worker_checkout_repo_root_local_dir=/absolute/worktree/path` before rerunning the gate
+- if the Windmill worker mirror still misses exact-worktree files such as `config/validation-lanes.yaml` after that replay, treat it as a stale checkout regression: copy the exact worktree validation surfaces into `/srv/proxmox_florin_server`, delete `/opt/windmill/worker-checkout.sha256` so the next managed replay cannot trust the stale checksum marker, and then rerun `config/windmill/scripts/post-merge-gate.py`
 - if the mirrored worker policy tree contains `._*` or `.DS_Store` files from a macOS checkout, replay `playbooks/windmill.yml`; ADR 0230 strips those metadata files during the repo sync before rerunning the worker gate
 - if the worker-local fallback reports a removed role as missing `meta/argument_specs.yml`, replay `playbooks/windmill.yml` from the current worktree so the worker mirror prunes stale empty directories before rerunning `f/lv3/post_merge_gate`
 - if the Windmill post-merge gate falls back locally because runner images cannot be pulled, treat the build-server `remote-validate` run as the authoritative full-manifest proof and use the fallback output to confirm the worker-safe ADR 0207 boundary checks still passed

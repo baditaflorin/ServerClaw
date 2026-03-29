@@ -1,6 +1,6 @@
 schema_version: 1.0.0
 repo_version: 0.177.84
-platform_version: 0.130.57
+platform_version: 0.130.58
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -114,6 +114,7 @@ live_apply_evidence:
     restore_verification: 2026-03-29-adr-0272-restore-readiness-mainline-live-apply
     public_endpoint_admission_control: 2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply
     https_tls_assurance: 2026-03-29-adr-0249-https-tls-assurance-mainline-live-apply
+    validation_gate: 2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -1035,5 +1036,5 @@ release_tracks:
     current: 0.177.84
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.57
+    current: 0.130.58
     meaning: intended platform release for the actual server configuration
