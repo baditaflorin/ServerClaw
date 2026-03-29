@@ -112,7 +112,8 @@ workstreams:
             - tests/test_mail_platform_verify_playbook.py
             - receipts/image-scans/2026-03-30-mailpit-runtime.json
             - receipts/image-scans/2026-03-30-mailpit-runtime.trivy.json
-            - receipts/live-applies/**
+            - receipts/live-applies/2026-03-30-adr-0282-mailpit-live-apply.json
+            - receipts/live-applies/evidence/2026-03-30-adr-0282-mailpit-live-apply.txt
           mode: exclusive
         - id: docs_portal_generation_contract
           paths:
