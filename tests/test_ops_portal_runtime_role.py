@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import yaml
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULTS_PATH = (
