@@ -42,13 +42,13 @@ matrix_synapse_openbao_approle_name: matrix-synapse-runtime
 matrix_synapse_container_name: matrix-synapse
 matrix_synapse_image: "{{ container_image_catalog.images.matrix_synapse_runtime.ref }}"
 matrix_synapse_server_name: matrix.lv3.org
-matrix_synapse_public_hostname: "{{ platform_service_topology.matrix_synapse.public_hostname }}"
-matrix_synapse_port: "{{ platform_service_topology | platform_service_port('matrix_synapse', 'internal') }}"
-matrix_synapse_host_proxy_port: "{{ platform_service_topology | platform_service_port('matrix_synapse', 'controller') }}"
-matrix_synapse_internal_base_url: "{{ platform_service_topology | platform_service_url('matrix_synapse', 'internal') }}"
-matrix_synapse_controller_url: "{{ platform_service_topology | platform_service_url('matrix_synapse', 'controller') }}"
-matrix_synapse_public_url: "{{ platform_service_topology.matrix_synapse.urls.public }}"
-matrix_synapse_public_base_url: "{{ platform_service_topology.matrix_synapse.urls.public }}/"
+matrix_synapse_public_hostname: "{{ hostvars['proxmox_florin'].platform_service_topology.matrix_synapse.public_hostname }}"
+matrix_synapse_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('matrix_synapse', 'internal') }}"
+matrix_synapse_host_proxy_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('matrix_synapse', 'controller') }}"
+matrix_synapse_internal_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('matrix_synapse', 'internal') }}"
+matrix_synapse_controller_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('matrix_synapse', 'controller') }}"
+matrix_synapse_public_url: "{{ hostvars['proxmox_florin'].platform_service_topology.matrix_synapse.urls.public }}"
+matrix_synapse_public_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology.matrix_synapse.urls.public }}/"
 matrix_synapse_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
 matrix_synapse_database_port: 5432
 matrix_synapse_database_name: matrix_synapse

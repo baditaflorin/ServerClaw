@@ -15,11 +15,11 @@ TASKS_FILE = REPO_ROOT / "roles" / "matrix_synapse_runtime" / "tasks" / "main.ym
 def test_matrix_synapse_runtime_defaults_expose_internal_controller_and_public_urls() -> None:
     defaults = yaml.safe_load(ROLE_DEFAULTS.read_text())
 
-    assert defaults["matrix_synapse_port"] == "{{ platform_service_topology | platform_service_port('matrix_synapse', 'internal') }}"
-    assert defaults["matrix_synapse_host_proxy_port"] == "{{ platform_service_topology | platform_service_port('matrix_synapse', 'controller') }}"
-    assert defaults["matrix_synapse_internal_base_url"] == "{{ platform_service_topology | platform_service_url('matrix_synapse', 'internal') }}"
-    assert defaults["matrix_synapse_controller_url"] == "{{ platform_service_topology | platform_service_url('matrix_synapse', 'controller') }}"
-    assert defaults["matrix_synapse_public_base_url"] == "{{ platform_service_topology.matrix_synapse.urls.public }}/"
+    assert defaults["matrix_synapse_port"] == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('matrix_synapse', 'internal') }}"
+    assert defaults["matrix_synapse_host_proxy_port"] == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('matrix_synapse', 'controller') }}"
+    assert defaults["matrix_synapse_internal_base_url"] == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('matrix_synapse', 'internal') }}"
+    assert defaults["matrix_synapse_controller_url"] == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('matrix_synapse', 'controller') }}"
+    assert defaults["matrix_synapse_public_base_url"] == "{{ hostvars['proxmox_florin'].platform_service_topology.matrix_synapse.urls.public }}/"
 
 
 def test_matrix_synapse_env_templates_pin_the_homeserver_config_path() -> None:
