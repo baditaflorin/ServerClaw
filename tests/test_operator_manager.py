@@ -61,6 +61,15 @@ class FakeBackend:
             "audit": {"status": "ok"},
         }
 
+    def update_operator_notes(self, operator: dict, notes_markdown: str) -> dict:
+        return {
+            "status": "ok",
+            "operator_id": operator["id"],
+            "notes_present": bool(notes_markdown.strip()),
+            "note_length": len(notes_markdown.strip()),
+            "audit": {"status": "ok"},
+        }
+
     def inventory_operator(self, operator: dict, state: dict, offline: bool) -> dict:
         return {"operator": operator, "state": state, "offline": offline}
 
@@ -277,6 +286,96 @@ def test_reset_password_persists_state(
     assert state["last_operation"] == "reset-password"
     assert state["keycloak"]["status"] == "password-reset"
     assert payload["result"]["keycloak"]["required_actions"] == ["UPDATE_PASSWORD"]
+
+
+def test_update_notes_persists_markdown_and_review_audit(
+    roster_paths: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    roster_path, state_dir = roster_paths
+    monkeypatch.setattr(operator_manager, "select_backend", lambda **kwargs: FakeBackend())
+    onboarded = operator_manager.onboard(
+        roster_path=roster_path,
+        state_dir=state_dir,
+        name="Alice Example",
+        email="alice@example.com",
+        role="operator",
+        ssh_key=TEST_KEY,
+        actor_id="tester",
+        actor_class="operator",
+        operator_id=None,
+        keycloak_username=None,
+        ssh_key_name="laptop",
+        tailscale_login_email=None,
+        tailscale_device_name=None,
+        bootstrap_password="Bootstrap123",
+        dry_run=False,
+    )
+
+    payload = operator_manager.update_notes(
+        roster_path=roster_path,
+        state_dir=state_dir,
+        operator_id=onboarded["operator"]["id"],
+        actor_id="reviewer",
+        actor_class="operator",
+        notes_markdown="## Shift handoff\n\n- Check `wiki.lv3.org`\n- [x] Review alerts",
+        dry_run=False,
+    )
+
+    saved = yaml.safe_load(roster_path.read_text(encoding="utf-8"))
+    operator = saved["operators"][0]
+    assert operator["notes"] == "## Shift handoff\n\n- Check `wiki.lv3.org`\n- [x] Review alerts"
+    assert operator["audit"]["last_reviewed_by"] == "reviewer"
+    state = json.loads((state_dir / "alice-example.json").read_text(encoding="utf-8"))
+    assert state["last_operation"] == "update-notes"
+    assert payload["changed"] is True
+    assert payload["result"]["notes_present"] is True
+
+
+def test_update_notes_can_clear_existing_markdown(
+    roster_paths: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    roster_path, state_dir = roster_paths
+    monkeypatch.setattr(operator_manager, "select_backend", lambda **kwargs: FakeBackend())
+    onboarded = operator_manager.onboard(
+        roster_path=roster_path,
+        state_dir=state_dir,
+        name="Alice Example",
+        email="alice@example.com",
+        role="operator",
+        ssh_key=TEST_KEY,
+        actor_id="tester",
+        actor_class="operator",
+        operator_id=None,
+        keycloak_username=None,
+        ssh_key_name="laptop",
+        tailscale_login_email=None,
+        tailscale_device_name=None,
+        bootstrap_password="Bootstrap123",
+        dry_run=False,
+    )
+    operator_manager.update_notes(
+        roster_path=roster_path,
+        state_dir=state_dir,
+        operator_id=onboarded["operator"]["id"],
+        actor_id="reviewer",
+        actor_class="operator",
+        notes_markdown="Existing notes",
+        dry_run=False,
+    )
+
+    payload = operator_manager.update_notes(
+        roster_path=roster_path,
+        state_dir=state_dir,
+        operator_id=onboarded["operator"]["id"],
+        actor_id="reviewer",
+        actor_class="operator",
+        notes_markdown="   \n",
+        dry_run=False,
+    )
+
+    saved = yaml.safe_load(roster_path.read_text(encoding="utf-8"))
+    assert "notes" not in saved["operators"][0]
+    assert payload["result"]["notes_present"] is False
 
 
 def test_quarterly_review_flags_stale_operator(

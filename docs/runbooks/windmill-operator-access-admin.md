@@ -11,6 +11,7 @@ It wraps the existing ADR 0108 backend so operators can:
 - off-board an existing operator
 - reconcile the live identity systems with `config/operators.yaml`
 - inspect one operator's access inventory
+- edit bounded rich operator notes through the ADR 0241 Tiptap surface while still storing markdown in `config/operators.yaml`
 - launch or resume task-specific guided tours for those workflows
 
 ## Location
@@ -40,6 +41,17 @@ The UI does not provision access directly. It calls repo-managed Windmill script
 
 That keeps the UI, CLI, and Make targets on the same governed backend path.
 
+## Rich Notes Workflow
+
+The `Rich Notes` panel is the first bounded ADR 0241 editing surface.
+
+- the left pane is a Tiptap editor with headings, lists, task items, code blocks, links, tables, and person mentions inserted as `@operator-id`
+- the right pane is the canonical markdown source so operators can paste markdown in, inspect what will be stored, or copy it back out
+- the `Save Notes` action calls `f/lv3/operator_update_notes`, which delegates to `scripts/operator_manager.py update-notes`
+- the worker persists the resulting markdown back into `config/operators.yaml` and records `audit.last_reviewed_at` plus `audit.last_reviewed_by`
+
+This is intentionally bounded knowledge editing, not a replacement for the larger Outline knowledge system at `wiki.lv3.org`.
+
 ## Operator Workflows Backed By The App
 
 - onboarding: `f/lv3/operator_onboard`
@@ -47,6 +59,7 @@ That keeps the UI, CLI, and Make targets on the same governed backend path.
 - roster sync: `f/lv3/sync_operators`
 - inventory lookup: `f/lv3/operator_inventory`
 - roster listing: `f/lv3/operator_roster`
+- rich note persistence: `f/lv3/operator_update_notes`
 
 ## Guided Tours
 
@@ -94,10 +107,25 @@ The panel reads the current live state for the selected operator and is the fast
 Run:
 
 ```bash
+docker run --rm \
+  -e WM_TOKEN="$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
+  -v "$PWD/config/windmill/apps:/workspace" \
+  ghcr.io/windmill-labs/windmill:1.662.0@sha256:13d5456a80500822446ce0154f68d5fd5089628df82e77e2bd9cb24ff898d58d \
+  sh -lc 'cd /workspace && wmill generate-metadata f/lv3/operator_access_admin.raw_app --base-url http://100.64.0.1:8005 --workspace lv3 --token "$WM_TOKEN" --lock-only --skip-scripts --skip-flows --yes'
 uv run --with pytest --with pyyaml python -m pytest tests/test_windmill_operator_admin_app.py -q
-python3 -m py_compile config/windmill/scripts/operator-roster.py config/windmill/scripts/operator-inventory.py
-npx --prefix config/windmill/apps/f/lv3/operator_access_admin.raw_app tsc --noEmit -p config/windmill/apps/f/lv3/operator_access_admin.raw_app/tsconfig.json
+uv run --with pytest --with pyyaml python -m pytest tests/test_operator_manager.py tests/test_windmill_operator_admin_app.py -q
+python3 -m py_compile scripts/operator_manager.py config/windmill/scripts/operator-roster.py config/windmill/scripts/operator-inventory.py config/windmill/scripts/operator-update-notes.py
 ANSIBLE_CONFIG=ansible.cfg ANSIBLE_COLLECTIONS_PATH=collections uvx --from ansible-core ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --syntax-check
+```
+
+To verify the Tiptap bundle itself from a clean environment without polluting the repo checkout:
+
+```bash
+tmpdir=$(mktemp -d) \
+  && rsync -a --exclude node_modules config/windmill/apps/f/lv3/operator_access_admin.raw_app/ "$tmpdir/" \
+  && cd "$tmpdir" \
+  && npm install --ignore-scripts --package-lock=false \
+  && npx tsc --noEmit
 ```
 
 ## Notes
@@ -105,3 +133,5 @@ ANSIBLE_CONFIG=ansible.cfg ANSIBLE_COLLECTIONS_PATH=collections uvx --from ansib
 - The bootstrap password is intentionally shown once in the onboarding result and is not written to git.
 - The app depends on the worker checkout being mounted at `/srv/proxmox_florin_server`; the Windmill runtime now bind-mounts that host checkout into both worker pools.
 - The app is a Windmill-private admin surface; `ops.lv3.org` remains a separate portal.
+- ADR 0241 keeps the stored source format as markdown even though the editor is rich text, so repo diffs, sync workflows, and later migrations stay inspectable.
+- Raw-app dependency changes must refresh `config/windmill/apps/wmill-lock.yaml` with `wmill generate-metadata` before the next live Windmill sync, or the remote bundle step can fail with unresolved package imports.
