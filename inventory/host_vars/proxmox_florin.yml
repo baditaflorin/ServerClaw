@@ -47,7 +47,7 @@ platform_port_assignments:
   mattermost_server_port: 8065
   mattermost_host_proxy_port: 8066
   matrix_synapse_port: 8008
-  matrix_synapse_host_proxy_port: 8014
+  matrix_synapse_host_proxy_port: 8015
   gitea_http_port: 3003
   gitea_host_proxy_port: 3009
   netbox_server_port: 8082

@@ -35,7 +35,7 @@ The workflow manages these live surfaces:
 - PostgreSQL login role `matrix_synapse` on `postgres-lv3`
 - Matrix Synapse runtime under `/opt/matrix-synapse` on `docker-runtime-lv3`
 - public Matrix client endpoint at `https://matrix.lv3.org/_matrix/client/versions`
-- Tailscale-only controller endpoint at `http://100.64.0.1:8014/_matrix/client/versions`
+- Tailscale-only controller endpoint at `http://100.64.0.1:8015/_matrix/client/versions`
 - repo-managed bootstrap admin account `@ops:matrix.lv3.org`
 - repo-managed signing key, registration secret, and mirrored controller-local recovery artifacts
 
@@ -56,13 +56,13 @@ Run these checks after converge:
 
 1. `make syntax-check-matrix-synapse`
 2. `curl -fsS https://matrix.lv3.org/_matrix/client/versions`
-3. `curl -fsS http://100.64.0.1:8014/_matrix/client/versions`
+3. `curl -fsS http://100.64.0.1:8015/_matrix/client/versions`
 4. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/matrix-synapse/docker-compose.yml ps && sudo ls -l /opt/matrix-synapse/openbao /run/lv3-secrets/matrix-synapse && sudo test ! -e /opt/matrix-synapse/matrix-synapse.env'`
-5. `curl -fsS -X POST http://100.64.0.1:8014/_matrix/client/v3/login -H 'Content-Type: application/json' -d '{"type":"m.login.password","identifier":{"type":"m.id.user","user":"ops"},"password":"'"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/ops-password.txt)"'"}'`
+5. `curl -fsS -X POST http://100.64.0.1:8015/_matrix/client/v3/login -H 'Content-Type: application/json' -d '{"type":"m.login.password","identifier":{"type":"m.id.user","user":"ops"},"password":"'"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/ops-password.txt)"'"}'`
 
 ## Notes
 
 - This rollout intentionally keeps Matrix Synapse client-facing but non-federating. The repo-managed listener publishes client APIs only and does not expose a federation listener on `8448`.
 - Authentication remains inside Synapse itself. `matrix.lv3.org` is published through the shared edge with TLS, but it is not wrapped in the shared oauth2-proxy browser flow.
-- The host-side controller proxy is intended for governed operator and automation access. It mirrors the same client API surface over Tailscale at `http://100.64.0.1:8014`.
+- The host-side controller proxy is intended for governed operator and automation access. It mirrors the same client API surface over Tailscale at `http://100.64.0.1:8015`.
 - The mirrored server signing key is a recovery artifact. Rotating it changes the homeserver identity contract and must be planned explicitly instead of happening as a routine secret rollover.

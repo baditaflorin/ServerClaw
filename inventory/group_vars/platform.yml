@@ -77,7 +77,7 @@ platform_host:
         upstream_port: 8065
       - name: matrix-synapse
         listen_address: 100.64.0.1
-        listen_port: 8014
+        listen_port: 8015
         upstream_host: 10.10.10.20
         upstream_port: 8008
       - name: gitea
@@ -161,7 +161,7 @@ platform_ports:
   mattermost_server_port: 8065
   mattermost_host_proxy_port: 8066
   matrix_synapse_port: 8008
-  matrix_synapse_host_proxy_port: 8014
+  matrix_synapse_host_proxy_port: 8015
   gitea_http_port: 3003
   gitea_host_proxy_port: 3009
   netbox_server_port: 8082
@@ -225,7 +225,7 @@ platform_port_assignments:
   mattermost_server_port: 8065
   mattermost_host_proxy_port: 8066
   matrix_synapse_port: 8008
-  matrix_synapse_host_proxy_port: 8014
+  matrix_synapse_host_proxy_port: 8015
   gitea_http_port: 3003
   gitea_host_proxy_port: 3009
   netbox_server_port: 8082
@@ -1350,15 +1350,15 @@ platform_service_topology:
       upstream: http://10.10.10.20:8008
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8014
+      url: http://100.64.0.1:8015
     service_id: matrix_synapse
     ports:
       internal: 8008
-      controller: 8014
+      controller: 8015
     urls:
       public: https://matrix.lv3.org
       internal: http://10.10.10.20:8008
-      controller: http://100.64.0.1:8014
+      controller: http://100.64.0.1:8015
   netbox:
     service_name: netbox
     owning_vm: docker-runtime-lv3
@@ -2163,7 +2163,7 @@ platform_management_allowed_tcp_ports:
   - 8008
   - 8011
   - 8066
-  - 8014
+  - 8015
   - 8010
   - 9444
   - 443
@@ -2628,15 +2628,15 @@ public_edge_service_topology:
       upstream: http://10.10.10.20:8008
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8014
+      url: http://100.64.0.1:8015
     service_id: matrix_synapse
     ports:
       internal: 8008
-      controller: 8014
+      controller: 8015
     urls:
       public: https://matrix.lv3.org
       internal: http://10.10.10.20:8008
-      controller: http://100.64.0.1:8014
+      controller: http://100.64.0.1:8015
   netbox:
     service_name: netbox
     owning_vm: docker-runtime-lv3
@@ -3322,9 +3322,9 @@ mattermost_host_proxy_port: 8066
 mattermost_private_base_url: http://10.10.10.20:8065
 mattermost_controller_url: http://100.64.0.1:8066
 matrix_synapse_port: 8008
-matrix_synapse_host_proxy_port: 8014
+matrix_synapse_host_proxy_port: 8015
 matrix_synapse_private_base_url: http://10.10.10.20:8008
-matrix_synapse_controller_url: http://100.64.0.1:8014
+matrix_synapse_controller_url: http://100.64.0.1:8015
 matrix_synapse_public_url: https://matrix.lv3.org
 gitea_http_port: 3003
 gitea_host_proxy_port: 3009
@@ -3361,7 +3361,7 @@ proxmox_management_allowed_tcp_ports:
   - 8008
   - 8011
   - 8066
-  - 8014
+  - 8015
   - 8010
   - 9444
   - 443

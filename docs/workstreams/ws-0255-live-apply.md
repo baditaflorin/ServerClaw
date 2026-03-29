@@ -60,7 +60,7 @@
 - `matrix.lv3.org` resolves through the shared edge and returns Matrix client metadata over TLS
 - `docker-runtime-lv3` runs the repo-managed Synapse compose stack with a stable signing key and repo-managed secrets
 - `postgres-lv3` hosts the repo-managed Matrix Synapse database and login role
-- `100.64.0.1:8014` proxies the private controller path to the Synapse client and admin API listener
+- `100.64.0.1:8015` proxies the private controller path to the Synapse client and admin API listener
 - the repo-managed admin account can authenticate successfully against the live Synapse server
 
 ## Verification
@@ -74,7 +74,7 @@
 - `make pre-push-gate`
 - `HETZNER_DNS_API_TOKEN=... make converge-matrix-synapse`
 - `curl -fsS https://matrix.lv3.org/_matrix/client/versions`
-- `curl -fsS http://100.64.0.1:8014/_matrix/client/versions`
+- `curl -fsS http://100.64.0.1:8015/_matrix/client/versions`
 - password-login verification for the repo-managed admin user against the live Matrix API
 
 ## Merge Criteria
