@@ -63,6 +63,7 @@
     api_gateway_verify_keycloak_request_succeeded: false
 
 - name: Request a Keycloak bearer token for API gateway verification
+  when: api_gateway_verify_client_secret_stat.stat.exists
   block:
     - name: Request a Keycloak bearer token for API gateway verification
       ansible.builtin.uri:
@@ -86,7 +87,6 @@
     - name: Mark the Keycloak verification token request as unavailable
       ansible.builtin.set_fact:
         api_gateway_verify_keycloak_request_succeeded: false
-  when: api_gateway_verify_client_secret_stat.stat.exists
 
 - name: Record the API gateway verification bearer token from Keycloak
   ansible.builtin.set_fact:
