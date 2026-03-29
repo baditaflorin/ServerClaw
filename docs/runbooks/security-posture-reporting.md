@@ -1,12 +1,10 @@
 # Security Posture Reporting
 
 This runbook covers the ADR 0102 security posture workflow that combines Lynis host scans with Trivy runtime image scans.
-ADR 0298 continuous Syft and Grype catalog scanning is documented separately in [docs/runbooks/sbom-cve-scanning.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/sbom-cve-scanning.md).
 
 ## Repo Surfaces
 
 - `playbooks/tasks/security-scan.yml`
-- `playbooks/tasks/generate-host-sbom.yml`
 - `scripts/parse_lynis_report.py`
 - `scripts/trivy_scan_running_images.sh`
 - `scripts/security_posture_report.py`
@@ -54,11 +52,10 @@ The workflow:
    `docker-runtime-lv3`, `docker-build-lv3`, `backup-lv3`, `coolify-lv3`,
    `postgres-lv3`, `nginx-lv3`, and `monitoring-lv3`)
 2. fetches each `report.dat` file into `.local/security-posture/lynis/`
-3. refreshes a CycloneDX host SBOM for each scanned host through the shared `generate-host-sbom.yml` task
-4. parses and suppresses known-acceptable Lynis findings
-5. SSHes to `docker-runtime-lv3` and `docker-build-lv3` and runs `scripts/trivy_scan_running_images.sh`
-6. compares the new scan to the latest committed receipt in `receipts/security-reports/`
-7. writes a new JSON receipt under `receipts/security-reports/`
+3. parses and suppresses known-acceptable Lynis findings
+4. SSHes to `docker-runtime-lv3` and `docker-build-lv3` and runs `scripts/trivy_scan_running_images.sh`
+5. compares the new scan to the latest committed receipt in `receipts/security-reports/`
+6. writes a new JSON receipt under `receipts/security-reports/`
 
 ## Outputs
 
@@ -68,8 +65,6 @@ Each receipt records:
 - per-host Lynis finding counts and new findings since the previous receipt
 - per-image HIGH and CRITICAL CVEs
 - an aggregate summary for portal and dashboard consumption
-
-Host SBOM receipts produced by the shared task land separately under `receipts/sbom/host-<hostname>-<date>.cdx.json`.
 
 When the relevant environment variables or controller-local secret files are present, the workflow also:
 
@@ -130,9 +125,6 @@ Confirm:
 - each expected active production host has a hardening index
 - each Docker host contributed image scan data, or a documented `--skip-trivy`
   fallback explains why the receipt is host-only for that run
-- the newest matching files under `receipts/sbom/` exist for the scanned hosts
-- each expected active production host has a hardening index
-- when the run does not use `--skip-trivy`, each Docker host contributed image scan data and the newest matching files under `receipts/sbom/` exist for the scanned hosts
 - the ops portal shows the latest security receipt summary
 - `python3 scripts/vulnerability_budget.py --all` passes when no active
   exceptions have expired
