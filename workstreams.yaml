@@ -478,7 +478,7 @@ workstreams:
   - id: ws-0251-main-integration
     adr: "0251"
     title: Integrate ADR 0251 exact-main durable verification onto current origin/main
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/ws-0251-main-integration
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply-r2

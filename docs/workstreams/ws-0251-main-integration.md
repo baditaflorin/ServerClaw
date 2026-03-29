@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0251](../adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md)
 - Title: Integrate ADR 0251 exact-main durable verification onto `origin/main`
-- Status: `ready_for_merge`
+- Status: `merged`
 - Included In Repo Version: 0.177.87
 - Platform Version Observed During Integration: 0.130.59
 - Release Date: 2026-03-29
