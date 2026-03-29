@@ -68,12 +68,14 @@
 - The live attestation payload for `api_gateway` proved the declared runtime witness, route witness, and receipt witness, and the authenticated summary showed the shared production attestation rollup under the new contract.
 - The live ops portal verified `HTTP 200` for `http://127.0.0.1:8092/health`, `HTTP 200` for `http://127.0.0.1:8092/`, `HTTP 200` for `http://127.0.0.1:8092/partials/overview`, and `HTTP 302` for public `https://ops.lv3.org/` back to the expected `/oauth2/sign_in` path.
 - Concurrent controller-side applies from other workstreams on the shared `ops-portal` surface interrupted the outer repo-managed replay path during this workstream. The final live state was recovered by syncing the exact branch Dockerfile, portal application files, and templates into `/opt/ops-portal/service` on `docker-runtime-lv3`, rebuilding with `docker compose --file /opt/ops-portal/docker-compose.yml up -d --build --force-recreate --remove-orphans`, and then re-verifying the internal and public portal surfaces end to end.
+- The final exact-main replay from committed source `0fc12d6caebe09b797bfafd85b5b3cbf71fe3e74` completed successfully with `make converge-api-gateway env=production ANSIBLE_TRACE_ARGS='-e bypass_promotion=true'` reporting `docker-runtime-lv3 : ok=242 changed=111 unreachable=0 failed=0 skipped=35 rescued=0 ignored=0` and `make converge-ops-portal env=production ANSIBLE_TRACE_ARGS='-e bypass_promotion=true'` reporting `docker-runtime-lv3 : ok=126 changed=18 unreachable=0 failed=0 skipped=13 rescued=0 ignored=0`.
+- After that exact-main replay, public `https://api.lv3.org/healthz` returned `HTTP 200`, unauthenticated `HEAD https://api.lv3.org/v1/platform/attestation` returned `HTTP 401`, authenticated `GET /v1/platform/attestation` returned a `44`-service summary with `api_gateway` attested, guest-local `http://127.0.0.1:8092/health`, `/`, and `/partials/overview` all returned `HTTP 200`, public `https://ops.lv3.org/health` returned `HTTP 200`, and public `https://ops.lv3.org/` returned `HTTP 302` to `/oauth2/sign_in`.
 
 ## Mainline Integration
 
 - release `0.177.64` now records ADR 0245 in repository truth on top of the current `origin/main` baseline
 - the canonical live-apply receipt for this workstream is `receipts/live-applies/2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply.json`
-- the remaining exact-main step is to replay the gateway and ops-portal converges from the committed `0.177.64` candidate, then record that receipt while preserving the current mainline platform baseline at `0.130.45`
+- the exact-main gateway and ops-portal replays are complete from committed source `0fc12d6caebe09b797bfafd85b5b3cbf71fe3e74`, and the recorded receipt preserves the current mainline platform baseline at `0.130.45`
 
 ## Notes For The Next Assistant
 
