@@ -41,6 +41,8 @@ concerns:
     - '0075'
     - '0145'
     - '0272'
+    - 0285
+    - 0286
     - 0287
     - 0289
     - 0292
@@ -109,8 +111,6 @@ concerns:
     - '0267'
     - 0269
     - '0275'
-    - 0285
-    - 0286
     - 0287
     - 0295
   documentation:
@@ -4870,20 +4870,20 @@ adr_index:
     summary: We will deploy Piper TTS as the canonical CPU neural text-to-speech service.
     filename: 0284-piper-tts-as-the-cpu-neural-text-to-speech-service.md
   - adr: 0285
-    title: Qdrant As The Vector Database For The RAG Pipeline
+    title: Paperless-ngx As The Document Management And Archive API
     status: Accepted
     implementation_status: Not Implemented
     date: '2026-03-29'
-    concern: ci-cd
+    concern: api
     keywords:
-      - qdrant
+      - paperless-ngx
       - as
-      - vector
-      - database
-      - rag
-      - pipeline
-    summary: We will deploy Qdrant as the vector database for the platform RAG pipeline
-    filename: 0285-qdrant-as-the-vector-database-for-the-rag-pipeline.md
+      - document
+      - management
+      - archive
+      - api
+    summary: We will deploy Paperless-ngx as the document management and archive API
+    filename: 0285-paperless-ngx-as-the-document-management-and-archive-api.md
   - adr: 0285
     title: Whisper ASR As The CPU Speech-To-Text Service
     status: Accepted
@@ -4900,22 +4900,6 @@ adr_index:
     summary: We will deploy whisper-asr-webservice (faster-whisper backend) as the
     filename: 0285-whisper-asr-as-the-cpu-speech-to-text-service.md
   - adr: 0286
-    title: OpenTelemetry Collector As The Unified Telemetry Ingest Gateway
-    status: Accepted
-    implementation_status: Not Implemented
-    date: '2026-03-29'
-    concern: ci-cd
-    keywords:
-      - opentelemetry
-      - collector
-      - as
-      - unified
-      - telemetry
-      - ingest
-      - gateway
-    summary: We will deploy OpenTelemetry Collector as the unified telemetry ingest
-    filename: 0286-opentelemetry-collector-as-the-unified-telemetry-ingest-gateway.md
-  - adr: 0286
     title: Tesseract OCR Service For Scanned Image Text Extraction
     status: Accepted
     implementation_status: Not Implemented
@@ -4931,6 +4915,22 @@ adr_index:
       - extraction
     summary: We will deploy Tesseract OCR as a REST service to fill the image-OCR gap
     filename: 0286-tesseract-ocr-service-for-scanned-image-text-extraction.md
+  - adr: 0286
+    title: Vikunja As The Task And Project Management REST API
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - vikunja
+      - as
+      - task
+      - project
+      - management
+      - rest
+      - api
+    summary: We will deploy Vikunja as the task and project management REST API for
+    filename: 0286-vikunja-as-the-task-and-project-management-rest-api.md
   - adr: 0287
     title: LiteLLM As The Unified LLM API Proxy And Router
     status: Deprecated
