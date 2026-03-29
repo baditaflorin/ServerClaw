@@ -3,8 +3,8 @@
 - ADR: [ADR 0260](../adr/0260-nextcloud-as-the-canonical-personal-data-plane-for-serverclaw.md)
 - Title: Nextcloud personal data plane live apply from latest `origin/main`
 - Status: live_applied
-- Branch: `codex/ws-0260-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0260-live-apply`
+- Branch: `codex/ws-0260-main-integration`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0260-main-integration`
 - Owner: codex
 - Depends On: `adr-0206-ports-and-adapters-for-external-integrations`, `adr-0259-n8n-as-the-external-app-connector-fabric-for-serverclaw`
 - Conflicts With: none
@@ -37,11 +37,11 @@
 - `curl -fsS https://cloud.lv3.org/status.php`
 - `curl -fsSI https://cloud.lv3.org/.well-known/caldav`
 - `curl -fsSI https://cloud.lv3.org/.well-known/carddav`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@65.108.75.123 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8084/status.php'`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@65.108.75.123 ops@10.10.10.20 'docker exec --user www-data nextcloud-app php occ config:app:get core backgroundjobs_mode'`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@65.108.75.123 ops@10.10.10.20 'docker exec --user www-data nextcloud-app php occ user:info ops --output=json'`
+- `ansible docker-runtime-lv3 --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -m shell -a 'curl -fsS http://127.0.0.1:8084/status.php'`
+- `ansible docker-runtime-lv3 --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -m shell -a 'docker exec --user www-data nextcloud-app php occ config:app:get core backgroundjobs_mode'`
+- `ansible docker-runtime-lv3 --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -m shell -a 'docker exec --user www-data nextcloud-app php occ user:info ops --output=json'`
 
 ## Notes
 
 - The branch-local work can add all ADR-local, workstream-local, and service-local state needed for a safe merge.
-- The original live-apply verification completed on 2026-03-29; the protected integration files and exact-main replay now proceed on `codex/ws-0260-main-integration`.
+- The final exact-main replay completed on 2026-03-29 from `codex/ws-0260-main-integration` at commit `01cb6cc3e3eec452fda4be04809216714492b5e5`, after merging the latest realistic `origin/main` release baseline `34559f5910c50f3ffe0cea2cd6701efc08302ffc`.
