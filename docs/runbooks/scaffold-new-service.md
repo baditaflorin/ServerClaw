@@ -70,7 +70,8 @@ make pin-image IMAGE=docker.io/vendor/image:tag
 ```
 
 2. Replace the placeholder digest, receipt metadata, and any scaffold notes in `config/image-catalog.json`.
-3. Replace the scaffolded health endpoint and monitor descriptions in `config/health-probe-catalog.json`.
-4. Review `inventory/host_vars/proxmox_florin.yml` and adjust DNS or edge publication details.
-5. Use an ADR 0106 ephemeral fixture for destructive or staging-like validation rather than creating an unmanaged long-lived VM.
-6. Finish the ADR and runbook content before merge.
+3. Replace the scaffolded startup, liveness, and readiness descriptions in `config/health-probe-catalog.json`.
+4. Add `degradation_modes` in `config/service-capability-catalog.json` if the service can stay reachable while a declared soft dependency is impaired.
+5. Review `inventory/host_vars/proxmox_florin.yml` and adjust DNS or edge publication details.
+6. Use an ADR 0106 ephemeral fixture for destructive or staging-like validation rather than creating an unmanaged long-lived VM.
+7. Finish the ADR and runbook content before merge.
