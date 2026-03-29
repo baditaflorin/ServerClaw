@@ -6,4 +6,4 @@ services:
     environment:
       JDK_JAVA_OPTIONS: {{ tika_runtime_java_opts | to_json }}
     ports:
-      - "{{ tika_runtime_port }}:9998"
+      - "{{ tika_runtime_port }}:{{ tika_runtime_container_port }}"

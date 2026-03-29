@@ -227,6 +227,11 @@
 - name: Flush Docker handlers before chain health checks
   ansible.builtin.meta: flush_handlers
 
+- name: Reset Docker failed state before nat-chain recovery restart
+  ansible.builtin.command: systemctl reset-failed docker.service
+  changed_when: false
+  when: docker_runtime_require_nat_chain | bool
+
 - name: Ensure Docker bridge networking chains are present
   ansible.builtin.include_role:
     name: lv3.platform.common

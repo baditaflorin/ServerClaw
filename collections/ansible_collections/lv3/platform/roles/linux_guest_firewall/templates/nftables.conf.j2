@@ -6,6 +6,7 @@ flush ruleset
 {% set guest_ip_map = linux_guest_firewall_guest_ip_map %}
 {% set guest_role_map = linux_guest_firewall_guest_role_map %}
 {% set guest_policy = policy.guests[inventory_hostname] %}
+{% set docker_forward_cidrs = docker_runtime_container_forward_source_cidrs | default(['172.16.0.0/12', '192.168.0.0/16']) %}
 {% macro render_match(rule) -%}
 {% if rule.protocol == 'vrrp' -%}
 ip protocol vrrp
@@ -69,7 +70,9 @@ table inet filter {
     policy drop;
     ct state established,related accept
 {% if guest_role_map[inventory_hostname] in ['docker-runtime', 'docker-build'] or guest_policy.allow_container_forwarding | default(false) %}
-    ip saddr 172.16.0.0/12 accept
+{% for cidr in docker_forward_cidrs %}
+    ip saddr {{ cidr }} accept
+{% endfor %}
 {% for rule in guest_policy.allowed_inbound %}
 {{ render_forward_rule(rule) }}
 {% endfor %}

@@ -27,6 +27,12 @@ argument_specs:
       tika_runtime_base_url:
         type: str
         required: true
+      tika_runtime_container_port:
+        type: int
+        required: true
+      tika_runtime_sample_text:
+        type: str
+        required: true
       tika_runtime_java_opts:
         type: str
         required: true
