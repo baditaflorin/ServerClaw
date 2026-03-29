@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0282](../adr/0282-mailpit-as-the-smtp-development-mail-interceptor.md)
 - Title: Deploy Mailpit as the private SMTP development and staging mail interceptor
-- Status: in_progress
+- Status: ready_for_merge
 - Implemented In Repo Version: N/A
-- Live Applied In Platform Version: N/A
-- Implemented On: N/A
-- Live Applied On: N/A
+- Live Applied In Platform Version: 0.130.60
+- Implemented On: 2026-03-30
+- Live Applied On: 2026-03-30
 - Branch: `codex/ws-0282-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-live-apply`
 - Owner: codex
@@ -87,8 +87,13 @@
 
 ## Results
 
-- In progress.
+- Branch-local live apply succeeded from commit `ae60394c67d15486f7d64a90b327bac4ad0e7174`.
+- Receipt: `receipts/live-applies/2026-03-30-adr-0282-mailpit-live-apply.json`
+- The first governed replay exposed a real role-contract bug (`platform service catalog must be a mapping`); commit `ae60394c67d15486f7d64a90b327bac4ad0e7174` repaired the topology lookup and the second replay completed cleanly.
+- `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=mailpit env=production` finished with `docker-runtime-lv3 : ok=95 changed=7 unreachable=0 failed=0 skipped=17 rescued=0 ignored=0`.
+- Independent post-apply Ansible verification on `docker-runtime-lv3` returned Mailpit info with `Version=v1.29.5`, and a second probe from `monitoring-lv3` sent SMTP to `10.10.10.20:1025` and confirmed one captured message through `http://10.10.10.20:8025/api/v1/messages`.
 
 ## Merge-To-Main Notes
 
-- remaining for merge to `main`: update `VERSION`, `changelog.md`, `README.md`, `versions/stack.yaml`, `build/platform-manifest.json`, and any generated status surfaces only after the live apply is verified and the exact mainline integration step is ready
+- remaining for merge to `main`: update `VERSION`, `changelog.md`, `README.md`, `versions/stack.yaml`, `build/platform-manifest.json`, and any generated status surfaces only after the exact synchronized mainline integration step is prepared
+- the branch-local receipt proves live state and keeps the protected release surfaces deferred until that final mainline closeout

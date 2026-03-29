@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-30'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 247
+  Implemented: 248
   Partial: 7
-  Not Implemented: 69
+  Not Implemented: 68
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4827,7 +4827,7 @@ adr_index:
   - adr: 0282
     title: Mailpit As The SMTP Development Mail Interceptor
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -4839,6 +4839,7 @@ adr_index:
       - interceptor
     summary: We will deploy Mailpit as the SMTP development mail interceptor, available
     filename: 0282-mailpit-as-the-smtp-development-mail-interceptor.md
+    implemented_version: 0.130.60
   - adr: 0283
     title: Plausible Analytics As The Privacy-First Web Traffic Analytics Layer
     status: Accepted
