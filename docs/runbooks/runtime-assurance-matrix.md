@@ -41,6 +41,9 @@ make converge-ops-portal
 
 If the gateway build or portal converge fails, do not patch the guest by hand.
 Fix the repo-managed role or runtime source first, then replay the same target.
+If the replay fails because `docker-runtime-lv3` has exhausted `/`, recover space
+with [docs/runbooks/docker-runtime-disk-pressure.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0244-main-merge-r3/docs/runbooks/docker-runtime-disk-pressure.md)
+and then rerun the repo-managed converge path.
 
 ## Live Verification
 

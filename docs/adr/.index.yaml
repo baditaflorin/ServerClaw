@@ -4201,7 +4201,7 @@ adr_index:
       - environment
     summary: We will govern runtime assurance through a service-by-environment assurance
     filename: 0244-runtime-assurance-matrix-per-service-and-environment.md
-    implemented_version: 0.130.44
+    implemented_version: 0.177.79
   - adr: '0245'
     title: Declared-To-Live Service Attestation
     status: Accepted

@@ -512,7 +512,7 @@ workstreams:
       release_bump: patch
       included_in_repo_version: 0.177.59
       latest_receipts:
-        ops_portal: 2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-latest-main-revalidation
+        ops_portal: 2026-03-29-adr-0244-runtime-assurance-matrix-live-apply
   - id: ws-0265-live-apply
     adr: "0265"
     title: Immutable validation snapshots for remote builders and schema checks
@@ -1288,7 +1288,7 @@ workstreams:
             - receipts/live-applies/2026-03-29-adr-0244-runtime-assurance-matrix-live-apply.json
           mode: shared_contract
           contract: live-apply-receipts-v1
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: true
     canonical_truth:
       changelog_entry: live-applied ADR 0244 by restoring the governed runtime
@@ -1518,7 +1518,7 @@ workstreams:
   - id: ws-0244-main-merge
     adr: "0244"
     title: Integrate ADR 0244 runtime assurance matrix into origin/main
-    status: in_progress
+    status: merged
     owner: codex
     branch: codex/ws-0244-main-merge-r3
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0244-main-merge-r3
@@ -1534,7 +1534,7 @@ workstreams:
       - VERSION
       - changelog.md
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.74.md
+      - docs/release-notes/0.177.79.md
       - versions/stack.yaml
       - build/platform-manifest.json
       - docs/adr/.index.yaml
@@ -1574,7 +1574,7 @@ workstreams:
             - VERSION
             - changelog.md
             - docs/release-notes/README.md
-            - docs/release-notes/0.177.74.md
+            - docs/release-notes/0.177.79.md
             - versions/stack.yaml
             - build/platform-manifest.json
           mode: exclusive
@@ -1583,8 +1583,19 @@ workstreams:
             - docs/adr/.index.yaml
           mode: shared_contract
           contract: adr-index-generator-v1
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: records ADR 0244 exact-main evidence on the current
+        mainline by preserving the verified service-by-environment runtime
+        assurance matrix, the authenticated gateway plus portal rollup, and the
+        corrected latest-main replay after concurrent live drift and
+        docker-runtime disk-pressure recovery
+      release_bump: patch
+      included_in_repo_version: 0.177.79
+      latest_receipts:
+        api_gateway: 2026-03-29-adr-0244-runtime-assurance-matrix-live-apply
+        ops_portal: 2026-03-29-adr-0244-runtime-assurance-matrix-live-apply
   - id: ws-0238-main-integration
     adr: "0238"
     title: Integrate ADR 0238 operator grid into origin/main

@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.79",
   "platform_version": "0.130.54",
-  "generated_at": "2026-03-29T13:51:20Z",
-  "next_refresh_at": "2026-03-29T14:51:20Z",
+  "generated_at": "2026-03-29T14:13:02Z",
+  "next_refresh_at": "2026-03-29T15:13:02Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -1350,7 +1350,7 @@
       },
       {
         "id": "converge-n8n",
-        "description": "Converge the n8n connector fabric on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress for ServerClaw adapters.",
+        "description": "Converge n8n on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress.",
         "tags": [
           "converge-n8n",
           "guest-live",
@@ -4213,7 +4213,7 @@
   "recent_changes": {
     "last_version": "0.177.78",
     "deployed_at": "2026-03-29",
-    "summary": "implemented ADR 0259 by reaffirming the governed n8n lane as the ServerClaw external connector fabric, hardening the runtime for proxmox_florin-scoped topology, private postgres reachability, and fresh-worktree edge publication, and recording a latest-main live-apply replay with protected editor and webhook verification",
+    "summary": "records ADR 0244 exact-main evidence on the current mainline by preserving the verified service-by-environment runtime assurance matrix, the authenticated gateway plus portal rollup, and the corrected latest-main replay after concurrent live drift and docker-runtime disk-pressure recovery",
     "release_notes_url": "docs/release-notes/0.177.79.md"
   },
   "agentic_architecture": {
