@@ -372,7 +372,7 @@ workstreams:
   - id: ws-0251-live-apply-r2
     adr: "0251"
     title: Stage-scoped smoke suites and promotion-gate live apply
-    status: in-progress
+    status: in_progress
     owner: codex
     branch: codex/ws-0251-live-apply-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply-r2

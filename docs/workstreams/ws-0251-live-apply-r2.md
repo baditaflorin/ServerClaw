@@ -85,3 +85,55 @@
 - if a live staging service is still not declared active in the service
   catalog, the promotion-gate live proof should stay a guarded rejection rather
   than inventing unsupported stage-ready truth
+
+## Current Progress
+
+- 2026-03-29 focused validation passed from this worktree:
+  `44 passed in 23.61s` across the stage-smoke, promotion-pipeline,
+  service-catalog, runtime-assurance, and interactive ops-portal slices
+- 2026-03-29 repo validation passed for
+  `scripts/policy_checks.py --validate`,
+  `scripts/promotion_pipeline.py --validate`,
+  `make command-info COMMAND=promote-to-production`, and
+  `make workflow-info WORKFLOW=deploy-and-promote`
+- 2026-03-29 the guarded live promotion-gate replay proved the negative path
+  from real staging data: `grafana` was rejected because the live catalog does
+  not yet declare an active staging smoke suite and the staging receipt is
+  stale
+- 2026-03-29 the scoped `windmill` replay reached the live healthcheck,
+  worker-registration, and seeded-script verification steps before failing in
+  the Windmill `f/lv3/gate-status` verification path; transcript:
+  `receipts/live-applies/evidence/2026-03-29-adr-0251-windmill-live-apply.txt`
+  and drift diagnosis:
+  `receipts/live-applies/evidence/2026-03-29-adr-0251-windmill-worker-drift.txt`
+
+## Live Apply Blocker
+
+- the shared worker checkout on `docker-runtime-lv3` did not remain on this
+  worktree snapshot through verification
+- after the replay, `/srv/proxmox_florin_server/scripts/promotion_pipeline.py`
+  and `/srv/proxmox_florin_server/scripts/ops_portal/runtime_assurance.py`
+  matched `origin/main`, `scripts/stage_smoke.py` was missing, and
+  `scripts/gate_status.py` had drifted to a newer branch-local variant that
+  imports `gate_bypass_waivers`
+- direct reproduction on `docker-runtime-lv3`:
+  `python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server`
+  failed with `ModuleNotFoundError: No module named 'gate_bypass_waivers'`
+- this is consistent with concurrent branch-local replays clobbering the
+  shared Windmill worker checkout on `docker-runtime-lv3`; the role expanded a
+  staged archive during this run, but the verified guest hashes no longer
+  matched the ADR 0251 worktree by the time the Windmill gate-status script ran
+
+## Remaining Steps
+
+- fetch and rebase onto the latest `origin/main` before any final integration:
+  during this run the worktree moved from `f3da817d` to `9416fec6`
+- re-run the exact `windmill` and `ops_portal` live applies from an
+  uncontended latest-main checkout and verify the guest hashes immediately
+  after each replay
+- update ADR 0251 metadata, refresh `docs/adr/.index.yaml`, and mark
+  `workstreams.yaml` `live_applied: true` only after the live hashes and public
+  behavior match the final merged tree
+- only in the final merge-to-main step: bump `VERSION`, update
+  `changelog.md`, refresh integrated `README.md` status, and set
+  `versions/stack.yaml` to the verified live platform truth
