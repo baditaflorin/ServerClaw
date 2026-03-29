@@ -284,6 +284,26 @@
         or (openfga_health_probe.status | default(0)) != 200
       }}
 
+- name: Remove stale OpenFGA compose resources before force recreate
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ openfga_compose_file }}"
+      - down
+      - --remove-orphans
+  args:
+    chdir: "{{ openfga_site_dir }}"
+  register: openfga_down
+  changed_when: >-
+    'Stopping' in openfga_down.stdout
+    or 'Removing' in openfga_down.stdout
+    or 'Removed' in openfga_down.stdout
+    or 'Network' in openfga_down.stdout
+  failed_when: false
+  when: openfga_force_recreate
+
 - name: Force-recreate the OpenFGA runtime stack after Docker networking recovery
   ansible.builtin.command:
     argv:

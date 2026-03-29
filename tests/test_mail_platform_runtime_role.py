@@ -128,3 +128,19 @@ def test_mail_platform_runtime_force_recreates_when_runtime_inputs_change() -> N
     assert "mail_platform_gateway_profiles.changed" in expression
     assert "mail_platform_compose.changed" in expression
     assert "mail_platform_gateway_build.changed" in expression
+
+
+def test_mail_platform_runtime_stages_openbao_env_template_locally() -> None:
+    tasks_text = TASKS_PATH.read_text()
+    assert "Create a controller-local staging path for the mail gateway OpenBao agent runtime env template" in tasks_text
+    assert "Render the mail gateway OpenBao agent runtime env template to a controller-local file" in tasks_text
+    assert 'common_openbao_compose_env_agent_template_local_file: "{{ mail_platform_openbao_agent_template_local.path }}"' in tasks_text
+    assert "Remove the controller-local mail gateway OpenBao agent runtime env template staging file" in tasks_text
+    assert "common_openbao_compose_env_agent_template_src: mail-gateway.env.ctmpl.j2" not in tasks_text
+
+
+def test_mail_platform_defaults_resolve_otlp_endpoint_from_proxmox_service_topology() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    assert defaults["mail_platform_gateway_trace_otlp_endpoint"] == (
+        "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('grafana', 'otlp_http') }}"
+    )

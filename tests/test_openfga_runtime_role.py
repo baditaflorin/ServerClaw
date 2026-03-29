@@ -86,6 +86,9 @@ def test_openfga_runtime_bootstraps_openbao_env_and_migrations() -> None:
     health_probe_task = next(
         task for task in tasks if task.get("name") == "Check whether the current OpenFGA health endpoint is healthy before startup"
     )
+    cleanup_task = next(
+        task for task in tasks if task.get("name") == "Remove stale OpenFGA compose resources before force recreate"
+    )
     force_recreate_task = next(
         task for task in tasks if task.get("name") == "Force-recreate the OpenFGA runtime stack after Docker networking recovery"
     )
@@ -137,6 +140,9 @@ def test_openfga_runtime_bootstraps_openbao_env_and_migrations() -> None:
     ]
     assert port_probe_task["ansible.builtin.wait_for"]["port"] == "{{ openfga_internal_http_port }}"
     assert health_probe_task["ansible.builtin.uri"]["url"] == "{{ openfga_local_url }}/healthz"
+    assert cleanup_task["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
+    assert cleanup_task["when"] == "openfga_force_recreate"
+    assert cleanup_task["failed_when"] is False
     assert force_recreate_task["ansible.builtin.command"]["argv"][-1] == "--force-recreate"
     assert force_recreate_task["retries"] == 3
     assert force_recreate_task["delay"] == 5

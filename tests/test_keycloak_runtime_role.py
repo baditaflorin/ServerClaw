@@ -93,10 +93,16 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
         for task in tasks
         if task.get("name") == "Wait for the Docker daemon to answer after networking recovery"
     )
+    cleanup_task = next(
+        task for task in tasks if task.get("name") == "Remove stale Keycloak compose resources before force recreate"
+    )
     force_recreate = next(
         task
         for task in tasks
         if task.get("name") == "Force-recreate the Keycloak stack after Docker networking recovery"
+    )
+    force_recreate_flag = next(
+        task for task in tasks if task.get("name") == "Record whether the Keycloak startup needs a force recreate"
     )
     readiness_probe = next(
         task
@@ -110,9 +116,12 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     assert env_render["register"] == "keycloak_env_template"
     assert compose_render["register"] == "keycloak_compose_template"
     assert readiness_probe["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
+    assert cleanup_task["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
+    assert cleanup_task["when"] == "keycloak_force_recreate"
+    assert cleanup_task["failed_when"] is False
     assert "--force-recreate" in force_recreate["ansible.builtin.command"]["argv"]
     assert force_recreate["until"] == "keycloak_up.rc == 0"
-    force_recreate_expression = tasks[tasks.index(force_recreate) - 1]["ansible.builtin.set_fact"]["keycloak_force_recreate"]
+    force_recreate_expression = force_recreate_flag["ansible.builtin.set_fact"]["keycloak_force_recreate"]
     assert "keycloak_docker_nat_chain.rc != 0" in force_recreate_expression
     assert "keycloak_local_http_port_probe.failed" in force_recreate_expression
     assert "keycloak_readiness_probe.status" in force_recreate_expression

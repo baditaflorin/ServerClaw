@@ -329,6 +329,26 @@
         or (keycloak_readiness_probe.status | default(0)) != 200
       }}
 
+- name: Remove stale Keycloak compose resources before force recreate
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ keycloak_compose_file }}"
+      - down
+      - --remove-orphans
+  args:
+    chdir: "{{ keycloak_site_dir }}"
+  register: keycloak_down
+  changed_when: >-
+    'Stopping' in keycloak_down.stdout
+    or 'Removing' in keycloak_down.stdout
+    or 'Removed' in keycloak_down.stdout
+    or 'Network' in keycloak_down.stdout
+  failed_when: false
+  when: keycloak_force_recreate
+
 - name: Force-recreate the Keycloak stack after Docker networking recovery
   ansible.builtin.command:
     argv:
