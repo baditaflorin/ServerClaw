@@ -60,13 +60,17 @@ workstreams:
             - docs/runbooks/configure-coolify.md
             - inventory/group_vars/platform.yml
             - playbooks/coolify.yml
-            - scripts/generate_platform_vars.py
             - scripts/coolify_tool.py
-            - tests/test_generate_platform_vars.py
             - tests/test_coolify_playbook.py
             - tests/test_coolify_tool.py
             - tests/test_lv3_cli.py
           mode: exclusive
+        - id: repo_intake_platform_contract
+          paths:
+            - scripts/generate_platform_vars.py
+            - tests/test_generate_platform_vars.py
+          mode: shared_contract
+          contract: platform-topology-v1
         - id: adr_index_generation
           paths:
             - docs/adr/.index.yaml
