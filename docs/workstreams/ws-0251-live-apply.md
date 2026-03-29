@@ -2,8 +2,8 @@
 
 - ADR: [ADR 0251](../adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md)
 - Title: Live apply stage-scoped smoke suites and promotion gates from the latest `origin/main`
-- Status: merged
-- Included In Repo Version: 0.177.82
+- Status: in_progress
+- Included In Repo Version: 0.177.86
 - First Live Applied In Platform Version: 0.130.54
 - Implemented On: 2026-03-29
 - First Live Applied On: 2026-03-29
@@ -88,10 +88,10 @@
 
 ## Mainline Integration Outcome
 
-- Release `0.177.82` is the first repository version that records ADR 0251 implemented on `main`.
+- Release `0.177.86` is the first repository version that records ADR 0251 implemented on `main`.
 - Platform version `0.130.54` remains the first observed platform version where ADR 0251 became true during the branch-local live apply.
 - The canonical receipt pointers, `README.md` integrated status summary, and `versions/stack.yaml` live-apply surfaces intentionally wait for the post-merge exact-main replay because stable verification depends on `origin/main` containing the ADR 0251 worker-checkout files.
 
 ## Merge-To-Main Notes
 
-- remaining after the first merge commit: push `0.177.82` to `origin/main`, replay `make converge-windmill` from the main-equivalent checkout, verify `f/lv3/stage-smoke-suites` returns a passing structured result without the worker-checkout churn, then update `README.md`, `versions/stack.yaml`, the workstream status, and the canonical receipt pointers in a final exact-main follow-up commit
+- remaining after the first merge commit: push `0.177.86` to `origin/main`, replay `make converge-windmill` from the main-equivalent checkout, verify `f/lv3/stage-smoke-suites` returns a passing structured result without the worker-checkout churn, then update `README.md`, `versions/stack.yaml`, the workstream status, and the canonical receipt pointers in a final exact-main follow-up commit
