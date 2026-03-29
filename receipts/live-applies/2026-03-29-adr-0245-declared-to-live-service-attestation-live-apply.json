@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-03-29",
   "recorded_on": "2026-03-29",
-  "recorded_at": "2026-03-29T02:36:38Z",
+  "recorded_at": "2026-03-29T03:31:13Z",
   "recorded_by": "codex",
-  "source_commit": "0f9fad63d9a32a4723fdfdcbb7f0bb363e8df4ed",
-  "repo_version_context": "0.177.65",
+  "source_commit": "a639fe4fc477722aec1cc84cfe3a62e68273ce7b",
+  "repo_version_context": "0.177.67",
   "platform_version_context": "0.130.46",
   "workflow_id": "adr-0245-declared-to-live-service-attestation-live-apply",
   "adr": "0245",
-  "summary": "Replayed ADR 0245 from the exact committed 0.177.65 mainline candidate by converging the shared API gateway and interactive ops portal on docker-runtime-lv3, publishing the declared-to-live service attestation contract through the authenticated gateway surfaces, and re-verifying both the internal portal runtime and the public edges while preserving the current mainline platform baseline.",
+  "summary": "Replayed ADR 0245 from the exact committed 0.177.67 mainline candidate by converging the shared API gateway and interactive ops portal on docker-runtime-lv3, publishing the declared-to-live service attestation contract through the authenticated gateway surfaces, and re-verifying both the internal portal runtime and the public edges while preserving the current mainline platform baseline.",
   "targets": [
     {
       "kind": "guest",
@@ -34,32 +34,32 @@
     {
       "check": "Focused ADR 0245 regression slice",
       "result": "pass",
-      "observed": "uv run --with pytest --with fastapi==0.116.1 --with httpx==0.28.1 --with uvicorn==0.35.0 --with pyyaml==6.0.2 --with cryptography==45.0.6 --with jinja2==3.1.5 --with itsdangerous==2.2.0 --with python-multipart==0.0.20 pytest -q tests/test_declared_live_attestation.py tests/test_api_gateway.py tests/test_interactive_ops_portal.py tests/test_ops_portal_runtime_role.py returned 43 passed in 8.07s, python3 -m py_compile platform/runtime_assurance/declared_live_attestation.py scripts/declared_live_attestation.py scripts/api_gateway/main.py scripts/ops_portal/app.py scripts/ops_portal/runtime_assurance.py passed, and make syntax-check-api-gateway plus make syntax-check-ops-portal both passed."
+      "observed": "uv run --with pytest --with fastapi==0.116.1 --with httpx==0.28.1 --with uvicorn==0.35.0 --with pyyaml==6.0.2 --with cryptography==45.0.6 --with jinja2==3.1.5 --with itsdangerous==2.2.0 --with python-multipart==0.0.20 pytest -q tests/test_declared_live_attestation.py tests/test_api_gateway.py tests/test_interactive_ops_portal.py tests/test_ops_portal_runtime_role.py tests/test_config_merge_windmill.py tests/test_windmill_circuit_clients.py tests/test_windmill_operator_admin_app.py returned 92 passed in 6.75s, python3 -m py_compile platform/runtime_assurance/declared_live_attestation.py scripts/declared_live_attestation.py scripts/api_gateway/main.py scripts/ops_portal/app.py scripts/ops_portal/runtime_assurance.py passed, and make syntax-check-api-gateway plus make syntax-check-ops-portal both passed."
     },
     {
       "check": "Repository automation validation gates",
       "result": "pass",
-      "observed": "make preflight WORKFLOW=converge-api-gateway and make preflight WORKFLOW=converge-ops-portal passed from the isolated worktree, ./scripts/validate_repo.sh shell passed after the SC2295 fix in scripts/validate_repo.sh, and ./scripts/validate_repo.sh agent-standards plus uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate both passed on the final 0.177.65 candidate."
+      "observed": "make preflight WORKFLOW=converge-api-gateway and make preflight WORKFLOW=converge-ops-portal passed from the isolated worktree, ./scripts/validate_repo.sh agent-standards passed, uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate passed, uv run --with pyyaml --with jsonschema python scripts/platform_manifest.py --check passed, and git diff --check passed on the final 0.177.67 candidate."
     },
     {
       "check": "Exact-commit gateway replay",
       "result": "pass",
-      "observed": "make converge-api-gateway env=production ANSIBLE_TRACE_ARGS='-e bypass_promotion=true' completed successfully from source commit 0f9fad63d9a32a4723fdfdcbb7f0bb363e8df4ed with recap docker-runtime-lv3 : ok=242 changed=111 unreachable=0 failed=0 skipped=35 rescued=0 ignored=0."
+      "observed": "The first make converge-api-gateway env=production ANSIBLE_TRACE_ARGS='-e bypass_promotion=true' run from source commit a639fe4fc477722aec1cc84cfe3a62e68273ce7b failed only at the final Keycloak bearer-token verification task even though https://api.lv3.org/healthz still returned HTTP 200 and the same lv3-agent-hub credentials still issued tokens successfully. The immediate retry from the same source commit then completed successfully with recap docker-runtime-lv3 : ok=242 changed=111 unreachable=0 failed=0 skipped=35 rescued=0 ignored=0."
     },
     {
       "check": "Exact-commit ops portal replay",
       "result": "pass",
-      "observed": "make converge-ops-portal env=production ANSIBLE_TRACE_ARGS='-e bypass_promotion=true' completed successfully from source commit 0f9fad63d9a32a4723fdfdcbb7f0bb363e8df4ed with recap docker-runtime-lv3 : ok=129 changed=17 unreachable=0 failed=0 skipped=14 rescued=0 ignored=0."
+      "observed": "make converge-ops-portal env=production ANSIBLE_TRACE_ARGS='-e bypass_promotion=true' completed successfully from source commit a639fe4fc477722aec1cc84cfe3a62e68273ce7b with recap docker-runtime-lv3 : ok=129 changed=17 unreachable=0 failed=0 skipped=14 rescued=0 ignored=0."
     },
     {
       "check": "Declared-to-live gateway contract verification",
       "result": "pass",
-      "observed": "HEAD https://api.lv3.org/v1/platform/attestation returned HTTP/2 401 without a bearer token, GET https://api.lv3.org/healthz returned HTTP/2 200 with {\"status\":\"ok\"}, authenticated GET https://api.lv3.org/v1/platform/attestation returned HTTP/2 200 with a 44-service production summary, and authenticated GET https://api.lv3.org/v1/platform/attestation/api_gateway returned HTTP/2 200 with service_id=api_gateway and status=attested."
+      "observed": "HEAD https://api.lv3.org/v1/platform/attestation returned HTTP/2 401 without a bearer token, GET https://api.lv3.org/healthz returned HTTP/2 200 with {\"status\":\"ok\"}, authenticated GET https://api.lv3.org/v1/platform/attestation returned HTTP/2 200 with a 45-service production summary, and authenticated GET https://api.lv3.org/v1/platform/attestation/api_gateway returned HTTP/2 200 with service_id=api_gateway and status=attested."
     },
     {
       "check": "Ops portal internal and public verification",
       "result": "pass",
-      "observed": "From docker-runtime-lv3 reached through the current Proxmox jump path, GET http://127.0.0.1:8092/health returned HTTP/1.1 200 with {\"status\":\"ok\"}, GET http://127.0.0.1:8092/ returned HTTP/1.1 200 and still contained Runtime Assurance, GET http://127.0.0.1:8092/partials/overview returned HTTP/1.1 200 and still contained Runtime Assurance, GET https://ops.lv3.org/health returned HTTP/2 200 with {\"status\":\"ok\"}, and HEAD https://ops.lv3.org/ returned HTTP/2 302 redirecting to /oauth2/sign_in as expected for the protected operator shell."
+      "observed": "From docker-runtime-lv3 reached through the current Proxmox jump path, GET http://127.0.0.1:8092/health returned HTTP 200 with {\"status\":\"ok\"}, GET http://127.0.0.1:8092/ returned HTTP 200 with root_len=420303 and still contained Runtime Assurance, GET http://127.0.0.1:8092/partials/overview returned HTTP 200 with overview_len=403590 and still contained Runtime Assurance, GET https://ops.lv3.org/health returned HTTP/2 200 with {\"status\":\"ok\"}, and HEAD https://ops.lv3.org/ returned HTTP/2 302 redirecting to /oauth2/sign_in as expected for the protected operator shell."
     },
     {
       "check": "Full repository validate wrapper",
@@ -89,8 +89,9 @@
     "versions/stack.yaml"
   ],
   "notes": [
-    "This exact-main receipt is the first canonical live-apply evidence for ADR 0245 and records the replay from the committed 0.177.65 candidate after 0.177.64 had already been consumed by ADR 0240 mainline integration.",
+    "This exact-main receipt supersedes the earlier stale 0.177.64 and 0.177.65 candidates and records the replay from the committed 0.177.67 candidate after origin/main advanced through ADR 0238 release 0.177.66.",
     "The verified mainline platform baseline remained 0.130.46 during this replay; the release cut records ADR 0245 in repo truth without claiming a new platform version bump.",
+    "The first exact-commit gateway replay failed only at the final Keycloak token verification step even though gateway health and independent bearer-token issuance still succeeded; the immediate retry from the same commit passed without code changes.",
     "The ops-portal recovery runbook was updated in the same branch because the older hardcoded Proxmox jump address no longer matched the live management path discovered during verification."
   ]
 }

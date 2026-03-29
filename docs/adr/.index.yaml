@@ -4169,7 +4169,7 @@ adr_index:
       - attestation
     summary: We will require declared-to-live service attestation for every active
     filename: 0245-declared-to-live-service-attestation.md
-    implemented_version: 0.177.64
+    implemented_version: 0.177.67
   - adr: '0246'
     title: Startup, Readiness, Liveness, And Degraded State Semantics
     status: Accepted
