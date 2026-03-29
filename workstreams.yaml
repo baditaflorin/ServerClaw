@@ -2677,7 +2677,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implements ADR 0254 by carrying the dedicated ServerClaw chat surface on chat.lv3.org onto current mainline truth, preserving the governed 8096 edge lane to coolify-lv3, and recording the first exact-main receipt once the merged replay is clean
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.88
       latest_receipts:
         serverclaw: 2026-03-29-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply
   - id: ws-0244-runtime-assurance-adrs
