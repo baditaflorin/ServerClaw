@@ -12,7 +12,7 @@
 - Owner: codex
 - Depends On: `adr-0082-remote-build-gateway`, `adr-0083-docker-check-runner`, `adr-0087-validation-gate`, `adr-0156-agent-session-workspace-isolation`, `adr-0227-bounded-command-execution-via-systemd-run-and-approved-wrappers`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `docs/adr/0266-validation-runner-capability-contracts-and-environment-attestation.md`, `docs/workstreams/adr-0266-validation-runner-capability-contracts-live-apply.md`, `docs/adr/.index.yaml`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `versions/stack.yaml`, `docs/release-notes/README.md`, `docs/release-notes/0.177.86.md`, `build/platform-manifest.json`, `.config-locations.yaml`, `config/build-server.json`, `config/check-runner-manifest.json`, `config/validation-gate.json`, `config/validation-runner-contracts.json`, `docs/schema/validation-runner-contracts.schema.json`, `scripts/gate_status.py`, `scripts/parallel_check.py`, `scripts/policy_checks.py`, `scripts/remote_exec.sh`, `scripts/run_gate.py`, `scripts/validate_repository_data_models.py`, `scripts/validation_runner_contracts.py`, `scripts/canonical_truth.py`, `scripts/release_manager.py`, `config/windmill/scripts/post-merge-gate.py`, `config/windmill/scripts/gate-status.py`, `collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml`, `collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml`, `collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/wait_for_workers.yml`, `policy/conftest/repository.rego`, `docs/diagrams/agent-coordination-map.excalidraw`, `docs/runbooks/remote-build-gateway.md`, `docs/runbooks/validation-gate.md`, `receipts/live-applies/2026-03-29-adr-0266-validation-runner-capability-contracts-live-apply.json`, `receipts/live-applies/2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply.json`, `receipts/live-applies/evidence/2026-03-29-adr-0266-*`, `tests/test_canonical_truth.py`, `tests/test_parallel_check.py`, `tests/test_policy_checks.py`, `tests/test_post_merge_gate.py`, `tests/test_release_manager.py`, `tests/test_remote_exec.py`, `tests/test_validation_gate.py`, `tests/test_validation_gate_windmill.py`, `tests/test_validation_runner_contracts.py`, `tests/test_windmill_operator_admin_app.py`
+- Shared Surfaces: `workstreams.yaml`, `docs/adr/0266-validation-runner-capability-contracts-and-environment-attestation.md`, `docs/workstreams/adr-0266-validation-runner-capability-contracts-live-apply.md`, `docs/adr/.index.yaml`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `versions/stack.yaml`, `docs/release-notes/README.md`, `docs/release-notes/0.177.87.md`, `build/platform-manifest.json`, `.config-locations.yaml`, `config/build-server.json`, `config/check-runner-manifest.json`, `config/validation-gate.json`, `config/validation-runner-contracts.json`, `docs/schema/validation-runner-contracts.schema.json`, `scripts/gate_status.py`, `scripts/parallel_check.py`, `scripts/policy_checks.py`, `scripts/remote_exec.sh`, `scripts/run_gate.py`, `scripts/validate_repository_data_models.py`, `scripts/validation_runner_contracts.py`, `scripts/canonical_truth.py`, `scripts/release_manager.py`, `config/windmill/scripts/post-merge-gate.py`, `config/windmill/scripts/gate-status.py`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml`, `collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml`, `collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml`, `collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/wait_for_workers.yml`, `policy/conftest/repository.rego`, `docs/diagrams/agent-coordination-map.excalidraw`, `docs/runbooks/configure-openbao.md`, `docs/runbooks/remote-build-gateway.md`, `docs/runbooks/validation-gate.md`, `receipts/live-applies/2026-03-29-adr-0266-validation-runner-capability-contracts-live-apply.json`, `receipts/live-applies/2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply.json`, `receipts/live-applies/evidence/2026-03-29-adr-0266-*`, `tests/test_canonical_truth.py`, `tests/test_parallel_check.py`, `tests/test_policy_checks.py`, `tests/test_post_merge_gate.py`, `tests/test_release_manager.py`, `tests/test_remote_exec.py`, `tests/test_validation_gate.py`, `tests/test_validation_gate_windmill.py`, `tests/test_validation_runner_contracts.py`, `tests/test_windmill_operator_admin_app.py`
 
 ## Scope
 
@@ -33,7 +33,7 @@
 - `changelog.md`
 - `versions/stack.yaml`
 - `docs/release-notes/README.md`
-- `docs/release-notes/0.177.86.md`
+- `docs/release-notes/0.177.87.md`
 - `build/platform-manifest.json`
 - `.config-locations.yaml`
 - `config/build-server.json`
@@ -52,11 +52,14 @@
 - `scripts/validation_runner_contracts.py`
 - `config/windmill/scripts/post-merge-gate.py`
 - `config/windmill/scripts/gate-status.py`
+- `collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml`
+- `collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml`
 - `collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml`
 - `collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml`
 - `collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/wait_for_workers.yml`
 - `policy/conftest/repository.rego`
 - `docs/diagrams/agent-coordination-map.excalidraw`
+- `docs/runbooks/configure-openbao.md`
 - `docs/runbooks/remote-build-gateway.md`
 - `docs/runbooks/validation-gate.md`
 - `receipts/live-applies/2026-03-29-adr-0266-validation-runner-capability-contracts-live-apply.json`

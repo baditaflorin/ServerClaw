@@ -59,8 +59,11 @@ workstreams:
       - config/windmill/scripts/gate-status.py
       - policy/conftest/repository.rego
       - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/runbooks/configure-openbao.md
       - docs/runbooks/remote-build-gateway.md
       - docs/runbooks/validation-gate.md
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/wait_for_workers.yml
@@ -133,8 +136,11 @@ workstreams:
             - config/windmill/scripts/gate-status.py
             - policy/conftest/repository.rego
             - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/runbooks/configure-openbao.md
             - docs/runbooks/remote-build-gateway.md
             - docs/runbooks/validation-gate.md
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
             - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
             - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
             - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/wait_for_workers.yml

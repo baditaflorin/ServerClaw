@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 from contextlib import contextmanager
 import importlib.util
+import inspect
 import json
 from pathlib import Path
 import sys
@@ -104,12 +105,16 @@ def main(repo_path: str = "/srv/proxmox_florin_server") -> dict:
         }
 
     module = _load_gate_status_module(repo_root)
+    payload_kwargs = {
+        "manifest_path": repo_root / "config" / "validation-gate.json",
+        "last_run_path": repo_root / ".local" / "validation-gate" / "last-run.json",
+        "remote_validate_run_path": repo_root / ".local" / "validation-gate" / "remote-validate-last-run.json",
+        "post_merge_run_path": repo_root / ".local" / "validation-gate" / "post-merge-last-run.json",
+        "bypass_dir": repo_root / "receipts" / "gate-bypasses",
+    }
+    accepted_kwargs = inspect.signature(module.build_status_payload).parameters
     payload = module.build_status_payload(
-        manifest_path=repo_root / "config" / "validation-gate.json",
-        last_run_path=repo_root / ".local" / "validation-gate" / "last-run.json",
-        remote_validate_run_path=repo_root / ".local" / "validation-gate" / "remote-validate-last-run.json",
-        post_merge_run_path=repo_root / ".local" / "validation-gate" / "post-merge-last-run.json",
-        bypass_dir=repo_root / "receipts" / "gate-bypasses",
+        **{name: value for name, value in payload_kwargs.items() if name in accepted_kwargs}
     )
     return {
         "status": "ok",
