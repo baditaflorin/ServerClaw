@@ -109,6 +109,31 @@ def test_role_gates_network_recovery_on_boolean_fact() -> None:
     assert "or not (harbor_registry_port_binding_present | bool)" in recovery_fact
 
 
+def test_role_only_runs_harbor_prepare_when_compose_assets_need_regeneration() -> None:
+    tasks = load_yaml(ROLE_TASKS)
+    task_by_name = {task["name"]: task for task in tasks}
+
+    compose_stat_task = task_by_name["Check whether the Harbor generated compose file already exists"]
+    prepare_needed_task = task_by_name["Record whether Harbor prepare needs to regenerate compose assets"]
+    prepare_task = task_by_name["Prepare Harbor compose assets"]
+    compose_assets_changed_task = task_by_name["Record whether Harbor compose assets changed"]
+
+    prepare_needed_fact = prepare_needed_task["ansible.builtin.set_fact"]["harbor_prepare_needed"]
+    compose_assets_changed_fact = compose_assets_changed_task["ansible.builtin.set_fact"]["harbor_compose_assets_changed"]
+
+    assert compose_stat_task["ansible.builtin.stat"]["path"] == "{{ harbor_generated_compose_file }}"
+    assert "harbor_installer_download.changed" in prepare_needed_fact
+    assert "harbor_installer_unarchive.changed" in prepare_needed_fact
+    assert "harbor_config_template.changed" in prepare_needed_fact
+    assert "not harbor_generated_compose_file_stat.stat.exists" in prepare_needed_fact
+    assert prepare_task["ansible.builtin.command"]["argv"] == (
+        "{{ ['./prepare'] + (['--with-trivy'] if harbor_prepare_with_trivy else []) }}"
+    )
+    assert prepare_task["when"] == "harbor_prepare_needed | bool"
+    assert prepare_task["changed_when"] == "harbor_prepare_needed | bool"
+    assert "or harbor_prepare_needed | bool" in compose_assets_changed_fact
+
+
 def test_verify_accepts_running_services_after_ping() -> None:
     tasks = load_yaml(VERIFY_TASKS)
     task_by_name = {task["name"]: task for task in tasks}
