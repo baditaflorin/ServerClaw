@@ -1,0 +1,159 @@
+---
+# Purpose: Declare the validated input contract for the harbor_runtime role.
+# Use case: Used by Ansible argument validation before Harbor convergence or verification tasks run.
+#
+# Inputs (required):
+#   - Harbor runtime directories, public topology, Keycloak inputs, and managed project settings defined below.
+#
+# Inputs (optional):
+#   - none
+#
+# Outputs:
+#   - Argument-spec validation metadata for the harbor_runtime role.
+#
+# Idempotency: Fully idempotent
+#              This file only declares validation metadata.
+#
+# Dependencies:
+#   - ADR 0201: Defines the Harbor runtime converge contract and verification expectations.
+#   - Requires: harbor_runtime role defaults and tasks.
+#
+# Related ADRs: 0165, 0201
+argument_specs:
+  main:
+    short_description: Converge Harbor, its local runtime secrets, and operator bootstrap integration.
+    options:
+      harbor_service_topology:
+        type: dict
+        required: true
+        description:
+          - Service topology entry for the Harbor publication surface.
+      harbor_public_hostname:
+        type: str
+        required: true
+      harbor_public_base_url:
+        type: str
+        required: true
+      harbor_site_dir:
+        type: path
+        required: true
+      harbor_installer_root:
+        type: path
+        required: true
+      harbor_installer_dir:
+        type: path
+        required: true
+      harbor_installer_version:
+        type: str
+        required: true
+      harbor_installer_archive:
+        type: path
+        required: true
+      harbor_installer_url:
+        type: str
+        required: true
+      harbor_config_file:
+        type: path
+        required: true
+      harbor_generated_compose_file:
+        type: path
+        required: true
+      harbor_data_dir:
+        type: path
+        required: true
+      harbor_log_dir:
+        type: path
+        required: true
+      harbor_secret_dir:
+        type: path
+        required: true
+      harbor_admin_password_remote_file:
+        type: path
+        required: true
+      harbor_database_password_remote_file:
+        type: path
+        required: true
+      harbor_local_artifact_dir:
+        type: path
+        required: true
+      harbor_admin_password_local_file:
+        type: path
+        required: true
+      harbor_database_password_local_file:
+        type: path
+        required: true
+      harbor_check_runner_robot_local_file:
+        type: path
+        required: true
+      harbor_http_port:
+        type: int
+        required: true
+      harbor_prepare_with_trivy:
+        type: bool
+        required: true
+      harbor_project_creation_restriction:
+        type: str
+        required: true
+      harbor_trivy_security_check:
+        type: str
+        required: true
+      harbor_trivy_ignore_unfixed:
+        type: bool
+        required: true
+      harbor_keycloak_local_admin_url:
+        type: str
+        required: true
+      harbor_keycloak_public_base_url:
+        type: str
+        required: true
+      harbor_keycloak_realm_name:
+        type: str
+        required: true
+      harbor_keycloak_bootstrap_admin_username:
+        type: str
+        required: true
+      harbor_keycloak_bootstrap_admin_password_remote_file:
+        type: path
+        required: true
+      harbor_keycloak_admin_group:
+        type: str
+        required: true
+      harbor_keycloak_client_id:
+        type: str
+        required: true
+      harbor_keycloak_client_secret_local_file:
+        type: path
+        required: true
+      harbor_oidc_provider_name:
+        type: str
+        required: true
+      harbor_oidc_scope:
+        type: str
+        required: true
+      harbor_oidc_user_claim:
+        type: str
+        required: true
+      harbor_oidc_groups_claim:
+        type: str
+        required: true
+      harbor_oidc_verify_cert:
+        type: bool
+        required: true
+      harbor_check_runner_project_name:
+        type: str
+        required: true
+      harbor_check_runner_project_public:
+        type: bool
+        required: true
+      harbor_check_runner_retention_days:
+        type: int
+        required: true
+      harbor_check_runner_retention_cron:
+        type: str
+        required: true
+      harbor_check_runner_robot_name:
+        type: str
+        required: true
+      harbor_check_runner_robot_description:
+        type: str
+        required: true

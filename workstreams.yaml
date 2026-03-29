@@ -14,6 +14,108 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0201-live-apply
+    adr: "0201"
+    title: Harbor runtime deployment, registry cutover, and repository automation replay
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0201-main-final
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0201-main-merge-r2
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0201-live-apply.md
+    depends_on:
+      - adr-0056-keycloak
+      - adr-0083-docker-check-runner
+      - adr-0089-build-artifact-cache
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0201-live-apply.md
+      - docs/adr/0201-harbor-container-registry-with-cve-scanning.md
+      - docs/runbooks/configure-harbor.md
+      - collections/ansible_collections/lv3/platform/roles/harbor_runtime/
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/
+      - inventory/group_vars/platform.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - playbooks/harbor.yml
+      - playbooks/services/harbor.yml
+      - Makefile
+      - scripts/remote_exec.sh
+      - scripts/validate_repo.sh
+      - config/workflow-catalog.json
+      - config/controller-local-secrets.json
+      - config/validation-gate.json
+      - config/subdomain-catalog.json
+      - config/subdomain-exposure-registry.json
+      - config/service-capability-catalog.json
+      - config/health-probe-catalog.json
+      - config/dependency-graph.json
+      - config/data-catalog.json
+      - config/secret-catalog.json
+      - config/api-gateway-catalog.json
+      - config/command-catalog.json
+      - config/grafana/dashboards/harbor.json
+      - config/alertmanager/rules/harbor.yml
+      - receipts/live-applies/2026-03-28-adr-0201-harbor-live-apply.json
+      - tests/test_harbor_runtime_role.py
+      - tests/test_docker_runtime_role.py
+      - tests/test_nginx_edge_publication_role.py
+      - tests/test_remote_exec.py
+      - tests/test_generate_platform_vars.py
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0201 by converging Harbor with Trivy scanning, Keycloak-backed operator login, and a repo-managed check-runner publication path through registry.lv3.org
+      release_bump: patch
+      included_in_repo_version: 0.177.63
+      latest_receipts:
+        harbor: 2026-03-29-adr-0201-harbor-mainline-live-apply
+  - id: ws-0201-main-merge
+    adr: "0201"
+    title: Finalize ADR 0201 Harbor exact-main evidence on origin/main
+    status: merged
+    owner: codex
+    branch: main
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0246-main-push
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0201-main-merge.md
+    depends_on:
+      - ws-0201-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0201-live-apply.md
+      - docs/workstreams/ws-0201-main-merge.md
+      - docs/adr/0201-harbor-container-registry-with-cve-scanning.md
+      - docs/runbooks/configure-harbor.md
+      - collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/
+      - tests/test_harbor_runtime_role.py
+      - tests/test_docker_runtime_role.py
+      - tests/test_nginx_edge_publication_role.py
+      - tests/test_remote_exec.py
+      - tests/test_generate_platform_vars.py
+      - receipts/live-applies/2026-03-28-adr-0201-harbor-live-apply.json
+      - receipts/live-applies/2026-03-29-adr-0201-harbor-mainline-live-apply.json
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.63.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/adr/.index.yaml
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: records ADR 0201 exact-main evidence on the current
+        mainline by preserving the verified Harbor rollout, the exact-main
+        OIDC readiness recovery, the repaired latest-main replay after ADR
+        0239 advanced origin/main, and the latest Harbor receipt truth while
+        the integrated platform baseline remains 0.130.45
+      release_bump: patch
+      included_in_repo_version: 0.177.63
   - id: ws-0264-receipt-driven-resilience-adrs
     adr: "0264"
     title: Receipt-driven resilience architecture bundle
@@ -916,7 +1018,8 @@ workstreams:
       release_bump: patch
       included_in_repo_version: 0.177.62
       latest_receipts:
-        docs_portal: 2026-03-29-adr-0239-browser-local-search-mainline-live-apply
+        docs_portal: 2026-03-29-adr-0239-browser-local-search-post-merge-replay
+        local_search_and_indexing_fabric: 2026-03-29-adr-0239-browser-local-search-post-merge-replay
   - id: ws-0239-main-merge
     adr: "0239"
     title: Integrate ADR 0239 browser-local search into origin/main
@@ -956,6 +1059,7 @@ workstreams:
       - tests/test_docs_site.py
       - receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json
       - receipts/live-applies/2026-03-29-adr-0239-browser-local-search-mainline-live-apply.json
+      - receipts/live-applies/2026-03-29-adr-0239-browser-local-search-post-merge-replay.json
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -997,6 +1101,7 @@ workstreams:
             - tests/test_docs_site.py
             - receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json
             - receipts/live-applies/2026-03-29-adr-0239-browser-local-search-mainline-live-apply.json
+            - receipts/live-applies/2026-03-29-adr-0239-browser-local-search-post-merge-replay.json
           mode: exclusive
     ready_to_merge: true
     live_applied: false
@@ -1008,7 +1113,8 @@ workstreams:
       release_bump: patch
       included_in_repo_version: 0.177.62
       latest_receipts:
-        docs_portal: 2026-03-29-adr-0239-browser-local-search-mainline-live-apply
+        docs_portal: 2026-03-29-adr-0239-browser-local-search-post-merge-replay
+        local_search_and_indexing_fabric: 2026-03-29-adr-0239-browser-local-search-post-merge-replay
   - id: ws-0241-live-apply
     adr: "0241"
     title: Live apply ADR 0241 rich content and inline knowledge editing via Tiptap

@@ -74,5 +74,9 @@
 - the exact-main replay on `2026-03-29` re-verified the authenticated edge
   redirect plus the published Pagefind assets under receipt
   `2026-03-29-adr-0239-browser-local-search-mainline-live-apply.json`
+- a latest-server check later on `2026-03-29` found `nginx-lv3` had drifted
+  back to the older docs bundle without the Pagefind publication, so the merged
+  mainline commit `48b8a79b02480f3cefa1b76e1e5ba88db9098cc6` was replayed again
+  under receipt `2026-03-29-adr-0239-browser-local-search-post-merge-replay.json`
 - the current live platform baseline after that exact-main replay is
   `0.130.45`
