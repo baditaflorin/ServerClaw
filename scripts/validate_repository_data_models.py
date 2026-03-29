@@ -83,6 +83,7 @@ HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 UPTIME_MONITORS_PATH = repo_path("config", "uptime-kuma", "monitors.json")
 HEALTH_PROBE_CATALOG_PATH = repo_path("config", "health-probe-catalog.json")
 CERTIFICATE_CATALOG_PATH = repo_path("config", "certificate-catalog.json")
+SERVICE_CAPABILITY_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
 SECRET_CATALOG_PATH = repo_path("config", "secret-catalog.json")
 SEED_DATA_CATALOG_PATH = repo_path("config", "seed-data-catalog.json")
 TOKEN_POLICY_PATH = repo_path("config", "token-policy.yaml")
@@ -997,6 +998,24 @@ def validate_certificate_catalog(host_vars_context: dict[str, Any]) -> None:
         raise ValueError("config/certificate-catalog.json.certificates must not be empty")
 
     topology = host_vars_context["topology"]
+    service_capability_catalog = require_mapping(
+        load_json(SERVICE_CAPABILITY_CATALOG_PATH),
+        str(SERVICE_CAPABILITY_CATALOG_PATH),
+    )
+    allowed_service_ids = set(topology)
+    allowed_service_ids.update(
+        require_identifier(
+            entry.get("id"),
+            f"config/service-capability-catalog.json.services[{index}].id",
+        )
+        for index, entry in enumerate(
+            require_list(
+                service_capability_catalog.get("services"),
+                "config/service-capability-catalog.json.services",
+            )
+        )
+        for entry in [require_mapping(entry, f"config/service-capability-catalog.json.services[{index}]")]
+    )
     certificate_ids: set[str] = set()
     for index, item in enumerate(certificates):
         path = f"config/certificate-catalog.json.certificates[{index}]"
@@ -1007,7 +1026,7 @@ def validate_certificate_catalog(host_vars_context: dict[str, Any]) -> None:
         certificate_ids.add(certificate_id)
 
         service_id = require_identifier(item.get("service_id"), f"{path}.service_id")
-        if service_id not in topology:
+        if service_id not in allowed_service_ids:
             raise ValueError(f"{path}.service_id references unknown platform service '{service_id}'")
 
         require_enum(item.get("status"), f"{path}.status", {"active", "planned"})

@@ -728,6 +728,69 @@ workstreams:
           mode: exclusive
     ready_to_merge: true
     live_applied: false
+  - id: ws-0273-public-endpoint-admission
+    adr: "0273"
+    title: Live apply ADR 0273 public endpoint admission control
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0273-public-endpoint-admission-control
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0273-public-endpoint-admission-control
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0273-public-endpoint-admission-control.md
+    depends_on:
+      - adr-0101-automated-certificate-lifecycle-management
+      - adr-0139-subdomain-exposure-audit-and-registry
+      - adr-0252-route-and-dns-publication-assertion-ledger
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/adr-0273-public-endpoint-admission-control.md
+      - docs/adr/0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/configure-edge-publication.md
+      - docs/runbooks/subdomain-exposure-audit.md
+      - config/certificate-catalog.json
+      - Makefile
+      - scripts/subdomain_exposure_audit.py
+      - scripts/validate_repo.sh
+      - tests/test_subdomain_exposure_audit.py
+      - tests/test_edge_publication_makefile.py
+      - tests/test_validate_repo_cache.py
+      - receipts/live-applies/2026-03-29-adr-0273-public-endpoint-admission-control-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_contract
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: adr_0273_live_apply
+          paths:
+            - docs/workstreams/adr-0273-public-endpoint-admission-control.md
+            - docs/adr/0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md
+            - docs/runbooks/configure-edge-publication.md
+            - docs/runbooks/subdomain-exposure-audit.md
+            - config/certificate-catalog.json
+            - Makefile
+            - scripts/subdomain_exposure_audit.py
+            - scripts/validate_repo.sh
+            - tests/test_subdomain_exposure_audit.py
+            - tests/test_edge_publication_makefile.py
+            - tests/test_validate_repo_cache.py
+            - receipts/live-applies/2026-03-29-adr-0273-public-endpoint-admission-control-live-apply.json
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false
+    canonical_truth:
+      changelog_entry: implemented ADR 0273 by turning public hostname, edge route,
+        DNS, and certificate-plan concordance into an enforced admission gate for
+        edge and route-ledger replays
+      release_bump: patch
+      included_in_repo_version: null
   - id: ws-0254-serverclaw-adrs
     adr: "0254"
     title: ServerClaw architecture bundle

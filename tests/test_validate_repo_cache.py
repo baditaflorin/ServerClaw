@@ -44,6 +44,13 @@ def test_validate_repo_supports_workstream_surface_stage() -> None:
     assert "scripts/workstream_surface_ownership.py" in script
 
 
+def test_validate_repo_runs_public_endpoint_admission_check() -> None:
+    script = VALIDATE_REPO_SCRIPT.read_text()
+
+    assert "scripts/subdomain_exposure_audit.py" in script
+    assert "subdomain_exposure_audit.py\" --validate" in script
+
+
 def test_validate_repo_supports_architecture_fitness_stage() -> None:
     script = VALIDATE_REPO_SCRIPT.read_text()
 

@@ -30,6 +30,7 @@ import subdomain_catalog
 
 REGISTRY_PATH = repo_path("config", "subdomain-exposure-registry.json")
 REGISTRY_SCHEMA_PATH = repo_path("docs", "schema", "subdomain-exposure-registry.schema.json")
+CERTIFICATE_CATALOG_PATH = repo_path("config", "certificate-catalog.json")
 HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 PUBLIC_EDGE_DEFAULTS_PATH = repo_path("roles", "nginx_edge_publication", "defaults", "main.yml")
 GLOBAL_VARS_PATH = repo_path("inventory", "group_vars", "all.yml")
@@ -37,6 +38,11 @@ RECEIPTS_DIR = repo_path("receipts", "subdomain-exposure-audit")
 HETZNER_DNS_API_TOKEN_ENV = "HETZNER_DNS_API_TOKEN"
 EXPECTED_EDGE_OIDC_PREFIX = "https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth"
 PROBE_USER_AGENT = "lv3-subdomain-exposure-audit/1.0"
+PUBLIC_ENDPOINT_STATUSES = {"active", "planned"}
+EXPECTED_ISSUER_BY_TLS_PROVIDER = {
+    "letsencrypt": "letsencrypt",
+    "step-ca": "step-ca",
+}
 
 
 def utc_now() -> datetime:
@@ -49,6 +55,10 @@ def compact_timestamp(value: datetime) -> str:
 
 def iso_timestamp(value: datetime) -> str:
     return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
+
+
+def load_certificate_catalog() -> dict[str, Any]:
+    return json.loads(CERTIFICATE_CATALOG_PATH.read_text(encoding="utf-8"))
 
 
 def hostname_record_type(target: str) -> str:
@@ -375,14 +385,64 @@ def check_registry_current(registry: dict[str, Any]) -> None:
         )
 
 
-def collect_repo_findings(registry: dict[str, Any]) -> list[dict[str, Any]]:
+def expected_edge_certificate_domains(
+    host_vars: dict[str, Any] | None = None,
+    public_edge_defaults: dict[str, Any] | None = None,
+) -> set[str]:
+    if host_vars is None:
+        host_vars = subdomain_catalog.load_host_vars()
+    if public_edge_defaults is None:
+        public_edge_defaults = subdomain_catalog.load_public_edge_defaults()
+    return {
+        hostname
+        for hostname in subdomain_catalog.collect_edge_route_hostnames(host_vars, public_edge_defaults)
+        if not hostname.startswith("*.")
+    }
+
+
+def is_public_hostname(hostname: str, zone_name: str) -> bool:
+    return hostname == zone_name or hostname.endswith(f".{zone_name}")
+
+
+def collect_repo_findings(
+    registry: dict[str, Any],
+    *,
+    certificate_catalog: dict[str, Any] | None = None,
+    edge_certificate_domains: set[str] | None = None,
+) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
+    if certificate_catalog is None:
+        certificate_catalog = load_certificate_catalog()
+    if edge_certificate_domains is None:
+        edge_certificate_domains = expected_edge_certificate_domains()
+    zone_name = registry.get("zone_name", "lv3.org")
+
+    certificate_entries = subdomain_catalog.require_list(
+        certificate_catalog.get("certificates"),
+        "config/certificate-catalog.json.certificates",
+    )
+    certificates_by_host: dict[str, list[dict[str, Any]]] = {}
+    for index, certificate in enumerate(certificate_entries):
+        certificate = subdomain_catalog.require_mapping(
+            certificate,
+            f"config/certificate-catalog.json.certificates[{index}]",
+        )
+        endpoint = subdomain_catalog.require_mapping(
+            certificate.get("endpoint"),
+            f"config/certificate-catalog.json.certificates[{index}].endpoint",
+        )
+        host = subdomain_catalog.require_str(
+            endpoint.get("host"),
+            f"config/certificate-catalog.json.certificates[{index}].endpoint.host",
+        )
+        certificates_by_host.setdefault(host, []).append(certificate)
+
+    catalogued_public_certificate_hosts: set[str] = set()
     for entry in registry_entries(registry):
-        if entry.get("status") != "active":
-            continue
+        status = entry.get("status")
         access_model = entry["publication"]["access_model"]
         edge_auth_provider = entry["adapter"]["edge_auth"]["provider"]
-        if access_model == "platform-sso" and edge_auth_provider != "oauth2_proxy":
+        if status == "active" and access_model == "platform-sso" and edge_auth_provider != "oauth2_proxy":
             findings.append(
                 {
                     "check": "repo_edge_auth",
@@ -395,7 +455,7 @@ def collect_repo_findings(registry: dict[str, Any]) -> list[dict[str, Any]]:
                     ),
                 }
             )
-        if access_model != "platform-sso" and edge_auth_provider == "oauth2_proxy":
+        if status == "active" and access_model != "platform-sso" and edge_auth_provider == "oauth2_proxy":
             findings.append(
                 {
                     "check": "repo_edge_auth",
@@ -408,6 +468,126 @@ def collect_repo_findings(registry: dict[str, Any]) -> list[dict[str, Any]]:
                     ),
                 }
             )
+
+        if entry.get("environment") != "production":
+            continue
+        if status not in PUBLIC_ENDPOINT_STATUSES:
+            continue
+        if entry["publication"]["delivery_model"] == "private-network":
+            continue
+        if entry["adapter"]["tls"]["provider"] == "none":
+            continue
+
+        fqdn = entry["fqdn"]
+        catalogued_public_certificate_hosts.add(fqdn)
+        matching_certificates = certificates_by_host.get(fqdn, [])
+        if not matching_certificates:
+            findings.append(
+                {
+                    "check": "certificate_plan",
+                    "severity": "CRITICAL",
+                    "subdomain": fqdn,
+                    "finding": "catalog_public_hostname_missing_from_certificate_catalog",
+                    "detail": (
+                        "The canonical public-endpoint catalog declares a live TLS hostname, "
+                        "but config/certificate-catalog.json does not plan certificate coverage for it."
+                    ),
+                }
+            )
+        elif len(matching_certificates) > 1:
+            findings.append(
+                {
+                    "check": "certificate_plan",
+                    "severity": "CRITICAL",
+                    "subdomain": fqdn,
+                    "finding": "catalog_public_hostname_has_duplicate_certificate_plan_entries",
+                    "detail": (
+                        "config/certificate-catalog.json defines more than one certificate entry "
+                        f"for {fqdn}, so admission cannot prove which plan owns the hostname."
+                    ),
+                }
+            )
+        else:
+            certificate = matching_certificates[0]
+            if certificate.get("service_id") != entry.get("service_id"):
+                findings.append(
+                    {
+                        "check": "certificate_plan",
+                        "severity": "CRITICAL",
+                        "subdomain": fqdn,
+                        "finding": "certificate_plan_service_id_mismatch",
+                        "detail": (
+                            f"The public-endpoint catalog maps {fqdn} to service "
+                            f"'{entry.get('service_id')}', but config/certificate-catalog.json maps it to "
+                            f"'{certificate.get('service_id')}'."
+                        ),
+                    }
+                )
+            endpoint = certificate.get("endpoint", {})
+            if endpoint.get("server_name") != fqdn:
+                findings.append(
+                    {
+                        "check": "certificate_plan",
+                        "severity": "CRITICAL",
+                        "subdomain": fqdn,
+                        "finding": "certificate_plan_server_name_mismatch",
+                        "detail": (
+                            "The certificate catalog does not use the public hostname as the "
+                            f"declared TLS server_name for {fqdn}."
+                        ),
+                    }
+                )
+            expected_issuer = EXPECTED_ISSUER_BY_TLS_PROVIDER.get(entry["adapter"]["tls"]["provider"])
+            if expected_issuer and certificate.get("expected_issuer") != expected_issuer:
+                findings.append(
+                    {
+                        "check": "certificate_plan",
+                        "severity": "CRITICAL",
+                        "subdomain": fqdn,
+                        "finding": "certificate_plan_expected_issuer_mismatch",
+                        "detail": (
+                            f"The public-endpoint catalog expects TLS provider "
+                            f"'{entry['adapter']['tls']['provider']}', but config/certificate-catalog.json declares "
+                            f"'{certificate.get('expected_issuer')}' for {fqdn}."
+                        ),
+                    }
+                )
+
+        if (
+            entry["publication"]["delivery_model"] in {"shared-edge", "informational-edge"}
+            and entry["adapter"]["tls"]["provider"] == "letsencrypt"
+            and fqdn not in edge_certificate_domains
+        ):
+            findings.append(
+                {
+                    "check": "certificate_plan",
+                    "severity": "CRITICAL",
+                    "subdomain": fqdn,
+                    "finding": "catalog_public_hostname_missing_from_shared_edge_certificate_domains",
+                    "detail": (
+                        "The public hostname is published through the shared edge, but the "
+                        "rendered shared-edge certificate domain set does not include it."
+                    ),
+                }
+            )
+
+    for certificate_host in sorted(certificates_by_host):
+        if not is_public_hostname(certificate_host, zone_name):
+            continue
+        if certificate_host in catalogued_public_certificate_hosts:
+            continue
+        findings.append(
+            {
+                "check": "certificate_plan",
+                "severity": "CRITICAL",
+                "subdomain": certificate_host,
+                "finding": "certificate_catalog_public_hostname_missing_from_endpoint_catalog",
+                "detail": (
+                    "config/certificate-catalog.json carries a public hostname that the canonical "
+                    "public-endpoint catalog does not declare as an active or planned TLS endpoint."
+                ),
+            }
+        )
     return findings
 
 
