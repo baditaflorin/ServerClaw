@@ -172,6 +172,7 @@ platform_ports:
   n8n_port: 5678
   coolify_dashboard_port: 8000
   coolify_proxy_port: 80
+  coolify_proxy_tls_port: 443
   coolify_host_proxy_port: 8012
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
@@ -233,6 +234,7 @@ platform_port_assignments:
   n8n_port: 5678
   coolify_dashboard_port: 8000
   coolify_proxy_port: 80
+  coolify_proxy_tls_port: 443
   coolify_host_proxy_port: 8012
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
@@ -1647,7 +1649,7 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.70:80
+      upstream: https://10.10.10.70:443
       aliases:
         - '*.apps.lv3.org'
       crawl_policy_enabled: false
@@ -1655,10 +1657,10 @@ platform_service_topology:
       preserve_upstream_security_headers: true
     service_id: coolify_apps
     ports:
-      internal: 80
+      internal: 443
     urls:
       public: https://apps.lv3.org
-      internal: http://10.10.10.70:80
+      internal: https://10.10.10.70:443
   api_gateway:
     service_name: api-gateway
     owning_vm: docker-runtime-lv3
@@ -2026,6 +2028,10 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: '*.apps'
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: api
       type: A
       value: 65.108.75.123
@@ -2043,10 +2049,6 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: home
-      type: A
-      value: 65.108.75.123
-      ttl: 60
-    - name: mail
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -2876,7 +2878,7 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.70:80
+      upstream: https://10.10.10.70:443
       aliases:
         - '*.apps.lv3.org'
       crawl_policy_enabled: false
@@ -2884,10 +2886,10 @@ public_edge_service_topology:
       preserve_upstream_security_headers: true
     service_id: coolify_apps
     ports:
-      internal: 80
+      internal: 443
     urls:
       public: https://apps.lv3.org
-      internal: http://10.10.10.70:80
+      internal: https://10.10.10.70:443
   api_gateway:
     service_name: api-gateway
     owning_vm: docker-runtime-lv3
@@ -3299,6 +3301,7 @@ ollama_api_port: 11434
 n8n_port: 5678
 coolify_dashboard_port: 8000
 coolify_proxy_port: 80
+coolify_proxy_tls_port: 443
 coolify_host_proxy_port: 8012
 open_webui_port: 8088
 homepage_port: 3090

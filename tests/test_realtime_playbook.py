@@ -13,6 +13,9 @@ PLAYBOOK_PATH = (
     / "playbooks"
     / "realtime.yml"
 )
+EXPECTED_COLLECTION_PLATFORM_VARS = [
+    "{{ playbook_dir }}/../../../../../inventory/group_vars/platform.yml"
+]
 
 
 def test_realtime_playbook_converges_network_before_agents() -> None:
@@ -30,9 +33,7 @@ def test_realtime_playbook_converges_network_before_agents() -> None:
         {"role": "lv3.platform.netdata_runtime"},
     ]
     assert all(
-        play["vars_files"] == [
-            "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
-        ]
+        play["vars_files"] == EXPECTED_COLLECTION_PLATFORM_VARS
         for play in plays
     )
 
@@ -47,10 +48,8 @@ def test_realtime_edge_play_builds_generated_portals_before_publication() -> Non
         if task.get("name") == "Build shared generated portal artifacts required by edge publication"
     )
 
-    assert edge_play["vars"]["realtime_repo_root"] == "{{ lookup('ansible.builtin.env', 'PWD') }}"
-    assert edge_play["vars_files"] == [
-        "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
-    ]
+    assert edge_play["vars"]["realtime_repo_root"] == "{{ playbook_dir }}/../../../../.."
+    assert edge_play["vars_files"] == EXPECTED_COLLECTION_PLATFORM_VARS
     assert build_task["ansible.builtin.command"]["argv"] == ["make", "generate-changelog-portal", "docs"]
     assert build_task["args"]["chdir"] == "{{ realtime_repo_root }}"
     assert build_task["delegate_to"] == "localhost"

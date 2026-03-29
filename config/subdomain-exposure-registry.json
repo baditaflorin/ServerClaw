@@ -207,7 +207,7 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.coolify_proxy_port }}",
+          "upstream": "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:443",
           "crawl_policy_enabled": false,
           "security_headers_enabled": false,
           "preserve_upstream_security_headers": true

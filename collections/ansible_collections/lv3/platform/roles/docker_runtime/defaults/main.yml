@@ -44,6 +44,11 @@ docker_runtime_daemon_config:
   log-opts:
     max-size: "10m"
     max-file: "5"
+  dns:
+    - "1.1.1.1"
+    - "8.8.8.8"
+  registry-mirrors:
+    - "https://mirror.gcr.io"
   default-address-pools:
     - base: 172.16.0.0/12
       size: 24
