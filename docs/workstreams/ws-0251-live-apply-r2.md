@@ -2,10 +2,10 @@
 
 - ADR: [ADR 0251](../adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md)
 - Title: Live apply stage-scoped smoke suites and promotion-gate enforcement from latest `origin/main`
-- Status: in_progress
-- Implemented In Repo Version: N/A
+- Status: merged
+- Implemented In Repo Version: 0.177.84
 - Live Applied In Platform Version: N/A
-- Implemented On: N/A
+- Implemented On: 2026-03-29
 - Live Applied On: N/A
 - Branch: `codex/ws-0251-live-apply-r2`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply-r2`
@@ -160,6 +160,25 @@
   `environment-topology.json`, but `/opt/api-gateway/config/runtime-assurance-matrix.json`
   disappears from both the host bind mount and the running container after the
   later concurrent gateway replay
+- 2026-03-29
+  `receipts/live-applies/evidence/2026-03-29-adr-0251-api-gateway-postrebase-rerun.txt`
+  completes successfully from the rebased exact-main worktree, and immediate
+  post-run checks confirm `pve-manager/9.1.6`, a fresh public
+  `https://api.lv3.org/v1/platform/runtime-assurance` envelope at
+  `2026-03-29T17:12:50Z`, the updated ops-portal partial on `:8092`, and both
+  `environment-topology.json` plus `runtime-assurance-matrix.json` present on
+  the host bind mount and inside the running `api-gateway` container
+- 2026-03-29
+  `receipts/live-applies/evidence/2026-03-29-adr-0251-windmill-worker-checkout-rerun.txt`
+  proves the branch-local `windmill` worker checkout refresh path still works:
+  `/srv/proxmox_florin_server/scripts/stage_smoke.py` appears briefly, the live
+  `promotion_pipeline.py` imports `stage_smoke`, and the updated
+  `config/windmill/scripts/gate-status.py` wrapper lands on the host before a
+  separate concurrent `ws-0266-main-integration-r2` replay overwrites the same
+  shared checkout back to the older worker tree again; the narrow direct
+  `ansible-playbook` replay itself later stops in the Windmill schedule-sync
+  phase because that targeted recovery path bypasses the scoped runner's
+  controller-side `PyYAML` dependency shell
 
 ## Live Apply Blocker
 
@@ -199,19 +218,23 @@
   but `runtime-assurance-matrix.json` missing, which immediately restores the
   ops-portal degraded fallback banner and a live `500` from
   `/v1/platform/runtime-assurance`
+- the latest targeted Windmill worker-checkout rerun confirms the repo changes
+  themselves are correct but the shared runtime host is still not stable enough
+  to claim ADR 0251 fully live: this worktree briefly restores
+  `scripts/stage_smoke.py`, the `stage_smoke` import in
+  `/srv/proxmox_florin_server/scripts/promotion_pipeline.py`, and the updated
+  `gate-status` wrapper, but an overlapping
+  `ws-0266-main-integration-r2` `windmill.yml` replay on the same
+  `docker-runtime-lv3` guest removes `scripts/stage_smoke.py` and reverts the
+  worker checkout before a durable negative-path promotion proof can be
+  recorded
 
 ## Remaining Steps
 
-- fetch and rebase onto the latest `origin/main` before any final integration:
-  during this run the worktree moved again and `origin/main` is now
-  `8871117b40466b7907a33992f44ca7d83a3e9409` as of 2026-03-29
-- re-run `api-gateway`, then the exact `ops_portal` and `windmill` live applies
-  from an uncontended latest-main checkout and verify the guest hashes and the
-  live config bind mounts immediately after each replay so the shared host
-  cannot drift between apply and proof
-- update ADR 0251 metadata, refresh `docs/adr/.index.yaml`, and mark
-  `workstreams.yaml` `live_applied: true` only after the live hashes and public
-  behavior match the final merged tree
-- only in the final merge-to-main step: bump `VERSION`, update
-  `changelog.md`, refresh integrated `README.md` status, and set
-  `versions/stack.yaml` to the verified live platform truth
+- replay `windmill` from an uncontended exact-main checkout after the current
+  concurrent `windmill.yml` writers stop clobbering `/srv/proxmox_florin_server`
+  on `docker-runtime-lv3`
+- only after that clean-window replay holds through verification: mark
+  ADR 0251 fully implemented, set `workstreams.yaml` `live_applied: true`, and
+  update `versions/stack.yaml` live evidence plus the integrated README live
+  status to the verified platform truth

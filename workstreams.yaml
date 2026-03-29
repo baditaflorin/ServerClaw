@@ -372,7 +372,7 @@ workstreams:
   - id: ws-0251-live-apply-r2
     adr: "0251"
     title: Stage-scoped smoke suites and promotion-gate live apply
-    status: in_progress
+    status: merged
     owner: codex
     branch: codex/ws-0251-live-apply-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply-r2
@@ -435,7 +435,7 @@ workstreams:
             - tests/test_validate_service_catalog.py
             - receipts/live-applies/
           mode: exclusive
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
     canonical_truth:
       changelog_entry: implement ADR 0251 by enforcing stage-scoped smoke suites
@@ -443,16 +443,18 @@ workstreams:
         repo-managed default suite for active environments and live proof from
         the updated operator workflow surfaces
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.84
       latest_receipts:
         windmill_attempt: 2026-03-29-adr-0251-windmill-live-apply
         windmill_worker_drift: 2026-03-29-adr-0251-windmill-worker-drift
+        windmill_worker_checkout_rerun: 2026-03-29-adr-0251-windmill-worker-checkout-rerun
         ops_portal_attempt: 2026-03-29-adr-0251-ops-portal-live-apply-rerun
         ops_portal_postgateway: 2026-03-29-adr-0251-ops-portal-live-apply-postgateway
         api_gateway_drift_recovery: 2026-03-29-adr-0251-api-gateway-drift-recovery
         api_gateway_drift_recur: 2026-03-29-adr-0251-api-gateway-drift-recur
         api_gateway_mainline_attempt: 2026-03-29-adr-0251-api-gateway-mainline-live-apply
         api_gateway_mainline_rerun: 2026-03-29-adr-0251-api-gateway-mainline-live-apply-rerun
+        api_gateway_postrebase_rerun: 2026-03-29-adr-0251-api-gateway-postrebase-rerun
         api_gateway_runtime_assurance_fix_attempt: 2026-03-29-adr-0251-api-gateway-runtime-assurance-config-fix
         api_gateway_runtime_assurance_fix_rerun: 2026-03-29-adr-0251-api-gateway-runtime-assurance-config-fix-rerun
   - id: ws-0224-repo-intake
