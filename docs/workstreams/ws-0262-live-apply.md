@@ -145,6 +145,8 @@
 - `https://api.lv3.org/v1/openfga/healthz` now returns the canonical
   `AUTH_INSUFFICIENT_ROLE` envelope for the `lv3-agent-hub` bearer token,
   which proves the gateway route is live and protected instead of missing
+- canonical branch-local live-apply receipt:
+  `receipts/live-applies/2026-03-29-adr-0262-openfga-keycloak-live-apply.json`
 - branch-local evidence files:
   `receipts/live-applies/evidence/2026-03-29-adr-0262-converge-openfga-live-apply.txt`
   and
