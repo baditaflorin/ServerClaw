@@ -5,6 +5,7 @@ import http.client
 import json
 import os
 import subprocess
+import time
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -816,15 +817,25 @@ def test_run_wait_result_helper_writes_polled_result(
         ],
     )
     monkeypatch.setenv("WINDMILL_TOKEN", "managed-secret")
+    monkeypatch.setenv("WINDMILL_BOOTSTRAP_SECRET", "bootstrap-secret")
 
     captured: dict[str, object] = {}
 
     class FakeClient:
-        def __init__(self, *, base_url: str, token: str, workspace: str, request_timeout_seconds: int) -> None:
+        def __init__(
+            self,
+            *,
+            base_url: str,
+            token: str,
+            workspace: str,
+            bootstrap_secret: str,
+            request_timeout_seconds: int,
+        ) -> None:
             captured["client_init"] = {
                 "base_url": base_url,
                 "token": token,
                 "workspace": workspace,
+                "bootstrap_secret": bootstrap_secret,
                 "request_timeout_seconds": request_timeout_seconds,
             }
 
@@ -853,6 +864,7 @@ def test_run_wait_result_helper_writes_polled_result(
             "base_url": "http://windmill.internal",
             "token": "managed-secret",
             "workspace": "lv3",
+            "bootstrap_secret": "bootstrap-secret",
             "request_timeout_seconds": 120,
         },
         "run": {
@@ -864,7 +876,7 @@ def test_run_wait_result_helper_writes_polled_result(
     }
 
 
-def test_run_wait_result_helper_falls_back_to_hash_polling_when_path_run_is_broken(
+def test_run_wait_result_helper_polls_completed_result_for_hash_submissions(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -885,7 +897,7 @@ def test_run_wait_result_helper_falls_back_to_hash_polling_when_path_run_is_brok
         ],
     )
     monkeypatch.setenv("WINDMILL_TOKEN", "session-token")
-    monkeypatch.setattr(module.time, "sleep", lambda _: None)
+    monkeypatch.setattr(time, "sleep", lambda _: None)
 
     class FakeResponse:
         def __init__(self, body: str, *, status: int = 200) -> None:
@@ -909,14 +921,6 @@ def test_run_wait_result_helper_falls_back_to_hash_polling_when_path_run_is_brok
 
     def fake_urlopen(request, timeout=120):
         calls.append(request.full_url)
-        if request.full_url.endswith("/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fwindmill_healthcheck"):
-            raise module.urllib.error.HTTPError(
-                request.full_url,
-                404,
-                "Not Found",
-                hdrs=None,
-                fp=FakeResponse("script not found"),
-            )
         if request.full_url.endswith("/api/w/lv3/scripts/get/p/f%2Flv3%2Fwindmill_healthcheck"):
             return FakeResponse('{"hash":"hash-123"}')
         if request.full_url.endswith("/api/w/lv3/jobs/run/h/hash-123"):
@@ -933,7 +937,6 @@ def test_run_wait_result_helper_falls_back_to_hash_polling_when_path_run_is_brok
     assert module.main() == 0
     assert json.loads(capsys.readouterr().out) == {"status": "ok"}
     assert calls == [
-        "http://windmill.internal/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fwindmill_healthcheck",
         "http://windmill.internal/api/w/lv3/scripts/get/p/f%2Flv3%2Fwindmill_healthcheck",
         "http://windmill.internal/api/w/lv3/jobs/run/h/hash-123",
         "http://windmill.internal/api/w/lv3/jobs_u/completed/get_result_maybe/job-123?get_started=true",

@@ -62,18 +62,48 @@ def test_host_inventory_proxy_ports_reference_platform_port_assignments() -> Non
     assert "listen_port: \"{{ platform_port_assignments.platform_context_host_proxy_port }}\"" in host_vars_text
 
 
-def test_role_recycles_active_services_before_restarting_changed_sockets() -> None:
-    tasks_text = ROLE_TASKS.read_text()
+def test_role_rearms_or_restarts_changed_proxy_units_after_rendering() -> None:
+    tasks = load_tasks()
+    enable_task = next(
+        task for task in tasks if task.get("name") == "Enable Proxmox Tailscale proxy sockets"
+    )
+    stop_task = next(
+        task
+        for task in tasks
+        if task.get("name")
+        == "Stop active Proxmox Tailscale proxy services before re-arming changed proxy listeners"
+    )
+    restart_task = next(
+        task
+        for task in tasks
+        if task.get("name")
+        == "Restart active Proxmox Tailscale proxy services when their unit or upstream changes"
+    )
+    rearm_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Start Proxmox Tailscale proxy sockets after re-arming changed proxy listeners"
+    )
 
-    assert "Stop active Proxmox Tailscale proxy services before restarting changed sockets" in tasks_text
-    assert tasks_text.index("Read active Proxmox Tailscale proxy service command lines") < tasks_text.index(
-        "Stop active Proxmox Tailscale proxy services before restarting changed sockets"
-    )
-    assert tasks_text.index("Read current Proxmox Tailscale proxy socket states") < tasks_text.index(
-        "Stop active Proxmox Tailscale proxy services before restarting changed sockets"
-    )
-    assert tasks_text.index("Stop active Proxmox Tailscale proxy services before restarting changed sockets") < tasks_text.index(
-        "Enable and start Proxmox Tailscale proxy sockets"
-    )
-    assert "proxmox_tailscale_socket_unit_changed" in tasks_text
-    assert "proxmox_tailscale_socket_state != 'active'" in tasks_text
+    assert enable_task["ansible.builtin.systemd"]["enabled"] is True
+    assert "state" not in enable_task["ansible.builtin.systemd"]
+    assert stop_task["ansible.builtin.systemd"]["state"] == "stopped"
+    assert "proxmox_tailscale_proxy_cmdlines.results" in stop_task["vars"]["proxmox_tailscale_running_cmdline"]
+    assert stop_task["when"] == [
+        "proxmox_tailscale_restart_required",
+        "proxmox_tailscale_service_active_state == 'active'",
+        "proxmox_tailscale_socket_active_state != 'active'",
+    ]
+    assert rearm_task["ansible.builtin.systemd"]["state"] == "started"
+    assert "proxmox_tailscale_proxy_cmdlines.results" in rearm_task["vars"]["proxmox_tailscale_running_cmdline"]
+    assert rearm_task["when"] == [
+        "proxmox_tailscale_restart_required",
+        "proxmox_tailscale_service_active_state == 'active'",
+        "proxmox_tailscale_socket_active_state != 'active'",
+    ]
+    assert restart_task["ansible.builtin.systemd"]["state"] == "restarted"
+    assert "proxmox_tailscale_proxy_sockets.results" in restart_task["vars"]["proxmox_tailscale_socket_unit_changed"]
+    assert "proxmox_tailscale_proxy_services.results" in restart_task["vars"]["proxmox_tailscale_service_unit_changed"]
+    assert "proxmox_tailscale_proxy_cmdlines.results" in restart_task["vars"]["proxmox_tailscale_running_cmdline"]
+    assert "proxmox_tailscale_restart_required" in restart_task["when"]
+    assert "proxmox_tailscale_socket_active_state == 'active'" in restart_task["when"]
