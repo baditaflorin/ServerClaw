@@ -115,6 +115,26 @@ def slugify(value: str) -> str:
     return value.replace("_", "-").replace(".", "-")
 
 
+def public_monitor_url(service_url: str, health_probe: dict[str, Any] | None) -> str | None:
+    if not health_probe:
+        return None
+    uptime_kuma = health_probe.get("uptime_kuma")
+    if not isinstance(uptime_kuma, dict) or not uptime_kuma.get("enabled"):
+        return None
+    monitor = uptime_kuma.get("monitor")
+    if not isinstance(monitor, dict):
+        return None
+    monitor_url = monitor.get("url")
+    if not isinstance(monitor_url, str) or not monitor_url.startswith(("https://", "http://")):
+        return None
+
+    service_parsed = urlparse(service_url)
+    monitor_parsed = urlparse(monitor_url)
+    if service_parsed.hostname != monitor_parsed.hostname:
+        return None
+    return normalize_url(monitor_url)
+
+
 def policy_from_certificate(certificate: dict[str, Any] | None, *, provider: str) -> dict[str, int | str]:
     if certificate is not None:
         policy = require_mapping(certificate.get("policy"), f"certificate[{certificate['id']}].policy")
@@ -213,7 +233,15 @@ def determine_probe_module(*, expected_issuer: str, host: str) -> str:
 
 def preferred_probe_url(service: dict[str, Any], *, service_url: str, scope: str, health_probe: dict[str, Any] | None) -> str:
     service_id = require_str(service.get("id"), "service.id")
-    if scope == "public" or not health_probe:
+    if scope == "public":
+        monitor_url = public_monitor_url(service_url, health_probe)
+        if monitor_url:
+            return monitor_url
+        if service_id in SPECIAL_PROBE_PATHS:
+            return normalize_url(url_with_path(service_url, SPECIAL_PROBE_PATHS[service_id]))
+        return normalize_url(service_url)
+
+    if not health_probe:
         if service_id in SPECIAL_PROBE_PATHS and scope != "public":
             return normalize_url(url_with_path(service_url, SPECIAL_PROBE_PATHS[service_id]))
         return normalize_url(service_url)
@@ -321,7 +349,7 @@ def discover_https_tls_targets(environment: str = DEFAULT_ENVIRONMENT) -> list[d
                     "probe_url": probe_url,
                     "probe_hostname": probe_hostname,
                     "probe_module": determine_probe_module(expected_issuer=tls_provider, host=host),
-                    "display_url": normalized_url,
+                    "display_url": probe_url if probe_url != normalized_url else normalized_url,
                     "testssl_url": testssl_url,
                     "testssl_ip": testssl_ip,
                     "certificate_id": certificate["id"] if certificate else "",
