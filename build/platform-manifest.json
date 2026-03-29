@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.89",
+  "repo_version": "0.177.90",
   "platform_version": "0.130.59",
-  "generated_at": "2026-03-29T22:27:54Z",
-  "next_refresh_at": "2026-03-29T23:27:54Z",
+  "generated_at": "2026-03-29T22:31:37Z",
+  "next_refresh_at": "2026-03-29T23:31:37Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -483,6 +483,18 @@
         "lifecycle_status": "active",
         "primary_url": "http://100.118.189.95:8020",
         "last_live_apply": "2026-03-29T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "serverclaw": {
+        "service_name": "ServerClaw",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://chat.lv3.org",
+        "last_live_apply": "2026-03-30T00:00:00Z",
         "slo_status": "unknown"
       },
       "status_page": {
@@ -1801,6 +1813,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-semaphore.md"
+      },
+      {
+        "id": "converge-serverclaw",
+        "description": "Deploy the first public ServerClaw surface on coolify-lv3, reconcile its dedicated Keycloak client, and publish chat.lv3.org through the shared edge.",
+        "tags": [
+          "converge-serverclaw",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-serverclaw.md"
       },
       {
         "id": "converge-step-ca",
@@ -3869,6 +3907,16 @@
         ]
       },
       {
+        "id": "configure-serverclaw",
+        "title": "Configure ServerClaw",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-serverclaw.md",
+        "workflow_ids": [
+          "converge-serverclaw"
+        ]
+      },
+      {
         "id": "configure-step-ca",
         "title": "Configure step-ca",
         "agent_trust_required": "T3",
@@ -4439,10 +4487,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.88",
+    "last_version": "0.177.89",
     "deployed_at": "2026-03-29",
-    "summary": "extends ADR 0224 by adding named repo-deploy profiles, a governed deploy-repo-profile operator path, and the verified 2026-03-30 education_wemeshup upstream refresh so production can be updated from upstream main without retyping raw Coolify arguments",
-    "release_notes_url": "docs/release-notes/0.177.89.md"
+    "summary": "implements ADR 0254 by carrying the dedicated ServerClaw chat surface on chat.lv3.org onto current mainline truth, preserving the governed 8096 edge lane to coolify-lv3, and recording the first exact-main receipt once the merged replay is clean",
+    "release_notes_url": "docs/release-notes/0.177.90.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
