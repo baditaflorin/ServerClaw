@@ -107,6 +107,26 @@ workstreams:
             - docs/adr/.index.yaml
           mode: shared_contract
           contract: adr-index-generator-v1
+        - id: ansible_scope_catalog_contract
+          paths:
+            - config/ansible-execution-scopes.yaml
+          mode: shared_contract
+          contract: ansible-execution-scope-catalog-v1
+        - id: workflow_catalog_contract
+          paths:
+            - config/workflow-catalog.json
+          mode: shared_contract
+          contract: workflow-catalog-v1
+        - id: command_catalog_contract
+          paths:
+            - config/command-catalog.json
+          mode: shared_contract
+          contract: command-catalog-v1
+        - id: live_apply_entrypoints_contract
+          paths:
+            - Makefile
+          mode: shared_contract
+          contract: live-apply-entrypoints-v1
         - id: docker_publication_assurance_runtime
           paths:
             - docs/workstreams/adr-0270-docker-publication-self-healing-and-port-programming-assertions.md
@@ -114,11 +134,7 @@ workstreams:
             - docs/runbooks/docker-publication-assurance.md
             - docs/runbooks/health-probe-contracts.md
             - docs/runbooks/playbook-execution-model.md
-            - Makefile
-            - config/ansible-execution-scopes.yaml
-            - config/command-catalog.json
             - config/health-probe-catalog.json
-            - config/workflow-catalog.json
             - playbooks/docker-publication-assurance.yml
             - playbooks/tasks/post-verify.yml
             - playbooks/tasks/docker-publication-assert.yml
