@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.69",
-  "platform_version": "0.130.47",
-  "generated_at": "2026-03-29T03:51:03Z",
-  "next_refresh_at": "2026-03-29T04:51:03Z",
+  "repo_version": "0.177.70",
+  "platform_version": "0.130.48",
+  "generated_at": "2026-03-29T04:23:04Z",
+  "next_refresh_at": "2026-03-29T05:23:04Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3869,7 +3869,7 @@
         "id": "platform-operations-portal",
         "title": "Platform Operations Portal",
         "agent_trust_required": "T3",
-        "steps": 4,
+        "steps": 12,
         "path": "docs/runbooks/platform-operations-portal.md",
         "workflow_ids": [
           "converge-ops-portal"
@@ -4175,10 +4175,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.68",
+    "last_version": "0.177.69",
     "deployed_at": "2026-03-29",
-    "summary": "records ADR 0248 exact-main evidence by preserving the shared Keycloak logout authority, oauth2-proxy cleanup flow, and app-surface sign-out alignment after the merged-main replay",
-    "release_notes_url": "docs/release-notes/0.177.69.md"
+    "summary": "implemented ADR 0235 by adding a PatternFly-style cross-application launcher to the interactive ops portal, with catalog-backed purpose grouping, persona filtering, favorites, and recent destinations across first-party browser surfaces",
+    "release_notes_url": "docs/release-notes/0.177.70.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

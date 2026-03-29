@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-29'
 total_adrs: 281
 implementation_status_summary:
-  Implemented: 226
+  Implemented: 228
   Partial: 6
-  Not Implemented: 48
+  Not Implemented: 46
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4036,6 +4036,7 @@ adr_index:
       - launcher
     summary: We will standardize on the PatternFly Application Launcher as the default
     filename: 0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher.md
+    implemented_version: 0.177.70
   - adr: '0236'
     title: Server-State And Mutation Feedback Via TanStack Query
     status: Accepted

@@ -3,7 +3,7 @@
 - ADR: [ADR 0235](../adr/0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher.md)
 - Title: Cross-application launcher and favorites via a PatternFly-style shared masthead launcher in the interactive ops portal
 - Status: live_applied
-- Implemented In Repo Version: 0.177.69
+- Implemented In Repo Version: 0.177.70
 - Live Applied In Platform Version: 0.130.45
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
@@ -83,6 +83,7 @@
 ## Live Evidence
 
 - live-apply receipt: `receipts/live-applies/2026-03-29-adr-0235-cross-application-launcher-live-apply.json`
+- mainline replay receipt: `receipts/live-applies/2026-03-29-adr-0235-cross-application-launcher-mainline-live-apply.json`
 - guest hash proof: `receipts/live-applies/evidence/2026-03-29-adr-0235-live-hashes.txt`
 - internal endpoint proof: `receipts/live-applies/evidence/2026-03-29-adr-0235-internal-endpoints.txt`
 - launcher session proof: `receipts/live-applies/evidence/2026-03-29-adr-0235-launcher-session-check.txt`
@@ -90,11 +91,13 @@
 
 ## Mainline Integration Notes
 
-- release `0.177.69` is the first merged repo version that carries ADR 0235 on
+- release `0.177.70` is the first merged repo version that carries ADR 0235 on
   `origin/main`
 - the exact-main replay from
   `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0235-main-merge-r3`
   re-verified the launcher on `2026-03-29` with final recap
-  `docker-runtime-lv3 ok=129 changed=14 failed=0 skipped=14`
+  `docker-runtime-lv3 ok=129 changed=15 failed=0 skipped=14`
+- the canonical integrated receipt is
+  `receipts/live-applies/2026-03-29-adr-0235-cross-application-launcher-mainline-live-apply.json`
 - the current live platform baseline after that exact-main replay is
-  `0.130.47`
+  `0.130.48`

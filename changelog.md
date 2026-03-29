@@ -12,13 +12,13 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 
 ## Unreleased
 
-- implemented ADR 0235 by adding a PatternFly-style cross-application launcher to the interactive ops portal, with catalog-backed purpose grouping, persona filtering, favorites, and recent destinations across first-party browser surfaces
-
 ## Latest Release
 
-- [0.177.69 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.69.md)
+- [0.177.70 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.70.md)
 
 ## Previous Releases
+
+- [0.177.69 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.69.md)
 
 - [0.177.68 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.68.md)
 
