@@ -13459,3 +13459,141 @@ workstreams:
       included_in_repo_version: 0.177.92
       latest_receipts:
         gotenberg: 2026-03-30-adr-0278-gotenberg-live-apply
+  - id: ws-0278-main-integration
+    adr: "0278"
+    title: Integrate ADR 0278 exact-main replay onto current origin/main
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0278-main-integration
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0278-main-integration
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0278-main-integration.md
+    depends_on:
+      - ws-0278-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0278-main-integration.md
+      - docs/workstreams/ws-0278-live-apply.md
+      - docs/adr/0278-gotenberg-as-the-document-to-pdf-rendering-service.md
+      - docs/adr/.index.yaml
+      - docs/site-generated/architecture/dependency-graph.md
+      - docs/runbooks/configure-gotenberg.md
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - scripts/generate_platform_vars.py
+      - Makefile
+      - config/service-capability-catalog.json
+      - config/health-probe-catalog.json
+      - config/image-catalog.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      - config/api-gateway-catalog.json
+      - config/dependency-graph.json
+      - config/slo-catalog.json
+      - config/data-catalog.json
+      - config/command-catalog.json
+      - config/workflow-catalog.json
+      - config/ansible-execution-scopes.yaml
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/slo_rules.yml
+      - config/grafana/dashboards/slo-overview.json
+      - config/grafana/dashboards/gotenberg.json
+      - config/alertmanager/rules/gotenberg.yml
+      - playbooks/gotenberg.yml
+      - playbooks/services/gotenberg.yml
+      - collections/ansible_collections/lv3/platform/roles/gotenberg_runtime/**
+      - tests/test_gotenberg_runtime_role.py
+      - receipts/image-scans/2026-03-30-gotenberg-runtime.json
+      - receipts/image-scans/2026-03-30-gotenberg-runtime.trivy.json
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/diagrams/service-dependency-graph.excalidraw
+      - docs/diagrams/trust-tier-model.excalidraw
+      - receipts/live-applies/2026-03-30-adr-0278-gotenberg-live-apply.json
+      - receipts/live-applies/2026-03-30-adr-0278-gotenberg-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-03-30-ws-0278-*
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0278_main_integration_carryover
+          paths:
+            - docs/workstreams/ws-0278-live-apply.md
+            - docs/adr/0278-gotenberg-as-the-document-to-pdf-rendering-service.md
+            - docs/runbooks/configure-gotenberg.md
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - scripts/generate_platform_vars.py
+            - Makefile
+            - config/service-capability-catalog.json
+            - config/health-probe-catalog.json
+            - config/image-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/api-gateway-catalog.json
+            - config/dependency-graph.json
+            - config/slo-catalog.json
+            - config/data-catalog.json
+            - config/command-catalog.json
+            - config/workflow-catalog.json
+            - config/ansible-execution-scopes.yaml
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/grafana/dashboards/slo-overview.json
+            - config/grafana/dashboards/gotenberg.json
+            - config/alertmanager/rules/gotenberg.yml
+            - playbooks/gotenberg.yml
+            - playbooks/services/gotenberg.yml
+            - collections/ansible_collections/lv3/platform/roles/gotenberg_runtime/**
+            - tests/test_gotenberg_runtime_role.py
+            - receipts/image-scans/2026-03-30-gotenberg-runtime.json
+            - receipts/image-scans/2026-03-30-gotenberg-runtime.trivy.json
+            - receipts/live-applies/2026-03-30-adr-0278-gotenberg-live-apply.json
+            - receipts/live-applies/evidence/2026-03-30-ws-0278-converge-gotenberg*.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0278-gateway-*.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0278-local-*.txt
+          mode: shared_contract
+          contract: gotenberg-live-apply-v1
+        - id: adr_0278_main_integration_shared_integration
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/adr/.index.yaml
+            - docs/site-generated/architecture/dependency-graph.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/diagrams/service-dependency-graph.excalidraw
+            - docs/diagrams/trust-tier-model.excalidraw
+          mode: shared_contract
+          contract: latest-main-integration-v1
+        - id: adr_0278_main_integration_receipts
+          paths:
+            - docs/workstreams/ws-0278-main-integration.md
+            - receipts/live-applies/2026-03-30-adr-0278-gotenberg-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-03-30-ws-0278-mainline-*
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0278 by adding the private Gotenberg document-to-PDF runtime on docker-runtime-lv3, publishing the authenticated `/v1/gotenberg` API gateway route, and verifying Chromium plus LibreOffice PDF conversion end to end
+      release_bump: patch
+      included_in_repo_version: 0.177.92
+      latest_receipts:
+        gotenberg: 2026-03-30-adr-0278-gotenberg-live-apply
