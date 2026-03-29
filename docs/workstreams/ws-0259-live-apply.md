@@ -12,7 +12,7 @@
 - Owner: codex
 - Depends On: `adr-0151-n8n`, `adr-0206-ports-and-adapters`, `adr-0254-serverclaw`, `adr-0258-temporal`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0259-live-apply.md`, `docs/adr/0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md`, `docs/adr/.index.yaml`, `docs/runbooks/configure-n8n.md`, `config/service-capability-catalog.json`, `config/workflow-catalog.json`, `config/command-catalog.json`, `tests/test_validate_service_catalog.py`, `tests/test_n8n_metadata.py`, `receipts/live-applies/`
+- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0259-live-apply.md`, `docs/adr/0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md`, `docs/adr/.index.yaml`, `docs/runbooks/configure-n8n.md`, `config/service-capability-catalog.json`, `config/workflow-catalog.json`, `config/command-catalog.json`, `scripts/restore_verification.py`, `tests/test_restore_verification.py`, `tests/test_validate_service_catalog.py`, `tests/test_n8n_metadata.py`, `receipts/live-applies/`
 
 ## Scope
 
@@ -34,8 +34,10 @@
 - `config/service-capability-catalog.json`
 - `config/workflow-catalog.json`
 - `config/command-catalog.json`
+- `scripts/restore_verification.py`
 - `tests/test_validate_service_catalog.py`
 - `tests/test_n8n_metadata.py`
+- `tests/test_restore_verification.py`
 - `workstreams.yaml`
 - `receipts/live-applies/2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-live-apply.json`
 
@@ -62,9 +64,10 @@
 ## Live Apply Outcome
 
 - Exact-main replay succeeded from source commit
-  `07898c3787d68260df5caecfc5d61eb942255bd3`, rebased on top of
-  `origin/main` commit `690108042934e878c6d2239090816e10c1701740`
-  (`VERSION` `0.177.73`), with final recap
+  `8751d7f0f784794320994e6aca8a7cd9af0e423b`, rebased on top of
+  `origin/main` commit `90c3b26f93fbfe6ffdaecd74fdc422cfcf10281f`
+  (`VERSION` `0.177.76`, integrated platform baseline `0.130.51`), with final
+  recap
   `docker-runtime-lv3 ok=117 changed=2 failed=0 skipped=32`,
   `postgres-lv3 ok=47 changed=0 failed=0 skipped=7`,
   `nginx-lv3 ok=37 changed=2 failed=0 skipped=8`, and
@@ -74,11 +77,15 @@
   host networking to reach `postgres-lv3` across the private guest network, and
   skips unrelated generated static-site syncs when publishing through the
   shared NGINX edge from a fresh worktree.
-- Service-specific guardrails also passed on the rebased head:
-  `scripts/interface_contracts.py --check-live-apply service:n8n`,
-  `scripts/standby_capacity.py --service n8n`,
-  `scripts/service_redundancy.py --check-live-apply --service n8n`, and
-  `scripts/immutable_guest_replacement.py --check-live-apply --service n8n --allow-in-place-mutation`.
+- Focused regression and repo-facing validation also passed on the rebased
+  head: `24` targeted tests passed across the n8n metadata, playbook, runtime,
+  idempotency, and artifact-cache guardrails; `make syntax-check-n8n` passed;
+  and the service-specific guardrails remained green for interface contracts,
+  standby capacity, service redundancy, and immutable guest replacement.
+- The repo-wide validation sweep also required migrating a pre-existing
+  restore-readiness warm-up loop onto the shared retry framework so the
+  `check_ad_hoc_retry.py` gate now passes on the same branch that carries the
+  ADR 0259 live-apply evidence.
 
 ## Live Evidence
 
@@ -105,3 +112,7 @@
   `VERSION`, release sections in `changelog.md`, the top-level `README.md`
   integrated status summary, `versions/stack.yaml`, and a final exact-main
   receipt after merge to `main`.
+- The branch-local `make validate` sweep now clears every non-release stage and
+  stops only at generated canonical truth for `changelog.md`, which is
+  expected until those protected merge-to-`main` surfaces are updated in the
+  final integration step.
