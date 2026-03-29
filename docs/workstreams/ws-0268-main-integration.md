@@ -3,7 +3,7 @@
 - ADR: [ADR 0268](../adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md)
 - Title: Integrate ADR 0268 exact-main replay onto `origin/main`
 - Status: `merged`
-- Included In Repo Version: 0.177.82
+- Included In Repo Version: 0.177.83
 - Platform Version Observed During Integration: 0.130.56
 - Release Date: 2026-03-29
 - Live Applied On: 2026-03-29
@@ -16,7 +16,7 @@
 
 Carry the verified ADR 0268 fresh-worktree bootstrap implementation onto the
 latest available `origin/main`, refresh the protected release and
-canonical-truth surfaces for repository version `0.177.82`, and then record
+canonical-truth surfaces for repository version `0.177.83`, and then record
 the exact-main production replay that turns the branch-local receipt into the
 canonical mainline evidence.
 
@@ -48,7 +48,7 @@ canonical mainline evidence.
 - `VERSION`
 - `changelog.md`
 - `docs/release-notes/README.md`
-- `docs/release-notes/0.177.82.md`
+- `docs/release-notes/0.177.83.md`
 - `versions/stack.yaml`
 - `receipts/ops-portal-snapshot.html`
 - `receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply.json`

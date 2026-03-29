@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.82",
+  "repo_version": "0.177.83",
   "platform_version": "0.130.56",
-  "generated_at": "2026-03-29T15:39:42Z",
-  "next_refresh_at": "2026-03-29T16:39:42Z",
+  "generated_at": "2026-03-29T16:10:01Z",
+  "next_refresh_at": "2026-03-29T17:10:01Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -2249,6 +2249,84 @@
         "runbook": "docs/runbooks/install-proxmox.md"
       },
       {
+        "id": "live-apply-group",
+        "description": "Run one grouped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.",
+        "tags": [
+          "host-and-guest-live",
+          "live-apply-group",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 4,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/playbook-execution-model.md"
+      },
+      {
+        "id": "live-apply-service",
+        "description": "Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.",
+        "tags": [
+          "host-and-guest-live",
+          "live-apply-service",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 4,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/playbook-execution-model.md"
+      },
+      {
+        "id": "live-apply-site",
+        "description": "Run the full site live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.",
+        "tags": [
+          "host-and-guest-live",
+          "live-apply-site",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 3600,
+          "max_steps": 450,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 8,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/playbook-execution-model.md"
+      },
+      {
         "id": "live-apply-waves",
         "description": "Execute one reviewed dependency-wave manifest so each wave acquires its locks up front and runs its playbooks in parallel.",
         "tags": [
@@ -2281,6 +2359,7 @@
           "guest-live",
           "merge-config-changes",
           "mutation",
+          "preflight",
           "validated"
         ],
         "risk_class": "HIGH",
@@ -2536,6 +2615,7 @@
         "tags": [
           "diagnostic",
           "post-merge-gate",
+          "preflight",
           "repo-only"
         ],
         "risk_class": "LOW",
@@ -3947,6 +4027,18 @@
         ]
       },
       {
+        "id": "playbook-execution-model",
+        "title": "Playbook Execution Model",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/playbook-execution-model.md",
+        "workflow_ids": [
+          "live-apply-group",
+          "live-apply-service",
+          "live-apply-site"
+        ]
+      },
+      {
         "id": "provision-guests",
         "title": "Provision Guests Runbook",
         "agent_trust_required": "T3",
@@ -4246,10 +4338,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.81",
+    "last_version": "0.177.82",
     "deployed_at": "2026-03-29",
-    "summary": "implemented ADR 0249 by generating repo-managed HTTPS and TLS assurance probes plus Prometheus expiry alerts from the shared service catalogs, recording periodic testssl.sh receipts from the same target set, and hardening the monitoring replay defaults that guest observability and Loki log shipping depend on",
-    "release_notes_url": "docs/release-notes/0.177.82.md"
+    "summary": "records ADR 0268 exact-main evidence on the current mainline by adding fresh-worktree bootstrap manifests for generated artifacts and controller-local inputs, teaching the governed live-apply wrapper to repair missing portal outputs before mutation, and preserving the public-edge to `nginx_edge` guard alias so the full preflight and guard chain run end to end",
+    "release_notes_url": "docs/release-notes/0.177.83.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

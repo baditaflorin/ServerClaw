@@ -193,7 +193,7 @@ workstreams:
     canonical_truth:
       changelog_entry: integrated ADR 0268 by adding machine-readable fresh-worktree bootstrap manifests, automatic generated-artifact repair, and governed live-apply preflight wiring so isolated worktrees stop failing mid-run on missing local inputs
       release_bump: patch
-      included_in_repo_version: 0.177.82
+      included_in_repo_version: 0.177.83
       latest_receipts:
         public_edge_publication: 2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply
   - id: ws-0268-main-integration
@@ -234,7 +234,7 @@ workstreams:
       - VERSION
       - changelog.md
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.82.md
+      - docs/release-notes/0.177.83.md
       - versions/stack.yaml
       - receipts/ops-portal-snapshot.html
       - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply.json
@@ -281,7 +281,7 @@ workstreams:
             - VERSION
             - changelog.md
             - docs/release-notes/README.md
-            - docs/release-notes/0.177.82.md
+            - docs/release-notes/0.177.83.md
             - versions/stack.yaml
             - receipts/ops-portal-snapshot.html
             - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply.json
@@ -298,9 +298,9 @@ workstreams:
     ready_to_merge: true
     live_applied: true
     canonical_truth:
-      changelog_entry: records ADR 0268 exact-main evidence on release 0.177.82 by replaying the generic public-edge live-apply wrapper from a clean worktree, preserving fresh-worktree bootstrap repair, and fixing the public-edge to nginx_edge guard-chain alias so the full governed path can run end to end
+      changelog_entry: records ADR 0268 exact-main evidence on release 0.177.83 by replaying the generic public-edge live-apply wrapper from a clean worktree, preserving fresh-worktree bootstrap repair, and fixing the public-edge to nginx_edge guard-chain alias so the full governed path can run end to end
       release_bump: patch
-      included_in_repo_version: 0.177.82
+      included_in_repo_version: 0.177.83
       latest_receipts:
         public_edge_publication: 2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply
   - id: ws-0272-live-apply
