@@ -1,0 +1,30 @@
+{
+  "active_publications_tracked": 31,
+  "audit_run_id": "2ce34bdc-8630-4c5d-985e-370e2e0e4877",
+  "audited_at": "2026-03-29T11:26:37.507513Z",
+  "dns_records_checked": 31,
+  "findings": [
+    {
+      "check": "dns_resolution",
+      "detail": "Expected DNS resolution to include ['100.64.0.1']; observed ['<missing>'].",
+      "finding": "active_subdomain_missing_expected_public_resolution",
+      "severity": "WARN",
+      "subdomain": "git.lv3.org"
+    },
+    {
+      "check": "hetzner_zone",
+      "detail": "Catalog marks the hostname active, but no corresponding A/AAAA/CNAME record exists in Hetzner DNS.",
+      "finding": "active_catalog_subdomain_missing_from_zone",
+      "severity": "WARN",
+      "subdomain": "git.lv3.org"
+    }
+  ],
+  "hetzner_zone_records_checked": 46,
+  "nginx_vhosts_checked": 26,
+  "private_routes_checked": 4,
+  "publications_in_catalog": 35,
+  "registry_path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0252-live-apply-r4/config/subdomain-exposure-registry.json",
+  "severity_counts": {
+    "WARN": 2
+  }
+}

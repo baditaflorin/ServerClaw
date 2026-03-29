@@ -50,7 +50,10 @@ Basic runtime checks:
 
 ```bash
 make syntax-check-vaultwarden
-curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt https://vault.lv3.org/alive
+curl --http1.1 \
+  --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt \
+  --resolve vault.lv3.org:443:100.64.0.1 \
+  https://vault.lv3.org/alive
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/vaultwarden/docker-compose.yml ps'
 ```
 
@@ -60,12 +63,16 @@ Admin bootstrap smoke test:
 tmp_cookie="$(mktemp)"
 trap 'rm -f "$tmp_cookie"' EXIT
 curl --silent --show-error \
+  --http1.1 \
   --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt \
+  --resolve vault.lv3.org:443:100.64.0.1 \
   --cookie-jar "$tmp_cookie" \
   --data-urlencode "token=$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/vaultwarden/admin-token.txt)" \
   https://vault.lv3.org/admin/ >/dev/null
 curl --silent --show-error \
+  --http1.1 \
   --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt \
+  --resolve vault.lv3.org:443:100.64.0.1 \
   --cookie "$tmp_cookie" \
   https://vault.lv3.org/admin/users/by-mail/ops%40lv3.org
 ```
@@ -85,4 +92,5 @@ After the first successful converge:
 
 - `vault.lv3.org` is intentionally private-only. Do not publish Vaultwarden through the public NGINX edge.
 - The service certificate is signed by the internal LV3 CA, not a public CA. Operator clients must trust the private root certificate.
+- Controller-side manual `curl` verification should force `--http1.1` and pin `vault.lv3.org` to `100.64.0.1`; the current Tailscale proxy path can return an empty reply or time out when libcurl negotiates HTTP/2 by default even though the service itself is healthy.
 - The admin token is a bounded bootstrap path for invitation and recovery-safe checks; routine operator usage should happen through named Vaultwarden accounts, not through the admin panel.
