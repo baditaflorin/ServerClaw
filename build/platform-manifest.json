@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.84",
+  "repo_version": "0.177.85",
   "platform_version": "0.130.58",
-  "generated_at": "2026-03-29T17:41:31Z",
-  "next_refresh_at": "2026-03-29T18:41:31Z",
+  "generated_at": "2026-03-29T19:21:41Z",
+  "next_refresh_at": "2026-03-29T20:21:41Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4386,10 +4386,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.83",
+    "last_version": "0.177.84",
     "deployed_at": "2026-03-29",
-    "summary": "implemented ADR 0264 by partitioning the validation gate into failure-domain-isolated lanes, propagating lane context and changed-surface evidence through the build-server and worker fallback paths, and re-verifying the newest exact-main pre-push plus post-merge automation flow",
-    "release_notes_url": "docs/release-notes/0.177.84.md"
+    "summary": "implemented ADR 0255 by adding repo-managed Matrix Synapse as the canonical ServerClaw conversation hub with postgres-backed persistence, a Tailscale-only controller proxy, public edge publication at matrix.lv3.org, and exact-main verification for runtime, login, and monitoring coverage",
+    "release_notes_url": "docs/release-notes/0.177.85.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -66,4 +66,10 @@ Run these checks after converge:
 - Authentication remains inside Synapse itself. `matrix.lv3.org` is published through the shared edge with TLS, but it is not wrapped in the shared oauth2-proxy browser flow.
 - The host-side controller proxy is intended for governed operator and automation access. It mirrors the same client API surface over Tailscale at `http://100.64.0.1:8015`.
 - The host-side controller proxy binds to the Tailscale address `100.64.0.1:8015`, not to `127.0.0.1:8015`, so host-local verification should target the Tailscale address explicitly.
+- Public HTTPS/TLS assurance for Matrix is evaluated from `monitoring-lv3`
+  through the shared internal edge target
+  `https://10.10.10.10:443/_matrix/client/versions` with `matrix.lv3.org` as
+  the Host and SNI override. Do not treat guest-local curls to
+  `https://matrix.lv3.org` from `monitoring-lv3` as equivalent evidence, because
+  guest-network hairpin access to the public host IP is not reliable.
 - The mirrored server signing key is a recovery artifact. Rotating it changes the homeserver identity contract and must be planned explicitly instead of happening as a routine secret rollover.
