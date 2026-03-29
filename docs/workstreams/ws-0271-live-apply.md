@@ -3,6 +3,10 @@
 - ADR: [ADR 0271](../adr/0271-backup-coverage-assertion-ledger-and-backup-of-backup-policy.md)
 - Title: Backup coverage assertion ledger and backup-of-backup policy live apply
 - Status: live_applied
+- Implemented In Repo Version: 0.177.75
+- Live Applied In Platform Version: 0.130.51
+- Implemented On: 2026-03-29
+- Live Applied On: 2026-03-29
 - Branch: `codex/ws-0271-backup-coverage-ledger`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0271-backup-coverage-ledger`
 - Owner: codex
@@ -55,9 +59,9 @@
 
 ## Mainline Integration
 
-- This workstream has been live-applied on the platform and replayed from the exact latest `origin/main` branch tip, but the branch still needs the final merge-to-main release surfaces updated on `main`.
+- This workstream is the merged-mainline candidate that becomes repository release `0.177.75` and platform version `0.130.51` after the exact-main replay from the integration worktree.
 - The remaining live gap is explicit and intentional: `backup-lv3` stays `uncovered` until `lv3-backup-offsite` exists and receives fresh VM `160` evidence.
-- When the branch is merged, update ADR 0271 implementation metadata, release truth, and the final live-apply receipt without hiding that off-site coverage is still pending.
+- The canonical mainline receipt is `receipts/live-applies/2026-03-29-adr-0271-backup-coverage-ledger-mainline-live-apply.json`, and it preserves the exact-main replay plus the still-open off-site gap.
 
 ## Notes For The Next Assistant
 
