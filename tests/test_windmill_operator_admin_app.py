@@ -561,6 +561,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert tasks.index("Install frontend dependencies for repo-managed Windmill raw apps") < tasks.index(
         "Sync repo-managed Windmill raw apps"
     )
+    assert '"{{ windmill_seed_app_sync_dir.path }}:/workspace"' in tasks
+    assert '"{{ windmill_seed_app_sync_dir }}:/workspace"' not in tasks
     assert "wmill sync push" in tasks
     assert "--skip-scripts" in tasks
     assert "--includes \"{{ item.sync_pattern }}\"" in tasks

@@ -181,8 +181,8 @@
   register: docker_runtime_nat_chain_recheck
   changed_when: false
   failed_when: docker_runtime_nat_chain_recheck.rc not in [0, 1]
-  retries: 10
-  delay: 2
+  retries: "{{ docker_runtime_chain_recheck_retries }}"
+  delay: "{{ docker_runtime_chain_recheck_delay_seconds }}"
   until: docker_runtime_nat_chain_recheck.rc == 0
   when: docker_runtime_require_nat_chain | bool
 
@@ -191,8 +191,8 @@
   register: docker_runtime_forward_chain_recheck
   changed_when: false
   failed_when: docker_runtime_forward_chain_recheck.rc not in [0, 1]
-  retries: 10
-  delay: 2
+  retries: "{{ docker_runtime_chain_recheck_retries }}"
+  delay: "{{ docker_runtime_chain_recheck_delay_seconds }}"
   until: docker_runtime_forward_chain_recheck.rc == 0
   when: docker_runtime_require_nat_chain | bool
 
