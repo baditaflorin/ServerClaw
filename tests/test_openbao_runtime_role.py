@@ -94,6 +94,17 @@ def test_openbao_runtime_recovers_detached_empty_default_network_before_compose_
     assert '      - network\n      - rm' in tasks
 
 
+def test_openbao_runtime_retries_seal_status_during_restart_window() -> None:
+    tasks = TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "- name: Read OpenBao seal status" in tasks
+    assert "register: openbao_seal_status" in tasks
+    assert "until: openbao_seal_status.status == 200" in tasks
+    assert "register: openbao_unsealed_status" in tasks
+    assert "until: openbao_unsealed_status.status == 200" in tasks
+    assert "changed_when: false" in tasks
+
+
 def test_openbao_runtime_rechecks_seal_state_before_auth_verification() -> None:
     tasks = TASKS_PATH.read_text(encoding="utf-8")
     ensure_unsealed_tasks = ENSURE_UNSEALED_TASKS_PATH.read_text(encoding="utf-8")

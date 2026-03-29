@@ -497,7 +497,12 @@
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
     method: GET
     return_content: true
+    status_code: 200
   register: openbao_seal_status
+  retries: 12
+  delay: 2
+  until: openbao_seal_status.status == 200
+  changed_when: false
 
 - name: Unseal OpenBao with the first threshold of recovery keys
   ansible.builtin.uri:
@@ -520,7 +525,12 @@
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
     method: GET
     return_content: true
+    status_code: 200
   register: openbao_unsealed_status
+  retries: 12
+  delay: 2
+  until: openbao_unsealed_status.status == 200
+  changed_when: false
 
 - name: Assert that OpenBao is unsealed
   ansible.builtin.assert:
