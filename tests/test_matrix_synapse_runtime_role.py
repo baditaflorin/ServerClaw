@@ -77,3 +77,5 @@ def test_matrix_synapse_runtime_generates_signing_material_and_bootstrap_user() 
     assert tasks.index(bootstrap_pull_task) < tasks.index(generate_task)
     assert compose_pull_task["retries"] == 3
     assert compose_pull_task["until"] == "matrix_synapse_pull.rc == 0"
+    assert "Assert Matrix Synapse bootstrap generation produced the required artifacts" in task_file
+    assert "matrix_synapse_generate.rc == 0" in task_file

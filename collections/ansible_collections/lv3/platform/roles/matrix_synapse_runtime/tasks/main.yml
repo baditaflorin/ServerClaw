@@ -316,9 +316,35 @@
       - "{{ matrix_synapse_image }}"
       - generate
   register: matrix_synapse_generate
+  failed_when: false
   changed_when: >-
     'Generating config file' in matrix_synapse_generate.stdout
     or 'Generating signing key file' in matrix_synapse_generate.stdout
+  when:
+    - not matrix_synapse_signing_key_stat.stat.exists
+      or not matrix_synapse_log_config_stat.stat.exists
+
+- name: Recheck whether the Matrix Synapse signing key exists after bootstrap generation
+  ansible.builtin.stat:
+    path: "{{ matrix_synapse_signing_key_remote_file }}"
+  register: matrix_synapse_signing_key_post_generate_stat
+
+- name: Recheck whether the Matrix Synapse generated log config exists after bootstrap generation
+  ansible.builtin.stat:
+    path: "{{ matrix_synapse_log_config_file }}"
+  register: matrix_synapse_log_config_post_generate_stat
+
+- name: Assert Matrix Synapse bootstrap generation produced the required artifacts
+  ansible.builtin.assert:
+    that:
+      - matrix_synapse_generate.rc == 0
+        or (
+          matrix_synapse_signing_key_post_generate_stat.stat.exists
+          and matrix_synapse_log_config_post_generate_stat.stat.exists
+        )
+    fail_msg: >-
+      Matrix Synapse bootstrap generation did not leave the expected signing key and
+      log config artifacts behind.
   when:
     - not matrix_synapse_signing_key_stat.stat.exists
       or not matrix_synapse_log_config_stat.stat.exists
