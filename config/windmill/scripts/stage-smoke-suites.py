@@ -13,6 +13,12 @@ import tempfile
 from pathlib import Path
 
 
+def default_report_file(service: str, environment: str) -> str:
+    safe_service = service.strip().replace("/", "-") or "service"
+    safe_environment = environment.strip().replace("/", "-") or "environment"
+    return str(Path(tempfile.gettempdir()) / f"lv3-stage-smoke-suites-{safe_environment}-{safe_service}.json")
+
+
 def main(
     service: str = "windmill",
     environment: str = "production",
@@ -39,13 +45,7 @@ def main(
         "--environment",
         environment,
     ]
-    resolved_report_file = report_file.strip()
-    if not resolved_report_file:
-        report_fd, resolved_report_file = tempfile.mkstemp(
-            prefix=f"stage-smoke-{service}-{environment}-",
-            suffix=".json",
-        )
-        os.close(report_fd)
+    resolved_report_file = report_file.strip() or default_report_file(service, environment)
     command.extend(["--report-file", resolved_report_file])
     for suite_id in [item.strip() for item in suite_ids.split(",") if item.strip()]:
         command.extend(["--suite-id", suite_id])
@@ -65,8 +65,8 @@ def main(
         "service": service,
         "environment": environment,
         "command": " ".join(shlex.quote(part) for part in command),
-        "report_file": resolved_report_file,
         "returncode": completed.returncode,
+        "report_file": resolved_report_file,
         "stdout": completed.stdout.strip(),
         "stderr": completed.stderr.strip(),
     }
