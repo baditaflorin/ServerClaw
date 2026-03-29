@@ -310,6 +310,38 @@ all:
         )
         + "\n"
     )
+    (tmp_path / "config" / "repo-deploy-catalog.json").write_text(
+        json.dumps(
+            {
+                "$schema": "docs/schema/repo-deploy-catalog.schema.json",
+                "schema_version": "1.0.0",
+                "profiles": [
+                    {
+                        "id": "education-wemeshup-production",
+                        "description": "Deploy the production education application.",
+                        "repo": "git@github.com:baditaflorin/education_wemeshup.git",
+                        "branch": "main",
+                        "source": "private-deploy-key",
+                        "app_name": "education-wemeshup",
+                        "project": "LV3 Apps",
+                        "environment": "production",
+                        "build_pack": "dockercompose",
+                        "ports": "80",
+                        "llm_assistance": "prohibited",
+                        "docker_compose_location": "/compose.yaml",
+                        "compose_domains": [
+                            {
+                                "service": "catalog-web",
+                                "domain": "education-wemeshup.apps.lv3.org",
+                            }
+                        ],
+                    }
+                ],
+            },
+            indent=2,
+        )
+        + "\n"
+    )
     (tmp_path / "config" / "disaster-recovery-targets.json").write_text(
         json.dumps(
             {
@@ -530,6 +562,44 @@ def test_deploy_repo_dry_run_prints_retry_args_when_overridden(
     assert "--retry-delay 2" in captured.out
 
 
+def test_deploy_repo_profile_dry_run_prints_named_profile_route(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(
+        [
+            "deploy-repo-profile",
+            "education-wemeshup-production",
+            "--wait",
+            "--dry-run",
+        ]
+    )
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "repo deploy profile catalog" in captured.out
+    assert "make deploy-repo-profile PROFILE=education-wemeshup-production" in captured.out
+    assert "--wait" in captured.out
+
+
+def test_deploy_repo_profile_dry_run_prints_override_args(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(
+        [
+            "deploy-repo-profile",
+            "education-wemeshup-production",
+            "--branch",
+            "release-candidate",
+            "--timeout",
+            "1800",
+            "--dry-run",
+        ]
+    )
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "--branch release-candidate" in captured.out
+    assert "--timeout 1800" in captured.out
+
+
 def test_open_dry_run_uses_catalog_url(
     capsys: pytest.CaptureFixture[str], minimal_repo: Path
 ) -> None:
@@ -588,6 +658,121 @@ def test_query_platform_context_command_prints_matches(
     assert exit_code == 0
     assert "docs/adr/0042-step-ca.md" in captured.out
     assert "ADR 0042" in captured.out
+
+
+def test_memory_put_command_prints_stored_entry(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class FakeMemoryClient:
+        def __init__(self, timeout_seconds: float = 30) -> None:
+            self.timeout_seconds = timeout_seconds
+
+        def upsert_entry(self, payload: dict[str, object]) -> dict[str, object]:
+            assert payload["scope_kind"] == "workspace"
+            assert payload["scope_id"] == "ops-smoke"
+            assert payload["object_type"] == "note"
+            assert payload["metadata"] == {"lane": "smoke"}
+            return {
+                "entry": {
+                    "memory_id": "mem-123",
+                    "scope_kind": "workspace",
+                    "scope_id": "ops-smoke",
+                    "object_type": "note",
+                    "title": "Smoke note",
+                    "provenance": "unit-test",
+                    "retention_class": "smoke",
+                }
+            }
+
+    monkeypatch.setattr(lv3_cli, "MemorySubstrateClient", FakeMemoryClient)
+
+    exit_code = lv3_cli.main(
+        [
+            "memory",
+            "put",
+            "--scope-kind",
+            "workspace",
+            "--scope-id",
+            "ops-smoke",
+            "--object-type",
+            "note",
+            "--title",
+            "Smoke note",
+            "--content",
+            "ServerClaw memory smoke entry",
+            "--provenance",
+            "unit-test",
+            "--retention-class",
+            "smoke",
+            "--consent-boundary",
+            "test-only",
+            "--metadata-json",
+            '{"lane":"smoke"}',
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "Stored memory entry mem-123" in captured.out
+
+
+def test_memory_query_command_prints_matches(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class FakeMemoryClient:
+        def __init__(self, timeout_seconds: float = 30) -> None:
+            self.timeout_seconds = timeout_seconds
+
+        def query(
+            self,
+            query: str,
+            *,
+            scope_kind: str,
+            scope_id: str,
+            object_type: str | None,
+            limit: int,
+        ) -> dict[str, object]:
+            assert query == "serverclaw smoke"
+            assert scope_kind == "workspace"
+            assert scope_id == "ops-smoke"
+            assert object_type == "note"
+            assert limit == 3
+            return {
+                "retrieval_backend": "hybrid",
+                "matches": [
+                    {
+                        "memory_id": "mem-123",
+                        "object_type": "note",
+                        "title": "Smoke note",
+                        "content": "ServerClaw memory substrate smoke entry with semantic and keyword recall.",
+                        "hybrid_score": 1.75,
+                        "matched_backends": ["semantic", "keyword"],
+                    }
+                ],
+            }
+
+    monkeypatch.setattr(lv3_cli, "MemorySubstrateClient", FakeMemoryClient)
+
+    exit_code = lv3_cli.main(
+        [
+            "memory",
+            "query",
+            "serverclaw smoke",
+            "--scope-kind",
+            "workspace",
+            "--scope-id",
+            "ops-smoke",
+            "--object-type",
+            "note",
+            "--limit",
+            "3",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "mem-123" in captured.out
+    assert "backends=semantic,keyword" in captured.out
 
 
 def test_run_dry_run_redacts_token(

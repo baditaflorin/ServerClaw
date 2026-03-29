@@ -181,3 +181,65 @@
       - (platform_context_verified_query.json.matches | default([])) | length > 0
       - (platform_context_verified_query.json.matches[0].source_path | default('')) | length > 0
     fail_msg: "Platform context API responded, but the query did not return cited matches."
+
+- name: Create a smoke ServerClaw memory entry on the private runtime
+  ansible.builtin.uri:
+    url: "{{ platform_context_private_url }}/v1/memory/entries"
+    method: POST
+    timeout: 180
+    headers:
+      Authorization: "Bearer {{ platform_context_api_token }}"
+    body_format: json
+    body:
+      scope_kind: "{{ platform_context_memory_verification_scope_kind }}"
+      scope_id: "{{ platform_context_memory_verification_scope_id }}"
+      object_type: "{{ platform_context_memory_verification_object_type }}"
+      title: "{{ platform_context_memory_verification_title }}"
+      content: "{{ platform_context_memory_verification_content }}"
+      provenance: adr-0263-live-verify
+      retention_class: ephemeral_smoke
+      consent_boundary: operator-verification
+    status_code: 200
+    return_content: true
+  register: platform_context_memory_smoke_entry
+  changed_when: false
+
+- name: Verify the ServerClaw memory query endpoint returns the smoke entry through both recall paths
+  ansible.builtin.uri:
+    url: "{{ platform_context_private_url }}/v1/memory/query"
+    method: POST
+    timeout: 180
+    headers:
+      Authorization: "Bearer {{ platform_context_api_token }}"
+    body_format: json
+    body:
+      query: "{{ platform_context_memory_verification_query }}"
+      scope_kind: "{{ platform_context_memory_verification_scope_kind }}"
+      scope_id: "{{ platform_context_memory_verification_scope_id }}"
+      object_type: "{{ platform_context_memory_verification_object_type }}"
+      limit: 3
+    status_code: 200
+    return_content: true
+  register: platform_context_memory_query
+  changed_when: false
+
+- name: Assert the ServerClaw memory query returned the smoke entry through semantic and keyword recall
+  ansible.builtin.assert:
+    that:
+      - (platform_context_memory_query.json.matches | default([])) | length > 0
+      - platform_context_memory_query.json.matches[0].memory_id == platform_context_memory_smoke_entry.json.entry.memory_id
+      - "'semantic' in (platform_context_memory_query.json.matches[0].matched_backends | default([]))"
+      - "'keyword' in (platform_context_memory_query.json.matches[0].matched_backends | default([]))"
+    fail_msg: "ServerClaw memory query did not return the smoke entry through both semantic and keyword recall."
+
+- name: Remove the smoke ServerClaw memory entry from the private runtime
+  ansible.builtin.uri:
+    url: "{{ platform_context_private_url }}/v1/memory/entries/{{ platform_context_memory_smoke_entry.json.entry.memory_id }}"
+    method: DELETE
+    timeout: 180
+    headers:
+      Authorization: "Bearer {{ platform_context_api_token }}"
+    status_code: 200
+    return_content: true
+  register: platform_context_memory_smoke_delete
+  changed_when: false
