@@ -13,10 +13,12 @@ n8n_openbao_policy_name: lv3-service-n8n-runtime
 n8n_openbao_approle_name: n8n-runtime
 n8n_container_name: n8n
 n8n_image: "{{ container_image_catalog.images.n8n_runtime.ref }}"
-n8n_port: "{{ platform_service_topology | platform_service_port('n8n', 'internal') }}"
-n8n_internal_base_url: "{{ platform_service_topology | platform_service_url('n8n', 'internal') }}"
-n8n_public_base_url: "{{ platform_service_topology.n8n.urls.public }}"
-n8n_public_hostname: "{{ platform_service_topology.n8n.public_hostname }}"
+n8n_network_mode: host
+n8n_requires_docker_nat: "{{ n8n_network_mode != 'host' }}"
+n8n_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('n8n', 'internal') }}"
+n8n_internal_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('n8n', 'internal') }}"
+n8n_public_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology.n8n.urls.public }}"
+n8n_public_hostname: "{{ hostvars['proxmox_florin'].platform_service_topology.n8n.public_hostname }}"
 n8n_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
 n8n_database_port: 5432
 n8n_database_name: n8n
