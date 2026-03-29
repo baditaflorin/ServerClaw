@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json
+from platform.retry import PlatformRetryError, RetryClass, RetryPolicy, with_retry
 
 
 DEFAULT_AUTH_FILE = Path(
@@ -667,6 +668,37 @@ def wait_for_deployment(client: CoolifyClient, deployment_uuid: str, timeout_sec
     raise RuntimeError(f"Timed out waiting for deployment {deployment_uuid}")
 
 
+def pause_before_retry(delay_seconds: float, *, retry_reason: str) -> None:
+    if delay_seconds <= 0:
+        return
+
+    should_pause = True
+
+    def _wait_once() -> None:
+        nonlocal should_pause
+        if not should_pause:
+            return
+        should_pause = False
+        raise PlatformRetryError(
+            f"retry deployment after {retry_reason}",
+            retry_class=RetryClass.BACKOFF,
+            retry_after=delay_seconds,
+        )
+
+    with_retry(
+        _wait_once,
+        policy=RetryPolicy(
+            max_attempts=2,
+            base_delay_s=delay_seconds,
+            max_delay_s=delay_seconds,
+            multiplier=1.0,
+            jitter=False,
+            transient_max=0,
+        ),
+        error_context=f"coolify deployment retry pause ({retry_reason})",
+    )
+
+
 def command_whoami(args: argparse.Namespace) -> int:
     client = CoolifyClient(load_auth(args.auth_file))
     team = client.current_team()
@@ -842,8 +874,7 @@ def command_deploy_repo(args: argparse.Namespace) -> int:
             if status == "finished":
                 break
             if retry_reason and attempt_number < max_attempts:
-                if retry_delay:
-                    time.sleep(retry_delay)
+                pause_before_retry(retry_delay, retry_reason=retry_reason)
                 continue
             result["attempts"] = attempts
             print(json.dumps(result, indent=2, sort_keys=True))

@@ -2660,7 +2660,7 @@ workstreams:
   - id: ws-0228-main-merge
     adr: "0228"
     title: Integrate ADR 0228 live apply into origin/main
-    status: in_progress
+    status: merged
     owner: codex
     branch: codex/ws-0228-main-merge
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0228-main-merge
@@ -2678,7 +2678,7 @@ workstreams:
       - VERSION
       - changelog.md
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.68.md
+      - docs/release-notes/0.177.70.md
       - versions/stack.yaml
       - build/platform-manifest.json
       - docs/diagrams/agent-coordination-map.excalidraw
@@ -2745,7 +2745,7 @@ workstreams:
             - VERSION
             - changelog.md
             - docs/release-notes/README.md
-            - docs/release-notes/0.177.68.md
+            - docs/release-notes/0.177.70.md
             - versions/stack.yaml
             - build/platform-manifest.json
             - docs/diagrams/agent-coordination-map.excalidraw
@@ -2806,7 +2806,7 @@ workstreams:
     canonical_truth:
       changelog_entry: records ADR 0228 exact-main evidence on the current mainline by verifying Windmill as the default browser-first and API-first operations surface, hardening seeded script and raw-app synchronization on CE v1.662.0, and refreshing the protected canonical truth after the exact-main replay
       release_bump: patch
-      included_in_repo_version: 0.177.68
+      included_in_repo_version: 0.177.70
   - id: ws-0224-server-resident-ops-adrs
     adr: "0224"
     title: Server-resident operations architecture bundle
