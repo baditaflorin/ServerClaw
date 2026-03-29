@@ -311,6 +311,7 @@ class PortalRepository:
             try:
                 payload = json.loads(report.read_text(encoding="utf-8"))
             except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+                # Mirrored drift receipts can include unreadable artifacts from live sync.
                 continue
             payload["_path"] = str(report)
             return payload
@@ -344,6 +345,7 @@ class PortalRepository:
             try:
                 receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
             except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+                # Keep the dashboard available even when one mirrored receipt is unreadable.
                 continue
             text = normalize_text(json.dumps(receipt, sort_keys=True))
             matched = []

@@ -233,6 +233,15 @@
     mode: "0644"
   loop: "{{ search_fabric_source_files.files | sort(attribute='path') }}"
 
+- name: Sync the shared search fabric package explicitly
+  ansible.builtin.copy:
+    src: "{{ ops_portal_repo_root }}/scripts/search_fabric/"
+    dest: "{{ ops_portal_service_dir }}/search_fabric/"
+    owner: root
+    group: root
+    mode: "0644"
+    directory_mode: "0755"
+
 - name: Sync the ops portal file-backed data sources
   ansible.builtin.copy:
     src: "{{ item.src }}"
@@ -241,6 +250,15 @@
     group: root
     mode: "0644"
   loop: "{{ ops_portal_file_sources }}"
+
+- name: Ensure the ops portal directory-backed data destinations exist
+  ansible.builtin.file:
+    path: "{{ item.dest }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ ops_portal_directory_sources }}"
 
 - name: Sync the ops portal directory-backed data sources
   ansible.builtin.copy:
