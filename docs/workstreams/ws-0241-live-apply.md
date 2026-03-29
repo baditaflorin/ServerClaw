@@ -3,7 +3,7 @@
 - ADR: [ADR 0241](../adr/0241-rich-content-and-inline-knowledge-editing-via-tiptap.md)
 - Title: Live apply a repo-managed Tiptap editor for bounded operator knowledge inside the Windmill admin app
 - Status: live_applied
-- Implemented In Repo Version: not yet (pending main merge)
+- Implemented In Repo Version: 0.177.61
 - Live Applied In Platform Version: 0.130.43
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
@@ -66,6 +66,17 @@
 - a second governed `f/lv3/operator_update_notes` run restored the original operator note string and returned `changed: true`, `status: ok`, and `note_length: 65`, leaving the live roster content back at the original single-line note
 - the final branch-local automation hardening covered both live-apply blockers discovered during replay: `config/windmill/apps/wmill-lock.yaml` is now a required validated raw-app surface, and the worker checkout archive now dereferences scoped-runner shard symlinks while using guest temp staging files so concurrent replays do not race on shared filenames
 
+## Mainline Integration Outcome
+
+- merged to `origin/main` in repository version `0.177.61`
+- updated `VERSION`, `changelog.md`, `RELEASE.md`, versioned release notes,
+  `versions/stack.yaml`, `README.md`, ADR metadata, and the workstream
+  registry only during the protected mainline integration step
+- preserved the current platform version `0.130.44` because the verified live
+  replay already ran from the rebased latest-`origin/main` worktree while the
+  mainline baseline later advanced with unrelated exact-main releases before
+  this repository release cut
+
 ## Live Evidence
 
 - live-apply receipt: `receipts/live-applies/2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply.json`
@@ -77,5 +88,6 @@
 
 ## Merge-To-Main Notes
 
-- protected integration files intentionally remain untouched on this workstream branch
-- remaining for merge to `main`: update `VERSION`, `changelog.md`, the top-level `README.md` integrated status summary, and `versions/stack.yaml` during the protected mainline integration step
+- protected integration files were intentionally deferred to the exact-main
+  integration branch and are now recorded in release `0.177.61`
+- remaining for merge to `main`: none

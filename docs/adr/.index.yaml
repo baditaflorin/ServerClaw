@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-29'
 total_adrs: 278
 implementation_status_summary:
-  Implemented: 219
+  Implemented: 220
   Partial: 4
-  Not Implemented: 54
+  Not Implemented: 53
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4077,7 +4077,7 @@ adr_index:
   - adr: '0241'
     title: Rich Content And Inline Knowledge Editing Via Tiptap
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4089,6 +4089,7 @@ adr_index:
       - tiptap
     summary: We will use Tiptap as the default rich-content editor framework for
     filename: 0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
+    implemented_version: 0.177.61
   - adr: '0242'
     title: Guided Human Onboarding Via Shepherd Tours
     status: Accepted
