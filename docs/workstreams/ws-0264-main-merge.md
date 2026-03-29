@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0264](../adr/0264-failure-domain-isolated-validation-lanes.md)
 - Title: Integrate ADR 0264 exact-main replay onto `origin/main`
-- Status: `ready_for_merge`
+- Status: `merged`
 - Included In Repo Version: 0.177.84
 - Platform Version Observed During Integration: 0.130.58
 - Release Date: 2026-03-29
@@ -76,6 +76,6 @@ mainline evidence.
 
 ## Outcome
 
-- release `0.177.84` is the prepared mainline cut for the ADR 0264 failure-domain-isolated validation lanes plus the exact-main Windmill worker hardening
+- release `0.177.84` now carries the ADR 0264 failure-domain-isolated validation lanes plus the exact-main Windmill worker hardening on `main`
 - platform version `0.130.58` is the first integrated platform version targeted by the canonical `validation_gate` receipt for the synchronized latest-main replay
-- `receipts/live-applies/2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply.json` remains the canonical exact-main proof to finalize once the rebased integrated-tree gates pass and `main` is fast-forwarded
+- `receipts/live-applies/2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply.json` is the canonical exact-main proof, while `docs/workstreams/ws-0264-live-apply.md` preserves the branch-local and worker-recovery narrative

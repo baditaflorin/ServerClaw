@@ -941,7 +941,7 @@ workstreams:
   - id: ws-0264-main-merge
     adr: "0264"
     title: Integrate ADR 0264 failure-domain-isolated validation lanes onto origin/main
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/adr-0264-main-integration
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0264-main-integration
