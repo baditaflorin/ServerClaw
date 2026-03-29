@@ -62,7 +62,7 @@ workstreams:
       - tests/test_nginx_edge_publication_role.py
       - tests/test_remote_exec.py
       - tests/test_generate_platform_vars.py
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: true
     canonical_truth:
       changelog_entry: implemented ADR 0201 by converging Harbor with Trivy scanning, Keycloak-backed operator login, and a repo-managed check-runner publication path through registry.lv3.org
@@ -542,6 +542,184 @@ workstreams:
         gates, route truth, and one operator-facing assurance rollup
       release_bump: patch
       included_in_repo_version: 0.177.51
+  - id: ws-0238-live-apply
+    adr: "0238"
+    title: Data-dense operator grids live apply
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0238-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0238-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0238-live-apply.md
+    depends_on:
+      - adr-0108-operator-onboarding
+      - adr-0122-operator-access-admin
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0238-live-apply.md
+      - docs/adr/0238-data-dense-operator-grids-via-ag-grid-community.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/budgeted-workflow-scheduler.md
+      - docs/runbooks/config-merge-protocol.md
+      - docs/runbooks/configure-windmill.md
+      - docs/runbooks/service-dependency-graph-runtime.md
+      - docs/runbooks/windmill-operator-access-admin.md
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/meta/argument_specs.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+      - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
+      - platform/scheduler/__init__.py
+      - platform/scheduler/scheduler.py
+      - platform/scheduler/windmill_client.py
+      - platform/use_cases/runbooks.py
+      - scripts/windmill_run_wait_result.py
+      - scripts/sync_windmill_seed_schedules.py
+      - tests/test_config_merge_windmill.py
+      - tests/test_windmill_circuit_clients.py
+      - tests/test_windmill_operator_admin_app.py
+      - receipts/live-applies/2026-03-28-adr-0238-operator-grid-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_contract
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: adr_0238_live_apply
+          paths:
+            - docs/workstreams/ws-0238-live-apply.md
+            - docs/adr/0238-data-dense-operator-grids-via-ag-grid-community.md
+            - docs/runbooks/budgeted-workflow-scheduler.md
+            - docs/runbooks/config-merge-protocol.md
+            - docs/runbooks/configure-windmill.md
+            - docs/runbooks/service-dependency-graph-runtime.md
+            - docs/runbooks/windmill-operator-access-admin.md
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/meta/argument_specs.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+            - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
+            - platform/scheduler/__init__.py
+            - platform/scheduler/scheduler.py
+            - platform/scheduler/windmill_client.py
+            - platform/use_cases/runbooks.py
+            - scripts/windmill_run_wait_result.py
+            - scripts/sync_windmill_seed_schedules.py
+            - tests/test_config_merge_windmill.py
+            - tests/test_windmill_circuit_clients.py
+            - tests/test_windmill_operator_admin_app.py
+            - receipts/live-applies/2026-03-28-adr-0238-operator-grid-live-apply.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: rolled out AG Grid Community on the Windmill operator
+        access roster so dense operator data now has governed sorting,
+        filtering, pagination, column control, and keyboard navigation
+      release_bump: patch
+      included_in_repo_version: 0.177.66
+      latest_receipts:
+        operator_access: 2026-03-28-adr-0238-operator-grid-live-apply
+        windmill: 2026-03-28-adr-0238-operator-grid-live-apply
+  - id: ws-0238-main-integration
+    adr: "0238"
+    title: Integrate ADR 0238 operator grid into origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0238-main-integration
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0238-main-integration
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0238-main-integration.md
+    depends_on:
+      - ws-0238-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0238-main-integration.md
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.66.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/adr/.index.yaml
+      - docs/adr/0238-data-dense-operator-grids-via-ag-grid-community.md
+      - docs/workstreams/ws-0238-live-apply.md
+      - docs/runbooks/budgeted-workflow-scheduler.md
+      - docs/runbooks/config-merge-protocol.md
+      - docs/runbooks/configure-windmill.md
+      - docs/runbooks/service-dependency-graph-runtime.md
+      - docs/runbooks/windmill-operator-access-admin.md
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/meta/argument_specs.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+      - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
+      - platform/scheduler/__init__.py
+      - platform/scheduler/scheduler.py
+      - platform/scheduler/windmill_client.py
+      - platform/use_cases/runbooks.py
+      - scripts/windmill_run_wait_result.py
+      - scripts/sync_windmill_seed_schedules.py
+      - tests/test_config_merge_windmill.py
+      - tests/test_windmill_circuit_clients.py
+      - tests/test_windmill_operator_admin_app.py
+      - receipts/live-applies/2026-03-28-adr-0238-operator-grid-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws_0238_main_integration_doc
+          paths:
+            - docs/workstreams/ws-0238-main-integration.md
+          mode: exclusive
+        - id: adr_0238_mainline_truth
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.66.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: exclusive
+        - id: adr_0238_main_merge_surfaces
+          paths:
+            - docs/adr/.index.yaml
+            - docs/adr/0238-data-dense-operator-grids-via-ag-grid-community.md
+            - docs/workstreams/ws-0238-live-apply.md
+            - docs/runbooks/budgeted-workflow-scheduler.md
+            - docs/runbooks/config-merge-protocol.md
+            - docs/runbooks/configure-windmill.md
+            - docs/runbooks/service-dependency-graph-runtime.md
+            - docs/runbooks/windmill-operator-access-admin.md
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/meta/argument_specs.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+            - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
+            - platform/scheduler/__init__.py
+            - platform/scheduler/scheduler.py
+            - platform/scheduler/windmill_client.py
+            - platform/use_cases/runbooks.py
+            - scripts/windmill_run_wait_result.py
+            - scripts/sync_windmill_seed_schedules.py
+            - tests/test_config_merge_windmill.py
+            - tests/test_windmill_circuit_clients.py
+            - tests/test_windmill_operator_admin_app.py
+            - receipts/live-applies/2026-03-28-adr-0238-operator-grid-live-apply.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
   - id: ws-0246-live-apply
     adr: "0246"
     title: Live apply startup, readiness, liveness, and degraded-state semantics

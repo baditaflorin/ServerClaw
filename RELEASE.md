@@ -3,10 +3,10 @@
 - Date: 2026-03-29
 
 ## Summary
-- implements ADR 0245 by surfacing declared-to-live service attestation through shared runtime witnesses, authenticated gateway APIs, and ops-portal visibility while hardening the live ops-portal sync and build path for separate-worktree replay
+- rolled out AG Grid Community on the Windmill operator access roster so dense operator data now has governed sorting, filtering, pagination, column control, and keyboard navigation
 
 ## Platform Impact
-- no live platform version bump; this release records the verified ADR 0245 declared-to-live attestation rollout on top of the current mainline platform baseline 0.130.46
+- no live platform version bump; this release records the verified ADR 0238 AG Grid operator-grid rollout while the current platform baseline remains 0.130.46
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)
