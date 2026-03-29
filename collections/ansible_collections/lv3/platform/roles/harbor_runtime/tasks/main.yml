@@ -670,6 +670,87 @@
   when: harbor_admin_password_needs_reset | bool
   no_log: true
 
+- name: Verify the Harbor admin configuration API is reachable before OIDC bootstrap
+  block:
+    - name: Probe the Harbor admin configuration API before OIDC bootstrap
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/configurations"
+        method: GET
+        user: admin
+        password: "{{ harbor_admin_password }}"
+        force_basic_auth: true
+        status_code: 200
+      register: harbor_config_query_before_oidc
+      retries: 12
+      delay: 5
+      until: harbor_config_query_before_oidc.status == 200
+      changed_when: false
+      no_log: true
+  rescue:
+    - name: Force one Harbor recycle when the published admin configuration API is unavailable
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - -f
+          - "{{ harbor_generated_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ harbor_installer_dir }}"
+      register: harbor_compose_oidc_recovery_down
+      changed_when: >-
+        'Stopping' in harbor_compose_oidc_recovery_down.stdout
+        or 'Removing' in harbor_compose_oidc_recovery_down.stdout
+        or 'Network' in harbor_compose_oidc_recovery_down.stdout
+
+    - name: Force one Harbor recreate when the published admin configuration API is unavailable
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - -f
+          - "{{ harbor_generated_compose_file }}"
+          - up
+          - -d
+          - --force-recreate
+      args:
+        chdir: "{{ harbor_installer_dir }}"
+      register: harbor_compose_oidc_recovery_up
+      retries: 6
+      delay: 10
+      until: harbor_compose_oidc_recovery_up.rc == 0
+      changed_when: >-
+        'Creating' in harbor_compose_oidc_recovery_up.stdout
+        or 'Recreating' in harbor_compose_oidc_recovery_up.stdout
+        or 'Starting' in harbor_compose_oidc_recovery_up.stdout
+
+    - name: Wait for Harbor ping locally after the OIDC readiness recycle
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/ping"
+        method: GET
+        status_code: 200
+      register: harbor_ping_after_oidc_recovery
+      retries: 30
+      delay: 10
+      until: harbor_ping_after_oidc_recovery.status == 200
+      changed_when: false
+
+    - name: Re-probe the Harbor admin configuration API after the OIDC readiness recycle
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/configurations"
+        method: GET
+        user: admin
+        password: "{{ harbor_admin_password }}"
+        force_basic_auth: true
+        status_code: 200
+      register: harbor_config_query_before_oidc
+      retries: 24
+      delay: 5
+      until: harbor_config_query_before_oidc.status == 200
+      changed_when: false
+      no_log: true
+
 - name: Configure Harbor OIDC defaults
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/configurations"
@@ -696,7 +777,7 @@
       - 200
       - 201
   register: harbor_oidc_configuration
-  retries: 12
+  retries: 24
   delay: 5
   until: harbor_oidc_configuration.status in [200, 201]
   no_log: true

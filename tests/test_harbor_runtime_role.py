@@ -51,6 +51,9 @@ def test_role_waits_for_keycloak_before_bootstrap_token_request() -> None:
 
     readiness_task = task_by_name["Wait for the local Keycloak admin endpoint to recover after Docker reconciliation"]
     token_task = task_by_name["Request a Keycloak admin token for Harbor bootstrap"]
+    oidc_readiness_block = task_by_name["Verify the Harbor admin configuration API is reachable before OIDC bootstrap"]
+    config_probe_task = oidc_readiness_block["block"][0]
+    recovery_down_task, recovery_up_task, recovery_ping_task, re_probe_task = oidc_readiness_block["rescue"]
     oidc_task = task_by_name["Configure Harbor OIDC defaults"]
 
     assert readiness_task["retries"] == 24
@@ -59,7 +62,20 @@ def test_role_waits_for_keycloak_before_bootstrap_token_request() -> None:
     assert token_task["retries"] == 12
     assert token_task["delay"] == 5
     assert token_task["until"] == "harbor_keycloak_admin_token_response.status == 200"
-    assert oidc_task["retries"] == 12
+    assert config_probe_task["retries"] == 12
+    assert config_probe_task["delay"] == 5
+    assert config_probe_task["until"] == "harbor_config_query_before_oidc.status == 200"
+    assert "Removing" in recovery_down_task["changed_when"]
+    assert recovery_up_task["retries"] == 6
+    assert recovery_up_task["delay"] == 10
+    assert recovery_up_task["until"] == "harbor_compose_oidc_recovery_up.rc == 0"
+    assert recovery_ping_task["retries"] == 30
+    assert recovery_ping_task["delay"] == 10
+    assert recovery_ping_task["until"] == "harbor_ping_after_oidc_recovery.status == 200"
+    assert re_probe_task["retries"] == 24
+    assert re_probe_task["delay"] == 5
+    assert re_probe_task["until"] == "harbor_config_query_before_oidc.status == 200"
+    assert oidc_task["retries"] == 24
     assert oidc_task["delay"] == 5
     assert oidc_task["until"] == "harbor_oidc_configuration.status in [200, 201]"
 
