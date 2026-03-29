@@ -62,7 +62,7 @@ workstreams:
       - tests/test_nginx_edge_publication_role.py
       - tests/test_remote_exec.py
       - tests/test_generate_platform_vars.py
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: true
     canonical_truth:
       changelog_entry: implemented ADR 0201 by converging Harbor with Trivy scanning, Keycloak-backed operator login, and a repo-managed check-runner publication path through registry.lv3.org
@@ -405,7 +405,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0252 by governing route assertions, DNS record sets, apex publication truth, and private-route verification through one shared route and DNS assertion ledger
       release_bump: patch
-      included_in_repo_version: 0.177.66
+      included_in_repo_version: 0.177.67
       latest_receipts:
         public_edge_publication: 2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-live-apply
         route_dns_assertion_ledger: 2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-live-apply
