@@ -73,6 +73,23 @@ def test_ops_portal_runtime_explicitly_syncs_search_fabric_package_before_build(
     }
 
 
+def test_ops_portal_runtime_syncs_search_fabric_tree_as_a_directory_copy() -> None:
+    tasks = yaml.safe_load(TASKS_PATH.read_text())
+
+    sync_task = next(
+        task for task in tasks if task.get("name") == "Sync the shared search fabric files"
+    )
+
+    assert sync_task["ansible.builtin.copy"] == {
+        "src": "{{ ops_portal_repo_root }}/scripts/search_fabric/",
+        "dest": "{{ ops_portal_service_dir }}/search_fabric/",
+        "owner": "root",
+        "group": "root",
+        "mode": "0644",
+        "directory_mode": "0755",
+    }
+
+
 def test_ops_portal_runtime_dockerfile_copies_package_contents_without_nesting() -> None:
     dockerfile_template = DOCKERFILE_TEMPLATE_PATH.read_text()
 

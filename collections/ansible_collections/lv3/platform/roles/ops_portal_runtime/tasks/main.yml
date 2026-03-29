@@ -196,63 +196,14 @@
     group: root
     mode: "0755"
 
-- name: Discover the search fabric directories on the controller
-  ansible.builtin.find:
-    paths: "{{ ops_portal_repo_root }}/scripts/search_fabric"
-    recurse: true
-    file_type: directory
-    excludes: "__pycache__"
-  register: search_fabric_source_directories
-  delegate_to: localhost
-  become: false
-
-- name: Ensure the synced search fabric directories exist
-  ansible.builtin.file:
-    path: "{{ ops_portal_service_dir }}/search_fabric/{{ item.path | replace(ops_portal_repo_root ~ '/scripts/search_fabric/', '') }}"
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
-  loop: "{{ search_fabric_source_directories.files | sort(attribute='path') }}"
-  when: item.path != ops_portal_repo_root ~ '/scripts/search_fabric'
-
-- name: Discover the search fabric files on the controller
-  ansible.builtin.find:
-    paths: "{{ ops_portal_repo_root }}/scripts/search_fabric"
-    recurse: true
-    file_type: file
-    excludes:
-      - "__pycache__"
-      - "*.pyc"
-      - "._*"
-      - ".DS_Store"
-  register: search_fabric_source_files
-  delegate_to: localhost
-  become: false
-
-- name: Ensure the synced search fabric file parent directories exist
-  ansible.builtin.file:
-    path: >-
-      {{
-        (
-          ops_portal_service_dir ~ '/search_fabric/' ~
-          (item.path | replace(ops_portal_repo_root ~ '/scripts/search_fabric/', ''))
-        ) | dirname
-      }}
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
-  loop: "{{ search_fabric_source_files.files | sort(attribute='path') }}"
-
 - name: Sync the shared search fabric files
   ansible.builtin.copy:
-    src: "{{ item.path }}"
-    dest: "{{ ops_portal_service_dir }}/search_fabric/{{ item.path | replace(ops_portal_repo_root ~ '/scripts/search_fabric/', '') }}"
+    src: "{{ ops_portal_repo_root }}/scripts/search_fabric/"
+    dest: "{{ ops_portal_service_dir }}/search_fabric/"
     owner: root
     group: root
     mode: "0644"
-  loop: "{{ search_fabric_source_files.files | sort(attribute='path') }}"
+    directory_mode: "0755"
 
 - name: Sync the shared search fabric package explicitly
   ansible.builtin.copy:
