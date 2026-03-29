@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/restore-readiness-profiles.schema.json",
+  "title": "LV3 Restore Readiness Profiles",
+  "type": "object",
+  "required": [
+    "$schema",
+    "schema_version",
+    "profiles"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "docs/schema/restore-readiness-profiles.schema.json"
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "profiles": {
+      "type": "object",
+      "minProperties": 1,
+      "patternProperties": {
+        "^[a-z0-9][a-z0-9-]*$": {
+          "type": "object",
+          "required": [
+            "description",
+            "initial_wait_seconds",
+            "max_attempts",
+            "network_dependency_checks",
+            "retry_delay_seconds",
+            "service_class",
+            "synthetic_replay"
+          ],
+          "properties": {
+            "description": {
+              "type": "string",
+              "minLength": 1
+            },
+            "initial_wait_seconds": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "max_attempts": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "network_dependency_checks": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9_:-]*$"
+              }
+            },
+            "retry_delay_seconds": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "service_class": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]*$"
+            },
+            "synthetic_replay": {
+              "type": "object",
+              "required": [
+                "enabled"
+              ],
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "target_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+                }
+              },
+              "additionalProperties": false,
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "enabled": {
+                        "const": true
+                      }
+                    }
+                  },
+                  "then": {
+                    "required": [
+                      "target_id"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

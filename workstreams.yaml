@@ -49,6 +49,36 @@ workstreams:
       - tests/test_artifact_cache_runtime_role.py
       - tests/test_artifact_cache_seed.py
       - tests/test_docker_runtime_role.py
+=======
+  - id: ws-0272-live-apply
+    adr: "0272"
+    title: Restore readiness ladders and stateful warm-up verification profiles
+    status: in_progress
+    owner: codex
+    branch: codex/adr-0272-restore-readiness-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0272-restore-readiness
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0272-live-apply.md
+    depends_on:
+      - adr-0099-backup-restore-verification
+      - adr-0190-synthetic-transaction-replay
+      - adr-0246-startup-readiness-liveness-and-degraded-state-semantics
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0272-live-apply.md
+      - docs/adr/0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/backup-restore-verification.md
+      - .config-locations.yaml
+      - config/restore-readiness-profiles.json
+      - docs/schema/restore-readiness-profiles.schema.json
+      - scripts/restore_verification.py
+      - scripts/validate_repository_data_models.py
+      - config/workflow-catalog.json
+      - tests/test_restore_verification.py
+      - receipts/restore-verifications/
+      - receipts/live-applies/
+>>>>>>> f025422a ([restore] Implement ADR 0272 readiness ladders)
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -56,6 +86,7 @@ workstreams:
             - workstreams.yaml
           mode: shared_contract
           contract: workstream-registry-v1
+<<<<<<< HEAD
         - id: artifact_cache_adr_index_contract
           paths:
             - docs/adr/.index.yaml
@@ -93,6 +124,65 @@ workstreams:
         cache VM from ADR 0296 as a later live-apply step
       release_bump: patch
       included_in_repo_version: 0.177.73
+  - id: ws-0272-live-apply
+    adr: "0272"
+    title: Restore readiness ladders and stateful warm-up verification profiles
+    status: in_progress
+    owner: codex
+    branch: codex/adr-0272-restore-readiness-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0272-restore-readiness
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0272-live-apply.md
+    depends_on:
+      - adr-0099-backup-restore-verification
+      - adr-0190-synthetic-transaction-replay
+      - adr-0246-startup-readiness-liveness-and-degraded-state-semantics
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0272-live-apply.md
+      - docs/adr/0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/backup-restore-verification.md
+      - .config-locations.yaml
+      - config/restore-readiness-profiles.json
+      - docs/schema/restore-readiness-profiles.schema.json
+      - scripts/restore_verification.py
+      - scripts/validate_repository_data_models.py
+      - config/workflow-catalog.json
+      - tests/test_restore_verification.py
+      - receipts/restore-verifications/
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0272_docs
+          paths:
+            - docs/workstreams/ws-0272-live-apply.md
+            - docs/adr/0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md
+            - docs/runbooks/backup-restore-verification.md
+            - docs/adr/.index.yaml
+            - .config-locations.yaml
+          mode: exclusive
+        - id: adr_0272_restore_automation
+          paths:
+            - config/restore-readiness-profiles.json
+            - docs/schema/restore-readiness-profiles.schema.json
+            - scripts/restore_verification.py
+            - scripts/validate_repository_data_models.py
+            - config/workflow-catalog.json
+            - tests/test_restore_verification.py
+            - receipts/restore-verifications/
+            - receipts/live-applies/
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false
+    canonical_truth:
+      changelog_entry: implements ADR 0272 by adding governed restore-readiness ladders, per-service warm-up profiles, ladder-aware restore receipts, and verified live restore evidence for the protected guests
+      release_bump: patch
   - id: ws-0224-repo-intake
     adr: "0224"
     title: Self-service repo intake and agent-assisted app deployments
