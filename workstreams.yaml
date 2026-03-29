@@ -359,8 +359,8 @@ workstreams:
     title: Unified runtime assurance scoreboard live apply
     status: live_applied
     owner: codex
-    branch: codex/ws-0253-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0253-live-apply
+    branch: codex/ws-0253-live-apply-r2
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0253-live-apply-r2
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0253-live-apply.md
     depends_on:
       - adr-0093-interactive-ops-portal
@@ -383,6 +383,7 @@ workstreams:
       - tests/test_interactive_ops_portal.py
       - tests/test_runtime_assurance_scoreboard.py
       - receipts/live-applies/2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-live-apply.json
+      - receipts/live-applies/2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-latest-main-revalidation.json
       - README.md
       - VERSION
       - changelog.md
@@ -421,6 +422,7 @@ workstreams:
             - tests/test_interactive_ops_portal.py
             - tests/test_runtime_assurance_scoreboard.py
             - receipts/live-applies/2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-live-apply.json
+            - receipts/live-applies/2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-latest-main-revalidation.json
           mode: exclusive
         - id: integration_release_surfaces
           paths:
@@ -444,7 +446,7 @@ workstreams:
       release_bump: patch
       included_in_repo_version: 0.177.59
       latest_receipts:
-        ops_portal: 2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-live-apply
+        ops_portal: 2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-latest-main-revalidation
   - id: ws-0252-live-apply
     adr: "0252"
     title: Live apply ADR 0252 route and DNS publication assertion ledger
