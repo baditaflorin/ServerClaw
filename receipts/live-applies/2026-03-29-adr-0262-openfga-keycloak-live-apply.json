@@ -5,7 +5,7 @@
   "applied_on": "2026-03-29",
   "recorded_on": "2026-03-29",
   "recorded_by": "codex",
-  "source_commit": "ac9e720f8cc2d8a3b88c3cead419a3642dc44434",
+  "source_commit": "e23b4f04483a86476bb41c1b08449c3d94a0e94a",
   "repo_version_context": "0.177.78",
   "workflow_id": "adr-0262-openfga-keycloak-live-apply",
   "adr": "0262",

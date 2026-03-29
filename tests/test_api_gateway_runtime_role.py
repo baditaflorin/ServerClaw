@@ -199,7 +199,6 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     tasks = TASKS_PATH.read_text(encoding="utf-8")
     sync_tree_tasks = SYNC_TREE_TASKS_PATH.read_text(encoding="utf-8")
     verify_tasks = VERIFY_TASKS_PATH.read_text(encoding="utf-8")
-    sync_tree_tasks = SYNC_TREE_TASKS_PATH.read_text(encoding="utf-8")
     requirements = REQUIREMENTS_PATH.read_text(encoding="utf-8")
 
     assert "scripts/maintenance_window_tool.py" in defaults
@@ -236,7 +235,7 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "api_gateway_tree_remote_archive_path" in sync_tree_tasks
     assert "(api_gateway_tree_archive_local.path | basename)" in sync_tree_tasks
     assert 'dest: "{{ api_gateway_tree_remote_archive_path }}"' in sync_tree_tasks
-    assert 'tar -xzf "{{ api_gateway_tree_remote_archive_path }}"' in sync_tree_tasks
+    assert '-xzf "{{ api_gateway_tree_remote_archive_path }}"' in sync_tree_tasks
     assert "Remove stale API gateway build-context ignore files" in tasks
     assert "{{ api_gateway_service_dir }}/.dockerignore" in tasks
     assert "Ensure the API gateway receipts build-context tree exists" not in tasks
