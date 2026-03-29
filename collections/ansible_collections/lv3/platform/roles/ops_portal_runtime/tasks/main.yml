@@ -160,6 +160,15 @@
     mode: "0644"
   loop: "{{ ops_portal_source_files.files | sort(attribute='path') }}"
 
+- name: Ensure the ops portal overlay directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ ops_portal_runtime_overlay_directories }}"
+
 - name: Sync critical ops portal runtime files explicitly
   ansible.builtin.copy:
     content: "{{ lookup('ansible.builtin.file', item.src) }}"
@@ -167,15 +176,7 @@
     owner: root
     group: root
     mode: "0644"
-  loop:
-    - src: "{{ ops_portal_repo_root }}/scripts/ops_portal/app.py"
-      dest: "{{ ops_portal_service_dir }}/ops_portal/app.py"
-    - src: "{{ ops_portal_repo_root }}/scripts/ops_portal/runtime_assurance.py"
-      dest: "{{ ops_portal_service_dir }}/ops_portal/runtime_assurance.py"
-    - src: "{{ ops_portal_repo_root }}/scripts/ops_portal/templates/partials/overview.html"
-      dest: "{{ ops_portal_service_dir }}/ops_portal/templates/partials/overview.html"
-    - src: "{{ ops_portal_repo_root }}/scripts/ops_portal/static/portal.css"
-      dest: "{{ ops_portal_service_dir }}/ops_portal/static/portal.css"
+  loop: "{{ ops_portal_runtime_file_sources }}"
 
 - name: Reset the synced search fabric package tree before refresh
   ansible.builtin.file:
@@ -224,6 +225,21 @@
   delegate_to: localhost
   become: false
 
+- name: Ensure the synced search fabric file parent directories exist
+  ansible.builtin.file:
+    path: >-
+      {{
+        (
+          ops_portal_service_dir ~ '/search_fabric/' ~
+          (item.path | replace(ops_portal_repo_root ~ '/scripts/search_fabric/', ''))
+        ) | dirname
+      }}
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ search_fabric_source_files.files | sort(attribute='path') }}"
+
 - name: Sync the shared search fabric files
   ansible.builtin.copy:
     content: "{{ lookup('ansible.builtin.file', item.path) }}"
@@ -269,6 +285,23 @@
     mode: "0644"
     directory_mode: "0755"
   loop: "{{ ops_portal_directory_sources }}"
+
+- name: Discover macOS metadata files in the synced ops portal data tree
+  ansible.builtin.find:
+    paths: "{{ ops_portal_data_dir }}"
+    recurse: true
+    file_type: file
+    hidden: true
+    patterns:
+      - "._*"
+      - ".DS_Store"
+  register: ops_portal_data_metadata_files
+
+- name: Remove macOS metadata files from the synced ops portal data tree
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ ops_portal_data_metadata_files.files }}"
 
 - name: Sync the ops portal service build inputs explicitly
   ansible.builtin.copy:

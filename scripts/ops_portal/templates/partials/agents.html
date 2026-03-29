@@ -34,6 +34,19 @@
   </section>
 </div>
 
+<section class="panel chart-panel">
+  <div class="section-head">
+    <div>
+      <p class="section-kicker">Coordination Mix</p>
+      <h3>Session states at a glance</h3>
+    </div>
+    <span class="pill">{{ coordination.summary.count }} sessions</span>
+  </div>
+  <div class="chart-canvas" data-echart-target="agent-coordination-status-chart"></div>
+  <script id="agent-coordination-status-chart" type="application/json">{{ charts.coordination_status|tojson }}</script>
+  <p class="muted chart-caption">The chart refreshes with the same cadence as the coordination cards, so blocked or escalated work stands out immediately.</p>
+</section>
+
 <div class="service-grid">
   {% if coordination.entries %}
     {% for entry in coordination.entries %}

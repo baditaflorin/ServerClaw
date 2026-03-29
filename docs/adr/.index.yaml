@@ -4080,7 +4080,7 @@ adr_index:
   - adr: '0240'
     title: Operator Visualization Panels Via Apache ECharts
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4091,6 +4091,7 @@ adr_index:
       - echarts
     summary: We will use Apache ECharts as the default charting and lightweight
     filename: 0240-operator-visualization-panels-via-apache-echarts.md
+    implemented_version: 0.177.64
   - adr: '0241'
     title: Rich Content And Inline Knowledge Editing Via Tiptap
     status: Accepted

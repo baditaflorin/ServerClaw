@@ -156,7 +156,8 @@ a {
 
 .overview-grid,
 .changelog-grid,
-.runbook-grid {
+.runbook-grid,
+.chart-grid {
   display: grid;
   gap: 1rem;
 }
@@ -178,6 +179,11 @@ a {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.chart-grid,
+.changelog-grid {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
 .service-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -188,6 +194,7 @@ a {
 .deployment-console,
 .runbook-card,
 .drift-panel,
+.chart-panel {
 .assurance-stat {
   padding: 1.2rem;
 }
@@ -337,6 +344,24 @@ a {
   font-family: "IBM Plex Mono", monospace;
 }
 
+.chart-panel {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.chart-canvas {
+  width: 100%;
+  min-height: 260px;
+}
+
+.chart-canvas-tall {
+  min-height: 320px;
+}
+
+.chart-caption {
+  margin: 0;
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -460,6 +485,7 @@ select {
   .hero,
   .overview-grid,
   .changelog-grid,
+  .chart-grid,
   .assurance-summary-grid {
     grid-template-columns: 1fr;
   }
