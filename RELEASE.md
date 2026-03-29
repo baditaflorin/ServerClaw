@@ -3,10 +3,10 @@
 - Date: 2026-03-29
 
 ## Summary
-- implements ADR 0245 by surfacing declared-to-live service attestation through shared runtime witnesses, authenticated gateway APIs, and ops-portal visibility while hardening the live ops-portal sync and build path for separate-worktree replay
+- implements ADR 0232 by adding the private Nomad scheduler, controller-local TLS and ACL bootstrap, Proxmox proxy and firewall wiring, and repo-managed smoke jobs for durable batch and long-running internal workloads
 
 ## Platform Impact
-- no live platform version bump; this release records the verified ADR 0245 declared-to-live attestation rollout on top of the current mainline platform baseline 0.130.46
+- release 0.177.65 records the verified ADR 0232 Nomad replay from the latest origin/main while the live platform baseline remains 0.130.44
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

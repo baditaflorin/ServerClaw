@@ -665,6 +665,55 @@
       }
     },
     {
+      "id": "nomad",
+      "name": "Nomad",
+      "description": "Private distributed scheduler for durable batch jobs and long-running internal workloads.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "monitoring-lv3",
+      "vmid": 140,
+      "internal_url": "https://100.64.0.1:8013",
+      "exposure": "private-only",
+      "health_probe_id": "nomad",
+      "secret_catalog_ids": [
+        "nomad_acl_management_token",
+        "nomad_tls_ca_key",
+        "nomad_tls_server_key",
+        "nomad_tls_client_key"
+      ],
+      "adr": "0232",
+      "runbook": "docs/runbooks/configure-nomad.md",
+      "degradation_modes": [
+        {
+          "dependency": "docker_runtime",
+          "dependency_type": "soft",
+          "degraded_behaviour": "Runtime-targeted jobs cannot place while the docker-runtime Nomad client is unavailable. The Nomad server and build-targeted jobs continue to operate.",
+          "degraded_for_seconds_max": -1,
+          "recovery_signal": "docker-runtime-lv3 rejoins the Nomad client set",
+          "tested_by": "fault:docker-runtime-unavailable"
+        },
+        {
+          "dependency": "docker_build",
+          "dependency_type": "soft",
+          "degraded_behaviour": "Build-targeted or long-running helper jobs pinned to the build pool cannot place while the docker-build Nomad client is unavailable. The Nomad server and runtime-targeted jobs continue to operate.",
+          "degraded_for_seconds_max": -1,
+          "recovery_signal": "docker-build-lv3 rejoins the Nomad client set",
+          "tested_by": "fault:docker-build-unavailable"
+        }
+      ],
+      "tags": [
+        "scheduler",
+        "batch",
+        "jobs"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://100.64.0.1:8013"
+        }
+      }
+    },
+    {
       "id": "ntopng",
       "name": "ntopng",
       "description": "Private flow-visibility and traffic-inspection surface for the platform network.",

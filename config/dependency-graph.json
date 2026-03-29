@@ -210,6 +210,15 @@
       "adr": "0021"
     },
     {
+      "id": "nomad",
+      "service": "nomad",
+      "name": "Nomad",
+      "vm": "monitoring-lv3",
+      "tier": 1,
+      "category": "automation",
+      "adr": "0232"
+    },
+    {
       "id": "ntfy",
       "service": "ntfy",
       "name": "ntfy",
@@ -477,6 +486,18 @@
       "to": "nginx_edge",
       "type": "soft",
       "description": "Public access to apps.lv3.org depends on the shared NGINX edge publication while the guest-local ingress remains reachable for direct verification."
+    },
+    {
+      "from": "nomad",
+      "to": "docker_runtime",
+      "type": "soft",
+      "description": "Runtime-targeted batch jobs and internal helper workloads depend on the docker-runtime Nomad client remaining available for placement."
+    },
+    {
+      "from": "nomad",
+      "to": "docker_build",
+      "type": "soft",
+      "description": "Long-running internal helper services pinned to the build pool depend on the docker-build Nomad client remaining available for placement."
     },
     {
       "from": "dify",

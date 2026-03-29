@@ -216,6 +216,14 @@
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
+    "nomad": {
+      "service_type": "vm-service",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
     "ntfy": {
       "service_type": "compose",
       "requires_subdomain": false,
