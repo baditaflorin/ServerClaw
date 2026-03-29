@@ -1563,6 +1563,7 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
       - tests/test_interactive_ops_portal.py
       - tests/test_nginx_edge_publication_role.py
+      - tests/test_ops_portal_runtime_role.py
       - tests/test_ops_portal_playbook.py
       - tests/test_security_headers_audit.py
       - receipts/live-applies/2026-03-28-adr-0234-patternfly-shell-live-apply.json
@@ -1602,6 +1603,7 @@ workstreams:
             - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
             - tests/test_interactive_ops_portal.py
             - tests/test_nginx_edge_publication_role.py
+            - tests/test_ops_portal_runtime_role.py
             - tests/test_ops_portal_playbook.py
             - tests/test_security_headers_audit.py
             - receipts/live-applies/2026-03-28-adr-0234-patternfly-shell-live-apply.json

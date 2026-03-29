@@ -70,6 +70,7 @@
 - `collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml`
 - `tests/test_interactive_ops_portal.py`
 - `tests/test_nginx_edge_publication_role.py`
+- `tests/test_ops_portal_runtime_role.py`
 - `tests/test_ops_portal_playbook.py`
 - `tests/test_security_headers_audit.py`
 - `receipts/live-applies/2026-03-28-adr-0234-patternfly-shell-live-apply.json`
@@ -87,10 +88,9 @@
 
 ## Verification
 
-- `uv run --with pytest --with pyyaml --with jsonschema --with-requirements requirements/ops-portal.txt python -m pytest -q tests/test_interactive_ops_portal.py tests/test_nginx_edge_publication_role.py tests/test_security_headers_audit.py tests/test_ops_portal_playbook.py`
+- `uv run --with pytest --with pyyaml --with jsonschema --with-requirements requirements/ops-portal.txt python -m pytest -q tests/test_interactive_ops_portal.py tests/test_nginx_edge_publication_role.py tests/test_ops_portal_runtime_role.py tests/test_ops_portal_playbook.py tests/test_ops_portal.py tests/test_security_headers_audit.py`
 - `make syntax-check-ops-portal`
-- `./scripts/validate_repo.sh agent-standards`
-- `./scripts/validate_repo.sh workstream-surfaces`
+- `./scripts/validate_repo.sh workstream-surfaces agent-standards`
 - live replay from this isolated worktree for the ops portal runtime and the
   shared edge publication path, followed by guest-local and published-browser
   verification
@@ -104,16 +104,11 @@
   because the shared shell depends on the pinned PatternFly asset URL
 - the protected `README.md`, `VERSION`, `changelog.md`, `versions/stack.yaml`,
   and release-note updates still belong to the final integration step
-- the branch carries a generated `README.md` document-index update only because
-  `check-canonical-truth` blocked `make live-apply-service` until that derived
-  index was current; the top-level integrated status summary remains untouched
 - as of `2026-03-29T00:18:47Z`, repo validation for the branch-local replay
   hardening is in good shape:
-  `26 passed` on the focused portal/CSP/playbook/security test set,
+  `48 passed` on the focused portal/CSP/runtime/playbook/security test set,
   `make syntax-check-ops-portal`,
-  `./scripts/validate_repo.sh workstream-surfaces agent-standards`,
-  and `4 passed` for `tests/test_ops_portal_playbook.py` after the sidecar
-  cleanup patch
+  and `./scripts/validate_repo.sh workstream-surfaces agent-standards`
 - the live blocker is still concurrency, not repo code review:
   repeated remote portal files matched
   `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0244-live-apply`
@@ -122,7 +117,8 @@
 - the branch now removes macOS `._*` AppleDouble sidecars from the synced
   portal build context in
   `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml`;
-  that cleanup is covered in `tests/test_ops_portal_playbook.py`
+  that cleanup is covered in `tests/test_ops_portal_playbook.py`, while the
+  rebased runtime sync contract is covered in `tests/test_ops_portal_runtime_role.py`
 - the next attempt should start by killing or pausing every competing
   `ops-portal` live apply that references `playbooks/ops-portal.yml` or
   `playbooks/services/ops_portal.yml`, then replay from this worktree and
