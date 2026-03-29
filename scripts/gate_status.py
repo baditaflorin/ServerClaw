@@ -28,13 +28,13 @@ except ModuleNotFoundError as exc:
     )
 
 
+DEFAULT_MANIFEST = Path("config/validation-gate.json")
+DEFAULT_LANE_CATALOG = Path("config/validation-lanes.yaml")
+DEFAULT_LAST_RUN = Path(".local/validation-gate/last-run.json")
+DEFAULT_REMOTE_VALIDATE_RUN = Path(".local/validation-gate/remote-validate-last-run.json")
+DEFAULT_POST_MERGE_RUN = Path(".local/validation-gate/post-merge-last-run.json")
+DEFAULT_BYPASS_DIR = Path("receipts/gate-bypasses")
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_MANIFEST = REPO_ROOT / "config" / "validation-gate.json"
-DEFAULT_LANE_CATALOG = REPO_ROOT / "config" / "validation-lanes.yaml"
-DEFAULT_LAST_RUN = REPO_ROOT / ".local" / "validation-gate" / "last-run.json"
-DEFAULT_REMOTE_VALIDATE_RUN = REPO_ROOT / ".local" / "validation-gate" / "remote-validate-last-run.json"
-DEFAULT_POST_MERGE_RUN = REPO_ROOT / ".local" / "validation-gate" / "post-merge-last-run.json"
-DEFAULT_BYPASS_DIR = REPO_ROOT / "receipts" / "gate-bypasses"
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -120,6 +120,12 @@ def build_status_payload(
     return payload
 
 
+def resolve_repo_path(path: Path) -> Path:
+    if path.is_absolute():
+        return path
+    return REPO_ROOT / path
+
+
 def print_run_summary(label: str, payload: dict[str, Any] | None) -> None:
     if payload is None:
         print(f"{label}: none recorded")
@@ -169,11 +175,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
 
     payload = build_status_payload(
-        manifest_path=args.manifest,
-        last_run_path=args.last_run,
-        remote_validate_run_path=args.remote_validate_run,
-        post_merge_run_path=args.post_merge_run,
-        bypass_dir=args.bypass_dir,
+        manifest_path=resolve_repo_path(args.manifest),
+        last_run_path=resolve_repo_path(args.last_run),
+        remote_validate_run_path=resolve_repo_path(args.remote_validate_run),
+        post_merge_run_path=resolve_repo_path(args.post_merge_run),
+        bypass_dir=resolve_repo_path(args.bypass_dir),
     )
     if args.format == "json":
         print(json.dumps(payload, indent=2, sort_keys=True))

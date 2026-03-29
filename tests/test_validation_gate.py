@@ -490,9 +490,31 @@ def test_gate_status_supports_json_output(tmp_path: Path, capsys) -> None:
     assert payload["latest_bypass"] is None
 
 
-def test_gate_status_defaults_are_repo_rooted_when_run_outside_repo(tmp_path: Path) -> None:
+def test_gate_status_resolves_default_paths_from_repo_root(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    (repo_root / "scripts").mkdir(parents=True)
+    (repo_root / "config").mkdir()
+    (repo_root / ".local" / "validation-gate").mkdir(parents=True)
+    script_path = repo_root / "scripts" / "gate_status.py"
+    script_path.write_text((REPO_ROOT / "scripts" / "gate_status.py").read_text(encoding="utf-8"), encoding="utf-8")
+    (repo_root / "config" / "validation-gate.json").write_text(
+        json.dumps(
+            {
+                "schema-validation": {
+                    "description": "validate schemas",
+                    "severity": "error",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    (repo_root / ".local" / "validation-gate" / "post-merge-last-run.json").write_text(
+        json.dumps({"status": "passed", "executed_at": "2026-03-29T16:39:41+00:00", "source": "windmill"}),
+        encoding="utf-8",
+    )
+
     completed = subprocess.run(
-        ["python3", str(REPO_ROOT / "scripts" / "gate_status.py"), "--format", "json"],
+        [sys.executable, str(script_path), "--format", "json"],
         cwd=tmp_path,
         text=True,
         capture_output=True,
@@ -501,8 +523,12 @@ def test_gate_status_defaults_are_repo_rooted_when_run_outside_repo(tmp_path: Pa
 
     assert completed.returncode == 0, completed.stderr
     payload = json.loads(completed.stdout)
-    assert payload["manifest_path"] == str(REPO_ROOT / "config" / "validation-gate.json")
-    assert payload["lane_catalog_path"] == str(REPO_ROOT / "config" / "validation-lanes.yaml")
+    assert payload["manifest_path"] == str(repo_root / "config" / "validation-gate.json")
+    assert payload["post_merge_run"] == {
+        "status": "passed",
+        "executed_at": "2026-03-29T16:39:41+00:00",
+        "source": "windmill",
+    }
 
 
 def test_gate_status_workflow_catalog_and_windmill_seed_align() -> None:
