@@ -256,6 +256,14 @@
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
     },
+    "serverclaw": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "keycloak_client_generated": true
+    },
     "openbao": {
       "service_type": "compose",
       "requires_subdomain": false,

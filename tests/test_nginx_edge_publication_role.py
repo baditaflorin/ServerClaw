@@ -114,6 +114,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
     def test_tasks_include_dns_hetzner_plugin_and_credentials_flow(self) -> None:
         task_names = {task["name"] for task in self.tasks}
 
+        self.assertIn("Resolve public edge site and certificate catalogs", task_names)
         self.assertIn("Install the pinned Certbot Hetzner DNS plugin", task_names)
         self.assertIn(
             "Assert the Hetzner DNS credential file is available when DNS-01 is enabled",
@@ -135,6 +136,19 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         )
         package_expr = ensure_packages_task["ansible.builtin.apt"]["name"]
         self.assertIn("rsync", package_expr)
+
+    def test_tasks_resolve_edge_catalogs_before_validation(self) -> None:
+        task_names = [task["name"] for task in self.tasks]
+        resolve_index = task_names.index("Resolve public edge site and certificate catalogs")
+        validate_index = task_names.index("Validate public edge publication inputs")
+
+        self.assertLess(resolve_index, validate_index)
+        resolve_task = self.tasks[resolve_index]
+        resolved_facts = resolve_task["ansible.builtin.set_fact"]
+        self.assertIn("service_topology_edge_certificate_domains", resolved_facts["public_edge_certificate_domains"])
+        self.assertIn("public_edge_extra_sites", resolved_facts["public_edge_certificate_domains"])
+        self.assertIn("service_topology_edge_sites", resolved_facts["public_edge_sites"])
+        self.assertIn("public_edge_extra_sites", resolved_facts["public_edge_sites"])
 
     def test_certificate_san_regex_preserves_domains_with_s_characters(self) -> None:
         derive_task = next(
