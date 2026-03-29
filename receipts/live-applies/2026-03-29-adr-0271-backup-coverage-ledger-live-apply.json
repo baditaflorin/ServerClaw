@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0271-backup-coverage-ledger-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T11:35:00Z",
+  "recorded_by": "codex",
+  "source_commit": "b18d04ad361416e242eac55f882e226462029eb3",
+  "repo_version_context": "0.177.73",
+  "platform_version_context": "0.130.50",
+  "workflow_id": "configure-backup-vm",
+  "adr": "0271",
+  "summary": "Applied ADR 0271 against the latest origin/main-based worktree by extending the nightly Proxmox PBS job to include coolify-lv3 on VM 170, generating receipt-backed backup coverage evidence, and surfacing the remaining backup-lv3 off-site gap explicitly in disaster recovery readiness.",
+  "targets": [
+    {
+      "kind": "hypervisor",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "backup-lv3",
+      "vmid": 160,
+      "address": "10.10.10.60"
+    },
+    {
+      "kind": "guest",
+      "name": "coolify-lv3",
+      "vmid": 170,
+      "address": "10.10.10.70"
+    },
+    {
+      "kind": "storage",
+      "name": "lv3-backup-pbs",
+      "address": "10.10.10.60:8007"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused backup coverage code validation",
+      "result": "pass",
+      "observed": "python3 -m py_compile config/windmill/scripts/backup-coverage-ledger.py scripts/backup_coverage_ledger.py scripts/generate_dr_report.py passed, and the focused pytest slice for tests/test_backup_coverage_ledger.py, tests/test_backup_coverage_ledger_windmill.py, and tests/test_disaster_recovery.py passed with 9 passed in 0.54s."
+    },
+    {
+      "check": "Repository automation validation gates",
+      "result": "pass",
+      "observed": "make preflight WORKFLOW=backup-coverage-ledger passed, ./scripts/validate_repo.sh agent-standards passed after registering ws-0271-live-apply, and uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate passed from the isolated worktree after the latest origin/main merge."
+    },
+    {
+      "check": "Latest origin/main worktree replay",
+      "result": "pass",
+      "observed": "make configure-backup-vm succeeded from the merged branch head b18d04ad361416e242eac55f882e226462029eb3 with backup-lv3 : ok=46 changed=2 unreachable=0 failed=0 skipped=11 rescued=0 ignored=0 and proxmox_florin : ok=35 changed=6 unreachable=0 failed=0 skipped=30 rescued=0 ignored=0."
+    },
+    {
+      "check": "Nightly PBS job now governs coolify-lv3",
+      "result": "pass",
+      "observed": "sudo pvesh get /cluster/backup/backup-lv3-nightly --output-format json-pretty on proxmox_florin returned vmid : \"110,120,130,140,150,170\"."
+    },
+    {
+      "check": "Immediate PBS artifact for VM 170",
+      "result": "pass",
+      "observed": "sudo vzdump 170 --storage lv3-backup-pbs --mode snapshot --compress zstd --notification-mode notification-system completed successfully on 2026-03-29 and sudo pvesm list lv3-backup-pbs --vmid 170 showed lv3-backup-pbs:backup/vm/170/2026-03-29T11:22:40Z."
+    },
+    {
+      "check": "Backup coverage ledger and Windmill wrapper",
+      "result": "pass",
+      "observed": "make backup-coverage-ledger wrote receipts/backup-coverage/20260329T113418Z.json with Protected: 6 Degraded: 0 Uncovered: 1 Governed assets: 7, and python3 config/windmill/scripts/backup-coverage-ledger.py --repo-path /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0271-backup-coverage-ledger returned status ok with the same 6/7 protected summary."
+    },
+    {
+      "check": "Disaster recovery readiness surfaces",
+      "result": "pass",
+      "observed": "make dr-status reported Backup coverage ledger warn 6/7 protected; uncovered backup-lv3 and Off-site backup warn proxmox-offsite-backup-of-backup-vm on lv3-backup-offsite; last success not recorded."
+    },
+    {
+      "check": "Remaining off-site gap visibility",
+      "result": "partial",
+      "observed": "ADR 0271 is live for backup coverage policy and evidence, but backup-lv3 remains uncovered because storage lv3-backup-offsite does not exist yet and no VM 160 off-site evidence is available."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0271-backup-coverage-assertion-ledger-and-backup-of-backup-policy.md",
+    "docs/workstreams/ws-0271-live-apply.md",
+    "docs/runbooks/backup-coverage-ledger.md",
+    "docs/runbooks/configure-backup-vm.md",
+    "docs/runbooks/disaster-recovery.md",
+    "Makefile",
+    "config/workflow-catalog.json",
+    "config/command-catalog.json",
+    "config/windmill/scripts/backup-coverage-ledger.py",
+    "collections/ansible_collections/lv3/platform/roles/proxmox_backups/defaults/main.yml",
+    "scripts/backup_coverage_ledger.py",
+    "scripts/generate_dr_report.py",
+    "receipts/backup-coverage/20260329T113418Z.json",
+    "tests/test_backup_coverage_ledger.py",
+    "tests/test_backup_coverage_ledger_windmill.py",
+    "tests/test_disaster_recovery.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This receipt records the latest-origin/main replay from the separate worktree after merging origin/main into codex/ws-0271-backup-coverage-ledger, not just the earlier branch-local apply.",
+    "The exact latest-base replay was still not perfectly idempotent on the Proxmox managed backup job block because it rewrote the staged pmxcfs job section and restarted the scheduler again even though the live definition remained the same.",
+    "The change intentionally does not claim off-site disaster recovery is complete; ADR 0271 now makes that missing lv3-backup-offsite evidence explicit instead of letting it stay implicit."
+  ]
+}

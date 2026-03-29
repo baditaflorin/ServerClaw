@@ -47,14 +47,15 @@
 - `make configure-backup-vm` completed successfully from this worktree with `backup-lv3 : ok=46 changed=2 unreachable=0 failed=0 skipped=11 rescued=0 ignored=0` and `proxmox_florin : ok=35 changed=7 unreachable=0 failed=0 skipped=30 rescued=0 ignored=0`.
 - `sudo pvesh get /cluster/backup/backup-lv3-nightly --output-format json-pretty` on `proxmox_florin` returned `vmid : "110,120,130,140,150,170"`.
 - `sudo vzdump 170 --storage lv3-backup-pbs --mode snapshot --compress zstd --notification-mode notification-system` completed successfully on 2026-03-29 and produced `lv3-backup-pbs:backup/vm/170/2026-03-29T11:22:40Z`.
-- `make backup-coverage-ledger` wrote `receipts/backup-coverage/20260329T112543Z.json` and reported `Protected: 6  Degraded: 0  Uncovered: 1  Governed assets: 7`, with only `backup-lv3` uncovered.
+- `make backup-coverage-ledger` wrote `receipts/backup-coverage/20260329T113418Z.json` after the latest-`origin/main` replay and reported `Protected: 6  Degraded: 0  Uncovered: 1  Governed assets: 7`, with only `backup-lv3` uncovered.
 - `python3 config/windmill/scripts/backup-coverage-ledger.py --repo-path /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0271-backup-coverage-ledger` returned `status: ok` and the same `6/7 protected` summary after adding CLI flag support for local repo-path testing.
 - `make dr-status` reported `Backup coverage ledger warn 6/7 protected; uncovered backup-lv3`, which is the intended honest state until `lv3-backup-offsite` exists.
 - `make preflight WORKFLOW=backup-coverage-ledger`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, and the focused pytest slice for `tests/test_backup_coverage_ledger.py`, `tests/test_backup_coverage_ledger_windmill.py`, and `tests/test_disaster_recovery.py` all passed.
+- The branch records the canonical live apply receipt at `receipts/live-applies/2026-03-29-adr-0271-backup-coverage-ledger-live-apply.json`, including the latest-`origin/main` replay commit and the explicit remaining off-site gap.
 
 ## Mainline Integration
 
-- This workstream has been live-applied on the platform, but the branch still needs the final merge-to-main release surfaces updated from the exact latest `origin/main`.
+- This workstream has been live-applied on the platform and replayed from the exact latest `origin/main` branch tip, but the branch still needs the final merge-to-main release surfaces updated on `main`.
 - The remaining live gap is explicit and intentional: `backup-lv3` stays `uncovered` until `lv3-backup-offsite` exists and receives fresh VM `160` evidence.
 - When the branch is merged, update ADR 0271 implementation metadata, release truth, and the final live-apply receipt without hiding that off-site coverage is still pending.
 
