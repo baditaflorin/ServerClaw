@@ -84,6 +84,15 @@
     dest: /etc/docker/daemon.json
     mode: "0644"
   notify: Restart Docker
+
+- name: Install the Docker publication assurance helper
+  ansible.builtin.copy:
+    content: "{{ lookup('ansible.builtin.file', (inventory_dir | dirname) ~ '/scripts/docker_publication_assurance.py') }}"
+    dest: "{{ docker_runtime_publication_assurance_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+
 - name: Check whether nftables config exists
   ansible.builtin.stat:
     path: "{{ docker_runtime_nftables_config_file }}"
@@ -154,6 +163,19 @@
 - name: Flush Docker handlers before chain health checks
   ansible.builtin.meta: flush_handlers
 
+- name: Warm the Docker control socket before chain health checks
+  ansible.builtin.command:
+    argv:
+      - docker
+      - info
+      - --format
+      - "{{ '{{.ServerVersion}}' }}"
+  register: docker_runtime_info_ready
+  changed_when: false
+  retries: "{{ docker_runtime_chain_recheck_retries }}"
+  delay: "{{ docker_runtime_chain_recheck_delay_seconds }}"
+  until: docker_runtime_info_ready.rc == 0
+
 - name: Check whether Docker nat chain exists
   ansible.builtin.command: iptables -t nat -S DOCKER
   register: docker_runtime_nat_chain_check
@@ -168,6 +190,25 @@
   failed_when: docker_runtime_forward_chain_check.rc not in [0, 1]
   when: docker_runtime_require_nat_chain | bool
 
+- name: Wait briefly for Docker chains to recover after daemon activation
+  ansible.builtin.shell: |
+    set -euo pipefail
+    for _ in $(seq 1 {{ docker_runtime_chain_recheck_retries }}); do
+      if iptables -t nat -S DOCKER >/dev/null 2>&1 && iptables -t filter -S DOCKER-FORWARD >/dev/null 2>&1; then
+        exit 0
+      fi
+      sleep {{ docker_runtime_chain_recheck_delay_seconds }}
+    done
+    exit 1
+  args:
+    executable: /bin/bash
+  register: docker_runtime_chain_warmup
+  changed_when: false
+  failed_when: false
+  when:
+    - docker_runtime_require_nat_chain | bool
+    - docker_runtime_nat_chain_check.rc == 1 or docker_runtime_forward_chain_check.rc == 1
+
 - name: Restart Docker when required chains are missing
   ansible.builtin.systemd:
     name: docker
@@ -175,6 +216,7 @@
   when:
     - docker_runtime_require_nat_chain | bool
     - docker_runtime_nat_chain_check.rc == 1 or docker_runtime_forward_chain_check.rc == 1
+    - docker_runtime_chain_warmup is not defined or docker_runtime_chain_warmup.rc != 0
 
 - name: Recheck Docker nat chain after restart
   ansible.builtin.command: iptables -t nat -S DOCKER

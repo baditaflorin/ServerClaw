@@ -7,6 +7,8 @@ keycloak_realm_display_name: LV3 Control Plane
 keycloak_site_dir: /opt/keycloak
 keycloak_secret_dir: /etc/lv3/keycloak
 keycloak_compose_file: "{{ keycloak_site_dir }}/docker-compose.yml"
+keycloak_compose_project_name: keycloak
+keycloak_compose_network_name: "{{ keycloak_compose_project_name }}_default"
 keycloak_env_file: "{{ compose_runtime_secret_root }}/keycloak/runtime.env"
 keycloak_legacy_env_file: "{{ keycloak_site_dir }}/keycloak.env"
 keycloak_openbao_agent_dir: "{{ keycloak_site_dir }}/openbao"

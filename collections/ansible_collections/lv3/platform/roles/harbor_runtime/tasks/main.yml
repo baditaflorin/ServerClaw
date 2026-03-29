@@ -173,19 +173,29 @@
   register: harbor_config_template
   no_log: true
 
+- name: Check whether the Harbor generated compose file already exists
+  ansible.builtin.stat:
+    path: "{{ harbor_generated_compose_file }}"
+  register: harbor_generated_compose_file_stat
+
+- name: Record whether Harbor prepare needs to regenerate compose assets
+  ansible.builtin.set_fact:
+    harbor_prepare_needed: >-
+      {{
+        harbor_installer_download.changed
+        or harbor_installer_unarchive.changed
+        or harbor_config_template.changed
+        or not harbor_generated_compose_file_stat.stat.exists
+      }}
+
 - name: Prepare Harbor compose assets
   ansible.builtin.command:
-    argv:
-      - ./prepare
-      - --with-trivy
+    argv: "{{ ['./prepare'] + (['--with-trivy'] if harbor_prepare_with_trivy else []) }}"
   args:
     chdir: "{{ harbor_installer_dir }}"
-  when: harbor_prepare_with_trivy
+  when: harbor_prepare_needed | bool
   register: harbor_prepare
-  changed_when: >-
-    harbor_installer_download.changed
-    or harbor_installer_unarchive.changed
-    or harbor_config_template.changed
+  changed_when: harbor_prepare_needed | bool
 
 - name: Record whether Harbor compose assets changed
   ansible.builtin.set_fact:
@@ -194,7 +204,7 @@
         harbor_installer_download.changed
         or harbor_installer_unarchive.changed
         or harbor_config_template.changed
-        or harbor_prepare.changed
+        or harbor_prepare_needed | bool
       }}
 
 - name: Probe the Harbor ping endpoint before compose reconciliation
@@ -235,11 +245,18 @@
 - name: Remove stale Harbor containers after the compose reset
   ansible.builtin.shell: |
     set -euo pipefail
+    ensure_docker_socket() {
+      if ! docker info >/dev/null 2>&1; then
+        systemctl restart docker
+        sleep 10
+        docker info >/dev/null 2>&1
+      fi
+    }
+    ensure_docker_socket
     stale_containers="$(docker ps -aq --filter label=com.docker.compose.project=harbor)"
     if [ -n "${stale_containers}" ]; then
       if ! docker rm -f ${stale_containers}; then
-        systemctl restart docker
-        sleep 10
+        ensure_docker_socket
         stale_containers="$(docker ps -aq --filter label=com.docker.compose.project=harbor)"
         if [ -n "${stale_containers}" ]; then
           docker rm -f ${stale_containers}

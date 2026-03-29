@@ -512,6 +512,9 @@ syntax-check-guest-network-policy:
 syntax-check-docker-runtime:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/docker-runtime.yml --syntax-check
 
+syntax-check-docker-publication-assurance:
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/docker-publication-assurance.yml --syntax-check
+
 syntax-check-backup-vm:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/backup-vm.yml --syntax-check
 
@@ -757,6 +760,10 @@ converge-ntopng:
 converge-docker-runtime:
 	$(MAKE) preflight WORKFLOW=converge-docker-runtime
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/docker-runtime.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
+converge-docker-publication-assurance:
+	$(MAKE) preflight WORKFLOW=converge-docker-publication-assurance
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/docker-publication-assurance.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
 converge-postgres-vm:
 	$(MAKE) preflight WORKFLOW=converge-postgres-vm

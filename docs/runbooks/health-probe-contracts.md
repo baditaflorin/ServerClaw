@@ -13,6 +13,7 @@ Each service contract declares:
 - `startup` when initialization needs an explicit completion proof before the service should be treated as failed
 - `liveness`: the lightest useful probe that proves the process answers on its intended listener or control surface
 - `readiness`: a deeper probe that proves the service can handle real platform traffic or a repo-managed bootstrap path
+- `readiness.docker_publication`: an optional Docker-host publication contract that proves the expected bridge networks, host-side bind addresses, and port programming exist before readiness is trusted
 - `timeout_seconds`, `retries`, `delay_seconds`: the convergence wait budget used by the role verify task
 - `uptime_kuma`: whether the service is mirrored into the generated [config/uptime-kuma/monitors.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/uptime-kuma/monitors.json)
 
@@ -61,6 +62,33 @@ Run just the dedicated probe-contract checks:
 make validate-health-probes
 make validate-data-models
 ```
+
+## Docker Publication Extension
+
+ADR 0270 adds an optional `docker_publication` sub-contract beneath `readiness`
+for Docker-hosted services whose private or edge publication path must be
+proven separately from the application response itself.
+
+The current catalog uses this extension for:
+
+- `coolify`
+- `dify`
+- `gitea`
+- `harbor`
+- `homepage`
+- `keycloak`
+- `langfuse`
+- `openbao`
+- `outline`
+- `step_ca`
+- `vaultwarden`
+
+When present, the shared post-verify path and the observation loop both run the
+repo-managed helper at
+`/usr/local/bin/lv3-docker-publication-assurance`. The helper derives expected
+host bindings from the probe contract, verifies declared Docker networks and
+iptables publication primitives, and can repair missing Docker publication
+state before the readiness probe runs.
 
 ## Notes
 

@@ -26,6 +26,17 @@ ROLE_DEFAULTS = (
     / "defaults"
     / "main.yml"
 )
+ROLE_VERIFY = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "docker_runtime"
+    / "tasks"
+    / "verify.yml"
+)
 
 
 def load_tasks() -> list[dict]:
@@ -34,6 +45,10 @@ def load_tasks() -> list[dict]:
 
 def load_defaults() -> dict:
     return yaml.safe_load(ROLE_DEFAULTS.read_text())
+
+
+def load_verify() -> list[dict]:
+    return yaml.safe_load(ROLE_VERIFY.read_text())
 
 
 def test_docker_runtime_patches_nftables_before_starting_docker() -> None:
@@ -48,13 +63,32 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     defaults = load_defaults()
     task_names = {task["name"] for task in tasks}
     assert "Flush Docker handlers before chain health checks" in task_names
+    assert "Warm the Docker control socket before chain health checks" in task_names
     assert "Check whether Docker nat chain exists" in task_names
     assert "Check whether Docker forward chain exists" in task_names
+    assert "Wait briefly for Docker chains to recover after daemon activation" in task_names
     assert "Restart Docker when required chains are missing" in task_names
+    info_ready = next(task for task in tasks if task["name"] == "Warm the Docker control socket before chain health checks")
+    chain_warmup = next(task for task in tasks if task["name"] == "Wait briefly for Docker chains to recover after daemon activation")
     nat_recheck = next(task for task in tasks if task["name"] == "Recheck Docker nat chain after restart")
     forward_recheck = next(task for task in tasks if task["name"] == "Recheck Docker forward chain after restart")
+    restart_task = next(task for task in tasks if task["name"] == "Restart Docker when required chains are missing")
     assert defaults["docker_runtime_chain_recheck_retries"] == 30
     assert defaults["docker_runtime_chain_recheck_delay_seconds"] == 2
+    assert info_ready["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "info",
+        "--format",
+        "{{ '{{.ServerVersion}}' }}",
+    ]
+    assert info_ready["retries"] == "{{ docker_runtime_chain_recheck_retries }}"
+    assert info_ready["delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
+    assert info_ready["until"] == "docker_runtime_info_ready.rc == 0"
+    assert "iptables -t nat -S DOCKER" in chain_warmup["ansible.builtin.shell"]
+    assert "iptables -t filter -S DOCKER-FORWARD" in chain_warmup["ansible.builtin.shell"]
+    assert "sleep {{ docker_runtime_chain_recheck_delay_seconds }}" in chain_warmup["ansible.builtin.shell"]
+    assert chain_warmup["failed_when"] is False
+    assert any("docker_runtime_chain_warmup.rc != 0" in condition for condition in restart_task["when"])
     assert nat_recheck["retries"] == "{{ docker_runtime_chain_recheck_retries }}"
     assert nat_recheck["delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
     assert nat_recheck["until"] == "docker_runtime_nat_chain_recheck.rc == 0"
@@ -97,6 +131,7 @@ def test_docker_runtime_defaults_pin_governed_resolvers_and_registry_mirror() ->
     daemon_config = defaults["docker_runtime_daemon_config"]
 
     assert defaults["docker_runtime_registry_mirrors"] == ["https://mirror.gcr.io"]
+    assert defaults["docker_runtime_publication_assurance_script_path"] == "/usr/local/bin/lv3-docker-publication-assurance"
     assert defaults["docker_runtime_insecure_registries"] == []
     assert daemon_config["dns"] == ["1.1.1.1", "8.8.8.8"]
     assert daemon_config["registry-mirrors"] == "{{ docker_runtime_registry_mirrors }}"
@@ -106,3 +141,27 @@ def test_docker_runtime_defaults_pin_governed_resolvers_and_registry_mirror() ->
         {"base": "192.168.0.0/16", "size": 24},
         {"base": "10.200.0.0/16", "size": 24},
     ]
+
+
+def test_docker_runtime_installs_publication_assurance_helper_before_chain_checks() -> None:
+    tasks = load_tasks()
+    install_task = next(task for task in tasks if task["name"] == "Install the Docker publication assurance helper")
+    nftables_check_task = next(task for task in tasks if task["name"] == "Check whether nftables config exists")
+
+    assert install_task["ansible.builtin.copy"]["dest"] == "{{ docker_runtime_publication_assurance_script_path }}"
+    assert "scripts/docker_publication_assurance.py" in install_task["ansible.builtin.copy"]["content"]
+    assert tasks.index(install_task) < tasks.index(nftables_check_task)
+
+
+def test_docker_runtime_verify_checks_publication_assurance_helper_is_executable() -> None:
+    verify_tasks = load_verify()
+    verify_task = next(
+        task for task in verify_tasks if task["name"] == "Verify the Docker publication assurance helper is installed"
+    )
+
+    assert verify_task["ansible.builtin.command"]["argv"] == [
+        "test",
+        "-x",
+        "{{ docker_runtime_publication_assurance_script_path }}",
+    ]
+    assert verify_task["changed_when"] is False
