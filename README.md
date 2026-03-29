@@ -147,6 +147,11 @@ client API serves at `https://matrix.lv3.org`, the governed controller path
 stays available at `http://100.64.0.1:8015`, and the 2026-03-29 exact-main
 replay re-verified public login plus the corrected internal-edge HTTPS
 assurance path from `monitoring-lv3`.
+ADR 0295 shared artifact cache plane is now live on production: `docker-build-lv3`
+now serves internal pull-through mirrors on `10.10.10.30:5001-5004`, the
+2026-03-29 exact-main replay re-warmed a repo-derived `41`-image seed set, and
+`docker buildx inspect lv3-cache --bootstrap` plus the local `apt-cacher-ng`
+path were both re-verified afterward.
 The repository now also ships ADR 0251 stage-scoped smoke suites on `main`: the
 promotion gate and runtime-assurance scoreboard now require declared or
 inherited smoke suites for active environments, the 2026-03-29 exact-main
@@ -166,7 +171,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.86` |
-| Platform version | `0.130.58` |
+| Platform version | `0.130.59` |
 | Observed check date | `2026-03-29` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -224,6 +229,7 @@ Template VM: `9000` `debian13-cloud-template`
 | --- | --- |
 | `agent_coordination` | `2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply` |
 | `api_gateway` | `2026-03-29-adr-0244-runtime-assurance-matrix-live-apply` |
+| `artifact_cache_plane` | `2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply` |
 | `backup_coverage` | `2026-03-29-adr-0271-backup-coverage-ledger-mainline-live-apply` |
 | `backup_vm` | `2026-03-22-adr-0029-backup-vm-live-apply` |
 | `bounded_command_execution` | `2026-03-28-adr-0227-bounded-command-execution-mainline-live-apply` |
@@ -1320,7 +1326,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.86` |
-| Platform version | `0.130.58` |
+| Platform version | `0.130.59` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1603,6 +1609,7 @@ This repository is intentionally opinionated:
 | `0272` | Restore readiness ladders and stateful warm-up verification profiles | `live_applied` | [ws-0272-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0272-live-apply.md) |
 | `0273` | Live apply ADR 0273 public endpoint admission control | `live_applied` | [adr-0273-public-endpoint-admission-control.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0273-public-endpoint-admission-control.md) |
 | `0295` | Shared artifact cache plane and dedicated cache VM roadmap | `merged` | [adr-0295-artifact-cache-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md) |
+| `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

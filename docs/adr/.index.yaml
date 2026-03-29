@@ -9,8 +9,8 @@ schema_version: 1
 generated: '2026-03-29'
 total_adrs: 314
 implementation_status_summary:
-  Implemented: 243
-  Partial: 7
+  Implemented: 244
+  Partial: 6
   Not Implemented: 63
   Deprecated: 1
 concerns:
@@ -5178,7 +5178,7 @@ adr_index:
   - adr: 0295
     title: Shared Artifact Cache Plane For Container And Package Dependencies
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: ci-cd
     keywords:

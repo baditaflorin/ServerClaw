@@ -67,8 +67,11 @@
 
 ## Expected Live Surfaces
 
-- none yet; the initial cache landing is merged on `main` but still awaits a
-  separate live-apply step
+- phase 1 is now live on `docker-build-lv3` through
+  `ws-0295-live-apply`, with repo-managed pull-through mirrors on
+  `10.10.10.30:5001-5004`
+- the dedicated `artifact-cache-lv3` VM from ADR 0296 still awaits a later
+  implementation and live-apply step
 
 ## Ownership Notes
 
@@ -95,8 +98,7 @@
 
 ## Notes For The Next Assistant
 
-- if phase 1 proves stable, the next implementation step is to add a real
-  `artifact-cache-lv3` guest in inventory and then move the mirror endpoints off
-  `docker-build-lv3`
+- the next implementation step is to add a real `artifact-cache-lv3` guest in
+  inventory and then move the mirror endpoints off `docker-build-lv3`
 - runtime-host adoption should happen after the dedicated VM exists so cache
   endpoints stop moving underneath consumers
