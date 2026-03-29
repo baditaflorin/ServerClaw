@@ -86,7 +86,7 @@ workstreams:
       - tests/test_docker_runtime_role.py
       - tests/test_platform_observation_tool.py
       - tests/test_post_verify_tasks.py
-      - receipts/live-applies/
+      - receipts/live-applies/**
       - VERSION
       - changelog.md
       - RELEASE.md
@@ -152,7 +152,7 @@ workstreams:
             - tests/test_docker_runtime_role.py
             - tests/test_platform_observation_tool.py
             - tests/test_post_verify_tasks.py
-            - receipts/live-applies/
+            - receipts/live-applies/**
           mode: exclusive
         - id: docker_publication_integration_surfaces
           paths:
