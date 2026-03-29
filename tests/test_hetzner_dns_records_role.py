@@ -35,3 +35,33 @@ def test_multi_record_role_translates_provider_payloads_before_matching() -> Non
     assert "dns_provider_boundary_existing_records" in record_tasks
     assert "hetzner_dns_records_lookup.json.records" not in record_tasks
     assert "dns_provider_boundary_matching_records[0].provider_ref" in record_tasks
+
+
+def test_multi_record_role_supports_absent_state() -> None:
+    record_tasks = ROLE_TASKS.read_text(encoding="utf-8")
+
+    assert "hetzner_dns_record.state | default('present')" in record_tasks
+    assert "Delete the canonical DNS record when it is retired" in record_tasks
+    assert "method: DELETE" in record_tasks
+
+
+def test_multi_record_role_updates_same_name_type_drift_instead_of_creating_duplicates() -> None:
+    record_tasks = ROLE_TASKS.read_text(encoding="utf-8")
+
+    assert "dns_provider_boundary_same_name_type_records" in record_tasks
+    assert "if (hetzner_dns_record.state | default('present')) == 'present'" in record_tasks
+
+
+def test_multi_record_role_retries_transient_provider_errors() -> None:
+    record_tasks = ROLE_TASKS.read_text(encoding="utf-8")
+
+    assert "retries: 5" in record_tasks
+    assert "delay: 2" in record_tasks
+    assert "429" in record_tasks
+    assert "504" in record_tasks
+
+
+def test_multi_record_role_marks_provider_mutations_as_changed() -> None:
+    record_tasks = ROLE_TASKS.read_text(encoding="utf-8")
+
+    assert record_tasks.count("changed_when: true") == 3

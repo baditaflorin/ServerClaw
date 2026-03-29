@@ -1,0 +1,62 @@
+---
+# Purpose: Reconcile the ADR 0252 route and DNS assertion ledger against the Hetzner DNS zone for the currently governed drift set.
+# Use case: Run when the canonical route ledger changes or when the live zone carries stale records that ADR 0252 now governs explicitly.
+#
+# Inputs (required):
+#   - HETZNER_DNS_API_TOKEN (environment): Hetzner DNS API token for the lv3.org zone.
+#
+# Inputs (optional):
+#   - env (string, optional, default=production): Included for standard scoped execution compatibility.
+#
+# Outputs:
+#   - Managed apex, mail, database, and vault DNS records aligned with the current route ledger.
+#   - Stale apex IPv6, autoconfig, notify, and www records removed from the zone when present.
+#
+# Idempotency: Y
+#              The playbook converges exact DNS record presence/absence and is safe to rerun.
+#
+# Dependencies:
+#   - ADR 0076: Subdomain governance remains the canonical hostname contract.
+#   - ADR 0139: The exposure registry remains the generated publication contract.
+#   - ADR 0252: This playbook is the live-apply mutation path for the route and DNS assertion ledger.
+#   - Role: lv3.platform.hetzner_dns_records
+#
+# Related ADRs: 0076, 0139, 0252
+# Related Runbooks: docs/runbooks/subdomain-governance.md, docs/runbooks/subdomain-exposure-audit.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
+
+- name: Reconcile route and DNS assertion records
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    proxmox_route_dns_assertion_present_records:
+      - name: "{{ hostvars['proxmox_florin'].lv3_service_topology.mail_platform.dns.name }}"
+        type: "{{ hostvars['proxmox_florin'].lv3_service_topology.mail_platform.dns.type }}"
+        value: "{{ hostvars['proxmox_florin'].lv3_service_topology.mail_platform.dns.target }}"
+        ttl: "{{ hostvars['proxmox_florin'].lv3_service_topology.mail_platform.dns.ttl }}"
+      - name: "{{ hostvars['proxmox_florin'].lv3_service_topology.postgres.dns.name }}"
+        type: "{{ hostvars['proxmox_florin'].lv3_service_topology.postgres.dns.type }}"
+        value: "{{ hostvars['proxmox_florin'].lv3_service_topology.postgres.dns.target }}"
+        ttl: "{{ hostvars['proxmox_florin'].lv3_service_topology.postgres.dns.ttl }}"
+      - name: "{{ hostvars['proxmox_florin'].lv3_service_topology.vaultwarden.dns.name }}"
+        type: "{{ hostvars['proxmox_florin'].lv3_service_topology.vaultwarden.dns.type }}"
+        value: "{{ hostvars['proxmox_florin'].lv3_service_topology.vaultwarden.dns.target }}"
+        ttl: "{{ hostvars['proxmox_florin'].lv3_service_topology.vaultwarden.dns.ttl }}"
+      - name: "{{ hostvars['proxmox_florin'].route_dns_assertion_extra_records[0].name }}"
+        type: "{{ hostvars['proxmox_florin'].route_dns_assertion_extra_records[0].type }}"
+        value: "{{ hostvars['proxmox_florin'].route_dns_assertion_extra_records[0].value }}"
+        ttl: "{{ hostvars['proxmox_florin'].route_dns_assertion_extra_records[0].ttl }}"
+    proxmox_route_dns_assertion_records: >-
+      {{
+        proxmox_route_dns_assertion_present_records
+        + hostvars['proxmox_florin'].route_dns_assertion_retired_records
+      }}
+
+  roles:
+    - role: lv3.platform.hetzner_dns_records
+      vars:
+        hetzner_dns_records: "{{ proxmox_route_dns_assertion_records }}"

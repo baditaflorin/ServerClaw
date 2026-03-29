@@ -100,6 +100,119 @@ workstreams:
         Playwright, OpenFGA, and a PostgreSQL-Qdrant-search memory stack
       release_bump: patch
       included_in_repo_version: 0.177.54
+  - id: ws-0252-live-apply
+    adr: "0252"
+    title: Live apply ADR 0252 route and DNS publication assertion ledger
+    status: ready
+    owner: codex
+    branch: codex/ws-0252-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0252-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0252-live-apply.md
+    depends_on:
+      - adr-0021-public-subdomain-publication-at-the-nginx-edge
+      - adr-0076-subdomain-governance-and-dns-lifecycle
+      - adr-0139-subdomain-exposure-audit-and-registry
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0252-live-apply.md
+      - docs/adr/0252-route-and-dns-publication-assertion-ledger.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/subdomain-exposure-audit.md
+      - docs/runbooks/subdomain-governance.md
+      - docs/runbooks/configure-postgres-vm.md
+      - docs/runbooks/configure-edge-publication.md
+      - config/ansible-execution-scopes.yaml
+      - config/command-catalog.json
+      - config/controller-local-secrets.json
+      - config/correction-loops.json
+      - config/workflow-catalog.json
+      - config/subdomain-catalog.json
+      - config/subdomain-exposure-registry.json
+      - docs/schema/subdomain-catalog.schema.json
+      - docs/schema/subdomain-exposure-registry.schema.json
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - scripts/subdomain_catalog.py
+      - scripts/subdomain_exposure_audit.py
+      - config/windmill/scripts/subdomain-exposure-audit.py
+      - Makefile
+      - playbooks/route-dns-assertion-ledger.yml
+      - collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml
+      - collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/vaultwarden_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/vaultwarden_runtime/tasks/main.yml
+      - tests/test_subdomain_catalog.py
+      - tests/test_subdomain_exposure_audit.py
+      - tests/test_hetzner_dns_record_role.py
+      - tests/test_hetzner_dns_records_role.py
+      - tests/test_proxmox_tailscale_proxy_role.py
+      - tests/test_vaultwarden_runtime_role.py
+      - tests/test_edge_publication_makefile.py
+      - receipts/subdomain-exposure-audit/**
+      - receipts/live-applies/2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_contract
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: adr_0252_live_apply
+          paths:
+            - docs/workstreams/ws-0252-live-apply.md
+            - docs/adr/0252-route-and-dns-publication-assertion-ledger.md
+            - docs/runbooks/subdomain-exposure-audit.md
+            - docs/runbooks/subdomain-governance.md
+            - docs/runbooks/configure-postgres-vm.md
+            - docs/runbooks/configure-edge-publication.md
+            - config/ansible-execution-scopes.yaml
+            - config/command-catalog.json
+            - config/controller-local-secrets.json
+            - config/correction-loops.json
+            - config/workflow-catalog.json
+            - config/subdomain-catalog.json
+            - config/subdomain-exposure-registry.json
+            - docs/schema/subdomain-catalog.schema.json
+            - docs/schema/subdomain-exposure-registry.schema.json
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - scripts/subdomain_catalog.py
+            - scripts/subdomain_exposure_audit.py
+            - config/windmill/scripts/subdomain-exposure-audit.py
+            - Makefile
+            - playbooks/route-dns-assertion-ledger.yml
+            - collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml
+            - collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/vaultwarden_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/vaultwarden_runtime/tasks/main.yml
+            - tests/test_subdomain_catalog.py
+            - tests/test_subdomain_exposure_audit.py
+            - tests/test_hetzner_dns_record_role.py
+            - tests/test_hetzner_dns_records_role.py
+            - tests/test_proxmox_tailscale_proxy_role.py
+            - tests/test_vaultwarden_runtime_role.py
+            - tests/test_edge_publication_makefile.py
+            - receipts/subdomain-exposure-audit/**
+            - receipts/live-applies/2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-live-apply.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0252 by governing route assertions, DNS record sets, apex publication truth, and private-route verification through one shared route and DNS assertion ledger
+      release_bump: patch
+      included_in_repo_version: null
+      latest_receipts:
+        route_dns_assertion_ledger: 2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-live-apply
   - id: ws-0244-runtime-assurance-adrs
     adr: "0244"
     title: Runtime assurance architecture bundle

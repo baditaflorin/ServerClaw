@@ -1763,7 +1763,7 @@
       }
     },
     "subdomain-exposure-audit": {
-      "description": "Run the ADR 0139 subdomain exposure registry audit, check live DNS and edge auth behavior, and store one receipt.",
+      "description": "Run the ADR 0139 subdomain exposure registry plus ADR 0252 route and DNS publication audit, check public DNS, private routes, TLS, and edge auth behavior, and store one receipt.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -1795,10 +1795,11 @@
         "docs/runbooks/subdomain-exposure-audit.md"
       ],
       "outputs": [
-        "A timestamped receipt that records repo contract drift, live DNS status drift, optional Hetzner zone discrepancies, and any missing edge OIDC enforcement for tracked hostnames."
+        "A timestamped receipt that records repo contract drift, live DNS status drift, Hetzner zone record-set discrepancies, missing private-route reachability, TLS coverage or verification drift, and any missing edge OIDC enforcement for tracked hostnames."
       ],
       "verification_commands": [
         "uvx --from pyyaml python scripts/subdomain_exposure_audit.py --validate",
+        "make subdomain-exposure-audit",
         "uv run --with pytest --with pyyaml --with jsonschema --with jinja2 pytest -q tests/test_subdomain_catalog.py tests/test_subdomain_exposure_audit.py tests/test_docs_site.py",
         "python3 config/windmill/scripts/subdomain-exposure-audit.py --help"
       ],
@@ -3890,7 +3891,7 @@
       }
     },
     "database-dns": {
-      "description": "Publish the private database.lv3.org DNS record toward the Patroni-managed PostgreSQL VIP.",
+      "description": "Publish the current private database.lv3.org DNS record toward the Proxmox host Tailscale proxy while the PostgreSQL HA VIP remains unapplied live.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -3907,17 +3908,66 @@
         "validate"
       ],
       "live_impact": "external_live",
-      "owner_runbook": "docs/runbooks/postgres-failover.md",
+      "owner_runbook": "docs/runbooks/configure-postgres-vm.md",
       "implementation_refs": [
         "Makefile",
         "playbooks/database-dns.yml",
         "roles/hetzner_dns_record/tasks/main.yml"
       ],
       "outputs": [
-        "database.lv3.org DNS record updated to the private PostgreSQL VIP."
+        "database.lv3.org DNS record updated to the private Proxmox Tailscale PostgreSQL proxy."
       ],
       "verification_commands": [
         "dig +short database.lv3.org"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "route-dns-assertion-ledger": {
+      "description": "Reconcile the ADR 0252 route and DNS assertion ledger drift set across the Hetzner zone, including apex publication truth, tailnet-only DNS targets, and stale record retirements.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "route-dns-assertion-ledger",
+        "command": "HETZNER_DNS_API_TOKEN=... make route-dns-assertion-ledger"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "hetzner_dns_api_token"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "validate-generated-vars",
+        "validate-data-models"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/subdomain-exposure-audit.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/route-dns-assertion-ledger.yml",
+        "collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "The governed apex, mail, database, and vault DNS records are aligned with the live route assertion ledger.",
+        "The stale apex IPv6, autoconfig, notify, and www records are retired from the lv3.org zone."
+      ],
+      "verification_commands": [
+        "dig +short lv3.org",
+        "dig +short mail.lv3.org",
+        "dig +short database.lv3.org",
+        "dig +short vault.lv3.org"
       ],
       "execution_class": "mutation",
       "budget": {

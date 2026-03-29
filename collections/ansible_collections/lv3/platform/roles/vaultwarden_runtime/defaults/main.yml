@@ -6,9 +6,9 @@ vaultwarden_site_dir: /opt/vaultwarden
 vaultwarden_data_dir: "{{ vaultwarden_site_dir }}/data"
 vaultwarden_tls_dir: "{{ vaultwarden_site_dir }}/tls"
 vaultwarden_compose_file: "{{ vaultwarden_site_dir }}/docker-compose.yml"
-vaultwarden_https_port: "{{ platform_service_topology | platform_service_port('vaultwarden', 'internal') }}"
-vaultwarden_internal_base_url: "{{ platform_service_topology | platform_service_url('vaultwarden', 'internal') }}"
-vaultwarden_controller_url: "{{ platform_service_topology | platform_service_url('vaultwarden', 'controller') }}"
+vaultwarden_https_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('vaultwarden', 'internal') }}"
+vaultwarden_internal_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('vaultwarden', 'internal') }}"
+vaultwarden_controller_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('vaultwarden', 'controller') }}"
 vaultwarden_public_base_url: "https://{{ vaultwarden_service_topology.public_hostname }}"
 vaultwarden_database_name: vaultwarden
 vaultwarden_database_user: vaultwarden_admin
@@ -37,7 +37,7 @@ vaultwarden_tls_server_key_file: /ssl/server.key
 vaultwarden_tls_certificate_subject: "{{ vaultwarden_service_topology.public_hostname }}"
 vaultwarden_tls_server_sans:
   - "{{ vaultwarden_service_topology.public_hostname }}"
-  - "{{ platform_host.management.tailscale_ipv4 }}"
+  - "{{ hostvars['proxmox_florin'].platform_host.management.tailscale_ipv4 }}"
   - localhost
   - 127.0.0.1
   - "{{ ansible_host }}"
