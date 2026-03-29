@@ -3,7 +3,7 @@
 - ADR: [ADR 0235](../adr/0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher.md)
 - Title: Cross-application launcher and favorites via a PatternFly-style shared masthead launcher in the interactive ops portal
 - Status: live_applied
-- Implemented In Repo Version: N/A (pending merge-to-main)
+- Implemented In Repo Version: 0.177.69
 - Live Applied In Platform Version: 0.130.45
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
@@ -88,7 +88,13 @@
 - launcher session proof: `receipts/live-applies/evidence/2026-03-29-adr-0235-launcher-session-check.txt`
 - public-edge proof: `receipts/live-applies/evidence/2026-03-29-adr-0235-public-edge-check.txt`
 
-## Merge-To-Main Notes
+## Mainline Integration Notes
 
-- remaining for merge to `main`: `VERSION`, `changelog.md`, `RELEASE.md`, `docs/release-notes/README.md`, the next numbered release note, `build/platform-manifest.json`, `versions/stack.yaml`, and the top-level `README.md` integrated status summary
-- when the protected mainline step happens, replace `Implemented In Repo Version: N/A (pending merge-to-main)` with the released repo version while preserving the verified live baseline `0.130.45`
+- release `0.177.69` is the first merged repo version that carries ADR 0235 on
+  `origin/main`
+- the exact-main replay from
+  `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0235-main-merge-r3`
+  re-verified the launcher on `2026-03-29` with final recap
+  `docker-runtime-lv3 ok=129 changed=14 failed=0 skipped=14`
+- the current live platform baseline after that exact-main replay is
+  `0.130.47`
