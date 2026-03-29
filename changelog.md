@@ -12,11 +12,15 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 
 ## Unreleased
 
+- implements the live interactive runtime assurance scoreboard and service-environment rollup for the ops portal, combining live health, publication truth, and receipt-backed evidence into one operator-facing trust surface while hardening the live ops-portal sync, build, and scoreboard verification path for containerized apply
+
 ## Latest Release
 
-- [0.177.58 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.58.md)
+- [0.177.59 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.59.md)
 
 ## Previous Releases
+
+- [0.177.58 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.58.md)
 
 - [0.177.57 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.57.md)
 

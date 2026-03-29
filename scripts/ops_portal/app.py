@@ -20,14 +20,22 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
 try:
-    from scripts.publication_contract import registry_entries
-except ImportError:  # pragma: no cover - packaged import path
     from publication_contract import registry_entries
+except ImportError:  # pragma: no cover - repo checkout import path
+    from scripts.publication_contract import registry_entries
 
 try:
     from search_fabric.collectors import available_collections
-except ImportError:  # pragma: no cover - packaged import path
+except ImportError:  # pragma: no cover - repo checkout import path
     from scripts.search_fabric.collectors import available_collections
+
+try:
+    from .runtime_assurance import build_runtime_assurance_models
+except ImportError:  # pragma: no cover - direct module or repo checkout import path
+    try:
+        from runtime_assurance import build_runtime_assurance_models
+    except ImportError:  # pragma: no cover - repo checkout import path
+        from scripts.ops_portal.runtime_assurance import build_runtime_assurance_models
 
 
 def utc_now() -> datetime:
@@ -776,7 +784,7 @@ class PortalRepository:
             return payload
         return {}
 
-    def recent_deployments(self, services: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def _service_keywords(self, services: list[dict[str, Any]]) -> dict[str, set[str]]:
         service_keywords: dict[str, set[str]] = {}
         for service in services:
             keywords = {
@@ -786,39 +794,62 @@ class PortalRepository:
             for field in ("public_url", "internal_url", "subdomain", "vm"):
                 if isinstance(service.get(field), str):
                     keywords.add(normalize_text(service[field]))
+            environments = service.get("environments")
+            if isinstance(environments, dict):
+                for binding in environments.values():
+                    if not isinstance(binding, dict):
+                        continue
+                    for field in ("url", "subdomain"):
+                        if isinstance(binding.get(field), str):
+                            keywords.add(normalize_text(binding[field]))
             service_keywords[service["id"]] = {keyword for keyword in keywords if keyword}
+        return service_keywords
 
+    def load_live_apply_receipts(self, services: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        service_keywords = self._service_keywords(services)
         receipts: list[dict[str, Any]] = []
         for receipt_path in sorted(self.settings.live_applies_dir.rglob("*.json"), reverse=True):
             try:
                 receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
             except (UnicodeDecodeError, json.JSONDecodeError, OSError):
                 continue
-            text = normalize_text(
-                " ".join(
-                    [
-                        json.dumps(receipt.get("targets", [])),
-                        receipt.get("summary", ""),
-                        receipt.get("workflow_id", ""),
-                    ]
-                )
-            )
+            text = normalize_text(json.dumps(receipt, sort_keys=True))
             matched = []
             for service_id, keywords in service_keywords.items():
                 if any(keyword and keyword in text for keyword in keywords):
                     matched.append(service_id)
-            receipts.append(
+            receipt["_path"] = str(receipt_path)
+            receipt["_normalized_text"] = text
+            receipt["_matched_services"] = sorted(set(matched))
+            receipt["_environment"] = (
+                str(receipt.get("environment", "")).strip().lower()
+                or ("staging" if "staging" in receipt_path.parts else "production")
+            )
+            receipts.append(receipt)
+        return receipts
+
+    def recent_deployments(
+        self,
+        services: list[dict[str, Any]],
+        *,
+        receipts: list[dict[str, Any]] | None = None,
+    ) -> list[dict[str, Any]]:
+        live_apply_receipts = receipts if receipts is not None else self.load_live_apply_receipts(services)
+
+        receipts_out: list[dict[str, Any]] = []
+        for receipt in live_apply_receipts:
+            receipts_out.append(
                 {
-                    "id": receipt.get("receipt_id", receipt_path.stem),
-                    "summary": receipt.get("summary", receipt_path.stem),
+                    "id": receipt.get("receipt_id", Path(str(receipt.get("_path", "receipt"))).stem),
+                    "summary": receipt.get("summary", Path(str(receipt.get("_path", "receipt"))).stem),
                     "workflow_id": receipt.get("workflow_id", ""),
                     "recorded_on": receipt.get("recorded_on") or receipt.get("applied_on"),
                     "recorded_by": receipt.get("recorded_by", "unknown"),
-                    "services": sorted(set(matched)),
-                    "path": str(receipt_path),
+                    "services": list(receipt.get("_matched_services", [])),
+                    "path": str(receipt.get("_path", "")),
                 }
             )
-        return receipts
+        return receipts_out
 
     def changelog_notes(self) -> list[str]:
         if not self.settings.changelog_path.exists():
@@ -928,9 +959,9 @@ def build_capability_contract_models(
 
 def status_tone(status: str) -> str:
     value = status.lower()
-    if value in {"healthy", "ok", "up", "success", "active"}:
+    if value in {"healthy", "ok", "up", "success", "active", "pass"}:
         return "ok"
-    if value in {"warning", "warn", "degraded", "pending", "blocked", "escalated"}:
+    if value in {"warning", "warn", "degraded", "pending", "blocked", "escalated", "maintenance"}:
         return "warn"
     if value in {"critical", "down", "error", "failed"}:
         return "danger"
@@ -1171,7 +1202,8 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
 
     capability_contracts = repository.load_capability_contract_catalog()
     maintenance_windows = repository.load_maintenance_windows()
-    deployments = repository.recent_deployments(services)
+    live_apply_receipts = repository.load_live_apply_receipts(services)
+    deployments = repository.recent_deployments(services, receipts=live_apply_receipts)
     drift_report = repository.latest_drift_report()
     changelog_notes = repository.changelog_notes()
 
@@ -1209,6 +1241,12 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         deployments,
         request.app.state.settings,
     )
+    assurance_rows, assurance_summary = build_runtime_assurance_models(
+        services,
+        publications,
+        health_payload if isinstance(health_payload, dict) else {},
+        live_apply_receipts,
+    )
     active_maintenance = [window for window in maintenance_windows if window.get("service_id")]
     drift_summary = drift_report.get("summary", {})
 
@@ -1216,6 +1254,8 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "request": request,
         "operator": session,
         "services": service_models,
+        "runtime_assurance_rows": assurance_rows,
+        "runtime_assurance_summary": assurance_summary,
         "capability_contracts": capability_models,
         "capability_contract_summary": capability_summary,
         "maintenance_windows": active_maintenance,

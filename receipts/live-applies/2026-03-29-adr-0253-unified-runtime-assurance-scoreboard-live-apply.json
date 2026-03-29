@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-28T23:42:33Z",
+  "recorded_by": "codex",
+  "source_commit": "71cac3ba043f82cf30a4f8f6b72655e464cffdae",
+  "repo_version_context": "0.177.58",
+  "platform_version_context": "0.130.44",
+  "workflow_id": "converge-ops-portal",
+  "adr": "0253",
+  "summary": "Applied ADR 0253 to the live ops portal by publishing the unified runtime assurance scoreboard on docker-runtime-lv3, hardening the macOS-controller sync and build path for the containerized portal runtime, and verifying both the internal listener and the authenticated public edge from the latest origin/main-based worktree.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "ops portal internal listener",
+      "address": "http://10.10.10.20:8092"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "ops portal public edge",
+      "address": "https://ops.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ops portal code validation",
+      "result": "pass",
+      "observed": "python3 -m py_compile scripts/ops_portal/app.py scripts/ops_portal/runtime_assurance.py passed; the focused pytest slice for tests/test_interactive_ops_portal.py and tests/test_runtime_assurance_scoreboard.py passed with 13 passed in 4.58s; and make syntax-check-ops-portal passed."
+    },
+    {
+      "check": "Repository automation validation gates",
+      "result": "pass",
+      "observed": "make preflight WORKFLOW=converge-ops-portal passed, uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate passed, and ./scripts/validate_repo.sh agent-standards passed from the isolated worktree."
+    },
+    {
+      "check": "Targeted live apply from the latest origin/main worktree",
+      "result": "pass",
+      "observed": "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i inventory/hosts.yml playbooks/ops-portal.yml -e env=production --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0253-live-apply --start-at-task Reset the synced ops portal application tree before refresh completed with docker-runtime-lv3 : ok=41 changed=11 unreachable=0 failed=0 skipped=8 rescued=0 ignored=0."
+    },
+    {
+      "check": "Internal runtime assurance scoreboard render",
+      "result": "pass",
+      "observed": "GET http://10.10.10.20:8092/health returned HTTP 200 with {\"status\":\"ok\"}, and GET http://10.10.10.20:8092/partials/overview returned HTTP 200 from uvicorn after the runtime assurance scoreboard partial converged."
+    },
+    {
+      "check": "Public authenticated edge verification",
+      "result": "pass",
+      "observed": "GET https://ops.lv3.org/health returned HTTP 200 with {\"status\":\"ok\"}, and HEAD https://ops.lv3.org/ returned HTTP 302 redirecting to /oauth2/sign_in as expected for the protected operator shell."
+    },
+    {
+      "check": "Full converge wrapper from this Codex execution environment",
+      "result": "partial",
+      "observed": "The outer make converge-ops-portal target and the equivalent ansible_scope_runner wrapper were retried from this worktree but received local exit 143 from the Codex execution environment before completion. The underlying preflight gate and targeted live playbook both succeeded, and the live ops portal remained healthy after those local wrapper terminations."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0253-unified-runtime-assurance-scoreboard-and-rollup.md",
+    "docs/workstreams/ws-0253-live-apply.md",
+    "docs/runbooks/runtime-assurance-scoreboard.md",
+    "docs/runbooks/ops-portal-down.md",
+    "Makefile",
+    "scripts/ops_portal/app.py",
+    "scripts/ops_portal/runtime_assurance.py",
+    "scripts/ops_portal/templates/partials/overview.html",
+    "scripts/ops_portal/static/portal.css",
+    "collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml",
+    "tests/test_interactive_ops_portal.py",
+    "tests/test_runtime_assurance_scoreboard.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This receipt captures the latest-origin/main worktree replay and the controller-side sync hardening that made the live ops-portal converge reliable from a separate macOS worktree.",
+    "The verified live platform baseline remained platform version 0.130.44 during this workstream; any later repo release cut on main should preserve that platform version unless a separate exact-main replay explicitly changes it.",
+    "The runtime assurance scoreboard intentionally surfaces unknown dimensions as visible unknown or degraded states instead of collapsing them into healthy green."
+  ]
+}
