@@ -308,13 +308,30 @@
         or 'Recreating' in nextcloud_compose_up.stdout
         or 'Running' in nextcloud_compose_up.stdout
   rescue:
-    - name: Flag stale Nextcloud compose networks after startup failure
+    - name: Flag Docker bridge-chain and stale Nextcloud compose network failures after startup failure
       ansible.builtin.set_fact:
+        nextcloud_docker_bridge_chain_missing: >-
+          {{
+            'No chain/target/match by that name' in (nextcloud_compose_up.stderr | default(''))
+            or 'Unable to enable ACCEPT OUTGOING rule' in (nextcloud_compose_up.stderr | default(''))
+          }}
         nextcloud_compose_network_missing: >-
           {{
             'failed to create endpoint' in (nextcloud_compose_up.stderr | default(''))
             and 'does not exist' in (nextcloud_compose_up.stderr | default(''))
           }}
+
+    - name: Surface unexpected Nextcloud startup failures
+      ansible.builtin.fail:
+        msg: >-
+          {{
+            nextcloud_compose_up.stderr
+            | default(nextcloud_compose_up.stdout)
+            | default('Unknown Nextcloud compose startup failure.')
+          }}
+      when: >-
+        not nextcloud_docker_bridge_chain_missing
+        and not nextcloud_compose_network_missing
 
     - name: Reset stale Nextcloud compose resources after startup failure
       ansible.builtin.command:
@@ -331,7 +348,23 @@
       changed_when: >-
         'Stopping' in nextcloud_compose_down_retry.stdout
         or 'Removing' in nextcloud_compose_down_retry.stdout
+      failed_when: false
       when: nextcloud_compose_network_missing
+
+    - name: Restart Docker to restore bridge chains before retrying Nextcloud startup
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: nextcloud_docker_bridge_chain_missing or nextcloud_compose_network_missing
+
+    - name: Ensure Docker bridge networking chains are present before retrying Nextcloud startup
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_bridge_chains
+      vars:
+        common_docker_bridge_chains_service_name: docker
+        common_docker_bridge_chains_require_nat_chain: true
+      when: nextcloud_docker_bridge_chain_missing or nextcloud_compose_network_missing
 
     - name: Retry Nextcloud startup after resetting stale compose resources
       ansible.builtin.command:
@@ -352,17 +385,7 @@
         or 'Starting' in nextcloud_compose_up_retry.stdout
         or 'Recreating' in nextcloud_compose_up_retry.stdout
         or 'Running' in nextcloud_compose_up_retry.stdout
-      when: nextcloud_compose_network_missing
-
-    - name: Re-raise unexpected Nextcloud startup failures
-      ansible.builtin.fail:
-        msg: >-
-          {{
-            nextcloud_compose_up.stderr
-            | default(nextcloud_compose_up.stdout)
-            | default('Unknown Nextcloud compose startup failure.')
-          }}
-      when: not nextcloud_compose_network_missing
+      when: nextcloud_docker_bridge_chain_missing or nextcloud_compose_network_missing
 
 - name: Wait for Nextcloud local status
   ansible.builtin.uri:

@@ -106,25 +106,54 @@ def test_runtime_resets_stale_compose_networks_before_retrying_startup() -> None
     ]
 
     start_task = next(task for task in startup["block"] if task.get("name") == "Start the Nextcloud runtime")
-    network_missing_fact = next(
-        task for task in startup["rescue"] if task.get("name") == "Flag stale Nextcloud compose networks after startup failure"
+    recovery_fact = next(
+        task
+        for task in startup["rescue"]
+        if task.get("name") == "Flag Docker bridge-chain and stale Nextcloud compose network failures after startup failure"
+    )
+    unexpected_failure = next(
+        task for task in startup["rescue"] if task.get("name") == "Surface unexpected Nextcloud startup failures"
     )
     retry_reset = next(
         task
         for task in startup["rescue"]
         if task.get("name") == "Reset stale Nextcloud compose resources after startup failure"
     )
+    restart_docker = next(
+        task
+        for task in startup["rescue"]
+        if task.get("name") == "Restart Docker to restore bridge chains before retrying Nextcloud startup"
+    )
+    reassert_chains = next(
+        task
+        for task in startup["rescue"]
+        if task.get("name") == "Ensure Docker bridge networking chains are present before retrying Nextcloud startup"
+    )
     retry_start = next(
         task for task in startup["rescue"] if task.get("name") == "Retry Nextcloud startup after resetting stale compose resources"
     )
 
     assert start_task["ansible.builtin.command"]["argv"][-3:] == ["up", "-d", "--remove-orphans"]
-    assert "failed to create endpoint" in network_missing_fact["ansible.builtin.set_fact"]["nextcloud_compose_network_missing"]
-    assert "does not exist" in network_missing_fact["ansible.builtin.set_fact"]["nextcloud_compose_network_missing"]
+    assert "No chain/target/match by that name" in recovery_fact["ansible.builtin.set_fact"]["nextcloud_docker_bridge_chain_missing"]
+    assert "Unable to enable ACCEPT OUTGOING rule" in recovery_fact["ansible.builtin.set_fact"]["nextcloud_docker_bridge_chain_missing"]
+    assert "failed to create endpoint" in recovery_fact["ansible.builtin.set_fact"]["nextcloud_compose_network_missing"]
+    assert "does not exist" in recovery_fact["ansible.builtin.set_fact"]["nextcloud_compose_network_missing"]
+    assert unexpected_failure["when"] == (
+        "not nextcloud_docker_bridge_chain_missing and not nextcloud_compose_network_missing"
+    )
     assert retry_reset["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
     assert retry_reset["when"] == "nextcloud_compose_network_missing"
+    assert retry_reset["failed_when"] is False
+    assert restart_docker["ansible.builtin.service"] == {"name": "docker", "state": "restarted"}
+    assert restart_docker["when"] == "nextcloud_docker_bridge_chain_missing or nextcloud_compose_network_missing"
+    include_role = reassert_chains["ansible.builtin.include_role"]
+    assert include_role["name"] == "lv3.platform.common"
+    assert include_role["tasks_from"] == "docker_bridge_chains"
+    assert reassert_chains["vars"]["common_docker_bridge_chains_service_name"] == "docker"
+    assert reassert_chains["vars"]["common_docker_bridge_chains_require_nat_chain"] is True
+    assert reassert_chains["when"] == "nextcloud_docker_bridge_chain_missing or nextcloud_compose_network_missing"
     assert retry_start["ansible.builtin.command"]["argv"][-4:] == ["up", "-d", "--remove-orphans", "--force-recreate"]
-    assert retry_start["when"] == "nextcloud_compose_network_missing"
+    assert retry_start["when"] == "nextcloud_docker_bridge_chain_missing or nextcloud_compose_network_missing"
 
 
 def test_postgres_role_provisions_named_database_and_role() -> None:
