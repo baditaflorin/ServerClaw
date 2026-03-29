@@ -171,20 +171,31 @@ def derive_expected_bindings(service_probe: dict[str, Any], local_ipv4s: set[str
     return dedupe_bindings(discovered)
 
 
-def flatten_published_bindings(port_map: dict[str, Any]) -> list[dict[str, str]]:
+def flatten_published_bindings(port_map: dict[str, Any], *, fallback_port_map: dict[str, Any] | None = None) -> list[dict[str, str]]:
     flattened: list[dict[str, str]] = []
-    for bindings in port_map.values():
-        if not isinstance(bindings, list):
+    candidate_maps = [port_map]
+    if fallback_port_map:
+        candidate_maps.append(fallback_port_map)
+
+    seen: set[tuple[str, str]] = set()
+    for candidate in candidate_maps:
+        if not isinstance(candidate, dict):
             continue
-        for binding in bindings:
-            if not isinstance(binding, dict):
+        for bindings in candidate.values():
+            if not isinstance(bindings, list):
                 continue
-            flattened.append(
-                {
-                    "host_ip": str(binding.get("HostIp", "")),
-                    "host_port": str(binding.get("HostPort", "")),
-                }
-            )
+            for binding in bindings:
+                if not isinstance(binding, dict):
+                    continue
+                host_ip = str(binding.get("HostIp", ""))
+                host_port = str(binding.get("HostPort", ""))
+                key = (host_ip, host_port)
+                if key in seen:
+                    continue
+                seen.add(key)
+                flattened.append({"host_ip": host_ip, "host_port": host_port})
+        if flattened:
+            break
     return flattened
 
 
@@ -355,6 +366,9 @@ def _run_checks(
     port_map = container_inspect.get("NetworkSettings", {}).get("Ports", {})
     if not isinstance(port_map, dict):
         port_map = {}
+    fallback_port_map = host_config.get("PortBindings", {})
+    if not isinstance(fallback_port_map, dict):
+        fallback_port_map = {}
     networks = container_inspect.get("NetworkSettings", {}).get("Networks", {})
     if not isinstance(networks, dict):
         networks = {}
@@ -389,7 +403,7 @@ def _run_checks(
             inspect_network = command_runner(["docker", "network", "inspect", network_name], None)
             command_log.append(_command_record(inspect_network))
 
-    published_bindings = flatten_published_bindings(port_map)
+    published_bindings = flatten_published_bindings(port_map, fallback_port_map=fallback_port_map)
     missing_port_bindings: list[dict[str, Any]] = []
     if network_mode != "host":
         for binding in expected_bindings:
@@ -487,6 +501,7 @@ def assure_docker_publication(
     after = before
     healed = False
     compose_recreated = False
+    compose_recreate_attempted = False
 
     if heal and _has_blocking_issues(before, strict_listeners=True):
         if before["container_present"] and (before["issues"]["missing_nat_chain"] or before["issues"]["missing_forward_chain"]):
@@ -511,6 +526,7 @@ def assure_docker_publication(
         )
 
         if intermediate["container_present"] and _has_blocking_issues(intermediate, strict_listeners=True):
+            compose_recreate_attempted = True
             recreate_result = _recreate_compose_project(
                 compose_working_directory=intermediate["compose_working_directory"],
                 compose_files=intermediate["compose_files"],
@@ -530,7 +546,9 @@ def assure_docker_publication(
             listener_timeout=listener_timeout,
         )
 
-    strict_listeners_after = not (heal and allow_listener_warmup_after_heal and compose_recreated)
+    strict_listeners_after = not (
+        heal and allow_listener_warmup_after_heal and (compose_recreated or compose_recreate_attempted)
+    )
     ok = not _has_blocking_issues(after, strict_listeners=strict_listeners_after)
     summary_bits: list[str] = []
     if after["issues"]["container_missing"]:
@@ -545,10 +563,10 @@ def assure_docker_publication(
         summary_bits.append("port bindings missing")
     if strict_listeners_after and after["issues"]["missing_listeners"]:
         summary_bits.append("listeners missing")
-    if not summary_bits:
-        summary = "docker publication contract is satisfied"
-    elif heal and not strict_listeners_after and after["issues"]["missing_listeners"]:
+    if heal and not strict_listeners_after and after["issues"]["missing_listeners"]:
         summary = "docker publication primitives recovered; listener warm-up deferred to readiness verification"
+    elif not summary_bits:
+        summary = "docker publication contract is satisfied"
     else:
         summary = ", ".join(summary_bits)
 

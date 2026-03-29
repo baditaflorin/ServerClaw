@@ -78,6 +78,21 @@ def test_binding_matches_accepts_wildcard_bindings_for_loopback_and_guest_ip() -
     assert tool._binding_matches("10.10.10.20", 8200, {"host_ip": "127.0.0.1", "host_port": "8200"}) is False
 
 
+def test_flatten_published_bindings_falls_back_to_host_config_bindings() -> None:
+    assert tool.flatten_published_bindings(
+        {},
+        fallback_port_map={
+            "8080/tcp": [
+                {"HostIp": "", "HostPort": "8095"},
+                {"HostIp": "10.10.10.20", "HostPort": "8095"},
+            ]
+        },
+    ) == [
+        {"host_ip": "", "host_port": "8095"},
+        {"host_ip": "10.10.10.20", "host_port": "8095"},
+    ]
+
+
 class FakeRunner:
     def __init__(self) -> None:
         self.docker_restarted = False
@@ -113,10 +128,10 @@ class FakeRunner:
         if argv[:3] == ["docker", "network", "inspect"]:
             return tool.CommandResult(argv=argv, returncode=0, stdout="[]", stderr="", cwd=cwd)
         if argv[:2] == ["docker", "inspect"]:
-            published_bindings = (
+            host_port_bindings = (
                 {
                     "8080/tcp": [
-                        {"HostIp": "127.0.0.1", "HostPort": "8095"},
+                        {"HostIp": "", "HostPort": "8095"},
                         {"HostIp": "10.10.10.20", "HostPort": "8095"},
                     ]
                 }
@@ -125,7 +140,10 @@ class FakeRunner:
             )
             payload = [
                 {
-                    "HostConfig": {"NetworkMode": "bridge"},
+                    "HostConfig": {
+                        "NetworkMode": "bridge",
+                        "PortBindings": host_port_bindings,
+                    },
                     "Config": {
                         "Labels": {
                             "com.docker.compose.project": "harbor",
@@ -134,7 +152,7 @@ class FakeRunner:
                         }
                     },
                     "NetworkSettings": {
-                        "Ports": published_bindings,
+                        "Ports": {},
                         "Networks": {"harbor_harbor": {}},
                     },
                 }
@@ -191,3 +209,54 @@ def test_assure_docker_publication_restarts_docker_and_recreates_compose() -> No
         "compose_force_recreate",
     ]
     assert result["summary"] == "docker publication contract is satisfied"
+
+
+class PartialComposeRunner(FakeRunner):
+    def __call__(self, argv: list[str], cwd: str | None) -> tool.CommandResult:
+        if argv[:2] == ["docker", "compose"]:
+            self.compose_recreated = True
+            return tool.CommandResult(
+                argv=argv,
+                returncode=1,
+                stdout="",
+                stderr="Container nginx Recreated",
+                cwd=cwd,
+            )
+        return super().__call__(argv, cwd)
+
+
+def test_assure_docker_publication_allows_listener_warmup_after_partial_compose_recreate() -> None:
+    runner = PartialComposeRunner()
+    service_probe = {
+        "liveness": {
+            "kind": "http",
+            "url": "http://127.0.0.1:8095/api/v2.0/ping",
+            "method": "GET",
+            "timeout_seconds": 10,
+        },
+        "readiness": {
+            "kind": "http",
+            "url": "https://registry.lv3.org/api/v2.0/ping",
+            "method": "GET",
+            "timeout_seconds": 10,
+            "docker_publication": {
+                "container_name": "nginx",
+                "bindings": [{"host": "10.10.10.20", "port": 8095}],
+                "required_networks": ["harbor_harbor"],
+            },
+        },
+    }
+
+    result = tool.assure_docker_publication(
+        service_id="harbor",
+        service_probe=service_probe,
+        contract=service_probe["readiness"]["docker_publication"],
+        heal=True,
+        allow_listener_warmup_after_heal=True,
+        command_runner=runner,
+        listener_checker=lambda *_args: False,
+    )
+
+    assert result["ok"] is True
+    assert result["compose_recreated"] is False
+    assert result["summary"] == "docker publication primitives recovered; listener warm-up deferred to readiness verification"
