@@ -533,6 +533,9 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Authenticate the Windmill bootstrap admin session" in tasks
     assert "/api/auth/login" in tasks
     assert "windmill_bootstrap_session_token" in tasks
+    assert "Read the durable Windmill runtime token from the rendered runtime env" in tasks
+    assert 'awk -F= \'$1 == "LV3_WINDMILL_TOKEN"' in tasks
+    assert "windmill_runtime_api_token" in tasks
     assert "Ensure the Windmill bootstrap admin login type matches the managed contract" in tasks
     assert "/api/users/set_login_type/" in tasks
     assert "Ensure the Windmill bootstrap admin password matches the managed secret" in tasks
@@ -570,7 +573,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "register: windmill_seed_raw_app_sync" in tasks
     assert "until: windmill_seed_raw_app_sync.rc == 0" in tasks
     assert "WM_TOKEN" in tasks
-    assert 'WM_TOKEN: "{{ windmill_bootstrap_session_token }}"' in tasks
+    assert 'WM_TOKEN: "{{ windmill_runtime_api_token }}"' in tasks
     assert "BASE_INTERNAL_URL" in tasks
     assert "windmill_runtime_api_base_url" in tasks
     assert "Build the local staging archive for the Windmill worker checkout" in tasks
@@ -659,6 +662,9 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "scripts/windmill_run_wait_result.py" in tasks
     assert "--payload-json" in tasks
     assert "--timeout {{ windmill_seed_job_timeout_seconds }}" in tasks
+    assert 'WINDMILL_TOKEN: "{{ windmill_runtime_api_token }}"' in tasks
+    assert "until: windmill_healthcheck.rc == 0" in tasks
+    assert "failed_when: false" in tasks
     assert "' not found' in (windmill_up.stderr | default(''))" in tasks
     assert "Wait for Windmill workers to register before seeded healthcheck execution" in tasks
     assert "import_tasks: wait_for_workers.yml" in tasks
@@ -666,11 +672,16 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "import_tasks: wait_for_workers.yml" in verify_tasks
     assert "Wait for Windmill workers to register" in wait_for_workers_tasks
     assert "/api/workers/list" in wait_for_workers_tasks
+    assert 'Authorization: "Bearer {{ windmill_runtime_api_token }}"' in wait_for_workers_tasks
     assert "windmill_registered_workers" in wait_for_workers_tasks
     assert "--path {{ windmill_validation_gate_status_script_path | quote }}" in verify_tasks
     assert "Run the Windmill validation gate status script" in verify_tasks
     assert "Assert the Windmill validation gate status result" in verify_tasks
     assert "Verify the Windmill default operations scripts are seeded" in verify_tasks
+    assert 'WINDMILL_TOKEN: "{{ windmill_runtime_api_token }}"' in verify_tasks
+    assert 'Authorization: "Bearer {{ windmill_runtime_api_token }}"' in verify_tasks
+    assert "until: windmill_verify_healthcheck.rc == 0" in verify_tasks
+    assert "until: windmill_verify_validation_gate_status.rc == 0" in verify_tasks
     assert "failed_when: false" in verify_tasks
     assert "retries: 6" in verify_tasks
     assert "windmill_verify_default_operations_scripts.status == 200" in verify_tasks

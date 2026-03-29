@@ -1350,6 +1350,21 @@
   until: windmill_version_post_contract.status == 200
   changed_when: false
 
+- name: Read the durable Windmill runtime token from the rendered runtime env
+  ansible.builtin.shell: |
+    set -euo pipefail
+    awk -F= '$1 == "LV3_WINDMILL_TOKEN" { sub(/^[^=]*=/, ""); print; exit }' "{{ windmill_env_file }}"
+  args:
+    executable: /bin/bash
+  register: windmill_runtime_api_token_read
+  changed_when: false
+  no_log: true
+
+- name: Record the durable Windmill runtime token
+  ansible.builtin.set_fact:
+    windmill_runtime_api_token: "{{ windmill_runtime_api_token_read.stdout | trim }}"
+  no_log: true
+
 - name: Authenticate the Windmill bootstrap admin session
   ansible.builtin.uri:
     url: "{{ windmill_runtime_api_base_url }}/api/auth/login"
@@ -1856,7 +1871,7 @@
   delegate_to: localhost
   become: false
   environment:
-    WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
+    WINDMILL_TOKEN: "{{ windmill_runtime_api_token }}"
   register: windmill_seed_script_sync
   changed_when: false
   tags:
@@ -1993,7 +2008,7 @@
   until: windmill_seed_raw_app_sync.rc == 0
   environment:
     WM_WORKSPACE: "{{ windmill_workspace_id }}"
-    WM_TOKEN: "{{ windmill_bootstrap_session_token }}"
+    WM_TOKEN: "{{ windmill_runtime_api_token }}"
     BASE_INTERNAL_URL: "{{ windmill_runtime_api_base_url }}"
   changed_when: false
   when: (windmill_seed_raw_apps | default([])) | length > 0
@@ -2052,7 +2067,7 @@
   delegate_to: localhost
   become: false
   environment:
-    WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
+    WINDMILL_TOKEN: "{{ windmill_runtime_api_token }}"
   register: windmill_seed_schedule_sync
   changed_when: false
   tags:
@@ -2097,9 +2112,13 @@
   delegate_to: localhost
   become: false
   environment:
-    WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
+    WINDMILL_TOKEN: "{{ windmill_runtime_api_token }}"
   register: windmill_healthcheck
+  retries: 3
+  delay: 10
+  until: windmill_healthcheck.rc == 0
   changed_when: false
+  failed_when: false
   no_log: true
 
 - name: Assert the Windmill seeded healthcheck result
