@@ -400,6 +400,11 @@
     group: root
     mode: "0644"
 
+- name: Render the OpenBao mail gateway env template content in the caller role context
+  ansible.builtin.set_fact:
+    mail_platform_openbao_agent_template_content: "{{ lookup('ansible.builtin.template', 'mail-gateway.env.ctmpl.j2') }}"
+  no_log: true
+
 - name: Prepare OpenBao agent runtime secret injection for the mail platform gateway
   ansible.builtin.include_role:
     name: lv3.platform.common
@@ -427,13 +432,7 @@
     common_openbao_compose_env_approle_name: "{{ mail_platform_openbao_approle_name }}"
     common_openbao_compose_env_agent_config_file: "{{ mail_platform_openbao_agent_dir }}/agent.hcl"
     common_openbao_compose_env_agent_template_file: "{{ mail_platform_openbao_agent_dir }}/runtime.env.ctmpl"
-    common_openbao_compose_env_agent_template_content: >-
-      {{
-        lookup(
-          'ansible.builtin.template',
-          role_path ~ '/templates/mail-gateway.env.ctmpl.j2'
-        )
-      }}
+    common_openbao_compose_env_agent_template_content: "{{ mail_platform_openbao_agent_template_content }}"
     common_openbao_compose_env_role_id_file: "{{ mail_platform_openbao_agent_dir }}/role_id"
     common_openbao_compose_env_secret_id_file: "{{ mail_platform_openbao_agent_dir }}/secret_id"
     common_openbao_compose_env_image: "{{ mail_platform_openbao_agent_image }}"

@@ -132,6 +132,10 @@ def test_mail_platform_runtime_force_recreates_when_runtime_inputs_change() -> N
 
 def test_mail_platform_runtime_renders_openbao_env_template_from_role_path() -> None:
     tasks_text = TASKS_PATH.read_text()
+    assert "mail_platform_openbao_agent_template_content" in tasks_text
+    assert "Render the OpenBao mail gateway env template content in the caller role context" in tasks_text
+    assert "lookup('ansible.builtin.template', 'mail-gateway.env.ctmpl.j2')" in tasks_text
     assert "common_openbao_compose_env_agent_template_content" in tasks_text
-    assert "role_path ~ '/templates/mail-gateway.env.ctmpl.j2'" in tasks_text
+    assert 'common_openbao_compose_env_agent_template_content: "{{ mail_platform_openbao_agent_template_content }}"' in tasks_text
+    assert "role_path ~ '/templates/mail-gateway.env.ctmpl.j2'" not in tasks_text
     assert "common_openbao_compose_env_agent_template_src: mail-gateway.env.ctmpl.j2" not in tasks_text
