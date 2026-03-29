@@ -2,16 +2,16 @@
   "schema_version": "1.0.0",
   "receipt_id": "2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply",
   "environment": "production",
-  "applied_on": "2026-03-29",
-  "recorded_on": "2026-03-29",
-  "recorded_at": "2026-03-29T19:39:25Z",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_at": "2026-03-29T22:46:29Z",
   "recorded_by": "codex",
-  "source_commit": "478917c8edc0fdc02f0d3d82bf777b21d1faf069",
-  "repo_version_context": "0.177.85",
-  "platform_version_context": "0.130.59",
+  "source_commit": "020c5f5ad21d21864861e7b3aa21570474ff8988",
+  "repo_version_context": "0.177.88",
+  "platform_version_context": "0.130.60",
   "workflow_id": "adr-0266-validation-runner-capability-contracts-mainline-live-apply",
   "adr": "0266",
-  "summary": "Integrated ADR 0266 on synchronized main release 0.177.85 by replaying the runner-capability catalog and environment-attestation path from exact-main commit 478917c8 on top of origin/main 430e364, re-verifying the build-server gate and pre-push automation on the declared build runner, and proving the worker post-merge gate records `runner_unavailable` plus a passing bounded local fallback when registry-backed runner images are unavailable, establishing platform version 0.130.59.",
+  "summary": "Closed out ADR 0266 from the latest `origin/main` release context (`0.177.90`) while preserving the original exact-main replay source `020c5f5ad` from repository version `0.177.88`: the build-server validation path, supporting OpenBao runtime converge, mirrored worker checkout refresh, and direct Windmill post-merge fallback all remain green, establishing platform version `0.130.60` as the first platform version where this ADR is true.",
   "targets": [
     {
       "kind": "host",
@@ -34,29 +34,34 @@
     {
       "kind": "service_endpoint",
       "name": "validation-gate",
-      "address": "latest-main build-server and worker-local replay"
+      "address": "latest-main build-server and worker replay"
     }
   ],
   "verification": [
     {
-      "check": "Latest origin/main baseline and protected release cut",
+      "check": "Published origin/main baseline",
       "result": "pass",
-      "observed": "`git fetch origin --prune` confirmed the newest published `origin/main` baseline remained commit `430e364e2a810ccd6463e201fd8b7d41fed95676`; after refreshing the protected mainline truth and receipt surfaces, the exact-main ADR 0266 replay source was committed as `478917c8edc0fdc02f0d3d82bf777b21d1faf069` on top of that head, and the protected release cut carried repository version `0.177.85`."
+      "observed": "`git fetch origin main` refreshed this worktree to the newer published mainline commit `f965aa3101fa2cd2260a8e6fda165f366365ed80` (`2026-03-30T01:45:22+03:00`, repository version `0.177.90`). ADR 0266 itself first became true from exact-main replay source commit `020c5f5ad21d21864861e7b3aa21570474ff8988`; the code-carrying replay tree was commit `42fcf4c04306967ae1a6e896738dd3e1f669ae6e`, and `020c5f5ad21d21864861e7b3aa21570474ff8988` only refreshed the evidence bundle before that earlier publication."
     },
     {
-      "check": "Integrated ADR 0266 regression sweep",
+      "check": "Integrated ADR 0266 automation and validation sweep",
       "result": "pass",
-      "observed": "`uv run --with pytest --with pyyaml pytest -q tests/test_canonical_truth.py tests/test_release_manager.py tests/test_validation_runner_contracts.py tests/test_validation_gate.py tests/test_parallel_check.py tests/test_post_merge_gate.py` returned `37 passed in 4.53s`; `./scripts/validate_repo.sh generated-docs workstream-surfaces agent-standards` passed after regenerating canonical truth plus diagrams; `uv run --with pyyaml python3 scripts/canonical_truth.py --check` returned `Canonical truth OK`; and `uv run --with pyyaml --with jsonschema python3 scripts/validate_repository_data_models.py --validate` returned `Repository data models OK`."
+      "observed": "`./scripts/validate_repo.sh generated-docs data-models policy workstream-surfaces agent-standards` passed; `uv run --with pytest --with pyyaml --with jsonschema pytest -q tests/test_canonical_truth.py tests/test_parallel_check.py tests/test_policy_checks.py tests/test_post_merge_gate.py tests/test_release_manager.py tests/test_remote_exec.py tests/test_validation_gate.py tests/test_validation_gate_windmill.py tests/test_validation_runner_contracts.py tests/test_windmill_operator_admin_app.py tests/test_windmill_playbook.py tests/test_windmill_integration_wrappers.py tests/test_stage_smoke_suites.py tests/test_integration_suite.py tests/test_declared_live_attestation.py tests/test_artifact_cache_runtime_role.py` returned `88 passed in 129.31s`, and `make syntax-check-openbao` passed from the synchronized mainline worktree."
     },
     {
       "check": "Exact-main build-server validation replay",
       "result": "pass",
-      "observed": "`make check-build-server` passed from commit `478917c8`, verified SSH reachability to `ops@10.10.10.30`, and confirmed immutable snapshot upload for `codex/ws-0266-main-integration-r3@478917c8edc0fdc02f0d3d82bf777b21d1faf069`. `make remote-validate` then passed at `2026-03-29T19:17:36.500717+00:00` on runner `build-server-validation` with selected lanes `repository-structure-and-schema`, `generated-artifact-and-canonical-truth`, and `service-syntax-and-unit`. `make pre-push-gate` passed at `2026-03-29T19:20:48.970790+00:00` on the same runner with all 20 blocking checks green, and `make gate-status` reported both exact-main build-server runs from the committed tree."
+      "observed": "`make check-build-server` passed and verified immutable snapshot upload for the exact-main tree on `ops@10.10.10.30`. `make remote-validate` then passed at `2026-03-29T22:07:09.413886+00:00` on runner `build-server-validation` with selected lanes `repository-structure-and-schema`, `generated-artifact-and-canonical-truth`, and `service-syntax-and-unit`; `make pre-push-gate` passed at `2026-03-29T22:10:48.423912+00:00` on the same runner with all 20 blocking checks green; and `make gate-status` reported both exact-main build-server runs from the committed tree."
     },
     {
-      "check": "Windmill replay and worker-local post-merge verification",
+      "check": "OpenBao runtime replay",
       "result": "pass",
-      "observed": "To avoid the controller-local Xcode Python 3.9 selecting a runtime without `datetime.UTC`, the exact-main Windmill replay was run as `UV_PYTHON=/opt/homebrew/bin/python3 make converge-windmill`; that replay refreshed the worker checkout, schedules, and seeded healthcheck, but the role's final localhost JSON assertion around `f/lv3/gate-status` failed after the script output became non-parseable. The authoritative worker proof then came from direct commands on `docker-runtime-lv3`: `python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server` returned `status: ok` with `post_merge_run.executed_at=2026-03-29T19:37:24.365664+00:00`, and `python3 config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox_florin_server` returned `status: passed` with `source=windmill-post-merge-local-fallback`. That worker receipt shows the primary manifest path correctly classified runner-image pull failures from `registry.lv3.org` as `runner_unavailable` while the bounded local fallback commands `./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals` and `uv run --with pyyaml python3 scripts/provider_boundary_catalog.py --validate` both returned `0`."
+      "observed": "`make converge-openbao` replay `2026-03-29-adr-0266-mainline-converge-openbao-rerun-2` finished with `docker-runtime-lv3 : ok=140 changed=9 failed=0` and `postgres-lv3 : ok=43 changed=0 failed=0`, re-verifying the OpenBao-backed runtime surfaces that ADR 0266 now depends on."
+    },
+    {
+      "check": "Worker mirror and post-merge fallback verification",
+      "result": "pass",
+      "observed": "`docker-runtime-lv3` keeps `/srv/proxmox_florin_server` as a mirrored runtime checkout rather than a git repository, so the exact-main worker proof synced `config/windmill/scripts/gate-status.py` directly into that mirror, refreshed `python3 scripts/generate_dependency_diagram.py --write`, `uvx --from pyyaml python scripts/canonical_truth.py --write`, and `python3 scripts/generate_diagrams.py --write`, then reran the live worker wrappers. `python3 /srv/proxmox_florin_server/config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server` returned `status: ok`, and `python3 /srv/proxmox_florin_server/config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox_florin_server` returned `status: ok` while writing `post-merge-last-run.json` with `status=passed`, `source=windmill-post-merge-local-fallback`, `executed_at=2026-03-29T22:24:37.498783+00:00`, and both bounded fallback commands returning `0`."
     }
   ],
   "evidence_refs": [
@@ -70,24 +75,30 @@
     "docs/adr/.index.yaml",
     "docs/adr/0266-validation-runner-capability-contracts-and-environment-attestation.md",
     "docs/workstreams/adr-0266-validation-runner-capability-contracts-live-apply.md",
+    "docs/runbooks/configure-openbao.md",
     "docs/runbooks/remote-build-gateway.md",
     "docs/runbooks/validation-gate.md",
-    "docs/release-notes/0.177.85.md",
+    "docs/release-notes/0.177.88.md",
     "docs/release-notes/README.md",
     "config/validation-runner-contracts.json",
     "docs/schema/validation-runner-contracts.schema.json",
     "scripts/validation_runner_contracts.py",
     "scripts/run_gate.py",
     "scripts/parallel_check.py",
+    "scripts/policy_checks.py",
     "scripts/remote_exec.sh",
     "scripts/gate_status.py",
+    "platform/policy/toolchain.py",
     "config/windmill/scripts/post-merge-gate.py",
     "config/windmill/scripts/gate-status.py",
+    "collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml",
     "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
     "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml",
     "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/wait_for_workers.yml",
     "tests/test_canonical_truth.py",
     "tests/test_parallel_check.py",
+    "tests/test_policy_checks.py",
     "tests/test_post_merge_gate.py",
     "tests/test_release_manager.py",
     "tests/test_remote_exec.py",
@@ -95,6 +106,9 @@
     "tests/test_validation_gate_windmill.py",
     "tests/test_validation_runner_contracts.py",
     "tests/test_windmill_operator_admin_app.py",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-validate-repo.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-targeted-pytests.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-syntax-check-openbao.txt",
     "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-check-build-server.txt",
     "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-remote-validate.txt",
     "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-remote-validate-last-run.txt",
@@ -103,18 +117,21 @@
     "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-pre-push-last-run.txt",
     "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-pre-push-summary.txt",
     "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-gate-status.txt",
-    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-converge-windmill.txt",
-    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-converge-windmill-tail.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-converge-openbao-rerun-2.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-worker-script-sync.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-worker-generated-doc-refresh.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-worker-canonical-truth-refresh.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-worker-diagrams-refresh.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-worker-gate-status.txt",
     "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-post-merge-gate.txt",
     "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-post-merge-last-run.txt",
     "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-post-merge-summary.txt",
-    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-worker-gate-status.txt",
     "receipts/live-applies/2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply.json"
   ],
   "notes": [
-    "This receipt supersedes the earlier branch-local receipt `2026-03-29-adr-0266-validation-runner-capability-contracts-live-apply` as the canonical source for repository version `0.177.85` and platform version `0.130.59`.",
-    "The exact-main replay first exposed missing lane declarations for ADR 0264-added checks in `config/validation-runner-contracts.json`; the canonical ADR 0266 implementation now includes those runner-contract entries before the final replay evidence is recorded.",
-    "The evidence bundle for this receipt is finalized on the synchronized mainline integration branch rather than the earlier isolated workstream branch so the release cut, canonical truth, and worker replay all refer to the same latest-main tree.",
-    "The Windmill role-level verification still has a brittle JSON assertion around the seeded `f/lv3/gate-status` script output. The platform itself was re-verified through the direct worker-side `gate-status.py` and `post-merge-gate.py` commands, so the remaining gap is a repo-managed verification wrapper issue rather than an ADR 0266 live-state regression."
+    "This receipt supersedes the earlier branch-local receipt `2026-03-29-adr-0266-validation-runner-capability-contracts-live-apply` as the canonical source for the ADR 0266 first-implemented repository version `0.177.88` and first live platform version `0.130.60`.",
+    "Latest `origin/main` has since advanced to repository version `0.177.90`; this closeout merges the ADR 0266 live-apply truth onto that newer release line without changing the original exact-main replay source commit or first-implemented version metadata.",
+    "Because `/srv/proxmox_florin_server` on the worker is a mirrored runtime checkout instead of a git repository, the authoritative worker replay uses direct mirrored-script verification plus generated-artifact refreshes instead of `git pull` on the VM.",
+    "No further merge-to-main action remains for ADR 0266 after this receipt closeout."
   ]
 }

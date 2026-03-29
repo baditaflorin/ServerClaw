@@ -188,6 +188,16 @@ argument_specs:
         required: true
         description:
           - Controller-local file used to mirror the operations portal client secret.
+      keycloak_serverclaw_client_id:
+        type: str
+        required: true
+        description:
+          - OIDC client id used by the public ServerClaw surface.
+      keycloak_serverclaw_client_secret_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file used to mirror the ServerClaw client secret.
       keycloak_agent_client_id:
         type: str
         required: true
@@ -264,3 +274,8 @@ argument_specs:
         required: true
         description:
           - Public operations portal base URL used when provisioning redirect URIs.
+      keycloak_serverclaw_root_url:
+        type: str
+        required: true
+        description:
+          - Public ServerClaw base URL used when provisioning redirect URIs.

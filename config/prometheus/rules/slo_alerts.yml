@@ -590,6 +590,46 @@ groups:
           summary: open-webui-availability has less than 10% error budget remaining
           description: Open WebUI remains reachable on the private runtime network.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_serverclaw_availability
+        expr: (slo:serverclaw_availability:error_rate_5m > (14 * 0.010000)) and (slo:serverclaw_availability:error_rate_1h
+          > (14 * 0.010000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: serverclaw
+          slo_id: serverclaw-availability
+          indicator: availability
+        annotations:
+          summary: serverclaw-availability is burning its error budget at 14x
+          description: ServerClaw remains reachable through the public LV3 edge for
+            chat-first assistant access.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_serverclaw_availability
+        expr: slo:serverclaw_availability:error_rate_1h > (3 * 0.010000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: serverclaw
+          slo_id: serverclaw-availability
+          indicator: availability
+        annotations:
+          summary: serverclaw-availability is burning its error budget at 3x
+          description: ServerClaw remains reachable through the public LV3 edge for
+            chat-first assistant access.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_serverclaw_availability
+        expr: slo:serverclaw_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: serverclaw
+          slo_id: serverclaw-availability
+          indicator: availability
+        annotations:
+          summary: serverclaw-availability has less than 10% error budget remaining
+          description: ServerClaw remains reachable through the public LV3 edge for
+            chat-first assistant access.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_outline_availability
         expr: (slo:outline_availability:error_rate_5m > (14 * 0.005000)) and (slo:outline_availability:error_rate_1h
           > (14 * 0.005000))

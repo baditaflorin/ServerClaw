@@ -74,6 +74,8 @@ keycloak_langfuse_client_id: langfuse
 keycloak_langfuse_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/langfuse-client-secret.txt
 keycloak_outline_client_id: outline
 keycloak_outline_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline-client-secret.txt
+keycloak_serverclaw_client_id: serverclaw
+keycloak_serverclaw_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-client-secret.txt
 keycloak_grafana_groups:
   admins: grafana-admins
   viewers: grafana-viewers
@@ -126,6 +128,7 @@ keycloak_repo_user_reconciliation_delay: 5
 keycloak_grafana_root_url: "https://{{ hostvars['proxmox_florin'].lv3_service_topology.grafana.public_hostname }}"
 keycloak_langfuse_root_url: https://langfuse.lv3.org
 keycloak_outline_root_url: https://wiki.lv3.org
+keycloak_serverclaw_root_url: https://chat.lv3.org
 keycloak_gitea_root_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('gitea', 'public') }}"
 keycloak_ops_portal_root_url: https://ops.lv3.org
 keycloak_ops_portal_post_logout_redirect_uris:
@@ -139,3 +142,6 @@ keycloak_outline_post_logout_redirect_uris:
   - "{{ keycloak_outline_root_url }}"
   - "{{ keycloak_outline_root_url }}/"
   - "{{ keycloak_session_authority.shared_proxy_cleanup_url }}"
+keycloak_serverclaw_post_logout_redirect_uris:
+  - "{{ keycloak_serverclaw_root_url }}"
+  - "{{ keycloak_serverclaw_root_url }}/"

@@ -273,6 +273,15 @@
       "adr": "0060"
     },
     {
+      "id": "serverclaw",
+      "service": "serverclaw",
+      "name": "ServerClaw",
+      "vm": "coolify-lv3",
+      "tier": 2,
+      "category": "access",
+      "adr": "0254"
+    },
+    {
       "id": "openbao",
       "service": "openbao",
       "name": "OpenBao",
@@ -804,6 +813,36 @@
       "to": "keycloak",
       "type": "soft",
       "description": "The repo-managed bootstrap verification path checks Keycloak-issued operator and runtime identities alongside the delegated authorization graph."
+    },
+    {
+      "from": "serverclaw",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "ServerClaw prefers Keycloak-backed browser sign-in while retaining a repo-managed bootstrap admin as the break-glass fallback."
+    },
+    {
+      "from": "serverclaw",
+      "to": "ollama",
+      "type": "hard",
+      "description": "ServerClaw routes its default local model connector to the private Ollama runtime on docker-runtime-lv3."
+    },
+    {
+      "from": "serverclaw",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "ServerClaw consumes mirrored runtime secrets and the dedicated OIDC client secret from the OpenBao sidecar."
+    },
+    {
+      "from": "serverclaw",
+      "to": "searxng",
+      "type": "soft",
+      "description": "ServerClaw delegates optional web-search requests to the private SearXNG runtime when the feature is enabled."
+    },
+    {
+      "from": "serverclaw",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public access to chat.lv3.org depends on the shared NGINX edge publication path."
     },
     {
       "from": "ops_portal",

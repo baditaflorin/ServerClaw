@@ -190,6 +190,7 @@ platform_ports:
   coolify_host_proxy_port: 8012
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
+  serverclaw_port: 8096
   api_gateway_internal_port: 8083
   platform_context_internal_port: 8010
   platform_context_host_proxy_port: 8010
@@ -256,6 +257,7 @@ platform_port_assignments:
   coolify_host_proxy_port: 8012
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
+  serverclaw_port: 8096
   api_gateway_internal_port: 8083
   platform_context_internal_port: 8010
   platform_context_host_proxy_port: 8010
@@ -1607,6 +1609,34 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8088
       controller: http://100.64.0.1:8008
+  serverclaw:
+    service_name: serverclaw
+    owning_vm: coolify-lv3
+    private_ip: 10.10.10.70
+    public_hostname: chat.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: chat
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.70:8096
+    service_id: serverclaw
+    ports:
+      internal: 8096
+    urls:
+      public: https://chat.lv3.org
+      internal: http://10.10.10.70:8096
   ollama:
     service_name: ollama
     owning_vm: docker-runtime-lv3
@@ -2097,6 +2127,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: draw
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: chat
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -2904,6 +2938,34 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8088
       controller: http://100.64.0.1:8008
+  serverclaw:
+    service_name: serverclaw
+    owning_vm: coolify-lv3
+    private_ip: 10.10.10.70
+    public_hostname: chat.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: chat
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.70:8096
+    service_id: serverclaw
+    ports:
+      internal: 8096
+    urls:
+      public: https://chat.lv3.org
+      internal: http://10.10.10.70:8096
   ollama:
     service_name: ollama
     owning_vm: docker-runtime-lv3
@@ -3451,6 +3513,7 @@ coolify_proxy_port: 80
 coolify_proxy_tls_port: 443
 coolify_host_proxy_port: 8012
 open_webui_port: 8088
+serverclaw_port: 8096
 homepage_port: 3090
 ops_portal_port: 8092
 harbor_port: 8095

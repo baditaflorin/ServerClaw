@@ -124,6 +124,17 @@
       "healthcheck_path": "/health"
     },
     {
+      "id": "serverclaw",
+      "name": "ServerClaw",
+      "upstream": "http://10.10.10.70:8096",
+      "gateway_prefix": "/v1/serverclaw",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-read",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/"
+    },
+    {
       "id": "openbao",
       "name": "OpenBao",
       "upstream": "https://10.10.10.20:8200",
