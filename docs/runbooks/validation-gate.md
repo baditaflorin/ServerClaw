@@ -71,7 +71,7 @@ The `integration-tests` stage runs [scripts/integration_suite.py](/Users/live/Do
 
 The `artifact-secret-scan` stage runs [scripts/published_artifact_secret_scan.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/published_artifact_secret_scan.py) in the security runner image so published receipts and generated portal/search artifacts are checked with `gitleaks` before merge.
 
-When the push starts from a Git worktree checkout, [scripts/remote_exec.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/remote_exec.sh) now mirrors the minimal worktree git metadata into the build-server workspace before running remote checks. That keeps `git ls-files` and similar repo-aware gate commands working on `build-lv3` instead of pointing back to a laptop-local `.git/worktrees/...` path.
+When the push starts from a Git worktree checkout, [scripts/remote_exec.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/remote_exec.sh) now builds one immutable content-addressed repository snapshot, uploads that archive into the active build-server session workspace, and unpacks it into a fresh `.lv3-runs/<run_id>/repo` namespace before running remote checks. The remote gate therefore validates one consistent repository image without depending on mirrored `.git/worktrees/...` metadata.
 
 ## Bypass Model
 
@@ -126,7 +126,7 @@ When the replay starts from a repo-scoped non-primary git worktree, `playbooks/w
 - if `make install-hooks` fails during `pre-commit` bootstrap, rerun it with working internet access so `pre-commit` can fetch hook environments
 - if the build server is unreachable, rerun `make pre-push-gate`; the wrapper already falls back to local Docker execution
 - if two remote gate runs appear to reuse one checkout, set distinct `LV3_SESSION_ID` values and rerun so each session gets its own build-server workspace
-- if a remote gate run fails with `fatal: not a git repository` from a worktree path, rerun on the updated `main`; the remote sync now rewrites worktree metadata into `.git-remote/` inside the build workspace
+- if a remote gate run fails with `fatal: not a git repository`, treat it as a validator regression rather than a checkout-shape requirement; the build-server path now uses immutable no-git snapshots and the affected check should be fixed to reason about repository content instead
 - if the Windmill post-merge gate points at an older mirrored worker tree without the canonical generated-doc inputs, replay `windmill_runtime` first so `/srv/proxmox_florin_server` includes the full worker-safe validation surface before rerunning the gate
 - if `policy-validation` fails on the build server or worker because OPA or Conftest binaries are missing, rerun the same entrypoint after clearing the cached toolchain root and ensure `LV3_POLICY_TOOLCHAIN_ROOT` points at a writable directory
 - if the Windmill worker mirror picked up files from the shared checkout instead of the branch worktree, verify the replay came from the repo worktree and not a temporary playbook path; otherwise rerun `playbooks/windmill.yml` with `-e windmill_worker_checkout_repo_root_local_dir=/absolute/worktree/path` before rerunning the gate

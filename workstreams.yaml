@@ -513,6 +513,67 @@ workstreams:
       included_in_repo_version: 0.177.59
       latest_receipts:
         ops_portal: 2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-latest-main-revalidation
+  - id: ws-0265-live-apply
+    adr: "0265"
+    title: Immutable validation snapshots for remote builders and schema checks
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0265-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0265-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+    depends_on:
+      - adr-0082-remote-build-execution-gateway
+      - adr-0083-docker-check-runners-for-repository-validation
+      - adr-0156-agent-session-workspace-isolation
+      - adr-0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/adr-0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+      - docs/adr/0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+      - docs/adr/.index.yaml
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/runbooks/remote-build-gateway.md
+      - docs/runbooks/validation-gate.md
+      - docs/runbooks/validate-repository-automation.md
+      - docs/runbooks/agent-session-workspace-isolation.md
+      - scripts/remote_exec.sh
+      - scripts/repository_snapshot.py
+      - scripts/validate_repository_data_models.py
+      - tests/test_remote_exec.py
+      - tests/test_repository_snapshot.py
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_registry
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: adr_0265_live_apply
+          paths:
+            - docs/workstreams/adr-0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+            - docs/adr/0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/runbooks/remote-build-gateway.md
+            - docs/runbooks/validation-gate.md
+            - docs/runbooks/validate-repository-automation.md
+            - docs/runbooks/agent-session-workspace-isolation.md
+            - scripts/remote_exec.sh
+            - scripts/repository_snapshot.py
+            - scripts/validate_repository_data_models.py
+            - tests/test_remote_exec.py
+            - tests/test_repository_snapshot.py
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false
+    canonical_truth:
+      changelog_entry: implements ADR 0265 by replacing mutable remote validation mirrors with immutable content-addressed repository snapshots, fresh per-run build-server namespaces, and repo-shape-safe validation fallbacks
+      release_bump: patch
   - id: ws-0252-live-apply
     adr: "0252"
     title: Live apply ADR 0252 route and DNS publication assertion ledger

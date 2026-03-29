@@ -73,6 +73,7 @@ runner `docker-build-lv3`.
 - the Windmill post-merge fallback reuses the worker-safe `validate_repo.sh` subset and then runs `scripts/provider_boundary_catalog.py --validate` explicitly so ADR 0207 still gets checked even when full runner-image-based manifest execution is unavailable
 - the mirrored Windmill worker checkout must include `README.md`, `VERSION`, `changelog.md`, `mkdocs.yml`, `roles/`, `versions/`, and `workstreams.yaml` because the worker-safe `generated-docs` and `generated-portals` checks read those canonical inputs even when the checkout has no `.git` metadata
 - repo-scoped `playbooks/windmill.yml` replays now mirror the active git worktree automatically because the worker-checkout archive dereferences the scoped-runner shard symlinks before upload
+- the build-server `remote-validate` and `remote-pre-push` paths now stage one immutable content-addressed repository snapshot per run and execute from a fresh `.lv3-runs/<run_id>/repo` namespace instead of a mutable remote mirror
 - if a Windmill replay starts from an out-of-tree or temporary playbook path, pass `-e windmill_worker_checkout_repo_root_local_dir=/absolute/worktree/path` to pin `/srv/proxmox_florin_server` to the intended checkout explicitly
 - validation resolves tracked JSON files against the repo root, falls back to `python3` when `jq` is unavailable, and skips rsync-excluded generated JSON artifacts that are intentionally absent from mirrored remote workspaces
 - required Ansible collections are installed from [collections/requirements.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/requirements.yml)
@@ -147,5 +148,5 @@ python3 scripts/correction_loops.py --validate
 - if validation fails on generated vars, regenerate [inventory/group_vars/platform.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/platform.yml) from the canonical inputs instead of hand-editing the file
 - if CI fails but local validation passes, rerun `make validate` from a clean working tree to catch unstaged or ignored-file drift
 - if a local fallback or login shell picks up an older Python and direct validators fail on `int | None` or similar modern type syntax, export `LV3_VALIDATE_PYTHON_BIN=/absolute/path/to/python3.10+` and rerun
-- if the build-server mirror is missing a generated JSON artifact that is intentionally excluded from rsync, keep the artifact excluded and extend the validation contract only if the remote gate truly needs that file
+- if the build-server immutable snapshot is missing a generated JSON artifact that is intentionally excluded from `.rsync-exclude`, keep the artifact excluded and extend the validation contract only if the remote gate truly needs that file
 - if a new file type needs validation, extend [scripts/validate_repo.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repo.sh) and keep `make validate` as the single top-level entry point

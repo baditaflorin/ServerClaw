@@ -365,9 +365,10 @@ def validate_no_tracked_env_files() -> None:
     if completed.returncode == 0:
         tracked = [line.strip() for line in completed.stdout.splitlines() if line.strip()]
     else:
-        # Some remote validation runners materialize git worktrees through an
-        # alternate `.git-remote/` layout that breaks `git ls-files`. Fall back
-        # to a repository scan so the no-.env invariant still holds there.
+        # Immutable remote validation snapshots deliberately omit `.git`
+        # metadata, and some older worker mirrors used an alternate
+        # `.git-remote/` layout that also breaks `git ls-files`. Fall back to a
+        # repository scan so the no-.env invariant still holds in both modes.
         ignored_dirs = {".ansible", ".claude", ".git", ".git-remote", ".local", ".venv", ".worktrees"}
         tracked = []
         for path in REPO_ROOT.rglob("*.env"):
