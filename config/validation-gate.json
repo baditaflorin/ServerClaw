@@ -3,7 +3,7 @@
     "description": "Run the repo-managed ansible-lint policy against playbooks and the packaged collection.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/ansible:2.17.10",
-    "command": "export ANSIBLE_CONFIG=/workspace/ansible.cfg; export ANSIBLE_COLLECTIONS_PATH=/workspace/collections${LV3_ANSIBLE_COLLECTIONS_DIR:+:$LV3_ANSIBLE_COLLECTIONS_DIR}; ANSIBLE_LINT_NODEPS=1 ansible-lint playbooks collections/ansible_collections/lv3/platform",
+    "command": "mkdir -p .ansible/validation/lint-collections && LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/lint-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/lint-requirements.sha ./scripts/validate_repo.sh ansible-lint",
     "working_dir": "/workspace",
     "timeout_seconds": 300,
     "cache_mounts": ["ansible_collections"]
@@ -12,7 +12,7 @@
     "description": "Syntax check every tracked playbook outside the shared playbook task includes.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/ansible:2.17.10",
-    "command": "export ANSIBLE_CONFIG=/workspace/ansible.cfg; export ANSIBLE_COLLECTIONS_PATH=/workspace/collections${LV3_ANSIBLE_COLLECTIONS_DIR:+:$LV3_ANSIBLE_COLLECTIONS_DIR}; for playbook in $(git -C /workspace ls-files 'playbooks/*.yml' 'playbooks/groups/*.yml' 'playbooks/services/*.yml' | awk -F/ '$1 == \"playbooks\" && $2 != \"tasks\" { print }'); do ansible-playbook -i inventory/hosts.yml \"$playbook\" --syntax-check >/dev/null; done",
+    "command": "mkdir -p .ansible/validation/syntax-collections && LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/syntax-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/syntax-requirements.sha ./scripts/validate_repo.sh ansible-syntax",
     "working_dir": "/workspace",
     "timeout_seconds": 300,
     "cache_mounts": ["ansible_collections"]

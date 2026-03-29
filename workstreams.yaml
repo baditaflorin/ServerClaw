@@ -14,6 +14,108 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0201-live-apply
+    adr: "0201"
+    title: Harbor runtime deployment, registry cutover, and repository automation replay
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0201-main-final
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0201-main-merge-r2
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0201-live-apply.md
+    depends_on:
+      - adr-0056-keycloak
+      - adr-0083-docker-check-runner
+      - adr-0089-build-artifact-cache
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0201-live-apply.md
+      - docs/adr/0201-harbor-container-registry-with-cve-scanning.md
+      - docs/runbooks/configure-harbor.md
+      - collections/ansible_collections/lv3/platform/roles/harbor_runtime/
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/
+      - inventory/group_vars/platform.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - playbooks/harbor.yml
+      - playbooks/services/harbor.yml
+      - Makefile
+      - scripts/remote_exec.sh
+      - scripts/validate_repo.sh
+      - config/workflow-catalog.json
+      - config/controller-local-secrets.json
+      - config/validation-gate.json
+      - config/subdomain-catalog.json
+      - config/subdomain-exposure-registry.json
+      - config/service-capability-catalog.json
+      - config/health-probe-catalog.json
+      - config/dependency-graph.json
+      - config/data-catalog.json
+      - config/secret-catalog.json
+      - config/api-gateway-catalog.json
+      - config/command-catalog.json
+      - config/grafana/dashboards/harbor.json
+      - config/alertmanager/rules/harbor.yml
+      - receipts/live-applies/2026-03-28-adr-0201-harbor-live-apply.json
+      - tests/test_harbor_runtime_role.py
+      - tests/test_docker_runtime_role.py
+      - tests/test_nginx_edge_publication_role.py
+      - tests/test_remote_exec.py
+      - tests/test_generate_platform_vars.py
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0201 by converging Harbor with Trivy scanning, Keycloak-backed operator login, and a repo-managed check-runner publication path through registry.lv3.org
+      release_bump: patch
+      included_in_repo_version: 0.177.63
+      latest_receipts:
+        harbor: 2026-03-29-adr-0201-harbor-mainline-live-apply
+  - id: ws-0201-main-merge
+    adr: "0201"
+    title: Finalize ADR 0201 Harbor exact-main evidence on origin/main
+    status: merged
+    owner: codex
+    branch: main
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0246-main-push
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0201-main-merge.md
+    depends_on:
+      - ws-0201-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0201-live-apply.md
+      - docs/workstreams/ws-0201-main-merge.md
+      - docs/adr/0201-harbor-container-registry-with-cve-scanning.md
+      - docs/runbooks/configure-harbor.md
+      - collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/
+      - tests/test_harbor_runtime_role.py
+      - tests/test_docker_runtime_role.py
+      - tests/test_nginx_edge_publication_role.py
+      - tests/test_remote_exec.py
+      - tests/test_generate_platform_vars.py
+      - receipts/live-applies/2026-03-28-adr-0201-harbor-live-apply.json
+      - receipts/live-applies/2026-03-29-adr-0201-harbor-mainline-live-apply.json
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.63.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/adr/.index.yaml
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: records ADR 0201 exact-main evidence on the current
+        mainline by preserving the verified Harbor rollout, the exact-main
+        OIDC readiness recovery, the repaired latest-main replay after ADR
+        0239 advanced origin/main, and the latest Harbor receipt truth while
+        the integrated platform baseline remains 0.130.45
+      release_bump: patch
+      included_in_repo_version: 0.177.63
   - id: ws-0264-receipt-driven-resilience-adrs
     adr: "0264"
     title: Receipt-driven resilience architecture bundle
@@ -756,6 +858,329 @@ workstreams:
       changelog_entry: records ADR 0242 exact-main evidence on the current mainline by preserving the verified Shepherd-tour rollout, refreshed release surfaces, and operator-access onboarding truth while the live platform baseline remains 0.130.44
       release_bump: patch
       included_in_repo_version: 0.177.58
+  - id: ws-0239-live-apply
+    adr: "0239"
+    title: Live apply browser-local search experience via Pagefind
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0239-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0239-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0239-live-apply.md
+    depends_on:
+      - adr-0094-developer-portal
+      - adr-0121-local-search-and-indexing-fabric
+      - adr-0135-developer-portal-sensitivity-classification
+      - adr-0137-robots-and-crawl-policy
+      - adr-0138-published-artifact-secret-scanning
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0239-live-apply.md
+      - docs/adr/0239-browser-local-search-experience-via-pagefind.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/deployment-history-portal.md
+      - docs/runbooks/developer-portal.md
+      - docs/site-generated/architecture/dependency-graph.md
+      - Makefile
+      - mkdocs.yml
+      - requirements/docs.txt
+      - scripts/generate_docs_site.py
+      - scripts/build_docs_portal.py
+      - scripts/validate_repo.sh
+      - docs/theme-overrides/**
+      - tests/test_docs_site.py
+      - receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0239_live_apply
+          paths:
+            - docs/workstreams/ws-0239-live-apply.md
+            - docs/adr/0239-browser-local-search-experience-via-pagefind.md
+            - docs/runbooks/deployment-history-portal.md
+            - docs/runbooks/developer-portal.md
+            - Makefile
+            - mkdocs.yml
+            - requirements/docs.txt
+            - scripts/generate_docs_site.py
+            - scripts/build_docs_portal.py
+            - scripts/validate_repo.sh
+            - docs/theme-overrides/**
+            - tests/test_docs_site.py
+          mode: exclusive
+        - id: adr_metadata_index
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: generated_portals_contract
+          paths:
+            - docs/site-generated/architecture/dependency-graph.md
+          mode: shared_contract
+          contract: generated-portals-v1
+        - id: live_apply_evidence
+          paths:
+            - receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json
+          mode: shared_contract
+          contract: live-apply-receipts-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0239 by publishing a Pagefind-backed
+        browser-local search experience for docs.lv3.org, including section,
+        audience, service, capability, sensitivity, and tag facets from the
+        generated portal corpus
+      release_bump: patch
+      included_in_repo_version: 0.177.62
+      latest_receipts:
+        docs_portal: 2026-03-29-adr-0239-browser-local-search-post-merge-replay
+        local_search_and_indexing_fabric: 2026-03-29-adr-0239-browser-local-search-post-merge-replay
+  - id: ws-0239-main-merge
+    adr: "0239"
+    title: Integrate ADR 0239 browser-local search into origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0239-main-merge-r2
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0239-main-merge-r2
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0239-main-merge.md
+    depends_on:
+      - ws-0239-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0239-main-merge.md
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.62.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/adr/.index.yaml
+      - docs/adr/0239-browser-local-search-experience-via-pagefind.md
+      - docs/workstreams/ws-0239-live-apply.md
+      - docs/runbooks/deployment-history-portal.md
+      - docs/runbooks/developer-portal.md
+      - docs/site-generated/architecture/dependency-graph.md
+      - Makefile
+      - mkdocs.yml
+      - requirements/docs.txt
+      - scripts/generate_docs_site.py
+      - scripts/build_docs_portal.py
+      - scripts/validate_repo.sh
+      - docs/theme-overrides/**
+      - tests/test_docs_site.py
+      - receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json
+      - receipts/live-applies/2026-03-29-adr-0239-browser-local-search-mainline-live-apply.json
+      - receipts/live-applies/2026-03-29-adr-0239-browser-local-search-post-merge-replay.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws_0239_main_merge_doc
+          paths:
+            - docs/workstreams/ws-0239-main-merge.md
+          mode: exclusive
+        - id: adr_0239_mainline_truth
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.62.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: exclusive
+        - id: adr_0239_main_merge_surfaces
+          paths:
+            - docs/adr/.index.yaml
+            - docs/adr/0239-browser-local-search-experience-via-pagefind.md
+            - docs/workstreams/ws-0239-live-apply.md
+            - docs/runbooks/deployment-history-portal.md
+            - docs/runbooks/developer-portal.md
+            - docs/site-generated/architecture/dependency-graph.md
+            - Makefile
+            - mkdocs.yml
+            - requirements/docs.txt
+            - scripts/generate_docs_site.py
+            - scripts/build_docs_portal.py
+            - scripts/validate_repo.sh
+            - docs/theme-overrides/**
+            - tests/test_docs_site.py
+            - receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json
+            - receipts/live-applies/2026-03-29-adr-0239-browser-local-search-mainline-live-apply.json
+            - receipts/live-applies/2026-03-29-adr-0239-browser-local-search-post-merge-replay.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: records ADR 0239 exact-main evidence on the current
+        mainline by preserving the verified Pagefind browser-local docs search
+        rollout, refreshed release surfaces, and the current platform baseline
+        after the exact-main replay
+      release_bump: patch
+      included_in_repo_version: 0.177.62
+      latest_receipts:
+        docs_portal: 2026-03-29-adr-0239-browser-local-search-post-merge-replay
+        local_search_and_indexing_fabric: 2026-03-29-adr-0239-browser-local-search-post-merge-replay
+  - id: ws-0241-live-apply
+    adr: "0241"
+    title: Live apply ADR 0241 rich content and inline knowledge editing via Tiptap
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0241-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0241-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0241-live-apply.md
+    depends_on:
+      - adr-0108-operator-onboarding-and-offboarding
+      - adr-0122-windmill-operator-access-admin
+      - adr-0199-outline-living-knowledge-wiki
+      - adr-0206-ports-and-adapters
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0241-live-apply.md
+      - docs/adr/0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/validate-repository-automation.md
+      - docs/runbooks/validation-gate.md
+      - docs/runbooks/windmill-operator-access-admin.md
+      - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
+      - config/windmill/apps/wmill-lock.yaml
+      - config/windmill/scripts/operator-update-notes.py
+      - scripts/operator_manager.py
+      - roles/windmill_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+      - tests/test_operator_manager.py
+      - tests/test_windmill_operator_admin_app.py
+      - receipts/live-applies/2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0241_live_apply
+          paths:
+            - docs/workstreams/ws-0241-live-apply.md
+            - docs/adr/0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
+            - docs/adr/.index.yaml
+            - docs/runbooks/validate-repository-automation.md
+            - docs/runbooks/validation-gate.md
+            - docs/runbooks/windmill-operator-access-admin.md
+            - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
+            - config/windmill/apps/wmill-lock.yaml
+            - config/windmill/scripts/operator-update-notes.py
+            - scripts/operator_manager.py
+            - roles/windmill_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+            - tests/test_operator_manager.py
+            - tests/test_windmill_operator_admin_app.py
+            - receipts/live-applies/2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0241 by adding a Tiptap-backed bounded-knowledge editor to the repo-managed Windmill operator-access admin surface, regenerating the raw-app dependency lock, and hardening governed Windmill live replay from concurrent non-primary worktrees
+      release_bump: patch
+      included_in_repo_version: 0.177.62
+      latest_receipts:
+        operator_access: 2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply
+        windmill: 2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply
+  - id: ws-0241-main-merge
+    adr: "0241"
+    title: Integrate ADR 0241 rich content and inline knowledge editing into origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0241-main-merge-r3
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0241-main-merge-r3
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0241-main-merge.md
+    depends_on:
+      - ws-0241-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0241-main-merge.md
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.61.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/adr/.index.yaml
+      - docs/adr/0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
+      - docs/workstreams/ws-0241-live-apply.md
+      - docs/runbooks/validate-repository-automation.md
+      - docs/runbooks/validation-gate.md
+      - docs/runbooks/windmill-operator-access-admin.md
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+      - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
+      - config/windmill/apps/wmill-lock.yaml
+      - config/windmill/scripts/operator-update-notes.py
+      - scripts/operator_manager.py
+      - tests/test_operator_manager.py
+      - tests/test_windmill_operator_admin_app.py
+      - receipts/live-applies/2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0241_main_merge
+          paths:
+            - docs/workstreams/ws-0241-main-merge.md
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.61.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/adr/.index.yaml
+            - docs/adr/0241-rich-content-and-inline-knowledge-editing-via-tiptap.md
+            - docs/workstreams/ws-0241-live-apply.md
+            - docs/runbooks/validate-repository-automation.md
+            - docs/runbooks/validation-gate.md
+            - docs/runbooks/windmill-operator-access-admin.md
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+            - config/windmill/apps/f/lv3/operator_access_admin.raw_app/**
+            - config/windmill/apps/wmill-lock.yaml
+            - config/windmill/scripts/operator-update-notes.py
+            - scripts/operator_manager.py
+            - tests/test_operator_manager.py
+            - tests/test_windmill_operator_admin_app.py
+            - receipts/live-applies/2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: records ADR 0241 exact-main evidence on the current
+        mainline by preserving the verified Tiptap rich-notes rollout,
+        refreshed release surfaces, and latest operator-access and Windmill
+        receipt truth while the live platform baseline remains 0.130.44
+      release_bump: patch
+      included_in_repo_version: 0.177.61
   - id: ws-0230-live-apply
     adr: "0230"
     title: Live apply policy decisions via Open Policy Agent and Conftest
@@ -1302,7 +1727,7 @@ workstreams:
   - id: ws-0228-main-merge
     adr: "0228"
     title: Integrate ADR 0228 live apply into origin/main
-    status: in_progress
+    status: merged
     owner: codex
     branch: codex/ws-0228-main-merge
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0228-main-merge
@@ -1346,7 +1771,7 @@ workstreams:
       - config/windmill/scripts/weekly-capacity-report.py
       - playbooks/openbao.yml
       - receipts/live-applies/2026-03-28-adr-0228-windmill-default-operations-surface-live-apply.json
-      - receipts/live-applies/2026-03-28-adr-0228-windmill-default-operations-surface-mainline-live-apply.json
+      - receipts/live-applies/2026-03-29-adr-0228-windmill-default-operations-surface-mainline-live-apply.json
       - tests/test_ansible_collection_packaging.py
       - tests/test_config_merge_windmill.py
       - tests/test_nightly_integration_tests.py
@@ -1412,7 +1837,7 @@ workstreams:
             - config/windmill/scripts/weekly-capacity-report.py
             - playbooks/openbao.yml
             - receipts/live-applies/2026-03-28-adr-0228-windmill-default-operations-surface-live-apply.json
-            - receipts/live-applies/2026-03-28-adr-0228-windmill-default-operations-surface-mainline-live-apply.json
+            - receipts/live-applies/2026-03-29-adr-0228-windmill-default-operations-surface-mainline-live-apply.json
             - tests/test_ansible_collection_packaging.py
             - tests/test_nightly_integration_tests.py
             - tests/test_openbao_runtime_role.py
@@ -1420,8 +1845,12 @@ workstreams:
             - tests/test_weekly_capacity_report_windmill.py
             - tests/test_windmill_default_operations_surface.py
           mode: exclusive
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
+    canonical_truth:
+      changelog_entry: records ADR 0228 exact-main evidence by making Windmill the default browser-first and API-first operations surface for governed routines, hardening hash-backed seeded-script execution on CE v1.662.0, and pruning stale worker-checkout directories so post-merge validation can complete from the mirrored runtime checkout
+      release_bump: patch
+      included_in_repo_version: 0.177.64
   - id: ws-0224-server-resident-ops-adrs
     adr: "0224"
     title: Server-resident operations architecture bundle

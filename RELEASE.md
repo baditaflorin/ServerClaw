@@ -1,12 +1,12 @@
-# Release 0.177.60
+# Release 0.177.64
 
 - Date: 2026-03-29
 
 ## Summary
-- implemented ADR 0246 by teaching the probe catalog, shared post-verify path, world-state service health worker, observation loop, and health composite to distinguish startup, ready, degraded, and failed runtime states
+- records ADR 0228 exact-main evidence by making Windmill the default browser-first and API-first operations surface for governed routines, hardening hash-backed seeded-script execution on CE v1.662.0, and pruning stale worker-checkout directories so post-merge validation can complete from the mirrored runtime checkout
 
 ## Platform Impact
-- no live platform version bump; this release records the verified ADR 0246 runtime-state rollout while the current mainline platform baseline remains 0.130.44
+- advances the live platform baseline to 0.130.46 by recording the verified ADR 0228 exact-main Windmill operations-surface replay, hash-backed seeded-script execution on CE v1.662.0, and worker-checkout validation fixes on top of release 0.177.63
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

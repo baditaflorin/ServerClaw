@@ -41,6 +41,12 @@ playbooks:
     shared_surfaces:
       - service:docker-runtime
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/harbor.yml:
+    playbook_id: harbor
+    mutation_scope: platform
+    shared_surfaces:
+      - service:harbor
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/excalidraw.yml:
     playbook_id: excalidraw
     mutation_scope: platform
@@ -245,6 +251,12 @@ playbooks:
     mutation_scope: host
     shared_surfaces:
       - service:docker-build-observability
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/harbor.yml:
+    playbook_id: harbor
+    mutation_scope: platform
+    shared_surfaces:
+      - service:harbor
       - inventory/host_vars/proxmox_florin.yml
   playbooks/services/docker-runtime-observability.yml:
     playbook_id: docker-runtime-observability

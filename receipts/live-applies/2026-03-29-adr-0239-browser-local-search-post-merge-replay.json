@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0239-browser-local-search-post-merge-replay",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T01:37:22Z",
+  "recorded_by": "codex",
+  "source_commit": "002156986cebf4eae90384a9465ee47bc5d3c0f9",
+  "repo_version_context": "0.177.62",
+  "platform_version_context": "0.130.45",
+  "workflow_id": "adr-0239-browser-local-search-mainline-live-apply",
+  "adr": "0239",
+  "summary": "After `origin/main` advanced to the final ADR 0239 evidence commits, a latest-server check still found `nginx-lv3` serving the older MkDocs search bundle without the Pagefind publication or the `0.177.62` release page, so the exact current `origin/main` commit was replayed again through `make deploy-docs-portal` and re-verified immediately on both the authenticated edge and the published docs tree.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Developer portal",
+      "address": "https://docs.lv3.org/"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Post-merge drift detection on the live docs tree",
+      "result": "pass",
+      "observed": "After `git ls-remote origin refs/heads/main` confirmed `origin/main` at `002156986cebf4eae90384a9465ee47bc5d3c0f9`, guest-local checks on `nginx-lv3` still showed `/var/www/lv3-generated/docs-portal` serving the older bundle from `2026-03-28 22:14` without `pagefind/` or `releases/0.177.62/`, even though the authenticated public edge still answered `302` behind OAuth."
+    },
+    {
+      "check": "Exact merged-main replay",
+      "result": "pass",
+      "observed": "`make deploy-docs-portal` rebuilt the docs portal with Pagefind reporting `Indexed 784 pages`, `Indexed 15027 words`, and `Indexed 6 filters`, then replayed the shared edge publication from source commit `002156986cebf4eae90384a9465ee47bc5d3c0f9` with `LV3_RUN_ID=c35d51cfeb804ff9bb7e77942b035520`, playbook run id `77b434ae928840aba734d5f62275b947`, and recap `nginx-lv3 ok=63 changed=7 failed=0 skipped=12`."
+    },
+    {
+      "check": "Guest-local verification after replay",
+      "result": "pass",
+      "observed": "Immediate guest checks on `nginx-lv3` confirmed `/var/www/lv3-generated/docs-portal/pagefind/pagefind-entry.json`, `pagefind/pagefind-ui.js`, `pagefind/pagefind-ui.css`, and `releases/0.177.62/index.html`; the published home page contains `id=\"pagefind-search\"` plus `pagefind/pagefind-ui.js`; `releases/0.177.62/index.html` contains `0.130.45`; and `architecture/dependency-graph/index.html` contains `data-pagefind-filter=\"section\"` without the earlier raw frontmatter leak."
+    },
+    {
+      "check": "External authenticated edge contract",
+      "result": "pass",
+      "observed": "`curl -ksSI https://docs.lv3.org/` returned `HTTP/2 302` with `location: https://docs.lv3.org/oauth2/sign_in?rd=https://docs.lv3.org/` and `x-robots-tag: noindex, nofollow` after the replay."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "build/platform-manifest.json",
+    "docs/workstreams/ws-0239-live-apply.md",
+    "docs/workstreams/ws-0239-main-merge.md",
+    "receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json",
+    "receipts/live-applies/2026-03-29-adr-0239-browser-local-search-mainline-live-apply.json",
+    "receipts/live-applies/2026-03-29-adr-0239-browser-local-search-post-merge-replay.json",
+    "versions/stack.yaml",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This receipt supersedes `2026-03-29-adr-0239-browser-local-search-mainline-live-apply` as the latest canonical docs-search evidence because it records the replay from the current merged `origin/main` commit after the stale live docs tree was detected again at the latest server check.",
+    "The platform version stays at `0.130.45` because this replay restores the merged `0.177.62` publication rather than introducing a new platform capability."
+  ]
+}

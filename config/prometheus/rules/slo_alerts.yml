@@ -316,6 +316,46 @@ groups:
           summary: keycloak-latency has less than 10% error budget remaining
           description: Keycloak discovery responds in under 500ms for 95% of probes.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_harbor_availability
+        expr: (slo:harbor_availability:error_rate_5m > (14 * 0.005000)) and (slo:harbor_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: harbor
+          slo_id: harbor-availability
+          indicator: availability
+        annotations:
+          summary: harbor-availability is burning its error budget at 14x
+          description: Harbor remains reachable through the shared LV3 edge for image
+            pulls, pushes, and operator access.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_harbor_availability
+        expr: slo:harbor_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: harbor
+          slo_id: harbor-availability
+          indicator: availability
+        annotations:
+          summary: harbor-availability is burning its error budget at 3x
+          description: Harbor remains reachable through the shared LV3 edge for image
+            pulls, pushes, and operator access.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_harbor_availability
+        expr: slo:harbor_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: harbor
+          slo_id: harbor-availability
+          indicator: availability
+        annotations:
+          summary: harbor-availability has less than 10% error budget remaining
+          description: Harbor remains reachable through the shared LV3 edge for image
+            pulls, pushes, and operator access.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_langfuse_availability
         expr: (slo:langfuse_availability:error_rate_5m > (14 * 0.005000)) and (slo:langfuse_availability:error_rate_1h
           > (14 * 0.005000))

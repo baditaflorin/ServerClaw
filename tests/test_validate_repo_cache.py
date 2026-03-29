@@ -70,9 +70,9 @@ def test_validate_repo_generated_portals_stage_does_not_require_make() -> None:
     script = VALIDATE_REPO_SCRIPT.read_text()
 
     assert 'run --with-requirements "$REPO_ROOT/requirements/docs.txt"' in script
-    assert "mkdocs build --strict" in script
-    assert "generate_docs_site.py" in script
-    assert 'sed "s|^docs_dir: .*|docs_dir: $generated_docs_dir|"' in script
+    assert "build_docs_portal.py" in script
+    assert '--generated-dir "$generated_docs_dir"' in script
+    assert '--output-dir "$REPO_ROOT/build/docs-portal"' in script
     assert 'make -C "$REPO_ROOT" docs' not in script
 
 
