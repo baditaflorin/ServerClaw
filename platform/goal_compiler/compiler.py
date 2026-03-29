@@ -6,7 +6,7 @@ import re
 import sys
 import uuid
 from dataclasses import dataclass, replace
-from datetime import UTC, datetime
+from platform.datetime_compat import UTC, datetime
 from pathlib import Path
 from typing import Any
 

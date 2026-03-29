@@ -45,6 +45,7 @@ def test_docker_runtime_patches_nftables_before_starting_docker() -> None:
 
 def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     tasks = load_tasks()
+    defaults = load_defaults()
     task_names = {task["name"] for task in tasks}
     assert "Flush Docker handlers before chain health checks" in task_names
     assert "Ensure Docker bridge networking chains are present" in task_names
@@ -54,6 +55,10 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert include_role["tasks_from"] == "docker_bridge_chains"
     assert ensure_task["vars"]["common_docker_bridge_chains_service_name"] == "docker"
     assert ensure_task["vars"]["common_docker_bridge_chains_require_nat_chain"] == "{{ docker_runtime_require_nat_chain }}"
+    assert defaults["docker_runtime_chain_recheck_retries"] == 30
+    assert defaults["docker_runtime_chain_recheck_delay_seconds"] == 2
+    assert ensure_task["vars"]["common_docker_bridge_chains_retries"] == "{{ docker_runtime_chain_recheck_retries }}"
+    assert ensure_task["vars"]["common_docker_bridge_chains_delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
 
 
 def test_docker_runtime_patches_nftables_rule_block_once() -> None:

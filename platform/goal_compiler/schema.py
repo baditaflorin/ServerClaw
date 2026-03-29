@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from enum import StrEnum
+from platform.enum_compat import StrEnum
 from typing import Any
 
 

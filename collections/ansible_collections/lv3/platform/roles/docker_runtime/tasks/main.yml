@@ -161,6 +161,8 @@
   vars:
     common_docker_bridge_chains_service_name: docker
     common_docker_bridge_chains_require_nat_chain: "{{ docker_runtime_require_nat_chain }}"
+    common_docker_bridge_chains_retries: "{{ docker_runtime_chain_recheck_retries }}"
+    common_docker_bridge_chains_delay: "{{ docker_runtime_chain_recheck_delay_seconds }}"
 
 - name: Verify Docker runtime health probes
   ansible.builtin.import_tasks: verify.yml

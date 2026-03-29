@@ -90,6 +90,103 @@
         }
       }
     },
+    "stage_smoke_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enforced",
+        "passed",
+        "required_suite_ids",
+        "missing_suite_ids",
+        "failed_suite_ids",
+        "passed_suite_ids",
+        "observed_suites",
+        "reasons"
+      ],
+      "properties": {
+        "enforced": {
+          "type": "boolean"
+        },
+        "passed": {
+          "type": "boolean"
+        },
+        "required_suite_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "missing_suite_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "failed_suite_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "passed_suite_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "observed_suites": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": [
+              "suite_id",
+              "service_id",
+              "environment",
+              "status",
+              "summary"
+            ],
+            "properties": {
+              "suite_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "service_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "environment": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "passed",
+                  "failed",
+                  "skipped"
+                ]
+              },
+              "summary": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
     "gate_decision": {
       "type": "string",
       "enum": [

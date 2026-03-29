@@ -6,6 +6,10 @@ import argparse
 import json
 from pathlib import Path
 
+from script_bootstrap import ensure_repo_root_on_path
+
+ensure_repo_root_on_path(__file__)
+
 from controller_automation_toolkit import emit_cli_error
 from platform.live_apply import (
     create_rollback_bundle,
