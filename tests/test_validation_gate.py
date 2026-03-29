@@ -360,6 +360,21 @@ def test_gate_status_supports_json_output(tmp_path: Path, capsys) -> None:
     assert payload["latest_bypass"] is None
 
 
+def test_gate_status_defaults_are_repo_rooted_when_run_outside_repo(tmp_path: Path) -> None:
+    completed = subprocess.run(
+        ["python3", str(REPO_ROOT / "scripts" / "gate_status.py"), "--format", "json"],
+        cwd=tmp_path,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    payload = json.loads(completed.stdout)
+    assert payload["manifest_path"] == str(REPO_ROOT / "config" / "validation-gate.json")
+    assert payload["lane_catalog_path"] == str(REPO_ROOT / "config" / "validation-lanes.yaml")
+
+
 def test_gate_status_workflow_catalog_and_windmill_seed_align() -> None:
     catalog = json.loads((REPO_ROOT / "config" / "workflow-catalog.json").read_text(encoding="utf-8"))
     runtime_defaults = yaml.safe_load(

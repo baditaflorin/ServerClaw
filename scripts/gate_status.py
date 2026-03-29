@@ -28,11 +28,12 @@ except ModuleNotFoundError as exc:
     )
 
 
-DEFAULT_MANIFEST = Path("config/validation-gate.json")
-DEFAULT_LANE_CATALOG = Path("config/validation-lanes.yaml")
-DEFAULT_LAST_RUN = Path(".local/validation-gate/last-run.json")
-DEFAULT_POST_MERGE_RUN = Path(".local/validation-gate/post-merge-last-run.json")
-DEFAULT_BYPASS_DIR = Path("receipts/gate-bypasses")
+REPO_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_MANIFEST = REPO_ROOT / "config" / "validation-gate.json"
+DEFAULT_LANE_CATALOG = REPO_ROOT / "config" / "validation-lanes.yaml"
+DEFAULT_LAST_RUN = REPO_ROOT / ".local" / "validation-gate" / "last-run.json"
+DEFAULT_POST_MERGE_RUN = REPO_ROOT / ".local" / "validation-gate" / "post-merge-last-run.json"
+DEFAULT_BYPASS_DIR = REPO_ROOT / "receipts" / "gate-bypasses"
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
