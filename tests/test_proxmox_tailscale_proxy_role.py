@@ -28,6 +28,33 @@ def test_role_argument_spec_declares_proxy_inputs() -> None:
     assert options["platform_host"]["type"] == "dict"
 
 
+def test_role_only_starts_socket_units_when_no_proxy_service_owns_the_listener() -> None:
+    tasks = load_tasks()
+    state_task = next(task for task in tasks if task.get("name") == "Read current Proxmox Tailscale proxy unit states")
+    start_task = next(
+        task
+        for task in tasks
+        if task.get("name")
+        == "Start Proxmox Tailscale proxy sockets when the listener is not already owned by an active proxy service"
+    )
+    assert state_task["register"] == "proxmox_tailscale_proxy_unit_states"
+    assert "proxmox_tailscale_proxy_unit_states.results" in start_task["vars"]["proxmox_tailscale_proxy_unit_state_lines"]
+    assert start_task["when"] == "proxmox_tailscale_service_active_state != 'active'"
+
+
+def test_role_asserts_proxy_listener_remains_available_after_converge() -> None:
+    tasks = load_tasks()
+    assert_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Assert Proxmox Tailscale proxy listeners remain active after converge"
+    )
+    assert (
+        assert_task["ansible.builtin.assert"]["that"][0]
+        == "proxmox_tailscale_socket_active_state == 'active' or proxmox_tailscale_service_active_state == 'active'"
+    )
+
+
 def test_host_inventory_proxy_ports_reference_platform_port_assignments() -> None:
     host_vars_text = HOST_VARS.read_text()
     assert "listen_port: \"{{ platform_port_assignments.windmill_host_proxy_port }}\"" in host_vars_text

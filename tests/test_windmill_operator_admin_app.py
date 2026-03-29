@@ -672,6 +672,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert ".DS_Store" in tasks
     assert "rsync" in tasks
     assert "scripts/windmill_run_wait_result.py" in tasks
+    assert "Wait for the Windmill worker containers to be running" in tasks
     assert "--payload-json" in tasks
     assert "--timeout {{ windmill_seed_job_timeout_seconds }}" in tasks
     assert "' not found' in (windmill_up.stderr | default(''))" in tasks
@@ -682,6 +683,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Wait for Windmill workers to register" in wait_for_workers_tasks
     assert "/api/workers/list" in wait_for_workers_tasks
     assert "windmill_registered_workers" in wait_for_workers_tasks
+    assert 'WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"' in tasks
+    assert 'WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"' in verify_tasks
     assert "--path {{ windmill_validation_gate_status_script_path | quote }}" in verify_tasks
     assert "Run the Windmill validation gate status script" in verify_tasks
     assert "Assert the Windmill validation gate status result" in verify_tasks
@@ -703,6 +706,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert defaults["windmill_worker_repo_checkout_host_path"] == "/srv/proxmox_florin_server"
     assert defaults["windmill_worker_repo_checkout_container_path"] == "/srv/proxmox_florin_server"
     assert "{{ windmill_worker_repo_checkout_host_path }}:{{ windmill_worker_repo_checkout_container_path }}" in compose_template
+    assert "network_mode: {{ windmill_worker_network_mode }}" in compose_template
     assert "openbao_runtime" in compose_template
     assert "name: {{ windmill_openbao_runtime_network }}" in compose_template
     assert compose_template.count('user: "0:0"') >= 3

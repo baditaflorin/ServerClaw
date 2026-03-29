@@ -1314,6 +1314,23 @@
   until: windmill_version.status == 200
   changed_when: false
 
+- name: Wait for the Windmill worker containers to be running
+  ansible.builtin.shell: |
+    set -euo pipefail
+    docker ps --quiet --filter "name=^{{ item }}$" --filter status=running | grep -q .
+  args:
+    executable: /bin/bash
+  loop:
+    - windmill-windmill_worker-1
+    - windmill-windmill_worker_native-1
+  loop_control:
+    label: "{{ item }}"
+  register: windmill_worker_container_wait
+  retries: 18
+  delay: 5
+  until: windmill_worker_container_wait.rc == 0
+  changed_when: false
+
 - name: Check whether the rendered Windmill runtime env exposes worker scheduler variables
   ansible.builtin.shell: |
     set -euo pipefail
@@ -1956,10 +1973,12 @@
       - -lc
       - >-
         cd /workspace/{{ item.relative_dir }}
-        && if [ -f package-lock.json ]; then
+        && if [ -f package.json ] && [ ! -f package-lock.json ]; then
+          echo "missing package-lock.json for {{ item.path }}" >&2;
+          exit 1;
+        elif [ -f package-lock.json ]; then
+          rm -rf node_modules;
           npm ci --no-audit --no-fund;
-        elif [ -f package.json ]; then
-          npm install --no-package-lock --no-audit --no-fund;
         fi
   loop: "{{ windmill_seed_raw_apps | default([]) }}"
   loop_control:
@@ -2129,6 +2148,7 @@
   delegate_to: localhost
   become: false
   environment:
+    WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"
     WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
   register: windmill_healthcheck
   changed_when: false
