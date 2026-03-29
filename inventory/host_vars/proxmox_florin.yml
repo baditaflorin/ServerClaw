@@ -65,6 +65,7 @@ platform_port_assignments:
   n8n_port: 5678
   coolify_dashboard_port: 8000
   coolify_proxy_port: 80
+  coolify_proxy_tls_port: 443
   coolify_host_proxy_port: 8012
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
@@ -131,7 +132,7 @@ proxmox_tailscale_tcp_proxies:
   - name: postgres-lv3
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: 5432
-    upstream_host: 10.10.10.55
+    upstream_host: 10.10.10.50
     upstream_port: 5432
   - name: windmill
     listen_address: "{{ management_tailscale_ipv4 }}"
@@ -702,6 +703,7 @@ network_policy:
           protocol: tcp
           ports:
             - 80
+            - 443
             - 8000
           description: Shared edge publication for the Coolify dashboard and wildcard app ingress
     postgres-lv3:
@@ -868,6 +870,35 @@ mail_platform_dns_records:
     value: '"brevo-code:b5e6a2e60000b8da96b912f8ea4c2e9a"'
     value_match_regex: '^"brevo-code:'
     ttl: 300
+
+route_dns_assertion_extra_records:
+  - name: "@"
+    type: A
+    value: "{{ management_ipv4 }}"
+    ttl: 60
+
+route_dns_assertion_retired_records:
+  - name: "@"
+    type: AAAA
+    value: "2a01:4f8:d0a:27bd::2"
+    ttl: 60
+    state: absent
+  - name: autoconfig
+    type: CNAME
+    value: "mail.your-server.de."
+    value_match_regex: '^mail\\.your-server\\.de\\.?$'
+    ttl: 300
+    state: absent
+  - name: notify
+    type: A
+    value: "{{ management_ipv4 }}"
+    ttl: 60
+    state: absent
+  - name: www
+    type: AAAA
+    value: "2a01:4f8:d0a:27bd::2"
+    ttl: 60
+    state: absent
 
 lv3_service_topology:
   nginx_edge:
@@ -1107,6 +1138,14 @@ lv3_service_topology:
       type: A
       target: "{{ management_ipv4 }}"
       ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: static
+      slug: mail
+      title: LV3 Mail
+      description: The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.
+      meta: Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.
   step_ca:
     service_name: step-ca
     owning_vm: docker-runtime-lv3
@@ -1433,7 +1472,7 @@ lv3_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.coolify_proxy_port }}"
+      upstream: "https://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:443"
       aliases:
         - "*.apps.lv3.org"
       crawl_policy_enabled: false
@@ -1633,7 +1672,7 @@ lv3_service_topology:
       visibility: tailnet
       name: database
       type: A
-      target: "{{ postgres_ha.vip_ipv4 }}"
+      target: "{{ management_tailscale_ipv4 }}"
       ttl: 60
   backup_pbs:
     service_name: backup-pbs

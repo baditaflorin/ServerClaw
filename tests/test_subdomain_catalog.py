@@ -48,6 +48,14 @@ class SubdomainCatalogTests(unittest.TestCase):
             subdomain_catalog.get_subdomain_entry(self.catalog, "n8n.lv3.org")["auth_requirement"],
             "edge_oidc",
         )
+        self.assertEqual(
+            subdomain_catalog.get_subdomain_entry(self.catalog, "lv3.org")["service_id"],
+            "nginx_edge",
+        )
+        self.assertEqual(
+            subdomain_catalog.get_subdomain_entry(self.catalog, "vault.lv3.org")["target"],
+            "100.64.0.1",
+        )
 
     def test_missing_edge_route_entry_fails(self) -> None:
         broken_catalog = copy.deepcopy(self.catalog)
@@ -166,6 +174,18 @@ class SubdomainCatalogTests(unittest.TestCase):
             "edge",
         )
 
+    def test_apex_route_mode_is_edge(self) -> None:
+        edge_route_hostnames = subdomain_catalog.collect_edge_route_hostnames(
+            self.host_vars,
+            self.public_edge_defaults,
+        )
+        entry = subdomain_catalog.get_subdomain_entry(self.catalog, "lv3.org")
+
+        self.assertEqual(
+            subdomain_catalog.validate_provisionable_subdomain(entry, edge_route_hostnames),
+            "edge",
+        )
+
     def test_wildcard_alias_routes_are_collected_without_requiring_catalog_literal_entry(self) -> None:
         edge_route_hostnames = subdomain_catalog.collect_edge_route_hostnames(
             self.host_vars,
@@ -173,6 +193,7 @@ class SubdomainCatalogTests(unittest.TestCase):
         )
 
         self.assertIn("*.apps.lv3.org", edge_route_hostnames)
+        self.assertIn("lv3.org", edge_route_hostnames)
         self.assertEqual(
             subdomain_catalog.route_mode_for_entry(
                 {

@@ -22,6 +22,8 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         registry = audit.build_registry()
         by_fqdn = {entry["fqdn"]: entry for entry in registry["publications"]}
 
+        self.assertEqual(by_fqdn["lv3.org"]["adapter"]["routing"]["source"], "public_edge_apex")
+        self.assertEqual(by_fqdn["lv3.org"]["adapter"]["dns"]["records"], [{"type": "A", "value": "65.108.75.123"}])
         self.assertEqual(by_fqdn["n8n.lv3.org"]["publication"]["access_model"], "platform-sso")
         self.assertEqual(
             by_fqdn["n8n.lv3.org"]["adapter"]["edge_auth"]["unauthenticated_prefix_paths"],
@@ -31,6 +33,8 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         self.assertEqual(by_fqdn["ops.lv3.org"]["adapter"]["edge_auth"]["provider"], "oauth2_proxy")
         self.assertEqual(by_fqdn["docs.lv3.org"]["adapter"]["routing"]["source"], "public_edge_extra_sites")
         self.assertEqual(by_fqdn["database.lv3.org"]["publication"]["access_model"], "private-network")
+        self.assertEqual(by_fqdn["vault.lv3.org"]["adapter"]["dns"]["visibility"], "tailnet")
+        self.assertTrue(by_fqdn["vault.lv3.org"]["evidence_plan"]["private_route"])
         self.assertTrue(by_fqdn["changelog.lv3.org"]["live_tracking_expected"])
         self.assertGreater(registry["summary"]["active_total"], 0)
 
@@ -67,6 +71,36 @@ class SubdomainExposureAuditTests(unittest.TestCase):
 
         self.assertEqual(findings, [])
 
+    def test_zone_findings_compare_full_record_sets(self) -> None:
+        registry = {
+            "zone_name": "lv3.org",
+            "publications": [
+                {
+                    "fqdn": "lv3.org",
+                    "environment": "production",
+                    "status": "active",
+                    "publication": {"delivery_model": "informational-edge"},
+                    "adapter": {
+                        "dns": {
+                            "records": [{"type": "A", "value": "65.108.75.123"}],
+                            "zone_expected": True,
+                        }
+                    },
+                }
+            ],
+        }
+
+        findings = audit.collect_zone_findings(
+            registry,
+            [
+                {"name": "@", "type": "A", "value": "65.108.75.123"},
+                {"name": "@", "type": "AAAA", "value": "2a01:db8::1"},
+            ],
+        )
+
+        self.assertEqual(findings[0]["finding"], "zone_record_differs_from_catalog")
+        self.assertIn("Unexpected", findings[0]["detail"])
+
     def test_resolution_findings_flag_planned_but_live(self) -> None:
         registry = {
             "publications": [
@@ -75,7 +109,13 @@ class SubdomainExposureAuditTests(unittest.TestCase):
                     "environment": "production",
                     "status": "planned",
                     "publication": {"delivery_model": "shared-edge"},
-                    "adapter": {"dns": {"target": "65.108.75.123"}},
+                    "adapter": {
+                        "dns": {
+                            "target": "65.108.75.123",
+                            "records": [{"type": "A", "value": "65.108.75.123"}],
+                            "zone_expected": True,
+                        }
+                    },
                 }
             ]
         }
@@ -128,8 +168,10 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         }
 
         original = audit.fetch_tls_metadata
-        audit.fetch_tls_metadata = lambda hostname: {
+        audit.fetch_tls_metadata = lambda hostname, **kwargs: {
             "expires_at": "2026-04-30T00:00:00Z",
+            "seconds_remaining": 30 * 86400,
+            "hours_remaining": 30 * 24,
             "days_remaining": 30,
             "issuer": "CN=Test",
             "verification_error": "hostname mismatch",
@@ -142,6 +184,32 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         self.assertEqual(findings[0]["severity"], "CRITICAL")
         self.assertEqual(findings[0]["finding"], "certificate_hostname_mismatch")
         self.assertIn("hostname mismatch", findings[0]["detail"])
+
+    def test_private_route_findings_record_unreachable_targets(self) -> None:
+        registry = {
+            "publications": [
+                {
+                    "fqdn": "database.lv3.org",
+                    "evidence_plan": {"private_route": True},
+                    "adapter": {"dns": {"target": "100.64.0.1", "target_port": 5432}},
+                }
+            ]
+        }
+
+        original = audit.socket.create_connection
+
+        def fail_connect(*args, **kwargs):  # type: ignore[no-untyped-def]
+            raise OSError("timed out")
+
+        audit.socket.create_connection = fail_connect
+        try:
+            findings = audit.collect_private_route_findings(registry)
+        finally:
+            audit.socket.create_connection = original
+
+        self.assertEqual(findings[0]["severity"], "CRITICAL")
+        self.assertEqual(findings[0]["finding"], "private_route_unreachable")
+        self.assertIn("100.64.0.1:5432", findings[0]["detail"])
 
     def test_tls_findings_record_probe_failures_without_crashing(self) -> None:
         registry = {
@@ -160,7 +228,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
 
         original = audit.fetch_tls_metadata
 
-        def fail_probe(hostname: str) -> dict[str, object]:
+        def fail_probe(hostname: str, **kwargs) -> dict[str, object]:
             raise ssl.SSLError("certificate verify failed")
 
         audit.fetch_tls_metadata = fail_probe
@@ -172,6 +240,71 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         self.assertEqual(findings[0]["severity"], "CRITICAL")
         self.assertEqual(findings[0]["finding"], "tls_probe_failed")
         self.assertIn("certificate verify failed", findings[0]["detail"])
+
+    def test_tls_findings_ignore_short_lived_step_ca_certs_outside_renew_window(self) -> None:
+        registry = {
+            "publications": [
+                {
+                    "fqdn": "vault.lv3.org",
+                    "status": "active",
+                    "environment": "production",
+                    "adapter": {
+                        "tls": {"provider": "step-ca", "auto_renew": True},
+                        "dns": {"target": "100.64.0.1", "target_port": 443},
+                    },
+                    "publication": {"delivery_model": "private-network"},
+                }
+            ]
+        }
+
+        original = audit.fetch_tls_metadata
+        audit.fetch_tls_metadata = lambda hostname, **kwargs: {
+            "expires_at": "2026-03-29T11:15:05Z",
+            "seconds_remaining": 11 * 3600,
+            "hours_remaining": 11,
+            "days_remaining": 0,
+            "issuer": "CN=Test",
+            "verification_error": None,
+        }
+        try:
+            findings = audit.collect_tls_findings(registry)
+        finally:
+            audit.fetch_tls_metadata = original
+
+        self.assertEqual(findings, [])
+
+    def test_tls_findings_warn_when_step_ca_cert_enters_renew_window(self) -> None:
+        registry = {
+            "publications": [
+                {
+                    "fqdn": "vault.lv3.org",
+                    "status": "active",
+                    "environment": "production",
+                    "adapter": {
+                        "tls": {"provider": "step-ca", "auto_renew": True},
+                        "dns": {"target": "100.64.0.1", "target_port": 443},
+                    },
+                    "publication": {"delivery_model": "private-network"},
+                }
+            ]
+        }
+
+        original = audit.fetch_tls_metadata
+        audit.fetch_tls_metadata = lambda hostname, **kwargs: {
+            "expires_at": "2026-03-29T04:15:05Z",
+            "seconds_remaining": 5 * 3600,
+            "hours_remaining": 5,
+            "days_remaining": 0,
+            "issuer": "CN=Test",
+            "verification_error": None,
+        }
+        try:
+            findings = audit.collect_tls_findings(registry)
+        finally:
+            audit.fetch_tls_metadata = original
+
+        self.assertEqual(findings[0]["severity"], "WARN")
+        self.assertIn("5 hours remaining", findings[0]["detail"])
 
     def test_check_registry_current_detects_staleness(self) -> None:
         temp_dir = Path(tempfile.mkdtemp(prefix="subdomain-exposure-"))

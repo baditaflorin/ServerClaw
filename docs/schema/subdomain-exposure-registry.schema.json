@@ -25,6 +25,8 @@
           "status",
           "owner_adr",
           "publication",
+          "assertions",
+          "evidence_plan",
           "adapter",
           "live_tracking_expected"
         ],
@@ -67,6 +69,73 @@
               }
             }
           },
+          "assertions": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["publication_class", "environment", "audience", "auth_requirement", "route_target"],
+            "properties": {
+              "publication_class": {
+                "type": "string",
+                "enum": ["edge-published", "informational-only", "private-only"]
+              },
+              "environment": {
+                "type": "string",
+                "enum": ["production", "staging"]
+              },
+              "audience": {
+                "type": "string",
+                "enum": ["public", "operator", "private-network"]
+              },
+              "auth_requirement": {
+                "type": "string",
+                "enum": ["none", "edge_oidc", "upstream_auth", "private_network"]
+              },
+              "route_target": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["service_id", "kind", "source", "target", "target_port"],
+                "properties": {
+                  "service_id": {
+                    "type": ["string", "null"]
+                  },
+                  "kind": {
+                    "type": "string"
+                  },
+                  "source": {
+                    "type": "string"
+                  },
+                  "target": {
+                    "type": "string"
+                  },
+                  "target_port": {
+                    "type": ["integer", "null"]
+                  }
+                }
+              }
+            }
+          },
+          "evidence_plan": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["dns_resolution", "dns_zone", "http_auth", "private_route", "tls"],
+            "properties": {
+              "dns_resolution": {
+                "type": "boolean"
+              },
+              "dns_zone": {
+                "type": "boolean"
+              },
+              "http_auth": {
+                "type": "boolean"
+              },
+              "private_route": {
+                "type": "boolean"
+              },
+              "tls": {
+                "type": "boolean"
+              }
+            }
+          },
           "adapter": {
             "type": "object",
             "additionalProperties": false,
@@ -75,7 +144,7 @@
               "dns": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["target", "record_type"],
+                "required": ["target", "record_type", "records", "managed", "visibility", "zone_expected"],
                 "properties": {
                   "target": {
                     "type": "string"
@@ -86,6 +155,34 @@
                   "record_type": {
                     "type": "string",
                     "enum": ["A", "AAAA", "CNAME"]
+                  },
+                  "records": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["type", "value"],
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": ["A", "AAAA", "CNAME"]
+                        },
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "managed": {
+                    "type": "boolean"
+                  },
+                  "visibility": {
+                    "type": "string",
+                    "enum": ["public", "tailnet"]
+                  },
+                  "zone_expected": {
+                    "type": "boolean"
                   }
                 }
               },
@@ -100,7 +197,7 @@
                   },
                   "source": {
                     "type": "string",
-                    "enum": ["service_topology", "public_edge_extra_sites", "dns-only"]
+                    "enum": ["service_topology", "public_edge_extra_sites", "public_edge_apex", "dns-only"]
                   },
                   "kind": {
                     "type": ["string", "null"]

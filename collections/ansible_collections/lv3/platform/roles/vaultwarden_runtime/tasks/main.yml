@@ -206,23 +206,191 @@
     mode: "0644"
   no_log: true
 
-- name: Start the Vaultwarden stack
+- name: Inspect current Vaultwarden container networks
   ansible.builtin.command:
     argv:
       - docker
-      - compose
-      - --file
-      - "{{ vaultwarden_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ vaultwarden_site_dir }}"
-  register: vaultwarden_up
-  changed_when: >-
-    'Creating' in vaultwarden_up.stdout
-    or 'Recreating' in vaultwarden_up.stdout
-    or 'Starting' in vaultwarden_up.stdout
+      - inspect
+      - "{{ vaultwarden_container_name }}"
+      - --format
+      - '{{ "{{json .NetworkSettings.Networks}}" }}'
+  register: vaultwarden_container_networks
+  changed_when: false
+  failed_when: vaultwarden_container_networks.rc not in [0, 1]
+
+- name: Inspect current Vaultwarden container published ports
+  ansible.builtin.command:
+    argv:
+      - docker
+      - inspect
+      - "{{ vaultwarden_container_name }}"
+      - --format
+      - '{{ "{{json .NetworkSettings.Ports}}" }}'
+  register: vaultwarden_container_ports
+  changed_when: false
+  failed_when: vaultwarden_container_ports.rc not in [0, 1]
+
+- name: Record whether Vaultwarden must be force recreated before startup
+  ansible.builtin.set_fact:
+    vaultwarden_force_recreate: >-
+      {{
+        vaultwarden_container_networks.rc == 0
+        and (
+          (vaultwarden_container_networks.stdout | default('{}', true) | trim) in ['{}', 'null']
+          or (vaultwarden_container_ports.stdout | default('{}', true) | trim) in ['{}', 'null']
+        )
+      }}
+
+- name: Build the Vaultwarden startup command
+  ansible.builtin.set_fact:
+    vaultwarden_compose_up_argv: >-
+      {{
+        ['docker', 'compose', '--file', vaultwarden_compose_file, 'up', '-d']
+        + (['--force-recreate'] if vaultwarden_force_recreate else [])
+        + ['--remove-orphans']
+      }}
+
+- name: Check whether the Docker nat chain exists before Vaultwarden startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: vaultwarden_docker_nat_chain_check
+  changed_when: false
+  failed_when: vaultwarden_docker_nat_chain_check.rc not in [0, 1]
+
+- name: Check whether the Docker forward chain exists before Vaultwarden startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -S
+      - DOCKER-FORWARD
+  register: vaultwarden_docker_forward_chain_check
+  changed_when: false
+  failed_when: vaultwarden_docker_forward_chain_check.rc not in [0, 1]
+
+- name: Restart Docker when the nat or forward chain is missing before Vaultwarden startup
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: vaultwarden_docker_nat_chain_check.rc == 1 or vaultwarden_docker_forward_chain_check.rc == 1
+
+- name: Recheck the Docker nat chain before Vaultwarden startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: vaultwarden_docker_nat_chain_recheck
+  changed_when: false
+  retries: 6
+  delay: 2
+  until: vaultwarden_docker_nat_chain_recheck.rc == 0
+
+- name: Recheck the Docker forward chain before Vaultwarden startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -S
+      - DOCKER-FORWARD
+  register: vaultwarden_docker_forward_chain_recheck
+  changed_when: false
+  retries: 6
+  delay: 2
+  until: vaultwarden_docker_forward_chain_recheck.rc == 0
+
+- name: Assert Docker bridge chains are present before Vaultwarden startup
+  ansible.builtin.assert:
+    that:
+      - vaultwarden_docker_nat_chain_recheck.rc == 0
+      - vaultwarden_docker_forward_chain_recheck.rc == 0
+    fail_msg: >-
+      Docker is running but the nat DOCKER or filter DOCKER-FORWARD chain is missing;
+      Vaultwarden bridge networking will fail.
+
+- name: Start the Vaultwarden stack and recover Docker bridge-chain failures
+  block:
+    - name: Start the Vaultwarden stack
+      ansible.builtin.command:
+        argv: "{{ vaultwarden_compose_up_argv }}"
+      args:
+        chdir: "{{ vaultwarden_site_dir }}"
+      register: vaultwarden_up
+      changed_when: >-
+        'Creating' in vaultwarden_up.stdout
+        or 'Recreating' in vaultwarden_up.stdout
+        or 'Starting' in vaultwarden_up.stdout
+  rescue:
+    - name: Flag Docker bridge-chain failures during Vaultwarden startup
+      ansible.builtin.set_fact:
+        vaultwarden_docker_bridge_chain_missing: >-
+          {{
+            'No chain/target/match by that name' in (ansible_failed_result.stderr | default(''))
+            or 'Unable to enable ACCEPT OUTGOING rule' in (ansible_failed_result.stderr | default(''))
+          }}
+        vaultwarden_docker_network_missing: >-
+          {{
+            'failed to create endpoint' in (ansible_failed_result.stderr | default(''))
+            and 'does not exist' in (ansible_failed_result.stderr | default(''))
+          }}
+
+    - name: Surface unexpected Vaultwarden startup failures
+      ansible.builtin.fail:
+        msg: >-
+          {{
+            ansible_failed_result.stderr
+            | default(ansible_failed_result.msg | default('Vaultwarden compose up failed'))
+          }}
+      when: >-
+        not vaultwarden_docker_bridge_chain_missing
+        and not vaultwarden_docker_network_missing
+
+    - name: Restart Docker to restore bridge chains before retrying Vaultwarden startup
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: vaultwarden_docker_bridge_chain_missing
+
+    - name: Reset stale Vaultwarden compose resources before retrying startup
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ vaultwarden_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ vaultwarden_site_dir }}"
+      register: vaultwarden_down
+      changed_when: >-
+        'Stopping' in (vaultwarden_down.stdout | default(''))
+        or 'Removing' in (vaultwarden_down.stdout | default(''))
+        or 'Removing' in (vaultwarden_down.stderr | default(''))
+      failed_when: false
+      when: vaultwarden_docker_network_missing
+
+    - name: Retry Vaultwarden startup after Docker bridge-chain recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ vaultwarden_compose_file }}"
+          - up
+          - -d
+          - --force-recreate
+          - --remove-orphans
+      args:
+        chdir: "{{ vaultwarden_site_dir }}"
+      register: vaultwarden_up
+      changed_when: true
+      when: vaultwarden_docker_bridge_chain_missing or vaultwarden_docker_network_missing
 
 - name: Install the Vaultwarden TLS renewal timer
   ansible.builtin.include_role:

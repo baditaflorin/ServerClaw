@@ -346,6 +346,29 @@
       }
     },
     {
+      "fqdn": "lv3.org",
+      "service_id": "nginx_edge",
+      "environment": "production",
+      "status": "active",
+      "exposure": "informational-only",
+      "auth_requirement": "none",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "expected_dns_records": [
+        {
+          "type": "A",
+          "value": "65.108.75.123"
+        }
+      ],
+      "owner_adr": "0021",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "The apex hostname is governed as a crawl-suppressed informational redirect to the shared NGINX edge entrypoint."
+    },
+    {
       "fqdn": "logs.lv3.org",
       "service_id": "dozzle",
       "environment": "production",
@@ -409,7 +432,8 @@
         "provider": "letsencrypt",
         "cert_path": "/etc/letsencrypt/live/lv3-edge/",
         "auto_renew": true
-      }
+      },
+      "notes": "Published as an informational HTTPS surface on the shared edge while the live mail service itself is reached over SMTP submission and IMAPS."
     },
     {
       "fqdn": "n8n.lv3.org",
@@ -550,7 +574,7 @@
       "status": "active",
       "exposure": "private-only",
       "auth_requirement": "private_network",
-      "target": "100.118.189.95",
+      "target": "100.64.0.1",
       "target_port": 443,
       "owner_adr": "0147",
       "tls": {

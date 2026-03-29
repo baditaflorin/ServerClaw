@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-28-adr-0224-private-repo-compose-smoke-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-28",
+  "recorded_on": "2026-03-28",
+  "recorded_by": "codex",
+  "source_commit": "1cdded04681d683a41dcbba62bdaaa2176491f8d",
+  "repo_version_context": "0.177.31",
+  "platform_version_context": "0.130.35",
+  "workflow_id": "adr-0224-private-repo-compose-smoke-live-apply",
+  "adr": "0224",
+  "summary": "Extended the governed Coolify wrapper to bootstrap private GitHub deploy keys plus Docker Compose application routing, merged the first app-side PaaS compatibility fix for `education_wemeshup`, deployed the private repository through Coolify, and repaired the shared edge plus firewall path so the public `education-wemeshup.apps.lv3.org` route works end to end.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "coolify-lv3",
+      "vmid": 170,
+      "address": "10.10.10.70"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "controller_artifacts",
+      "name": "coolify-local-auth",
+      "address": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/coolify"
+    },
+    {
+      "kind": "application",
+      "name": "education-wemeshup.apps.lv3.org",
+      "address": "https://education-wemeshup.apps.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Wrapper and CLI regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml --with jsonschema python -m pytest tests/test_coolify_tool.py tests/test_lv3_cli.py -q` passed with `59 passed in 1.25s` after adding private deploy-key bootstrap, Docker Compose domain mapping, and `lv3` flag plumbing."
+    },
+    {
+      "check": "Application repository PaaS compatibility fix",
+      "result": "pass",
+      "observed": "The companion repository `baditaflorin/education_wemeshup` merged PR `#1` at commit `732e247bc2a7856c31272b8caac131cff5611cdc`, separating local host port bindings into `compose.local.yaml` so the base `compose.yaml` runs cleanly under Coolify."
+    },
+    {
+      "check": "Governed private-repo deployment",
+      "result": "pass",
+      "observed": "`python3 scripts/coolify_tool.py deploy-repo --repo git@github.com:baditaflorin/education_wemeshup.git --branch main --source private-deploy-key --app-name education-wemeshup --project 'LV3 Apps' --environment production --build-pack dockercompose --docker-compose-location compose.yaml --compose-domain catalog-web=education-wemeshup.apps.lv3.org --ports 80 --description 'education_wemeshup production docker compose smoke' --force --wait --timeout 1800` finished successfully with application `p10amt0lscl3upokas4mq45y`, deployment `d3r1fq0dzaxu2jzgb1qx0lwf`, source mode `private-deploy-key`, deploy key title `coolify-baditaflorin-education-wemeshup`, and deployed app commit `732e247bc2a7856c31272b8caac131cff5611cdc`."
+    },
+    {
+      "check": "Coolify internal HTTPS application path",
+      "result": "pass",
+      "observed": "Direct probes on `coolify-lv3` returned `HTTP/2 200` for `curl -kfsSI -H 'Host: education-wemeshup.apps.lv3.org' https://127.0.0.1/` and again for the host IP probe after the final firewall replay."
+    },
+    {
+      "check": "Shared edge publication replay",
+      "result": "pass",
+      "observed": "The first `make configure-edge-publication EXTRA_ARGS='--limit nginx-lv3'` attempt failed only because generated portal directories were absent in this worktree. Re-running `make configure-edge-publication EXTRA_ARGS='--limit nginx-lv3 -e public_edge_sync_generated_static_dirs=false'` completed with `ok=60 changed=3 failed=0`, switching the wildcard `coolify_apps` upstream to `https://10.10.10.70:443`."
+    },
+    {
+      "check": "Firewall convergence for Coolify HTTPS ingress",
+      "result": "pass",
+      "observed": "A scoped guest replay first updated `coolify-lv3` nftables (`ok=15 changed=2 failed=0`) to allow `nginx-lv3` to TCP `443`. A follow-up scoped `playbooks/guest-network-policy.yml` run for `proxmox_florin,coolify-lv3` updated the Proxmox guest-firewall files and restarted `pve-firewall` (`proxmox_florin ok=22 changed=3 failed=0`; `coolify-lv3 ok=13 changed=0 failed=0`), after which `/etc/pve/firewall/170.fw` contained the new `IN ACCEPT -source 10.10.10.10/32 -p tcp -dport 443` rule."
+    },
+    {
+      "check": "End-to-end public reachability",
+      "result": "pass",
+      "observed": "From `nginx-lv3`, `nc -vz -w 5 10.10.10.70 443` succeeded and `curl -kfsSI -H 'Host: education-wemeshup.apps.lv3.org' https://10.10.10.70/` returned `HTTP/2 200`. From the controller, `curl -ksSI --resolve education-wemeshup.apps.lv3.org:443:65.108.75.123 https://education-wemeshup.apps.lv3.org/` returned `HTTP/2 200`, and `curl -ksS --resolve education-wemeshup.apps.lv3.org:443:65.108.75.123 https://education-wemeshup.apps.lv3.org/api/v1/catalog/taxonomy | jq '.meta.apiVersion, .meta.categoryCount, .meta.activityCount'` returned `\"v1\"`, `2`, and `6`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md",
+    "docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md",
+    "docs/runbooks/configure-coolify.md",
+    "inventory/host_vars/proxmox_florin.yml",
+    "inventory/group_vars/platform.yml",
+    "config/subdomain-exposure-registry.json",
+    "playbooks/guest-network-policy.yml",
+    "playbooks/public-edge.yml",
+    "scripts/coolify_tool.py",
+    "scripts/lv3_cli.py",
+    "tests/test_coolify_tool.py",
+    "tests/test_lv3_cli.py",
+    "workstreams.yaml",
+    "receipts/live-applies/2026-03-28-adr-0224-private-repo-compose-smoke-live-apply.json"
+  ],
+  "notes": [
+    "The governed private-repo path now uses a per-repository GitHub deploy key plus a matching Coolify private key instead of a broad personal access token.",
+    "The first public-edge symptom changed over time: the wildcard route initially looped on `307` while proxying to Coolify over plain HTTP, then timed out after the edge switched to HTTPS because the Proxmox VM firewall and `coolify-lv3` guest firewall still only allowed `nginx-lv3` to reach ports `80` and `8000`.",
+    "The scoped Proxmox guest-network-policy replay also reinstalled repo-managed firewall files for `docker-runtime-lv3`, `docker-build-lv3`, `monitoring-lv3`, and `postgres-lv3` before restarting `pve-firewall`; no guest restarts were required, and SSH verification from the Proxmox host passed for every checked guest after the replay.",
+    "The application apex `https://apps.lv3.org` remains intentionally unassigned; this receipt verifies the named application route `education-wemeshup.apps.lv3.org` instead."
+  ]
+}
