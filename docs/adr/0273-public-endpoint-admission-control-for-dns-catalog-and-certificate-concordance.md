@@ -1,9 +1,10 @@
 # ADR 0273: Public Endpoint Admission Control For DNS Catalog And Certificate Concordance
 
 - Status: Accepted
-- Implementation Status: Not Implemented
+- Implementation Status: Implemented
 - Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implemented In Platform Version: 0.130.50
+- Implemented On: 2026-03-29
 - Date: 2026-03-28
 
 ## Context

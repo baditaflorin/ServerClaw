@@ -2,17 +2,17 @@
 
 - ADR: [ADR 0273](../adr/0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md)
 - Title: Live apply public-endpoint admission control across the DNS catalog, shared edge, and certificate plan
-- Status: in_progress
+- Status: live_applied
 - Implemented In Repo Version: N/A
-- Live Applied In Platform Version: N/A
-- Implemented On: N/A
-- Live Applied On: N/A
+- Live Applied In Platform Version: 0.130.50
+- Implemented On: 2026-03-29
+- Live Applied On: 2026-03-29
 - Branch: `codex/ws-0273-public-endpoint-admission-control`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0273-public-endpoint-admission-control`
 - Owner: codex
 - Depends On: `adr-0101-automated-certificate-lifecycle-management`, `adr-0139-subdomain-exposure-audit-and-registry`, `adr-0252-route-and-dns-publication-assertion-ledger`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/adr-0273-public-endpoint-admission-control.md`, `docs/adr/0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md`, `docs/adr/.index.yaml`, `docs/runbooks/configure-edge-publication.md`, `docs/runbooks/subdomain-exposure-audit.md`, `config/certificate-catalog.json`, `Makefile`, `scripts/subdomain_exposure_audit.py`, `scripts/validate_repo.sh`, `tests/test_subdomain_exposure_audit.py`, `tests/test_edge_publication_makefile.py`, `tests/test_validate_repo_cache.py`, `receipts/live-applies/`
+- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/adr-0273-public-endpoint-admission-control.md`, `docs/adr/0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md`, `docs/adr/.index.yaml`, `docs/runbooks/configure-edge-publication.md`, `docs/runbooks/subdomain-exposure-audit.md`, `config/certificate-catalog.json`, `Makefile`, `scripts/subdomain_exposure_audit.py`, `scripts/validate_repo.sh`, `tests/test_subdomain_exposure_audit.py`, `tests/test_edge_publication_makefile.py`, `tests/test_validate_repo_cache.py`, `docs/site-generated/architecture/dependency-graph.md`, `receipts/subdomain-exposure-audit/`, `receipts/live-applies/`
 
 ## Scope
 
@@ -35,6 +35,8 @@
 - `tests/test_subdomain_exposure_audit.py`
 - `tests/test_edge_publication_makefile.py`
 - `tests/test_validate_repo_cache.py`
+- `docs/site-generated/architecture/dependency-graph.md`
+- `receipts/subdomain-exposure-audit/20260329T111555Z.json`
 - `receipts/live-applies/2026-03-29-adr-0273-public-endpoint-admission-control-live-apply.json`
 
 ## Expected Live Surfaces
@@ -51,7 +53,45 @@
 - replay `make configure-edge-publication` and `make route-dns-assertion-ledger` from this isolated worktree
 - rerun `make subdomain-exposure-audit` plus direct TLS and HTTP checks before writing the receipt
 
-## Notes For The Next Assistant
+## Live Apply Outcome
 
-- this workstream intentionally leaves protected release files alone until the final mainline integration step
-- if the live audit still reports unrelated legacy public-hostname drift, record it explicitly in the receipt instead of hiding it inside chat context
+- `make route-dns-assertion-ledger env=production` completed successfully with
+  `localhost ok=56 changed=0 failed=0 skipped=24`, proving the new admission
+  gate allows the already-aligned public DNS state to replay idempotently
+- `make configure-edge-publication env=production` completed successfully with
+  `nginx-lv3 ok=61 changed=4 failed=0 skipped=14`; the run rebuilt the docs
+  and changelog portals, revalidated the shared-edge inputs, rendered the final
+  NGINX configuration, and verified both HTTP and HTTPS probe hostnames before
+  finishing
+- direct live verification now shows `https://lv3.org` returning `HTTP/2 308`
+  to `https://nginx.lv3.org/`, while `https://docs.lv3.org` and
+  `https://ops.lv3.org` both return `HTTP/2 302` to the expected
+  `oauth2/sign_in` path with `x-robots-tag: noindex, nofollow`
+- the live shared-edge certificate now proves the concordance contract with a
+  Let's Encrypt issuer (`CN=E7`) and SAN coverage including
+  `docs.lv3.org`, `ops.lv3.org`, `agents.lv3.org`, `api.lv3.org`,
+  `apps.lv3.org`, `changelog.lv3.org`, `coolify.lv3.org`, `draw.lv3.org`,
+  `headscale.lv3.org`, `home.lv3.org`, `langfuse.lv3.org`, `logs.lv3.org`,
+  `n8n.lv3.org`, `realtime.lv3.org`, `registry.lv3.org`, `status.lv3.org`,
+  `tasks.lv3.org`, and `wiki.lv3.org`
+- `make subdomain-exposure-audit` wrote
+  `receipts/subdomain-exposure-audit/20260329T111555Z.json`; the remaining
+  findings are the pre-existing `git.lv3.org` DNS warnings, not ADR 0273
+  regressions
+
+## Live Evidence
+
+- live-apply receipt:
+  `receipts/live-applies/2026-03-29-adr-0273-public-endpoint-admission-control-live-apply.json`
+- final audit receipt:
+  `receipts/subdomain-exposure-audit/20260329T111555Z.json`
+- final direct probes:
+  `curl -I https://lv3.org`, `curl -I https://docs.lv3.org`,
+  `curl -I https://ops.lv3.org`, and
+  `echo | openssl s_client -servername docs.lv3.org -connect docs.lv3.org:443 2>/dev/null | openssl x509 -noout -issuer -subject -ext subjectAltName`
+
+## Mainline Integration Outcome
+
+- remaining for merge to `main`: update `VERSION`, `changelog.md`,
+  `docs/release-notes/`, `versions/stack.yaml`, and the ADR/workstream repo
+  version fields during the final integrated release step

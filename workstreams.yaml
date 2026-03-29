@@ -731,7 +731,7 @@ workstreams:
   - id: ws-0273-public-endpoint-admission
     adr: "0273"
     title: Live apply ADR 0273 public endpoint admission control
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0273-public-endpoint-admission-control
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0273-public-endpoint-admission-control
@@ -755,6 +755,8 @@ workstreams:
       - tests/test_subdomain_exposure_audit.py
       - tests/test_edge_publication_makefile.py
       - tests/test_validate_repo_cache.py
+      - docs/site-generated/architecture/dependency-graph.md
+      - receipts/subdomain-exposure-audit/20260329T111555Z.json
       - receipts/live-applies/2026-03-29-adr-0273-public-endpoint-admission-control-live-apply.json
     ownership_manifest:
       owned_surfaces:
@@ -781,16 +783,22 @@ workstreams:
             - tests/test_subdomain_exposure_audit.py
             - tests/test_edge_publication_makefile.py
             - tests/test_validate_repo_cache.py
+            - docs/site-generated/architecture/dependency-graph.md
+            - receipts/subdomain-exposure-audit/*.json
             - receipts/live-applies/2026-03-29-adr-0273-public-endpoint-admission-control-live-apply.json
           mode: exclusive
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
     canonical_truth:
       changelog_entry: implemented ADR 0273 by turning public hostname, edge route,
         DNS, and certificate-plan concordance into an enforced admission gate for
         edge and route-ledger replays
       release_bump: patch
       included_in_repo_version: null
+      latest_receipts:
+        public_endpoint_admission_control: 2026-03-29-adr-0273-public-endpoint-admission-control-live-apply
+        public_edge_publication: 2026-03-29-adr-0273-public-endpoint-admission-control-live-apply
+        route_dns_assertion_ledger: 2026-03-29-adr-0273-public-endpoint-admission-control-live-apply
   - id: ws-0254-serverclaw-adrs
     adr: "0254"
     title: ServerClaw architecture bundle

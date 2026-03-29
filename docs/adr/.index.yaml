@@ -4635,7 +4635,7 @@ adr_index:
   - adr: '0273'
     title: Public Endpoint Admission Control For DNS Catalog And Certificate Concordance
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: networking
     keywords:
@@ -4649,6 +4649,7 @@ adr_index:
       - concordance
     summary: We will require public endpoint admission control that proves concordance
     filename: 0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md
+    implemented_version: 0.130.50
   - adr: '0274'
     title: Governed Base Image Mirrors And Warm Caches For Repo Deployments
     status: Accepted
