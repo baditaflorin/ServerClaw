@@ -83,12 +83,14 @@ class HttpWindmillClient:
         base_url: str,
         token: str,
         workspace: str = "lv3",
+        bootstrap_secret: str | None = None,
         request_timeout_seconds: float | None = None,
         circuit_breaker: Any | None = None,
         circuit_registry: Any | None = None,
     ) -> None:
         self._base_url = base_url.rstrip("/")
         self._token = token
+        self._bootstrap_secret = bootstrap_secret or token
         self._workspace = workspace
         self._internal_api_retry_policy = _load_internal_api_retry_policy()
         self._request_timeout_seconds = _compute_request_timeout_seconds(request_timeout_seconds)
@@ -109,7 +111,7 @@ class HttpWindmillClient:
         payload = json.dumps(
             {
                 "email": "superadmin_secret@windmill.dev",
-                "password": self._token,
+                "password": self._bootstrap_secret,
             }
         ).encode("utf-8")
         request = urllib.request.Request(
@@ -156,13 +158,20 @@ class HttpWindmillClient:
                 request,
                 timeout=_compute_request_timeout_seconds(timeout or self._request_timeout_seconds),
             )
-            response_cm = open_request()
-            if retry and self._internal_api_retry_policy is not None and _with_retry is not None:
+            use_internal_retry = (
+                retry
+                and self._internal_api_retry_policy is not None
+                and _with_retry is not None
+                and self._circuit_breaker is None
+            )
+            if use_internal_retry:
                 response_cm = _with_retry(
                     open_request,
                     policy=self._internal_api_retry_policy,
                     error_context=f"windmill {method} {path}",
                 )
+            else:
+                response_cm = open_request()
             with response_cm as response:
                 return response.read().decode("utf-8")
 
@@ -209,7 +218,7 @@ class HttpWindmillClient:
     @staticmethod
     def _normalize_submission_response(response: Any) -> dict[str, Any]:
         if isinstance(response, str):
-            return {"job_id": response, "running": True}
+            return {"job_id": response.strip().strip('"'), "running": True}
         if isinstance(response, dict):
             if "job_id" in response or "id" in response:
                 return {"job_id": str(response.get("job_id") or response.get("id")), **response}
@@ -311,6 +320,15 @@ class HttpWindmillClient:
             raise RuntimeError(f"unexpected Windmill job response: {response!r}")
         return response
 
+    def get_job_result_maybe(self, job_id: str) -> dict[str, Any]:
+        response = self._request(
+            f"/api/w/{self._workspace}/jobs_u/completed/get_result_maybe/{urllib.parse.quote(job_id, safe='')}?get_started=true",
+            method="GET",
+        )
+        if not isinstance(response, dict):
+            raise RuntimeError(f"unexpected Windmill job result response: {response!r}")
+        return response
+
     def wait_for_job(
         self,
         job_id: str,
@@ -322,6 +340,31 @@ class HttpWindmillClient:
         deadline = time.monotonic() + max(wait_timeout, 1)
         while True:
             response = self.get_job(job_id)
+            if self.is_terminal_job(response):
+                return response
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError(f"timed out waiting for Windmill job {job_id}")
+            time.sleep(min(max(poll_interval_seconds, 0.1), remaining))
+
+    def wait_for_job_result(
+        self,
+        job_id: str,
+        *,
+        timeout_seconds: int | None = None,
+        poll_interval_seconds: float = 1.0,
+    ) -> dict[str, Any]:
+        wait_timeout = timeout_seconds or self._request_timeout_seconds
+        deadline = time.monotonic() + max(wait_timeout, 1)
+        use_result_endpoint = True
+        while True:
+            try:
+                response = self.get_job_result_maybe(job_id) if use_result_endpoint else self.get_job(job_id)
+            except urllib.error.HTTPError as exc:
+                if use_result_endpoint and exc.code in {404, 405}:
+                    use_result_endpoint = False
+                    continue
+                raise
             if self.is_terminal_job(response):
                 return response
             remaining = deadline - time.monotonic()
@@ -348,11 +391,20 @@ class HttpWindmillClient:
                 )
             return submission.get("result")
 
-        status = self.wait_for_job(
-            str(job_id),
-            timeout_seconds=timeout_seconds,
-            poll_interval_seconds=poll_interval_seconds,
-        )
+        try:
+            status = self.wait_for_job_result(
+                str(job_id),
+                timeout_seconds=timeout_seconds,
+                poll_interval_seconds=poll_interval_seconds,
+            )
+        except TimeoutError as exc:
+            try:
+                last_status = self.get_job(str(job_id))
+            except Exception:
+                raise exc
+            raise TimeoutError(
+                f"timed out waiting for Windmill job {job_id}: {json.dumps(last_status, sort_keys=True)}"
+            ) from exc
         if status.get("canceled") is True:
             raise RuntimeError(f"Windmill job {job_id} for {workflow_id} was canceled")
         if status.get("success") is False:

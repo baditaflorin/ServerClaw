@@ -37,6 +37,7 @@ The workflow manages these live surfaces:
 - password-login bootstrap admin `superadmin_secret@windmill.dev` backed by the managed Windmill secret
 - repo-managed workspace `lv3`
 - seeded script `f/lv3/windmill_healthcheck`
+- seeded script `f/lv3/stage-smoke-suites`
 - seeded script `f/lv3/scheduler_watchdog_loop`
 - seeded script `f/lv3/rotate_credentials`
 - seeded script `f/lv3/deploy_and_promote`
@@ -82,6 +83,7 @@ Run these checks after converge:
 5. `WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" python3 scripts/windmill_run_wait_result.py --base-url http://100.64.0.1:8005 --workspace lv3 --path f/lv3/windmill_healthcheck --payload-json '{"probe":"manual-run"}'`
 6. `curl -s -X POST http://100.64.0.1:8005/api/auth/login -H "Content-Type: application/json" -d "{\"email\":\"superadmin_secret@windmill.dev\",\"password\":\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)\"}"`
 7. `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.64.0.1:8005/api/w/lv3/schedules/list | grep scheduler_watchdog_loop_every_10s`
+8. `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{"service":"windmill","environment":"production"}' http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fstage-smoke-suites`
 8. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'test -s /srv/proxmox_florin_server/.local/scheduler/watchdog-heartbeat.json && sudo cat /srv/proxmox_florin_server/.local/scheduler/watchdog-heartbeat.json'`
 9. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.50 "psql -d windmill -Atqc \"SELECT to_regclass('public.config_change_staging')\""`
 10. `WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" python3 scripts/windmill_run_wait_result.py --base-url http://100.64.0.1:8005 --workspace lv3 --path f/lv3/config_merge/merge_config_changes --payload-json '{}'`
@@ -117,6 +119,8 @@ Run these checks after converge:
 - The raw-app sync now stages the controller-side app tree through `rsync --filter='dir-merge,- .gitignore'` before it crosses the Proxmox jump path. Keep local frontend build artifacts like `node_modules/` and generated bundles excluded through each app's committed `.gitignore`, because ignored controller-local files are now intentionally pruned from the live seed upload.
 - The raw-app dependency install and `wmill sync push` steps now retry transient guest-side Docker EOFs before the converge fails. If a replay still exhausts those retries, capture the Docker journal evidence in the live-apply receipt before re-running.
 - ADR 0230 expects the worker mirror to keep the `policy/` tree and the worker-safe policy helpers in sync with the controller checkout because approval and gate-status wrappers now evaluate the shared OPA bundle locally on `docker-runtime-lv3`.
+- ADR 0251 adds the seeded `f/lv3/stage-smoke-suites` helper so the worker can replay the same repo-managed smoke suite catalog that the controller uses for live-apply receipts and promotion evidence.
+- Worker-side ADR 0251 smoke and nightly integration runs prefer `LV3_WINDMILL_BASE_URL` and otherwise fall back to Windmill's guest-local health probe URL from `config/health-probe-catalog.json`, so Windmill's own primary-path smoke resolves the local runtime API instead of the controller-only host proxy on `100.64.0.1:8005`.
 - ADR 0230 also strips `._*` and `.DS_Store` metadata from the worker checkout during sync so macOS worktrees do not poison OPA or Conftest evaluation on the Linux runtime.
 - The live CE v1.662.0 control plane now behaves best when representative operator checks resolve script metadata first and then execute via the repo helper `scripts/windmill_run_wait_result.py`, which submits the current hash-backed `jobs/run/h/<hash>` path instead of the older path-based sync route.
 - ADR 0172 owns the live scheduler watchdog seed and schedule. ADR 0170 aligns the timeout hierarchy used around that path.

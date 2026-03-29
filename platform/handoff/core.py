@@ -10,7 +10,7 @@ import urllib.request
 import uuid
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass, field
-from datetime import UTC, datetime
+from platform.datetime_compat import UTC, datetime
 from pathlib import Path
 from typing import Any, Callable
 

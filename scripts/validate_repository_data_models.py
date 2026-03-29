@@ -54,6 +54,7 @@ from runtime_assurance import (
     load_runtime_assurance_catalog,
     validate_runtime_assurance_catalog,
 )
+from stage_smoke_suites import load_stage_smoke_catalog, validate_stage_smoke_catalog
 from validate_ephemeral_vmid import validate_ephemeral_vmid_ranges
 from generate_slo_rules import outputs_match as slo_outputs_match
 from immutable_guest_replacement import load_guest_replacement_catalog, validate_guest_replacement_catalog
@@ -2685,6 +2686,7 @@ def validate_repository_data_models() -> int:
     validate_mutation_audit_schema(load_mutation_audit_schema())
     validate_receipts()
     validate_promotion_receipts()
+    validate_stage_smoke_catalog(load_stage_smoke_catalog())
     validate_uptime_monitors()
     host_vars_context = validate_host_vars()
     validate_certificate_catalog(host_vars_context)

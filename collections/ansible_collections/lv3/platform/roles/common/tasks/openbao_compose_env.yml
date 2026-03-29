@@ -156,6 +156,9 @@
     status_code:
       - 200
       - 404
+      - 500
+      - 502
+      - 503
   register: common_openbao_compose_env_current_secret
   retries: 12
   delay: 5
@@ -188,6 +191,9 @@
     status_code:
       - 200
       - 404
+      - 500
+      - 502
+      - 503
   register: common_openbao_compose_env_current_policy
   retries: 12
   delay: 5

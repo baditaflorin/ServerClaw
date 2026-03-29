@@ -18,11 +18,15 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
-from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
 from secrets import token_urlsafe
 from typing import Any
 
+from script_bootstrap import ensure_repo_root_on_path
+
+ensure_repo_root_on_path(__file__)
+
+from platform.datetime_compat import UTC, datetime
 from controller_automation_toolkit import emit_cli_error, repo_path, run_command
 from platform.retry import MaxRetriesExceeded, PlatformRetryError, RetryClass, RetryPolicy, with_retry
 

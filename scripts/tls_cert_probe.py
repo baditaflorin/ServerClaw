@@ -6,10 +6,14 @@ import argparse
 import json
 import socket
 import ssl
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from script_bootstrap import ensure_repo_root_on_path
+
+ensure_repo_root_on_path(__file__)
+
+from platform.datetime_compat import UTC, datetime
 from controller_automation_toolkit import load_json, repo_path
 
 

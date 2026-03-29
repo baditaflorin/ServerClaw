@@ -5,8 +5,8 @@
     method: GET
     status_code: 200
   register: windmill_verify_version
-  retries: 18
-  delay: 5
+  retries: "{{ windmill_runtime_api_wait_retries }}"
+  delay: "{{ windmill_runtime_api_wait_delay_seconds }}"
   until: windmill_verify_version.status == 200
   changed_when: false
 
@@ -26,7 +26,8 @@
   delegate_to: localhost
   become: false
   environment:
-    WINDMILL_TOKEN: "{{ windmill_runtime_api_token }}"
+    WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"
+    WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
   register: windmill_verify_healthcheck
   retries: 3
   delay: 10
@@ -56,7 +57,8 @@
   delegate_to: localhost
   become: false
   environment:
-    WINDMILL_TOKEN: "{{ windmill_runtime_api_token }}"
+    WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"
+    WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
   register: windmill_verify_validation_gate_status
   retries: 3
   delay: 10
@@ -73,6 +75,34 @@
       - ((windmill_verify_validation_gate_status.stdout | from_json).gate_status.enabled_checks | length) >= 1
     fail_msg: >-
       Windmill API responded, but the seeded validation gate status script did not return the expected structured result.
+
+- name: Run the Windmill stage smoke suites script
+  ansible.builtin.shell: >
+    python3 {{ (playbook_dir | dirname ~ '/scripts/windmill_run_wait_result.py') | quote }}
+    --base-url {{ windmill_base_url | quote }}
+    --workspace {{ windmill_workspace_id | quote }}
+    --path {{ windmill_stage_smoke_suites_script_path | quote }}
+    --payload-json '{"service":"windmill","environment":"production"}'
+    --timeout {{ windmill_seed_job_timeout_seconds }}
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  environment:
+    WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"
+    WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
+  register: windmill_verify_stage_smoke_suites
+  changed_when: false
+  no_log: true
+
+- name: Assert the Windmill stage smoke suites result
+  ansible.builtin.assert:
+    that:
+      - (windmill_verify_stage_smoke_suites.stdout | from_json).status == "ok"
+      - (windmill_verify_stage_smoke_suites.stdout | from_json).result.status == "passed"
+      - ((windmill_verify_stage_smoke_suites.stdout | from_json).result.receipt_smoke_suites | length) >= 1
+    fail_msg: >-
+      Windmill API responded, but the seeded stage smoke suites script did not return a passing structured result.
 
 - name: Verify the Windmill default operations scripts are seeded
   ansible.builtin.uri:

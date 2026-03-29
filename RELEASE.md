@@ -3,10 +3,10 @@
 - Date: 2026-03-29
 
 ## Summary
-- implemented ADR 0266 by adding declared validation-runner contracts, per-run environment attestation, runner-aware gate scheduling, and recorded build handoff evidence across the remote build server, controller fallback, and worker post-merge paths
+- implemented ADR 0251 by declaring stage-scoped smoke suites, enforcing structured smoke evidence on staged promotion receipts, seeding Windmill with the same repo-managed smoke runner used for live verification, and carrying the latest worker-runtime hardening needed for the exact-main replay path
 
 ## Platform Impact
-- platform version advances to 0.130.59 after the exact-main ADR 0266 replay re-verifies declared runner contracts, build-server and local-fallback gate scheduling, and worker post-merge validation on top of the 0.130.58 matrix-synapse baseline
+- no live platform version bump yet; this release carries ADR 0251 onto `main` while the canonical platform baseline remains 0.130.58 until the exact-main Windmill replay records the new stage-smoke and promotion receipts
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

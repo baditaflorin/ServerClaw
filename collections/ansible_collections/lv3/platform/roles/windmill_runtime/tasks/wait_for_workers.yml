@@ -7,8 +7,8 @@
       Authorization: "Bearer {{ windmill_runtime_api_token }}"
     status_code: 200
   register: windmill_registered_workers
-  retries: 18
-  delay: 5
+  retries: "{{ windmill_worker_registration_retries }}"
+  delay: "{{ windmill_worker_registration_delay_seconds }}"
   until: (windmill_registered_workers.json | length) >= 1
   delegate_to: localhost
   become: false

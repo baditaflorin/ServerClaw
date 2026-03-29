@@ -92,7 +92,6 @@ The repository now also ships the repo-managed `lv3` operator CLI for terminal-f
 The repository now also ships ADR 0156 session workspace isolation for controller automation and the remote build gateway: separate checkouts now resolve to separate session namespaces and remote build-server workspaces, and the first live verification from current `main` completed on 2026-03-26.
 The repository now also ships ADR 0264 failure-domain-isolated validation lanes: current `main` resolves changed repository surfaces into focused blocking lanes, declares live-apply receipts as a dedicated surface class, and the 2026-03-29 exact-main replay re-verified `make pre-push-gate`, `make gate-status`, `make remote-validate`, plus the worker-side lane-aware post-merge fallback from the refreshed `docker-runtime-lv3` checkout.
 The repository now also ships ADR 0265 immutable validation snapshots for remote builders and schema checks: current `main` now uploads content-addressed repository snapshots into fresh `.lv3-runs/` namespaces on `docker-build-lv3`, and the newest exact-main replay on 2026-03-29 passed `make check-build-server` and `make remote-validate` end to end.
-The repository now also ships ADR 0266 validation runner capability contracts and environment attestation: current `main` declares the runner contract catalog, records attested runner identity for build-server, controller-fallback, and worker post-merge validation paths, and fails missing runner capabilities closed as `runner_unavailable` instead of misreporting repository-content regressions.
 The repository now also ships ADR 0170 timeout hierarchy primitives: `config/timeout-hierarchy.yaml`, shared deadline propagation helpers, validation for catalog and hardcoded timeout drift, and runtime timeout wiring across the API gateway, scheduler, world-state workers, drift helpers, and NetBox sync; the integrated mainline live apply on 2026-03-25 re-converged the API gateway and Windmill with those runtime paths active and hardened the shared OpenBao secret-injection helper to recover from sealed restarts.
 The repository now also ships ADR 0171 controlled fault injection live on production: the repo-managed `fault-injection` Windmill workflow and guarded schedule are present on `docker-runtime-lv3`, and the first `main`-based governed drills for Keycloak and OpenBao both passed on 2026-03-26 with OpenBao using pause/unpause so the secret store stays unsealed after validation.
 The repository now also ships ADR 0189 network impairment matrix automation: the repo-managed Windmill workflow can render the governed staging and preview impairment plan on demand, and the 2026-03-27 live verification also hardened the mirrored worker checkout so repo-managed Python jobs no longer fail on stale editable-build metadata.
@@ -148,6 +147,11 @@ client API serves at `https://matrix.lv3.org`, the governed controller path
 stays available at `http://100.64.0.1:8015`, and the 2026-03-29 exact-main
 replay re-verified public login plus the corrected internal-edge HTTPS
 assurance path from `monitoring-lv3`.
+ADR 0295 shared artifact cache plane is now live on production: `docker-build-lv3`
+now serves internal pull-through mirrors on `10.10.10.30:5001-5004`, the
+2026-03-29 exact-main replay re-warmed a repo-derived `41`-image seed set, and
+`docker buildx inspect lv3-cache --bootstrap` plus the local `apt-cacher-ng`
+path were both re-verified afterward.
 The repository now also ships ADR 0251 stage-scoped smoke suites on `main`: the
 promotion gate and runtime-assurance scoreboard now require declared or
 inherited smoke suites for active environments, the 2026-03-29 exact-main
@@ -167,7 +171,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.86` |
-| Platform version | `0.130.58` |
+| Platform version | `0.130.59` |
 | Observed check date | `2026-03-29` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -224,7 +228,8 @@ Template VM: `9000` `debian13-cloud-template`
 | Capability | Receipt |
 | --- | --- |
 | `agent_coordination` | `2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply` |
-| `api_gateway` | `2026-03-29-adr-0244-runtime-assurance-matrix-live-apply` |
+| `api_gateway` | `2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply` |
+| `artifact_cache_plane` | `2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply` |
 | `backup_coverage` | `2026-03-29-adr-0271-backup-coverage-ledger-mainline-live-apply` |
 | `backup_vm` | `2026-03-22-adr-0029-backup-vm-live-apply` |
 | `bounded_command_execution` | `2026-03-28-adr-0227-bounded-command-execution-mainline-live-apply` |
@@ -293,7 +298,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `operator_access_runbooks` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_validation` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_workflows` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
-| `ops_portal` | `2026-03-29-adr-0234-patternfly-shell-live-apply` |
+| `ops_portal` | `2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply` |
 | `ops_portal_visualizations` | `2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply` |
 | `outline` | `2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply` |
 | `plane` | `2026-03-28-adr-0193-plane-mainline-live-apply` |
@@ -1037,6 +1042,16 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0294: One-API As The Unified LLM API Proxy And Router](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0294-one-api-as-the-unified-llm-api-proxy-and-router.md)
 - [ADR 0295: Shared Artifact Cache Plane For Container And Package Dependencies](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md)
 - [ADR 0296: Dedicated Artifact-Cache VM With Phased Consumer Adoption](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md)
+- [ADR 0297: Renovate Bot As The Automated Stack Version Upgrade Proposer](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0297-renovate-bot-as-the-automated-stack-version-upgrade-proposer.md)
+- [ADR 0298: Syft And Grype For Platform-Wide SBOM Generation And Continuous CVE Scanning](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0298-syft-and-grype-for-platform-wide-sbom-generation-and-continuous-cve-scanning.md)
+- [ADR 0299: Ntfy As The Self-Hosted Push Notification Channel For Programmatic Alert Delivery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md)
+- [ADR 0300: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0300-falco-for-container-runtime-syscall-security-monitoring-and-autonomous-anomaly-detection.md)
+- [ADR 0301: Semgrep For SAST And Application Code Security Scanning In The CI Gate](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md)
+- [ADR 0302: Restic For Encrypted File-Level Backup Of Platform Configuration And State Artifacts](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0302-restic-for-encrypted-file-level-backup-of-platform-configuration-and-state-artifacts.md)
+- [ADR 0303: pgaudit For PostgreSQL Query And Privilege Change Audit Logging](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0303-pgaudit-for-postgresql-query-and-privilege-change-audit-logging.md)
+- [ADR 0304: Atlas For Declarative Database Schema Migration Versioning And Pre-Migration Linting](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md)
+- [ADR 0305: k6 For Continuous Load Testing And SLO Error Budget Burn Validation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md)
+- [ADR 0306: Checkov For IaC Policy Compliance Scanning Of OpenTofu, Compose, And Ansible](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -1214,7 +1229,6 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0254: ServerClaw Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0254-serverclaw-architecture-bundle.md)
 - [Workstream ADR 0264: Receipt-Driven Resilience Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md)
 - [Workstream WS-0265: Immutable Validation Snapshots For Remote Builders And Schema Checks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md)
-- [Workstream ADR 0266: Validation Runner Capability Contracts Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0266-validation-runner-capability-contracts-live-apply.md)
 - [Workstream ADR 0273: Public Endpoint Admission Control](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0273-public-endpoint-admission-control.md)
 - [Workstream ADR 0295: Artifact Cache Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md)
 - [Workstream ws-0021-edge-cert-repair: Shared Edge Certificate Expansion Repair](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0021-edge-cert-repair.md)
@@ -1281,6 +1295,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0242-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0242-main-merge.md)
 - [Workstream WS-0244: Runtime Assurance Matrix Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0244-live-apply.md)
 - [Workstream WS-0244: Mainline Integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0244-main-merge.md)
+- [Workstream WS-0245: Declared-To-Live Service Attestation Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0245-live-apply.md)
 - [Workstream ws-0246-live-apply: ADR 0246 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0246-live-apply.md)
 - [Workstream ws-0246-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0246-main-merge.md)
 - [Workstream WS-0248: Session And Logout Authority Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0248-live-apply.md)
@@ -1288,6 +1303,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0249-live-apply: ADR 0249 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0249-live-apply.md)
 - [Workstream ws-0250-live-apply: Live Apply ADR 0250 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0250-live-apply.md)
 - [Workstream ws-0251-live-apply-r2: Stage-Scoped Smoke Suites And Promotion Gates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0251-live-apply-r2.md)
+- [Workstream WS-0251: Stage-Scoped Smoke Suites Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0251-live-apply.md)
 - [Workstream WS-0252: Route And DNS Publication Assertion Ledger Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0252-live-apply.md)
 - [Workstream ws-0252-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0252-main-merge.md)
 - [Workstream ws-0252-mainline-replay](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0252-mainline-replay.md)
@@ -1302,6 +1318,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0268-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0268-main-integration.md)
 - [Workstream WS-0271: Backup Coverage Assertion Ledger Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0271-live-apply.md)
 - [Workstream ws-0272-live-apply: ADR 0272 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0272-live-apply.md)
+- [Workstream ws-0295-live-apply: Live Apply ADR 0295 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -1320,7 +1337,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.86` |
-| Platform version | `0.130.58` |
+| Platform version | `0.130.59` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1577,6 +1594,7 @@ This repository is intentionally opinionated:
 | `0244` | Live apply runtime assurance matrix per service and environment | `live_applied` | [ws-0244-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0244-live-apply.md) |
 | `0244` | Integrate ADR 0244 runtime assurance matrix into origin/main | `merged` | [ws-0244-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0244-main-merge.md) |
 | `0244` | Runtime assurance architecture bundle | `merged` | [adr-0244-runtime-assurance-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0244-runtime-assurance-architecture-bundle.md) |
+| `0245` | Declared-to-live service attestation live apply | `live_applied` | [ws-0245-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0245-live-apply.md) |
 | `0246` | Live apply startup, readiness, liveness, and degraded-state semantics | `live_applied` | [ws-0246-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0246-live-apply.md) |
 | `0246` | Integrate ADR 0246 runtime-state semantics into origin/main | `merged` | [ws-0246-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0246-main-merge.md) |
 | `0248` | Live apply session and logout authority across Keycloak, oauth2-proxy, and app surfaces | `live_applied` | [ws-0248-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0248-live-apply.md) |
@@ -1603,6 +1621,7 @@ This repository is intentionally opinionated:
 | `0272` | Restore readiness ladders and stateful warm-up verification profiles | `live_applied` | [ws-0272-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0272-live-apply.md) |
 | `0273` | Live apply ADR 0273 public endpoint admission control | `live_applied` | [adr-0273-public-endpoint-admission-control.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0273-public-endpoint-admission-control.md) |
 | `0295` | Shared artifact cache plane and dedicated cache VM roadmap | `merged` | [adr-0295-artifact-cache-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md) |
+| `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

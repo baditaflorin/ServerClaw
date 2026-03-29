@@ -219,3 +219,27 @@ Portal operators do not need to know how the workflow is wired underneath:
 - the portal parses JSON parameters and forwards them as a thin adapter
 - the API gateway enforces auth and resolves the shared runbook contract
 - the shared use-case service owns runbook lookup, surface allowlists, templating, workflow sequencing, and persisted run records
+
+## Declared-To-Live Attestation
+
+The interactive portal overview now includes the declared-to-live attestation rollup from the platform API gateway.
+
+Operator flow:
+
+1. Open `https://ops.lv3.org`.
+2. Check the **Attested** summary tile in the overview strip.
+3. Open a service card and read the `Declared-live ...` hint strip for endpoint, route, and receipt witness state.
+4. If the overview banner says declared-to-live data is degraded, verify the upstream gateway payload before changing portal code.
+
+Internal verification from a trusted network path:
+
+```bash
+curl -sf http://10.10.10.20:8092/partials/overview | rg 'Attested|Declared-live'
+curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/attestation
+```
+
+Expected result:
+
+- the portal overview shows the attestation summary tile
+- affected service cards render `Declared-live <status> · endpoint <status> / route <status> / receipt <status>`
+- the gateway route returns the same witness record shape the portal is rendering

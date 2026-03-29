@@ -10,7 +10,7 @@ import subprocess
 import sys
 import time
 from contextlib import contextmanager
-from datetime import UTC, datetime
+from platform.datetime_compat import UTC, datetime
 from pathlib import Path
 from typing import Any
 

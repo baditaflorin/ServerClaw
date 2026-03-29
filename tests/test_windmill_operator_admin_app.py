@@ -53,6 +53,7 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_base_url"] == "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
     assert defaults["windmill_healthcheck_script_path"] == "f/lv3/windmill_healthcheck"
     assert defaults["windmill_validation_gate_status_script_path"] == "f/lv3/gate-status"
+    assert defaults["windmill_stage_smoke_suites_script_path"] == "f/lv3/stage-smoke-suites"
     assert defaults["windmill_worker_checkout_repo_root_local_dir"].strip().startswith("{{\n  (playbook_dir ~ '/..')")
     assert "inventory_dir" in defaults["windmill_worker_checkout_repo_root_local_dir"]
     assert "playbook_dir" in defaults["windmill_worker_checkout_repo_root_local_dir"]
@@ -65,13 +66,16 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "scripts/policy_toolchain.py",
         "scripts/command_catalog.py",
         "scripts/gate_status.py",
+        "scripts/stage_smoke_suites.py",
         "config/windmill/scripts/gate-status.py",
         "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
+        "config/windmill/scripts/stage-smoke-suites.py",
     ]
     assert defaults["windmill_seed_repo_root_local_dir"] == "{{ windmill_worker_checkout_repo_root_local_dir }}"
     assert defaults["windmill_seed_script_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/scripts"
     assert defaults["windmill_seed_app_repo_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
     assert {
+        ".gitea",
         "README.md",
         "VERSION",
         "ansible.cfg",
@@ -108,7 +112,14 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_worker_superadmin_secret_dir"] == "{{ windmill_worker_repo_checkout_host_path }}/.local/windmill"
     assert defaults["windmill_worker_superadmin_secret_file"] == "{{ windmill_worker_superadmin_secret_dir }}/superadmin-secret.txt"
     assert defaults["windmill_runtime_api_base_url"] == "http://127.0.0.1:{{ windmill_server_port }}"
-    assert defaults["windmill_worker_api_base_url"] == "http://windmill_server:8000"
+    assert defaults["windmill_worker_network_mode"] == "{{ windmill_server_network_mode }}"
+    assert "127.0.0.1" in defaults["windmill_worker_api_base_url"]
+    assert defaults["windmill_runtime_api_wait_retries"] == 18
+    assert defaults["windmill_runtime_api_wait_delay_seconds"] == 5
+    assert defaults["windmill_worker_container_wait_retries"] == 48
+    assert defaults["windmill_worker_container_wait_delay_seconds"] == 5
+    assert defaults["windmill_worker_registration_retries"] == 18
+    assert defaults["windmill_worker_registration_delay_seconds"] == 5
     assert defaults["windmill_seed_job_timeout_seconds"] == 120
     mutable_directories = {frozenset(item.items()) for item in defaults["windmill_worker_repo_mutable_directories"]}
     assert {
@@ -120,6 +131,7 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fault-injection", "mode": "0777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/network-impairment-matrix", "mode": "0777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/integration-tests", "mode": "0777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/stage-smoke-suites", "mode": "0777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/governed-command/logs", "mode": "0777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/governed-command/receipts", "mode": "0777"}.items()),
     }.issubset(mutable_directories)
@@ -315,7 +327,8 @@ def test_operator_admin_raw_app_lockfile_and_runtime_sync_contract() -> None:
     assert "- name: Install frontend dependencies for repo-managed Windmill raw apps" in runtime_tasks
     assert "register: windmill_seed_raw_app_frontend_install" in runtime_tasks
     assert "npm ci --no-audit --no-fund" in runtime_tasks
-    assert "npm install --no-package-lock --no-audit --no-fund" in runtime_tasks
+    assert 'missing package-lock.json for {{ item.path }}' in runtime_tasks
+    assert "npm install --no-package-lock --no-audit --no-fund" not in runtime_tasks
     assert '"{{ windmill_seed_app_sync_dir.path }}:/workspace"' in runtime_tasks
     assert runtime_tasks.count("retries: 3") >= 2
     assert runtime_tasks.count("delay: 5") >= 2
@@ -553,6 +566,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert tasks.count("--with") >= 2
     assert tasks.count("pyyaml") >= 2
     assert "--path {{ windmill_healthcheck_script_path | quote }}" in tasks
+    assert "--path {{ windmill_stage_smoke_suites_script_path | quote }}" in verify_tasks
+    assert '$1 == "DATABASE_URL"' in tasks
     assert '. "{{ windmill_env_file }}"' not in tasks
     assert "Converge repo-managed Windmill schedule enabled flags" in tasks
     assert 'psql "${database_url}"' in tasks
@@ -561,7 +576,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Install frontend dependencies for repo-managed Windmill raw apps" in tasks
     assert "register: windmill_seed_raw_app_frontend_install" in tasks
     assert "npm ci --no-audit --no-fund" in tasks
-    assert "npm install --no-package-lock --no-audit --no-fund" in tasks
+    assert 'missing package-lock.json for {{ item.path }}' in tasks
+    assert "npm install --no-package-lock --no-audit --no-fund" not in tasks
     assert "npm ci --prefix" not in tasks
     assert "npm install --prefix" not in tasks
     assert tasks.count("retries: 3") >= 2
@@ -668,6 +684,9 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert ".DS_Store" in tasks
     assert "rsync" in tasks
     assert "scripts/windmill_run_wait_result.py" in tasks
+    assert "Wait for the Windmill worker containers to be running" in tasks
+    assert 'retries: "{{ windmill_worker_container_wait_retries }}"' in tasks
+    assert 'delay: "{{ windmill_worker_container_wait_delay_seconds }}"' in tasks
     assert "--payload-json" in tasks
     assert "--timeout {{ windmill_seed_job_timeout_seconds }}" in tasks
     assert 'WINDMILL_TOKEN: "{{ windmill_runtime_api_token }}"' in tasks
@@ -682,6 +701,12 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "/api/workers/list" in wait_for_workers_tasks
     assert 'Authorization: "Bearer {{ windmill_runtime_api_token }}"' in wait_for_workers_tasks
     assert "windmill_registered_workers" in wait_for_workers_tasks
+    assert 'retries: "{{ windmill_runtime_api_wait_retries }}"' in verify_tasks
+    assert 'delay: "{{ windmill_runtime_api_wait_delay_seconds }}"' in verify_tasks
+    assert 'retries: "{{ windmill_worker_registration_retries }}"' in wait_for_workers_tasks
+    assert 'delay: "{{ windmill_worker_registration_delay_seconds }}"' in wait_for_workers_tasks
+    assert 'WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"' in tasks
+    assert 'WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"' in verify_tasks
     assert "--path {{ windmill_validation_gate_status_script_path | quote }}" in verify_tasks
     assert "Run the Windmill validation gate status script" in verify_tasks
     assert "Assert the Windmill validation gate status result" in verify_tasks
@@ -707,6 +732,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert defaults["windmill_worker_repo_checkout_host_path"] == "/srv/proxmox_florin_server"
     assert defaults["windmill_worker_repo_checkout_container_path"] == "/srv/proxmox_florin_server"
     assert "{{ windmill_worker_repo_checkout_host_path }}:{{ windmill_worker_repo_checkout_container_path }}" in compose_template
+    assert "network_mode: {{ windmill_worker_network_mode }}" in compose_template
     assert "openbao_runtime" in compose_template
     assert "name: {{ windmill_openbao_runtime_network }}" in compose_template
     assert compose_template.count('user: "0:0"') >= 3
