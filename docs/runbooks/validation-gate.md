@@ -100,10 +100,30 @@ When the push starts from a Git worktree checkout, [scripts/remote_exec.sh](/Use
 The supported audited bypass is:
 
 ```bash
-SKIP_REMOTE_GATE=1 git push
+SKIP_REMOTE_GATE=1 \
+GATE_BYPASS_REASON_CODE=build_server_unreachable \
+GATE_BYPASS_DETAIL="build-lv3 SSH probe timed out during the remote pre-push gate" \
+GATE_BYPASS_SUBSTITUTE_EVIDENCE="./scripts/validate_repo.sh agent-standards;python3 scripts/gate_status.py --format json" \
+GATE_BYPASS_REMEDIATION_REF=ws-0267-live-apply \
+git push
 ```
 
-That path records a receipt under [receipts/gate-bypasses](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/gate-bypasses).
+That path records a governed waiver receipt under [receipts/gate-bypasses](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/gate-bypasses).
+
+ADR 0267 now requires every new bypass receipt to include:
+
+- `GATE_BYPASS_REASON_CODE` from [config/gate-bypass-waiver-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/gate-bypass-waiver-catalog.json)
+- `GATE_BYPASS_DETAIL` with the concrete failure class
+- `GATE_BYPASS_SUBSTITUTE_EVIDENCE` listing the substitute validations that already passed
+- `GATE_BYPASS_REMEDIATION_REF` pointing at the cleanup workstream or issue
+
+Optional fields:
+
+- `GATE_BYPASS_IMPACTED_LANES` for a comma-separated override to the default `remote-pre-push-gate`
+- `GATE_BYPASS_OWNER` to override the inferred git user or shell user
+- `GATE_BYPASS_EXPIRES_ON=YYYY-MM-DD` to shorten the default policy window from the catalog
+
+If those fields are missing, the hook now fails closed instead of writing another vague bypass receipt.
 
 `git push --no-verify` still skips both hook layers, but native Git hooks cannot observe that bypass after the fact. Treat it as break-glass only and record the reason in the change notes if it is used.
 
@@ -126,7 +146,11 @@ The Windmill post-merge gate writes its most recent result to:
 
 - `.local/validation-gate/post-merge-last-run.json`
 
-`make gate-status` reads all three files when present.
+`make gate-status` reads all three files when present and now also summarizes:
+
+- legacy versus governed bypass receipts
+- currently open waivers and their expiry dates
+- repeated expired reason codes that have escalated to warning or release-blocking status
 
 ## Windmill Post-Merge Gate
 
@@ -170,3 +194,4 @@ The worker currently evaluates `generated-portals` with its local Python `3.11` 
 - if `packer-validate` falls back locally, inspect the build-worker plugin cache under `/opt/builds/.packer.d`; the remote gate expects the `github.com/hashicorp/proxmox` plugin to be prewarmed there when outbound GitHub access is unavailable
 - if a local fallback fails because Docker is unavailable, fix the local Docker daemon or restore build-server reachability before pushing
 - if `make gate-status` shows no results, run `make pre-push-gate` once to seed the local status file
+- if `SKIP_REMOTE_GATE=1 git push` now fails with a waiver validation error, fill in the required `GATE_BYPASS_*` fields instead of retrying with `--no-verify`

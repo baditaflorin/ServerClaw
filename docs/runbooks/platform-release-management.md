@@ -23,6 +23,7 @@ This reports:
 - the current repository and platform versions
 - any release-blocking workstreams still in `status: in_progress`
 - the `1.0.0` readiness checklist defined in `config/version-semantics.json`
+- open ADR 0267 gate-bypass waivers plus any repeated expired reason codes that now count as release blockers
 
 ## Prepare A Release
 
@@ -71,3 +72,4 @@ If `tag.gpgSign=true` is configured in git, the tag command signs the tag. Other
 
 - Repository releases do not bump `platform_version`; that happens only after a verified live apply from `main`.
 - `lv3 release status` uses local receipts plus lightweight URL probes. Missing future-facing inputs, such as SLO receipts, are reported as pending rather than guessed.
+- ADR 0267 means repeated bypass waivers past expiry can now block a release cut. Review `make gate-status` or `lv3 release status` before cutting a version if recent pushes required `SKIP_REMOTE_GATE=1`.

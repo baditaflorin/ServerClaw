@@ -265,6 +265,20 @@ automation:
       - "config/build-server.json: Remote build-server command routing and runner identities"
       - "docs/runbooks/remote-build-gateway.md: Operator procedure for remote validation"
 
+  config/gate-bypass-waiver-catalog.json:
+    purpose: Canonical ADR 0267 taxonomy and escalation policy for governed validation-gate bypass waivers
+    owner: human
+    format: JSON
+    use_for: Validating structured reason codes, expiry windows, and repeated-reason escalation before a gate bypass receipt is recorded or summarized
+    update_when: Adding or changing allowed waiver reason codes, expiry windows, or repeat-after-expiry escalation thresholds
+    update_by: Agent or human implementing ADR 0267 governance work
+    validation: "python3 scripts/gate_bypass_waivers.py --validate"
+    related_files:
+      - "docs/schema/gate-bypass-waiver-catalog.schema.json: JSON schema for the waiver catalog"
+      - "docs/schema/gate-bypass-waiver-receipt.schema.json: JSON schema for governed waiver receipts"
+      - "scripts/gate_bypass_waivers.py: Loader, validator, and summary helper"
+      - "docs/runbooks/validation-gate.md: operator procedure"
+
   keys/gitea-release-bundle-cosign.pub:
     purpose: Committed ADR 0233 Cosign public verifier for signed private Gitea release bundles
     owner: human

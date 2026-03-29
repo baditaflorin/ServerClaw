@@ -39,6 +39,9 @@ from platform.circuit import load_circuit_policies
 from platform.faults import load_network_impairment_matrix
 from platform.interface_contracts import validate_contracts
 from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
+from gate_bypass_waivers import load_catalog as load_gate_bypass_waiver_catalog
+from gate_bypass_waivers import summarize_receipts as summarize_gate_bypass_waivers
+from gate_bypass_waivers import validate_catalog as validate_gate_bypass_waiver_catalog
 from mutation_audit import load_mutation_audit_schema, validate_mutation_audit_schema
 from operator_manager import ROSTER_PATH, validate_operator_roster
 from platform.execution_lanes import load_execution_lane_catalog
@@ -2742,6 +2745,10 @@ def validate_repository_data_models() -> int:
     token_classes = validate_token_policy()
     validate_token_inventory(token_classes, workflow_catalog)
     validate_circuit_policies()
+    validate_gate_bypass_waiver_catalog(load_gate_bypass_waiver_catalog())
+    gate_bypass_summary = summarize_gate_bypass_waivers()
+    if gate_bypass_summary["invalid_receipts"]:
+        raise ValueError("receipts/gate-bypasses contains invalid governed waiver receipts")
     validate_version_semantics()
     validate_workstreams_release_policy()
     validate_workstream_canonical_truth_metadata()

@@ -366,8 +366,16 @@ def test_log_gate_bypass_writes_receipt(tmp_path: Path) -> None:
             str(REPO_ROOT / "scripts" / "log_gate_bypass.py"),
             "--bypass",
             "skip_remote_gate",
-            "--reason",
+            "--reason-code",
+            "build_server_unreachable",
+            "--detail",
             "test-case",
+            "--impacted-lane",
+            "remote-pre-push-gate",
+            "--substitute-evidence",
+            "./scripts/validate_repo.sh agent-standards",
+            "--remediation-ref",
+            "ws-0267-live-apply",
             "--receipt-dir",
             str(receipt_dir),
         ],
@@ -381,7 +389,10 @@ def test_log_gate_bypass_writes_receipt(tmp_path: Path) -> None:
     receipt_path = Path(completed.stdout.strip())
     payload = json.loads(receipt_path.read_text(encoding="utf-8"))
     assert payload["bypass"] == "skip_remote_gate"
-    assert payload["reason"] == "test-case"
+    assert payload["waiver"]["reason_code"] == "build_server_unreachable"
+    assert payload["waiver"]["detail"] == "test-case"
+    assert payload["waiver"]["remediation_ref"] == "ws-0267-live-apply"
+    assert payload["waiver"]["substitute_evidence"] == ["./scripts/validate_repo.sh agent-standards"]
 
 
 def test_gate_status_reports_latest_bypass_and_runs(tmp_path: Path, capsys) -> None:
@@ -441,6 +452,7 @@ def test_gate_status_reports_latest_bypass_and_runs(tmp_path: Path, capsys) -> N
     assert "Last gate run: passed" in captured.out
     assert "Last post-merge gate run: failed" in captured.out
     assert "Latest bypass receipt:" in captured.out
+    assert "Waiver summary:" in captured.out
 
 
 def test_gate_status_supports_json_output(tmp_path: Path, capsys) -> None:
@@ -488,6 +500,8 @@ def test_gate_status_supports_json_output(tmp_path: Path, capsys) -> None:
     assert payload["last_run"] is None
     assert payload["post_merge_run"] is None
     assert payload["latest_bypass"] is None
+    assert payload["waiver_summary"]["totals"]["all_receipts"] == 0
+    assert payload["waiver_summary"]["release_blockers"] == []
 
 
 def test_gate_status_defaults_are_repo_rooted_when_run_outside_repo(tmp_path: Path) -> None:

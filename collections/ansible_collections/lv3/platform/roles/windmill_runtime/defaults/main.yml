@@ -128,6 +128,7 @@ windmill_default_operations_surface_script_paths:
   - f/lv3/subdomain_exposure_audit
   - f/lv3/restore_verification
   - f/lv3/security_posture_scan
+  - f/lv3/weekly_https_tls_assurance
   - f/lv3/weekly_security_scan
   - f/lv3/audit_token_inventory
   - f/lv3/token_exposure_response
@@ -214,11 +215,17 @@ windmill_worker_checkout_integrity_files:
   - Makefile
   - config/validation-gate.json
   - config/validation-lanes.yaml
+  - config/gate-bypass-waiver-catalog.json
+  - scripts/__init__.py
   - scripts/policy_checks.py
   - scripts/policy_toolchain.py
   - scripts/command_catalog.py
+  - scripts/controller_automation_toolkit.py
+  - scripts/gate_bypass_waivers.py
   - scripts/gate_status.py
   - scripts/stage_smoke_suites.py
+  - scripts/validation_lanes.py
+  - scripts/run_python_with_packages.sh
   - config/windmill/scripts/gate-status.py
   - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
   - config/windmill/scripts/stage-smoke-suites.py
@@ -456,6 +463,11 @@ windmill_seed_scripts:
     language: python3
     summary: ADR 0102 security posture scan
     description: Repo-managed Windmill wrapper that runs the security posture report from the worker checkout and returns the structured scan output.
+  - path: f/lv3/weekly_https_tls_assurance
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/https-tls-assurance.py"
+    language: python3
+    summary: ADR 0249 HTTPS/TLS assurance
+    description: Repo-managed Windmill wrapper that runs the HTTPS/TLS assurance scan and stores one receipt.
   - path: f/lv3/weekly_security_scan
     local_file: "{{ inventory_dir }}/../config/windmill/scripts/weekly-security-scan.py"
     language: python3
