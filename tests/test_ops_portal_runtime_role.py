@@ -40,6 +40,12 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert 'tar -C "{{ ops_portal_repo_root }}/scripts" -czf "{{ ops_portal_search_fabric_archive_local.path }}" search_fabric' in tasks
     assert "Sync the shared publication contract helper" in tasks
     assert "Sync the ops portal requirements file" in tasks
+    assert "Remove stale ops portal directory-backed data sources before sync" in tasks
+    assert "Build local staging archives for the ops portal directory-backed data sources" in tasks
+    assert 'tar -C "{{ item.src | regex_replace(\'/$\', \'\') | dirname }}" \\' in tasks
+    assert '"/tmp/ops-portal-{{ item.dest | regex_replace(\'/$\', \'\') | basename }}-sync.tar.gz"' in tasks
+    assert "Copy the staged archives to the guest for the ops portal directory-backed data sources" in tasks
+    assert "Expand the staged archives on the guest for the ops portal directory-backed data sources" in tasks
 
 
 def test_ops_portal_dockerfile_depends_on_synced_helper_files() -> None:

@@ -490,6 +490,17 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert gateway.runbook_fetch_tokens == ["test-token"]
 
 
+def test_dashboard_skips_non_utf8_live_apply_receipts(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, _gateway = portal_client
+    bad_receipt = client.app.state.settings.live_applies_dir / "2026-03-24-bad.json"
+    bad_receipt.write_bytes(b"\xa3not-valid-utf8")
+
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert "Interactive Ops Portal" in response.text
+
+
 def test_dashboard_uses_same_origin_static_stylesheet(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
     client, _gateway = portal_client
 

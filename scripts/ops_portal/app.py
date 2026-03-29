@@ -770,7 +770,7 @@ class PortalRepository:
         for report in reports:
             try:
                 payload = json.loads(report.read_text(encoding="utf-8"))
-            except json.JSONDecodeError:
+            except (UnicodeDecodeError, json.JSONDecodeError, OSError):
                 continue
             payload["_path"] = str(report)
             return payload
@@ -792,7 +792,7 @@ class PortalRepository:
         for receipt_path in sorted(self.settings.live_applies_dir.rglob("*.json"), reverse=True):
             try:
                 receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
-            except json.JSONDecodeError:
+            except (UnicodeDecodeError, json.JSONDecodeError, OSError):
                 continue
             text = normalize_text(
                 " ".join(

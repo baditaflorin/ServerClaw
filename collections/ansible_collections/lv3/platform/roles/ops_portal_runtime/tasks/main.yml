@@ -237,15 +237,69 @@
     mode: "0644"
   loop: "{{ ops_portal_file_sources }}"
 
-- name: Sync the ops portal directory-backed data sources
+- name: Remove stale ops portal directory-backed data sources before sync
+  ansible.builtin.file:
+    path: "{{ item.dest | regex_replace('/$', '') }}"
+    state: absent
+  loop: "{{ ops_portal_directory_sources }}"
+  loop_control:
+    label: "{{ item.dest }}"
+
+- name: Build local staging archives for the ops portal directory-backed data sources
+  ansible.builtin.shell: |
+    set -euo pipefail
+    tar -C "{{ item.src | regex_replace('/$', '') | dirname }}" \
+      -czf "/tmp/ops-portal-{{ item.dest | regex_replace('/$', '') | basename }}-sync.tar.gz" \
+      "{{ item.src | regex_replace('/$', '') | basename }}"
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  loop: "{{ ops_portal_directory_sources }}"
+  loop_control:
+    label: "{{ item.src }}"
+
+- name: Copy the staged archives to the guest for the ops portal directory-backed data sources
   ansible.builtin.copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
+    src: "/tmp/ops-portal-{{ item.dest | regex_replace('/$', '') | basename }}-sync.tar.gz"
+    dest: "{{ ops_portal_site_dir }}/ops-portal-{{ item.dest | regex_replace('/$', '') | basename }}-sync.tar.gz"
     owner: root
     group: root
-    mode: "0644"
-    directory_mode: "0755"
+    mode: "0600"
   loop: "{{ ops_portal_directory_sources }}"
+  loop_control:
+    label: "{{ item.dest }}"
+
+- name: Expand the staged archives on the guest for the ops portal directory-backed data sources
+  ansible.builtin.shell: |
+    set -euo pipefail
+    tar -xzf "{{ ops_portal_site_dir }}/ops-portal-{{ item.dest | regex_replace('/$', '') | basename }}-sync.tar.gz" \
+      -C "{{ item.dest | regex_replace('/$', '') | dirname }}"
+  args:
+    executable: /bin/bash
+  changed_when: true
+  loop: "{{ ops_portal_directory_sources }}"
+  loop_control:
+    label: "{{ item.dest }}"
+
+- name: Remove the staged archives from the guest for the ops portal directory-backed data sources
+  ansible.builtin.file:
+    path: "{{ ops_portal_site_dir }}/ops-portal-{{ item.dest | regex_replace('/$', '') | basename }}-sync.tar.gz"
+    state: absent
+  loop: "{{ ops_portal_directory_sources }}"
+  loop_control:
+    label: "{{ item.dest }}"
+
+- name: Remove the local staging archives for the ops portal directory-backed data sources
+  ansible.builtin.file:
+    path: "/tmp/ops-portal-{{ item.dest | regex_replace('/$', '') | basename }}-sync.tar.gz"
+    state: absent
+  delegate_to: localhost
+  become: false
+  loop: "{{ ops_portal_directory_sources }}"
+  loop_control:
+    label: "{{ item.src }}"
 
 - name: Build and start the ops portal stack
   ansible.builtin.command:
