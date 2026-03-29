@@ -670,6 +670,11 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "--path {{ windmill_validation_gate_status_script_path | quote }}" in verify_tasks
     assert "Run the Windmill validation gate status script" in verify_tasks
     assert "Assert the Windmill validation gate status result" in verify_tasks
+    assert "Verify the Windmill default operations scripts are seeded" in verify_tasks
+    assert "failed_when: false" in verify_tasks
+    assert "retries: 6" in verify_tasks
+    assert "windmill_verify_default_operations_scripts.status == 200" in verify_tasks
+    assert "windmill_verify_default_operations_scripts.json | default({})" in verify_tasks
     assert "delegate_to: localhost" in tasks
     assert "become: false" in tasks
     assert "Decide whether the Windmill worker checkout needs to be refreshed" in tasks

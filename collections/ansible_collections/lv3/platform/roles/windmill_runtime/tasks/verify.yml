@@ -72,7 +72,14 @@
     method: GET
     headers:
       Authorization: "Bearer {{ windmill_bootstrap_session_token }}"
-    status_code: 200
+    status_code:
+      - 200
+      - 404
+      - 429
+      - 500
+      - 502
+      - 503
+      - 504
   loop: "{{ windmill_default_operations_surface_script_paths }}"
   loop_control:
     label: "{{ item }}"
@@ -80,6 +87,12 @@
   become: false
   register: windmill_verify_default_operations_scripts
   changed_when: false
+  failed_when: false
+  retries: 6
+  delay: 5
+  until:
+    - windmill_verify_default_operations_scripts.status == 200
+    - ((windmill_verify_default_operations_scripts.json | default({})).path | default('')) == item
   no_log: true
 
 - name: Assert the Windmill default operations scripts exist

@@ -119,3 +119,6 @@ def test_windmill_postgres_support_role_enforces_bypassrls() -> None:
 
     assert "CREATE ROLE {{ windmill_database_support_role }} BYPASSRLS" in tasks
     assert "ALTER ROLE {{ windmill_database_support_role }} BYPASSRLS" in tasks
+    assert "Wait for local PostgreSQL SQL readiness before Windmill role reconciliation" in tasks
+    assert "windmill_postgres_local_sql_probe.stdout | trim == \"1\"" in tasks
+    assert "windmill_postgres_writable_check.rc == 0" in tasks

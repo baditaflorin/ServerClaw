@@ -2618,7 +2618,7 @@ workstreams:
   - id: ws-0236-live-apply
     adr: "0236"
     title: Live apply TanStack Query server-state conventions on the Windmill operator admin app
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/ws-0236-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0236-live-apply
@@ -2688,24 +2688,99 @@ workstreams:
           contract: live-apply-receipts-v1
     ready_to_merge: true
     live_applied: true
+  - id: ws-0236-main-merge
+    adr: "0236"
+    title: Integrate ADR 0236 TanStack Query server-state feedback into origin/main
+    status: ready_for_merge
+    owner: codex
+    branch: codex/ws-0236-main-merge
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0236-mainline
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0236-main-merge.md
+    depends_on:
+      - ws-0236-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0236-main-merge.md
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.76.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/adr/.index.yaml
+      - docs/adr/0236-server-state-and-mutation-feedback-via-tanstack-query.md
+      - docs/workstreams/ws-0236-live-apply.md
+      - docs/runbooks/configure-windmill.md
+      - docs/runbooks/windmill-operator-access-admin.md
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+      - config/windmill/apps/f/lv3/operator_access_admin.raw_app/package.json
+      - config/windmill/apps/f/lv3/operator_access_admin.raw_app/index.tsx
+      - config/windmill/apps/f/lv3/operator_access_admin.raw_app/App.tsx
+      - config/windmill/apps/f/lv3/operator_access_admin.raw_app/index.css
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+      - tests/test_openbao_compose_env_helper.py
+      - tests/test_windmill_operator_admin_app.py
+      - receipts/live-applies/2026-03-28-adr-0236-tanstack-query-live-apply.json
+      - receipts/live-applies/2026-03-29-adr-0236-tanstack-query-mainline-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws_0236_main_merge_doc
+          paths:
+            - docs/workstreams/ws-0236-main-merge.md
+          mode: exclusive
+        - id: integration_release_surfaces
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.76.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: exclusive
+        - id: adr_index_contract
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: adr_0236_main_merge_surfaces
+          paths:
+            - docs/adr/0236-server-state-and-mutation-feedback-via-tanstack-query.md
+            - docs/workstreams/ws-0236-live-apply.md
+            - docs/runbooks/configure-windmill.md
+            - docs/runbooks/windmill-operator-access-admin.md
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+            - config/windmill/apps/f/lv3/operator_access_admin.raw_app/package.json
+            - config/windmill/apps/f/lv3/operator_access_admin.raw_app/index.tsx
+            - config/windmill/apps/f/lv3/operator_access_admin.raw_app/App.tsx
+            - config/windmill/apps/f/lv3/operator_access_admin.raw_app/index.css
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+            - tests/test_openbao_compose_env_helper.py
+            - tests/test_windmill_operator_admin_app.py
+            - receipts/live-applies/2026-03-28-adr-0236-tanstack-query-live-apply.json
+            - receipts/live-applies/2026-03-29-adr-0236-tanstack-query-mainline-live-apply.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
     canonical_truth:
-      changelog_entry: implemented ADR 0236 by adopting TanStack Query on the
-        Windmill operator admin raw app, rendering explicit roster and inventory
-        loading or stale feedback, invalidating query keys after operator
-        mutations, and hardening the latest-main Windmill converge path for raw
-        app frontend dependencies plus transient OpenBao reads
+      changelog_entry: records ADR 0236 exact-main evidence on the current
+        mainline by preserving the verified TanStack Query operator-admin
+        rollout, explicit roster and inventory feedback states, query
+        invalidation, and the hardened Windmill raw-app dependency plus
+        worker-readiness converge path while the later ADR 0241 and ADR 0228
+        receipts remain canonical for the broader shared surfaces
       release_bump: patch
-      latest_receipts:
-        windmill_operator_access_admin: 2026-03-28-adr-0236-tanstack-query-live-apply
-      live_apply_verification:
-        app_path: f/lv3/operator_access_admin
-        app_version: 20
-        edited_at: '2026-03-28T22:50:09.339380Z'
-        roster_job_status: ok
-        roster_counts:
-          operator_count: 1
-          active_count: 1
-          inactive_count: 0
   - id: ws-0240-live-apply
     adr: "0240"
     title: Live apply operator visualization panels via Apache ECharts

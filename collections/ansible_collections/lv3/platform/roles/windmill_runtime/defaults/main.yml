@@ -509,6 +509,11 @@ windmill_seed_scripts:
     language: python3
     summary: ADR 0100 disaster recovery runbook
     description: Repo-managed helper that renders the ordered LV3 disaster recovery plan and records the runbook invocation path.
+  - path: f/lv3/backup_coverage_ledger
+    local_file: "{{ windmill_seed_script_root_local_dir }}/backup-coverage-ledger.py"
+    language: python3
+    summary: ADR 0271 backup coverage ledger
+    description: Repo-managed helper that audits governed backup coverage, writes one receipt, and surfaces uncovered assets explicitly in DR readiness reporting.
   - path: f/lv3/operator_onboard
     local_file: "{{ windmill_seed_script_root_local_dir }}/operator-onboard.py"
     language: python3
