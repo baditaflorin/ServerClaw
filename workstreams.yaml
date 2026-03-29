@@ -119,6 +119,7 @@ workstreams:
       - .config-locations.yaml
       - Makefile
       - mkdocs.yml
+      - config/ansible-execution-scopes.yaml
       - config/command-catalog.json
       - config/correction-loops.json
       - config/workflow-catalog.json
@@ -131,6 +132,7 @@ workstreams:
       - scripts/workflow_catalog.py
       - tests/test_docs_site.py
       - tests/test_preflight_controller_local.py
+      - tests/test_service_id_resolver.py
       - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply.json
     ownership_manifest:
       owned_surfaces:
@@ -148,9 +150,11 @@ workstreams:
             - docs/release-process.md
             - .config-locations.yaml
             - config/worktree-bootstrap-manifests.json
+            - config/ansible-execution-scopes.yaml
             - scripts/preflight_controller_local.py
             - scripts/worktree_bootstrap.py
             - tests/test_preflight_controller_local.py
+            - tests/test_service_id_resolver.py
             - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply.json
           mode: exclusive
         - id: docs_portal_generation_contract
@@ -206,6 +210,7 @@ workstreams:
       - .config-locations.yaml
       - Makefile
       - mkdocs.yml
+      - config/ansible-execution-scopes.yaml
       - config/command-catalog.json
       - config/correction-loops.json
       - config/workflow-catalog.json
@@ -235,6 +240,7 @@ workstreams:
       - scripts/worktree_bootstrap.py
       - tests/test_docs_site.py
       - tests/test_preflight_controller_local.py
+      - tests/test_service_id_resolver.py
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -247,6 +253,7 @@ workstreams:
             - .config-locations.yaml
             - Makefile
             - mkdocs.yml
+            - config/ansible-execution-scopes.yaml
             - config/command-catalog.json
             - config/correction-loops.json
             - config/workflow-catalog.json
@@ -276,6 +283,7 @@ workstreams:
             - scripts/worktree_bootstrap.py
             - tests/test_docs_site.py
             - tests/test_preflight_controller_local.py
+            - tests/test_service_id_resolver.py
           mode: exclusive
     ready_to_merge: false
     live_applied: false

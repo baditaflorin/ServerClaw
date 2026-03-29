@@ -25,6 +25,7 @@ canonical mainline evidence.
 - `.config-locations.yaml`
 - `Makefile`
 - `mkdocs.yml`
+- `config/ansible-execution-scopes.yaml`
 - `config/command-catalog.json`
 - `config/correction-loops.json`
 - `config/workflow-catalog.json`
@@ -54,6 +55,7 @@ canonical mainline evidence.
 - `scripts/worktree_bootstrap.py`
 - `tests/test_docs_site.py`
 - `tests/test_preflight_controller_local.py`
+- `tests/test_service_id_resolver.py`
 
 ## Verification
 

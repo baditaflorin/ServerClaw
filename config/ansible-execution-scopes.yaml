@@ -200,6 +200,7 @@ playbooks:
       - config/subdomain-catalog.json
   playbooks/public-edge.yml:
     playbook_id: public-edge
+    canonical_service_id: nginx_edge
     mutation_scope: host
     shared_surfaces:
       - service:public-edge

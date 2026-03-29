@@ -12,7 +12,7 @@
 - Owner: codex
 - Depends On: `adr-0034-controller-local-secret-manifest-and-preflight`, `adr-0035-workflow-catalog-and-machine-readable-execution-contracts`, `adr-0079-playbook-decomposition-and-shared-execution-model`, `adr-0167-agent-handoff-and-context-preservation`, `adr-0211-shared-policy-packs-and-rule-registries`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0094-developer-portal-and-documentation-site.md`, `docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md`, `docs/workstreams/ws-0268-live-apply.md`, `docs/runbooks/controller-local-secrets-and-preflight.md`, `docs/runbooks/playbook-execution-model.md`, `docs/release-process.md`, `.config-locations.yaml`, `Makefile`, `mkdocs.yml`, `config/command-catalog.json`, `config/correction-loops.json`, `config/workflow-catalog.json`, `config/worktree-bootstrap-manifests.json`, `docs/site-generated/architecture/dependency-graph.md`, `receipts/ops-portal-snapshot.html`, `scripts/generate_docs_site.py`, `scripts/preflight_controller_local.py`, `scripts/worktree_bootstrap.py`, `scripts/workflow_catalog.py`, `tests/test_docs_site.py`, `tests/test_preflight_controller_local.py`, `workstreams.yaml`
+- Shared Surfaces: `docs/adr/0094-developer-portal-and-documentation-site.md`, `docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md`, `docs/workstreams/ws-0268-live-apply.md`, `docs/runbooks/controller-local-secrets-and-preflight.md`, `docs/runbooks/playbook-execution-model.md`, `docs/release-process.md`, `.config-locations.yaml`, `Makefile`, `mkdocs.yml`, `config/ansible-execution-scopes.yaml`, `config/command-catalog.json`, `config/correction-loops.json`, `config/workflow-catalog.json`, `config/worktree-bootstrap-manifests.json`, `docs/site-generated/architecture/dependency-graph.md`, `receipts/ops-portal-snapshot.html`, `scripts/generate_docs_site.py`, `scripts/preflight_controller_local.py`, `scripts/worktree_bootstrap.py`, `scripts/workflow_catalog.py`, `tests/test_docs_site.py`, `tests/test_preflight_controller_local.py`, `tests/test_service_id_resolver.py`, `workstreams.yaml`
 
 ## Scope
 
@@ -33,6 +33,7 @@
 - `config/workflow-catalog.json`
 - `Makefile`
 - `mkdocs.yml`
+- `config/ansible-execution-scopes.yaml`
 - `scripts/preflight_controller_local.py`
 - `scripts/generate_docs_site.py`
 - `scripts/workflow_catalog.py`
@@ -46,6 +47,7 @@
 - `receipts/ops-portal-snapshot.html`
 - `tests/test_docs_site.py`
 - `tests/test_preflight_controller_local.py`
+- `tests/test_service_id_resolver.py`
 - `docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md`
 - `docs/workstreams/ws-0268-live-apply.md`
 - `workstreams.yaml`
