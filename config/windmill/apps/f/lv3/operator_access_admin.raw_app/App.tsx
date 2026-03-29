@@ -1,4 +1,15 @@
-import React, { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import React, { FormEvent, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import {
+  AllCommunityModule,
+  ModuleRegistry,
+  themeQuartz,
+  type ColDef,
+  type GridApi,
+  type GridReadyEvent,
+  type ModelUpdatedEvent,
+  type SelectionChangedEvent,
+} from "ag-grid-community";
+import { AgGridReact, type CustomCellRendererProps } from "ag-grid-react";
 import type { Editor } from "@tiptap/react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { Markdown } from "@tiptap/markdown";
@@ -20,6 +31,8 @@ import {
   type TourProgress,
 } from "./touring";
 import "./index.css";
+
+ModuleRegistry.registerModules([AllCommunityModule]);
 
 type OperatorRecord = {
   id: string;
@@ -129,6 +142,16 @@ const initialSyncState: SyncFormState = {
   dry_run: false,
 };
 
+const operatorGridTheme = themeQuartz.withParams({
+  spacing: 7,
+  accentColor: "#a5411c",
+  backgroundColor: "#fffaf2",
+  foregroundColor: "#1c1a16",
+  headerBackgroundColor: "#efe3d2",
+  headerTextColor: "#4c4035",
+  rowHoverColor: "rgba(165, 65, 28, 0.08)",
+});
+
 function ToolbarButton({ label, onClick, active = false, disabled = false }: ToolbarButtonProps) {
   return (
     <button
@@ -146,7 +169,7 @@ function prettyJson(value: unknown): string {
   return JSON.stringify(value, null, 2);
 }
 
-function formatDate(value?: string): string {
+function formatDate(value?: string | null): string {
   if (!value) {
     return "n/a";
   }
@@ -155,6 +178,70 @@ function formatDate(value?: string): string {
     return value;
   }
   return date.toLocaleString();
+}
+
+function formatOperatorSearchText(operator: OperatorRecord): string {
+  return [
+    operator.name,
+    operator.email,
+    operator.role,
+    operator.status,
+    operator.keycloak_username,
+    operator.realm_roles.join(" "),
+    operator.groups.join(" "),
+    operator.tailscale_login_email,
+    operator.notes ?? "",
+    operator.onboarded_at,
+    operator.offboarded_at ?? "",
+    operator.last_reviewed_at ?? "",
+    operator.last_seen_at ?? "",
+  ]
+    .join(" ")
+    .trim();
+}
+
+function pillToneClass(value: string): string {
+  return value === "active" ? "pillActive" : "pillInactive";
+}
+
+function OperatorIdentityCell({ data }: CustomCellRendererProps<OperatorRecord>) {
+  if (!data) {
+    return null;
+  }
+
+  return (
+    <div className="operatorIdentity">
+      <span className="operatorPrimary">{data.name}</span>
+      <span className="operatorSecondary">{data.email}</span>
+    </div>
+  );
+}
+
+function RoleCell({ value }: CustomCellRendererProps<OperatorRecord, string>) {
+  return <span className="pill pillRole">{value ?? "n/a"}</span>;
+}
+
+function StatusCell({ value }: CustomCellRendererProps<OperatorRecord, string>) {
+  const status = value ?? "unknown";
+  return <span className={`pill ${pillToneClass(status)}`}>{status}</span>;
+}
+
+function KeycloakCell({ data }: CustomCellRendererProps<OperatorRecord>) {
+  if (!data) {
+    return null;
+  }
+
+  const roles = data.realm_roles.join(", ");
+  return (
+    <div className="operatorIdentity">
+      <span className="operatorPrimary">{data.keycloak_username || "n/a"}</span>
+      <span className="operatorSecondary">{roles || "no realm roles"}</span>
+    </div>
+  );
+}
+
+function TimestampCell({ value }: CustomCellRendererProps<OperatorRecord, string>) {
+  return <span className="gridTimestamp">{formatDate(value)}</span>;
 }
 
 function extractRosterError(payload: RosterPayloadError): string {
@@ -184,6 +271,8 @@ function App() {
   const [rosterLoading, setRosterLoading] = useState(true);
   const [rosterError, setRosterError] = useState("");
   const [selectedOperatorId, setSelectedOperatorId] = useState("");
+  const [quickFilterText, setQuickFilterText] = useState("");
+  const [displayedOperatorCount, setDisplayedOperatorCount] = useState(0);
   const [mentionTarget, setMentionTarget] = useState("");
   const [notesMarkdown, setNotesMarkdown] = useState("");
   const [onboard, setOnboard] = useState<OnboardFormState>(initialOnboardState);
@@ -194,6 +283,8 @@ function App() {
   const [actionPayload, setActionPayload] = useState<ActionPayload | null>(null);
   const [inventoryPayload, setInventoryPayload] = useState<InventoryPayload | null>(null);
   const [inventoryLoading, setInventoryLoading] = useState(false);
+  const gridApiRef = useRef<GridApi<OperatorRecord> | null>(null);
+  const deferredQuickFilterText = useDeferredValue(quickFilterText);
   const [tourProgress, setTourProgress] = useState<TourProgress>(() => readTourProgress());
   const [tourRunning, setTourRunning] = useState(false);
   const tourRef = useRef<Tour | null>(null);
@@ -209,6 +300,107 @@ function App() {
   const lastTourTimestamp = tourProgress.lastCompletedAt ?? tourProgress.lastDismissedAt;
   const selectedOperatorNotes = selectedOperator?.notes ?? "";
   const notesDirty = notesMarkdown !== selectedOperatorNotes;
+  const defaultColDef = useMemo<ColDef<OperatorRecord>>(
+    () => ({
+      sortable: true,
+      resizable: true,
+      filter: "agTextColumnFilter",
+      floatingFilter: true,
+      flex: 1,
+      minWidth: 140,
+    }),
+    [],
+  );
+  const rosterRowSelection = useMemo(
+    () => ({
+      mode: "singleRow" as const,
+      checkboxes: false,
+      enableClickSelection: true,
+    }),
+    [],
+  );
+  const rosterColumns = useMemo<ColDef<OperatorRecord>[]>(
+    () => [
+      {
+        headerName: "Operator",
+        field: "name",
+        pinned: "left",
+        minWidth: 260,
+        sort: "asc",
+        cellRenderer: OperatorIdentityCell,
+        getQuickFilterText: ({ data }) => (data ? formatOperatorSearchText(data) : ""),
+      },
+      {
+        headerName: "Role",
+        field: "role",
+        maxWidth: 150,
+        cellRenderer: RoleCell,
+      },
+      {
+        headerName: "Status",
+        field: "status",
+        maxWidth: 150,
+        cellRenderer: StatusCell,
+      },
+      {
+        headerName: "Keycloak",
+        field: "keycloak_username",
+        minWidth: 240,
+        cellRenderer: KeycloakCell,
+        getQuickFilterText: ({ data }) =>
+          data ? [data.keycloak_username, data.realm_roles.join(" ")].filter(Boolean).join(" ") : "",
+      },
+      {
+        headerName: "SSH",
+        field: "ssh_enabled",
+        maxWidth: 160,
+        valueGetter: ({ data }) => (data?.ssh_enabled ? "enabled" : "not required"),
+      },
+      {
+        headerName: "Onboarded",
+        field: "onboarded_at",
+        minWidth: 190,
+        cellRenderer: TimestampCell,
+      },
+      {
+        headerName: "Last Reviewed",
+        field: "last_reviewed_at",
+        hide: true,
+        minWidth: 190,
+        cellRenderer: TimestampCell,
+      },
+      {
+        headerName: "Last Seen",
+        field: "last_seen_at",
+        hide: true,
+        minWidth: 190,
+        cellRenderer: TimestampCell,
+      },
+      {
+        headerName: "Realm Roles",
+        field: "realm_roles",
+        hide: true,
+        valueGetter: ({ data }) => data?.realm_roles.join(", ") ?? "",
+      },
+      {
+        headerName: "Groups",
+        field: "groups",
+        hide: true,
+        valueGetter: ({ data }) => data?.groups.join(", ") ?? "",
+      },
+      {
+        headerName: "Tailscale Login",
+        field: "tailscale_login_email",
+        hide: true,
+      },
+      {
+        headerName: "Notes",
+        field: "notes",
+        hide: true,
+      },
+    ],
+    [],
+  );
   const tourStatusLabel = tourRunning
     ? "Tour Running"
     : tourProgress.lastOutcome === "completed"
@@ -216,6 +408,45 @@ function App() {
       : tourProgress.lastOutcome === "dismissed"
         ? "Paused"
         : "Ready";
+
+  function updateDisplayedOperatorCount(api: GridApi<OperatorRecord>) {
+    setDisplayedOperatorCount(api.getDisplayedRowCount());
+  }
+
+  function syncGridSelection(api: GridApi<OperatorRecord>) {
+    if (!selectedOperatorId) {
+      api.deselectAll();
+      return;
+    }
+    const rowNode = api.getRowNode(selectedOperatorId);
+    if (!rowNode) {
+      api.deselectAll();
+      return;
+    }
+    if (!rowNode.isSelected()) {
+      rowNode.setSelected(true, true, "api");
+    }
+  }
+
+  function handleGridReady(event: GridReadyEvent<OperatorRecord>) {
+    gridApiRef.current = event.api;
+    updateDisplayedOperatorCount(event.api);
+    syncGridSelection(event.api);
+  }
+
+  function handleGridModelUpdated(event: ModelUpdatedEvent<OperatorRecord>) {
+    updateDisplayedOperatorCount(event.api);
+  }
+
+  function handleGridSelectionChanged(event: SelectionChangedEvent<OperatorRecord>) {
+    const nextOperator = event.api.getSelectedRows()[0];
+    if (!nextOperator || nextOperator.id === selectedOperatorId) {
+      return;
+    }
+    if (!selectOperator(nextOperator.id)) {
+      syncGridSelection(event.api);
+    }
+  }
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -263,11 +494,9 @@ function App() {
         return;
       }
       setRoster(payload);
-      if (!selectedOperatorId && payload.operators.length > 0) {
-        const first = payload.operators[0].id;
-        setSelectedOperatorId(first);
-        setOffboard((current) => ({ ...current, operator_id: first }));
-      }
+      const selectedIdStillExists = payload.operators.some((item) => item.id === selectedOperatorId);
+      const nextSelectedOperatorId = selectedIdStillExists ? selectedOperatorId : payload.operators[0]?.id ?? "";
+      setSelectedOperatorId(nextSelectedOperatorId);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       setRosterError(message);
@@ -298,6 +527,14 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (!selectedOperatorId) {
+      setOffboard((current) => ({ ...current, operator_id: "" }));
+      return;
+    }
+    setOffboard((current) => ({ ...current, operator_id: selectedOperatorId }));
+  }, [selectedOperatorId]);
+
+  useEffect(() => {
     if (selectedOperatorId) {
       void loadInventory(selectedOperatorId);
     }
@@ -311,6 +548,15 @@ function App() {
   useEffect(() => {
     setEditorMarkdown(editor, notesMarkdown);
   }, [editor, notesMarkdown]);
+
+  useEffect(() => {
+    const api = gridApiRef.current;
+    if (!api) {
+      return;
+    }
+    syncGridSelection(api);
+    updateDisplayedOperatorCount(api);
+  }, [operators, selectedOperatorId]);
 
   useEffect(() => {
     return () => {
@@ -551,53 +797,72 @@ function App() {
             ) : null}
 
             <div className="tableWrap">
-              <table className="rosterTable">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Keycloak</th>
-                    <th>SSH</th>
-                    <th>Onboarded</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {operators.map((operator) => (
-                    <tr
-                      key={operator.id}
-                      className={operator.id === selectedOperatorId ? "isSelected" : ""}
-                      onClick={() => {
-                        void selectOperator(operator.id);
-                      }}
-                    >
-                      <td>
-                        <strong>{operator.name}</strong>
-                        <div className="muted">{operator.email}</div>
-                      </td>
-                      <td>
-                        <span className="pill pillRole">{operator.role}</span>
-                      </td>
-                      <td>
-                        <span className={`pill ${operator.status === "active" ? "pillActive" : "pillInactive"}`}>
-                          {operator.status}
-                        </span>
-                      </td>
-                      <td>
-                        <div>{operator.keycloak_username}</div>
-                        <div className="muted">{operator.realm_roles.join(", ") || "n/a"}</div>
-                      </td>
-                      <td>{operator.ssh_enabled ? "enabled" : "not required"}</td>
-                      <td>{formatDate(operator.onboarded_at)}</td>
-                    </tr>
-                  ))}
-                  {!operators.length && !rosterLoading ? (
-                    <tr>
-                      <td colSpan={6}>No operators found in the roster.</td>
-                    </tr>
-                  ) : null}
-                </tbody>
-              </table>
+              <div className="gridControls">
+                <label className="gridSearch">
+                  <span className="gridSearchLabel">Quick Filter</span>
+                  <input
+                    value={quickFilterText}
+                    onChange={(event) => setQuickFilterText(event.target.value)}
+                    placeholder="Search by operator, role, group, status, or notes"
+                  />
+                </label>
+                <div className="toolbar">
+                  <button
+                    className="buttonGhost"
+                    onClick={() => setQuickFilterText("")}
+                    disabled={!quickFilterText}
+                    type="button"
+                  >
+                    Clear Search
+                  </button>
+                  <button
+                    className="buttonGhost"
+                    onClick={() => {
+                      gridApiRef.current?.resetColumnState();
+                      gridApiRef.current?.setFilterModel(null);
+                    }}
+                    disabled={!operators.length}
+                    type="button"
+                  >
+                    Reset Columns
+                  </button>
+                </div>
+              </div>
+
+              <div className="gridSummary">
+                <span className="pill pillRole">
+                  Showing {displayedOperatorCount} of {operators.length}
+                </span>
+                <span className="muted">
+                  Sort, filter, pin, or resize columns. Keyboard selection works with arrow keys plus space.
+                </span>
+              </div>
+
+              <div className="gridHost">
+                <AgGridReact<OperatorRecord>
+                  theme={operatorGridTheme}
+                  rowData={operators}
+                  columnDefs={rosterColumns}
+                  defaultColDef={defaultColDef}
+                  rowSelection={rosterRowSelection}
+                  quickFilterText={deferredQuickFilterText}
+                  includeHiddenColumnsInQuickFilter={true}
+                  cacheQuickFilter={true}
+                  pagination={true}
+                  paginationPageSize={10}
+                  paginationPageSizeSelector={[10, 25, 50]}
+                  animateRows={true}
+                  rowHeight={74}
+                  headerHeight={50}
+                  getRowId={({ data }) => data.id}
+                  overlayNoRowsTemplate={
+                    rosterLoading ? '<span class="ag-overlay-loading-center">Loading operator roster…</span>' : "No operators found in the roster."
+                  }
+                  onGridReady={handleGridReady}
+                  onModelUpdated={handleGridModelUpdated}
+                  onSelectionChanged={handleGridSelectionChanged}
+                />
+              </div>
             </div>
           </section>
 
@@ -625,9 +890,7 @@ function App() {
               <>
                 <div className="inventoryMeta noteMeta">
                   <span className="pill pillRole">{selectedOperator.name}</span>
-                  <span className={`pill ${selectedOperator.status === "active" ? "pillActive" : "pillInactive"}`}>
-                    {selectedOperator.status}
-                  </span>
+                  <span className={`pill ${pillToneClass(selectedOperator.status)}`}>{selectedOperator.status}</span>
                   <span className="pill">{selectedOperator.role}</span>
                   <span className="pill">{selectedOperator.keycloak_username || "no username"}</span>
                   <span className="pill">{selectedOperator.notes ? "Notes present" : "No saved notes"}</span>
@@ -923,9 +1186,7 @@ function App() {
             {selectedOperator ? (
               <div className="inventoryMeta">
                 <span className="pill pillRole">{selectedOperator.name}</span>
-                <span className={`pill ${selectedOperator.status === "active" ? "pillActive" : "pillInactive"}`}>
-                  {selectedOperator.status}
-                </span>
+                <span className={`pill ${pillToneClass(selectedOperator.status)}`}>{selectedOperator.status}</span>
                 <span className="pill">{selectedOperator.role}</span>
                 <span className="pill">{selectedOperator.keycloak_username || "no username"}</span>
               </div>

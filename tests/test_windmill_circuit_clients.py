@@ -5,6 +5,7 @@ import urllib.request
 
 import pytest
 
+import platform.scheduler.windmill_client as windmill_client_module
 import runbook_executor as executor_module
 from platform.circuit import CircuitBreaker, CircuitOpenError, CircuitPolicy, MemoryCircuitStateBackend, should_count_urllib_exception
 from platform.scheduler import HttpWindmillClient
@@ -111,6 +112,7 @@ def test_scheduler_windmill_client_retries_401_with_bootstrap_login(monkeypatch:
         base_url="https://windmill.example.test",
         token="managed-secret",
     )
+    client._internal_api_retry_policy = None
 
     assert client.submit_workflow("deploy-and-promote", {"service": "netbox"}) == {
         "job_id": "job-123",
@@ -121,3 +123,108 @@ def test_scheduler_windmill_client_retries_401_with_bootstrap_login(monkeypatch:
         ("https://windmill.example.test/api/auth/login", None),
         ("https://windmill.example.test/api/w/lv3/jobs/run/p/f%2Flv3%2Fdeploy-and-promote", "Bearer session-token"),
     ]
+
+
+def test_scheduler_windmill_client_falls_back_to_hash_submit(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeResponse:
+        def __init__(self, body: str) -> None:
+            self._body = body.encode("utf-8")
+
+        def read(self) -> bytes:
+            return self._body
+
+        def close(self) -> None:
+            return None
+
+        def __enter__(self) -> "FakeResponse":
+            return self
+
+        def __exit__(self, exc_type, exc, tb) -> None:
+            return None
+
+    calls: list[tuple[str, str | None]] = []
+
+    def fake_urlopen(request: urllib.request.Request, timeout: float | None = None):
+        auth_header = request.headers.get("Authorization")
+        calls.append((request.full_url, auth_header))
+        if request.full_url.endswith("/api/w/lv3/jobs/run/p/f%2Flv3%2Fdeploy-and-promote"):
+            raise urllib.error.HTTPError(
+                request.full_url,
+                404,
+                "Not Found",
+                hdrs=None,
+                fp=FakeResponse("script route unavailable"),
+            )
+        if request.full_url.endswith("/api/w/lv3/scripts/get/p/f%2Flv3%2Fdeploy-and-promote"):
+            return FakeResponse('{"path":"f/lv3/deploy-and-promote","hash":"abc123"}')
+        if request.full_url.endswith("/api/w/lv3/jobs/run/h/abc123"):
+            return FakeResponse('"job-123"')
+        raise AssertionError(request.full_url)
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+
+    client = HttpWindmillClient(
+        base_url="https://windmill.example.test",
+        token="managed-secret",
+    )
+    client._internal_api_retry_policy = None
+
+    assert client.submit_workflow("deploy-and-promote", {"service": "netbox"}) == {
+        "job_id": "job-123",
+        "running": True,
+        "mode": "hash_fallback",
+    }
+    assert calls == [
+        ("https://windmill.example.test/api/w/lv3/jobs/run/p/f%2Flv3%2Fdeploy-and-promote", "Bearer managed-secret"),
+        ("https://windmill.example.test/api/w/lv3/scripts/get/p/f%2Flv3%2Fdeploy-and-promote", "Bearer managed-secret"),
+        ("https://windmill.example.test/api/w/lv3/jobs/run/h/abc123", "Bearer managed-secret"),
+    ]
+
+
+def test_scheduler_windmill_client_waits_for_job_result(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeResponse:
+        def __init__(self, body: str) -> None:
+            self._body = body.encode("utf-8")
+
+        def read(self) -> bytes:
+            return self._body
+
+        def close(self) -> None:
+            return None
+
+        def __enter__(self) -> "FakeResponse":
+            return self
+
+        def __exit__(self, exc_type, exc, tb) -> None:
+            return None
+
+    poll_count = {"count": 0}
+    sleep_calls: list[float] = []
+
+    def fake_urlopen(request: urllib.request.Request, timeout: float | None = None):
+        if request.full_url.endswith("/api/w/lv3/jobs/run/p/f%2Flv3%2Fdeploy-and-promote"):
+            return FakeResponse('"job-123"')
+        if request.full_url.endswith("/api/w/lv3/jobs_u/get/job-123"):
+            poll_count["count"] += 1
+            if poll_count["count"] == 1:
+                return FakeResponse('{"running": true}')
+            return FakeResponse('{"completed": true, "success": true, "result": {"status": "ok"}}')
+        raise AssertionError(request.full_url)
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr(windmill_client_module.time, "sleep", lambda seconds: sleep_calls.append(seconds))
+
+    client = HttpWindmillClient(
+        base_url="https://windmill.example.test",
+        token="managed-secret",
+    )
+    client._internal_api_retry_policy = None
+
+    assert client.run_workflow_wait_result(
+        "deploy-and-promote",
+        {"service": "netbox"},
+        timeout_seconds=10,
+        poll_interval_seconds=0.25,
+    ) == {"status": "ok"}
+    assert poll_count["count"] == 2
+    assert sleep_calls == [0.25]

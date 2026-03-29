@@ -4052,7 +4052,7 @@ adr_index:
   - adr: 0238
     title: Data-Dense Operator Grids Via AG Grid Community
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4064,6 +4064,7 @@ adr_index:
       - community
     summary: We will use AG Grid Community as the default open source grid library for
     filename: 0238-data-dense-operator-grids-via-ag-grid-community.md
+    implemented_version: 0.177.66
   - adr: 0239
     title: Browser-Local Search Experience Via Pagefind
     status: Accepted
