@@ -3,7 +3,7 @@
 - ADR: [ADR 0263](../adr/0263-qdrant-postgresql-and-local-search-as-the-serverclaw-memory-substrate.md)
 - Title: Integrate ADR 0263 exact-main replay onto `origin/main`
 - Status: `merged`
-- Included In Repo Version: 0.177.89
+- Included In Repo Version: 0.177.90
 - Platform Version Observed During Merge: 0.130.60
 - Release Date: 2026-03-29
 - Branch: `codex/ws-0263-main-push`
@@ -30,7 +30,7 @@ changing the replay's original source-commit context.
 - `VERSION`
 - `changelog.md`
 - `docs/release-notes/README.md`
-- `docs/release-notes/0.177.89.md`
+- `docs/release-notes/0.177.90.md`
 - `docs/diagrams/agent-coordination-map.excalidraw`
 - `docs/runbooks/serverclaw-memory-substrate.md`
 - `docs/runbooks/rag-platform-context.md`
@@ -56,9 +56,9 @@ changing the replay's original source-commit context.
 
 ## Verification
 
-- Release `0.177.88` was cut from the merged integration worktree after
+- Release `0.177.90` was cut from the merged integration worktree after
   cherry-picking the validated ADR 0263 integration onto the latest fetched
-  `origin/main` commit `020c5f5ad21d21864861e7b3aa21570474ff8988`.
+  `origin/main` commit `92c56a075c273dc4b4e2d720ceb5e75c46cb9399`.
 - The exact-main replay that backs this merge succeeded from source commit
   `7fe9af77cf7b842884533dde6b2b1af64857fe0d` with
   `docker-runtime-lv3 ok=119 changed=19 failed=0 skipped=21` and
@@ -83,10 +83,10 @@ changing the replay's original source-commit context.
 
 ## Outcome
 
-- Release `0.177.89` carries ADR 0263's exact-main replay onto `main`.
+- Release `0.177.90` carries ADR 0263's exact-main replay onto `main`.
 - The integrated platform baseline advanced from `0.130.59` to `0.130.60`
   after the exact-main replay and verification completed.
 - `versions/stack.yaml` now points `serverclaw_memory` at
   `2026-03-29-adr-0263-serverclaw-memory-substrate-mainline-live-apply` while
-  ADR 0263 itself records `0.177.89` and `0.130.60` as the first repo and
+  ADR 0263 itself records `0.177.90` and `0.130.60` as the first repo and
   platform versions where the decision is fully implemented on main.

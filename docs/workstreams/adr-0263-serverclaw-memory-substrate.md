@@ -4,7 +4,7 @@
 - Title: Implement the governed ServerClaw memory contract on the live private
   retrieval runtime
 - Status: live_applied
-- Implemented In Repo Version: 0.177.89
+- Implemented In Repo Version: 0.177.90
 - Live Applied In Platform Version: 0.130.60
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
@@ -142,7 +142,7 @@
 
 ## Mainline Integration Outcome
 
-- Release `0.177.89` was cut on 2026-03-29 from the merged mainline
+- Release `0.177.90` was cut on 2026-03-29 from the merged mainline
   integration worktree.
 - `VERSION`, `changelog.md`, `README.md`, `RELEASE.md`,
   `docs/release-notes/`, `versions/stack.yaml`, and `workstreams.yaml` now

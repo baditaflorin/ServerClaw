@@ -4522,7 +4522,7 @@ adr_index:
       - substrate
     summary: We will use PostgreSQL, Qdrant, and the local search fabric together as the
     filename: 0263-qdrant-postgresql-and-local-search-as-the-serverclaw-memory-substrate.md
-    implemented_version: 0.177.89
+    implemented_version: 0.177.90
   - adr: '0264'
     title: Failure-Domain-Isolated Validation Lanes
     status: Accepted

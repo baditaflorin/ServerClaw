@@ -172,7 +172,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.89` |
+| Repository version | `0.177.90` |
 | Platform version | `0.130.60` |
 | Observed check date | `2026-03-29` |
 | Observed OS | `Debian 13` |
@@ -1328,6 +1328,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream WS-0271: Backup Coverage Assertion Ledger Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0271-live-apply.md)
 - [Workstream ws-0272-live-apply: ADR 0272 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0272-live-apply.md)
 - [Workstream ws-0295-live-apply: Live Apply ADR 0295 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md)
+- [Workstream WS-0296: Education Repo Refresh And Named Deploy Profiles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-education-refresh.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -1345,7 +1346,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.89` |
+| Repository version | `0.177.90` |
 | Platform version | `0.130.60` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
