@@ -4257,7 +4257,7 @@ adr_index:
       - ledger
     summary: We will maintain a route and DNS publication assertion ledger for all
     filename: 0252-route-and-dns-publication-assertion-ledger.md
-    implemented_version: 0.130.43
+    implemented_version: 0.177.63
   - adr: '0253'
     title: Unified Runtime Assurance Scoreboard And Rollup
     status: Accepted

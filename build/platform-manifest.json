@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.62",
+  "repo_version": "0.177.63",
   "platform_version": "0.130.45",
-  "generated_at": "2026-03-29T01:17:11Z",
-  "next_refresh_at": "2026-03-29T02:17:11Z",
+  "generated_at": "2026-03-29T01:42:01Z",
+  "next_refresh_at": "2026-03-29T02:42:01Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -1769,7 +1769,7 @@
       },
       {
         "id": "database-dns",
-        "description": "Publish the private database.lv3.org DNS record toward the Patroni-managed PostgreSQL VIP.",
+        "description": "Publish the current private database.lv3.org DNS record toward the Proxmox host Tailscale proxy while the PostgreSQL HA VIP remains unapplied live.",
         "tags": [
           "database-dns",
           "external-live",
@@ -1791,7 +1791,7 @@
           "max_rollback_depth": 1,
           "escalation_action": "notify_and_abort"
         },
-        "runbook": "docs/runbooks/postgres-failover.md"
+        "runbook": "docs/runbooks/configure-postgres-vm.md"
       },
       {
         "id": "deploy-and-promote",
@@ -2733,6 +2733,32 @@
         "runbook": "docs/runbooks/token-lifecycle-management.md"
       },
       {
+        "id": "route-dns-assertion-ledger",
+        "description": "Reconcile the ADR 0252 route and DNS assertion ledger drift set across the Hetzner zone, including apex publication truth, tailnet-only DNS targets, and stale record retirements.",
+        "tags": [
+          "external-live",
+          "mutation",
+          "preflight",
+          "route-dns-assertion-ledger",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "external_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/subdomain-exposure-audit.md"
+      },
+      {
         "id": "run-triage",
         "description": "Run the ADR 0114 rule-based incident triage engine for one alert payload, write the report, and optionally post the summary to Mattermost.",
         "tags": [
@@ -2861,7 +2887,7 @@
       },
       {
         "id": "subdomain-exposure-audit",
-        "description": "Run the ADR 0139 subdomain exposure registry audit, check live DNS and edge auth behavior, and store one receipt.",
+        "description": "Run the ADR 0139 subdomain exposure registry plus ADR 0252 route and DNS publication audit, check public DNS, private routes, TLS, and edge auth behavior, and store one receipt.",
         "tags": [
           "diagnostic",
           "guest-live",
@@ -3461,7 +3487,8 @@
         "steps": 0,
         "path": "docs/runbooks/configure-postgres-vm.md",
         "workflow_ids": [
-          "converge-postgres-vm"
+          "converge-postgres-vm",
+          "database-dns"
         ]
       },
       {
@@ -3754,16 +3781,6 @@
         ]
       },
       {
-        "id": "postgres-failover",
-        "title": "PostgreSQL Failover Runbook",
-        "agent_trust_required": "T3",
-        "steps": 4,
-        "path": "docs/runbooks/postgres-failover.md",
-        "workflow_ids": [
-          "database-dns"
-        ]
-      },
-      {
         "id": "provision-guests",
         "title": "Provision Guests Runbook",
         "agent_trust_required": "T3",
@@ -3846,10 +3863,11 @@
       {
         "id": "subdomain-exposure-audit",
         "title": "Subdomain Exposure Audit",
-        "agent_trust_required": "T2",
-        "steps": 4,
+        "agent_trust_required": "T3",
+        "steps": 6,
         "path": "docs/runbooks/subdomain-exposure-audit.md",
         "workflow_ids": [
+          "route-dns-assertion-ledger",
           "subdomain-exposure-audit"
         ]
       },
@@ -4062,10 +4080,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.61",
+    "last_version": "0.177.62",
     "deployed_at": "2026-03-29",
-    "summary": "records ADR 0239 exact-main evidence on the current mainline by preserving the verified Pagefind browser-local docs search rollout, refreshed release surfaces, and the current platform baseline after the exact-main replay",
-    "release_notes_url": "docs/release-notes/0.177.62.md"
+    "summary": "implemented ADR 0252 by governing route assertions, DNS record sets, apex publication truth, and private-route verification through one shared route and DNS assertion ledger",
+    "release_notes_url": "docs/release-notes/0.177.63.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

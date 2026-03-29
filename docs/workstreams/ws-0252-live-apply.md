@@ -3,7 +3,7 @@
 - ADR: [ADR 0252](../adr/0252-route-and-dns-publication-assertion-ledger.md)
 - Title: Live apply the route and DNS publication assertion ledger across the governed `lv3.org` drift set
 - Status: live_applied
-- Implemented In Repo Version: pending merge to main
+- Implemented In Repo Version: 0.177.63
 - Live Applied In Platform Version: 0.130.43
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
@@ -114,14 +114,18 @@
   `dig +short vault.lv3.org`, `curl -I https://mail.lv3.org`, `curl -I https://lv3.org`,
   and `curl --cacert .local/step-ca/certs/root_ca.crt -Is https://vault.lv3.org/alive`
 
-## Merge-To-Main Notes
+## Mainline Integration Outcome
 
-- protected integration files still intentionally wait for the final `main`
-  step: `VERSION`, release sections in `changelog.md`, the top-level `README.md`
-  status summary, and `versions/stack.yaml`
-- ADR 0252 is live on platform version `0.130.43`; the final merge should set
-  `Implemented In Repo Version` to the actual release cut on `main`
+- repository version `0.177.63` now carries ADR 0252 on `main` without a
+  platform-version bump; the current integrated baseline remains
+  `0.130.45`, while this ADR first became true on platform version `0.130.43`
+- `versions/stack.yaml` now records the ADR 0252 live-apply receipt as the
+  latest evidence for `route_dns_assertion_ledger`, `public_edge_publication`,
+  and `vaultwarden`, and the generated README status surfaces now reflect the
+  apex plus `mail.lv3.org` publication truth and the corrected database
+  tailnet DNS evidence
 - during diagnosis, direct Hetzner DNS API `PUT` and `POST` requests were used
   to inspect and partially correct provider state before the final idempotent
-  `make route-dns-assertion-ledger` replay; that manual intervention is recorded
-  in the live-apply receipt and should remain part of the audit trail
+  `make route-dns-assertion-ledger` replay; that manual intervention remains
+  recorded in the live-apply receipt as part of the permanent audit trail
+- remaining for merge to `main`: none

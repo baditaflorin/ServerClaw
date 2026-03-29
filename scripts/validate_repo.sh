@@ -583,7 +583,7 @@ _validate_windmill_raw_app_lockfiles() {
 
   while IFS= read -r package_json; do
     [[ -z "$package_json" ]] && continue
-    local relative_package="${package_json#$REPO_ROOT/}"
+    local relative_package="${package_json#"$REPO_ROOT"/}"
     local app_dir
     app_dir=$(dirname "$relative_package")
     if [[ ! -f "$REPO_ROOT/$app_dir/package-lock.json" ]]; then
