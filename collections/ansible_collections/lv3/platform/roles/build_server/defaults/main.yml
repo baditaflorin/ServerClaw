@@ -22,6 +22,7 @@ build_server_buildkit_socket_dir: /run/buildkit
 build_server_buildkit_socket_file: /run/buildkit/buildkitd.sock
 build_server_buildkit_cache_dir: /opt/builds/.buildkit-cache
 build_server_buildkit_cache_gb: 50
+build_server_buildkit_registry_mirrors: {}
 build_server_buildkit_keep_duration_hours: 336
 build_server_buildkit_keep_bytes: "{{ build_server_buildkit_cache_gb | int * 1024 * 1024 * 1024 }}"
 build_server_managed_directories:

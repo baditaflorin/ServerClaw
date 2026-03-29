@@ -7,11 +7,11 @@
 
 schema_version: 1
 generated: '2026-03-29'
-total_adrs: 302
+total_adrs: 304
 implementation_status_summary:
   Implemented: 230
-  Partial: 6
-  Not Implemented: 65
+  Partial: 7
+  Not Implemented: 66
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -107,6 +107,7 @@ concerns:
     - '0267'
     - 0269
     - '0275'
+    - 0295
   documentation:
     - '0074'
     - 0081
@@ -334,6 +335,7 @@ concerns:
     - '0157'
     - 0191
     - '0223'
+    - 0296
 discovery_queries:
   how do we bootstrap:
     - '0001'
@@ -4991,3 +4993,35 @@ adr_index:
       - router
     summary: We will deploy One-API as the unified LLM API proxy and router, superseding
     filename: 0294-one-api-as-the-unified-llm-api-proxy-and-router.md
+  - adr: 0295
+    title: Shared Artifact Cache Plane For Container And Package Dependencies
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-29'
+    concern: ci-cd
+    keywords:
+      - shared
+      - artifact
+      - cache
+      - plane
+      - container
+      - package
+      - dependencies
+    summary: We will treat reusable dependency downloads as a shared artifact cache plane
+    filename: 0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md
+    implemented_version: 0.177.73
+  - adr: 0296
+    title: Dedicated Artifact-Cache VM With Phased Consumer Adoption
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: vm-topology
+    keywords:
+      - dedicated
+      - artifact-cache
+      - vm
+      - phased
+      - consumer
+      - adoption
+    summary: We will adopt artifact caching in two phases.
+    filename: 0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md

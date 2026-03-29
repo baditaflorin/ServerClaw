@@ -5,6 +5,7 @@
 ADR 0089 moves the expensive build-time downloads for the private build VM onto persistent cache surfaces:
 
 - Docker layers via a dedicated BuildKit daemon
+- Docker upstream pulls via repo-managed pull-through mirror endpoints
 - Python downloads via the `pip-cache` Docker volume
 - Packer plugins under `/opt/builds/.packer.d`
 - Ansible collections under `/opt/builds/.ansible/collections`
@@ -31,6 +32,7 @@ ansible-playbook -i inventory/hosts.yml playbooks/build-artifact-cache.yml \
 Expected host-side outcomes:
 
 - `apt-cacher-ng` is active on `docker-build-lv3:3142`
+- the artifact-cache registry listeners respond on `docker-build-lv3:5001-5004`
 - `lv3-buildkitd.service` is active and exposes `/run/buildkit/buildkitd.sock`
 - `docker buildx inspect lv3-cache --bootstrap` succeeds
 - Docker volume `pip-cache` exists
@@ -51,6 +53,14 @@ Check the BuildKit daemon and builder:
 ```bash
 ansible -i inventory/hosts.yml docker-build-lv3 -m shell \
   -a 'systemctl is-active lv3-buildkitd && docker buildx inspect lv3-cache --bootstrap >/dev/null' \
+  -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+```
+
+Check the registry mirrors:
+
+```bash
+ansible -i inventory/hosts.yml docker-build-lv3 -m shell \
+  -a 'for port in 5001 5002 5003 5004; do curl -fsS "http://10.10.10.30:${port}/v2/" >/dev/null; done' \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
@@ -85,5 +95,7 @@ python3 config/windmill/scripts/build-cache-maintenance.py
 ## Operational Notes
 
 - Keep the BuildKit cache root on the build VM's fast local storage.
+- The new mirror endpoints are an internal phase-1 landing point; ADR 0296 keeps
+  the long-term target as a dedicated `artifact-cache-lv3` VM.
 - Do not commit runtime cache contents; only the manifest belongs in git.
 - The first full warm run is expected to be slow. The value is in subsequent reuse.
