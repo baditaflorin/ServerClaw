@@ -3,7 +3,7 @@
 - ADR: [ADR 0252](../adr/0252-route-and-dns-publication-assertion-ledger.md)
 - Title: Live apply the route and DNS publication assertion ledger across the governed `lv3.org` drift set
 - Status: live_applied
-- Implemented In Repo Version: 0.177.65
+- Implemented In Repo Version: 0.177.66
 - Live Applied In Platform Version: 0.130.43
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
@@ -116,9 +116,10 @@
 
 ## Mainline Integration Outcome
 
-- repository version `0.177.65` now carries ADR 0252 on `main` without a
+- repository version `0.177.66` now carries ADR 0252 on `main` without a
   platform-version bump; the current integrated baseline remains
   `0.130.46`, while this ADR first became true on platform version `0.130.43`
+  during the verified live apply
 - `versions/stack.yaml` now records the ADR 0252 live-apply receipt as the
   latest evidence for `route_dns_assertion_ledger`, `public_edge_publication`,
   and `vaultwarden`, and the generated README status surfaces now reflect the
@@ -128,4 +129,5 @@
   to inspect and partially correct provider state before the final idempotent
   `make route-dns-assertion-ledger` replay; that manual intervention remains
   recorded in the live-apply receipt as part of the permanent audit trail
-- remaining for merge to `main`: none
+- remaining for merge to `main`: none; this branch now contains the validated
+  `0.177.66` release surfaces prepared for the final push to `origin/main`

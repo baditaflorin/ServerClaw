@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.177.65
+repo_version: 0.177.66
 platform_version: 0.130.46
 
 live_apply_evidence:
@@ -12,7 +12,7 @@ live_apply_evidence:
     world_state_materializer: 2026-03-27-adr-0113-world-state-materializer-mainline-live-apply
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
     mutation_ledger: 2026-03-27-adr-0115-mutation-ledger-mainline-live-apply
-    public_edge_publication: 2026-03-28-adr-0021-shared-edge-certificate-repair-mainline-live-apply
+    public_edge_publication: 2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-live-apply
     agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
     api_gateway: 2026-03-28-adr-0209-use-case-services-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
@@ -29,7 +29,7 @@ live_apply_evidence:
     mail_platform: 2026-03-24-keycloak-password-reset-mail-live-apply
     step_ca: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
     openbao: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
-    vaultwarden: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
+    vaultwarden: 2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-live-apply
     certificate_lifecycle: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
     windmill: 2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply
     self_correcting_automation_loops: 2026-03-28-adr-0204-self-correcting-automation-loops-live-apply
@@ -108,6 +108,7 @@ live_apply_evidence:
     harbor: 2026-03-29-adr-0201-harbor-mainline-live-apply
     ops_portal_visualizations: 2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply
     nomad_scheduler: 2026-03-29-adr-0232-nomad-mainline-live-apply
+    route_dns_assertion_ledger: 2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -405,6 +406,7 @@ desired_state:
     edge_vm: 10.10.10.10
     tls_termination: nginx_edge
     published_hostnames:
+      - lv3.org
       - apps.lv3.org
       - api.lv3.org
       - build.lv3.org
@@ -413,6 +415,7 @@ desired_state:
       - docker.lv3.org
       - docs.lv3.org
       - grafana.lv3.org
+      - mail.lv3.org
       - nginx.lv3.org
       - ops.lv3.org
       - proxmox.lv3.org
@@ -422,7 +425,7 @@ desired_state:
       - wiki.lv3.org
 
 observed_state:
-  checked_at: 2026-03-28
+  checked_at: 2026-03-29
   access:
     ssh_bootstrap_key_working: true
     host_ops_user_working: true
@@ -543,7 +546,7 @@ observed_state:
   dns:
     zone: lv3.org
     root_a: 65.108.75.123
-    root_aaaa_present: true
+    root_aaaa_present: false
     root_aaaa_matches_current_host_ipv6: false
     created_a_subdomains:
       - mail.lv3.org
@@ -555,6 +558,7 @@ observed_state:
       - uptime.lv3.org
       - sso.lv3.org
       - database.lv3.org
+      - vault.lv3.org
   guests:
     template:
       vmid: 9000
@@ -951,11 +955,13 @@ observed_state:
   public_publication:
     edge_configured: true
     edge_tls_certificate_present: true
+    apex_domain_live: true
     apps_domain_live: true
     api_domain_live: true
     coolify_domain_live: true
     docs_domain_live: true
     grafana_domain_live: true
+    mail_domain_live: true
     ops_domain_live: true
     sso_domain_live: true
     status_domain_live: true
@@ -964,6 +970,7 @@ observed_state:
     security_headers_audit_passed: true
     security_headers_audited_at: 2026-03-25T06:15:03Z
     published_hostnames:
+      - lv3.org
       - apps.lv3.org
       - api.lv3.org
       - build.lv3.org
@@ -972,6 +979,7 @@ observed_state:
       - docker.lv3.org
       - docs.lv3.org
       - grafana.lv3.org
+      - mail.lv3.org
       - nginx.lv3.org
       - ops.lv3.org
       - proxmox.lv3.org
@@ -985,7 +993,7 @@ observed_state:
     guest_firewall_enabled: true
     tailscale_proxy_host: 100.64.0.1:5432
     dns_name: database.lv3.org
-    dns_resolves_to_tailscale_ip: false
+    dns_resolves_to_tailscale_ip: true
     public_ipv4_reachable: false
   backups:
     configured: true
@@ -1019,7 +1027,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.65
+    current: 0.177.66
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.46
