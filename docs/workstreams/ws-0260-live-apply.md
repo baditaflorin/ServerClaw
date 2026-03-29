@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0260](../adr/0260-nextcloud-as-the-canonical-personal-data-plane-for-serverclaw.md)
 - Title: Nextcloud personal data plane live apply from latest `origin/main`
-- Status: in_progress
+- Status: live_applied
 - Branch: `codex/ws-0260-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0260-live-apply`
 - Owner: codex
@@ -44,4 +44,4 @@
 ## Notes
 
 - The branch-local work can add all ADR-local, workstream-local, and service-local state needed for a safe merge.
-- Protected integration files remain deferred until the final exact-main replay and merge step.
+- The original live-apply verification completed on 2026-03-29; the protected integration files and exact-main replay now proceed on `codex/ws-0260-main-integration`.

@@ -165,7 +165,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.85` |
+| Repository version | `0.177.86` |
 | Platform version | `0.130.58` |
 | Observed check date | `2026-03-29` |
 | Observed OS | `Debian 13` |
@@ -193,6 +193,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `api.lv3.org` | `api-gateway` | `edge-published` | `docker-runtime-lv3` |
 | `apps.lv3.org` | `coolify-apps` | `edge-published` | `coolify-lv3` |
 | `build.lv3.org` | `docker-build` | `informational-only` | `docker-build-lv3` |
+| `cloud.lv3.org` | `nextcloud` | `edge-published` | `docker-runtime-lv3` |
 | `coolify.lv3.org` | `coolify` | `edge-published` | `coolify-lv3` |
 | `database.lv3.org` | `postgres` | `private-only` | `postgres-lv3` |
 | `docker.lv3.org` | `docker-runtime` | `informational-only` | `docker-runtime-lv3` |
@@ -273,6 +274,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `n8n` | `2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply` |
 | `netbox` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `network_impairment_matrix` | `2026-03-27-adr-0189-network-impairment-matrix-live-apply` |
+| `nextcloud` | `2026-03-29-adr-0260-nextcloud-personal-data-plane-mainline-live-apply` |
 | `nomad_scheduler` | `2026-03-29-adr-0232-nomad-mainline-live-apply` |
 | `notification_profiles` | `2026-03-22-adr-0050-notification-profiles-live-apply` |
 | `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
@@ -577,6 +579,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure n8n](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-n8n.md)
 - [Configure NetBox](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-netbox.md)
 - [Configure Netdata](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-netdata.md)
+- [Configure Nextcloud](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-nextcloud.md)
 - [Configure Nomad](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-nomad.md)
 - [Configure Ntfy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-ntfy.md)
 - [Configure ntopng Private Flow Visibility](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-ntopng.md)
@@ -1294,6 +1297,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0255-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0255-main-integration.md)
 - [Workstream WS-0259: n8n Connector Fabric Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0259-live-apply.md)
 - [Workstream ws-0259-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0259-main-merge.md)
+- [Workstream ws-0260-live-apply: ADR 0260 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0260-live-apply.md)
 - [Workstream ws-0264-live-apply: Live Apply ADR 0264 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0264-live-apply.md)
 - [Workstream ws-0264-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0264-main-merge.md)
 - [Workstream ws-0268-live-apply: Live Apply ADR 0268 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0268-live-apply.md)
@@ -1317,7 +1321,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.85` |
+| Repository version | `0.177.86` |
 | Platform version | `0.130.58` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1590,6 +1594,7 @@ This repository is intentionally opinionated:
 | `0255` | ADR 0255 live apply from latest origin/main | `live_applied` | [ws-0255-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0255-live-apply.md) |
 | `0259` | Live apply n8n as the external app connector fabric for ServerClaw | `live_applied` | [ws-0259-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0259-live-apply.md) |
 | `0259` | Integrate ADR 0259 exact-main replay onto current origin/main | `merged` | [ws-0259-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0259-main-merge.md) |
+| `0260` | Live-apply ADR 0260 Nextcloud personal data plane from latest origin/main | `live_applied` | [ws-0260-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0260-live-apply.md) |
 | `0264` | Failure-domain-isolated validation lanes live apply | `live_applied` | [ws-0264-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0264-live-apply.md) |
 | `0264` | Integrate ADR 0264 failure-domain-isolated validation lanes onto origin/main | `merged` | [ws-0264-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0264-main-merge.md) |
 | `0264` | Receipt-driven resilience architecture bundle | `merged` | [adr-0264-receipt-driven-resilience-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md) |
