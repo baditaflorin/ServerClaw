@@ -2651,12 +2651,12 @@
     }
   ],
   "summary": {
-    "catalog_total": 36,
-    "active_total": 32,
-    "active_public_total": 28,
+    "catalog_total": 37,
+    "active_total": 33,
+    "active_public_total": 29,
     "active_private_total": 4,
     "planned_total": 4,
-    "shared_edge_total": 27,
+    "shared_edge_total": 28,
     "platform_sso_total": 13
   }
 }
