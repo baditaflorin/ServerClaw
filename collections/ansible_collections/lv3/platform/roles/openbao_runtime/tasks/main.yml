@@ -321,6 +321,38 @@
   changed_when: openbao_container_remove.rc == 0
   when: openbao_container_inspect.rc == 0
 
+- name: Inspect the managed OpenBao default network before compose up
+  ansible.builtin.command:
+    argv:
+      - docker
+      - network
+      - inspect
+      - "{{ openbao_default_network_name }}"
+  register: openbao_default_network_inspect
+  changed_when: false
+  failed_when: openbao_default_network_inspect.rc not in [0, 1]
+
+- name: Remove the detached managed OpenBao default network before compose up
+  vars:
+    mutation_audit_action: remove.openbao_default_network
+    mutation_audit_target: openbao-runtime
+  ansible.builtin.command:
+    argv:
+      - docker
+      - network
+      - rm
+      - "{{ openbao_default_network_name }}"
+  register: openbao_default_network_remove
+  changed_when: openbao_default_network_remove.rc == 0
+  when:
+    - openbao_default_network_inspect.rc == 0
+    - >-
+      (
+        (openbao_default_network_inspect.stdout | from_json | first).Containers | default({})
+      ) | length == 0
+  tags:
+    - mutation
+
 - name: Start the OpenBao stack
   vars:
     mutation_audit_action: start.openbao_stack

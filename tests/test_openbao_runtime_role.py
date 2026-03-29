@@ -82,6 +82,18 @@ def test_openbao_runtime_checks_certificate_freshness_before_renewal() -> None:
     assert "when: openbao_tls_certificate_freshness.rc != 0" in tasks
 
 
+def test_openbao_runtime_recovers_detached_empty_default_network_before_compose_up() -> None:
+    defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
+    tasks = TASKS_PATH.read_text(encoding="utf-8")
+
+    assert 'openbao_default_network_name: "{{ openbao_site_dir | basename }}_default"' in defaults
+    assert "Inspect the managed OpenBao default network before compose up" in tasks
+    assert "Remove the detached managed OpenBao default network before compose up" in tasks
+    assert "openbao_default_network_inspect.stdout | from_json | first" in tasks
+    assert ".Containers | default({})" in tasks
+    assert '      - network\n      - rm' in tasks
+
+
 def test_openbao_runtime_rechecks_seal_state_before_auth_verification() -> None:
     tasks = TASKS_PATH.read_text(encoding="utf-8")
     ensure_unsealed_tasks = ENSURE_UNSEALED_TASKS_PATH.read_text(encoding="utf-8")

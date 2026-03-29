@@ -112,11 +112,11 @@ curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local
 
 ## Recovery Notes From The 2026-03-26 Live Apply
 
-As of the `2026-03-27` replay, `make converge-openbao` automatically recovers the recurring Docker publish regression by rechecking the guest `DOCKER` and `DOCKER-FORWARD` chains, restarting Docker when they are missing, and recreating the named `lv3-openbao` container before `docker compose up`.
+As of the `2026-03-29` replay, `make converge-openbao` automatically recovers the recurring Docker publish regression by rechecking the guest `DOCKER` and `DOCKER-FORWARD` chains, restarting Docker when they are missing, removing an empty detached `openbao_default` network when Docker has lost the endpoint attachment, and recreating the named `lv3-openbao` container before `docker compose up`.
 
 If a future rerun still leaves the guest runtime broken, the failure usually presents as `docker compose up` failing to bind `:8200` with an iptables DNAT error and `docker inspect lv3-openbao` showing an empty `NetworkSettings.Networks` object.
 
-Recover the guest runtime in this order:
+If the automated cleanup still cannot recover the guest runtime, repair it in this order:
 
 1. Restart Docker on `docker-runtime-lv3`.
 2. Remove the broken `lv3-openbao` container.
