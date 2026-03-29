@@ -1264,7 +1264,7 @@
       }
     },
     "converge-openfga": {
-      "description": "Converge the private OpenFGA runtime, Proxmox host controller proxy, Keycloak ServerClaw client identities, and delegated authorization seed.",
+      "description": "Converge the private OpenFGA runtime, Proxmox host controller proxy, the ServerClaw runtime client plus operator identity binding, and the delegated authorization seed.",
       "workflow_id": "converge-openfga",
       "scope": "host_and_guest",
       "approval_policy": "sensitive_live_change",

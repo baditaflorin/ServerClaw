@@ -23,7 +23,12 @@
 - name: Assert OpenFGA health and authenticated access are working
   ansible.builtin.assert:
     that:
-      - openfga_verify_health.content | trim == 'ok'
+      - openfga_verify_health.status == 200
+      - >-
+        (
+          openfga_verify_health.json is defined
+          and (openfga_verify_health.json.status | default('')) == 'SERVING'
+        ) or (openfga_verify_health.content | default('') | trim == 'ok')
       - openfga_verify_authenticated_api.status == 200
     fail_msg: "OpenFGA answered locally, but the authenticated API path did not validate."
   no_log: true

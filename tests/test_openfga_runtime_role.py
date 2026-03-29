@@ -59,6 +59,7 @@ def test_openfga_runtime_defaults_use_private_controller_url() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text(encoding="utf-8"))
 
     assert defaults["openfga_image"] == "{{ container_image_catalog.images.openfga_runtime.ref }}"
+    assert "| urlencode" in defaults["openfga_datastore_uri"]
     assert defaults["openfga_controller_url"].startswith("http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}")
     assert "openfga_host_proxy_port" in defaults["openfga_controller_url"]
     assert defaults["openfga_preshared_key_local_file"].endswith("/.local/openfga/preshared-key.txt")
@@ -67,12 +68,34 @@ def test_openfga_runtime_defaults_use_private_controller_url() -> None:
 def test_openfga_runtime_bootstraps_openbao_env_and_migrations() -> None:
     tasks = load_tasks()
 
+    secret_payload_task = next(task for task in tasks if task.get("name") == "Record the OpenFGA runtime secrets")
     openbao_helper = next(task for task in tasks if task.get("name") == "Prepare OpenBao agent runtime secret injection for OpenFGA")
+    openbao_agent_up_task = next(task for task in tasks if task.get("name") == "Start the OpenFGA OpenBao agent")
+    runtime_env_wait_task = next(task for task in tasks if task.get("name") == "Wait for the OpenFGA runtime env file")
     migrate_task = next(task for task in tasks if task.get("name") == "Run OpenFGA database migrations")
     up_task = next(task for task in tasks if task.get("name") == "Converge the OpenFGA runtime stack")
 
+    runtime_secret_payload = secret_payload_task["ansible.builtin.set_fact"]["openfga_runtime_secret_payload"]
+    assert "| urlencode" in runtime_secret_payload["OPENFGA_DATASTORE_URI"]
+    assert runtime_secret_payload["OPENFGA_DATASTORE_ENGINE"] == "postgres"
+    assert runtime_secret_payload["OPENFGA_AUTHN_METHOD"] == "preshared"
+    assert runtime_secret_payload["OPENFGA_AUTHN_PRESHARED_KEYS"] == (
+        "{{ lookup('ansible.builtin.file', openfga_preshared_key_local_file) | trim }}"
+    )
+    assert runtime_secret_payload["OPENFGA_PLAYGROUND_ENABLED"] == "false"
     assert openbao_helper["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
     assert openbao_helper["ansible.builtin.include_role"]["tasks_from"] == "openbao_compose_env"
+    assert openbao_agent_up_task["ansible.builtin.command"]["argv"][-3:] == ["up", "-d", "openbao-agent"]
+    assert runtime_env_wait_task["ansible.builtin.stat"]["path"] == "{{ openfga_env_file }}"
+    assert runtime_env_wait_task["until"] == "openfga_runtime_env_file.stat.exists and (openfga_runtime_env_file.stat.size | int > 0)"
+    assert migrate_task["ansible.builtin.command"]["argv"][:5] == [
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "host",
+    ]
+    assert migrate_task["ansible.builtin.command"]["argv"][5] == "{{ openfga_image }}"
     assert migrate_task["ansible.builtin.command"]["argv"][-4:] == [
         "--datastore-engine",
         "postgres",
@@ -87,9 +110,12 @@ def test_openfga_verify_task_checks_health_and_authenticated_api() -> None:
 
     health_task = next(task for task in tasks if task.get("name") == "Verify OpenFGA responds on the local health endpoint")
     api_task = next(task for task in tasks if task.get("name") == "Verify the OpenFGA API enforces the repo-managed preshared key")
+    assert_task = next(task for task in tasks if task.get("name") == "Assert OpenFGA health and authenticated access are working")
 
     assert health_task["ansible.builtin.uri"]["url"] == "{{ openfga_local_url }}/healthz"
     assert api_task["ansible.builtin.uri"]["headers"]["Authorization"] == "Bearer {{ openfga_preshared_key }}"
+    assert "openfga_verify_health.status == 200" in assert_task["ansible.builtin.assert"]["that"]
+    assert any("SERVING" in clause for clause in assert_task["ansible.builtin.assert"]["that"])
 
 
 def test_openfga_compose_template_uses_openbao_agent_and_runtime_env() -> None:
@@ -98,7 +124,8 @@ def test_openfga_compose_template_uses_openbao_agent_and_runtime_env() -> None:
     assert "  openbao-agent:" in template
     assert "    env_file:" in template
     assert "      - {{ openfga_env_file }}" in template
-    assert "--authn-method=preshared" in template
+    assert "      - run" in template
+    assert "--authn-method=preshared" not in template
 
 
 def test_openfga_playbook_bootstraps_serverclaw_authz_from_localhost() -> None:
@@ -111,3 +138,9 @@ def test_openfga_playbook_bootstraps_serverclaw_authz_from_localhost() -> None:
     assert task["ansible.builtin.command"]["argv"][0] == "python3"
     assert task["ansible.builtin.command"]["argv"][1] == "{{ openfga_bootstrap_script }}"
     assert "--openfga-preshared-key-file" in task["ansible.builtin.command"]["argv"]
+    assert bootstrap_play["vars"]["openfga_bootstrap_keycloak_host"] == (
+        "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+    )
+    assert bootstrap_play["vars"]["openfga_bootstrap_keycloak_url"] == (
+        "http://{{ hostvars[openfga_bootstrap_keycloak_host].ansible_host }}:8091"
+    )

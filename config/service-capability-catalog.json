@@ -985,7 +985,6 @@
       "secret_catalog_ids": [
         "openfga_database_password",
         "openfga_preshared_key",
-        "keycloak_serverclaw_operator_client_secret",
         "keycloak_serverclaw_runtime_client_secret"
       ],
       "adr": "0262",

@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import subprocess
 import sys
 import urllib.error
 import urllib.parse
@@ -18,6 +19,28 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
+def detect_common_repo_root(repo_root: Path) -> Path:
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--git-common-dir"],
+            cwd=repo_root,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return repo_root
+    common_dir = Path(result.stdout.strip())
+    if not common_dir.is_absolute():
+        common_dir = (repo_root / common_dir).resolve()
+    if common_dir.name == ".git":
+        return common_dir.parent
+    return repo_root
+
+
+COMMON_REPO_ROOT = detect_common_repo_root(REPO_ROOT)
+
+
 class AuthzError(RuntimeError):
     pass
 
@@ -27,16 +50,26 @@ class KeycloakPrincipal:
     name: str
     principal: str
     grant_type: str
-    client_id: str
-    client_secret_file: Path
     expected_claims: dict[str, str]
+    client_id: str | None = None
+    client_secret_file: Path | None = None
     username: str | None = None
     password_file: Path | None = None
 
 
 def repo_path(value: str) -> Path:
     path = Path(value)
-    return path if path.is_absolute() else REPO_ROOT / path
+    if path.is_absolute():
+        return path
+    worktree_path = REPO_ROOT / path
+    if worktree_path.exists():
+        return worktree_path
+    common_path = COMMON_REPO_ROOT / path
+    if path.parts and path.parts[0] == ".local":
+        return common_path
+    if common_path.exists():
+        return common_path
+    return worktree_path
 
 
 def load_json(path: Path) -> Any:
@@ -45,6 +78,10 @@ def load_json(path: Path) -> Any:
 
 def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8").strip()
+
+
+def keycloak_principal(kind: str, identifier: str) -> str:
+    return f"principal:{kind}__{identifier}"
 
 
 def http_json(
@@ -103,9 +140,9 @@ def load_principals(config: dict[str, Any]) -> list[KeycloakPrincipal]:
                 name=name,
                 principal=item["principal"],
                 grant_type=item["grant_type"],
-                client_id=item["client_id"],
-                client_secret_file=repo_path(item["client_secret_file"]),
                 expected_claims=dict(item.get("expected_claims", {})),
+                client_id=item.get("client_id"),
+                client_secret_file=repo_path(item["client_secret_file"]) if item.get("client_secret_file") else None,
                 username=item.get("username"),
                 password_file=repo_path(item["password_file"]) if item.get("password_file") else None,
             )
@@ -114,6 +151,29 @@ def load_principals(config: dict[str, Any]) -> list[KeycloakPrincipal]:
 
 
 def verify_keycloak_principal(base_url: str, principal: KeycloakPrincipal) -> dict[str, Any]:
+    if principal.grant_type == "declared":
+        if not principal.username:
+            raise AuthzError(f"declared principal '{principal.name}' is missing username")
+        expected_principal = keycloak_principal("keycloak-user", principal.username)
+        if principal.principal != expected_principal:
+            raise AuthzError(
+                f"declared principal '{principal.name}' must match the stable Keycloak username reference "
+                f"'{expected_principal}'"
+            )
+        return {
+            "principal_name": principal.name,
+            "principal": principal.principal,
+            "client_id": None,
+            "grant_type": principal.grant_type,
+            "verification": "declared_principal",
+            "claims": {
+                "preferred_username": principal.username,
+            },
+        }
+
+    if not principal.client_id or principal.client_secret_file is None:
+        raise AuthzError(f"token-backed principal '{principal.name}' is missing client_id or client_secret_file")
+
     token_url = f"{base_url.rstrip('/')}/realms/lv3/protocol/openid-connect/token"
     form = {
         "client_id": principal.client_id,
@@ -151,6 +211,7 @@ def verify_keycloak_principal(base_url: str, principal: KeycloakPrincipal) -> di
         "principal": principal.principal,
         "client_id": principal.client_id,
         "grant_type": principal.grant_type,
+        "verification": "token",
         "claims": {claim: claims.get(claim) for claim in sorted(set(principal.expected_claims) | {"sub", "azp", "preferred_username", "client_id"}) if claims.get(claim) is not None},
     }
 

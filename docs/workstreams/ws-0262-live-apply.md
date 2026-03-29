@@ -18,8 +18,9 @@
 
 - converge the private OpenFGA runtime, PostgreSQL backend, and Proxmox-host
   Tailscale controller proxy
-- extend Keycloak with the repo-managed ServerClaw operator and runtime
-  confidential clients used by the delegated authorization bootstrap flow
+- extend Keycloak with the repo-managed ServerClaw runtime confidential client
+  and stable operator identity reference used by the delegated authorization
+  bootstrap flow
 - seed the OpenFGA store, model, tuples, and verification checks from
   repo-managed JSON contracts
 - register the service in repo validation, workflow, image, dependency,
@@ -71,8 +72,11 @@
   requests on `http://127.0.0.1:8096`
 - the Proxmox host publishes the controller-private OpenFGA URL at
   `http://100.64.0.1:8014`
-- Keycloak issues a password-grant token for `serverclaw-operator-cli` and a
-  client-credentials token for `serverclaw-runtime`
+- Keycloak issues a client-credentials token for `serverclaw-runtime` while the
+  named operator remains a stable MFA-first Keycloak user reference
+- the controller-side delegated-authz bootstrap uses the VM-private Keycloak
+  listener at `http://10.10.10.20:8091` so live verification does not depend on
+  the public `sso.lv3.org` edge route
 - the repo-managed bootstrap store, model, tuples, and check set verify cleanly
   against the live OpenFGA runtime
 - the shared API gateway can expose `/v1/openfga` after its follow-up converge
@@ -89,7 +93,7 @@
 - `./scripts/validate_repo.sh agent-standards`
 - `make converge-openfga env=production`
 - `make converge-api-gateway env=production`
-- direct health, authenticated API, token-issuance, and
+- direct health, authenticated API, runtime token-issuance, and
   `scripts/serverclaw_authz.py verify` checks
 
 ## Mainline Integration

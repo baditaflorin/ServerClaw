@@ -68,8 +68,6 @@ keycloak_agent_client_id: lv3-agent-hub
 keycloak_agent_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/lv3-agent-hub-client-secret.txt
 keycloak_api_gateway_client_id: api-gateway
 keycloak_api_gateway_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/api-gateway-client-secret.txt
-keycloak_serverclaw_operator_client_id: serverclaw-operator-cli
-keycloak_serverclaw_operator_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-operator-client-secret.txt
 keycloak_serverclaw_runtime_client_id: serverclaw-runtime
 keycloak_serverclaw_runtime_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-runtime-client-secret.txt
 keycloak_langfuse_client_id: langfuse
@@ -118,7 +116,9 @@ keycloak_service_account_realm_role_mappings:
 keycloak_public_base_url: "https://{{ keycloak_service_topology.public_hostname }}"
 keycloak_local_admin_url: "http://{{ ansible_host }}:{{ keycloak_internal_http_port }}"
 keycloak_repo_user_admin_url: "{{ keycloak_local_admin_url }}"
-keycloak_admin_connection_timeout: 30
+keycloak_admin_connection_timeout: 60
+keycloak_admin_reconciliation_retries: 6
+keycloak_admin_reconciliation_delay: 5
 keycloak_startup_probe_retries: 60
 keycloak_startup_probe_delay: 5
 keycloak_repo_user_reconciliation_retries: 24

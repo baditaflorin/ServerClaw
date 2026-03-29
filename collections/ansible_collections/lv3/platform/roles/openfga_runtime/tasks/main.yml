@@ -58,9 +58,13 @@
     openfga_runtime_secret_payload:
       OPENFGA_DATASTORE_URI: >-
         postgresql://{{ openfga_database_user }}:{{
-          lookup('ansible.builtin.file', openfga_database_password_local_file) | trim
+          lookup('ansible.builtin.file', openfga_database_password_local_file) | trim | urlencode
         }}@{{ openfga_database_host }}:5432/{{ openfga_database_name }}?sslmode=disable
       OPENFGA_PRESHARED_KEY: "{{ lookup('ansible.builtin.file', openfga_preshared_key_local_file) | trim }}"
+      OPENFGA_DATASTORE_ENGINE: postgres
+      OPENFGA_AUTHN_METHOD: preshared
+      OPENFGA_AUTHN_PRESHARED_KEYS: "{{ lookup('ansible.builtin.file', openfga_preshared_key_local_file) | trim }}"
+      OPENFGA_PLAYGROUND_ENABLED: "false"
       OPENFGA_HTTP_ADDR: "{{ openfga_http_addr }}"
       OPENFGA_GRPC_ADDR: "{{ openfga_grpc_addr }}"
   no_log: true
@@ -138,16 +142,43 @@
     or 'Downloaded newer image' in openfga_pull.stdout
     or 'Pull complete' in openfga_pull.stdout
 
-- name: Run OpenFGA database migrations
+- name: Start the OpenFGA OpenBao agent
   ansible.builtin.command:
     argv:
       - docker
       - compose
       - --file
       - "{{ openfga_compose_file }}"
+      - up
+      - -d
+      - openbao-agent
+  args:
+    chdir: "{{ openfga_site_dir }}"
+  register: openfga_openbao_agent_up
+  changed_when: >-
+    'Creating' in openfga_openbao_agent_up.stdout
+    or 'Recreating' in openfga_openbao_agent_up.stdout
+    or 'Starting' in openfga_openbao_agent_up.stdout
+    or 'Running' in openfga_openbao_agent_up.stdout
+
+- name: Wait for the OpenFGA runtime env file
+  ansible.builtin.stat:
+    path: "{{ openfga_env_file }}"
+  register: openfga_runtime_env_file
+  retries: 24
+  delay: 5
+  until: openfga_runtime_env_file.stat.exists and (openfga_runtime_env_file.stat.size | int > 0)
+  changed_when: false
+
+- name: Run OpenFGA database migrations
+  ansible.builtin.command:
+    argv:
+      - docker
       - run
       - --rm
-      - openfga
+      - --network
+      - host
+      - "{{ openfga_image }}"
       - migrate
       - --datastore-engine
       - postgres

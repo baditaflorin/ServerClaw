@@ -1663,7 +1663,6 @@
         "generated_secret_ids": [
           "openfga_database_password",
           "openfga_preshared_key",
-          "keycloak_serverclaw_operator_client_secret",
           "keycloak_serverclaw_runtime_client_secret"
         ]
       },
@@ -1692,7 +1691,7 @@
         "make syntax-check-openfga",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 '\\''curl -fsS http://127.0.0.1:8096/healthz && docker compose --file /opt/openfga/docker-compose.yml ps'\\'''",
         "curl -fsS -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/preshared-key.txt)\" http://100.64.0.1:8014/stores",
-        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/serverclaw_authz.py verify --config /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/preshared-key.txt --keycloak-url https://sso.lv3.org"
+        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/serverclaw_authz.py verify --config /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/preshared-key.txt --keycloak-url http://10.10.10.20:8091"
       ],
       "execution_class": "mutation",
       "budget": {

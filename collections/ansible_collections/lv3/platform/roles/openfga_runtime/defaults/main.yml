@@ -28,6 +28,6 @@ openfga_local_url: "http://127.0.0.1:{{ openfga_internal_http_port }}"
 openfga_http_addr: "0.0.0.0:{{ openfga_internal_http_port }}"
 openfga_grpc_addr: "127.0.0.1:{{ openfga_internal_grpc_port }}"
 openfga_datastore_uri: >-
-  postgresql://{{ openfga_database_user }}:{{ openfga_database_password }}@{{
+  postgresql://{{ openfga_database_user }}:{{ openfga_database_password | urlencode }}@{{
     openfga_database_host
   }}:5432/{{ openfga_database_name }}?sslmode=disable

@@ -32,12 +32,5 @@ services:
       - {{ openfga_env_file }}
     command:
       - run
-      - --playground-enabled=false
-      - --authn-method=preshared
-      - --authn-preshared-keys=${OPENFGA_PRESHARED_KEY}
-      - --datastore-engine=postgres
-      - --datastore-uri=${OPENFGA_DATASTORE_URI}
-      - --http-addr=${OPENFGA_HTTP_ADDR}
-      - --grpc-addr=${OPENFGA_GRPC_ADDR}
     ports:
       - "{{ openfga_internal_http_port }}:{{ openfga_internal_http_port }}"
