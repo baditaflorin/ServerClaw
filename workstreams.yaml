@@ -631,7 +631,7 @@ workstreams:
   - id: ws-0252-mainline-replay
     adr: "0252"
     title: Re-verify ADR 0252 from the latest origin/main and prepare final merge surfaces
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0252-live-apply-r4
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0252-live-apply-r4
@@ -666,13 +666,68 @@ workstreams:
     ready_to_merge: true
     live_applied: true
     canonical_truth:
-      changelog_entry: re-verified ADR 0252 on the latest 0.177.72 mainline by replaying the route and DNS ledger, shared edge publication, and private Vaultwarden path while preserving the existing 0.130.49 platform baseline, documenting the HTTP/1.1 Vaultwarden verification form, and keeping the original first-implementation truth intact
+      changelog_entry: records ADR 0252 exact-main evidence on the current mainline by refreshing the latest route, edge, and Vaultwarden receipts and documenting the HTTP/1.1 Vaultwarden verification form while the integrated platform baseline remains 0.130.51 and the original first-implementation truth stays anchored at repo version 0.177.68 on platform version 0.130.43
       release_bump: patch
-      included_in_repo_version: 0.177.72
+      included_in_repo_version: 0.177.76
       latest_receipts:
         public_edge_publication: 2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply
         route_dns_assertion_ledger: 2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply
         vaultwarden: 2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply
+  - id: ws-0252-main-merge
+    adr: "0252"
+    title: Integrate ADR 0252 exact-main replay onto current origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0252-main-merge-r3
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0252-main-merge-r3
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0252-main-merge.md
+    depends_on:
+      - ws-0252-mainline-replay
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0252-main-merge.md
+      - docs/workstreams/ws-0252-mainline-replay.md
+      - docs/runbooks/configure-vaultwarden.md
+      - docs/site-generated/architecture/dependency-graph.md
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.76.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - receipts/live-applies/2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply.json
+      - receipts/subdomain-exposure-audit/20260329T112637Z.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0252_main_merge
+          paths:
+            - docs/workstreams/ws-0252-main-merge.md
+            - docs/workstreams/ws-0252-mainline-replay.md
+            - docs/runbooks/configure-vaultwarden.md
+            - docs/site-generated/architecture/dependency-graph.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.76.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - receipts/live-applies/2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply.json
+            - receipts/subdomain-exposure-audit/20260329T112637Z.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
   - id: ws-0254-serverclaw-adrs
     adr: "0254"
     title: ServerClaw architecture bundle

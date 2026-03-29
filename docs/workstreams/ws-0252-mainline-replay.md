@@ -2,7 +2,9 @@
 
 - ADR: [ADR 0252](../adr/0252-route-and-dns-publication-assertion-ledger.md)
 - Title: Re-verify ADR 0252 from the latest `origin/main` and stage final merge surfaces
-- Status: `in_progress` (`live_applied: true`, awaiting merge to `main`)
+- Status: `live_applied`
+- Included In Repo Version: 0.177.76
+- Integrated Platform Version: 0.130.51
 - Repo Version Observed During Replay: 0.177.72
 - Platform Version Observed During Replay: 0.130.49
 - Live Applied On: 2026-03-29
@@ -41,6 +43,6 @@ original first-implementation truth recorded by ADR 0252.
 
 ## Outcome
 
-- ADR 0252 remains first implemented in repo version `0.177.68` on platform version `0.130.43`; this replay only re-verifies the capability on the newer `0.177.72` / `0.130.49` mainline baseline.
+- ADR 0252 remains first implemented in repo version `0.177.68` on platform version `0.130.43`; this replay re-verified the capability on the `0.177.72` / `0.130.49` mainline baseline and was later integrated into repo version `0.177.76` while the platform baseline had advanced to `0.130.51`.
 - The new canonical latest-main receipt is `receipts/live-applies/2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply.json`.
-- Remaining for merge to `main`: update the protected release and canonical-truth surfaces so they point at the latest-main replay receipt rather than the earlier branch-local live-apply receipt, and carry forward the exact-main docs portal metadata refresh from the shared edge rebuild.
+- Release `0.177.76` now carries the exact-main replay onto `main`, and the canonical latest-receipt pointers for `public_edge_publication`, `route_dns_assertion_ledger`, and `vaultwarden` now point at the latest-main replay receipt rather than the earlier branch-local live-apply receipt.
