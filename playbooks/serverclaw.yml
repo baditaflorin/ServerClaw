@@ -10,7 +10,7 @@
 #   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): SSH path to managed guests.
 #
 # Outputs:
-#   - ServerClaw is deployed on coolify-lv3, the dedicated Keycloak client secret is mirrored locally, and chat.lv3.org is published through the shared edge.
+#   - ServerClaw is deployed on coolify-lv3, the dedicated Keycloak client secret is mirrored locally, the Proxmox VM firewall exposes the upstream proxy lane, and chat.lv3.org is published through the shared edge.
 #
 # Idempotency: Fully idempotent
 #
@@ -43,6 +43,20 @@
           delegate_to: localhost
           become: false
       run_once: true
+
+- name: Converge the Proxmox guest network policy for ServerClaw
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+  tags:
+    - tier-1
+    - access
+    - service-serverclaw
+
+  roles:
+    - role: lv3.platform.proxmox_network
 
 - name: Converge the ServerClaw Keycloak client on the Docker runtime VM
   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"

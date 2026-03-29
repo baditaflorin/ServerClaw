@@ -35,7 +35,8 @@ cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
 make syntax-check-serverclaw
 ```
 
-Converge the live ServerClaw runtime, OIDC client, and public edge publication:
+Converge the live ServerClaw Proxmox guest firewall lane, runtime, OIDC client,
+and public edge publication:
 
 ```bash
 cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
@@ -54,6 +55,13 @@ Verify the rendered runtime env enables Keycloak, Ollama, and web search:
 
 ```bash
 ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml coolify-lv3 -m shell -a "sudo grep -E '^(WEBUI_URL|WEBUI_NAME|ENABLE_OAUTH_SIGNUP|OAUTH_CLIENT_ID|OPENID_PROVIDER_URL|OLLAMA_BASE_URL|SEARXNG_QUERY_URL|DEFAULT_MODELS|DEFAULT_PINNED_MODELS)=' /run/lv3-secrets/serverclaw/runtime.env" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+```
+
+Verify the Proxmox VM firewall exposes the upstream proxy lane from
+`nginx-lv3` to `coolify-lv3:8096`:
+
+```bash
+ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml proxmox_florin -m shell -a "grep -n '10.10.10.10/32 -p tcp -dport 8096' /etc/pve/firewall/170.fw" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
 ```
 
 Verify the public edge responds:
