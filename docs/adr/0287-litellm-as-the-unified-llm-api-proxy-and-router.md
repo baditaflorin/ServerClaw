@@ -1,6 +1,7 @@
 # ADR 0287: LiteLLM As The Unified LLM API Proxy And Router
 
-- Status: Accepted
+- Status: Deprecated
+- Superseded By: ADR 0294
 - Implementation Status: Not Implemented
 - Implemented In Repo Version: N/A
 - Implemented In Platform Version: N/A
