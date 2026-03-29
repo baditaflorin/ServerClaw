@@ -1,4 +1,5 @@
 ---
+# Purpose: Render and run the repo-managed ops portal runtime on the docker guest with its required directories, secrets, and image build context.
 - name: Validate ops portal runtime inputs
   ansible.builtin.include_role:
     name: lv3.platform.common

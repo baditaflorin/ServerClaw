@@ -1,9 +1,9 @@
 # ADR 0295: Shared Artifact Cache Plane For Container And Package Dependencies
 
 - Status: Accepted
-- Implementation Status: Partial
+- Implementation Status: Implemented
 - Implemented In Repo Version: 0.177.73
-- Implemented In Platform Version: N/A
+- Implemented In Platform Version: 0.130.59
 - Date: 2026-03-29
 
 ## Context

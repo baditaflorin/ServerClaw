@@ -4,10 +4,13 @@ services:
     image: {{ artifact_cache_registry_image }}
     container_name: {{ mirror.container_name }}
     restart: unless-stopped
+    network_mode: {{ artifact_cache_network_mode }}
+{% if artifact_cache_network_mode != 'host' %}
     ports:
       - "{{ artifact_cache_bind_host }}:{{ mirror.bind_port }}:5000"
+{% endif %}
     environment:
-      REGISTRY_HTTP_ADDR: 0.0.0.0:5000
+      REGISTRY_HTTP_ADDR: 0.0.0.0:{{ (artifact_cache_network_mode == 'host') | ternary(mirror.bind_port, 5000) }}
       REGISTRY_LOG_LEVEL: warn
       REGISTRY_PROXY_REMOTEURL: {{ mirror.upstream_registry }}
       REGISTRY_STORAGE_DELETE_ENABLED: "true"

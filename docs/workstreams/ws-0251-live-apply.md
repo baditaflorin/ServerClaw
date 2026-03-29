@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0251](../adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md)
 - Title: Live apply stage-scoped smoke suites and promotion gates from the latest `origin/main`
-- Status: in_progress
+- Status: live_applied
 - Included In Repo Version: 0.177.86
 - First Live Applied In Platform Version: 0.130.54
 - Implemented On: 2026-03-29
@@ -90,8 +90,9 @@
 
 - Release `0.177.86` is the first repository version that records ADR 0251 implemented on `main`.
 - Platform version `0.130.54` remains the first observed platform version where ADR 0251 became true during the branch-local live apply.
-- The canonical receipt pointers, `README.md` integrated status summary, and `versions/stack.yaml` live-apply surfaces intentionally wait for the post-merge exact-main replay because stable verification depends on `origin/main` containing the ADR 0251 worker-checkout files.
+- Release `0.177.87` carries the exact-main durable verification that confirms the live worker checkout keeps the stage-smoke helper durable, the worker-local gate-status replay stays healthy, and the live API-gateway plus ops-portal surfaces stay aligned on the current verified platform baseline `0.130.59`.
+- The canonical exact-main receipt is `receipts/live-applies/2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply.json`; it now supersedes the branch-local receipt for the canonical `promotion_pipeline` and `stage_smoke_suites` evidence pointers, while the earlier branch-local receipt remains preserved as the first successful isolated-worktree live apply.
 
 ## Merge-To-Main Notes
 
-- remaining after the first merge commit: push `0.177.86` to `origin/main`, replay `make converge-windmill` from the main-equivalent checkout, verify `f/lv3/stage-smoke-suites` returns a passing structured result without the worker-checkout churn, then update `README.md`, `versions/stack.yaml`, the workstream status, and the canonical receipt pointers in a final exact-main follow-up commit
+- none; the exact-main durable verification, canonical receipt, README summary, and `versions/stack.yaml` receipt pointer move together in the final `0.177.87` follow-up
