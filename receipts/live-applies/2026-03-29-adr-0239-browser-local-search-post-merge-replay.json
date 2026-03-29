@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-03-29",
   "recorded_on": "2026-03-29",
-  "recorded_at": "2026-03-29T01:15:24Z",
+  "recorded_at": "2026-03-29T01:37:22Z",
   "recorded_by": "codex",
-  "source_commit": "48b8a79b02480f3cefa1b76e1e5ba88db9098cc6",
+  "source_commit": "002156986cebf4eae90384a9465ee47bc5d3c0f9",
   "repo_version_context": "0.177.62",
   "platform_version_context": "0.130.45",
   "workflow_id": "adr-0239-browser-local-search-mainline-live-apply",
   "adr": "0239",
-  "summary": "After `origin/main` accepted ADR 0239, a latest-server check found that `nginx-lv3` was still serving the older MkDocs search bundle without the Pagefind publication or the `0.177.62` release page, so the exact merged mainline commit was replayed again through `make deploy-docs-portal` and re-verified on both the authenticated edge and the published docs tree.",
+  "summary": "After `origin/main` advanced to the final ADR 0239 evidence commits, a latest-server check still found `nginx-lv3` serving the older MkDocs search bundle without the Pagefind publication or the `0.177.62` release page, so the exact current `origin/main` commit was replayed again through `make deploy-docs-portal` and re-verified immediately on both the authenticated edge and the published docs tree.",
   "targets": [
     {
       "kind": "host",
@@ -34,17 +34,17 @@
     {
       "check": "Post-merge drift detection on the live docs tree",
       "result": "pass",
-      "observed": "After `git fetch origin --prune` confirmed `HEAD` and `origin/main` were both `48b8a79b02480f3cefa1b76e1e5ba88db9098cc6`, guest-local checks on `nginx-lv3` showed `/var/www/lv3-generated/docs-portal` still lacked `pagefind/pagefind-entry.json`, `pagefind/pagefind-ui.js`, `pagefind/pagefind-ui.css`, and `releases/0.177.62/index.html` even though the authenticated public edge still answered `302` behind OAuth."
+      "observed": "After `git ls-remote origin refs/heads/main` confirmed `origin/main` at `002156986cebf4eae90384a9465ee47bc5d3c0f9`, guest-local checks on `nginx-lv3` still showed `/var/www/lv3-generated/docs-portal` serving the older bundle from `2026-03-28 22:14` without `pagefind/` or `releases/0.177.62/`, even though the authenticated public edge still answered `302` behind OAuth."
     },
     {
       "check": "Exact merged-main replay",
       "result": "pass",
-      "observed": "`make deploy-docs-portal` rebuilt the docs portal with Pagefind reporting `Indexed 784 pages`, `Indexed 15027 words`, and `Indexed 6 filters`, then replayed the shared edge publication from source commit `48b8a79b02480f3cefa1b76e1e5ba88db9098cc6` with `LV3_RUN_ID=12349b9b76a24ed384af3c6650184963`, playbook run id `6e1f04fed42347009d0c9be9f6a1db45`, and recap `nginx-lv3 ok=63 changed=6 failed=0 skipped=12`."
+      "observed": "`make deploy-docs-portal` rebuilt the docs portal with Pagefind reporting `Indexed 784 pages`, `Indexed 15027 words`, and `Indexed 6 filters`, then replayed the shared edge publication from source commit `002156986cebf4eae90384a9465ee47bc5d3c0f9` with `LV3_RUN_ID=c35d51cfeb804ff9bb7e77942b035520`, playbook run id `77b434ae928840aba734d5f62275b947`, and recap `nginx-lv3 ok=63 changed=7 failed=0 skipped=12`."
     },
     {
       "check": "Guest-local verification after replay",
       "result": "pass",
-      "observed": "Direct guest checks on `nginx-lv3` confirmed `/var/www/lv3-generated/docs-portal/pagefind/pagefind-entry.json`, `pagefind/pagefind-ui.js`, and `pagefind/pagefind-ui.css`; the published home page contains `id=\"pagefind-search\"` plus `pagefind/pagefind-ui.js`; `releases/0.177.62/index.html` contains `0.130.45`; and `architecture/dependency-graph/index.html` contains `data-pagefind-filter=\"section\"` without the earlier raw frontmatter leak."
+      "observed": "Immediate guest checks on `nginx-lv3` confirmed `/var/www/lv3-generated/docs-portal/pagefind/pagefind-entry.json`, `pagefind/pagefind-ui.js`, `pagefind/pagefind-ui.css`, and `releases/0.177.62/index.html`; the published home page contains `id=\"pagefind-search\"` plus `pagefind/pagefind-ui.js`; `releases/0.177.62/index.html` contains `0.130.45`; and `architecture/dependency-graph/index.html` contains `data-pagefind-filter=\"section\"` without the earlier raw frontmatter leak."
     },
     {
       "check": "External authenticated edge contract",
@@ -64,7 +64,7 @@
     "workstreams.yaml"
   ],
   "notes": [
-    "This receipt supersedes `2026-03-29-adr-0239-browser-local-search-mainline-live-apply` as the latest canonical docs-search evidence because it records the replay from the final merged `origin/main` commit after the stale live docs tree was detected.",
+    "This receipt supersedes `2026-03-29-adr-0239-browser-local-search-mainline-live-apply` as the latest canonical docs-search evidence because it records the replay from the current merged `origin/main` commit after the stale live docs tree was detected again at the latest server check.",
     "The platform version stays at `0.130.45` because this replay restores the merged `0.177.62` publication rather than introducing a new platform capability."
   ]
 }
