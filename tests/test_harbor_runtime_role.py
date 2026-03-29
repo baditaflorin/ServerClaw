@@ -51,6 +51,7 @@ def test_role_waits_for_keycloak_before_bootstrap_token_request() -> None:
 
     readiness_task = task_by_name["Wait for the local Keycloak admin endpoint to recover after Docker reconciliation"]
     token_task = task_by_name["Request a Keycloak admin token for Harbor bootstrap"]
+    oidc_task = task_by_name["Configure Harbor OIDC defaults"]
 
     assert readiness_task["retries"] == 24
     assert readiness_task["delay"] == 5
@@ -58,6 +59,9 @@ def test_role_waits_for_keycloak_before_bootstrap_token_request() -> None:
     assert token_task["retries"] == 12
     assert token_task["delay"] == 5
     assert token_task["until"] == "harbor_keycloak_admin_token_response.status == 200"
+    assert oidc_task["retries"] == 12
+    assert oidc_task["delay"] == 5
+    assert oidc_task["until"] == "harbor_oidc_configuration.status in [200, 201]"
 
 
 def test_role_gates_network_recovery_on_boolean_fact() -> None:
@@ -65,12 +69,28 @@ def test_role_gates_network_recovery_on_boolean_fact() -> None:
     task_by_name = {task["name"]: task for task in tasks}
 
     reset_task = task_by_name["Reset the Harbor compose stack before a controlled reapply"]
+    port_binding_state_task = task_by_name["Record the Harbor published port binding state"]
+    port_binding_task = task_by_name["Record whether Harbor's published registry port binding is present"]
     recycle_task = task_by_name["Force one Harbor recycle when compose network membership is incomplete"]
     recreate_task = task_by_name["Force one Harbor recreate when compose network membership is incomplete"]
+    recovery_fact = task_by_name["Record whether Harbor needs one forced network recovery recycle"][
+        "ansible.builtin.set_fact"
+    ]["harbor_compose_needs_recovery"]
 
     assert reset_task["when"] == "(harbor_compose_assets_changed | bool) or not (harbor_runtime_healthy_before_reconcile | bool)"
     assert recycle_task["when"] == "harbor_compose_needs_recovery | bool"
     assert recreate_task["when"] == "harbor_compose_needs_recovery | bool"
+    assert "systemctl restart docker" in task_by_name["Remove stale Harbor containers after the compose reset"]["ansible.builtin.shell"]
+    assert ".NetworkSettings.Ports" in task_by_name["Read the Harbor published port bindings after reconciliation"][
+        "ansible.builtin.command"
+    ]["argv"][-1]
+    assert "harbor_proxy_port_bindings_raw.stdout" in port_binding_state_task["ansible.builtin.set_fact"][
+        "harbor_proxy_port_bindings"
+    ]
+    assert "selectattr('HostPort', 'equalto', harbor_http_port | string)" in port_binding_task["ansible.builtin.set_fact"][
+        "harbor_registry_port_binding_present"
+    ]
+    assert "or not (harbor_registry_port_binding_present | bool)" in recovery_fact
 
 
 def test_verify_accepts_running_services_after_ping() -> None:

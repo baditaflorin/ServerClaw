@@ -19,7 +19,7 @@ workstreams:
     title: Harbor runtime deployment, registry cutover, and repository automation replay
     status: live_applied
     owner: codex
-    branch: codex/ws-0201-main-merge-r2
+    branch: codex/ws-0201-main-final
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0201-main-merge-r2
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0201-live-apply.md
     depends_on:
@@ -67,7 +67,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0201 by converging Harbor with Trivy scanning, Keycloak-backed operator login, and a repo-managed check-runner publication path through registry.lv3.org
       release_bump: patch
-      included_in_repo_version: 0.177.56
+      included_in_repo_version: null
       latest_receipts:
         harbor: 2026-03-28-adr-0201-harbor-live-apply
   - id: ws-0264-receipt-driven-resilience-adrs

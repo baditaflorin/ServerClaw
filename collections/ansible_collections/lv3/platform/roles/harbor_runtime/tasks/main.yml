@@ -237,7 +237,14 @@
     set -euo pipefail
     stale_containers="$(docker ps -aq --filter label=com.docker.compose.project=harbor)"
     if [ -n "${stale_containers}" ]; then
-      docker rm -f ${stale_containers}
+      if ! docker rm -f ${stale_containers}; then
+        systemctl restart docker
+        sleep 10
+        stale_containers="$(docker ps -aq --filter label=com.docker.compose.project=harbor)"
+        if [ -n "${stale_containers}" ]; then
+          docker rm -f ${stale_containers}
+        fi
+      fi
       echo changed
     fi
   args:
@@ -308,6 +315,40 @@
         )
       }}
 
+- name: Read the Harbor published port bindings after reconciliation
+  ansible.builtin.command:
+    argv:
+      - docker
+      - inspect
+      - nginx
+      - --format
+      - "{{ '{{ json .NetworkSettings.Ports }}' }}"
+  register: harbor_proxy_port_bindings_raw
+  failed_when: false
+  changed_when: false
+
+- name: Record the Harbor published port binding state
+  ansible.builtin.set_fact:
+    harbor_proxy_port_bindings: >-
+      {{
+        harbor_proxy_port_bindings_raw.stdout | default('{}') | from_json
+        if harbor_proxy_port_bindings_raw.rc == 0
+        and (harbor_proxy_port_bindings_raw.stdout | default('') | trim | length > 0)
+        else {}
+      }}
+
+- name: Record whether Harbor's published registry port binding is present
+  ansible.builtin.set_fact:
+    harbor_registry_port_binding_present: >-
+      {{
+        (
+          harbor_proxy_port_bindings.get('8080/tcp', [])
+          | selectattr('HostPort', 'equalto', harbor_http_port | string)
+          | list
+          | length
+        ) > 0
+      }}
+
 - name: Record whether Harbor needs one forced network recovery recycle
   ansible.builtin.set_fact:
     harbor_compose_needs_recovery: >-
@@ -318,6 +359,7 @@
           | difference(harbor_network_container_names | default([]))
           | length
         ) > 0
+        or not (harbor_registry_port_binding_present | bool)
       }}
 
 - name: Force one Harbor recycle when compose network membership is incomplete
@@ -654,6 +696,9 @@
       - 200
       - 201
   register: harbor_oidc_configuration
+  retries: 12
+  delay: 5
+  until: harbor_oidc_configuration.status in [200, 201]
   no_log: true
 
 - name: Query the check-runner Harbor project
