@@ -1315,13 +1315,13 @@ workstreams:
     canonical_truth:
       changelog_entry: implements ADR 0248 by making Keycloak the governed browser-session authority, routing shared-edge logout through oauth2-proxy with Keycloak id-token logout hints, and aligning app-local logout surfaces with the same contract
       release_bump: patch
-      included_in_repo_version: 0.177.63
+      included_in_repo_version: 0.177.69
       latest_receipts:
-        session_logout_authority: 2026-03-28-adr-0248-session-logout-authority-live-apply
+        session_logout_authority: 2026-03-29-adr-0248-session-logout-authority-mainline-live-apply
   - id: ws-0248-main-merge
     adr: "0248"
     title: Integrate ADR 0248 session/logout authority into origin/main
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/ws-0248-main-merge
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0248-main-merge

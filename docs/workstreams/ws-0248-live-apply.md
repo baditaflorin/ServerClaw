@@ -131,12 +131,18 @@
 - live verifier command:
   `uv run --with playwright python scripts/session_logout_verify.py --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline.automation-password.txt`
 
-## Merge-To-Main Notes
+## Mainline Integration Outcome
 
-- this workstream branch intentionally left `VERSION`, `changelog.md`, the
-  top-level `README.md` status summary, and `versions/stack.yaml` untouched
-- remaining for merge to `main`: update the protected release truth surfaces
-  only during the final integration step, and only change `versions/stack.yaml`
-  if the final integrator also performs an exact-main replay that is meant to
-  establish a new first-live platform version beyond the current `0.130.45`
-  baseline
+- The isolated workstream intentionally left `VERSION`, `changelog.md`, the
+  top-level `README.md` status summary, and `versions/stack.yaml` untouched.
+  The exact-main integration step later updated those protected surfaces from
+  `main` in repository version `0.177.69`.
+- The synchronized mainline replay established the canonical receipt
+  `receipts/live-applies/2026-03-29-adr-0248-session-logout-authority-mainline-live-apply.json`
+  and advanced the integrated platform baseline to `0.130.47` while leaving ADR
+  0248's first-live metadata unchanged at repo version `0.177.63` and platform
+  version `0.130.45`.
+- The guarded `make live-apply-service service=outline env=production ALLOW_IN_PLACE_MUTATION=true`
+  path was exercised successfully on the exact-main candidate after a transient
+  Keycloak admin-token timeout was recovered by a clean
+  `make converge-keycloak env=production` replay and a successful rerun.
