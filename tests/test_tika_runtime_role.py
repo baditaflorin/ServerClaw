@@ -16,6 +16,9 @@ def test_defaults_define_private_tika_listener_and_fixture() -> None:
 
     assert defaults["tika_runtime_site_dir"] == "/opt/tika"
     assert defaults["tika_runtime_container_name"] == "tika"
+    assert defaults["tika_runtime_port"] == "{{ platform_port_assignments.tika_port }}"
+    assert defaults["tika_runtime_base_url"] == "http://127.0.0.1:{{ tika_runtime_port }}"
+    assert defaults["tika_runtime_container_port"] == 9998
     assert defaults["tika_runtime_java_opts"] == "-Xms256m -Xmx1024m"
     assert "Hello Tika" in defaults["tika_runtime_verify_html_fixture"]
 
