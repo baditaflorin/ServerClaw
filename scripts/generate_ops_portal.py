@@ -320,10 +320,11 @@ def render_drift_panel() -> str:
         f"<div><strong>Suppressed</strong><span>{escape(summary.get('suppressed_count', 0))}</span></div>"
         "</div>"
     )
+    empty_state_row = '<tr><td colspan="4">No actionable drift.</td></tr>'
     table = (
         '<div class="table-scroll"><table>'
         "<thead><tr><th>Source</th><th>Resource</th><th>Severity</th><th>Detail</th></tr></thead>"
-        f"<tbody>{''.join(top_rows) if top_rows else '<tr><td colspan=\"4\">No actionable drift.</td></tr>'}</tbody></table></div>"
+        f"<tbody>{''.join(top_rows) if top_rows else empty_state_row}</tbody></table></div>"
     )
     return (
         '<section class="panel">'
@@ -376,10 +377,11 @@ def render_security_panel() -> str:
         f"<div><strong>Scanned Images</strong><span>{escape(len(images))}</span></div>"
         "</div>"
     )
+    empty_state_row = '<tr><td colspan="4">No host scan data.</td></tr>'
     table = (
         '<div class="table-scroll"><table>'
         "<thead><tr><th>Host</th><th>Index</th><th>Delta</th><th>New Findings</th></tr></thead>"
-        f"<tbody>{''.join(top_rows) if top_rows else '<tr><td colspan=\"4\">No host scan data.</td></tr>'}</tbody></table></div>"
+        f"<tbody>{''.join(top_rows) if top_rows else empty_state_row}</tbody></table></div>"
     )
     return (
         '<section class="panel">'
@@ -833,6 +835,7 @@ def render_agents(tools: list[dict[str, Any]]) -> str:
                     f"<td>{escape(str(item.get('last_heartbeat', 'n/a')))}</td>"
                     "</tr>"
                 )
+        empty_coordination_row = '<tr><td colspan="5">No active sessions recorded.</td></tr>'
         coordination_panel = (
             '<section class="panel">'
             '<div class="card-head">'
@@ -848,7 +851,7 @@ def render_agents(tools: list[dict[str, Any]]) -> str:
             f'<div class="chip-row">{render_external_link(repo_view_link(snapshot_path), "Snapshot Receipt")}</div>'
             '<div class="table-scroll"><table>'
             "<thead><tr><th>Agent</th><th>Phase</th><th>Target</th><th>Status</th><th>Heartbeat</th></tr></thead>"
-            f"<tbody>{''.join(rows) if rows else '<tr><td colspan=\"5\">No active sessions recorded.</td></tr>'}</tbody></table></div>"
+            f"<tbody>{''.join(rows) if rows else empty_coordination_row}</tbody></table></div>"
             "</section>"
         )
     else:

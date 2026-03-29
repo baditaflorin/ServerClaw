@@ -102,6 +102,27 @@ class OpsPortalRenderTests(unittest.TestCase):
             ops_portal.latest_drift_report = original
             shutil.rmtree(temp_dir)
 
+    def test_render_portal_shows_empty_drift_state(self) -> None:
+        temp_dir = Path(tempfile.mkdtemp(prefix="ops-portal-test-"))
+        original = ops_portal.latest_drift_report
+        try:
+            drift_receipt = temp_dir / "latest-drift.json"
+            drift_receipt.write_text(
+                '{"generated_at":"2026-03-23T18:00:00Z","summary":{"status":"healthy","unsuppressed_count":0,"warn_count":0,"critical_count":0,"suppressed_count":0},"records":[]}'
+            )
+            ops_portal.latest_drift_report = lambda: (drift_receipt, json.loads(drift_receipt.read_text()))
+            ops_portal.render_portal(
+                temp_dir,
+                REPO_ROOT / "tests" / "fixtures" / "ops_portal_health.json",
+                0,
+                temp_dir / "snapshot.html",
+            )
+            index_html = (temp_dir / "index.html").read_text()
+            self.assertIn("No actionable drift.", index_html)
+        finally:
+            ops_portal.latest_drift_report = original
+            shutil.rmtree(temp_dir)
+
     def test_render_portal_includes_security_receipt_summary(self) -> None:
         temp_dir = Path(tempfile.mkdtemp(prefix="ops-portal-test-"))
         original = ops_portal.latest_security_report
