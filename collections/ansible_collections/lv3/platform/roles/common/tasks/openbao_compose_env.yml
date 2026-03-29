@@ -230,6 +230,9 @@
     return_content: true
     status_code: 200
   register: common_openbao_compose_env_role_id
+  retries: 12
+  delay: 2
+  until: common_openbao_compose_env_role_id.status == 200
   changed_when: false
   no_log: true
 
