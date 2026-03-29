@@ -1,0 +1,7 @@
+GET /health
+HTTP/2 200
+body={"status":"ok"}
+
+GET /
+HTTP/2 302
+location=https://ops.lv3.org/oauth2/sign_in?rd=https://ops.lv3.org/

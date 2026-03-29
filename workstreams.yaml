@@ -1184,7 +1184,7 @@ workstreams:
   - id: ws-0235-live-apply
     adr: "0235"
     title: Live apply cross-application launcher and favorites in the interactive ops portal
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0235-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0235-live-apply
@@ -1213,9 +1213,10 @@ workstreams:
       - scripts/service_catalog.py
       - scripts/validate_repository_data_models.py
       - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
       - tests/test_interactive_ops_portal.py
-      - tests/test_validate_service_catalog.py
-      - receipts/live-applies/2026-03-28-adr-0235-cross-application-launcher-live-apply.json
+      - tests/test_ops_portal_runtime_role.py
+      - receipts/live-applies/2026-03-29-adr-0235-cross-application-launcher-live-apply.json
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -1240,23 +1241,26 @@ workstreams:
             - scripts/service_catalog.py
             - scripts/validate_repository_data_models.py
             - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
             - tests/test_interactive_ops_portal.py
-            - tests/test_validate_service_catalog.py
-            - receipts/live-applies/2026-03-28-adr-0235-cross-application-launcher-live-apply.json
+            - tests/test_ops_portal_runtime_role.py
+            - receipts/live-applies/2026-03-29-adr-0235-cross-application-launcher-live-apply.json
           mode: exclusive
         - id: adr_index_contract
           paths:
             - docs/adr/.index.yaml
           mode: shared_contract
           contract: adr-index-v1
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
     canonical_truth:
       changelog_entry: implemented ADR 0235 by adding a PatternFly-style
         cross-application launcher to the interactive ops portal, with
         catalog-backed purpose grouping, persona filtering, favorites, and
         recent destinations across first-party browser surfaces
       release_bump: patch
+      latest_receipts:
+        ops_portal: 2026-03-29-adr-0235-cross-application-launcher-live-apply
   - id: ws-0230-live-apply
     adr: "0230"
     title: Live apply policy decisions via Open Policy Agent and Conftest

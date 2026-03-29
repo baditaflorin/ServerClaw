@@ -100,13 +100,28 @@ make converge-ops-portal env=production
 For the governed production replay used during live applies:
 
 ```bash
-make live-apply-service service=ops_portal env=production EXTRA_ARGS='-e bypass_promotion=true'
+ALLOW_IN_PLACE_MUTATION=true \
+make live-apply-service service=ops_portal env=production \
+  EXTRA_ARGS='-e bypass_promotion=true -e ops_portal_repo_root=/absolute/path/to/worktree'
 ```
 
 `bypass_promotion=true` is the documented break-glass path for direct production
 replays from a workstream branch. The Make target still enforces canonical truth,
 interface contracts, redundancy checks, immutable-guest checks, and emits the
 promotion-bypass audit event before running the service playbook.
+
+`ALLOW_IN_PLACE_MUTATION=true` is the documented ADR 0191 narrow exception for
+`ops_portal` because the live service still runs on immutable-replacement-governed
+`docker-runtime-lv3`. Set `ops_portal_repo_root` to the exact checkout you want
+mirrored into `/opt/ops-portal/service`; using the absolute worktree path avoids
+accidentally syncing a different branch's portal tree.
+
+Do not run two branch-local `ops_portal` production replays at the same time.
+Concurrent applies share `/opt/ops-portal/service` on `docker-runtime-lv3` and
+can clobber each other's uploaded tree, which leaves partial routes such as
+`/partials/launcher` missing even when the playbook itself reached the verify
+phase. The runtime role now checks `/partials/launcher` locally during replay so
+that drift fails closed instead of silently publishing an incomplete shell.
 
 ## Publication Boundary
 
@@ -181,6 +196,10 @@ The safest live verification path is:
 2. open `Validation Gate Status` or `Drift Status` from the launcher
 3. reopen the launcher and confirm the destination now appears under
    **Recent destinations**
+
+A failed live replay that serves `/health` but returns `404` for
+`/partials/launcher` indicates sync drift or a clobbered guest-side portal tree,
+not a healthy launcher rollout.
 
 ## Structured Runbook Launcher
 
