@@ -928,6 +928,8 @@ def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
             if not (REPO_ROOT / verify_file).is_file():
                 raise ValueError(f"{service_path}.verify_file does not exist: {verify_file}")
 
+        if "startup" in service:
+            validate_probe_definition(service.get("startup"), f"{service_path}.startup")
         validate_probe_definition(service.get("liveness"), f"{service_path}.liveness")
         validate_probe_definition(service.get("readiness"), f"{service_path}.readiness")
         if "tls_certificate_ids" in service:
