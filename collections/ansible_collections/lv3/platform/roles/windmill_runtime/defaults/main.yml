@@ -146,9 +146,13 @@ windmill_default_operations_surface_script_paths:
 windmill_seed_job_timeout_seconds: 120
 windmill_worker_checkout_repo_root_local_dir: >-
   {{
-    (inventory_dir ~ '/..')
-    if (inventory_dir is defined and inventory_dir | length > 0)
-    else (lookup('ansible.builtin.env', 'PWD') | default(playbook_dir ~ '/..', true))
+    (playbook_dir ~ '/..')
+    if (playbook_dir is defined and playbook_dir | length > 0)
+    else (
+      (inventory_dir ~ '/..')
+      if (inventory_dir is defined and inventory_dir | length > 0)
+      else (lookup('ansible.builtin.env', 'PWD') | default(playbook_dir ~ '/..', true))
+    )
   }}
 windmill_worker_repo_checkout_host_path: /srv/proxmox_florin_server
 windmill_worker_repo_checkout_container_path: /srv/proxmox_florin_server
