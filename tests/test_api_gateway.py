@@ -570,6 +570,52 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
                     assert platform_health.json()["service_count"] == 3
                     assert platform_health.json()["source"] == "health_composite"
 
+                    def fake_collect_platform_attestation(environment: str = "production") -> dict[str, object]:
+                        assert environment == "production"
+                        return {
+                            "summary": {"total": 3, "attested": 2, "missing": 1, "route_failed": 0},
+                            "services": [
+                                {
+                                    "service_id": "windmill",
+                                    "status": "attested",
+                                    "endpoint_proof": {"status": "pass"},
+                                    "route_proof": {"status": "not_required"},
+                                    "receipt_witness": {"status": "pass"},
+                                }
+                            ],
+                        }
+
+                    def fake_collect_platform_service_attestation(
+                        service_id: str,
+                        environment: str = "production",
+                    ) -> dict[str, object]:
+                        assert environment == "production"
+                        if service_id != "windmill":
+                            raise gateway_main.ServiceAttestationNotFoundError(service_id, environment)
+                        return {
+                            "service_id": "windmill",
+                            "status": "attested",
+                            "endpoint_proof": {"status": "pass"},
+                            "route_proof": {"status": "not_required"},
+                            "receipt_witness": {"status": "pass"},
+                        }
+
+                    runtime.collect_platform_attestation = fake_collect_platform_attestation  # type: ignore[method-assign]
+                    runtime.collect_platform_service_attestation = fake_collect_platform_service_attestation  # type: ignore[method-assign]
+
+                    platform_attestation = await client.get("/v1/platform/attestation", headers=headers)
+                    assert platform_attestation.status_code == 200
+                    assert platform_attestation.json()["summary"]["attested"] == 2
+
+                    windmill_attestation = await client.get("/v1/platform/attestation/windmill", headers=headers)
+                    assert windmill_attestation.status_code == 200
+                    assert windmill_attestation.json()["service_id"] == "windmill"
+                    assert windmill_attestation.json()["status"] == "attested"
+
+                    missing_attestation = await client.get("/v1/platform/attestation/unknown", headers=headers)
+                    assert missing_attestation.status_code == 404
+                    assert missing_attestation.json()["error"]["code"] == "INPUT_UNKNOWN_SERVICE"
+
                     postgres_health = await client.get("/v1/platform/health/postgres", headers=headers)
                     assert postgres_health.status_code == 200
                     assert postgres_health.json()["status"] == "degraded"

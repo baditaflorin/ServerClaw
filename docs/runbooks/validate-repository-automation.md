@@ -55,6 +55,7 @@ runner `docker-build-lv3`.
 - repo-managed JSON artifacts pass syntax validation via `jq` when available, or a `python3` JSON parser fallback when `jq` is absent
 - service-owning roles ship and import explicit `tasks/verify.yml` contracts
 - canonical repository data models pass schema validation
+- declared-to-live attestation contracts stay covered by the focused runtime, API gateway, and ops-portal regression slice
 - architecture fitness functions verify the governed replaceability scorecards and vendor exit plans for critical product ADRs
 - provider-boundary anti-corruption guards keep raw provider payload selectors confined to the declared boundary translation step
 - the ADR 0204 correction-loop catalog covers every governed mutating workflow exactly once
@@ -106,6 +107,13 @@ make validate-dependency-direction
 make validate-architecture-fitness
 make validate-health-probes
 make validate-generated-docs
+```
+
+Focused declared-to-live validation can also be replayed directly:
+
+```bash
+uv run --with pytest --with fastapi==0.116.1 --with httpx==0.28.1 --with uvicorn==0.35.0 --with pyyaml==6.0.2 --with cryptography==45.0.6 --with jinja2==3.1.5 --with itsdangerous==2.2.0 --with python-multipart==0.0.20 pytest -q tests/test_declared_live_attestation.py tests/test_api_gateway.py tests/test_interactive_ops_portal.py
+uv run --with pyyaml python3 scripts/declared_live_attestation.py --repo-root . --service api_gateway --format json --timeout-seconds 5
 ```
 
 `make validate-dependency-direction` enforces ADR 0208. It scans `platform/`

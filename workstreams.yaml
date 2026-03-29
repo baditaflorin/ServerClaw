@@ -513,6 +513,89 @@ workstreams:
       included_in_repo_version: 0.177.59
       latest_receipts:
         ops_portal: 2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-latest-main-revalidation
+  - id: ws-0245-live-apply
+    adr: "0245"
+    title: Declared-to-live service attestation live apply
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0245-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0245-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0245-live-apply.md
+    depends_on:
+      - adr-0075-service-capability-catalog
+      - adr-0113-world-state-materializer
+      - adr-0123-service-uptime-contracts
+      - adr-0244-runtime-assurance-matrix-per-service-and-environment
+    conflicts_with: []
+    shared_surfaces:
+      - .repo-structure.yaml
+      - workstreams.yaml
+      - docs/workstreams/ws-0245-live-apply.md
+      - docs/adr/0245-declared-to-live-service-attestation.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/configure-api-gateway.md
+      - docs/runbooks/platform-operations-portal.md
+      - docs/runbooks/validate-repository-automation.md
+      - receipts/live-applies/2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply.json
+      - platform/runtime_assurance/**
+      - scripts/declared_live_attestation.py
+      - scripts/api_gateway/main.py
+      - scripts/ops_portal/**
+      - scripts/validate_repo.sh
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/Dockerfile.j2
+      - tests/test_declared_live_attestation.py
+      - tests/test_api_gateway.py
+      - tests/test_interactive_ops_portal.py
+      - tests/test_ops_portal_runtime_role.py
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_contract
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: adr_0245_live_apply
+          paths:
+            - .repo-structure.yaml
+            - docs/workstreams/ws-0245-live-apply.md
+            - docs/adr/0245-declared-to-live-service-attestation.md
+            - docs/runbooks/configure-api-gateway.md
+            - docs/runbooks/platform-operations-portal.md
+            - docs/runbooks/validate-repository-automation.md
+            - receipts/live-applies/2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply.json
+            - platform/runtime_assurance/**
+            - scripts/declared_live_attestation.py
+            - scripts/api_gateway/main.py
+            - scripts/ops_portal/**
+            - scripts/validate_repo.sh
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/Dockerfile.j2
+            - tests/test_declared_live_attestation.py
+            - tests/test_api_gateway.py
+            - tests/test_interactive_ops_portal.py
+            - tests/test_ops_portal_runtime_role.py
+          mode: shared_contract
+          contract: adr-0245-live-apply-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0245 by surfacing declared-to-live service
+        attestation through shared runtime witnesses, authenticated gateway
+        APIs, and ops-portal visibility while hardening the live ops-portal
+        sync and build path for separate-worktree replay
+      release_bump: patch
+      included_in_repo_version: 0.177.72
+      latest_receipts:
+        api_gateway: 2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply
+        ops_portal: 2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply
   - id: ws-0252-live-apply
     adr: "0252"
     title: Live apply ADR 0252 route and DNS publication assertion ledger

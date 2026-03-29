@@ -10,6 +10,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from scripts.ops_portal.app import (
+    PortalRepository,
     PortalSettings,
     build_dependency_focus_chart,
     build_health_mix_chart,
@@ -922,3 +923,65 @@ def test_normalize_health_accepts_service_id_list_payload() -> None:
 
     assert result["grafana"]["status"] == "healthy"
     assert result["ops_portal"]["detail"] == "Maintenance window"
+
+
+def test_load_live_apply_receipts_ignores_unreadable_receipts(tmp_path: Path) -> None:
+    data_root = tmp_path / "data"
+    live_applies_dir = data_root / "receipts" / "live-applies"
+    drift_receipts_dir = data_root / "receipts" / "drift-reports"
+    config_dir = data_root / "config"
+    config_dir.mkdir(parents=True)
+    live_applies_dir.mkdir(parents=True)
+    drift_receipts_dir.mkdir(parents=True)
+
+    (config_dir / "service-capability-catalog.json").write_text('{"services":[]}\n', encoding="utf-8")
+    (config_dir / "persona-catalog.json").write_text('{"personas":[]}\n', encoding="utf-8")
+    (config_dir / "subdomain-exposure-registry.json").write_text('{"publications":[]}\n', encoding="utf-8")
+    (config_dir / "workflow-catalog.json").write_text('{"workflows":{}}\n', encoding="utf-8")
+    (data_root / "changelog.md").write_text("# Changelog\n", encoding="utf-8")
+
+    (live_applies_dir / "2026-03-29-good.json").write_text(
+        json.dumps(
+            {
+                "receipt_id": "receipt-ops-portal",
+                "summary": "Applied ops portal runtime",
+                "workflow_id": "live-apply-service service=ops_portal env=production",
+                "recorded_on": "2026-03-29T18:00:00Z",
+                "recorded_by": "ops",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (live_applies_dir / "2026-03-30-bad.json").write_bytes(b"\xa3\x00not-utf8")
+
+    settings = PortalSettings(
+        gateway_url="http://gateway.invalid",
+        session_secret="test-secret",
+        static_api_token="test-token",
+        service_catalog_path=config_dir / "service-capability-catalog.json",
+        persona_catalog_path=config_dir / "persona-catalog.json",
+        publication_registry_path=config_dir / "subdomain-exposure-registry.json",
+        workflow_catalog_path=config_dir / "workflow-catalog.json",
+        changelog_path=data_root / "changelog.md",
+        live_applies_dir=live_applies_dir,
+        drift_receipts_dir=drift_receipts_dir,
+        maintenance_windows_path=None,
+        docs_base_url="https://docs.lv3.org",
+        grafana_logs_url="https://grafana.lv3.org/explore?service={service}",
+    )
+
+    repository = PortalRepository(settings)
+    receipts = repository.load_live_apply_receipts(
+        [
+            {
+                "id": "ops_portal",
+                "name": "Platform Operations Portal",
+                "internal_url": "http://10.10.10.20:8092",
+                "public_url": "https://ops.lv3.org",
+            }
+        ]
+    )
+
+    assert [receipt["receipt_id"] for receipt in receipts] == ["receipt-ops-portal"]
+    assert receipts[0]["_matched_services"] == ["ops_portal"]

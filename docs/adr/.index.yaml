@@ -4204,7 +4204,7 @@ adr_index:
   - adr: '0245'
     title: Declared-To-Live Service Attestation
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: testing
     keywords:
@@ -4213,6 +4213,7 @@ adr_index:
       - attestation
     summary: We will require declared-to-live service attestation for every active
     filename: 0245-declared-to-live-service-attestation.md
+    implemented_version: 0.177.72
   - adr: '0246'
     title: Startup, Readiness, Liveness, And Degraded State Semantics
     status: Accepted

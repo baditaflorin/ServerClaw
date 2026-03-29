@@ -22,25 +22,41 @@ Recover the interactive ops portal runtime when `ops.lv3.org` or the local `http
 1. Verify the local runtime on `docker-runtime-lv3`:
 
 ```bash
-ssh ops@100.118.189.95 'ssh ops@10.10.10.20 "docker compose -f /opt/ops-portal/docker-compose.yml ps"'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p' \
+  ops@10.10.10.20 \
+  'docker compose -f /opt/ops-portal/docker-compose.yml ps'
 ```
 
 2. Verify the local health endpoint:
 
 ```bash
-ssh ops@100.118.189.95 'ssh ops@10.10.10.20 "curl -sf http://10.10.10.20:8092/health"'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p' \
+  ops@10.10.10.20 \
+  'curl -sf http://127.0.0.1:8092/health'
 ```
 
 3. Verify the runtime assurance overview partial still renders:
 
 ```bash
-ssh ops@100.118.189.95 'ssh ops@10.10.10.20 "curl -sf http://10.10.10.20:8092/partials/overview | grep -F \"Runtime Assurance\" "'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p' \
+  ops@10.10.10.20 \
+  'curl -sf http://127.0.0.1:8092/partials/overview | grep -F "Runtime Assurance"'
 ```
 
 4. Verify the edge can still reach the runtime:
 
 ```bash
-ssh ops@100.118.189.95 'ssh ops@10.10.10.10 "curl -k -I -H \"Host: ops.lv3.org\" https://127.0.0.1/health"'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p' \
+  ops@10.10.10.10 \
+  'curl -k -I -H "Host: ops.lv3.org" https://127.0.0.1/health'
 ```
 
 5. If the portal redirects to Keycloak but the submit fails, check the Keycloak runtime directly:
@@ -49,7 +65,7 @@ ssh ops@100.118.189.95 'ssh ops@10.10.10.10 "curl -k -I -H \"Host: ops.lv3.org\"
 curl -I https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
-  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p' \
+  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p' \
   ops@10.10.10.20 \
   'docker logs --tail 80 keycloak-keycloak-1'
 ```
@@ -206,12 +222,12 @@ ANSIBLE_HOST_KEY_CHECKING=False "$REPO/scripts/run_with_namespace.sh" uvx --from
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
-  root@100.118.189.95 \
+  root@100.64.0.1 \
   "qm guest exec 120 -- /bin/sh -lc 'systemctl restart docker'"
 
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
-  root@100.118.189.95 \
+  root@100.64.0.1 \
   \"qm guest exec 120 -- /bin/sh -lc 'cd /opt/keycloak && docker compose up -d --force-recreate keycloak'\"
 ```
 
@@ -227,13 +243,13 @@ curl -I https://ops.lv3.org/oauth2/sign_in
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
-  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p' \
+  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p' \
   ops@10.10.10.20 \
   'python3 - <<'"'"'PY'"'"'\nimport smtplib\nfrom pathlib import Path\npassword = Path("/etc/lv3/mail-platform/server-mailbox-password").read_text().strip()\nclient = smtplib.SMTP("10.10.10.20", 1587, timeout=10)\nclient.ehlo()\nprint(client.login("server", password))\nclient.quit()\nPY'
 
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
-  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p' \
+  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p' \
   ops@10.10.10.20 \
   'docker logs --tail 120 keycloak-keycloak-1 | grep -i -E "smtp|reset_password|required.action"'
 ```
