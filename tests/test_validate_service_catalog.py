@@ -101,6 +101,34 @@ class ValidateServiceCatalogTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "must declare at least one receipt keyword or verification check token"):
             service_catalog.validate_service_catalog(catalog)
 
+    def test_stage_ready_environment_requires_smoke_suite_ids(self) -> None:
+        catalog = {
+            "$schema": "docs/schema/service-capability-catalog.schema.json",
+            "schema_version": "1.0.0",
+            "services": [
+                {
+                    "id": "demo",
+                    "name": "Demo",
+                    "description": "Demo service.",
+                    "category": "automation",
+                    "lifecycle_status": "active",
+                    "vm": "docker-runtime-lv3",
+                    "exposure": "private-only",
+                    "internal_url": "http://10.10.10.20:9999",
+                    "environments": {
+                        "production": {
+                            "status": "active",
+                            "url": "http://10.10.10.20:9999",
+                            "stage_ready": True,
+                        }
+                    },
+                }
+            ],
+        }
+
+        with self.assertRaisesRegex(ValueError, "stage_ready requires at least one smoke suite id"):
+            service_catalog.validate_service_catalog(catalog)
+
 
 if __name__ == "__main__":
     unittest.main()

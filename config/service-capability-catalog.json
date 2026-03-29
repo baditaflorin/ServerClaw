@@ -73,6 +73,10 @@
           "status": "active",
           "url": "https://api.lv3.org",
           "subdomain": "api.lv3.org",
+          "stage_ready": true,
+          "smoke_suite_ids": [
+            "production-api-gateway-operator-path"
+          ],
           "notes": "Repository automation is ready; live publication still requires apply from main."
         }
       }
@@ -1634,7 +1638,11 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "http://100.64.0.1:8005"
+          "url": "http://100.64.0.1:8005",
+          "stage_ready": true,
+          "smoke_suite_ids": [
+            "production-windmill-primary-path"
+          ]
         }
       }
     },

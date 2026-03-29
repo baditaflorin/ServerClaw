@@ -17,6 +17,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
+from script_bootstrap import ensure_repo_root_on_path
+
+ensure_repo_root_on_path(__file__)
+
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from mutation_audit import build_event, emit_event
 from platform.operator_access import (

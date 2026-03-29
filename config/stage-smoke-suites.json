@@ -1,0 +1,36 @@
+{
+  "$schema": "docs/schema/stage-smoke-suites.schema.json",
+  "schema_version": "1.0.0",
+  "suites": [
+    {
+      "id": "production-api-gateway-operator-path",
+      "service_id": "api_gateway",
+      "environment": "production",
+      "description": "Verify the live platform API gateway health and public discovery path through /healthz and /openapi.json.",
+      "runner": "integration_suite",
+      "mode": "gate",
+      "targets": [
+        "tests/integration/test_platform_api.py::test_gateway_public_healthz_and_openapi_are_available"
+      ],
+      "required_service_ids": [
+        "api_gateway"
+      ],
+      "notes": "Kept rollback-safe and authentication-independent so the smoke path stays usable even when role mapping changes."
+    },
+    {
+      "id": "production-windmill-primary-path",
+      "service_id": "windmill",
+      "environment": "production",
+      "description": "Verify the live Windmill operator path by resolving the production endpoint from the service catalog and reading /api/version.",
+      "runner": "integration_suite",
+      "mode": "gate",
+      "targets": [
+        "tests/integration/test_deployment.py::test_windmill_version_endpoint_reports_version"
+      ],
+      "required_service_ids": [
+        "windmill"
+      ],
+      "notes": "Kept intentionally small so Windmill verification stays rollback-safe and suitable for seeded live apply checks."
+    }
+  ]
+}

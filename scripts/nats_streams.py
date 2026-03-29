@@ -11,6 +11,10 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
+from script_bootstrap import ensure_repo_root_on_path
+
+ensure_repo_root_on_path(__file__)
+
 from controller_automation_toolkit import emit_cli_error, load_yaml, repo_path
 from drift_lib import connect_nats, load_controller_context, nats_tunnel, resolve_nats_credentials
 from platform.events import build_envelope

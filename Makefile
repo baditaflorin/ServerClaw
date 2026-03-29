@@ -159,6 +159,9 @@ post-merge-gate:
 	$(MAKE) preflight WORKFLOW=post-merge-gate
 	python3 $(REPO_ROOT)/config/windmill/scripts/post-merge-gate.py --repo-path $(REPO_ROOT)
 
+stage-smoke-suites:
+	python3 $(REPO_ROOT)/scripts/stage_smoke_suites.py $(STAGE_SMOKE_ARGS)
+
 integration-tests:
 	uv run --with-requirements $(REPO_ROOT)/requirements/integration-tests.txt python $(REPO_ROOT)/scripts/integration_suite.py
 

@@ -4,9 +4,13 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import UTC, datetime
 from typing import Any
 
+from script_bootstrap import ensure_repo_root_on_path
+
+ensure_repo_root_on_path(__file__)
+
+from platform.datetime_compat import UTC, datetime
 from tls_cert_probe import load_certificate_catalog
 
 

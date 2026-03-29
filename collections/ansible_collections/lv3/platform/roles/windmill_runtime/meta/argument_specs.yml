@@ -43,6 +43,11 @@ argument_specs:
         required: false
         description:
           - Docker networking mode used by the Windmill server container.
+      windmill_worker_network_mode:
+        type: str
+        required: false
+        description:
+          - Docker networking mode used by the Windmill worker containers.
       windmill_server_requires_docker_nat:
         type: bool
         required: false

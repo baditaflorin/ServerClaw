@@ -35,12 +35,6 @@
     - role: lv3.platform.postgres_vm
     - role: lv3.platform.windmill_postgres
 
-  post_tasks:
-    - name: Restart PostgreSQL before Windmill runtime verification
-      ansible.builtin.service:
-        name: "{{ postgres_vm_postgresql_service_name }}"
-        state: restarted
-
 - name: Converge Windmill on the Docker runtime VM
   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
   become: true

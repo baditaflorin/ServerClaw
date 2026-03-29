@@ -58,6 +58,19 @@ def make_service(service_id: str, name: str, vm: str) -> dict:
 
 class PromotionPipelineTests(unittest.TestCase):
     def setUp(self) -> None:
+        self.stage_ready_service = {
+            "id": "grafana",
+            "name": "Grafana",
+            "vm": "monitoring-lv3",
+            "environments": {
+                "staging": {
+                    "status": "active",
+                    "url": "https://grafana.staging.lv3.org",
+                    "stage_ready": True,
+                    "smoke_suite_ids": ["staging-grafana-primary-path"],
+                }
+            },
+        }
         self.stage_receipt = {
             "schema_version": "1.0.0",
             "receipt_id": "2026-03-23-grafana-staging",
@@ -79,6 +92,17 @@ class PromotionPipelineTests(unittest.TestCase):
                     "observed": "Smoke path ready.",
                 }
             ],
+            "smoke_suites": [
+                {
+                    "suite_id": "staging-grafana-primary-path",
+                    "service_id": "grafana",
+                    "environment": "staging",
+                    "status": "passed",
+                    "executed_at": "2026-03-23T09:05:00Z",
+                    "summary": "1 passed, 0 failed, 0 skipped",
+                    "report_ref": "docs/adr/0073-environment-promotion-gate-and-deployment-pipeline.md",
+                }
+            ],
             "evidence_refs": ["docs/adr/0073-environment-promotion-gate-and-deployment-pipeline.md"],
             "notes": [],
         }
@@ -94,14 +118,11 @@ class PromotionPipelineTests(unittest.TestCase):
 
     def _fake_policy_decision(self, payload: dict, *, repo_root=None, toolchain=None) -> dict:
         reasons = list(payload["approval"]["reasons"])
-        if not payload["stage_smoke_gate"]["declared"]:
-            reasons.append(payload["stage_smoke_gate"]["reason"])
-        elif not payload["stage_smoke_gate"]["matched_suite_ids"]:
-            reasons.append("staging receipt does not satisfy a declared stage smoke suite")
         if payload["staging_receipt"]["age_hours"] > 24:
             reasons.append("staging receipt is older than 24 hours")
         if not payload["staging_receipt"]["verification_passed"]:
             reasons.append("staging receipt verification is not clean")
+        reasons.extend(payload["smoke_gate"]["reasons"])
         if payload["blocking_findings"]["count"] > 0:
             reasons.append(f"open critical findings exist for service '{payload['service_id']}'")
         reasons.extend(payload["capacity_gate"]["reasons"])
@@ -132,7 +153,7 @@ class PromotionPipelineTests(unittest.TestCase):
             ), patch.object(
                 promotion_pipeline,
                 "load_service_index",
-                return_value={"grafana": make_service("grafana", "Grafana", "monitoring-lv3")},
+                return_value={"grafana": self.stage_ready_service},
             ), patch.object(
                 promotion_pipeline, "load_receipt", return_value=self.stage_receipt
             ), patch.object(
@@ -186,7 +207,7 @@ class PromotionPipelineTests(unittest.TestCase):
             ), patch.object(
                 promotion_pipeline,
                 "load_service_index",
-                return_value={"grafana": make_service("grafana", "Grafana", "monitoring-lv3")},
+                return_value={"grafana": self.stage_ready_service},
             ), patch.object(
                 promotion_pipeline, "load_receipt", return_value=stale_receipt
             ), patch.object(
@@ -237,7 +258,7 @@ class PromotionPipelineTests(unittest.TestCase):
             ), patch.object(
                 promotion_pipeline,
                 "load_service_index",
-                return_value={"grafana": make_service("grafana", "Grafana", "monitoring-lv3")},
+                return_value={"grafana": self.stage_ready_service},
             ), patch.object(
                 promotion_pipeline, "load_receipt", return_value=self.stage_receipt
             ), patch.object(
@@ -290,7 +311,7 @@ class PromotionPipelineTests(unittest.TestCase):
             ), patch.object(
                 promotion_pipeline,
                 "load_service_index",
-                return_value={"grafana": make_service("grafana", "Grafana", "monitoring-lv3")},
+                return_value={"grafana": self.stage_ready_service},
             ), patch.object(
                 promotion_pipeline, "load_receipt", return_value=self.stage_receipt
             ), patch.object(
@@ -402,7 +423,7 @@ class PromotionPipelineTests(unittest.TestCase):
             ), patch.object(
                 promotion_pipeline,
                 "load_service_index",
-                return_value={"grafana": make_service("grafana", "Grafana", "monitoring-lv3")},
+                return_value={"grafana": self.stage_ready_service},
             ), patch.object(
                 promotion_pipeline, "load_receipt", return_value=self.stage_receipt
             ), patch.object(
@@ -447,18 +468,11 @@ class PromotionPipelineTests(unittest.TestCase):
         self.assertEqual(verdict["gate_decision"], "rejected")
         self.assertIn("SLO error budget below 10%", verdict["reasons"][0] + " ".join(verdict["reasons"]))
 
-    def test_gate_rejects_receipt_without_matching_stage_smoke_check(self) -> None:
+    def test_gate_rejects_missing_required_stage_smoke_suite(self) -> None:
         from unittest.mock import patch
 
-        stage_receipt = dict(self.stage_receipt)
-        stage_receipt["verification"] = [
-            {
-                "check": "Grafana health",
-                "result": "pass",
-                "observed": "Ready.",
-            }
-        ]
-
+        missing_smoke_receipt = dict(self.stage_receipt)
+        missing_smoke_receipt["smoke_suites"] = []
         with tempfile.TemporaryDirectory() as temp_dir:
             stage_dir = Path(temp_dir) / "staging"
             stage_dir.mkdir(parents=True, exist_ok=True)
@@ -470,9 +484,9 @@ class PromotionPipelineTests(unittest.TestCase):
             ), patch.object(
                 promotion_pipeline,
                 "load_service_index",
-                return_value={"grafana": make_service("grafana", "Grafana", "monitoring-lv3")},
+                return_value={"grafana": self.stage_ready_service},
             ), patch.object(
-                promotion_pipeline, "load_receipt", return_value=stage_receipt
+                promotion_pipeline, "load_receipt", return_value=missing_smoke_receipt
             ), patch.object(
                 promotion_pipeline, "validate_receipt", return_value=None
             ), patch.object(
@@ -507,7 +521,7 @@ class PromotionPipelineTests(unittest.TestCase):
                 )
 
         self.assertEqual(verdict["gate_decision"], "rejected")
-        self.assertIn("staging receipt does not satisfy a declared stage smoke suite", verdict["reasons"])
+        self.assertIn("staging smoke suites missing from staged receipt", " ".join(verdict["reasons"]))
 
     def test_validate_promotion_receipt_accepts_linked_receipts(self) -> None:
         from unittest.mock import patch
@@ -537,6 +551,24 @@ class PromotionPipelineTests(unittest.TestCase):
                             "observed": "Ready.",
                         }
                     ],
+                },
+                "stage_smoke_gate": {
+                    "enforced": True,
+                    "passed": True,
+                    "required_suite_ids": ["staging-grafana-primary-path"],
+                    "missing_suite_ids": [],
+                    "failed_suite_ids": [],
+                    "passed_suite_ids": ["staging-grafana-primary-path"],
+                    "observed_suites": [
+                        {
+                            "suite_id": "staging-grafana-primary-path",
+                            "service_id": "grafana",
+                            "environment": "staging",
+                            "status": "passed",
+                            "summary": "1 passed, 0 failed, 0 skipped",
+                        }
+                    ],
+                    "reasons": [],
                 },
                 "gate_decision": "approved",
                 "gate_actor": {"class": "operator", "id": "ops"},

@@ -7,11 +7,11 @@ import sys
 import time
 import uuid
 from copy import deepcopy
-from datetime import UTC, datetime
+from platform.datetime_compat import UTC, datetime
 from pathlib import Path
 from typing import Any, Protocol
 
-from platform.circuit import CircuitRegistry, should_count_urllib_exception
+from platform.circuit import CircuitRegistry
 from platform.mutation_audit import build_event, emit_event_best_effort
 from platform.repo import load_json, load_yaml, write_json
 from platform.scheduler import HttpWindmillClient
@@ -400,23 +400,21 @@ class WindmillWorkflowRunner:
         self.token = token
         self.workspace = workspace
         self.repo_root = repo_root
-        self.circuit_breaker = circuit_breaker
-        if self.circuit_breaker is None:
-            registry = circuit_registry or CircuitRegistry(repo_root or REPO_ROOT)
-            if registry.has_policy("windmill"):
-                self.circuit_breaker = registry.sync_breaker(
-                    "windmill",
-                    exception_classifier=should_count_urllib_exception,
-                )
         self._client = HttpWindmillClient(
             base_url=self.base_url,
-            token=self.token,
-            workspace=self.workspace,
-            circuit_breaker=self.circuit_breaker,
+            token=token,
+            workspace=workspace,
+            circuit_breaker=circuit_breaker,
+            circuit_registry=circuit_registry,
         )
+        self.circuit_breaker = getattr(self._client, "_circuit_breaker", None)
 
     def run_workflow(self, workflow_id: str, payload: dict[str, Any], *, timeout_seconds: int | None = None) -> Any:
-        return self._client.run_workflow_wait_result(workflow_id, payload, timeout_seconds=timeout_seconds)
+        return self._client.run_workflow_wait_result(
+            workflow_id,
+            payload,
+            timeout_seconds=timeout_seconds,
+        )
 
 
 class RunbookUseCaseService:

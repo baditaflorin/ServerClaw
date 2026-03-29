@@ -1848,6 +1848,198 @@ workstreams:
         Playwright, OpenFGA, and a PostgreSQL-Qdrant-search memory stack
       release_bump: patch
       included_in_repo_version: 0.177.59
+  - id: ws-0251-live-apply
+    adr: "0251"
+    title: Live apply stage-scoped smoke suites and promotion gates
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0251-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0251-live-apply.md
+    depends_on:
+      - adr-0036-live-apply-receipts
+      - adr-0044-windmill-for-background-automation
+      - adr-0073-environment-promotion-gate-and-deployment-pipeline
+      - adr-0087-repository-validation-gate
+      - adr-0111-end-to-end-integration-test-suite
+      - adr-0244-runtime-assurance-matrix-per-service-and-environment
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0251-live-apply.md
+      - docs/adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md
+      - docs/adr/.index.yaml
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/*.md
+      - build/platform-manifest.json
+      - docs/diagrams/*.excalidraw
+      - versions/stack.yaml
+      - docs/runbooks/environment-promotion-pipeline.md
+      - docs/runbooks/integration-test-suite.md
+      - docs/runbooks/live-apply-receipts-and-verification-evidence.md
+      - docs/runbooks/configure-windmill.md
+      - .repo-structure.yaml
+      - .config-locations.yaml
+      - Makefile
+      - config/command-catalog.json
+      - config/service-capability-catalog.json
+      - config/stage-smoke-suites.json
+      - config/workflow-catalog.json
+      - config/validation-gate.json
+      - config/windmill/scripts/nightly-integration-tests.py
+      - config/windmill/scripts/stage-smoke-suites.py
+      - config/windmill/scripts/windmill_integration_env.py
+      - playbooks/windmill.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/*.yml
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/*.yml
+      - collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/tasks/*.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/*.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/*.j2
+      - platform/*.py
+      - platform/**/*.py
+      - policy/*.rego
+      - policy/tests/*.rego
+      - platform/datetime_compat.py
+      - platform/enum_compat.py
+      - platform/ansible/__init__.py
+      - platform/scheduler/windmill_client.py
+      - scripts/integration_suite.py
+      - scripts/live_apply_receipts.py
+      - scripts/promotion_pipeline.py
+      - scripts/script_bootstrap.py
+      - scripts/service_catalog.py
+      - scripts/stage_smoke_suites.py
+      - scripts/windmill_run_wait_result.py
+      - scripts/*.py
+      - scripts/ops_portal/*.py
+      - scripts/risk_scorer/*.py
+      - scripts/search_fabric/*.py
+      - docs/schema/service-capability-catalog.schema.json
+      - docs/schema/stage-smoke-suites.schema.json
+      - docs/schema/promotion-receipt.json
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/meta/argument_specs.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
+      - tests/test_integration_suite.py
+      - tests/test_live_apply_receipts.py
+      - tests/test_promotion_pipeline.py
+      - tests/test_stage_smoke_suites.py
+      - tests/test_script_bootstrap.py
+      - tests/test_windmill_integration_wrappers.py
+      - tests/test_windmill_operator_admin_app.py
+      - tests/test_windmill_playbook.py
+      - tests/*.py
+      - tests/integration/*.py
+      - receipts/live-applies/evidence/2026-03-29-adr-0251-*
+      - receipts/live-applies/2026-03-29-adr-0251-stage-smoke-suites-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0251_live_apply
+          paths:
+            - docs/workstreams/ws-0251-live-apply.md
+            - docs/adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md
+            - docs/runbooks/environment-promotion-pipeline.md
+            - docs/runbooks/integration-test-suite.md
+            - docs/runbooks/live-apply-receipts-and-verification-evidence.md
+            - docs/runbooks/configure-windmill.md
+            - .repo-structure.yaml
+            - .config-locations.yaml
+            - Makefile
+            - config/command-catalog.json
+            - config/service-capability-catalog.json
+            - config/stage-smoke-suites.json
+            - config/workflow-catalog.json
+            - config/validation-gate.json
+            - config/windmill/scripts/nightly-integration-tests.py
+            - config/windmill/scripts/stage-smoke-suites.py
+            - config/windmill/scripts/windmill_integration_env.py
+            - playbooks/windmill.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/*.yml
+            - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/*.yml
+            - collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/tasks/*.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/*.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/*.j2
+            - platform/*.py
+            - platform/**/*.py
+            - policy/*.rego
+            - policy/tests/*.rego
+            - platform/datetime_compat.py
+            - platform/enum_compat.py
+            - platform/ansible/__init__.py
+            - platform/scheduler/windmill_client.py
+            - scripts/integration_suite.py
+            - scripts/live_apply_receipts.py
+            - scripts/promotion_pipeline.py
+            - scripts/script_bootstrap.py
+            - scripts/service_catalog.py
+            - scripts/stage_smoke_suites.py
+            - scripts/windmill_run_wait_result.py
+            - scripts/*.py
+            - scripts/ops_portal/*.py
+            - scripts/risk_scorer/*.py
+            - scripts/search_fabric/*.py
+            - docs/schema/service-capability-catalog.schema.json
+            - docs/schema/stage-smoke-suites.schema.json
+            - docs/schema/promotion-receipt.json
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/meta/argument_specs.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
+            - tests/test_integration_suite.py
+            - tests/test_live_apply_receipts.py
+            - tests/test_promotion_pipeline.py
+            - tests/test_stage_smoke_suites.py
+            - tests/test_script_bootstrap.py
+            - tests/test_windmill_integration_wrappers.py
+            - tests/test_windmill_operator_admin_app.py
+            - tests/test_windmill_playbook.py
+            - tests/*.py
+            - tests/integration/*.py
+          mode: exclusive
+        - id: adr_0251_main_integration
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/*.md
+            - build/platform-manifest.json
+            - docs/diagrams/*.excalidraw
+            - versions/stack.yaml
+          mode: shared_contract
+          contract: release-mainline-cut-v1
+        - id: adr_index
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: live_apply_evidence
+          paths:
+            - receipts/live-applies/evidence/2026-03-29-adr-0251-*
+            - receipts/live-applies/2026-03-29-adr-0251-stage-smoke-suites-live-apply.json
+          mode: shared_contract
+          contract: live-apply-receipts-v1
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: implement ADR 0251 by declaring stage-scoped smoke suites,
+        enforcing structured smoke evidence on staged promotion receipts, and
+        seeding Windmill with the same repo-managed smoke runner used for live
+        verification
+      release_bump: patch
+      included_in_repo_version: 0.177.86
+      latest_receipts:
+        promotion_pipeline: 2026-03-29-adr-0251-stage-smoke-suites-live-apply
+        stage_smoke_suites: 2026-03-29-adr-0251-stage-smoke-suites-live-apply
   - id: ws-0259-live-apply
     adr: "0259"
     title: Live apply n8n as the external app connector fabric for ServerClaw

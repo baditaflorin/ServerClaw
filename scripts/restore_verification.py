@@ -20,6 +20,10 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
+from script_bootstrap import ensure_repo_root_on_path
+
+ensure_repo_root_on_path(__file__)
+
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path, write_json
 from capacity_report import ResourceAmount, check_capacity_class_request, load_capacity_model
 from drift_lib import (
