@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T12:13:19Z",
+  "recorded_by": "codex",
+  "source_commit": "21c13855a4dcbcc6440a486d2aaf7f85d4f4385c",
+  "repo_version_context": "0.177.76",
+  "platform_version_context": "0.130.52",
+  "workflow_id": "adr-0273-public-endpoint-admission-control-mainline-live-apply",
+  "adr": "0273",
+  "summary": "Integrated ADR 0273 on synchronized main release 0.177.76 by replaying exact-main public endpoint admission control across the shared edge and route-ledger publication paths, re-verifying direct HTTP and TLS evidence, and establishing platform version 0.130.52 without introducing new public DNS or certificate drift.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "lv3.org",
+      "address": "https://lv3.org/"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "docs.lv3.org",
+      "address": "https://docs.lv3.org/"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "ops.lv3.org",
+      "address": "https://ops.lv3.org/"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Latest origin/main baseline and protected release cut",
+      "result": "pass",
+      "observed": "`git fetch origin --prune` confirmed the synchronized mainline baseline at commit `4c9f554ff9ee515afa42fb6c307d29970087124d`; the integrated ADR 0273 replay source was commit `21c13855a4dcbcc6440a486d2aaf7f85d4f4385c` on top of that head, and the protected release cut then advanced repository version `0.177.75` to `0.177.76` while recording platform version `0.130.52` for this exact-main public-endpoint admission rollout."
+    },
+    {
+      "check": "Repo automation and validation sweep",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml python -m pytest tests/test_subdomain_exposure_audit.py tests/test_edge_publication_makefile.py tests/test_validate_repo_cache.py -q` returned `35 passed`; `./scripts/validate_repo.sh data-models agent-standards generated-docs generated-portals` passed; and the dependency-graph generator check `uv run --with jsonschema --with pyyaml python scripts/validate_dependency_graph.py >/dev/null && uv run --with jsonschema python scripts/generate_dependency_diagram.py --check >/dev/null && uv run --with pyyaml python scripts/generate_diagrams.py --check >/dev/null` returned `OK` on the integrated latest-main tree."
+    },
+    {
+      "check": "Exact-main route-ledger replay",
+      "result": "pass",
+      "observed": "`make route-dns-assertion-ledger env=production` completed successfully with final recap `localhost : ok=56 changed=0 unreachable=0 failed=0 skipped=24 rescued=0 ignored=0`, proving the new admission gate keeps the already-aligned public DNS state idempotent on the latest main release."
+    },
+    {
+      "check": "Exact-main shared-edge replay",
+      "result": "pass",
+      "observed": "`make configure-edge-publication env=production` completed successfully with final recap `nginx-lv3 : ok=61 changed=3 unreachable=0 failed=0 skipped=14 rescued=0 ignored=0`; the exact-main run rebuilt the docs and changelog portals, published the generated static directories, revalidated the shared-edge certificate inputs, and completed all HTTP and HTTPS probe checks before finishing."
+    },
+    {
+      "check": "Direct HTTPS and SAN verification",
+      "result": "pass",
+      "observed": "`curl -I https://lv3.org` returned `HTTP/2 308` redirecting to `https://nginx.lv3.org/`; `curl -I https://docs.lv3.org` and `curl -I https://ops.lv3.org` both returned `HTTP/2 302` to their `oauth2/sign_in` paths with `x-robots-tag: noindex, nofollow`; and `echo | openssl s_client -servername docs.lv3.org -connect docs.lv3.org:443 2>/dev/null | openssl x509 -noout -issuer -subject -ext subjectAltName` showed a Let's Encrypt issuer (`CN=E7`) with SAN coverage for `agents.lv3.org`, `api.lv3.org`, `apps.lv3.org`, `changelog.lv3.org`, `docs.lv3.org`, `draw.lv3.org`, `headscale.lv3.org`, `home.lv3.org`, `langfuse.lv3.org`, `logs.lv3.org`, `lv3.org`, `n8n.lv3.org`, `nginx.lv3.org`, `ops.lv3.org`, `realtime.lv3.org`, `registry.lv3.org`, `status.lv3.org`, `tasks.lv3.org`, and `wiki.lv3.org`."
+    },
+    {
+      "check": "Final public exposure audit",
+      "result": "partial",
+      "observed": "`make subdomain-exposure-audit` wrote audit run `57cdc152-4ab1-4276-ab0f-58d458fa7578` at `2026-03-29T12:13:18.818710Z` into `receipts/subdomain-exposure-audit/20260329T121318Z.json`; the ADR 0273 concordance checks passed, while the audit still reported only the pre-existing `git.lv3.org` warnings `active_subdomain_missing_expected_public_resolution` and `active_catalog_subdomain_missing_from_zone`."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "changelog.md",
+    "versions/stack.yaml",
+    "workstreams.yaml",
+    "build/platform-manifest.json",
+    "docs/adr/.index.yaml",
+    "docs/adr/0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md",
+    "docs/workstreams/adr-0273-public-endpoint-admission-control.md",
+    "docs/runbooks/configure-edge-publication.md",
+    "docs/runbooks/subdomain-exposure-audit.md",
+    "docs/release-notes/0.177.76.md",
+    "docs/release-notes/README.md",
+    "config/certificate-catalog.json",
+    "Makefile",
+    "scripts/subdomain_exposure_audit.py",
+    "scripts/validate_repo.sh",
+    "scripts/validate_repository_data_models.py",
+    "tests/test_subdomain_exposure_audit.py",
+    "tests/test_edge_publication_makefile.py",
+    "tests/test_validate_repo_cache.py",
+    "receipts/subdomain-exposure-audit/20260329T121318Z.json",
+    "receipts/live-applies/2026-03-29-adr-0273-public-endpoint-admission-control-live-apply.json"
+  ],
+  "notes": [
+    "This receipt supersedes the earlier branch-local receipt `2026-03-29-adr-0273-public-endpoint-admission-control-live-apply` as the canonical source for the merged mainline state because it records the synchronized replay from the protected release cut on top of the newest available origin/main baseline.",
+    "The route-ledger replay remained fully idempotent on the integrated tree, while the shared-edge replay made three safe changes on `nginx-lv3` while re-publishing the generated docs and changelog portals for release 0.177.76.",
+    "The live platform already satisfied ADR 0273's public-hostname and certificate concordance contract before this exact-main replay; platform version 0.130.52 records the synchronized mainline verification of that contract together with the protected release surfaces."
+  ]
+}
