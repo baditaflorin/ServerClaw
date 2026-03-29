@@ -5,6 +5,8 @@
 # Idempotency: Fully idempotent because this file only documents the role interface.
 # Dependencies: ADR 0165 and ADR 0262.
 ---
+# Purpose: Describe the required runtime variables for the Keycloak stack.
+
 argument_specs:
   main:
     short_description: Converge the Keycloak runtime, realm bootstrap, and brokered identities.
@@ -249,6 +251,16 @@ argument_specs:
         required: true
         description:
           - Controller-local file used to mirror the ServerClaw runtime client secret.
+      keycloak_grist_client_id:
+        type: str
+        required: true
+        description:
+          - OIDC client id used by Grist.
+      keycloak_grist_client_secret_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file used to mirror the Grist client secret.
       keycloak_grafana_groups:
         type: dict
         required: true

@@ -382,6 +382,34 @@
         "converge-gotenberg"
       ]
     },
+    "grist_runtime": {
+      "kind": "runtime",
+      "service_id": "grist",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "grist",
+      "registry_ref": "docker.io/gristlabs/grist",
+      "tag": "1.7.11",
+      "digest": "sha256:abb5270d518c2e8659cc19ca9f0d5b9fd903396c732328b316b4f8a30a4e5008",
+      "ref": "docker.io/gristlabs/grist:1.7.11@sha256:abb5270d518c2e8659cc19ca9f0d5b9fd903396c732328b316b4f8a30a4e5008",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-30-grist-runtime.json",
+      "exception": {
+        "reason": "The pinned upstream Grist image still reports critical or high Trivy findings in bundled Debian and Node components; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-30",
+        "review_by": "2026-04-13"
+      },
+      "consumers": [
+        "roles/grist_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "live-apply-service service=grist env=production"
+      ]
+    },
     "homepage_runtime": {
       "kind": "runtime",
       "service_id": "homepage",

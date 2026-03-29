@@ -251,6 +251,24 @@
     policy_critical: '14'
     display_url: https://grafana.lv3.org:443/
 - targets:
+    - https://10.10.10.10:443/status
+  labels:
+    assurance_id: grist-public
+    service_id: grist
+    service_name: Grist
+    environment: production
+    scope: public
+    exposure: edge-published
+    auth_requirement: upstream_auth
+    probe_module: http_2xx_follow_redirects
+    probe_hostname: grist.lv3.org
+    certificate_id: grist-edge
+    expected_issuer: letsencrypt
+    policy_unit: days
+    policy_warn: '21'
+    policy_critical: '14'
+    display_url: https://grist.lv3.org:443/status
+- targets:
     - https://10.10.10.10:443/api/v2.0/ping
   labels:
     assurance_id: harbor-public

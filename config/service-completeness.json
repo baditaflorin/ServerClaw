@@ -450,6 +450,17 @@
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
+    "grist": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "dashboard_file": "config/grafana/dashboards/grist.json",
+      "alert_rule_file": "config/alertmanager/rules/grist.yml",
+      "keycloak_client_generated": true,
+      "suppressed_checks": {}
+    },
     "outline": {
       "service_type": "compose",
       "requires_subdomain": true,

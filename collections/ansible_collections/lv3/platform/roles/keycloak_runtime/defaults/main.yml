@@ -5,6 +5,8 @@
 # Idempotency: Fully idempotent because this file only declares role defaults.
 # Dependencies: ADR 0165, ADR 0046, ADR 0197, and ADR 0262.
 ---
+# Purpose: Default runtime inputs for Keycloak and its repo-managed identity integrations.
+
 keycloak_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') }}"
 keycloak_session_authority: "{{ platform_session_authority }}"
 keycloak_image: quay.io/keycloak/keycloak:26.5.4
@@ -83,6 +85,8 @@ keycloak_serverclaw_runtime_client_id: serverclaw-runtime
 keycloak_serverclaw_runtime_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-runtime-client-secret.txt
 keycloak_langfuse_client_id: langfuse
 keycloak_langfuse_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/langfuse-client-secret.txt
+keycloak_grist_client_id: grist
+keycloak_grist_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/grist-client-secret.txt
 keycloak_directus_client_id: directus
 keycloak_directus_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/directus-client-secret.txt
 keycloak_jupyterhub_client_id: jupyterhub
@@ -142,6 +146,7 @@ keycloak_repo_user_reconciliation_retries: 24
 keycloak_repo_user_reconciliation_delay: 5
 keycloak_grafana_root_url: "https://{{ hostvars['proxmox_florin'].lv3_service_topology.grafana.public_hostname }}"
 keycloak_langfuse_root_url: https://langfuse.lv3.org
+keycloak_grist_root_url: https://grist.lv3.org
 keycloak_directus_root_url: https://data.lv3.org
 keycloak_jupyterhub_root_url: https://notebooks.lv3.org
 keycloak_outline_root_url: https://wiki.lv3.org
@@ -154,6 +159,10 @@ keycloak_ops_portal_post_logout_redirect_uris:
   - "{{ keycloak_session_authority.shared_logged_out_url }}"
 keycloak_grafana_post_logout_redirect_uris:
   - "{{ keycloak_grafana_root_url }}/login"
+  - "{{ keycloak_session_authority.shared_proxy_cleanup_url }}"
+keycloak_grist_post_logout_redirect_uris:
+  - "{{ keycloak_grist_root_url }}"
+  - "{{ keycloak_grist_root_url }}/"
   - "{{ keycloak_session_authority.shared_proxy_cleanup_url }}"
 keycloak_outline_post_logout_redirect_uris:
   - "{{ keycloak_outline_root_url }}"

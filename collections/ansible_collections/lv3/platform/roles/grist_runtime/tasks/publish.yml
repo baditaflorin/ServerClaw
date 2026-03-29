@@ -1,0 +1,57 @@
+---
+# Purpose: Verify the public Grist surface after edge publication.
+
+- name: Validate Grist publication inputs
+  ansible.builtin.assert:
+    that:
+      - grist_public_base_url | length > 0
+      - grist_service_topology.public_hostname | length > 0
+    fail_msg: >-
+      grist_runtime publication requires the public URL and public hostname
+      for the shared edge route.
+
+- name: Wait for the Grist public status endpoint
+  ansible.builtin.uri:
+    url: "{{ grist_public_base_url }}/status"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: grist_publish_public_status
+  retries: 18
+  delay: 5
+  until: grist_publish_public_status.status == 200
+  changed_when: false
+
+- name: Assert the Grist public status endpoint reports a healthy runtime
+  ansible.builtin.assert:
+    that:
+      - "'alive' in (grist_publish_public_status.content | default(''))"
+    fail_msg: "The public Grist status endpoint answered, but it did not report a healthy runtime."
+
+- name: Verify the Grist public document route redirects into the auth-controlled surface
+  ansible.builtin.uri:
+    url: "{{ grist_public_base_url }}/o/docs/"
+    method: GET
+    follow_redirects: none
+    status_code:
+      - 302
+      - 303
+      - 307
+      - 308
+  register: grist_publish_auth_redirect
+  changed_when: false
+
+- name: Assert the Grist public document route is login-gated
+  ansible.builtin.assert:
+    that:
+      - grist_publish_auth_redirect.location is defined
+      - >-
+        (
+          'login' in grist_publish_auth_redirect.location
+          or 'oidc' in grist_publish_auth_redirect.location
+          or 'oauth' in grist_publish_auth_redirect.location
+          or hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname in grist_publish_auth_redirect.location
+        )
+    fail_msg: >-
+      Grist is reachable publicly, but the unauthenticated document route did not
+      redirect into the expected login-controlled surface.

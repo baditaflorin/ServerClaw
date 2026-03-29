@@ -641,6 +641,51 @@ groups:
           description: https://grafana.lv3.org:443/ has less than 14 days remaining
             before certificate expiry.
           runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_grist_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="grist-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: grist
+          assurance_id: grist-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: grist-public HTTPS probe is failing.
+          description: https://grist.lv3.org:443/status is no longer completing a
+            healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_grist_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="grist-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: grist
+          assurance_id: grist-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: grist-public TLS certificate is approaching expiry.
+          description: https://grist.lv3.org:443/status has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_grist_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="grist-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: grist
+          assurance_id: grist-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: grist-public TLS certificate is within the critical expiry window.
+          description: https://grist.lv3.org:443/status has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
       - alert: HTTPSProbeFailed_harbor_public
         expr: probe_success{job="https-tls-blackbox",assurance_id="harbor-public"}
           == 0

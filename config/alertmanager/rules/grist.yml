@@ -1,0 +1,13 @@
+groups:
+  - name: lv3-grist
+    rules:
+      - alert: GristSpreadsheetDown
+        expr: probe_success{service="grist",probe_kind="readiness"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: grist
+        annotations:
+          summary: Grist is unreachable on the public spreadsheet endpoint.
+          description: The Grist readiness probe for grist.lv3.org has been failing for at least two minutes.
+          runbook_url: https://docs.lv3.org/runbooks/configure-grist/

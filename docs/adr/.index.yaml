@@ -4793,7 +4793,7 @@ adr_index:
   - adr: 0279
     title: Grist As The No-Code Operational Spreadsheet Database
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -4805,6 +4805,7 @@ adr_index:
       - database
     summary: We will deploy Grist as the shared no-code operational spreadsheet
     filename: 0279-grist-as-the-no-code-operational-spreadsheet-database.md
+    implemented_version: 0.130.60
   - adr: 0280
     title: Changedetection.io For External Content And API Change Monitoring
     status: Accepted

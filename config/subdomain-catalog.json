@@ -788,6 +788,23 @@
       "notes": "Tailnet-only HTTPS publication through the Proxmox host using an LV3 internal CA certificate."
     },
     {
+      "fqdn": "grist.lv3.org",
+      "service_id": "grist",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0279",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge while Grist itself delegates operator browser sign-in to the repo-managed Keycloak OIDC client."
+    },
+    {
       "fqdn": "wiki.lv3.org",
       "service_id": "outline",
       "environment": "production",

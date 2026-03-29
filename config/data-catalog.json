@@ -577,6 +577,21 @@
       "notes": "The delegated authorization graph persists named operator and service-principal relationships until the repo-managed bootstrap contract removes or replaces them."
     },
     {
+      "id": "grist-document-store",
+      "service": "grist",
+      "name": "Grist document and instance store",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "/opt/grist/persist/docs",
+        "/opt/grist/persist/home.sqlite3"
+      ],
+      "notes": "Grist persists operator-managed spreadsheet documents and instance metadata as SQLite files under /persist on docker-runtime-lv3."
+    },
+    {
       "id": "temporal-workflow-history",
       "service": "temporal",
       "name": "Temporal workflow history and visibility",

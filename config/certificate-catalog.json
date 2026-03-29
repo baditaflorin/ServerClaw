@@ -409,6 +409,30 @@
       }
     },
     {
+      "id": "grist-edge",
+      "service_id": "grist",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for grist.lv3.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "grist.lv3.org",
+        "port": 443,
+        "server_name": "grist.lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
       "id": "headscale-edge",
       "service_id": "headscale",
       "status": "active",

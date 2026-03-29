@@ -39,6 +39,8 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_serverclaw_runtime_client_secret_local_file"].endswith(
         "/.local/keycloak/serverclaw-runtime-client-secret.txt"
     )
+    assert defaults["keycloak_grist_client_id"] == "grist"
+    assert defaults["keycloak_grist_client_secret_local_file"].endswith("/.local/keycloak/grist-client-secret.txt")
     assert defaults["keycloak_outline_automation_username"] == "outline.automation"
     assert defaults["keycloak_outline_automation_password_local_file"].endswith("/.local/keycloak/outline.automation-password.txt")
     assert defaults["keycloak_ops_portal_post_logout_redirect_uris"] == [
@@ -48,6 +50,11 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     ]
     assert defaults["keycloak_grafana_post_logout_redirect_uris"] == [
         "{{ keycloak_grafana_root_url }}/login",
+        "{{ keycloak_session_authority.shared_proxy_cleanup_url }}",
+    ]
+    assert defaults["keycloak_grist_post_logout_redirect_uris"] == [
+        "{{ keycloak_grist_root_url }}",
+        "{{ keycloak_grist_root_url }}/",
         "{{ keycloak_session_authority.shared_proxy_cleanup_url }}",
     ]
     assert defaults["keycloak_outline_post_logout_redirect_uris"] == [
@@ -429,9 +436,15 @@ def test_role_manages_outline_client_secret() -> None:
     ops_portal_client_task = next(
         task for task in realm_block["block"] if task.get("name") == "Ensure the operations portal OAuth client exists"
     )
+    grist_client_task = next(task for task in realm_block["block"] if task.get("name") == "Ensure the Grist OAuth client exists")
     outline_client_task = next(task for task in realm_block["block"] if task.get("name") == "Ensure the Outline OAuth client exists")
+    read_grist_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the Grist client secret")
     read_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the Outline client secret")
+    mirror_grist_secret_task = next(task for task in tasks if task.get("name") == "Mirror the Grist client secret to the control machine")
     mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the Outline client secret to the control machine")
+    assert defaults["keycloak_grist_client_id"] == "grist"
+    assert defaults["keycloak_grist_client_secret_local_file"].endswith("/.local/keycloak/grist-client-secret.txt")
+    assert defaults["keycloak_grist_root_url"] == "https://grist.lv3.org"
     assert defaults["keycloak_outline_client_id"] == "outline"
     assert defaults["keycloak_outline_client_secret_local_file"].endswith("/.local/keycloak/outline-client-secret.txt")
     assert defaults["keycloak_outline_root_url"] == "https://wiki.lv3.org"
@@ -441,6 +454,13 @@ def test_role_manages_outline_client_secret() -> None:
     assert ops_portal_client_task["community.general.keycloak_client"]["valid_post_logout_redirect_uris"] == (
         "{{ keycloak_ops_portal_post_logout_redirect_uris }}"
     )
+    assert grist_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_grist_client_id }}"
+    assert grist_client_task["community.general.keycloak_client"]["redirect_uris"] == [
+        "{{ keycloak_grist_root_url }}/oauth2/callback"
+    ]
+    assert grist_client_task["community.general.keycloak_client"]["valid_post_logout_redirect_uris"] == (
+        "{{ keycloak_grist_post_logout_redirect_uris }}"
+    )
     assert outline_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_outline_client_id }}"
     assert outline_client_task["community.general.keycloak_client"]["redirect_uris"] == [
         "{{ keycloak_outline_root_url }}/auth/oidc.callback"
@@ -448,6 +468,8 @@ def test_role_manages_outline_client_secret() -> None:
     assert outline_client_task["community.general.keycloak_client"]["valid_post_logout_redirect_uris"] == (
         "{{ keycloak_outline_post_logout_redirect_uris }}"
     )
+    assert read_grist_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_grist_client_id }}"
+    assert mirror_grist_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_grist_client_secret_local_file }}"
     assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_outline_client_id }}"
     assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_outline_client_secret_local_file }}"
 

@@ -1,0 +1,8 @@
+---
+# Purpose: Provide the service-scoped live-apply entry point for Grist.
+# Use case: Used by make live-apply-service service=grist env=<environment>.
+# Outputs: Imports the full Grist converge playbook without duplicating service logic.
+# Idempotency: Matches playbooks/grist.yml.
+# Dependencies: ADR 0279 and playbooks/grist.yml.
+
+- import_playbook: ../grist.yml

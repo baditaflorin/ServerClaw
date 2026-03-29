@@ -2149,6 +2149,64 @@
         }
       }
     },
+    "grist": {
+      "service_name": "grist",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "grist_runtime",
+      "verify_file": "roles/grist_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Grist startup completes once the public status endpoint answers through the shared edge publication path.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "https://grist.lv3.org/status",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The local Grist status endpoint responds on the runtime listener.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8484/status",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The public Grist status endpoint renders through the shared edge while authenticated document routes remain OIDC-gated.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "https://grist.lv3.org/status",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Grist Public Status",
+          "type": "http",
+          "url": "https://grist.lv3.org/status",
+          "description": "Public Grist status endpoint published through the shared NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
     "outline": {
       "service_name": "outline",
       "owning_vm": "docker-runtime-lv3",

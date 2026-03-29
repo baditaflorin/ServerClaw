@@ -325,6 +325,19 @@
     ]
   },
   {
+    "name": "Grist Public Status",
+    "type": "http",
+    "url": "https://grist.lv3.org/status",
+    "description": "Public Grist status endpoint published through the shared NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
     "name": "Outline Public Health",
     "type": "http",
     "url": "https://wiki.lv3.org/_health",

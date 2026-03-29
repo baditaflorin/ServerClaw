@@ -1,0 +1,48 @@
+services:
+  openbao-agent:
+    image: {{ grist_openbao_agent_image }}
+    container_name: {{ grist_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ grist_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ grist_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ grist_env_file | dirname }}:{{ grist_env_file | dirname }}
+
+  grist:
+    image: {{ grist_image }}
+    container_name: {{ grist_container_name }}
+    restart: unless-stopped
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+    extra_hosts:
+{% for item in grist_public_hostname_overrides %}
+      - "{{ item.hostname }}:{{ item.address }}"
+{% endfor %}
+    env_file:
+      - {{ grist_env_file }}
+    ports:
+      - "{{ ansible_host }}:{{ grist_internal_port }}:8484"
+      - "127.0.0.1:{{ grist_internal_port }}:8484"
+    volumes:
+      - {{ grist_persist_dir }}:/persist
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider http://127.0.0.1:8484/status || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 24

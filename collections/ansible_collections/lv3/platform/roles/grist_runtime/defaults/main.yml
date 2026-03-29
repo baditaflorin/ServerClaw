@@ -1,0 +1,39 @@
+---
+# Purpose: Default runtime inputs for the Grist operational spreadsheet database.
+
+grist_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('grist') }}"
+grist_session_authority: "{{ platform_session_authority }}"
+grist_site_dir: /opt/grist
+grist_persist_dir: "{{ grist_site_dir }}/persist"
+grist_secret_dir: /etc/lv3/grist
+grist_compose_file: "{{ grist_site_dir }}/docker-compose.yml"
+grist_env_file: "{{ compose_runtime_secret_root }}/grist/runtime.env"
+grist_legacy_env_file: "{{ grist_site_dir }}/grist.env"
+grist_openbao_agent_dir: "{{ grist_site_dir }}/openbao"
+grist_openbao_agent_image: "{{ openbao_agent_image }}"
+grist_openbao_agent_container_name: grist-openbao-agent
+grist_openbao_secret_path: services/grist/runtime-env
+grist_openbao_policy_name: lv3-service-grist-runtime
+grist_openbao_approle_name: grist-runtime
+grist_internal_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.grist_port }}"
+grist_internal_base_url: "http://127.0.0.1:{{ grist_internal_port }}"
+grist_public_base_url: "https://{{ grist_service_topology.public_hostname }}"
+grist_public_edge_private_ip: "{{ hostvars['proxmox_florin'].proxmox_public_edge_ipv4 }}"
+grist_public_hostname_overrides:
+  - hostname: "{{ grist_service_topology.public_hostname }}"
+    address: "{{ grist_public_edge_private_ip }}"
+  - hostname: "{{ hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname }}"
+    address: "{{ grist_public_edge_private_ip }}"
+grist_container_name: grist
+grist_image: "{{ container_image_catalog.images.grist_runtime.ref }}"
+grist_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/grist
+grist_session_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/grist/session-secret.txt
+grist_keycloak_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/grist-client-secret.txt
+grist_session_secret_remote_file: "{{ grist_secret_dir }}/session-secret.txt"
+grist_keycloak_client_id: grist
+grist_keycloak_issuer: https://sso.lv3.org/realms/lv3
+grist_keycloak_scopes: openid profile email
+grist_keycloak_sp_host: "{{ grist_public_base_url }}"
+grist_single_org: lv3
+grist_default_email: "{{ keycloak_operator_email | default('baditaflorin@gmail.com') }}"
+grist_force_login: true

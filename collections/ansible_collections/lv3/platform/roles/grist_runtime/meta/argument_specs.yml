@@ -1,0 +1,46 @@
+---
+# Purpose: Describe the required runtime variables for the Grist stack.
+
+argument_specs:
+  main:
+    short_description: Converge the Grist runtime and public OIDC publication.
+    options:
+      grist_site_dir:
+        type: path
+        required: true
+      grist_persist_dir:
+        type: path
+        required: true
+      grist_secret_dir:
+        type: path
+        required: true
+      grist_compose_file:
+        type: path
+        required: true
+      grist_env_file:
+        type: path
+        required: true
+      grist_image:
+        type: str
+        required: true
+      grist_internal_port:
+        type: int
+        required: true
+      grist_internal_base_url:
+        type: str
+        required: true
+      grist_public_base_url:
+        type: str
+        required: true
+      grist_session_secret_local_file:
+        type: path
+        required: true
+      grist_keycloak_client_secret_local_file:
+        type: path
+        required: true
+      grist_keycloak_client_id:
+        type: str
+        required: true
+      grist_keycloak_issuer:
+        type: str
+        required: true

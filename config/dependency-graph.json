@@ -408,6 +408,15 @@
       "adr": "0074"
     },
     {
+      "id": "grist",
+      "service": "grist",
+      "name": "Grist",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "automation",
+      "adr": "0279"
+    },
+    {
       "id": "outline",
       "service": "outline",
       "name": "Outline",
@@ -1110,6 +1119,24 @@
       "to": "nginx_edge",
       "type": "hard",
       "description": "The generated portal is published as static content on nginx-lv3."
+    },
+    {
+      "from": "grist",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Grist delegates routine browser sign-in to the shared Keycloak OIDC broker."
+    },
+    {
+      "from": "grist",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public access to grist.lv3.org depends on the shared NGINX edge publication path."
+    },
+    {
+      "from": "grist",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Grist starts from OpenBao-rendered runtime secrets mirrored into its compose environment."
     },
     {
       "from": "outline",

@@ -205,6 +205,16 @@
       "description": "Open WebUI remains reachable on the private runtime network."
     },
     {
+      "id": "grist-availability",
+      "service_id": "grist",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://grist.lv3.org/status",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Grist remains reachable through the public LV3 edge for operator-managed spreadsheet databases and workflow tables."
+    },
+    {
       "id": "openfga-availability",
       "service_id": "openfga",
       "indicator": "availability",

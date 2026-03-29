@@ -1,0 +1,312 @@
+---
+# Purpose: Deploy Grist with repo-managed OIDC publication and persistent document storage.
+
+- name: Validate Grist runtime inputs
+  ansible.builtin.assert:
+    that:
+      - grist_site_dir | length > 0
+      - grist_persist_dir | length > 0
+      - grist_secret_dir | length > 0
+      - grist_compose_file | length > 0
+      - grist_env_file | length > 0
+      - grist_internal_port | int > 0
+      - grist_internal_base_url | length > 0
+      - grist_public_base_url | length > 0
+      - grist_keycloak_client_secret_local_file | length > 0
+      - grist_image | length > 0
+      - grist_keycloak_client_id | length > 0
+      - grist_keycloak_issuer | length > 0
+      - grist_default_email | length > 0
+    fail_msg: >-
+      grist_runtime requires runtime paths, image refs, public URLs,
+      and Keycloak OIDC credentials.
+
+- name: Check whether the Grist Keycloak client secret exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ grist_keycloak_client_secret_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: grist_keycloak_client_secret_local
+
+- name: Fail if the Grist Keycloak client secret is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ grist_keycloak_client_secret_local_file }} is missing on the control machine.
+      Converge the Keycloak runtime before deploying Grist.
+  when: not grist_keycloak_client_secret_local.stat.exists
+
+- name: Ensure the Grist runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Grist runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ grist_site_dir }}"
+      mode: "0755"
+    - path: "{{ grist_persist_dir }}"
+      mode: "0755"
+    - path: "{{ grist_secret_dir }}"
+      mode: "0700"
+
+- name: Generate the Grist session secret
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ grist_session_secret_remote_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ grist_session_secret_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: grist_session_secret_generation
+  changed_when: "'changed' in grist_session_secret_generation.stdout"
+  no_log: true
+
+- name: Read the Grist session secret
+  ansible.builtin.slurp:
+    src: "{{ grist_session_secret_remote_file }}"
+  register: grist_session_secret_raw
+  no_log: true
+
+- name: Record the Grist runtime secrets
+  ansible.builtin.set_fact:
+    grist_session_secret: "{{ grist_session_secret_raw.content | b64decode | trim }}"
+    grist_keycloak_client_secret: "{{ lookup('ansible.builtin.file', grist_keycloak_client_secret_local_file) | trim }}"
+    grist_runtime_secret_payload:
+      GRIST_SESSION_SECRET: "{{ grist_session_secret_raw.content | b64decode | trim }}"
+      GRIST_OIDC_IDP_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', grist_keycloak_client_secret_local_file) | trim }}"
+  no_log: true
+
+- name: Ensure the local Grist artifact directory exists
+  ansible.builtin.file:
+    path: "{{ grist_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the Grist session secret to the control machine
+  ansible.builtin.copy:
+    dest: "{{ grist_session_secret_local_file }}"
+    content: "{{ grist_session_secret }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for Grist
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: grist
+    common_openbao_compose_env_agent_dir: "{{ grist_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ grist_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ grist_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ grist_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ grist_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ grist_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ grist_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ grist_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ grist_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ grist_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ grist_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: grist.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ grist_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ grist_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ grist_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ grist_legacy_env_file }}"
+  no_log: true
+
+- name: Render the Grist environment file
+  ansible.builtin.template:
+    src: grist.env.j2
+    dest: "{{ grist_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  register: grist_env_template
+  no_log: true
+
+- name: Render the Grist compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ grist_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: grist_compose_template
+
+- name: Pull the Grist image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ grist_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ grist_site_dir }}"
+  register: grist_pull
+  changed_when: >-
+    'Pulling' in grist_pull.stdout
+    or 'Downloaded newer image' in grist_pull.stdout
+    or 'Pull complete' in grist_pull.stdout
+
+- name: Check whether the Docker nat chain exists before Grist startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: grist_docker_nat_chain
+  changed_when: false
+  failed_when: false
+
+- name: Restore Docker networking when the nat chain is missing before Grist startup
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: grist_docker_nat_chain.rc != 0
+
+- name: Recheck the Docker nat chain before Grist startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: grist_docker_nat_chain_recheck
+  changed_when: false
+  failed_when: grist_docker_nat_chain_recheck.rc not in [0, 1]
+  retries: 10
+  delay: 2
+  until: grist_docker_nat_chain_recheck.rc == 0
+  when: grist_docker_nat_chain.rc != 0
+
+- name: Wait for the Docker daemon to answer after networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - info
+      - --format
+      - '{{ "{{.ServerVersion}}" }}'
+  register: grist_docker_info
+  changed_when: false
+  retries: 10
+  delay: 2
+  until: grist_docker_info.rc == 0
+  when: grist_docker_nat_chain.rc != 0
+
+- name: Assert Docker nat chain is present before Grist startup
+  ansible.builtin.assert:
+    that:
+      - grist_docker_nat_chain.rc == 0 or grist_docker_nat_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; Grist published ports will fail."
+
+- name: Check whether the Grist local port is already published
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ grist_internal_port }}"
+    delay: 0
+    timeout: 1
+  register: grist_local_port_probe
+  changed_when: false
+  failed_when: false
+
+- name: Check whether the current Grist local status endpoint is healthy before startup
+  ansible.builtin.uri:
+    url: "{{ grist_internal_base_url }}/status"
+    method: GET
+    status_code: 200
+  register: grist_status_probe
+  changed_when: false
+  failed_when: false
+
+- name: Record whether the Grist startup needs a force recreate
+  ansible.builtin.set_fact:
+    grist_force_recreate: >-
+      {{
+        grist_docker_nat_chain.rc != 0
+        or (grist_env_template.changed | default(false))
+        or (grist_compose_template.changed | default(false))
+        or (grist_pull.changed | default(false))
+        or (grist_local_port_probe.failed | default(false))
+        or (grist_status_probe.status | default(0)) != 200
+      }}
+
+- name: Force-recreate the Grist runtime stack after Docker networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ grist_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - --remove-orphans
+  args:
+    chdir: "{{ grist_site_dir }}"
+  register: grist_force_recreate_up
+  changed_when: >-
+    'Creating' in grist_force_recreate_up.stdout
+    or 'Recreating' in grist_force_recreate_up.stdout
+    or 'Starting' in grist_force_recreate_up.stdout
+  retries: 2
+  delay: 3
+  until: grist_force_recreate_up.rc == 0
+  when: grist_force_recreate | bool
+
+- name: Start the Grist runtime stack when a force recreate is not needed
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ grist_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ grist_site_dir }}"
+  register: grist_up
+  changed_when: >-
+    'Creating' in grist_up.stdout
+    or 'Recreating' in grist_up.stdout
+    or 'Starting' in grist_up.stdout
+  when: not (grist_force_recreate | bool)
+
+- name: Wait for Grist to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ grist_internal_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Verify the Grist runtime
+  ansible.builtin.import_tasks: verify.yml

@@ -68,6 +68,7 @@ PORT_KEYS = (
     "changedetection_port",
     "crawl4ai_port",
     "browser_runner_port",
+    "grist_port",
     "outline_port",
     "directus_port",
     "jupyterhub_port",
@@ -542,6 +543,9 @@ def build_service_urls(
     elif service_id == "browser_runner":
         urls["internal"] = service_url("http", private_ip, ports["browser_runner_port"])
         port_map["internal"] = ports["browser_runner_port"]
+    elif service_id == "grist":
+        urls["internal"] = service_url("http", private_ip, ports["grist_port"])
+        port_map["internal"] = ports["grist_port"]
     elif service_id == "outline":
         urls["internal"] = service_url("http", private_ip, ports["outline_port"])
         port_map["internal"] = ports["outline_port"]

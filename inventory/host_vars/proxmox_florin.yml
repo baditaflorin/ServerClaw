@@ -70,6 +70,7 @@ platform_port_assignments:
   changedetection_port: 5000
   crawl4ai_port: 11235
   browser_runner_port: 8096
+  grist_port: 8484
   outline_port: 3006
   directus_port: 8055
   jupyterhub_port: 8097
@@ -1762,6 +1763,28 @@ lv3_service_topology:
       noindex: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port }}"
+  grist:
+    service_name: grist
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: grist.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: grist
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.grist_port }}"
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3

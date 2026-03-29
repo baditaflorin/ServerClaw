@@ -1,0 +1,20 @@
+---
+# Purpose: Verify the local Grist runtime health after compose convergence.
+
+- name: Verify the Grist local status endpoint
+  ansible.builtin.uri:
+    url: "{{ grist_internal_base_url }}/status"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: grist_verify_local_status
+  retries: 12
+  delay: 5
+  until: grist_verify_local_status.status == 200
+  changed_when: false
+
+- name: Assert the Grist local status endpoint returned the expected payload
+  ansible.builtin.assert:
+    that:
+      - "'alive' in (grist_verify_local_status.content | default(''))"
+    fail_msg: "Grist started, but the local /status endpoint did not report a healthy runtime."
