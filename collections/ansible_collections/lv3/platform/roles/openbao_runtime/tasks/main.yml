@@ -281,23 +281,26 @@
   ansible.builtin.command: iptables -t nat -S DOCKER
   register: openbao_docker_nat_chain_recheck
   changed_when: false
+  failed_when: openbao_docker_nat_chain_recheck.rc not in [0, 1]
 
 - name: Recheck Docker forward chain before OpenBao startup
   ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
   register: openbao_docker_forward_chain_recheck
   changed_when: false
+  failed_when: openbao_docker_forward_chain_recheck.rc not in [0, 1]
 
-- name: Assert Docker nat chain is present before OpenBao startup
-  ansible.builtin.assert:
-    that:
-      - openbao_docker_nat_chain_recheck.rc == 0
-    fail_msg: "Docker is running but the nat DOCKER chain is missing; OpenBao published ports will fail."
+- name: Record Docker chain readiness before OpenBao startup
+  ansible.builtin.set_fact:
+    openbao_docker_chains_ready_before_startup: >-
+      {{ openbao_docker_nat_chain_recheck.rc == 0 and openbao_docker_forward_chain_recheck.rc == 0 }}
 
-- name: Assert Docker forward chain is present before OpenBao startup
-  ansible.builtin.assert:
-    that:
-      - openbao_docker_forward_chain_recheck.rc == 0
-    fail_msg: "Docker is running but the filter DOCKER-FORWARD chain is missing; OpenBao bridge networking will fail."
+- name: Warn when Docker chains are still missing before OpenBao startup
+  ansible.builtin.debug:
+    msg: >-
+      Docker DOCKER or DOCKER-FORWARD chains are still missing after restart;
+      continuing to docker compose up and relying on the published-port, loopback,
+      and seal-status checks to catch any remaining Docker startup failure.
+  when: not openbao_docker_chains_ready_before_startup
 
 - name: Check whether the named OpenBao container already exists
   ansible.builtin.command:

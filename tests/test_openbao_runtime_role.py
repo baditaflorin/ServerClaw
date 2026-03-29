@@ -105,6 +105,19 @@ def test_openbao_runtime_retries_seal_status_during_restart_window() -> None:
     assert "changed_when: false" in tasks
 
 
+def test_openbao_runtime_continues_after_docker_chain_recheck_when_compose_health_checks_guard_recovery() -> None:
+    tasks = TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "Recheck Docker nat chain before OpenBao startup" in tasks
+    assert "failed_when: openbao_docker_nat_chain_recheck.rc not in [0, 1]" in tasks
+    assert "failed_when: openbao_docker_forward_chain_recheck.rc not in [0, 1]" in tasks
+    assert "Record Docker chain readiness before OpenBao startup" in tasks
+    assert "Warn when Docker chains are still missing before OpenBao startup" in tasks
+    assert "continuing to docker compose up" in tasks
+    assert "Assert Docker nat chain is present before OpenBao startup" not in tasks
+    assert "Assert Docker forward chain is present before OpenBao startup" not in tasks
+
+
 def test_openbao_runtime_persisted_approles_use_reusable_secret_ids() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
 
