@@ -450,6 +450,8 @@ workstreams:
         ops_portal_attempt: 2026-03-29-adr-0251-ops-portal-live-apply-rerun
         api_gateway_drift_recovery: 2026-03-29-adr-0251-api-gateway-drift-recovery
         api_gateway_drift_recur: 2026-03-29-adr-0251-api-gateway-drift-recur
+        api_gateway_mainline_attempt: 2026-03-29-adr-0251-api-gateway-mainline-live-apply
+        api_gateway_mainline_rerun: 2026-03-29-adr-0251-api-gateway-mainline-live-apply-rerun
   - id: ws-0224-repo-intake
     adr: "0224"
     title: Self-service repo intake and agent-assisted app deployments

@@ -122,6 +122,21 @@
   `receipts/live-applies/evidence/2026-03-29-adr-0251-api-gateway-drift-recovery.txt`,
   and recurrence proof:
   `receipts/live-applies/evidence/2026-03-29-adr-0251-api-gateway-drift-recur.txt`
+- 2026-03-29 the rebased exact-main `api_gateway` replay uncovered a second
+  concurrency hazard on `docker-runtime-lv3`: tree-sync archives used fixed
+  guest filenames like `/opt/api-gateway/collections-sync.tar.gz`, so parallel
+  gateway replays could delete each other between copy and expand; this branch
+  now derives a per-run guest archive filename inside
+  `api_gateway_runtime/tasks/sync_tree.yml`, and
+  `tests/test_api_gateway_runtime_role.py` covers that contract
+- 2026-03-29 the first exact-main gateway replay and the immediate rerun prove
+  two separate live issues clearly in branch-local evidence:
+  `receipts/live-applies/evidence/2026-03-29-adr-0251-api-gateway-mainline-live-apply.txt`
+  shows the fixed-name archive race, while
+  `receipts/live-applies/evidence/2026-03-29-adr-0251-api-gateway-mainline-live-apply-rerun.txt`
+  gets through the rebuild but still fails the final runtime-assurance route
+  verification because another concurrent `api-gateway` replay clobbered the
+  host back to the older `acc8…` implementation during verification
 
 ## Live Apply Blocker
 
@@ -147,13 +162,17 @@
   which removes `/v1/platform/runtime-assurance` from the live gateway and
   forces the ops portal back onto the degraded fallback banner during final
   verification
+- the exact-main gateway rerun confirms the overwrite is coming from another
+  branch-local replay, not from this worktree: while this branch expected
+  `ce9f…`, the live host and container stayed on `acc8…`, and local controller
+  process inspection showed a concurrent `ws-0257-main-merge` `playbooks/api-gateway.yml`
+  replay targeting the same host during the same verification window
 
 ## Remaining Steps
 
 - fetch and rebase onto the latest `origin/main` before any final integration:
   during this run the worktree moved again and `origin/main` is now
-  `a4f8e6cc894c59e8fb744cc5be9691b96c44702a` (`v0.177.81`) as of
-  2026-03-29
+  `7f1bbe50518fd30a78a2ce5f7ee5f410ba07b0ea` as of 2026-03-29
 - re-run `api-gateway`, then the exact `ops_portal` and `windmill` live applies
   from an uncontended latest-main checkout and verify the guest hashes
   immediately after each replay so the shared host cannot drift between apply
