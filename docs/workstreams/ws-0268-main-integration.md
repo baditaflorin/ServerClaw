@@ -4,7 +4,7 @@
 - Title: Integrate ADR 0268 exact-main replay onto `origin/main`
 - Status: `merged`
 - Included In Repo Version: 0.177.83
-- Platform Version Observed During Integration: 0.130.56
+- Platform Version Observed During Integration: 0.130.57
 - Release Date: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0268-main-integration`
@@ -65,10 +65,10 @@ canonical mainline evidence.
 ## Verification
 
 - `git fetch origin --prune` confirmed the newest available `origin/main`
-  baseline remained commit `a4f8e6cc894c59e8fb744cc5be9691b96c44702a` while
-  the protected release cut advanced repository version `0.177.81` to
-  `0.177.82`.
-- The exact-main source commit `9e120e0f7d63d8dfd483aedefc5f1cd7430f1824`
+  baseline remained commit `7f1bbe50518fd30a78a2ce5f7ee5f410ba07b0ea` while
+  the protected release cut advanced repository version `0.177.82` to
+  `0.177.83`.
+- The exact-main source commit `813f0a4f6859360ec25a873be45390087c62c836`
   preserved the `public-edge` to `nginx_edge` alias in
   `config/ansible-execution-scopes.yaml`, refreshed the generated ops-portal
   snapshot, and preserved a clean latest-main replay source.
@@ -78,7 +78,7 @@ canonical mainline evidence.
   window.
 - `scripts/canonical_truth.py` was updated so capability receipt precedence now
   follows the integrated repo version instead of ADR number, allowing the
-  newer `0.177.82` exact-main public-edge receipt to override the older
+  newer `0.177.83` exact-main public-edge receipt to override the older
   `0.177.77` edge receipt for `versions/stack.yaml.live_apply_evidence`.
 - `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=public-edge env=production`
   rebuilt the missing `build/ops-portal/`, `build/changelog-portal/`, and
@@ -91,9 +91,9 @@ canonical mainline evidence.
 
 ## Outcome
 
-- Release `0.177.82` now carries both the ADR 0268 implementation and the
+- Release `0.177.83` now carries both the ADR 0268 implementation and the
   exact-main wrapper verification onto `main`.
-- Platform version `0.130.56` is the first integrated platform version that
+- Platform version `0.130.57` is the first integrated platform version that
   records the canonical `live-apply-service service=public-edge` replay from
   the synchronized latest-main source commit.
 - `receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply.json`

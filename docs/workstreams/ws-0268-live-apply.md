@@ -4,7 +4,7 @@
 - Title: Add bootstrap manifests for generated artifacts and controller-local inputs, then verify the fresh-worktree apply path end to end
 - Status: live_applied
 - Implemented In Repo Version: 0.177.83
-- Live Applied In Platform Version: 0.130.56
+- Live Applied In Platform Version: 0.130.57
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0268-live-apply`
@@ -79,9 +79,9 @@
 - `curl -I https://grafana.lv3.org`, `curl -I https://nginx.lv3.org`, `curl -I https://docs.lv3.org`, and `curl -I https://changelog.lv3.org` all returned healthy responses after the replay
 - the branch-local live-apply evidence is recorded in `receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply.json`
 - the integrated release cut on the latest available `origin/main` advanced the repository version to `0.177.83`
-- after `origin/main` advanced to `a4f8e6cc894c59e8fb744cc5be9691b96c44702a`, the final exact-main replay from commit `9e120e0f7d63d8dfd483aedefc5f1cd7430f1824` preserved the execution-scope alias for `public-edge` to canonical service `nginx_edge` and re-verified the documented `ALLOW_IN_PLACE_MUTATION=true` ADR 0191 narrow exception for `nginx_edge`
+- after `origin/main` advanced to `7f1bbe50518fd30a78a2ce5f7ee5f410ba07b0ea`, the final exact-main replay from commit `813f0a4f6859360ec25a873be45390087c62c836` preserved the execution-scope alias for `public-edge` to canonical service `nginx_edge` and re-verified the documented `ALLOW_IN_PLACE_MUTATION=true` ADR 0191 narrow exception for `nginx_edge`
 - `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=public-edge env=production` rebuilt the missing portal directories from a clean worktree and completed successfully with `nginx-lv3 ok=61 changed=4 failed=0`
-- the canonical mainline evidence is recorded in `receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply.json`, and platform version `0.130.56` is the first integrated platform version that records ADR 0268 as verified from the latest synchronized mainline
+- the canonical mainline evidence is recorded in `receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply.json`, and platform version `0.130.57` is the first integrated platform version that records ADR 0268 as verified from the latest synchronized mainline
 
 ## Merge Criteria
 

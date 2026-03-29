@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-03-29",
   "recorded_on": "2026-03-29",
-  "recorded_at": "2026-03-29T15:51:39Z",
+  "recorded_at": "2026-03-29T16:14:02Z",
   "recorded_by": "codex",
-  "source_commit": "9e120e0f7d63d8dfd483aedefc5f1cd7430f1824",
-  "repo_version_context": "0.177.82",
-  "platform_version_context": "0.130.56",
+  "source_commit": "813f0a4f6859360ec25a873be45390087c62c836",
+  "repo_version_context": "0.177.83",
+  "platform_version_context": "0.130.57",
   "workflow_id": "adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply",
   "adr": "0268",
-  "summary": "Integrated ADR 0268 on synchronized main release 0.177.82 by replaying the generic public-edge live-apply wrapper from a clean worktree, proving the bootstrap manifests rebuilt the shared portal artifacts before mutation began, preserving the public-edge to nginx_edge guard-chain alias so the full governed path runs end to end, and establishing platform version 0.130.56 with the shared edge healthy afterward.",
+  "summary": "Integrated ADR 0268 on synchronized main release 0.177.83 by replaying the generic public-edge live-apply wrapper from a clean worktree, proving the bootstrap manifests rebuilt the shared portal artifacts before mutation began, preserving the public-edge to nginx_edge guard-chain alias so the full governed path runs end to end, and establishing platform version 0.130.57 with the shared edge healthy afterward.",
   "targets": [
     {
       "kind": "host",
@@ -45,7 +45,7 @@
     {
       "check": "Latest origin/main baseline and protected release cut",
       "result": "pass",
-      "observed": "`git fetch origin --prune` confirmed the newest published `origin/main` baseline remained commit `a4f8e6cc894c59e8fb744cc5be9691b96c44702a`; the exact-main ADR 0268 replay source was commit `9e120e0f7d63d8dfd483aedefc5f1cd7430f1824` on top of that head, and the protected release cut carried repository version `0.177.82`."
+      "observed": "`git fetch origin --prune` confirmed the newest published `origin/main` baseline remained commit `7f1bbe50518fd30a78a2ce5f7ee5f410ba07b0ea`; the exact-main ADR 0268 replay source was commit `813f0a4f6859360ec25a873be45390087c62c836` on top of that head, and the protected release cut carried repository version `0.177.83`."
     },
     {
       "check": "Public-edge guard chain and immutable-replacement exception",
@@ -65,7 +65,7 @@
     {
       "check": "Repo automation and validation sweep on the integrated tree",
       "result": "pass",
-      "observed": "`uv run --with pytest --with-requirements requirements/docs.txt --with pyyaml python -m pytest -q tests/test_docs_site.py tests/test_preflight_controller_local.py tests/test_correction_loops.py tests/test_ansible_execution_scopes.py tests/test_service_id_resolver.py tests/test_canonical_truth.py` returned `31 passed in 30.44s`; `uv run --with pyyaml python scripts/workflow_catalog.py --validate` returned `Workflow catalog OK`; `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate` returned `Repository data models OK`; `./scripts/validate_repo.sh agent-standards generated-docs generated-portals` passed after refreshing `docs/site-generated/architecture/dependency-graph.md`; and `git diff --check` passed on the integrated `0.177.82` tree."
+      "observed": "`uv run --with pytest --with-requirements requirements/docs.txt --with pyyaml python -m pytest -q tests/test_docs_site.py tests/test_preflight_controller_local.py tests/test_correction_loops.py tests/test_ansible_execution_scopes.py tests/test_service_id_resolver.py tests/test_canonical_truth.py` returned `31 passed in 26.79s`; `uv run --with pyyaml python scripts/workflow_catalog.py --validate` returned `Workflow catalog OK`; `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate` returned `Repository data models OK`; `./scripts/validate_repo.sh agent-standards generated-docs generated-portals` passed after refreshing `docs/site-generated/architecture/dependency-graph.md`; and `git diff --check` passed on the integrated `0.177.83` tree."
     }
   ],
   "evidence_refs": [
@@ -83,7 +83,7 @@
     "docs/runbooks/controller-local-secrets-and-preflight.md",
     "docs/runbooks/playbook-execution-model.md",
     "docs/release-process.md",
-    "docs/release-notes/0.177.82.md",
+    "docs/release-notes/0.177.83.md",
     "docs/release-notes/README.md",
     "config/ansible-execution-scopes.yaml",
     "config/command-catalog.json",
@@ -102,8 +102,8 @@
     "receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply.json"
   ],
   "notes": [
-    "This receipt supersedes the earlier branch-local receipt `2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply` as the canonical source for repository version `0.177.82` and platform version `0.130.56`, while preserving that first isolated-worktree proof.",
-    "After `origin/main` advanced to `a4f8e6cc894c59e8fb744cc5be9691b96c44702a`, source commit `9e120e0f7d63d8dfd483aedefc5f1cd7430f1824` replayed the same guarded public-edge wrapper on top of the final release cut while preserving the earlier `public-edge` to `nginx_edge` execution-scope alias fix.",
+    "This receipt supersedes the earlier branch-local receipt `2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply` as the canonical source for repository version `0.177.83` and platform version `0.130.57`, while preserving that first isolated-worktree proof.",
+    "After `origin/main` advanced to `7f1bbe50518fd30a78a2ce5f7ee5f410ba07b0ea`, source commit `813f0a4f6859360ec25a873be45390087c62c836` replayed the same guarded public-edge wrapper on top of the final release cut while preserving the earlier `public-edge` to `nginx_edge` execution-scope alias fix.",
     "The exact-main wrapper replay intentionally used `ALLOW_IN_PLACE_MUTATION=true` as the documented ADR 0191 narrow exception for `nginx_edge`; the default production path for future edge changes remains immutable guest replacement."
   ]
 }
