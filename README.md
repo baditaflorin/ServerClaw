@@ -152,7 +152,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.81` |
-| Platform version | `0.130.54` |
+| Platform version | `0.130.55` |
 | Observed check date | `2026-03-29` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -993,16 +993,26 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0281: GlitchTip As The Sentry-Compatible Application Error Tracker](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0281-glitchtip-as-the-sentry-compatible-application-error-tracker.md)
 - [ADR 0282: Mailpit As The SMTP Development Mail Interceptor](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0282-mailpit-as-the-smtp-development-mail-interceptor.md)
 - [ADR 0283: Plausible Analytics As The Privacy-First Web Traffic Analytics Layer](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0283-plausible-analytics-as-the-privacy-first-web-traffic-analytics-layer.md)
+- [ADR 0284: Netbox As The Network IPAM And Topology Source Of Truth](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0284-netbox-as-the-network-ipam-and-topology-source-of-truth.md)
 - [ADR 0284: Piper TTS As The CPU Neural Text-To-Speech Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0284-piper-tts-as-the-cpu-neural-text-to-speech-service.md)
+- [ADR 0285: Paperless-ngx As The Document Management And Archive API](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0285-paperless-ngx-as-the-document-management-and-archive-api.md)
 - [ADR 0285: Whisper ASR As The CPU Speech-To-Text Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0285-whisper-asr-as-the-cpu-speech-to-text-service.md)
 - [ADR 0286: Tesseract OCR Service For Scanned Image Text Extraction](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0286-tesseract-ocr-service-for-scanned-image-text-extraction.md)
+- [ADR 0286: Vikunja As The Task And Project Management REST API](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0286-vikunja-as-the-task-and-project-management-rest-api.md)
 - [ADR 0287: LiteLLM As The Unified LLM API Proxy And Router](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0287-litellm-as-the-unified-llm-api-proxy-and-router.md)
+- [ADR 0287: Woodpecker CI As The API-Driven Continuous Integration Server](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md)
 - [ADR 0288: Crawl4AI As The LLM-Optimised Web Content Crawler](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0288-crawl4ai-as-the-llm-optimised-web-content-crawler.md)
+- [ADR 0288: Flagsmith As The Feature Flag And Remote Configuration Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0288-flagsmith-as-the-feature-flag-and-remote-configuration-service.md)
+- [ADR 0289: Directus As The REST And GraphQL Data API Layer Over Postgres](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0289-directus-as-the-rest-graphql-data-api-layer-over-postgres.md)
 - [ADR 0289: Label Studio As The Human-In-The-Loop Data Annotation Platform](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0289-label-studio-as-the-human-in-the-loop-data-annotation-platform.md)
 - [ADR 0290: MLflow As The Machine Learning Experiment Tracker And Model Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0290-mlflow-as-the-machine-learning-experiment-tracker-and-model-registry.md)
+- [ADR 0290: Redpanda As The Kafka-Compatible Streaming Platform](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0290-redpanda-as-the-kafka-compatible-streaming-platform.md)
 - [ADR 0291: JupyterHub As The Interactive Notebook Environment](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0291-jupyterhub-as-the-interactive-notebook-environment.md)
+- [ADR 0291: SFTPGo As The Managed File Transfer Service With REST Provisioning](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0291-sftpgo-as-the-managed-file-transfer-service-with-rest-provisioning.md)
 - [ADR 0292: Apache Superset As The SQL-First Business Intelligence Layer](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0292-apache-superset-as-the-sql-first-business-intelligence-layer.md)
+- [ADR 0292: Lago As The Usage Metering And Billing API Layer](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0292-lago-as-the-usage-metering-and-billing-api-layer.md)
 - [ADR 0293: Livekit As The Real-Time Audio And Voice Channel For Agents](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md)
+- [ADR 0293: Temporal As The Durable Workflow And Task Queue Engine](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0293-temporal-as-the-durable-workflow-and-task-queue-engine.md)
 - [ADR 0294: One-API As The Unified LLM API Proxy And Router](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0294-one-api-as-the-unified-llm-api-proxy-and-router.md)
 - [ADR 0295: Shared Artifact Cache Plane For Container And Package Dependencies](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md)
 - [ADR 0296: Dedicated Artifact-Cache VM With Phased Consumer Adoption](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md)
@@ -1280,7 +1290,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.81` |
-| Platform version | `0.130.54` |
+| Platform version | `0.130.55` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |

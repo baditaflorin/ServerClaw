@@ -6,7 +6,7 @@
   "recorded_on": "2026-03-29",
   "recorded_at": "2026-03-29T15:20:00Z",
   "recorded_by": "codex",
-  "source_commit": "f7a0bdcd1c0a28dd54562e656b762cbed75bc121",
+  "source_commit": "f0d477afcfdc2252a6edcedffbed2ab9758c16a3",
   "repo_version_context": "0.177.80",
   "platform_version_context": "0.130.54",
   "workflow_id": "adr-0236-tanstack-query-mainline-live-apply",
@@ -94,6 +94,7 @@
   "notes": [
     "ADR 0236 itself first became true earlier on the branch-local live apply from 2026-03-28, which is why the ADR metadata still records platform version 0.130.43 as the first live platform version where the decision became true.",
     "This exact-main receipt revalidates ADR 0236 from repo version 0.177.80 on top of platform version 0.130.54 before the protected release surfaces move to release 0.177.81 and integrated platform version 0.130.55.",
+    "Two later origin/main commits added new ADR documentation only; the branch was rebased onto that newer mainline before the final push, and the post-rebase smoke checks confirmed the live Windmill surfaces remained unchanged.",
     "The broader `operator_access` and `windmill` latest-receipt pointers remain owned by the later ADR 0241 and ADR 0228 mainline receipts; this receipt is canonical evidence for ADR 0236 itself.",
     "No manual server mutation was retained outside the repo-managed converges; the live platform was corrected by rerunning the exact-main Windmill automation until the deployed app and validation wrappers matched the branch again."
   ]

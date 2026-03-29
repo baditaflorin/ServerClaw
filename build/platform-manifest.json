@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.80",
-  "platform_version": "0.130.54",
-  "generated_at": "2026-03-29T14:34:39Z",
-  "next_refresh_at": "2026-03-29T15:34:39Z",
+  "repo_version": "0.177.81",
+  "platform_version": "0.130.55",
+  "generated_at": "2026-03-29T15:26:13Z",
+  "next_refresh_at": "2026-03-29T16:26:13Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4211,10 +4211,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.79",
+    "last_version": "0.177.80",
     "deployed_at": "2026-03-29",
-    "summary": "records ADR 0244 exact-main evidence on the current mainline by preserving the verified service-by-environment runtime assurance matrix, the authenticated gateway plus portal rollup, and the corrected latest-main replay after concurrent live drift and docker-runtime disk-pressure recovery",
-    "release_notes_url": "docs/release-notes/0.177.80.md"
+    "summary": "records ADR 0236 exact-main evidence on the current mainline by preserving the verified TanStack Query operator-admin rollout, explicit roster and inventory feedback states, query invalidation, and the hardened Windmill raw-app dependency plus worker-readiness converge path while the later ADR 0241 and ADR 0228 receipts remain canonical for the broader shared surfaces",
+    "release_notes_url": "docs/release-notes/0.177.81.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

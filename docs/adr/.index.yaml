@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-29'
 total_adrs: 314
 implementation_status_summary:
-  Implemented: 237
+  Implemented: 238
   Partial: 7
-  Not Implemented: 69
+  Not Implemented: 68
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4075,7 +4075,7 @@ adr_index:
   - adr: '0236'
     title: Server-State And Mutation Feedback Via TanStack Query
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4086,6 +4086,7 @@ adr_index:
       - query
     summary: We will use TanStack Query as the default server-state and mutation-feedback
     filename: 0236-server-state-and-mutation-feedback-via-tanstack-query.md
+    implemented_version: 0.177.81
   - adr: '0237'
     title: Schema-First Human Forms Via React Hook Form And Zod
     status: Accepted
