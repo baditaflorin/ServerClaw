@@ -162,13 +162,19 @@
     or 'Running' in openfga_openbao_agent_up.stdout
 
 - name: Wait for the OpenFGA runtime env file
-  ansible.builtin.stat:
-    path: "{{ openfga_env_file }}"
-  register: openfga_runtime_env_file
+  ansible.builtin.shell: |
+    set -euo pipefail
+    test -s "{{ openfga_env_file }}"
+    grep -Fqx "OPENFGA_HTTP_ADDR={{ openfga_http_addr }}" "{{ openfga_env_file }}"
+    grep -Fqx "OPENFGA_GRPC_ADDR={{ openfga_grpc_addr }}" "{{ openfga_env_file }}"
+  args:
+    executable: /bin/bash
+  register: openfga_runtime_env_contract
   retries: 24
   delay: 5
-  until: openfga_runtime_env_file.stat.exists and (openfga_runtime_env_file.stat.size | int > 0)
+  until: openfga_runtime_env_contract.rc == 0
   changed_when: false
+  no_log: true
 
 - name: Run OpenFGA database migrations
   ansible.builtin.command:

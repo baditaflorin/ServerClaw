@@ -1686,7 +1686,7 @@
         "timeout_seconds": 120,
         "retries": 24,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8096/healthz",
+        "url": "http://127.0.0.1:8098/healthz",
         "method": "GET",
         "expected_status": [
           200
@@ -1698,7 +1698,7 @@
         "timeout_seconds": 120,
         "retries": 24,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8096/healthz",
+        "url": "http://127.0.0.1:8098/healthz",
         "method": "GET",
         "expected_status": [
           200
@@ -1710,7 +1710,7 @@
         "timeout_seconds": 120,
         "retries": 24,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8096/healthz",
+        "url": "http://127.0.0.1:8098/healthz",
         "method": "GET",
         "expected_status": [
           200

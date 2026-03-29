@@ -1663,7 +1663,7 @@ workstreams:
   - id: ws-0262-live-apply
     adr: "0262"
     title: OpenFGA and Keycloak delegated authorization live apply
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0262-openfga-keycloak-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0262-openfga-keycloak-live-apply
@@ -1797,8 +1797,16 @@ workstreams:
             - tests/test_openfga_runtime_role.py
             - tests/test_serverclaw_authz.py
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0262 by deploying the OpenFGA delegated
+        authorization runtime, the ServerClaw bootstrap contracts, the
+        repo-managed Keycloak runtime clients, and the API gateway registration
+        for delegated authorization checks
+      release_bump: patch
+      latest_receipts:
+        openfga: 2026-03-29-adr-0262-openfga-keycloak-live-apply
   - id: ws-0244-runtime-assurance-adrs
     adr: "0244"
     title: Runtime assurance architecture bundle

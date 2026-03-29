@@ -137,7 +137,7 @@
     {
       "id": "openfga",
       "name": "OpenFGA",
-      "upstream": "http://10.10.10.20:8096",
+      "upstream": "http://10.10.10.20:8098",
       "gateway_prefix": "/v1/openfga",
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",

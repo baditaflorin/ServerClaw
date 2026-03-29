@@ -34,7 +34,7 @@ platform_port_assignments:
   mail_platform_gateway_port: 8081
   mail_platform_internal_submission_port: 1587
   ntfy_port: 2586
-  openfga_http_port: 8096
+  openfga_http_port: 8098
   openfga_host_proxy_port: 8014
   openbao_http_port: 8201
   openbao_proxy_port: 8200

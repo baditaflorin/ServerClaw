@@ -62,7 +62,7 @@ python3 scripts/serverclaw_authz.py verify \
 
 Expected results:
 
-- `http://127.0.0.1:8096/healthz` returns `200 ok` on `docker-runtime-lv3`
+- `http://127.0.0.1:8098/healthz` returns `200 ok` on `docker-runtime-lv3`
 - `http://100.64.0.1:8014/stores` returns `200` when the repo-managed
   preshared key is presented
 - the controller-side bootstrap and verify steps use the VM-private Keycloak
@@ -83,6 +83,9 @@ Expected results:
 
 - Re-run `make converge-openfga env=production` instead of hand-editing the
   OpenFGA store, tuples, or the runtime Keycloak client.
+- Keep the OpenFGA runtime on `8098`; `8096` is already occupied by the
+  separate `browser-runner` stack on `docker-runtime-lv3`, while the
+  controller-private OpenFGA endpoint remains `http://100.64.0.1:8014`.
 - If the controller-local preshared key is lost, rotate it by deleting
   `.local/openfga/preshared-key.txt` and replaying the converge from git.
 - If the authz checks fail after runtime-client recreation, re-run the OpenFGA

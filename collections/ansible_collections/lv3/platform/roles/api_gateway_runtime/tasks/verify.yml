@@ -78,6 +78,9 @@
       register: api_gateway_verify_token_response
       no_log: true
       changed_when: false
+      retries: 6
+      delay: "{{ api_gateway_keycloak_retry_after_seconds }}"
+      until: api_gateway_verify_token_response.status == 200
 
     - name: Record whether the Keycloak verification token request returned an access token
       ansible.builtin.set_fact:

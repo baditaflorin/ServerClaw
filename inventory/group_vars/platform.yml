@@ -99,7 +99,7 @@ platform_host:
         listen_address: 100.64.0.1
         listen_port: 8014
         upstream_host: 10.10.10.20
-        upstream_port: 8096
+        upstream_port: 8098
       - name: semaphore
         listen_address: 100.64.0.1
         listen_port: 8020
@@ -148,7 +148,7 @@ platform_ports:
   netdata_port: 19999
   mail_platform_gateway_port: 8081
   ntfy_port: 2586
-  openfga_http_port: 8096
+  openfga_http_port: 8098
   openfga_host_proxy_port: 8014
   openbao_http_port: 8201
   openbao_proxy_port: 8200
@@ -212,7 +212,7 @@ platform_port_assignments:
   netdata_port: 19999
   mail_platform_gateway_port: 8081
   ntfy_port: 2586
-  openfga_http_port: 8096
+  openfga_http_port: 8098
   openfga_host_proxy_port: 8014
   openbao_http_port: 8201
   openbao_proxy_port: 8200
@@ -1857,10 +1857,10 @@ platform_service_topology:
       url: http://100.64.0.1:8014
     service_id: openfga
     ports:
-      internal: 8096
+      internal: 8098
       controller: 8014
     urls:
-      internal: http://10.10.10.20:8096
+      internal: http://10.10.10.20:8098
       controller: http://100.64.0.1:8014
   ntfy:
     service_name: ntfy
@@ -3116,10 +3116,10 @@ public_edge_service_topology:
       url: http://100.64.0.1:8014
     service_id: openfga
     ports:
-      internal: 8096
+      internal: 8098
       controller: 8014
     urls:
-      internal: http://10.10.10.20:8096
+      internal: http://10.10.10.20:8098
       controller: http://100.64.0.1:8014
   ntfy:
     service_name: ntfy
@@ -3263,7 +3263,7 @@ hetzner_dns_records: *id001
 platform_postgres_host: database.lv3.org
 openbao_postgres_host: 10.10.10.50
 openbao_controller_url: https://100.64.0.1:8200
-openfga_http_port: 8096
+openfga_http_port: 8098
 openfga_host_proxy_port: 8014
 openfga_controller_url: http://100.64.0.1:8014
 semaphore_server_port: 3004

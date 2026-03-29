@@ -102,8 +102,15 @@ def test_openfga_runtime_bootstraps_openbao_env_and_migrations() -> None:
     assert openbao_helper["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
     assert openbao_helper["ansible.builtin.include_role"]["tasks_from"] == "openbao_compose_env"
     assert openbao_agent_up_task["ansible.builtin.command"]["argv"][-3:] == ["up", "-d", "openbao-agent"]
-    assert runtime_env_wait_task["ansible.builtin.stat"]["path"] == "{{ openfga_env_file }}"
-    assert runtime_env_wait_task["until"] == "openfga_runtime_env_file.stat.exists and (openfga_runtime_env_file.stat.size | int > 0)"
+    assert runtime_env_wait_task["ansible.builtin.shell"].startswith("set -euo pipefail")
+    assert 'test -s "{{ openfga_env_file }}"' in runtime_env_wait_task["ansible.builtin.shell"]
+    assert 'grep -Fqx "OPENFGA_HTTP_ADDR={{ openfga_http_addr }}" "{{ openfga_env_file }}"' in (
+        runtime_env_wait_task["ansible.builtin.shell"]
+    )
+    assert 'grep -Fqx "OPENFGA_GRPC_ADDR={{ openfga_grpc_addr }}" "{{ openfga_env_file }}"' in (
+        runtime_env_wait_task["ansible.builtin.shell"]
+    )
+    assert runtime_env_wait_task["until"] == "openfga_runtime_env_contract.rc == 0"
     assert migrate_task["ansible.builtin.command"]["argv"][:5] == [
         "docker",
         "run",
