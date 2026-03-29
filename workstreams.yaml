@@ -835,7 +835,8 @@ workstreams:
       release_bump: patch
       included_in_repo_version: 0.177.62
       latest_receipts:
-        docs_portal: 2026-03-29-adr-0239-browser-local-search-mainline-live-apply
+        docs_portal: 2026-03-29-adr-0239-browser-local-search-post-merge-replay
+        local_search_and_indexing_fabric: 2026-03-29-adr-0239-browser-local-search-post-merge-replay
   - id: ws-0239-main-merge
     adr: "0239"
     title: Integrate ADR 0239 browser-local search into origin/main
@@ -875,6 +876,7 @@ workstreams:
       - tests/test_docs_site.py
       - receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json
       - receipts/live-applies/2026-03-29-adr-0239-browser-local-search-mainline-live-apply.json
+      - receipts/live-applies/2026-03-29-adr-0239-browser-local-search-post-merge-replay.json
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -916,6 +918,7 @@ workstreams:
             - tests/test_docs_site.py
             - receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json
             - receipts/live-applies/2026-03-29-adr-0239-browser-local-search-mainline-live-apply.json
+            - receipts/live-applies/2026-03-29-adr-0239-browser-local-search-post-merge-replay.json
           mode: exclusive
     ready_to_merge: true
     live_applied: false
@@ -927,7 +930,8 @@ workstreams:
       release_bump: patch
       included_in_repo_version: 0.177.62
       latest_receipts:
-        docs_portal: 2026-03-29-adr-0239-browser-local-search-mainline-live-apply
+        docs_portal: 2026-03-29-adr-0239-browser-local-search-post-merge-replay
+        local_search_and_indexing_fabric: 2026-03-29-adr-0239-browser-local-search-post-merge-replay
   - id: ws-0241-live-apply
     adr: "0241"
     title: Live apply ADR 0241 rich content and inline knowledge editing via Tiptap

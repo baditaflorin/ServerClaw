@@ -48,6 +48,7 @@ main replay is re-verified.
 - `tests/test_docs_site.py`
 - `receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json`
 - `receipts/live-applies/2026-03-29-adr-0239-browser-local-search-mainline-live-apply.json`
+- `receipts/live-applies/2026-03-29-adr-0239-browser-local-search-post-merge-replay.json`
 
 ## Verification
 
@@ -66,6 +67,14 @@ main replay is re-verified.
 - `make deploy-docs-portal` completed successfully from the rebased `0.177.62`
   candidate and re-published both the changelog and docs portal directories on
   `nginx-lv3`
+- a latest-server check after the merge found `/var/www/lv3-generated/docs-portal`
+  still serving the older MkDocs search bundle without `pagefind/` or the
+  `0.177.62` release page, so `git fetch origin --prune` confirmed merged
+  commit `48b8a79b02480f3cefa1b76e1e5ba88db9098cc6` on both `HEAD` and
+  `origin/main` before a second exact-main `make deploy-docs-portal` replay
+  restored the Pagefind publication with `LV3_RUN_ID=12349b9b76a24ed384af3c6650184963`,
+  playbook run id `6e1f04fed42347009d0c9be9f6a1db45`, and recap
+  `nginx-lv3 ok=63 changed=6 failed=0 skipped=12`
 - `curl -ksSI https://docs.lv3.org/` returned `HTTP/2 302` with
   `location: https://docs.lv3.org/oauth2/sign_in?rd=https://docs.lv3.org/` and
   `x-robots-tag: noindex, nofollow`
@@ -79,5 +88,7 @@ main replay is re-verified.
 
 - release `0.177.62` carries ADR 0239 onto `main`
 - the current live platform baseline after the exact-main replay is `0.130.45`
-- the exact-main evidence is recorded under
-  `receipts/live-applies/2026-03-29-adr-0239-browser-local-search-mainline-live-apply.json`
+- the final post-merge replay evidence is recorded under
+  `receipts/live-applies/2026-03-29-adr-0239-browser-local-search-post-merge-replay.json`,
+  superseding the earlier mainline-candidate receipt after the stale server
+  state was corrected
