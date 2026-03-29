@@ -11,9 +11,16 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+try:
+    from datetime import UTC
+except ImportError:  # pragma: no cover - exercised on older controller Python runtimes
+    from datetime import timezone
+
+    UTC = timezone.utc
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent

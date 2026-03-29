@@ -178,6 +178,20 @@ def test_openfga_playbook_bootstraps_serverclaw_authz_from_localhost() -> None:
     assert task["ansible.builtin.command"]["argv"][0] == "python3"
     assert task["ansible.builtin.command"]["argv"][1] == "{{ openfga_bootstrap_script }}"
     assert "--openfga-preshared-key-file" in task["ansible.builtin.command"]["argv"]
+    assert task["retries"] == 5
+    assert task["delay"] == 3
+    assert task["until"] == (
+        "openfga_bootstrap.rc == 0 and (openfga_bootstrap.stdout | length > 0) and "
+        "((openfga_bootstrap.stdout | from_json).verification_passed)"
+    )
+    assert task["changed_when"] == (
+        "openfga_bootstrap.rc == 0 and (openfga_bootstrap.stdout | length > 0) and "
+        "((openfga_bootstrap.stdout | from_json).changed)"
+    )
+    assert task["failed_when"] == (
+        "openfga_bootstrap.rc != 0 or (openfga_bootstrap.stdout | length == 0) or "
+        "(not (openfga_bootstrap.stdout | from_json).verification_passed)"
+    )
     assert bootstrap_play["vars"]["openfga_bootstrap_keycloak_host"] == (
         "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
     )

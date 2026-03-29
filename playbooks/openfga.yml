@@ -120,7 +120,20 @@
           - --write-report
           - "{{ openfga_bootstrap_report_file }}"
       register: openfga_bootstrap
-      changed_when: (openfga_bootstrap.stdout | from_json).changed
+      retries: 5
+      delay: 3
+      until: >-
+        openfga_bootstrap.rc == 0 and
+        (openfga_bootstrap.stdout | length > 0) and
+        ((openfga_bootstrap.stdout | from_json).verification_passed)
+      changed_when: >-
+        openfga_bootstrap.rc == 0 and
+        (openfga_bootstrap.stdout | length > 0) and
+        ((openfga_bootstrap.stdout | from_json).changed)
+      failed_when: >-
+        openfga_bootstrap.rc != 0 or
+        (openfga_bootstrap.stdout | length == 0) or
+        (not (openfga_bootstrap.stdout | from_json).verification_passed)
 
     - name: Assert the delegated authorization bootstrap passed verification
       ansible.builtin.assert:

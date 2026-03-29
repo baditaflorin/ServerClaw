@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import timedelta
 from pathlib import Path
 
 import serverclaw_authz
@@ -9,6 +10,10 @@ import serverclaw_authz
 REPO_ROOT = Path(__file__).resolve().parents[1]
 BOOTSTRAP_PATH = REPO_ROOT / "config" / "serverclaw-authz" / "bootstrap.json"
 MODEL_PATH = REPO_ROOT / "config" / "serverclaw-authz" / "model.json"
+
+
+def test_module_exposes_a_utc_timezone_constant() -> None:
+    assert serverclaw_authz.UTC.utcoffset(None) == timedelta(0)
 
 
 def test_bootstrap_config_points_to_stable_repo_managed_principals() -> None:
