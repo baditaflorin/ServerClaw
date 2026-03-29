@@ -1,17 +1,17 @@
 {
   "schema_version": "1.0.0",
-  "receipt_id": "2026-03-28-adr-0232-nomad-mainline-live-apply",
+  "receipt_id": "2026-03-29-adr-0232-nomad-mainline-live-apply",
   "environment": "production",
-  "applied_on": "2026-03-28",
-  "recorded_on": "2026-03-28",
-  "recorded_at": "2026-03-28T21:14:03Z",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T01:58:23Z",
   "recorded_by": "codex",
-  "source_commit": "bc783587002130a06f6e08ed2390ae747d5fa71e",
-  "repo_version_context": "0.177.51",
-  "platform_version_context": "0.130.42",
+  "source_commit": "aaaa344ec68898af659d735f23ccbe243cc8c41f",
+  "repo_version_context": "0.177.63",
+  "platform_version_context": "0.130.44",
   "workflow_id": "adr-0232-nomad-mainline-live-apply",
   "adr": "0232",
-  "summary": "Integrated ADR 0232 from the rebased latest-origin/main worktree by replaying the private Nomad scheduler through the guarded production entrypoint, recording the ADR 0191 in-place mutation exception for monitoring-lv3, and re-verifying controller access, service placement, and durable batch execution on the live platform.",
+  "summary": "Integrated ADR 0232 from the rebased latest-origin/main worktree by replaying the private Nomad scheduler from repository version 0.177.63 through the guarded production entrypoint, recording the ADR 0191 in-place mutation exception for monitoring-lv3, and re-verifying controller access, service placement, and durable batch execution on the live platform.",
   "targets": [
     {
       "kind": "host",
@@ -56,17 +56,17 @@
     {
       "check": "Latest-origin/main guarded live apply with documented ADR 0191 exception",
       "result": "pass",
-      "observed": "Earlier in this rebased integration worktree, `make live-apply-service service=nomad env=production ALLOW_IN_PLACE_MUTATION=true` completed successfully and fully replayed the private Nomad service. The final play recap was `docker-build-lv3 ok=82 changed=5 failed=0`, `docker-runtime-lv3 ok=92 changed=3 failed=0`, `localhost ok=12 changed=0 failed=0`, `monitoring-lv3 ok=98 changed=2 failed=0`, and `proxmox_florin ok=52 changed=7 failed=0`."
+      "observed": "`make live-apply-service service=nomad env=production ALLOW_IN_PLACE_MUTATION=true` completed successfully from the rebased `0.177.63` integration worktree with final recap `docker-build-lv3 ok=83 changed=5 failed=0`, `docker-runtime-lv3 ok=92 changed=2 failed=0`, `localhost ok=12 changed=0 failed=0`, `monitoring-lv3 ok=98 changed=2 failed=0`, and `proxmox_florin ok=50 changed=1 failed=0`."
     },
     {
       "check": "Controller proxy and cluster readiness after integrated replay",
       "result": "pass",
-      "observed": "`curl -sS https://100.64.0.1:8013/v1/status/leader --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tls/nomad-agent-ca.pem -H \"X-Nomad-Token: ...\"` returned `\"10.10.10.40:4647\"`, and `/v1/nodes` through the same proxy reported `docker-runtime-lv3 ready runtime` plus `docker-build-lv3 ready build`."
+      "observed": "`curl -sS https://100.64.0.1:8013/v1/status/leader --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tls/nomad-agent-ca.pem -H \"X-Nomad-Token: ...\"` returned `\"10.10.10.40:4647\"`, and `/v1/nodes` through the same proxy reported `docker-runtime-lv3 ready runtime` plus `docker-build-lv3 ready build` on Nomad `1.11.3`."
     },
     {
       "check": "Smoke service and durable batch proof after integrated replay",
       "result": "pass",
-      "observed": "`ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml monitoring-lv3 -m shell -a 'sudo systemctl is-active lv3-nomad && sudo /usr/local/bin/lv3-nomad job status lv3-nomad-smoke-service' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` returned `active`, `Status = running`, and deployment `successful`; `ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-build-lv3 -m shell -a 'systemctl is-active lv3-nomad && curl -fsS http://10.10.10.30:18180/' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` returned `active` and `lv3 nomad smoke service`; and `ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell -a 'systemctl is-active lv3-nomad && sudo cat /var/lib/nomad/verification/lv3-nomad-smoke-batch/last-run.log' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` returned `active`, `adr-0232-live-apply batch verification`, and timestamp `2026-03-28T21:07:33+00:00`."
+      "observed": "`ansible monitoring-lv3 -i inventory/hosts.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -m shell -a 'systemctl is-active lv3-nomad && /usr/local/bin/lv3-nomad job status lv3-nomad-smoke-service'` returned `active`, `Status = running`, and deployment `successful`; `ansible docker-build-lv3 -i inventory/hosts.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -m shell -a 'systemctl is-active lv3-nomad && curl -fsS http://10.10.10.30:18180/'` returned `active` and `lv3 nomad smoke service`; and `ansible docker-runtime-lv3 -i inventory/hosts.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -m shell -a 'systemctl is-active lv3-nomad && cat /var/lib/nomad/verification/lv3-nomad-smoke-batch/last-run.log'` returned `active`, `adr-0232-live-apply batch verification`, and timestamp `2026-03-29T01:57:54+00:00`."
     }
   ],
   "evidence_refs": [
@@ -84,14 +84,14 @@
     "config/nomad/jobs/lv3-nomad-smoke-service.nomad.hcl",
     "config/nomad/jobs/lv3-nomad-smoke-batch.nomad.hcl",
     "receipts/live-applies/2026-03-28-adr-0232-nomad-live-apply.json",
-    "receipts/live-applies/2026-03-28-adr-0232-nomad-mainline-live-apply.json",
+    "receipts/live-applies/2026-03-29-adr-0232-nomad-mainline-live-apply.json",
     "tests/test_nomad_cluster_roles.py",
     "tests/test_nomad_playbook.py",
     "workstreams.yaml"
   ],
   "notes": [
-    "The earlier branch-local receipt remains preserved as the first isolated-worktree live apply, but this mainline-equivalent receipt is the canonical evidence for the release and platform-version updates that follow on current main.",
+    "The earlier branch-local receipt remains preserved as the first isolated-worktree live apply, but this current-main receipt is the canonical evidence for the release and stack truth updates that follow on top of `origin/main` version `0.177.63`.",
     "This integrated replay intentionally used `ALLOW_IN_PLACE_MUTATION=true` as the documented ADR 0191 narrow exception because `nomad` is hosted on `monitoring-lv3`, which also carries other R1 monitoring services. The default path for future production changes to that guest remains immutable replacement.",
-    "The follow-on release step updates `VERSION`, `changelog.md`, `README.md`, `RELEASE.md`, `docs/release-notes/*`, `versions/stack.yaml`, `build/platform-manifest.json`, and the ADR/workstream metadata to record ADR 0232 in repository version 0.177.52 and platform version 0.130.43."
+    "Release `0.177.64` records the verified current-main replay while the live platform baseline remains `0.130.44`; `versions/stack.yaml.platform_version` does not advance further because the same live platform was re-proven from the newest repository base."
   ]
 }

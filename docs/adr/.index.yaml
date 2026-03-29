@@ -3972,7 +3972,7 @@ adr_index:
       - jobs
     summary: We will adopt Nomad as the future distributed scheduler for internal jobs
     filename: 0232-nomad-for-durable-batch-and-long-running-internal-jobs.md
-    implemented_version: 0.177.52
+    implemented_version: 0.177.64
   - adr: '0233'
     title: Signed Release Bundles Via Gitea Releases And Cosign
     status: Accepted
