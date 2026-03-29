@@ -46,7 +46,7 @@ workstreams:
   - id: ws-0270-live-apply
     adr: "0270"
     title: Docker publication self-healing and port-programming assertions
-    status: in_progress
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0270-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0270-live-apply
@@ -64,6 +64,8 @@ workstreams:
       - docs/runbooks/docker-publication-assurance.md
       - docs/runbooks/health-probe-contracts.md
       - docs/runbooks/playbook-execution-model.md
+      - docs/runbooks/configure-keycloak.md
+      - docs/runbooks/configure-openbao.md
       - Makefile
       - config/ansible-execution-scopes.yaml
       - config/command-catalog.json
@@ -74,16 +76,26 @@ workstreams:
       - playbooks/tasks/docker-publication-assert.yml
       - collections/ansible_collections/lv3/platform/playbooks/tasks/post-verify.yml
       - collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
       - collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
       - collections/ansible_collections/lv3/platform/roles/docker_runtime/meta/argument_specs.yml
       - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/verify.yml
+      - collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/meta/argument_specs.yml
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/reconcile_repo_managed_users.yml
       - scripts/docker_publication_assurance.py
       - scripts/platform_observation_tool.py
       - scripts/validate_repository_data_models.py
       - tests/test_docker_publication_assurance.py
       - tests/test_docker_publication_assurance_playbook.py
       - tests/test_docker_runtime_role.py
+      - tests/test_harbor_runtime_role.py
+      - tests/test_keycloak_runtime_role.py
+      - tests/test_openbao_compose_env_helper.py
       - tests/test_platform_observation_tool.py
       - tests/test_post_verify_tasks.py
       - receipts/live-applies/**
@@ -154,6 +166,30 @@ workstreams:
             - tests/test_post_verify_tasks.py
             - receipts/live-applies/**
           mode: exclusive
+        - id: openbao_publication_recovery_contract
+          paths:
+            - docs/runbooks/configure-openbao.md
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+            - tests/test_openbao_compose_env_helper.py
+          mode: shared_contract
+          contract: openbao-publication-recovery-v1
+        - id: harbor_runtime_recovery_contract
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/main.yml
+            - tests/test_harbor_runtime_role.py
+          mode: shared_contract
+          contract: harbor-runtime-recovery-v1
+        - id: keycloak_repo_user_recovery_contract
+          paths:
+            - docs/runbooks/configure-keycloak.md
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/meta/argument_specs.yml
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/reconcile_repo_managed_users.yml
+            - tests/test_keycloak_runtime_role.py
+          mode: shared_contract
+          contract: keycloak-repo-user-recovery-v1
         - id: docker_publication_integration_surfaces
           paths:
             - VERSION
@@ -165,10 +201,10 @@ workstreams:
             - docs/release-notes/README.md
             - docs/release-notes/
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
     canonical_truth:
-      changelog_entry: implemented ADR 0270 by adding a shared Docker publication assurance helper, catalog-declared host publication contracts, post-verify repair hooks, and read-only observation checks for managed Docker services
+      changelog_entry: implemented ADR 0270 by adding a shared Docker publication assurance helper, catalog-declared host publication contracts, post-verify repair hooks, read-only observation checks, and live-apply recovery hardening for Harbor, Keycloak, and OpenBao when Docker publication drift surfaced during replay
       release_bump: patch
       included_in_repo_version: null
       latest_receipts:

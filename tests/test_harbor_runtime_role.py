@@ -92,11 +92,14 @@ def test_role_gates_network_recovery_on_boolean_fact() -> None:
     recovery_fact = task_by_name["Record whether Harbor needs one forced network recovery recycle"][
         "ansible.builtin.set_fact"
     ]["harbor_compose_needs_recovery"]
+    stale_cleanup_script = task_by_name["Remove stale Harbor containers after the compose reset"]["ansible.builtin.shell"]
 
     assert reset_task["when"] == "(harbor_compose_assets_changed | bool) or not (harbor_runtime_healthy_before_reconcile | bool)"
     assert recycle_task["when"] == "harbor_compose_needs_recovery | bool"
     assert recreate_task["when"] == "harbor_compose_needs_recovery | bool"
-    assert "systemctl restart docker" in task_by_name["Remove stale Harbor containers after the compose reset"]["ansible.builtin.shell"]
+    assert "ensure_docker_socket()" in stale_cleanup_script
+    assert "docker info >/dev/null 2>&1" in stale_cleanup_script
+    assert "systemctl restart docker" in stale_cleanup_script
     assert ".NetworkSettings.Ports" in task_by_name["Read the Harbor published port bindings after reconciliation"][
         "ansible.builtin.command"
     ]["argv"][-1]

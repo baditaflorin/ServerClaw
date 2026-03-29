@@ -171,32 +171,33 @@ def derive_expected_bindings(service_probe: dict[str, Any], local_ipv4s: set[str
     return dedupe_bindings(discovered)
 
 
-def flatten_published_bindings(port_map: dict[str, Any], *, fallback_port_map: dict[str, Any] | None = None) -> list[dict[str, str]]:
+def _flatten_binding_map(port_map: dict[str, Any]) -> list[dict[str, str]]:
     flattened: list[dict[str, str]] = []
-    candidate_maps = [port_map]
-    if fallback_port_map:
-        candidate_maps.append(fallback_port_map)
-
     seen: set[tuple[str, str]] = set()
-    for candidate in candidate_maps:
-        if not isinstance(candidate, dict):
+    if not isinstance(port_map, dict):
+        return flattened
+    for bindings in port_map.values():
+        if not isinstance(bindings, list):
             continue
-        for bindings in candidate.values():
-            if not isinstance(bindings, list):
+        for binding in bindings:
+            if not isinstance(binding, dict):
                 continue
-            for binding in bindings:
-                if not isinstance(binding, dict):
-                    continue
-                host_ip = str(binding.get("HostIp", ""))
-                host_port = str(binding.get("HostPort", ""))
-                key = (host_ip, host_port)
-                if key in seen:
-                    continue
-                seen.add(key)
-                flattened.append({"host_ip": host_ip, "host_port": host_port})
-        if flattened:
-            break
+            host_ip = str(binding.get("HostIp", ""))
+            host_port = str(binding.get("HostPort", ""))
+            key = (host_ip, host_port)
+            if key in seen:
+                continue
+            seen.add(key)
+            flattened.append({"host_ip": host_ip, "host_port": host_port})
     return flattened
+
+
+def flatten_published_bindings(port_map: dict[str, Any]) -> list[dict[str, str]]:
+    return _flatten_binding_map(port_map)
+
+
+def flatten_configured_bindings(port_map: dict[str, Any]) -> list[dict[str, str]]:
+    return _flatten_binding_map(port_map)
 
 
 def _binding_matches(expected_host: str, expected_port: int, actual_binding: dict[str, str]) -> bool:
@@ -350,6 +351,7 @@ def _run_checks(
             "compose_files": [],
             "actual_networks": [],
             "published_bindings": [],
+            "configured_bindings": [],
             "issues": {
                 "container_missing": True,
                 "missing_nat_chain": False,
@@ -403,7 +405,8 @@ def _run_checks(
             inspect_network = command_runner(["docker", "network", "inspect", network_name], None)
             command_log.append(_command_record(inspect_network))
 
-    published_bindings = flatten_published_bindings(port_map, fallback_port_map=fallback_port_map)
+    published_bindings = flatten_published_bindings(port_map)
+    configured_bindings = flatten_configured_bindings(fallback_port_map)
     missing_port_bindings: list[dict[str, Any]] = []
     if network_mode != "host":
         for binding in expected_bindings:
@@ -432,6 +435,7 @@ def _run_checks(
         "compose_files": compose_files,
         "actual_networks": sorted(networks.keys()),
         "published_bindings": published_bindings,
+        "configured_bindings": configured_bindings,
         "issues": {
             "container_missing": False,
             "missing_nat_chain": missing_nat_chain,
@@ -494,6 +498,42 @@ def _recreate_compose_project(
     return command_runner(argv, compose_working_directory)
 
 
+def _compose_down_project(
+    *,
+    compose_working_directory: str | None,
+    compose_files: list[str],
+    command_runner: CommandRunner,
+) -> CommandResult:
+    if not compose_files:
+        raise RuntimeError("compose reset requested but no compose files were available from the service labels")
+    argv = ["docker", "compose"]
+    for compose_file in compose_files:
+        argv.extend(["--file", compose_file])
+    argv.extend(["down", "--remove-orphans"])
+    return command_runner(argv, compose_working_directory)
+
+
+def _remove_compose_networks(
+    *,
+    network_names: Iterable[str],
+    command_runner: CommandRunner,
+) -> list[CommandResult]:
+    results: list[CommandResult] = []
+    seen: set[str] = set()
+    for network_name in network_names:
+        network = str(network_name).strip()
+        if not network or network in seen:
+            continue
+        seen.add(network)
+        results.append(command_runner(["docker", "network", "rm", network], None))
+    return results
+
+
+def _compose_recreate_needs_network_reset(result: CommandResult) -> bool:
+    message = "\n".join(part for part in (result.stdout, result.stderr) if part).lower()
+    return result.returncode != 0 and "network" in message and "does not exist" in message
+
+
 def assure_docker_publication(
     *,
     service_id: str,
@@ -522,6 +562,7 @@ def assure_docker_publication(
     compose_recreate_attempted = False
 
     if heal and _has_blocking_issues(before, strict_listeners=True):
+        latest_compose_recreate_returncode: int | None = None
         if before["container_present"] and (before["issues"]["missing_nat_chain"] or before["issues"]["missing_forward_chain"]):
             healed = _record_docker_restart_and_wait(
                 report=before,
@@ -548,6 +589,26 @@ def assure_docker_publication(
                 command_runner=command_runner,
             )
             actions.append({"action": "compose_force_recreate", "result": _command_record(recreate_result)})
+            if _compose_recreate_needs_network_reset(recreate_result):
+                down_result = _compose_down_project(
+                    compose_working_directory=intermediate["compose_working_directory"],
+                    compose_files=intermediate["compose_files"],
+                    command_runner=command_runner,
+                )
+                actions.append({"action": "compose_reset_down", "result": _command_record(down_result)})
+                network_results = _remove_compose_networks(
+                    network_names=intermediate["required_networks"] + intermediate["actual_networks"],
+                    command_runner=command_runner,
+                )
+                for network_result in network_results:
+                    actions.append({"action": "remove_compose_network", "result": _command_record(network_result)})
+                recreate_result = _recreate_compose_project(
+                    compose_working_directory=intermediate["compose_working_directory"],
+                    compose_files=intermediate["compose_files"],
+                    command_runner=command_runner,
+                )
+                actions.append({"action": "compose_force_recreate", "result": _command_record(recreate_result)})
+            latest_compose_recreate_returncode = recreate_result.returncode
             compose_recreated = recreate_result.returncode == 0
             healed = compose_recreated or healed
 
@@ -561,8 +622,19 @@ def assure_docker_publication(
             listener_timeout=listener_timeout,
         )
 
+        compose_recreate_failed_with_publication_still_broken = (
+            compose_recreate_attempted
+            and latest_compose_recreate_returncode not in {None, 0}
+            and (
+                after["issues"]["container_missing"]
+                or after["issues"]["missing_networks"]
+                or after["issues"]["missing_port_bindings"]
+            )
+        )
         if compose_recreate_attempted and after["container_present"] and (
-            after["issues"]["missing_nat_chain"] or after["issues"]["missing_forward_chain"]
+            after["issues"]["missing_nat_chain"]
+            or after["issues"]["missing_forward_chain"]
+            or compose_recreate_failed_with_publication_still_broken
         ):
             healed = _record_docker_restart_and_wait(
                 report=after,
@@ -588,6 +660,26 @@ def assure_docker_publication(
                     command_runner=command_runner,
                 )
                 actions.append({"action": "compose_force_recreate", "result": _command_record(recreate_result)})
+                if _compose_recreate_needs_network_reset(recreate_result):
+                    down_result = _compose_down_project(
+                        compose_working_directory=recovery["compose_working_directory"],
+                        compose_files=recovery["compose_files"],
+                        command_runner=command_runner,
+                    )
+                    actions.append({"action": "compose_reset_down", "result": _command_record(down_result)})
+                    network_results = _remove_compose_networks(
+                        network_names=recovery["required_networks"] + recovery["actual_networks"],
+                        command_runner=command_runner,
+                    )
+                    for network_result in network_results:
+                        actions.append({"action": "remove_compose_network", "result": _command_record(network_result)})
+                    recreate_result = _recreate_compose_project(
+                        compose_working_directory=recovery["compose_working_directory"],
+                        compose_files=recovery["compose_files"],
+                        command_runner=command_runner,
+                    )
+                    actions.append({"action": "compose_force_recreate", "result": _command_record(recreate_result)})
+                latest_compose_recreate_returncode = recreate_result.returncode
                 compose_recreated = recreate_result.returncode == 0 or compose_recreated
                 healed = recreate_result.returncode == 0 or healed
                 recovery = _run_checks(

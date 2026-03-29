@@ -245,11 +245,18 @@
 - name: Remove stale Harbor containers after the compose reset
   ansible.builtin.shell: |
     set -euo pipefail
+    ensure_docker_socket() {
+      if ! docker info >/dev/null 2>&1; then
+        systemctl restart docker
+        sleep 10
+        docker info >/dev/null 2>&1
+      fi
+    }
+    ensure_docker_socket
     stale_containers="$(docker ps -aq --filter label=com.docker.compose.project=harbor)"
     if [ -n "${stale_containers}" ]; then
       if ! docker rm -f ${stale_containers}; then
-        systemctl restart docker
-        sleep 10
+        ensure_docker_socket
         stale_containers="$(docker ps -aq --filter label=com.docker.compose.project=harbor)"
         if [ -n "${stale_containers}" ]; then
           docker rm -f ${stale_containers}

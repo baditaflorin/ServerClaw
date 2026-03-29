@@ -6,11 +6,12 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULTS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "defaults" / "main.yml"
 TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "main.yml"
+REPO_USER_TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "reconcile_repo_managed_users.yml"
 COMPOSE_TEMPLATE_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "templates" / "docker-compose.yml.j2"
 
 
-def load_tasks() -> list[dict]:
-    return yaml.safe_load(TASKS_PATH.read_text())
+def load_tasks(path: Path = TASKS_PATH) -> list[dict]:
+    return yaml.safe_load(path.read_text())
 
 
 def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
@@ -243,22 +244,49 @@ def test_role_manages_outline_client_secret() -> None:
 def test_role_manages_the_outline_automation_identity() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     tasks = load_tasks()
+    repo_user_tasks = load_tasks(REPO_USER_TASKS_PATH)
     password_generation_task = next(task for task in tasks if task.get("name") == "Generate the Outline automation password")
     password_mirror_task = next(task for task in tasks if task.get("name") == "Mirror the Outline automation password to the control machine")
+    repo_user_reconciliation = next(task for task in tasks if task.get("name") == "Reconcile repo-managed Keycloak users")
+    include_task = next(
+        task for task in repo_user_reconciliation["block"] if task.get("name") == "Run the repo-managed Keycloak user reconciliation tasks"
+    )
+    recovery_restart_task = next(
+        task
+        for task in repo_user_reconciliation["rescue"]
+        if task.get("name") == "Recreate the Keycloak service before retrying repo-managed user reconciliation"
+    )
+    recovery_token_probe_task = next(
+        task
+        for task in repo_user_reconciliation["rescue"]
+        if task.get("name")
+        == "Wait for the Keycloak bootstrap admin token endpoint after repo-managed user reconciliation recovery"
+    )
+    recovery_retry_task = next(
+        task
+        for task in repo_user_reconciliation["rescue"]
+        if task.get("name") == "Retry the repo-managed Keycloak user reconciliation tasks after recovery"
+    )
     admin_token_task = next(
-        task for task in tasks if task.get("name") == "Request a Keycloak admin token for repo-managed user reconciliation"
+        task for task in repo_user_tasks if task.get("name") == "Request a Keycloak admin token for repo-managed user reconciliation"
     )
     platform_group_lookup_task = next(
-        task for task in tasks if task.get("name") == "Look up the lv3-platform-admins group in Keycloak"
+        task for task in repo_user_tasks if task.get("name") == "Look up the lv3-platform-admins group in Keycloak"
     )
-    operator_update_task = next(task for task in tasks if task.get("name") == "Update the named operator profile in Keycloak")
-    operator_password_task = next(task for task in tasks if task.get("name") == "Reset the named operator password in Keycloak")
+    operator_update_task = next(
+        task for task in repo_user_tasks if task.get("name") == "Update the named operator profile in Keycloak"
+    )
+    operator_password_task = next(
+        task for task in repo_user_tasks if task.get("name") == "Reset the named operator password in Keycloak"
+    )
     automation_create_task = next(
-        task for task in tasks if task.get("name") == "Create the Outline automation user in Keycloak when missing"
+        task for task in repo_user_tasks if task.get("name") == "Create the Outline automation user in Keycloak when missing"
     )
-    automation_user_task = next(task for task in tasks if task.get("name") == "Update the Outline automation user profile in Keycloak")
+    automation_user_task = next(
+        task for task in repo_user_tasks if task.get("name") == "Update the Outline automation user profile in Keycloak"
+    )
     automation_password_task = next(
-        task for task in tasks if task.get("name") == "Reset the Outline automation user password in Keycloak"
+        task for task in repo_user_tasks if task.get("name") == "Reset the Outline automation user password in Keycloak"
     )
     assert password_generation_task["ansible.builtin.shell"].count("openssl rand -base64 24") == 1
     assert password_mirror_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_outline_automation_password_local_file }}"
@@ -267,6 +295,21 @@ def test_role_manages_the_outline_automation_identity() -> None:
     assert defaults["keycloak_admin_connection_timeout"] == 30
     assert defaults["keycloak_local_admin_url"] == "http://{{ ansible_host }}:{{ keycloak_internal_http_port }}"
     assert defaults["keycloak_repo_user_admin_url"] == "{{ keycloak_local_admin_url }}"
+    assert include_task["ansible.builtin.include_tasks"] == "reconcile_repo_managed_users.yml"
+    assert recovery_restart_task["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "compose",
+        "--file",
+        "{{ keycloak_compose_file }}",
+        "up",
+        "-d",
+        "--force-recreate",
+        "--no-deps",
+        "keycloak",
+    ]
+    assert recovery_token_probe_task["retries"] == "{{ keycloak_startup_probe_retries }}"
+    assert recovery_token_probe_task["delay"] == "{{ keycloak_startup_probe_delay }}"
+    assert recovery_retry_task["ansible.builtin.include_tasks"] == "reconcile_repo_managed_users.yml"
     assert admin_token_task["ansible.builtin.uri"]["url"] == (
         "{{ keycloak_repo_user_admin_url }}/realms/master/protocol/openid-connect/token"
     )

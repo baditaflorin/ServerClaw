@@ -114,6 +114,15 @@ curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local
 
 As of the `2026-03-27` replay, `make converge-openbao` automatically recovers the recurring Docker publish regression by rechecking the guest `DOCKER` and `DOCKER-FORWARD` chains, restarting Docker when they are missing, and recreating the named `lv3-openbao` container before `docker compose up`.
 
+As of the `2026-03-29` ADR 0270 replay, the shared OpenBao helpers used by
+runtime secret injection and host-native systemd credential delivery also
+recover a missing loopback `127.0.0.1:8201` publication automatically. When the
+local health probe fails with a connection-refused style outage, the helper now
+force-recreates the `openbao` service, waits for the loopback listener to
+return, and only then retries the health call. This keeps later workflows such
+as `make converge-keycloak` from failing just because the private OpenBao API
+publication drifted while the container itself still existed.
+
 If a future rerun still leaves the guest runtime broken, the failure usually presents as `docker compose up` failing to bind `:8200` with an iptables DNAT error and `docker inspect lv3-openbao` showing an empty `NetworkSettings.Networks` object.
 
 Recover the guest runtime in this order:
