@@ -1,9 +1,10 @@
 # ADR 0248: Session And Logout Authority Across Keycloak, Oauth2-Proxy, And App Surfaces
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.177.63
+- Implemented In Platform Version: 0.130.45
+- Implemented On: 2026-03-29
 - Date: 2026-03-28
 
 ## Context
@@ -62,6 +63,33 @@ sessions as one platform contract.
 - ADR 0056: Keycloak for operator and agent SSO
 - ADR 0133: Portal authentication by default
 - ADR 0247: Authenticated browser journey verification via Playwright
+
+## Live Apply Notes
+
+- Live verification ran from rebased workstream commit
+  `7b0bd0230482ef077c17714ad224364badf3171b` by replaying the Keycloak,
+  Outline, and public-edge publication paths from the latest `origin/main`
+  worktree and then rechecking the shared logout endpoints plus the full
+  browser logout journey.
+- The shared edge now exposes repo-managed logout surfaces at
+  `home.lv3.org/.well-known/lv3/session/logout`,
+  `ops.lv3.org/.well-known/lv3/session/proxy-logout`, and
+  `ops.lv3.org/.well-known/lv3/session/logged-out`, with NGINX extracting the
+  current bearer token from `/oauth2/auth` so Keycloak logout can receive an
+  `id_token_hint` where the shared proxy flow supports it.
+- Grafana and the shared edge-protected portals now hand logout through that
+  governed path without pausing on a Keycloak confirmation page.
+- Outline remains the declared gap for perfect RP-initiated logout because it
+  cannot supply `id_token_hint` on its app-local logout handoff. The live
+  platform now reaches the Keycloak confirmation page consistently, and the
+  verifier submits that real confirmation form before proving both
+  `home.lv3.org` and `wiki.lv3.org` challenge again after logout.
+- The authoritative `make live-apply-service service=outline env=production`
+  wrapper was exercised on the workstream branch and correctly stopped at the
+  canonical-truth gate because `README.md` is a protected shared integration
+  file. The branch therefore records the direct scoped-playbook replay plus the
+  passed interface-contract, standby-capacity, redundancy, and immutable-guest
+  checks as the safe workstream-branch live-apply evidence.
 
 ## References
 

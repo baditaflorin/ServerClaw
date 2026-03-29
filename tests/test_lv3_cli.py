@@ -474,6 +474,62 @@ def test_deploy_repo_dry_run_prints_coolify_wrapper_route(
     assert "--wait" in captured.out
 
 
+def test_deploy_repo_dry_run_prints_private_compose_bootstrap_args(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(
+        [
+            "deploy-repo",
+            "--repo",
+            "git@github.com:baditaflorin/education_wemeshup.git",
+            "--source",
+            "private-deploy-key",
+            "--app-name",
+            "education-wemeshup",
+            "--build-pack",
+            "dockercompose",
+            "--docker-compose-location",
+            "/compose.yaml",
+            "--compose-domain",
+            "catalog-web=education-wemeshup.apps.lv3.org",
+            "--deploy-key-name",
+            "coolify-baditaflorin-education-wemeshup",
+            "--wait",
+            "--dry-run",
+        ]
+    )
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "--source private-deploy-key" in captured.out
+    assert "--docker-compose-location /compose.yaml" in captured.out
+    assert "--compose-domain catalog-web=education-wemeshup.apps.lv3.org" in captured.out
+    assert "--deploy-key-name coolify-baditaflorin-education-wemeshup" in captured.out
+
+
+def test_deploy_repo_dry_run_prints_retry_args_when_overridden(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(
+        [
+            "deploy-repo",
+            "--repo",
+            "https://github.com/coollabsio/coolify-examples",
+            "--app-name",
+            "repo-smoke",
+            "--wait",
+            "--max-deploy-attempts",
+            "5",
+            "--retry-delay",
+            "2",
+            "--dry-run",
+        ]
+    )
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "--max-deploy-attempts 5" in captured.out
+    assert "--retry-delay 2" in captured.out
+
+
 def test_open_dry_run_uses_catalog_url(
     capsys: pytest.CaptureFixture[str], minimal_repo: Path
 ) -> None:

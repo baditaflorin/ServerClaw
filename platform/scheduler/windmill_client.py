@@ -268,7 +268,14 @@ class HttpWindmillClient:
         timeout_seconds: int | None = None,
     ) -> dict[str, Any]:
         script_path = self._workflow_script_path(workflow_id)
+        script_hash = self.resolve_script_hash(script_path)
         encoded_path = urllib.parse.quote(script_path, safe="")
+        try:
+            return self.submit_workflow_by_hash(script_hash, arguments)
+        except urllib.error.HTTPError as exc:
+            if exc.code not in {404, 405}:
+                raise
+
         try:
             response = self._request(
                 f"/api/w/{self._workspace}/jobs/run/p/{encoded_path}",
@@ -281,9 +288,19 @@ class HttpWindmillClient:
             if exc.code not in {404, 405}:
                 raise
 
-        submission = self.submit_workflow_by_hash(self.resolve_script_hash(script_path), arguments)
-        submission.setdefault("mode", "hash_fallback")
-        return submission
+        response = self._request(
+            f"/api/w/{self._workspace}/jobs/run_wait_result/p/{encoded_path}",
+            method="POST",
+            payload=arguments,
+            timeout=_compute_request_timeout_seconds(timeout_seconds or self._request_timeout_seconds),
+            retry=False,
+        )
+        return {
+            "completed": True,
+            "success": True,
+            "result": response,
+            "mode": "sync_fallback",
+        }
 
     def get_job(self, job_id: str) -> dict[str, Any]:
         response = self._request(

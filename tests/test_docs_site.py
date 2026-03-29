@@ -97,6 +97,28 @@ class DocsSiteTests(unittest.TestCase):
             shutil.rmtree(generated_dir)
             shutil.rmtree(output_dir)
 
+    def test_mkdocs_temp_config_uses_writable_temp_dir_for_generated_site(self) -> None:
+        generated_dir = Path(tempfile.mkdtemp(prefix="docs-site-generated-"))
+        temp_config: Path | None = None
+        try:
+            mkdocs_config, temp_config = docs_portal.mkdocs_config_for_generated_dir(generated_dir)
+            config_text = mkdocs_config.read_text(encoding="utf-8")
+
+            self.assertEqual(mkdocs_config, temp_config)
+            self.assertIsNotNone(temp_config)
+            assert temp_config is not None
+            self.assertNotEqual(temp_config.parent.resolve(), REPO_ROOT.resolve())
+            self.assertTrue(temp_config.exists())
+            self.assertIn(f"docs_dir: {generated_dir.as_posix()}", config_text)
+            self.assertIn(
+                f"  custom_dir: {(REPO_ROOT / 'docs' / 'theme-overrides').as_posix()}",
+                config_text,
+            )
+        finally:
+            if temp_config is not None:
+                temp_config.unlink(missing_ok=True)
+            shutil.rmtree(generated_dir)
+
     def test_build_portal_document_defaults_to_internal_sensitivity(self) -> None:
         temp_dir = Path(tempfile.mkdtemp(prefix="docs-site-test-"))
         try:

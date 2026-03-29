@@ -88,6 +88,25 @@
             "type": "integer",
             "minimum": 1
           },
+          "expected_dns_records": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["type", "value"],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["A", "AAAA", "CNAME"]
+                },
+                "value": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
           "notes": {
             "type": "string"
           },

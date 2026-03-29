@@ -61,6 +61,7 @@ PORT_KEYS = (
     "n8n_port",
     "coolify_dashboard_port",
     "coolify_proxy_port",
+    "coolify_proxy_tls_port",
     "coolify_host_proxy_port",
     "open_webui_port",
     "open_webui_host_proxy_port",
@@ -85,6 +86,9 @@ PORT_KEYS = (
 
 MANAGEMENT_IPV4_TOKEN = "{{ management_ipv4 }}"
 MANAGEMENT_TAILSCALE_IPV4_TOKEN = "{{ management_tailscale_ipv4 }}"
+SESSION_AUTHORITY_SHARED_LOGOUT_PATH = "/.well-known/lv3/session/logout"
+SESSION_AUTHORITY_SHARED_PROXY_CLEANUP_PATH = "/.well-known/lv3/session/proxy-logout"
+SESSION_AUTHORITY_SHARED_LOGGED_OUT_PATH = "/.well-known/lv3/session/logged-out"
 
 
 def yaml_dump(payload: Any) -> str:
@@ -124,6 +128,10 @@ def require_list(value: Any, path: str) -> list[Any]:
     if not isinstance(value, list):
         raise ValueError(f"{path} must be a list")
     return value
+
+
+def require_string_list(value: Any, path: str) -> list[str]:
+    return [require_string(item, f"{path}[{index}]") for index, item in enumerate(require_list(value, path))]
 
 
 def resolve_dns_target(target: str, host_vars: dict[str, Any]) -> str:
@@ -195,6 +203,35 @@ def build_dns_records(
     service_topology: dict[str, Any],
     host_vars: dict[str, Any],
 ) -> dict[str, list[dict[str, Any]]]:
+    def append_record(visibility: str, record: dict[str, Any]) -> None:
+        bucket = records.setdefault(visibility, [])
+        if record not in bucket:
+            bucket.append(record)
+
+    def managed_zone_name(service: dict[str, Any], path: str) -> str:
+        dns = require_mapping(service.get("dns"), f"{path}.dns")
+        public_hostname = require_string(service.get("public_hostname"), f"{path}.public_hostname")
+        dns_name = require_string(dns.get("name"), f"{path}.dns.name")
+        if dns_name == "@":
+            return public_hostname
+        prefix = f"{dns_name}."
+        if not public_hostname.startswith(prefix):
+            raise ValueError(
+                f"{path}.public_hostname must start with {prefix!r} so wildcard aliases can derive the zone name"
+            )
+        zone_name = public_hostname[len(prefix) :]
+        if not zone_name:
+            raise ValueError(f"{path}.public_hostname must include a managed DNS zone suffix")
+        return zone_name
+
+    def relative_record_name(fqdn: str, zone_name: str, path: str) -> str:
+        if fqdn == zone_name:
+            return "@"
+        suffix = f".{zone_name}"
+        if not fqdn.endswith(suffix):
+            raise ValueError(f"{path} must stay inside the managed DNS zone {zone_name}")
+        return fqdn[: -len(suffix)]
+
     records = {
         "public": [
             {
@@ -206,14 +243,13 @@ def build_dns_records(
         ],
         "tailnet": [],
     }
-    for service in service_topology.values():
+    for service_id, service in service_topology.items():
         dns = service.get("dns")
         if not dns or not dns.get("managed"):
             continue
         visibility = dns["visibility"]
-        if visibility not in records:
-            records[visibility] = []
-        records[visibility].append(
+        append_record(
+            visibility,
             {
                 "name": dns["name"],
                 "type": dns["type"],
@@ -221,10 +257,26 @@ def build_dns_records(
                 "ttl": dns["ttl"],
             }
         )
+        edge = require_mapping(service.get("edge", {}), f"service_topology.{service_id}.edge")
+        aliases = require_string_list(edge.get("aliases", []), f"service_topology.{service_id}.edge.aliases")
+        if visibility != "public" or not aliases:
+            continue
+        zone_name = managed_zone_name(service, f"service_topology.{service_id}")
+        for index, alias in enumerate(aliases):
+            append_record(
+                visibility,
+                {
+                    "name": relative_record_name(alias, zone_name, f"service_topology.{service_id}.edge.aliases[{index}]"),
+                    "type": dns["type"],
+                    "value": dns["target"],
+                    "ttl": dns["ttl"],
+                },
+            )
 
     for index, record in enumerate(host_vars.get("mail_platform_dns_records", [])):
         record = require_mapping(record, f"host_vars.mail_platform_dns_records[{index}]")
-        records["public"].append(
+        append_record(
+            "public",
             {
                 "name": require_string(record.get("name"), f"host_vars.mail_platform_dns_records[{index}].name"),
                 "type": require_string(record.get("type"), f"host_vars.mail_platform_dns_records[{index}].type"),
@@ -368,8 +420,8 @@ def build_service_urls(
         port_map["internal"] = ports["coolify_dashboard_port"]
         port_map["controller"] = ports["coolify_host_proxy_port"]
     elif service_id == "coolify_apps":
-        urls["internal"] = service_url("http", private_ip, ports["coolify_proxy_port"])
-        port_map["internal"] = ports["coolify_proxy_port"]
+        urls["internal"] = service_url("https", private_ip, ports["coolify_proxy_tls_port"])
+        port_map["internal"] = ports["coolify_proxy_tls_port"]
     elif service_id == "open_webui":
         urls["internal"] = service_url("http", private_ip, ports["open_webui_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["open_webui_host_proxy_port"])
@@ -552,6 +604,43 @@ def build_tcp_proxies(host_vars: dict[str, Any], ports: dict[str, int]) -> list[
     return resolved
 
 
+def build_platform_session_authority(service_topology: dict[str, Any]) -> dict[str, str]:
+    keycloak_service = require_mapping(
+        service_topology.get("keycloak"),
+        "platform_service_topology.keycloak",
+    )
+    ops_portal_service = require_mapping(
+        service_topology.get("ops_portal"),
+        "platform_service_topology.ops_portal",
+    )
+    keycloak_public_url = require_string(
+        require_mapping(keycloak_service.get("urls"), "platform_service_topology.keycloak.urls").get("public"),
+        "platform_service_topology.keycloak.urls.public",
+    )
+    ops_portal_public_url = require_string(
+        require_mapping(
+            ops_portal_service.get("urls"),
+            "platform_service_topology.ops_portal.urls",
+        ).get("public"),
+        "platform_service_topology.ops_portal.urls.public",
+    )
+    return {
+        "authority_hostname": require_string(
+            ops_portal_service.get("public_hostname"),
+            "platform_service_topology.ops_portal.public_hostname",
+        ),
+        "ops_portal_client_id": "ops-portal-oauth",
+        "keycloak_logout_url": f"{keycloak_public_url}/realms/lv3/protocol/openid-connect/logout",
+        "oauth2_proxy_sign_out_url": f"{ops_portal_public_url}/oauth2/sign_out",
+        "shared_logout_path": SESSION_AUTHORITY_SHARED_LOGOUT_PATH,
+        "shared_logout_url": f"{ops_portal_public_url}{SESSION_AUTHORITY_SHARED_LOGOUT_PATH}",
+        "shared_proxy_cleanup_path": SESSION_AUTHORITY_SHARED_PROXY_CLEANUP_PATH,
+        "shared_proxy_cleanup_url": f"{ops_portal_public_url}{SESSION_AUTHORITY_SHARED_PROXY_CLEANUP_PATH}",
+        "shared_logged_out_path": SESSION_AUTHORITY_SHARED_LOGGED_OUT_PATH,
+        "shared_logged_out_url": f"{ops_portal_public_url}{SESSION_AUTHORITY_SHARED_LOGGED_OUT_PATH}",
+    }
+
+
 def build_platform_vars(
     stack: dict[str, Any] | None = None,
     host_vars: dict[str, Any] | None = None,
@@ -563,6 +652,7 @@ def build_platform_vars(
     resolved_ports = {key: require_int(ports.get(key), f"host_vars.platform_port_assignments.{key}") for key in PORT_KEYS}
     guest_catalog, guest_by_name, guest_ipv4_by_name = build_guest_catalog(host_vars)
     service_topology = build_service_topology(stack, host_vars, guest_ipv4_by_name, resolved_ports)
+    session_authority = build_platform_session_authority(service_topology)
     dns_records = build_dns_records(service_topology, host_vars)
     tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
     monitoring_service = service_topology["grafana"]
@@ -664,6 +754,7 @@ def build_platform_vars(
         "platform_port_assignments": copy.deepcopy(resolved_ports),
         "platform_guest_catalog": guest_catalog,
         "platform_service_topology": service_topology,
+        "platform_session_authority": session_authority,
         "platform_dns_records": dns_records,
         "platform_management_allowed_tcp_ports": [
             resolved_ports["ntopng_proxy_port"],

@@ -18,7 +18,7 @@ def test_collection_metadata_and_runtime_contract() -> None:
     assert galaxy["namespace"] == "lv3"
     assert galaxy["name"] == "platform"
     assert galaxy["version"] == "1.0.0"
-    assert runtime["requires_ansible"] == ">=2.17.0"
+    assert runtime["requires_ansible"] == ">=2.16.0"
 
 
 def test_repo_root_paths_are_collection_symlinks() -> None:

@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
 import os
 import socket
 import ssl
+import tempfile
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -93,8 +95,25 @@ def _route_entry(
 def _publication_entry(
     entry: dict[str, Any],
     route: dict[str, Any] | None,
+    service: dict[str, Any] | None,
 ) -> dict[str, Any]:
     route_mode = "edge" if route else "dns-only"
+    delivery_model = publication_delivery_model(entry["exposure"])
+    access_model = publication_access_model(entry["auth_requirement"])
+    audience = publication_audience(
+        exposure=entry["exposure"],
+        auth_requirement=entry["auth_requirement"],
+    )
+    dns_records = subdomain_catalog.expected_dns_records_for_entry(entry, f"subdomains[{entry['fqdn']}]")
+    service_dns = subdomain_catalog.require_mapping(service.get("dns", {}), f"service.{entry['fqdn']}.dns") if service else {}
+    service_access = subdomain_catalog.require_mapping(service.get("access", {}), f"service.{entry['fqdn']}.access") if service else {}
+    route_target = entry["target"]
+    if route:
+        route_target = (
+            route["metadata"].get("upstream")
+            or route["metadata"].get("redirect_target_hostname")
+            or route_target
+        )
     return {
         "fqdn": entry["fqdn"],
         "service_id": entry.get("service_id"),
@@ -102,18 +121,49 @@ def _publication_entry(
         "status": entry["status"],
         "owner_adr": entry["owner_adr"],
         "publication": {
-            "delivery_model": publication_delivery_model(entry["exposure"]),
-            "access_model": publication_access_model(entry["auth_requirement"]),
-            "audience": publication_audience(
-                exposure=entry["exposure"],
-                auth_requirement=entry["auth_requirement"],
-            ),
+            "delivery_model": delivery_model,
+            "access_model": access_model,
+            "audience": audience,
+        },
+        "assertions": {
+            "publication_class": entry["exposure"],
+            "environment": entry["environment"],
+            "audience": audience,
+            "auth_requirement": entry["auth_requirement"],
+            "route_target": {
+                "service_id": route["service_id"] if route and route["service_id"] else entry.get("service_id"),
+                "kind": route["route_kind"] if route else service_access.get("kind", "dns-only"),
+                "source": route["route_source"] if route else service_access.get("kind", "dns-only"),
+                "target": route_target,
+                "target_port": entry.get("target_port"),
+            },
+        },
+        "evidence_plan": {
+            "dns_resolution": bool(service_dns.get("managed", True)),
+            "dns_zone": bool(service_dns.get("managed", True)),
+            "http_auth": entry["status"] == "active"
+            and entry["environment"] == "production"
+            and access_model == "platform-sso",
+            "private_route": entry["status"] == "active"
+            and entry["environment"] == "production"
+            and delivery_model == "private-network",
+            "tls": entry["status"] == "active"
+            and entry["environment"] == "production"
+            and entry["tls"]["provider"] != "none"
+            and entry.get("target_port") in (None, 443),
         },
         "adapter": {
             "dns": {
                 "target": entry["target"],
                 "target_port": entry.get("target_port"),
-                "record_type": hostname_record_type(entry["target"]),
+                "record_type": dns_records[0]["type"],
+                "records": dns_records,
+                "managed": bool(service_dns.get("managed", True)),
+                "visibility": service_dns.get(
+                    "visibility",
+                    "public" if delivery_model != "private-network" else "tailnet",
+                ),
+                "zone_expected": bool(service_dns.get("managed", True)),
             },
             "routing": {
                 "mode": route_mode,
@@ -131,7 +181,7 @@ def _publication_entry(
         },
         "live_tracking_expected": entry["status"] == "active"
         and entry["environment"] == "production"
-        and publication_delivery_model(entry["exposure"]) != "private-network",
+        and delivery_model != "private-network",
         "notes": entry.get("notes"),
     }
 
@@ -207,7 +257,44 @@ def build_edge_route_index(
                 authenticated_sites=authenticated_sites,
             )
 
+    apex_hostname = public_edge_defaults.get("public_edge_apex_hostname")
+    if apex_hostname is not None:
+        apex_hostname = subdomain_catalog.require_hostname(apex_hostname, "public_edge_apex_hostname")
+        nginx_edge_service = subdomain_catalog.require_mapping(
+            service_topology.get("nginx_edge"),
+            "inventory/host_vars/proxmox_florin.yml.lv3_service_topology.nginx_edge",
+        )
+        routes[apex_hostname] = _route_entry(
+            hostname=apex_hostname,
+            route_source="public_edge_apex",
+            route_kind="redirect",
+            service_id="nginx_edge",
+            site={
+                "hostname": apex_hostname,
+                "kind": "redirect",
+                "redirect_target_hostname": subdomain_catalog.require_hostname(
+                    nginx_edge_service.get("public_hostname"),
+                    "inventory/host_vars/proxmox_florin.yml.lv3_service_topology.nginx_edge.public_hostname",
+                ),
+            },
+            authenticated_sites=authenticated_sites,
+        )
+
     return routes
+
+
+def build_service_topology_index(host_vars: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    service_topology = subdomain_catalog.require_mapping(
+        host_vars.get("lv3_service_topology"),
+        "inventory/host_vars/proxmox_florin.yml.lv3_service_topology",
+    )
+    return {
+        service_id: subdomain_catalog.require_mapping(
+            service,
+            f"inventory/host_vars/proxmox_florin.yml.lv3_service_topology.{service_id}",
+        )
+        for service_id, service in service_topology.items()
+    }
 
 
 def resolve_route_for_hostname(
@@ -247,11 +334,12 @@ def build_registry(
     subdomain_catalog.validate_subdomain_catalog(catalog, service_catalog, host_vars, public_edge_defaults)
 
     route_index = build_edge_route_index(host_vars, public_edge_defaults)
+    service_topology_index = build_service_topology_index(host_vars)
     publication_entries: list[dict[str, Any]] = []
 
     for entry in sorted(catalog["subdomains"], key=lambda item: item["fqdn"]):
         route = resolve_route_for_hostname(entry["fqdn"], route_index)
-        publication_entries.append(_publication_entry(entry, route))
+        publication_entries.append(_publication_entry(entry, route, service_topology_index.get(entry.get("service_id"))))
 
     active_entries = [entry for entry in publication_entries if entry["status"] == "active"]
     summary = {
@@ -328,7 +416,25 @@ def resolve_public_records(fqdn: str) -> list[str]:
         answers = socket.getaddrinfo(fqdn, None, type=socket.SOCK_STREAM)
     except socket.gaierror:
         return []
-    return sorted({item[4][0] for item in answers})
+    return sorted({normalize_resolved_address(item[4][0]) for item in answers})
+
+
+def normalize_resolved_address(address: str) -> str:
+    try:
+        parsed = ipaddress.ip_address(address)
+    except ValueError:
+        return address
+    if isinstance(parsed, ipaddress.IPv6Address) and parsed.ipv4_mapped is not None:
+        return str(parsed.ipv4_mapped)
+    return str(parsed)
+
+
+def expected_resolvable_dns_values(entry: dict[str, Any]) -> set[str]:
+    return {
+        record["value"]
+        for record in entry["adapter"]["dns"].get("records", [])
+        if record["type"] in {"A", "AAAA"}
+    }
 
 
 def collect_resolution_findings(registry: dict[str, Any]) -> list[dict[str, Any]]:
@@ -336,12 +442,15 @@ def collect_resolution_findings(registry: dict[str, Any]) -> list[dict[str, Any]
     for entry in registry_entries(registry):
         if entry["environment"] != "production":
             continue
-        if entry["publication"]["delivery_model"] == "private-network":
+        if not entry["adapter"]["dns"].get("zone_expected", False):
             continue
 
-        actual = resolve_public_records(entry["fqdn"])
-        expected = entry["adapter"]["dns"]["target"]
-        expected_present = expected in actual
+        expected_values = expected_resolvable_dns_values(entry)
+        if not expected_values:
+            continue
+
+        actual = set(resolve_public_records(entry["fqdn"]))
+        expected_present = expected_values.issubset(actual)
 
         if entry["status"] == "active" and not expected_present:
             findings.append(
@@ -350,17 +459,24 @@ def collect_resolution_findings(registry: dict[str, Any]) -> list[dict[str, Any]
                     "severity": "WARN",
                     "subdomain": entry["fqdn"],
                     "finding": "active_subdomain_missing_expected_public_resolution",
-                    "detail": f"Expected public resolution to include {expected}; observed {actual or ['<missing>']}.",
+                    "detail": (
+                        "Expected DNS resolution to include "
+                        f"{sorted(expected_values)}; observed {sorted(actual) or ['<missing>']}."
+                    ),
                 }
             )
-        elif entry["status"] != "active" and expected_present:
+        elif entry["status"] != "active" and actual.intersection(expected_values):
             findings.append(
                 {
                     "check": "dns_resolution",
                     "severity": "CRITICAL",
                     "subdomain": entry["fqdn"],
                     "finding": "subdomain_resolves_publicly_but_is_not_tracked_active",
-                    "detail": f"The hostname resolves publicly to {expected} while the catalog status is '{entry['status']}'.",
+                    "detail": (
+                        "The hostname resolves to the declared DNS target set "
+                        f"{sorted(actual.intersection(expected_values))} while the catalog status is "
+                        f"'{entry['status']}'."
+                    ),
                 }
             )
     return findings
@@ -432,10 +548,14 @@ def fetch_hetzner_zone_records(
     return list(records_payload.get("records", []))
 
 
+def dns_record_identity(record: dict[str, Any]) -> tuple[str, str]:
+    return record["type"], record["value"]
+
+
 def collect_zone_findings(registry: dict[str, Any], zone_records: list[dict[str, Any]]) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
     catalog_by_fqdn = {entry["fqdn"]: entry for entry in registry_entries(registry)}
-    relevant_zone_records = []
+    relevant_zone_records: list[dict[str, Any]] = []
 
     for record in zone_records:
         name = record.get("name")
@@ -450,22 +570,32 @@ def collect_zone_findings(registry: dict[str, Any], zone_records: list[dict[str,
             continue
         relevant_zone_records.append({"fqdn": fqdn, "type": record_type, "value": value, "ttl": record.get("ttl")})
 
-    zone_by_fqdn = {record["fqdn"]: record for record in relevant_zone_records}
-    for fqdn, record in sorted(zone_by_fqdn.items()):
+    zone_by_fqdn: dict[str, list[dict[str, Any]]] = {}
+    for record in relevant_zone_records:
+        zone_by_fqdn.setdefault(record["fqdn"], []).append(record)
+
+    for fqdn, records in sorted(zone_by_fqdn.items()):
         if fqdn not in catalog_by_fqdn:
-            findings.append(
-                {
-                    "check": "hetzner_zone",
-                    "severity": "CRITICAL",
-                    "subdomain": fqdn,
-                    "finding": "undeclared_subdomain_present_in_zone",
-                    "detail": f"Hetzner DNS exposes {record['type']} {record['value']} for {fqdn}, but the hostname is missing from the catalog.",
-                }
-            )
+            for record in records:
+                findings.append(
+                    {
+                        "check": "hetzner_zone",
+                        "severity": "CRITICAL",
+                        "subdomain": fqdn,
+                        "finding": "undeclared_subdomain_present_in_zone",
+                        "detail": f"Hetzner DNS exposes {record['type']} {record['value']} for {fqdn}, but the hostname is missing from the catalog.",
+                    }
+                )
             continue
-        expected = catalog_by_fqdn[fqdn]
-        expected_dns = expected["adapter"]["dns"]
-        if expected_dns["record_type"] != record["type"] or expected_dns["target"] != record["value"]:
+
+        expected_dns_records = {
+            dns_record_identity(record)
+            for record in catalog_by_fqdn[fqdn]["adapter"]["dns"].get("records", [])
+        }
+        actual_dns_records = {dns_record_identity(record) for record in records}
+        missing_dns_records = sorted(expected_dns_records - actual_dns_records)
+        unexpected_dns_records = sorted(actual_dns_records - expected_dns_records)
+        if missing_dns_records or unexpected_dns_records:
             findings.append(
                 {
                     "check": "hetzner_zone",
@@ -473,8 +603,18 @@ def collect_zone_findings(registry: dict[str, Any], zone_records: list[dict[str,
                     "subdomain": fqdn,
                     "finding": "zone_record_differs_from_catalog",
                     "detail": (
-                        f"Expected {expected_dns['record_type']} {expected_dns['target']} from the catalog; "
-                        f"observed {record['type']} {record['value']} in Hetzner DNS."
+                        f"Expected {sorted(expected_dns_records)} from the catalog; observed "
+                        f"{sorted(actual_dns_records)} in Hetzner DNS."
+                        + (
+                            f" Missing {missing_dns_records}."
+                            if missing_dns_records
+                            else ""
+                        )
+                        + (
+                            f" Unexpected {unexpected_dns_records}."
+                            if unexpected_dns_records
+                            else ""
+                        )
                     ),
                 }
             )
@@ -482,9 +622,9 @@ def collect_zone_findings(registry: dict[str, Any], zone_records: list[dict[str,
     for fqdn, entry in sorted(catalog_by_fqdn.items()):
         if entry["environment"] != "production":
             continue
-        if entry["publication"]["delivery_model"] == "private-network":
-            continue
         if entry["status"] != "active":
+            continue
+        if not entry["adapter"]["dns"].get("zone_expected", False):
             continue
         if fqdn not in zone_by_fqdn:
             findings.append(
@@ -510,34 +650,76 @@ def zone_name_from_record(name: str, zone_name: str) -> str | None:
     return f"{name}.{zone_name}"
 
 
-def fetch_tls_metadata(hostname: str, port: int = 443) -> dict[str, Any]:
+def decode_certificate(binary_certificate: bytes) -> dict[str, Any]:
+    if not binary_certificate:
+        raise ValueError("server did not present a decodable certificate")
+    with tempfile.NamedTemporaryFile("w", suffix=".pem", delete=False) as handle:
+        handle.write(ssl.DER_cert_to_PEM_cert(binary_certificate))
+        certificate_path = handle.name
+    try:
+        return ssl._ssl._test_decode_cert(certificate_path)
+    finally:
+        os.unlink(certificate_path)
+
+
+def fetch_tls_metadata(
+    hostname: str,
+    *,
+    port: int = 443,
+    connect_host: str | None = None,
+) -> dict[str, Any]:
     verification_error: str | None = None
     cert: dict[str, Any]
+    connect_target = connect_host or hostname
 
     context = ssl.create_default_context()
     try:
-        with socket.create_connection((hostname, port), timeout=10) as sock:
+        with socket.create_connection((connect_target, port), timeout=10) as sock:
             with context.wrap_socket(sock, server_hostname=hostname) as tls_sock:
-                cert = tls_sock.getpeercert()
+                cert = tls_sock.getpeercert() or decode_certificate(tls_sock.getpeercert(binary_form=True))
     except ssl.SSLCertVerificationError as exc:
         verification_error = str(exc)
         insecure_context = ssl.create_default_context()
         insecure_context.check_hostname = False
         insecure_context.verify_mode = ssl.CERT_NONE
-        with socket.create_connection((hostname, port), timeout=10) as sock:
+        with socket.create_connection((connect_target, port), timeout=10) as sock:
             with insecure_context.wrap_socket(sock, server_hostname=hostname) as tls_sock:
-                cert = tls_sock.getpeercert()
+                cert = decode_certificate(tls_sock.getpeercert(binary_form=True))
 
     not_after = cert.get("notAfter")
     if not not_after:
         raise ValueError(f"certificate for {hostname} did not expose notAfter")
     expires_at = datetime.strptime(not_after, "%b %d %H:%M:%S %Y %Z").replace(tzinfo=UTC)
+    seconds_remaining = int((expires_at - utc_now()).total_seconds())
     issuer = ", ".join("=".join(part) for parts in cert.get("issuer", []) for part in parts)
     return {
         "expires_at": iso_timestamp(expires_at),
-        "days_remaining": int((expires_at - utc_now()).total_seconds() // 86400),
+        "seconds_remaining": seconds_remaining,
+        "hours_remaining": int(seconds_remaining // 3600),
+        "days_remaining": int(seconds_remaining // 86400),
         "issuer": issuer,
         "verification_error": verification_error,
+    }
+
+
+def should_report_tls_verification_error(entry: dict[str, Any], verification_error: str) -> bool:
+    if entry["adapter"]["tls"]["provider"] != "step-ca":
+        return True
+    return "hostname" in verification_error.lower()
+
+
+def tls_expiry_policy(entry: dict[str, Any]) -> dict[str, int | str]:
+    tls = entry.get("adapter", {}).get("tls", {})
+    if tls.get("provider") == "step-ca" and tls.get("auto_renew"):
+        return {
+            "warn_seconds": 6 * 3600,
+            "critical_seconds": 3600,
+            "unit": "hours",
+        }
+    return {
+        "warn_seconds": 14 * 86400,
+        "critical_seconds": 7 * 86400,
+        "unit": "days",
     }
 
 
@@ -554,7 +736,15 @@ def collect_tls_findings(registry: dict[str, Any]) -> list[dict[str, Any]]:
             continue
 
         try:
-            metadata = fetch_tls_metadata(entry["fqdn"])
+            metadata = fetch_tls_metadata(
+                entry["fqdn"],
+                port=entry["adapter"]["dns"].get("target_port") or 443,
+                connect_host=(
+                    entry["adapter"]["dns"]["target"]
+                    if entry.get("publication", {}).get("delivery_model") == "private-network"
+                    else None
+                ),
+            )
         except (OSError, ssl.SSLError, ValueError) as exc:
             findings.append(
                 {
@@ -567,7 +757,7 @@ def collect_tls_findings(registry: dict[str, Any]) -> list[dict[str, Any]]:
             )
             continue
 
-        if metadata.get("verification_error"):
+        if metadata.get("verification_error") and should_report_tls_verification_error(entry, metadata["verification_error"]):
             findings.append(
                 {
                     "check": "tls_certificate",
@@ -577,17 +767,48 @@ def collect_tls_findings(registry: dict[str, Any]) -> list[dict[str, Any]]:
                     "detail": f"TLS identity verification failed: {metadata['verification_error']}",
                 }
             )
-        if metadata["days_remaining"] < 14:
+        expiry_policy = tls_expiry_policy(entry)
+        if metadata["seconds_remaining"] < expiry_policy["warn_seconds"]:
+            remaining_value = metadata["hours_remaining"] if expiry_policy["unit"] == "hours" else metadata["days_remaining"]
             findings.append(
                 {
                     "check": "tls_certificate",
-                    "severity": "WARN" if metadata["days_remaining"] >= 7 else "CRITICAL",
+                    "severity": (
+                        "WARN"
+                        if metadata["seconds_remaining"] >= expiry_policy["critical_seconds"]
+                        else "CRITICAL"
+                    ),
                     "subdomain": entry["fqdn"],
                     "finding": "certificate_expiry_imminent",
                     "detail": (
                         f"TLS certificate expires on {metadata['expires_at']} "
-                        f"({metadata['days_remaining']} days remaining)."
+                        f"({remaining_value} {expiry_policy['unit']} remaining)."
                     ),
+                }
+            )
+    return findings
+
+
+def collect_private_route_findings(registry: dict[str, Any]) -> list[dict[str, Any]]:
+    findings: list[dict[str, Any]] = []
+    for entry in registry_entries(registry):
+        if not entry.get("evidence_plan", {}).get("private_route", False):
+            continue
+        target = entry["adapter"]["dns"]["target"]
+        port = entry["adapter"]["dns"].get("target_port")
+        if port is None:
+            continue
+        try:
+            with socket.create_connection((target, port), timeout=10):
+                pass
+        except OSError as exc:
+            findings.append(
+                {
+                    "check": "private_route_probe",
+                    "severity": "CRITICAL",
+                    "subdomain": entry["fqdn"],
+                    "finding": "private_route_unreachable",
+                    "detail": f"Failed to connect to the declared private route target {target}:{port}: {exc}",
                 }
             )
     return findings
@@ -598,6 +819,7 @@ def build_report(
     *,
     include_live_dns: bool = False,
     include_http_auth: bool = False,
+    include_private_routes: bool = False,
     include_tls: bool = False,
     include_hetzner_zone: bool = False,
 ) -> dict[str, Any]:
@@ -607,6 +829,8 @@ def build_report(
         findings.extend(collect_resolution_findings(registry))
     if include_http_auth:
         findings.extend(collect_http_auth_findings(registry))
+    if include_private_routes:
+        findings.extend(collect_private_route_findings(registry))
     if include_tls:
         findings.extend(collect_tls_findings(registry))
     if include_hetzner_zone:
@@ -619,13 +843,27 @@ def build_report(
         severity = finding["severity"]
         severity_counts[severity] = severity_counts.get(severity, 0) + 1
 
+    dns_records_checked = sum(
+        1
+        for entry in registry_entries(registry)
+        if entry["status"] == "active"
+        and entry["environment"] == "production"
+        and entry["adapter"]["dns"].get("zone_expected", False)
+    )
+    private_routes_checked = sum(
+        1
+        for entry in registry_entries(registry)
+        if entry.get("evidence_plan", {}).get("private_route", False)
+    )
+
     return {
         "audit_run_id": str(uuid.uuid4()),
         "audited_at": iso_timestamp(utc_now()),
         "registry_path": str(REGISTRY_PATH),
         "publications_in_catalog": registry["summary"]["catalog_total"],
         "active_publications_tracked": registry["summary"]["active_total"],
-        "dns_records_checked": registry["summary"]["active_public_total"] if include_live_dns else 0,
+        "dns_records_checked": dns_records_checked if include_live_dns else 0,
+        "private_routes_checked": private_routes_checked if include_private_routes else 0,
         "nginx_vhosts_checked": registry["summary"]["shared_edge_total"],
         "hetzner_zone_records_checked": len(zone_records),
         "severity_counts": severity_counts,
@@ -641,6 +879,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--validate", action="store_true", help="Validate the repo-side registry and auth contract.")
     parser.add_argument("--include-live-dns", action="store_true", help="Resolve production hostnames and report live status drift.")
     parser.add_argument("--include-http-auth", action="store_true", help="Probe live edge_oidc hostnames and validate redirects into Keycloak.")
+    parser.add_argument(
+        "--include-private-routes",
+        action="store_true",
+        help="Probe active private-network route targets from the current control-plane vantage point.",
+    )
     parser.add_argument("--include-tls", action="store_true", help="Probe live TLS expiry for active HTTPS hostnames.")
     parser.add_argument(
         "--include-hetzner-zone",
@@ -667,6 +910,7 @@ def main(argv: list[str] | None = None) -> int:
             registry,
             include_live_dns=args.include_live_dns,
             include_http_auth=args.include_http_auth,
+            include_private_routes=args.include_private_routes,
             include_tls=args.include_tls,
             include_hetzner_zone=args.include_hetzner_zone,
         )

@@ -12,8 +12,6 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-from environment_catalog import environment_choices, primary_environment
-
 
 def post_json_webhook(url: str, payload: dict[str, Any]) -> None:
     request = urllib.request.Request(
@@ -39,6 +37,15 @@ def maybe_read_secret_path(repo_root: Path, secret_id: str) -> str | None:
     if not secret_path.exists():
         return None
     return secret_path.read_text(encoding="utf-8").strip()
+
+
+def _load_environment_catalog(repo_root: Path):
+    scripts_dir = repo_root / "scripts"
+    if str(scripts_dir) not in sys.path:
+        sys.path.insert(0, str(scripts_dir))
+    import environment_catalog
+
+    return environment_catalog
 
 
 def build_summary(payload: dict[str, Any]) -> str:
@@ -143,14 +150,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--environment",
-        default=primary_environment(),
-        choices=environment_choices(),
+        default="",
         help="Environment selection forwarded to scripts/integration_suite.py.",
     )
     return parser
 
 
-def main(repo_path: str = "/srv/proxmox_florin_server", environment: str = "production") -> dict[str, Any]:
+def main(repo_path: str = "/srv/proxmox_florin_server", environment: str = "") -> dict[str, Any]:
     repo_root = Path(repo_path)
     if not repo_root.exists():
         return {
@@ -159,8 +165,19 @@ def main(repo_path: str = "/srv/proxmox_florin_server", environment: str = "prod
             "expected_repo_path": str(repo_root),
         }
 
+    environment_catalog = _load_environment_catalog(repo_root)
+    effective_environment = environment.strip() or environment_catalog.primary_environment()
+    allowed_environments = set(environment_catalog.environment_choices())
+    if effective_environment not in allowed_environments:
+        return {
+            "status": "blocked",
+            "reason": "unsupported environment",
+            "environment": effective_environment,
+            "allowed_environments": sorted(allowed_environments),
+        }
+
     report_file = repo_root / ".local" / "integration-tests" / "nightly-last-run.json"
-    payload = execute_suite(repo_root, environment, report_file)
+    payload = execute_suite(repo_root, effective_environment, report_file)
     publish_notifications(repo_root, payload)
     return payload
 

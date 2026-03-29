@@ -7,11 +7,11 @@
 
 schema_version: 1
 generated: '2026-03-29'
-total_adrs: 279
+total_adrs: 281
 implementation_status_summary:
-  Implemented: 225
-  Partial: 4
-  Not Implemented: 49
+  Implemented: 229
+  Partial: 6
+  Not Implemented: 45
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -33,6 +33,7 @@ concerns:
     - '0167'
     - 0168
     - 0181
+    - '0224'
     - '0254'
   api:
     - 0049
@@ -245,6 +246,7 @@ concerns:
     - '0260'
     - '0261'
     - '0270'
+    - '0274'
   release:
     - 0008
     - '0110'
@@ -3830,6 +3832,21 @@ adr_index:
     summary: We will centralize HA and replication intent in one canonical topology
     filename: 0223-canonical-ha-topology-catalog-and-reusable-automation-profiles.md
   - adr: '0224'
+    title: Self-Service Repo Intake And Agent-Assisted Deployments
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-28'
+    concern: agent-discovery
+    keywords:
+      - self-service
+      - repo
+      - intake
+      - agent-assisted
+      - deployments
+    summary: We will extend the existing ADR 0194 Coolify deploy path instead of introducing
+    filename: 0224-self-service-repo-intake-and-agent-assisted-deployments.md
+    implemented_version: 0.177.31
+  - adr: '0224'
     title: Server-Resident Operations As The Default Control Model
     status: Accepted
     implementation_status: Implemented
@@ -3895,7 +3912,7 @@ adr_index:
   - adr: 0228
     title: Windmill As The Default Browser-And-API Operations Surface
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: automation
     keywords:
@@ -3907,6 +3924,7 @@ adr_index:
       - surface
     summary: We will treat Windmill as the default browser-first and API-first operations
     filename: 0228-windmill-as-the-default-browser-and-api-operations-surface.md
+    implemented_version: 0.177.70
   - adr: 0229
     title: Gitea Actions Runners For On-Platform Validation And Release Preparation
     status: Accepted
@@ -4007,7 +4025,7 @@ adr_index:
   - adr: '0235'
     title: Cross-Application Launcher And Favorites Via PatternFly Application Launcher
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4019,6 +4037,7 @@ adr_index:
       - launcher
     summary: We will standardize on the PatternFly Application Launcher as the default
     filename: 0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher.md
+    implemented_version: 0.177.70
   - adr: '0236'
     title: Server-State And Mutation Feedback Via TanStack Query
     status: Accepted
@@ -4203,7 +4222,7 @@ adr_index:
   - adr: 0248
     title: Session And Logout Authority Across Keycloak, Oauth2-Proxy, And App Surfaces
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: security
     keywords:
@@ -4217,6 +4236,7 @@ adr_index:
       - surfaces
     summary: We will make Keycloak the session authority for protected browser surfaces
     filename: 0248-session-and-logout-authority-across-keycloak-oauth2-proxy-and-apps.md
+    implemented_version: 0.177.63
   - adr: 0249
     title: HTTPS And TLS Assurance Via Blackbox Exporter And testssl.sh
     status: Accepted
@@ -4266,7 +4286,7 @@ adr_index:
   - adr: '0252'
     title: Route And DNS Publication Assertion Ledger
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: networking
     keywords:
@@ -4277,6 +4297,7 @@ adr_index:
       - ledger
     summary: We will maintain a route and DNS publication assertion ledger for all
     filename: 0252-route-and-dns-publication-assertion-ledger.md
+    implemented_version: 0.177.68
   - adr: '0253'
     title: Unified Runtime Assurance Scoreboard And Rollup
     status: Accepted
@@ -4602,3 +4623,21 @@ adr_index:
       - concordance
     summary: We will require public endpoint admission control that proves concordance
     filename: 0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md
+  - adr: '0274'
+    title: Governed Base Image Mirrors And Warm Caches For Repo Deployments
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - governed
+      - base
+      - image
+      - mirrors
+      - warm
+      - caches
+      - repo
+      - deployments
+    summary: We will add a cache-first base-image policy for governed repo deployments.
+    filename: 0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments.md
+    implemented_version: 0.177.31

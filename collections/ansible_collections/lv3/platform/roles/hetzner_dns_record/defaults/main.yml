@@ -7,3 +7,4 @@ hetzner_dns_record_type: A
 hetzner_dns_record_value: ""
 hetzner_dns_record_ttl: 60
 hetzner_dns_record_value_match_regex: ""
+hetzner_dns_record_state: present

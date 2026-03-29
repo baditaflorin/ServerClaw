@@ -107,7 +107,7 @@ Windmill should call:
 python3 config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox_florin_server
 ```
 
-That workflow re-runs the same `config/validation-gate.json` manifest after merge on `main` and records the result in the worker checkout.
+That workflow is seeded into the `lv3` workspace as `f/lv3/post_merge_gate`, re-runs the same `config/validation-gate.json` manifest after merge on `main`, and records the result in the worker checkout.
 
 If the worker cannot pull the registry-backed `check-runner` images and the manifest run fails with a runner-image error, the post-merge script falls back to a worker-safe local subset:
 
@@ -117,6 +117,8 @@ If the worker cannot pull the registry-backed `check-runner` images and the mani
 That fallback intentionally omits the full `data-models` stage because mirrored worker checkouts can lack the complete historical git ancestry needed to validate every live-apply receipt `source_commit`, even when the ADR 0207 provider-boundary contract itself is healthy.
 The mirrored worker checkout still needs the canonical generated-doc inputs (`README.md`, `VERSION`, `changelog.md`, `mkdocs.yml`, `roles/`, `versions/`, and `workstreams.yaml`) because the fallback keeps `generated-docs` and `generated-portals` enabled even without `.git`.
 The mirrored worker checkout also needs the ADR 0230 policy surfaces (`policy/`, `scripts/policy_checks.py`, `scripts/policy_toolchain.py`, `scripts/command_catalog.py`, `scripts/gate_status.py`, and `config/windmill/scripts/gate-status.py`) because the worker-side approval and gate-status wrappers evaluate the same shared policy bundle after each sync.
+The worker mirror is file-backed rather than git-backed, so `role-argument-specs` now skips empty role directories in no-git mode and `windmill_runtime` prunes stale empty directories from synchronized roots before the fallback runs.
+The worker currently evaluates `generated-portals` with its local Python `3.11` interpreter, so repo-managed portal generators must remain compatible with that parser as well as the newer controller-side Python runtimes.
 When the replay starts from a repo-scoped non-primary git worktree, `playbooks/windmill.yml` now mirrors that active worktree automatically because the worker-checkout archive dereferences the scoped-runner shard symlinks before upload. If the replay starts from an out-of-tree or temporary playbook path instead, rerun it with `-e windmill_worker_checkout_repo_root_local_dir=/absolute/worktree/path` so the worker mirror still reflects the branch under verification.
 
 ## Troubleshooting
@@ -127,8 +129,9 @@ When the replay starts from a repo-scoped non-primary git worktree, `playbooks/w
 - if a remote gate run fails with `fatal: not a git repository` from a worktree path, rerun on the updated `main`; the remote sync now rewrites worktree metadata into `.git-remote/` inside the build workspace
 - if the Windmill post-merge gate points at an older mirrored worker tree without the canonical generated-doc inputs, replay `windmill_runtime` first so `/srv/proxmox_florin_server` includes the full worker-safe validation surface before rerunning the gate
 - if `policy-validation` fails on the build server or worker because OPA or Conftest binaries are missing, rerun the same entrypoint after clearing the cached toolchain root and ensure `LV3_POLICY_TOOLCHAIN_ROOT` points at a writable directory
-- if the Windmill worker mirror still picked up files from the wrong checkout, verify the replay came from the repo worktree and not a temporary playbook path; otherwise rerun `playbooks/windmill.yml` with `-e windmill_worker_checkout_repo_root_local_dir=/absolute/worktree/path` before rerunning the gate
+- if the Windmill worker mirror picked up files from the shared checkout instead of the branch worktree, verify the replay came from the repo worktree and not a temporary playbook path; otherwise rerun `playbooks/windmill.yml` with `-e windmill_worker_checkout_repo_root_local_dir=/absolute/worktree/path` before rerunning the gate
 - if the mirrored worker policy tree contains `._*` or `.DS_Store` files from a macOS checkout, replay `playbooks/windmill.yml`; ADR 0230 strips those metadata files during the repo sync before rerunning the worker gate
+- if the worker-local fallback reports a removed role as missing `meta/argument_specs.yml`, replay `playbooks/windmill.yml` from the current worktree so the worker mirror prunes stale empty directories before rerunning `f/lv3/post_merge_gate`
 - if the Windmill post-merge gate falls back locally because runner images cannot be pulled, treat the build-server `remote-validate` run as the authoritative full-manifest proof and use the fallback output to confirm the worker-safe ADR 0207 boundary checks still passed
 - if a remote or worker-local fallback fails on `int | None` or another modern type annotation, export `LV3_VALIDATE_PYTHON_BIN=/absolute/path/to/python3.10+` before rerunning so the direct Python validators do not inherit an older login-shell interpreter
 - if `packer-validate` falls back locally, inspect the build-worker plugin cache under `/opt/builds/.packer.d`; the remote gate expects the `github.com/hashicorp/proxmox` plugin to be prewarmed there when outbound GitHub access is unavailable

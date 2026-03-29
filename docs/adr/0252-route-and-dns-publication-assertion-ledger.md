@@ -1,9 +1,10 @@
 # ADR 0252: Route And DNS Publication Assertion Ledger
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.68
+- Implemented In Platform Version: 0.130.43
+- Implemented On: 2026-03-29
 - Date: 2026-03-28
 
 ## Context

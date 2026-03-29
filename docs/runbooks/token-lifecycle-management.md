@@ -8,6 +8,7 @@ Use this runbook for the governed ADR 0141 weekly audit path and for planned tok
 - `config/token-inventory.yaml` lists the currently governed tokens that must be audited.
 - `scripts/token_lifecycle.py` performs validation, inventory audit, and hook-driven rotation or revocation.
 - `receipts/token-lifecycle/` stores the generated audit receipts.
+- the Windmill wrapper uses `.local/token-lifecycle/receipts/` inside the worker checkout so concurrent checkout syncs do not block receipt creation.
 
 ## Validate the contract
 
@@ -49,6 +50,7 @@ If the token inventory only defines the workflow identifier and not an executabl
 
 ## Expected outcomes
 
-- a receipt is written under `receipts/token-lifecycle/`
+- local CLI runs write a receipt under `receipts/token-lifecycle/`
+- Windmill wrapper runs write a receipt under `.local/token-lifecycle/receipts/`
 - the mutation ledger file receives a `secret.audited` event for every inventory audit
 - successful hook-backed rotations emit `secret.rotated`

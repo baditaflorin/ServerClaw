@@ -20,6 +20,7 @@ def load_yaml(path: Path) -> list[dict] | dict:
 def test_defaults_define_public_oidc_and_local_artifacts() -> None:
     defaults = load_yaml(DEFAULTS_PATH)
     assert defaults["outline_public_base_url"] == "https://{{ outline_service_topology.public_hostname }}"
+    assert defaults["outline_session_authority"] == "{{ platform_session_authority }}"
     assert defaults["outline_public_edge_private_ip"] == "{{ hostvars['proxmox_florin'].proxmox_public_edge_ipv4 }}"
     assert defaults["outline_public_hostname_overrides"][0]["hostname"] == "{{ outline_service_topology.public_hostname }}"
     assert defaults["outline_public_hostname_overrides"][0]["address"] == "{{ outline_public_edge_private_ip }}"
@@ -28,6 +29,11 @@ def test_defaults_define_public_oidc_and_local_artifacts() -> None:
     assert defaults["outline_internal_base_url"] == "http://127.0.0.1:{{ outline_internal_port }}"
     assert defaults["outline_database_host"] == "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
     assert defaults["outline_keycloak_client_id"] == "outline"
+    assert defaults["outline_keycloak_logout_uri"] == (
+        "{{ outline_session_authority.keycloak_logout_url }}"
+        "?client_id={{ outline_keycloak_client_id }}"
+        "&post_logout_redirect_uri={{ outline_session_authority.shared_proxy_cleanup_url | urlencode }}"
+    )
     assert defaults["outline_keycloak_scopes"] == "openid profile email"
     assert defaults["outline_bootstrap_username"] == "outline.automation"
     assert defaults["outline_api_token_local_file"].endswith("/.local/outline/api-token.txt")
@@ -141,6 +147,7 @@ def test_outline_templates_enable_collaboration_and_private_s3_storage() -> None
     assert "AWS_S3_UPLOAD_BUCKET_URL=http://minio:9000" in env_template
     assert 'AWS_S3_UPLOAD_BUCKET_URL=[[ with secret "kv/data/{{ outline_openbao_secret_path }}" ]][[ .Data.data.AWS_S3_UPLOAD_BUCKET_URL ]][[ end ]]' in env_ctemplate
     assert "OIDC_CLIENT_ID={{ outline_keycloak_client_id }}" in env_template
+    assert "OIDC_LOGOUT_URI={{ outline_keycloak_logout_uri }}" in env_template
     assert "redis:" in compose_template
     assert "minio:" in compose_template
     assert '      - "{{ ansible_host }}:{{ outline_internal_port }}:3000"' in compose_template

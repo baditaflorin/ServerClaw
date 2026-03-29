@@ -156,6 +156,19 @@
         "make gate-status",
         "python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server"
       ],
+      "human_navigation": {
+        "launcher": {
+          "enabled": true,
+          "label": "Validation Gate Status",
+          "description": "Open the safe validation status path in the shared runbook launcher.",
+          "purpose": "observe",
+          "personas": [
+            "operator",
+            "observer"
+          ],
+          "href": "/#runbooks"
+        }
+      },
       "execution_class": "diagnostic",
       "budget": {
         "max_duration_seconds": 900,
@@ -303,6 +316,19 @@
         "python3 -m pytest tests/test_fault_injection.py tests/test_fault_injection_repo_surfaces.py tests/test_fault_injection_windmill.py tests/test_windmill_operator_admin_app.py -q",
         "python3 config/windmill/scripts/fault-injection.py --repo-path /srv/proxmox_florin_server --scenario-names fault:keycloak-unavailable --dry-run"
       ],
+      "human_navigation": {
+        "launcher": {
+          "enabled": true,
+          "label": "Fault Injection",
+          "description": "Jump to the governed resilience drill path in the ops portal runbook launcher.",
+          "purpose": "administer",
+          "personas": [
+            "administrator",
+            "observer"
+          ],
+          "href": "/#runbooks"
+        }
+      },
       "execution_class": "diagnostic",
       "budget": {
         "max_duration_seconds": 1800,
@@ -357,6 +383,19 @@
         "python3 -m pytest tests/test_network_impairment_matrix.py tests/test_network_impairment_matrix_repo_surfaces.py tests/test_network_impairment_matrix_windmill.py -q",
         "python3 config/windmill/scripts/network-impairment-matrix.py --repo-path /srv/proxmox_florin_server --target-class staging"
       ],
+      "human_navigation": {
+        "launcher": {
+          "enabled": true,
+          "label": "Network Impairment Matrix",
+          "description": "Open the staged degradation planning and rehearsal path from the shared shell.",
+          "purpose": "plan",
+          "personas": [
+            "planner",
+            "operator"
+          ],
+          "href": "/#runbooks"
+        }
+      },
       "execution_class": "diagnostic",
       "budget": {
         "max_duration_seconds": 600,
@@ -1808,6 +1847,19 @@
         "echo '' | python3 scripts/parse_ansible_drift.py",
         "python3 scripts/drift_detector.py --help"
       ],
+      "human_navigation": {
+        "launcher": {
+          "enabled": true,
+          "label": "Drift Status",
+          "description": "Jump directly to the latest multi-source drift view in the interactive ops portal.",
+          "purpose": "observe",
+          "personas": [
+            "observer",
+            "operator"
+          ],
+          "href": "/#drift"
+        }
+      },
       "execution_class": "diagnostic",
       "budget": {
         "max_duration_seconds": 1800,
@@ -1820,7 +1872,7 @@
       }
     },
     "subdomain-exposure-audit": {
-      "description": "Run the ADR 0139 subdomain exposure registry audit, check live DNS and edge auth behavior, and store one receipt.",
+      "description": "Run the ADR 0139 subdomain exposure registry plus ADR 0252 route and DNS publication audit, check public DNS, private routes, TLS, and edge auth behavior, and store one receipt.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -1852,10 +1904,11 @@
         "docs/runbooks/subdomain-exposure-audit.md"
       ],
       "outputs": [
-        "A timestamped receipt that records repo contract drift, live DNS status drift, optional Hetzner zone discrepancies, and any missing edge OIDC enforcement for tracked hostnames."
+        "A timestamped receipt that records repo contract drift, live DNS status drift, Hetzner zone record-set discrepancies, missing private-route reachability, TLS coverage or verification drift, and any missing edge OIDC enforcement for tracked hostnames."
       ],
       "verification_commands": [
         "uvx --from pyyaml python scripts/subdomain_exposure_audit.py --validate",
+        "make subdomain-exposure-audit",
         "uv run --with pytest --with pyyaml --with jsonschema --with jinja2 pytest -q tests/test_subdomain_catalog.py tests/test_subdomain_exposure_audit.py tests/test_docs_site.py",
         "python3 config/windmill/scripts/subdomain-exposure-audit.py --help"
       ],
@@ -2058,7 +2111,7 @@
         "tests/test_token_lifecycle.py"
       ],
       "outputs": [
-        "A token inventory audit receipt under receipts/token-lifecycle/ with healthy, warning, expired, and remediation counts.",
+        "A token inventory audit receipt under receipts/token-lifecycle/ for CLI runs, or under .local/token-lifecycle/receipts/ from the Windmill wrapper, with healthy, warning, expired, and remediation counts.",
         "A mutation-ledger file event describing the audit summary."
       ],
       "verification_commands": [
@@ -2105,7 +2158,7 @@
         "tests/test_token_lifecycle.py"
       ],
       "outputs": [
-        "An exposure incident receipt under receipts/security-incidents/ capturing the exposure window, revocation, replacement, session invalidation, and impact steps.",
+        "An exposure incident receipt under receipts/security-incidents/ for CLI runs, or under .local/token-lifecycle/incidents/ from the Windmill wrapper, capturing the exposure window, revocation, replacement, session invalidation, and impact steps.",
         "Mutation-ledger file events for revocation and incident creation when the required hooks succeed."
       ],
       "verification_commands": [
@@ -2689,6 +2742,19 @@
         "ssh ops@100.118.189.95 'ssh ops@10.10.10.20 \"curl -sf http://127.0.0.1:8092/health\"'",
         "curl -I https://ops.lv3.org"
       ],
+      "human_navigation": {
+        "launcher": {
+          "enabled": true,
+          "label": "Converge Ops Portal",
+          "description": "Open the governed portal deployment workflow through the shared runbook and action shell.",
+          "purpose": "administer",
+          "personas": [
+            "administrator",
+            "operator"
+          ],
+          "href": "/#runbooks"
+        }
+      },
       "execution_class": "mutation",
       "budget": {
         "max_duration_seconds": 900,
@@ -4005,7 +4071,7 @@
       }
     },
     "database-dns": {
-      "description": "Publish the private database.lv3.org DNS record toward the Patroni-managed PostgreSQL VIP.",
+      "description": "Publish the current private database.lv3.org DNS record toward the Proxmox host Tailscale proxy while the PostgreSQL HA VIP remains unapplied live.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4022,17 +4088,66 @@
         "validate"
       ],
       "live_impact": "external_live",
-      "owner_runbook": "docs/runbooks/postgres-failover.md",
+      "owner_runbook": "docs/runbooks/configure-postgres-vm.md",
       "implementation_refs": [
         "Makefile",
         "playbooks/database-dns.yml",
         "roles/hetzner_dns_record/tasks/main.yml"
       ],
       "outputs": [
-        "database.lv3.org DNS record updated to the private PostgreSQL VIP."
+        "database.lv3.org DNS record updated to the private Proxmox Tailscale PostgreSQL proxy."
       ],
       "verification_commands": [
         "dig +short database.lv3.org"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "route-dns-assertion-ledger": {
+      "description": "Reconcile the ADR 0252 route and DNS assertion ledger drift set across the Hetzner zone, including apex publication truth, tailnet-only DNS targets, and stale record retirements.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "route-dns-assertion-ledger",
+        "command": "HETZNER_DNS_API_TOKEN=... make route-dns-assertion-ledger"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "hetzner_dns_api_token"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "validate-generated-vars",
+        "validate-data-models"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/subdomain-exposure-audit.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/route-dns-assertion-ledger.yml",
+        "collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "The governed apex, mail, database, and vault DNS records are aligned with the live route assertion ledger.",
+        "The stale apex IPv6, autoconfig, notify, and www records are retired from the lv3.org zone."
+      ],
+      "verification_commands": [
+        "dig +short lv3.org",
+        "dig +short mail.lv3.org",
+        "dig +short database.lv3.org",
+        "dig +short vault.lv3.org"
       ],
       "execution_class": "mutation",
       "budget": {

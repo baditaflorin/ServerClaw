@@ -24,6 +24,7 @@ from secrets import token_urlsafe
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, repo_path, run_command
+from platform.retry import MaxRetriesExceeded, PlatformRetryError, RetryClass, RetryPolicy, with_retry
 
 
 REPO_ROOT = repo_path()
@@ -547,6 +548,49 @@ def asset_download_urls(*, asset: dict[str, Any], asset_detail: dict[str, Any], 
     return candidates
 
 
+def asset_download_retry_policy(max_wait_seconds: float) -> RetryPolicy:
+    attempts = 1
+    delay_seconds = 1.0
+    elapsed_seconds = 0.0
+    while elapsed_seconds < max_wait_seconds:
+        attempts += 1
+        elapsed_seconds += delay_seconds
+        delay_seconds = min(delay_seconds * 2, 30.0)
+    return RetryPolicy(
+        max_attempts=attempts,
+        base_delay_s=1.0,
+        max_delay_s=30.0,
+        multiplier=2.0,
+        jitter=False,
+        transient_max=0,
+    )
+
+
+def _download_asset_candidates_once(urls: list[str], *, token: str, destination: Path) -> None:
+    last_error: Exception | None = None
+    for url in urls:
+        try:
+            _status, payload = api_request("GET", url, token=token)
+            destination.write_bytes(payload)
+            return
+        except urllib.error.URLError as exc:
+            last_error = exc
+        except RuntimeError as exc:
+            if not is_retryable_download_error(exc):
+                raise
+            status_match = re.search(r"HTTP (\d+)", str(exc))
+            status_code = int(status_match.group(1)) if status_match else 503
+            last_error = PlatformRetryError(
+                str(exc),
+                code=f"http:{status_code}",
+                retry_class=RetryClass.BACKOFF,
+            )
+            last_error.__cause__ = exc
+    if last_error is None:
+        raise RuntimeError("release asset download failed without reporting an error")
+    raise last_error
+
+
 def download_asset_candidates(
     urls: list[str],
     *,
@@ -556,27 +600,19 @@ def download_asset_candidates(
 ) -> None:
     if not urls:
         raise ValueError("expected at least one asset download URL")
-    delay_seconds = 1.0
-    deadline = time.monotonic() + max_wait_seconds
-    last_error: Exception | None = None
-    while True:
-        for url in urls:
-            try:
-                _status, payload = api_request("GET", url, token=token)
-                destination.write_bytes(payload)
-                return
-            except urllib.error.URLError as exc:
-                last_error = exc
-            except RuntimeError as exc:
-                if not is_retryable_download_error(exc):
-                    raise
-                last_error = exc
-        if last_error is None:
-            raise RuntimeError("release asset download failed without reporting an error")
-        if time.monotonic() >= deadline:
-            raise last_error
-        time.sleep(delay_seconds)
-        delay_seconds = min(delay_seconds * 2, 30.0)
+    try:
+        with_retry(
+            lambda: _download_asset_candidates_once(urls, token=token, destination=destination),
+            policy=asset_download_retry_policy(max_wait_seconds),
+            error_context="release asset download",
+            sleep_fn=time.sleep,
+        )
+    except MaxRetriesExceeded as exc:
+        if exc.last_error is None:
+            raise RuntimeError("release asset download failed without reporting an error") from exc
+        if isinstance(exc.last_error, PlatformRetryError) and exc.last_error.__cause__ is not None:
+            raise exc.last_error.__cause__ from exc.last_error.__cause__
+        raise exc.last_error
 
 
 def download_asset(

@@ -2,7 +2,8 @@
 
 ## Purpose
 
-The operations portal is a generated static site under `build/ops-portal/`.
+The operations portal is a repo-managed interactive runtime served at
+`https://ops.lv3.org` from `docker-runtime-lv3`.
 
 It gives operators one place to answer:
 
@@ -12,10 +13,20 @@ It gives operators one place to answer:
 - which runbook documents it
 - which ADR introduced it
 - which agent tools already exist
+- which first-party surface should I jump to next
 
-## Generation
+The current portal combines:
 
-Generate the portal locally:
+- a FastAPI-based operator shell under `scripts/ops_portal/`
+- repo-synced catalogs and receipts mirrored into `/opt/ops-portal/data`
+- dashboard actions such as the runbook launcher
+- a shared masthead application launcher with purpose grouping, persona filters,
+  favorites, and recent destinations
+
+## Local Generation
+
+Generate the static snapshot locally when you need a read-only render for checks,
+design review, or fallback artifacts:
 
 ```bash
 make generate-ops-portal
@@ -41,6 +52,10 @@ The generator reads:
 - `docs/adr/*.md`
 - `docs/runbooks/*.md`
 
+The generated snapshot is not the production runtime. Production serves the
+interactive app from `scripts/ops_portal/` and syncs the same catalogs into the
+container data directory during converge.
+
 ## Health Data
 
 The portal can embed a generation-time health snapshot:
@@ -59,18 +74,64 @@ Run:
 
 ```bash
 uvx --from pyyaml python scripts/generate_ops_portal.py --check
+make syntax-check-ops-portal
 ```
 
-That renders the site in a temporary directory and verifies that all expected pages are present.
+That covers both sides of the portal contract:
 
-## Deployment Boundary
+- `generate_ops_portal.py --check` verifies the static snapshot still renders
+- `make syntax-check-ops-portal` verifies the interactive runtime playbook and
+  role wiring
 
-This workstream implements the generated site and repo automation.
+For the launcher-specific runtime behavior, also run the focused tests:
 
-The portal publication path now has two repo-managed components:
+```bash
+uv run --with pytest --with pyyaml --with jsonschema --with fastapi==0.116.1 --with httpx==0.28.1 --with cryptography==45.0.6 --with PyJWT==2.10.1 --with jinja2==3.1.5 --with itsdangerous==2.2.0 --with python-multipart==0.0.20 pytest tests/test_interactive_ops_portal.py tests/test_ops_portal.py -q
+```
 
+## Deployment
+
+For a repo-managed converge without the production live-apply guard:
+
+```bash
+make converge-ops-portal env=production
+```
+
+For the governed production replay used during live applies:
+
+```bash
+ALLOW_IN_PLACE_MUTATION=true \
+make live-apply-service service=ops_portal env=production \
+  EXTRA_ARGS='-e bypass_promotion=true -e ops_portal_repo_root=/absolute/path/to/worktree'
+```
+
+`bypass_promotion=true` is the documented break-glass path for direct production
+replays from a workstream branch. The Make target still enforces canonical truth,
+interface contracts, redundancy checks, immutable-guest checks, and emits the
+promotion-bypass audit event before running the service playbook.
+
+`ALLOW_IN_PLACE_MUTATION=true` is the documented ADR 0191 narrow exception for
+`ops_portal` because the live service still runs on immutable-replacement-governed
+`docker-runtime-lv3`. Set `ops_portal_repo_root` to the exact checkout you want
+mirrored into `/opt/ops-portal/service`; using the absolute worktree path avoids
+accidentally syncing a different branch's portal tree.
+
+Do not run two branch-local `ops_portal` production replays at the same time.
+Concurrent applies share `/opt/ops-portal/service` on `docker-runtime-lv3` and
+can clobber each other's uploaded tree, which leaves partial routes such as
+`/partials/launcher` missing even when the playbook itself reached the verify
+phase. The runtime role now checks `/partials/launcher` locally during replay so
+that drift fails closed instead of silently publishing an incomplete shell.
+
+## Publication Boundary
+
+The portal publication path has three repo-managed components:
+
+- `ops_portal_runtime` serves the interactive FastAPI shell on
+  `docker-runtime-lv3`
 - `public_edge_oidc_auth` runs `oauth2-proxy` on `nginx-lv3` and uses the Keycloak client secret mirrored at `.local/keycloak/ops-portal-client-secret.txt`
-- `nginx_edge_publication` serves `build/ops-portal/` and gates `ops.lv3.org` behind `/oauth2/*` instead of serving the static files anonymously
+- `nginx_edge_publication` forwards authenticated traffic for `ops.lv3.org` to
+  the interactive runtime instead of serving the old static snapshot directly
 
 Internal verification should show an unauthenticated request redirecting to the sign-in flow:
 
@@ -93,6 +154,52 @@ Two network details are now part of the live publication contract:
 - `docker-runtime-lv3` must allow TCP `8091` from `nginx-lv3` in both the Proxmox VM firewall and the in-guest nftables policy so `sso.lv3.org` and `oauth2-proxy` can reach Keycloak
 
 If cloud access to `https://ops.lv3.org` regresses, verify those two conditions before changing the portal or Keycloak configuration again.
+
+## Application Launcher
+
+ADR 0235 adds a shared masthead application launcher as the default
+cross-application switcher inside the interactive portal.
+
+Launcher inputs come from repo-managed data:
+
+- `config/service-capability-catalog.json`
+- `config/subdomain-exposure-registry.json`
+- `config/workflow-catalog.json`
+- `config/persona-catalog.json`
+
+Workflow entries only appear when the workflow declares
+`human_navigation.launcher` metadata in the workflow catalog.
+
+Operator flow:
+
+1. Open `https://ops.lv3.org` and complete the normal sign-in flow.
+2. Select **Application Launcher** in the masthead.
+3. Search for a destination, switch persona if needed, and use the purpose
+   groups to narrow the list.
+4. Toggle the star button on any destination to add or remove it from
+   favorites.
+5. Open a destination through the launcher to record it in recent destinations.
+
+Expected behavior:
+
+- the launcher groups entries into `Operate`, `Observe`, `Learn`, `Plan`, and
+  `Administer`
+- switching persona changes which destinations stay visible without mutating the
+  underlying catalogs
+- favorites and recent destinations persist for the current browser session
+- launcher redirects preserve the destination URL while recording the recent
+  visit server-side through the portal session
+
+The safest live verification path is:
+
+1. favorite `Keycloak` or another common admin surface
+2. open `Validation Gate Status` or `Drift Status` from the launcher
+3. reopen the launcher and confirm the destination now appears under
+   **Recent destinations**
+
+A failed live replay that serves `/health` but returns `404` for
+`/partials/launcher` indicates sync drift or a clobbered guest-side portal tree,
+not a healthy launcher rollout.
 
 ## Structured Runbook Launcher
 

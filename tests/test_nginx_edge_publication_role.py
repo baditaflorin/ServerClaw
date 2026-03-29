@@ -21,6 +21,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
     def test_defaults_use_webroot_acme_with_pinned_hetzner_support(self) -> None:
         self.assertEqual(self.defaults["public_edge_acme_challenge_method"], "webroot")
         self.assertEqual(self.defaults["public_edge_control_plane_host"], "{{ groups['proxmox_hosts'][0] }}")
+        self.assertEqual(self.defaults["public_edge_session_authority"], "{{ platform_session_authority }}")
         self.assertEqual(
             self.defaults["proxmox_guests"],
             "{{ hostvars[public_edge_control_plane_host].proxmox_guests }}",
@@ -37,7 +38,16 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             self.defaults["postgres_ha"],
             "{{ hostvars[public_edge_control_plane_host].postgres_ha }}",
         )
-        self.assertEqual(self.defaults["public_edge_service_topology"], "{{ platform_service_topology }}")
+        public_edge_service_topology_expr = self.defaults["public_edge_service_topology"]
+        self.assertIn(
+            "hostvars[public_edge_control_plane_host].public_edge_service_topology",
+            public_edge_service_topology_expr,
+        )
+        self.assertIn(
+            "hostvars[public_edge_control_plane_host].platform_service_topology",
+            public_edge_service_topology_expr,
+        )
+        self.assertIn("default(platform_service_topology)", public_edge_service_topology_expr)
         self.assertEqual(self.defaults["public_edge_dns_hetzner_plugin_version"], "3.0.0")
         self.assertEqual(
             self.defaults["public_edge_dns_hetzner_credentials_file"],
@@ -167,6 +177,9 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("https://fonts.googleapis.com", security_overrides["docs.lv3.org"]["content_security_policy"])
         self.assertIn("https://cdn.jsdelivr.net", security_overrides["logs.lv3.org"]["content_security_policy"])
         self.assertIn("https://unpkg.com", security_overrides["ops.lv3.org"]["content_security_policy"])
+        self.assertIn("wiki.lv3.org", security_overrides)
+        self.assertIn("'unsafe-inline'", security_overrides["wiki.lv3.org"]["content_security_policy"])
+        self.assertIn("https://wiki.lv3.org", security_overrides["wiki.lv3.org"]["content_security_policy"])
         self.assertIn("wss://tasks.lv3.org", security_overrides["tasks.lv3.org"]["content_security_policy"])
         self.assertIn("wss://realtime.lv3.org", security_overrides["realtime.lv3.org"]["content_security_policy"])
 
@@ -212,6 +225,22 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("site.crawl_policy_enabled | default(true)", self.template)
         self.assertIn('proxy_hide_header Cross-Origin-Resource-Policy;', self.template)
         self.assertIn('proxy_hide_header Content-Security-Policy;', self.template)
+
+    def test_template_renders_shared_session_logout_contract(self) -> None:
+        self.assertIn("public_edge_session_authority.shared_logout_path", self.template)
+        self.assertIn("public_edge_session_authority.shared_proxy_cleanup_path", self.template)
+        self.assertIn("public_edge_session_authority.shared_logged_out_path", self.template)
+        self.assertIn("public_edge_session_authority.oauth2_proxy_sign_out_url", self.template)
+        self.assertIn("public_edge_session_authority.keycloak_logout_url", self.template)
+        self.assertIn("site.hostname == public_edge_session_authority.authority_hostname", self.template)
+        self.assertIn("map $lv3_logout_authorization $lv3_logout_id_token", self.template)
+        self.assertIn("auth_request_set $lv3_logout_authorization $upstream_http_authorization;", self.template)
+        self.assertIn("location @lv3_shared_logout_without_session {", self.template)
+        self.assertIn("id_token_hint={{ id_token_hint }}", self.template)
+        self.assertIn("id_token_hint={id_token}", self.template)
+        self.assertIn("'$lv3_logout_id_token'", self.template)
+        self.assertIn('add_header Cache-Control "no-store" always;', self.template)
+        self.assertIn('add_header Clear-Site-Data "\\"cache\\", \\"cookies\\", \\"storage\\"" always;', self.template)
 
 
 if __name__ == "__main__":

@@ -53,6 +53,7 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_base_url"] == "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
     assert defaults["windmill_healthcheck_script_path"] == "f/lv3/windmill_healthcheck"
     assert defaults["windmill_validation_gate_status_script_path"] == "f/lv3/gate-status"
+    assert defaults["windmill_worker_checkout_repo_root_local_dir"].strip().startswith("{{\n  (playbook_dir ~ '/..')")
     assert "inventory_dir" in defaults["windmill_worker_checkout_repo_root_local_dir"]
     assert "playbook_dir" in defaults["windmill_worker_checkout_repo_root_local_dir"]
     assert (
@@ -255,6 +256,7 @@ def test_operator_admin_runbook_mentions_ag_grid_roster_controls() -> None:
 
 def test_operator_admin_raw_app_lockfile_and_runtime_sync_contract() -> None:
     app_dir = REPO_ROOT / "config/windmill/apps/f/lv3/operator_access_admin.raw_app"
+    package = json.loads((app_dir / "package.json").read_text())
     package_lock = json.loads((app_dir / "package-lock.json").read_text())
     runtime_tasks = (
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml"
@@ -264,11 +266,13 @@ def test_operator_admin_raw_app_lockfile_and_runtime_sync_contract() -> None:
             REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/meta/argument_specs.yml"
         ).read_text()
     )
+    lock_root_dependencies = package_lock["packages"][""]["dependencies"]
 
     assert package_lock["lockfileVersion"] == 3
-    assert package_lock["packages"][""]["dependencies"]["ag-grid-community"] == "35.2.0"
-    assert package_lock["packages"][""]["dependencies"]["ag-grid-react"] == "35.2.0"
-    assert package_lock["packages"][""]["dependencies"]["shepherd.js"] == "15.2.2"
+    assert lock_root_dependencies == package["dependencies"]
+    assert lock_root_dependencies["ag-grid-community"] == "35.2.0"
+    assert lock_root_dependencies["ag-grid-react"] == "35.2.0"
+    assert lock_root_dependencies["shepherd.js"] == "15.2.2"
     assert package_lock["packages"]["node_modules/ag-grid-community"]["version"] == "35.2.0"
     assert package_lock["packages"]["node_modules/ag-grid-react"]["version"] == "35.2.0"
     assert package_lock["packages"]["node_modules/shepherd.js"]["version"] == "15.2.2"
@@ -276,6 +280,7 @@ def test_operator_admin_raw_app_lockfile_and_runtime_sync_contract() -> None:
     assert "register: windmill_seed_raw_app_frontend_install" in runtime_tasks
     assert "missing package-lock.json for {{ item.path }}" in runtime_tasks
     assert "npm ci --no-audit --no-fund" in runtime_tasks
+    assert '"{{ windmill_seed_app_sync_dir.path }}:/workspace"' in runtime_tasks
     assert runtime_tasks.count("retries: 3") >= 2
     assert runtime_tasks.count("delay: 5") >= 2
     assert "until: windmill_seed_raw_app_frontend_install.rc == 0" in runtime_tasks
@@ -558,23 +563,42 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "windmill_worker_checkout_integrity_mismatch" in tasks
     assert "windmill_worker_checkout_sync_paths" in tasks
     assert "Create a local manifest path for the Windmill worker checkout contents" in tasks
-    assert "Create a guest staging archive path for the Windmill worker checkout" in tasks
-    assert "Create a guest manifest path for the Windmill worker checkout contents" in tasks
+    assert "Create a temporary remote path for the staged Windmill worker checkout archive" in tasks
+    assert "Create a temporary remote path for the staged Windmill worker checkout manifest" in tasks
     assert "Render the local manifest for the Windmill worker checkout contents" in tasks
+    assert "manifest_entries = set()" in tasks
+    assert 'path.name == "__pycache__"' in tasks
+    assert 'path.suffix == ".pyc"' in tasks
+    assert 'manifest_entries.add(f"{path.relative_to(repo_root).as_posix().rstrip(\'/\')}/")' in tasks
     assert "Copy the staged Windmill worker checkout manifest to the guest" in tasks
     assert "Prune stale immutable files from the Windmill worker checkout" in tasks
     assert "Removed stale immutable files from the Windmill worker checkout" in tasks
+    assert "Prune stale immutable empty directories from the Windmill worker checkout" in tasks
+    assert "Removed stale immutable empty directories from the Windmill worker checkout" in tasks
+    assert "manifest_directories" in tasks
+    assert "child.rmdir()" in tasks
     assert "Remove the remote manifest for the Windmill worker checkout contents" in tasks
     assert "Remove the local manifest for the Windmill worker checkout contents" in tasks
-    assert "windmill_worker_checkout_archive_remote.path" in tasks
+    assert "windmill_worker_checkout_archive_remote_file.path" in tasks
     assert "windmill_worker_checkout_manifest_remote.path" in tasks
     assert "windmill_worker_checkout_prune_preserve_paths" in tasks
     assert "Create a temporary Windmill seed app sync directory" in tasks
+    assert "Create a controller-local staging directory for the Windmill app sync root" in tasks
+    assert "Stage the repo-managed Windmill app sync root without ignored frontend build artifacts" in tasks
     assert "Remove the temporary Windmill seed app sync directory" in tasks
+    assert "Remove the controller-local Windmill app sync staging directory" in tasks
     assert "windmill_seed_app_sync_dir.path" in tasks
+    assert "windmill_seed_app_sync_root_local.path" in tasks
+    assert "dir-merge,- .gitignore" in tasks
+    assert "--exclude" in tasks
+    assert ".DS_Store" in tasks
+    assert "rsync" in tasks
     assert "scripts/windmill_run_wait_result.py" in tasks
     assert "--payload-json" in tasks
     assert "--timeout {{ windmill_seed_job_timeout_seconds }}" in tasks
+    assert "' not found' in (windmill_up.stderr | default(''))" in tasks
+    assert "Wait for Windmill workers to register" in verify_tasks
+    assert "/api/workers/list" in verify_tasks
     assert "--path {{ windmill_validation_gate_status_script_path | quote }}" in verify_tasks
     assert "Run the Windmill validation gate status script" in verify_tasks
     assert "Assert the Windmill validation gate status result" in verify_tasks

@@ -16,6 +16,7 @@ REPO_ROOT = repo_path()
 MKDOCS_CONFIG_PATH = repo_path("mkdocs.yml")
 DEFAULT_GENERATED_DIR = repo_path("docs", "site-generated")
 DEFAULT_OUTPUT_DIR = repo_path("build", "docs-portal")
+THEME_OVERRIDES_DIR = repo_path("docs", "theme-overrides")
 PUBLISHED_ARTIFACT_SCAN = repo_path("scripts", "published_artifact_secret_scan.py")
 EXPECTED_SITE_ARTIFACTS = (
     Path("index.html"),
@@ -36,20 +37,30 @@ def mkdocs_config_for_generated_dir(generated_dir: Path) -> tuple[Path, Path | N
         return MKDOCS_CONFIG_PATH, None
 
     mkdocs_config = MKDOCS_CONFIG_PATH.read_text(encoding="utf-8")
-    rewritten = mkdocs_config.replace(
-        f"docs_dir: {DEFAULT_GENERATED_DIR.relative_to(REPO_ROOT).as_posix()}",
-        f"docs_dir: {generated_dir.as_posix()}",
-        1,
+    rewritten = mkdocs_config
+    replacements = (
+        (
+            f"docs_dir: {DEFAULT_GENERATED_DIR.relative_to(REPO_ROOT).as_posix()}",
+            f"docs_dir: {generated_dir.as_posix()}",
+            "docs_dir",
+        ),
+        (
+            f"  custom_dir: {THEME_OVERRIDES_DIR.relative_to(REPO_ROOT).as_posix()}",
+            f"  custom_dir: {THEME_OVERRIDES_DIR.as_posix()}",
+            "theme.custom_dir",
+        ),
     )
-    if rewritten == mkdocs_config:
-        raise ValueError(f"unable to rewrite docs_dir in {MKDOCS_CONFIG_PATH}")
+    for original, replacement, label in replacements:
+        updated = rewritten.replace(original, replacement, 1)
+        if updated == rewritten:
+            raise ValueError(f"unable to rewrite {label} in {MKDOCS_CONFIG_PATH}")
+        rewritten = updated
 
     temp_file = tempfile.NamedTemporaryFile(
         mode="w",
         encoding="utf-8",
         prefix="lv3-mkdocs-",
         suffix=".yml",
-        dir=REPO_ROOT,
         delete=False,
     )
     with temp_file:

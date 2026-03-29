@@ -41,7 +41,7 @@ openbao_tls_server_key_file: "{{ openbao_tls_mount_dir }}/server.key"
 openbao_tls_client_ca_file: "{{ openbao_tls_mount_dir }}/root_ca.crt"
 openbao_tls_certificate_subject: "{{ platform_host.management.tailscale_ipv4 }}"
 openbao_tls_server_sans:
-  - "{{ platform_service_topology | platform_service_host('openbao') }}"
+  - "{{ openbao_controller_url | urlsplit('hostname') }}"
   - "{{ platform_host.management.tailscale_ipv4 }}"
 openbao_tls_certificate_not_after: 24h
 openbao_tls_cert_renew_before_seconds: 21600
