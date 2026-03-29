@@ -207,7 +207,7 @@ workstreams:
   - id: ws-0253-live-apply
     adr: "0253"
     title: Unified runtime assurance scoreboard live apply
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/ws-0253-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0253-live-apply
@@ -298,7 +298,7 @@ workstreams:
   - id: ws-0245-live-apply
     adr: "0245"
     title: Declared-to-live service attestation live apply
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/ws-0245-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0245-live-apply
@@ -372,7 +372,7 @@ workstreams:
         APIs, and ops-portal visibility while hardening the live ops-portal
         sync and build path for separate-worktree replay
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.64
       latest_receipts:
         api_gateway: 2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply
         ops_portal: 2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply

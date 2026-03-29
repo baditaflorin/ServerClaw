@@ -2,8 +2,8 @@
 
 - ADR: [ADR 0245](../adr/0245-declared-to-live-service-attestation.md)
 - Title: declared-to-live service attestation through shared runtime evidence, gateway APIs, and ops-portal visibility
-- Status: ready
-- Implemented In Repo Version: not yet
+- Status: live_applied
+- Implemented In Repo Version: 0.177.64
 - Live Applied In Platform Version: 0.130.45
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
@@ -71,9 +71,9 @@
 
 ## Mainline Integration
 
-- protected integration files still remain for the exact-main merge step: `README.md`, `VERSION`, `RELEASE.md`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/0.177.63.md`, `versions/stack.yaml`, and `build/platform-manifest.json`
+- release `0.177.64` now records ADR 0245 in repository truth on top of the current `origin/main` baseline
 - the canonical live-apply receipt for this workstream is `receipts/live-applies/2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply.json`
-- exact-main integration should point both `api_gateway` and `ops_portal` latest-receipt truth to that receipt while preserving the current mainline platform baseline at `0.130.45`
+- the remaining exact-main step is to replay the gateway and ops-portal converges from the committed `0.177.64` candidate, then record that receipt while preserving the current mainline platform baseline at `0.130.45`
 
 ## Notes For The Next Assistant
 
