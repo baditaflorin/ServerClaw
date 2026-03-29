@@ -3,6 +3,8 @@
   hosts: proxmox_hosts
   become: true
   gather_facts: true
+  vars:
+    ansible_become_timeout: 120
 
   roles:
     - role: lv3.platform.proxmox_tailscale_proxy
@@ -12,6 +14,8 @@
   hosts: docker-runtime-lv3
   become: true
   gather_facts: true
+  vars:
+    ansible_become_timeout: 120
 
   pre_tasks:
     - name: Ensure target guest is Debian
