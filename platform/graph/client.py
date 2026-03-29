@@ -604,7 +604,7 @@ class DependencyGraphClient:
                         "path": self.path(node_id, dependency_id),
                     }
                 )
-            if upstream_issues and current_status in {"ok", "healthy"}:
+            if upstream_issues and current_status in {"ok", "healthy", "ready"}:
                 derived_status = "degraded"
         return {
             "node_id": node_id,
@@ -630,7 +630,7 @@ class DependencyGraphClient:
             if not dependent_id.startswith("service:"):
                 continue
             service_id = dependent_id.removeprefix("service:")
-            if health_map.get(service_id) not in {"ok", "healthy"}:
+            if health_map.get(service_id) not in {"ok", "healthy", "ready"}:
                 continue
             affected.append(
                 {

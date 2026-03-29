@@ -1,0 +1,22 @@
+<div class="md-search lv3-pagefind-search" role="dialog" aria-modal="true" aria-label="Search the docs portal">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner lv3-pagefind-search__inner" role="search">
+    <div class="lv3-pagefind-search__panel">
+      <div class="lv3-pagefind-search__toolbar">
+        <p class="lv3-pagefind-search__hint">
+          Search docs, ADRs, runbooks, and release notes locally in the browser.
+          <span class="lv3-pagefind-search__shortcut">Ctrl/Cmd+K</span>
+        </p>
+        <label class="md-search__icon md-icon lv3-pagefind-search__close" for="__search" aria-label="Close search">
+          {% set icon = config.theme.icon.close or "material/close" %}
+          {% include ".icons/" ~ icon ~ ".svg" %}
+        </label>
+      </div>
+      <div
+        id="pagefind-search"
+        data-pagefind-base="{{ 'pagefind/' | url }}"
+        data-pagefind-placeholder="Search docs, ADRs, runbooks, services, and release notes">
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,11 +1,11 @@
 schema_version: 1.0.0
-repo_version: 0.177.54
-platform_version: 0.130.43
+repo_version: 0.177.62
+platform_version: 0.130.45
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
-    monitoring: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
+    monitoring: 2026-03-28-adr-0250-log-queryability-canary-live-apply
     realtime: 2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply
     capacity_model: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
     capability_contracts: 2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply
@@ -31,7 +31,7 @@ live_apply_evidence:
     openbao: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
     vaultwarden: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
     certificate_lifecycle: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
-    windmill: 2026-03-28-adr-0209-use-case-services-live-apply
+    windmill: 2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply
     self_correcting_automation_loops: 2026-03-28-adr-0204-self-correcting-automation-loops-live-apply
     budgeted_workflow_scheduler: 2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply
     observation_to_action_closure_loop: 2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply
@@ -46,7 +46,7 @@ live_apply_evidence:
     config_merge: 2026-03-26-adr-0158-config-merge-live-apply
     control_plane_recovery: 2026-03-28-adr-0231-local-secret-delivery-live-apply
     control_metadata_witness: 2026-03-27-adr-0181-control-metadata-witness-live-apply
-    local_search_and_indexing_fabric: 2026-03-26-adr-0121-search-indexing-fabric-live-apply
+    local_search_and_indexing_fabric: 2026-03-29-adr-0239-browser-local-search-mainline-live-apply
     notification_profiles: 2026-03-22-adr-0050-notification-profiles-live-apply
     platform_event_taxonomy: 2026-03-26-adr-0124-platform-event-taxonomy-live-apply
     netbox: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
@@ -61,9 +61,9 @@ live_apply_evidence:
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
     semaphore: 2026-03-25-adr-0149-semaphore-live-apply
     searxng: 2026-03-26-adr-0148-searxng-live-apply
-    ops_portal: 2026-03-28-adr-0209-use-case-services-live-apply
+    ops_portal: 2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-live-apply
     ollama: 2026-03-27-adr-0176-inventory-sharding-mainline-live-apply
-    operator_access: 2026-03-28-adr-0206-ports-and-adapters-live-apply
+    operator_access: 2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply
     preview_environment: 2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z
     staging_environment: 2026-03-27-adr-0183-staging-live-apply
     immutable_guest_replacement: 2026-03-27-adr-0191-immutable-guest-replacement-live-apply
@@ -99,8 +99,12 @@ live_apply_evidence:
     policy_validation: 2026-03-28-adr-0230-policy-decisions-live-apply
     promotion_pipeline: 2026-03-28-adr-0230-policy-decisions-live-apply
     server_resident_operations: 2026-03-28-adr-0224-server-resident-operations-default-control-live-apply
-    host_control_loops: 2026-03-28-adr-0226-host-control-loops-live-apply
+    host_control_loops: 2026-03-28-adr-0226-host-control-loops-mainline-live-apply
     signed_release_bundles: 2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply
+    log_queryability_canary: 2026-03-28-adr-0250-log-queryability-canary-live-apply
+    operator_access_guided_onboarding: 2026-03-28-adr-0242-guided-human-onboarding-live-apply
+    runtime_state_semantics: 2026-03-28-adr-0246-runtime-state-semantics-live-apply
+    docs_portal: 2026-03-29-adr-0239-browser-local-search-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -594,6 +598,7 @@ observed_state:
     grafana_version: 12.4.1
     influxdb_running: true
     loki_running: true
+    loki_canary_running: true
     prometheus_running: true
     tempo_running: true
     alloy_log_shipping_active: true
@@ -614,6 +619,9 @@ observed_state:
       - uid: lv3-mail-platform
         title: LV3 Mail Platform
         panels: 14
+      - uid: lv3-log-canary-overview
+        title: LV3 Log Canary
+        panels: 11
       - uid: lv3-vm-nginx-lv3
         title: LV3 nginx-lv3 Detail
         panels: 12
@@ -630,6 +638,8 @@ observed_state:
         title: LV3 postgres-lv3 Detail
         panels: 8
     grafana_dashboards_provisioned: true
+    log_queryability_canary_verified: true
+    log_queryability_canary_selector: '{name="loki-canary",stream="stdout"}'
     influxdb_internal_url: http://10.10.10.40:8086
     proxmox_metric_server_id: influxdb-http
     proxmox_metrics_flow_verified: true
@@ -1006,8 +1016,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.54
+    current: 0.177.62
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.43
+    current: 0.130.45
     meaning: intended platform release for the actual server configuration

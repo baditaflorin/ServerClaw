@@ -104,7 +104,7 @@ ADR 0185 branch-scoped ephemeral preview environments are now live in the reposi
 The repository now also ships ADR 0115 mutation-ledger primitives live on production: the `ledger.events` Postgres schema migration, the `platform.ledger` writer/reader/replay package, the one-time `audit_log` migration helper, and optional dual-write from the existing mutation-audit emitter when `LV3_LEDGER_DSN` is configured; the latest `main` replay on 2026-03-27 re-projected the Windmill runtime ledger env and verified a fresh guest-side `execution.completed` row through both `ledger.events` and the compatibility `audit_log` view.
 The repository now also ships ADR 0117 dependency-graph runtime live on production: the `platform.graph` traversal client, `graph.nodes` / `graph.edges` schema migration, repo-managed graph rebuild helpers, `/v1/graph/*` gateway routes, and risk-scorer integration are now verified against the live Windmill, PostgreSQL, and API-gateway runtime after the 2026-03-26 dependency-graph apply.
 The repository now also ships ADR 0121 local search live on production: a repo-managed search fabric under `scripts/search_fabric/`, a persisted local index at `build/search-index/documents.json`, the `lv3 search` CLI command, the `/v1/search` API surface, and an ops-portal search panel backed by the same corpus, with the first production receipt recorded on 2026-03-26 after the API gateway and Windmill worker indexing paths were hardened against malformed corpus files.
-The repository now also ships ADR 0122 browser-first operator access management: a repo-managed Windmill admin app at `f/lv3/operator_access_admin` backed by the governed ADR 0108 onboarding, off-boarding, reconciliation, and inventory workflows.
+The repository now also ships ADR 0122 browser-first operator access management: a repo-managed Windmill admin app at `f/lv3/operator_access_admin` backed by the governed ADR 0108 onboarding, off-boarding, reconciliation, inventory, and bounded rich-notes workflows. ADR 0241 is now live there as the first Tiptap-backed inline knowledge editor with markdown persistence, and ADR 0242 adds Shepherd.js-powered guided tours with resumable first-run task flows and direct runbook links for operators.
 The repository now also ships ADR 0130 agent state persistence: `platform.agent.AgentStateClient`, the `agent.state` schema migration, and `lv3 agent state show|delete|verify` provide a governed scratch-state path for resumable agent work and post-handoff integrity validation; the first live schema apply from `main` is still pending.
 The repository now also ships ADR 0131 multi-agent handoffs: `platform.handoff`, the `handoff.transfers` schema migration, mutation-ledger event types, and `lv3 handoff send|list|view|accept|refuse|complete` provide a durable transfer path between agents and operators, with concurrent burst coverage verified in-repo; the first live transport integration from `main` is still pending.
 The repository now also ships ADR 0161 real-time agent coordination: `platform.agent.coordination`, `/v1/platform/agents`, the interactive ops-portal coordination panel, and committed coordination snapshot receipts expose active observation-loop and closure-loop sessions from one shared read model; the first live apply from `main` completed on 2026-03-26 with the coordination surfaces verified on `docker-runtime-lv3`.
@@ -121,6 +121,11 @@ The repository now also ships ADR 0194 Coolify repo-deploy automation live on pr
 The repository now also ships ADR 0199 Outline living knowledge wiki live on production: `https://wiki.lv3.org` is published through the shared NGINX edge, the Keycloak-backed `outline.automation` bootstrap path is repo-managed, and the 2026-03-28 merged-main replay re-verified the five governed living-knowledge collections end to end.
 The developer portal generator now stamps published docs pages with sensitivity metadata, keeps `RESTRICTED` ADRs and runbooks summary-only in portal output, and leaves `CONFIDENTIAL` documents source-only until a dedicated admin-view path exists.
 Portal access is now authentication-by-default on the live platform: `ops.lv3.org`, `docs.lv3.org`, and `changelog.lv3.org` are gated by the shared Keycloak edge auth flow, and Grafana no longer serves anonymous dashboards.
+ADR 0239 browser-local search is now live on `main`: `docs.lv3.org` publishes
+Pagefind bundles for the generated docs corpus, the header search opens the
+Pagefind-backed modal, and the latest exact-main replay re-verified both the
+authenticated `302` edge contract and the published search assets on
+`nginx-lv3`.
 ADR 0134 changelog redaction is now live on the shared authenticated edge: the published deployment-history view masks emails, private IPs, internal hostnames, and inline secret material before changelog data reaches `changelog.lv3.org`.
 ADR 0102 security posture reporting is now live on production: the Windmill-compatible weekly security scan can execute end to end from the worker checkout through the private Proxmox jump path, and committed receipts now include both the first production report and the verified worker replay from 2026-03-26.
 The repository now also ships ADR 0142 public-surface security scanning: `make public-surface-security-scan ENV=production` writes structured receipts under `receipts/security-scan/`, uses `testssl.sh` and `nuclei` container runners for the live public HTTP or HTTPS surface, and can publish high or critical findings on `platform.security.*`; the live weekly schedule still requires apply from `main`.
@@ -137,8 +142,8 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.54` |
-| Platform version | `0.130.43` |
+| Repository version | `0.177.62` |
+| Platform version | `0.130.45` |
 | Observed check date | `2026-03-28` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -214,6 +219,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `dependency_graph_runtime` | `2026-03-26-adr-0117-dependency-graph-live-apply` |
 | `dify` | `2026-03-28-adr-0197-dify-mainline-live-apply` |
 | `docker_runtime` | `2026-03-22-adr-0023-docker-runtime-live-apply` |
+| `docs_portal` | `2026-03-29-adr-0239-browser-local-search-mainline-live-apply` |
 | `dozzle` | `2026-03-26-adr-0150-dozzle-live-apply` |
 | `excalidraw` | `2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply` |
 | `failure_domain_policy` | `2026-03-27-adr-0184-failure-domain-labels-live-apply` |
@@ -222,16 +228,17 @@ Template VM: `9000` `debian13-cloud-template`
 | `gitea_actions_runners` | `2026-03-28-adr-0229-gitea-actions-runners-live-apply` |
 | `guest_network_policy` | `2026-03-22-adr-0067-guest-network-policy-live-apply` |
 | `homepage` | `2026-03-26-adr-0152-homepage-live-apply` |
-| `host_control_loops` | `2026-03-28-adr-0226-host-control-loops-live-apply` |
+| `host_control_loops` | `2026-03-28-adr-0226-host-control-loops-mainline-live-apply` |
 | `identity_taxonomy` | `2026-03-22-adr-0046-identity-classes-live-apply` |
 | `immutable_guest_replacement` | `2026-03-27-adr-0191-immutable-guest-replacement-live-apply` |
 | `keycloak` | `2026-03-26-adr-0171-fault-injection-live-apply` |
 | `keycloak_operator_access` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `langfuse` | `2026-03-26-adr-0146-langfuse-live-apply` |
-| `local_search_and_indexing_fabric` | `2026-03-26-adr-0121-search-indexing-fabric-live-apply` |
+| `local_search_and_indexing_fabric` | `2026-03-29-adr-0239-browser-local-search-mainline-live-apply` |
+| `log_queryability_canary` | `2026-03-28-adr-0250-log-queryability-canary-live-apply` |
 | `mail_platform` | `2026-03-24-keycloak-password-reset-mail-live-apply` |
 | `mattermost` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
-| `monitoring` | `2026-03-27-adr-0105-capacity-model-mainline-live-apply` |
+| `monitoring` | `2026-03-28-adr-0250-log-queryability-canary-live-apply` |
 | `mutation_audit` | `2026-03-23-adr-0066-mutation-audit-live-apply` |
 | `mutation_ledger` | `2026-03-27-adr-0115-mutation-ledger-mainline-live-apply` |
 | `n8n` | `2026-03-26-adr-0151-n8n-live-apply` |
@@ -245,8 +252,9 @@ Template VM: `9000` `debian13-cloud-template`
 | `openbao` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
 | `openbao_operator_entity` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `openbao_operator_policy` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
-| `operator_access` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
+| `operator_access` | `2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply` |
 | `operator_access_composition_root` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
+| `operator_access_guided_onboarding` | `2026-03-28-adr-0242-guided-human-onboarding-live-apply` |
 | `operator_access_inventory` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_ports` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_quarterly_review` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
@@ -254,7 +262,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `operator_access_runbooks` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_validation` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_workflows` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
-| `ops_portal` | `2026-03-28-adr-0209-use-case-services-live-apply` |
+| `ops_portal` | `2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-live-apply` |
 | `outline` | `2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply` |
 | `plane` | `2026-03-28-adr-0193-plane-mainline-live-apply` |
 | `platform_context` | `2026-03-28-adr-0198-semantic-rag-mainline-live-apply` |
@@ -269,6 +277,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `realtime` | `2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply` |
 | `remote_build_gateway` | `2026-03-26-adr-0156-agent-session-workspace-isolation-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
+| `runtime_state_semantics` | `2026-03-28-adr-0246-runtime-state-semantics-live-apply` |
 | `searxng` | `2026-03-26-adr-0148-searxng-live-apply` |
 | `secret_rotation` | `2026-03-23-adr-0065-secret-rotation-live-apply` |
 | `security_posture_reporting` | `2026-03-26-adr-0102-security-posture-live-apply` |
@@ -286,7 +295,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
 | `vaultwarden` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
-| `windmill` | `2026-03-28-adr-0209-use-case-services-live-apply` |
+| `windmill` | `2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply` |
 | `world_state_materializer` | `2026-03-27-adr-0113-world-state-materializer-mainline-live-apply` |
 <!-- END GENERATED: platform-status -->
 
@@ -584,6 +593,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Live Apply Merge Train](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/live-apply-merge-train.md)
 - [Live Apply Receipts And Verification Evidence](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/live-apply-receipts-and-verification-evidence.md)
 - [LLM Implementation Prompts — ADRs 0082–0091](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/llm-implementation-prompts.md)
+- [Log Queryability Canary](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/log-queryability-canary.md)
 - [Maintenance Windows](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/maintenance-windows.md)
 - [Monitoring Stack Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/monitoring-stack.md)
 - [Mutation Audit Log](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/mutation-audit-log.md)
@@ -632,6 +642,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Rotate Certificates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/rotate-certificates.md)
 - [Run Namespace Partitioning](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/run-namespace-partitioning.md)
 - [Runbook Automation Executor](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/runbook-automation-executor.md)
+- [Runtime Assurance Scoreboard](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/runtime-assurance-scoreboard.md)
 - [Scaffold A New Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/scaffold-new-service.md)
 - [Search Indexing Fabric](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/search-indexing-fabric.md)
 - [Secret Rotation And Lifecycle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/secret-rotation-and-lifecycle.md)
@@ -933,6 +944,16 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0261: Playwright Browser Runners For ServerClaw Web Action And Extraction](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0261-playwright-browser-runners-for-serverclaw-web-action-and-extraction.md)
 - [ADR 0262: OpenFGA And Keycloak For Delegated ServerClaw Capability Authorization](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0262-openfga-and-keycloak-for-delegated-serverclaw-capability-authorization.md)
 - [ADR 0263: Qdrant, PostgreSQL, And Local Search As The ServerClaw Memory Substrate](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0263-qdrant-postgresql-and-local-search-as-the-serverclaw-memory-substrate.md)
+- [ADR 0264: Failure-Domain-Isolated Validation Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0264-failure-domain-isolated-validation-lanes.md)
+- [ADR 0265: Immutable Validation Snapshots For Remote Builders And Schema Checks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md)
+- [ADR 0266: Validation Runner Capability Contracts And Environment Attestation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0266-validation-runner-capability-contracts-and-environment-attestation.md)
+- [ADR 0267: Expiring Gate Bypass Waivers With Structured Reason Codes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0267-expiring-gate-bypass-waivers-with-structured-reason-codes.md)
+- [ADR 0268: Fresh-Worktree Bootstrap Manifests For Generated Artifacts And Local Inputs](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md)
+- [ADR 0269: Vulnerability Budgets And Image-Host Freshness Promotion Gates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md)
+- [ADR 0270: Docker Publication Self-Healing And Port-Programming Assertions](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0270-docker-publication-self-healing-and-port-programming-assertions.md)
+- [ADR 0271: Backup Coverage Assertion Ledger And Backup-Of-Backup Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0271-backup-coverage-assertion-ledger-and-backup-of-backup-policy.md)
+- [ADR 0272: Restore Readiness Ladders And Stateful Warm-Up Verification Profiles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md)
+- [ADR 0273: Public Endpoint Admission Control For DNS Catalog And Certificate Concordance](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -1107,6 +1128,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0234: Human User Experience Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md)
 - [Workstream ADR 0244: Runtime Assurance Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0244-runtime-assurance-architecture-bundle.md)
 - [Workstream ADR 0254: ServerClaw Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0254-serverclaw-architecture-bundle.md)
+- [Workstream ADR 0264: Receipt-Driven Resilience Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md)
 - [Workstream ws-0021-edge-cert-repair: Shared Edge Certificate Expansion Repair](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0021-edge-cert-repair.md)
 - [Workstream ws-0101-live-apply: ADR 0101 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0101-live-apply.md)
 - [Workstream ws-0105-live-apply: Live Apply ADR 0105 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0105-live-apply.md)
@@ -1137,6 +1159,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream WS-0224: Server-Resident Operations Default-Control Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0224-live-apply.md)
 - [Workstream WS-0225: Server-Resident Reconciliation Via Ansible Pull Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0225-live-apply.md)
 - [Workstream WS-0226: Host Control Loops Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0226-live-apply.md)
+- [Workstream ws-0226-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0226-main-merge.md)
 - [Workstream WS-0227: Bounded Command Execution Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0227-live-apply.md)
 - [Workstream ws-0229-live-apply: ADR 0229 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0229-live-apply.md)
 - [Workstream ws-0229-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0229-main-merge.md)
@@ -1145,6 +1168,16 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0231-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0231-main-merge.md)
 - [Workstream WS-0233: Signed Release Bundles Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0233-live-apply.md)
 - [Workstream ws-0233-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0233-main-merge.md)
+- [Workstream WS-0239: Browser-Local Search Experience Via Pagefind Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0239-live-apply.md)
+- [Workstream ws-0239-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0239-main-merge.md)
+- [Workstream WS-0241: Rich Content And Inline Knowledge Editing Via Tiptap Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0241-live-apply.md)
+- [Workstream ws-0241-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0241-main-merge.md)
+- [Workstream WS-0242: Guided Human Onboarding Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0242-live-apply.md)
+- [Workstream ws-0242-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0242-main-merge.md)
+- [Workstream ws-0246-live-apply: ADR 0246 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0246-live-apply.md)
+- [Workstream ws-0246-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0246-main-merge.md)
+- [Workstream ws-0250-live-apply: Live Apply ADR 0250 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0250-live-apply.md)
+- [Workstream WS-0253: Unified Runtime Assurance Scoreboard Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0253-live-apply.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -1162,8 +1195,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.54` |
-| Platform version | `0.130.43` |
+| Repository version | `0.177.62` |
+| Platform version | `0.130.45` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1388,13 +1421,26 @@ This repository is intentionally opinionated:
 | `0224` | Live apply ADR 0224 server-resident operations as the default control model | `live_applied` | [ws-0224-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0224-live-apply.md) |
 | `0224` | Server-resident operations architecture bundle | `merged` | [adr-0224-server-resident-operations-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0224-server-resident-operations-architecture-bundle.md) |
 | `0226` | Live apply ADR 0226 systemd host-resident control-loop supervision | `live_applied` | [ws-0226-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0226-live-apply.md) |
+| `0226` | Finalize ADR 0226 exact-main evidence on origin/main | `merged` | [ws-0226-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0226-main-merge.md) |
 | `0230` | Live apply policy decisions via Open Policy Agent and Conftest | `live_applied` | [ws-0230-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0230-live-apply.md) |
+| `0231` | Live apply ADR 0231 local secret delivery via OpenBao Agent and systemd credentials | `live_applied` | [ws-0231-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0231-live-apply.md) |
 | `0231` | Integrate ADR 0231 live apply into origin/main | `merged` | [ws-0231-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0231-main-merge.md) |
 | `0233` | Live apply signed release bundles via Gitea Releases and Cosign | `live_applied` | [ws-0233-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0233-live-apply.md) |
 | `0233` | Integrate ADR 0233 signed release bundles into origin/main | `merged` | [ws-0233-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0233-main-merge.md) |
 | `0234` | Human user experience architecture bundle | `merged` | [adr-0234-human-user-experience-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md) |
+| `0239` | Live apply browser-local search experience via Pagefind | `live_applied` | [ws-0239-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0239-live-apply.md) |
+| `0239` | Integrate ADR 0239 browser-local search into origin/main | `merged` | [ws-0239-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0239-main-merge.md) |
+| `0241` | Live apply ADR 0241 rich content and inline knowledge editing via Tiptap | `live_applied` | [ws-0241-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0241-live-apply.md) |
+| `0241` | Integrate ADR 0241 rich content and inline knowledge editing into origin/main | `merged` | [ws-0241-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0241-main-merge.md) |
+| `0242` | Guided human onboarding live apply via Shepherd tours | `live_applied` | [ws-0242-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0242-live-apply.md) |
+| `0242` | Integrate ADR 0242 guided onboarding into origin/main | `merged` | [ws-0242-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0242-main-merge.md) |
 | `0244` | Runtime assurance architecture bundle | `merged` | [adr-0244-runtime-assurance-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0244-runtime-assurance-architecture-bundle.md) |
+| `0246` | Live apply startup, readiness, liveness, and degraded-state semantics | `live_applied` | [ws-0246-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0246-live-apply.md) |
+| `0246` | Integrate ADR 0246 runtime-state semantics into origin/main | `merged` | [ws-0246-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0246-main-merge.md) |
+| `0250` | ADR 0250 live apply from latest origin/main | `live_applied` | [ws-0250-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0250-live-apply.md) |
+| `0253` | Unified runtime assurance scoreboard live apply | `live_applied` | [ws-0253-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0253-live-apply.md) |
 | `0254` | ServerClaw architecture bundle | `merged` | [adr-0254-serverclaw-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0254-serverclaw-architecture-bundle.md) |
+| `0264` | Receipt-driven resilience architecture bundle | `merged` | [adr-0264-receipt-driven-resilience-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

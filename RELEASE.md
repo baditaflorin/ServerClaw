@@ -1,12 +1,12 @@
-# Release 0.177.54
+# Release 0.177.62
 
-- Date: 2026-03-28
+- Date: 2026-03-29
 
 ## Summary
-- integrated ADR 0233 into main by carrying the verified private Gitea release-bundle publication path, durable repository-token secret seeding, and Cosign verification evidence onto the protected release surfaces
+- records ADR 0239 exact-main evidence on the current mainline by preserving the verified Pagefind browser-local docs search rollout, refreshed release surfaces, and the current platform baseline after the exact-main replay
 
 ## Platform Impact
-- live platform version bump to 0.130.43; this release records ADR 0233 signed release bundles on top of the merged 0.177.53 mainline, including durable repository-token secret seeding for private Gitea release assets and controller-side Cosign verification
+- platform version advances to 0.130.45 after the exact-main ADR 0239 replay re-verifies Pagefind-backed browser-local docs search on docs.lv3.org while preserving the authenticated edge contract on top of the 0.130.44 baseline
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

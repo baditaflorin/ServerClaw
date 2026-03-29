@@ -1,0 +1,1 @@
+{"operator_id": "florin-badita", "notes_markdown": "Existing platform owner documented when ADR 0108 was implemented."}

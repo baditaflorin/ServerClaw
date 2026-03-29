@@ -403,19 +403,14 @@ validate_generated_docs() {
 
 validate_generated_portals() {
   local generated_docs_dir=""
-  local mkdocs_config=""
 
   echo "Generated portal validation"
   run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/generate_ops_portal.py" --check >/dev/null
   run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/generate_changelog_portal.py" --check >/dev/null
   generated_docs_dir="$(mktemp -d "${TMPDIR:-/tmp}/lv3-docs-site.XXXXXX")"
-  mkdocs_config="$(mktemp "$REPO_ROOT/.mkdocs-validate.XXXXXX.yml")"
-  trap 'rm -rf "$generated_docs_dir" "$mkdocs_config"' RETURN
+  trap 'rm -rf "$generated_docs_dir"' RETURN
   "${UV_CMD[@]}" run --with-requirements "$REPO_ROOT/requirements/docs.txt" \
-    python3 "$REPO_ROOT/scripts/generate_docs_site.py" --write --output-dir "$generated_docs_dir" >/dev/null
-  sed "s|^docs_dir: .*|docs_dir: $generated_docs_dir|" "$REPO_ROOT/mkdocs.yml" >"$mkdocs_config"
-  "${UV_CMD[@]}" run --with-requirements "$REPO_ROOT/requirements/docs.txt" \
-    mkdocs build --strict --config-file "$mkdocs_config" --site-dir "$REPO_ROOT/build/docs-portal" \
+    python3 "$REPO_ROOT/scripts/build_docs_portal.py" --generated-dir "$generated_docs_dir" --output-dir "$REPO_ROOT/build/docs-portal" \
     >/dev/null
 }
 
@@ -496,6 +491,10 @@ validate_agent_standards() {
   local idx_rc=$?
   [[ $idx_rc -ne 0 ]] && rc=$idx_rc
 
+  _validate_windmill_raw_app_lockfiles
+  local raw_app_lock_rc=$?
+  [[ $raw_app_lock_rc -ne 0 ]] && rc=$raw_app_lock_rc
+
   # Warnings only — do not fail
   _validate_config_registry_updated || true
   _validate_structure_index_updated || true
@@ -574,6 +573,33 @@ _validate_adr_index_current() {
     echo "  Run: uv run --with pyyaml python3 scripts/generate_adr_index.py --write" >&2
     echo "  Then: git add docs/adr/.index.yaml" >&2
     # Warning only — do not block push for this
+  fi
+  return 0
+}
+
+_validate_windmill_raw_app_lockfiles() {
+  local package_json
+  local missing_lockfiles=()
+
+  while IFS= read -r package_json; do
+    [[ -z "$package_json" ]] && continue
+    local relative_package="${package_json#$REPO_ROOT/}"
+    local app_dir
+    app_dir=$(dirname "$relative_package")
+    if [[ ! -f "$REPO_ROOT/$app_dir/package-lock.json" ]]; then
+      missing_lockfiles+=("$app_dir/package-lock.json")
+    fi
+  done < <(
+    find "$REPO_ROOT/config/windmill/apps" -type f -name package.json 2>/dev/null |
+    grep '\.raw_app/package\.json$' |
+    sort
+  )
+
+  if [[ ${#missing_lockfiles[@]} -gt 0 ]]; then
+    echo "ERROR: Windmill raw apps with frontend dependencies must commit package-lock.json:" >&2
+    printf '  - %s\n' "${missing_lockfiles[@]}" >&2
+    echo "  Reference: docs/runbooks/configure-windmill.md" >&2
+    return 1
   fi
   return 0
 }
