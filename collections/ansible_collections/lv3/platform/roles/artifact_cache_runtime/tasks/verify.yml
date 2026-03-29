@@ -1,0 +1,22 @@
+---
+# Purpose: Verify that each managed mirror listener responds and that the seed plan includes at least one supported image.
+- name: Verify artifact cache registry APIs respond
+  ansible.builtin.uri:
+    url: "http://{{ artifact_cache_bind_host }}:{{ item.value.bind_port }}/v2/"
+    method: GET
+    status_code:
+      - 200
+      - 401
+  loop: "{{ artifact_cache_registry_mirrors | dict2items }}"
+  loop_control:
+    label: "{{ item.value.registry_host }}"
+  changed_when: false
+
+- name: Assert the artifact cache seed plan contains warmable images
+  ansible.builtin.assert:
+    that:
+      - (artifact_cache_seed_plan.seed_images | default([])) | length > 0
+    fail_msg: >-
+      The generated artifact cache seed plan did not include any warmable image
+      references from the configured catalogs.
+  when: artifact_cache_seed_enabled | bool

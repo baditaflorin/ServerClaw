@@ -1,0 +1,57 @@
+---
+# Purpose: Declare the validated input contract for the artifact_cache_runtime role.
+argument_specs:
+  main:
+    short_description: Converge internal pull-through mirrors and a repo-derived warm set for repeated container-image pulls.
+    options:
+      artifact_cache_site_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the artifact cache runtime stack.
+      artifact_cache_data_root:
+        type: path
+        required: true
+        description:
+          - Root directory that stores persistent registry cache data.
+      artifact_cache_compose_file:
+        type: path
+        required: true
+        description:
+          - Compose file path for the managed artifact cache stack.
+      artifact_cache_seed_plan_file:
+        type: path
+        required: true
+        description:
+          - Guest-local JSON file that records the last rendered seed plan.
+      artifact_cache_bind_host:
+        type: str
+        required: true
+        description:
+          - Internal listener address bound by every registry mirror.
+      artifact_cache_registry_image:
+        type: str
+        required: true
+        description:
+          - Container image used for each managed pull-through registry.
+      artifact_cache_seed_enabled:
+        type: bool
+        required: true
+        description:
+          - Whether the role should render and warm the repo-derived seed plan.
+      artifact_cache_seed_script:
+        type: path
+        required: true
+        description:
+          - Controller-local helper that derives the seed plan from repo catalogs.
+      artifact_cache_seed_catalogs:
+        type: list
+        required: true
+        elements: path
+        description:
+          - Controller-local JSON catalogs scanned for image references that should be prewarmed.
+      artifact_cache_registry_mirrors:
+        type: dict
+        required: true
+        description:
+          - Mapping of mirror definitions keyed by a stable local identifier.

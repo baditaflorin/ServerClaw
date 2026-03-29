@@ -602,7 +602,11 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     response = client.get("/")
 
     assert response.status_code == 200
+    assert "LV3 Human Shell" in response.text
     assert "Interactive Ops Portal" in response.text
+    assert "Connected Surfaces" in response.text
+    assert "Homepage" in response.text
+    assert "Docs" in response.text
     assert "Platform Overview" in response.text
     assert "Runtime Assurance" in response.text
     assert "Scoreboard and rollup by active service and environment" in response.text
@@ -662,6 +666,7 @@ def test_dashboard_uses_same_origin_static_stylesheet(portal_client: tuple[TestC
     response = client.get("/")
 
     assert response.status_code == 200
+    assert '<link rel="stylesheet" href="https://unpkg.com/@patternfly/patternfly@5.4.0/patternfly.min.css">' in response.text
     assert '<link rel="stylesheet" href="/static/portal.css">' in response.text
     assert '<script src="/static/portal.js" defer></script>' in response.text
     assert 'https://unpkg.com/echarts@5.6.0/dist/echarts.min.js' in response.text
@@ -878,7 +883,8 @@ def test_dashboard_keeps_runbooks_visible_when_agent_coordination_degrades(
 
     assert response.status_code == 200
     assert "validation-gate-status" in response.text
-    assert "Agent coordination data is degraded: coordination unavailable" in response.text
+    assert "Agent coordination data is degraded" in response.text
+    assert "coordination unavailable" in response.text
     assert gateway.runbook_fetch_tokens == ["test-token"]
     assert gateway.agent_coordination_tokens == ["test-token"]
 
@@ -899,7 +905,8 @@ def test_runbooks_partial_surfaces_gateway_warning(portal_client: tuple[TestClie
     response = client.get("/partials/runbooks")
 
     assert response.status_code == 200
-    assert "Runbook launcher data is degraded: runbook index unavailable" in response.text
+    assert "Runbook launcher data is degraded" in response.text
+    assert "runbook index unavailable" in response.text
     assert gateway.runbook_fetch_tokens == ["test-token"]
 
 

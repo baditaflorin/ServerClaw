@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.72",
-  "platform_version": "0.130.49",
-  "generated_at": "2026-03-29T10:05:22Z",
-  "next_refresh_at": "2026-03-29T11:05:22Z",
+  "repo_version": "0.177.73",
+  "platform_version": "0.130.50",
+  "generated_at": "2026-03-29T11:16:17Z",
+  "next_refresh_at": "2026-03-29T12:16:17Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3869,7 +3869,7 @@
         "id": "platform-operations-portal",
         "title": "Platform Operations Portal",
         "agent_trust_required": "T3",
-        "steps": 16,
+        "steps": 12,
         "path": "docs/runbooks/platform-operations-portal.md",
         "workflow_ids": [
           "converge-ops-portal"
@@ -4175,10 +4175,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.71",
+    "last_version": "0.177.72",
     "deployed_at": "2026-03-29",
-    "summary": "implements ADR 0245 by surfacing declared-to-live service attestation through shared runtime witnesses, authenticated gateway APIs, and ops-portal visibility while hardening the live ops-portal sync and build path for separate-worktree replay",
-    "release_notes_url": "docs/release-notes/0.177.72.md"
+    "summary": "implemented ADR 0295 by adding repo-managed pull-through image mirrors, a catalog-derived warm-set planner, and build-host BuildKit mirror wiring on the build artifact cache lane while keeping ADR 0296's dedicated cache VM as a later live-apply step",
+    "release_notes_url": "docs/release-notes/0.177.73.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

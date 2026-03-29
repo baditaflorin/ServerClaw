@@ -1,0 +1,42 @@
+{% macro state_message(title, message, tone="info") -%}
+{% set resolved_tone = {
+  "ok": "ok",
+  "success": "ok",
+  "warn": "warning",
+  "warning": "warning",
+  "danger": "danger",
+  "error": "danger",
+  "unauthorized": "unauthorized",
+}.get(tone, tone or "info") %}
+<div class="shell-state shell-state--{{ resolved_tone }}" data-shell-state="{{ resolved_tone }}">
+  <span class="shell-state__eyebrow">
+    {% if resolved_tone == "unauthorized" %}
+    Authentication required
+    {% elif resolved_tone == "danger" %}
+    Error state
+    {% elif resolved_tone == "warning" %}
+    Warning state
+    {% elif resolved_tone == "ok" %}
+    Healthy state
+    {% else %}
+    Shared state
+    {% endif %}
+  </span>
+  <strong>{{ title }}</strong>
+  <span>{{ message }}</span>
+</div>
+{%- endmacro %}
+
+{% macro empty_state(title, message) -%}
+<section class="pf-v5-c-card shell-empty-state">
+  <div class="shell-empty-state__content">
+    <span class="shell-empty-state__eyebrow">Empty state</span>
+    <h3>{{ title }}</h3>
+    <p class="muted">{{ message }}</p>
+  </div>
+</section>
+{%- endmacro %}
+
+{% macro unauthorized_state(message) -%}
+{{ state_message("Authentication required", message, "unauthorized") }}
+{%- endmacro %}

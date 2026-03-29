@@ -146,7 +146,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.72` |
-| Platform version | `0.130.49` |
+| Platform version | `0.130.50` |
 | Observed check date | `2026-03-29` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -202,7 +202,7 @@ Template VM: `9000` `debian13-cloud-template`
 | Capability | Receipt |
 | --- | --- |
 | `agent_coordination` | `2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply` |
-| `api_gateway` | `2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply` |
+| `api_gateway` | `2026-03-28-adr-0209-use-case-services-live-apply` |
 | `backup_vm` | `2026-03-22-adr-0029-backup-vm-live-apply` |
 | `bounded_command_execution` | `2026-03-28-adr-0227-bounded-command-execution-mainline-live-apply` |
 | `budgeted_workflow_scheduler` | `2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply` |
@@ -969,6 +969,27 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0272: Restore Readiness Ladders And Stateful Warm-Up Verification Profiles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md)
 - [ADR 0273: Public Endpoint Admission Control For DNS Catalog And Certificate Concordance](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md)
 - [ADR 0274: Governed Base Image Mirrors And Warm Caches For Repo Deployments](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments.md)
+- [ADR 0274: MinIO As The S3-Compatible Object Storage Layer](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0274-minio-as-the-s3-compatible-object-storage-layer.md)
+- [ADR 0275: Apache Tika Server For Document Text Extraction In The RAG Pipeline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline.md)
+- [ADR 0276: NATS JetStream As The Platform Event Bus](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0276-nats-jetstream-as-the-platform-event-bus.md)
+- [ADR 0277: Typesense As The Full-Text Search Engine For Internal Structured Data](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0277-typesense-as-the-full-text-search-engine-for-internal-structured-data.md)
+- [ADR 0278: Gotenberg As The Document-To-PDF Rendering Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0278-gotenberg-as-the-document-to-pdf-rendering-service.md)
+- [ADR 0279: Grist As The No-Code Operational Spreadsheet Database](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0279-grist-as-the-no-code-operational-spreadsheet-database.md)
+- [ADR 0280: Changedetection.io For External Content And API Change Monitoring](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0280-changedetection-io-for-external-content-and-api-change-monitoring.md)
+- [ADR 0281: GlitchTip As The Sentry-Compatible Application Error Tracker](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0281-glitchtip-as-the-sentry-compatible-application-error-tracker.md)
+- [ADR 0282: Mailpit As The SMTP Development Mail Interceptor](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0282-mailpit-as-the-smtp-development-mail-interceptor.md)
+- [ADR 0283: Plausible Analytics As The Privacy-First Web Traffic Analytics Layer](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0283-plausible-analytics-as-the-privacy-first-web-traffic-analytics-layer.md)
+- [ADR 0284: Piper TTS As The CPU Neural Text-To-Speech Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0284-piper-tts-as-the-cpu-neural-text-to-speech-service.md)
+- [ADR 0285: Whisper ASR As The CPU Speech-To-Text Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0285-whisper-asr-as-the-cpu-speech-to-text-service.md)
+- [ADR 0286: Tesseract OCR Service For Scanned Image Text Extraction](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0286-tesseract-ocr-service-for-scanned-image-text-extraction.md)
+- [ADR 0287: LiteLLM As The Unified LLM API Proxy And Router](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0287-litellm-as-the-unified-llm-api-proxy-and-router.md)
+- [ADR 0288: Crawl4AI As The LLM-Optimised Web Content Crawler](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0288-crawl4ai-as-the-llm-optimised-web-content-crawler.md)
+- [ADR 0289: Label Studio As The Human-In-The-Loop Data Annotation Platform](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0289-label-studio-as-the-human-in-the-loop-data-annotation-platform.md)
+- [ADR 0290: MLflow As The Machine Learning Experiment Tracker And Model Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0290-mlflow-as-the-machine-learning-experiment-tracker-and-model-registry.md)
+- [ADR 0291: JupyterHub As The Interactive Notebook Environment](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0291-jupyterhub-as-the-interactive-notebook-environment.md)
+- [ADR 0292: Apache Superset As The SQL-First Business Intelligence Layer](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0292-apache-superset-as-the-sql-first-business-intelligence-layer.md)
+- [ADR 0293: Livekit As The Real-Time Audio And Voice Channel For Agents](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md)
+- [ADR 0294: One-API As The Unified LLM API Proxy And Router](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0294-one-api-as-the-unified-llm-api-proxy-and-router.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -1190,6 +1211,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0232-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0232-main-merge.md)
 - [Workstream WS-0233: Signed Release Bundles Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0233-live-apply.md)
 - [Workstream ws-0233-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0233-main-merge.md)
+- [Workstream WS-0234: PatternFly Human Shell Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0234-live-apply.md)
 - [Workstream WS-0235: Cross-Application Launcher Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0235-live-apply.md)
 - [Workstream ws-0235-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0235-main-merge.md)
 - [Workstream WS-0238: Data-Dense Operator Grids Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0238-live-apply.md)
@@ -1202,7 +1224,6 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0241-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0241-main-merge.md)
 - [Workstream WS-0242: Guided Human Onboarding Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0242-live-apply.md)
 - [Workstream ws-0242-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0242-main-merge.md)
-- [Workstream WS-0245: Declared-To-Live Service Attestation Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0245-live-apply.md)
 - [Workstream ws-0246-live-apply: ADR 0246 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0246-live-apply.md)
 - [Workstream ws-0246-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0246-main-merge.md)
 - [Workstream WS-0248: Session And Logout Authority Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0248-live-apply.md)
@@ -1228,7 +1249,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.72` |
-| Platform version | `0.130.49` |
+| Platform version | `0.130.50` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1466,6 +1487,7 @@ This repository is intentionally opinionated:
 | `0233` | Live apply signed release bundles via Gitea Releases and Cosign | `live_applied` | [ws-0233-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0233-live-apply.md) |
 | `0233` | Integrate ADR 0233 signed release bundles into origin/main | `merged` | [ws-0233-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0233-main-merge.md) |
 | `0234` | Human user experience architecture bundle | `merged` | [adr-0234-human-user-experience-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md) |
+| `0234` | Live apply shared human app shell and navigation via PatternFly | `live_applied` | [ws-0234-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0234-live-apply.md) |
 | `0235` | Live apply cross-application launcher and favorites in the interactive ops portal | `live_applied` | [ws-0235-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0235-live-apply.md) |
 | `0235` | Integrate ADR 0235 cross-application launcher into origin/main | `merged` | [ws-0235-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0235-main-merge.md) |
 | `0238` | Data-dense operator grids live apply | `live_applied` | [ws-0238-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0238-live-apply.md) |
@@ -1479,7 +1501,6 @@ This repository is intentionally opinionated:
 | `0242` | Guided human onboarding live apply via Shepherd tours | `live_applied` | [ws-0242-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0242-live-apply.md) |
 | `0242` | Integrate ADR 0242 guided onboarding into origin/main | `merged` | [ws-0242-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0242-main-merge.md) |
 | `0244` | Runtime assurance architecture bundle | `merged` | [adr-0244-runtime-assurance-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0244-runtime-assurance-architecture-bundle.md) |
-| `0245` | Declared-to-live service attestation live apply | `live_applied` | [ws-0245-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0245-live-apply.md) |
 | `0246` | Live apply startup, readiness, liveness, and degraded-state semantics | `live_applied` | [ws-0246-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0246-live-apply.md) |
 | `0246` | Integrate ADR 0246 runtime-state semantics into origin/main | `merged` | [ws-0246-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0246-main-merge.md) |
 | `0248` | Live apply session and logout authority across Keycloak, oauth2-proxy, and app surfaces | `live_applied` | [ws-0248-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0248-live-apply.md) |

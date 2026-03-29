@@ -3,10 +3,10 @@
 - Date: 2026-03-29
 
 ## Summary
-- implements ADR 0245 by surfacing declared-to-live service attestation through shared runtime witnesses, authenticated gateway APIs, and ops-portal visibility while hardening the live ops-portal sync and build path for separate-worktree replay
+- implemented ADR 0234 by live-applying the shared PatternFly shell on the interactive ops portal, including the masthead, responsive navigation, shared state primitives, and the public-edge CSP allowance for the pinned PatternFly asset
 
 ## Platform Impact
-- no live platform version bump; this release records the verified ADR 0245 declared-to-live attestation rollout on top of the current mainline platform baseline 0.130.49
+- Platform version advances to 0.130.50 after ADR 0234 live-applies the shared PatternFly shell and responsive navigation on ops.lv3.org, preserves the authenticated public-edge contract, and re-verifies the branch-safe replay hardening from the latest origin/main baseline.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

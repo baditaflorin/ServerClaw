@@ -40,13 +40,15 @@ def test_expected_headers_for_host_merges_override_over_default() -> None:
             "content_security_policy": "default-src 'self'",
         },
         "public_edge_security_headers_overrides": {
-            "ops.lv3.org": {"content_security_policy": "default-src 'self' https://unpkg.com"}
+            "ops.lv3.org": {
+                "content_security_policy": "default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' https://unpkg.com"
+            }
         },
     }
 
     assert audit.expected_headers_for_host(role_defaults, "ops.lv3.org") == {
         "x_frame_options": "DENY",
-        "content_security_policy": "default-src 'self' https://unpkg.com",
+        "content_security_policy": "default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' https://unpkg.com",
     }
 
 

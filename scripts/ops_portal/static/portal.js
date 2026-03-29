@@ -1,5 +1,54 @@
 (() => {
   const instances = new Map();
+  const body = document.body;
+  const navToggle = document.querySelector("[data-portal-nav-toggle]");
+  const sidebar = document.querySelector("[data-portal-sidebar]");
+  const launcherToggle = document.getElementById("launcher-toggle");
+  const launcherShell = document.getElementById("launcher-shell");
+
+  function setSidebarOpen(isOpen) {
+    body.classList.toggle("portal-sidebar-open", isOpen);
+    if (navToggle) {
+      navToggle.setAttribute("aria-expanded", String(isOpen));
+    }
+  }
+
+  function setLauncherOpen(isOpen) {
+    if (!launcherShell || !launcherToggle) {
+      return;
+    }
+    launcherShell.hidden = !isOpen;
+    launcherToggle.setAttribute("aria-expanded", String(isOpen));
+    if (isOpen) {
+      const searchInput = launcherShell.querySelector('input[name="query"]');
+      if (searchInput instanceof HTMLElement) {
+        searchInput.focus();
+      }
+    }
+  }
+
+  if (navToggle && sidebar) {
+    navToggle.addEventListener("click", (event) => {
+      event.stopPropagation();
+      setSidebarOpen(!body.classList.contains("portal-sidebar-open"));
+    });
+
+    sidebar.addEventListener("click", (event) => {
+      event.stopPropagation();
+    });
+  }
+
+  if (launcherToggle && launcherShell) {
+    launcherToggle.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const isOpen = launcherToggle.getAttribute("aria-expanded") === "true";
+      setLauncherOpen(!isOpen);
+    });
+
+    launcherShell.addEventListener("click", (event) => {
+      event.stopPropagation();
+    });
+  }
 
   function initCharts(root = document) {
     if (typeof window.echarts === "undefined") {
@@ -30,6 +79,47 @@
       }
     });
   }
+
+  document.addEventListener("click", (event) => {
+    if (!(event.target instanceof Node)) {
+      return;
+    }
+
+    if (
+      launcherShell &&
+      launcherToggle &&
+      !launcherShell.hidden &&
+      !launcherShell.contains(event.target) &&
+      !launcherToggle.contains(event.target)
+    ) {
+      setLauncherOpen(false);
+    }
+
+    if (
+      window.innerWidth <= 960 &&
+      body.classList.contains("portal-sidebar-open") &&
+      sidebar &&
+      navToggle &&
+      !sidebar.contains(event.target) &&
+      !navToggle.contains(event.target)
+    ) {
+      setSidebarOpen(false);
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") {
+      return;
+    }
+    if (launcherShell && !launcherShell.hidden) {
+      setLauncherOpen(false);
+      launcherToggle?.focus();
+    }
+    if (body.classList.contains("portal-sidebar-open")) {
+      setSidebarOpen(false);
+      navToggle?.focus();
+    }
+  });
 
   function resizeCharts() {
     instances.forEach((chart) => chart.resize());
@@ -75,5 +165,10 @@
     resizeCharts();
   });
 
-  window.addEventListener("resize", resizeCharts);
+  window.addEventListener("resize", () => {
+    resizeCharts();
+    if (window.innerWidth > 960) {
+      setSidebarOpen(false);
+    }
+  });
 })();

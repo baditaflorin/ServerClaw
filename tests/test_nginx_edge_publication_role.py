@@ -177,6 +177,8 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("https://fonts.googleapis.com", security_overrides["docs.lv3.org"]["content_security_policy"])
         self.assertIn("https://cdn.jsdelivr.net", security_overrides["logs.lv3.org"]["content_security_policy"])
         self.assertIn("https://unpkg.com", security_overrides["ops.lv3.org"]["content_security_policy"])
+        self.assertIn("style-src 'self' 'unsafe-inline' https://unpkg.com", security_overrides["ops.lv3.org"]["content_security_policy"])
+        self.assertIn("font-src 'self' data: https://unpkg.com", security_overrides["ops.lv3.org"]["content_security_policy"])
         self.assertIn("wiki.lv3.org", security_overrides)
         self.assertIn("'unsafe-inline'", security_overrides["wiki.lv3.org"]["content_security_policy"])
         self.assertIn("https://wiki.lv3.org", security_overrides["wiki.lv3.org"]["content_security_policy"])

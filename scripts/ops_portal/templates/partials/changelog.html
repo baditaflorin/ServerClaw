@@ -1,5 +1,6 @@
+{% from "macros/states.html" import empty_state %}
 <div class="changelog-grid">
-  <section class="panel chart-panel">
+  <section class="pf-v5-c-card panel chart-panel">
     <div class="section-head">
       <div>
         <p class="section-kicker">Live Apply Cadence</p>
@@ -12,7 +13,7 @@
     <p class="muted chart-caption">Bars show receipt count per day, while the line tracks how many unique services were touched.</p>
   </section>
 
-  <section class="panel">
+  <section class="pf-v5-c-card panel">
     <h3>Recent Live Applies</h3>
     {% if deployments %}
     <ul class="timeline">
@@ -25,11 +26,11 @@
       {% endfor %}
     </ul>
     {% else %}
-    <p class="muted">No live-apply receipts are mirrored into the portal data set yet.</p>
+    {{ empty_state("No live-apply receipts mirrored", "The portal data set does not yet include any recent live-apply evidence.") }}
     {% endif %}
   </section>
 
-  <section class="panel">
+  <section class="pf-v5-c-card panel">
     <h3>Unreleased Notes</h3>
     {% if changelog_notes %}
     <ul class="compact-list">
@@ -38,7 +39,7 @@
       {% endfor %}
     </ul>
     {% else %}
-    <p class="muted">No unreleased notes are recorded in changelog.md.</p>
+    {{ empty_state("No unreleased notes", "The current changelog does not record any pending notes in the Unreleased section.") }}
     {% endif %}
   </section>
 </div>

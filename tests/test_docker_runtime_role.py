@@ -83,8 +83,11 @@ def test_docker_runtime_defaults_pin_governed_resolvers_and_registry_mirror() ->
     defaults = load_defaults()
     daemon_config = defaults["docker_runtime_daemon_config"]
 
+    assert defaults["docker_runtime_registry_mirrors"] == ["https://mirror.gcr.io"]
+    assert defaults["docker_runtime_insecure_registries"] == []
     assert daemon_config["dns"] == ["1.1.1.1", "8.8.8.8"]
-    assert daemon_config["registry-mirrors"] == ["https://mirror.gcr.io"]
+    assert daemon_config["registry-mirrors"] == "{{ docker_runtime_registry_mirrors }}"
+    assert daemon_config["insecure-registries"] == "{{ docker_runtime_insecure_registries }}"
     assert daemon_config["default-address-pools"] == [
         {"base": "172.16.0.0/12", "size": 24},
         {"base": "192.168.0.0/16", "size": 24},
