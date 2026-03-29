@@ -20,6 +20,9 @@ def test_matrix_synapse_runtime_defaults_expose_internal_controller_and_public_u
     assert defaults["matrix_synapse_internal_base_url"] == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('matrix_synapse', 'internal') }}"
     assert defaults["matrix_synapse_controller_url"] == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('matrix_synapse', 'controller') }}"
     assert defaults["matrix_synapse_public_base_url"] == "{{ hostvars['proxmox_florin'].platform_service_topology.matrix_synapse.urls.public }}/"
+    assert defaults["matrix_synapse_container_data_dir"] == "/data"
+    assert defaults["matrix_synapse_log_config_container_file"] == "{{ matrix_synapse_container_data_dir }}/{{ matrix_synapse_server_name }}.log.config"
+    assert defaults["matrix_synapse_signing_key_container_file"] == "{{ matrix_synapse_container_data_dir }}/{{ matrix_synapse_server_name }}.signing.key"
 
 
 def test_matrix_synapse_env_templates_pin_the_homeserver_config_path() -> None:
@@ -47,6 +50,8 @@ def test_matrix_synapse_homeserver_template_is_client_only_and_x_forwarded() -> 
     assert "- client" in homeserver_template
     assert "allow_public_rooms_over_federation: false" in homeserver_template
     assert "public_baseurl: \"{{ matrix_synapse_public_base_url }}\"" in homeserver_template
+    assert 'log_config: "{{ matrix_synapse_log_config_container_file }}"' in homeserver_template
+    assert 'signing_key_path: "{{ matrix_synapse_signing_key_container_file }}"' in homeserver_template
 
 
 def test_matrix_synapse_runtime_generates_signing_material_and_bootstrap_user() -> None:
