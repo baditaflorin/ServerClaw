@@ -45,19 +45,18 @@ commit, and record the canonical mainline live-apply receipt before pushing
 
 ## Verification
 
-- `git fetch origin --prune` refreshed this worktree onto `origin/main` commit `bae420263872e079fdc34f7f755a6984a3cd5949`, which currently carries repository version `0.177.87` and platform version `0.130.59`.
+- `git fetch origin --prune` most recently refreshed this worktree onto `origin/main` commit `020c5f5ad21d21864861e7b3aa21570474ff8988`, which currently carries repository version `0.177.88` and platform version `0.130.59`.
 - `git diff origin/main -- inventory/group_vars/platform.yml inventory/host_vars/proxmox_florin.yml playbooks/serverclaw.yml docs/runbooks/configure-serverclaw.md collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/templates/nftables.conf.j2 collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml` confirmed current `main` still lacks the ADR 0254 ServerClaw topology, playbook, runbook, guest-firewall rule, and public-edge publication contract.
 - Regenerating the dependent catalogs and diagrams restored the current branch truth after merging `origin/main`; `python3 scripts/validate_service_completeness.py --validate` passed, and `uv run --with pyyaml --with jsonschema python scripts/platform_manifest.py --check` passed.
-- Current live host checks still confirm `Debian GNU/Linux 13 (trixie)`, kernel `6.17.13-2-pve`, `pve-manager/9.1.6/71482d1833ded40a`, and `/etc/pve/firewall/170.fw` entry `17:IN ACCEPT -source 10.10.10.10/32 -p tcp -dport 8096` on `proxmox_florin`.
-- Current guest-local checks still confirm `coolify-lv3` serves the dedicated ServerClaw container on `0.0.0.0:8096->8080`, returns `HTTP/1.1 200 OK` locally on `127.0.0.1:8096`, and still accepts bootstrap admin sign-in for `ops@lv3.org`.
-- Current exact-main candidate checks also show the durability gap clearly: `coolify-lv3` guest nftables currently allows `10.10.10.10` only to `{ 80, 443, 8000 }`, `nginx-lv3` times out on `10.10.10.70:8096`, and public `https://chat.lv3.org/` currently returns `HTTP/2 308` with `location: https://nginx.lv3.org/`.
-- The repo automation fixes discovered during this workstream remain on the branch: `platform/policy/toolchain.py` now scopes cached OPA and Conftest binaries by platform, and `config/check-runner-manifest.json` plus `config/validation-gate.json` raise the `yaml-lint` timeout to `240` seconds for local amd64-container replays on arm64 hosts.
+- `receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-live-apply.json` preserves the first branch-local proof where the dedicated `chat.lv3.org` surface, internal `8096` lane, and bootstrap admin sign-in all succeeded before later `origin/main` drift.
+- `receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply.json` plus `receipts/live-applies/evidence/2026-03-29-adr-0254-*.txt` preserve the later pre-merge gap where the merged-main lane was not yet durable on current `origin/main`.
+- The merged branch now also carries the ADR 0266 validation-runner contract hardening and the platform-scoped policy-toolchain refresh from current `origin/main`; a fresh exact-main `make converge-serverclaw` replay from this merged branch is still required before any final platform-version claim.
 
 ## Current State
 
 - The ADR 0254 branch implementation is complete and validated, and the branch-local live proof remains preserved in the first receipt.
-- The latest exact-main candidate proof is currently partial, not final: it records that the runtime is healthy but `main` still lacks the governed topology required to keep `chat.lv3.org` stable under server-resident reconciliation.
-- Shared integration files remain intentionally untouched here until the final merge step, because the realistic first integrated repo and platform versions will only be known after the exact-main replay succeeds from merged `main`.
+- This integration branch is now refreshed onto current `origin/main` commit `020c5f5ad21d21864861e7b3aa21570474ff8988`, so the next realistic repository release is the post-`0.177.88` patch cut from this merged tree.
+- The latest exact-main proof is still pending from this merged branch, so shared release files and platform-version claims remain intentionally provisional until that replay succeeds from the refreshed base.
 
 ## Remaining For Merge-To-Main
 
