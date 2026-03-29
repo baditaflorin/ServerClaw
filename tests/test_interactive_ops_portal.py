@@ -928,6 +928,7 @@ def test_load_live_apply_receipts_ignores_unreadable_receipts(tmp_path: Path) ->
     drift_receipts_dir.mkdir(parents=True)
 
     (config_dir / "service-capability-catalog.json").write_text('{"services":[]}\n', encoding="utf-8")
+    (config_dir / "persona-catalog.json").write_text('{"personas":[]}\n', encoding="utf-8")
     (config_dir / "subdomain-exposure-registry.json").write_text('{"publications":[]}\n', encoding="utf-8")
     (config_dir / "workflow-catalog.json").write_text('{"workflows":{}}\n', encoding="utf-8")
     (data_root / "changelog.md").write_text("# Changelog\n", encoding="utf-8")
@@ -952,6 +953,7 @@ def test_load_live_apply_receipts_ignores_unreadable_receipts(tmp_path: Path) ->
         session_secret="test-secret",
         static_api_token="test-token",
         service_catalog_path=config_dir / "service-capability-catalog.json",
+        persona_catalog_path=config_dir / "persona-catalog.json",
         publication_registry_path=config_dir / "subdomain-exposure-registry.json",
         workflow_catalog_path=config_dir / "workflow-catalog.json",
         changelog_path=data_root / "changelog.md",
