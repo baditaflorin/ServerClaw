@@ -13,7 +13,7 @@ import uuid
 import urllib.error
 import urllib.request
 from contextlib import contextmanager
-from datetime import UTC, datetime, timedelta
+from platform.datetime_compat import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 

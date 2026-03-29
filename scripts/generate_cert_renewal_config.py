@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import UTC, datetime
+from platform.datetime_compat import UTC, datetime
 from typing import Any
 
 from tls_cert_probe import load_certificate_catalog

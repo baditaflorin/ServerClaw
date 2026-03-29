@@ -18,7 +18,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from platform.datetime_compat import UTC, datetime
 from pathlib import Path, PurePosixPath
 from secrets import token_urlsafe
 from typing import Any

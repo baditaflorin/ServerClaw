@@ -20,7 +20,7 @@ import urllib.parse
 import urllib.request
 import webbrowser
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from platform.datetime_compat import UTC, datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Iterable

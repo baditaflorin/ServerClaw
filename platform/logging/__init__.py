@@ -8,7 +8,7 @@ import socket
 import sys
 import uuid
 from contextlib import contextmanager
-from datetime import UTC, datetime
+from platform.datetime_compat import UTC, datetime
 from typing import Any, Iterator
 
 

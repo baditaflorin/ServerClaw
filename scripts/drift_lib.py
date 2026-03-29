@@ -11,7 +11,7 @@ import subprocess
 import time
 from contextlib import contextmanager
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from platform.datetime_compat import UTC, datetime
 from pathlib import Path
 import sys
 from typing import Any

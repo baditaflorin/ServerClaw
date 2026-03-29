@@ -11,7 +11,7 @@ import pwd
 import shlex
 import subprocess
 import sys
-from datetime import UTC, datetime
+from platform.datetime_compat import UTC, datetime
 from pathlib import Path
 from typing import Any
 
