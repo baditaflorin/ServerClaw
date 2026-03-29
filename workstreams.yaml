@@ -102,7 +102,7 @@ workstreams:
       - VERSION
       - changelog.md
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.63.md
+      - docs/release-notes/0.177.64.md
       - versions/stack.yaml
       - build/platform-manifest.json
       - docs/adr/.index.yaml
@@ -858,6 +858,142 @@ workstreams:
       changelog_entry: records ADR 0242 exact-main evidence on the current mainline by preserving the verified Shepherd-tour rollout, refreshed release surfaces, and operator-access onboarding truth while the live platform baseline remains 0.130.44
       release_bump: patch
       included_in_repo_version: 0.177.58
+  - id: ws-0240-live-apply
+    adr: "0240"
+    title: Live apply operator visualization panels via Apache ECharts
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0240-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0240-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0240-live-apply.md
+    depends_on:
+      - adr-0093-interactive-ops-portal
+      - adr-0104-service-dependency-graph
+      - adr-0161-real-time-agent-coordination-map
+      - adr-0205-capability-contracts-before-product-selection
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0240-live-apply.md
+      - docs/adr/0240-operator-visualization-panels-via-apache-echarts.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/ops-portal-down.md
+      - scripts/ops_portal/**
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+      - tests/test_interactive_ops_portal.py
+      - receipts/live-applies/2026-03-28-adr-0240-operator-visualization-panels-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0240_live_apply
+          paths:
+            - docs/workstreams/ws-0240-live-apply.md
+            - docs/adr/0240-operator-visualization-panels-via-apache-echarts.md
+            - docs/runbooks/ops-portal-down.md
+            - scripts/ops_portal/**
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+            - tests/test_interactive_ops_portal.py
+          mode: exclusive
+        - id: adr_index
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: live_apply_evidence
+          paths:
+            - receipts/live-applies/2026-03-28-adr-0240-operator-visualization-panels-live-apply.json
+          mode: shared_contract
+          contract: live-apply-receipts-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0240 by embedding Apache ECharts-backed
+        health, coordination, rollout, and dependency topology panels in the
+        interactive ops portal from canonical repository data
+      release_bump: patch
+      included_in_repo_version: 0.177.64
+      latest_receipts:
+        ops_portal_visualizations: 2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply
+  - id: ws-0240-main-merge
+    adr: "0240"
+    title: Integrate ADR 0240 operator visualization panels into origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0240-main-merge
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0240-main-merge
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0240-main-merge.md
+    depends_on:
+      - ws-0240-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0240-main-merge.md
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.64.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/adr/.index.yaml
+      - docs/adr/0240-operator-visualization-panels-via-apache-echarts.md
+      - docs/workstreams/ws-0240-live-apply.md
+      - docs/runbooks/ops-portal-down.md
+      - scripts/ops_portal/app.py
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+      - tests/test_interactive_ops_portal.py
+      - receipts/live-applies/2026-03-28-adr-0240-operator-visualization-panels-live-apply.json
+      - receipts/live-applies/2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws_0240_main_merge_doc
+          paths:
+            - docs/workstreams/ws-0240-main-merge.md
+          mode: exclusive
+        - id: adr_0240_mainline_truth
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.64.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+          mode: exclusive
+        - id: adr_0240_main_merge_surfaces
+          paths:
+            - docs/adr/.index.yaml
+            - docs/adr/0240-operator-visualization-panels-via-apache-echarts.md
+            - docs/workstreams/ws-0240-live-apply.md
+            - docs/runbooks/ops-portal-down.md
+            - scripts/ops_portal/app.py
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+            - tests/test_interactive_ops_portal.py
+            - receipts/live-applies/2026-03-28-adr-0240-operator-visualization-panels-live-apply.json
+            - receipts/live-applies/2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: records ADR 0240 exact-main evidence on the current
+        mainline by preserving the verified Apache ECharts operator
+        visualization rollout, refreshed release surfaces, and the current
+        ops-portal platform baseline after the mainline replay
+      release_bump: patch
+      included_in_repo_version: 0.177.64
+      latest_receipts:
+        ops_portal_visualizations: 2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply
   - id: ws-0239-live-apply
     adr: "0239"
     title: Live apply browser-local search experience via Pagefind
