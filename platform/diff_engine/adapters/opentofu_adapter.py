@@ -7,7 +7,7 @@ import uuid
 from pathlib import Path
 from typing import Any, Callable
 
-from scripts.run_namespace import ensure_run_namespace, resolve_run_namespace
+from platform.run_namespace import ensure_run_namespace, resolve_run_namespace
 
 from ..schema import ChangedObject, unknown_object
 

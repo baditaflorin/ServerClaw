@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import base64
 import concurrent.futures
+import importlib
 import json
 import os
 import shlex
@@ -31,6 +32,7 @@ REPO_ROOT = CODE_ROOT
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from controller_automation_toolkit import resolve_repo_local_path
 from dependency_graph import dependency_summary, load_dependency_graph
 from environment_catalog import environment_choices, primary_environment
 from platform.conflict import IntentConflictRegistry
@@ -103,6 +105,19 @@ class ProbeResult:
 
 def repo_path(*parts: str) -> Path:
     return REPO_ROOT.joinpath(*parts)
+
+
+def load_incident_triage_module(repo_root: Path) -> Any:
+    scripts_dir = repo_root / "scripts"
+    if str(scripts_dir) not in sys.path:
+        sys.path.insert(0, str(scripts_dir))
+    importlib.invalidate_caches()
+    incident_triage_path = scripts_dir / "incident_triage.py"
+    loaded = sys.modules.get("incident_triage")
+    loaded_path = Path(getattr(loaded, "__file__", "")).resolve() if getattr(loaded, "__file__", "") else None
+    if loaded is not None and loaded_path != incident_triage_path.resolve():
+        sys.modules.pop("incident_triage", None)
+    return importlib.import_module("incident_triage")
 
 
 def load_json(path: Path, *, default: Any | None = None) -> Any:
@@ -293,6 +308,14 @@ def primary_service_url(service: dict[str, Any], environment: str = "production"
         value = service.get(field)
         if isinstance(value, str) and value.strip():
             return value
+    return None
+
+
+def environment_url(*names: str) -> str | None:
+    for name in names:
+        value = os.environ.get(name, "").strip()
+        if value:
+            return value.rstrip("/")
     return None
 
 
@@ -701,6 +724,9 @@ def promote_command(branch: str, service: str, staging_receipt: str, dry_run: bo
 
 
 def windmill_url(service_map: dict[str, dict[str, Any]]) -> str:
+    override = environment_url("LV3_WINDMILL_BASE_URL", "BASE_URL")
+    if override:
+        return override
     service = get_service_or_exit(service_map, "windmill")
     url = primary_service_url(service)
     if not url:
@@ -716,7 +742,7 @@ def load_secret_file(secret_id: str) -> str:
     path = entry.get("path")
     if not isinstance(path, str):
         raise SystemExit(f"Secret '{secret_id}' does not define a file path.")
-    secret_path = Path(path)
+    secret_path = resolve_repo_local_path(path, repo_root=REPO_ROOT)
     if not secret_path.exists():
         raise SystemExit(f"Secret file not found: {secret_path}")
     return secret_path.read_text(encoding="utf-8").strip()
@@ -2440,7 +2466,10 @@ def loop_command(
     actor_id: str | None = None,
 ) -> int:
     try:
-        loop = ClosureLoop(REPO_ROOT)
+        loop = ClosureLoop(
+            REPO_ROOT,
+            triage_report_builder=load_incident_triage_module(REPO_ROOT).build_report,
+        )
         if action == "start":
             if payload_file is not None:
                 payload = load_json(payload_file)

@@ -17,7 +17,7 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Headscale, Mail Platform, NGINX Edge, Netdata Realtime Metrics, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
+| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, Mail Platform, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
 | `2` | Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Excalidraw, Gitea, Keycloak, Langfuse, Mattermost, NetBox, Open WebUI, Outline, Plane, Public Status Page, Semaphore, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway |
 | `4` | Ops Portal |
@@ -32,10 +32,12 @@ graph TD
     docker_runtime["Docker Runtime VM\nTier 1"]
     dozzle["Dozzle\nTier 1"]
     grafana["Grafana\nTier 1"]
+    harbor["Harbor\nTier 1"]
     headscale["Headscale\nTier 1"]
     mail_platform["Mail Platform\nTier 1"]
     realtime["Netdata Realtime Metrics\nTier 1"]
     nginx_edge["NGINX Edge\nTier 1"]
+    nomad["Nomad\nTier 1"]
     ntfy["ntfy\nTier 1"]
     ntopng["ntopng\nTier 1"]
     ollama["Ollama\nTier 1"]
@@ -97,6 +99,8 @@ graph TD
     gitea -->|hard| postgres
     grafana -->|soft| keycloak
     grafana -->|soft| nginx_edge
+    harbor -->|soft| keycloak
+    harbor -->|soft| nginx_edge
     headscale -->|soft| nginx_edge
     homepage -->|hard| keycloak
     homepage -->|hard| nginx_edge
@@ -118,6 +122,8 @@ graph TD
     n8n -->|hard| postgres
     netbox -->|startup_only| openbao
     netbox -->|hard| postgres
+    nomad -->|soft| docker_build
+    nomad -->|soft| docker_runtime
     open_webui -->|soft| keycloak
     open_webui -->|hard| ollama
     open_webui -->|startup_only| openbao

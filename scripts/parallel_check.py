@@ -156,6 +156,11 @@ def build_docker_command(
             if host_path:
                 mount_args.extend(["-v", f"{Path(host_path).resolve()}:/var/lib/trivy"])
                 env_args.extend(["-e", "TRIVY_CACHE_DIR=/var/lib/trivy"])
+        elif cache_mount == "policy_tools":
+            host_path = os.environ.get("LV3_POLICY_TOOLCHAIN_ROOT")
+            if host_path:
+                mount_args.extend(["-v", f"{Path(host_path).resolve()}:/opt/lv3/policy-toolchain"])
+                env_args.extend(["-e", "LV3_POLICY_TOOLCHAIN_ROOT=/opt/lv3/policy-toolchain"])
         elif cache_mount == "packer_plugins":
             host_path = os.environ.get("LV3_PACKER_PLUGIN_CACHE_DIR")
             if host_path:

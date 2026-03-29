@@ -1,18 +1,49 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
 
-from scripts.ops_portal.app import PortalSettings, create_app, normalize_health
+from scripts.ops_portal.app import (
+    PortalSettings,
+    build_dependency_focus_chart,
+    build_health_mix_chart,
+    build_live_apply_timeline_chart,
+    create_app,
+    normalize_health,
+)
+
+
+def test_ops_portal_package_import_works_in_container_layout() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    package_root = repo_root / "scripts"
+    env = os.environ | {"PYTHONPATH": str(package_root)}
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "from ops_portal.app import PortalSettings; print(PortalSettings.__name__)",
+        ],
+        capture_output=True,
+        check=False,
+        env=env,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == "PortalSettings"
 
 
 class FakeGatewayClient:
     def __init__(self) -> None:
         self.platform_health_tokens: list[str | None] = []
         self.agent_coordination_tokens: list[str | None] = []
+        self.runbook_fetch_tokens: list[str | None] = []
         self.service_health_calls: list[dict[str, object]] = []
         self.deploy_calls: list[dict[str, object]] = []
         self.secret_calls: list[str] = []
@@ -23,8 +54,57 @@ class FakeGatewayClient:
         self.platform_health_tokens.append(token)
         return {
             "services": [
-                {"service_id": "grafana", "status": "healthy", "detail": "Dashboards are green"},
-                {"service_id": "ops_portal", "status": "healthy", "detail": "Portal runtime is ready"},
+                {
+                    "service_id": "grafana",
+                    "status": "healthy",
+                    "composite_status": "healthy",
+                    "reason": "healthy probe result",
+                    "detail": "Dashboards are green",
+                    "computed_at": "2026-03-25T09:00:00Z",
+                    "signals": [
+                        {
+                            "name": "health_probe",
+                            "value": "healthy",
+                            "score": 1.0,
+                            "weight": 0.4,
+                            "reason": "healthy probe result",
+                        }
+                    ],
+                },
+                {
+                    "service_id": "keycloak",
+                    "status": "degraded",
+                    "composite_status": "degraded",
+                    "reason": "open incident inc-1",
+                    "detail": "Identity is degraded but still reachable",
+                    "computed_at": "2026-03-25T09:00:00Z",
+                    "signals": [
+                        {
+                            "name": "health_probe",
+                            "value": "degraded",
+                            "score": 0.5,
+                            "weight": 0.4,
+                            "reason": "service probe is degraded",
+                        }
+                    ],
+                },
+                {
+                    "service_id": "ops_portal",
+                    "status": "healthy",
+                    "composite_status": "healthy",
+                    "reason": "healthy probe result",
+                    "detail": "Portal runtime is ready",
+                    "computed_at": "2026-03-25T09:00:00Z",
+                    "signals": [
+                        {
+                            "name": "health_probe",
+                            "value": "healthy",
+                            "score": 1.0,
+                            "weight": 0.4,
+                            "reason": "healthy probe result",
+                        }
+                    ],
+                },
             ]
         }
 
@@ -80,22 +160,44 @@ class FakeGatewayClient:
         restart_only: bool = False,
         source: str = "portal",
     ) -> dict[str, object]:
-        self.deploy_calls.append({"service_id": service_id, "restart_only": restart_only, "source": source})
+        self.deploy_calls.append(
+            {"service_id": service_id, "restart_only": restart_only, "source": source, "token": token}
+        )
         return {"job_id": "job-123", "message": "Deployment accepted by gateway"}
 
     async def rotate_secret(self, service_id: str, *, token: str | None = None) -> dict[str, object]:
-        self.secret_calls.append(service_id)
+        self.secret_calls.append(f"{service_id}:{token}")
         return {"message": "Secret rotation accepted by gateway"}
+
+    async def fetch_runbooks(
+        self,
+        *,
+        token: str | None = None,
+        delivery_surface: str = "ops_portal",
+    ) -> dict[str, object]:
+        self.runbook_fetch_tokens.append(token)
+        return {
+            "runbooks": [
+                {
+                    "id": "validation-gate-status",
+                    "title": "Inspect validation gate status",
+                    "description": "Show the current validation-gate summary through the shared runbook service.",
+                    "owner_runbook": "docs/runbooks/validation-gate-status.yaml",
+                    "live_impact": "repo_only",
+                    "execution_class": "diagnostic",
+                }
+            ]
+        }
 
     async def launch_runbook(
         self,
-        workflow_id: str,
+        runbook_id: str,
         *,
         token: str | None = None,
         parameters: dict[str, object] | None = None,
     ) -> dict[str, object]:
-        self.runbook_calls.append({"workflow_id": workflow_id, "parameters": parameters or {}})
-        return {"message": "Runbook accepted by gateway"}
+        self.runbook_calls.append({"runbook_id": runbook_id, "parameters": parameters or {}, "token": token})
+        return {"status": "completed", "message": "Runbook completed successfully"}
 
     async def search(
         self,
@@ -121,7 +223,7 @@ class FakeGatewayClient:
 
 
 @pytest.fixture()
-def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
+def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]:
     data_root = tmp_path / "data"
     (data_root / "config").mkdir(parents=True)
     (data_root / "receipts" / "live-applies").mkdir(parents=True)
@@ -143,6 +245,16 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
                         "adr": "0011",
                     },
                     {
+                        "id": "keycloak",
+                        "name": "Keycloak",
+                        "description": "Identity provider.",
+                        "category": "access",
+                        "lifecycle_status": "active",
+                        "public_url": "https://sso.lv3.org",
+                        "runbook": "docs/runbooks/configure-keycloak.md",
+                        "adr": "0056",
+                    },
+                    {
                         "id": "ops_portal",
                         "name": "Platform Operations Portal",
                         "description": "Interactive control surface.",
@@ -153,6 +265,115 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
                         "runbook": "docs/runbooks/ops-portal-down.md",
                         "adr": "0093",
                     },
+                ]
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (data_root / "config" / "subdomain-exposure-registry.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "2.0.0",
+                "zone_name": "lv3.org",
+                "publications": [
+                    {
+                        "fqdn": "grafana.lv3.org",
+                        "service_id": "grafana",
+                        "environment": "production",
+                        "status": "active",
+                        "owner_adr": "0011",
+                        "publication": {
+                            "delivery_model": "shared-edge",
+                            "access_model": "open",
+                            "audience": "public",
+                        },
+                        "adapter": {
+                            "dns": {"target": "65.108.75.123", "target_port": 443, "record_type": "A"},
+                            "routing": {"mode": "edge", "source": "service_topology", "kind": "proxy"},
+                            "edge_auth": {
+                                "provider": "none",
+                                "unauthenticated_paths": [],
+                                "unauthenticated_prefix_paths": [],
+                            },
+                            "repo_route_service_id": "grafana",
+                            "repo_route_metadata": {},
+                            "tls": {
+                                "provider": "letsencrypt",
+                                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+                                "auto_renew": True,
+                            },
+                        },
+                        "live_tracking_expected": True,
+                        "notes": "Published through the shared edge.",
+                    },
+                    {
+                        "fqdn": "ops.lv3.org",
+                        "service_id": "ops_portal",
+                        "environment": "production",
+                        "status": "active",
+                        "owner_adr": "0093",
+                        "publication": {
+                            "delivery_model": "shared-edge",
+                            "access_model": "platform-sso",
+                            "audience": "operator",
+                        },
+                        "adapter": {
+                            "dns": {"target": "65.108.75.123", "target_port": 443, "record_type": "A"},
+                            "routing": {"mode": "edge", "source": "service_topology", "kind": "proxy"},
+                            "edge_auth": {
+                                "provider": "oauth2_proxy",
+                                "unauthenticated_paths": [],
+                                "unauthenticated_prefix_paths": [],
+                            },
+                            "repo_route_service_id": "ops_portal",
+                            "repo_route_metadata": {},
+                            "tls": {
+                                "provider": "letsencrypt",
+                                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+                                "auto_renew": True,
+                            },
+                        },
+                        "live_tracking_expected": True,
+                        "notes": "Authenticated operator entrypoint.",
+                    },
+                ],
+                "summary": {
+                    "catalog_total": 2,
+                    "active_total": 2,
+                    "active_public_total": 2,
+                    "active_private_total": 0,
+                    "planned_total": 0,
+                    "shared_edge_total": 2,
+                    "platform_sso_total": 1,
+                },
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (data_root / "config" / "capability-contract-catalog.json").write_text(
+        json.dumps(
+            {
+                "capabilities": [
+                    {
+                        "id": "identity_provider",
+                        "name": "Identity Provider",
+                        "summary": "Authenticate operators through a contract-first OIDC surface.",
+                        "review_cadence": "quarterly",
+                        "migration_expectations": {
+                            "export_formats": ["realm export JSON"],
+                            "fallback_behaviour": "Existing sessions continue until expiry while new logins fail closed."
+                        },
+                        "current_selection": {
+                            "product_name": "Keycloak",
+                            "service_id": "keycloak",
+                            "selection_adr": "0056",
+                            "runbook": "docs/runbooks/configure-keycloak.md"
+                        }
+                    }
                 ]
             },
             indent=2,
@@ -182,6 +403,29 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
         + "\n",
         encoding="utf-8",
     )
+    (data_root / "config" / "dependency-graph.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0.0",
+                "nodes": [
+                    {"id": "ops_portal", "service": "ops_portal", "name": "Ops Portal", "vm": "docker-runtime-lv3", "tier": 4},
+                    {"id": "api_gateway", "service": "api_gateway", "name": "API Gateway", "vm": "docker-runtime-lv3", "tier": 3},
+                    {"id": "keycloak", "service": "keycloak", "name": "Keycloak", "vm": "docker-runtime-lv3", "tier": 2},
+                    {"id": "nginx_edge", "service": "nginx_edge", "name": "NGINX Edge", "vm": "nginx-lv3", "tier": 1},
+                    {"id": "postgres", "service": "postgres", "name": "Postgres", "vm": "postgres-lv3", "tier": 1},
+                ],
+                "edges": [
+                    {"from": "ops_portal", "to": "api_gateway", "type": "hard", "description": "Portal uses the gateway."},
+                    {"from": "ops_portal", "to": "keycloak", "type": "hard", "description": "Portal uses shared auth."},
+                    {"from": "ops_portal", "to": "nginx_edge", "type": "hard", "description": "Portal is published at the edge."},
+                    {"from": "keycloak", "to": "postgres", "type": "hard", "description": "Keycloak stores state in Postgres."},
+                ],
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     (data_root / "changelog.md").write_text(
         "# Changelog\n\n## Unreleased\n- Added the interactive ops portal runtime.\n",
         encoding="utf-8",
@@ -194,6 +438,30 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
                 "workflow_id": "live-apply-service service=ops_portal env=production",
                 "recorded_on": "2026-03-23T18:00:00Z",
                 "recorded_by": "ops",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (data_root / "receipts" / "live-applies" / "2026-03-24-grafana-runtime-assurance.json").write_text(
+        json.dumps(
+            {
+                "receipt_id": "receipt-grafana-runtime-assurance",
+                "environment": "production",
+                "summary": "Verified Grafana browser login, logout, HTTPS certificate posture, Loki queryability, and smoke flow.",
+                "workflow_id": "converge-grafana",
+                "recorded_on": "2026-03-24T18:00:00Z",
+                "recorded_by": "ops",
+                "verification": [
+                    {"check": "Browser login", "result": "pass"},
+                    {"check": "TLS posture", "result": "pass"},
+                    {"check": "Loki queryability", "result": "pass"},
+                ],
+                "notes": [
+                    "Playwright login and logout both passed.",
+                    "HTTPS and TLS certificate checks passed.",
+                    "Loki queryability is healthy."
+                ],
             }
         )
         + "\n",
@@ -223,6 +491,7 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
         session_secret="test-secret",
         static_api_token="test-token",
         service_catalog_path=data_root / "config" / "service-capability-catalog.json",
+        publication_registry_path=data_root / "config" / "subdomain-exposure-registry.json",
         workflow_catalog_path=data_root / "config" / "workflow-catalog.json",
         changelog_path=data_root / "changelog.md",
         live_applies_dir=data_root / "receipts" / "live-applies",
@@ -233,7 +502,13 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
     )
     gateway = FakeGatewayClient()
     app = create_app(settings, gateway_client=gateway)
-    return TestClient(app), gateway
+    return TestClient(app), gateway, data_root
+
+
+@pytest.fixture()
+def portal_client(portal_runtime: tuple[TestClient, FakeGatewayClient, Path]) -> tuple[TestClient, FakeGatewayClient]:
+    client, gateway, _data_root = portal_runtime
+    return client, gateway
 
 
 def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
@@ -244,14 +519,42 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert response.status_code == 200
     assert "Interactive Ops Portal" in response.text
     assert "Platform Overview" in response.text
+    assert "Runtime Assurance" in response.text
+    assert "Scoreboard and rollup by active service and environment" in response.text
     assert "Deployment Console" in response.text
     assert "Agent Coordination" in response.text
     assert "agent/observation-loop" in response.text
     assert "Search Fabric" in response.text
     assert "Runbook Launcher" in response.text
     assert "Recent Live Applies" in response.text
+    assert "shared-edge / platform-sso" in response.text
+    assert "ops.lv3.org · operator · shared-edge · platform-sso" in response.text
+    assert "Capability Contracts" in response.text
+    assert "Identity Provider" in response.text
+    assert "Keycloak" in response.text
+    assert "Current service-state distribution" in response.text
+    assert "Ops portal dependency map" in response.text
+    assert "Session states at a glance" in response.text
+    assert "Recent rollout tempo" in response.text
     assert gateway.platform_health_tokens == ["test-token"]
     assert gateway.agent_coordination_tokens == ["test-token"]
+    assert gateway.runbook_fetch_tokens == ["test-token"]
+
+
+def test_runtime_assurance_scoreboard_renders_service_rows(
+    portal_client: tuple[TestClient, FakeGatewayClient],
+) -> None:
+    client, _gateway = portal_client
+
+    response = client.get("/partials/overview")
+
+    assert response.status_code == 200
+    assert "Healthy Rows" in response.text
+    assert "Rows Needing Action" in response.text
+    assert "Grafana" in response.text
+    assert "Keycloak" in response.text
+    assert "production" in response.text
+    assert "lv3-platform" in response.text
 
 
 def test_dashboard_uses_same_origin_static_stylesheet(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
@@ -261,6 +564,84 @@ def test_dashboard_uses_same_origin_static_stylesheet(portal_client: tuple[TestC
 
     assert response.status_code == 200
     assert '<link rel="stylesheet" href="/static/portal.css">' in response.text
+    assert '<script src="/static/portal.js" defer></script>' in response.text
+    assert 'https://unpkg.com/echarts@5.6.0/dist/echarts.min.js' in response.text
+
+
+def test_dashboard_ignores_macos_metadata_receipts(
+    portal_runtime: tuple[TestClient, FakeGatewayClient, Path],
+) -> None:
+    client, _gateway, data_root = portal_runtime
+    (data_root / "receipts" / "live-applies" / "._2026-03-25-ops-portal.json").write_bytes(b"\xa3")
+    (data_root / "receipts" / "drift-reports" / "._latest.json").write_bytes(b"\xa3")
+
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert "Interactive Ops Portal" in response.text
+    assert "Dashboard permissions drifted" in response.text
+    assert "Applied ops portal runtime" in response.text
+
+
+def test_build_health_mix_chart_groups_service_tones() -> None:
+    option = build_health_mix_chart(
+        [
+            {"id": "grafana", "status_tone": "ok"},
+            {"id": "ops_portal", "status_tone": "ok"},
+            {"id": "keycloak", "status_tone": "warn"},
+            {"id": "postgres", "status_tone": "danger"},
+        ]
+    )
+
+    series = option["series"][0]["data"]
+    assert {item["name"]: item["value"] for item in series} == {
+        "Healthy": 2,
+        "Needs attention": 1,
+        "Critical": 1,
+    }
+
+
+def test_build_dependency_focus_chart_follows_ops_portal_dependencies() -> None:
+    option = build_dependency_focus_chart(
+        {
+            "nodes": [
+                {"id": "ops_portal", "service": "ops_portal", "name": "Ops Portal", "vm": "docker-runtime-lv3", "tier": 4},
+                {"id": "api_gateway", "service": "api_gateway", "name": "API Gateway", "vm": "docker-runtime-lv3", "tier": 3},
+                {"id": "keycloak", "service": "keycloak", "name": "Keycloak", "vm": "docker-runtime-lv3", "tier": 2},
+                {"id": "postgres", "service": "postgres", "name": "Postgres", "vm": "postgres-lv3", "tier": 1},
+            ],
+            "edges": [
+                {"from": "ops_portal", "to": "api_gateway", "type": "hard", "description": "Portal uses the gateway."},
+                {"from": "api_gateway", "to": "keycloak", "type": "hard", "description": "Gateway trusts Keycloak."},
+                {"from": "keycloak", "to": "postgres", "type": "hard", "description": "Keycloak stores state in Postgres."},
+            ],
+        },
+        [
+            {"id": "ops_portal", "status_tone": "ok", "status": "healthy"},
+            {"id": "api_gateway", "status_tone": "ok", "status": "healthy"},
+            {"id": "keycloak", "status_tone": "warn", "status": "degraded"},
+            {"id": "postgres", "status_tone": "neutral", "status": "unknown"},
+        ],
+    )
+
+    series = option["series"][0]
+    assert {node["id"] for node in series["data"]} == {"ops_portal", "api_gateway", "keycloak", "postgres"}
+    assert len(series["links"]) == 3
+
+
+def test_build_live_apply_timeline_chart_tracks_receipt_and_service_counts() -> None:
+    option = build_live_apply_timeline_chart(
+        [
+            {"recorded_on": "2026-03-23T18:00:00Z", "services": ["ops_portal", "api_gateway"]},
+            {"recorded_on": "2026-03-23T18:30:00Z", "services": ["ops_portal"]},
+            {"recorded_on": "2026-03-24T09:00:00Z", "services": ["grafana"]},
+        ],
+        days=3,
+    )
+
+    assert option["xAxis"]["data"] == ["03-22", "03-23", "03-24"]
+    assert option["series"][0]["data"] == [0, 2, 1]
+    assert option["series"][1]["data"] == [0, 2, 1]
 
 
 def test_health_check_action_returns_fragment(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
@@ -281,17 +662,21 @@ def test_deploy_action_records_gateway_call(portal_client: tuple[TestClient, Fak
 
     assert response.status_code == 200
     assert "Deployment accepted by gateway" in response.text
-    assert gateway.deploy_calls == [{"service_id": "grafana", "restart_only": False, "source": "portal"}]
+    assert gateway.deploy_calls == [
+        {"service_id": "grafana", "restart_only": False, "source": "portal", "token": "test-token"}
+    ]
 
 
 def test_runbook_action_accepts_json_parameters(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
     client, gateway = portal_client
 
-    response = client.post("/actions/runbooks/rotate-secret", data={"parameters": '{"service":"grafana"}'})
+    response = client.post("/actions/runbooks/validation-gate-status", data={"parameters": '{"service":"grafana"}'})
 
     assert response.status_code == 200
-    assert "Runbook accepted by gateway" in response.text
-    assert gateway.runbook_calls == [{"workflow_id": "rotate-secret", "parameters": {"service": "grafana"}}]
+    assert "Runbook completed successfully" in response.text
+    assert gateway.runbook_calls == [
+        {"runbook_id": "validation-gate-status", "parameters": {"service": "grafana"}, "token": "test-token"}
+    ]
 
 
 def test_search_action_renders_results(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
@@ -302,6 +687,70 @@ def test_search_action_renders_results(portal_client: tuple[TestClient, FakeGate
     assert response.status_code == 200
     assert "Rotate Certificates" in response.text
     assert gateway.search_calls == [{"query": "tls cert expires", "collection": "runbooks", "limit": 8, "token": "test-token"}]
+
+
+def test_dashboard_keeps_runbooks_visible_when_agent_coordination_degrades(
+    portal_client: tuple[TestClient, FakeGatewayClient],
+) -> None:
+    client, gateway = portal_client
+    coordination_failed = {"value": False}
+
+    async def degraded_coordination(token: str | None = None) -> dict[str, object]:
+        gateway.agent_coordination_tokens.append(token)
+        coordination_failed["value"] = True
+        raise RuntimeError("coordination unavailable")
+
+    async def ordering_sensitive_runbooks(
+        *,
+        token: str | None = None,
+        delivery_surface: str = "ops_portal",
+    ) -> dict[str, object]:
+        gateway.runbook_fetch_tokens.append(token)
+        if coordination_failed["value"]:
+            raise RuntimeError("runbook delivery was poisoned by the previous failure")
+        return {
+            "runbooks": [
+                {
+                    "id": "validation-gate-status",
+                    "title": "Inspect validation gate status",
+                    "description": "Show the current validation-gate summary through the shared runbook service.",
+                    "owner_runbook": "docs/runbooks/validation-gate-status.yaml",
+                    "live_impact": "repo_only",
+                    "execution_class": "diagnostic",
+                }
+            ]
+        }
+
+    gateway.fetch_agent_coordination = degraded_coordination  # type: ignore[method-assign]
+    gateway.fetch_runbooks = ordering_sensitive_runbooks  # type: ignore[method-assign]
+
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert "validation-gate-status" in response.text
+    assert "Agent coordination data is degraded: coordination unavailable" in response.text
+    assert gateway.runbook_fetch_tokens == ["test-token"]
+    assert gateway.agent_coordination_tokens == ["test-token"]
+
+
+def test_runbooks_partial_surfaces_gateway_warning(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, gateway = portal_client
+
+    async def degraded_runbooks(
+        *,
+        token: str | None = None,
+        delivery_surface: str = "ops_portal",
+    ) -> dict[str, object]:
+        gateway.runbook_fetch_tokens.append(token)
+        raise RuntimeError("runbook index unavailable")
+
+    gateway.fetch_runbooks = degraded_runbooks  # type: ignore[method-assign]
+
+    response = client.get("/partials/runbooks")
+
+    assert response.status_code == 200
+    assert "Runbook launcher data is degraded: runbook index unavailable" in response.text
+    assert gateway.runbook_fetch_tokens == ["test-token"]
 
 
 def test_normalize_health_accepts_service_id_list_payload() -> None:

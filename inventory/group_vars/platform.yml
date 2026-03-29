@@ -65,6 +65,11 @@ platform_host:
         listen_port: 8005
         upstream_host: 10.10.10.20
         upstream_port: 8000
+      - name: nomad
+        listen_address: 100.64.0.1
+        listen_port: 8013
+        upstream_host: 10.10.10.40
+        upstream_port: 4646
       - name: mattermost
         listen_address: 100.64.0.1
         listen_port: 8066
@@ -144,6 +149,10 @@ platform_ports:
   semaphore_host_proxy_port: 8020
   windmill_server_port: 8000
   windmill_host_proxy_port: 8005
+  nomad_server_port: 4646
+  nomad_rpc_port: 4647
+  nomad_serf_port: 4648
+  nomad_host_proxy_port: 8013
   mattermost_server_port: 8065
   mattermost_host_proxy_port: 8066
   gitea_http_port: 3003
@@ -172,6 +181,7 @@ platform_ports:
   platform_context_host_proxy_port: 8010
   homepage_port: 3090
   ops_portal_port: 8092
+  harbor_port: 8095
   plane_port: 8093
   plane_host_proxy_port: 8011
   ntopng_http_port: 3000
@@ -201,6 +211,10 @@ platform_port_assignments:
   semaphore_host_proxy_port: 8020
   windmill_server_port: 8000
   windmill_host_proxy_port: 8005
+  nomad_server_port: 4646
+  nomad_rpc_port: 4647
+  nomad_serf_port: 4648
+  nomad_host_proxy_port: 8013
   mattermost_server_port: 8065
   mattermost_host_proxy_port: 8066
   gitea_http_port: 3003
@@ -229,6 +243,7 @@ platform_port_assignments:
   platform_context_host_proxy_port: 8010
   homepage_port: 3090
   ops_portal_port: 8092
+  harbor_port: 8095
   plane_port: 8093
   plane_host_proxy_port: 8011
   ntopng_http_port: 3000
@@ -1229,6 +1244,24 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8000
       controller: http://100.64.0.1:8005
+  nomad:
+    service_name: nomad
+    owning_vm: monitoring-lv3
+    private_ip: 10.10.10.40
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: https://100.64.0.1:8013
+    service_id: nomad
+    ports:
+      internal: 4646
+      controller: 8013
+    urls:
+      internal: https://10.10.10.40:4646
+      controller: https://100.64.0.1:8013
   gitea:
     service_name: gitea
     owning_vm: docker-runtime-lv3
@@ -1688,6 +1721,38 @@ platform_service_topology:
     ports: {}
     urls:
       public: https://sso.lv3.org
+  harbor:
+    service_name: harbor
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: registry.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    dns:
+      managed: true
+      visibility: public
+      name: registry
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8095
+      client_max_body_size: 0
+      chunked_transfer_encoding: true
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 900
+      proxy_send_timeout_seconds: 900
+    service_id: harbor
+    ports:
+      internal: 8095
+    urls:
+      public: https://registry.lv3.org
+      internal: http://10.10.10.20:8095
   ops_portal:
     service_name: ops-portal
     owning_vm: docker-runtime-lv3
@@ -1965,6 +2030,10 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: registry
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: ops
       type: A
       value: 65.108.75.123
@@ -2023,6 +2092,7 @@ platform_management_allowed_tcp_ports:
   - 8020
   - 8080
   - 8005
+  - 8013
   - 8008
   - 8011
   - 8066
@@ -2393,6 +2463,24 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8000
       controller: http://100.64.0.1:8005
+  nomad:
+    service_name: nomad
+    owning_vm: monitoring-lv3
+    private_ip: 10.10.10.40
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: https://100.64.0.1:8013
+    service_id: nomad
+    ports:
+      internal: 4646
+      controller: 8013
+    urls:
+      internal: https://10.10.10.40:4646
+      controller: https://100.64.0.1:8013
   gitea:
     service_name: gitea
     owning_vm: docker-runtime-lv3
@@ -2852,6 +2940,38 @@ public_edge_service_topology:
     ports: {}
     urls:
       public: https://sso.lv3.org
+  harbor:
+    service_name: harbor
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: registry.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    dns:
+      managed: true
+      visibility: public
+      name: registry
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8095
+      client_max_body_size: 0
+      chunked_transfer_encoding: true
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 900
+      proxy_send_timeout_seconds: 900
+    service_id: harbor
+    ports:
+      internal: 8095
+    urls:
+      public: https://registry.lv3.org
+      internal: http://10.10.10.20:8095
   ops_portal:
     service_name: ops-portal
     owning_vm: docker-runtime-lv3
@@ -3109,6 +3229,8 @@ step_ca_internal_url: https://10.10.10.20:9000
 step_ca_controller_url: https://100.64.0.1:9443
 windmill_host_proxy_port: 8005
 windmill_controller_url: http://100.64.0.1:8005
+nomad_host_proxy_port: 8013
+nomad_controller_url: https://100.64.0.1:8013
 monitoring_loki_push_api_url: http://10.10.10.40:3100/loki/api/v1/push
 proxmox_management_allowed_tcp_ports:
   - 3001
@@ -3119,6 +3241,7 @@ proxmox_management_allowed_tcp_ports:
   - 8020
   - 8080
   - 8005
+  - 8013
   - 8008
   - 8011
   - 8066
@@ -3141,6 +3264,9 @@ ntfy_port: 2586
 openbao_http_port: 8201
 openbao_proxy_port: 8200
 windmill_server_port: 8000
+nomad_server_port: 4646
+nomad_rpc_port: 4647
+nomad_serf_port: 4648
 netbox_server_port: 8082
 searxng_port: 8881
 searxng_host_proxy_port: 80
@@ -3160,5 +3286,6 @@ coolify_host_proxy_port: 8012
 open_webui_port: 8088
 homepage_port: 3090
 ops_portal_port: 8092
+harbor_port: 8095
 ntopng_http_port: 3000
 portainer_https_port: 9443

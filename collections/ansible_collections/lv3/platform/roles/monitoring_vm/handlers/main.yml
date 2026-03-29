@@ -1,3 +1,29 @@
+# Role Handler File: monitoring_vm/handlers/main.yml
+# Purpose: Restart monitoring VM services when rendered configuration or managed assets change.
+# Use case: Triggered by the monitoring VM role after updating Grafana, Loki, Prometheus, Tempo, or Loki Canary inputs.
+#
+# Inputs (required):
+#   - monitoring_* role defaults: Provide the managed systemd unit names and service identities.
+#
+# Inputs (optional):
+#   - None.
+#
+# Outputs:
+#   - Restarts the specific monitoring services affected by configuration drift.
+#
+# Idempotency: Fully idempotent
+#              Handlers only run when notified by a changed task.
+#
+# Dependencies:
+#   - ADR 0011: Establishes the monitoring VM managed service set.
+#   - ADR 0250: Adds the Loki Canary service restart path.
+#   - Requires: systemd-managed monitoring services to be installed on monitoring-lv3.
+#
+# Related ADRs: 0011, 0250
+# Related Runbooks: docs/runbooks/monitoring-stack.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
 ---
 - name: Restart Grafana
   ansible.builtin.systemd:
@@ -8,6 +34,12 @@
   ansible.builtin.systemd:
     name: loki
     state: restarted
+
+- name: Restart Loki Canary
+  ansible.builtin.systemd:
+    name: "{{ monitoring_loki_canary_service_name }}"
+    state: restarted
+    daemon_reload: true
 
 - name: Restart Tempo
   ansible.builtin.systemd:

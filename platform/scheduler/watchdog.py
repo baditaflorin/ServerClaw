@@ -8,7 +8,8 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any, Callable
 
-from platform.ledger._common import REPO_ROOT, load_module_from_repo
+from platform.events.publisher import publish_nats_events
+from platform.ledger._common import REPO_ROOT
 
 from .budgets import WorkflowBudget, load_workflow_policy
 
@@ -45,8 +46,7 @@ def _default_escalation_handler(subject: str, payload: dict[str, Any]) -> None:
     nats_url = os.environ.get("LV3_LEDGER_NATS_URL", "").strip() or os.environ.get("LV3_NATS_URL", "").strip()
     if not nats_url:
         return
-    drift_lib = load_module_from_repo(REPO_ROOT / "scripts" / "drift_lib.py", "lv3_scheduler_drift_lib")
-    drift_lib.publish_nats_events(
+    publish_nats_events(
         [{"subject": subject, "payload": payload}],
         nats_url=nats_url,
         credentials=None,

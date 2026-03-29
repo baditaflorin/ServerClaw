@@ -44,9 +44,9 @@ plane_openbao_agent_container_name: plane-openbao-agent
 plane_openbao_secret_path: services/plane/runtime-env
 plane_openbao_policy_name: lv3-service-plane-runtime
 plane_openbao_approle_name: plane-runtime
-plane_internal_port: "{{ platform_service_topology | platform_service_port('plane', 'internal') }}"
-plane_internal_base_url: "{{ platform_service_topology | platform_service_url('plane', 'internal') }}"
-plane_controller_url: "{{ platform_service_topology | platform_service_url('plane', 'controller') }}"
+plane_internal_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('plane', 'internal') }}"
+plane_internal_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('plane', 'internal') }}"
+plane_controller_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('plane', 'controller') }}"
 plane_public_base_url: "https://{{ plane_service_topology.public_hostname }}"
 plane_app_release: v1.2.3
 plane_frontend_image: "{{ container_image_catalog.images.plane_frontend_runtime.ref }}"

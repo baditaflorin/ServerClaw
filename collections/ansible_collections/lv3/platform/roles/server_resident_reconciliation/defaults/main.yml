@@ -1,0 +1,43 @@
+---
+server_resident_reconciliation_enabled: true
+server_resident_reconciliation_bootstrap_gitea_access: false
+server_resident_reconciliation_gitea_base_url: "{{ gitea_controller_url }}"
+server_resident_reconciliation_repo_owner: ops
+server_resident_reconciliation_repo_name: proxmox_florin_server
+server_resident_reconciliation_repo_branch: main
+server_resident_reconciliation_repo_url: >-
+  {{ server_resident_reconciliation_gitea_base_url }}/{{ server_resident_reconciliation_repo_owner }}/{{ server_resident_reconciliation_repo_name }}.git
+server_resident_reconciliation_inventory_host: proxmox_florin
+server_resident_reconciliation_playbook_path: playbooks/server-resident-reconciliation.yml
+server_resident_reconciliation_checkout_path: /srv/proxmox_florin_server
+server_resident_reconciliation_runtime_root: /var/lib/lv3/server-resident-reconciliation
+server_resident_reconciliation_inventory_path: "{{ server_resident_reconciliation_runtime_root }}/ansible-pull-inventory.yml"
+server_resident_reconciliation_receipts_dir: "{{ server_resident_reconciliation_runtime_root }}/receipts"
+server_resident_reconciliation_lock_file: "{{ server_resident_reconciliation_runtime_root }}/reconcile.lock"
+server_resident_reconciliation_secret_dir: /etc/lv3/server-resident-reconciliation
+server_resident_reconciliation_http_token_remote_file: "{{ server_resident_reconciliation_secret_dir }}/gitea-read-token"
+server_resident_reconciliation_gitea_admin_token_local_file: >-
+  {{ lookup('ansible.builtin.env', 'LV3_GITEA_ADMIN_TOKEN_FILE') | default('/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-token.txt', true) }}
+server_resident_reconciliation_gitea_read_token_local_file: >-
+  {{ lookup('ansible.builtin.env', 'LV3_SERVER_RESIDENT_RECONCILIATION_GITEA_TOKEN_FILE') | default('/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/lv3-reconcile-read-token.txt', true) }}
+server_resident_reconciliation_gitea_username: lv3-reconcile
+server_resident_reconciliation_gitea_email: lv3-reconcile@lv3.org
+server_resident_reconciliation_gitea_login_name: empty
+server_resident_reconciliation_gitea_source_id: 0
+server_resident_reconciliation_gitea_token_name: proxmox-florin-ansible-pull
+server_resident_reconciliation_gitea_token_scopes:
+  - read:repository
+server_resident_reconciliation_gitea_restricted_user: true
+server_resident_reconciliation_gitea_collaborator_permission: read
+server_resident_reconciliation_askpass_path: /usr/local/libexec/lv3-server-resident-reconciliation-askpass.sh
+server_resident_reconciliation_wrapper_path: /usr/local/libexec/lv3-server-resident-reconciliation.sh
+server_resident_reconciliation_service_name: lv3-server-resident-reconciliation.service
+server_resident_reconciliation_timer_name: lv3-server-resident-reconciliation.timer
+server_resident_reconciliation_on_calendar: "*:0/30"
+server_resident_reconciliation_randomized_delay_sec: 300
+server_resident_reconciliation_timeout_start_sec: 2700
+server_resident_reconciliation_managed_packages:
+  - ansible-core
+  - git
+  - python3
+server_resident_reconciliation_receipt_schema_version: "1.0.0"

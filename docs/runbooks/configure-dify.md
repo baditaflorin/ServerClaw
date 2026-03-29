@@ -1,6 +1,6 @@
 # Configure Dify
 
-This runbook covers the repo-managed Dify deployment introduced by [ADR 0197](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0197-live-apply/docs/adr/0197-dify-visual-llm-workflow-canvas.md).
+This runbook covers the repo-managed Dify deployment introduced by [ADR 0197](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0197-dify-visual-llm-workflow-canvas.md).
 
 ## Scope
 
@@ -61,14 +61,9 @@ Runtime and API verification:
 
 ```bash
 curl -fsS https://agents.lv3.org/healthz
-uv run --with requests --with pyyaml python3 scripts/dify_smoke.py \
-  --base-url https://agents.lv3.org \
-  --admin-email baditaflorin@gmail.com \
-  --admin-password-file .local/dify/admin-password.txt \
-  --tools-api-key-file .local/dify/tools-api-key.txt
 ```
 
-When `agents.lv3.org` cannot be published yet, verify through a local tunnel to `docker-runtime-lv3` instead:
+The public hostname verifies the unauthenticated health path, but the bootstrap and app-management APIs remain OAuth-protected at the edge. Run the smoke flow through a local tunnel to `docker-runtime-lv3`:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
@@ -95,6 +90,8 @@ curl -sS -X POST https://api.lv3.org/v1/dify-tools/get-platform-status \
 ```
 
 The smoke script verifies the setup flow, signs in with the bootstrap administrator, syncs the governed tool provider, imports a minimal workflow DSL, exports it back into `platform/dify-workflows/`, and confirms Langfuse trace configuration can be written and read on the smoke app.
+
+When you run the smoke flow from a linked git worktree, the script now falls back to the shared repository `.local/langfuse/` directory automatically, so trace verification still succeeds without copying controller-local secrets into the worktree.
 
 ## Operational Notes
 

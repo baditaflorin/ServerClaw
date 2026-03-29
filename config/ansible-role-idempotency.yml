@@ -22,6 +22,9 @@ roles:
   cert_renewer_sidecar:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  coolify_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   common:
     policy: exempt
     reason: Shared task include library; not applied as a standalone role.
@@ -133,6 +136,12 @@ roles:
   monitoring_vm:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  nomad_cluster_bootstrap:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  nomad_cluster_member:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   n8n_postgres:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -213,6 +222,9 @@ roles:
   proxmox_guests:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  proxmox_host_control_loops:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   proxmox_headscale:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -250,6 +262,9 @@ roles:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   searxng_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  server_resident_reconciliation:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   secret_fact:

@@ -10,6 +10,7 @@ The manifest is the single machine-readable summary of the platform's current re
 - service health posture derived from repo evidence or live SLO metrics
 - active incident and maintenance context when local inputs are available
 - governed workflow and runbook capability summaries
+- contract-first capability summaries for critical shared product surfaces
 - registered automation identities and known ADR gaps
 
 The committed artifact lives at `build/platform-manifest.json`.
@@ -19,6 +20,7 @@ The committed artifact lives at `build/platform-manifest.json`.
 The generator reads from:
 
 - `config/manifest-static.yaml`
+- `config/capability-contract-catalog.json`
 - `config/service-capability-catalog.json`
 - `config/workflow-catalog.json`
 - `config/workflow-defaults.yaml`

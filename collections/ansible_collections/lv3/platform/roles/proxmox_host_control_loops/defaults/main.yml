@@ -1,0 +1,40 @@
+---
+# Purpose: Declare the canonical ADR 0226 host-resident control-loop unit names, filesystem paths, and scheduling defaults for proxmox_florin.
+# Use case: Applied on the Proxmox host when the platform needs the repo-managed systemd supervisor baseline for host-local control loops.
+# Inputs:
+#   - proxmox_host_control_loops_root (str): Root directory for loop state and manual trigger files.
+#   - proxmox_host_control_loops_timer_on_calendar (str): systemd timer cadence for the reconcile pass.
+#   - proxmox_host_control_loops_timeout_start_seconds (int): Maximum runtime for one reconcile pass.
+# Outputs:
+#   - Canonical script path, service unit, timer unit, path unit, and state directories for the host control-loop baseline.
+# Idempotency: Fully idempotent.
+# Dependencies:
+#   - ADR 0204: Defines the broader correction-loop policy this host supervisor supports.
+#   - ADR 0220: Supplies the bootstrap and recovery ordering model referenced by the service unit.
+#   - ADR 0224: Makes server-resident operations the default runtime model.
+#   - ADR 0226: Selects systemd as the canonical host-resident supervisor.
+# Related ADRs: 0204, 0220, 0224, 0226
+
+proxmox_host_control_loops_root: /var/lib/lv3-host-control-loops
+proxmox_host_control_loops_request_dir: "{{ proxmox_host_control_loops_root }}/requests"
+proxmox_host_control_loops_history_dir: "{{ proxmox_host_control_loops_root }}/runs"
+proxmox_host_control_loops_status_dir: "{{ proxmox_host_control_loops_root }}/status"
+proxmox_host_control_loops_status_file: "{{ proxmox_host_control_loops_status_dir }}/latest.json"
+proxmox_host_control_loops_reconcile_request_path: "{{ proxmox_host_control_loops_request_dir }}/reconcile.request"
+proxmox_host_control_loops_script_path: /usr/local/libexec/lv3-host-control-loop-reconcile.py
+proxmox_host_control_loops_service_name: lv3-host-control-loop-reconcile.service
+proxmox_host_control_loops_timer_name: lv3-host-control-loop-reconcile.timer
+proxmox_host_control_loops_path_name: lv3-host-control-loop-reconcile.path
+proxmox_host_control_loops_description: LV3 host control-loop reconcile baseline
+proxmox_host_control_loops_syslog_identifier: lv3-host-control-loop-reconcile
+proxmox_host_control_loops_service_user: root
+proxmox_host_control_loops_service_group: root
+proxmox_host_control_loops_timer_on_calendar: "*:0/30"
+proxmox_host_control_loops_timer_accuracy: 1m
+proxmox_host_control_loops_randomized_delay_seconds: 120
+proxmox_host_control_loops_timeout_start_seconds: 300
+proxmox_host_control_loops_after_units:
+  - network-online.target
+  - pveproxy.service
+proxmox_host_control_loops_wants_units:
+  - network-online.target

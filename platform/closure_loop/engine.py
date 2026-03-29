@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import importlib.util
 import json
 import os
-import sys
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
@@ -11,8 +9,10 @@ from types import SimpleNamespace
 from typing import Any, Callable
 
 from platform.agent import AgentCoordinationStore
+from platform.correction_loops import load_correction_loop_catalog, resolve_workflow_correction_loop
+from platform.events.publisher import publish_nats_events
 from platform.ledger import LedgerWriter
-from platform.ledger._common import REPO_ROOT, load_module_from_repo
+from platform.ledger._common import REPO_ROOT
 from platform.world_state._db import parse_timestamp
 from platform.world_state.client import WorldStateClient, WorldStateError
 
@@ -50,22 +50,11 @@ def _default_event_publisher(subject: str, payload: dict[str, Any]) -> None:
     nats_url = os.environ.get("LV3_NATS_URL", "").strip() or os.environ.get("LV3_LEDGER_NATS_URL", "").strip()
     if not nats_url:
         return
-    drift_lib = load_module_from_repo(REPO_ROOT / "scripts" / "drift_lib.py", "lv3_closure_loop_drift_lib")
-    drift_lib.publish_nats_events(
+    publish_nats_events(
         [{"subject": subject, "payload": payload}],
         nats_url=nats_url,
         credentials=None,
     )
-
-
-def load_module(name: str, path: Path) -> Any:
-    spec = importlib.util.spec_from_file_location(name, path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"unable to load module from {path}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules.setdefault(name, module)
-    spec.loader.exec_module(module)
-    return module
 
 
 def observation_finding_to_alert_payload(finding: dict[str, Any], *, fallback_ref: str) -> dict[str, Any] | None:
@@ -128,6 +117,8 @@ class ClosureLoop:
         self._world_state_client = world_state_client or WorldStateClient(self._repo_root)
         self._coordination_store = coordination_store or AgentCoordinationStore(self._repo_root)
         self._clock = clock
+        self._correction_loop_catalog_loaded = False
+        self._correction_loop_catalog: dict[str, Any] | None = None
 
     def start(
         self,
@@ -159,6 +150,7 @@ class ClosureLoop:
             "verification_result": None,
             "resolution": None,
             "escalation_reason": None,
+            "correction_loop": self._correction_loop_snapshot("platform-observation-loop"),
             "trigger_payload": payload,
             "cycle_count": 0,
             "operator_approved": False,
@@ -372,16 +364,46 @@ class ClosureLoop:
         return "agent/observation-loop"
 
     def _default_triage_report_builder(self, payload: dict[str, Any]) -> dict[str, Any]:
-        scripts_dir = self._repo_root / "scripts"
-        if str(scripts_dir) not in sys.path:
-            sys.path.insert(0, str(scripts_dir))
-        incident_triage = load_module("lv3_closure_loop_incident_triage", self._repo_root / "scripts" / "incident_triage.py")
-        return incident_triage.build_report(payload)
+        raise RuntimeError(
+            "ClosureLoop requires triage_report_builder from a composition root; "
+            "pass scripts.incident_triage.build_report when wiring the runtime."
+        )
 
     def _load_workflow_catalog(self) -> dict[str, Any]:
         payload = json.loads((self._repo_root / "config" / "workflow-catalog.json").read_text(encoding="utf-8"))
         workflows = payload.get("workflows", {})
         return workflows if isinstance(workflows, dict) else {}
+
+    def _load_correction_loop_catalog(self) -> dict[str, Any] | None:
+        if self._correction_loop_catalog_loaded:
+            return self._correction_loop_catalog
+        catalog_path = self._repo_root / "config" / "correction-loops.json"
+        if not catalog_path.exists():
+            self._correction_loop_catalog_loaded = True
+            self._correction_loop_catalog = None
+            return None
+        self._correction_loop_catalog = load_correction_loop_catalog(path=catalog_path)
+        self._correction_loop_catalog_loaded = True
+        return self._correction_loop_catalog
+
+    def _resolve_correction_loop(self, workflow_id: str) -> dict[str, Any] | None:
+        catalog = self._load_correction_loop_catalog()
+        if catalog is None:
+            return None
+        return resolve_workflow_correction_loop(catalog, workflow_id)
+
+    def _correction_loop_snapshot(self, workflow_id: str) -> dict[str, Any] | None:
+        loop = self._resolve_correction_loop(workflow_id)
+        if loop is None:
+            return None
+        return {
+            "loop_id": loop["id"],
+            "workflow_id": workflow_id,
+            "verification_source": loop["verification"]["source"],
+            "escalation_target": loop["escalation"]["target"],
+            "retry_budget_cycles": loop.get("retry_budget_cycles"),
+            "repair_action_kinds": [action["kind"] for action in loop["repair_actions"]],
+        }
 
     def _load_agent_policies(self) -> dict[str, Any]:
         path = self._repo_root / "config" / "agent-policies.yaml"
@@ -505,6 +527,11 @@ class ClosureLoop:
         return False
 
     def _max_retriage_cycles(self, service_id: str) -> int:
+        observation_loop = self._resolve_correction_loop("platform-observation-loop")
+        if isinstance(observation_loop, dict):
+            configured = observation_loop.get("retry_budget_cycles")
+            if isinstance(configured, int):
+                return max(0, min(configured, 5))
         catalog = json.loads((self._repo_root / "config" / "service-capability-catalog.json").read_text(encoding="utf-8"))
         services = catalog.get("services", [])
         if not isinstance(services, list):

@@ -1,0 +1,104 @@
+---
+# Purpose: Document the public input contract for the proxmox_host_control_loops role.
+# Use case: Validated by repository automation whenever the ADR 0226 role is changed or reused.
+# Inputs:
+#   - proxmox_host_control_loops_*: Unit names, paths, cadence, and hardening settings for the host control-loop baseline.
+# Outputs:
+#   - A validated role interface for the Proxmox host control-loop supervisor.
+# Idempotency: Fully idempotent.
+# Dependencies:
+#   - ADR 0030: Role interface contracts.
+#   - ADR 0165: Metadata requirements for new playbook and role surfaces.
+#   - ADR 0226: Systemd host-control-loop baseline.
+# Related ADRs: 0030, 0165, 0226
+argument_specs:
+  main:
+    short_description: Install the ADR 0226 host-resident control-loop service, timer, and path units on the Proxmox host.
+    options:
+      proxmox_host_control_loops_root:
+        type: str
+        required: false
+        default: /var/lib/lv3-host-control-loops
+      proxmox_host_control_loops_request_dir:
+        type: str
+        required: false
+      proxmox_host_control_loops_history_dir:
+        type: str
+        required: false
+      proxmox_host_control_loops_status_dir:
+        type: str
+        required: false
+      proxmox_host_control_loops_status_file:
+        type: str
+        required: false
+      proxmox_host_control_loops_reconcile_request_path:
+        type: str
+        required: false
+      proxmox_host_control_loops_script_path:
+        type: str
+        required: false
+        default: /usr/local/libexec/lv3-host-control-loop-reconcile.py
+      proxmox_host_control_loops_service_name:
+        type: str
+        required: false
+        default: lv3-host-control-loop-reconcile.service
+      proxmox_host_control_loops_timer_name:
+        type: str
+        required: false
+        default: lv3-host-control-loop-reconcile.timer
+      proxmox_host_control_loops_path_name:
+        type: str
+        required: false
+        default: lv3-host-control-loop-reconcile.path
+      proxmox_host_control_loops_description:
+        type: str
+        required: false
+        default: LV3 host control-loop reconcile baseline
+      proxmox_host_control_loops_syslog_identifier:
+        type: str
+        required: false
+        default: lv3-host-control-loop-reconcile
+      proxmox_host_control_loops_service_user:
+        type: str
+        required: false
+        default: root
+      proxmox_host_control_loops_service_group:
+        type: str
+        required: false
+        default: root
+      proxmox_host_control_loops_timer_on_calendar:
+        type: str
+        required: false
+        default: "*:0/30"
+      proxmox_host_control_loops_timer_accuracy:
+        type: str
+        required: false
+        default: 1m
+      proxmox_host_control_loops_randomized_delay_seconds:
+        type: int
+        required: false
+        default: 120
+      proxmox_host_control_loops_timeout_start_seconds:
+        type: int
+        required: false
+        default: 300
+      proxmox_host_control_loops_restart_seconds:
+        type: int
+        required: false
+        default: 30
+      proxmox_host_control_loops_start_limit_interval_seconds:
+        type: int
+        required: false
+        default: 900
+      proxmox_host_control_loops_start_limit_burst:
+        type: int
+        required: false
+        default: 3
+      proxmox_host_control_loops_after_units:
+        type: list
+        elements: str
+        required: false
+      proxmox_host_control_loops_wants_units:
+        type: list
+        elements: str
+        required: false

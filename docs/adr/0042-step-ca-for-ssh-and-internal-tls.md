@@ -47,6 +47,26 @@ Provisioners must be separated by identity class:
 - services
 - hosts
 
+## Replaceability Scorecard
+
+- Capability Definition: `internal_trust_authority` as defined by ADR 0046 identity classes, ADR 0047 short-lived credential policy, and the step-ca runbook.
+- Contract Fit: strong for short-lived SSH user certificates, SSH host certificates, and internal X.509 issuance behind a private API.
+- Data Export / Import: CA configuration, policy, trusted roots, SSH principal mappings, issued certificate inventories, and host trust bundles can be exported and re-established on another CA.
+- Migration Complexity: medium because every SSH and TLS consumer must trust both issuers during the transition and then rotate to the new authority without breaking automation.
+- Proprietary Surface Area: low because the repo already treats certificates, trust bundles, and principal mappings as platform-owned concepts instead of step-ca-specific schemas.
+- Approved Exceptions: ACME-compatible issuance behavior and step-ca admin tooling are accepted so long as the canonical trust inventory and issued-artifact mapping remain portable.
+- Fallback / Downgrade: controller-local SSH keys, break-glass root access, and static internal certificates can keep minimum operator access alive while a replacement CA is introduced.
+- Observability / Audit Continuity: certificate issuance, renewal, and revocation remain visible through repo-managed logs, trust-distribution automation, and live-apply receipts during migration.
+
+## Vendor Exit Plan
+
+- Reevaluation Triggers: unsupported auth methods, recovery gaps around CA key custody, upgrade dead-ends, or inability to keep SSH and mTLS issuance policy aligned with platform identity rules.
+- Portable Artifacts: root and intermediate material, CA policy, SSH principals, host certificate mappings, trusted root bundles, and issuance inventories.
+- Migration Path: stand up the replacement CA in parallel, publish its trust roots beside the current ones, reissue host and user credentials by wave, switch default issuance to the replacement, then retire step-ca once all active principals and services validate cleanly.
+- Alternative Product: OpenBao PKI or HashiCorp Vault PKI.
+- Owner: platform security.
+- Review Cadence: quarterly.
+
 ## Consequences
 
 - Routine SSH access can move from long-lived keys toward short-lived certificates.

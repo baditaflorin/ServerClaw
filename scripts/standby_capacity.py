@@ -17,14 +17,16 @@ from capacity_report import (
     load_capacity_model,
 )
 from service_id_resolver import resolve_service_id
+from shared_policy_packs import load_shared_policy_packs
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SERVICE_CATALOG_PATH = REPO_ROOT / "config" / "service-capability-catalog.json"
-ALLOWED_REDUNDANCY_TIERS = {"R0", "R1", "R2", "R3"}
-ENFORCED_REDUNDANCY_TIERS = {"R2", "R3"}
-ALLOWED_STANDBY_MODES = {"warm", "passive", "active"}
-CONTROL_PLANE_CATEGORIES = {"automation", "security", "access", "infrastructure"}
+SHARED_POLICIES = load_shared_policy_packs()
+ALLOWED_REDUNDANCY_TIERS = set(SHARED_POLICIES.allowed_redundancy_tiers)
+ENFORCED_REDUNDANCY_TIERS = SHARED_POLICIES.enforced_redundancy_tiers
+ALLOWED_STANDBY_MODES = SHARED_POLICIES.allowed_standby_modes
+CONTROL_PLANE_CATEGORIES = SHARED_POLICIES.control_plane_categories
 
 
 def load_json(path: Path) -> Any:

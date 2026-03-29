@@ -144,15 +144,17 @@
       "implementation_refs": [
         "Makefile",
         "config/validation-gate.json",
+        "config/windmill/scripts/gate-status.py",
         "scripts/gate_status.py",
         "scripts/log_gate_bypass.py",
         "receipts/gate-bypasses/.gitkeep"
       ],
       "outputs": [
-        "A human-readable summary of enabled validation checks, the last local gate run, the last post-merge gate run, and the latest explicit bypass receipt."
+        "A human-readable or machine-readable summary of enabled validation checks, the last local gate run, the last post-merge gate run, and the latest explicit bypass receipt."
       ],
       "verification_commands": [
-        "make gate-status"
+        "make gate-status",
+        "python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server"
       ],
       "execution_class": "diagnostic",
       "budget": {
@@ -212,7 +214,10 @@
       },
       "preflight": {
         "required": false,
-        "required_secret_ids": []
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "windmill_superadmin_secret"
+        ]
       },
       "validation_targets": [
         "validate"
@@ -266,7 +271,11 @@
       },
       "preflight": {
         "required": false,
-        "required_secret_ids": []
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "windmill_superadmin_secret",
+          "nats_jetstream_admin_password"
+        ]
       },
       "validation_targets": [
         "validate"
@@ -315,7 +324,11 @@
       },
       "preflight": {
         "required": false,
-        "required_secret_ids": []
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "windmill_superadmin_secret",
+          "nats_jetstream_admin_password"
+        ]
       },
       "validation_targets": [
         "validate"
@@ -840,6 +853,59 @@
       "budget": {
         "max_duration_seconds": 1200,
         "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "configure-host-control-loops": {
+      "description": "Install the ADR 0226 host-resident control-loop baseline on proxmox_florin, including the managed systemd service, timer, path unit, and verification state paths.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "configure-host-control-loops",
+        "command": "make configure-host-control-loops"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check"
+      ],
+      "live_impact": "host_live",
+      "owner_runbook": "docs/runbooks/configure-host-control-loops.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/proxmox-install.yml",
+        "roles/proxmox_host_control_loops/tasks/main.yml"
+      ],
+      "outputs": [
+        "The canonical host control-loop script plus matching systemd service, timer, path unit, and status files on proxmox_florin."
+      ],
+      "verification_commands": [
+        "make workflow-info WORKFLOW=configure-host-control-loops",
+        "make syntax-check",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl status lv3-host-control-loop-reconcile.timer --no-pager'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl status lv3-host-control-loop-reconcile.path --no-pager'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl start lv3-host-control-loop-reconcile.service && sudo cat /var/lib/lv3-host-control-loops/status/latest.json'"
+      ],
+      "execution_class": "mutation",
+      "target_lane": "lane:proxmox-host",
+      "resource_reservation": {
+        "cpu_milli": 250,
+        "memory_mb": 128,
+        "disk_iops": 20,
+        "estimated_duration_seconds": 180
+      },
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 120,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 1,
         "max_restarts": 0,
@@ -1464,6 +1530,63 @@
         "max_steps": 300,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-nomad": {
+      "description": "Converge the private Nomad scheduler on monitoring-lv3 plus the runtime and build clients, including controller-local TLS and ACL bootstrap artifacts and repo-managed smoke jobs.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-nomad",
+        "command": "make converge-nomad"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "nomad_acl_management_token",
+          "nomad_tls_ca_key",
+          "nomad_tls_server_key",
+          "nomad_tls_client_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-nomad"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-nomad.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/groups/automation.yml",
+        "playbooks/nomad.yml",
+        "playbooks/services/nomad.yml",
+        "collections/ansible_collections/lv3/platform/roles/nomad_cluster_member/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/nomad_cluster_bootstrap/tasks/main.yml",
+        "config/nomad/jobs/lv3-nomad-smoke-service.nomad.hcl",
+        "config/nomad/jobs/lv3-nomad-smoke-batch.nomad.hcl",
+        "inventory/host_vars/proxmox_florin.yml",
+        "scripts/generate_platform_vars.py"
+      ],
+      "outputs": [
+        "A private Nomad API published on the Proxmox Tailscale proxy, a Nomad server on monitoring-lv3, Nomad clients on docker-runtime-lv3 and docker-build-lv3, and repo-managed smoke jobs verified across both client classes."
+      ],
+      "verification_commands": [
+        "make syntax-check-nomad",
+        "make converge-nomad",
+        "NOMAD_ADDR=https://100.64.0.1:8013 NOMAD_CACERT=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tls/nomad-agent-ca.pem NOMAD_TOKEN=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tokens/bootstrap-management.token) nomad node status"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
         "max_restarts": 0,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
@@ -2418,6 +2541,64 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-harbor": {
+      "description": "Converge Harbor on docker-runtime-lv3, publish it at registry.lv3.org through the shared edge, bootstrap Keycloak OIDC, and seed the check-runner project automation credentials.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-harbor",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-harbor"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "harbor_admin_password",
+          "harbor_database_password",
+          "harbor_check_runner_robot_secret",
+          "keycloak_harbor_client_secret"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-harbor"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-harbor.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/harbor.yml",
+        "playbooks/services/harbor.yml",
+        "collections/ansible_collections/lv3/platform/roles/harbor_runtime",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/controller-local-secrets.json"
+      ],
+      "outputs": [
+        "A repo-managed Harbor deployment on docker-runtime-lv3 with Trivy scanning enabled, a public registry endpoint at registry.lv3.org, Keycloak-backed browser sign-in, and a generated robot credential for check-runner image publication."
+      ],
+      "verification_commands": [
+        "make syntax-check-harbor",
+        "curl -fsS https://registry.lv3.org/api/v2.0/ping",
+        "curl -fsS -u \"admin:$(cat .local/harbor/admin-password.txt)\" https://registry.lv3.org/api/v2.0/projects/check-runner",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p' ops@10.10.10.30 'docker pull registry.lv3.org/check-runner/python:3.12.10'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 350,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-api-gateway": {
       "description": "Converge the unified platform API gateway on docker-runtime-lv3 and publish it at api.lv3.org through the shared NGINX edge.",
       "lifecycle_status": "active",
@@ -2464,6 +2645,56 @@
         "max_steps": 250,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-ops-portal": {
+      "description": "Converge the interactive ops portal on docker-runtime-lv3 so the browser control plane stays aligned with the shared API gateway contracts.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-ops-portal",
+        "command": "make converge-ops-portal"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "platform_context_api_token"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-ops-portal"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/platform-operations-portal.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/ops-portal.yml",
+        "collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2",
+        "scripts/ops_portal/app.py",
+        "docs/runbooks/platform-operations-portal.md",
+        "docs/runbooks/ops-portal-down.md"
+      ],
+      "outputs": [
+        "A repo-managed interactive ops portal on docker-runtime-lv3 that stays aligned with the shared platform API gateway contracts for health, coordination, and runbook operations."
+      ],
+      "verification_commands": [
+        "make syntax-check-ops-portal",
+        "ssh ops@100.118.189.95 'ssh ops@10.10.10.20 \"curl -sf http://127.0.0.1:8092/health\"'",
+        "curl -I https://ops.lv3.org"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
         "max_restarts": 0,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
@@ -3151,7 +3382,9 @@
       "preflight": {
         "required": true,
         "required_secret_ids": [
-          "bootstrap_ssh_private_key"
+          "bootstrap_ssh_private_key",
+          "gitea_release_bundle_cosign_private_key",
+          "gitea_release_bundle_cosign_password"
         ],
         "generated_secret_ids": [
           "gitea_database_password",
@@ -3172,17 +3405,21 @@
         "collections/ansible_collections/lv3/platform/roles/gitea_postgres",
         "collections/ansible_collections/lv3/platform/roles/gitea_runtime",
         "collections/ansible_collections/lv3/platform/roles/gitea_runner",
+        ".gitea/workflows/release-bundle.yml",
+        "scripts/release_bundle.py",
+        "docs/runbooks/signed-release-bundles.md",
         "inventory/host_vars/proxmox_florin.yml",
         "config/service-capability-catalog.json",
         "config/health-probe-catalog.json"
       ],
       "outputs": [
-        "A private Gitea runtime on docker-runtime-lv3 with Keycloak OIDC login, a PostgreSQL backend on postgres-lv3, the bootstrapped ops/proxmox_florin_server repository path, and a dedicated self-hosted Actions runner on docker-build-lv3."
+        "A private Gitea runtime on docker-runtime-lv3 with Keycloak OIDC login, a PostgreSQL backend on postgres-lv3, the bootstrapped ops/proxmox_florin_server repository path, a dedicated self-hosted Actions runner on docker-build-lv3, and the ADR 0233 release-bundle signing plus repo-token secrets seeded for server-resident publication and verification."
       ],
       "verification_commands": [
         "make syntax-check-gitea",
         "curl -sf http://100.64.0.1:3009/api/v1/version",
-        "curl -sf http://100.64.0.1:3009/api/swagger >/dev/null"
+        "curl -sf http://100.64.0.1:3009/api/swagger >/dev/null",
+        "python3 scripts/release_bundle.py validate --public-key-path keys/gitea-release-bundle-cosign.pub"
       ],
       "execution_class": "mutation",
       "budget": {

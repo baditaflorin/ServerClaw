@@ -30,6 +30,12 @@
       - gitea_runner_registration_token_local_file | length > 0
       - gitea_webhook_secret_remote_file | length > 0
       - gitea_webhook_secret_local_file | length > 0
+      - gitea_release_bundle_cosign_private_key_local_file | length > 0
+      - gitea_release_bundle_cosign_password_local_file | length > 0
+      - gitea_release_bundle_cosign_public_key_repo_file | length > 0
+      - gitea_release_bundle_cosign_private_key_secret_name | length > 0
+      - gitea_release_bundle_cosign_password_secret_name | length > 0
+      - gitea_release_bundle_repo_token_secret_name | length > 0
       - gitea_repo_org | length > 0
       - gitea_repo_name | length > 0
     fail_msg: "gitea_runtime requires runtime paths, database credentials, OIDC inputs, and bootstrap artifact paths."
@@ -61,6 +67,48 @@
       {{ gitea_oidc_client_secret_local_file }} is missing on the control machine.
       Re-run the Keycloak converge so the Gitea OIDC client is provisioned before bootstrapping Gitea.
   when: not gitea_oidc_client_secret_local.stat.exists
+
+- name: Ensure the release-bundle Cosign private key exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ gitea_release_bundle_cosign_private_key_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: gitea_release_bundle_private_key_local
+
+- name: Fail if the release-bundle Cosign private key is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ gitea_release_bundle_cosign_private_key_local_file }} is missing on the control machine.
+      Run `python3 scripts/release_bundle.py init-signing` from the repository root before converging Gitea.
+  when: not gitea_release_bundle_private_key_local.stat.exists
+
+- name: Ensure the release-bundle Cosign password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ gitea_release_bundle_cosign_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: gitea_release_bundle_password_local
+
+- name: Fail if the release-bundle Cosign password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ gitea_release_bundle_cosign_password_local_file }} is missing on the control machine.
+      Run `python3 scripts/release_bundle.py init-signing` from the repository root before converging Gitea.
+  when: not gitea_release_bundle_password_local.stat.exists
+
+- name: Ensure the committed release-bundle Cosign public key exists
+  ansible.builtin.stat:
+    path: "{{ gitea_release_bundle_cosign_public_key_repo_file }}"
+  delegate_to: localhost
+  become: false
+  register: gitea_release_bundle_public_key_repo
+
+- name: Fail if the committed release-bundle Cosign public key is missing
+  ansible.builtin.fail:
+    msg: >-
+      {{ gitea_release_bundle_cosign_public_key_repo_file }} is missing from the repository checkout.
+      Commit the matching public key before converging Gitea so release bundles can be verified later.
+  when: not gitea_release_bundle_public_key_repo.stat.exists
 
 - name: Ensure Gitea runtime packages are present
   ansible.builtin.apt:
@@ -138,6 +186,8 @@
     gitea_admin_password: "{{ gitea_admin_password_raw.content | b64decode | trim }}"
     gitea_database_password: "{{ lookup('ansible.builtin.file', gitea_database_password_local_file) | trim }}"
     gitea_oidc_client_secret: "{{ lookup('ansible.builtin.file', gitea_oidc_client_secret_local_file) | trim }}"
+    gitea_release_bundle_cosign_private_key: "{{ lookup('ansible.builtin.file', gitea_release_bundle_cosign_private_key_local_file) }}"
+    gitea_release_bundle_cosign_password: "{{ lookup('ansible.builtin.file', gitea_release_bundle_cosign_password_local_file) | trim }}"
     gitea_webhook_secret: "{{ gitea_webhook_secret_raw.content | b64decode | trim }}"
   no_log: true
 
@@ -306,6 +356,8 @@
     GITEA_ADMIN_PASSWORD: "{{ gitea_admin_password }}"
     GITEA_DATABASE_PASSWORD: "{{ gitea_database_password }}"
     GITEA_KEYCLOAK_CLIENT_SECRET: "{{ gitea_oidc_client_secret }}"
+    GITEA_RELEASE_BUNDLE_COSIGN_PRIVATE_KEY: "{{ gitea_release_bundle_cosign_private_key }}"
+    GITEA_RELEASE_BUNDLE_COSIGN_PASSWORD: "{{ gitea_release_bundle_cosign_password }}"
   register: gitea_bootstrap
   changed_when: "'GITEA_BOOTSTRAP_CHANGED=true' in gitea_bootstrap.stdout"
   no_log: true

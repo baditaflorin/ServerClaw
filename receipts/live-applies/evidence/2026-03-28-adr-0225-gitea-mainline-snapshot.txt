@@ -1,0 +1,36 @@
+== commit ==
+[main 5b121f70] Publish internal Gitea snapshot for aacd8443b064aa2a14f9929f11a3ae45ae530095
+ 81 files changed, 4407 insertions(+), 189 deletions(-)
+ create mode 100644 config/capability-contract-catalog.json
+ create mode 100644 config/provider-boundary-catalog.yaml
+ create mode 100644 docs/release-notes/0.177.42.md
+ create mode 100644 docs/release-notes/0.177.43.md
+ create mode 100644 docs/runbooks/capability-contract-catalog.md
+ create mode 100644 docs/schema/capability-contract-catalog.schema.json
+ create mode 100644 docs/workstreams/adr-0205-capability-contracts-before-product-selection.md
+ create mode 100644 docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md
+ create mode 100644 docs/workstreams/ws-0205-main-final.md
+ create mode 100644 docs/workstreams/ws-0207-main-merge.md
+ create mode 100644 receipts/gate-bypasses/20260328T171832Z-codex-ws-0205-main-final-64ba042-skip-remote-gate.json
+ create mode 100644 receipts/live-applies/2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply.json
+ create mode 100644 receipts/live-applies/2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply.json
+ create mode 100644 receipts/live-applies/2026-03-28-adr-0225-server-resident-reconciliation-via-ansible-pull-live-apply.json
+ create mode 100644 receipts/live-applies/evidence/2026-03-28-adr-0205-overview-snippets.txt
+ create mode 100644 receipts/live-applies/evidence/2026-03-28-adr-0205-public-health.txt
+ create mode 100644 receipts/live-applies/evidence/2026-03-28-adr-0205-public-root-head.txt
+ create mode 100644 receipts/live-applies/evidence/2026-03-28-adr-0225-controller-reapply-runtime-inventory.txt
+ create mode 100644 receipts/live-applies/evidence/2026-03-28-adr-0225-gitea-mainline-snapshot.txt
+ create mode 100644 receipts/live-applies/evidence/2026-03-28-adr-0225-host-receipt-and-journal.txt
+ create mode 100644 receipts/live-applies/evidence/2026-03-28-adr-0225-host-service-run.txt
+ create mode 100644 scripts/capability_contracts.py
+ create mode 100644 scripts/provider_boundary_catalog.py
+ create mode 100644 tests/test_capability_contracts.py
+ create mode 100644 tests/test_hetzner_dns_record_role.py
+ create mode 100644 tests/test_post_merge_gate.py
+ create mode 100644 tests/test_provider_boundary_catalog.py
+
+== push ==
+remote: . Processing 1 references
+remote: Processed 1 references in total
+To http://100.64.0.1:3009/ops/proxmox_florin_server.git
+   e24e0cf3..5b121f70  main -> main

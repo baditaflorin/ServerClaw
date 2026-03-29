@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/correction-loop-catalog.schema.json",
+  "title": "Correction Loop Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "loops"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "docs/schema/correction-loop-catalog.schema.json"
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "required_workflow_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9-]*$"
+      },
+      "uniqueItems": true
+    },
+    "loops": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/correctionLoop"
+      }
+    }
+  },
+  "$defs": {
+    "selectorSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "workflow_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "uniqueItems": true
+        },
+        "workflow_id_prefixes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "repairAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "summary",
+        "requires_approval",
+        "destructive"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "no_op",
+            "reconcile",
+            "rollback",
+            "replace",
+            "escalate"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requires_approval": {
+          "type": "boolean"
+        },
+        "destructive": {
+          "type": "boolean"
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "success_signal"
+      ],
+      "properties": {
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "success_signal": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "escalation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "boundary",
+        "target",
+        "runbook"
+      ],
+      "properties": {
+        "boundary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runbook": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "correctionLoop": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "description",
+        "applies_to",
+        "invariant",
+        "observation_sources",
+        "diagnosis_taxonomy",
+        "repair_actions",
+        "verification",
+        "escalation"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_]*$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "applies_to": {
+          "$ref": "#/$defs/selectorSet"
+        },
+        "invariant": {
+          "type": "string",
+          "minLength": 1
+        },
+        "observation_sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "diagnosis_taxonomy": {
+          "type": "array",
+          "minItems": 5,
+          "items": {
+            "type": "string",
+            "enum": [
+              "transient_failure",
+              "contract_drift",
+              "dependency_outage",
+              "stale_input",
+              "irreversible_data_loss_risk"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "repair_actions": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/repairAction"
+          }
+        },
+        "verification": {
+          "$ref": "#/$defs/verification"
+        },
+        "escalation": {
+          "$ref": "#/$defs/escalation"
+        },
+        "retry_budget_cycles": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        }
+      }
+    }
+  }
+}

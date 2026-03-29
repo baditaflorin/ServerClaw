@@ -20,9 +20,16 @@
     "timeout_seconds": 180,
     "cache_mounts": ["pip"]
   },
+  "policy-validation": {
+    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "command": "python scripts/policy_checks.py --validate",
+    "working_dir": "/workspace",
+    "timeout_seconds": 240,
+    "cache_mounts": ["policy_tools"]
+  },
   "type-check": {
     "image": "registry.lv3.org/check-runner/python:3.12.10",
-    "command": "mypy scripts/parallel_check.py config/windmill/scripts/check-runner-rebuild.py tests/test_parallel_check.py",
+    "command": "mypy scripts/parallel_check.py scripts/policy_checks.py scripts/policy_toolchain.py config/windmill/scripts/check-runner-rebuild.py tests/test_parallel_check.py tests/test_policy_checks.py tests/test_command_catalog.py",
     "working_dir": "/workspace",
     "timeout_seconds": 120,
     "cache_mounts": ["pip"]

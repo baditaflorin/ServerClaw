@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0204](../adr/0204-self-correcting-automation-loops.md)
 - Title: Ten governance ADRs for self-correction, clean boundaries, DRY policy reuse, and vendor replaceability
-- Status: implemented
+- Status: merged
 - Implemented In Repo Version: 0.177.23
 - Implemented In Platform Version: N/A
 - Implemented On: 2026-03-28

@@ -616,6 +616,9 @@
           "break_glass": {
             "type": "boolean"
           },
+          "parameters": {
+            "type": "object"
+          },
           "dry_run": {
             "type": "boolean"
           }
@@ -653,10 +656,28 @@
           "entrypoint": {
             "type": "string"
           },
-          "returncode": {
-            "type": "integer"
+          "runtime_host": {
+            "type": "string"
+          },
+          "unit_name": {
+            "type": "string"
+          },
+          "stdout_log": {
+            "type": "string"
+          },
+            "stderr_log": {
+              "type": "string"
+            },
+            "receipt_path": {
+              "type": "string"
+            },
+            "parameters": {
+              "type": "object"
+            },
+            "returncode": {
+              "type": "integer"
+            }
           }
-        }
       },
       "implementation": {
         "kind": "handler",

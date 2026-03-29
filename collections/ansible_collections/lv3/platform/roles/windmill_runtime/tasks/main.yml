@@ -133,13 +133,87 @@
   become: false
   register: windmill_worker_checkout_archive_local
 
+- name: Create a local manifest path for the Windmill worker checkout contents
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .txt
+  delegate_to: localhost
+  become: false
+  register: windmill_worker_checkout_manifest_local
+
+- name: Create a guest staging archive path for the Windmill worker checkout
+  ansible.builtin.tempfile:
+    state: file
+    path: "{{ windmill_site_dir }}"
+    suffix: .tar.gz
+  register: windmill_worker_checkout_archive_remote
+
+- name: Create a guest manifest path for the Windmill worker checkout contents
+  ansible.builtin.tempfile:
+    state: file
+    path: "{{ windmill_site_dir }}"
+    suffix: .txt
+  register: windmill_worker_checkout_manifest_remote
+
+- name: Render the local manifest for the Windmill worker checkout contents
+  ansible.builtin.shell: |
+    set -euo pipefail
+    python3 - <<'PY'
+    import json
+    import os
+    from pathlib import Path
+
+    repo_root = Path(os.environ["LV3_WINDMILL_REPO_ROOT"])
+    manifest_path = Path(os.environ["LV3_WINDMILL_MANIFEST_PATH"])
+    sync_paths = json.loads(os.environ["LV3_WINDMILL_SYNC_PATHS_JSON"])
+
+    manifest_entries = []
+    for relative_root in sync_paths:
+        candidate = repo_root / relative_root
+        if not candidate.exists():
+            continue
+        if candidate.is_file():
+            if candidate.name == ".DS_Store" or candidate.name.startswith("._"):
+                continue
+            manifest_entries.append(candidate.relative_to(repo_root).as_posix())
+            continue
+        for child in sorted(path for path in candidate.rglob("*") if path.is_file()):
+            if child.name == ".DS_Store" or child.name.startswith("._"):
+                continue
+            manifest_entries.append(child.relative_to(repo_root).as_posix())
+
+    manifest_path.write_text(
+        "".join(f"{entry}\n" for entry in manifest_entries),
+        encoding="utf-8",
+    )
+    PY
+  args:
+    executable: /bin/bash
+  environment:
+    LV3_WINDMILL_REPO_ROOT: "{{ windmill_worker_checkout_repo_root_local_dir }}"
+    LV3_WINDMILL_MANIFEST_PATH: "{{ windmill_worker_checkout_manifest_local.path }}"
+    LV3_WINDMILL_SYNC_PATHS_JSON: "{{ windmill_worker_checkout_sync_paths | to_json }}"
+  delegate_to: localhost
+  become: false
+  changed_when: false
+
 - name: Build the local staging archive for the Windmill worker checkout
   vars:
     mutation_audit_action: sync.windmill_worker_checkout
     mutation_audit_target: "{{ windmill_worker_repo_checkout_host_path }}"
   ansible.builtin.shell: |
     set -euo pipefail
-    tar -C "{{ windmill_worker_checkout_repo_root_local_dir }}" -czf "{{ windmill_worker_checkout_archive_local.path }}" {{ windmill_worker_checkout_sync_paths | map('quote') | join(' ') }}
+    export COPYFILE_DISABLE=1
+    export COPY_EXTENDED_ATTRIBUTES_DISABLE=1
+    tar \
+      --dereference \
+      --exclude='._*' \
+      --exclude='*/._*' \
+      --exclude='.DS_Store' \
+      --exclude='*/.DS_Store' \
+      -C "{{ windmill_worker_checkout_repo_root_local_dir }}" \
+      -czf "{{ windmill_worker_checkout_archive_local.path }}" \
+      {{ windmill_worker_checkout_sync_paths | map('quote') | join(' ') }}
   args:
     executable: /bin/bash
   delegate_to: localhost
@@ -151,9 +225,15 @@
 - name: Copy the staged Windmill worker checkout archive to the guest
   ansible.builtin.copy:
     src: "{{ windmill_worker_checkout_archive_local.path }}"
-    dest: "{{ windmill_site_dir }}/worker-checkout.tar.gz"
+    dest: "{{ windmill_worker_checkout_archive_remote.path }}"
     mode: "0600"
-  register: windmill_worker_checkout_archive_remote
+  register: windmill_worker_checkout_archive_copy
+
+- name: Copy the staged Windmill worker checkout manifest to the guest
+  ansible.builtin.copy:
+    src: "{{ windmill_worker_checkout_manifest_local.path }}"
+    dest: "{{ windmill_worker_checkout_manifest_remote.path }}"
+    mode: "0600"
 
 - name: Check whether the Windmill worker checkout checksum marker exists
   ansible.builtin.stat:
@@ -166,6 +246,52 @@
   register: windmill_worker_checkout_checksum_marker_raw
   when: windmill_worker_checkout_checksum_marker.stat.exists
 
+- name: Collect controller-side integrity checksums for Windmill worker checkout sentinels
+  ansible.builtin.stat:
+    path: "{{ windmill_worker_checkout_repo_root_local_dir }}/{{ item }}"
+    checksum_algorithm: sha256
+  delegate_to: localhost
+  become: false
+  loop: "{{ windmill_worker_checkout_integrity_files }}"
+  register: windmill_worker_checkout_integrity_local
+
+- name: Assert controller-side Windmill worker checkout sentinels exist
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists | bool
+    fail_msg: >-
+      Windmill worker checkout integrity sentinel {{ item.item }} is missing from the controller workspace.
+  loop: "{{ windmill_worker_checkout_integrity_local.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+
+- name: Collect guest-side integrity checksums for Windmill worker checkout sentinels
+  ansible.builtin.stat:
+    path: "{{ windmill_worker_repo_checkout_host_path }}/{{ item.item }}"
+    checksum_algorithm: sha256
+  loop: "{{ windmill_worker_checkout_integrity_local.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  register: windmill_worker_checkout_integrity_remote
+
+- name: Initialize the Windmill worker checkout integrity drift tracker
+  ansible.builtin.set_fact:
+    windmill_worker_checkout_integrity_mismatch: false
+
+- name: Flag the Windmill worker checkout for refresh when integrity sentinels drift
+  ansible.builtin.set_fact:
+    windmill_worker_checkout_integrity_mismatch: true
+  loop: "{{ range(0, windmill_worker_checkout_integrity_local.results | length) | list }}"
+  loop_control:
+    label: "{{ windmill_worker_checkout_integrity_local.results[item].item }}"
+  when: >-
+    (not (windmill_worker_checkout_integrity_remote.results[item].stat.exists | default(false)))
+    or (
+      (windmill_worker_checkout_integrity_remote.results[item].stat.checksum | default(''))
+      !=
+      (windmill_worker_checkout_integrity_local.results[item].stat.checksum | default(''))
+    )
+
 - name: Decide whether the Windmill worker checkout needs to be refreshed
   ansible.builtin.set_fact:
     windmill_worker_checkout_needs_refresh: >-
@@ -173,14 +299,15 @@
         (not windmill_worker_checkout_checksum_marker.stat.exists)
         or (
           (windmill_worker_checkout_checksum_marker_raw.content | default('') | b64decode | trim)
-          != (windmill_worker_checkout_archive_remote.checksum | default(''))
+          != (windmill_worker_checkout_archive_copy.checksum | default(''))
         )
+        or (windmill_worker_checkout_integrity_mismatch | default(false) | bool)
       }}
 
 - name: Expand the staged Windmill worker checkout on the guest when the archive changed
   ansible.builtin.shell: |
     set -euo pipefail
-    tar -xzf "{{ windmill_site_dir }}/worker-checkout.tar.gz" \
+    tar -xzf "{{ windmill_worker_checkout_archive_remote.path }}" \
       --overwrite \
       -C "{{ windmill_worker_repo_checkout_host_path }}"
   args:
@@ -191,11 +318,72 @@
 - name: Record the deployed Windmill worker checkout archive checksum
   ansible.builtin.copy:
     dest: "{{ windmill_worker_checkout_checksum_file }}"
-    content: "{{ windmill_worker_checkout_archive_remote.checksum | default('') }}\n"
+    content: "{{ windmill_worker_checkout_archive_copy.checksum | default('') }}\n"
     owner: root
     group: root
     mode: "0600"
   when: windmill_worker_checkout_needs_refresh | bool
+
+- name: Prune stale immutable files from the Windmill worker checkout
+  ansible.builtin.shell: |
+    set -euo pipefail
+    python3 - <<'PY'
+    import json
+    import os
+    from pathlib import Path
+
+    repo_root = Path(os.environ["LV3_WINDMILL_REPO_ROOT"])
+    manifest_path = Path(os.environ["LV3_WINDMILL_MANIFEST_PATH"])
+    sync_paths = json.loads(os.environ["LV3_WINDMILL_SYNC_PATHS_JSON"])
+    preserve_prefixes = tuple(
+        entry.rstrip("/")
+        for entry in json.loads(os.environ["LV3_WINDMILL_PRESERVE_PATHS_JSON"])
+        if entry and entry != "."
+    )
+    manifest_entries = {
+        line.strip()
+        for line in manifest_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    }
+
+    removed = []
+    for relative_root in sync_paths:
+        candidate = repo_root / relative_root
+        if not candidate.exists():
+            continue
+        files = [candidate] if candidate.is_file() else sorted(path for path in candidate.rglob("*") if path.is_file())
+        for child in files:
+            relative_path = child.relative_to(repo_root).as_posix()
+            if child.name == ".DS_Store" or child.name.startswith("._"):
+                continue
+            if relative_path in manifest_entries:
+                continue
+            if any(
+                relative_path == prefix or relative_path.startswith(f"{prefix}/")
+                for prefix in preserve_prefixes
+            ):
+                continue
+            child.unlink()
+            removed.append(relative_path)
+
+    for entry in removed:
+        print(entry)
+    PY
+  args:
+    executable: /bin/bash
+  environment:
+    LV3_WINDMILL_REPO_ROOT: "{{ windmill_worker_repo_checkout_host_path }}"
+    LV3_WINDMILL_MANIFEST_PATH: "{{ windmill_worker_checkout_manifest_remote.path }}"
+    LV3_WINDMILL_SYNC_PATHS_JSON: "{{ windmill_worker_checkout_sync_paths | to_json }}"
+    LV3_WINDMILL_PRESERVE_PATHS_JSON: "{{ windmill_worker_checkout_prune_preserve_paths | to_json }}"
+  register: windmill_worker_checkout_stale_files
+  changed_when: windmill_worker_checkout_stale_files.stdout | trim | length > 0
+
+- name: Removed stale immutable files from the Windmill worker checkout
+  ansible.builtin.debug:
+    msg: "Removed stale immutable files from the Windmill worker checkout"
+  when: windmill_worker_checkout_stale_files.stdout | trim | length > 0
+  changed_when: false
 
 - name: Ensure repo-backed Windmill runtime paths stay writable after checkout sync
   ansible.builtin.include_role:
@@ -218,6 +406,75 @@
     mode: "{{ item.mode }}"
   loop: "{{ windmill_worker_repo_mutable_files }}"
 
+- name: Ensure the controller-style compatibility parent exists for the worker checkout
+  ansible.builtin.file:
+    path: "{{ windmill_worker_repo_checkout_compat_root | dirname }}"
+    state: directory
+    mode: "0755"
+
+- name: Check whether the controller-style compatibility path already exists
+  ansible.builtin.stat:
+    path: "{{ windmill_worker_repo_checkout_compat_root }}"
+  register: windmill_worker_repo_checkout_compat_path
+
+- name: Validate any legacy controller-style compatibility directory is already mirrored into the worker checkout
+  ansible.builtin.shell: |
+    set -euo pipefail
+    compat_root="{{ windmill_worker_repo_checkout_compat_root }}"
+    runtime_root="{{ windmill_worker_repo_checkout_host_path }}"
+
+    while IFS= read -r entry; do
+      rel_path="${entry#"$compat_root/"}"
+      runtime_entry="$runtime_root/$rel_path"
+      if [ ! -e "$runtime_entry" ]; then
+        echo "missing:$rel_path"
+        exit 1
+      fi
+
+      if [ -f "$entry" ] && [ -f "$runtime_entry" ]; then
+        cmp -s "$entry" "$runtime_entry" || {
+          echo "mismatch:$rel_path"
+          exit 1
+        }
+        continue
+      fi
+
+      if [ -L "$entry" ] && [ -L "$runtime_entry" ]; then
+        [ "$(readlink "$entry")" = "$(readlink "$runtime_entry")" ] || {
+          echo "mismatch-link:$rel_path"
+          exit 1
+        }
+        continue
+      fi
+
+      echo "unsupported:$rel_path"
+      exit 1
+    done < <(find "$compat_root" -mindepth 1 \( -type f -o -type l \) | sort)
+
+    echo safe
+  args:
+    executable: /bin/bash
+  register: windmill_worker_repo_checkout_compat_validation
+  changed_when: false
+  when:
+    - windmill_worker_repo_checkout_compat_path.stat.exists | default(false)
+    - windmill_worker_repo_checkout_compat_path.stat.isdir | default(false)
+
+- name: Remove a legacy controller-style compatibility directory once it is mirrored into the worker checkout
+  ansible.builtin.file:
+    path: "{{ windmill_worker_repo_checkout_compat_root }}"
+    state: absent
+  when:
+    - windmill_worker_repo_checkout_compat_path.stat.exists | default(false)
+    - windmill_worker_repo_checkout_compat_path.stat.isdir | default(false)
+    - windmill_worker_repo_checkout_compat_validation.stdout_lines | default([]) | last == "safe"
+
+- name: Ensure the worker checkout is reachable through the controller-style compatibility path
+  ansible.builtin.file:
+    src: "{{ windmill_worker_repo_checkout_host_path }}"
+    dest: "{{ windmill_worker_repo_checkout_compat_root }}"
+    state: link
+
 - name: Ensure the Windmill worker checkout secret directories exist
   ansible.builtin.file:
     path: "{{ item.path }}"
@@ -236,8 +493,33 @@
 
 - name: Remove the staged Windmill worker checkout archive from the guest
   ansible.builtin.file:
-    path: "{{ windmill_site_dir }}/worker-checkout.tar.gz"
+    path: "{{ windmill_worker_checkout_archive_remote.path }}"
     state: absent
+
+- name: Remove the remote manifest for the Windmill worker checkout contents
+  ansible.builtin.file:
+    path: "{{ windmill_worker_checkout_manifest_remote.path }}"
+    state: absent
+
+- name: Find stale macOS metadata files in the Windmill worker checkout
+  ansible.builtin.shell: |
+    set -euo pipefail
+    find \
+      "{{ windmill_worker_repo_checkout_host_path }}" \
+      -type f \
+      \( -name '._*' -o -name '.DS_Store' \) \
+      -print \
+      -delete
+  args:
+    executable: /bin/bash
+  register: windmill_worker_checkout_macos_metadata_files
+  changed_when: windmill_worker_checkout_macos_metadata_files.stdout | trim | length > 0
+
+- name: Remove stale macOS metadata files from the Windmill worker checkout
+  ansible.builtin.debug:
+    msg: "Removed stale macOS metadata files from the Windmill worker checkout"
+  when: windmill_worker_checkout_macos_metadata_files.stdout | trim | length > 0
+  changed_when: false
 
 - name: Find stale Python bytecode files in the Windmill worker checkout
   ansible.builtin.shell: |
@@ -301,6 +583,13 @@
 - name: Remove the local staging archive for the Windmill worker checkout
   ansible.builtin.file:
     path: "{{ windmill_worker_checkout_archive_local.path }}"
+    state: absent
+  delegate_to: localhost
+  become: false
+
+- name: Remove the local manifest for the Windmill worker checkout contents
+  ansible.builtin.file:
+    path: "{{ windmill_worker_checkout_manifest_local.path }}"
     state: absent
   delegate_to: localhost
   become: false
@@ -1369,19 +1658,53 @@
   delegate_to: localhost
   become: false
 
-- name: Ensure the Windmill seed app sync directory exists
-  ansible.builtin.file:
-    path: "{{ windmill_seed_app_sync_dir }}"
+- name: Create a temporary Windmill seed app sync directory
+  ansible.builtin.tempfile:
     state: directory
-    mode: "0755"
+    path: "{{ windmill_site_dir }}"
+    prefix: seed-apps-
   when: (windmill_seed_raw_apps | default([])) | length > 0
+  register: windmill_seed_app_sync_dir
 
 - name: Copy the repo-managed Windmill app sync root
   ansible.builtin.copy:
     src: "{{ windmill_seed_app_repo_root_local_dir }}/"
-    dest: "{{ windmill_seed_app_sync_dir }}/"
+    dest: "{{ windmill_seed_app_sync_dir.path }}/"
     mode: preserve
   when: (windmill_seed_raw_apps | default([])) | length > 0
+
+- name: Install repo-managed Windmill raw app frontend dependencies
+  vars:
+    mutation_audit_action: sync.windmill_raw_app_dependencies
+    mutation_audit_target: "{{ item.path }}"
+    mutation_audit_emit_on_success: true
+  ansible.builtin.command:
+    argv:
+      - docker
+      - run
+      - --rm
+      - --network
+      - host
+      - -v
+      - "{{ windmill_seed_app_sync_dir }}:/workspace"
+      - "{{ windmill_image }}"
+      - sh
+      - -lc
+      - >-
+        cd /workspace/{{ item.relative_dir }}
+        && if [ -f package.json ] && [ ! -f package-lock.json ]; then
+          echo "missing package-lock.json for {{ item.path }}" >&2;
+          exit 1;
+        elif [ -f package-lock.json ]; then
+          npm ci --no-audit --no-fund;
+        fi
+  loop: "{{ windmill_seed_raw_apps | default([]) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  changed_when: false
+  when: (windmill_seed_raw_apps | default([])) | length > 0
+  tags:
+    - mutation
 
 - name: Sync repo-managed Windmill raw apps
   vars:
@@ -1402,7 +1725,7 @@
       - -e
       - BASE_INTERNAL_URL
       - -v
-      - "{{ windmill_seed_app_sync_dir }}:/workspace"
+      - "{{ windmill_seed_app_sync_dir.path }}:/workspace"
       - "{{ windmill_image }}"
       - sh
       - -lc
@@ -1433,6 +1756,12 @@
   when: (windmill_seed_raw_apps | default([])) | length > 0
   tags:
     - mutation
+
+- name: Remove the temporary Windmill seed app sync directory
+  ansible.builtin.file:
+    path: "{{ windmill_seed_app_sync_dir.path }}"
+    state: absent
+  when: (windmill_seed_raw_apps | default([])) | length > 0
 
 - name: Create a local manifest path for repo-managed Windmill schedules
   ansible.builtin.tempfile:
@@ -1498,8 +1827,7 @@
   loop: "{{ windmill_seed_schedules }}"
   loop_control:
     label: "{{ item.path }}"
-  register: windmill_seed_schedule_enabled_sync
-  changed_when: "'UPDATE 1' in (windmill_seed_schedule_enabled_sync.stdout | default(''))"
+  changed_when: false
   no_log: true
 
 - name: Run the Windmill seeded healthcheck script
@@ -1507,7 +1835,7 @@
     python3 {{ (playbook_dir | dirname ~ '/scripts/windmill_run_wait_result.py') | quote }}
     --base-url {{ windmill_base_url | quote }}
     --workspace {{ windmill_workspace_id | quote }}
-    --path {{ windmill_seed_scripts[0].path | quote }}
+    --path {{ windmill_healthcheck_script_path | quote }}
     --payload-json '{"probe":"live-verify"}'
     --timeout {{ windmill_seed_job_timeout_seconds }}
   args:

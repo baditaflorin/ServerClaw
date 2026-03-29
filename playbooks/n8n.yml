@@ -1,4 +1,31 @@
 ---
+# Playbook: n8n.yml
+# Purpose: Converge n8n DNS publication, PostgreSQL access, and runtime state for the repo-managed automation surface.
+# Use case: Run during n8n deployment, upgrade, or recovery when workflow automation must match repo truth.
+#
+# Inputs (required):
+#   - proxmox_guest_ssh_connection_mode (string, required): SSH path used by the runtime and postgres guest plays.
+#
+# Inputs (optional):
+#   - n8n_runtime_skip_bootstrap (boolean, optional, default=false): Skip bootstrap-only tasks when verifying an existing runtime.
+#
+# Outputs:
+#   - The n8n DNS records, PostgreSQL access, runtime services, and published edge endpoint are reconciled to repo state.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - ADR 0151: n8n provides the managed automation surface.
+#   - Requires: postgres-lv3, docker-runtime-lv3, and the shared edge components to already exist.
+#   - Role: lv3.platform.n8n_postgres - provisions the n8n database and role.
+#   - Role: lv3.platform.n8n_runtime - converges the n8n runtime and publication flow.
+#
+# Related ADRs: 0151, 0197
+# Related Runbooks: docs/runbooks/configure-n8n.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
+
 - name: Ensure Hetzner DNS publication for n8n
   hosts: localhost
   connection: local
@@ -74,18 +101,8 @@
           - "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
 
   roles:
+    - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.postgres_vm
-      vars:
-        postgres_vm_client_allowed_sources_extra:
-          - >-
-            {{
-              (
-                hostvars['proxmox_florin'].proxmox_guests
-                | selectattr('name', 'equalto', playbook_execution_host_patterns.docker_runtime[playbook_execution_env])
-                | map(attribute='ipv4')
-                | first
-              )
-            }}/32
     - role: lv3.platform.n8n_postgres
 
 - name: Converge n8n on the Docker runtime VM

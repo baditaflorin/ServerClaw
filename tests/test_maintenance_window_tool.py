@@ -162,3 +162,22 @@ def test_list_active_windows_uses_direct_worker_nats_env(monkeypatch):
         "nats_url": "nats://worker:4222",
         "credentials": {"user": "jetstream-admin", "password": "secret"},
     }
+
+
+def test_build_guest_ssh_command_makes_proxy_non_interactive() -> None:
+    command = tool.build_guest_ssh_command(
+        {
+            "bootstrap_key": Path("/tmp/bootstrap.id_ed25519"),
+            "host_user": "ops",
+            "host_addr": "100.64.0.1",
+            "guests": {"docker-runtime-lv3": "10.10.10.20"},
+        },
+        "docker-runtime-lv3",
+        "true",
+    )
+
+    joined = " ".join(command)
+
+    assert "ProxyCommand=" in joined
+    assert "-o StrictHostKeyChecking=no" in joined
+    assert "-o UserKnownHostsFile=/dev/null" in joined

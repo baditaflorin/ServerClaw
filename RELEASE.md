@@ -1,12 +1,12 @@
-# Release 0.177.31
+# Release 0.177.65
 
-- Date: 2026-03-28
+- Date: 2026-03-29
 
 ## Summary
-- accepted ADRs 0214 through 0223 to define the target HA and replication architecture across production and staging, including cells, node roles, service criticality rings, single-writer relational policy, non-relational data-class replication rules, bootstrap sequencing, placement boundaries, failover authority, and reusable DRY automation profiles
+- implements ADR 0232 by adding the private Nomad scheduler, controller-local TLS and ACL bootstrap, Proxmox proxy and firewall wiring, and repo-managed smoke jobs for durable batch and long-running internal workloads
 
 ## Platform Impact
-- no platform version bump; this is a repo-only architecture release that records the target production and staging HA model without changing live infrastructure from `main`.
+- release 0.177.65 records the verified ADR 0232 Nomad replay from the latest origin/main while the live platform baseline remains 0.130.44
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

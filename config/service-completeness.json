@@ -120,6 +120,17 @@
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
+    "harbor": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": false,
+      "dashboard_file": "config/grafana/dashboards/harbor.json",
+      "alert_rule_file": "config/alertmanager/rules/harbor.yml",
+      "keycloak_client_generated": true,
+      "suppressed_checks": {}
+    },
     "headscale": {
       "service_type": "vm-service",
       "requires_subdomain": true,
@@ -202,6 +213,14 @@
       "requires_subdomain": true,
       "requires_oidc": false,
       "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
+    "nomad": {
+      "service_type": "vm-service",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": true,
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },

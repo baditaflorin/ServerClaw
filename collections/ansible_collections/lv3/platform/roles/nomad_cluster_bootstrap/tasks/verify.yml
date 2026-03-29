@@ -1,0 +1,167 @@
+---
+- name: Wait for the expected Nomad nodes to join the cluster
+  ansible.builtin.command:
+    argv:
+      - /usr/local/bin/lv3-nomad
+      - node
+      - status
+      - -json
+  register: nomad_cluster_bootstrap_node_status
+  retries: 24
+  delay: 5
+  until: >-
+    (
+      nomad_cluster_bootstrap_expected_nodes
+      | difference(
+          (
+            nomad_cluster_bootstrap_node_status.stdout
+            | from_json
+            | map(attribute='Name')
+            | list
+          )
+        )
+      | length
+    ) == 0
+  changed_when: false
+
+- name: Assert the expected Nomad nodes are ready
+  ansible.builtin.assert:
+    that:
+      - >-
+        (
+          nomad_cluster_bootstrap_node_status.stdout
+          | from_json
+          | selectattr('Name', 'equalto', item)
+          | map(attribute='Status')
+          | list
+          | first
+        ) == 'ready'
+    fail_msg: "Nomad node {{ item }} did not report ready status."
+  loop: "{{ nomad_cluster_bootstrap_expected_nodes }}"
+
+- name: Wait for the smoke service allocation on the build node
+  ansible.builtin.command:
+    argv:
+      - /usr/local/bin/lv3-nomad
+      - job
+      - allocs
+      - -json
+      - "{{ nomad_cluster_bootstrap_smoke_service_job_name }}"
+  register: nomad_cluster_bootstrap_smoke_service_allocs
+  retries: 24
+  delay: 5
+  until: >-
+    (
+      nomad_cluster_bootstrap_smoke_service_allocs.stdout
+      | from_json
+      | selectattr('ClientStatus', 'equalto', 'running')
+      | selectattr('NodeName', 'equalto', nomad_cluster_bootstrap_build_host)
+      | list
+      | length
+    ) >= 1
+  changed_when: false
+
+- name: Verify the smoke service content from the build host
+  ansible.builtin.uri:
+    url: "http://{{ nomad_cluster_bootstrap_build_ip }}:{{ nomad_cluster_bootstrap_smoke_service_port }}/"
+    method: GET
+    status_code:
+      - 200
+    return_content: true
+    timeout: 30
+  delegate_to: "{{ nomad_cluster_bootstrap_build_host }}"
+  become: false
+  register: nomad_cluster_bootstrap_smoke_service_http
+  changed_when: false
+
+- name: Assert the smoke service returns the expected page content
+  ansible.builtin.assert:
+    that:
+      - nomad_cluster_bootstrap_smoke_service_expected_text in nomad_cluster_bootstrap_smoke_service_http.content
+    fail_msg: "The repo-managed Nomad smoke service did not return the expected content."
+
+- name: Ensure the smoke batch verification directory exists on the runtime host
+  ansible.builtin.file:
+    path: "{{ nomad_cluster_bootstrap_smoke_batch_output_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  delegate_to: "{{ nomad_cluster_bootstrap_runtime_host }}"
+  become: true
+
+- name: Remove the previous smoke batch verification file
+  ansible.builtin.file:
+    path: "{{ nomad_cluster_bootstrap_smoke_batch_output_file }}"
+    state: absent
+  delegate_to: "{{ nomad_cluster_bootstrap_runtime_host }}"
+  become: true
+
+- name: Dispatch the smoke batch job
+  ansible.builtin.shell: |
+    set -euo pipefail
+    /usr/local/bin/lv3-nomad job dispatch \
+      -meta "message={{ nomad_cluster_bootstrap_smoke_batch_message }}" \
+      "{{ nomad_cluster_bootstrap_smoke_batch_job_name }}" \
+      | awk -F'= ' '/Dispatched Job ID/ {print $2}'
+  args:
+    executable: /bin/bash
+  register: nomad_cluster_bootstrap_batch_dispatch
+  changed_when: true
+
+- name: Assert the smoke batch dispatch returned a job id
+  ansible.builtin.assert:
+    that:
+      - nomad_cluster_bootstrap_batch_dispatch.stdout | trim | length > 0
+    fail_msg: "Nomad batch dispatch did not return a dispatched job id."
+
+- name: Wait for the dispatched smoke batch allocation to complete on the runtime node
+  ansible.builtin.command:
+    argv:
+      - /usr/local/bin/lv3-nomad
+      - job
+      - allocs
+      - -json
+      - "{{ nomad_cluster_bootstrap_batch_dispatch.stdout | trim }}"
+  register: nomad_cluster_bootstrap_batch_allocs
+  retries: 24
+  delay: 5
+  until: >-
+    (
+      nomad_cluster_bootstrap_batch_allocs.stdout
+      | from_json
+      | selectattr('ClientStatus', 'equalto', 'complete')
+      | selectattr('NodeName', 'equalto', nomad_cluster_bootstrap_runtime_host)
+      | list
+      | length
+    ) >= 1
+  changed_when: false
+
+- name: Record the completed smoke batch allocation id
+  ansible.builtin.set_fact:
+    nomad_cluster_bootstrap_batch_alloc_id: >-
+      {{
+        (
+          nomad_cluster_bootstrap_batch_allocs.stdout
+          | from_json
+          | selectattr('ClientStatus', 'equalto', 'complete')
+          | selectattr('NodeName', 'equalto', nomad_cluster_bootstrap_runtime_host)
+          | map(attribute='ID')
+          | list
+          | first
+        )
+      }}
+
+- name: Read the smoke batch verification file from the runtime host
+  ansible.builtin.slurp:
+    src: "{{ nomad_cluster_bootstrap_smoke_batch_output_file }}"
+  delegate_to: "{{ nomad_cluster_bootstrap_runtime_host }}"
+  become: true
+  register: nomad_cluster_bootstrap_batch_output_file_data
+  changed_when: false
+
+- name: Assert the smoke batch verification file contains the expected marker
+  ansible.builtin.assert:
+    that:
+      - nomad_cluster_bootstrap_smoke_batch_message in (nomad_cluster_bootstrap_batch_output_file_data.content | b64decode)
+    fail_msg: "The dispatched Nomad smoke batch job did not write the expected verification marker to the runtime host."

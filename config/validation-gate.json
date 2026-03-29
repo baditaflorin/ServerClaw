@@ -3,7 +3,7 @@
     "description": "Run the repo-managed ansible-lint policy against playbooks and the packaged collection.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/ansible:2.17.10",
-    "command": "export ANSIBLE_CONFIG=/workspace/ansible.cfg; export ANSIBLE_COLLECTIONS_PATH=/workspace/collections${LV3_ANSIBLE_COLLECTIONS_DIR:+:$LV3_ANSIBLE_COLLECTIONS_DIR}; ANSIBLE_LINT_NODEPS=1 ansible-lint playbooks collections/ansible_collections/lv3/platform",
+    "command": "mkdir -p .ansible/validation/lint-collections && LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/lint-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/lint-requirements.sha ./scripts/validate_repo.sh ansible-lint",
     "working_dir": "/workspace",
     "timeout_seconds": 300,
     "cache_mounts": ["ansible_collections"]
@@ -12,7 +12,7 @@
     "description": "Syntax check every tracked playbook outside the shared playbook task includes.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/ansible:2.17.10",
-    "command": "export ANSIBLE_CONFIG=/workspace/ansible.cfg; export ANSIBLE_COLLECTIONS_PATH=/workspace/collections${LV3_ANSIBLE_COLLECTIONS_DIR:+:$LV3_ANSIBLE_COLLECTIONS_DIR}; for playbook in $(git -C /workspace ls-files 'playbooks/*.yml' 'playbooks/groups/*.yml' 'playbooks/services/*.yml' | awk -F/ '$1 == \"playbooks\" && $2 != \"tasks\" { print }'); do ansible-playbook -i inventory/hosts.yml \"$playbook\" --syntax-check >/dev/null; done",
+    "command": "mkdir -p .ansible/validation/syntax-collections && LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/syntax-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/syntax-requirements.sha ./scripts/validate_repo.sh ansible-syntax",
     "working_dir": "/workspace",
     "timeout_seconds": 300,
     "cache_mounts": ["ansible_collections"]
@@ -22,6 +22,14 @@
     "severity": "error",
     "image": "registry.lv3.org/check-runner/python:3.12.10",
     "command": "python scripts/validate_dependency_graph.py >/dev/null && python scripts/generate_dependency_diagram.py --check >/dev/null && python scripts/generate_diagrams.py --check >/dev/null",
+    "working_dir": "/workspace",
+    "timeout_seconds": 120
+  },
+  "dependency-direction": {
+    "description": "Reject reusable platform modules that import outward into scripts/ composition roots or dynamically load script-only helpers.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "command": "python scripts/validate_dependency_direction.py >/dev/null",
     "working_dir": "/workspace",
     "timeout_seconds": 120
   },
@@ -35,12 +43,23 @@
     "cache_mounts": ["packer_plugins"]
   },
   "schema-validation": {
-    "description": "Validate canonical repository data models, the committed platform manifest artifact, operator roster schema, cross references, and receipt schemas.",
+    "description": "Validate canonical repository data models, provider-boundary anti-corruption guards, capability-contract catalogs, the committed platform manifest artifact, operator roster schema, cross references, and receipt schemas.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/python:3.12.10",
-    "command": "python scripts/validate_repository_data_models.py --validate >/dev/null && python scripts/platform_manifest.py --check >/dev/null && python scripts/data_catalog.py --validate >/dev/null && python scripts/operator_manager.py validate >/dev/null && python scripts/service_catalog.py --validate >/dev/null && python scripts/environment_topology.py --validate >/dev/null && python scripts/subdomain_catalog.py --validate >/dev/null && python scripts/subdomain_exposure_audit.py --validate >/dev/null && ./scripts/agent_tool_registry.py --export-mcp >/dev/null && python scripts/mutation_audit.py --validate-schema >/dev/null",
+    "command": "python scripts/provider_boundary_catalog.py --validate >/dev/null && python scripts/validate_repository_data_models.py --validate >/dev/null && python scripts/capability_contracts.py --validate >/dev/null && python scripts/platform_manifest.py --check >/dev/null && python scripts/data_catalog.py --validate >/dev/null && python scripts/operator_manager.py validate >/dev/null && python scripts/service_catalog.py --validate >/dev/null && python scripts/environment_topology.py --validate >/dev/null && python scripts/subdomain_catalog.py --validate >/dev/null && python scripts/subdomain_exposure_audit.py --validate >/dev/null && ./scripts/agent_tool_registry.py --export-mcp >/dev/null && python scripts/mutation_audit.py --validate-schema >/dev/null",
     "working_dir": "/workspace",
     "timeout_seconds": 180
+  },
+  "policy-validation": {
+    "description": "Run the ADR 0230 shared OPA and Conftest policy checks against command approval, promotion eligibility, runner admission, and service-boundary invariants.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "command": "python scripts/policy_checks.py --validate",
+    "working_dir": "/workspace",
+    "timeout_seconds": 240,
+    "cache_mounts": [
+      "policy_tools"
+    ]
   },
   "alert-rule-validation": {
     "description": "Regenerate SLO burn-rate rules and enforce severity plus runbook annotations on committed alert rules.",
@@ -87,7 +106,7 @@
     "description": "Type check the gate orchestration code and the manifest-backed Docker runner surfaces.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/python:3.12.10",
-    "command": "mypy --cache-dir /tmp/mypy-cache scripts/parallel_check.py scripts/run_gate.py scripts/gate_status.py scripts/log_gate_bypass.py config/windmill/scripts/post-merge-gate.py tests/test_parallel_check.py tests/test_validation_gate.py",
+    "command": "mypy --cache-dir /tmp/mypy-cache scripts/parallel_check.py scripts/run_gate.py scripts/gate_status.py scripts/log_gate_bypass.py scripts/policy_checks.py scripts/policy_toolchain.py config/windmill/scripts/post-merge-gate.py tests/test_parallel_check.py tests/test_validation_gate.py tests/test_policy_checks.py tests/test_command_catalog.py",
     "working_dir": "/workspace",
     "timeout_seconds": 180
   },

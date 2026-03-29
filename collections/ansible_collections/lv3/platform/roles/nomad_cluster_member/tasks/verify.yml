@@ -1,0 +1,30 @@
+---
+- name: Verify Nomad service is active
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - is-active
+      - "{{ nomad_cluster_service_name }}"
+  register: nomad_cluster_service_status
+  retries: 12
+  delay: 5
+  until: nomad_cluster_service_status.stdout | trim == "active"
+  changed_when: false
+  failed_when: >-
+    nomad_cluster_service_status.rc not in [0, 3]
+    or nomad_cluster_service_status.stdout | trim not in ["active", "activating"]
+
+- name: Wait for the local Nomad HTTP API port
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ nomad_cluster_http_port }}"
+    delay: 0
+    timeout: 60
+    state: started
+  changed_when: false
+
+- name: Verify Nomad reports the pinned version
+  ansible.builtin.command: nomad version
+  register: nomad_cluster_verify_version
+  changed_when: false
+  failed_when: "'v' ~ nomad_cluster_version not in (nomad_cluster_verify_version.stdout | default(''))"

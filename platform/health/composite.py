@@ -1,15 +1,17 @@
 from __future__ import annotations
 
-import importlib
 import json
 import os
-import sys
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Callable
 
+from platform.degradation import default_state_path
+from platform.health.semantics import canonical_runtime_state, runtime_state_score
 from platform.ledger import LedgerReader
+from platform.maintenance import list_active_windows_best_effort
+from platform.slo import build_slo_status_entries
 from platform.world_state._db import (
     ConnectionFactory,
     connection_kind,
@@ -30,10 +32,6 @@ from platform.world_state.client import (
 from platform.world_state.materializer import SQLITE_CURRENT_VIEW_NAME, SQLITE_SNAPSHOTS_TABLE_NAME
 
 
-SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "scripts"
-from platform.degradation import default_state_path
-
-
 DEFAULT_TTL_SECONDS = 120
 DEFAULT_SIGNAL_WEIGHTS = {
     "health_probe": 0.40,
@@ -51,13 +49,6 @@ SQLITE_HEALTH_TABLE_NAME = "health_composite"
 
 def repo_root_default() -> Path:
     return Path(__file__).resolve().parents[2]
-
-
-def _load_script_symbol(module_name: str, symbol_name: str) -> Any:
-    if str(SCRIPTS_DIR) not in sys.path:
-        sys.path.insert(0, str(SCRIPTS_DIR))
-    module = importlib.import_module(module_name)
-    return getattr(module, symbol_name)
 
 
 @dataclass(frozen=True)
@@ -202,13 +193,9 @@ def load_maintenance_windows(
         if isinstance(active_windows, list):
             return [item for item in active_windows if isinstance(item, dict)]
     try:
-        list_active_windows_best_effort = _load_script_symbol(
-            "maintenance_window_tool",
-            "list_active_windows_best_effort",
-        )
-    except ImportError:
+        windows = list_active_windows_best_effort(repo_root=repo_root)
+    except (ModuleNotFoundError, OSError, RuntimeError, ValueError, json.JSONDecodeError):
         return []
-    windows = list_active_windows_best_effort()
     return [window for window in windows.values() if isinstance(window, dict)]
 
 
@@ -228,18 +215,15 @@ def load_slo_entries(
     catalog_path = repo_root / "config" / "slo-catalog.json"
     if not catalog_path.exists():
         return []
-    try:
-        build_slo_status_entries = _load_script_symbol("slo_tracking", "build_slo_status_entries")
-    except ImportError:
-        return []
     prometheus_url = None if allow_live_queries else ""
-    return build_slo_status_entries(
-        prometheus_url=prometheus_url,
-        query_fn=query_fn,
-        catalog_path=catalog_path,
-        service_catalog_path=repo_root / "config" / "service-capability-catalog.json",
-        stack_path=repo_root / "versions" / "stack.yaml",
-    )
+    try:
+        return build_slo_status_entries(
+            repo_root=repo_root,
+            prometheus_url=prometheus_url,
+            query_fn=query_fn,
+        )
+    except (ModuleNotFoundError, OSError, RuntimeError, ValueError, json.JSONDecodeError):
+        return []
 
 
 def _load_ledger_events_from_file(path: Path) -> list[dict[str, Any]]:
@@ -300,14 +284,7 @@ def load_degradation_state(repo_root: Path) -> dict[str, list[dict[str, Any]]]:
 
 
 def _score_probe_status(status: str) -> tuple[float, str]:
-    normalized = status.strip().lower()
-    if normalized in {"ok", "healthy"}:
-        return 1.0, "healthy probe result"
-    if normalized in {"degraded", "warn", "warning"}:
-        return 0.5, "service probe is degraded"
-    if normalized in {"down", "failed", "error", "unhealthy", "unreachable"}:
-        return 0.0, "service probe is failing"
-    return 0.8, "probe state is unknown; treated as cautionary"
+    return runtime_state_score(status)
 
 
 def _service_health_map(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -329,7 +306,7 @@ def _maintenance_active(service_id: str, windows: list[dict[str, Any]]) -> bool:
 
 def _health_probe_signal(service_id: str, health_map: dict[str, dict[str, Any]]) -> Signal:
     item = health_map.get(service_id, {})
-    status = str(item.get("status", "unknown"))
+    status = canonical_runtime_state(item)
     score, reason = _score_probe_status(status)
     detail = (
         f"{reason}; HTTP {item['http_status']}" if isinstance(item.get("http_status"), int) else reason
@@ -593,9 +570,13 @@ def compute_health_entries(
             score = sum(signal.score * signal.weight for signal in signals)
             score = max(0.0, min(1.0, score))
             status = _status_for_score(score)
+            if signals[0].value == "startup":
+                status = "degraded"
+                safe_to_act = False
+            else:
+                safe_to_act = score >= 0.7 and not any(signal.score == 0.0 for signal in signals)
             if any(signal.score == 0.0 for signal in signals) and status == "healthy":
                 status = "degraded"
-            safe_to_act = score >= 0.7 and not any(signal.score == 0.0 for signal in signals)
             if active_degradations.get(service_id):
                 status = "degraded"
                 safe_to_act = False

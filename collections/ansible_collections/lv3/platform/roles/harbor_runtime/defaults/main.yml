@@ -1,0 +1,81 @@
+---
+# Purpose: Declare the shared defaults for converging the Harbor runtime, secrets, Keycloak integration, and verification artifacts.
+# Use case: Used whenever the harbor_runtime role renders Harbor, manages robot credentials, and verifies the registry path.
+#
+# Inputs (required):
+#   - platform service topology (generated, required): Supplies the Harbor hostname, URLs, and assigned port.
+#
+# Inputs (optional):
+#   - harbor_installer_version (str, optional, default=2.15.0): Harbor release used for online installer downloads.
+#   - harbor_prepare_with_trivy (bool, optional, default=true): Enables Harbor's Trivy-backed prepare flow.
+#   - harbor_check_runner_project_name (str, optional, default=check-runner): Managed Harbor project for check-runner images.
+#
+# Outputs:
+#   - Default variable values consumed by the Harbor runtime role tasks and templates.
+#
+# Idempotency: Fully idempotent
+#              This file only declares role defaults.
+#
+# Dependencies:
+#   - ADR 0201: Defines Harbor deployment, registry publication, vulnerability scanning, and robot credential management.
+#   - Requires: Generated topology facts and local controller artifact paths to be current.
+#   - Role: harbor_runtime — converges the Harbor stack and verification flow.
+#
+# Related ADRs: 0165, 0201
+harbor_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology.harbor }}"
+harbor_public_hostname: "{{ harbor_service_topology.public_hostname }}"
+harbor_public_base_url: "https://{{ harbor_public_hostname }}"
+harbor_site_dir: /opt/harbor
+harbor_installer_root: "{{ harbor_site_dir }}/installer"
+harbor_installer_dir: "{{ harbor_installer_root }}/harbor"
+harbor_installer_version: 2.15.0
+harbor_installer_archive: "{{ harbor_site_dir }}/harbor-online-installer-v{{ harbor_installer_version }}.tgz"
+harbor_installer_url: "https://github.com/goharbor/harbor/releases/download/v{{ harbor_installer_version }}/harbor-online-installer-v{{ harbor_installer_version }}.tgz"
+harbor_config_file: "{{ harbor_installer_dir }}/harbor.yml"
+harbor_generated_compose_file: "{{ harbor_installer_dir }}/docker-compose.yml"
+harbor_compose_project_name: harbor
+harbor_compose_network_name: "{{ harbor_compose_project_name }}_harbor"
+harbor_data_dir: "{{ harbor_site_dir }}/data"
+harbor_log_dir: /var/log/harbor
+harbor_secret_dir: /etc/lv3/harbor
+harbor_admin_password_remote_file: "{{ harbor_secret_dir }}/admin-password"
+harbor_database_password_remote_file: "{{ harbor_secret_dir }}/database-password"
+harbor_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/harbor
+harbor_admin_password_local_file: "{{ harbor_local_artifact_dir }}/admin-password.txt"
+harbor_database_password_local_file: "{{ harbor_local_artifact_dir }}/database-password.txt"
+harbor_check_runner_robot_local_file: "{{ harbor_local_artifact_dir }}/check-runner-robot.json"
+harbor_http_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.harbor_port | default(8095) }}"
+harbor_prepare_with_trivy: true
+harbor_project_creation_restriction: adminonly
+harbor_trivy_security_check: vuln
+harbor_trivy_ignore_unfixed: false
+harbor_keycloak_local_admin_url: http://127.0.0.1:18080
+harbor_keycloak_public_base_url: https://sso.lv3.org
+harbor_keycloak_realm_name: lv3
+harbor_keycloak_bootstrap_admin_username: lv3-bootstrap-admin
+harbor_keycloak_bootstrap_admin_password_remote_file: /etc/lv3/keycloak/bootstrap-admin-password
+harbor_keycloak_admin_group: harbor-admins
+harbor_keycloak_client_id: harbor
+harbor_keycloak_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/harbor-client-secret.txt
+harbor_oidc_provider_name: Keycloak
+harbor_oidc_scope: openid,profile,email,groups
+harbor_oidc_user_claim: preferred_username
+harbor_oidc_groups_claim: groups
+harbor_oidc_verify_cert: true
+harbor_check_runner_project_name: check-runner
+harbor_check_runner_project_public: true
+harbor_check_runner_retention_days: 90
+harbor_check_runner_retention_cron: 0 0 0 * * *
+harbor_check_runner_robot_name: check-runner-publisher
+harbor_check_runner_robot_description: Managed push and pull robot for the check-runner Harbor project.
+harbor_runtime_container_names:
+  - harbor-log
+  - harbor-db
+  - redis
+  - registry
+  - registryctl
+  - harbor-core
+  - harbor-portal
+  - harbor-jobservice
+  - trivy-adapter
+  - nginx

@@ -190,6 +190,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
     def test_certificate_domain_expression_includes_additional_domains(self) -> None:
         certificate_domains_expr = self.defaults["public_edge_certificate_domains"]
         self.assertIn("public_edge_additional_certificate_domains", certificate_domains_expr)
+        self.assertIn("registry.lv3.org", [site["hostname"] for site in self.defaults["public_edge_extra_sites"]])
 
     def test_static_pages_include_robots_meta_tag(self) -> None:
         self.assertIn('<meta name="robots" content="{{ public_edge_robots_meta_content }}">', self.static_template)
@@ -199,6 +200,10 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("site.blocked_exact_paths | default([])", self.template)
         self.assertIn("site.server_sent_events | default(false)", self.template)
         self.assertIn("site.prefix_proxy_routes | default([])", self.template)
+        self.assertIn("site.client_max_body_size | default(none)", self.template)
+        self.assertIn("site.proxy_request_buffering | default(true)", self.template)
+        self.assertIn("site.proxy_read_timeout_seconds | default(300)", self.template)
+        self.assertIn("site.proxy_send_timeout_seconds | default(proxy_read_timeout_seconds)", self.template)
         self.assertIn("proxy_hide_header {{ header_name }};", self.template)
         self.assertIn("protected_site.unauthenticated_prefix_paths | default([])", self.template)
         self.assertIn("location ^~ {{ path }} {", self.template)

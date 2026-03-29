@@ -9,6 +9,7 @@ from typing import Any, Final
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from service_id_resolver import resolve_service_id
+from shared_policy_packs import load_shared_policy_packs
 
 try:
     import jsonschema
@@ -25,17 +26,13 @@ SERVICE_REDUNDANCY_SCHEMA_PATH: Final = repo_path(
 SERVICE_CATALOG_PATH: Final = repo_path("config", "service-capability-catalog.json")
 HOST_VARS_PATH: Final = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 
-TIER_ORDER = {"R0": 0, "R1": 1, "R2": 2, "R3": 3}
-STANDBY_KIND_BY_TIER = {"R0": "none", "R1": "cold", "R2": "warm", "R3": "active"}
-LIVE_APPLY_MODE_BY_TIER = {
-    "R0": "primary_only",
-    "R1": "primary_only",
-    "R2": "primary_and_standby",
-    "R3": "multi_domain",
-}
-KNOWN_EMPTY_LOCATIONS = {"none", "n/a", "not_applicable", "primary-only"}
-REHEARSAL_TIER_SEQUENCE = ("R1", "R2", "R3")
-ALLOWED_REHEARSAL_RESULTS = {"pass", "partial", "fail"}
+SHARED_POLICIES = load_shared_policy_packs()
+TIER_ORDER = SHARED_POLICIES.tier_order
+STANDBY_KIND_BY_TIER = SHARED_POLICIES.standby_kind_by_tier
+LIVE_APPLY_MODE_BY_TIER = SHARED_POLICIES.live_apply_mode_by_tier
+KNOWN_EMPTY_LOCATIONS = SHARED_POLICIES.known_empty_locations
+REHEARSAL_TIER_SEQUENCE = SHARED_POLICIES.rehearsal_tier_sequence
+ALLOWED_REHEARSAL_RESULTS = SHARED_POLICIES.allowed_rehearsal_results
 
 
 def require_mapping(value: Any, path: str) -> dict[str, Any]:
@@ -129,7 +126,7 @@ def known_locations() -> set[str]:
 
 
 def max_supported_tier_for_domains(failure_domain_count: int) -> str:
-    return "R3" if failure_domain_count >= 2 else "R2"
+    return SHARED_POLICIES.max_supported_tier_for_failure_domain_count(failure_domain_count)
 
 
 def required_rehearsal_tiers(declared_tier: str) -> list[str]:

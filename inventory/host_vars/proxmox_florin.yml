@@ -40,6 +40,10 @@ platform_port_assignments:
   semaphore_host_proxy_port: 8020
   windmill_server_port: 8000
   windmill_host_proxy_port: 8005
+  nomad_server_port: 4646
+  nomad_rpc_port: 4647
+  nomad_serf_port: 4648
+  nomad_host_proxy_port: 8013
   mattermost_server_port: 8065
   mattermost_host_proxy_port: 8066
   gitea_http_port: 3003
@@ -70,6 +74,7 @@ platform_port_assignments:
   platform_context_host_proxy_port: 8010
   homepage_port: 3090
   ops_portal_port: 8092
+  harbor_port: 8095
   ntopng_http_port: 3000
   ntopng_proxy_port: 3001
   portainer_https_port: 9443
@@ -134,6 +139,11 @@ proxmox_tailscale_tcp_proxies:
     listen_port: "{{ platform_port_assignments.windmill_host_proxy_port }}"
     upstream_host: 10.10.10.20
     upstream_port: 8000
+  - name: nomad
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: "{{ platform_port_assignments.nomad_host_proxy_port }}"
+    upstream_host: 10.10.10.40
+    upstream_port: "{{ platform_port_assignments.nomad_server_port }}"
   - name: mattermost
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.mattermost_host_proxy_port }}"
@@ -537,6 +547,11 @@ network_policy:
         - source: nginx-lv3
           protocol: tcp
           ports:
+            - 8095
+          description: Edge access to the Harbor registry and operator UI
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
             - 8089
           description: Reverse proxy access to the Dozzle hub
         - source: nginx-lv3
@@ -575,6 +590,11 @@ network_policy:
           ports:
             - 2586
           description: Alertmanager access to the private ntfy paging gateway
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
+            - 4647
+          description: Nomad server RPC to docker-runtime-lv3
     docker-build-lv3:
       allow_container_forwarding: true
       allowed_inbound:
@@ -588,6 +608,11 @@ network_policy:
           ports:
             - 7007
           description: Dozzle hub access to the docker-build agent
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
+            - 4647
+          description: Nomad server RPC to docker-build-lv3
     monitoring-lv3:
       allowed_inbound:
         - source: management
@@ -595,6 +620,11 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: host
+          protocol: tcp
+          ports:
+            - 4646
+          description: Proxmox host Tailscale controller proxy access to the Nomad API
         - source: host
           protocol: tcp
           ports:
@@ -641,6 +671,16 @@ network_policy:
             - 2379
             - 2380
           description: etcd quorum traffic from the replica PostgreSQL member
+        - source: docker-runtime-lv3
+          protocol: tcp
+          ports:
+            - 4647
+          description: Nomad client RPC from docker-runtime-lv3
+        - source: docker-build-lv3
+          protocol: tcp
+          ports:
+            - 4647
+          description: Nomad client RPC from docker-build-lv3
     coolify-lv3:
       allow_container_forwarding: true
       allowed_inbound:
@@ -683,6 +723,16 @@ network_policy:
           ports:
             - 5432
           description: Application databases and secret rotation
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 5432
+          description: Docker bridge-backed application databases and secret rotation
+        - source: 192.168.0.0/16
+          protocol: tcp
+          ports:
+            - 5432
+          description: Docker bridge-backed application databases and secret rotation
         - source: postgres-replica-lv3
           protocol: tcp
           ports:
@@ -1092,6 +1142,17 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ windmill_controller_url }}"
+  nomad:
+    service_name: nomad
+    owning_vm: monitoring-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: "{{ nomad_controller_url }}"
   gitea:
     service_name: gitea
     owning_vm: docker-runtime-lv3
@@ -1433,6 +1494,32 @@ lv3_service_topology:
       tls: true
       kind: proxy
       upstream: http://10.10.10.20:8091
+  harbor:
+    service_name: harbor
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: registry.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    dns:
+      managed: true
+      visibility: public
+      name: registry
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: "http://10.10.10.20:{{ platform_port_assignments.harbor_port }}"
+      client_max_body_size: 0
+      chunked_transfer_encoding: true
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 900
+      proxy_send_timeout_seconds: 900
   ops_portal:
     service_name: ops-portal
     owning_vm: docker-runtime-lv3

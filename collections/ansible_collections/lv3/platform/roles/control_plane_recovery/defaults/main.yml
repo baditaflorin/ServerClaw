@@ -10,8 +10,19 @@ control_plane_recovery_backup_on_calendar: "*-*-* 01,07,13,19:15:00"
 control_plane_recovery_backup_retention_count: 28
 control_plane_recovery_runtime_ssh_private_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/ssh/docker-runtime-backup.id_ed25519
 control_plane_recovery_runtime_ssh_public_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/ssh/docker-runtime-backup.id_ed25519.pub
-control_plane_recovery_runtime_openbao_backup_policy_name: lv3-control-plane-backup
-control_plane_recovery_runtime_openbao_backup_token_remote_file: "{{ control_plane_recovery_runtime_config_dir }}/openbao-backup-token.json"
+control_plane_recovery_runtime_openbao_policy_name: lv3-control-plane-backup
+control_plane_recovery_runtime_openbao_secret_path: services/control-plane-recovery/runtime
+control_plane_recovery_runtime_openbao_approle_name: control-plane-backup
+control_plane_recovery_runtime_openbao_agent_dir: "{{ control_plane_recovery_runtime_config_dir }}/openbao-agent"
+control_plane_recovery_runtime_openbao_agent_service_name: lv3-control-plane-backup-openbao-agent
+control_plane_recovery_runtime_openbao_agent_container_name: lv3-control-plane-backup-openbao-agent
+control_plane_recovery_runtime_credential_dir: /run/lv3-systemd-credentials/control-plane-backup
+control_plane_recovery_runtime_openbao_token_file: "{{ control_plane_recovery_runtime_credential_dir }}/openbao-token"
+control_plane_recovery_runtime_windmill_db_dsn_file: "{{ control_plane_recovery_runtime_credential_dir }}/windmill-db-dsn"
+control_plane_recovery_runtime_openbao_agent_config_file: "{{ control_plane_recovery_runtime_openbao_agent_dir }}/agent.hcl"
+control_plane_recovery_runtime_openbao_agent_template_file: "{{ control_plane_recovery_runtime_openbao_agent_dir }}/windmill-db-dsn.ctmpl"
+control_plane_recovery_runtime_openbao_role_id_file: "{{ control_plane_recovery_runtime_openbao_agent_dir }}/role_id"
+control_plane_recovery_runtime_openbao_secret_id_file: "{{ control_plane_recovery_runtime_openbao_agent_dir }}/secret_id"
 control_plane_recovery_runtime_backup_target_host: "{{ hostvars['backup-lv3'].ansible_host }}"
 control_plane_recovery_runtime_backup_target_user: lv3-control-plane-backup
 control_plane_recovery_runtime_backup_target_dir: /srv/control-plane-recovery/runtime/docker-runtime-lv3
@@ -52,5 +63,19 @@ control_plane_recovery_windmill_backup_database_password: >-
   }}
 control_plane_recovery_windmill_backup_database_dsn: >-
   {%- set password = control_plane_recovery_windmill_backup_database_password | trim -%}
-  {%- if password | length == 0 -%}{{ "" }}{%- else -%}postgresql://{{ control_plane_recovery_windmill_backup_database_user }}:{{ password | urlencode | replace('/', '%2F') }}@{{ control_plane_recovery_windmill_backup_database_host }}:{{ control_plane_recovery_windmill_backup_database_port }}/{{ control_plane_recovery_windmill_backup_database_name }}?sslmode=disable{%- endif -%}
+  {%- if password | length == 0 -%}
+  {{ "" }}
+  {%- else -%}
+  postgresql://{{ control_plane_recovery_windmill_backup_database_user }}:{{ password | urlencode | replace('/', '%2F') }}@{{ control_plane_recovery_windmill_backup_database_host }}:{{ control_plane_recovery_windmill_backup_database_port }}/{{ control_plane_recovery_windmill_backup_database_name }}?sslmode=disable
+  {%- endif -%}
+control_plane_recovery_runtime_openbao_secret_payload:
+  windmill_db_dsn: "{{ control_plane_recovery_windmill_backup_database_dsn }}"
+control_plane_recovery_runtime_openbao_policy_rules: |-
+  path "kv/data/{{ control_plane_recovery_runtime_openbao_secret_path }}" {
+    capabilities = ["read"]
+  }
+
+  path "sys/storage/raft/snapshot" {
+    capabilities = ["read", "create", "update", "sudo"]
+  }
 control_plane_recovery_run_backup_now: true

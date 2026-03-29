@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import REPO_ROOT, load_json, load_yaml
+from shared_policy_packs import load_shared_policy_packs
 
 
 CAPACITY_MODEL_PATH = REPO_ROOT / "config" / "capacity-model.json"
@@ -21,23 +22,12 @@ INVENTORY_PATH = REPO_ROOT / "inventory" / "hosts.yml"
 SECRET_MANIFEST_PATH = REPO_ROOT / "config" / "controller-local-secrets.json"
 FIXTURE_RECEIPTS_DIR = REPO_ROOT / "receipts" / "fixtures"
 SSH_TIMEOUT_SECONDS = 10
-CAPACITY_CLASSES = ("ha_reserved", "recovery_reserved", "preview_burst")
-REQUESTER_CLASS_ALIASES = {
-    "fixture": "preview",
-    "preview": "preview",
-    "preview_burst": "preview",
-    "restore-verification": "recovery",
-    "recovery": "recovery",
-    "recovery_drill": "recovery",
-    "standby": "standby",
-    "failover": "standby",
-    "ha_reserved": "standby",
-}
-PRIMARY_CLASS_FOR_REQUESTER = {
-    "preview": "preview_burst",
-    "recovery": "recovery_reserved",
-    "standby": "ha_reserved",
-}
+SHARED_POLICIES = load_shared_policy_packs()
+CAPACITY_CLASSES = SHARED_POLICIES.capacity_class_ids
+REQUESTER_CLASS_ALIASES = SHARED_POLICIES.requester_class_aliases
+PRIMARY_CLASS_FOR_REQUESTER = SHARED_POLICIES.primary_capacity_class_by_requester
+DECLARED_DRILL_BORROW_BY_REQUESTER = SHARED_POLICIES.declared_drill_borrow_by_requester
+BREAK_GLASS_BORROW_BY_REQUESTER = SHARED_POLICIES.break_glass_borrow_by_requester
 
 
 def require_mapping(value: Any, path: str) -> dict[str, Any]:
@@ -708,7 +698,7 @@ def active_fixture_preview_usage() -> ResourceAmount:
 
 def occupied_capacity_by_class(model: CapacityModel) -> dict[str, ResourceAmount]:
     occupied = {identifier: ZERO_RESOURCES for identifier in CAPACITY_CLASSES}
-    occupied["preview_burst"] = active_fixture_preview_usage()
+    occupied[PRIMARY_CLASS_FOR_REQUESTER["preview"]] = active_fixture_preview_usage()
     return occupied
 
 
@@ -745,6 +735,8 @@ def check_capacity_class_request(
     primary_class = PRIMARY_CLASS_FOR_REQUESTER[canonical_requester]
     states = capacity_class_state_map(model)
     primary_available = states[primary_class].available
+    declared_drill_borrow_classes = DECLARED_DRILL_BORROW_BY_REQUESTER.get(canonical_requester, ())
+    break_glass_borrow_classes = BREAK_GLASS_BORROW_BY_REQUESTER.get(canonical_requester, ())
 
     result: dict[str, Any] = {
         "approved": False,
@@ -773,42 +765,52 @@ def check_capacity_class_request(
         result["approved"] = True
         return result
 
-    if canonical_requester == "recovery":
-        preview_available = states["preview_burst"].available
+    if declared_drill_borrow_classes:
         if not declared_drill:
             result["reasons"].append(
-                "recovery requests may borrow from preview_burst only for a declared drill"
+                f"{canonical_requester} requests may borrow from "
+                f"{', '.join(declared_drill_borrow_classes)} only for a declared drill"
             )
-        elif resources_fit(primary_available.add(preview_available), requested):
-            result["approved"] = True
-            result["borrowed_from"] = ["preview_burst"]
-            result["admitted_classes"] = [primary_class, "preview_burst"]
-            result["conditions"].append(
-                "Declared recovery drill approved with preview_burst spillover."
-            )
-            return result
+        else:
+            combined = primary_available
+            admitted_classes = [primary_class]
+            for borrow_class in declared_drill_borrow_classes:
+                combined = combined.add(states[borrow_class].available)
+                admitted_classes.append(borrow_class)
+            if resources_fit(combined, requested):
+                result["approved"] = True
+                result["borrowed_from"] = admitted_classes[1:]
+                result["admitted_classes"] = admitted_classes
+                result["conditions"].append(
+                    "Declared recovery drill approved with protected spillover."
+                )
+                return result
 
-    if primary_class != "ha_reserved":
+    if break_glass_borrow_classes:
         if not break_glass_ref:
             result["reasons"].append(
-                "borrowing from ha_reserved requires explicit break-glass evidence"
+                "borrowing from protected classes requires explicit break-glass evidence"
             )
         if duration_hours is None or duration_hours <= 0:
             result["reasons"].append(
-                "borrowing from ha_reserved must declare a positive time-bounded duration"
+                "borrowing from protected classes must declare a positive time-bounded duration"
             )
         if break_glass_ref and duration_hours is not None and duration_hours > 0:
             combined = primary_available
             admitted_classes = [primary_class]
-            if canonical_requester == "recovery" and declared_drill:
-                combined = combined.add(states["preview_burst"].available)
-                if not resources_fit(primary_available, requested):
-                    admitted_classes.append("preview_burst")
-            combined = combined.add(states["ha_reserved"].available)
+            if declared_drill:
+                for borrow_class in declared_drill_borrow_classes:
+                    combined = combined.add(states[borrow_class].available)
+                    if borrow_class not in admitted_classes:
+                        admitted_classes.append(borrow_class)
+            for borrow_class in break_glass_borrow_classes:
+                combined = combined.add(states[borrow_class].available)
+                if borrow_class not in admitted_classes:
+                    admitted_classes.append(borrow_class)
             if resources_fit(combined, requested):
                 result["approved"] = True
-                result["borrowed_from"] = admitted_classes[1:] + ["ha_reserved"]
-                result["admitted_classes"] = admitted_classes + ["ha_reserved"]
+                result["borrowed_from"] = admitted_classes[1:]
+                result["admitted_classes"] = admitted_classes
                 result["conditions"].append(
                     f"Break-glass admission approved with evidence `{break_glass_ref}` for {duration_hours:g}h."
                 )

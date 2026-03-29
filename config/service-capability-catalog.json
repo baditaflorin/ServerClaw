@@ -424,6 +424,44 @@
       }
     },
     {
+      "id": "harbor",
+      "name": "Harbor",
+      "description": "Private container registry with vulnerability scanning, operator SSO, and scoped robot credentials for repository automation.",
+      "category": "security",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8095",
+      "public_url": "https://registry.lv3.org",
+      "subdomain": "registry.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Harbor Registry Public",
+      "health_probe_id": "harbor",
+      "secret_catalog_ids": [
+        "harbor_admin_password",
+        "harbor_database_password",
+        "harbor_check_runner_robot_secret",
+        "keycloak_harbor_client_secret"
+      ],
+      "adr": "0201",
+      "runbook": "docs/runbooks/configure-harbor.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-harbor/lv3-harbor",
+      "tags": [
+        "registry",
+        "containers",
+        "trivy",
+        "supply-chain"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://registry.lv3.org",
+          "subdomain": "registry.lv3.org",
+          "notes": "Published through the shared NGINX edge while Harbor handles operator authentication and project policy."
+        }
+      }
+    },
+    {
       "id": "langfuse",
       "name": "Langfuse",
       "description": "Self-hosted LLM trace, generation, and evaluation observability surface for repo-managed agents.",
@@ -623,6 +661,55 @@
           "status": "active",
           "url": "https://nginx.lv3.org",
           "subdomain": "nginx.lv3.org"
+        }
+      }
+    },
+    {
+      "id": "nomad",
+      "name": "Nomad",
+      "description": "Private distributed scheduler for durable batch jobs and long-running internal workloads.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "monitoring-lv3",
+      "vmid": 140,
+      "internal_url": "https://100.64.0.1:8013",
+      "exposure": "private-only",
+      "health_probe_id": "nomad",
+      "secret_catalog_ids": [
+        "nomad_acl_management_token",
+        "nomad_tls_ca_key",
+        "nomad_tls_server_key",
+        "nomad_tls_client_key"
+      ],
+      "adr": "0232",
+      "runbook": "docs/runbooks/configure-nomad.md",
+      "degradation_modes": [
+        {
+          "dependency": "docker_runtime",
+          "dependency_type": "soft",
+          "degraded_behaviour": "Runtime-targeted jobs cannot place while the docker-runtime Nomad client is unavailable. The Nomad server and build-targeted jobs continue to operate.",
+          "degraded_for_seconds_max": -1,
+          "recovery_signal": "docker-runtime-lv3 rejoins the Nomad client set",
+          "tested_by": "fault:docker-runtime-unavailable"
+        },
+        {
+          "dependency": "docker_build",
+          "dependency_type": "soft",
+          "degraded_behaviour": "Build-targeted or long-running helper jobs pinned to the build pool cannot place while the docker-build Nomad client is unavailable. The Nomad server and runtime-targeted jobs continue to operate.",
+          "degraded_for_seconds_max": -1,
+          "recovery_signal": "docker-build-lv3 rejoins the Nomad client set",
+          "tested_by": "fault:docker-build-unavailable"
+        }
+      ],
+      "tags": [
+        "scheduler",
+        "batch",
+        "jobs"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://100.64.0.1:8013"
         }
       }
     },

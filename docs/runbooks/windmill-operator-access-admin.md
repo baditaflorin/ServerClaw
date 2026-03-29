@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This runbook documents the browser-first operator administration surface introduced by ADR 0122.
+This runbook documents the browser-first operator administration surface introduced by ADR 0122 and the guided in-app onboarding added for ADR 0242.
 
 It wraps the existing ADR 0108 backend so operators can:
 
@@ -11,6 +11,8 @@ It wraps the existing ADR 0108 backend so operators can:
 - off-board an existing operator
 - reconcile the live identity systems with `config/operators.yaml`
 - inspect one operator's access inventory
+- edit bounded rich operator notes through the ADR 0241 Tiptap surface while still storing markdown in `config/operators.yaml`
+- launch or resume task-specific guided tours for those workflows
 
 ## Location
 
@@ -39,6 +41,17 @@ The UI does not provision access directly. It calls repo-managed Windmill script
 
 That keeps the UI, CLI, and Make targets on the same governed backend path.
 
+## Rich Notes Workflow
+
+The `Rich Notes` panel is the first bounded ADR 0241 editing surface.
+
+- the left pane is a Tiptap editor with headings, lists, task items, code blocks, links, tables, and person mentions inserted as `@operator-id`
+- the right pane is the canonical markdown source so operators can paste markdown in, inspect what will be stored, or copy it back out
+- the `Save Notes` action calls `f/lv3/operator_update_notes`, which delegates to `scripts/operator_manager.py update-notes`
+- the worker persists the resulting markdown back into `config/operators.yaml` and records `audit.last_reviewed_at` plus `audit.last_reviewed_by`
+
+This is intentionally bounded knowledge editing, not a replacement for the larger Outline knowledge system at `wiki.lv3.org`.
+
 ## Operator Workflows Backed By The App
 
 - onboarding: `f/lv3/operator_onboard`
@@ -46,31 +59,73 @@ That keeps the UI, CLI, and Make targets on the same governed backend path.
 - roster sync: `f/lv3/sync_operators`
 - inventory lookup: `f/lv3/operator_inventory`
 - roster listing: `f/lv3/operator_roster`
+- rich note persistence: `f/lv3/operator_update_notes`
+
+## Guided Tours
+
+The app now ships a Shepherd-powered `Guided Onboarding` launcher for:
+
+- first-run orientation
+- admin or operator onboarding
+- viewer onboarding
+- off-boarding
+- inventory review
+
+Tour behavior:
+
+- the first-run walkthrough auto-starts on a fresh browser session
+- every tour is safe to skip and can be resumed from the launcher after dismissal
+- each step links back to the authoritative ADR 0108 runbooks instead of embedding an alternate policy source in the UI
+- keyboard navigation, focus trapping, and `Esc` exit are handled by Shepherd
 
 ## New Operator Flow
 
 1. Open Windmill and launch `f/lv3/operator_access_admin`.
-2. Fill in `name`, `email`, `role`, and `ssh key` when the role is `admin` or `operator`.
-3. Submit the create action.
-4. Record the returned bootstrap password securely.
-5. Direct the new operator to sign in through Keycloak, rotate the bootstrap password, and complete TOTP enrollment.
+2. Let the first-run tour start automatically, or choose `Onboard Admin Or Operator` or `Onboard Viewer` from `Guided Onboarding`.
+3. Confirm the target role and complete the required form fields.
+4. Submit the create action.
+5. Record the returned bootstrap password securely.
+6. Direct the new operator to sign in through Keycloak, rotate the bootstrap password, and complete TOTP enrollment.
 
 ## Off-boarding Flow
 
 1. Open the same app.
-2. Select the target operator from the roster.
-3. Optionally record a reason.
-4. Submit the off-board action.
-5. Refresh the roster and, when needed, inspect the per-operator inventory result.
+2. Start `Off-board Operator` from `Guided Onboarding` if you want the step-by-step walkthrough.
+3. Select the target operator from the roster.
+4. Optionally record a reason.
+5. Submit the off-board action.
+6. Refresh the roster and, when needed, inspect the per-operator inventory result.
+
+## Inventory Review
+
+Use `Review Inventory` from `Guided Onboarding` when you want a focused verification pass after onboarding, reconciliation, or off-boarding.
+
+The panel reads the current live state for the selected operator and is the fastest post-mutation confidence check in the app.
 
 ## Repo Validation
 
 Run:
 
 ```bash
+docker run --rm \
+  -e WM_TOKEN="$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
+  -v "$PWD/config/windmill/apps:/workspace" \
+  ghcr.io/windmill-labs/windmill:1.662.0@sha256:13d5456a80500822446ce0154f68d5fd5089628df82e77e2bd9cb24ff898d58d \
+  sh -lc 'cd /workspace && wmill generate-metadata f/lv3/operator_access_admin.raw_app --base-url http://100.64.0.1:8005 --workspace lv3 --token "$WM_TOKEN" --lock-only --skip-scripts --skip-flows --yes'
 uv run --with pytest --with pyyaml python -m pytest tests/test_windmill_operator_admin_app.py -q
-python3 -m py_compile config/windmill/scripts/operator-roster.py config/windmill/scripts/operator-inventory.py
+uv run --with pytest --with pyyaml python -m pytest tests/test_operator_manager.py tests/test_windmill_operator_admin_app.py -q
+python3 -m py_compile scripts/operator_manager.py config/windmill/scripts/operator-roster.py config/windmill/scripts/operator-inventory.py config/windmill/scripts/operator-update-notes.py
 ANSIBLE_CONFIG=ansible.cfg ANSIBLE_COLLECTIONS_PATH=collections uvx --from ansible-core ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --syntax-check
+```
+
+To verify the Tiptap bundle itself from a clean environment without polluting the repo checkout:
+
+```bash
+tmpdir=$(mktemp -d) \
+  && rsync -a --exclude node_modules config/windmill/apps/f/lv3/operator_access_admin.raw_app/ "$tmpdir/" \
+  && cd "$tmpdir" \
+  && npm install --ignore-scripts --package-lock=false \
+  && npx tsc --noEmit
 ```
 
 ## Notes
@@ -78,3 +133,5 @@ ANSIBLE_CONFIG=ansible.cfg ANSIBLE_COLLECTIONS_PATH=collections uvx --from ansib
 - The bootstrap password is intentionally shown once in the onboarding result and is not written to git.
 - The app depends on the worker checkout being mounted at `/srv/proxmox_florin_server`; the Windmill runtime now bind-mounts that host checkout into both worker pools.
 - The app is a Windmill-private admin surface; `ops.lv3.org` remains a separate portal.
+- ADR 0241 keeps the stored source format as markdown even though the editor is rich text, so repo diffs, sync workflows, and later migrations stay inspectable.
+- Raw-app dependency changes must refresh `config/windmill/apps/wmill-lock.yaml` with `wmill generate-metadata` before the next live Windmill sync, or the remote bundle step can fail with unresolved package imports.

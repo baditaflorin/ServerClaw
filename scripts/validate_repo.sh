@@ -6,10 +6,13 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VALIDATION_CACHE_DIR="${LV3_VALIDATION_CACHE_DIR:-$REPO_ROOT/.ansible/validation}"
 ANSIBLE_COLLECTIONS_DIR="${LV3_ANSIBLE_COLLECTIONS_DIR:-$VALIDATION_CACHE_DIR/collections}"
 ANSIBLE_COLLECTIONS_SHA_FILE="${LV3_ANSIBLE_COLLECTIONS_SHA_FILE:-$VALIDATION_CACHE_DIR/requirements.sha}"
-ANSIBLE_PLAYBOOK_CMD=(uvx --from ansible-core ansible-playbook)
-ANSIBLE_GALAXY_CMD=(uvx --from ansible-core ansible-galaxy)
-ANSIBLE_LINT_CMD=(uvx --from ansible-lint ansible-lint)
-YAMLLINT_CMD=(uvx --from yamllint yamllint)
+PYTHON_BIN="${LV3_VALIDATE_PYTHON_BIN:-}"
+UV_CMD=(uv)
+ANSIBLE_PLAYBOOK_CMD=()
+ANSIBLE_GALAXY_CMD=()
+ANSIBLE_LINT_CMD=()
+YAMLLINT_CMD=()
+HAS_UV=true
 
 export ANSIBLE_CONFIG="$REPO_ROOT/ansible.cfg"
 export ANSIBLE_COLLECTIONS_PATH="$REPO_ROOT/collections:$ANSIBLE_COLLECTIONS_DIR"
@@ -17,7 +20,7 @@ export ANSIBLE_COLLECTIONS_PATH="$REPO_ROOT/collections:$ANSIBLE_COLLECTIONS_DIR
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|compose-runtime-envs|retry-guard|data-models|workstream-surfaces|generated-docs|generated-portals|health-probes|alert-rules|tofu|agent-standards]...
+  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|compose-runtime-envs|retry-guard|dependency-direction|data-models|policy|architecture-fitness|workstream-surfaces|generated-docs|generated-portals|health-probes|alert-rules|tofu|agent-standards]...
 
 Examples:
   scripts/validate_repo.sh
@@ -32,8 +35,152 @@ require_command() {
   fi
 }
 
+python_candidate_path() {
+  local candidate="$1"
+
+  if [[ "$candidate" == */* ]]; then
+    [[ -x "$candidate" ]] || return 1
+    printf '%s\n' "$candidate"
+    return 0
+  fi
+
+  command -v "$candidate" 2>/dev/null
+}
+
+python_meets_min_version() {
+  local candidate="$1"
+
+  "$candidate" - <<'PY' >/dev/null 2>&1
+import sys
+
+raise SystemExit(0 if sys.version_info >= (3, 10) else 1)
+PY
+}
+
+resolve_python_bin() {
+  local candidate=""
+  local candidate_path=""
+  local candidates=()
+
+  if [[ -n "$PYTHON_BIN" ]]; then
+    candidate_path="$(python_candidate_path "$PYTHON_BIN")" || {
+      echo "Configured LV3_VALIDATE_PYTHON_BIN is not executable: $PYTHON_BIN" >&2
+      exit 1
+    }
+    python_meets_min_version "$candidate_path" || {
+      echo "LV3_VALIDATE_PYTHON_BIN must resolve to Python 3.10 or newer: $candidate_path" >&2
+      exit 1
+    }
+    PYTHON_BIN="$candidate_path"
+    return 0
+  fi
+
+  candidates=(
+    python3
+    python3.13
+    python3.12
+    python3.11
+    python3.10
+    /opt/homebrew/bin/python3
+    /usr/local/bin/python3
+  )
+
+  for candidate in "${candidates[@]}"; do
+    candidate_path="$(python_candidate_path "$candidate")" || continue
+    if python_meets_min_version "$candidate_path"; then
+      PYTHON_BIN="$candidate_path"
+      return 0
+    fi
+  done
+
+  echo "Missing Python 3.10+ for validation. Set LV3_VALIDATE_PYTHON_BIN to a compatible interpreter." >&2
+  exit 1
+}
+
+ensure_uv() {
+  resolve_python_bin
+  if command -v uv >/dev/null 2>&1; then
+    return 0
+  fi
+
+  HAS_UV=false
+  UV_CMD=()
+}
+
+configure_validation_commands() {
+  ensure_uv
+  if [[ "$HAS_UV" == true ]]; then
+    ANSIBLE_PLAYBOOK_CMD=("${UV_CMD[@]}" tool run --from ansible-core ansible-playbook)
+    ANSIBLE_GALAXY_CMD=("${UV_CMD[@]}" tool run --from ansible-core ansible-galaxy)
+    ANSIBLE_LINT_CMD=("${UV_CMD[@]}" tool run --from ansible-lint ansible-lint)
+    YAMLLINT_CMD=("${UV_CMD[@]}" tool run --from yamllint yamllint)
+    return 0
+  fi
+
+  require_command ansible-playbook
+  require_command ansible-galaxy
+  require_command ansible-lint
+  require_command yamllint
+  ANSIBLE_PLAYBOOK_CMD=(ansible-playbook)
+  ANSIBLE_GALAXY_CMD=(ansible-galaxy)
+  ANSIBLE_LINT_CMD=(ansible-lint)
+  YAMLLINT_CMD=(yamllint)
+}
+
+run_uv_python() {
+  local packages=()
+
+  if [[ "$HAS_UV" != true ]]; then
+    echo "uv is required for this validation stage but is not available in the current runtime." >&2
+    exit 1
+  fi
+
+  while [[ $# -gt 0 ]]; do
+    if [[ "$1" == "--" ]]; then
+      shift
+      break
+    fi
+    packages+=(--with "$1")
+    shift
+  done
+
+  "${UV_CMD[@]}" run "${packages[@]}" python3 "$@"
+}
+
 tracked_files() {
-  git -C "$REPO_ROOT" ls-files -- "$@"
+  if git -C "$REPO_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    git -C "$REPO_ROOT" ls-files -- "$@"
+    return 0
+  fi
+
+  "$PYTHON_BIN" - "$REPO_ROOT" "$@" <<'PY'
+from pathlib import Path
+import sys
+
+repo_root = Path(sys.argv[1])
+patterns = sys.argv[2:]
+skip_dirs = {".ansible", ".git", ".local", ".pytest_cache", ".venv", ".worktrees"}
+seen: set[str] = set()
+
+for pattern in patterns:
+    iterator = repo_root.glob(pattern) if "/" in pattern else repo_root.rglob(pattern)
+    for path in sorted(iterator):
+        if not path.is_file():
+            continue
+        rel = path.relative_to(repo_root)
+        parts = rel.parts
+        if any(part in skip_dirs for part in parts[:-1]):
+            continue
+        if any(part.startswith("._") for part in parts):
+            continue
+        if rel.name == ".DS_Store":
+            continue
+        rel_posix = rel.as_posix()
+        if rel_posix in seen:
+            continue
+        seen.add(rel_posix)
+        print(rel_posix)
+PY
 }
 
 load_lines_into_array() {
@@ -48,20 +195,34 @@ load_lines_into_array() {
   done
 }
 
+configure_validation_commands
+
 install_collections() {
   local requirements_file="$REPO_ROOT/collections/requirements.yml"
   local current_sha_file=""
+  local lock_file="${ANSIBLE_COLLECTIONS_SHA_FILE}.lock"
+  local lock_fd=""
 
   [[ -f "$requirements_file" ]] || return 0
 
   mkdir -p "$ANSIBLE_COLLECTIONS_DIR"
   mkdir -p "$(dirname "$ANSIBLE_COLLECTIONS_SHA_FILE")"
+  mkdir -p "$(dirname "$lock_file")"
+
+  if command -v flock >/dev/null 2>&1; then
+    exec {lock_fd}> "$lock_file"
+    flock "$lock_fd"
+  fi
 
   current_sha_file="$(mktemp)"
   sha256sum "$requirements_file" > "$current_sha_file"
   if [[ -s "$ANSIBLE_COLLECTIONS_SHA_FILE" ]] && find "$ANSIBLE_COLLECTIONS_DIR" -mindepth 1 -print -quit | grep -q .; then
     if cmp -s "$current_sha_file" "$ANSIBLE_COLLECTIONS_SHA_FILE"; then
       rm -f "$current_sha_file"
+      if [[ -n "$lock_fd" ]]; then
+        flock -u "$lock_fd"
+        eval "exec ${lock_fd}>&-"
+      fi
       return 0
     fi
   fi
@@ -69,9 +230,14 @@ install_collections() {
   "${ANSIBLE_GALAXY_CMD[@]}" collection install \
     -r "$requirements_file" \
     -p "$ANSIBLE_COLLECTIONS_DIR" \
+    --force-with-deps \
     >/dev/null
   cp "$current_sha_file" "$ANSIBLE_COLLECTIONS_SHA_FILE"
   rm -f "$current_sha_file"
+  if [[ -n "$lock_fd" ]]; then
+    flock -u "$lock_fd"
+    eval "exec ${lock_fd}>&-"
+  fi
 }
 
 validate_ansible_syntax() {
@@ -99,7 +265,7 @@ validate_ansible_syntax() {
 
 validate_generated_vars() {
   echo "Generated platform vars validation"
-  uvx --from pyyaml python "$REPO_ROOT/scripts/generate_platform_vars.py" --check >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_platform_vars.py" --check >/dev/null
 }
 
 validate_yaml() {
@@ -143,7 +309,7 @@ validate_ansible_lint() {
 
 validate_ansible_idempotency() {
   echo "Ansible role idempotency policy"
-  uv run --with pyyaml python "$REPO_ROOT/scripts/ansible_role_idempotency.py"
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/ansible_role_idempotency.py"
 }
 
 validate_role_argument_specs() {
@@ -167,12 +333,31 @@ validate_shell() {
 
 validate_json() {
   local json_file
+  local resolved_json_file=""
   local json_files=()
 
   echo "JSON validation"
   load_lines_into_array json_files < <(tracked_files '*.json')
   for json_file in "${json_files[@]}"; do
-    jq empty "$json_file"
+    if [[ "$json_file" = /* ]]; then
+      resolved_json_file="$json_file"
+    else
+      resolved_json_file="$REPO_ROOT/$json_file"
+    fi
+    if [[ ! -f "$resolved_json_file" ]]; then
+      continue
+    fi
+    if command -v jq >/dev/null 2>&1; then
+      jq empty "$resolved_json_file"
+    else
+      "$PYTHON_BIN" - "$resolved_json_file" <<'PY'
+import json
+import pathlib
+import sys
+
+json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+PY
+    fi
   done
 }
 
@@ -199,46 +384,69 @@ validate_compose_runtime_envs() {
 
 validate_retry_guard() {
   echo "Retry guard"
-  python3 "$REPO_ROOT/scripts/check_ad_hoc_retry.py" >/dev/null
+  "$PYTHON_BIN" "$REPO_ROOT/scripts/check_ad_hoc_retry.py" >/dev/null
+}
+
+validate_dependency_direction() {
+  echo "Dependency direction validation"
+  python3 "$REPO_ROOT/scripts/validate_dependency_direction.py" >/dev/null
 }
 
 validate_data_models() {
   echo "Repository data model validation"
-  uv run --with pyyaml python3 "$REPO_ROOT/scripts/ansible_scope_runner.py" validate >/dev/null
-  uv run --with pyyaml python "$REPO_ROOT/scripts/validate_timeout_hierarchy.py" >/dev/null
-  python3 "$REPO_ROOT/scripts/check_hardcoded_timeouts.py" >/dev/null
-  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/validate_repository_data_models.py" --validate >/dev/null
-  uvx --from pyyaml python "$REPO_ROOT/scripts/execution_lanes.py" --validate >/dev/null
-  uvx --from pyyaml python "$REPO_ROOT/scripts/operator_manager.py" validate >/dev/null
-  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/data_catalog.py" --validate >/dev/null
-  uv run --with jsonschema python "$REPO_ROOT/scripts/validate_dependency_graph.py" >/dev/null
-  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/service_catalog.py" --validate >/dev/null
-  uvx --from pyyaml python "$REPO_ROOT/scripts/environment_topology.py" --validate >/dev/null
-  uvx --from pyyaml python "$REPO_ROOT/scripts/subdomain_catalog.py" --validate >/dev/null
-  python3 "$REPO_ROOT/scripts/validate_service_completeness.py" --validate >/dev/null
-  uv run --with pyyaml python "$REPO_ROOT/scripts/agent_tool_registry.py" --export-mcp >/dev/null
-  python3 "$REPO_ROOT/scripts/mutation_audit.py" --validate-schema >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/ansible_scope_runner.py" validate >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_timeout_hierarchy.py" >/dev/null
+  "$PYTHON_BIN" "$REPO_ROOT/scripts/check_hardcoded_timeouts.py" >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/provider_boundary_catalog.py" --validate >/dev/null
+  run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/validate_repository_data_models.py" --validate >/dev/null
+  run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/capability_contracts.py" --validate >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/execution_lanes.py" --validate >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/operator_manager.py" validate >/dev/null
+  run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/data_catalog.py" --validate >/dev/null
+  run_uv_python jsonschema -- "$REPO_ROOT/scripts/validate_dependency_graph.py" >/dev/null
+  run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/service_catalog.py" --validate >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/environment_topology.py" --validate >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/subdomain_catalog.py" --validate >/dev/null
+  "$PYTHON_BIN" "$REPO_ROOT/scripts/validate_service_completeness.py" --validate >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/agent_tool_registry.py" --export-mcp >/dev/null
+  "$PYTHON_BIN" "$REPO_ROOT/scripts/mutation_audit.py" --validate-schema >/dev/null
+}
+
+validate_policy() {
+  echo "ADR 0230 policy validation"
+  python3 "$REPO_ROOT/scripts/policy_checks.py" --validate >/dev/null
+}
+
+validate_architecture_fitness() {
+  echo "Architecture fitness validation"
+  "$PYTHON_BIN" "$REPO_ROOT/scripts/replaceability_scorecards.py" --validate >/dev/null
 }
 
 validate_workstream_surfaces() {
   echo "Workstream surface ownership validation"
-  uv run --with pyyaml python "$REPO_ROOT/scripts/workstream_surface_ownership.py" --validate-registry >/dev/null
-  uv run --with pyyaml python "$REPO_ROOT/scripts/workstream_surface_ownership.py" --validate-branch --base-ref origin/main >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/workstream_surface_ownership.py" --validate-registry >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/workstream_surface_ownership.py" --validate-branch --base-ref origin/main >/dev/null
 }
 
 validate_generated_docs() {
   echo "Generated status document validation"
-  uvx --from pyyaml python "$REPO_ROOT/scripts/canonical_truth.py" --check >/dev/null
-  uvx --from pyyaml python "$REPO_ROOT/scripts/generate_status_docs.py" --check >/dev/null
-  uv run --with jsonschema python "$REPO_ROOT/scripts/generate_dependency_diagram.py" --check >/dev/null
-  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/generate_diagrams.py" --check >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/canonical_truth.py" --check >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_status_docs.py" --check >/dev/null
+  run_uv_python jsonschema -- "$REPO_ROOT/scripts/generate_dependency_diagram.py" --check >/dev/null
+  run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/generate_diagrams.py" --check >/dev/null
 }
 
 validate_generated_portals() {
+  local generated_docs_dir=""
+
   echo "Generated portal validation"
-  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/generate_ops_portal.py" --check >/dev/null
-  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/generate_changelog_portal.py" --check >/dev/null
-  make -C "$REPO_ROOT" docs >/dev/null
+  run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/generate_ops_portal.py" --check >/dev/null
+  run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/generate_changelog_portal.py" --check >/dev/null
+  generated_docs_dir="$(mktemp -d "${TMPDIR:-/tmp}/lv3-docs-site.XXXXXX")"
+  trap 'rm -rf "$generated_docs_dir"' RETURN
+  "${UV_CMD[@]}" run --with-requirements "$REPO_ROOT/requirements/docs.txt" \
+    python3 "$REPO_ROOT/scripts/build_docs_portal.py" --generated-dir "$generated_docs_dir" --output-dir "$REPO_ROOT/build/docs-portal" \
+    >/dev/null
 }
 
 validate_health_probes() {
@@ -287,8 +495,8 @@ validate_health_probes() {
 
 validate_alert_rules() {
   echo "Alert rule validation"
-  uv run --with pyyaml python "$REPO_ROOT/scripts/generate_slo_rules.py" --check >/dev/null
-  uv run --with pyyaml python "$REPO_ROOT/scripts/validate_alert_rules.py"
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_slo_rules.py" --check >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_alert_rules.py"
 }
 
 validate_tofu() {
@@ -317,6 +525,10 @@ validate_agent_standards() {
   _validate_adr_index_current
   local idx_rc=$?
   [[ $idx_rc -ne 0 ]] && rc=$idx_rc
+
+  _validate_windmill_raw_app_lockfiles
+  local raw_app_lock_rc=$?
+  [[ $raw_app_lock_rc -ne 0 ]] && rc=$raw_app_lock_rc
 
   # Warnings only — do not fail
   _validate_config_registry_updated || true
@@ -400,6 +612,33 @@ _validate_adr_index_current() {
   return 0
 }
 
+_validate_windmill_raw_app_lockfiles() {
+  local package_json
+  local missing_lockfiles=()
+
+  while IFS= read -r package_json; do
+    [[ -z "$package_json" ]] && continue
+    local relative_package="${package_json#$REPO_ROOT/}"
+    local app_dir
+    app_dir=$(dirname "$relative_package")
+    if [[ ! -f "$REPO_ROOT/$app_dir/package-lock.json" ]]; then
+      missing_lockfiles+=("$app_dir/package-lock.json")
+    fi
+  done < <(
+    find "$REPO_ROOT/config/windmill/apps" -type f -name package.json 2>/dev/null |
+    grep '\.raw_app/package\.json$' |
+    sort
+  )
+
+  if [[ ${#missing_lockfiles[@]} -gt 0 ]]; then
+    echo "ERROR: Windmill raw apps with frontend dependencies must commit package-lock.json:" >&2
+    printf '  - %s\n' "${missing_lockfiles[@]}" >&2
+    echo "  Reference: docs/runbooks/configure-windmill.md" >&2
+    return 1
+  fi
+  return 0
+}
+
 _validate_config_registry_updated() {
   local new_config_files registry_updated
 
@@ -453,10 +692,13 @@ for stage in "$@"; do
       validate_json
       validate_compose_runtime_envs
       validate_retry_guard
+      validate_dependency_direction
       validate_health_probes
       validate_alert_rules
       validate_tofu
       validate_data_models
+      validate_policy
+      validate_architecture_fitness
       validate_workstream_surfaces
       validate_generated_docs
       validate_generated_portals
@@ -492,8 +734,17 @@ for stage in "$@"; do
     retry-guard)
       validate_retry_guard
       ;;
+    dependency-direction)
+      validate_dependency_direction
+      ;;
     data-models)
       validate_data_models
+      ;;
+    policy)
+      validate_policy
+      ;;
+    architecture-fitness)
+      validate_architecture_fitness
       ;;
     workstream-surfaces)
       validate_workstream_surfaces

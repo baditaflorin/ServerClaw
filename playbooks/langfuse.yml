@@ -1,4 +1,31 @@
 ---
+# Playbook: langfuse.yml
+# Purpose: Converge Langfuse DNS publication, PostgreSQL access, and runtime state for repo-managed observability tracing.
+# Use case: Run during production or staging Langfuse deployment, upgrade, or recovery when workflow tracing must match repo truth.
+#
+# Inputs (required):
+#   - env (string, required): Target environment selector used to choose the postgres and docker-runtime guests.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH path to managed guests.
+#
+# Outputs:
+#   - Langfuse DNS records, PostgreSQL access, runtime configuration, and authenticated edge publication are reconciled to the declared platform state.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - ADR 0146: Langfuse supplies governed trace capture for platform workflows.
+#   - Requires: PostgreSQL, docker-runtime, and the shared NGINX edge to already exist.
+#   - Role: lv3.platform.langfuse_postgres - provisions the Langfuse database and role.
+#   - Role: lv3.platform.langfuse_runtime - converges the Langfuse runtime and publication flow.
+#
+# Related ADRs: 0146, 0197
+# Related Runbooks: docs/runbooks/configure-langfuse.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
+
 - name: Ensure Hetzner DNS publication for Langfuse
   hosts: proxmox_hosts
   become: false
@@ -28,18 +55,8 @@
           - "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
 
   roles:
+    - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.postgres_vm
-      vars:
-        postgres_vm_client_allowed_sources_extra:
-          - >-
-            {{
-              (
-                hostvars['proxmox_florin'].proxmox_guests
-                | selectattr('name', 'equalto', playbook_execution_host_patterns.docker_runtime[playbook_execution_env])
-                | map(attribute='ipv4')
-                | first
-              )
-            }}/32
     - role: lv3.platform.langfuse_postgres
 
 - name: Converge Langfuse on the Docker runtime VM

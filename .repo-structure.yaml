@@ -158,6 +158,16 @@ directories:
     key_files:
       "network-impairment-matrix.yaml": "ADR 0189 governed preview/staging network impairment catalog"
 
+  policy:
+    purpose: Shared Rego policy bundles and tests for OPA and Conftest
+    contains: "decisions/, conftest/, tests/"
+    concern: policy, validation, shared-decision-logic
+    keywords: [policy, opa, conftest, rego, approvals, promotion]
+    for_agents: >
+      Shared decision logic lives here for command approval, promotion
+      eligibility, and repository invariants. Validate changes with
+      scripts/policy_checks.py before updating callers.
+
   scripts:
     purpose: Utility and helper scripts (Python, Bash)
     contains: Validation, data generation, CI helpers, operational utilities
@@ -169,6 +179,7 @@ directories:
       platform_manifest.py generates build/platform-manifest.json.
     key_files:
       "network_impairment_matrix.py": "ADR 0189 CLI and validation helper for governed network impairment scenarios"
+      "policy_checks.py": "ADR 0230 validator for the shared OPA and Conftest policy bundle and toolchain"
 
   tests:
     purpose: Test suites for automated validation
@@ -252,6 +263,7 @@ directories:
     for_agents: Platform-level management utilities
     key_files:
       "faults/network_impairment_matrix.py": "ADR 0189 typed loader and execution helpers for governed network impairment profiles"
+      "policy/engine.py": "ADR 0230 shared OPA evaluation helpers for command approval and promotion gating"
 
   keys:
     purpose: SSH keys and cryptographic material (bootstrap and automation)

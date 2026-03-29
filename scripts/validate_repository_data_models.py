@@ -25,6 +25,7 @@ from fixture_manager import load_ephemeral_pool_catalog
 from canonical_errors import ErrorRegistry
 from container_image_policy import load_image_catalog, validate_image_catalog as validate_container_image_catalog
 from changelog_redaction import load_redaction_policy, validate_redaction_policy
+from correction_loops import load_correction_loop_catalog, validate_correction_loop_catalog
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from control_plane_lanes import load_lane_catalog
 from data_catalog import load_data_catalog, validate_data_catalog
@@ -41,9 +42,18 @@ from operator_manager import ROSTER_PATH, validate_operator_roster
 from platform.execution_lanes import load_execution_lane_catalog
 from promotion_pipeline import validate_promotion_receipts
 from public_surface_scan import load_public_surface_scan_policy
+from shared_policy_packs import (
+    SHARED_POLICY_PACKS_PATH,
+    SHARED_POLICY_PACKS_SCHEMA_PATH,
+    load_shared_policy_packs,
+)
 from validate_ephemeral_vmid import validate_ephemeral_vmid_ranges
 from generate_slo_rules import outputs_match as slo_outputs_match
 from immutable_guest_replacement import load_guest_replacement_catalog, validate_guest_replacement_catalog
+from replaceability_scorecards import (
+    load_replaceability_review_catalog,
+    validate_replaceability_review_catalog,
+)
 from slo_tracking import (
     GRAFANA_DASHBOARD_PATH,
     PROMETHEUS_ALERTS_PATH,
@@ -84,6 +94,7 @@ CAPACITY_MODEL_PATH = repo_path("config", "capacity-model.json")
 CAPACITY_MODEL_SCHEMA_PATH = repo_path("docs", "schema", "capacity-model.schema.json")
 EPHEMERAL_POOL_CATALOG_PATH = repo_path("config", "ephemeral-capacity-pools.json")
 EPHEMERAL_POOL_SCHEMA_PATH = repo_path("docs", "schema", "ephemeral-capacity-pools.schema.json")
+REPLACEABILITY_REVIEW_CATALOG_PATH = repo_path("config", "replaceability-review-catalog.json")
 VERSION_SEMANTICS_PATH = repo_path("config", "version-semantics.json")
 WORKSTREAMS_PATH = repo_path("workstreams.yaml")
 TRIAGE_RULES_PATH = repo_path("config", "triage-rules.yaml")
@@ -300,9 +311,13 @@ def validate_no_scaffold_placeholders() -> None:
         repo_path("config", "service-capability-catalog.json"): load_json(
             repo_path("config", "service-capability-catalog.json")
         ),
+        repo_path("config", "capability-contract-catalog.json"): load_json(
+            repo_path("config", "capability-contract-catalog.json")
+        ),
         repo_path("config", "service-redundancy-catalog.json"): load_json(
             repo_path("config", "service-redundancy-catalog.json")
         ),
+        SHARED_POLICY_PACKS_PATH: load_json(SHARED_POLICY_PACKS_PATH),
         repo_path("config", "api-gateway-catalog.json"): load_json(
             repo_path("config", "api-gateway-catalog.json")
         ),
@@ -913,6 +928,8 @@ def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
             if not (REPO_ROOT / verify_file).is_file():
                 raise ValueError(f"{service_path}.verify_file does not exist: {verify_file}")
 
+        if "startup" in service:
+            validate_probe_definition(service.get("startup"), f"{service_path}.startup")
         validate_probe_definition(service.get("liveness"), f"{service_path}.liveness")
         validate_probe_definition(service.get("readiness"), f"{service_path}.readiness")
         if "tls_certificate_ids" in service:
@@ -1410,6 +1427,24 @@ def validate_capacity_model_schema() -> None:
     for field in ("$schema", "schema_version", "host", "guests", "reservations"):
         if field not in properties:
             raise ValueError(f"docs/schema/capacity-model.schema.json.properties must include '{field}'")
+
+
+def validate_shared_policy_packs() -> None:
+    load_shared_policy_packs()
+
+
+def validate_shared_policy_packs_schema() -> None:
+    schema = require_mapping(load_json(SHARED_POLICY_PACKS_SCHEMA_PATH), str(SHARED_POLICY_PACKS_SCHEMA_PATH))
+    require_str(schema.get("$schema"), "docs/schema/shared-policy-packs.schema.json.$schema")
+    require_str(schema.get("$id"), "docs/schema/shared-policy-packs.schema.json.$id")
+    require_str(schema.get("title"), "docs/schema/shared-policy-packs.schema.json.title")
+    properties = require_mapping(
+        schema.get("properties"),
+        "docs/schema/shared-policy-packs.schema.json.properties",
+    )
+    for field in ("$schema", "schema_version", "packs"):
+        if field not in properties:
+            raise ValueError(f"docs/schema/shared-policy-packs.schema.json.properties must include '{field}'")
 
 
 def validate_ephemeral_pool_catalog() -> None:
@@ -2488,12 +2523,18 @@ def validate_preview_environment_profiles() -> None:
     validate_profile_catalog(load_profile_catalog())
 
 
+def validate_replaceability_review_data() -> None:
+    payload = load_replaceability_review_catalog(REPLACEABILITY_REVIEW_CATALOG_PATH)
+    validate_replaceability_review_catalog(payload)
+
+
 def validate_repository_data_models() -> int:
     load_dependency_graph(validate_schema=True)
     secret_manifest = load_secret_manifest()
     validate_secret_manifest(secret_manifest)
     workflow_catalog = load_workflow_catalog()
     validate_workflow_catalog(workflow_catalog, secret_manifest)
+    validate_correction_loop_catalog(load_correction_loop_catalog(), workflow_catalog)
     validate_agent_policies(workflow_catalog)
     command_catalog = load_command_catalog()
     validate_command_catalog(command_catalog, workflow_catalog, secret_manifest)
@@ -2534,10 +2575,13 @@ def validate_repository_data_models() -> int:
     validate_changelog_redaction_contract()
     validate_platform_finding_schema()
     validate_maintenance_window_schema()
+    validate_shared_policy_packs_schema()
+    validate_shared_policy_packs()
     validate_capacity_model_schema()
     validate_capacity_model()
     validate_preview_environment_profiles()
     validate_ephemeral_pool_catalog()
+    validate_replaceability_review_data()
     load_public_surface_scan_policy()
     validate_vm_template_manifest(host_vars_context["proxmox_vm_templates"])
     validate_operator_roster(load_yaml(ROSTER_PATH))

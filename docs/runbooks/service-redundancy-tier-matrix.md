@@ -3,6 +3,7 @@
 ## Purpose
 
 `config/service-redundancy-catalog.json` is the machine-readable declaration for ADR 0179.
+The canonical tier order, standby-kind mapping, rehearsal tier sequence, and live-apply modes now live in `config/shared-policy-packs.json`.
 
 It answers, for every managed service:
 
@@ -59,6 +60,7 @@ make validate
 Validation checks:
 
 - JSON Schema validity and required fields
+- policy values resolved from `config/shared-policy-packs.json`
 - exact service-id coverage against `config/service-capability-catalog.json`
 - valid tier-to-standby mapping (`R0` -> `none`, `R1` -> `cold`, `R2` -> `warm`, `R3` -> `active`)
 - known standby locations for non-empty standby modes
@@ -116,3 +118,4 @@ For every `R1` or higher rehearsal, record at least:
 - a repo-relative evidence reference, usually a structured live-apply receipt or branch-local evidence note
 
 When the latest proof does not pass, keep it in the catalog anyway so status reporting can downgrade the implemented claim without hiding the failed exercise.
+If the redundancy tier vocabulary changes, update `config/shared-policy-packs.json` instead of editing duplicate enums in multiple schema and script files.

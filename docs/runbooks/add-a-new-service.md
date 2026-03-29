@@ -8,7 +8,9 @@ ADR 0107 makes new-service integration an explicit repository contract rather th
 
 1. Write the ADR.
    Create the service ADR first so the decision, runtime model, and risks exist before any scaffolded files do.
-2. Run the scaffold.
+2. Define the capability contract first when the service introduces or replaces a critical shared product surface.
+   Update `config/capability-contract-catalog.json` before locking in a new identity provider, workflow engine, secret authority, topology system, or similar shared capability choice.
+3. Run the scaffold.
 
 ```bash
 make scaffold-service \
@@ -19,15 +21,15 @@ make scaffold-service \
   OIDC=true
 ```
 
-3. Fill the generated stubs.
+4. Fill the generated stubs.
    Complete the role, playbooks, catalog entries, dependency edges, SLO description, dashboard, alert rules, runbook, and any generated ADR/workstream placeholders.
-4. Run the completeness check.
+5. Run the completeness check.
 
 ```bash
 lv3 validate --service my_service
 ```
 
-5. Run the repo validation flow and continue the workstream normally.
+6. Run the repo validation flow and continue the workstream normally.
 
 ```bash
 make validate-data-models
@@ -58,6 +60,7 @@ New scaffolded services do not receive those suppressions. Missing checklist ite
 ## Related Runbooks
 
 - [Scaffold new service](scaffold-new-service.md)
+- [Capability contract catalog](capability-contract-catalog.md)
 - [Service capability catalog](service-capability-catalog.md)
 - [Subdomain governance](subdomain-governance.md)
 - [Health probe contracts](health-probe-contracts.md)

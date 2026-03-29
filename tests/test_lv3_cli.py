@@ -539,6 +539,14 @@ def test_open_dry_run_uses_catalog_url(
     assert "https://ops.lv3.org" in captured.out
 
 
+def test_windmill_url_prefers_runtime_environment_override(
+    minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("LV3_WINDMILL_BASE_URL", "http://127.0.0.1:8000/")
+
+    assert lv3_cli.windmill_url(lv3_cli.load_service_map()) == "http://127.0.0.1:8000"
+
+
 def test_logs_dry_run_builds_loki_query(
     capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -787,6 +795,28 @@ def test_runbook_execute_dry_run_renders_steps(
     assert "Runbook: renew-certificate" in captured.out
     assert "check-expiry -> check-cert-expiry" in captured.out
     assert '"service": "grafana"' in captured.out
+
+
+def test_load_secret_file_maps_controller_style_path_into_repo_local(
+    minimal_repo: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller_style_path = "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt"
+    repo_local_secret = minimal_repo / ".local" / "windmill" / "superadmin-secret.txt"
+    repo_local_secret.parent.mkdir(parents=True, exist_ok=True)
+    repo_local_secret.write_text("runtime-token", encoding="utf-8")
+    (minimal_repo / "config" / "controller-local-secrets.json").write_text(
+        json.dumps({"secrets": {"windmill_superadmin_secret": {"path": controller_style_path}}}, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(lv3_cli, "REPO_ROOT", minimal_repo)
+    monkeypatch.setattr(
+        lv3_cli,
+        "resolve_repo_local_path",
+        lambda path, *, repo_root: repo_local_secret if path == controller_style_path and repo_root == minimal_repo else Path(path),
+    )
+
+    assert lv3_cli.load_secret_file("windmill_superadmin_secret") == "runtime-token"
 
 
 def test_runbook_completion_suggests_runbooks(minimal_repo: Path) -> None:

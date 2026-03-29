@@ -1,3 +1,29 @@
+# Role Task File: monitoring_vm/tasks/main.yml
+# Purpose: Converge the monitoring VM runtime, dashboards, datasources, and Loki Canary service.
+# Use case: Run from the monitoring stack service playbook when establishing or replaying monitoring-lv3 state.
+#
+# Inputs (required):
+#   - monitoring_* role defaults and inventory topology: Provide package, endpoint, secret, and dashboard settings.
+#
+# Inputs (optional):
+#   - monitoring_loki_canary_* role defaults: Tune canary cadence and local queryability verification behavior.
+#
+# Outputs:
+#   - Installs and configures Grafana, Loki, Prometheus, Tempo, OpenTelemetry, dashboards, and Loki Canary.
+#
+# Idempotency: Fully idempotent
+#              Safe to replay; service handlers run only when rendered inputs change.
+#
+# Dependencies:
+#   - ADR 0011: Defines the monitoring VM baseline and service composition.
+#   - ADR 0250: Adds Loki Canary queryability assurance and dashboard import.
+#   - Requires: monitoring-lv3 inventory data, repo-managed dashboards, and monitoring package repositories.
+#
+# Related ADRs: 0011, 0250
+# Related Runbooks: docs/runbooks/monitoring-stack.md, docs/runbooks/log-queryability-canary.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
 ---
 - name: Validate monitoring VM inputs
   ansible.builtin.assert:
@@ -23,12 +49,15 @@
       - monitoring_blackbox_exporter_config_file | length > 0
       - monitoring_blackbox_exporter_env_file | length > 0
       - monitoring_grafana_slo_dashboard_file | length > 0
+      - monitoring_grafana_log_canary_dashboard_file | length > 0
       - monitoring_tempo_deb_url | length > 0
       - monitoring_tempo_deb_checksum | length > 0
       - monitoring_tempo_config_file | length > 0
       - monitoring_otelcol_deb_url | length > 0
       - monitoring_otelcol_deb_checksum | length > 0
       - monitoring_otelcol_config_file | length > 0
+      - monitoring_loki_canary_service_name | length > 0
+      - monitoring_loki_canary_service_file | length > 0
       - groups['proxmox_hosts'] | length > 0
     fail_msg: "monitoring_vm requires monitoring paths plus an available proxmox_hosts inventory group."
 
@@ -739,6 +768,25 @@
   register: monitoring_grafana_capacity_dashboard_file_rendered
   notify: Restart Grafana
 
+- name: Copy LV3 log canary overview dashboard
+  ansible.builtin.copy:
+    src: "{{ monitoring_grafana_log_canary_dashboard_source_file }}"
+    dest: "{{ monitoring_grafana_log_canary_dashboard_file }}"
+    owner: root
+    group: grafana
+    mode: "0644"
+  register: monitoring_grafana_log_canary_dashboard_file_rendered
+  notify: Restart Grafana
+
+- name: Render Loki Canary systemd unit
+  ansible.builtin.template:
+    src: loki-canary.service.j2
+    dest: "{{ monitoring_loki_canary_service_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Loki Canary
+
 - name: Enable and start blackbox exporter
   ansible.builtin.systemd:
     name: "{{ monitoring_blackbox_exporter_service_name }}"
@@ -750,6 +798,13 @@
     name: grafana-server
     enabled: true
     state: started
+
+- name: Enable and start Loki Canary
+  ansible.builtin.systemd:
+    name: "{{ monitoring_loki_canary_service_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true
 
 - name: Flush monitoring service handlers
   ansible.builtin.meta: flush_handlers
@@ -990,6 +1045,21 @@
   failed_when: monitoring_grafana_capacity_dashboard_existing.status not in [200, 404]
   no_log: true
 
+- name: Check whether LV3 log canary dashboard already exists
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_log_canary_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code:
+      - 200
+      - 404
+  register: monitoring_grafana_log_canary_dashboard_existing
+  changed_when: false
+  failed_when: monitoring_grafana_log_canary_dashboard_existing.status not in [200, 404]
+  no_log: true
+
 - name: Check whether VM detail dashboards already exist
   ansible.builtin.uri:
     url: "http://127.0.0.1:3000/api/dashboards/uid/lv3-vm-{{ item.name }}"
@@ -1029,6 +1099,12 @@
   ansible.builtin.slurp:
     src: "{{ monitoring_grafana_capacity_dashboard_file }}"
   register: monitoring_grafana_capacity_dashboard_payload_raw
+  no_log: true
+
+- name: Read rendered LV3 log canary overview dashboard
+  ansible.builtin.slurp:
+    src: "{{ monitoring_grafana_log_canary_dashboard_file }}"
+  register: monitoring_grafana_log_canary_dashboard_payload_raw
   no_log: true
 
 - name: Render VM detail dashboards
@@ -1127,6 +1203,24 @@
   when: monitoring_grafana_capacity_dashboard_file_rendered is changed or monitoring_grafana_capacity_dashboard_existing.status == 404
   no_log: true
 
+- name: Import LV3 log canary dashboard into Grafana
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/api/dashboards/db
+    method: POST
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      dashboard: "{{ monitoring_grafana_log_canary_dashboard_payload_raw.content | b64decode | from_json }}"
+      folderUid: "{{ monitoring_grafana_folder_uid }}"
+      overwrite: true
+    status_code: 200
+  register: monitoring_grafana_log_canary_dashboard_import
+  changed_when: monitoring_grafana_log_canary_dashboard_file_rendered is changed or monitoring_grafana_log_canary_dashboard_existing.status == 404
+  when: monitoring_grafana_log_canary_dashboard_file_rendered is changed or monitoring_grafana_log_canary_dashboard_existing.status == 404
+  no_log: true
+
 - name: Import VM detail dashboards into Grafana
   ansible.builtin.uri:
     url: http://127.0.0.1:3000/api/dashboards/db
@@ -1194,6 +1288,18 @@
     force_basic_auth: true
     status_code: 200
   register: monitoring_grafana_capacity_dashboard_check
+  changed_when: false
+  no_log: true
+
+- name: Verify LV3 log canary dashboard is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_log_canary_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_grafana_log_canary_dashboard_check
   changed_when: false
   no_log: true
 

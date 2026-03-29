@@ -6,6 +6,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import yaml  # type: ignore[import-untyped]
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -184,3 +186,63 @@ def test_gate_status_reports_latest_bypass_and_runs(tmp_path: Path, capsys) -> N
     assert "Last gate run: passed" in captured.out
     assert "Last post-merge gate run: failed" in captured.out
     assert "Latest bypass receipt:" in captured.out
+
+
+def test_gate_status_supports_json_output(tmp_path: Path, capsys) -> None:
+    gate_status = load_module("gate_status_json", "scripts/gate_status.py")
+    manifest_path = tmp_path / "validation-gate.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "yaml-lint": {
+                    "description": "lint yaml",
+                    "severity": "warning",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    old_argv = sys.argv[:]
+    try:
+        sys.argv = [
+            "gate_status.py",
+            "--manifest",
+            str(manifest_path),
+            "--last-run",
+            str(tmp_path / "missing-last-run.json"),
+            "--post-merge-run",
+            str(tmp_path / "missing-post-merge.json"),
+            "--bypass-dir",
+            str(tmp_path / "missing-bypasses"),
+            "--format",
+            "json",
+        ]
+        exit_code = gate_status.main()
+    finally:
+        sys.argv = old_argv
+
+    payload = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert payload["enabled_checks"] == [
+        {
+            "description": "lint yaml",
+            "id": "yaml-lint",
+            "severity": "warning",
+        }
+    ]
+    assert payload["last_run"] is None
+    assert payload["post_merge_run"] is None
+    assert payload["latest_bypass"] is None
+
+
+def test_gate_status_workflow_catalog_and_windmill_seed_align() -> None:
+    catalog = json.loads((REPO_ROOT / "config" / "workflow-catalog.json").read_text(encoding="utf-8"))
+    runtime_defaults = yaml.safe_load(
+        (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text(
+            encoding="utf-8"
+        )
+    )
+    script_paths = {entry["path"] for entry in runtime_defaults["windmill_seed_scripts"]}
+
+    assert "config/windmill/scripts/gate-status.py" in catalog["workflows"]["gate-status"]["implementation_refs"]
+    assert "f/lv3/gate-status" in script_paths

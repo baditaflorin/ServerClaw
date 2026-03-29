@@ -1,3 +1,29 @@
+# Playbook: proxmox-install.yml
+# Purpose: Converge the Debian 13 host into the repo-managed Proxmox baseline, including access, networking, security, API access, backups, and the ADR 0226 host control-loop supervisor.
+# Use case: Run for first-host bootstrap or later host-only convergence from the canonical repository state.
+#
+# Inputs (required):
+#   - bootstrap_ssh_private_key (path, required via make targets): SSH private key used for the host connection.
+#
+# Inputs (optional):
+#   - platform_trace_id (str, optional): Mutation-audit trace identifier propagated by the make wrapper.
+#
+# Outputs:
+#   - Proxmox platform packages, host access, networking, security, API access, backup policy, and host control-loop systemd units converged from repo truth.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - ADR 0001: Establishes the Debian-to-Proxmox bootstrap path.
+#   - ADR 0224: Treats server-resident operation as the default control model.
+#   - ADR 0226: Requires systemd service, timer, and path coverage for host-resident control loops.
+#   - Role: lv3.platform.proxmox_host_control_loops — installs the canonical host control-loop supervisor baseline.
+#
+# Related ADRs: 0001, 0224, 0226
+# Related Runbooks: docs/runbooks/configure-host-control-loops.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
 ---
 - name: Install Proxmox VE on Debian 13 hosts
   hosts: proxmox_hosts
@@ -44,6 +70,9 @@
     - role: lv3.platform.proxmox_api_access
       tags:
         - api-access
+    - role: lv3.platform.proxmox_host_control_loops
+      tags:
+        - control-loops
     - role: lv3.platform.proxmox_backups
       tags:
         - storage

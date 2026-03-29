@@ -334,6 +334,9 @@ class ScaffoldServiceTests(unittest.TestCase):
             self.assertTrue((root / "docs" / "adr" / "0002-test-echo.md").is_file())
             self.assertTrue((root / "docs" / "workstreams" / "adr-0002-test-echo.md").is_file())
             self.assertTrue((root / "docs" / "runbooks" / "configure-test-echo.md").is_file())
+            adr_text = (root / "docs" / "adr" / "0002-test-echo.md").read_text()
+            self.assertIn("## Replaceability Scorecard", adr_text)
+            self.assertIn("## Vendor Exit Plan", adr_text)
 
             service_catalog = json.loads((root / "config" / "service-capability-catalog.json").read_text())
             service_entry = next(item for item in service_catalog["services"] if item["id"] == "test_echo")
@@ -348,6 +351,7 @@ class ScaffoldServiceTests(unittest.TestCase):
             self.assertEqual(subdomain_entry["target_port"], 8181)
 
             health_catalog = json.loads((root / "config" / "health-probe-catalog.json").read_text())
+            self.assertIn("startup", health_catalog["services"]["test_echo"])
             self.assertFalse(health_catalog["services"]["test_echo"]["uptime_kuma"]["enabled"])
             self.assertIn("TODO", health_catalog["services"]["test_echo"]["uptime_kuma"]["reason"])
 

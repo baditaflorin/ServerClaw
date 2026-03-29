@@ -19,6 +19,28 @@ We will manage @@DISPLAY_NAME@@ as a repo-scaffolded service using:
 - playbook: [@@PLAYBOOK_PATH@@](@@ABS_REPO_ROOT@@/@@PLAYBOOK_PATH@@)
 - runbook: [@@RUNBOOK_PATH@@](@@ABS_REPO_ROOT@@/@@RUNBOOK_PATH@@)
 
+## Replaceability Scorecard
+
+Required when this ADR is classified as a critical product surface under ADR 0212. Remove or replace this placeholder section before merge if the service is explicitly outside that governed set.
+
+- Capability Definition: TODO: cite the current capability definition or nearest canonical contract for @@DISPLAY_NAME@@.
+- Contract Fit: TODO
+- Data Export / Import: TODO
+- Migration Complexity: TODO
+- Proprietary Surface Area: TODO
+- Approved Exceptions: TODO
+- Fallback / Downgrade: TODO
+- Observability / Audit Continuity: TODO
+
+## Vendor Exit Plan
+
+- Reevaluation Triggers: TODO
+- Portable Artifacts: TODO
+- Migration Path: TODO
+- Alternative Product: TODO
+- Owner: TODO
+- Review Cadence: TODO
+
 ## Consequences
 
 - TODO: record the operational tradeoffs, risks, and follow-up work.

@@ -6,8 +6,10 @@ Use this runbook when adding, changing, or live-applying placement metadata gove
 
 ## Repo Truth
 
-The authoritative placement declarations live in two places:
+The authoritative placement declarations live in three places:
 
+- `config/shared-policy-packs.json`
+  - declares the canonical failure-domain kinds, statuses, placement classes, and reserved-capacity exclusion vocabulary used by the validators
 - `inventory/host_vars/proxmox_florin.yml`
   - `platform_failure_domains` declares the currently active and planned failure domains.
   - each `proxmox_guests[]` entry declares `placement.failure_domain`, `placement.placement_class`, `placement.anti_affinity_group`, and `placement.co_location_exceptions`.
@@ -17,9 +19,10 @@ The authoritative placement declarations live in two places:
 ## Update Procedure
 
 1. Update the relevant guest or environment placement metadata in repo.
-2. If a standby or recovery object still shares the only active failure domain, add an explicit `co_location_exceptions` entry with a clear rationale.
-3. If a preview or fixture environment shares the primary host, keep `reserved_capacity_exclusions` at least `standby` and preferably `recovery` too.
-4. Validate the policy and the wider repo models:
+2. If the placement vocabulary itself changes, update `config/shared-policy-packs.json` instead of hand-editing duplicate enums in each consumer.
+3. If a standby or recovery object still shares the only active failure domain, add an explicit `co_location_exceptions` entry with a clear rationale.
+4. If a preview or fixture environment shares the primary host, keep `reserved_capacity_exclusions` at least `standby` and preferably `recovery` too.
+5. Validate the policy and the wider repo models:
 
 ```bash
 python3 scripts/failure_domain_policy.py --validate

@@ -60,16 +60,23 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert forward_recheck["until"] == "docker_runtime_forward_chain_recheck.rc == 0"
 
 
-def test_docker_runtime_patches_nftables_one_rule_per_cidr() -> None:
+def test_docker_runtime_patches_nftables_rule_block_once() -> None:
     tasks = load_tasks()
     build_rules = next(task for task in tasks if task["name"] == "Build the Docker bridge forward-compat rule block")
     patch_rules = next(task for task in tasks if task["name"] == "Patch nftables forward policy for Docker bridge egress")
     reload_rules = next(task for task in tasks if task["name"] == "Reload nftables after forward compatibility patch")
 
-    assert "docker_runtime_container_forward_rules" in build_rules["ansible.builtin.set_fact"]
-    assert patch_rules["ansible.builtin.lineinfile"]["line"] == "    {{ item }}"
-    assert patch_rules["loop"] == "{{ docker_runtime_container_forward_rules }}"
-    assert reload_rules["changed_when"] == "docker_runtime_nftables_forward_patch.results | selectattr('changed') | list | length > 0"
+    assert "docker_runtime_container_forward_rule_block" in build_rules["ansible.builtin.set_fact"]
+    assert patch_rules["ansible.builtin.lineinfile"]["line"] == "    {{ docker_runtime_container_forward_rule_block }}"
+    assert "loop" not in patch_rules
+    assert reload_rules["changed_when"] == "docker_runtime_nftables_forward_patch.changed"
+
+
+def test_docker_runtime_pins_public_edge_hostnames_and_address_pools() -> None:
+    tasks = load_tasks()
+    pin_hosts = next(task for task in tasks if task["name"] == "Pin public edge hostnames to the internal edge for Docker guests")
+
+    assert pin_hosts["loop"] == "{{ docker_runtime_public_edge_host_aliases | default([]) }}"
 
 
 def test_docker_runtime_defaults_pin_governed_resolvers_and_registry_mirror() -> None:
@@ -78,3 +85,8 @@ def test_docker_runtime_defaults_pin_governed_resolvers_and_registry_mirror() ->
 
     assert daemon_config["dns"] == ["1.1.1.1", "8.8.8.8"]
     assert daemon_config["registry-mirrors"] == ["https://mirror.gcr.io"]
+    assert daemon_config["default-address-pools"] == [
+        {"base": "172.16.0.0/12", "size": 24},
+        {"base": "192.168.0.0/16", "size": 24},
+        {"base": "10.200.0.0/16", "size": 24},
+    ]

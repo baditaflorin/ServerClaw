@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0193](../adr/0193-plane-kanban-task-board.md)
 - Title: Integrate ADR 0193 live apply into `origin/main`
-- Status: ready
+- Status: live_applied
 - Branch: `codex/ws-0193-main-merge`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0193-main-merge`
 - Owner: codex
@@ -32,3 +32,11 @@ Carry the verified ADR 0193 Plane live-apply branch into the latest `origin/main
 - replay the Plane live apply from mainline truth
 - update protected main-only state after the live replay is verified
 - push the final merge into `origin/main`
+
+## Outcome
+
+- latest `origin/main` was fetched and merged before the final Plane replay
+- the merged-main candidate kept the Plane replay-safe topology defaults that now resolve controller URLs from `hostvars['proxmox_florin'].platform_service_topology`
+- `make live-apply-service service=plane env=production ALLOW_IN_PLACE_MUTATION=true` reconverged the Plane host, database, runtime, bootstrap, and ADR-sync lanes from the merged-main candidate
+- the shared public edge lane was then completed with `make configure-edge-publication env=production` after regenerating the required portal/docs publication artifacts
+- the final live evidence is recorded in `receipts/live-applies/2026-03-28-adr-0193-plane-mainline-live-apply.json`

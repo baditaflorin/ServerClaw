@@ -1,0 +1,156 @@
+---
+- name: Validate Nomad bootstrap inputs
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: assert_vars
+  vars:
+    common_assert_vars_required:
+      - nomad_cluster_bootstrap_management_token_local_file
+      - nomad_cluster_bootstrap_management_token_remote_file
+      - nomad_cluster_bootstrap_remote_ca_cert_file
+      - nomad_cluster_bootstrap_remote_job_dir
+      - nomad_cluster_bootstrap_server_local_url
+      - nomad_cluster_bootstrap_smoke_service_job_file_local
+      - nomad_cluster_bootstrap_smoke_service_job_file_remote
+      - nomad_cluster_bootstrap_smoke_batch_job_file_local
+      - nomad_cluster_bootstrap_smoke_batch_job_file_remote
+      - nomad_cluster_bootstrap_build_host
+      - nomad_cluster_bootstrap_runtime_host
+      - nomad_cluster_bootstrap_expected_nodes
+    common_assert_vars_fail_msg: >-
+      nomad_cluster_bootstrap requires the mirrored token paths, remote job paths, and smoke job metadata.
+
+- name: Ensure the controller-local Nomad token directory exists
+  ansible.builtin.file:
+    path: "{{ nomad_cluster_bootstrap_local_tokens_dir }}"
+    state: directory
+    owner: "{{ lookup('ansible.builtin.env', 'USER') | default('live', true) }}"
+    group: staff
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Check whether the controller-local Nomad bootstrap token exists
+  ansible.builtin.stat:
+    path: "{{ nomad_cluster_bootstrap_management_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: nomad_cluster_bootstrap_local_token_stat
+
+- name: Check whether the remote Nomad bootstrap token exists
+  ansible.builtin.stat:
+    path: "{{ nomad_cluster_bootstrap_management_token_remote_file }}"
+  register: nomad_cluster_bootstrap_remote_token_stat
+
+- name: Read the remote Nomad bootstrap token for controller restoration
+  ansible.builtin.slurp:
+    src: "{{ nomad_cluster_bootstrap_management_token_remote_file }}"
+  register: nomad_cluster_bootstrap_remote_token_raw
+  when:
+    - not nomad_cluster_bootstrap_local_token_stat.stat.exists
+    - nomad_cluster_bootstrap_remote_token_stat.stat.exists
+
+- name: Restore the controller-local Nomad bootstrap token from the live server
+  ansible.builtin.copy:
+    dest: "{{ nomad_cluster_bootstrap_management_token_local_file }}"
+    content: "{{ nomad_cluster_bootstrap_remote_token_raw.content | b64decode | trim }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+  when:
+    - not nomad_cluster_bootstrap_local_token_stat.stat.exists
+    - nomad_cluster_bootstrap_remote_token_stat.stat.exists
+
+- name: Refresh the controller-local Nomad bootstrap token stat after restoration
+  ansible.builtin.stat:
+    path: "{{ nomad_cluster_bootstrap_management_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: nomad_cluster_bootstrap_local_token_restored_stat
+
+- name: Bootstrap the Nomad ACL management token
+  ansible.builtin.command:
+    argv:
+      - nomad
+      - acl
+      - bootstrap
+      - -address={{ nomad_cluster_bootstrap_server_local_url }}
+      - -ca-cert={{ nomad_cluster_bootstrap_remote_ca_cert_file }}
+      - -json
+  register: nomad_cluster_bootstrap_acl_bootstrap
+  changed_when: true
+  no_log: true
+  when: not nomad_cluster_bootstrap_local_token_restored_stat.stat.exists
+
+- name: Persist the freshly bootstrapped Nomad management token locally
+  ansible.builtin.copy:
+    dest: "{{ nomad_cluster_bootstrap_management_token_local_file }}"
+    content: "{{ (nomad_cluster_bootstrap_acl_bootstrap.stdout | from_json).SecretID | trim }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+  when: not nomad_cluster_bootstrap_local_token_restored_stat.stat.exists
+
+- name: Read the controller-local Nomad management token
+  ansible.builtin.set_fact:
+    nomad_cluster_bootstrap_management_token: >-
+      {{ lookup('ansible.builtin.file', nomad_cluster_bootstrap_management_token_local_file) | trim }}
+  no_log: true
+
+- name: Mirror the Nomad management token to the live server
+  ansible.builtin.copy:
+    dest: "{{ nomad_cluster_bootstrap_management_token_remote_file }}"
+    content: "{{ nomad_cluster_bootstrap_management_token }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Ensure the remote Nomad job directory exists
+  ansible.builtin.file:
+    path: "{{ nomad_cluster_bootstrap_remote_job_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install the repo-managed Nomad smoke service job
+  ansible.builtin.copy:
+    src: "{{ nomad_cluster_bootstrap_smoke_service_job_file_local }}"
+    dest: "{{ nomad_cluster_bootstrap_smoke_service_job_file_remote }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Install the repo-managed Nomad smoke batch job
+  ansible.builtin.copy:
+    src: "{{ nomad_cluster_bootstrap_smoke_batch_job_file_local }}"
+    dest: "{{ nomad_cluster_bootstrap_smoke_batch_job_file_remote }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Register the repo-managed Nomad smoke service job
+  ansible.builtin.command:
+    argv:
+      - /usr/local/bin/lv3-nomad
+      - job
+      - run
+      - "{{ nomad_cluster_bootstrap_smoke_service_job_file_remote }}"
+  register: nomad_cluster_bootstrap_smoke_service_run
+  changed_when: "'registered' in (nomad_cluster_bootstrap_smoke_service_run.stdout | lower)"
+
+- name: Register the repo-managed Nomad smoke batch job
+  ansible.builtin.command:
+    argv:
+      - /usr/local/bin/lv3-nomad
+      - job
+      - run
+      - "{{ nomad_cluster_bootstrap_smoke_batch_job_file_remote }}"
+  register: nomad_cluster_bootstrap_smoke_batch_run
+  changed_when: "'registered' in (nomad_cluster_bootstrap_smoke_batch_run.stdout | lower)"
+
+- name: Verify the Nomad cluster bootstrap state
+  ansible.builtin.import_tasks: verify.yml

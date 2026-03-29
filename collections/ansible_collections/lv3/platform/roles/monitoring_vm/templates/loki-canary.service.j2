@@ -1,0 +1,41 @@
+[Unit]
+Description=LV3 Loki Canary
+Documentation=https://grafana.com/docs/loki/latest/operations/loki-canary/
+After=network-online.target loki.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/loki-canary \
+  -addr=127.0.0.1:{{ monitoring_loki_port }} \
+  -push \
+  -port={{ monitoring_loki_canary_metrics_port }} \
+  -interval={{ monitoring_loki_canary_interval }} \
+  -wait={{ monitoring_loki_canary_wait }} \
+  -max-wait={{ monitoring_loki_canary_max_wait }} \
+  -query-timeout={{ monitoring_loki_canary_query_timeout }} \
+  -metric-test-interval={{ monitoring_loki_canary_metric_test_interval }} \
+  -metric-test-range={{ monitoring_loki_canary_metric_test_range }} \
+  -spot-check-interval={{ monitoring_loki_canary_spot_check_interval }} \
+  -spot-check-max={{ monitoring_loki_canary_spot_check_max }} \
+  -spot-check-query-rate={{ monitoring_loki_canary_spot_check_query_rate }} \
+  -size={{ monitoring_loki_canary_line_size }}
+Restart=always
+RestartSec=10s
+DynamicUser=yes
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectControlGroups=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

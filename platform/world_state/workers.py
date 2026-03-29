@@ -7,7 +7,6 @@ import os
 import socket
 import ssl
 import subprocess
-import sys
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -15,7 +14,18 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Any, Callable
 
+from platform.degradation import default_state_path
 from platform.events import build_envelope
+from platform.health.semantics import (
+    RUNTIME_STATE_DEGRADED,
+    RUNTIME_STATE_FAILED,
+    RUNTIME_STATE_READY,
+    RUNTIME_STATE_STARTUP,
+    RUNTIME_STATE_UNKNOWN,
+    classify_runtime_state,
+    legacy_status_for_runtime_state,
+)
+from platform.maintenance import list_active_windows
 from platform.timeouts import TimeoutContext, default_timeout, resolve_timeout_seconds
 
 from ._db import ConnectionFactory, isoformat, parse_timestamp, utc_now
@@ -162,6 +172,27 @@ def health_probe_catalog(repo_root: Path) -> dict[str, dict[str, Any]]:
     return services if isinstance(services, dict) else {}
 
 
+def load_degradation_state(repo_root: Path) -> dict[str, list[dict[str, Any]]]:
+    path = default_state_path(repo_root)
+    if not path.exists():
+        return {}
+    try:
+        payload = load_json(path)
+    except (OSError, json.JSONDecodeError):
+        return {}
+    services = payload.get("services", {}) if isinstance(payload, dict) else {}
+    if not isinstance(services, dict):
+        return {}
+    normalized: dict[str, list[dict[str, Any]]] = {}
+    for service_id, entries in services.items():
+        if not isinstance(service_id, str) or not isinstance(entries, dict):
+            continue
+        active = [entry for entry in entries.values() if isinstance(entry, dict)]
+        if active:
+            normalized[service_id] = active
+    return normalized
+
+
 def probe_service(url: str) -> tuple[str, int | None, str | None]:
     parsed = urllib.parse.urlparse(url)
     if parsed.scheme not in {"http", "https"}:
@@ -222,35 +253,107 @@ def probe_tcp_contract(probe: dict[str, Any]) -> tuple[str, int | None, str | No
         return "down", None, str(exc)
 
 
+def phase_result_from_observation(
+    phase: str,
+    kind: str,
+    status: str,
+    http_status: int | None,
+    detail: str | None,
+) -> dict[str, Any]:
+    return {
+        "phase": phase,
+        "kind": kind,
+        "supported": True,
+        "ok": status == "ok",
+        "status": status,
+        "http_status": http_status,
+        "detail": detail,
+    }
+
+
+def unsupported_phase_result(phase: str, kind: str) -> dict[str, Any]:
+    return {
+        "phase": phase,
+        "kind": kind,
+        "supported": False,
+        "ok": None,
+        "status": "unsupported",
+        "http_status": None,
+        "detail": f"{kind} probes are not executable from the service_health worker",
+    }
+
+
+def probe_contract_phase(probe: dict[str, Any], phase: str) -> dict[str, Any]:
+    kind = str(probe.get("kind") or "unknown")
+    if kind == "http":
+        status, http_status, detail = probe_http_contract(probe)
+        return phase_result_from_observation(phase, kind, status, http_status, detail)
+    if kind == "tcp":
+        status, http_status, detail = probe_tcp_contract(probe)
+        return phase_result_from_observation(phase, kind, status, http_status, detail)
+    return unsupported_phase_result(phase, kind)
+
+
+def contract_phase_results(contract: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    results: dict[str, dict[str, Any]] = {}
+    for phase in ("startup", "liveness", "readiness"):
+        probe = contract.get(phase)
+        if isinstance(probe, dict):
+            results[phase] = probe_contract_phase(probe, phase)
+    return results
+
+
+def fallback_runtime_state(status: str) -> str | None:
+    normalized = status.strip().lower()
+    if normalized in {"ok", "healthy"}:
+        return RUNTIME_STATE_READY
+    if normalized in {"warn", "warning", "degraded"}:
+        return RUNTIME_STATE_DEGRADED
+    if normalized in {"down", "failed", "error", "unhealthy", "unreachable"}:
+        return RUNTIME_STATE_FAILED
+    return None
+
+
+def primary_phase_result(phase_results: dict[str, dict[str, Any]], runtime_state: str) -> dict[str, Any] | None:
+    if runtime_state == RUNTIME_STATE_STARTUP and "startup" in phase_results:
+        return phase_results["startup"]
+    if runtime_state == RUNTIME_STATE_FAILED:
+        for phase in ("liveness", "readiness", "startup"):
+            if phase_results.get(phase, {}).get("ok") is False:
+                return phase_results[phase]
+    for phase in ("readiness", "liveness", "startup"):
+        if phase in phase_results:
+            return phase_results[phase]
+    return None
+
+
 def probe_via_contract(service: dict[str, Any], contract: dict[str, Any]) -> dict[str, Any]:
-    for source in ("readiness", "liveness"):
-        probe = contract.get(source)
-        if not isinstance(probe, dict):
-            continue
-        kind = probe.get("kind")
-        if kind == "http":
-            status, http_status, detail = probe_http_contract(probe)
-            return {
-                "status": status,
-                "http_status": http_status,
-                "error": None if status == "ok" else detail,
-                "detail": detail,
-                "probe_source": source,
-                "probe_kind": kind,
-            }
-        if kind == "tcp":
-            status, http_status, detail = probe_tcp_contract(probe)
-            return {
-                "status": status,
-                "http_status": http_status,
-                "error": None if status == "ok" else detail,
-                "detail": detail,
-                "probe_source": source,
-                "probe_kind": kind,
-            }
+    phase_results = contract_phase_results(contract)
+    runtime_state = RUNTIME_STATE_UNKNOWN
+    detail = "missing URL"
+    degraded_active = bool(service.get("active_degradations"))
+    if phase_results:
+        runtime_state, detail = classify_runtime_state(
+            phase_results,
+            degraded_active=degraded_active,
+        )
+        primary = primary_phase_result(phase_results, runtime_state) or {}
+        result = {
+            "status": legacy_status_for_runtime_state(runtime_state),
+            "http_status": primary.get("http_status"),
+            "error": None if runtime_state in {RUNTIME_STATE_READY, RUNTIME_STATE_DEGRADED, RUNTIME_STATE_STARTUP} else detail,
+            "detail": detail,
+            "probe_source": primary.get("phase") or "service_catalog",
+            "probe_kind": primary.get("kind") or "url",
+            "phase_results": phase_results,
+        }
+        if runtime_state != RUNTIME_STATE_UNKNOWN:
+            result["runtime_state"] = runtime_state
+        return result
+
     url = url_for_service(service)
     status, http_status, detail = probe_service(url) if url else ("unknown", None, "missing URL")
-    return {
+    result = {
         "status": status,
         "http_status": http_status,
         "error": None if status == "ok" else detail,
@@ -258,10 +361,14 @@ def probe_via_contract(service: dict[str, Any], contract: dict[str, Any]) -> dic
         "probe_source": "service_catalog",
         "probe_kind": "url",
     }
+    runtime_state = fallback_runtime_state(status)
+    if runtime_state is not None:
+        result["runtime_state"] = runtime_state
+    return result
 
 
 def preferred_probe_source(contract: dict[str, Any]) -> tuple[str, str]:
-    for source in ("readiness", "liveness"):
+    for source in ("startup", "readiness", "liveness"):
         probe = contract.get(source)
         if not isinstance(probe, dict):
             continue
@@ -277,6 +384,7 @@ def collect_service_health(repo_root: Path) -> dict[str, Any]:
 
     catalog = read_repo_json(repo_root, "config/service-capability-catalog.json", {"services": []})
     probe_catalog = health_probe_catalog(repo_root)
+    degradation_state = load_degradation_state(repo_root)
     services: list[dict[str, Any]] = []
     for service in catalog.get("services", []):
         if service.get("lifecycle_status") != "active":
@@ -284,6 +392,8 @@ def collect_service_health(repo_root: Path) -> dict[str, Any]:
         url = url_for_service(service)
         health_probe_id = str(service.get("health_probe_id") or service.get("id") or "")
         contract = probe_catalog.get(health_probe_id, {})
+        service = dict(service)
+        service["active_degradations"] = degradation_state.get(str(service.get("id")), [])
         try:
             if contract:
                 result = probe_via_contract(service, contract)
@@ -320,12 +430,28 @@ def collect_service_health(repo_root: Path) -> dict[str, Any]:
                 "probe_source": result["probe_source"],
                 "probe_kind": result["probe_kind"],
                 "uptime_monitor_name": service.get("uptime_monitor_name"),
+                "active_degradations": service["active_degradations"],
             }
         )
+        if "runtime_state" in result:
+            services[-1]["runtime_state"] = result["runtime_state"]
+        if "phase_results" in result:
+            services[-1]["phase_results"] = result["phase_results"]
     status_counts: dict[str, int] = {}
+    runtime_state_counts: dict[str, int] = {}
     for service in services:
         status_counts[service["status"]] = status_counts.get(service["status"], 0) + 1
-    return {"services": services, "summary": {"total": len(services), "statuses": status_counts}}
+        runtime_state = str(service.get("runtime_state") or "").strip()
+        if runtime_state:
+            runtime_state_counts[runtime_state] = runtime_state_counts.get(runtime_state, 0) + 1
+    return {
+        "services": services,
+        "summary": {
+            "total": len(services),
+            "statuses": status_counts,
+            "runtime_states": runtime_state_counts,
+        },
+    }
 
 
 def collect_container_inventory(repo_root: Path) -> list[dict[str, Any]]:
@@ -531,12 +657,7 @@ def collect_maintenance_windows(repo_root: Path) -> dict[str, Any]:
     if fixture is not None:
         return fixture
 
-    scripts_dir = repo_root / "scripts"
-    if str(scripts_dir) not in sys.path:
-        sys.path.insert(0, str(scripts_dir))
-    import maintenance_window_tool
-
-    windows = maintenance_window_tool.list_active_windows()
+    windows = list_active_windows(repo_root=repo_root)
     active_windows = []
     for key, value in windows.items():
         active_windows.append({"key": key, **value})

@@ -95,6 +95,15 @@ If step 7 returns `302` to `/oauth2/sign_in`, treat that as the expected authent
 
 If step 7 returns `308` to `https://nginx.lv3.org/`, treat that as a shared NGINX publication blocker rather than a Plane runtime failure. The controller path at `http://100.64.0.1:8011` remains the authoritative automation surface until the edge publication lane is reconciled.
 
+If the shared publication lane fails because `build/changelog-portal/` or `build/docs-portal/` is missing, regenerate the shared static artifacts first and then replay the edge publication only:
+
+```bash
+make generate-ops-portal
+make generate-changelog-portal
+make docs
+make configure-edge-publication env=production
+```
+
 ## Operating Rules
 
 - keep public browser access behind the shared edge auth flow

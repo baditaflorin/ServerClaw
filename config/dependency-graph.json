@@ -129,6 +129,15 @@
       "adr": "0011"
     },
     {
+      "id": "harbor",
+      "service": "harbor",
+      "name": "Harbor",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "security",
+      "adr": "0201"
+    },
+    {
       "id": "keycloak",
       "service": "keycloak",
       "name": "Keycloak",
@@ -199,6 +208,15 @@
       "tier": 1,
       "category": "infrastructure",
       "adr": "0021"
+    },
+    {
+      "id": "nomad",
+      "service": "nomad",
+      "name": "Nomad",
+      "vm": "monitoring-lv3",
+      "tier": 1,
+      "category": "automation",
+      "adr": "0232"
     },
     {
       "id": "ntfy",
@@ -470,6 +488,18 @@
       "description": "Public access to apps.lv3.org depends on the shared NGINX edge publication while the guest-local ingress remains reachable for direct verification."
     },
     {
+      "from": "nomad",
+      "to": "docker_runtime",
+      "type": "soft",
+      "description": "Runtime-targeted batch jobs and internal helper workloads depend on the docker-runtime Nomad client remaining available for placement."
+    },
+    {
+      "from": "nomad",
+      "to": "docker_build",
+      "type": "soft",
+      "description": "Long-running internal helper services pinned to the build pool depend on the docker-build Nomad client remaining available for placement."
+    },
+    {
       "from": "dify",
       "to": "postgres",
       "type": "hard",
@@ -558,6 +588,18 @@
       "to": "nginx_edge",
       "type": "soft",
       "description": "Public access to grafana.lv3.org depends on the shared NGINX edge; private reachability remains available if the edge is degraded."
+    },
+    {
+      "from": "harbor",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Operator browser sign-in to registry.lv3.org depends on the shared Keycloak OIDC path, while robot credentials still support governed automation."
+    },
+    {
+      "from": "harbor",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public reachability for registry.lv3.org depends on the shared NGINX edge publication path."
     },
     {
       "from": "keycloak",

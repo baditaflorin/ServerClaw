@@ -1,0 +1,97 @@
+#!/bin/bash
+set -euo pipefail
+
+checkout_path="{{ server_resident_reconciliation_checkout_path }}"
+receipts_dir="{{ server_resident_reconciliation_receipts_dir }}"
+lock_file="{{ server_resident_reconciliation_lock_file }}"
+repo_url="{{ server_resident_reconciliation_repo_url }}"
+repo_branch="{{ server_resident_reconciliation_repo_branch }}"
+inventory_path="{{ server_resident_reconciliation_inventory_path }}"
+playbook_path="{{ server_resident_reconciliation_playbook_path }}"
+inventory_host="{{ server_resident_reconciliation_inventory_host }}"
+askpass_path="{{ server_resident_reconciliation_askpass_path }}"
+schema_version="{{ server_resident_reconciliation_receipt_schema_version }}"
+
+mkdir -p "$receipts_dir"
+
+exec 9>"$lock_file"
+if ! flock -n 9; then
+  echo "server-resident reconciliation already running"
+  exit 0
+fi
+
+started_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+started_epoch="$(date -u +%s)"
+run_id="reconcile-$(date -u +%Y%m%dT%H%M%SZ)"
+log_path="$receipts_dir/${run_id}.log"
+receipt_path="$receipts_dir/${run_id}.json"
+latest_path="$receipts_dir/latest.json"
+host_name="$(hostname -f 2>/dev/null || hostname)"
+
+export GIT_TERMINAL_PROMPT=0
+export GIT_ASKPASS="$askpass_path"
+
+set +e
+ansible-pull \
+  -U "$repo_url" \
+  -d "$checkout_path" \
+  -C "$repo_branch" \
+  -i "$inventory_path" \
+  -l "$inventory_host" \
+  -c local \
+  "$playbook_path" \
+  2>&1 | tee "$log_path"
+pull_exit_code=${PIPESTATUS[0]}
+set -e
+
+finished_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+finished_epoch="$(date -u +%s)"
+duration_seconds="$((finished_epoch - started_epoch))"
+source_commit="unknown"
+if [ -d "$checkout_path/.git" ]; then
+  source_commit="$(git -C "$checkout_path" rev-parse HEAD 2>/dev/null || printf 'unknown')"
+fi
+
+python3 - "$receipt_path" "$schema_version" "$host_name" "$started_at" "$finished_at" "$duration_seconds" "$pull_exit_code" "$source_commit" "$repo_branch" "$repo_url" "$playbook_path" "$inventory_path" "$inventory_host" "$log_path" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+(
+    receipt_path,
+    schema_version,
+    host_name,
+    started_at,
+    finished_at,
+    duration_seconds,
+    exit_code,
+    source_commit,
+    repo_branch,
+    repo_url,
+    playbook_path,
+    inventory_path,
+    inventory_host,
+    log_path,
+) = sys.argv[1:]
+
+payload = {
+    "schema_version": schema_version,
+    "host": host_name,
+    "started_at": started_at,
+    "finished_at": finished_at,
+    "duration_seconds": int(duration_seconds),
+    "exit_code": int(exit_code),
+    "status": "ok" if exit_code == "0" else "failed",
+    "source_commit": source_commit,
+    "repo_branch": repo_branch,
+    "repo_url": repo_url,
+    "playbook_path": playbook_path,
+    "inventory_path": inventory_path,
+    "inventory_host": inventory_host,
+    "log_path": log_path,
+}
+Path(receipt_path).write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+PY
+
+cp "$receipt_path" "$latest_path"
+exit "$pull_exit_code"

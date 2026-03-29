@@ -4,9 +4,21 @@ import argparse
 import json
 import os
 import sys
+from pathlib import Path
 from typing import Final
 
+if str(Path(__file__).resolve().parents[1]) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+    del sys.modules["platform"]
+
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
+from correction_loops import (
+    CORRECTION_LOOP_CATALOG_PATH,
+    load_correction_loop_catalog,
+    resolve_workflow_correction_loop,
+    validate_correction_loop_catalog,
+)
 from mutation_audit import build_event, emit_event_best_effort
 from workflow_catalog import (
     ALLOWED_LIVE_IMPACTS,
@@ -15,12 +27,15 @@ from workflow_catalog import (
     validate_secret_manifest,
     validate_workflow_catalog,
 )
+from platform.policy.engine import evaluate_command_approval_policy
 
 
 COMMAND_CATALOG_PATH = repo_path("config", "command-catalog.json")
 SUPPORTED_SCHEMA_VERSION: Final[str] = "1.0.0"
 ALLOWED_IDENTITY_CLASSES = {"human_operator", "service_identity", "agent", "break_glass"}
 ALLOWED_SCOPES = {"proxmox_host", "guest_runtime", "host_and_guest", "external_service"}
+ALLOWED_EXECUTION_TRANSPORTS = {"ssh_systemd_run_make"}
+ALLOWED_KILL_MODES = {"control-group", "mixed", "process", "none"}
 MUTATION_AUDIT_ACTOR_CLASS_MAP = {
     "human_operator": "operator",
     "service_identity": "service",
@@ -57,6 +72,15 @@ def require_mapping(value: object, path: str) -> dict:
     return value
 
 
+def validate_string_mapping(value: object, path: str) -> dict[str, str]:
+    mapping = require_mapping(value, path)
+    result: dict[str, str] = {}
+    for key, item in mapping.items():
+        normalized_key = require_str(key, f"{path} key")
+        result[normalized_key] = require_str(item, f"{path}.{normalized_key}")
+    return result
+
+
 def require_int(value: object, path: str, minimum: int = 0) -> int:
     if isinstance(value, bool) or not isinstance(value, int):
         raise ValueError(f"{path} must be an integer")
@@ -86,6 +110,34 @@ def validate_command_catalog(command_catalog: dict, workflow_catalog: dict, secr
 
     workflows = workflow_catalog["workflows"]
     secret_ids = set(secret_manifest["secrets"].keys())
+    execution_profiles = require_mapping(command_catalog.get("execution_profiles"), "execution_profiles")
+    if not execution_profiles:
+        raise ValueError("execution_profiles must not be empty")
+    for profile_id, profile in execution_profiles.items():
+        profile = require_mapping(profile, f"execution_profiles.{profile_id}")
+        require_str(profile_id, f"execution profile id '{profile_id}'")
+        transport = require_str(profile.get("transport"), f"execution_profiles.{profile_id}.transport")
+        if transport not in ALLOWED_EXECUTION_TRANSPORTS:
+            raise ValueError(
+                f"execution_profiles.{profile_id}.transport must be one of {sorted(ALLOWED_EXECUTION_TRANSPORTS)}"
+            )
+        require_str(profile.get("runtime_host"), f"execution_profiles.{profile_id}.runtime_host")
+        require_str(profile.get("runtime_repo_root"), f"execution_profiles.{profile_id}.runtime_repo_root")
+        require_str(
+            profile.get("runtime_compat_repo_root"),
+            f"execution_profiles.{profile_id}.runtime_compat_repo_root",
+        )
+        require_str(profile.get("effective_user"), f"execution_profiles.{profile_id}.effective_user")
+        require_str(profile.get("working_directory"), f"execution_profiles.{profile_id}.working_directory")
+        kill_mode = require_str(profile.get("kill_mode"), f"execution_profiles.{profile_id}.kill_mode")
+        if kill_mode not in ALLOWED_KILL_MODES:
+            raise ValueError(
+                f"execution_profiles.{profile_id}.kill_mode must be one of {sorted(ALLOWED_KILL_MODES)}"
+            )
+        require_str(profile.get("log_directory"), f"execution_profiles.{profile_id}.log_directory")
+        require_str(profile.get("receipt_directory"), f"execution_profiles.{profile_id}.receipt_directory")
+        if profile.get("env") is not None:
+            validate_string_mapping(profile.get("env"), f"execution_profiles.{profile_id}.env")
 
     policies = require_mapping(command_catalog.get("approval_policies"), "approval_policies")
     if not policies:
@@ -191,6 +243,18 @@ def validate_command_catalog(command_catalog: dict, workflow_catalog: dict, secr
             for index, item in enumerate(items):
                 require_str(item, f"commands.{command_id}.failure_guidance.{field}[{index}]")
 
+        execution = require_mapping(contract.get("execution"), f"commands.{command_id}.execution")
+        profile_id = require_str(execution.get("profile"), f"commands.{command_id}.execution.profile")
+        if profile_id not in execution_profiles:
+            raise ValueError(
+                f"commands.{command_id}.execution.profile references unknown execution profile '{profile_id}'"
+            )
+        require_int(execution.get("timeout_seconds"), f"commands.{command_id}.execution.timeout_seconds", 1)
+        if workflows[workflow_id]["preferred_entrypoint"]["kind"] != "make_target":
+            raise ValueError(
+                f"commands.{command_id}.workflow_id must use a make_target preferred entrypoint for this execution model"
+            )
+
     missing_contracts = sorted(
         workflow_id
         for workflow_id, workflow in workflows.items()
@@ -253,6 +317,28 @@ def show_command(command_catalog: dict, workflow_catalog: dict, command_id: str)
         print(f"  - stop: {item}")
     for item in contract["failure_guidance"]["rollback_guidance"]:
         print(f"  - rollback: {item}")
+    execution = contract["execution"]
+    profile = command_catalog["execution_profiles"][execution["profile"]]
+    print("Execution:")
+    print(f"  - profile: {execution['profile']}")
+    print(f"  - runtime_host: {profile['runtime_host']}")
+    print(f"  - effective_user: {profile['effective_user']}")
+    print(f"  - working_directory: {profile['working_directory']}")
+    print(f"  - timeout_seconds: {execution['timeout_seconds']}")
+    print(f"  - kill_mode: {profile['kill_mode']}")
+    print(f"  - log_directory: {profile['log_directory']}")
+    print(f"  - receipt_directory: {profile['receipt_directory']}")
+    if profile.get("env"):
+        print(f"  - env: {json.dumps(profile['env'], sort_keys=True)}")
+    if CORRECTION_LOOP_CATALOG_PATH.exists():
+        correction_catalog = load_correction_loop_catalog()
+        correction_loop = resolve_workflow_correction_loop(correction_catalog, contract["workflow_id"])
+        if correction_loop is not None:
+            print("Correction loop:")
+            print(f"  - id: {correction_loop['id']}")
+            print(f"  - invariant: {correction_loop['invariant']}")
+            print(f"  - verification: {correction_loop['verification']['source']}")
+            print(f"  - escalation: {correction_loop['escalation']['boundary']}")
     return 0
 
 
@@ -281,6 +367,40 @@ def emit_approval_audit_event(
     emit_event_best_effort(event, context=f"command approval '{command_id}'", stderr=sys.stderr)
 
 
+def build_approval_policy_input(
+    *,
+    command_catalog: dict,
+    workflow_catalog: dict,
+    command_id: str,
+    requester_class: str,
+    approver_classes: list[str],
+    preflight_passed: bool,
+    validation_passed: bool,
+    receipt_planned: bool,
+    self_approve: bool,
+    break_glass: bool,
+) -> dict[str, object]:
+    contract = command_catalog["commands"].get(command_id)
+    if contract is None:
+        raise ValueError(f"Unknown command contract: {command_id}")
+
+    workflow = workflow_catalog["workflows"][contract["workflow_id"]]
+    policy = command_catalog["approval_policies"][contract["approval_policy"]]
+    return {
+        "command_id": command_id,
+        "requester_class": requester_class,
+        "approver_classes": approver_classes,
+        "preflight_passed": preflight_passed,
+        "validation_passed": validation_passed,
+        "receipt_planned": receipt_planned,
+        "self_approve": self_approve,
+        "break_glass": break_glass,
+        "contract": contract,
+        "workflow": workflow,
+        "policy": policy,
+    }
+
+
 def evaluate_approval(
     command_catalog: dict,
     workflow_catalog: dict,
@@ -297,53 +417,28 @@ def evaluate_approval(
     contract = command_catalog["commands"].get(command_id)
     if contract is None:
         raise ValueError(f"Unknown command contract: {command_id}")
-
     workflow = workflow_catalog["workflows"][contract["workflow_id"]]
-    policy = command_catalog["approval_policies"][contract["approval_policy"]]
-    reasons: list[str] = []
-
-    if workflow["lifecycle_status"] != "active":
-        reasons.append(
-            f"workflow '{contract['workflow_id']}' is '{workflow['lifecycle_status']}', not active"
-        )
-
-    if requester_class not in ALLOWED_IDENTITY_CLASSES:
-        reasons.append(f"requester_class must be one of {sorted(ALLOWED_IDENTITY_CLASSES)}")
-    elif requester_class not in policy["allowed_requester_classes"]:
-        reasons.append(
-            f"requester_class '{requester_class}' is not allowed by policy '{contract['approval_policy']}'"
-        )
-
-    if len(approver_classes) < policy["minimum_approvals"]:
-        reasons.append(
-            f"policy '{contract['approval_policy']}' requires at least {policy['minimum_approvals']} approval(s)"
-        )
-
-    for approver_class in approver_classes:
-        if approver_class not in ALLOWED_IDENTITY_CLASSES:
-            reasons.append(f"approver_class '{approver_class}' must be one of {sorted(ALLOWED_IDENTITY_CLASSES)}")
-        elif approver_class not in policy["allowed_approver_classes"]:
-            reasons.append(
-                f"approver_class '{approver_class}' is not allowed by policy '{contract['approval_policy']}'"
-            )
-
-    if self_approve and not policy["allow_self_approval"]:
-        reasons.append(f"policy '{contract['approval_policy']}' does not allow self approval")
-    if break_glass and not policy["allow_break_glass"]:
-        reasons.append(f"policy '{contract['approval_policy']}' does not allow break-glass execution")
-    if policy["require_preflight"] and not preflight_passed:
-        reasons.append("preflight has not been marked passed")
-    if policy["require_validation"] and not validation_passed:
-        reasons.append("repository validation has not been marked passed")
-    if policy["require_receipt_plan"] and not receipt_planned:
-        reasons.append("receipt planning has not been marked complete")
-
+    payload = build_approval_policy_input(
+        command_catalog=command_catalog,
+        workflow_catalog=workflow_catalog,
+        command_id=command_id,
+        requester_class=requester_class,
+        approver_classes=approver_classes,
+        preflight_passed=preflight_passed,
+        validation_passed=validation_passed,
+        receipt_planned=receipt_planned,
+        self_approve=self_approve,
+        break_glass=break_glass,
+    )
+    decision = evaluate_command_approval_policy(payload, repo_root=Path(__file__).resolve().parents[1])
+    entrypoint_target = workflow["preferred_entrypoint"].get("target")
     return {
-        "approved": not reasons,
-        "reasons": reasons,
-        "workflow_id": contract["workflow_id"],
-        "entrypoint": workflow["preferred_entrypoint"]["command"],
-        "receipt_required": contract["evidence"]["live_apply_receipt_required"],
+        "approved": bool(decision["approved"]),
+        "reasons": list(decision["reasons"]),
+        "workflow_id": str(decision["workflow_id"]),
+        "entrypoint": str(decision["entrypoint"]),
+        "entrypoint_target": str(entrypoint_target) if entrypoint_target is not None else None,
+        "receipt_required": bool(decision["receipt_required"]),
     }
 
 
@@ -460,6 +555,9 @@ def main() -> int:
         validate_secret_manifest(secret_manifest)
         workflow_catalog = load_workflow_catalog()
         validate_workflow_catalog(workflow_catalog, secret_manifest)
+        if CORRECTION_LOOP_CATALOG_PATH.exists():
+            correction_catalog = load_correction_loop_catalog()
+            validate_correction_loop_catalog(correction_catalog, workflow_catalog)
         command_catalog = load_command_catalog()
         validate_command_catalog(command_catalog, workflow_catalog, secret_manifest)
     except (OSError, json.JSONDecodeError, ValueError) as exc:

@@ -4,8 +4,6 @@ import argparse
 import datetime as dt
 import json
 import os
-import shlex
-import subprocess
 import sys
 import uuid
 import urllib.error
@@ -22,6 +20,7 @@ from command_catalog import (
 )
 from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_json, load_yaml, repo_path
 from deployment_history import query_deployment_history
+from governed_command import execute_governed_command
 from live_apply_receipts import iter_receipt_paths, load_receipt, validate_receipts
 from maintenance_window_tool import list_active_windows_best_effort
 from workflow_catalog import (
@@ -506,55 +505,18 @@ def tool_check_command_approval(_tool: dict[str, Any], args: dict[str, Any]) -> 
 
 
 def tool_run_governed_command(_tool: dict[str, Any], args: dict[str, Any]) -> tuple[dict[str, Any], str]:
-    command_id = require_str(args.get("command_id"), "arguments.command_id")
-    dry_run = bool(args.get("dry_run", True))
-    secret_manifest, workflow_catalog, command_catalog = load_catalog_context()
-    validate_secret_manifest(secret_manifest)
-    verdict = evaluate_approval(
-        command_catalog,
-        workflow_catalog,
-        command_id,
-        **normalize_approval_args(args),
+    return execute_governed_command(
+        command_id=require_str(args.get("command_id"), "arguments.command_id"),
+        requester_class=require_str(args.get("requester_class"), "arguments.requester_class"),
+        approver_classes=require_list(args.get("approver_classes", []), "arguments.approver_classes"),
+        preflight_passed=bool(args.get("preflight_passed", False)),
+        validation_passed=bool(args.get("validation_passed", False)),
+        receipt_planned=bool(args.get("receipt_planned", False)),
+        self_approve=bool(args.get("self_approve", False)),
+        break_glass=bool(args.get("break_glass", False)),
+        parameters=require_mapping(args.get("parameters", {}), "arguments.parameters"),
+        dry_run=bool(args.get("dry_run", True)),
     )
-    if not verdict["approved"]:
-        return (
-            {
-                "approved": False,
-                "executed": False,
-                "command_id": command_id,
-                "workflow_id": verdict["workflow_id"],
-                "entrypoint": verdict["entrypoint"],
-                "reasons": verdict["reasons"],
-            },
-            "rejected",
-        )
-
-    if dry_run:
-        return (
-            {
-                "approved": True,
-                "executed": False,
-                "command_id": command_id,
-                "workflow_id": verdict["workflow_id"],
-                "entrypoint": verdict["entrypoint"],
-                "reasons": [],
-            },
-            "success",
-        )
-
-    command = shlex.split(verdict["entrypoint"])
-    process = subprocess.run(command, cwd=REPO_ROOT, text=True, capture_output=True, check=False)
-    result = {
-        "approved": True,
-        "executed": process.returncode == 0,
-        "command_id": command_id,
-        "workflow_id": verdict["workflow_id"],
-        "entrypoint": verdict["entrypoint"],
-        "reasons": [] if process.returncode == 0 else [process.stderr.strip() or "command execution failed"],
-        "returncode": process.returncode,
-    }
-    outcome = "success" if process.returncode == 0 else "failure"
-    return result, outcome
 
 
 HANDLERS: Final[dict[str, Any]] = {

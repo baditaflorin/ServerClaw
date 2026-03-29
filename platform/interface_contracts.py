@@ -4,9 +4,8 @@ import re
 from pathlib import Path
 from typing import Any
 
-from command_catalog import load_command_catalog
-from controller_automation_toolkit import load_yaml, parse_make_targets, repo_path
-from workflow_catalog import load_workflow_catalog
+from platform.catalogs import load_command_catalog, load_workflow_catalog
+from platform.repo import load_yaml, parse_make_targets, repo_path
 
 
 CONTRACTS_DIR = repo_path("config", "contracts")
@@ -17,7 +16,7 @@ ALLOWED_COMPATIBILITY_POLICIES = {
     "backward_compatible_patch",
     "versioned_breaking_change",
 }
-ALLOWED_WORKSTREAM_STATUSES = {"implemented", "live_applied", "merged", "ready"}
+ALLOWED_WORKSTREAM_STATUSES = {"implemented", "in_progress", "live_applied", "merged", "ready"}
 
 
 def _require_mapping(value: Any, path: str) -> dict[str, Any]:

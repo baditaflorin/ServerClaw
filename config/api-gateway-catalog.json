@@ -36,6 +36,17 @@
       "healthcheck_path": "/api/health"
     },
     {
+      "id": "harbor",
+      "name": "Harbor",
+      "upstream": "http://10.10.10.20:8095",
+      "gateway_prefix": "/v1/harbor",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 60,
+      "healthcheck_path": "/api/v2.0/ping"
+    },
+    {
       "id": "keycloak",
       "name": "Keycloak",
       "upstream": "http://10.10.10.20:18080",

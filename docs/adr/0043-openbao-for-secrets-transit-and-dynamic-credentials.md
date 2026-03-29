@@ -43,6 +43,26 @@ Authentication and authorization must be structured around narrow roles:
 - named services
 - break-glass operators
 
+## Replaceability Scorecard
+
+- Capability Definition: `platform_secret_authority` as defined by ADR 0034 controller-local secret handling, ADR 0047 short-lived credential policy, and the OpenBao operational runbook.
+- Contract Fit: strong for secret storage, transit cryptography, service and agent auth, and the future dynamic-credential path required by the control plane.
+- Data Export / Import: secret-path definitions, policy, auth mounts, transit key metadata, audit configuration, and recovery procedures can be exported and recreated on another secret authority even when secret values themselves are reissued instead of copied verbatim.
+- Migration Complexity: high because auth methods, policy boundaries, client bootstrap flows, and secret rotation sequences all have to move together without exposing long-lived fallback credentials.
+- Proprietary Surface Area: medium because auth mount semantics, transit APIs, and policy language are product-shaped even though the repo keeps secret inventory and rotation intent in platform-owned catalogs.
+- Approved Exceptions: OpenBao-native policy and transit semantics are accepted where they reduce blast radius, provided the repo keeps the canonical secret inventory, rotation workflow, and client ownership metadata outside product-specific exports.
+- Fallback / Downgrade: bounded controller-local secrets plus step-ca-issued mTLS and manual rotation can preserve minimum operation while a replacement authority is brought up.
+- Observability / Audit Continuity: audit devices, mutation audit logs, rotation receipts, and secret inventory reports remain the continuity surface during migration.
+
+## Vendor Exit Plan
+
+- Reevaluation Triggers: unacceptable seal or recovery posture, unsupported auth integrations, audit gaps, or a sustained inability to rotate secrets without downtime.
+- Portable Artifacts: path and policy definitions, auth mount inventory, transit key metadata, controller-local bootstrap manifests, rotation runbooks, and audit sinks.
+- Migration Path: stand up the replacement authority in parallel, mirror auth and policy boundaries, rotate service credentials and transit consumers by wave, prove the replacement through health and mutation tests, then disable OpenBao after the final credential cutover.
+- Alternative Product: HashiCorp Vault.
+- Owner: platform security.
+- Review Cadence: quarterly.
+
 ## Consequences
 
 - Repo-local secret files stop being the long-term operating model for internal services.

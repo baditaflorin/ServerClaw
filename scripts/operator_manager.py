@@ -12,17 +12,26 @@ import os
 import re
 import secrets
 import string
-import subprocess
 import sys
-import urllib.error
-import urllib.parse
-import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from mutation_audit import build_event, emit_event
+from platform.operator_access import (
+    IdentityDirectoryPort,
+    KeycloakAdminAdapter,
+    MattermostWebhookAdapter,
+    MeshNetworkPort,
+    NotificationPort,
+    OpenBaoIdentityAdapter,
+    OperatorAccessIntegrationError,
+    SSHCertificateRegistryPort,
+    SecretAuthorityPort,
+    StepCACommandAdapter,
+    TailscaleApiAdapter,
+)
 
 
 ROSTER_PATH = repo_path("config", "operators.yaml")
@@ -102,6 +111,9 @@ class OperatorBackend(Protocol):
         ...
 
     def reset_password(self, operator: dict[str, Any], password: str, *, temporary: bool) -> dict[str, Any]:
+        ...
+
+    def update_operator_notes(self, operator: dict[str, Any], notes_markdown: str) -> dict[str, Any]:
         ...
 
     def inventory_operator(self, operator: dict[str, Any], state: dict[str, Any], offline: bool) -> dict[str, Any]:
@@ -432,6 +444,13 @@ def dump_operator_roster(payload: dict[str, Any], path: Path = ROSTER_PATH) -> N
     path.write_text(yaml.safe_dump(normalized, sort_keys=False), encoding="utf-8")
 
 
+def normalize_notes_markdown(value: str) -> str | None:
+    normalized = value.replace("\r\n", "\n").strip()
+    if not normalized:
+        return None
+    return normalized
+
+
 def role_payload(role: str) -> dict[str, Any]:
     definition = ROLE_DEFINITIONS[role]
     return {
@@ -547,6 +566,28 @@ def mark_operator_inactive(roster: dict[str, Any], operator_id: str, offboarded_
     raise OperatorManagerError(f"Operator '{operator_id}' was not found in {ROSTER_PATH}.")
 
 
+def update_operator_notes_in_roster(
+    roster: dict[str, Any],
+    operator_id: str,
+    notes_markdown: str,
+    updated_by: str,
+) -> tuple[dict[str, Any], dict[str, Any], bool]:
+    updated = copy.deepcopy(roster)
+    normalized_notes = normalize_notes_markdown(notes_markdown)
+    for operator in updated["operators"]:
+        if operator["id"] != operator_id:
+            continue
+        previous_notes = normalize_notes_markdown(str(operator.get("notes", "")))
+        if normalized_notes is None:
+            operator.pop("notes", None)
+        else:
+            operator["notes"] = normalized_notes
+        operator["audit"]["last_reviewed_at"] = utc_now()
+        operator["audit"]["last_reviewed_by"] = updated_by
+        return validate_operator_roster(updated), operator, previous_notes != normalized_notes
+    raise OperatorManagerError(f"Operator '{operator_id}' was not found in {ROSTER_PATH}.")
+
+
 def find_operator(roster: dict[str, Any], operator_id: str) -> dict[str, Any]:
     for operator in roster["operators"]:
         if operator["id"] == operator_id:
@@ -577,192 +618,71 @@ def policy_documents() -> dict[str, str]:
     return payload
 
 
-def json_request(
-    url: str,
-    *,
-    method: str = "GET",
-    headers: dict[str, str] | None = None,
-    body: dict[str, Any] | list[Any] | str | None = None,
-    form: dict[str, str] | None = None,
-    expected_status: tuple[int, ...] = (200,),
-) -> Any:
-    request_headers = dict(headers or {})
-    data: bytes | None = None
-    if body is not None and form is not None:
-        raise OperatorManagerError("json_request cannot encode JSON and form payloads at the same time.")
-    if body is not None:
-        if isinstance(body, str):
-            data = body.encode("utf-8")
-        else:
-            data = json.dumps(body).encode("utf-8")
-        request_headers.setdefault("Content-Type", "application/json")
-    elif form is not None:
-        data = urllib.parse.urlencode(form).encode("utf-8")
-        request_headers.setdefault("Content-Type", "application/x-www-form-urlencoded")
-
-    request = urllib.request.Request(url, data=data, method=method, headers=request_headers)
-    try:
-        with urllib.request.urlopen(request, timeout=15) as response:
-            content = response.read().decode("utf-8")
-            if response.status not in expected_status:
-                raise OperatorManagerError(f"{method} {url} returned unexpected HTTP {response.status}.")
-            if not content.strip():
-                return {}
-            if "application/json" in response.headers.get("Content-Type", ""):
-                return json.loads(content)
-            try:
-                return json.loads(content)
-            except json.JSONDecodeError:
-                return {"raw": content}
-    except urllib.error.HTTPError as exc:
-        detail = exc.read().decode("utf-8", errors="replace")
-        raise OperatorManagerError(f"{method} {url} failed with HTTP {exc.code}: {detail}") from exc
-    except urllib.error.URLError as exc:
-        raise OperatorManagerError(f"{method} {url} failed: {exc}") from exc
+def build_live_backend_ports() -> tuple[
+    IdentityDirectoryPort,
+    SecretAuthorityPort,
+    SSHCertificateRegistryPort,
+    MeshNetworkPort,
+    NotificationPort,
+]:
+    return (
+        KeycloakAdminAdapter(
+            base_url=service_url("keycloak", prefer_public=True),
+            realm=KEYCLOAK_REALM,
+            bootstrap_admin=KEYCLOAK_BOOTSTRAP_ADMIN,
+            bootstrap_password_loader=load_keycloak_bootstrap_password,
+        ),
+        OpenBaoIdentityAdapter(
+            base_url=service_url("openbao"),
+            root_token_loader=load_openbao_root_token,
+        ),
+        StepCACommandAdapter(
+            register_command_template=os.environ.get("LV3_STEP_CA_SSH_REGISTER_COMMAND", ""),
+            revoke_command_template=os.environ.get("LV3_STEP_CA_SSH_REVOKE_COMMAND", ""),
+            state_dir=STATE_DIR,
+        ),
+        TailscaleApiAdapter(
+            api_key_loader=load_tailscale_api_key,
+            tailnet_loader=load_tailscale_tailnet,
+            invite_endpoint_loader=lambda: os.environ.get("LV3_TAILSCALE_INVITE_ENDPOINT", "").strip(),
+        ),
+        MattermostWebhookAdapter(
+            webhook_loader=load_mattermost_webhook,
+        ),
+    )
 
 
 class LiveBackend:
-    def __init__(self, *, actor_class: str, actor_id: str):
+    def __init__(
+        self,
+        *,
+        actor_class: str,
+        actor_id: str,
+        identity_directory: IdentityDirectoryPort | None = None,
+        secret_authority: SecretAuthorityPort | None = None,
+        ssh_certificates: SSHCertificateRegistryPort | None = None,
+        mesh_network: MeshNetworkPort | None = None,
+        notifications: NotificationPort | None = None,
+    ):
         self.actor_class = actor_class
         self.actor_id = actor_id
-        self._keycloak_token: str | None = None
-        self._keycloak_user_cache: dict[str, dict[str, Any]] = {}
-        self._openbao_root_token: str | None = None
-
-    def ensure_prerequisites(self) -> dict[str, Any]:
-        details = {
-            "keycloak_url": service_url("keycloak", prefer_public=True),
-            "openbao_url": service_url("openbao"),
-            "tailscale_tailnet": load_tailscale_tailnet() or "",
-            "mattermost_webhook_configured": bool(load_mattermost_webhook()),
-        }
-        missing: list[str] = []
-        if not load_keycloak_bootstrap_password():
-            missing.append("KEYCLOAK_BOOTSTRAP_PASSWORD or " + str(KEYCLOAK_BOOTSTRAP_PASSWORD_PATH))
-        try:
-            load_openbao_init_payload()
-        except (OperatorManagerError, FileNotFoundError):
-            missing.append("OPENBAO_INIT_JSON or " + str(OPENBAO_INIT_PATH))
-        if missing:
-            raise OperatorManagerError("Missing required local artifacts: " + ", ".join(missing))
-        return details
-
-    def _keycloak_admin_token(self) -> str:
-        if self._keycloak_token is not None:
-            return self._keycloak_token
-        password = load_keycloak_bootstrap_password()
-        if not password:
-            raise OperatorManagerError(
-                "Keycloak bootstrap admin password is missing from KEYCLOAK_BOOTSTRAP_PASSWORD and "
-                f"{KEYCLOAK_BOOTSTRAP_PASSWORD_PATH}"
-            )
-        payload = json_request(
-            f"{service_url('keycloak', prefer_public=True)}/realms/master/protocol/openid-connect/token",
-            method="POST",
-            form={
-                "grant_type": "password",
-                "client_id": "admin-cli",
-                "username": KEYCLOAK_BOOTSTRAP_ADMIN,
-                "password": password,
-            },
-        )
-        access_token = payload.get("access_token")
-        if not isinstance(access_token, str) or not access_token:
-            raise OperatorManagerError("Keycloak did not return an access_token for the bootstrap admin.")
-        self._keycloak_token = access_token
-        return access_token
-
-    def _keycloak_headers(self) -> dict[str, str]:
-        return {"Authorization": f"Bearer {self._keycloak_admin_token()}"}
-
-    def _keycloak_role(self, role_name: str) -> dict[str, Any]:
-        base = f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/roles/{urllib.parse.quote(role_name, safe='')}"
-        try:
-            return json_request(base, headers=self._keycloak_headers(), expected_status=(200,))
-        except OperatorManagerError:
-            json_request(
-                f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/roles",
-                method="POST",
-                headers=self._keycloak_headers(),
-                body={"name": role_name, "description": f"Repo-managed ADR 0108 operator role {role_name}."},
-                expected_status=(201, 204),
-            )
-            return json_request(base, headers=self._keycloak_headers(), expected_status=(200,))
-
-    def _keycloak_group(self, group_name: str) -> dict[str, Any]:
-        search_url = (
-            f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/groups"
-            f"?search={urllib.parse.quote(group_name, safe='')}"
-        )
-        groups = json_request(search_url, headers=self._keycloak_headers(), expected_status=(200,))
-        if isinstance(groups, list):
-            for group in groups:
-                if isinstance(group, dict) and group.get("name") == group_name:
-                    return group
-        json_request(
-            f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/groups",
-            method="POST",
-            headers=self._keycloak_headers(),
-            body={"name": group_name},
-            expected_status=(201, 204),
-        )
-        groups = json_request(search_url, headers=self._keycloak_headers(), expected_status=(200,))
-        if isinstance(groups, list):
-            for group in groups:
-                if isinstance(group, dict) and group.get("name") == group_name:
-                    return group
-        raise OperatorManagerError(f"Keycloak group '{group_name}' could not be created or found.")
-
-    def _keycloak_user(self, username: str) -> dict[str, Any] | None:
-        if username in self._keycloak_user_cache:
-            return self._keycloak_user_cache[username]
-        url = (
-            f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/users"
-            f"?username={urllib.parse.quote(username, safe='')}&exact=true"
-        )
-        users = json_request(url, headers=self._keycloak_headers(), expected_status=(200,))
-        if isinstance(users, list) and users:
-            for user in users:
-                if isinstance(user, dict) and user.get("username") == username:
-                    self._keycloak_user_cache[username] = user
-                    return user
-        return None
-
-    def _keycloak_user_id(self, username: str) -> str:
-        user = self._keycloak_user(username)
-        if user is None:
-            raise OperatorManagerError(f"Keycloak user '{username}' was not found.")
-        user_id = user.get("id")
-        if not isinstance(user_id, str) or not user_id:
-            raise OperatorManagerError(f"Keycloak user '{username}' does not expose an id.")
-        return user_id
-
-    def _keycloak_user_details(self, username: str) -> dict[str, Any]:
-        user_id = self._keycloak_user_id(username)
-        details = json_request(
-            f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}",
-            headers=self._keycloak_headers(),
-            expected_status=(200,),
-        )
-        if not isinstance(details, dict):
-            raise OperatorManagerError(f"Keycloak user '{username}' did not return a valid detail payload.")
-        return details
-
-    def _keycloak_user_credentials(self, username: str) -> list[dict[str, Any]]:
-        user_id = self._keycloak_user_id(username)
-        payload = json_request(
-            f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}/credentials",
-            headers=self._keycloak_headers(),
-            expected_status=(200,),
-        )
-        if not isinstance(payload, list):
-            raise OperatorManagerError(f"Keycloak credentials for '{username}' did not return a list.")
-        return [entry for entry in payload if isinstance(entry, dict)]
-
-    def _openbao_headers(self) -> dict[str, str]:
-        if self._openbao_root_token is None:
-            self._openbao_root_token = load_openbao_root_token()
-        return {"X-Vault-Token": self._openbao_root_token}
+        if all(
+            port is not None
+            for port in (identity_directory, secret_authority, ssh_certificates, mesh_network, notifications)
+        ):
+            self.identity_directory = identity_directory
+            self.secret_authority = secret_authority
+            self.ssh_certificates = ssh_certificates
+            self.mesh_network = mesh_network
+            self.notifications = notifications
+        else:
+            (
+                self.identity_directory,
+                self.secret_authority,
+                self.ssh_certificates,
+                self.mesh_network,
+                self.notifications,
+            ) = build_live_backend_ports()
 
     def _emit_audit(self, action: str, target: str) -> dict[str, Any]:
         event = build_event(
@@ -775,31 +695,33 @@ class LiveBackend:
         )
         return emit_event(event)
 
-    def _ensure_openbao_policies(self) -> dict[str, Any]:
-        results: dict[str, Any] = {}
-        for policy_name, document in policy_documents().items():
-            json_request(
-                f"{service_url('openbao')}/v1/sys/policies/acl/{urllib.parse.quote(policy_name, safe='')}",
-                method="PUT",
-                headers=self._openbao_headers(),
-                body={"policy": document},
-                expected_status=(200, 204),
-            )
-            results[policy_name] = "upserted"
-        return results
-
     def ensure_prerequisites_payload(self) -> dict[str, Any]:
-        policy_results = self._ensure_openbao_policies()
-        role_results = {}
-        group_results = {}
+        policy_results: dict[str, Any] = {}
+        role_results: dict[str, Any] = {}
+        group_results: dict[str, Any] = {}
+        for policy_name, document in policy_documents().items():
+            policy_results[policy_name] = self.secret_authority.ensure_policy(policy_name, document)
         for definition in ROLE_DEFINITIONS.values():
             for role_name in definition.keycloak_roles:
-                role_results[role_name] = self._keycloak_role(role_name).get("name", role_name)
+                role_results[role_name] = self.identity_directory.ensure_role(
+                    role_name,
+                    description=f"Repo-managed ADR 0108 operator role {role_name}.",
+                ).get("name", role_name)
             for group_name in definition.keycloak_groups:
-                group_results[group_name] = self._keycloak_group(group_name).get("name", group_name)
+                group_results[group_name] = self.identity_directory.ensure_group(group_name).get("name", group_name)
         return {"keycloak_roles": role_results, "keycloak_groups": group_results, "openbao_policies": policy_results}
 
     def ensure_prerequisites(self) -> dict[str, Any]:
+        missing: list[str] = []
+        if not load_keycloak_bootstrap_password():
+            missing.append("KEYCLOAK_BOOTSTRAP_PASSWORD or " + str(KEYCLOAK_BOOTSTRAP_PASSWORD_PATH))
+        try:
+            load_openbao_init_payload()
+        except (OperatorManagerError, FileNotFoundError):
+            missing.append("OPENBAO_INIT_JSON or " + str(OPENBAO_INIT_PATH))
+        if missing:
+            raise OperatorManagerError("Missing required local artifacts: " + ", ".join(missing))
+
         details = self.ensure_prerequisites_payload()
         details.update(
             {
@@ -811,251 +733,16 @@ class LiveBackend:
         )
         return details
 
-    def _ensure_keycloak_user(self, operator: dict[str, Any], bootstrap_password: str) -> dict[str, Any]:
-        username = operator["keycloak"]["username"]
-        role_def = ROLE_DEFINITIONS[operator["role"]]
-        existing = self._keycloak_user(username)
-        payload = {
-            "username": username,
-            "firstName": operator["name"].split(" ", 1)[0],
-            "lastName": operator["name"].split(" ", 1)[1] if " " in operator["name"] else operator["name"],
-            "email": operator["email"],
-            "enabled": operator["status"] == "active",
-            "emailVerified": True,
-            "requiredActions": ["UPDATE_PASSWORD", "CONFIGURE_TOTP"],
-            "credentials": [
-                {
-                    "type": "password",
-                    "value": bootstrap_password,
-                    "temporary": True,
-                }
-            ],
-            "groups": list(role_def.keycloak_groups),
-        }
-        if existing is None:
-            json_request(
-                f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/users",
-                method="POST",
-                headers=self._keycloak_headers(),
-                body=payload,
-                expected_status=(201, 204),
-            )
-        else:
-            json_request(
-                f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/users/{self._keycloak_user_id(username)}",
-                method="PUT",
-                headers=self._keycloak_headers(),
-                body=payload,
-                expected_status=(204,),
-            )
-
-        self._keycloak_user_cache.pop(username, None)
-        user_id = self._keycloak_user_id(username)
-        role_representations = [self._keycloak_role(role_name) for role_name in role_def.keycloak_roles]
-        json_request(
-            f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}/role-mappings/realm",
-            method="POST",
-            headers=self._keycloak_headers(),
-            body=role_representations,
-            expected_status=(204,),
-        )
-        return {"user_id": user_id, "username": username, "realm_roles": list(role_def.keycloak_roles)}
-
-    def _disable_keycloak_user(self, username: str) -> dict[str, Any]:
-        user = self._keycloak_user(username)
-        if user is None:
-            return {"status": "missing", "username": username}
-        updated = dict(user)
-        updated["enabled"] = False
-        json_request(
-            f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/users/{self._keycloak_user_id(username)}",
-            method="PUT",
-            headers=self._keycloak_headers(),
-            body=updated,
-            expected_status=(204,),
-        )
-        return {"status": "disabled", "username": username, "user_id": self._keycloak_user_id(username)}
-
-    def _ensure_openbao_entity(self, operator: dict[str, Any]) -> dict[str, Any]:
-        payload = {
-            "policies": operator["openbao"]["policies"],
-            "metadata": {
-                "email": operator["email"],
-                "role": operator["role"],
-                "status": operator["status"],
-                "operator_id": operator["id"],
-            },
-            "disabled": operator["status"] != "active",
-        }
-        json_request(
-            f"{service_url('openbao')}/v1/identity/entity/name/{urllib.parse.quote(operator['openbao']['entity_name'], safe='')}",
-            method="POST",
-            headers=self._openbao_headers(),
-            body=payload,
-            expected_status=(200, 204),
-        )
-        current = json_request(
-            f"{service_url('openbao')}/v1/identity/entity/name/{urllib.parse.quote(operator['openbao']['entity_name'], safe='')}",
-            headers=self._openbao_headers(),
-            expected_status=(200,),
-        )
-        entity = current.get("data", {}) if isinstance(current, dict) else {}
-        return {
-            "entity_name": operator["openbao"]["entity_name"],
-            "entity_id": entity.get("id", ""),
-            "policies": operator["openbao"]["policies"],
-            "disabled": payload["disabled"],
-        }
-
-    def _register_step_ca_principal(self, operator: dict[str, Any]) -> dict[str, Any]:
-        if not ROLE_DEFINITIONS[operator["role"]].ssh_enabled:
-            return {
-                "status": "skipped",
-                "reason": f"role '{operator['role']}' does not receive SSH access",
-                "principal": operator["ssh"]["principal"],
-            }
-        command_template = os.environ.get("LV3_STEP_CA_SSH_REGISTER_COMMAND", "").strip()
-        if not command_template:
-            return {
-                "status": "skipped",
-                "reason": "LV3_STEP_CA_SSH_REGISTER_COMMAND is not configured",
-                "principal": operator["ssh"]["principal"],
-            }
-        public_key = operator["ssh"]["public_keys"][0]["public_key"]
-        temp_key = STATE_DIR / f"{operator['id']}.pub"
-        temp_key.parent.mkdir(parents=True, exist_ok=True)
-        temp_key.write_text(public_key + "\n", encoding="utf-8")
-        try:
-            command = command_template.format(principal=operator["ssh"]["principal"], public_key_path=str(temp_key))
-            result = subprocess.run(command, shell=True, text=True, capture_output=True, check=False)
-        finally:
-            temp_key.unlink(missing_ok=True)
-        return {
-            "status": "ok" if result.returncode == 0 else "error",
-            "principal": operator["ssh"]["principal"],
-            "command": command,
-            "returncode": result.returncode,
-            "stdout": result.stdout.strip(),
-            "stderr": result.stderr.strip(),
-        }
-
-    def _revoke_step_ca_principal(self, operator: dict[str, Any]) -> dict[str, Any]:
-        if not ROLE_DEFINITIONS[operator["role"]].ssh_enabled:
-            return {
-                "status": "skipped",
-                "reason": f"role '{operator['role']}' does not receive SSH access",
-                "principal": operator["ssh"]["principal"],
-            }
-        command_template = os.environ.get("LV3_STEP_CA_SSH_REVOKE_COMMAND", "").strip()
-        if not command_template:
-            return {
-                "status": "skipped",
-                "reason": "LV3_STEP_CA_SSH_REVOKE_COMMAND is not configured",
-                "principal": operator["ssh"]["principal"],
-            }
-        command = command_template.format(principal=operator["ssh"]["principal"])
-        result = subprocess.run(command, shell=True, text=True, capture_output=True, check=False)
-        return {
-            "status": "ok" if result.returncode == 0 else "error",
-            "principal": operator["ssh"]["principal"],
-            "command": command,
-            "returncode": result.returncode,
-            "stdout": result.stdout.strip(),
-            "stderr": result.stderr.strip(),
-        }
-
-    def _tailscale_headers(self) -> dict[str, str]:
-        api_key = load_tailscale_api_key()
-        if not api_key:
-            raise OperatorManagerError("Tailscale API key is not configured. Set TAILSCALE_API_KEY or create .local/tailscale/api-key.txt.")
-        return {"Authorization": f"Bearer {api_key}"}
-
-    def _tailscale_invite(self, operator: dict[str, Any]) -> dict[str, Any]:
-        tailnet = load_tailscale_tailnet()
-        endpoint = os.environ.get("LV3_TAILSCALE_INVITE_ENDPOINT", "").strip()
-        if not tailnet or not endpoint:
-            return {
-                "status": "skipped",
-                "reason": "TAILSCALE_TAILNET or LV3_TAILSCALE_INVITE_ENDPOINT is not configured",
-                "login_email": operator["tailscale"]["login_email"],
-            }
-        payload = {
-            "email": operator["tailscale"]["login_email"],
-            "tags": operator["tailscale"]["tags"],
-        }
-        invite = json_request(
-            endpoint.format(tailnet=tailnet),
-            method="POST",
-            headers=self._tailscale_headers(),
-            body=payload,
-            expected_status=(200, 201, 202),
-        )
-        return {
-            "status": "ok",
-            "login_email": operator["tailscale"]["login_email"],
-            "invite": invite,
-        }
-
-    def _tailscale_devices(self) -> list[dict[str, Any]]:
-        tailnet = load_tailscale_tailnet()
-        if not tailnet:
-            raise OperatorManagerError("TAILSCALE_TAILNET is not configured.")
-        response = json_request(
-            f"https://api.tailscale.com/api/v2/tailnet/{urllib.parse.quote(tailnet, safe='')}/devices",
-            headers=self._tailscale_headers(),
-            expected_status=(200,),
-        )
-        devices = response.get("devices", response if isinstance(response, list) else [])
-        if not isinstance(devices, list):
-            raise OperatorManagerError("Tailscale devices response did not contain a list.")
-        return [device for device in devices if isinstance(device, dict)]
-
-    def _tailscale_remove(self, operator: dict[str, Any]) -> dict[str, Any]:
-        if not load_tailscale_api_key() or not load_tailscale_tailnet():
-            return {
-                "status": "skipped",
-                "reason": "TAILSCALE_API_KEY or TAILSCALE_TAILNET is not configured",
-                "login_email": operator["tailscale"]["login_email"],
-            }
-        devices = self._tailscale_devices()
-        device_name = operator["tailscale"].get("device_name")
-        device_id = operator["tailscale"].get("device_id")
-        login_email = operator["tailscale"]["login_email"]
-        matches = [
-            device
-            for device in devices
-            if (device_id and device.get("id") == device_id)
-            or (device_name and device.get("hostname") == device_name)
-            or device.get("user") == login_email
-        ]
-        deleted_ids: list[str] = []
-        for device in matches:
-            candidate_id = device.get("id")
-            if not isinstance(candidate_id, str) or not candidate_id:
-                continue
-            json_request(
-                f"https://api.tailscale.com/api/v2/device/{urllib.parse.quote(candidate_id, safe='')}",
-                method="DELETE",
-                headers=self._tailscale_headers(),
-                expected_status=(200, 202, 204),
-            )
-            deleted_ids.append(candidate_id)
-        return {"status": "ok", "deleted_device_ids": deleted_ids}
-
-    def _mattermost_post(self, text: str) -> dict[str, Any]:
-        webhook = load_mattermost_webhook()
-        if not webhook:
-            return {"status": "skipped", "reason": "LV3_MATTERMOST_WEBHOOK is not configured"}
-        json_request(webhook, method="POST", body={"text": text}, expected_status=(200,))
-        return {"status": "ok"}
-
     def onboard_operator(self, operator: dict[str, Any], bootstrap_password: str) -> dict[str, Any]:
         prereq = self.ensure_prerequisites_payload()
-        keycloak = self._ensure_keycloak_user(operator, bootstrap_password)
-        openbao = self._ensure_openbao_entity(operator)
-        step_ca = self._register_step_ca_principal(operator)
-        tailscale = self._tailscale_invite(operator)
-        mattermost = self._mattermost_post(
+        keycloak = self.identity_directory.ensure_user(operator, bootstrap_password=bootstrap_password)
+        openbao = self.secret_authority.ensure_entity(operator)
+        step_ca = self.ssh_certificates.register_principal(
+            operator,
+            enabled=ROLE_DEFINITIONS[operator["role"]].ssh_enabled,
+        )
+        tailscale = self.mesh_network.invite(operator)
+        mattermost = self.notifications.post_text(
             "\n".join(
                 [
                     f"Operator onboarded: {operator['name']} ({operator['role']})",
@@ -1078,14 +765,17 @@ class LiveBackend:
 
     def offboard_operator(self, operator: dict[str, Any], reason: str | None) -> dict[str, Any]:
         prereq = self.ensure_prerequisites_payload()
-        keycloak = self._disable_keycloak_user(operator["keycloak"]["username"])
-        openbao = self._ensure_openbao_entity(operator)
-        step_ca = self._revoke_step_ca_principal(operator)
-        tailscale = self._tailscale_remove(operator)
+        keycloak = self.identity_directory.disable_user(operator["keycloak"]["username"])
+        openbao = self.secret_authority.ensure_entity(operator)
+        step_ca = self.ssh_certificates.revoke_principal(
+            operator,
+            enabled=ROLE_DEFINITIONS[operator["role"]].ssh_enabled,
+        )
+        tailscale = self.mesh_network.remove(operator)
         message = f"Operator offboarded: {operator['name']}"
         if reason:
             message += f" ({reason})"
-        mattermost = self._mattermost_post(message)
+        mattermost = self.notifications.post_text(message)
         audit = self._emit_audit("operator.offboarded", operator["id"])
         return {
             "prerequisites": prereq,
@@ -1098,107 +788,28 @@ class LiveBackend:
         }
 
     def recover_totp(self, operator: dict[str, Any]) -> dict[str, Any]:
-        username = operator["keycloak"]["username"]
-        user_id = self._keycloak_user_id(username)
-        details = self._keycloak_user_details(username)
-        removed_credentials: list[dict[str, str]] = []
-        for credential in self._keycloak_user_credentials(username):
-            if credential.get("type") != "otp":
-                continue
-            credential_id = credential.get("id")
-            if not isinstance(credential_id, str) or not credential_id:
-                continue
-            json_request(
-                f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}/credentials/{credential_id}",
-                method="DELETE",
-                headers=self._keycloak_headers(),
-                expected_status=(200, 204),
-            )
-            removed_credentials.append(
-                {
-                    "id": credential_id,
-                    "userLabel": str(credential.get("userLabel") or ""),
-                }
-            )
-
-        required_actions = details.get("requiredActions")
-        if not isinstance(required_actions, list):
-            required_actions = []
-        normalized_required_actions = [str(action) for action in required_actions if str(action).strip()]
-        if "CONFIGURE_TOTP" not in normalized_required_actions:
-            normalized_required_actions.append("CONFIGURE_TOTP")
-        details["requiredActions"] = normalized_required_actions
-        json_request(
-            f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}",
-            method="PUT",
-            headers=self._keycloak_headers(),
-            body=details,
-            expected_status=(204,),
-        )
-        json_request(
-            f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/attack-detection/brute-force/users/{user_id}",
-            method="DELETE",
-            headers=self._keycloak_headers(),
-            expected_status=(200, 204),
-        )
-        self._keycloak_user_cache.pop(username, None)
+        keycloak = self.identity_directory.recover_totp(operator["keycloak"]["username"])
         audit = self._emit_audit("operator.totp_recovered", operator["id"])
-        return {
-            "keycloak": {
-                "status": "totp-reset",
-                "username": username,
-                "user_id": user_id,
-                "removed_otp_credentials": removed_credentials,
-                "required_actions": normalized_required_actions,
-                "failure_counters_cleared": True,
-            },
-            "audit": audit,
-        }
+        return {"keycloak": keycloak, "audit": audit}
 
     def reset_password(self, operator: dict[str, Any], password: str, *, temporary: bool) -> dict[str, Any]:
         if not password.strip():
             raise OperatorManagerError("Password reset requires a non-empty password.")
-        username = operator["keycloak"]["username"]
-        user_id = self._keycloak_user_id(username)
-        details = self._keycloak_user_details(username)
-        json_request(
-            f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}/reset-password",
-            method="PUT",
-            headers=self._keycloak_headers(),
-            body={"type": "password", "temporary": temporary, "value": password},
-            expected_status=(204,),
+        keycloak = self.identity_directory.reset_password(
+            operator["keycloak"]["username"],
+            password=password,
+            temporary=temporary,
         )
-        required_actions = details.get("requiredActions")
-        if not isinstance(required_actions, list):
-            required_actions = []
-        normalized_required_actions = [str(action) for action in required_actions if str(action).strip()]
-        if temporary and "UPDATE_PASSWORD" not in normalized_required_actions:
-            normalized_required_actions.append("UPDATE_PASSWORD")
-        details["requiredActions"] = normalized_required_actions
-        json_request(
-            f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}",
-            method="PUT",
-            headers=self._keycloak_headers(),
-            body=details,
-            expected_status=(204,),
-        )
-        json_request(
-            f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/attack-detection/brute-force/users/{user_id}",
-            method="DELETE",
-            headers=self._keycloak_headers(),
-            expected_status=(200, 204),
-        )
-        self._keycloak_user_cache.pop(username, None)
         audit = self._emit_audit("operator.password_recovered", operator["id"])
+        return {"keycloak": keycloak, "audit": audit}
+
+    def update_operator_notes(self, operator: dict[str, Any], notes_markdown: str) -> dict[str, Any]:
+        audit = self._emit_audit("operator.notes_updated", operator["id"])
         return {
-            "keycloak": {
-                "status": "password-reset",
-                "username": username,
-                "user_id": user_id,
-                "temporary": temporary,
-                "required_actions": normalized_required_actions,
-                "failure_counters_cleared": True,
-            },
+            "status": "ok",
+            "operator_id": operator["id"],
+            "notes_present": bool(normalize_notes_markdown(notes_markdown)),
+            "note_length": len(notes_markdown.strip()),
             "audit": audit,
         }
 
@@ -1219,59 +830,15 @@ class LiveBackend:
         if offline:
             return summary
 
-        user = self._keycloak_user(operator["keycloak"]["username"])
-        if user is None:
-            summary["keycloak"] = {"status": "missing", "username": operator["keycloak"]["username"]}
-        else:
-            summary["keycloak"] = {
-                "status": "active" if user.get("enabled") else "disabled",
-                "username": operator["keycloak"]["username"],
-                "email": user.get("email", operator["email"]),
-            }
-
-        entity = json_request(
-            f"{service_url('openbao')}/v1/identity/entity/name/{urllib.parse.quote(operator['openbao']['entity_name'], safe='')}",
-            headers=self._openbao_headers(),
-            expected_status=(200,),
+        summary["keycloak"] = self.identity_directory.inventory_user(
+            operator["keycloak"]["username"],
+            email_fallback=operator["email"],
         )
-        entity_data = entity.get("data", {}) if isinstance(entity, dict) else {}
-        summary["openbao"] = {
-            "status": "disabled" if entity_data.get("disabled") else "active",
-            "entity_name": operator["openbao"]["entity_name"],
-            "entity_id": entity_data.get("id", ""),
-            "policies": entity_data.get("policies", operator["openbao"]["policies"]),
-        }
-
-        try:
-            devices = self._tailscale_devices()
-        except OperatorManagerError as exc:
-            summary["tailscale"] = {"status": "unavailable", "reason": str(exc)}
-        else:
-            matches = [
-                device
-                for device in devices
-                if device.get("id") == operator["tailscale"].get("device_id")
-                or device.get("hostname") == operator["tailscale"].get("device_name")
-                or device.get("user") == operator["tailscale"]["login_email"]
-            ]
-            if matches:
-                summary["tailscale"] = {
-                    "status": "connected",
-                    "devices": [
-                        {
-                            "id": match.get("id", ""),
-                            "hostname": match.get("hostname", ""),
-                            "last_seen": match.get("lastSeen", ""),
-                            "addresses": match.get("addresses", []),
-                        }
-                        for match in matches
-                    ],
-                }
-            else:
-                summary["tailscale"] = {
-                    "status": "absent",
-                    "login_email": operator["tailscale"]["login_email"],
-                }
+        summary["openbao"] = self.secret_authority.inventory_entity(
+            operator["openbao"]["entity_name"],
+            policies_fallback=operator["openbao"]["policies"],
+        )
+        summary["tailscale"] = self.mesh_network.inventory(operator)
         return summary
 
     def quarterly_review(self, review: dict[str, Any]) -> dict[str, Any]:
@@ -1285,7 +852,7 @@ class LiveBackend:
             markdown_lines.append(
                 f"- {entry['id']} ({entry['role']}) last seen {entry['last_seen']}{suffix}"
             )
-        mattermost = self._mattermost_post("\n".join(markdown_lines))
+        mattermost = self.notifications.post_text("\n".join(markdown_lines))
         return {"mattermost": mattermost}
 
 
@@ -1330,6 +897,14 @@ class NoopBackend:
                 "required_actions": ["UPDATE_PASSWORD"] if temporary else [],
                 "failure_counters_cleared": True,
             }
+        }
+
+    def update_operator_notes(self, operator: dict[str, Any], notes_markdown: str) -> dict[str, Any]:
+        return {
+            "status": "dry-run",
+            "operator_id": operator["id"],
+            "notes_present": bool(normalize_notes_markdown(notes_markdown)),
+            "note_length": len(notes_markdown.strip()),
         }
 
     def inventory_operator(self, operator: dict[str, Any], state: dict[str, Any], offline: bool) -> dict[str, Any]:
@@ -1502,6 +1077,36 @@ def reset_password(
     }
 
 
+def update_notes(
+    *,
+    roster_path: Path,
+    state_dir: Path,
+    operator_id: str,
+    actor_id: str,
+    actor_class: str,
+    notes_markdown: str,
+    dry_run: bool,
+) -> dict[str, Any]:
+    roster = load_operator_roster(roster_path)
+    updated_roster, updated_operator, changed = update_operator_notes_in_roster(roster, operator_id, notes_markdown, actor_id)
+    if not dry_run:
+        dump_operator_roster(updated_roster, roster_path)
+    backend = select_backend(dry_run=dry_run, actor_class=actor_class, actor_id=actor_id)
+    effective_notes = updated_operator.get("notes", "")
+    result = backend.update_operator_notes(updated_operator, effective_notes)
+    state_path = operator_state_path(operator_id, state_dir)
+    if not dry_run:
+        state_path = persist_state(operator_id, "update-notes", result, state_dir=state_dir)
+    return {
+        "status": "dry-run" if dry_run else "ok",
+        "changed": changed,
+        "operator": updated_operator,
+        "roster_path": str(roster_path),
+        "state_path": str(state_path),
+        "result": result,
+    }
+
+
 def sync(
     *,
     roster_path: Path,
@@ -1666,6 +1271,15 @@ def build_parser() -> argparse.ArgumentParser:
     reset_password_parser.add_argument("--temporary", action="store_true")
     reset_password_parser.add_argument("--dry-run", action="store_true")
 
+    update_notes_parser = subparsers.add_parser(
+        "update-notes",
+        help="Update one operator's bounded markdown notes in the repo-authoritative roster.",
+    )
+    update_notes_parser.add_argument("--id", required=True)
+    update_notes_parser.add_argument("--notes-markdown", default="")
+    update_notes_parser.add_argument("--notes-file")
+    update_notes_parser.add_argument("--dry-run", action="store_true")
+
     inventory_parser = subparsers.add_parser("inventory", help="Show the access inventory for one operator.")
     inventory_parser.add_argument("--id", required=True)
     inventory_parser.add_argument("--offline", action="store_true")
@@ -1741,6 +1355,19 @@ def main(argv: list[str] | None = None) -> int:
                 temporary=args.temporary,
                 dry_run=args.dry_run,
             )
+        elif args.command == "update-notes":
+            notes_markdown = args.notes_markdown
+            if args.notes_file:
+                notes_markdown = Path(args.notes_file).read_text(encoding="utf-8")
+            payload = update_notes(
+                roster_path=roster_path,
+                state_dir=state_dir,
+                operator_id=args.id,
+                actor_id=args.actor_id,
+                actor_class=args.actor_class,
+                notes_markdown=notes_markdown,
+                dry_run=args.dry_run,
+            )
         elif args.command == "inventory":
             payload = inventory(
                 roster_path=roster_path,
@@ -1777,7 +1404,7 @@ def main(argv: list[str] | None = None) -> int:
 
         print(json.dumps(payload, indent=2, sort_keys=True))
         return 0
-    except (OSError, ValueError, json.JSONDecodeError, OperatorManagerError) as exc:
+    except (OSError, ValueError, json.JSONDecodeError, OperatorManagerError, OperatorAccessIntegrationError) as exc:
         return emit_cli_error("Operator manager", exc)
 
 

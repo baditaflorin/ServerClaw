@@ -1,0 +1,10 @@
+[Unit]
+Description=Run LV3 server-resident ansible-pull reconciliation
+
+[Timer]
+OnCalendar={{ server_resident_reconciliation_on_calendar }}
+RandomizedDelaySec={{ server_resident_reconciliation_randomized_delay_sec }}
+Persistent=true
+
+[Install]
+WantedBy=timers.target

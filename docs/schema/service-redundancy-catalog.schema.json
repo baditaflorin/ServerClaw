@@ -34,12 +34,8 @@
         },
         "max_supported_tier": {
           "type": "string",
-          "enum": [
-            "R0",
-            "R1",
-            "R2",
-            "R3"
-          ]
+          "minLength": 1,
+          "description": "Validated against config/shared-policy-packs.json."
         },
         "notes": {
           "type": "array",
@@ -58,22 +54,9 @@
           "properties": {
             "tiers": {
               "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "R1",
-                "R2",
-                "R3"
-              ],
-              "properties": {
-                "R1": {
-                  "$ref": "#/$defs/rehearsalPolicy"
-                },
-                "R2": {
-                  "$ref": "#/$defs/rehearsalPolicy"
-                },
-                "R3": {
-                  "$ref": "#/$defs/rehearsalPolicy"
-                }
+              "minProperties": 1,
+              "additionalProperties": {
+                "$ref": "#/$defs/rehearsalPolicy"
               }
             }
           }
@@ -104,12 +87,8 @@
       "properties": {
         "tier": {
           "type": "string",
-          "enum": [
-            "R0",
-            "R1",
-            "R2",
-            "R3"
-          ]
+          "minLength": 1,
+          "description": "Validated against config/shared-policy-packs.json."
         },
         "recovery_objective": {
           "type": "object",
@@ -150,12 +129,8 @@
           "properties": {
             "kind": {
               "type": "string",
-              "enum": [
-                "none",
-                "cold",
-                "warm",
-                "active"
-              ]
+              "minLength": 1,
+              "description": "Validated against config/shared-policy-packs.json."
             },
             "location": {
               "type": "string",
@@ -183,17 +158,8 @@
           "properties": {
             "policies": {
               "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "R1": {
-                  "$ref": "#/$defs/rehearsalPolicy"
-                },
-                "R2": {
-                  "$ref": "#/$defs/rehearsalPolicy"
-                },
-                "R3": {
-                  "$ref": "#/$defs/rehearsalPolicy"
-                }
+              "additionalProperties": {
+                "$ref": "#/$defs/rehearsalPolicy"
               }
             },
             "proofs": {
@@ -244,19 +210,13 @@
       "properties": {
         "proves_tier": {
           "type": "string",
-          "enum": [
-            "R1",
-            "R2",
-            "R3"
-          ]
+          "minLength": 1,
+          "description": "Validated against config/shared-policy-packs.json."
         },
         "result": {
           "type": "string",
-          "enum": [
-            "pass",
-            "partial",
-            "fail"
-          ]
+          "minLength": 1,
+          "description": "Validated against config/shared-policy-packs.json."
         },
         "performed_on": {
           "type": "string",

@@ -172,6 +172,14 @@ public_edge_security_headers_overrides:
       img-src 'self' data:; font-src 'self' data:; connect-src 'self'
       https://uptime.lv3.org ws://uptime.lv3.org wss://uptime.lv3.org; manifest-src 'self'
 public_edge_extra_sites:
+  - hostname: registry.lv3.org
+    kind: proxy
+    upstream: "http://10.10.10.20:{{ platform_port_assignments.harbor_port }}"
+    client_max_body_size: 0
+    chunked_transfer_encoding: true
+    proxy_request_buffering: false
+    proxy_read_timeout_seconds: 900
+    proxy_send_timeout_seconds: 900
   - hostname: changelog.lv3.org
     kind: static_dir
     source_dir: changelog-portal
@@ -221,4 +229,11 @@ public_edge_certificate_domains: >-
       + public_edge_additional_certificate_domains
     ) | unique
   }}
-public_edge_sites: "{{ (public_edge_service_topology | service_topology_edge_sites) + public_edge_extra_sites }}"
+public_edge_sites: >-
+  {{
+    (
+      public_edge_extra_sites
+      + (public_edge_service_topology | service_topology_edge_sites)
+    )
+    | unique(attribute='hostname')
+  }}

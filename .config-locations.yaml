@@ -98,6 +98,19 @@ infrastructure_state:
       - "docs/schema/preview-environment-profiles.schema.json: Schema for the profile catalog"
       - "scripts/preview_environment.py: Lifecycle automation for create/validate/destroy"
 
+  config/correction-loops.json:
+    purpose: Canonical ADR 0204 registry of governed self-correcting automation loops and their workflow selectors
+    owner: human
+    format: JSON
+    use_for: Declaring the invariant, observation sources, diagnosis taxonomy, repair actions, verification probe, and escalation boundary for mutable automation surfaces
+    update_when: Adding a new mutating workflow, changing repair policy, or adjusting a loop's retry budget
+    update_by: Agent or human implementing ADR 0204 self-correction changes
+    validation: "python3 scripts/correction_loops.py --validate"
+    related_files:
+      - "docs/schema/correction-loop-catalog.schema.json: Schema for the correction-loop catalog"
+      - "scripts/correction_loops.py: Selector resolution and validation helper"
+      - "config/workflow-catalog.json: Workflows that must be covered by the correction-loop selectors"
+
   receipts/preview-environments/:
     purpose: Durable branch-local evidence for completed preview create/validate/destroy cycles
     owner: automation
@@ -202,6 +215,31 @@ inventory:
 
 automation:
 
+  keys/gitea-release-bundle-cosign.pub:
+    purpose: Committed ADR 0233 Cosign public verifier for signed private Gitea release bundles
+    owner: human
+    format: PEM public key
+    use_for: Verifying the detached Cosign signatures published alongside ADR 0233 release bundles
+    update_when: Rotating the release-bundle signing material
+    update_by: "python3 scripts/release_bundle.py init-signing --force"
+    related_files:
+      - "scripts/release_bundle.py: bundle build, publish, and verification helper"
+      - "docs/runbooks/signed-release-bundles.md: operator procedure"
+      - "config/controller-local-secrets.json: controller-local private-key and password contract"
+
+  config/replaceability-review-catalog.json:
+    purpose: Canonical ADR 0212 catalog of critical integrated product ADRs that must carry replaceability scorecards and vendor exit plans
+    owner: human
+    format: JSON
+    use_for: Declaring which ADRs are governed by the replaceability fitness function and which capability-definition references anchor each review
+    update_when: Adding or removing a governed critical product ADR, or changing its capability identifier or definition references
+    update_by: Agent or human implementing ADR 0212 governance work
+    validation: "python3 scripts/replaceability_scorecards.py --validate"
+    related_files:
+      - "docs/schema/replaceability-review-catalog.schema.json: Schema for the governed replaceability catalog"
+      - "scripts/replaceability_scorecards.py: ADR section validator and summary report"
+      - "docs/runbooks/replaceability-scorecards.md: authoring and review procedure"
+
   config/seed-data-catalog.json:
     purpose: Canonical contract for anonymized seed-data snapshot classes and storage paths
     owner: human
@@ -222,6 +260,54 @@ automation:
       - "scripts/network_impairment_matrix.py: CLI and repo-surface validation"
       - "config/windmill/scripts/network-impairment-matrix.py: mirrored worker entrypoint"
       - "docs/runbooks/network-impairment-matrix.md: operator procedure"
+
+  config/provider-boundary-catalog.yaml:
+    purpose: Canonical ADR 0207 catalog of provider boundaries that must translate raw provider payloads into canonical internal facts
+    owner: human
+    format: YAML
+    use_for: Declaring which provider integrations are governed by anti-corruption validation and how their implementation guardrails are enforced
+    update_when: Adding a new critical provider boundary or tightening the validation contract for an existing one
+    validation: "uv run --with pyyaml python scripts/provider_boundary_catalog.py --validate"
+    related_files:
+      - "scripts/provider_boundary_catalog.py: validator and catalog reader"
+      - "docs/runbooks/subdomain-governance.md: operator workflow for DNS-boundary usage"
+      - "docs/runbooks/validation-gate.md: remote and post-merge validation path"
+
+  policy/:
+    purpose: Canonical ADR 0230 shared Rego bundle for Open Policy Agent and Conftest decisions
+    owner: human
+    format: "Rego modules and tests"
+    use_for: Command approval, promotion eligibility, runner admission, and repository invariant checks through one shared policy engine
+    update_when: Adding or changing governed decision logic that must stay consistent across controller and worker callers
+    validation: "python3 scripts/policy_checks.py --validate"
+    related_files:
+      - "platform/policy/engine.py: shared Python adapters around OPA evaluation"
+      - "scripts/policy_toolchain.py: local and remote OPA or Conftest bootstrap helper"
+      - "policy/tests/: Rego policy test coverage"
+
+  config/command-catalog.json:
+    purpose: Canonical catalog of governed mutating commands, approval policies, and execution profiles
+    owner: human
+    format: JSON
+    use_for: Declaring which command ids exist, which approval policy each uses, and which runtime envelope executes them
+    update_when: Adding or changing recurring mutating command surfaces, approval classes, or execution profiles
+    validation: "python3 scripts/command_catalog.py --validate"
+    related_files:
+      - "policy/decisions/command_approval.rego: ADR 0230 shared approval decision logic"
+      - "scripts/command_catalog.py: catalog validator and approval evaluator"
+      - "docs/runbooks/command-catalog-and-approval-gates.md: operator procedure"
+
+  config/workflow-catalog.json:
+    purpose: Canonical workflow registry for operator and automation entrypoints
+    owner: human
+    format: JSON
+    use_for: Resolving preferred entrypoints, runbooks, verification commands, and worker-mirrored workflow wrappers
+    update_when: Adding or changing reusable workflows or their implementation references
+    validation: "python3 scripts/workflow_catalog.py --validate"
+    related_files:
+      - "config/command-catalog.json: command layer that references these workflow ids"
+      - "config/windmill/scripts/: worker-side wrappers for selected workflows"
+      - "docs/runbooks/command-catalog-and-approval-gates.md: operator procedure"
 
   playbooks/site.yml:
     purpose: Main site playbook — full host bootstrap from bare Debian 13
@@ -280,6 +366,18 @@ service_configuration:
     format: JSON
     update_by: "scripts/service_catalog.py --write"
 
+  config/capability-contract-catalog.json:
+    purpose: Contract-first catalog for critical shared platform capabilities and their current product selections
+    owner: human
+    format: JSON
+    use_for: Defining capability requirements before selecting or replacing a critical product surface
+    update_when: Adding or changing a critical product selection, or tightening the shared capability contract
+    validation: "uv run --with pyyaml --with jsonschema python scripts/capability_contracts.py --validate"
+    related_files:
+      - "docs/schema/capability-contract-catalog.schema.json: JSON Schema for the contract catalog"
+      - "scripts/capability_contracts.py: Validation, CLI inspection, and manifest summaries"
+      - "docs/runbooks/capability-contract-catalog.md: Operator workflow for contract-first product choices"
+
   config/immutable-guest-replacement-catalog.json:
     purpose: Guest-level ADR 0191 policy for immutable replacement, validation mode, and documented in-place exceptions
     owner: human
@@ -299,10 +397,41 @@ service_configuration:
     update_by: "python scripts/generate_dependency_diagram.py --write"
 
   config/validation-gate.json:
-    purpose: Validation gate configuration (which checks run)
+    purpose: Validation gate configuration for local, remote, and worker post-merge checks
     owner: human
     format: JSON
-    use_for: Controlling which validation checks are active
+    use_for: Controlling which validation checks are active, including ADR 0230 policy-validation on controller, build-server, and Windmill worker paths
+    validation: "python3 scripts/gate_status.py --repo-path ."
+    related_files:
+      - "config/build-server.json: remote-validate and remote-pre-push command wiring"
+      - "config/check-runner-manifest.json: runner-image check definitions"
+      - "scripts/run_gate.py: gate orchestrator"
+      - "scripts/policy_checks.py: ADR 0230 policy-validation stage"
+      - "docs/runbooks/validation-gate.md: operator procedure"
+
+  config/build-server.json:
+    purpose: Canonical build-server remote automation command catalog
+    owner: human
+    format: JSON
+    use_for: Declaring remote lint, validate, pre-push, and image-build entrypoints plus their local fallback commands
+    update_when: Adjusting build-server automation or local fallback command contracts
+    validation: "python3 scripts/policy_checks.py --validate"
+    related_files:
+      - "config/check-runner-manifest.json: runner image check definitions consumed by remote validate"
+      - "config/validation-gate.json: authoritative enabled gate checks"
+      - "scripts/remote_exec.sh: dispatch wrapper"
+
+  config/check-runner-manifest.json:
+    purpose: Canonical manifest of runner-backed validation checks for remote gate execution
+    owner: human
+    format: JSON
+    use_for: Declaring the exact commands and container images used by the build-server check runners
+    update_when: Adding or changing remote validation checks or their toolchain images
+    validation: "python3 scripts/policy_checks.py --validate"
+    related_files:
+      - "config/build-server.json: remote-validate entrypoint that invokes the manifest"
+      - "scripts/policy_checks.py: ADR 0230 policy-validation check command"
+      - "docs/runbooks/validation-gate.md: remote gate procedure"
 
   docker/docker-compose.yml:
     purpose: Docker Compose reference for services on docker-runtime-lv3
