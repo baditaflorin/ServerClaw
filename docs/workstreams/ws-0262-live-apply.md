@@ -7,14 +7,19 @@
 - Live Applied In Platform Version: live workstream replay pending exact-main merge
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
-- Branch: `codex/ws-0262-openfga-keycloak-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0262-openfga-keycloak-live-apply`
+- Branch: `codex/ws-0261-main-finish`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish`
 - Owner: codex
 - Depends On: `adr-0056-keycloak-for-operator-and-agent-sso`, `adr-0043-openbao-for-secrets-transit-and-dynamic-credentials`, `adr-0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3`
 - Conflicts With: none
 - Shared Surfaces: `docs/adr/0262-openfga-and-keycloak-for-delegated-serverclaw-capability-authorization.md`, `docs/adr/.index.yaml`, `docs/runbooks/configure-openfga.md`, `docs/runbooks/configure-keycloak.md`, `workstreams.yaml`
 
 ## Scope
+
+The original ADR-local replay completed on
+`codex/ws-0262-openfga-keycloak-live-apply`. The exact-main continuation now
+runs on `codex/ws-0261-main-finish` so ADR 0261 and ADR 0262 can be replayed,
+verified, and merged together from the latest realistic `origin/main`.
 
 - converge the private OpenFGA runtime, PostgreSQL backend, and Proxmox-host
   Tailscale controller proxy

@@ -3,14 +3,18 @@
 - ADR: [ADR 0261](../adr/0261-playwright-browser-runners-for-serverclaw-web-action-and-extraction.md)
 - Title: Live apply private Playwright browser runners for governed ServerClaw web action and extraction
 - Status: in_progress
-- Branch: `codex/ws-0261-playwright-browser-runners-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-playwright-browser-runners`
+- Branch: `codex/ws-0261-main-finish`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish`
 - Owner: codex
 - Depends On: `adr-0069-agent-tool-registry`, `adr-0197-dify-canvas`, `adr-0247-authenticated-browser-journey-verification-via-playwright`
 - Conflicts With: none
 - Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0261-live-apply.md`, `docs/adr/0261-playwright-browser-runners-for-serverclaw-web-action-and-extraction.md`, `docs/adr/.index.yaml`, `docs/runbooks/configure-browser-runner.md`, `docs/runbooks/agent-tool-registry.md`, `playbooks/browser-runner.yml`, `playbooks/services/browser-runner.yml`, `collections/ansible_collections/lv3/platform/roles/browser_runner_runtime/**`, `scripts/browser_runner_service.py`, `scripts/browser_runner_client.py`, `scripts/browser_runner_smoke.py`, `requirements/browser-runner.txt`, `config/agent-tool-registry.json`, `scripts/agent_tool_registry.py`, `config/api-gateway-catalog.json`, `config/service-capability-catalog.json`, `config/health-probe-catalog.json`, `config/dependency-graph.json`, `config/slo-catalog.json`, `config/data-catalog.json`, `config/service-completeness.json`, `config/workflow-catalog.json`, `config/command-catalog.json`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `Makefile`, `tests/test_browser_runner_service.py`, `tests/test_browser_runner_client.py`, `tests/test_browser_runner_runtime_role.py`, `tests/test_generate_platform_vars.py`, `tests/test_agent_tool_registry.py`, `receipts/live-applies/`, `receipts/live-applies/evidence/`
 
 ## Scope
+
+The original ADR-local implementation branch was rebased forward into
+`codex/ws-0261-main-finish` so the exact-main live replay can continue from the
+latest realistic `origin/main` while preserving the ADR 0261 workstream state.
 
 - add a private `browser_runner` service on `docker-runtime-lv3` for bounded Playwright session execution
 - expose the runtime through the governed operator API gateway route `/v1/browser-runner/*`
