@@ -3068,6 +3068,44 @@
         "timeout_seconds": 5400
       }
     },
+    "run-backup-coverage-ledger": {
+      "description": "Run the ADR 0271 backup coverage ledger so governed VM backups and the backup-of-backup path are measured from live Proxmox evidence instead of assumed from static configuration.",
+      "workflow_id": "backup-coverage-ledger",
+      "scope": "proxmox_host",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used to query the Proxmox host backup jobs and storage listings over the managed operations path."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes on the repo state being used for the backup-coverage run",
+        "The controller-to-Proxmox SSH path is healthy enough to read pvesh and pvesm output from the live host",
+        "The service redundancy catalog remains the governed declaration of which VM-level backup sources matter for production recovery"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the dated backup-coverage receipt, the governed asset summary, every uncovered asset, and any live repair commands that were required before the final rerun."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the Proxmox host cannot be queried reliably enough to distinguish a real coverage gap from a connectivity failure.",
+          "Stop if the governed backup sources in the service redundancy catalog no longer map cleanly to the current VM inventory."
+        ],
+        "rollback_guidance": [
+          "Treat uncovered assets as policy failures and repair the governed backup job or storage path before retrying.",
+          "If an ad hoc backup is required to verify a newly added governed VM, document that action in the live-apply receipt and keep the scheduled job as the durable path."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
+      }
+    },
     "open-maintenance-window": {
       "description": "Open one governed ADR 0080 maintenance window for a planned live change so expected alert noise is suppressed.",
       "workflow_id": "open-maintenance-window",

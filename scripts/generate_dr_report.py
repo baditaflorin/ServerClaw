@@ -17,6 +17,7 @@ DEFAULT_STACK_PATH = repo_path("versions", "stack.yaml")
 DEFAULT_TABLE_TOP_DIR = repo_path("receipts", "dr-table-top-reviews")
 DEFAULT_RESTORE_DIR = repo_path("receipts", "restore-verifications")
 DEFAULT_WITNESS_DIR = repo_path("receipts", "witness-replication")
+DEFAULT_BACKUP_COVERAGE_DIR = repo_path("receipts", "backup-coverage")
 DEFAULT_ADR_DIR = repo_path("docs", "adr")
 UTC = dt.timezone.utc
 
@@ -167,6 +168,42 @@ def _load_witness_status(witness_dir: Path) -> dict[str, Any]:
     }
 
 
+def _load_backup_coverage_status(backup_coverage_dir: Path) -> dict[str, Any]:
+    latest_receipt = _latest_json_receipt(backup_coverage_dir)
+    if latest_receipt is None:
+        return {
+            "status": "missing",
+            "checked_at": "not recorded",
+            "path": "",
+            "summary": {
+                "governed_assets": 0,
+                "protected": 0,
+                "degraded": 0,
+                "uncovered": 0,
+                "degraded_assets": [],
+                "uncovered_assets": [],
+            },
+        }
+    path, payload = latest_receipt
+    summary = payload.get("summary", {}) if isinstance(payload, dict) else {}
+    degraded_assets = list(summary.get("degraded_assets") or [])
+    uncovered_assets = list(summary.get("uncovered_assets") or [])
+    status = "pass" if not degraded_assets and not uncovered_assets else "warn"
+    return {
+        "status": status,
+        "checked_at": str(payload.get("generated_at") or payload.get("recorded_on") or "unknown"),
+        "path": _display_path(path),
+        "summary": {
+            "governed_assets": int(summary.get("governed_assets", 0)),
+            "protected": int(summary.get("protected", 0)),
+            "degraded": int(summary.get("degraded", 0)),
+            "uncovered": int(summary.get("uncovered", 0)),
+            "degraded_assets": degraded_assets,
+            "uncovered_assets": uncovered_assets,
+        },
+    }
+
+
 def _collect_adr_metadata(adr_dir: Path) -> dict[str, dict[str, str]]:
     metadata: dict[str, dict[str, str]] = {}
     for path in sorted(adr_dir.glob("*.md")):
@@ -194,6 +231,7 @@ def build_dr_report(
     table_top_dir: Path = DEFAULT_TABLE_TOP_DIR,
     restore_dir: Path = DEFAULT_RESTORE_DIR,
     witness_dir: Path = DEFAULT_WITNESS_DIR,
+    backup_coverage_dir: Path = DEFAULT_BACKUP_COVERAGE_DIR,
     adr_dir: Path = DEFAULT_ADR_DIR,
     today: dt.date | None = None,
 ) -> dict[str, Any]:
@@ -205,6 +243,7 @@ def build_dr_report(
     table_top_review = _load_table_top_review(table_top_dir)
     offsite_backup = _load_offsite_status(targets, stack)
     witness_status = _load_witness_status(witness_dir)
+    backup_coverage = _load_backup_coverage_status(backup_coverage_dir)
     review_policy = targets.get("review_policy", {})
     table_top_interval_days = int(review_policy.get("table_top_interval_days", 90))
 
@@ -249,6 +288,15 @@ def build_dr_report(
             "detail": f"{restore_evidence['status']} via {restore_evidence['source']} at {restore_evidence['checked_at']}",
         },
         {
+            "id": "backup_coverage",
+            "label": "Backup coverage ledger",
+            "status": "pass" if backup_coverage["status"] == "pass" else "warn",
+            "detail": (
+                f"{backup_coverage['summary']['protected']}/{backup_coverage['summary']['governed_assets']} protected; "
+                f"uncovered {', '.join(backup_coverage['summary']['uncovered_assets']) or 'none'}"
+            ),
+        },
+        {
             "id": "offsite_backup",
             "label": "Off-site backup",
             "status": "pass" if offsite_backup["configured"] else "warn",
@@ -286,6 +334,7 @@ def build_dr_report(
         "table_top_review": table_top_review,
         "offsite_backup": offsite_backup,
         "witness_status": witness_status,
+        "backup_coverage": backup_coverage,
         "checks": checks,
         "overall_status": overall_status,
         "adr_summary": {
@@ -338,6 +387,11 @@ def render_release_status(report: dict[str, Any]) -> str:
             "  Backup restore evidence: "
             f"{report['restore_evidence']['status']} ({report['restore_evidence']['source']} at {report['restore_evidence']['checked_at']})"
         ),
+        (
+            "  Backup coverage: "
+            f"{report['backup_coverage']['summary']['protected']}/{report['backup_coverage']['summary']['governed_assets']} protected; "
+            f"uncovered {', '.join(report['backup_coverage']['summary']['uncovered_assets']) or 'none'}"
+        ),
         f"  Ops portal (ADR 0093): {adr_ready('0093')}",
         f"  Status page (ADR 0109): {adr_ready('0109')}",
         f"  Docs site (ADR 0094): {adr_ready('0094')}",
@@ -357,6 +411,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--table-top-dir", type=Path, default=DEFAULT_TABLE_TOP_DIR)
     parser.add_argument("--restore-dir", type=Path, default=DEFAULT_RESTORE_DIR)
     parser.add_argument("--witness-dir", type=Path, default=DEFAULT_WITNESS_DIR)
+    parser.add_argument("--backup-coverage-dir", type=Path, default=DEFAULT_BACKUP_COVERAGE_DIR)
     parser.add_argument("--adr-dir", type=Path, default=DEFAULT_ADR_DIR)
     parser.add_argument("--format", choices=["text", "json", "release"], default="text")
     parser.add_argument("--strict", action="store_true", help="Exit non-zero when readiness is degraded.")
@@ -371,6 +426,7 @@ def main(argv: list[str] | None = None) -> int:
         table_top_dir=args.table_top_dir,
         restore_dir=args.restore_dir,
         witness_dir=args.witness_dir,
+        backup_coverage_dir=args.backup_coverage_dir,
         adr_dir=args.adr_dir,
     )
     if args.format == "json":

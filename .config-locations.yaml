@@ -57,6 +57,16 @@ infrastructure_state:
     validation: Manual review
     naming_convention: "YYYY-MM-DD-adr-XXXX-description-live-apply.json"
 
+  receipts/backup-coverage/:
+    purpose: Durable ADR 0271 backup coverage ledger receipts derived from live Proxmox backup jobs, storage listings, and restore-verification evidence
+    owner: automation
+    format: JSON
+    use_for: Proving which governed assets are protected, degraded, or uncovered at a specific point in time
+    update_when: After every `make backup-coverage-ledger` run or equivalent worker execution
+    update_by: "scripts/backup_coverage_ledger.py --write-receipt"
+    validation: Manual review
+    naming_convention: "YYYYMMDDTHHMMSSZ.json"
+
   receipts/gate-bypasses/:
     purpose: Records of --no-verify gate overrides with justification
     owner: automation  # written by pre-push hook bypass
