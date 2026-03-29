@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-29'
 total_adrs: 304
 implementation_status_summary:
-  Implemented: 234
+  Implemented: 235
   Partial: 7
-  Not Implemented: 62
+  Not Implemented: 61
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4510,7 +4510,7 @@ adr_index:
   - adr: '0265'
     title: Immutable Validation Snapshots For Remote Builders And Schema Checks
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -4523,6 +4523,7 @@ adr_index:
       - checks
     summary: We will run remote builder and schema validation against immutable repository
     filename: 0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+    implemented_version: 0.177.78
   - adr: '0266'
     title: Validation Runner Capability Contracts And Environment Attestation
     status: Accepted

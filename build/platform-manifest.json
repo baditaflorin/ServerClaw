@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.77",
-  "platform_version": "0.130.52",
-  "generated_at": "2026-03-29T12:53:14Z",
-  "next_refresh_at": "2026-03-29T13:53:14Z",
+  "repo_version": "0.177.78",
+  "platform_version": "0.130.53",
+  "generated_at": "2026-03-29T13:08:12Z",
+  "next_refresh_at": "2026-03-29T14:08:12Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4211,10 +4211,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.76",
+    "last_version": "0.177.77",
     "deployed_at": "2026-03-29",
-    "summary": "implemented ADR 0273 by turning public hostname, edge route, DNS, and certificate-plan concordance into an enforced admission gate for edge and route-ledger replays",
-    "release_notes_url": "docs/release-notes/0.177.77.md"
+    "summary": "implemented ADR 0265 by replacing mutable remote validation mirrors with immutable content-addressed repository snapshots, fresh per-run build-server namespaces, and repository-shape-safe remote schema and dependency checks on the newest exact `main`",
+    "release_notes_url": "docs/release-notes/0.177.78.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

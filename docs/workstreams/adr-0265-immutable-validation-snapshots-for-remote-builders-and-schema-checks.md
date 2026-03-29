@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0265](../adr/0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md)
 - Title: Replace mutable remote build mirrors with immutable validation snapshots
-- Status: in_progress
-- Implemented In Repo Version: N/A
-- Live Applied In Platform Version: N/A
-- Implemented On: N/A
-- Live Applied On: N/A
+- Status: live_applied
+- Implemented In Repo Version: 0.177.78
+- Live Applied In Platform Version: 0.130.53
+- Implemented On: 2026-03-29
+- Live Applied On: 2026-03-29
 - Branch: `codex/ws-0265-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0265-live-apply`
 - Owner: codex
@@ -40,6 +40,7 @@
 - `docs/adr/.index.yaml`
 - `tests/test_remote_exec.py`
 - `tests/test_repository_snapshot.py`
+- `receipts/live-applies/2026-03-29-adr-0265-immutable-validation-snapshots-mainline-live-apply.json`
 - `workstreams.yaml`
 
 ## Expected Live Surfaces
@@ -63,14 +64,44 @@
 - record one live-apply receipt with the snapshot id, remote run namespace, and
   end-to-end gate results after the latest-main replay passes
 
+## Verification
+
+- `LV3_SESSION_ID=adr-0265-main-race REMOTE_EXEC_VERBOSE=1 make check-build-server`
+  passed from commit `768ab550`.
+- `LV3_SESSION_ID=adr-0265-main-race REMOTE_EXEC_VERBOSE=1 make remote-validate`
+  passed all six remote checks from the newest exact-main replay.
+- Earlier in this session, the focused regression slice for
+  `tests/test_repository_snapshot.py`, `tests/test_remote_exec.py`,
+  `tests/test_validate_repo_cache.py`, `tests/test_validation_gate.py`,
+  `tests/test_session_workspace.py`, and `tests/test_parallel_check.py`
+  repeatedly passed while ADR 0265 was rebased forward across the concurrent
+  mainline churn.
+
 ## Live Apply Outcome
 
-- Pending live apply and exact-main verification.
+- The newest exact-main replay from commit `768ab550` became the canonical ADR
+  0265 mainline proof for repository version `0.177.78` and platform version
+  `0.130.53`.
 
 ## Live Evidence
 
-- Pending live build-server replay.
+- `LV3_SESSION_ID=adr-0265-main-race REMOTE_EXEC_VERBOSE=1 make check-build-server`
+  passed, built immutable snapshot
+  `de22562164d38fb57a8f2dcfb8ab8c58a49094fbed15643b73df2ccf3b52fce0`, and
+  verified dry-run upload under
+  `/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/adr-0265-main-race/repo/.lv3-runs/20260329T130452Z-de22562164d3/repo`.
+- `LV3_SESSION_ID=adr-0265-main-race REMOTE_EXEC_VERBOSE=1 make remote-validate`
+  passed all six remote checks from
+  `/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/adr-0265-main-race/repo/.lv3-runs/20260329T130506Z-de22562164d3/repo`.
+- Canonical receipt:
+  `receipts/live-applies/2026-03-29-adr-0265-immutable-validation-snapshots-mainline-live-apply.json`.
 
 ## Mainline Integration Outcome
 
-- Pending branch completion and merge-to-main release reconciliation.
+- release `0.177.78` is the first repository version that records ADR 0265
+  implemented on `main`
+- platform version `0.130.53` is the first verified live platform version with
+  immutable repository snapshots active on the remote build gateway
+- shared integration files are updated in this branch already; the only
+  remaining publish-time verification is the remote pre-push gate that runs
+  automatically as part of `git push origin HEAD:main`

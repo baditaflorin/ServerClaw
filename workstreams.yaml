@@ -516,7 +516,7 @@ workstreams:
   - id: ws-0265-live-apply
     adr: "0265"
     title: Immutable validation snapshots for remote builders and schema checks
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0265-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0265-live-apply
@@ -569,11 +569,14 @@ workstreams:
             - tests/test_remote_exec.py
             - tests/test_repository_snapshot.py
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
     canonical_truth:
-      changelog_entry: implements ADR 0265 by replacing mutable remote validation mirrors with immutable content-addressed repository snapshots, fresh per-run build-server namespaces, and repo-shape-safe validation fallbacks
+      changelog_entry: implemented ADR 0265 by replacing mutable remote validation mirrors with immutable content-addressed repository snapshots, fresh per-run build-server namespaces, and repo-shape-safe validation fallbacks
       release_bump: patch
+      included_in_repo_version: 0.177.78
+      latest_receipts:
+        remote_build_gateway: 2026-03-29-adr-0265-immutable-validation-snapshots-mainline-live-apply
   - id: ws-0252-live-apply
     adr: "0252"
     title: Live apply ADR 0252 route and DNS publication assertion ledger

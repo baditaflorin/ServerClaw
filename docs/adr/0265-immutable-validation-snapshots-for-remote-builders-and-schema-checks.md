@@ -1,9 +1,10 @@
 # ADR 0265: Immutable Validation Snapshots For Remote Builders And Schema Checks
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.177.78
+- Implemented In Platform Version: 0.130.53
+- Implemented On: 2026-03-29
 - Date: 2026-03-28
 
 ## Context

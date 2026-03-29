@@ -1,12 +1,12 @@
-# Release 0.177.77
+# Release 0.177.78
 
 - Date: 2026-03-29
 
 ## Summary
-- implemented ADR 0273 by turning public hostname, edge route, DNS, and certificate-plan concordance into an enforced admission gate for edge and route-ledger replays
+- records ADR 0265 exact-main evidence on the newest current mainline by replacing mutable remote validation mirrors with immutable repository snapshots, fresh per-run builder namespaces, and repo-shape-safe remote validation for the build gateway
 
 ## Platform Impact
-- establishes platform version 0.130.52 by replaying exact-main public endpoint admission control across the shared edge and route-ledger publication paths
+- establishes platform version 0.130.53 because the 2026-03-29 newest exact-main replay verified `make check-build-server` and `make remote-validate` on `docker-build-lv3`, and the publish path re-runs the full pre-push gate on the exact commit delivered to `main`
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

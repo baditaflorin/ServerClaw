@@ -90,6 +90,7 @@ Semantic platform-context retrieval is now live on `docker-runtime-lv3` at `http
 
 The repository now also ships the repo-managed `lv3` operator CLI for terminal-first discovery, validation, status checks, and private control-plane entrypoints.
 The repository now also ships ADR 0156 session workspace isolation for controller automation and the remote build gateway: separate checkouts now resolve to separate session namespaces and remote build-server workspaces, and the first live verification from current `main` completed on 2026-03-26.
+The repository now also ships ADR 0265 immutable validation snapshots for remote builders and schema checks: current `main` now uploads content-addressed repository snapshots into fresh `.lv3-runs/` namespaces on `docker-build-lv3`, and the newest exact-main replay on 2026-03-29 passed `make check-build-server` and `make remote-validate` end to end.
 The repository now also ships ADR 0170 timeout hierarchy primitives: `config/timeout-hierarchy.yaml`, shared deadline propagation helpers, validation for catalog and hardcoded timeout drift, and runtime timeout wiring across the API gateway, scheduler, world-state workers, drift helpers, and NetBox sync; the integrated mainline live apply on 2026-03-25 re-converged the API gateway and Windmill with those runtime paths active and hardened the shared OpenBao secret-injection helper to recover from sealed restarts.
 The repository now also ships ADR 0171 controlled fault injection live on production: the repo-managed `fault-injection` Windmill workflow and guarded schedule are present on `docker-runtime-lv3`, and the first `main`-based governed drills for Keycloak and OpenBao both passed on 2026-03-26 with OpenBao using pause/unpause so the secret store stays unsealed after validation.
 The repository now also ships ADR 0189 network impairment matrix automation: the repo-managed Windmill workflow can render the governed staging and preview impairment plan on demand, and the 2026-03-27 live verification also hardened the mirrored worker checkout so repo-managed Python jobs no longer fail on stale editable-build metadata.
@@ -145,8 +146,8 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.77` |
-| Platform version | `0.130.52` |
+| Repository version | `0.177.78` |
+| Platform version | `0.130.53` |
 | Observed check date | `2026-03-29` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -284,7 +285,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `public_edge_publication` | `2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply` |
 | `public_endpoint_admission_control` | `2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply` |
 | `realtime` | `2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply` |
-| `remote_build_gateway` | `2026-03-26-adr-0156-agent-session-workspace-isolation-live-apply` |
+| `remote_build_gateway` | `2026-03-29-adr-0265-immutable-validation-snapshots-mainline-live-apply` |
 | `restore_verification` | `2026-03-29-adr-0272-restore-readiness-mainline-live-apply` |
 | `route_dns_assertion_ledger` | `2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
@@ -1174,6 +1175,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0244: Runtime Assurance Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0244-runtime-assurance-architecture-bundle.md)
 - [Workstream ADR 0254: ServerClaw Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0254-serverclaw-architecture-bundle.md)
 - [Workstream ADR 0264: Receipt-Driven Resilience Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md)
+- [Workstream WS-0265: Immutable Validation Snapshots For Remote Builders And Schema Checks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md)
 - [Workstream ADR 0273: Public Endpoint Admission Control](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0273-public-endpoint-admission-control.md)
 - [Workstream ADR 0295: Artifact Cache Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md)
 - [Workstream ws-0021-edge-cert-repair: Shared Edge Certificate Expansion Repair](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0021-edge-cert-repair.md)
@@ -1264,8 +1266,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.77` |
-| Platform version | `0.130.52` |
+| Repository version | `0.177.78` |
+| Platform version | `0.130.53` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1530,6 +1532,7 @@ This repository is intentionally opinionated:
 | `0253` | Unified runtime assurance scoreboard live apply | `live_applied` | [ws-0253-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0253-live-apply.md) |
 | `0254` | ServerClaw architecture bundle | `merged` | [adr-0254-serverclaw-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0254-serverclaw-architecture-bundle.md) |
 | `0264` | Receipt-driven resilience architecture bundle | `merged` | [adr-0264-receipt-driven-resilience-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md) |
+| `0265` | Immutable validation snapshots for remote builders and schema checks | `live_applied` | [adr-0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md) |
 | `0271` | Backup coverage assertion ledger live apply | `live_applied` | [ws-0271-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0271-live-apply.md) |
 | `0272` | Restore readiness ladders and stateful warm-up verification profiles | `live_applied` | [ws-0272-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0272-live-apply.md) |
 | `0273` | Live apply ADR 0273 public endpoint admission control | `live_applied` | [adr-0273-public-endpoint-admission-control.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0273-public-endpoint-admission-control.md) |
