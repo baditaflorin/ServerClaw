@@ -3,8 +3,8 @@
 - ADR: [ADR 0260](../adr/0260-nextcloud-as-the-canonical-personal-data-plane-for-serverclaw.md)
 - Title: Nextcloud personal data plane live apply from latest `origin/main`
 - Status: live_applied
-- Branch: `codex/ws-0260-main-integration`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0260-main-integration`
+- Branch: `codex/ws-0260-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0260-live-apply`
 - Owner: codex
 - Depends On: `adr-0206-ports-and-adapters-for-external-integrations`, `adr-0259-n8n-as-the-external-app-connector-fabric-for-serverclaw`
 - Conflicts With: none
