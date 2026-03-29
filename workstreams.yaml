@@ -14,6 +14,32 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0295-live-apply
+    adr: "0295"
+    title: Live apply the shared artifact cache plane from latest origin/main
+    status: in-progress
+    owner: codex
+    branch: codex/ws-0295-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0295-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md
+    depends_on:
+      - ws-0274-artifact-cache-plane
+      - adr-0089-build-cache
+      - adr-0153-distributed-resource-lock-registry
+      - adr-0191-immutable-guest-replacement
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0295-live-apply.md
+      - docs/adr/0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md
+      - docs/runbooks/artifact-cache-runtime.md
+      - docs/runbooks/configure-build-artifact-cache.md
+      - receipts/live-applies/2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply.json
+      - build/platform-manifest.json
+      - versions/stack.yaml
+      - README.md
+    ready_to_merge: false
+    live_applied: false
   - id: ws-0274-artifact-cache-plane
     adr: "0295"
     title: Shared artifact cache plane and dedicated cache VM roadmap
