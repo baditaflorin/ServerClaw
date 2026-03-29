@@ -1,0 +1,73 @@
+---
+# Purpose: Declare the default runtime inputs for the Matrix Synapse service role.
+# Use case: Used when converging Matrix Synapse on docker-runtime-lv3 with repo-managed bootstrap secrets, config, and publication contracts.
+#
+# Inputs (required):
+#   - none
+#
+# Inputs (optional):
+#   - matrix_synapse_server_name (str, optional, default=matrix.lv3.org): Canonical Matrix server name.
+#   - matrix_synapse_admin_localpart (str, optional, default=ops): Bootstrap admin localpart.
+#   - matrix_synapse_disable_federation (bool, optional, default=true): Whether the repo-managed listener stays client-only.
+#
+# Outputs:
+#   - Default paths, URLs, and image references for Matrix Synapse runtime convergence.
+#
+# Idempotency: Fully idempotent
+#              This file only declares role defaults.
+#
+# Dependencies:
+#   - ADR 0255: Matrix Synapse As The Canonical ServerClaw Conversation Hub
+#   - Role: matrix_synapse_runtime — deploys the Matrix Synapse runtime on docker-runtime-lv3.
+#
+# Related ADRs: 0165, 0255
+# Related Runbooks: docs/runbooks/configure-matrix-synapse.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-29
+matrix_synapse_site_dir: /opt/matrix-synapse
+matrix_synapse_data_dir: "{{ matrix_synapse_site_dir }}/data"
+matrix_synapse_secret_dir: /etc/lv3/matrix-synapse
+matrix_synapse_compose_file: "{{ matrix_synapse_site_dir }}/docker-compose.yml"
+matrix_synapse_homeserver_config_file: "{{ matrix_synapse_data_dir }}/homeserver.yaml"
+matrix_synapse_log_config_file: "{{ matrix_synapse_data_dir }}/{{ matrix_synapse_server_name }}.log.config"
+matrix_synapse_env_file: "{{ compose_runtime_secret_root }}/matrix-synapse/runtime.env"
+matrix_synapse_legacy_env_file: "{{ matrix_synapse_site_dir }}/matrix-synapse.env"
+matrix_synapse_openbao_agent_dir: "{{ matrix_synapse_site_dir }}/openbao"
+matrix_synapse_openbao_agent_image: "{{ openbao_agent_image }}"
+matrix_synapse_openbao_agent_container_name: matrix-synapse-openbao-agent
+matrix_synapse_openbao_secret_path: services/matrix-synapse/runtime-env
+matrix_synapse_openbao_policy_name: lv3-service-matrix-synapse-runtime
+matrix_synapse_openbao_approle_name: matrix-synapse-runtime
+matrix_synapse_container_name: matrix-synapse
+matrix_synapse_image: "{{ container_image_catalog.images.matrix_synapse_runtime.ref }}"
+matrix_synapse_server_name: matrix.lv3.org
+matrix_synapse_public_hostname: "{{ platform_service_topology.matrix_synapse.public_hostname }}"
+matrix_synapse_port: "{{ platform_service_topology | platform_service_port('matrix_synapse', 'internal') }}"
+matrix_synapse_host_proxy_port: "{{ platform_service_topology | platform_service_port('matrix_synapse', 'controller') }}"
+matrix_synapse_internal_base_url: "{{ platform_service_topology | platform_service_url('matrix_synapse', 'internal') }}"
+matrix_synapse_controller_url: "{{ platform_service_topology | platform_service_url('matrix_synapse', 'controller') }}"
+matrix_synapse_public_url: "{{ platform_service_topology.matrix_synapse.urls.public }}"
+matrix_synapse_public_base_url: "{{ platform_service_topology.matrix_synapse.urls.public }}/"
+matrix_synapse_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+matrix_synapse_database_port: 5432
+matrix_synapse_database_name: matrix_synapse
+matrix_synapse_database_user: matrix_synapse
+matrix_synapse_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse
+matrix_synapse_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/database-password.txt
+matrix_synapse_ops_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/ops-password.txt
+matrix_synapse_registration_shared_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/registration-shared-secret.txt
+matrix_synapse_signing_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/server-signing.key
+matrix_synapse_ops_password_remote_file: "{{ matrix_synapse_secret_dir }}/ops-password.txt"
+matrix_synapse_registration_shared_secret_remote_file: "{{ matrix_synapse_secret_dir }}/registration-shared-secret.txt"
+matrix_synapse_form_secret_remote_file: "{{ matrix_synapse_secret_dir }}/form-secret.txt"
+matrix_synapse_macaroon_secret_key_remote_file: "{{ matrix_synapse_secret_dir }}/macaroon-secret-key.txt"
+matrix_synapse_signing_key_remote_file: "{{ matrix_synapse_data_dir }}/{{ matrix_synapse_server_name }}.signing.key"
+matrix_synapse_admin_localpart: ops
+matrix_synapse_admin_user_id: "@{{ matrix_synapse_admin_localpart }}:{{ matrix_synapse_server_name }}"
+matrix_synapse_report_stats: false
+matrix_synapse_disable_federation: true
+matrix_synapse_trusted_key_servers:
+  - matrix.org
+matrix_synapse_uid: "991"
+matrix_synapse_gid: "991"

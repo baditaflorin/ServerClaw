@@ -39,24 +39,6 @@
       "adr": "0081"
     },
     {
-      "id": "docker_build",
-      "service": "docker_build",
-      "name": "Docker Build VM",
-      "vm": "docker-build-lv3",
-      "tier": 1,
-      "category": "infrastructure",
-      "adr": "0028"
-    },
-    {
-      "id": "docker_runtime",
-      "service": "docker_runtime",
-      "name": "Docker Runtime VM",
-      "vm": "docker-runtime-lv3",
-      "tier": 1,
-      "category": "infrastructure",
-      "adr": "0023"
-    },
-    {
       "id": "coolify",
       "service": "coolify",
       "name": "Coolify",
@@ -84,13 +66,22 @@
       "adr": "0197"
     },
     {
-      "id": "dozzle",
-      "service": "dozzle",
-      "name": "Dozzle",
+      "id": "docker_build",
+      "service": "docker_build",
+      "name": "Docker Build VM",
+      "vm": "docker-build-lv3",
+      "tier": 1,
+      "category": "infrastructure",
+      "adr": "0028"
+    },
+    {
+      "id": "docker_runtime",
+      "service": "docker_runtime",
+      "name": "Docker Runtime VM",
       "vm": "docker-runtime-lv3",
       "tier": 1,
-      "category": "observability",
-      "adr": "0150"
+      "category": "infrastructure",
+      "adr": "0023"
     },
     {
       "id": "docs_portal",
@@ -100,6 +91,15 @@
       "tier": 2,
       "category": "access",
       "adr": "0094"
+    },
+    {
+      "id": "dozzle",
+      "service": "dozzle",
+      "name": "Dozzle",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "observability",
+      "adr": "0150"
     },
     {
       "id": "excalidraw",
@@ -138,13 +138,13 @@
       "adr": "0201"
     },
     {
-      "id": "keycloak",
-      "service": "keycloak",
-      "name": "Keycloak",
-      "vm": "docker-runtime-lv3",
-      "tier": 2,
+      "id": "headscale",
+      "service": "headscale",
+      "name": "Headscale",
+      "vm": "proxmox_florin",
+      "tier": 1,
       "category": "access",
-      "adr": "0056"
+      "adr": "0144"
     },
     {
       "id": "homepage",
@@ -156,13 +156,13 @@
       "adr": "0152"
     },
     {
-      "id": "realtime",
-      "service": "realtime",
-      "name": "Netdata Realtime Metrics",
-      "vm": "monitoring-lv3",
-      "tier": 1,
-      "category": "observability",
-      "adr": "0196"
+      "id": "keycloak",
+      "service": "keycloak",
+      "name": "Keycloak",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "access",
+      "adr": "0056"
     },
     {
       "id": "langfuse",
@@ -183,6 +183,15 @@
       "adr": "0041"
     },
     {
+      "id": "matrix_synapse",
+      "service": "matrix_synapse",
+      "name": "Matrix Synapse",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "communication",
+      "adr": "0255"
+    },
+    {
       "id": "mattermost",
       "service": "mattermost",
       "name": "Mattermost",
@@ -190,6 +199,15 @@
       "tier": 2,
       "category": "communication",
       "adr": "0057"
+    },
+    {
+      "id": "n8n",
+      "service": "n8n",
+      "name": "n8n",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0151"
     },
     {
       "id": "netbox",
@@ -237,15 +255,6 @@
       "adr": "0059"
     },
     {
-      "id": "open_webui",
-      "service": "open_webui",
-      "name": "Open WebUI",
-      "vm": "docker-runtime-lv3",
-      "tier": 2,
-      "category": "automation",
-      "adr": "0060"
-    },
-    {
       "id": "ollama",
       "service": "ollama",
       "name": "Ollama",
@@ -255,13 +264,13 @@
       "adr": "0145"
     },
     {
-      "id": "searxng",
-      "service": "searxng",
-      "name": "SearXNG",
+      "id": "open_webui",
+      "service": "open_webui",
+      "name": "Open WebUI",
       "vm": "docker-runtime-lv3",
-      "tier": 1,
+      "tier": 2,
       "category": "automation",
-      "adr": "0148"
+      "adr": "0060"
     },
     {
       "id": "openbao",
@@ -271,15 +280,6 @@
       "tier": 1,
       "category": "security",
       "adr": "0043"
-    },
-    {
-      "id": "n8n",
-      "service": "n8n",
-      "name": "n8n",
-      "vm": "docker-runtime-lv3",
-      "tier": 2,
-      "category": "automation",
-      "adr": "0151"
     },
     {
       "id": "ops_portal",
@@ -300,6 +300,15 @@
       "adr": "0199"
     },
     {
+      "id": "plane",
+      "service": "plane",
+      "name": "Plane",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0193"
+    },
+    {
       "id": "platform_context_api",
       "service": "platform_context_api",
       "name": "Platform Context API",
@@ -316,15 +325,6 @@
       "tier": 1,
       "category": "automation",
       "adr": "0055"
-    },
-    {
-      "id": "vaultwarden",
-      "service": "vaultwarden",
-      "name": "Vaultwarden",
-      "vm": "docker-runtime-lv3",
-      "tier": 2,
-      "category": "security",
-      "adr": "0147"
     },
     {
       "id": "postgres",
@@ -345,13 +345,31 @@
       "adr": "0004"
     },
     {
-      "id": "headscale",
-      "service": "headscale",
-      "name": "Headscale",
-      "vm": "proxmox_florin",
+      "id": "realtime",
+      "service": "realtime",
+      "name": "Netdata Realtime Metrics",
+      "vm": "monitoring-lv3",
       "tier": 1,
-      "category": "access",
-      "adr": "0144"
+      "category": "observability",
+      "adr": "0196"
+    },
+    {
+      "id": "searxng",
+      "service": "searxng",
+      "name": "SearXNG",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "automation",
+      "adr": "0148"
+    },
+    {
+      "id": "semaphore",
+      "service": "semaphore",
+      "name": "Semaphore",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0149"
     },
     {
       "id": "status_page",
@@ -381,6 +399,15 @@
       "adr": "0027"
     },
     {
+      "id": "vaultwarden",
+      "service": "vaultwarden",
+      "name": "Vaultwarden",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "security",
+      "adr": "0147"
+    },
+    {
       "id": "windmill",
       "service": "windmill",
       "name": "Windmill",
@@ -388,24 +415,6 @@
       "tier": 2,
       "category": "automation",
       "adr": "0044"
-    },
-    {
-      "id": "semaphore",
-      "service": "semaphore",
-      "name": "Semaphore",
-      "vm": "docker-runtime-lv3",
-      "tier": 2,
-      "category": "automation",
-      "adr": "0149"
-    },
-    {
-      "id": "plane",
-      "service": "plane",
-      "name": "Plane",
-      "vm": "docker-runtime-lv3",
-      "tier": 2,
-      "category": "automation",
-      "adr": "0193"
     }
   ],
   "edges": [
@@ -440,30 +449,6 @@
       "description": "The changelog portal is served as generated static content on nginx-lv3."
     },
     {
-      "from": "docs_portal",
-      "to": "nginx_edge",
-      "type": "hard",
-      "description": "The generated developer portal is published as static content on nginx-lv3."
-    },
-    {
-      "from": "excalidraw",
-      "to": "docker_runtime",
-      "type": "hard",
-      "description": "The Excalidraw frontend and collaboration room are hosted on docker-runtime-lv3."
-    },
-    {
-      "from": "excalidraw",
-      "to": "keycloak",
-      "type": "soft",
-      "description": "Operator access to draw.lv3.org depends on the shared Keycloak-backed oauth2-proxy edge flow, while the private runtime can still be verified locally."
-    },
-    {
-      "from": "excalidraw",
-      "to": "nginx_edge",
-      "type": "hard",
-      "description": "The private diagram surface is published at draw.lv3.org through the shared NGINX edge, including the routed /socket.io/ collaboration path."
-    },
-    {
       "from": "coolify",
       "to": "keycloak",
       "type": "soft",
@@ -488,34 +473,10 @@
       "description": "Public access to apps.lv3.org depends on the shared NGINX edge publication while the guest-local ingress remains reachable for direct verification."
     },
     {
-      "from": "nomad",
-      "to": "docker_runtime",
-      "type": "soft",
-      "description": "Runtime-targeted batch jobs and internal helper workloads depend on the docker-runtime Nomad client remaining available for placement."
-    },
-    {
-      "from": "nomad",
-      "to": "docker_build",
-      "type": "soft",
-      "description": "Long-running internal helper services pinned to the build pool depend on the docker-build Nomad client remaining available for placement."
-    },
-    {
       "from": "dify",
-      "to": "postgres",
-      "type": "hard",
-      "description": "Dify stores application state, accounts, knowledge metadata, and workflow definitions in Postgres."
-    },
-    {
-      "from": "dify",
-      "to": "openbao",
-      "type": "startup_only",
-      "description": "Dify loads its mirrored database, admin, and tool-bridge secrets through the OpenBao agent before startup."
-    },
-    {
-      "from": "dify",
-      "to": "nginx_edge",
+      "to": "api_gateway",
       "type": "soft",
-      "description": "Public reachability for agents.lv3.org depends on the shared NGINX edge publication path."
+      "description": "Dify uses the governed API gateway route to call named LV3 tools, but the canvas remains reachable without tool invocation."
     },
     {
       "from": "dify",
@@ -525,21 +486,39 @@
     },
     {
       "from": "dify",
-      "to": "api_gateway",
-      "type": "soft",
-      "description": "Dify uses the governed API gateway route to call named LV3 tools, but the canvas remains reachable without tool invocation."
-    },
-    {
-      "from": "dify",
       "to": "langfuse",
       "type": "soft",
       "description": "Dify can publish workflow traces into Langfuse, but authoring and bootstrap access remain available without trace export."
     },
     {
       "from": "dify",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public reachability for agents.lv3.org depends on the shared NGINX edge publication path."
+    },
+    {
+      "from": "dify",
       "to": "ollama",
       "type": "soft",
       "description": "Dify can use the private Ollama runtime for local model inference, but the canvas can still operate with external model providers."
+    },
+    {
+      "from": "dify",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Dify loads its mirrored database, admin, and tool-bridge secrets through the OpenBao agent before startup."
+    },
+    {
+      "from": "dify",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Dify stores application state, accounts, knowledge metadata, and workflow definitions in Postgres."
+    },
+    {
+      "from": "docs_portal",
+      "to": "nginx_edge",
+      "type": "hard",
+      "description": "The generated developer portal is published as static content on nginx-lv3."
     },
     {
       "from": "dozzle",
@@ -552,6 +531,24 @@
       "to": "nginx_edge",
       "type": "soft",
       "description": "Public operator access to logs.lv3.org depends on the shared NGINX edge publication while the private runtime remains reachable inside the guest network."
+    },
+    {
+      "from": "excalidraw",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Excalidraw frontend and collaboration room are hosted on docker-runtime-lv3."
+    },
+    {
+      "from": "excalidraw",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Operator access to draw.lv3.org depends on the shared Keycloak-backed oauth2-proxy edge flow, while the private runtime can still be verified locally."
+    },
+    {
+      "from": "excalidraw",
+      "to": "nginx_edge",
+      "type": "hard",
+      "description": "The private diagram surface is published at draw.lv3.org through the shared NGINX edge, including the routed /socket.io/ collaboration path."
     },
     {
       "from": "gitea",
@@ -602,28 +599,10 @@
       "description": "Public reachability for registry.lv3.org depends on the shared NGINX edge publication path."
     },
     {
-      "from": "keycloak",
-      "to": "postgres",
-      "type": "hard",
-      "description": "Keycloak stores realm, client, and session state in Postgres."
-    },
-    {
-      "from": "keycloak",
-      "to": "openbao",
-      "type": "startup_only",
-      "description": "Keycloak reads its mirrored database and bootstrap secrets through the OpenBao agent before startup."
-    },
-    {
-      "from": "keycloak",
-      "to": "step_ca",
-      "type": "startup_only",
-      "description": "Keycloak depends on the internal certificate authority when repo-managed internal TLS material is refreshed."
-    },
-    {
-      "from": "keycloak",
+      "from": "headscale",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public reachability for sso.lv3.org depends on the shared edge publication path."
+      "description": "Public registration and control-plane reachability for headscale.lv3.org depends on the shared NGINX edge publication path."
     },
     {
       "from": "homepage",
@@ -638,22 +617,28 @@
       "description": "The unified dashboard is published at home.lv3.org through the shared NGINX edge and is not exposed directly on the public internet."
     },
     {
-      "from": "realtime",
-      "to": "keycloak",
-      "type": "soft",
-      "description": "Public operator access to realtime.lv3.org depends on the shared Keycloak-backed edge auth path, but the private Netdata parent remains reachable on monitoring-lv3."
-    },
-    {
-      "from": "realtime",
+      "from": "keycloak",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public operator access to realtime.lv3.org depends on the shared NGINX edge publication while the private Netdata parent remains reachable on the guest network."
+      "description": "Public reachability for sso.lv3.org depends on the shared edge publication path."
     },
     {
-      "from": "langfuse",
+      "from": "keycloak",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Keycloak reads its mirrored database and bootstrap secrets through the OpenBao agent before startup."
+    },
+    {
+      "from": "keycloak",
       "to": "postgres",
       "type": "hard",
-      "description": "Langfuse stores application metadata, users, projects, and bootstrap state in Postgres."
+      "description": "Keycloak stores realm, client, and session state in Postgres."
+    },
+    {
+      "from": "keycloak",
+      "to": "step_ca",
+      "type": "startup_only",
+      "description": "Keycloak depends on the internal certificate authority when repo-managed internal TLS material is refreshed."
     },
     {
       "from": "langfuse",
@@ -663,21 +648,21 @@
     },
     {
       "from": "langfuse",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public access to langfuse.lv3.org depends on the shared NGINX edge publication path."
+    },
+    {
+      "from": "langfuse",
       "to": "openbao",
       "type": "startup_only",
       "description": "Langfuse starts from OpenBao-rendered runtime secrets mirrored into its compose environment."
     },
     {
       "from": "langfuse",
-      "to": "nginx_edge",
-      "type": "soft",
-      "description": "Public access to langfuse.lv3.org depends on the shared NGINX edge publication path."
-    },
-    {
-      "from": "mail_platform",
-      "to": "openbao",
-      "type": "startup_only",
-      "description": "The mail gateway runtime is rendered from secrets mirrored locally by the OpenBao sidecar."
+      "to": "postgres",
+      "type": "hard",
+      "description": "Langfuse stores application metadata, users, projects, and bootstrap state in Postgres."
     },
     {
       "from": "mail_platform",
@@ -686,10 +671,28 @@
       "description": "The published mail.lv3.org informational surface is exposed through the shared NGINX edge."
     },
     {
-      "from": "mattermost",
+      "from": "mail_platform",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "The mail gateway runtime is rendered from secrets mirrored locally by the OpenBao sidecar."
+    },
+    {
+      "from": "matrix_synapse",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public reachability for matrix.lv3.org depends on the shared edge publication path."
+    },
+    {
+      "from": "matrix_synapse",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Matrix Synapse starts from mirrored database credentials rendered through the shared OpenBao compose environment helper."
+    },
+    {
+      "from": "matrix_synapse",
       "to": "postgres",
       "type": "hard",
-      "description": "Mattermost stores channels, users, and message history in Postgres."
+      "description": "Matrix Synapse stores users, room metadata, media references, and event history in Postgres."
     },
     {
       "from": "mattermost",
@@ -698,28 +701,16 @@
       "description": "Mattermost starts from OpenBao-rendered runtime secrets mirrored into its compose environment."
     },
     {
-      "from": "netbox",
+      "from": "mattermost",
       "to": "postgres",
       "type": "hard",
-      "description": "NetBox stores all inventory, topology, and IPAM data in Postgres."
-    },
-    {
-      "from": "netbox",
-      "to": "openbao",
-      "type": "startup_only",
-      "description": "NetBox receives its database and Redis credentials from the OpenBao agent before the application containers start."
+      "description": "Mattermost stores channels, users, and message history in Postgres."
     },
     {
       "from": "n8n",
-      "to": "postgres",
-      "type": "hard",
-      "description": "n8n stores workflow, credential, and execution state in Postgres."
-    },
-    {
-      "from": "n8n",
-      "to": "openbao",
-      "type": "startup_only",
-      "description": "n8n reads its mirrored database password and encryption key through the OpenBao agent before startup."
+      "to": "keycloak",
+      "type": "soft",
+      "description": "The public n8n editor path is gated behind oauth2-proxy and Keycloak-backed browser authentication."
     },
     {
       "from": "n8n",
@@ -729,21 +720,39 @@
     },
     {
       "from": "n8n",
-      "to": "keycloak",
-      "type": "soft",
-      "description": "The public n8n editor path is gated behind oauth2-proxy and Keycloak-backed browser authentication."
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "n8n reads its mirrored database password and encryption key through the OpenBao agent before startup."
     },
     {
-      "from": "open_webui",
-      "to": "ollama",
+      "from": "n8n",
+      "to": "postgres",
       "type": "hard",
-      "description": "Open WebUI routes the repo-managed local model connector to the private Ollama runtime on docker-runtime-lv3."
+      "description": "n8n stores workflow, credential, and execution state in Postgres."
     },
     {
-      "from": "open_webui",
-      "to": "searxng",
+      "from": "netbox",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "NetBox receives its database and Redis credentials from the OpenBao agent before the application containers start."
+    },
+    {
+      "from": "netbox",
+      "to": "postgres",
+      "type": "hard",
+      "description": "NetBox stores all inventory, topology, and IPAM data in Postgres."
+    },
+    {
+      "from": "nomad",
+      "to": "docker_build",
       "type": "soft",
-      "description": "Open WebUI delegates optional web-search requests to the private SearXNG runtime when the feature is enabled."
+      "description": "Long-running internal helper services pinned to the build pool depend on the docker-build Nomad client remaining available for placement."
+    },
+    {
+      "from": "nomad",
+      "to": "docker_runtime",
+      "type": "soft",
+      "description": "Runtime-targeted batch jobs and internal helper workloads depend on the docker-runtime Nomad client remaining available for placement."
     },
     {
       "from": "open_webui",
@@ -753,9 +762,21 @@
     },
     {
       "from": "open_webui",
+      "to": "ollama",
+      "type": "hard",
+      "description": "Open WebUI routes the repo-managed local model connector to the private Ollama runtime on docker-runtime-lv3."
+    },
+    {
+      "from": "open_webui",
       "to": "openbao",
       "type": "startup_only",
       "description": "Open WebUI consumes mirrored runtime secrets and optional OIDC client credentials from the OpenBao sidecar."
+    },
+    {
+      "from": "open_webui",
+      "to": "searxng",
+      "type": "soft",
+      "description": "Open WebUI delegates optional web-search requests to the private SearXNG runtime when the feature is enabled."
     },
     {
       "from": "ops_portal",
@@ -800,6 +821,30 @@
       "description": "Outline stores workspace, user, and document metadata in Postgres."
     },
     {
+      "from": "plane",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Authenticated browser access to tasks.lv3.org depends on the shared Keycloak-backed edge auth path, while the private controller path remains available for governed automation."
+    },
+    {
+      "from": "plane",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public access to tasks.lv3.org depends on the shared NGINX edge publication path."
+    },
+    {
+      "from": "plane",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Plane consumes mirrored runtime secrets from the OpenBao sidecar before the containers start."
+    },
+    {
+      "from": "plane",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Plane persists workspaces, projects, users, and issue metadata in Postgres."
+    },
+    {
       "from": "platform_context_api",
       "to": "openbao",
       "type": "startup_only",
@@ -812,10 +857,28 @@
       "description": "The indexed corpus includes step-ca ADR and runbook content for operator query grounding."
     },
     {
-      "from": "headscale",
+      "from": "realtime",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Public operator access to realtime.lv3.org depends on the shared Keycloak-backed edge auth path, but the private Netdata parent remains reachable on monitoring-lv3."
+    },
+    {
+      "from": "realtime",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Public registration and control-plane reachability for headscale.lv3.org depends on the shared NGINX edge publication path."
+      "description": "Public operator access to realtime.lv3.org depends on the shared NGINX edge publication while the private Netdata parent remains reachable on the guest network."
+    },
+    {
+      "from": "semaphore",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Semaphore loads database and bootstrap secrets from the OpenBao agent before the container starts."
+    },
+    {
+      "from": "semaphore",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Semaphore persists project metadata, inventories, templates, and task history in Postgres."
     },
     {
       "from": "status_page",
@@ -843,51 +906,15 @@
     },
     {
       "from": "windmill",
-      "to": "postgres",
-      "type": "hard",
-      "description": "Windmill persists workflow metadata, run history, and state in Postgres."
-    },
-    {
-      "from": "windmill",
       "to": "openbao",
       "type": "startup_only",
       "description": "Windmill workers and the server runtime load mirrored secrets from the OpenBao agent before the containers start."
     },
     {
-      "from": "semaphore",
+      "from": "windmill",
       "to": "postgres",
       "type": "hard",
-      "description": "Semaphore persists project metadata, inventories, templates, and task history in Postgres."
-    },
-    {
-      "from": "semaphore",
-      "to": "openbao",
-      "type": "startup_only",
-      "description": "Semaphore loads database and bootstrap secrets from the OpenBao agent before the container starts."
-    },
-    {
-      "from": "plane",
-      "to": "postgres",
-      "type": "hard",
-      "description": "Plane persists workspaces, projects, users, and issue metadata in Postgres."
-    },
-    {
-      "from": "plane",
-      "to": "openbao",
-      "type": "startup_only",
-      "description": "Plane consumes mirrored runtime secrets from the OpenBao sidecar before the containers start."
-    },
-    {
-      "from": "plane",
-      "to": "keycloak",
-      "type": "soft",
-      "description": "Authenticated browser access to tasks.lv3.org depends on the shared Keycloak-backed edge auth path, while the private controller path remains available for governed automation."
-    },
-    {
-      "from": "plane",
-      "to": "nginx_edge",
-      "type": "soft",
-      "description": "Public access to tasks.lv3.org depends on the shared NGINX edge publication path."
+      "description": "Windmill persists workflow metadata, run history, and state in Postgres."
     }
   ]
 }

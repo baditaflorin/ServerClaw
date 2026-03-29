@@ -46,6 +46,8 @@ platform_port_assignments:
   nomad_host_proxy_port: 8013
   mattermost_server_port: 8065
   mattermost_host_proxy_port: 8066
+  matrix_synapse_port: 8008
+  matrix_synapse_host_proxy_port: 8014
   gitea_http_port: 3003
   gitea_host_proxy_port: 3009
   netbox_server_port: 8082
@@ -149,6 +151,11 @@ proxmox_tailscale_tcp_proxies:
     listen_port: "{{ platform_port_assignments.mattermost_host_proxy_port }}"
     upstream_host: 10.10.10.20
     upstream_port: 8065
+  - name: matrix-synapse
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: "{{ platform_port_assignments.matrix_synapse_host_proxy_port }}"
+    upstream_host: 10.10.10.20
+    upstream_port: "{{ platform_port_assignments.matrix_synapse_port }}"
   - name: gitea
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.gitea_host_proxy_port }}"
@@ -456,6 +463,7 @@ network_policy:
             - 3003
             - 3004
             - 8000
+            - 8008
             - 8010
             - 8082
             - 8088
@@ -514,6 +522,11 @@ network_policy:
           ports:
             - 3003
           description: Gitea Actions runner access from docker-build-lv3
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 8008
+          description: Reverse proxy access to the Matrix Synapse client API
         - source: nginx-lv3
           protocol: tcp
           ports:
@@ -1220,6 +1233,31 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ mattermost_controller_url }}"
+  matrix_synapse:
+    service_name: matrix-synapse
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: matrix.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: matrix
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.matrix_synapse_port }}"
+    access:
+      kind: tailscale-tcp-proxy
+      url: "{{ matrix_synapse_controller_url }}"
   netbox:
     service_name: netbox
     owning_vm: docker-runtime-lv3

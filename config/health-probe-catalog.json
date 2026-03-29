@@ -1,6 +1,1079 @@
 {
   "schema_version": "1.1.0",
   "services": {
+    "alertmanager": {
+      "service_name": "alertmanager",
+      "owning_vm": "monitoring-lv3",
+      "role": "alertmanager_runtime",
+      "verify_file": "roles/alertmanager_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "Alertmanager responds on its local health endpoint.",
+        "timeout_seconds": 60,
+        "retries": 20,
+        "delay_seconds": 3,
+        "url": "http://127.0.0.1:9093/-/healthy",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "Alertmanager responds on its local readiness endpoint after routing config loads.",
+        "timeout_seconds": 60,
+        "retries": 20,
+        "delay_seconds": 3,
+        "url": "http://127.0.0.1:9093/-/ready",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Alertmanager is private-only and its operator value is already covered by role verification on monitoring-lv3."
+      }
+    },
+    "api_gateway": {
+      "service_name": "api-gateway",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "api_gateway_runtime",
+      "verify_file": "roles/api_gateway_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Gateway startup completes once the authenticated aggregate health endpoint is routing requests.",
+        "timeout_seconds": 90,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8083/v1/health",
+        "method": "GET",
+        "expected_status": [
+          401
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The local API gateway health endpoint responds on docker-runtime-lv3.",
+        "timeout_seconds": 90,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8083/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The authenticated aggregate health endpoint rejects anonymous requests while the gateway is serving traffic.",
+        "timeout_seconds": 90,
+        "retries": 1,
+        "delay_seconds": 0,
+        "url": "http://127.0.0.1:8083/v1/health",
+        "method": "GET",
+        "expected_status": [
+          401
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Platform API Gateway Public",
+          "type": "http",
+          "url": "https://api.lv3.org/healthz",
+          "description": "Public edge entrypoint for the unified LV3 API gateway.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "backup_pbs": {
+      "service_name": "backup-pbs",
+      "owning_vm": "backup-lv3",
+      "role": "backup_vm",
+      "verify_file": "roles/backup_vm/tasks/verify.yml",
+      "liveness": {
+        "kind": "tcp",
+        "description": "The PBS proxy port is reachable on the backup guest.",
+        "timeout_seconds": 60,
+        "retries": 1,
+        "delay_seconds": 0,
+        "host": "127.0.0.1",
+        "port": 8007
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "The managed PBS datastore is readable through the local CLI.",
+        "timeout_seconds": 60,
+        "retries": 1,
+        "delay_seconds": 0,
+        "argv": [
+          "proxmox-backup-manager",
+          "datastore",
+          "list",
+          "--output-format",
+          "json"
+        ],
+        "success_rc": 0
+      },
+      "tls_certificate_ids": [
+        "backup-pbs-ui"
+      ],
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Backup PBS Port",
+          "type": "port",
+          "hostname": "10.10.10.60",
+          "port": 8007,
+          "description": "Private PBS listener on backup-lv3.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "coolify": {
+      "service_name": "coolify",
+      "owning_vm": "coolify-lv3",
+      "role": "coolify_runtime",
+      "verify_file": "roles/coolify_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Coolify API health endpoint responds on the guest-local controller listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8000/api/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The guest-local Coolify health endpoint remains reachable after repo-managed bootstrap completes; authenticated controller API checks are covered by the role verify contract.",
+        "timeout_seconds": 120,
+        "retries": 1,
+        "delay_seconds": 0,
+        "url": "http://127.0.0.1:8000/api/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "The dashboard is OIDC-gated and the repo-managed role plus live-apply verification are the current health contract."
+      }
+    },
+    "coolify_apps": {
+      "service_name": "coolify-apps",
+      "owning_vm": "coolify-lv3",
+      "role": "coolify_runtime",
+      "verify_file": "roles/coolify_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Coolify public applications ingress answers on the guest-local proxy listener for the managed smoke hostname.",
+        "timeout_seconds": 180,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "headers": {
+          "Host": "apps.lv3.org"
+        }
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The managed smoke deployment is served through the Coolify public applications ingress for the shared hostname.",
+        "timeout_seconds": 180,
+        "retries": 1,
+        "delay_seconds": 0,
+        "url": "http://127.0.0.1/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "headers": {
+          "Host": "apps.lv3.org"
+        }
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "The ingress currently serves a repo-managed smoke deployment and is verified directly during ADR 0194 live apply."
+      }
+    },
+    "dify": {
+      "service_name": "dify",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "dify_runtime",
+      "verify_file": "roles/dify_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Dify startup completes once the setup-status endpoint responds on the private listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://10.10.10.20:8094/console/api/setup",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The Dify edge health endpoint responds on the docker-runtime listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://10.10.10.20:8094/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The Dify setup-status endpoint responds and reports the bootstrap step state.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://10.10.10.20:8094/console/api/setup",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Dify Public",
+          "type": "http",
+          "url": "https://agents.lv3.org/healthz",
+          "description": "Dify publication through the shared NGINX edge and oauth2-proxy gate.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "docker_build": {
+      "service_name": "docker-build",
+      "owning_vm": "docker-build-lv3",
+      "role": null,
+      "verify_file": null,
+      "liveness": {
+        "kind": "tcp",
+        "description": "SSH is reachable on the Docker build VM.",
+        "timeout_seconds": 30,
+        "retries": 1,
+        "delay_seconds": 0,
+        "host": "10.10.10.30",
+        "port": 22
+      },
+      "readiness": {
+        "kind": "tcp",
+        "description": "The Docker build VM is ready enough to accept routine operator SSH sessions.",
+        "timeout_seconds": 30,
+        "retries": 1,
+        "delay_seconds": 0,
+        "host": "10.10.10.30",
+        "port": 22
+      },
+      "tls_certificate_ids": [
+        "build-edge"
+      ],
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Docker Build SSH",
+          "type": "port",
+          "hostname": "10.10.10.30",
+          "port": 22,
+          "description": "SSH reachability for the Docker build VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "docker_runtime": {
+      "service_name": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "docker_runtime",
+      "verify_file": "roles/docker_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "systemd",
+        "description": "The Docker daemon is active on docker-runtime-lv3.",
+        "timeout_seconds": 30,
+        "retries": 1,
+        "delay_seconds": 0,
+        "unit": "docker",
+        "expected_state": "active"
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "The local Docker Engine API returns server metadata.",
+        "timeout_seconds": 30,
+        "retries": 1,
+        "delay_seconds": 0,
+        "argv": [
+          "docker",
+          "info",
+          "--format",
+          "{{.ServerVersion}}"
+        ],
+        "success_rc": 0
+      },
+      "tls_certificate_ids": [
+        "docker-runtime-edge"
+      ],
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Docker daemon health is enforced by the role verify task and does not expose a dedicated external HTTP surface."
+      }
+    },
+    "dozzle": {
+      "service_name": "dozzle",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "dozzle_runtime",
+      "verify_file": "roles/dozzle_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Dozzle hub healthcheck responds on the local listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8089/healthcheck",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The Dozzle hub responds on the local healthcheck endpoint.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8089/healthcheck",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Dozzle Private",
+          "type": "http",
+          "url": "http://10.10.10.20:8089/healthcheck",
+          "description": "Private Dozzle healthcheck on docker-runtime-lv3.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "excalidraw": {
+      "service_name": "excalidraw",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "excalidraw_runtime",
+      "verify_file": "roles/excalidraw_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Excalidraw frontend responds on the private runtime listener.",
+        "timeout_seconds": 90,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://10.10.10.20:3095/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The Excalidraw collaboration room responds on its local socket service port.",
+        "timeout_seconds": 90,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://10.10.10.20:3096/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Excalidraw Public",
+          "type": "http",
+          "url": "https://draw.lv3.org",
+          "description": "Private Excalidraw publication through the authenticated shared NGINX edge.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-399"
+          ]
+        }
+      }
+    },
+    "gitea": {
+      "service_name": "gitea",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "gitea_runtime",
+      "verify_file": "roles/gitea_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Gitea health endpoint responds on the local runtime listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://10.10.10.20:3003/api/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "The repo-managed pre-receive hook is installed in the bootstrap repository.",
+        "timeout_seconds": 30,
+        "retries": 1,
+        "delay_seconds": 0,
+        "argv": [
+          "test",
+          "-x",
+          "/opt/gitea/data/git/repositories/ops/proxmox_florin_server.git/custom_hooks/pre-receive"
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Gitea Private",
+          "type": "http",
+          "url": "http://10.10.10.20:3003/api/healthz",
+          "description": "Private Gitea health endpoint on docker-runtime-lv3.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "grafana": {
+      "service_name": "grafana",
+      "owning_vm": "monitoring-lv3",
+      "role": "monitoring_vm",
+      "verify_file": "roles/monitoring_vm/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "Grafana responds on its local health endpoint.",
+        "timeout_seconds": 60,
+        "retries": 20,
+        "delay_seconds": 3,
+        "url": "http://127.0.0.1:3000/api/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "Grafana serves its local health endpoint after provisioning completes.",
+        "timeout_seconds": 60,
+        "retries": 1,
+        "delay_seconds": 0,
+        "url": "http://127.0.0.1:3000/api/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "tls_certificate_ids": [
+        "grafana-edge"
+      ],
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Grafana Public",
+          "type": "http",
+          "url": "https://grafana.lv3.org",
+          "description": "Grafana publication through the NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-399"
+          ]
+        }
+      }
+    },
+    "harbor": {
+      "service_name": "harbor",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "harbor_runtime",
+      "verify_file": "roles/harbor_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "Harbor answers the local ping endpoint on the private runtime port.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8095/api/v2.0/ping",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The public Harbor registry endpoint answers the authenticated API ping through the shared edge.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "https://registry.lv3.org/api/v2.0/ping",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Harbor Registry Public",
+          "type": "http",
+          "url": "https://registry.lv3.org/api/v2.0/ping",
+          "description": "Harbor ping endpoint published through the shared NGINX edge.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "headscale": {
+      "service_name": "headscale",
+      "owning_vm": "proxmox_florin",
+      "role": "proxmox_headscale",
+      "verify_file": "roles/proxmox_headscale/tasks/main.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Headscale local health endpoint responds on the Proxmox host.",
+        "timeout_seconds": 60,
+        "retries": 20,
+        "delay_seconds": 3,
+        "url": "http://127.0.0.1:8080/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "The Headscale CLI can query the managed user catalog through the local config file.",
+        "timeout_seconds": 30,
+        "retries": 1,
+        "delay_seconds": 0,
+        "argv": [
+          "headscale",
+          "--config",
+          "/etc/headscale/config.yaml",
+          "users",
+          "list",
+          "--output",
+          "json"
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Headscale Public Health",
+          "type": "http",
+          "url": "https://headscale.lv3.org/health",
+          "description": "Public Headscale health endpoint published through the shared NGINX edge.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "homepage": {
+      "service_name": "homepage",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "homepage_runtime",
+      "verify_file": "roles/homepage_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "Homepage responds on the private runtime listener.",
+        "timeout_seconds": 90,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://10.10.10.20:3090/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "Homepage renders the repo-managed dashboard shell locally after startup.",
+        "timeout_seconds": 90,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://10.10.10.20:3090/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Homepage Public",
+          "type": "http",
+          "url": "https://home.lv3.org",
+          "description": "Unified service dashboard published through the authenticated shared NGINX edge.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-399"
+          ]
+        }
+      }
+    },
+    "keycloak": {
+      "service_name": "keycloak",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "keycloak_runtime",
+      "verify_file": "roles/keycloak_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Keycloak startup completes once local realm discovery responds with the managed issuer metadata.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:18080/realms/lv3/.well-known/openid-configuration",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The Keycloak management liveness endpoint responds on the loopback management port.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:19000/health/live",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The Keycloak realm discovery endpoint responds locally with the expected issuer metadata.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:18080/realms/lv3/.well-known/openid-configuration",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "tls_certificate_ids": [
+        "keycloak-edge"
+      ],
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Keycloak OIDC Discovery",
+          "type": "http",
+          "url": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration",
+          "description": "Shared SSO discovery endpoint published through the NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "langfuse": {
+      "service_name": "langfuse",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "langfuse_runtime",
+      "verify_file": "roles/langfuse_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Langfuse startup completes once the local sign-in page renders after the web and worker services settle.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:3002/auth/sign-in",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The Langfuse public health endpoint responds on the local runtime listener.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:3002/api/public/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The Langfuse sign-in page renders locally after the web and worker services finish startup.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:3002/auth/sign-in",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Langfuse Public Health",
+          "type": "http",
+          "url": "https://langfuse.lv3.org/api/public/health",
+          "description": "Public Langfuse health endpoint published through the shared NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "mail_platform": {
+      "service_name": "mail-platform",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "mail_platform_runtime",
+      "verify_file": "roles/mail_platform_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The private mail gateway health endpoint responds.",
+        "timeout_seconds": 60,
+        "retries": 1,
+        "delay_seconds": 0,
+        "url": "http://127.0.0.1:8081/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "The mail gateway can list the managed notification profiles over the authenticated API.",
+        "timeout_seconds": 60,
+        "retries": 1,
+        "delay_seconds": 0,
+        "argv": [
+          "python3",
+          "-c",
+          "from pathlib import Path; import sys, urllib.request; api_key = Path('/etc/lv3/mail-platform/gateway-api-key').read_text(encoding='utf-8').strip(); request = urllib.request.Request('http://127.0.0.1:8081/v1/profiles', headers={'X-API-Key': api_key}); response = urllib.request.urlopen(request, timeout=60); sys.exit(0 if response.status == 200 else 1)"
+        ],
+        "success_rc": 0
+      },
+      "tls_certificate_ids": [
+        "mail-platform-edge"
+      ],
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Mail Platform Gateway Private",
+          "type": "http",
+          "url": "http://10.10.10.20:8081/healthz",
+          "description": "Private mail gateway health endpoint on docker-runtime-lv3.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "matrix_synapse": {
+      "service_name": "matrix-synapse",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "matrix_synapse_runtime",
+      "verify_file": "roles/matrix_synapse_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Matrix Synapse startup completes once the local client versions endpoint responds after config rendering and database bootstrap.",
+        "timeout_seconds": 180,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8008/_matrix/client/versions",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The Matrix Synapse local health endpoint responds on the managed runtime listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8008/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The Matrix Synapse client versions endpoint answers on the local listener after bootstrap and admin seeding.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8008/_matrix/client/versions",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Matrix Synapse Public",
+          "type": "http",
+          "url": "https://matrix.lv3.org/_matrix/client/versions",
+          "description": "Public Matrix Synapse client versions endpoint on matrix.lv3.org.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "mattermost": {
+      "service_name": "mattermost",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "mattermost_runtime",
+      "verify_file": "roles/mattermost_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Mattermost system ping endpoint responds on the local runtime listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8065/api/v4/system/ping",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "The repo-managed Mattermost webhook manifest is rendered after bootstrap.",
+        "timeout_seconds": 30,
+        "retries": 1,
+        "delay_seconds": 0,
+        "argv": [
+          "test",
+          "-s",
+          "/etc/lv3/mattermost/incoming-webhooks.json"
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Mattermost Private",
+          "type": "http",
+          "url": "http://10.10.10.20:8065/api/v4/system/ping",
+          "description": "Private Mattermost system ping endpoint on docker-runtime-lv3.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "n8n": {
+      "service_name": "n8n",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "n8n_runtime",
+      "verify_file": "roles/n8n_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "n8n startup completes once the local readiness endpoint reports a ready runtime after bootstrap.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:5678/healthz/readiness",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The n8n health endpoint responds on the local listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:5678/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The n8n readiness endpoint reports a ready runtime after startup and database bootstrap.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:5678/healthz/readiness",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "n8n Public Health",
+          "type": "http",
+          "url": "https://n8n.lv3.org/healthz",
+          "description": "n8n edge-published health endpoint behind the shared NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "netbox": {
+      "service_name": "netbox",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "netbox_runtime",
+      "verify_file": "roles/netbox_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "NetBox startup completes once the repo-managed API token can read the users API.",
+        "timeout_seconds": 300,
+        "retries": 30,
+        "delay_seconds": 10,
+        "url": "http://127.0.0.1:8082/api/users/users/?limit=1",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The NetBox login page responds on the local runtime listener.",
+        "timeout_seconds": 300,
+        "retries": 30,
+        "delay_seconds": 10,
+        "url": "http://127.0.0.1:8082/login/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The repo-managed NetBox API token can read the users API.",
+        "timeout_seconds": 60,
+        "retries": 12,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8082/api/users/users/?limit=1",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "NetBox Private",
+          "type": "http",
+          "url": "http://10.10.10.20:8082/login/",
+          "description": "Private NetBox login surface on docker-runtime-lv3.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
     "nginx_edge": {
       "service_name": "nginx-edge",
       "owning_vm": "nginx-lv3",
@@ -81,18 +1154,18 @@
         "reason": "Nomad stays private-only behind the Proxmox Tailscale TCP proxy and is verified directly by the repo-managed cluster bootstrap path."
       }
     },
-    "grafana": {
-      "service_name": "grafana",
-      "owning_vm": "monitoring-lv3",
-      "role": "monitoring_vm",
-      "verify_file": "roles/monitoring_vm/tasks/verify.yml",
+    "ntfy": {
+      "service_name": "ntfy",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "ntfy_runtime",
+      "verify_file": "roles/ntfy_runtime/tasks/verify.yml",
       "liveness": {
         "kind": "http",
-        "description": "Grafana responds on its local health endpoint.",
+        "description": "The private ntfy health endpoint responds on docker-runtime-lv3.",
         "timeout_seconds": 60,
         "retries": 20,
         "delay_seconds": 3,
-        "url": "http://127.0.0.1:3000/api/health",
+        "url": "http://127.0.0.1:2586/v1/health",
         "method": "GET",
         "expected_status": [
           200
@@ -100,60 +1173,11 @@
       },
       "readiness": {
         "kind": "http",
-        "description": "Grafana serves its local health endpoint after provisioning completes.",
-        "timeout_seconds": 60,
-        "retries": 1,
-        "delay_seconds": 0,
-        "url": "http://127.0.0.1:3000/api/health",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "tls_certificate_ids": [
-        "grafana-edge"
-      ],
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Grafana Public",
-          "type": "http",
-          "url": "https://grafana.lv3.org",
-          "description": "Grafana publication through the NGINX edge VM.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 10,
-          "accepted_statuscodes": [
-            "200-399"
-          ]
-        }
-      }
-    },
-    "alertmanager": {
-      "service_name": "alertmanager",
-      "owning_vm": "monitoring-lv3",
-      "role": "alertmanager_runtime",
-      "verify_file": "roles/alertmanager_runtime/tasks/verify.yml",
-      "liveness": {
-        "kind": "http",
-        "description": "Alertmanager responds on its local health endpoint.",
+        "description": "The private ntfy health endpoint remains reachable after auth config loads.",
         "timeout_seconds": 60,
         "retries": 20,
         "delay_seconds": 3,
-        "url": "http://127.0.0.1:9093/-/healthy",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "Alertmanager responds on its local readiness endpoint after routing config loads.",
-        "timeout_seconds": 60,
-        "retries": 20,
-        "delay_seconds": 3,
-        "url": "http://127.0.0.1:9093/-/ready",
+        "url": "http://127.0.0.1:2586/v1/health",
         "method": "GET",
         "expected_status": [
           200
@@ -161,79 +1185,56 @@
       },
       "uptime_kuma": {
         "enabled": false,
-        "reason": "Alertmanager is private-only and its operator value is already covered by role verification on monitoring-lv3."
+        "reason": "The paging gateway is private-only and verified directly by the role and Alertmanager integration."
       }
     },
-    "dify": {
-      "service_name": "dify",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "dify_runtime",
-      "verify_file": "roles/dify_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "Dify startup completes once the setup-status endpoint responds on the private listener.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://10.10.10.20:8094/console/api/setup",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
+    "ntopng": {
+      "service_name": "ntopng",
+      "owning_vm": "proxmox_florin",
+      "role": "proxmox_ntopng",
+      "verify_file": "roles/proxmox_ntopng/tasks/verify.yml",
       "liveness": {
         "kind": "http",
-        "description": "The Dify edge health endpoint responds on the docker-runtime listener.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://10.10.10.20:8094/healthz",
+        "description": "The local ntopng HTTP endpoint responds on the Proxmox host.",
+        "timeout_seconds": 60,
+        "retries": 20,
+        "delay_seconds": 3,
+        "url": "http://127.0.0.1:3000/",
         "method": "GET",
         "expected_status": [
-          200
+          200,
+          302
         ]
       },
       "readiness": {
         "kind": "http",
-        "description": "The Dify setup-status endpoint responds and reports the bootstrap step state.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://10.10.10.20:8094/console/api/setup",
+        "description": "ntopng exposes the managed interface inventory over its authenticated API.",
+        "timeout_seconds": 60,
+        "retries": 20,
+        "delay_seconds": 3,
+        "url": "http://127.0.0.1:3000/lua/rest/v2/get/ntopng/interfaces.lua",
         "method": "GET",
         "expected_status": [
           200
         ]
       },
       "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Dify Public",
-          "type": "http",
-          "url": "https://agents.lv3.org/healthz",
-          "description": "Dify publication through the shared NGINX edge and oauth2-proxy gate.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 10,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
+        "enabled": false,
+        "reason": "The useful ntopng readiness signal requires authenticated API access and host-local traffic generation."
       }
     },
-    "gitea": {
-      "service_name": "gitea",
+    "ollama": {
+      "service_name": "ollama",
       "owning_vm": "docker-runtime-lv3",
-      "role": "gitea_runtime",
-      "verify_file": "roles/gitea_runtime/tasks/verify.yml",
+      "role": "ollama_runtime",
+      "verify_file": "roles/ollama_runtime/tasks/verify.yml",
       "liveness": {
         "kind": "http",
-        "description": "The Gitea health endpoint responds on the local runtime listener.",
+        "description": "The Ollama version endpoint responds on the local listener.",
         "timeout_seconds": 120,
         "retries": 24,
         "delay_seconds": 5,
-        "url": "http://10.10.10.20:3003/api/healthz",
+        "url": "http://127.0.0.1:11434/api/version",
         "method": "GET",
         "expected_status": [
           200
@@ -241,24 +1242,73 @@
       },
       "readiness": {
         "kind": "command",
-        "description": "The repo-managed pre-receive hook is installed in the bootstrap repository.",
-        "timeout_seconds": 30,
+        "description": "The repo-managed default Ollama model is available inside the runtime container.",
+        "timeout_seconds": 60,
         "retries": 1,
         "delay_seconds": 0,
         "argv": [
-          "test",
-          "-x",
-          "/opt/gitea/data/git/repositories/ops/proxmox_florin_server.git/custom_hooks/pre-receive"
+          "docker",
+          "exec",
+          "ollama",
+          "ollama",
+          "show",
+          "llama3.2:3b"
         ],
         "success_rc": 0
       },
       "uptime_kuma": {
+        "enabled": false,
+        "reason": "The Ollama inference API remains private to the docker-runtime VM and internal guest network."
+      }
+    },
+    "open_webui": {
+      "service_name": "open-webui",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "open_webui_runtime",
+      "verify_file": "roles/open_webui_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Open WebUI startup completes once the repo-managed admin sign-in path succeeds locally.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8088/api/v1/auths/signin",
+        "method": "POST",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The Open WebUI root page responds on the local listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8088",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The repo-managed Open WebUI admin account can sign in successfully.",
+        "timeout_seconds": 120,
+        "retries": 1,
+        "delay_seconds": 0,
+        "url": "http://127.0.0.1:8088/api/v1/auths/signin",
+        "method": "POST",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
         "enabled": true,
         "monitor": {
-          "name": "Gitea Private",
+          "name": "Open WebUI Private",
           "type": "http",
-          "url": "http://10.10.10.20:3003/api/healthz",
-          "description": "Private Gitea health endpoint on docker-runtime-lv3.",
+          "url": "http://10.10.10.20:8088",
+          "description": "Private Open WebUI surface on docker-runtime-lv3.",
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,
@@ -269,18 +1319,18 @@
         }
       }
     },
-    "keycloak": {
-      "service_name": "keycloak",
+    "openbao": {
+      "service_name": "openbao",
       "owning_vm": "docker-runtime-lv3",
-      "role": "keycloak_runtime",
-      "verify_file": "roles/keycloak_runtime/tasks/verify.yml",
+      "role": "openbao_runtime",
+      "verify_file": "roles/openbao_runtime/tasks/verify.yml",
       "startup": {
         "kind": "http",
-        "description": "Keycloak startup completes once local realm discovery responds with the managed issuer metadata.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:18080/realms/lv3/.well-known/openid-configuration",
+        "description": "OpenBao startup completes once the local health endpoint reports the active node as ready.",
+        "timeout_seconds": 60,
+        "retries": 30,
+        "delay_seconds": 2,
+        "url": "http://127.0.0.1:8201/v1/sys/health",
         "method": "GET",
         "expected_status": [
           200
@@ -288,11 +1338,11 @@
       },
       "liveness": {
         "kind": "http",
-        "description": "The Keycloak management liveness endpoint responds on the loopback management port.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:19000/health/live",
+        "description": "OpenBao exposes the local seal-status endpoint.",
+        "timeout_seconds": 60,
+        "retries": 1,
+        "delay_seconds": 0,
+        "url": "http://127.0.0.1:8201/v1/sys/seal-status",
         "method": "GET",
         "expected_status": [
           200
@@ -300,328 +1350,22 @@
       },
       "readiness": {
         "kind": "http",
-        "description": "The Keycloak realm discovery endpoint responds locally with the expected issuer metadata.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:18080/realms/lv3/.well-known/openid-configuration",
+        "description": "OpenBao reports the active node as ready on the local health endpoint.",
+        "timeout_seconds": 60,
+        "retries": 30,
+        "delay_seconds": 2,
+        "url": "http://127.0.0.1:8201/v1/sys/health",
         "method": "GET",
         "expected_status": [
           200
         ]
       },
       "tls_certificate_ids": [
-        "keycloak-edge"
+        "openbao-proxy"
       ],
       "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Keycloak OIDC Discovery",
-          "type": "http",
-          "url": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration",
-          "description": "Shared SSO discovery endpoint published through the NGINX edge VM.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 5,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "harbor": {
-      "service_name": "harbor",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "harbor_runtime",
-      "verify_file": "roles/harbor_runtime/tasks/verify.yml",
-      "liveness": {
-        "kind": "http",
-        "description": "Harbor answers the local ping endpoint on the private runtime port.",
-        "timeout_seconds": 180,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8095/api/v2.0/ping",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The public Harbor registry endpoint answers the authenticated API ping through the shared edge.",
-        "timeout_seconds": 180,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "https://registry.lv3.org/api/v2.0/ping",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Harbor Registry Public",
-          "type": "http",
-          "url": "https://registry.lv3.org/api/v2.0/ping",
-          "description": "Harbor ping endpoint published through the shared NGINX edge.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 5,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "homepage": {
-      "service_name": "homepage",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "homepage_runtime",
-      "verify_file": "roles/homepage_runtime/tasks/verify.yml",
-      "liveness": {
-        "kind": "http",
-        "description": "Homepage responds on the private runtime listener.",
-        "timeout_seconds": 90,
-        "retries": 18,
-        "delay_seconds": 5,
-        "url": "http://10.10.10.20:3090/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "Homepage renders the repo-managed dashboard shell locally after startup.",
-        "timeout_seconds": 90,
-        "retries": 18,
-        "delay_seconds": 5,
-        "url": "http://10.10.10.20:3090/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Homepage Public",
-          "type": "http",
-          "url": "https://home.lv3.org",
-          "description": "Unified service dashboard published through the authenticated shared NGINX edge.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 5,
-          "accepted_statuscodes": [
-            "200-399"
-          ]
-        }
-      }
-    },
-    "excalidraw": {
-      "service_name": "excalidraw",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "excalidraw_runtime",
-      "verify_file": "roles/excalidraw_runtime/tasks/verify.yml",
-      "liveness": {
-        "kind": "http",
-        "description": "The Excalidraw frontend responds on the private runtime listener.",
-        "timeout_seconds": 90,
-        "retries": 18,
-        "delay_seconds": 5,
-        "url": "http://10.10.10.20:3095/",
-        "method": "GET",
-        "expected_status": [200]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The Excalidraw collaboration room responds on its local socket service port.",
-        "timeout_seconds": 90,
-        "retries": 18,
-        "delay_seconds": 5,
-        "url": "http://10.10.10.20:3096/",
-        "method": "GET",
-        "expected_status": [200]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Excalidraw Public",
-          "type": "http",
-          "url": "https://draw.lv3.org",
-          "description": "Private Excalidraw publication through the authenticated shared NGINX edge.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 5,
-          "accepted_statuscodes": ["200-399"]
-        }
-      }
-    },
-    "realtime": {
-      "service_name": "realtime",
-      "owning_vm": "monitoring-lv3",
-      "role": "netdata_runtime",
-      "verify_file": "roles/netdata_runtime/tasks/verify.yml",
-      "liveness": {
-        "kind": "http",
-        "description": "The Netdata parent info endpoint responds on monitoring-lv3.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:19999/api/v1/info",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The Netdata parent exporter responds with consolidated metrics on monitoring-lv3.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:19999/api/v1/allmetrics?format=prometheus_all_hosts&source=as-collected",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Realtime Metrics Private",
-          "type": "http",
-          "url": "http://10.10.10.40:19999/api/v1/info",
-          "description": "Private Netdata parent healthcheck on monitoring-lv3.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 10,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "langfuse": {
-      "service_name": "langfuse",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "langfuse_runtime",
-      "verify_file": "roles/langfuse_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "Langfuse startup completes once the local sign-in page renders after the web and worker services settle.",
-        "timeout_seconds": 300,
-        "retries": 60,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:3002/auth/sign-in",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The Langfuse public health endpoint responds on the local runtime listener.",
-        "timeout_seconds": 300,
-        "retries": 60,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:3002/api/public/health",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The Langfuse sign-in page renders locally after the web and worker services finish startup.",
-        "timeout_seconds": 300,
-        "retries": 60,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:3002/auth/sign-in",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Langfuse Public Health",
-          "type": "http",
-          "url": "https://langfuse.lv3.org/api/public/health",
-          "description": "Public Langfuse health endpoint published through the shared NGINX edge VM.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 5,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "api_gateway": {
-      "service_name": "api-gateway",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "api_gateway_runtime",
-      "verify_file": "roles/api_gateway_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "Gateway startup completes once the authenticated aggregate health endpoint is routing requests.",
-        "timeout_seconds": 90,
-        "retries": 18,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8083/v1/health",
-        "method": "GET",
-        "expected_status": [
-          401
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The local API gateway health endpoint responds on docker-runtime-lv3.",
-        "timeout_seconds": 90,
-        "retries": 18,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8083/healthz",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The authenticated aggregate health endpoint rejects anonymous requests while the gateway is serving traffic.",
-        "timeout_seconds": 90,
-        "retries": 1,
-        "delay_seconds": 0,
-        "url": "http://127.0.0.1:8083/v1/health",
-        "method": "GET",
-        "expected_status": [
-          401
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Platform API Gateway Public",
-          "type": "http",
-          "url": "https://api.lv3.org/healthz",
-          "description": "Public edge entrypoint for the unified LV3 API gateway.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 5,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
+        "enabled": false,
+        "reason": "The operator-facing TLS surface requires client-certificate authentication, so Uptime Kuma only tracks this contract indirectly through role verification."
       }
     },
     "ops_portal": {
@@ -728,196 +1472,18 @@
         }
       }
     },
-    "proxmox_ui": {
-      "service_name": "proxmox-ui",
-      "owning_vm": "proxmox_florin",
-      "role": null,
-      "verify_file": null,
-      "liveness": {
-        "kind": "tcp",
-        "description": "The Proxmox UI listener accepts TCP connections on the host bridge.",
-        "timeout_seconds": 30,
-        "retries": 1,
-        "delay_seconds": 0,
-        "host": "10.10.10.1",
-        "port": 8006
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The Proxmox API version endpoint responds on the management listener.",
-        "timeout_seconds": 30,
-        "retries": 1,
-        "delay_seconds": 0,
-        "url": "https://10.10.10.1:8006/api2/json/version",
-        "method": "GET",
-        "expected_status": [
-          200
-        ],
-        "validate_tls": false
-      },
-      "tls_certificate_ids": [
-        "proxmox-ui",
-        "proxmox-edge-page"
-      ],
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Proxmox UI Port",
-          "type": "port",
-          "hostname": "10.10.10.1",
-          "port": 8006,
-          "description": "Internal Proxmox UI listener on the host bridge address.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "headscale": {
-      "service_name": "headscale",
-      "owning_vm": "proxmox_florin",
-      "role": "proxmox_headscale",
-      "verify_file": "roles/proxmox_headscale/tasks/main.yml",
-      "liveness": {
-        "kind": "http",
-        "description": "The Headscale local health endpoint responds on the Proxmox host.",
-        "timeout_seconds": 60,
-        "retries": 20,
-        "delay_seconds": 3,
-        "url": "http://127.0.0.1:8080/health",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "command",
-        "description": "The Headscale CLI can query the managed user catalog through the local config file.",
-        "timeout_seconds": 30,
-        "retries": 1,
-        "delay_seconds": 0,
-        "argv": [
-          "headscale",
-          "--config",
-          "/etc/headscale/config.yaml",
-          "users",
-          "list",
-          "--output",
-          "json"
-        ],
-        "success_rc": 0
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Headscale Public Health",
-          "type": "http",
-          "url": "https://headscale.lv3.org/health",
-          "description": "Public Headscale health endpoint published through the shared NGINX edge.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 5,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "docker_runtime": {
-      "service_name": "docker-runtime",
+    "plane": {
+      "service_name": "plane",
       "owning_vm": "docker-runtime-lv3",
-      "role": "docker_runtime",
-      "verify_file": "roles/docker_runtime/tasks/verify.yml",
-      "liveness": {
-        "kind": "systemd",
-        "description": "The Docker daemon is active on docker-runtime-lv3.",
-        "timeout_seconds": 30,
-        "retries": 1,
-        "delay_seconds": 0,
-        "unit": "docker",
-        "expected_state": "active"
-      },
-      "readiness": {
-        "kind": "command",
-        "description": "The local Docker Engine API returns server metadata.",
-        "timeout_seconds": 30,
-        "retries": 1,
-        "delay_seconds": 0,
-        "argv": [
-          "docker",
-          "info",
-          "--format",
-          "{{.ServerVersion}}"
-        ],
-        "success_rc": 0
-      },
-      "tls_certificate_ids": [
-        "docker-runtime-edge"
-      ],
-      "uptime_kuma": {
-        "enabled": false,
-        "reason": "Docker daemon health is enforced by the role verify task and does not expose a dedicated external HTTP surface."
-      }
-    },
-    "docker_build": {
-      "service_name": "docker-build",
-      "owning_vm": "docker-build-lv3",
-      "role": null,
-      "verify_file": null,
-      "liveness": {
-        "kind": "tcp",
-        "description": "SSH is reachable on the Docker build VM.",
-        "timeout_seconds": 30,
-        "retries": 1,
-        "delay_seconds": 0,
-        "host": "10.10.10.30",
-        "port": 22
-      },
-      "readiness": {
-        "kind": "tcp",
-        "description": "The Docker build VM is ready enough to accept routine operator SSH sessions.",
-        "timeout_seconds": 30,
-        "retries": 1,
-        "delay_seconds": 0,
-        "host": "10.10.10.30",
-        "port": 22
-      },
-      "tls_certificate_ids": [
-        "build-edge"
-      ],
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Docker Build SSH",
-          "type": "port",
-          "hostname": "10.10.10.30",
-          "port": 22,
-          "description": "SSH reachability for the Docker build VM.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "dozzle": {
-      "service_name": "dozzle",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "dozzle_runtime",
-      "verify_file": "roles/dozzle_runtime/tasks/verify.yml",
+      "role": "plane_runtime",
+      "verify_file": "roles/plane_runtime/tasks/verify.yml",
       "liveness": {
         "kind": "http",
-        "description": "The Dozzle hub healthcheck responds on the local listener.",
-        "timeout_seconds": 120,
-        "retries": 24,
+        "description": "The Plane proxy root responds on the local runtime listener.",
+        "timeout_seconds": 300,
+        "retries": 60,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8089/healthcheck",
+        "url": "http://127.0.0.1:8093/",
         "method": "GET",
         "expected_status": [
           200
@@ -925,11 +1491,11 @@
       },
       "readiness": {
         "kind": "http",
-        "description": "The Dozzle hub responds on the local healthcheck endpoint.",
-        "timeout_seconds": 120,
-        "retries": 24,
+        "description": "The Plane instance API answers locally after the proxy, API, and worker services finish startup.",
+        "timeout_seconds": 300,
+        "retries": 60,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8089/healthcheck",
+        "url": "http://127.0.0.1:8093/api/instances/",
         "method": "GET",
         "expected_status": [
           200
@@ -938,632 +1504,16 @@
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
-          "name": "Dozzle Private",
+          "name": "Plane Public",
           "type": "http",
-          "url": "http://10.10.10.20:8089/healthcheck",
-          "description": "Private Dozzle healthcheck on docker-runtime-lv3.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 10,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "uptime_kuma": {
-      "service_name": "uptime-kuma",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "uptime_kuma_runtime",
-      "verify_file": "roles/uptime_kuma_runtime/tasks/verify.yml",
-      "liveness": {
-        "kind": "command",
-        "description": "The Uptime Kuma container is running on docker-runtime-lv3.",
-        "timeout_seconds": 30,
-        "retries": 1,
-        "delay_seconds": 0,
-        "argv": [
-          "docker",
-          "ps",
-          "--filter",
-          "name=uptime-kuma",
-          "--filter",
-          "status=running",
-          "--format",
-          "{{.Names}}"
-        ],
-        "success_rc": 0
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The Uptime Kuma web UI responds on the local listener.",
-        "timeout_seconds": 30,
-        "retries": 1,
-        "delay_seconds": 0,
-        "url": "http://127.0.0.1:3001",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "tls_certificate_ids": [
-        "uptime-kuma-edge"
-      ],
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Uptime Kuma Public",
-          "type": "http",
-          "url": "https://uptime.lv3.org",
-          "description": "Public Uptime Kuma entrypoint through the NGINX edge.",
+          "url": "https://tasks.lv3.org/",
+          "description": "Public Plane board published through the shared NGINX edge and authenticated by the repo-managed oauth2-proxy flow.",
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 10,
           "accepted_statuscodes": [
             "200-399"
-          ]
-        }
-      }
-    },
-    "status_page": {
-      "service_name": "status-page",
-      "owning_vm": "docker-runtime-lv3",
-      "role": null,
-      "verify_file": null,
-      "liveness": {
-        "kind": "http",
-        "description": "The Uptime Kuma status page slug responds on the local runtime listener.",
-        "timeout_seconds": 30,
-        "retries": 1,
-        "delay_seconds": 0,
-        "url": "http://127.0.0.1:3001/status/lv3-platform",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The public status page route responds through the shared edge host header.",
-        "timeout_seconds": 30,
-        "retries": 1,
-        "delay_seconds": 0,
-        "url": "https://127.0.0.1/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ],
-        "headers": {
-          "Host": "status.lv3.org"
-        },
-        "validate_tls": false
-      },
-      "uptime_kuma": {
-        "enabled": false,
-        "reason": "The status page should not recursively monitor itself from the same Uptime Kuma instance; independent coverage is delegated to Uptime Robot."
-      }
-    },
-    "mail_platform": {
-      "service_name": "mail-platform",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "mail_platform_runtime",
-      "verify_file": "roles/mail_platform_runtime/tasks/verify.yml",
-      "liveness": {
-        "kind": "http",
-        "description": "The private mail gateway health endpoint responds.",
-        "timeout_seconds": 60,
-        "retries": 1,
-        "delay_seconds": 0,
-        "url": "http://127.0.0.1:8081/healthz",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "command",
-        "description": "The mail gateway can list the managed notification profiles over the authenticated API.",
-        "timeout_seconds": 60,
-        "retries": 1,
-        "delay_seconds": 0,
-        "argv": [
-          "python3",
-          "-c",
-          "from pathlib import Path; import sys, urllib.request; api_key = Path('/etc/lv3/mail-platform/gateway-api-key').read_text(encoding='utf-8').strip(); request = urllib.request.Request('http://127.0.0.1:8081/v1/profiles', headers={'X-API-Key': api_key}); response = urllib.request.urlopen(request, timeout=60); sys.exit(0 if response.status == 200 else 1)"
-        ],
-        "success_rc": 0
-      },
-      "tls_certificate_ids": [
-        "mail-platform-edge"
-      ],
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Mail Platform Gateway Private",
-          "type": "http",
-          "url": "http://10.10.10.20:8081/healthz",
-          "description": "Private mail gateway health endpoint on docker-runtime-lv3.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 10,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "step_ca": {
-      "service_name": "step-ca",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "step_ca_runtime",
-      "verify_file": "roles/step_ca_runtime/tasks/verify.yml",
-      "liveness": {
-        "kind": "tcp",
-        "description": "The private step-ca API listens on the Docker runtime guest.",
-        "timeout_seconds": 120,
-        "retries": 1,
-        "delay_seconds": 0,
-        "host": "10.10.10.20",
-        "port": 9000
-      },
-      "readiness": {
-        "kind": "command",
-        "description": "The services provisioner can issue a short-lived X.509 certificate.",
-        "timeout_seconds": 120,
-        "retries": 1,
-        "delay_seconds": 0,
-        "argv": [
-          "step",
-          "ca",
-          "certificate",
-          "step-ca-service-test.lv3.internal",
-          "/opt/step-ca/service-test.crt",
-          "/opt/step-ca/service-test.key",
-          "--force",
-          "--ca-url",
-          "https://10.10.10.20:9000",
-          "--root",
-          "/opt/step-ca/home/certs/root_ca.crt",
-          "--provisioner",
-          "services",
-          "--provisioner-password-file",
-          "/opt/step-ca/secrets/services-password.txt",
-          "--password-file",
-          "/opt/step-ca/secrets/services-password.txt",
-          "--san",
-          "step-ca-service-test.lv3.internal",
-          "--not-after",
-          "1h"
-        ],
-        "success_rc": 0
-      },
-      "tls_certificate_ids": [
-        "step-ca-proxy"
-      ],
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Step CA Private",
-          "type": "http",
-          "url": "https://10.10.10.20:9000/health",
-          "description": "Private step-ca health endpoint on docker-runtime-lv3.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 10,
-          "accepted_statuscodes": [
-            "200-299"
-          ],
-          "ignoreTls": true
-        }
-      }
-    },
-    "windmill": {
-      "service_name": "windmill",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "windmill_runtime",
-      "verify_file": "roles/windmill_runtime/tasks/verify.yml",
-      "liveness": {
-        "kind": "http",
-        "description": "The Windmill API version endpoint responds on the local listener.",
-        "timeout_seconds": 90,
-        "retries": 18,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8000/api/version",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The Windmill API version endpoint remains reachable after workspace bootstrap.",
-        "timeout_seconds": 90,
-        "retries": 1,
-        "delay_seconds": 0,
-        "url": "http://127.0.0.1:8000/api/version",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Windmill Private",
-          "type": "http",
-          "url": "http://10.10.10.20:8000/api/version",
-          "description": "Private Windmill API version endpoint on docker-runtime-lv3.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 10,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "coolify": {
-      "service_name": "coolify",
-      "owning_vm": "coolify-lv3",
-      "role": "coolify_runtime",
-      "verify_file": "roles/coolify_runtime/tasks/verify.yml",
-      "liveness": {
-        "kind": "http",
-        "description": "The Coolify API health endpoint responds on the guest-local controller listener.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8000/api/health",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The guest-local Coolify health endpoint remains reachable after repo-managed bootstrap completes; authenticated controller API checks are covered by the role verify contract.",
-        "timeout_seconds": 120,
-        "retries": 1,
-        "delay_seconds": 0,
-        "url": "http://127.0.0.1:8000/api/health",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": false,
-        "reason": "The dashboard is OIDC-gated and the repo-managed role plus live-apply verification are the current health contract."
-      }
-    },
-    "mattermost": {
-      "service_name": "mattermost",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "mattermost_runtime",
-      "verify_file": "roles/mattermost_runtime/tasks/verify.yml",
-      "liveness": {
-        "kind": "http",
-        "description": "The Mattermost system ping endpoint responds on the local runtime listener.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8065/api/v4/system/ping",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "command",
-        "description": "The repo-managed Mattermost webhook manifest is rendered after bootstrap.",
-        "timeout_seconds": 30,
-        "retries": 1,
-        "delay_seconds": 0,
-        "argv": [
-          "test",
-          "-s",
-          "/etc/lv3/mattermost/incoming-webhooks.json"
-        ],
-        "success_rc": 0
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Mattermost Private",
-          "type": "http",
-          "url": "http://10.10.10.20:8065/api/v4/system/ping",
-          "description": "Private Mattermost system ping endpoint on docker-runtime-lv3.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 10,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "ntfy": {
-      "service_name": "ntfy",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "ntfy_runtime",
-      "verify_file": "roles/ntfy_runtime/tasks/verify.yml",
-      "liveness": {
-        "kind": "http",
-        "description": "The private ntfy health endpoint responds on docker-runtime-lv3.",
-        "timeout_seconds": 60,
-        "retries": 20,
-        "delay_seconds": 3,
-        "url": "http://127.0.0.1:2586/v1/health",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The private ntfy health endpoint remains reachable after auth config loads.",
-        "timeout_seconds": 60,
-        "retries": 20,
-        "delay_seconds": 3,
-        "url": "http://127.0.0.1:2586/v1/health",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": false,
-        "reason": "The paging gateway is private-only and verified directly by the role and Alertmanager integration."
-      }
-    },
-    "netbox": {
-      "service_name": "netbox",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "netbox_runtime",
-      "verify_file": "roles/netbox_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "NetBox startup completes once the repo-managed API token can read the users API.",
-        "timeout_seconds": 300,
-        "retries": 30,
-        "delay_seconds": 10,
-        "url": "http://127.0.0.1:8082/api/users/users/?limit=1",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The NetBox login page responds on the local runtime listener.",
-        "timeout_seconds": 300,
-        "retries": 30,
-        "delay_seconds": 10,
-        "url": "http://127.0.0.1:8082/login/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The repo-managed NetBox API token can read the users API.",
-        "timeout_seconds": 60,
-        "retries": 12,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8082/api/users/users/?limit=1",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "NetBox Private",
-          "type": "http",
-          "url": "http://10.10.10.20:8082/login/",
-          "description": "Private NetBox login surface on docker-runtime-lv3.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 10,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "open_webui": {
-      "service_name": "open-webui",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "open_webui_runtime",
-      "verify_file": "roles/open_webui_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "Open WebUI startup completes once the repo-managed admin sign-in path succeeds locally.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8088/api/v1/auths/signin",
-        "method": "POST",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The Open WebUI root page responds on the local listener.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8088",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The repo-managed Open WebUI admin account can sign in successfully.",
-        "timeout_seconds": 120,
-        "retries": 1,
-        "delay_seconds": 0,
-        "url": "http://127.0.0.1:8088/api/v1/auths/signin",
-        "method": "POST",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Open WebUI Private",
-          "type": "http",
-          "url": "http://10.10.10.20:8088",
-          "description": "Private Open WebUI surface on docker-runtime-lv3.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 10,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "searxng": {
-      "service_name": "searxng",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "searxng_runtime",
-      "verify_file": "roles/searxng_runtime/tasks/verify.yml",
-      "liveness": {
-        "kind": "http",
-        "description": "The SearXNG root page responds on the local listener.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8881/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The SearXNG JSON search endpoint returns a structured payload for the default verification query.",
-        "timeout_seconds": 120,
-        "retries": 6,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8881/search?q=proxmox%20ve&format=json",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": false,
-        "reason": "The SearXNG interface is intentionally tailnet-only and verified by its runtime role plus direct operator checks."
-      }
-    },
-    "ollama": {
-      "service_name": "ollama",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "ollama_runtime",
-      "verify_file": "roles/ollama_runtime/tasks/verify.yml",
-      "liveness": {
-        "kind": "http",
-        "description": "The Ollama version endpoint responds on the local listener.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:11434/api/version",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "command",
-        "description": "The repo-managed default Ollama model is available inside the runtime container.",
-        "timeout_seconds": 60,
-        "retries": 1,
-        "delay_seconds": 0,
-        "argv": [
-          "docker",
-          "exec",
-          "ollama",
-          "ollama",
-          "show",
-          "llama3.2:3b"
-        ],
-        "success_rc": 0
-      },
-      "uptime_kuma": {
-        "enabled": false,
-        "reason": "The Ollama inference API remains private to the docker-runtime VM and internal guest network."
-      }
-    },
-    "n8n": {
-      "service_name": "n8n",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "n8n_runtime",
-      "verify_file": "roles/n8n_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "n8n startup completes once the local readiness endpoint reports a ready runtime after bootstrap.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:5678/healthz/readiness",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The n8n health endpoint responds on the local listener.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:5678/healthz",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The n8n readiness endpoint reports a ready runtime after startup and database bootstrap.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:5678/healthz/readiness",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "n8n Public Health",
-          "type": "http",
-          "url": "https://n8n.lv3.org/healthz",
-          "description": "n8n edge-published health endpoint behind the shared NGINX edge VM.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 5,
-          "accepted_statuscodes": [
-            "200-299"
           ]
         }
       }
@@ -1624,90 +1574,6 @@
             "200-299"
           ]
         }
-      }
-    },
-    "openbao": {
-      "service_name": "openbao",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "openbao_runtime",
-      "verify_file": "roles/openbao_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "OpenBao startup completes once the local health endpoint reports the active node as ready.",
-        "timeout_seconds": 60,
-        "retries": 30,
-        "delay_seconds": 2,
-        "url": "http://127.0.0.1:8201/v1/sys/health",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "OpenBao exposes the local seal-status endpoint.",
-        "timeout_seconds": 60,
-        "retries": 1,
-        "delay_seconds": 0,
-        "url": "http://127.0.0.1:8201/v1/sys/seal-status",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "OpenBao reports the active node as ready on the local health endpoint.",
-        "timeout_seconds": 60,
-        "retries": 30,
-        "delay_seconds": 2,
-        "url": "http://127.0.0.1:8201/v1/sys/health",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "tls_certificate_ids": [
-        "openbao-proxy"
-      ],
-      "uptime_kuma": {
-        "enabled": false,
-        "reason": "The operator-facing TLS surface requires client-certificate authentication, so Uptime Kuma only tracks this contract indirectly through role verification."
-      }
-    },
-    "ntopng": {
-      "service_name": "ntopng",
-      "owning_vm": "proxmox_florin",
-      "role": "proxmox_ntopng",
-      "verify_file": "roles/proxmox_ntopng/tasks/verify.yml",
-      "liveness": {
-        "kind": "http",
-        "description": "The local ntopng HTTP endpoint responds on the Proxmox host.",
-        "timeout_seconds": 60,
-        "retries": 20,
-        "delay_seconds": 3,
-        "url": "http://127.0.0.1:3000/",
-        "method": "GET",
-        "expected_status": [
-          200,
-          302
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "ntopng exposes the managed interface inventory over its authenticated API.",
-        "timeout_seconds": 60,
-        "retries": 20,
-        "delay_seconds": 3,
-        "url": "http://127.0.0.1:3000/lua/rest/v2/get/ntopng/interfaces.lua",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": false,
-        "reason": "The useful ntopng readiness signal requires authenticated API access and host-local traffic generation."
       }
     },
     "portainer": {
@@ -1802,46 +1668,45 @@
         }
       }
     },
-    "backup_pbs": {
-      "service_name": "backup-pbs",
-      "owning_vm": "backup-lv3",
-      "role": "backup_vm",
-      "verify_file": "roles/backup_vm/tasks/verify.yml",
+    "proxmox_ui": {
+      "service_name": "proxmox-ui",
+      "owning_vm": "proxmox_florin",
+      "role": null,
+      "verify_file": null,
       "liveness": {
         "kind": "tcp",
-        "description": "The PBS proxy port is reachable on the backup guest.",
-        "timeout_seconds": 60,
+        "description": "The Proxmox UI listener accepts TCP connections on the host bridge.",
+        "timeout_seconds": 30,
         "retries": 1,
         "delay_seconds": 0,
-        "host": "127.0.0.1",
-        "port": 8007
+        "host": "10.10.10.1",
+        "port": 8006
       },
       "readiness": {
-        "kind": "command",
-        "description": "The managed PBS datastore is readable through the local CLI.",
-        "timeout_seconds": 60,
+        "kind": "http",
+        "description": "The Proxmox API version endpoint responds on the management listener.",
+        "timeout_seconds": 30,
         "retries": 1,
         "delay_seconds": 0,
-        "argv": [
-          "proxmox-backup-manager",
-          "datastore",
-          "list",
-          "--output-format",
-          "json"
+        "url": "https://10.10.10.1:8006/api2/json/version",
+        "method": "GET",
+        "expected_status": [
+          200
         ],
-        "success_rc": 0
+        "validate_tls": false
       },
       "tls_certificate_ids": [
-        "backup-pbs-ui"
+        "proxmox-ui",
+        "proxmox-edge-page"
       ],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
-          "name": "Backup PBS Port",
+          "name": "Proxmox UI Port",
           "type": "port",
-          "hostname": "10.10.10.60",
-          "port": 8007,
-          "description": "Private PBS listener on backup-lv3.",
+          "hostname": "10.10.10.1",
+          "port": 8006,
+          "description": "Internal Proxmox UI listener on the host bridge address.",
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,
@@ -1851,79 +1716,84 @@
         }
       }
     },
-    "vaultwarden": {
-      "service_name": "vaultwarden",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "vaultwarden_runtime",
-      "verify_file": "roles/vaultwarden_runtime/tasks/verify.yml",
+    "realtime": {
+      "service_name": "realtime",
+      "owning_vm": "monitoring-lv3",
+      "role": "netdata_runtime",
+      "verify_file": "roles/netdata_runtime/tasks/verify.yml",
       "liveness": {
-        "kind": "tcp",
-        "description": "Vaultwarden accepts TLS connections on the private runtime listener.",
-        "timeout_seconds": 180,
-        "retries": 1,
-        "delay_seconds": 0,
-        "host": "127.0.0.1",
-        "port": 8222
-      },
-      "readiness": {
         "kind": "http",
-        "description": "Vaultwarden returns success from the managed liveness endpoint over HTTPS.",
-        "timeout_seconds": 60,
-        "retries": 12,
+        "description": "The Netdata parent info endpoint responds on monitoring-lv3.",
+        "timeout_seconds": 120,
+        "retries": 24,
         "delay_seconds": 5,
-        "url": "https://10.10.10.20:8222/alive",
+        "url": "http://127.0.0.1:19999/api/v1/info",
         "method": "GET",
         "expected_status": [
           200
-        ],
-        "validate_tls": false
+        ]
       },
-      "tls_certificate_ids": [
-        "vaultwarden-private"
-      ],
+      "readiness": {
+        "kind": "http",
+        "description": "The Netdata parent exporter responds with consolidated metrics on monitoring-lv3.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:19999/api/v1/allmetrics?format=prometheus_all_hosts&source=as-collected",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
       "uptime_kuma": {
-        "enabled": false,
-        "reason": "Vaultwarden is private-only and uses an internal CA trust chain, so repo-managed role verification is the current health contract."
+        "enabled": true,
+        "monitor": {
+          "name": "Realtime Metrics Private",
+          "type": "http",
+          "url": "http://10.10.10.40:19999/api/v1/info",
+          "description": "Private Netdata parent healthcheck on monitoring-lv3.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
       }
     },
-    "coolify_apps": {
-      "service_name": "coolify-apps",
-      "owning_vm": "coolify-lv3",
-      "role": "coolify_runtime",
-      "verify_file": "roles/coolify_runtime/tasks/verify.yml",
+    "searxng": {
+      "service_name": "searxng",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "searxng_runtime",
+      "verify_file": "roles/searxng_runtime/tasks/verify.yml",
       "liveness": {
         "kind": "http",
-        "description": "The Coolify public applications ingress answers on the guest-local proxy listener for the managed smoke hostname.",
-        "timeout_seconds": 180,
-        "retries": 18,
+        "description": "The SearXNG root page responds on the local listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1/",
+        "url": "http://127.0.0.1:8881/",
         "method": "GET",
         "expected_status": [
           200
-        ],
-        "headers": {
-          "Host": "apps.lv3.org"
-        }
+        ]
       },
       "readiness": {
         "kind": "http",
-        "description": "The managed smoke deployment is served through the Coolify public applications ingress for the shared hostname.",
-        "timeout_seconds": 180,
-        "retries": 1,
-        "delay_seconds": 0,
-        "url": "http://127.0.0.1/",
+        "description": "The SearXNG JSON search endpoint returns a structured payload for the default verification query.",
+        "timeout_seconds": 120,
+        "retries": 6,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8881/search?q=proxmox%20ve&format=json",
         "method": "GET",
         "expected_status": [
           200
-        ],
-        "headers": {
-          "Host": "apps.lv3.org"
-        }
+        ]
       },
       "uptime_kuma": {
         "enabled": false,
-        "reason": "The ingress currently serves a repo-managed smoke deployment and is verified directly during ADR 0194 live apply."
+        "reason": "The SearXNG interface is intentionally tailnet-only and verified by its runtime role plus direct operator checks."
       }
     },
     "semaphore": {
@@ -1972,18 +1842,18 @@
         }
       }
     },
-    "plane": {
-      "service_name": "plane",
+    "status_page": {
+      "service_name": "status-page",
       "owning_vm": "docker-runtime-lv3",
-      "role": "plane_runtime",
-      "verify_file": "roles/plane_runtime/tasks/verify.yml",
+      "role": null,
+      "verify_file": null,
       "liveness": {
         "kind": "http",
-        "description": "The Plane proxy root responds on the local runtime listener.",
-        "timeout_seconds": 300,
-        "retries": 60,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8093/",
+        "description": "The Uptime Kuma status page slug responds on the local runtime listener.",
+        "timeout_seconds": 30,
+        "retries": 1,
+        "delay_seconds": 0,
+        "url": "http://127.0.0.1:3001/status/lv3-platform",
         "method": "GET",
         "expected_status": [
           200
@@ -1991,11 +1861,205 @@
       },
       "readiness": {
         "kind": "http",
-        "description": "The Plane instance API answers locally after the proxy, API, and worker services finish startup.",
-        "timeout_seconds": 300,
-        "retries": 60,
+        "description": "The public status page route responds through the shared edge host header.",
+        "timeout_seconds": 30,
+        "retries": 1,
+        "delay_seconds": 0,
+        "url": "https://127.0.0.1/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "headers": {
+          "Host": "status.lv3.org"
+        },
+        "validate_tls": false
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "The status page should not recursively monitor itself from the same Uptime Kuma instance; independent coverage is delegated to Uptime Robot."
+      }
+    },
+    "step_ca": {
+      "service_name": "step-ca",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "step_ca_runtime",
+      "verify_file": "roles/step_ca_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "tcp",
+        "description": "The private step-ca API listens on the Docker runtime guest.",
+        "timeout_seconds": 120,
+        "retries": 1,
+        "delay_seconds": 0,
+        "host": "10.10.10.20",
+        "port": 9000
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "The services provisioner can issue a short-lived X.509 certificate.",
+        "timeout_seconds": 120,
+        "retries": 1,
+        "delay_seconds": 0,
+        "argv": [
+          "step",
+          "ca",
+          "certificate",
+          "step-ca-service-test.lv3.internal",
+          "/opt/step-ca/service-test.crt",
+          "/opt/step-ca/service-test.key",
+          "--force",
+          "--ca-url",
+          "https://10.10.10.20:9000",
+          "--root",
+          "/opt/step-ca/home/certs/root_ca.crt",
+          "--provisioner",
+          "services",
+          "--provisioner-password-file",
+          "/opt/step-ca/secrets/services-password.txt",
+          "--password-file",
+          "/opt/step-ca/secrets/services-password.txt",
+          "--san",
+          "step-ca-service-test.lv3.internal",
+          "--not-after",
+          "1h"
+        ],
+        "success_rc": 0
+      },
+      "tls_certificate_ids": [
+        "step-ca-proxy"
+      ],
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Step CA Private",
+          "type": "http",
+          "url": "https://10.10.10.20:9000/health",
+          "description": "Private step-ca health endpoint on docker-runtime-lv3.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ],
+          "ignoreTls": true
+        }
+      }
+    },
+    "uptime_kuma": {
+      "service_name": "uptime-kuma",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "uptime_kuma_runtime",
+      "verify_file": "roles/uptime_kuma_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "command",
+        "description": "The Uptime Kuma container is running on docker-runtime-lv3.",
+        "timeout_seconds": 30,
+        "retries": 1,
+        "delay_seconds": 0,
+        "argv": [
+          "docker",
+          "ps",
+          "--filter",
+          "name=uptime-kuma",
+          "--filter",
+          "status=running",
+          "--format",
+          "{{.Names}}"
+        ],
+        "success_rc": 0
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The Uptime Kuma web UI responds on the local listener.",
+        "timeout_seconds": 30,
+        "retries": 1,
+        "delay_seconds": 0,
+        "url": "http://127.0.0.1:3001",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "tls_certificate_ids": [
+        "uptime-kuma-edge"
+      ],
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Uptime Kuma Public",
+          "type": "http",
+          "url": "https://uptime.lv3.org",
+          "description": "Public Uptime Kuma entrypoint through the NGINX edge.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-399"
+          ]
+        }
+      }
+    },
+    "vaultwarden": {
+      "service_name": "vaultwarden",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "vaultwarden_runtime",
+      "verify_file": "roles/vaultwarden_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "tcp",
+        "description": "Vaultwarden accepts TLS connections on the private runtime listener.",
+        "timeout_seconds": 180,
+        "retries": 1,
+        "delay_seconds": 0,
+        "host": "127.0.0.1",
+        "port": 8222
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "Vaultwarden returns success from the managed liveness endpoint over HTTPS.",
+        "timeout_seconds": 60,
+        "retries": 12,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8093/api/instances/",
+        "url": "https://10.10.10.20:8222/alive",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "validate_tls": false
+      },
+      "tls_certificate_ids": [
+        "vaultwarden-private"
+      ],
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Vaultwarden is private-only and uses an internal CA trust chain, so repo-managed role verification is the current health contract."
+      }
+    },
+    "windmill": {
+      "service_name": "windmill",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "windmill_runtime",
+      "verify_file": "roles/windmill_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Windmill API version endpoint responds on the local listener.",
+        "timeout_seconds": 90,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8000/api/version",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The Windmill API version endpoint remains reachable after workspace bootstrap.",
+        "timeout_seconds": 90,
+        "retries": 1,
+        "delay_seconds": 0,
+        "url": "http://127.0.0.1:8000/api/version",
         "method": "GET",
         "expected_status": [
           200
@@ -2004,16 +2068,16 @@
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
-          "name": "Plane Public",
+          "name": "Windmill Private",
           "type": "http",
-          "url": "https://tasks.lv3.org/",
-          "description": "Public Plane board published through the shared NGINX edge and authenticated by the repo-managed oauth2-proxy flow.",
+          "url": "http://10.10.10.20:8000/api/version",
+          "description": "Private Windmill API version endpoint on docker-runtime-lv3.",
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 10,
           "accepted_statuscodes": [
-            "200-399"
+            "200-299"
           ]
         }
       }

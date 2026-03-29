@@ -2828,6 +2828,67 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-matrix-synapse": {
+      "description": "Converge Matrix Synapse on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish matrix.lv3.org through the shared edge, and expose the private controller proxy on the Proxmox host.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-matrix-synapse",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-matrix-synapse"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "matrix_synapse_database_password",
+          "matrix_synapse_ops_password",
+          "matrix_synapse_registration_shared_secret",
+          "matrix_synapse_signing_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-matrix-synapse"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-matrix-synapse.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/matrix-synapse.yml",
+        "playbooks/services/matrix-synapse.yml",
+        "roles/matrix_synapse_postgres",
+        "roles/matrix_synapse_runtime",
+        "roles/proxmox_tailscale_proxy",
+        "roles/proxmox_security",
+        "roles/nginx_edge_publication",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/uptime-kuma/monitors.json",
+        "config/grafana/dashboards/matrix-synapse.json",
+        "config/alertmanager/rules/matrix-synapse.yml"
+      ],
+      "outputs": [
+        "A repo-managed Matrix Synapse runtime on docker-runtime-lv3 with PostgreSQL persistence, a private controller proxy on the Proxmox host, and a public client API at matrix.lv3.org while federation remains disabled."
+      ],
+      "verification_commands": [
+        "make syntax-check-matrix-synapse",
+        "curl -fsS https://matrix.lv3.org/_matrix/client/versions",
+        "curl -fsS http://100.64.0.1:8015/_matrix/client/versions",
+        "python3 -c 'import json,pathlib,urllib.request; password=pathlib.Path(\"/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/ops-password.txt\").read_text().strip(); data=json.dumps({\"type\":\"m.login.password\",\"identifier\":{\"type\":\"m.id.user\",\"user\":\"ops\"},\"password\":password}).encode(); req=urllib.request.Request(\"http://100.64.0.1:8015/_matrix/client/v3/login\", data=data, headers={\"Content-Type\":\"application/json\"}); print(urllib.request.urlopen(req).read().decode())'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 350,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-ops-portal": {
       "description": "Converge the interactive ops portal on docker-runtime-lv3 so the browser control plane stays aligned with the shared API gateway contracts.",
       "lifecycle_status": "active",

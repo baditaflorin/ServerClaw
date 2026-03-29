@@ -167,6 +167,18 @@ def test_build_platform_vars_includes_plane_publication_topology() -> None:
     assert plane["urls"]["controller"] == "http://100.64.0.1:8011"
 
 
+def test_build_platform_vars_includes_matrix_synapse_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    matrix_synapse = platform_vars["platform_service_topology"]["matrix_synapse"]
+
+    assert matrix_synapse["public_hostname"] == "matrix.lv3.org"
+    assert matrix_synapse["dns"]["name"] == "matrix"
+    assert matrix_synapse["ports"]["internal"] == 8008
+    assert matrix_synapse["ports"]["controller"] == 8014
+    assert matrix_synapse["urls"]["public"] == "https://matrix.lv3.org"
+    assert matrix_synapse["urls"]["controller"] == "http://100.64.0.1:8014"
+
+
 def test_build_service_urls_resolves_realtime_internal_url() -> None:
     ports = {"netdata_port": 19999}
     service = {"owning_vm": "monitoring-lv3"}

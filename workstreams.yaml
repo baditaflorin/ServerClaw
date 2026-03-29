@@ -457,6 +457,141 @@ workstreams:
         api_gateway_postrebase_rerun: 2026-03-29-adr-0251-api-gateway-postrebase-rerun
         api_gateway_runtime_assurance_fix_attempt: 2026-03-29-adr-0251-api-gateway-runtime-assurance-config-fix
         api_gateway_runtime_assurance_fix_rerun: 2026-03-29-adr-0251-api-gateway-runtime-assurance-config-fix-rerun
+  - id: ws-0255-live-apply
+    adr: "0255"
+    title: ADR 0255 live apply from latest origin/main
+    status: in_progress
+    owner: codex
+    branch: codex/adr-0255-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0255-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0255-live-apply.md
+    depends_on:
+      - adr-0023-docker-runtime-vm-baseline
+      - adr-0026-dedicated-postgresql-vm-baseline
+      - adr-0077-compose-runtime-secrets-injection
+      - adr-0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3
+    conflicts_with: []
+    shared_surfaces:
+      - docs/adr/0255-matrix-synapse-as-the-canonical-serverclaw-conversation-hub.md
+      - docs/workstreams/ws-0255-live-apply.md
+      - docs/runbooks/configure-matrix-synapse.md
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - config/service-capability-catalog.json
+      - config/certificate-catalog.json
+      - config/health-probe-catalog.json
+      - config/subdomain-catalog.json
+      - config/subdomain-exposure-registry.json
+      - config/secret-catalog.json
+      - config/controller-local-secrets.json
+      - config/image-catalog.json
+      - config/api-gateway-catalog.json
+      - config/dependency-graph.json
+      - config/slo-catalog.json
+      - config/data-catalog.json
+      - config/service-completeness.json
+      - config/uptime-kuma/monitors.json
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - config/service-redundancy-catalog.json
+      - config/ansible-execution-scopes.yaml
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/slo_rules.yml
+      - config/grafana/dashboards/slo-overview.json
+      - playbooks/matrix-synapse.yml
+      - playbooks/services/matrix-synapse.yml
+      - collections/ansible_collections/lv3/platform/playbooks/matrix-synapse.yml
+      - collections/ansible_collections/lv3/platform/roles/matrix_synapse_postgres/
+      - collections/ansible_collections/lv3/platform/roles/matrix_synapse_runtime/
+      - scripts/generate_platform_vars.py
+      - scripts/validate_repo.sh
+      - tests/test_generate_platform_vars.py
+      - tests/test_compose_runtime_secret_injection.py
+      - tests/test_edge_publication_playbooks.py
+      - tests/test_postgres_vm_access_policy.py
+      - tests/test_matrix_synapse_playbook.py
+      - tests/test_matrix_synapse_runtime_role.py
+      - receipts/image-scans/2026-03-29-matrix-synapse-runtime.json
+      - receipts/image-scans/2026-03-29-matrix-synapse-runtime.trivy.json
+      - workstreams.yaml
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: matrix_synapse_docs
+          paths:
+            - docs/adr/0255-matrix-synapse-as-the-canonical-serverclaw-conversation-hub.md
+            - docs/workstreams/ws-0255-live-apply.md
+            - docs/runbooks/configure-matrix-synapse.md
+          mode: exclusive
+        - id: matrix_synapse_platform_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - scripts/generate_platform_vars.py
+            - tests/test_generate_platform_vars.py
+          mode: shared_contract
+          contract: platform-topology-v1
+        - id: matrix_synapse_shared_catalog_contract
+          paths:
+            - config/ansible-execution-scopes.yaml
+            - config/service-capability-catalog.json
+            - config/certificate-catalog.json
+            - config/health-probe-catalog.json
+            - config/subdomain-catalog.json
+            - config/subdomain-exposure-registry.json
+            - config/secret-catalog.json
+            - config/controller-local-secrets.json
+            - config/image-catalog.json
+            - config/api-gateway-catalog.json
+            - config/dependency-graph.json
+            - config/slo-catalog.json
+            - config/data-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/uptime-kuma/monitors.json
+            - config/workflow-catalog.json
+            - config/command-catalog.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/grafana/dashboards/slo-overview.json
+          mode: shared_contract
+          contract: service-catalogs-v1
+        - id: matrix_synapse_shared_validation_contract
+          paths:
+            - Makefile
+            - scripts/validate_repo.sh
+            - tests/test_compose_runtime_secret_injection.py
+            - tests/test_edge_publication_playbooks.py
+            - tests/test_postgres_vm_access_policy.py
+          mode: shared_contract
+          contract: repository-automation-v1
+        - id: matrix_synapse_runtime_surfaces
+          paths:
+            - config/alertmanager/rules/matrix-synapse.yml
+            - config/grafana/dashboards/matrix-synapse.json
+            - playbooks/matrix-synapse.yml
+            - playbooks/services/matrix-synapse.yml
+            - collections/ansible_collections/lv3/platform/playbooks/matrix-synapse.yml
+            - collections/ansible_collections/lv3/platform/roles/matrix_synapse_postgres/
+            - collections/ansible_collections/lv3/platform/roles/matrix_synapse_runtime/
+            - tests/test_matrix_synapse_playbook.py
+            - tests/test_matrix_synapse_runtime_role.py
+            - receipts/image-scans/2026-03-29-matrix-synapse-runtime.json
+            - receipts/image-scans/2026-03-29-matrix-synapse-runtime.trivy.json
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false
   - id: ws-0224-repo-intake
     adr: "0224"
     title: Self-service repo intake and agent-assisted app deployments
