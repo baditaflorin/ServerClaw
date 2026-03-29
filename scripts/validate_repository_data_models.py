@@ -81,6 +81,7 @@ from workflow_catalog import (
 from workstream_surface_ownership import validate_registry as validate_workstream_surface_ownership_registry
 from platform.config_merge import validate_merge_eligible_catalog
 from preview_environment import load_profile_catalog, validate_profile_catalog
+from repo_deploy_profiles import load_repo_deploy_catalog, validate_repo_deploy_catalog
 
 
 STACK_PATH = repo_path("versions", "stack.yaml")
@@ -107,6 +108,8 @@ RESTORE_READINESS_PROFILE_PATH = repo_path("config", "restore-readiness-profiles
 RESTORE_READINESS_PROFILE_SCHEMA_PATH = repo_path("docs", "schema", "restore-readiness-profiles.schema.json")
 PERSONA_CATALOG_PATH = repo_path("config", "persona-catalog.json")
 PERSONA_CATALOG_SCHEMA_PATH = repo_path("docs", "schema", "persona-catalog.schema.json")
+REPO_DEPLOY_CATALOG_PATH = repo_path("config", "repo-deploy-catalog.json")
+REPO_DEPLOY_CATALOG_SCHEMA_PATH = repo_path("docs", "schema", "repo-deploy-catalog.schema.json")
 REPLACEABILITY_REVIEW_CATALOG_PATH = repo_path("config", "replaceability-review-catalog.json")
 VERSION_SEMANTICS_PATH = repo_path("config", "version-semantics.json")
 WORKSTREAMS_PATH = repo_path("workstreams.yaml")
@@ -2643,6 +2646,13 @@ def validate_runtime_assurance_matrix_data() -> None:
     validate_runtime_assurance_catalog(payload, schema_path=RUNTIME_ASSURANCE_SCHEMA_PATH)
 
 
+def validate_repo_deploy_catalog_data() -> None:
+    payload = load_repo_deploy_catalog(REPO_DEPLOY_CATALOG_PATH)
+    schema = load_json(REPO_DEPLOY_CATALOG_SCHEMA_PATH)
+    jsonschema.validate(instance=payload, schema=schema)
+    validate_repo_deploy_catalog(payload, path=REPO_DEPLOY_CATALOG_PATH)
+
+
 def validate_preview_environment_profiles() -> None:
     validate_profile_catalog(load_profile_catalog())
 
@@ -2706,6 +2716,7 @@ def validate_repository_data_models() -> int:
     validate_capacity_model()
     validate_persona_catalog()
     validate_runtime_assurance_matrix_data()
+    validate_repo_deploy_catalog_data()
     validate_preview_environment_profiles()
     validate_ephemeral_pool_catalog()
     validate_restore_readiness_profiles()

@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/repo-deploy-catalog.schema.json",
+  "title": "Repo Deploy Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "profiles"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "docs/schema/repo-deploy-catalog.schema.json"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "profiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "description",
+          "repo",
+          "branch",
+          "source",
+          "app_name",
+          "project",
+          "environment",
+          "build_pack",
+          "ports",
+          "llm_assistance"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "repo": {
+            "type": "string",
+            "minLength": 1
+          },
+          "branch": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "public",
+              "private-deploy-key"
+            ]
+          },
+          "app_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "project": {
+            "type": "string",
+            "minLength": 1
+          },
+          "environment": {
+            "type": "string",
+            "minLength": 1
+          },
+          "build_pack": {
+            "type": "string",
+            "enum": [
+              "nixpacks",
+              "static",
+              "dockerfile",
+              "dockercompose"
+            ]
+          },
+          "ports": {
+            "type": "string",
+            "minLength": 1
+          },
+          "llm_assistance": {
+            "type": "string",
+            "enum": [
+              "allowed",
+              "required",
+              "prohibited"
+            ]
+          },
+          "image_bundle": {
+            "type": "string",
+            "minLength": 1
+          },
+          "base_directory": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description_override": {
+            "type": "string",
+            "minLength": 1
+          },
+          "private_key_uuid": {
+            "type": "string",
+            "minLength": 1
+          },
+          "deploy_key_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "deploy_key_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dockerfile_location": {
+            "type": "string",
+            "minLength": 1
+          },
+          "docker_compose_location": {
+            "type": "string",
+            "minLength": 1
+          },
+          "publish_directory": {
+            "type": "string",
+            "minLength": 1
+          },
+          "compose_domains": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "service",
+                "domain"
+              ],
+              "properties": {
+                "service": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "domain": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "verification": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "url",
+              "activity_count_json_path",
+              "minimum_activity_count"
+            ],
+            "properties": {
+              "url": {
+                "type": "string",
+                "minLength": 1
+              },
+              "activity_count_json_path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minimum_activity_count": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

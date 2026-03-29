@@ -1,0 +1,32 @@
+{
+  "$schema": "docs/schema/repo-deploy-catalog.schema.json",
+  "schema_version": "1.0.0",
+  "profiles": [
+    {
+      "id": "education-wemeshup-production",
+      "description": "Pull the latest committed Docker Compose deployment from upstream main into the governed production Coolify lane.",
+      "repo": "git@github.com:baditaflorin/education_wemeshup.git",
+      "branch": "main",
+      "source": "private-deploy-key",
+      "app_name": "education-wemeshup",
+      "project": "LV3 Apps",
+      "environment": "production",
+      "build_pack": "dockercompose",
+      "ports": "80",
+      "llm_assistance": "prohibited",
+      "image_bundle": "education-wemeshup-compose-v1",
+      "docker_compose_location": "/compose.yaml",
+      "compose_domains": [
+        {
+          "service": "catalog-web",
+          "domain": "education-wemeshup.apps.lv3.org"
+        }
+      ],
+      "verification": {
+        "url": "https://education-wemeshup.apps.lv3.org/api/v1/catalog/taxonomy",
+        "activity_count_json_path": "meta.activityCount",
+        "minimum_activity_count": 1000
+      }
+    }
+  ]
+}

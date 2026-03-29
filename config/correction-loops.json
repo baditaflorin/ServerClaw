@@ -82,6 +82,7 @@
         "workflow_ids": [
           "close-maintenance-window",
           "coolify-manage",
+          "deploy-repo-profile",
           "database-dns",
           "open-maintenance-window",
           "plane-manage",
