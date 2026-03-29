@@ -4,7 +4,7 @@
 - Title: Live apply stage-scoped smoke suites and promotion-gate enforcement from latest `origin/main`
 - Status: live_applied
 - Implemented In Repo Version: 0.177.84
-- Live Applied In Platform Version: 0.130.58
+- Live Applied In Platform Version: 0.130.59
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0251-live-apply-r2`
@@ -185,11 +185,13 @@
   worker checkout on `docker-runtime-lv3` keeps `scripts/stage_smoke.py`, both
   `promotion_pipeline.py` and `ops_portal/runtime_assurance.py` import it,
   `python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server`
-  returns `status: ok`, the exact-main promotion gate rejects the real staged
-  `grafana` receipt with the ADR 0251 reason that no active staging smoke suite
-  is declared, and the authenticated runtime-assurance gateway plus local
-  ops-portal runtime-assurance partial both verify cleanly on platform version
-  `0.130.58`
+  returns `status: ok`, the bounded exact-main promotion gate replay rejects
+  the real staged `grafana` receipt because the receipt is stale, projected
+  vCPU commitment `36.0` exceeds target `22.5`, and Prometheus SLO queries time
+  out, the returned `stage_smoke_gate` payload stays `enforced=false` with
+  `required_suite_ids=[]` and `observed_suites=[]`, and the authenticated
+  runtime-assurance gateway plus local ops-portal runtime-assurance partial
+  both verify cleanly on platform version `0.130.59`
 
 ## Live Apply Resolution
 
@@ -202,4 +204,5 @@
 
 ## Remaining Steps
 
-- none; ADR 0251 is fully live on platform version `0.130.58`
+- none; ADR 0251 is fully live on the current verified platform baseline
+  `0.130.59`

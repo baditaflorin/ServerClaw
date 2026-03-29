@@ -62,12 +62,7 @@ control_plane_recovery_windmill_backup_database_password: >-
     | trim
   }}
 control_plane_recovery_windmill_backup_database_dsn: >-
-  {%- set password = control_plane_recovery_windmill_backup_database_password | trim -%}
-  {%- if password | length == 0 -%}
-  {{ "" }}
-  {%- else -%}
-  postgresql://{{ control_plane_recovery_windmill_backup_database_user }}:{{ password | urlencode | replace('/', '%2F') }}@{{ control_plane_recovery_windmill_backup_database_host }}:{{ control_plane_recovery_windmill_backup_database_port }}/{{ control_plane_recovery_windmill_backup_database_name }}?sslmode=disable
-  {%- endif -%}
+  {%- set password = control_plane_recovery_windmill_backup_database_password | trim -%}{%- if password | length == 0 -%}{{ "" }}{%- else -%}postgresql://{{ control_plane_recovery_windmill_backup_database_user }}:{{ password | urlencode | replace('/', '%2F') }}@{{ control_plane_recovery_windmill_backup_database_host }}:{{ control_plane_recovery_windmill_backup_database_port }}/{{ control_plane_recovery_windmill_backup_database_name }}?sslmode=disable{%- endif -%}
 control_plane_recovery_runtime_openbao_secret_payload:
   windmill_db_dsn: "{{ control_plane_recovery_windmill_backup_database_dsn }}"
 control_plane_recovery_runtime_openbao_policy_rules: |-
