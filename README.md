@@ -145,7 +145,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.72` |
+| Repository version | `0.177.74` |
 | Platform version | `0.130.50` |
 | Observed check date | `2026-03-29` |
 | Observed OS | `Debian 13` |
@@ -506,6 +506,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Ansible Collection Development](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ansible-collection-development.md)
 - [Ansible Inventory Sharding](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ansible-inventory-sharding.md)
 - [Ansible Role Idempotency CI](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ansible-role-idempotency-ci.md)
+- [Artifact Cache Runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/artifact-cache-runtime.md)
 - [Backup Restore Verification](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/backup-restore-verification.md)
 - [Bounded Command Execution](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/bounded-command-execution.md)
 - [Break-Glass Recovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/break-glass-recovery.md)
@@ -990,6 +991,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0292: Apache Superset As The SQL-First Business Intelligence Layer](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0292-apache-superset-as-the-sql-first-business-intelligence-layer.md)
 - [ADR 0293: Livekit As The Real-Time Audio And Voice Channel For Agents](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md)
 - [ADR 0294: One-API As The Unified LLM API Proxy And Router](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0294-one-api-as-the-unified-llm-api-proxy-and-router.md)
+- [ADR 0295: Shared Artifact Cache Plane For Container And Package Dependencies](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md)
+- [ADR 0296: Dedicated Artifact-Cache VM With Phased Consumer Adoption](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -1166,6 +1169,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0244: Runtime Assurance Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0244-runtime-assurance-architecture-bundle.md)
 - [Workstream ADR 0254: ServerClaw Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0254-serverclaw-architecture-bundle.md)
 - [Workstream ADR 0264: Receipt-Driven Resilience Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md)
+- [Workstream ADR 0295: Artifact Cache Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md)
 - [Workstream ws-0021-edge-cert-repair: Shared Edge Certificate Expansion Repair](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0021-edge-cert-repair.md)
 - [Workstream ws-0101-live-apply: ADR 0101 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0101-live-apply.md)
 - [Workstream ws-0105-live-apply: Live Apply ADR 0105 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0105-live-apply.md)
@@ -1214,6 +1218,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream WS-0234: PatternFly Human Shell Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0234-live-apply.md)
 - [Workstream WS-0235: Cross-Application Launcher Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0235-live-apply.md)
 - [Workstream ws-0235-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0235-main-merge.md)
+- [Workstream WS-0237: Schema-First Human Forms Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0237-live-apply.md)
+- [Workstream ws-0237-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0237-main-merge.md)
 - [Workstream WS-0238: Data-Dense Operator Grids Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0238-live-apply.md)
 - [Workstream ws-0238-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0238-main-integration.md)
 - [Workstream WS-0239: Browser-Local Search Experience Via Pagefind Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0239-live-apply.md)
@@ -1248,7 +1254,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.72` |
+| Repository version | `0.177.74` |
 | Platform version | `0.130.50` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1490,6 +1496,8 @@ This repository is intentionally opinionated:
 | `0234` | Live apply shared human app shell and navigation via PatternFly | `live_applied` | [ws-0234-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0234-live-apply.md) |
 | `0235` | Live apply cross-application launcher and favorites in the interactive ops portal | `live_applied` | [ws-0235-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0235-live-apply.md) |
 | `0235` | Integrate ADR 0235 cross-application launcher into origin/main | `merged` | [ws-0235-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0235-main-merge.md) |
+| `0237` | Live apply schema-first human forms via React Hook Form and Zod | `live_applied` | [ws-0237-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0237-live-apply.md) |
+| `0237` | Integrate ADR 0237 schema-first human forms into origin/main | `merged` | [ws-0237-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0237-main-merge.md) |
 | `0238` | Data-dense operator grids live apply | `live_applied` | [ws-0238-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0238-live-apply.md) |
 | `0238` | Integrate ADR 0238 operator grid into origin/main | `merged` | [ws-0238-main-integration.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0238-main-integration.md) |
 | `0239` | Live apply browser-local search experience via Pagefind | `live_applied` | [ws-0239-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0239-live-apply.md) |
@@ -1510,6 +1518,7 @@ This repository is intentionally opinionated:
 | `0253` | Unified runtime assurance scoreboard live apply | `live_applied` | [ws-0253-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0253-live-apply.md) |
 | `0254` | ServerClaw architecture bundle | `merged` | [adr-0254-serverclaw-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0254-serverclaw-architecture-bundle.md) |
 | `0264` | Receipt-driven resilience architecture bundle | `merged` | [adr-0264-receipt-driven-resilience-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md) |
+| `0295` | Shared artifact cache plane and dedicated cache VM roadmap | `merged` | [adr-0295-artifact-cache-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

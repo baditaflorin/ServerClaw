@@ -168,16 +168,20 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     lock_config = yaml.safe_load(lock_path.read_text())
     package_lock = json.loads((app_dir / "package-lock.json").read_text())
     app_source = (app_dir / "App.tsx").read_text()
+    schema_source = (app_dir / "schemas.ts").read_text()
     tour_source = (app_dir / "touring.ts").read_text()
 
     assert app_config["summary"] == "LV3 operator access admin console"
+    assert package["dependencies"]["@hookform/resolvers"] == "^5.1.1"
     assert package["dependencies"]["ag-grid-community"] == "35.2.0"
     assert package["dependencies"]["ag-grid-react"] == "35.2.0"
     assert package["dependencies"]["react"] == "19.0.0"
+    assert package["dependencies"]["react-hook-form"] == "^7.69.0"
     assert package["dependencies"]["shepherd.js"] == "15.2.2"
     assert package["dependencies"]["windmill-client"] == "^1"
     assert package["dependencies"]["@tiptap/react"] == "3.21.0"
     assert package["dependencies"]["@tiptap/markdown"] == "3.21.0"
+    assert package["dependencies"]["zod"] == "^4.3.6"
     assert lock_config["version"] == "v2"
     assert "f/lv3/operator_access_admin.raw_app+__app_hash" in lock_config["locks"]
     assert "Operator Access Admin" in app_source
@@ -193,6 +197,17 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert "isRosterPayload" in app_source
     assert "candidate.status === \"ok\" && Array.isArray(candidate.operators)" in app_source
     assert "extractRosterError" in app_source
+    assert "useForm<OnboardFormValues>" in app_source
+    assert "resolver: zodResolver(onboardFormSchema)" in app_source
+    assert "resolver: zodResolver(offboardFormSchema)" in app_source
+    assert "resolver: zodResolver(syncFormSchema)" in app_source
+    assert "Schema validation mirrors the governed onboarding payload." in app_source
+    assert "touched fields update inline" in app_source.lower()
+    assert "export const onboardFormSchema" in schema_source
+    assert "export const offboardFormSchema" in schema_source
+    assert "export const syncFormSchema" in schema_source
+    assert "superRefine" in schema_source
+    assert "SSH public key is required for admin and operator roles." in schema_source
     assert 'import "shepherd.js/dist/css/shepherd.css"' in tour_source
     assert "lv3.operator_access_admin.shepherd.v1" in tour_source
     assert "resumeFromStepId" in tour_source
@@ -207,6 +222,8 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert 'const ADMIN_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/windmill-operator-access-admin/`;' in tour_source
     assert package_lock["packages"][""]["dependencies"]["ag-grid-community"] == "35.2.0"
     assert package_lock["packages"][""]["dependencies"]["ag-grid-react"] == "35.2.0"
+    assert package_lock["packages"][""]["dependencies"]["react-hook-form"] == "^7.69.0"
+    assert package_lock["packages"][""]["dependencies"]["zod"] == "^4.3.6"
     assert package_lock["lockfileVersion"] == 3
     roster_script = (REPO_ROOT / "config/windmill/scripts/operator-roster.py").read_text()
     onboard_script = (REPO_ROOT / "config/windmill/scripts/operator-onboard.py").read_text()
@@ -248,6 +265,9 @@ def test_operator_admin_runbook_mentions_ag_grid_roster_controls() -> None:
     runbook = (REPO_ROOT / "docs/runbooks/windmill-operator-access-admin.md").read_text()
 
     assert "AG Grid Community" in runbook
+    assert "react-hook-form" in runbook
+    assert "zod" in runbook
+    assert "schemas.ts" in runbook
     assert "Quick Filter" in runbook
     assert "pin or resize columns" in runbook
     assert "Guided Onboarding" in runbook
@@ -276,17 +296,17 @@ def test_operator_admin_raw_app_lockfile_and_runtime_sync_contract() -> None:
     assert package_lock["packages"]["node_modules/ag-grid-community"]["version"] == "35.2.0"
     assert package_lock["packages"]["node_modules/ag-grid-react"]["version"] == "35.2.0"
     assert package_lock["packages"]["node_modules/shepherd.js"]["version"] == "15.2.2"
-    assert "- name: Install repo-managed Windmill raw app frontend dependencies" in runtime_tasks
+    assert "- name: Install frontend dependencies for repo-managed Windmill raw apps" in runtime_tasks
     assert "register: windmill_seed_raw_app_frontend_install" in runtime_tasks
-    assert "missing package-lock.json for {{ item.path }}" in runtime_tasks
     assert "npm ci --no-audit --no-fund" in runtime_tasks
+    assert "npm install --no-package-lock --no-audit --no-fund" in runtime_tasks
     assert '"{{ windmill_seed_app_sync_dir.path }}:/workspace"' in runtime_tasks
     assert runtime_tasks.count("retries: 3") >= 2
     assert runtime_tasks.count("delay: 5") >= 2
     assert "until: windmill_seed_raw_app_frontend_install.rc == 0" in runtime_tasks
     assert "register: windmill_seed_raw_app_sync" in runtime_tasks
     assert "until: windmill_seed_raw_app_sync.rc == 0" in runtime_tasks
-    assert runtime_tasks.index("- name: Install repo-managed Windmill raw app frontend dependencies") < runtime_tasks.index(
+    assert runtime_tasks.index("- name: Install frontend dependencies for repo-managed Windmill raw apps") < runtime_tasks.index(
         "- name: Sync repo-managed Windmill raw apps"
     )
     assert "windmill_seed_app_repo_root_local_dir" in argument_specs["argument_specs"]["main"]["options"]
@@ -495,16 +515,16 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert 'psql "${database_url}"' in tasks
     assert "become: true" in tasks
     assert "Sync repo-managed Windmill raw apps" in tasks
-    assert "Install repo-managed Windmill raw app frontend dependencies" in tasks
+    assert "Install frontend dependencies for repo-managed Windmill raw apps" in tasks
     assert "register: windmill_seed_raw_app_frontend_install" in tasks
-    assert "missing package-lock.json for {{ item.path }}" in tasks
     assert "npm ci --no-audit --no-fund" in tasks
+    assert "npm install --no-package-lock --no-audit --no-fund" in tasks
     assert "npm ci --prefix" not in tasks
     assert "npm install --prefix" not in tasks
     assert tasks.count("retries: 3") >= 2
     assert tasks.count("delay: 5") >= 2
     assert "until: windmill_seed_raw_app_frontend_install.rc == 0" in tasks
-    assert tasks.index("Install repo-managed Windmill raw app frontend dependencies") < tasks.index(
+    assert tasks.index("Install frontend dependencies for repo-managed Windmill raw apps") < tasks.index(
         "Sync repo-managed Windmill raw apps"
     )
     assert "wmill sync push" in tasks

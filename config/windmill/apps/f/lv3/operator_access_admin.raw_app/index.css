@@ -6,6 +6,7 @@
   --muted: #5d584d;
   --line: rgba(28, 26, 22, 0.12);
   --accent: #a5411c;
+  --focus: #d96a33;
   --ok: #23623a;
   --danger: #7e1d13;
   --pause: #7b5607;
@@ -423,6 +424,19 @@ textarea {
   gap: 20px;
 }
 
+.formBody {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.formBody:disabled {
+  opacity: 0.82;
+}
+
 .formGrid {
   display: grid;
   gap: 12px;
@@ -439,8 +453,23 @@ textarea {
 }
 
 .formField label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   font-size: 0.9rem;
   color: var(--muted);
+}
+
+.labelTag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 8px;
+  background: rgba(165, 65, 28, 0.09);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .formField input,
@@ -452,11 +481,52 @@ textarea {
   background: white;
   border-radius: 14px;
   color: var(--ink);
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    background-color 140ms ease;
+}
+
+.formField input:focus-visible,
+.formField select:focus-visible,
+.formField textarea:focus-visible {
+  outline: none;
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px rgba(217, 106, 51, 0.18);
+}
+
+.formField.isTouched input,
+.formField.isTouched select,
+.formField.isTouched textarea {
+  border-color: rgba(35, 98, 58, 0.22);
+  background: rgba(35, 98, 58, 0.02);
+}
+
+.formField.isInvalid input,
+.formField.isInvalid select,
+.formField.isInvalid textarea {
+  border-color: rgba(126, 29, 19, 0.36);
+  background: rgba(126, 29, 19, 0.04);
 }
 
 .formField textarea {
   min-height: 110px;
   resize: vertical;
+}
+
+.fieldMeta {
+  min-height: 1.2rem;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+.fieldMetaReady {
+  color: var(--ok);
+}
+
+.fieldMetaError {
+  color: var(--danger);
 }
 
 .checkboxRow {
@@ -465,6 +535,11 @@ textarea {
   align-items: center;
   color: var(--muted);
   margin-top: 2px;
+}
+
+.checkboxRow input {
+  width: 16px;
+  height: 16px;
 }
 
 .resultPanel {
@@ -486,6 +561,10 @@ textarea {
   border-radius: 16px;
   padding: 14px 16px;
   border: 1px solid transparent;
+}
+
+.bannerInline {
+  margin-bottom: 0;
 }
 
 .bannerInfo {

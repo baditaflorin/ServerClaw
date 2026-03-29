@@ -1,4 +1,5 @@
-import React, { FormEvent, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import React, { ReactNode, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   AllCommunityModule,
   ModuleRegistry,
@@ -20,7 +21,19 @@ import TableRow from "@tiptap/extension-table-row";
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
 import StarterKit from "@tiptap/starter-kit";
+import { Controller, useForm } from "react-hook-form";
 import type { Tour } from "shepherd.js";
+import {
+  OffboardFormValues,
+  offboardFormDefaults,
+  offboardFormSchema,
+  OnboardFormValues,
+  onboardFormDefaults,
+  onboardFormSchema,
+  SyncFormValues,
+  syncFormDefaults,
+  syncFormSchema,
+} from "./schemas";
 import { backend } from "./wmill";
 import {
   readTourProgress,
@@ -84,32 +97,29 @@ type InventoryPayload = {
   result?: unknown;
 };
 
-type OnboardFormState = {
-  name: string;
-  email: string;
-  role: "admin" | "operator" | "viewer";
-  ssh_key: string;
-  operator_id: string;
-  keycloak_username: string;
-  tailscale_login_email: string;
-  tailscale_device_name: string;
-  dry_run: boolean;
-};
-
-type OffboardFormState = {
-  operator_id: string;
-  reason: string;
-  dry_run: boolean;
-};
-
-type SyncFormState = {
-  operator_id: string;
-  dry_run: boolean;
-};
-
 type TourLaunchOptions = {
   autoPrompted?: boolean;
   resume?: boolean;
+};
+
+type FieldShellProps = {
+  htmlFor: string;
+  label: string;
+  hint: string;
+  error?: string;
+  touched?: boolean;
+  required?: boolean;
+  stretch?: boolean;
+  tourTarget?: string;
+  children: ReactNode;
+};
+
+type FormStatusProps = {
+  isSubmitting: boolean;
+  isDirty: boolean;
+  submitCount: number;
+  errorCount: number;
+  idleMessage: string;
 };
 
 type ToolbarButtonProps = {
@@ -117,29 +127,6 @@ type ToolbarButtonProps = {
   onClick: () => void;
   active?: boolean;
   disabled?: boolean;
-};
-
-const initialOnboardState: OnboardFormState = {
-  name: "",
-  email: "",
-  role: "operator",
-  ssh_key: "",
-  operator_id: "",
-  keycloak_username: "",
-  tailscale_login_email: "",
-  tailscale_device_name: "",
-  dry_run: false,
-};
-
-const initialOffboardState: OffboardFormState = {
-  operator_id: "",
-  reason: "",
-  dry_run: false,
-};
-
-const initialSyncState: SyncFormState = {
-  operator_id: "",
-  dry_run: false,
 };
 
 const operatorGridTheme = themeQuartz.withParams({
@@ -266,6 +253,61 @@ function setEditorMarkdown(editor: Editor | null, markdown: string) {
   editor.commands.setContent(markdown, { contentType: "markdown" });
 }
 
+function FieldShell({
+  htmlFor,
+  label,
+  hint,
+  error,
+  touched,
+  required = false,
+  stretch = false,
+  tourTarget,
+  children,
+}: FieldShellProps) {
+  const meta = error || (touched ? "Validated locally." : hint);
+  const fieldClassName = [
+    "formField",
+    stretch ? "formFieldWide" : "",
+    touched ? "isTouched" : "",
+    error ? "isInvalid" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const metaClassName = error ? "fieldMeta fieldMetaError" : touched ? "fieldMeta fieldMetaReady" : "fieldMeta";
+
+  return (
+    <div className={fieldClassName} data-tour-target={tourTarget}>
+      <label htmlFor={htmlFor}>
+        <span>{label}</span>
+        {required ? <span className="labelTag">Required</span> : null}
+      </label>
+      {children}
+      <div className={metaClassName}>{meta}</div>
+    </div>
+  );
+}
+
+function FormStatus({ isSubmitting, isDirty, submitCount, errorCount, idleMessage }: FormStatusProps) {
+  let className = "banner bannerInfo bannerInline";
+  let message = idleMessage;
+
+  if (isSubmitting) {
+    className = "banner bannerInfo bannerInline";
+    message = "Validating and submitting through the governed backend.";
+  } else if (submitCount > 0 && errorCount > 0) {
+    className = "banner bannerError bannerInline";
+    message =
+      errorCount === 1
+        ? "Resolve the highlighted field before submitting."
+        : `Resolve ${errorCount} highlighted fields before submitting.`;
+  } else if (isDirty) {
+    className = "banner bannerInfo bannerInline";
+    message = "Schema validation is active for this form. Touched fields update inline.";
+  }
+
+  return <div className={className}>{message}</div>;
+}
+
 function App() {
   const [roster, setRoster] = useState<RosterPayload | null>(null);
   const [rosterLoading, setRosterLoading] = useState(true);
@@ -275,9 +317,6 @@ function App() {
   const [displayedOperatorCount, setDisplayedOperatorCount] = useState(0);
   const [mentionTarget, setMentionTarget] = useState("");
   const [notesMarkdown, setNotesMarkdown] = useState("");
-  const [onboard, setOnboard] = useState<OnboardFormState>(initialOnboardState);
-  const [offboard, setOffboard] = useState<OffboardFormState>(initialOffboardState);
-  const [syncForm, setSyncForm] = useState<SyncFormState>(initialSyncState);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionTitle, setActionTitle] = useState("No action executed yet");
   const [actionPayload, setActionPayload] = useState<ActionPayload | null>(null);
@@ -288,12 +327,30 @@ function App() {
   const [tourProgress, setTourProgress] = useState<TourProgress>(() => readTourProgress());
   const [tourRunning, setTourRunning] = useState(false);
   const tourRef = useRef<Tour | null>(null);
+  const onboardForm = useForm<OnboardFormValues>({
+    resolver: zodResolver(onboardFormSchema),
+    defaultValues: onboardFormDefaults,
+    mode: "onTouched",
+  });
+  const offboardForm = useForm<OffboardFormValues>({
+    resolver: zodResolver(offboardFormSchema),
+    defaultValues: offboardFormDefaults,
+    mode: "onTouched",
+  });
+  const syncForm = useForm<SyncFormValues>({
+    resolver: zodResolver(syncFormSchema),
+    defaultValues: syncFormDefaults,
+    mode: "onTouched",
+  });
 
   const operators = roster?.operators ?? [];
   const selectedOperator = useMemo(
     () => operators.find((item) => item.id === selectedOperatorId) ?? null,
     [operators, selectedOperatorId],
   );
+  const onboardRole = onboardForm.watch("role");
+  const sshRequired = onboardRole !== "viewer";
+  const offboardOperatorId = offboardForm.watch("operator_id");
   const canResumeTour = Boolean(
     tourProgress.lastIntent && tourProgress.lastStepId && tourProgress.lastOutcome === "dismissed",
   );
@@ -481,7 +538,7 @@ function App() {
     },
   });
 
-  async function refreshRoster() {
+  async function refreshRoster(): Promise<string> {
     setRosterLoading(true);
     setRosterError("");
     try {
@@ -489,17 +546,34 @@ function App() {
       if (!isRosterPayload(payload)) {
         setRoster(null);
         setSelectedOperatorId("");
-        setOffboard(initialOffboardState);
+        setInventoryPayload(null);
+        offboardForm.reset(offboardFormDefaults);
         setRosterError(extractRosterError((payload ?? {}) as RosterPayloadError));
-        return;
+        return "";
       }
+
       setRoster(payload);
-      const selectedIdStillExists = payload.operators.some((item) => item.id === selectedOperatorId);
-      const nextSelectedOperatorId = selectedIdStillExists ? selectedOperatorId : payload.operators[0]?.id ?? "";
+
+      const nextSelectedOperatorId = payload.operators.length
+        ? payload.operators.some((item) => item.id === selectedOperatorId)
+          ? selectedOperatorId
+          : payload.operators[0].id
+        : "";
+
       setSelectedOperatorId(nextSelectedOperatorId);
+      offboardForm.setValue("operator_id", nextSelectedOperatorId, {
+        shouldValidate: offboardForm.formState.submitCount > 0,
+      });
+
+      if (!nextSelectedOperatorId) {
+        setInventoryPayload(null);
+      }
+
+      return nextSelectedOperatorId;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       setRosterError(message);
+      return "";
     } finally {
       setRosterLoading(false);
     }
@@ -507,6 +581,7 @@ function App() {
 
   async function loadInventory(operatorId: string) {
     if (!operatorId) {
+      setInventoryPayload(null);
       return;
     }
     setInventoryLoading(true);
@@ -527,17 +602,17 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (!selectedOperatorId) {
-      setOffboard((current) => ({ ...current, operator_id: "" }));
-      return;
-    }
-    setOffboard((current) => ({ ...current, operator_id: selectedOperatorId }));
-  }, [selectedOperatorId]);
+    offboardForm.setValue("operator_id", selectedOperatorId, {
+      shouldValidate: offboardForm.formState.submitCount > 0,
+    });
+  }, [selectedOperatorId, offboardForm]);
 
   useEffect(() => {
-    if (selectedOperatorId) {
-      void loadInventory(selectedOperatorId);
+    if (!selectedOperatorId) {
+      setInventoryPayload(null);
+      return;
     }
+    void loadInventory(selectedOperatorId);
   }, [selectedOperatorId]);
 
   useEffect(() => {
@@ -586,7 +661,7 @@ function App() {
       autoPrompted: shouldMarkAutoPrompted,
       resumeFromStepId: options.resume ? tourProgress.lastStepId : null,
       context: {
-        intendedRole: intent === "onboard_viewer" ? "viewer" : onboard.role === "admin" ? "admin" : "operator",
+        intendedRole: intent === "onboard_viewer" ? "viewer" : onboardRole === "admin" ? "admin" : "operator",
         selectedOperatorName: selectedOperator?.name ?? null,
         selectedOperatorStatus: selectedOperator?.status ?? null,
         hasOperators: operators.length > 0,
@@ -609,9 +684,9 @@ function App() {
       const payload = await runner();
       setActionPayload(payload);
       if (refresh) {
-        await refreshRoster();
-        if (selectedOperatorId) {
-          await loadInventory(selectedOperatorId);
+        const nextSelectedOperatorId = await refreshRoster();
+        if (nextSelectedOperatorId) {
+          await loadInventory(nextSelectedOperatorId);
         }
       }
     } finally {
@@ -624,7 +699,10 @@ function App() {
       return false;
     }
     setSelectedOperatorId(nextId);
-    setOffboard((current) => ({ ...current, operator_id: nextId }));
+    offboardForm.setValue("operator_id", nextId, {
+      shouldTouch: true,
+      shouldValidate: offboardForm.formState.submitCount > 0,
+    });
     return true;
   }
 
@@ -652,29 +730,26 @@ function App() {
     editor.chain().focus().insertContent(`@${targetOperatorId} `).run();
   }
 
-  async function handleOnboardSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  const handleOnboardSubmit = onboardForm.handleSubmit(async (values) => {
     await executeAction("Operator onboarding result", async () => {
-      const payload = (await backend.create_operator(onboard)) as ActionPayload;
-      if (payload.status === "ok" && !onboard.dry_run) {
-        setOnboard((current) => ({
-          ...initialOnboardState,
-          role: current.role,
-        }));
+      const payload = (await backend.create_operator(values)) as ActionPayload;
+      if (payload.status === "ok" && !values.dry_run) {
+        onboardForm.reset({
+          ...onboardFormDefaults,
+          role: values.role,
+        });
       }
       return payload;
     });
-  }
+  });
 
-  async function handleOffboardSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    await executeAction("Operator off-boarding result", async () => backend.offboard_operator(offboard) as Promise<ActionPayload>);
-  }
+  const handleOffboardSubmit = offboardForm.handleSubmit(async (values) => {
+    await executeAction("Operator off-boarding result", async () => backend.offboard_operator(values) as Promise<ActionPayload>);
+  });
 
-  async function handleSyncSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    await executeAction("Operator roster reconciliation result", async () => backend.sync_operators(syncForm) as Promise<ActionPayload>);
-  }
+  const handleSyncSubmit = syncForm.handleSubmit(async (values) => {
+    await executeAction("Operator roster reconciliation result", async () => backend.sync_operators(values) as Promise<ActionPayload>);
+  });
 
   async function handleSaveNotes() {
     if (!selectedOperatorId) {
@@ -690,8 +765,9 @@ function App() {
         }) as Promise<ActionPayload>),
     );
   }
-
-  const sshRequired = onboard.role !== "viewer";
+  const onboardErrorCount = Object.keys(onboardForm.formState.errors).length;
+  const offboardErrorCount = Object.keys(offboardForm.formState.errors).length;
+  const syncErrorCount = Object.keys(syncForm.formState.errors).length;
 
   return (
     <div className="shell">
@@ -699,9 +775,9 @@ function App() {
         <div className="heroCard">
           <h1>Operator Access Admin</h1>
           <p>
-            Browser-first access control for ADR 0108. This console wraps the repo-managed onboarding,
-            off-boarding, inventory, roster reconciliation, and bounded rich notes workflows instead of
-            creating a second provisioning path.
+            Browser-first access control for ADR 0108. This console combines schema-first forms,
+            the data-dense AG Grid roster, task-specific guided tours, and bounded rich notes while
+            keeping every mutation on the same repo-managed backend path.
           </p>
         </div>
         <div className="heroStats">
@@ -979,181 +1055,297 @@ function App() {
 
         <aside className="sidebar">
           <div className="forms">
-            <form className="panel" onSubmit={handleOnboardSubmit} data-tour-target="onboard-form">
+            <form className="panel" onSubmit={handleOnboardSubmit} noValidate data-tour-target="onboard-form">
               <div className="panelHeader">
                 <div>
                   <h3>Onboard Operator</h3>
                   <p>Create a new human operator through the governed ADR 0108 workflow.</p>
                 </div>
               </div>
-              <div className="formGrid">
-                <div className="formField">
-                  <label>Name</label>
-                  <input value={onboard.name} onChange={(event) => setOnboard({ ...onboard, name: event.target.value })} required />
-                </div>
-                <div className="formField">
-                  <label>Email</label>
-                  <input
-                    type="email"
-                    value={onboard.email}
-                    onChange={(event) => setOnboard({ ...onboard, email: event.target.value })}
-                    required
-                  />
-                </div>
-                <div className="formField" data-tour-target="role-field">
-                  <label>Role</label>
-                  <select
-                    value={onboard.role}
-                    onChange={(event) => setOnboard({ ...onboard, role: event.target.value as OnboardFormState["role"] })}
-                  >
-                    <option value="admin">admin</option>
-                    <option value="operator">operator</option>
-                    <option value="viewer">viewer</option>
-                  </select>
-                </div>
-                <div className="formField">
-                  <label>Operator ID</label>
-                  <input
-                    value={onboard.operator_id}
-                    onChange={(event) => setOnboard({ ...onboard, operator_id: event.target.value })}
-                    placeholder="optional slug"
-                  />
-                </div>
-                <div className="formField">
-                  <label>Keycloak Username</label>
-                  <input
-                    value={onboard.keycloak_username}
-                    onChange={(event) => setOnboard({ ...onboard, keycloak_username: event.target.value })}
-                    placeholder="optional username override"
-                  />
-                </div>
-                <div className="formField">
-                  <label>Tailscale Login Email</label>
-                  <input
-                    value={onboard.tailscale_login_email}
-                    onChange={(event) => setOnboard({ ...onboard, tailscale_login_email: event.target.value })}
-                    placeholder="optional override"
-                  />
-                </div>
-                <div className="formField formFieldWide" data-tour-target="ssh-key-field">
-                  <label>SSH Public Key {sshRequired ? "(required)" : "(optional for viewer)"}</label>
-                  <textarea
-                    value={onboard.ssh_key}
-                    onChange={(event) => setOnboard({ ...onboard, ssh_key: event.target.value })}
-                    required={sshRequired}
-                    placeholder="ssh-ed25519 AAAA..."
-                  />
-                </div>
-                <div className="formField formFieldWide">
-                  <label>Tailscale Device Name</label>
-                  <input
-                    value={onboard.tailscale_device_name}
-                    onChange={(event) => setOnboard({ ...onboard, tailscale_device_name: event.target.value })}
-                    placeholder="optional device label"
-                  />
-                </div>
-              </div>
-              <label className="checkboxRow">
-                <input
-                  type="checkbox"
-                  checked={onboard.dry_run}
-                  onChange={(event) => setOnboard({ ...onboard, dry_run: event.target.checked })}
+              <fieldset className="formBody" disabled={actionLoading}>
+                <FormStatus
+                  isSubmitting={onboardForm.formState.isSubmitting}
+                  isDirty={onboardForm.formState.isDirty}
+                  submitCount={onboardForm.formState.submitCount}
+                  errorCount={onboardErrorCount}
+                  idleMessage="Schema validation mirrors the governed onboarding payload."
                 />
-                Dry run only
-              </label>
-              <div className="toolbar">
-                <button className="button" type="submit" disabled={actionLoading}>
-                  {actionLoading ? "Running…" : "Create Operator"}
-                </button>
-              </div>
+                <div className="formGrid">
+                  <FieldShell
+                    htmlFor="onboard-name"
+                    label="Name"
+                    hint="Full human-readable operator name."
+                    error={onboardForm.formState.errors.name?.message}
+                    touched={onboardForm.formState.touchedFields.name}
+                    required
+                  >
+                    <input
+                      id="onboard-name"
+                      {...onboardForm.register("name")}
+                      aria-invalid={Boolean(onboardForm.formState.errors.name)}
+                    />
+                  </FieldShell>
+
+                  <FieldShell
+                    htmlFor="onboard-email"
+                    label="Email"
+                    hint="Used for the operator roster and login workflows."
+                    error={onboardForm.formState.errors.email?.message}
+                    touched={onboardForm.formState.touchedFields.email}
+                    required
+                  >
+                    <input
+                      id="onboard-email"
+                      type="email"
+                      {...onboardForm.register("email")}
+                      aria-invalid={Boolean(onboardForm.formState.errors.email)}
+                    />
+                  </FieldShell>
+
+                  <FieldShell
+                    htmlFor="onboard-role"
+                    label="Role"
+                    hint="Controls SSH and privilege expectations."
+                    error={onboardForm.formState.errors.role?.message}
+                    touched={onboardForm.formState.touchedFields.role}
+                    required
+                    tourTarget="role-field"
+                  >
+                    <select
+                      id="onboard-role"
+                      {...onboardForm.register("role")}
+                      aria-invalid={Boolean(onboardForm.formState.errors.role)}
+                    >
+                      <option value="admin">admin</option>
+                      <option value="operator">operator</option>
+                      <option value="viewer">viewer</option>
+                    </select>
+                  </FieldShell>
+
+                  <FieldShell
+                    htmlFor="onboard-operator-id"
+                    label="Operator ID"
+                    hint="Optional slug override such as alice-example."
+                    error={onboardForm.formState.errors.operator_id?.message}
+                    touched={onboardForm.formState.touchedFields.operator_id}
+                  >
+                    <input
+                      id="onboard-operator-id"
+                      {...onboardForm.register("operator_id")}
+                      aria-invalid={Boolean(onboardForm.formState.errors.operator_id)}
+                      placeholder="optional slug"
+                    />
+                  </FieldShell>
+
+                  <FieldShell
+                    htmlFor="onboard-keycloak-username"
+                    label="Keycloak Username"
+                    hint="Optional username override for Keycloak."
+                    error={onboardForm.formState.errors.keycloak_username?.message}
+                    touched={onboardForm.formState.touchedFields.keycloak_username}
+                  >
+                    <input
+                      id="onboard-keycloak-username"
+                      {...onboardForm.register("keycloak_username")}
+                      aria-invalid={Boolean(onboardForm.formState.errors.keycloak_username)}
+                      placeholder="optional username override"
+                    />
+                  </FieldShell>
+
+                  <FieldShell
+                    htmlFor="onboard-tailscale-login-email"
+                    label="Tailscale Login Email"
+                    hint="Optional override for the Tailscale identity."
+                    error={onboardForm.formState.errors.tailscale_login_email?.message}
+                    touched={onboardForm.formState.touchedFields.tailscale_login_email}
+                  >
+                    <input
+                      id="onboard-tailscale-login-email"
+                      type="email"
+                      {...onboardForm.register("tailscale_login_email")}
+                      aria-invalid={Boolean(onboardForm.formState.errors.tailscale_login_email)}
+                      placeholder="optional override"
+                    />
+                  </FieldShell>
+
+                  <FieldShell
+                    htmlFor="onboard-ssh-key"
+                    label="SSH Public Key"
+                    hint={sshRequired ? "Admin and operator accounts require a public key." : "Optional for viewer accounts."}
+                    error={onboardForm.formState.errors.ssh_key?.message}
+                    touched={onboardForm.formState.touchedFields.ssh_key}
+                    required={sshRequired}
+                    stretch
+                    tourTarget="ssh-key-field"
+                  >
+                    <textarea
+                      id="onboard-ssh-key"
+                      {...onboardForm.register("ssh_key")}
+                      aria-invalid={Boolean(onboardForm.formState.errors.ssh_key)}
+                      placeholder="ssh-ed25519 AAAA..."
+                    />
+                  </FieldShell>
+
+                  <FieldShell
+                    htmlFor="onboard-device-name"
+                    label="Tailscale Device Name"
+                    hint="Optional label for the expected device."
+                    error={onboardForm.formState.errors.tailscale_device_name?.message}
+                    touched={onboardForm.formState.touchedFields.tailscale_device_name}
+                    stretch
+                  >
+                    <input
+                      id="onboard-device-name"
+                      {...onboardForm.register("tailscale_device_name")}
+                      aria-invalid={Boolean(onboardForm.formState.errors.tailscale_device_name)}
+                      placeholder="optional device label"
+                    />
+                  </FieldShell>
+                </div>
+                <label className="checkboxRow">
+                  <input type="checkbox" {...onboardForm.register("dry_run")} />
+                  Dry run only
+                </label>
+                <div className="toolbar">
+                  <button className="button" type="submit" disabled={actionLoading}>
+                    {actionLoading ? "Running…" : "Create Operator"}
+                  </button>
+                </div>
+              </fieldset>
             </form>
 
-            <form className="panel" onSubmit={handleOffboardSubmit} data-tour-target="offboard-form">
+            <form className="panel" onSubmit={handleOffboardSubmit} noValidate data-tour-target="offboard-form">
               <div className="panelHeader">
                 <div>
                   <h3>Off-board Operator</h3>
                   <p>Disable one operator through the same governed backend used by the CLI path.</p>
                 </div>
               </div>
-              <div className="formGrid">
-                <div className="formField formFieldWide">
-                  <label>Operator</label>
-                  <select
-                    value={offboard.operator_id}
-                    onChange={(event) => {
-                      const nextId = event.target.value;
-                      void selectOperator(nextId);
-                    }}
-                    required
-                  >
-                    <option value="">Select operator</option>
-                    {operators.map((operator) => (
-                      <option key={operator.id} value={operator.id}>
-                        {operator.name} ({operator.role}, {operator.status})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="formField formFieldWide">
-                  <label>Reason</label>
-                  <textarea
-                    value={offboard.reason}
-                    onChange={(event) => setOffboard({ ...offboard, reason: event.target.value })}
-                    placeholder="optional audit note"
-                  />
-                </div>
-              </div>
-              <label className="checkboxRow">
-                <input
-                  type="checkbox"
-                  checked={offboard.dry_run}
-                  onChange={(event) => setOffboard({ ...offboard, dry_run: event.target.checked })}
+              <fieldset className="formBody" disabled={actionLoading}>
+                <FormStatus
+                  isSubmitting={offboardForm.formState.isSubmitting}
+                  isDirty={offboardForm.formState.isDirty}
+                  submitCount={offboardForm.formState.submitCount}
+                  errorCount={offboardErrorCount}
+                  idleMessage="Schema validation keeps the off-boarding payload aligned with the backend."
                 />
-                Dry run only
-              </label>
-              <div className="toolbar">
-                <button className="buttonDanger" type="submit" disabled={actionLoading || !offboard.operator_id}>
-                  {actionLoading ? "Running…" : "Off-board Operator"}
-                </button>
-              </div>
+                <div className="formGrid">
+                  <FieldShell
+                    htmlFor="offboard-operator"
+                    label="Operator"
+                    hint="Pick one operator from the live roster."
+                    error={offboardForm.formState.errors.operator_id?.message}
+                    touched={offboardForm.formState.touchedFields.operator_id}
+                    required
+                    stretch
+                  >
+                    <Controller
+                      name="operator_id"
+                      control={offboardForm.control}
+                      render={({ field }) => (
+                        <select
+                          id="offboard-operator"
+                          name={field.name}
+                          ref={field.ref}
+                          value={field.value}
+                          onBlur={field.onBlur}
+                          onChange={(event) => {
+                            const nextId = event.target.value;
+                            if (selectOperator(nextId)) {
+                              field.onChange(nextId);
+                              return;
+                            }
+                            field.onChange(selectedOperatorId);
+                          }}
+                          aria-invalid={Boolean(offboardForm.formState.errors.operator_id)}
+                        >
+                          <option value="">Select operator</option>
+                          {operators.map((operator) => (
+                            <option key={operator.id} value={operator.id}>
+                              {operator.name} ({operator.role}, {operator.status})
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    />
+                  </FieldShell>
+
+                  <FieldShell
+                    htmlFor="offboard-reason"
+                    label="Reason"
+                    hint="Optional audit note for the off-boarding event."
+                    error={offboardForm.formState.errors.reason?.message}
+                    touched={offboardForm.formState.touchedFields.reason}
+                    stretch
+                  >
+                    <textarea
+                      id="offboard-reason"
+                      {...offboardForm.register("reason")}
+                      aria-invalid={Boolean(offboardForm.formState.errors.reason)}
+                      placeholder="optional audit note"
+                    />
+                  </FieldShell>
+                </div>
+                <label className="checkboxRow">
+                  <input type="checkbox" {...offboardForm.register("dry_run")} />
+                  Dry run only
+                </label>
+                <div className="toolbar">
+                  <button className="buttonDanger" type="submit" disabled={actionLoading || !offboardOperatorId}>
+                    {actionLoading ? "Running…" : "Off-board Operator"}
+                  </button>
+                </div>
+              </fieldset>
             </form>
 
-            <form className="panel" onSubmit={handleSyncSubmit}>
+            <form className="panel" onSubmit={handleSyncSubmit} noValidate>
               <div className="panelHeader">
                 <div>
                   <h3>Reconcile Roster</h3>
                   <p>Force the live identity systems to match the merged operator roster.</p>
                 </div>
               </div>
-              <div className="formGrid">
-                <div className="formField formFieldWide">
-                  <label>Scope</label>
-                  <select
-                    value={syncForm.operator_id}
-                    onChange={(event) => setSyncForm({ ...syncForm, operator_id: event.target.value })}
-                  >
-                    <option value="">All operators</option>
-                    {operators.map((operator) => (
-                      <option key={operator.id} value={operator.id}>
-                        {operator.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <label className="checkboxRow">
-                <input
-                  type="checkbox"
-                  checked={syncForm.dry_run}
-                  onChange={(event) => setSyncForm({ ...syncForm, dry_run: event.target.checked })}
+              <fieldset className="formBody" disabled={actionLoading}>
+                <FormStatus
+                  isSubmitting={syncForm.formState.isSubmitting}
+                  isDirty={syncForm.formState.isDirty}
+                  submitCount={syncForm.formState.submitCount}
+                  errorCount={syncErrorCount}
+                  idleMessage="Schema validation keeps reconciliation scope explicit before submit."
                 />
-                Dry run only
-              </label>
-              <div className="toolbar">
-                <button className="buttonGhost" type="submit" disabled={actionLoading}>
-                  {actionLoading ? "Running…" : "Reconcile"}
-                </button>
-              </div>
+                <div className="formGrid">
+                  <FieldShell
+                    htmlFor="sync-operator"
+                    label="Scope"
+                    hint="Leave blank to reconcile the full operator roster."
+                    error={syncForm.formState.errors.operator_id?.message}
+                    touched={syncForm.formState.touchedFields.operator_id}
+                    stretch
+                  >
+                    <select
+                      id="sync-operator"
+                      {...syncForm.register("operator_id")}
+                      aria-invalid={Boolean(syncForm.formState.errors.operator_id)}
+                    >
+                      <option value="">All operators</option>
+                      {operators.map((operator) => (
+                        <option key={operator.id} value={operator.id}>
+                          {operator.name}
+                        </option>
+                      ))}
+                    </select>
+                  </FieldShell>
+                </div>
+                <label className="checkboxRow">
+                  <input type="checkbox" {...syncForm.register("dry_run")} />
+                  Dry run only
+                </label>
+                <div className="toolbar">
+                  <button className="buttonGhost" type="submit" disabled={actionLoading}>
+                    {actionLoading ? "Running…" : "Reconcile"}
+                  </button>
+                </div>
+              </fieldset>
             </form>
           </div>
 
