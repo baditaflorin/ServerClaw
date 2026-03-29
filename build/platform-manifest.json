@@ -245,6 +245,18 @@
         "primary_url": "https://mail.lv3.org",
         "last_live_apply": "2026-03-29T00:00:00Z"
       },
+      "matrix_synapse": {
+        "service_name": "Matrix Synapse",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://matrix.lv3.org",
+        "last_live_apply": "2026-03-29T00:00:00Z",
+        "slo_status": "unknown"
+      },
       "mattermost": {
         "service_name": "Mattermost",
         "status": "healthy",
@@ -1295,6 +1307,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-mail-platform.md"
+      },
+      {
+        "id": "converge-matrix-synapse",
+        "description": "Converge Matrix Synapse on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish matrix.lv3.org through the shared edge, and expose the private controller proxy on the Proxmox host.",
+        "tags": [
+          "converge-matrix-synapse",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 350,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 4,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-matrix-synapse.md"
       },
       {
         "id": "converge-mattermost",
@@ -3592,6 +3630,16 @@
         "path": "docs/runbooks/configure-mail-platform.md",
         "workflow_ids": [
           "converge-mail-platform"
+        ]
+      },
+      {
+        "id": "configure-matrix-synapse",
+        "title": "Configure Matrix Synapse",
+        "agent_trust_required": "T3",
+        "steps": 9,
+        "path": "docs/runbooks/configure-matrix-synapse.md",
+        "workflow_ids": [
+          "converge-matrix-synapse"
         ]
       },
       {
