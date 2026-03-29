@@ -4189,7 +4189,7 @@ adr_index:
   - adr: '0244'
     title: Runtime Assurance Matrix Per Service And Environment
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4201,6 +4201,7 @@ adr_index:
       - environment
     summary: We will govern runtime assurance through a service-by-environment assurance
     filename: 0244-runtime-assurance-matrix-per-service-and-environment.md
+    implemented_version: 0.130.44
   - adr: '0245'
     title: Declared-To-Live Service Attestation
     status: Accepted
