@@ -150,6 +150,12 @@ windmill_default_operations_surface_script_paths:
   - f/lv3/packer_template_rebuild
   - f/lv3/fixture_expiry_reaper
   - f/lv3/maintenance_window
+windmill_runtime_api_wait_retries: 18
+windmill_runtime_api_wait_delay_seconds: 5
+windmill_worker_container_wait_retries: 48
+windmill_worker_container_wait_delay_seconds: 5
+windmill_worker_registration_retries: 18
+windmill_worker_registration_delay_seconds: 5
 windmill_seed_job_timeout_seconds: 120
 windmill_worker_checkout_repo_root_local_dir: >-
   {{

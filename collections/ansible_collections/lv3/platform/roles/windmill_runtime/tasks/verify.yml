@@ -5,8 +5,8 @@
     method: GET
     status_code: 200
   register: windmill_verify_version
-  retries: 18
-  delay: 5
+  retries: "{{ windmill_runtime_api_wait_retries }}"
+  delay: "{{ windmill_runtime_api_wait_delay_seconds }}"
   until: windmill_verify_version.status == 200
   changed_when: false
 

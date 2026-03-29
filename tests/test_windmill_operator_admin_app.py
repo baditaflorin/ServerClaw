@@ -114,6 +114,12 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_runtime_api_base_url"] == "http://127.0.0.1:{{ windmill_server_port }}"
     assert defaults["windmill_worker_network_mode"] == "{{ windmill_server_network_mode }}"
     assert "127.0.0.1" in defaults["windmill_worker_api_base_url"]
+    assert defaults["windmill_runtime_api_wait_retries"] == 18
+    assert defaults["windmill_runtime_api_wait_delay_seconds"] == 5
+    assert defaults["windmill_worker_container_wait_retries"] == 48
+    assert defaults["windmill_worker_container_wait_delay_seconds"] == 5
+    assert defaults["windmill_worker_registration_retries"] == 18
+    assert defaults["windmill_worker_registration_delay_seconds"] == 5
     assert defaults["windmill_seed_job_timeout_seconds"] == 120
     mutable_directories = {frozenset(item.items()) for item in defaults["windmill_worker_repo_mutable_directories"]}
     assert {
@@ -676,6 +682,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "rsync" in tasks
     assert "scripts/windmill_run_wait_result.py" in tasks
     assert "Wait for the Windmill worker containers to be running" in tasks
+    assert 'retries: "{{ windmill_worker_container_wait_retries }}"' in tasks
+    assert 'delay: "{{ windmill_worker_container_wait_delay_seconds }}"' in tasks
     assert "--payload-json" in tasks
     assert "--timeout {{ windmill_seed_job_timeout_seconds }}" in tasks
     assert "' not found' in (windmill_up.stderr | default(''))" in tasks
@@ -686,6 +694,10 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Wait for Windmill workers to register" in wait_for_workers_tasks
     assert "/api/workers/list" in wait_for_workers_tasks
     assert "windmill_registered_workers" in wait_for_workers_tasks
+    assert 'retries: "{{ windmill_runtime_api_wait_retries }}"' in verify_tasks
+    assert 'delay: "{{ windmill_runtime_api_wait_delay_seconds }}"' in verify_tasks
+    assert 'retries: "{{ windmill_worker_registration_retries }}"' in wait_for_workers_tasks
+    assert 'delay: "{{ windmill_worker_registration_delay_seconds }}"' in wait_for_workers_tasks
     assert 'WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"' in tasks
     assert 'WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"' in verify_tasks
     assert "--path {{ windmill_validation_gate_status_script_path | quote }}" in verify_tasks

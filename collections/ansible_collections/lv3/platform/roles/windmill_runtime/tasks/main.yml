@@ -1309,8 +1309,8 @@
     method: GET
     status_code: 200
   register: windmill_version
-  retries: 18
-  delay: 5
+  retries: "{{ windmill_runtime_api_wait_retries }}"
+  delay: "{{ windmill_runtime_api_wait_delay_seconds }}"
   until: windmill_version.status == 200
   changed_when: false
 
@@ -1326,8 +1326,8 @@
   loop_control:
     label: "{{ item }}"
   register: windmill_worker_container_wait
-  retries: 18
-  delay: 5
+  retries: "{{ windmill_worker_container_wait_retries }}"
+  delay: "{{ windmill_worker_container_wait_delay_seconds }}"
   until: windmill_worker_container_wait.rc == 0
   changed_when: false
 
@@ -1378,8 +1378,8 @@
   args:
     executable: /bin/bash
   register: windmill_runtime_env_contract_verify
-  retries: 18
-  delay: 5
+  retries: "{{ windmill_runtime_api_wait_retries }}"
+  delay: "{{ windmill_runtime_api_wait_delay_seconds }}"
   until: windmill_runtime_env_contract_verify.rc == 0
   changed_when: false
 
@@ -1389,8 +1389,8 @@
     method: GET
     status_code: 200
   register: windmill_version_post_contract
-  retries: 18
-  delay: 5
+  retries: "{{ windmill_runtime_api_wait_retries }}"
+  delay: "{{ windmill_runtime_api_wait_delay_seconds }}"
   until: windmill_version_post_contract.status == 200
   changed_when: false
 
