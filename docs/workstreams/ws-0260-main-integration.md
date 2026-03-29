@@ -39,8 +39,13 @@ branch-local proof authoritative on `main`.
 - `playbooks/nextcloud.yml`
 - `playbooks/services/nextcloud.yml`
 - `collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml`
+- `collections/ansible_collections/lv3/platform/roles/control_plane_recovery/defaults/main.yml`
+- `collections/ansible_collections/lv3/platform/roles/rag_context_runtime/tasks/main.yml`
+- `collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml`
 - `collections/ansible_collections/lv3/platform/roles/nextcloud_postgres/**`
 - `collections/ansible_collections/lv3/platform/roles/nextcloud_runtime/**`
+- `config/prometheus/file_sd/https_tls_targets.yml`
+- `config/prometheus/rules/https_tls_alerts.yml`
 - `tests/test_nextcloud_playbook.py`
 - `tests/test_nextcloud_runtime_role.py`
 - `tests/test_openbao_compose_env_helper.py`

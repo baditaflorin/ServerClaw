@@ -477,6 +477,9 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/docker_runtime/meta/argument_specs.yml
       - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/verify.yml
+      - collections/ansible_collections/lv3/platform/roles/control_plane_recovery/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/rag_context_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
       - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/nextcloud_postgres/**
       - collections/ansible_collections/lv3/platform/roles/nextcloud_runtime/**
@@ -494,7 +497,9 @@ workstreams:
       - config/grafana/dashboards/slo-overview.json
       - config/health-probe-catalog.json
       - config/image-catalog.json
+      - config/prometheus/file_sd/https_tls_targets.yml
       - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/https_tls_alerts.yml
       - config/prometheus/rules/slo_alerts.yml
       - config/prometheus/rules/slo_rules.yml
       - config/replaceability-review-catalog.json
@@ -587,6 +592,9 @@ workstreams:
             - collections/ansible_collections/lv3/platform/roles/docker_runtime/meta/argument_specs.yml
             - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
             - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/verify.yml
+            - collections/ansible_collections/lv3/platform/roles/control_plane_recovery/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/rag_context_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
             - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml
             - collections/ansible_collections/lv3/platform/roles/nextcloud_postgres/**
             - collections/ansible_collections/lv3/platform/roles/nextcloud_runtime/**
@@ -604,7 +612,9 @@ workstreams:
             - config/grafana/dashboards/slo-overview.json
             - config/health-probe-catalog.json
             - config/image-catalog.json
+            - config/prometheus/file_sd/https_tls_targets.yml
             - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/https_tls_alerts.yml
             - config/prometheus/rules/slo_alerts.yml
             - config/prometheus/rules/slo_rules.yml
             - config/replaceability-review-catalog.json
