@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0268](../adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md)
 - Title: Add bootstrap manifests for generated artifacts and controller-local inputs, then verify the fresh-worktree apply path end to end
-- Status: in_progress
+- Status: live_applied
 - Implemented In Repo Version: N/A
-- Live Applied In Platform Version: N/A
-- Implemented On: N/A
-- Live Applied On: N/A
+- Live Applied In Platform Version: 0.130.54
+- Implemented On: 2026-03-29
+- Live Applied On: 2026-03-29
 - Branch: `codex/ws-0268-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0268-live-apply`
 - Owner: codex
@@ -82,6 +82,12 @@
 - fresh worktrees no longer fail late when shared edge publication needs generated portals
 - the generic `live-apply-*` entrypoints invoke the bootstrap preflight before mutating anything
 - ADR 0268 metadata records repository implementation plus live-apply evidence, while merge-only release files remain deferred until integration
+
+## Remaining For Merge-To-Main
+
+- merge the committed workstream branch onto the latest `origin/main`
+- update the protected integration files `VERSION`, `changelog.md`, `README.md`, and `versions/stack.yaml`
+- replay the merged-main production apply and record the canonical mainline receipt before pushing `origin/main`
 
 ## Notes For The Next Assistant
 

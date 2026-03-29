@@ -96,7 +96,7 @@ workstreams:
   - id: ws-0268-live-apply
     adr: "0268"
     title: Fresh-worktree bootstrap manifests live apply
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0268-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0268-live-apply
@@ -184,8 +184,8 @@ workstreams:
             - config/correction-loops.json
           mode: shared_contract
           contract: self-correction-loop-v1
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
     canonical_truth:
       changelog_entry: integrated ADR 0268 by adding machine-readable fresh-worktree bootstrap manifests, automatic generated-artifact repair, and governed live-apply preflight wiring so isolated worktrees stop failing mid-run on missing local inputs
       release_bump: patch
