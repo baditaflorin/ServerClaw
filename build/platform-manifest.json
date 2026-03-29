@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.88",
+  "repo_version": "0.177.87",
   "platform_version": "0.130.59",
-  "generated_at": "2026-03-29T22:16:35Z",
-  "next_refresh_at": "2026-03-29T23:16:35Z",
+  "generated_at": "2026-03-29T20:46:28Z",
+  "next_refresh_at": "2026-03-29T21:46:28Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -37,7 +37,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://api.lv3.org",
-        "last_live_apply": "2026-03-30T00:00:00Z"
+        "last_live_apply": "2026-03-29T00:00:00Z"
       },
       "backup_pbs": {
         "service_name": "Proxmox Backup Server",
@@ -70,7 +70,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://coolify.lv3.org",
-        "last_live_apply": "2026-03-30T00:00:00Z"
+        "last_live_apply": "2026-03-29T00:00:00Z"
       },
       "coolify_apps": {
         "service_name": "Coolify Apps Ingress",
@@ -81,7 +81,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://apps.lv3.org",
-        "last_live_apply": "2026-03-30T00:00:00Z"
+        "last_live_apply": "2026-03-29T00:00:00Z"
       },
       "dify": {
         "service_name": "Dify",
@@ -92,7 +92,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://agents.lv3.org",
-        "last_live_apply": "2026-03-30T00:00:00Z"
+        "last_live_apply": "2026-03-29T00:00:00Z"
       },
       "docker_build": {
         "service_name": "Docker Build VM",
@@ -148,7 +148,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://draw.lv3.org",
-        "last_live_apply": "2026-03-30T00:00:00Z",
+        "last_live_apply": "2026-03-29T00:00:00Z",
         "slo_status": "unknown"
       },
       "gitea": {
@@ -160,7 +160,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:3009",
-        "last_live_apply": "2026-03-30T00:00:00Z",
+        "last_live_apply": "2026-03-29T00:00:00Z",
         "slo_status": "unknown"
       },
       "grafana": {
@@ -196,7 +196,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://headscale.lv3.org",
-        "last_live_apply": "2026-03-30T00:00:00Z"
+        "last_live_apply": "2026-03-29T00:00:00Z"
       },
       "homepage": {
         "service_name": "Homepage",
@@ -207,7 +207,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://home.lv3.org",
-        "last_live_apply": "2026-03-30T00:00:00Z",
+        "last_live_apply": "2026-03-29T00:00:00Z",
         "slo_status": "unknown"
       },
       "keycloak": {
@@ -266,7 +266,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8066",
-        "last_live_apply": "2026-03-30T00:00:00Z"
+        "last_live_apply": "2026-03-29T00:00:00Z"
       },
       "n8n": {
         "service_name": "n8n",
@@ -323,7 +323,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:2586",
-        "last_live_apply": "2026-03-30T00:00:00Z"
+        "last_live_apply": "2026-03-29T00:00:00Z"
       },
       "ntopng": {
         "service_name": "ntopng",
@@ -334,7 +334,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:3001",
-        "last_live_apply": "2026-03-30T00:00:00Z"
+        "last_live_apply": "2026-03-29T00:00:00Z"
       },
       "ollama": {
         "service_name": "Ollama",
@@ -345,7 +345,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:11434",
-        "last_live_apply": "2026-03-30T00:00:00Z"
+        "last_live_apply": "2026-03-29T00:00:00Z"
       },
       "open_webui": {
         "service_name": "Open WebUI",
@@ -402,7 +402,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://tasks.lv3.org",
-        "last_live_apply": "2026-03-30T00:00:00Z",
+        "last_live_apply": "2026-03-29T00:00:00Z",
         "slo_status": "unknown"
       },
       "platform_context_api": {
@@ -414,7 +414,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8010",
-        "last_live_apply": "2026-03-30T00:00:00Z",
+        "last_live_apply": "2026-03-29T00:00:00Z",
         "slo_status": "unknown"
       },
       "portainer": {
@@ -448,7 +448,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://proxmox.lv3.org",
-        "last_live_apply": "2026-03-30T00:00:00Z"
+        "last_live_apply": "2026-03-29T00:00:00Z"
       },
       "realtime": {
         "service_name": "Netdata Realtime Metrics",
@@ -494,7 +494,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://status.lv3.org",
-        "last_live_apply": "2026-03-30T00:00:00Z",
+        "last_live_apply": "2026-03-29T00:00:00Z",
         "slo_status": "unknown"
       },
       "step_ca": {
@@ -506,7 +506,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9443",
-        "last_live_apply": "2026-03-30T00:00:00Z"
+        "last_live_apply": "2026-03-29T00:00:00Z"
       },
       "uptime_kuma": {
         "service_name": "Uptime Kuma",
@@ -529,7 +529,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://vault.lv3.org",
-        "last_live_apply": "2026-03-30T00:00:00Z",
+        "last_live_apply": "2026-03-29T00:00:00Z",
         "slo_status": "unknown"
       },
       "windmill": {
@@ -541,7 +541,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8005",
-        "last_live_apply": "2026-03-30T00:00:00Z",
+        "last_live_apply": "2026-03-29T00:00:00Z",
         "slo_status": "unknown"
       }
     }
@@ -1957,32 +1957,6 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/environment-promotion-pipeline.md"
-      },
-      {
-        "id": "deploy-repo-profile",
-        "description": "Deploy one named repo-deploy profile through the governed Coolify lane without restating raw repository, domain, and compose arguments.",
-        "tags": [
-          "deploy-repo-profile",
-          "external-live",
-          "mutation",
-          "preflight",
-          "validated"
-        ],
-        "risk_class": "HIGH",
-        "automation_eligible": true,
-        "agent_trust_required": "T3",
-        "execution_class": "mutation",
-        "live_impact": "external_live",
-        "budget": {
-          "max_duration_seconds": 1800,
-          "max_steps": 250,
-          "max_concurrent_instances": 1,
-          "max_touched_hosts": 1,
-          "max_restarts": 0,
-          "max_rollback_depth": 1,
-          "escalation_action": "notify_and_abort"
-        },
-        "runbook": "docs/runbooks/configure-coolify.md"
       },
       {
         "id": "deploy-uptime-kuma",
@@ -3540,8 +3514,7 @@
         "path": "docs/runbooks/configure-coolify.md",
         "workflow_ids": [
           "converge-coolify",
-          "coolify-manage",
-          "deploy-repo-profile"
+          "coolify-manage"
         ]
       },
       {
@@ -4439,10 +4412,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.87",
+    "last_version": "0.177.86",
     "deployed_at": "2026-03-29",
-    "summary": "extends ADR 0224 by adding named repo-deploy profiles, a governed deploy-repo-profile operator path, and the verified 2026-03-30 education_wemeshup upstream refresh so production can be updated from upstream main without retyping raw Coolify arguments",
-    "release_notes_url": "docs/release-notes/0.177.88.md"
+    "summary": "records ADR 0251 exact-main durable verification on the latest realistic origin/main by marking the stage-scoped smoke suite and promotion-gate workflow fully live, preserving the live worker checkout, gate-status, runtime-assurance, and ops-portal verification on release 0.177.87 while the current verified platform baseline remains 0.130.59",
+    "release_notes_url": "docs/release-notes/0.177.87.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
