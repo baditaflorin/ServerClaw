@@ -1317,6 +1317,86 @@ workstreams:
         receipt truth while the live platform baseline remains 0.130.44
       release_bump: patch
       included_in_repo_version: 0.177.61
+  - id: ws-0235-live-apply
+    adr: "0235"
+    title: Live apply cross-application launcher and favorites in the interactive ops portal
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0235-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0235-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0235-live-apply.md
+    depends_on:
+      - adr-0093-interactive-ops-portal
+      - adr-0152-homepage
+      - adr-0209-use-case-services
+      - adr-0234-shared-human-app-shell-and-navigation-via-patternfly
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0235-live-apply.md
+      - docs/adr/0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/platform-operations-portal.md
+      - .config-locations.yaml
+      - config/service-capability-catalog.json
+      - config/workflow-catalog.json
+      - config/persona-catalog.json
+      - docs/schema/persona-catalog.schema.json
+      - scripts/ops_portal/app.py
+      - scripts/ops_portal/static/portal.css
+      - scripts/ops_portal/templates/base.html
+      - scripts/ops_portal/templates/index.html
+      - scripts/service_catalog.py
+      - scripts/validate_repository_data_models.py
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+      - tests/test_interactive_ops_portal.py
+      - tests/test_ops_portal_runtime_role.py
+      - receipts/live-applies/2026-03-29-adr-0235-cross-application-launcher-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0235_live_apply
+          paths:
+            - docs/workstreams/ws-0235-live-apply.md
+            - docs/adr/0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher.md
+            - docs/runbooks/platform-operations-portal.md
+            - .config-locations.yaml
+            - config/service-capability-catalog.json
+            - config/workflow-catalog.json
+            - config/persona-catalog.json
+            - docs/schema/persona-catalog.schema.json
+            - scripts/ops_portal/app.py
+            - scripts/ops_portal/static/portal.css
+            - scripts/ops_portal/templates/base.html
+            - scripts/ops_portal/templates/index.html
+            - scripts/service_catalog.py
+            - scripts/validate_repository_data_models.py
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/verify.yml
+            - tests/test_interactive_ops_portal.py
+            - tests/test_ops_portal_runtime_role.py
+            - receipts/live-applies/2026-03-29-adr-0235-cross-application-launcher-live-apply.json
+          mode: exclusive
+        - id: adr_index_contract
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0235 by adding a PatternFly-style
+        cross-application launcher to the interactive ops portal, with
+        catalog-backed purpose grouping, persona filtering, favorites, and
+        recent destinations across first-party browser surfaces
+      release_bump: patch
+      latest_receipts:
+        ops_portal: 2026-03-29-adr-0235-cross-application-launcher-live-apply
   - id: ws-0230-live-apply
     adr: "0230"
     title: Live apply policy decisions via Open Policy Agent and Conftest

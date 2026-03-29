@@ -1177,6 +1177,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0231-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0231-main-merge.md)
 - [Workstream WS-0233: Signed Release Bundles Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0233-live-apply.md)
 - [Workstream ws-0233-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0233-main-merge.md)
+- [Workstream WS-0235: Cross-Application Launcher Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0235-live-apply.md)
 - [Workstream WS-0239: Browser-Local Search Experience Via Pagefind Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0239-live-apply.md)
 - [Workstream ws-0239-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0239-main-merge.md)
 - [Workstream WS-0240: Operator Visualization Panels Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0240-live-apply.md)

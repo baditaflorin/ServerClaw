@@ -309,6 +309,18 @@ automation:
       - "config/windmill/scripts/: worker-side wrappers for selected workflows"
       - "docs/runbooks/command-catalog-and-approval-gates.md: operator procedure"
 
+  config/persona-catalog.json:
+    purpose: Canonical persona catalog for shared human launcher defaults and purpose-focused navigation
+    owner: human
+    format: JSON
+    use_for: Declaring the operator personas, their preferred launcher purposes, and their default favorites
+    update_when: Adding or changing shared persona defaults for first-party browser navigation
+    validation: "uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate"
+    related_files:
+      - "docs/schema/persona-catalog.schema.json: JSON Schema for launcher persona metadata"
+      - "scripts/ops_portal/app.py: interactive launcher rendering and session-backed preferences"
+      - "docs/runbooks/platform-operations-portal.md: operator usage of the shared launcher"
+
   playbooks/site.yml:
     purpose: Main site playbook — full host bootstrap from bare Debian 13
     owner: human  # maintained by platform team

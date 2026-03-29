@@ -1,9 +1,10 @@
 # ADR 0235: Cross-Application Launcher And Favorites Via PatternFly Application Launcher
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: N/A (pending merge-to-main)
+- Implemented In Platform Version: 0.130.45
+- Implemented On: 2026-03-29
 - Date: 2026-03-28
 
 ## Context

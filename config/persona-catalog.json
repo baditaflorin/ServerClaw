@@ -1,0 +1,78 @@
+{
+  "$schema": "docs/schema/persona-catalog.schema.json",
+  "schema_version": "1.0.0",
+  "personas": [
+    {
+      "id": "operator",
+      "name": "Operator",
+      "description": "Day-to-day runtime operations and service switching.",
+      "default": true,
+      "focus_purposes": [
+        "operate",
+        "observe",
+        "learn"
+      ],
+      "default_favorites": [
+        "service:ops_portal",
+        "service:homepage",
+        "service:grafana",
+        "service:docs_portal",
+        "workflow:gate-status"
+      ]
+    },
+    {
+      "id": "observer",
+      "name": "Observer",
+      "description": "Monitoring, drift, assurance, and incident triage.",
+      "default": false,
+      "focus_purposes": [
+        "observe",
+        "operate",
+        "administer"
+      ],
+      "default_favorites": [
+        "service:grafana",
+        "service:realtime",
+        "service:dozzle",
+        "service:status_page",
+        "workflow:continuous-drift-detection"
+      ]
+    },
+    {
+      "id": "planner",
+      "name": "Planner",
+      "description": "Planning work, reviewing docs, and coordinating changes.",
+      "default": false,
+      "focus_purposes": [
+        "plan",
+        "learn",
+        "operate"
+      ],
+      "default_favorites": [
+        "service:plane",
+        "service:outline",
+        "service:docs_portal",
+        "service:netbox",
+        "service:gitea"
+      ]
+    },
+    {
+      "id": "administrator",
+      "name": "Administrator",
+      "description": "Identity, secrets, control-plane, and platform administration.",
+      "default": false,
+      "focus_purposes": [
+        "administer",
+        "operate",
+        "observe"
+      ],
+      "default_favorites": [
+        "service:keycloak",
+        "service:openbao",
+        "service:proxmox_ui",
+        "service:portainer",
+        "workflow:converge-ops-portal"
+      ]
+    }
+  ]
+}

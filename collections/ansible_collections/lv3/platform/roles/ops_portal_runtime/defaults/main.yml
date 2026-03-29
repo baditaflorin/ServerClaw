@@ -60,6 +60,8 @@ ops_portal_file_sources:
     dest: "{{ ops_portal_data_dir }}/config/dependency-graph.json"
   - src: "{{ ops_portal_repo_root }}/config/service-capability-catalog.json"
     dest: "{{ ops_portal_data_dir }}/config/service-capability-catalog.json"
+  - src: "{{ ops_portal_repo_root }}/config/persona-catalog.json"
+    dest: "{{ ops_portal_data_dir }}/config/persona-catalog.json"
   - src: "{{ ops_portal_repo_root }}/config/subdomain-exposure-registry.json"
     dest: "{{ ops_portal_data_dir }}/config/subdomain-exposure-registry.json"
   - src: "{{ ops_portal_repo_root }}/config/workflow-catalog.json"

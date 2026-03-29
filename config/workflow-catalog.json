@@ -156,6 +156,19 @@
         "make gate-status",
         "python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server"
       ],
+      "human_navigation": {
+        "launcher": {
+          "enabled": true,
+          "label": "Validation Gate Status",
+          "description": "Open the safe validation status path in the shared runbook launcher.",
+          "purpose": "observe",
+          "personas": [
+            "operator",
+            "observer"
+          ],
+          "href": "/#runbooks"
+        }
+      },
       "execution_class": "diagnostic",
       "budget": {
         "max_duration_seconds": 900,
@@ -303,6 +316,19 @@
         "python3 -m pytest tests/test_fault_injection.py tests/test_fault_injection_repo_surfaces.py tests/test_fault_injection_windmill.py tests/test_windmill_operator_admin_app.py -q",
         "python3 config/windmill/scripts/fault-injection.py --repo-path /srv/proxmox_florin_server --scenario-names fault:keycloak-unavailable --dry-run"
       ],
+      "human_navigation": {
+        "launcher": {
+          "enabled": true,
+          "label": "Fault Injection",
+          "description": "Jump to the governed resilience drill path in the ops portal runbook launcher.",
+          "purpose": "administer",
+          "personas": [
+            "administrator",
+            "observer"
+          ],
+          "href": "/#runbooks"
+        }
+      },
       "execution_class": "diagnostic",
       "budget": {
         "max_duration_seconds": 1800,
@@ -357,6 +383,19 @@
         "python3 -m pytest tests/test_network_impairment_matrix.py tests/test_network_impairment_matrix_repo_surfaces.py tests/test_network_impairment_matrix_windmill.py -q",
         "python3 config/windmill/scripts/network-impairment-matrix.py --repo-path /srv/proxmox_florin_server --target-class staging"
       ],
+      "human_navigation": {
+        "launcher": {
+          "enabled": true,
+          "label": "Network Impairment Matrix",
+          "description": "Open the staged degradation planning and rehearsal path from the shared shell.",
+          "purpose": "plan",
+          "personas": [
+            "planner",
+            "operator"
+          ],
+          "href": "/#runbooks"
+        }
+      },
       "execution_class": "diagnostic",
       "budget": {
         "max_duration_seconds": 600,
@@ -1751,6 +1790,19 @@
         "echo '' | python3 scripts/parse_ansible_drift.py",
         "python3 scripts/drift_detector.py --help"
       ],
+      "human_navigation": {
+        "launcher": {
+          "enabled": true,
+          "label": "Drift Status",
+          "description": "Jump directly to the latest multi-source drift view in the interactive ops portal.",
+          "purpose": "observe",
+          "personas": [
+            "observer",
+            "operator"
+          ],
+          "href": "/#drift"
+        }
+      },
       "execution_class": "diagnostic",
       "budget": {
         "max_duration_seconds": 1800,
@@ -2632,6 +2684,19 @@
         "ssh ops@100.118.189.95 'ssh ops@10.10.10.20 \"curl -sf http://127.0.0.1:8092/health\"'",
         "curl -I https://ops.lv3.org"
       ],
+      "human_navigation": {
+        "launcher": {
+          "enabled": true,
+          "label": "Converge Ops Portal",
+          "description": "Open the governed portal deployment workflow through the shared runbook and action shell.",
+          "purpose": "administer",
+          "personas": [
+            "administrator",
+            "operator"
+          ],
+          "href": "/#runbooks"
+        }
+      },
       "execution_class": "mutation",
       "budget": {
         "max_duration_seconds": 900,

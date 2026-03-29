@@ -4006,7 +4006,7 @@ adr_index:
   - adr: '0235'
     title: Cross-Application Launcher And Favorites Via PatternFly Application Launcher
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
