@@ -4610,7 +4610,7 @@ adr_index:
   - adr: 0269
     title: Vulnerability Budgets And Image-Host Freshness Promotion Gates
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -4622,6 +4622,7 @@ adr_index:
       - gates
     summary: We will introduce vulnerability budgets and freshness gates for managed
     filename: 0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+    implemented_version: 0.177.72
   - adr: '0270'
     title: Docker Publication Self-Healing And Port-Programming Assertions
     status: Accepted

@@ -3599,7 +3599,7 @@ workstreams:
   - id: ws-0269-live-apply
     adr: "0269"
     title: Vulnerability budgets and image-host freshness promotion gates
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/adr-0269-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0269-live-apply
@@ -3668,7 +3668,7 @@ workstreams:
             - tests/test_security_posture_report.py
           mode: exclusive
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
   - id: ws-0253-live-apply
     adr: "0253"
     title: Unified runtime assurance scoreboard live apply
