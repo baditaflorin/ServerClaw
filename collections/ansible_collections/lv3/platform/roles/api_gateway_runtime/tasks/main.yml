@@ -143,23 +143,6 @@
     - "{{ api_gateway_service_dir }}/.dockerignore"
     - "{{ api_gateway_service_dir }}/receipts/.dockerignore"
 
-- name: Ensure the API gateway receipts build-context tree exists
-  ansible.builtin.file:
-    path: "{{ api_gateway_service_dir }}/receipts"
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
-
-- name: Sync the API gateway receipts build-context tree explicitly
-  ansible.builtin.copy:
-    src: "{{ api_gateway_repo_root }}/receipts/"
-    dest: "{{ api_gateway_service_dir }}/receipts/"
-    owner: root
-    group: root
-    mode: "0644"
-    directory_mode: "0755"
-
 - name: Remove stale managed API gateway config bundle entries
   ansible.builtin.file:
     path: "{{ api_gateway_config_dir }}/{{ item.dest }}"

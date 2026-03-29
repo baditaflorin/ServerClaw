@@ -195,10 +195,10 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "ansible.builtin.include_tasks: sync_tree.yml" in tasks
     assert "Remove stale API gateway build-context ignore files" in tasks
     assert "{{ api_gateway_service_dir }}/.dockerignore" in tasks
-    assert "Ensure the API gateway receipts build-context tree exists" in tasks
-    assert "Sync the API gateway receipts build-context tree explicitly" in tasks
-    assert 'src: "{{ api_gateway_repo_root }}/receipts/"' in tasks
-    assert 'dest: "{{ api_gateway_service_dir }}/receipts/"' in tasks
+    assert "Ensure the API gateway receipts build-context tree exists" not in tasks
+    assert "Sync the API gateway receipts build-context tree explicitly" not in tasks
+    assert 'src: "{{ api_gateway_repo_root }}/receipts/"' not in tasks
+    assert 'dest: "{{ api_gateway_service_dir }}/receipts/"' not in tasks
     assert "Remove stale managed API gateway config bundle entries" in tasks
     assert "ansible.builtin.meta: reset_connection" in tasks
     assert "Check whether the API gateway container sees the runtime config bundle" in tasks
