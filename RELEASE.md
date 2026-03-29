@@ -1,12 +1,12 @@
-# Release 0.177.89
+# Release 0.177.91
 
 - Date: 2026-03-30
 
 ## Summary
-- extends ADR 0224 by adding named repo-deploy profiles, a governed deploy-repo-profile operator path, and the verified 2026-03-30 education_wemeshup upstream refresh so production can be updated from upstream main without retyping raw Coolify arguments
+- implements ADR 0254 by carrying the dedicated ServerClaw chat surface on chat.lv3.org onto current mainline truth, preserving the governed 8096 edge lane to coolify-lv3, and recording the first exact-main receipt once the merged replay is clean
 
 ## Platform Impact
-- no live platform version bump; this release adds named repo-deploy profiles for governed upstream app refreshes and records the 2026-03-30 education_wemeshup production refresh on the existing 0.130.59 platform baseline
+- no live platform version bump yet; this release carries ADR 0254 exact-main ServerClaw publication onto the current 0.177.90 / 0.130.60 baseline before the final post-release replay updates shared platform truth
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

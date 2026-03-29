@@ -162,6 +162,12 @@ playbooks:
     shared_surfaces:
       - service:open-webui
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/serverclaw.yml:
+    playbook_id: serverclaw
+    mutation_scope: platform
+    shared_surfaces:
+      - service:serverclaw
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/outline.yml:
     playbook_id: outline
     mutation_scope: platform

@@ -23,6 +23,7 @@
   register: open_webui_verify_admin_signin
   changed_when: false
   no_log: true
+  when: open_webui_enable_password_auth | bool
 
 - name: Assert Open WebUI sign-in returned the expected account
   ansible.builtin.assert:
@@ -31,3 +32,4 @@
       - (open_webui_verify_admin_signin.json.role | default('')) == 'admin'
     fail_msg: "Open WebUI started, but the repo-managed admin bootstrap could not be verified."
   no_log: true
+  when: open_webui_enable_password_auth | bool

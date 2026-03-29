@@ -41,6 +41,8 @@
       mode: "0755"
     - path: "{{ platform_context_data_dir }}"
       mode: "0755"
+    - path: "{{ platform_context_memory_index_dir }}"
+      mode: "0755"
     - path: "{{ platform_context_secret_dir }}"
       mode: "0700"
 
@@ -148,11 +150,18 @@
       WORKDIR /app
       ENV PYTHONPATH=/app/scripts:/app
       COPY requirements.txt ./requirements.txt
+      # Only install the heavier sentence-transformers stack when that backend is selected.
+      {% if platform_context_embedding_backend == "sentence-transformers" %}
+      RUN pip install --no-cache-dir -r requirements.txt sentence-transformers==5.1.0
+      {% else %}
       RUN pip install --no-cache-dir -r requirements.txt
+      {% endif %}
       COPY canonical_errors.py ./canonical_errors.py
       COPY platform ./platform
       COPY scripts ./scripts
+      COPY search_fabric ./search_fabric
       COPY platform_context_corpus.py ./platform_context_corpus.py
+      COPY script_bootstrap.py ./script_bootstrap.py
       COPY platform_context_service.py ./platform_context_service.py
       EXPOSE 8010
       CMD ["uvicorn", "platform_context_service:app", "--host", "0.0.0.0", "--port", "8010"]
@@ -180,36 +189,218 @@
     mode: "0644"
   loop: "{{ platform_context_service_sources }}"
 
-- name: Sync the shared platform package for platform-context runtime helpers
+- name: Create a controller-local archive path for the shared platform package
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .tar.gz
+  register: platform_context_platform_package_archive
+  delegate_to: localhost
+  become: false
+
+- name: Archive the shared platform package for platform-context runtime helpers
+  ansible.builtin.command:
+    argv:
+      - tar
+      - -C
+      - "{{ platform_context_repo_root }}"
+      - -czf
+      - "{{ platform_context_platform_package_archive.path }}"
+      - platform
+  delegate_to: localhost
+  become: false
+  changed_when: true
+
+- name: Remove the existing shared platform package before unpacking the refreshed archive
+  ansible.builtin.file:
+    path: "{{ platform_context_service_dir }}/platform"
+    state: absent
+
+- name: Copy the shared platform package archive to the runtime host
   ansible.builtin.copy:
-    src: "{{ platform_context_repo_root }}/platform/"
-    dest: "{{ platform_context_service_dir }}/platform/"
+    src: "{{ platform_context_platform_package_archive.path }}"
+    dest: "{{ platform_context_service_dir }}/platform.tar.gz"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Unpack the shared platform package for platform-context runtime helpers
+  ansible.builtin.unarchive:
+    src: "{{ platform_context_service_dir }}/platform.tar.gz"
+    dest: "{{ platform_context_service_dir }}"
+    remote_src: true
+    owner: root
+    group: root
+
+- name: Remove the copied shared platform package archive from the runtime host
+  ansible.builtin.file:
+    path: "{{ platform_context_service_dir }}/platform.tar.gz"
+    state: absent
+
+- name: Remove the controller-local shared platform package archive
+  ansible.builtin.file:
+    path: "{{ platform_context_platform_package_archive.path }}"
+    state: absent
+  delegate_to: localhost
+  become: false
+
+- name: Sync the shared search fabric package for ServerClaw keyword recall
+  ansible.builtin.copy:
+    src: "{{ platform_context_search_fabric_source_dir }}/"
+    dest: "{{ platform_context_service_dir }}/search_fabric/"
     owner: root
     group: root
     mode: "0644"
     directory_mode: "0755"
 
-- name: Ensure platform context corpus parent directories exist
+- name: Create a controller-local archive path for the platform context corpus bundle
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .tar.gz
+  register: platform_context_corpus_archive
+  delegate_to: localhost
+  become: false
+
+- name: Archive the platform context corpus bundle from the repository workspace
+  ansible.builtin.command:
+    argv: >-
+      {{
+        ['tar', '-C', platform_context_repo_root, '-czf', platform_context_corpus_archive.path]
+        + (platform_context_corpus_sources | map(attribute='dest') | list)
+      }}
+  delegate_to: localhost
+  become: false
+  changed_when: true
+
+- name: Remove the existing platform context corpus bundle paths before unpacking the refreshed archive
   ansible.builtin.file:
-    path: "{{ platform_context_corpus_dir }}/{{ item.dest | dirname }}"
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
+    path: "{{ platform_context_corpus_dir }}/{{ item.dest }}"
+    state: absent
   loop: "{{ platform_context_corpus_sources }}"
   loop_control:
     label: "{{ item.dest }}"
 
-- name: Sync the platform context corpus files
+- name: Copy the platform context corpus bundle archive to the runtime host
   ansible.builtin.copy:
-    src: "{{ item.src }}"
-    dest: "{{ platform_context_corpus_dir }}/{{ item.dest }}"
+    src: "{{ platform_context_corpus_archive.path }}"
+    dest: "{{ platform_context_site_dir }}/corpus.tar.gz"
     owner: root
     group: root
     mode: "0644"
-  loop: "{{ platform_context_corpus_sources }}"
-  loop_control:
-    label: "{{ item.dest }}"
+
+- name: Unpack the platform context corpus bundle on the runtime host
+  ansible.builtin.unarchive:
+    src: "{{ platform_context_site_dir }}/corpus.tar.gz"
+    dest: "{{ platform_context_corpus_dir }}"
+    remote_src: true
+    owner: root
+    group: root
+
+- name: Remove the copied platform context corpus bundle archive from the runtime host
+  ansible.builtin.file:
+    path: "{{ platform_context_site_dir }}/corpus.tar.gz"
+    state: absent
+
+- name: Remove the controller-local platform context corpus bundle archive
+  ansible.builtin.file:
+    path: "{{ platform_context_corpus_archive.path }}"
+    state: absent
+  delegate_to: localhost
+  become: false
+
+- name: Create a temporary path for the ADR 0263 ServerClaw memory migration
+  delegate_to: "{{ platform_context_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .sql
+  register: platform_context_memory_migration_tmp
+
+- name: Copy the ADR 0263 ServerClaw memory migration to the database host
+  delegate_to: "{{ platform_context_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../migrations/0017_serverclaw_memory_schema.sql"
+    dest: "{{ platform_context_memory_migration_tmp.path }}"
+    mode: "0600"
+
+- name: Apply the ADR 0263 ServerClaw memory migration in the shared platform database
+  delegate_to: "{{ platform_context_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ platform_context_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -f
+      - "{{ platform_context_memory_migration_tmp.path }}"
+  changed_when: false
+
+- name: Remove the temporary ADR 0263 ServerClaw memory migration file
+  delegate_to: "{{ platform_context_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.file:
+    path: "{{ platform_context_memory_migration_tmp.path }}"
+    state: absent
+
+- name: Assert the ADR 0263 ServerClaw memory schema exists in the shared platform database
+  delegate_to: "{{ platform_context_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ platform_context_database_name }}"
+      - -Atqc
+      - "SELECT to_regclass('memory.entries')"
+  register: platform_context_memory_schema_check
+  changed_when: false
+
+- name: Fail when the ADR 0263 ServerClaw memory schema is missing
+  ansible.builtin.assert:
+    that:
+      - platform_context_memory_schema_check.stdout | trim == 'memory.entries'
+    fail_msg: "ADR 0263 live schema apply did not create memory.entries in the shared platform database."
+
+- name: Ensure the ADR 0263 ServerClaw memory schema is owned by the runtime database role
+  delegate_to: "{{ platform_context_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ platform_context_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        ALTER SCHEMA memory OWNER TO {{ platform_context_database_user }};
+        ALTER TABLE memory.entries OWNER TO {{ platform_context_database_user }};
+  changed_when: false
+
+- name: Ensure the ADR 0263 ServerClaw memory schema grants runtime access to the database role
+  delegate_to: "{{ platform_context_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ platform_context_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        GRANT USAGE ON SCHEMA memory TO {{ platform_context_database_user }};
+        GRANT ALL ON ALL TABLES IN SCHEMA memory TO {{ platform_context_database_user }};
+  changed_when: false
 
 - name: Pull the platform context images
   ansible.builtin.command:
@@ -299,25 +490,135 @@
     state: restarted
   when: platform_context_docker_nat_chain.rc != 0
 
-- name: Build and start the platform context stack
+- name: Recheck the Docker nat chain before platform-context startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: platform_context_docker_nat_chain_recheck
+  changed_when: false
+  failed_when: platform_context_docker_nat_chain_recheck.rc not in [0, 1]
+  when: platform_context_docker_nat_chain.rc != 0
+
+- name: Wait for the Docker daemon to answer after networking recovery
   ansible.builtin.command:
     argv:
       - docker
-      - compose
-      - --file
-      - "{{ platform_context_compose_file }}"
-      - up
-      - -d
-      - --build
-      - --remove-orphans
-  args:
-    chdir: "{{ platform_context_site_dir }}"
-  register: platform_context_up
-  changed_when: >-
-    'Creating' in platform_context_up.stdout
-    or 'Recreating' in platform_context_up.stdout
-    or 'Starting' in platform_context_up.stdout
-    or 'Building' in platform_context_up.stdout
+      - info
+      - --format
+      - '{{ "{{.ServerVersion}}" }}'
+  register: platform_context_docker_info
+  changed_when: false
+  retries: 10
+  delay: 2
+  until: platform_context_docker_info.rc == 0
+  when: platform_context_docker_nat_chain.rc != 0
+
+- name: Build and start the platform context stack and recover stale compose networks
+  block:
+    - name: Build the platform context API image with host networking
+      ansible.builtin.command:
+        argv:
+          - docker
+          - build
+          - --network
+          - host
+          - -t
+          - "{{ platform_context_api_image_name }}:latest"
+          - "{{ platform_context_service_dir }}"
+      args:
+        chdir: "{{ platform_context_site_dir }}"
+      environment:
+        DOCKER_BUILDKIT: "0"
+        COMPOSE_DOCKER_CLI_BUILD: "0"
+      register: platform_context_build
+      changed_when: >-
+        'Successfully built' in (platform_context_build.stdout | default(''))
+        or 'Successfully tagged' in (platform_context_build.stdout | default(''))
+        or 'writing image sha256:' in (platform_context_build.stdout | default(''))
+
+    - name: Start the platform context stack
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ platform_context_compose_file }}"
+          - up
+          - -d
+          - --no-build
+          - --remove-orphans
+      args:
+        chdir: "{{ platform_context_site_dir }}"
+      environment:
+        DOCKER_BUILDKIT: "0"
+        COMPOSE_DOCKER_CLI_BUILD: "0"
+      register: platform_context_up
+      changed_when: >-
+        'Creating' in platform_context_up.stdout
+        or 'Recreating' in platform_context_up.stdout
+        or 'Starting' in platform_context_up.stdout
+        or 'Building' in platform_context_up.stdout
+  rescue:
+    - name: Flag stale platform context compose-network failures during startup
+      ansible.builtin.set_fact:
+        platform_context_docker_network_missing: >-
+          {{
+            'failed to create endpoint' in (ansible_failed_result.stderr | default(''))
+            and 'does not exist' in (ansible_failed_result.stderr | default(''))
+          }}
+
+    - name: Surface unexpected platform context startup failures
+      ansible.builtin.fail:
+        msg: >-
+          {{
+            ansible_failed_result.stderr
+            | default(ansible_failed_result.msg | default('platform-context compose up failed'))
+          }}
+      when: not platform_context_docker_network_missing
+
+    - name: Reset stale platform context compose resources before retrying startup
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ platform_context_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ platform_context_site_dir }}"
+      register: platform_context_down
+      changed_when: >-
+        'Stopping' in (platform_context_down.stdout | default(''))
+        or 'Removing' in (platform_context_down.stdout | default(''))
+        or 'Removing' in (platform_context_down.stderr | default(''))
+      failed_when: false
+      when: platform_context_docker_network_missing
+
+    - name: Retry platform context stack startup after compose-network recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ platform_context_compose_file }}"
+          - up
+          - -d
+          - --no-build
+          - --force-recreate
+          - --remove-orphans
+      args:
+        chdir: "{{ platform_context_site_dir }}"
+      environment:
+        DOCKER_BUILDKIT: "0"
+        COMPOSE_DOCKER_CLI_BUILD: "0"
+      register: platform_context_up
+      changed_when: true
+      when: platform_context_docker_network_missing
 
 - name: Verify the platform context runtime
   ansible.builtin.import_tasks: verify.yml

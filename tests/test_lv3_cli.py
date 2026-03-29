@@ -660,6 +660,121 @@ def test_query_platform_context_command_prints_matches(
     assert "ADR 0042" in captured.out
 
 
+def test_memory_put_command_prints_stored_entry(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class FakeMemoryClient:
+        def __init__(self, timeout_seconds: float = 30) -> None:
+            self.timeout_seconds = timeout_seconds
+
+        def upsert_entry(self, payload: dict[str, object]) -> dict[str, object]:
+            assert payload["scope_kind"] == "workspace"
+            assert payload["scope_id"] == "ops-smoke"
+            assert payload["object_type"] == "note"
+            assert payload["metadata"] == {"lane": "smoke"}
+            return {
+                "entry": {
+                    "memory_id": "mem-123",
+                    "scope_kind": "workspace",
+                    "scope_id": "ops-smoke",
+                    "object_type": "note",
+                    "title": "Smoke note",
+                    "provenance": "unit-test",
+                    "retention_class": "smoke",
+                }
+            }
+
+    monkeypatch.setattr(lv3_cli, "MemorySubstrateClient", FakeMemoryClient)
+
+    exit_code = lv3_cli.main(
+        [
+            "memory",
+            "put",
+            "--scope-kind",
+            "workspace",
+            "--scope-id",
+            "ops-smoke",
+            "--object-type",
+            "note",
+            "--title",
+            "Smoke note",
+            "--content",
+            "ServerClaw memory smoke entry",
+            "--provenance",
+            "unit-test",
+            "--retention-class",
+            "smoke",
+            "--consent-boundary",
+            "test-only",
+            "--metadata-json",
+            '{"lane":"smoke"}',
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "Stored memory entry mem-123" in captured.out
+
+
+def test_memory_query_command_prints_matches(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class FakeMemoryClient:
+        def __init__(self, timeout_seconds: float = 30) -> None:
+            self.timeout_seconds = timeout_seconds
+
+        def query(
+            self,
+            query: str,
+            *,
+            scope_kind: str,
+            scope_id: str,
+            object_type: str | None,
+            limit: int,
+        ) -> dict[str, object]:
+            assert query == "serverclaw smoke"
+            assert scope_kind == "workspace"
+            assert scope_id == "ops-smoke"
+            assert object_type == "note"
+            assert limit == 3
+            return {
+                "retrieval_backend": "hybrid",
+                "matches": [
+                    {
+                        "memory_id": "mem-123",
+                        "object_type": "note",
+                        "title": "Smoke note",
+                        "content": "ServerClaw memory substrate smoke entry with semantic and keyword recall.",
+                        "hybrid_score": 1.75,
+                        "matched_backends": ["semantic", "keyword"],
+                    }
+                ],
+            }
+
+    monkeypatch.setattr(lv3_cli, "MemorySubstrateClient", FakeMemoryClient)
+
+    exit_code = lv3_cli.main(
+        [
+            "memory",
+            "query",
+            "serverclaw smoke",
+            "--scope-kind",
+            "workspace",
+            "--scope-id",
+            "ops-smoke",
+            "--object-type",
+            "note",
+            "--limit",
+            "3",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "mem-123" in captured.out
+    assert "backends=semantic,keyword" in captured.out
+
+
 def test_run_dry_run_redacts_token(
     capsys: pytest.CaptureFixture[str], minimal_repo: Path
 ) -> None:

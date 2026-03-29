@@ -47,6 +47,7 @@ except ImportError:  # pragma: no cover - packaged entrypoint path
 from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 from platform.idempotency import IdempotencyStore
 from platform.llm import PlatformContextRetriever
+from platform.memory import MemorySubstrateClient
 from platform.scheduler import build_scheduler
 from scripts.risk_scorer import ExecutionIntent, assemble_context, compile_workflow_intent, score_intent
 CLI_VERSION = "0.1.0"
@@ -2161,6 +2162,167 @@ def query_platform_context_command(question: str, *, limit: int, json_output: bo
     return 0
 
 
+def _load_memory_metadata(raw_metadata: str) -> dict[str, Any]:
+    try:
+        payload = json.loads(raw_metadata)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"--metadata-json must contain valid JSON: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise ValueError("--metadata-json must decode to a JSON object")
+    return payload
+
+
+def memory_put_command(
+    *,
+    memory_id: str | None,
+    scope_kind: str,
+    scope_id: str,
+    object_type: str,
+    title: str,
+    content: str,
+    provenance: str,
+    retention_class: str,
+    consent_boundary: str,
+    delegation_boundary: str | None,
+    source_uri: str | None,
+    metadata_json: str,
+    expires_at: str | None,
+    json_output: bool,
+) -> int:
+    try:
+        client = MemorySubstrateClient(timeout_seconds=30)
+        payload: dict[str, Any] = {
+            "scope_kind": scope_kind,
+            "scope_id": scope_id,
+            "object_type": object_type,
+            "title": title,
+            "content": content,
+            "provenance": provenance,
+            "retention_class": retention_class,
+            "consent_boundary": consent_boundary,
+            "metadata": _load_memory_metadata(metadata_json),
+        }
+        if memory_id:
+            payload["memory_id"] = memory_id
+        if delegation_boundary:
+            payload["delegation_boundary"] = delegation_boundary
+        if source_uri:
+            payload["source_uri"] = source_uri
+        if expires_at:
+            payload["expires_at"] = expires_at
+        result = client.upsert_entry(payload)
+    except (OSError, RuntimeError, ValueError) as exc:
+        print(f"ServerClaw memory put failed: {exc}", file=sys.stderr)
+        return 1
+    if json_output:
+        emit_json(result)
+        return 0
+    entry = result["entry"]
+    print(f"Stored memory entry {entry['memory_id']} [{entry['scope_kind']}:{entry['scope_id']}] {entry['object_type']}")
+    print(f"{entry['title']}  provenance={entry['provenance']}  retention={entry['retention_class']}")
+    return 0
+
+
+def memory_query_command(
+    query: str,
+    *,
+    scope_kind: str,
+    scope_id: str,
+    object_type: str | None,
+    limit: int,
+    json_output: bool,
+) -> int:
+    try:
+        client = MemorySubstrateClient(timeout_seconds=30)
+        payload = client.query(
+            query,
+            scope_kind=scope_kind,
+            scope_id=scope_id,
+            object_type=object_type,
+            limit=limit,
+        )
+    except (OSError, RuntimeError, ValueError) as exc:
+        print(f"ServerClaw memory query failed: {exc}", file=sys.stderr)
+        return 1
+    if json_output:
+        emit_json(payload)
+        return 0
+    matches = payload.get("matches", [])
+    if not matches:
+        print(f"No ServerClaw memory matches for '{query}'.")
+        return 0
+    for index, match in enumerate(matches, start=1):
+        backends = ",".join(match.get("matched_backends", [])) or "none"
+        print(
+            f"[{index}] {match['memory_id']} | {match['object_type']} | "
+            f"{match['title']} | backends={backends} | score={match['hybrid_score']:.3f}"
+        )
+        print(textwrap.shorten(str(match.get("content", "")).replace("\n", " "), width=200, placeholder=" ..."))
+        print()
+    return 0
+
+
+def memory_get_command(memory_id: str, *, json_output: bool) -> int:
+    try:
+        client = MemorySubstrateClient(timeout_seconds=30)
+        payload = client.get_entry(memory_id)
+    except (OSError, RuntimeError, ValueError) as exc:
+        print(f"ServerClaw memory get failed: {exc}", file=sys.stderr)
+        return 1
+    if json_output:
+        emit_json(payload)
+        return 0
+    print(f"{payload['memory_id']} [{payload['scope_kind']}:{payload['scope_id']}] {payload['object_type']}")
+    print(payload["title"])
+    print(textwrap.shorten(str(payload.get("content", "")).replace("\n", " "), width=240, placeholder=" ..."))
+    return 0
+
+
+def memory_list_command(
+    *,
+    scope_kind: str,
+    scope_id: str,
+    object_type: str | None,
+    limit: int,
+    json_output: bool,
+) -> int:
+    try:
+        client = MemorySubstrateClient(timeout_seconds=30)
+        payload = client.list_entries(
+            scope_kind=scope_kind,
+            scope_id=scope_id,
+            object_type=object_type,
+            limit=limit,
+        )
+    except (OSError, RuntimeError, ValueError) as exc:
+        print(f"ServerClaw memory list failed: {exc}", file=sys.stderr)
+        return 1
+    if json_output:
+        emit_json(payload)
+        return 0
+    entries = payload.get("entries", [])
+    if not entries:
+        print(f"No ServerClaw memory entries for {scope_kind}:{scope_id}.")
+        return 0
+    for entry in entries:
+        print(f"{entry['memory_id']} | {entry['object_type']} | {entry['title']}")
+    return 0
+
+
+def memory_delete_command(memory_id: str, *, json_output: bool) -> int:
+    try:
+        client = MemorySubstrateClient(timeout_seconds=30)
+        payload = client.delete_entry(memory_id)
+    except (OSError, RuntimeError, ValueError) as exc:
+        print(f"ServerClaw memory delete failed: {exc}", file=sys.stderr)
+        return 1
+    if json_output:
+        emit_json(payload)
+        return 0
+    print(f"Deleted memory entry {payload['memory_id']}.")
+    return 0
+
+
 def agent_state_client(agent_id: str, task_id: str) -> AgentStateClient:
     return AgentStateClient(agent_id=agent_id, task_id=task_id)
 
@@ -2666,6 +2828,43 @@ def build_parser() -> argparse.ArgumentParser:
     query_platform_context.add_argument("--limit", type=int, default=5)
     query_platform_context.add_argument("--json", action="store_true")
 
+    memory = subparsers.add_parser("memory", help="Manage the private ServerClaw memory substrate.")
+    memory_subparsers = memory.add_subparsers(dest="memory_action", required=True)
+    memory_put = memory_subparsers.add_parser("put", help="Create or update one memory entry.")
+    memory_put.add_argument("--memory-id")
+    memory_put.add_argument("--scope-kind", required=True, choices=["owner", "workspace"])
+    memory_put.add_argument("--scope-id", required=True)
+    memory_put.add_argument("--object-type", required=True)
+    memory_put.add_argument("--title", required=True)
+    memory_put.add_argument("--content", required=True)
+    memory_put.add_argument("--provenance", required=True)
+    memory_put.add_argument("--retention-class", required=True)
+    memory_put.add_argument("--consent-boundary", required=True)
+    memory_put.add_argument("--delegation-boundary")
+    memory_put.add_argument("--source-uri")
+    memory_put.add_argument("--metadata-json", default="{}")
+    memory_put.add_argument("--expires-at")
+    memory_put.add_argument("--json", action="store_true")
+    memory_query = memory_subparsers.add_parser("query", help="Query ServerClaw memory by hybrid recall.")
+    memory_query.add_argument("query")
+    memory_query.add_argument("--scope-kind", required=True, choices=["owner", "workspace"])
+    memory_query.add_argument("--scope-id", required=True)
+    memory_query.add_argument("--object-type")
+    memory_query.add_argument("--limit", type=int, default=5)
+    memory_query.add_argument("--json", action="store_true")
+    memory_get = memory_subparsers.add_parser("get", help="Fetch one memory entry by id.")
+    memory_get.add_argument("memory_id")
+    memory_get.add_argument("--json", action="store_true")
+    memory_list = memory_subparsers.add_parser("list", help="List memory entries for one scope.")
+    memory_list.add_argument("--scope-kind", required=True, choices=["owner", "workspace"])
+    memory_list.add_argument("--scope-id", required=True)
+    memory_list.add_argument("--object-type")
+    memory_list.add_argument("--limit", type=int, default=20)
+    memory_list.add_argument("--json", action="store_true")
+    memory_delete = memory_subparsers.add_parser("delete", help="Delete one memory entry by id.")
+    memory_delete.add_argument("memory_id")
+    memory_delete.add_argument("--json", action="store_true")
+
     status = subparsers.add_parser("status", help="Show service health status.")
     status.add_argument("service", nargs="?")
     status.add_argument("--env", default=DEFAULT_ENVIRONMENT, choices=ENVIRONMENT_CHOICES)
@@ -3074,6 +3273,44 @@ def main(argv: list[str] | None = None) -> int:
         return search_command(args.query, collection=args.collection, limit=args.limit, rebuild=args.rebuild)
     if args.command == "query-platform-context":
         return query_platform_context_command(args.question, limit=args.limit, json_output=args.json)
+    if args.command == "memory":
+        if args.memory_action == "put":
+            return memory_put_command(
+                memory_id=args.memory_id,
+                scope_kind=args.scope_kind,
+                scope_id=args.scope_id,
+                object_type=args.object_type,
+                title=args.title,
+                content=args.content,
+                provenance=args.provenance,
+                retention_class=args.retention_class,
+                consent_boundary=args.consent_boundary,
+                delegation_boundary=args.delegation_boundary,
+                source_uri=args.source_uri,
+                metadata_json=args.metadata_json,
+                expires_at=args.expires_at,
+                json_output=args.json,
+            )
+        if args.memory_action == "query":
+            return memory_query_command(
+                args.query,
+                scope_kind=args.scope_kind,
+                scope_id=args.scope_id,
+                object_type=args.object_type,
+                limit=args.limit,
+                json_output=args.json,
+            )
+        if args.memory_action == "get":
+            return memory_get_command(args.memory_id, json_output=args.json)
+        if args.memory_action == "list":
+            return memory_list_command(
+                scope_kind=args.scope_kind,
+                scope_id=args.scope_id,
+                object_type=args.object_type,
+                limit=args.limit,
+                json_output=args.json,
+            )
+        return memory_delete_command(args.memory_id, json_output=args.json)
     if args.command == "status":
         return status_command(args.service, args.env, timeout=args.timeout, no_color=no_color)
     if args.command == "health":

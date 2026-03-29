@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import httpx
+from fastapi.testclient import TestClient
 
 import platform_context_service
 from platform_context_service import OLLAMA_EMBED_BATCH_SIZE, OllamaEmbedder, PlatformContextService, ServiceConfig, TokenHashEmbedder
@@ -70,6 +71,13 @@ error_codes:
     retry_advice: none
     description: Requested platform service is not defined.
     context_fields: [service_id]
+  INPUT_UNKNOWN_MEMORY_ENTRY:
+    http_status: 404
+    severity: info
+    category: input
+    retry_advice: none
+    description: Requested ServerClaw memory entry is not defined.
+    context_fields: [memory_id]
   INTERNAL_UNEXPECTED_ERROR:
     http_status: 500
     severity: error
@@ -119,6 +127,61 @@ def test_query_returns_cited_step_ca_chunk(tmp_path: Path) -> None:
     assert result["matches"]
     assert any(match["source_path"].startswith("docs/") for match in result["matches"])
     assert any("SSH certificates" in match["content"] for match in result["matches"])
+
+
+def test_serverclaw_memory_roundtrip_uses_structured_semantic_and_keyword_paths(tmp_path: Path) -> None:
+    repo_root = make_repo(tmp_path)
+    service = PlatformContextService(
+        ServiceConfig(
+            api_token="test-token",
+            corpus_root=repo_root,
+            error_registry_path=repo_root / "config" / "error-codes.yaml",
+            collection_name="test",
+            qdrant_url=None,
+            qdrant_location=":memory:",
+            embedding_backend="token-hash",
+            embedding_model="unused",
+            embedding_dimension=384,
+            memory_dsn=f"sqlite:///{tmp_path / 'serverclaw-memory.sqlite3'}",
+            memory_collection_name="serverclaw_memory_test",
+            memory_index_path=tmp_path / "serverclaw-memory-index" / "documents.json",
+        )
+    )
+
+    created = service.upsert_memory_entry(
+        platform_context_service.MemoryEntryRequest(
+            scope_kind="workspace",
+            scope_id="ops-smoke",
+            object_type="note",
+            title="ADR 0263 smoke memory substrate",
+            content="ServerClaw memory substrate smoke entry for qdrant semantic recall and local keyword search.",
+            provenance="unit-test",
+            retention_class="smoke",
+            consent_boundary="test-only",
+        )
+    )
+
+    payload = service.query_memory(
+        platform_context_service.MemoryQueryRequest(
+            query="serverclaw memory substrate smoke qdrant local keyword",
+            scope_kind="workspace",
+            scope_id="ops-smoke",
+            object_type="note",
+            limit=3,
+        )
+    )
+    listed = service.list_memory_entries(scope_kind="workspace", scope_id="ops-smoke", object_type="note", limit=5)
+    fetched = service.get_memory_entry(created["entry"]["memory_id"])
+
+    assert payload["retrieval_backend"] == "hybrid"
+    assert payload["matches"][0]["memory_id"] == created["entry"]["memory_id"]
+    assert set(payload["matches"][0]["matched_backends"]) >= {"semantic", "keyword"}
+    assert listed["count"] == 1
+    assert fetched is not None
+    assert fetched["title"] == "ADR 0263 smoke memory substrate"
+
+    assert service.delete_memory_entry(created["entry"]["memory_id"]) is True
+    assert service.get_memory_entry(created["entry"]["memory_id"]) is None
 
 
 def test_sentence_transformers_backend_falls_back_to_token_hash(tmp_path: Path, monkeypatch) -> None:
@@ -333,8 +396,6 @@ def test_build_config_uses_corpus_root_for_default_observability_paths(tmp_path:
 
 
 def test_platform_context_app_returns_canonical_errors(tmp_path: Path) -> None:
-    from fastapi.testclient import TestClient
-
     repo_root = make_repo(tmp_path)
     platform_context_service.service = PlatformContextService(
         ServiceConfig(
@@ -347,6 +408,9 @@ def test_platform_context_app_returns_canonical_errors(tmp_path: Path) -> None:
             embedding_backend="token-hash",
             embedding_model="unused",
             embedding_dimension=384,
+            memory_dsn=f"sqlite:///{tmp_path / 'serverclaw-memory-errors.sqlite3'}",
+            memory_collection_name="serverclaw_memory_test",
+            memory_index_path=tmp_path / "serverclaw-memory-index" / "documents.json",
         )
     )
     client = TestClient(platform_context_service.app)
@@ -369,5 +433,12 @@ def test_platform_context_app_returns_canonical_errors(tmp_path: Path) -> None:
         )
         assert invalid_query.status_code == 422
         assert invalid_query.json()["error"]["code"] == "INPUT_SCHEMA_INVALID"
+
+        missing_memory = client.get(
+            "/v1/memory/entries/missing-memory-entry",
+            headers={"Authorization": "Bearer test-token"},
+        )
+        assert missing_memory.status_code == 404
+        assert missing_memory.json()["error"]["code"] == "INPUT_UNKNOWN_MEMORY_ENTRY"
     finally:
         platform_context_service.service = None

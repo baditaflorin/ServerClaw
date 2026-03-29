@@ -6,12 +6,12 @@
 # ============================================================================
 
 schema_version: 1
-generated: '2026-03-29'
+generated: '2026-03-30'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 245
+  Implemented: 247
   Partial: 7
-  Not Implemented: 71
+  Not Implemented: 69
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4365,7 +4365,7 @@ adr_index:
   - adr: '0254'
     title: ServerClaw As A Distinct Self-Hosted Agent Product On LV3
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: agent-discovery
     keywords:
@@ -4508,7 +4508,7 @@ adr_index:
   - adr: '0263'
     title: Qdrant, PostgreSQL, And Local Search As The ServerClaw Memory Substrate
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: documentation
     keywords:
@@ -4522,6 +4522,7 @@ adr_index:
       - substrate
     summary: We will use PostgreSQL, Qdrant, and the local search fabric together as the
     filename: 0263-qdrant-postgresql-and-local-search-as-the-serverclaw-memory-substrate.md
+    implemented_version: 0.177.90
   - adr: '0264'
     title: Failure-Domain-Isolated Validation Lanes
     status: Accepted
@@ -4555,7 +4556,7 @@ adr_index:
   - adr: '0266'
     title: Validation Runner Capability Contracts And Environment Attestation
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -4567,6 +4568,7 @@ adr_index:
       - attestation
     summary: We will require every local or remote validation runner to publish a
     filename: 0266-validation-runner-capability-contracts-and-environment-attestation.md
+    implemented_version: 0.177.88
   - adr: '0267'
     title: Expiring Gate Bypass Waivers With Structured Reason Codes
     status: Accepted
