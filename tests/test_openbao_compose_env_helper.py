@@ -41,6 +41,9 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     assert "keys_base64[: (openbao_init_key_threshold | default(2) | int)]" in tasks
     assert "- name: Assert the local OpenBao API is unsealed before runtime secret injection" in tasks
     assert "- name: Wait for the local OpenBao API to become active" in tasks
+    assert "- name: Upsert the OpenBao AppRole for the runtime agent" in tasks
+    assert "register: common_openbao_compose_env_approle_upsert" in tasks
+    assert "until: common_openbao_compose_env_approle_upsert.status == 204" in tasks
     assert "common_openbao_compose_env_agent_template_local_file" in tasks
     assert "common_openbao_compose_env_agent_template_content" in tasks
     assert "ansible.builtin.copy" in tasks

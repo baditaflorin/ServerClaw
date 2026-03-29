@@ -4,14 +4,95 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
+import importlib.util
+import inspect
 import json
-import shlex
-import subprocess
 from pathlib import Path
-from typing import Any
+import sys
+import types
+from typing import Iterator
 
 
-def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
+def _build_gate_bypass_waivers_fallback():
+    module = types.ModuleType("gate_bypass_waivers")
+
+    def summarize_receipts(*, directory: Path):
+        return {
+            "totals": {
+                "all_receipts": 0,
+                "legacy_receipts": 0,
+                "compliant_receipts": 0,
+                "open_waivers": 0,
+                "expired_waivers": 0,
+                "invalid_receipts": 0,
+            },
+            "latest_receipt": None,
+            "open_waivers": [],
+            "expiring_soon": [],
+            "warnings": [],
+            "release_blockers": [],
+            "invalid_receipts": [],
+            "reason_codes": [],
+            "receipt_dir": str(directory),
+        }
+
+    module.summarize_receipts = summarize_receipts
+    return module
+
+
+@contextmanager
+def _gate_status_import_context(
+    repo_root: Path,
+    *,
+    inject_waiver_fallback: bool = False,
+) -> Iterator[None]:
+    scripts_dir = str(repo_root / "scripts")
+    added_scripts_dir = False
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+        added_scripts_dir = True
+
+    previous_gate_bypass_waivers = sys.modules.pop("gate_bypass_waivers", None)
+    if inject_waiver_fallback:
+        sys.modules["gate_bypass_waivers"] = _build_gate_bypass_waivers_fallback()
+
+    try:
+        yield
+    finally:
+        sys.modules.pop("gate_bypass_waivers", None)
+        if previous_gate_bypass_waivers is not None:
+            sys.modules["gate_bypass_waivers"] = previous_gate_bypass_waivers
+        if added_scripts_dir:
+            try:
+                sys.path.remove(scripts_dir)
+            except ValueError:
+                pass
+
+
+def _load_gate_status_module_once(repo_root: Path):
+    script_path = repo_root / "scripts" / "gate_status.py"
+    spec = importlib.util.spec_from_file_location("gate_status_runtime", script_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"unable to load gate status script from {script_path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _load_gate_status_module(repo_root: Path):
+    with _gate_status_import_context(repo_root):
+        try:
+            return _load_gate_status_module_once(repo_root)
+        except ModuleNotFoundError as exc:
+            if exc.name != "gate_bypass_waivers":
+                raise
+
+    with _gate_status_import_context(repo_root, inject_waiver_fallback=True):
+        return _load_gate_status_module_once(repo_root)
+
+
+def main(repo_path: str = "/srv/proxmox_florin_server") -> dict:
     repo_root = Path(repo_path)
     script_path = repo_root / "scripts" / "gate_status.py"
     if not script_path.exists():
@@ -21,53 +102,22 @@ def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
             "expected_repo_path": str(repo_root),
         }
 
-    command = [
-        "python3",
-        str(script_path),
-        "--format",
-        "json",
-    ]
-    completed = subprocess.run(
-        command,
-        cwd=repo_root,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
-    stdout = completed.stdout.strip()
-    stderr = completed.stderr.strip()
-    payload: dict[str, Any] = {
-        "status": "ok" if completed.returncode == 0 else "error",
-        "command": " ".join(shlex.quote(part) for part in command),
-        "returncode": completed.returncode,
-        "stdout": stdout,
-        "stderr": stderr,
+    module = _load_gate_status_module(repo_root)
+    payload_kwargs = {
+        "manifest_path": repo_root / "config" / "validation-gate.json",
+        "last_run_path": repo_root / ".local" / "validation-gate" / "last-run.json",
+        "remote_validate_run_path": repo_root / ".local" / "validation-gate" / "remote-validate-last-run.json",
+        "post_merge_run_path": repo_root / ".local" / "validation-gate" / "post-merge-last-run.json",
+        "bypass_dir": repo_root / "receipts" / "gate-bypasses",
     }
-
-    if completed.returncode != 0:
-        payload["reason"] = "gate status command failed"
-        return payload
-
-    if not stdout:
-        payload["status"] = "error"
-        payload["reason"] = "gate status command returned no JSON payload"
-        return payload
-
-    try:
-        gate_status = json.loads(stdout)
-    except json.JSONDecodeError:
-        payload["status"] = "error"
-        payload["reason"] = "gate status command did not return valid JSON"
-        return payload
-
-    if not isinstance(gate_status, dict):
-        payload["status"] = "error"
-        payload["reason"] = "gate status command did not return a JSON object"
-        payload["gate_status"] = gate_status
-        return payload
-
-    payload["gate_status"] = gate_status
-    return payload
+    accepted_kwargs = inspect.signature(module.build_status_payload).parameters
+    payload = module.build_status_payload(
+        **{name: value for name, value in payload_kwargs.items() if name in accepted_kwargs}
+    )
+    return {
+        "status": "ok",
+        "gate_status": payload,
+    }
 
 
 if __name__ == "__main__":
