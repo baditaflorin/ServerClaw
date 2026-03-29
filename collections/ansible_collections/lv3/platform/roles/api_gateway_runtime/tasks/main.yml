@@ -282,26 +282,40 @@
         or 'Starting' in api_gateway_up.stdout
         or 'Building' in api_gateway_up.stdout
   rescue:
-    - name: Flag Docker nat-chain failure during API gateway start
+    - name: Flag recoverable Docker engine failures during API gateway start
       ansible.builtin.set_fact:
         api_gateway_docker_nat_missing: >-
           {{
             'No chain/target/match by that name' in (ansible_failed_result.stderr | default(''))
             or 'Unable to enable DNAT rule' in (ansible_failed_result.stderr | default(''))
           }}
+        api_gateway_docker_builder_database_missing: >-
+          {{
+            'database not open' in
+            (
+              ansible_failed_result.stderr
+              | default(ansible_failed_result.msg | default(''))
+              | lower
+            )
+          }}
+        api_gateway_docker_recoverable_start_failure: >-
+          {{
+            api_gateway_docker_nat_missing
+            or api_gateway_docker_builder_database_missing
+          }}
 
     - name: Surface unexpected API gateway startup failures
       ansible.builtin.fail:
         msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('api gateway compose up failed')) }}"
-      when: not api_gateway_docker_nat_missing
+      when: not api_gateway_docker_recoverable_start_failure
 
-    - name: Restart Docker to restore the nat chain before retrying the API gateway start
+    - name: Restart Docker to restore the container engine before retrying the API gateway start
       ansible.builtin.service:
         name: docker
         state: restarted
-      when: api_gateway_docker_nat_missing
+      when: api_gateway_docker_recoverable_start_failure
 
-    - name: Retry the API gateway stack start after Docker nat-chain recovery
+    - name: Retry the API gateway stack start after Docker engine recovery
       ansible.builtin.command:
         argv:
           - docker
@@ -316,7 +330,7 @@
         chdir: "{{ api_gateway_site_dir }}"
       register: api_gateway_up
       changed_when: true
-      when: api_gateway_docker_nat_missing
+      when: api_gateway_docker_recoverable_start_failure
 
 - name: Check whether the API gateway published host port is present
   ansible.builtin.command:

@@ -222,6 +222,11 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "Remove stale managed API gateway config bundle entries" in tasks
     assert "ansible.builtin.meta: reset_connection" in tasks
     assert "Check whether the API gateway container sees the runtime config bundle" in tasks
+    assert "database not open" in tasks
+    assert "api_gateway_docker_builder_database_missing" in tasks
+    assert "api_gateway_docker_recoverable_start_failure" in tasks
+    assert "Restart Docker to restore the container engine before retrying the API gateway start" in tasks
+    assert "Retry the API gateway stack start after Docker engine recovery" in tasks
     assert "/v1/platform/runtime-assurance" in verify_tasks
     assert "runtime assurance endpoint returns a report envelope" in verify_tasks
     assert "Check whether the controller-local legacy platform context token exists" in verify_tasks
