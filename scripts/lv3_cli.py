@@ -1160,11 +1160,12 @@ def run_windmill_request(
     token = load_secret_file("windmill_superadmin_secret")
     script_path = workflow_name if "/" in workflow_name else f"f/lv3/{workflow_name}"
     encoded_path = urllib.parse.quote(script_path, safe="")
-    url = f"{base_url}/api/w/lv3/jobs/run_wait_result/p/{encoded_path}"
+    metadata_url = f"{base_url}/api/w/lv3/scripts/get/p/{encoded_path}"
+    url = f"{base_url}/api/w/lv3/jobs/run/h/<resolved-hash>"
     encoded_payload = json.dumps(payload).encode("utf-8")
     plan = CommandPlan(
         label=f"run {workflow_name}",
-        route="controller -> budgeted scheduler -> Windmill API",
+        route="controller -> resolve script hash -> budgeted scheduler -> Windmill API",
         command=[
             "curl",
             "-X",
@@ -1173,6 +1174,8 @@ def run_windmill_request(
             "Authorization: Bearer <redacted>",
             "-H",
             "Content-Type: application/json",
+            metadata_url,
+            "then",
             url,
             "--data-binary",
             encoded_payload.decode("utf-8"),

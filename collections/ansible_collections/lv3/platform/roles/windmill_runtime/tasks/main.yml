@@ -153,23 +153,42 @@
     manifest_path = Path(os.environ["LV3_WINDMILL_MANIFEST_PATH"])
     sync_paths = json.loads(os.environ["LV3_WINDMILL_SYNC_PATHS_JSON"])
 
-    manifest_entries = []
+    manifest_entries = set()
+
+    def skip_path(path: Path) -> bool:
+        return (
+            path.name == ".DS_Store"
+            or path.name.startswith("._")
+            or path.name == "__pycache__"
+            or path.suffix == ".pyc"
+        )
+
+    def add_directory(path: Path) -> None:
+        if path == repo_root or skip_path(path):
+            return
+        manifest_entries.add(f"{path.relative_to(repo_root).as_posix().rstrip('/')}/")
+
     for relative_root in sync_paths:
         candidate = repo_root / relative_root
         if not candidate.exists():
             continue
         if candidate.is_file():
-            if candidate.name == ".DS_Store" or candidate.name.startswith("._"):
+            if skip_path(candidate):
                 continue
-            manifest_entries.append(candidate.relative_to(repo_root).as_posix())
+            manifest_entries.add(candidate.relative_to(repo_root).as_posix())
             continue
-        for child in sorted(path for path in candidate.rglob("*") if path.is_file()):
-            if child.name == ".DS_Store" or child.name.startswith("._"):
+        add_directory(candidate)
+        for child in sorted(candidate.rglob("*")):
+            if skip_path(child):
                 continue
-            manifest_entries.append(child.relative_to(repo_root).as_posix())
+            if child.is_dir():
+                add_directory(child)
+                continue
+            if child.is_file():
+                manifest_entries.add(child.relative_to(repo_root).as_posix())
 
     manifest_path.write_text(
-        "".join(f"{entry}\n" for entry in manifest_entries),
+        "".join(f"{entry}\n" for entry in sorted(manifest_entries)),
         encoding="utf-8",
     )
     PY
@@ -415,6 +434,76 @@
   ansible.builtin.debug:
     msg: "Removed stale immutable files from the Windmill worker checkout"
   when: windmill_worker_checkout_stale_files.stdout | trim | length > 0
+  changed_when: false
+
+- name: Prune stale immutable empty directories from the Windmill worker checkout
+  ansible.builtin.shell: |
+    set -euo pipefail
+    python3 - <<'PY'
+    import json
+    import os
+    from pathlib import Path
+
+    repo_root = Path(os.environ["LV3_WINDMILL_REPO_ROOT"])
+    manifest_path = Path(os.environ["LV3_WINDMILL_MANIFEST_PATH"])
+    sync_paths = json.loads(os.environ["LV3_WINDMILL_SYNC_PATHS_JSON"])
+    preserve_prefixes = tuple(
+        entry.rstrip("/")
+        for entry in json.loads(os.environ["LV3_WINDMILL_PRESERVE_PATHS_JSON"])
+        if entry and entry != "."
+    )
+    manifest_entries = {
+        line.strip()
+        for line in manifest_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    }
+    manifest_directories = {
+        entry.rstrip("/")
+        for entry in manifest_entries
+        if entry.endswith("/")
+    }
+
+    removed = []
+    for relative_root in sync_paths:
+        candidate = repo_root / relative_root
+        if not candidate.exists() or not candidate.is_dir():
+            continue
+        for child in sorted(
+            (path for path in candidate.rglob("*") if path.is_dir()),
+            key=lambda path: len(path.relative_to(repo_root).parts),
+            reverse=True,
+        ):
+            relative_path = child.relative_to(repo_root).as_posix()
+            if any(
+                relative_path == prefix or relative_path.startswith(f"{prefix}/")
+                for prefix in preserve_prefixes
+            ):
+                continue
+            if relative_path in manifest_directories:
+                continue
+            try:
+                child.rmdir()
+            except OSError:
+                continue
+            removed.append(relative_path)
+
+    for entry in removed:
+        print(entry)
+    PY
+  args:
+    executable: /bin/bash
+  environment:
+    LV3_WINDMILL_REPO_ROOT: "{{ windmill_worker_repo_checkout_host_path }}"
+    LV3_WINDMILL_MANIFEST_PATH: "{{ windmill_worker_checkout_manifest_remote.path }}"
+    LV3_WINDMILL_SYNC_PATHS_JSON: "{{ windmill_worker_checkout_sync_paths | to_json }}"
+    LV3_WINDMILL_PRESERVE_PATHS_JSON: "{{ windmill_worker_checkout_prune_preserve_paths | to_json }}"
+  register: windmill_worker_checkout_stale_dirs
+  changed_when: windmill_worker_checkout_stale_dirs.stdout | trim | length > 0
+
+- name: Removed stale immutable empty directories from the Windmill worker checkout
+  ansible.builtin.debug:
+    msg: "Removed stale immutable empty directories from the Windmill worker checkout"
+  when: windmill_worker_checkout_stale_dirs.stdout | trim | length > 0
   changed_when: false
 
 - name: Ensure repo-backed Windmill runtime paths stay writable after checkout sync
@@ -1009,7 +1098,10 @@
         windmill_missing_network_failure: >-
           {{
             'network ' in (windmill_up.stderr | default(''))
-            and ' does not exist' in (windmill_up.stderr | default(''))
+            and (
+              ' does not exist' in (windmill_up.stderr | default(''))
+              or ' not found' in (windmill_up.stderr | default(''))
+            )
           }}
 
     - name: Reset the stale Windmill compose network before retrying startup

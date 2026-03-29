@@ -49,15 +49,23 @@ curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/pr
   http://100.64.0.1:8005/api/w/lv3/scripts/get/p/f%2Flv3%2Fweekly_capacity_report
 ```
 
-Run a script and wait for the result:
+Run a script through the repo helper:
 
 ```bash
-curl -s -X POST \
-  -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
-  -H "Content-Type: application/json" \
-  -d '{"no_live_metrics":true}' \
-  http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fweekly_capacity_report
+WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
+  python3 scripts/windmill_run_wait_result.py \
+    --base-url http://100.64.0.1:8005 \
+    --workspace lv3 \
+    --path f/lv3/weekly_capacity_report \
+    --payload-json '{"no_live_metrics":true}'
 ```
+
+The live Windmill runtime currently resolves script execution reliably by
+looking up `/api/w/<workspace>/scripts/get/p/<path>`, submitting
+`/api/w/<workspace>/jobs/run/h/<hash>`, and then polling
+`/api/w/<workspace>/jobs_u/get/<job_id>`. The helper above follows that
+contract directly and should be preferred over the older path-based
+`jobs/run_wait_result/p/...` route for representative operator checks.
 
 Open the authenticated raw app route:
 
@@ -88,21 +96,24 @@ Representative live checks:
 curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
   http://100.64.0.1:8005/api/w/lv3/scripts/get/p/f%2Flv3%2Fpost_merge_gate | jq '{path, summary}'
 
-curl -s -X POST \
-  -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
-  -H "Content-Type: application/json" \
-  -d '{"no_live_metrics":true}' \
-  http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fweekly_capacity_report
+WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
+  python3 scripts/windmill_run_wait_result.py \
+    --base-url http://100.64.0.1:8005 \
+    --workspace lv3 \
+    --path f/lv3/weekly_capacity_report \
+    --payload-json '{"no_live_metrics":true}'
 
-curl -s -X POST \
-  -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
-  -H "Content-Type: application/json" \
-  -d '{"dry_run":true}' \
-  http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Faudit_token_inventory
+WINDMILL_TOKEN="$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" \
+  python3 scripts/windmill_run_wait_result.py \
+    --base-url http://100.64.0.1:8005 \
+    --workspace lv3 \
+    --path f/lv3/audit_token_inventory \
+    --payload-json '{"dry_run":true}'
 ```
 
 ## Notes
 
 - Scheduled enablement remains owned by each workflow’s safety contract; ADR 0228 makes the Windmill execution surface present by default, not every schedule automatically enabled.
 - Some wrappers are intentionally powerful. The repo-managed wrapper, workflow budget, runbook, and secret contracts remain the governing safety boundary; seeding the script does not bypass those controls.
+- The mirrored worker checkout under `/srv/proxmox_florin_server` is a file mirror rather than a git clone. The Windmill runtime now prunes stale empty directories from that mirror so the worker-safe post-merge fallback does not trip on removed role paths.
 - `f/lv3/maintenance_window` is part of the default surface, but the current live NATS publish authorization gap in `docs/runbooks/maintenance-windows.md` still applies.

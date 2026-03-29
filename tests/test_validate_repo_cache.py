@@ -1,3 +1,4 @@
+import subprocess
 from pathlib import Path
 
 
@@ -111,3 +112,55 @@ def test_check_role_argument_specs_falls_back_without_git_metadata() -> None:
 
     assert 'rev-parse --is-inside-work-tree >/dev/null 2>&1' in script
     assert 'find "$REPO_ROOT/$COLLECTION_ROLES_ROOT" -mindepth 1 -maxdepth 1 -type d' in script
+    assert "find \"$REPO_ROOT/$role_dir\" -type f" in script
+
+
+def _stage_role_argument_specs_repo(tmp_path: Path) -> tuple[Path, Path]:
+    repo_root = tmp_path / "repo"
+    script_path = repo_root / "scripts" / "check_role_argument_specs.sh"
+    script_path.parent.mkdir(parents=True)
+    script_path.write_text(CHECK_ROLE_ARGUMENT_SPECS_SCRIPT.read_text(), encoding="utf-8")
+    script_path.chmod(0o755)
+    return repo_root, script_path
+
+
+def test_check_role_argument_specs_skips_empty_roles_without_git_metadata(tmp_path: Path) -> None:
+    repo_root, script_path = _stage_role_argument_specs_repo(tmp_path)
+    roles_root = repo_root / "collections" / "ansible_collections" / "lv3" / "platform" / "roles"
+
+    (roles_root / "empty_role" / "defaults").mkdir(parents=True)
+    good_role_meta = roles_root / "good_role" / "meta"
+    good_role_meta.mkdir(parents=True)
+    (good_role_meta / "argument_specs.yml").write_text(
+        "argument_specs:\n  main:\n    options: {}\n",
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        ["bash", str(script_path)],
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "empty_role" not in result.stderr
+
+
+def test_check_role_argument_specs_still_flags_populated_roles_without_meta(tmp_path: Path) -> None:
+    repo_root, script_path = _stage_role_argument_specs_repo(tmp_path)
+    role_dir = repo_root / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "bad_role" / "tasks"
+    role_dir.mkdir(parents=True)
+    (role_dir / "main.yml").write_text("---\n[]\n", encoding="utf-8")
+
+    result = subprocess.run(
+        ["bash", str(script_path)],
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "Missing meta/argument_specs.yml for bad_role" in result.stderr

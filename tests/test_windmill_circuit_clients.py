@@ -103,7 +103,11 @@ def test_scheduler_windmill_client_retries_401_with_bootstrap_login(monkeypatch:
                 fp=FakeResponse("Unauthorized"),
             )
         assert auth_header == "Bearer session-token"
-        return FakeResponse('"job-123"')
+        if request.full_url.endswith("/scripts/get/p/f%2Flv3%2Fdeploy-and-promote"):
+            return FakeResponse('{"hash":"hash-123"}')
+        if request.full_url.endswith("/jobs/run/h/hash-123"):
+            return FakeResponse('"job-123"')
+        raise AssertionError(request.full_url)
 
     monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
 
@@ -117,7 +121,8 @@ def test_scheduler_windmill_client_retries_401_with_bootstrap_login(monkeypatch:
         "running": True,
     }
     assert calls == [
-        ("https://windmill.example.test/api/w/lv3/jobs/run/p/f%2Flv3%2Fdeploy-and-promote", "Bearer managed-secret"),
+        ("https://windmill.example.test/api/w/lv3/scripts/get/p/f%2Flv3%2Fdeploy-and-promote", "Bearer managed-secret"),
         ("https://windmill.example.test/api/auth/login", None),
-        ("https://windmill.example.test/api/w/lv3/jobs/run/p/f%2Flv3%2Fdeploy-and-promote", "Bearer session-token"),
+        ("https://windmill.example.test/api/w/lv3/scripts/get/p/f%2Flv3%2Fdeploy-and-promote", "Bearer session-token"),
+        ("https://windmill.example.test/api/w/lv3/jobs/run/h/hash-123", "Bearer session-token"),
     ]

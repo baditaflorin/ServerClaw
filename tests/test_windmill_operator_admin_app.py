@@ -457,9 +457,17 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "windmill_worker_checkout_sync_paths" in tasks
     assert "Create a local manifest path for the Windmill worker checkout contents" in tasks
     assert "Render the local manifest for the Windmill worker checkout contents" in tasks
+    assert "manifest_entries = set()" in tasks
+    assert 'path.name == "__pycache__"' in tasks
+    assert 'path.suffix == ".pyc"' in tasks
+    assert 'manifest_entries.add(f"{path.relative_to(repo_root).as_posix().rstrip(\'/\')}/")' in tasks
     assert "Copy the staged Windmill worker checkout manifest to the guest" in tasks
     assert "Prune stale immutable files from the Windmill worker checkout" in tasks
     assert "Removed stale immutable files from the Windmill worker checkout" in tasks
+    assert "Prune stale immutable empty directories from the Windmill worker checkout" in tasks
+    assert "Removed stale immutable empty directories from the Windmill worker checkout" in tasks
+    assert "manifest_directories" in tasks
+    assert "child.rmdir()" in tasks
     assert "Remove the remote manifest for the Windmill worker checkout contents" in tasks
     assert "Remove the local manifest for the Windmill worker checkout contents" in tasks
     assert "windmill_worker_checkout_manifest_remote.path" in tasks
@@ -467,6 +475,9 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "scripts/windmill_run_wait_result.py" in tasks
     assert "--payload-json" in tasks
     assert "--timeout {{ windmill_seed_job_timeout_seconds }}" in tasks
+    assert "' not found' in (windmill_up.stderr | default(''))" in tasks
+    assert "Wait for Windmill workers to register" in verify_tasks
+    assert "/api/workers/list" in verify_tasks
     assert "--path {{ windmill_validation_gate_status_script_path | quote }}" in verify_tasks
     assert "Run the Windmill validation gate status script" in verify_tasks
     assert "Assert the Windmill validation gate status result" in verify_tasks

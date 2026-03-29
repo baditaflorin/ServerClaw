@@ -299,6 +299,26 @@ class HttpWindmillClient:
     ) -> dict[str, Any]:
         script_path = workflow_id if "/" in workflow_id else f"f/{self._workspace}/{workflow_id}"
         encoded_path = urllib.parse.quote(script_path, safe="")
+        script_hash = self._resolve_script_hash(script_path)
+        encoded_hash = urllib.parse.quote(script_hash, safe="")
+        try:
+            response = self._request(
+                f"/api/w/{self._workspace}/jobs/run/h/{encoded_hash}",
+                method="POST",
+                payload=arguments,
+                retry=False,
+            )
+            if isinstance(response, str):
+                return {"job_id": response, "running": True}
+            if isinstance(response, dict):
+                if "job_id" in response or "id" in response:
+                    return {"job_id": str(response.get("job_id") or response.get("id")), **response}
+                return response
+            raise RuntimeError(f"unexpected Windmill submit response: {response!r}")
+        except urllib.error.HTTPError as exc:
+            if exc.code not in {404, 405}:
+                raise
+
         try:
             response = self._request(
                 f"/api/w/{self._workspace}/jobs/run/p/{encoded_path}",
@@ -330,6 +350,20 @@ class HttpWindmillClient:
             "result": response,
             "mode": "sync_fallback",
         }
+
+    def _resolve_script_hash(self, script_path: str) -> str:
+        encoded_path = urllib.parse.quote(script_path, safe="")
+        response = self._request(
+            f"/api/w/{self._workspace}/scripts/get/p/{encoded_path}",
+            method="GET",
+            retry=False,
+        )
+        if not isinstance(response, dict):
+            raise RuntimeError(f"unexpected Windmill script metadata response: {response!r}")
+        script_hash = response.get("hash")
+        if not isinstance(script_hash, str) or not script_hash.strip():
+            raise RuntimeError(f"Windmill script metadata for {script_path!r} did not include a hash")
+        return script_hash.strip()
 
     def get_job(self, job_id: str) -> dict[str, Any]:
         response = self._request(

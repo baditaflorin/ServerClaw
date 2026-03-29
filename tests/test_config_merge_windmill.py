@@ -710,16 +710,24 @@ def test_run_wait_result_helper_retries_with_bootstrap_login(
                 fp=FakeResponse("Unauthorized"),
             )
         assert auth_header == "Bearer session-token"
-        return FakeResponse('{"status":"ok"}')
+        if request.full_url.endswith("/scripts/get/p/f%2Flv3%2Fwindmill_healthcheck"):
+            return FakeResponse('{"hash":"hash-123"}')
+        if request.full_url.endswith("/jobs/run/h/hash-123"):
+            return FakeResponse("job-123")
+        if request.full_url.endswith("/jobs_u/get/job-123"):
+            return FakeResponse('{"type":"CompletedJob","success":true,"result":{"status":"ok"}}')
+        raise AssertionError(request.full_url)
 
     monkeypatch.setattr(module.urllib.request, "urlopen", fake_urlopen)
 
     assert module.main() == 0
     assert json.loads(capsys.readouterr().out) == {"status": "ok"}
     assert calls == [
-        "http://windmill.internal/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fwindmill_healthcheck",
+        "http://windmill.internal/api/w/lv3/scripts/get/p/f%2Flv3%2Fwindmill_healthcheck",
         "http://windmill.internal/api/auth/login",
-        "http://windmill.internal/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fwindmill_healthcheck",
+        "http://windmill.internal/api/w/lv3/scripts/get/p/f%2Flv3%2Fwindmill_healthcheck",
+        "http://windmill.internal/api/w/lv3/jobs/run/h/hash-123",
+        "http://windmill.internal/api/w/lv3/jobs_u/get/job-123",
     ]
 
 

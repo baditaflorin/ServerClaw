@@ -113,11 +113,24 @@
       - -v
       - ON_ERROR_STOP=1
       - -c
-      - "CREATE ROLE {{ windmill_database_support_role }}"
+      - "CREATE ROLE {{ windmill_database_support_role }} BYPASSRLS"
   changed_when: true
   when:
     - windmill_postgres_writable_check.stdout | trim == "1"
     - windmill_postgres_support_role_check.stdout != "1"
+
+- name: Ensure the Windmill support role attributes match the managed policy
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER ROLE {{ windmill_database_support_role }} BYPASSRLS"
+  changed_when: false
+  when: windmill_postgres_writable_check.stdout | trim == "1"
 
 - name: Check whether the Windmill admin role already exists
   become: true
