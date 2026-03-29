@@ -1,9 +1,6 @@
 {% if health_warning %}
 <div class="banner warning">Gateway health aggregation is degraded: {{ health_warning }}</div>
 {% endif %}
-{% if attestation_warning %}
-<div class="banner warning">Declared-to-live attestation is degraded: {{ attestation_warning }}</div>
-{% endif %}
 
 <div class="overview-grid">
   <section class="panel summary-panel">
@@ -18,10 +15,6 @@
     <div class="stat-block">
       <span class="label">Unsuppressed Drift</span>
       <strong>{{ drift_summary.unsuppressed_count or 0 }}</strong>
-    </div>
-    <div class="stat-block">
-      <span class="label">Attested</span>
-      <strong>{{ attestation_summary.attested or 0 }}/{{ attestation_summary.total or 0 }}</strong>
     </div>
   </section>
 
@@ -254,10 +247,6 @@
         <dd>{{ service.drift_items|length }} findings</dd>
       </div>
       <div>
-        <dt>Attestation</dt>
-        <dd>{{ service.attestation_status }}</dd>
-      </div>
-      <div>
         <dt>Surface</dt>
         <dd>{{ service.public_url or service.internal_url or "Private only" }}</dd>
       </div>
@@ -280,10 +269,6 @@
       {% endfor %}
     </div>
     {% endif %}
-
-    <div class="hint-strip">
-      <span>Declared-live {{ service.attestation_status }} · {{ service.attestation_detail }}</span>
-    </div>
 
     {% if service.maintenance_windows %}
     <div class="hint-strip">

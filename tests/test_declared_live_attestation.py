@@ -237,6 +237,41 @@ def test_collect_declared_live_attestations_fails_without_matching_receipt(monke
     assert api_gateway["receipt_witness"]["status"] == "fail"
 
 
+def test_collect_declared_live_attestations_ignores_unreadable_receipt(monkeypatch, tmp_path: Path) -> None:
+    repo_root = build_repo(tmp_path)
+    unreadable_receipt = repo_root / "receipts" / "live-applies" / "2026-03-29-api-gateway-bad-live-apply.json"
+    unreadable_receipt.parent.mkdir(parents=True, exist_ok=True)
+    unreadable_receipt.write_bytes(b"\xff\xfe\x00bad-json")
+
+    monkeypatch.setattr(
+        module,
+        "http_probe",
+        lambda url, **kwargs: {
+            "status": "pass",
+            "observed": "HTTP 200",
+            "http_status": 200,
+            "observed_target": url,
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "tcp_probe",
+        lambda host, port, **kwargs: {
+            "status": "pass",
+            "observed": f"TCP {host}:{port}",
+            "http_status": None,
+            "observed_target": f"{host}:{port}",
+        },
+    )
+
+    payload = module.collect_declared_live_attestations(repo_root=repo_root, timeout_seconds=1.0, max_workers=2)
+    api_gateway = next(item for item in payload["services"] if item["service_id"] == "api_gateway")
+
+    assert api_gateway["status"] == "attested"
+    assert api_gateway["receipt_witness"]["status"] == "pass"
+    assert api_gateway["receipt_witness"]["receipt"]["receipt_id"] == "2026-03-28-api-gateway-live-apply"
+
+
 def test_collect_declared_live_service_attestation_only_probes_requested_service(
     monkeypatch,
     tmp_path: Path,

@@ -559,7 +559,7 @@ def latest_receipt_for_service(
     for receipt_path in sorted(receipts_dir(repo_root).rglob("*.json"), reverse=True):
         try:
             receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError:
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError):
             continue
         receipt_environment = receipt.get("environment")
         if isinstance(receipt_environment, str) and receipt_environment != environment:

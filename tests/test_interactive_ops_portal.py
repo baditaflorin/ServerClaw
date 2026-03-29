@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from scripts.ops_portal.app import PortalSettings, create_app, normalize_attestation, normalize_health
+from scripts.ops_portal.app import PortalRepository, PortalSettings, create_app, normalize_health
 
 
 def test_ops_portal_package_import_works_in_container_layout() -> None:
@@ -35,7 +35,6 @@ def test_ops_portal_package_import_works_in_container_layout() -> None:
 class FakeGatewayClient:
     def __init__(self) -> None:
         self.platform_health_tokens: list[str | None] = []
-        self.platform_attestation_tokens: list[str | None] = []
         self.agent_coordination_tokens: list[str | None] = []
         self.runbook_fetch_tokens: list[str | None] = []
         self.service_health_calls: list[dict[str, object]] = []
@@ -100,28 +99,6 @@ class FakeGatewayClient:
                     ],
                 },
             ]
-        }
-
-    async def fetch_platform_attestation(self, token: str | None = None) -> dict[str, object]:
-        self.platform_attestation_tokens.append(token)
-        return {
-            "summary": {"total": 3, "attested": 2, "missing": 1, "route_failed": 0},
-            "services": [
-                {
-                    "service_id": "grafana",
-                    "status": "attested",
-                    "endpoint_proof": {"status": "pass"},
-                    "route_proof": {"status": "pass"},
-                    "receipt_witness": {"status": "pass"},
-                },
-                {
-                    "service_id": "ops_portal",
-                    "status": "missing",
-                    "endpoint_proof": {"status": "pass"},
-                    "route_proof": {"status": "pass"},
-                    "receipt_witness": {"status": "fail"},
-                },
-            ],
         }
 
     async def fetch_agent_coordination(self, token: str | None = None) -> dict[str, object]:
@@ -516,13 +493,10 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Recent Live Applies" in response.text
     assert "shared-edge / platform-sso" in response.text
     assert "ops.lv3.org · operator · shared-edge · platform-sso" in response.text
-    assert "Attested" in response.text
-    assert "Declared-live missing" in response.text
     assert "Capability Contracts" in response.text
     assert "Identity Provider" in response.text
     assert "Keycloak" in response.text
     assert gateway.platform_health_tokens == ["test-token"]
-    assert gateway.platform_attestation_tokens == ["test-token"]
     assert gateway.agent_coordination_tokens == ["test-token"]
     assert gateway.runbook_fetch_tokens == ["test-token"]
 
@@ -676,32 +650,61 @@ def test_normalize_health_accepts_service_id_list_payload() -> None:
     assert result["ops_portal"]["detail"] == "Maintenance window"
 
 
-def test_normalize_attestation_preserves_route_and_receipt_statuses() -> None:
-    services = [{"id": "grafana"}, {"id": "ops_portal"}]
-    payload = {
-        "summary": {"total": 2, "attested": 1, "missing": 1, "route_failed": 0},
-        "services": [
-            {
-                "service_id": "grafana",
-                "status": "attested",
-                "endpoint_proof": {"status": "pass"},
-                "route_proof": {"status": "pass"},
-                "receipt_witness": {"status": "pass"},
-            },
-            {
-                "service_id": "ops_portal",
-                "status": "missing",
-                "endpoint_proof": {"status": "pass"},
-                "route_proof": {"status": "pass"},
-                "receipt_witness": {"status": "fail"},
-            },
-        ],
-    }
+def test_load_live_apply_receipts_ignores_unreadable_receipts(tmp_path: Path) -> None:
+    data_root = tmp_path / "data"
+    live_applies_dir = data_root / "receipts" / "live-applies"
+    drift_receipts_dir = data_root / "receipts" / "drift-reports"
+    config_dir = data_root / "config"
+    config_dir.mkdir(parents=True)
+    live_applies_dir.mkdir(parents=True)
+    drift_receipts_dir.mkdir(parents=True)
 
-    attestation, summary = normalize_attestation(payload, services)
+    (config_dir / "service-capability-catalog.json").write_text('{"services":[]}\n', encoding="utf-8")
+    (config_dir / "subdomain-exposure-registry.json").write_text('{"publications":[]}\n', encoding="utf-8")
+    (config_dir / "workflow-catalog.json").write_text('{"workflows":{}}\n', encoding="utf-8")
+    (data_root / "changelog.md").write_text("# Changelog\n", encoding="utf-8")
 
-    assert summary["attested"] == 1
-    assert attestation["grafana"]["status"] == "attested"
-    assert attestation["grafana"]["route_status"] == "pass"
-    assert attestation["ops_portal"]["receipt_status"] == "fail"
-    assert attestation["ops_portal"]["detail"] == "endpoint pass / route pass / receipt fail"
+    (live_applies_dir / "2026-03-29-good.json").write_text(
+        json.dumps(
+            {
+                "receipt_id": "receipt-ops-portal",
+                "summary": "Applied ops portal runtime",
+                "workflow_id": "live-apply-service service=ops_portal env=production",
+                "recorded_on": "2026-03-29T18:00:00Z",
+                "recorded_by": "ops",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (live_applies_dir / "2026-03-30-bad.json").write_bytes(b"\xa3\x00not-utf8")
+
+    settings = PortalSettings(
+        gateway_url="http://gateway.invalid",
+        session_secret="test-secret",
+        static_api_token="test-token",
+        service_catalog_path=config_dir / "service-capability-catalog.json",
+        publication_registry_path=config_dir / "subdomain-exposure-registry.json",
+        workflow_catalog_path=config_dir / "workflow-catalog.json",
+        changelog_path=data_root / "changelog.md",
+        live_applies_dir=live_applies_dir,
+        drift_receipts_dir=drift_receipts_dir,
+        maintenance_windows_path=None,
+        docs_base_url="https://docs.lv3.org",
+        grafana_logs_url="https://grafana.lv3.org/explore?service={service}",
+    )
+
+    repository = PortalRepository(settings)
+    receipts = repository.load_live_apply_receipts(
+        [
+            {
+                "id": "ops_portal",
+                "name": "Platform Operations Portal",
+                "internal_url": "http://10.10.10.20:8092",
+                "public_url": "https://ops.lv3.org",
+            }
+        ]
+    )
+
+    assert [receipt["receipt_id"] for receipt in receipts] == ["receipt-ops-portal"]
+    assert receipts[0]["_matched_services"] == ["ops_portal"]
