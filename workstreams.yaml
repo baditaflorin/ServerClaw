@@ -1385,7 +1385,6 @@ workstreams:
       included_in_repo_version: null
       latest_receipts:
         https_tls_assurance: 2026-03-28-adr-0249-https-tls-assurance-live-apply
-    live_applied: false
   - id: ws-0237-live-apply
     adr: "0237"
     title: Live apply schema-first human forms via React Hook Form and Zod
