@@ -10,6 +10,9 @@ roles:
   api_gateway_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  artifact_cache_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   backup_vm:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.

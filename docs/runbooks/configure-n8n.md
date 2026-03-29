@@ -41,7 +41,15 @@ This workflow:
 - generates the database password, owner password, and encryption key if missing
 - stores runtime secrets through the shared OpenBao compose-env path
 - starts or updates the n8n compose stack on `docker-runtime-lv3`
+- runs `n8n` in host-network mode so the runtime reaches private guest-network
+  dependencies such as `postgres-lv3` directly instead of relying on Docker
+  bridge NAT
 - re-renders the shared edge config so `n8n.lv3.org` is published
+
+The playbook intentionally sets
+`public_edge_sync_generated_static_dirs: false` for the n8n edge publication.
+Fresh worktrees can therefore replay `make converge-n8n` without first
+rebuilding unrelated shared docs or changelog static portals.
 
 ## Verification
 
@@ -62,6 +70,10 @@ Public webhook prefix without the browser auth redirect:
 ```bash
 curl -sSI https://n8n.lv3.org/webhook-test/serverclaw-connector-smoke
 ```
+
+Expect a direct n8n response, usually `404` until a test workflow exists. The
+important contract is that the request reaches the application without an
+`/oauth2/sign_in` redirect.
 
 Guest-local readiness:
 

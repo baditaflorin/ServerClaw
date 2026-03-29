@@ -162,7 +162,7 @@ workstreams:
   - id: ws-0224-repo-intake
     adr: "0224"
     title: Self-service repo intake and agent-assisted app deployments
-    status: live_applied
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0224-repo-intake
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0224-repo-intake
@@ -973,7 +973,7 @@ workstreams:
   - id: ws-0259-live-apply
     adr: "0259"
     title: Live apply n8n as the external app connector fabric for ServerClaw
-    status: in_progress
+    status: ready_for_merge
     owner: codex
     branch: codex/adr-0259-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0259-live-apply
@@ -996,8 +996,8 @@ workstreams:
       - tests/test_validate_service_catalog.py
       - tests/test_n8n_metadata.py
       - receipts/live-applies/
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
   - id: ws-0244-runtime-assurance-adrs
     adr: "0244"
     title: Runtime assurance architecture bundle

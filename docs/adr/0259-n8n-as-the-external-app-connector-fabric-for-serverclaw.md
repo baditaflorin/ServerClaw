@@ -1,9 +1,10 @@
 # ADR 0259: n8n As The External App Connector Fabric For ServerClaw
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: not yet
+- Implemented In Platform Version: 0.130.50
+- Implemented On: 2026-03-29
 - Date: 2026-03-28
 
 ## Context
@@ -68,6 +69,20 @@ We will use **n8n** as the external app connector fabric for ServerClaw.
 
 - ADR 0206: Ports and adapters for external integrations
 - ADR 0258: Temporal as the durable ServerClaw session orchestrator
+
+## Implementation Notes
+
+The live platform implementation was re-verified on 2026-03-29 by replaying
+`make converge-n8n` from rebased latest-`origin/main` commit
+`07898c3787d68260df5caecfc5d61eb942255bd3`. The branch-local proof covers the
+protected editor redirect, unauthenticated webhook ingress, guest-local
+readiness and owner-login checks, and the repo-managed runtime adjustments that
+pin topology lookups to `proxmox_florin`, run `n8n` in host-network mode, and
+avoid unrelated shared static-site sync prerequisites in fresh worktrees.
+
+The main-only integration files still remain pending until merge:
+`VERSION`, release sections in `changelog.md`, the top-level `README.md`
+integrated status summary, and `versions/stack.yaml`.
 
 ## References
 

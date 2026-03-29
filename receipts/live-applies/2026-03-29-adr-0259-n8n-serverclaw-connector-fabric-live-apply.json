@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T11:53:08Z",
+  "recorded_by": "codex",
+  "source_commit": "07898c3787d68260df5caecfc5d61eb942255bd3",
+  "repo_version_context": "0.177.73",
+  "platform_version_context": "0.130.50",
+  "workflow_id": "adr-0259-n8n-serverclaw-connector-fabric-live-apply",
+  "adr": "0259",
+  "summary": "Live-applied ADR 0259 from the rebased latest-origin/main worktree by reaffirming n8n as the ServerClaw external connector fabric, binding the runtime topology lookups to proxmox_florin, switching n8n to host networking for private guest-network reachability, skipping unrelated generated static-site syncs during edge publication, and replaying make converge-n8n successfully through postgres-lv3, docker-runtime-lv3, and nginx-lv3.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "n8n",
+      "address": "https://n8n.lv3.org/"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0259 regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml --with jsonschema python -m pytest -q tests/test_n8n_playbook.py tests/test_n8n_runtime_role.py tests/test_n8n_metadata.py tests/test_validate_service_catalog.py` returned `17 passed in 36.81s`, and `make syntax-check-n8n` passed on the rebased latest-main worktree."
+    },
+    {
+      "check": "n8n service contracts and placement guardrails",
+      "result": "pass",
+      "observed": "`uvx --from pyyaml python scripts/interface_contracts.py --check-live-apply service:n8n` returned `Live apply contract OK: service:n8n -> playbooks/services/n8n.yml`; `uv run --with pyyaml python scripts/standby_capacity.py --service n8n` returned `Decision: approved`; `uv run --with pyyaml --with jsonschema python scripts/service_redundancy.py --check-live-apply --service n8n` returned `declared R1 -> platform R1 -> implemented R0 [gate=unproven] (primary_only) standby=cold@docker-runtime-lv3`; and `uv run --with pyyaml --with jsonschema python scripts/immutable_guest_replacement.py --check-live-apply --service n8n --allow-in-place-mutation` confirmed the service remains governed by immutable guest replacement on `docker-runtime-lv3`."
+    },
+    {
+      "check": "Exact-main n8n converge replay",
+      "result": "pass",
+      "observed": "`make converge-n8n` completed successfully from source commit `07898c3787d68260df5caecfc5d61eb942255bd3`, rebased on top of `origin/main` commit `690108042934e878c6d2239090816e10c1701740`, with recap `docker-runtime-lv3 ok=117 changed=2 failed=0 skipped=32`, `postgres-lv3 ok=47 changed=0 failed=0 skipped=7`, `nginx-lv3 ok=37 changed=2 failed=0 skipped=8`, and `localhost ok=18 changed=0 failed=0 skipped=3`."
+    },
+    {
+      "check": "External public edge verification",
+      "result": "pass",
+      "observed": "`curl -fsS https://n8n.lv3.org/healthz` returned `{\"status\":\"ok\"}`; `curl -fsSI https://n8n.lv3.org/` returned `HTTP/2 302` with `location: https://n8n.lv3.org/oauth2/sign_in?rd=https://n8n.lv3.org/`; and `curl -sSI https://n8n.lv3.org/webhook-test/serverclaw-connector-smoke` returned `HTTP/2 404` from the application without an oauth redirect, preserving the public webhook ingress contract."
+    },
+    {
+      "check": "Guest-local readiness, login, and runtime state",
+      "result": "pass",
+      "observed": "A guest-local verification playbook on `docker-runtime-lv3` returned `readiness_status: 200`, `readiness_body: ok`, `login_email: ops@lv3.org`, and `login_role: global:owner`. `ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell -a 'sudo docker ps | grep -w n8n' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519` showed `docker.n8n.io/n8nio/n8n:2.2.6` and `openbao/openbao:2.5.1` both running."
+    }
+  ],
+  "evidence_refs": [
+    "collections/ansible_collections/lv3/platform/playbooks/n8n.yml",
+    "collections/ansible_collections/lv3/platform/roles/n8n_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/n8n_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/n8n_runtime/templates/docker-compose.yml.j2",
+    "config/command-catalog.json",
+    "config/service-capability-catalog.json",
+    "config/workflow-catalog.json",
+    "docs/adr/0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md",
+    "docs/runbooks/configure-n8n.md",
+    "docs/workstreams/ws-0259-live-apply.md",
+    "playbooks/n8n.yml",
+    "receipts/live-applies/2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-live-apply.json",
+    "tests/test_n8n_metadata.py",
+    "tests/test_n8n_playbook.py",
+    "tests/test_n8n_runtime_role.py",
+    "tests/test_validate_service_catalog.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "The first worktree replay surfaced two real defects before this final exact-main run: n8n was resolving topology from an undefined guest-local variable, and the container could not reach postgres-lv3 over the Docker bridge even though the host could. The live apply fixed both by sourcing topology from proxmox_florin and running n8n in host-network mode.",
+    "The n8n edge publication now opts out of unrelated generated static-site syncs so a fresh worktree can replay the shared NGINX edge lane without prebuilding docs or changelog portals.",
+    "This receipt records the branch-local live apply. The main-only merge surfaces still remain pending: VERSION, release sections in changelog.md, the top-level README.md integrated status summary, versions/stack.yaml, and a final exact-main receipt after merge to main.",
+    "The current redundancy report remains at implemented R0 because no recorded R1 rehearsal proof exists yet for n8n; this receipt does not claim that higher redundancy evidence."
+  ]
+}

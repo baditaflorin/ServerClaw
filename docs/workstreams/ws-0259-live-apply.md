@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0259](../adr/0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md)
 - Title: Re-verify the governed n8n lane as the external app connector fabric for ServerClaw
-- Status: in_progress
-- Implemented In Repo Version: N/A
-- Live Applied In Platform Version: N/A
-- Implemented On: N/A
-- Live Applied On: N/A
+- Status: ready_for_merge
+- Implemented In Repo Version: not yet
+- Live Applied In Platform Version: 0.130.50
+- Implemented On: 2026-03-29
+- Live Applied On: 2026-03-29
 - Branch: `codex/adr-0259-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0259-live-apply`
 - Owner: codex
@@ -61,12 +61,47 @@
 
 ## Live Apply Outcome
 
-Pending live replay.
+- Exact-main replay succeeded from source commit
+  `07898c3787d68260df5caecfc5d61eb942255bd3`, rebased on top of
+  `origin/main` commit `690108042934e878c6d2239090816e10c1701740`
+  (`VERSION` `0.177.73`), with final recap
+  `docker-runtime-lv3 ok=117 changed=2 failed=0 skipped=32`,
+  `postgres-lv3 ok=47 changed=0 failed=0 skipped=7`,
+  `nginx-lv3 ok=37 changed=2 failed=0 skipped=8`, and
+  `localhost ok=18 changed=0 failed=0 skipped=3`.
+- The branch-local live apply fixed the real replay blockers surfaced during the
+  first run: `n8n` now reads topology from `hostvars['proxmox_florin']`, uses
+  host networking to reach `postgres-lv3` across the private guest network, and
+  skips unrelated generated static-site syncs when publishing through the
+  shared NGINX edge from a fresh worktree.
+- Service-specific guardrails also passed on the rebased head:
+  `scripts/interface_contracts.py --check-live-apply service:n8n`,
+  `scripts/standby_capacity.py --service n8n`,
+  `scripts/service_redundancy.py --check-live-apply --service n8n`, and
+  `scripts/immutable_guest_replacement.py --check-live-apply --service n8n --allow-in-place-mutation`.
 
 ## Live Evidence
 
-Pending live replay.
+- `curl -fsS https://n8n.lv3.org/healthz` returned `{"status":"ok"}`.
+- `curl -fsSI https://n8n.lv3.org/` returned `HTTP/2 302` with
+  `location: https://n8n.lv3.org/oauth2/sign_in?rd=https://n8n.lv3.org/`.
+- `curl -sSI https://n8n.lv3.org/webhook-test/serverclaw-connector-smoke`
+  returned `HTTP/2 404` from `n8n` without an oauth redirect, preserving the
+  unauthenticated webhook ingress contract.
+- Guest-local verification on `docker-runtime-lv3` returned
+  `readiness_status: 200`, `readiness_body: ok`,
+  `login_email: ops@lv3.org`, and `login_role: global:owner`.
+- `sudo docker ps | grep -w n8n` on `docker-runtime-lv3` showed the
+  `docker.n8n.io/n8nio/n8n:2.2.6` runtime container and the
+  `openbao/openbao:2.5.1` sidecar both running.
+- `scripts/service_redundancy.py --check-live-apply --service n8n` still reports
+  `declared R1 -> platform R1 -> implemented R0 [gate=unproven]` because the
+  repository has no recorded R1 rehearsal proof yet; this live apply does not
+  claim that proof.
 
 ## Mainline Integration Outcome
 
-Pending merge to `main`.
+- Pending the main-only integration surfaces:
+  `VERSION`, release sections in `changelog.md`, the top-level `README.md`
+  integrated status summary, `versions/stack.yaml`, and a final exact-main
+  receipt after merge to `main`.
