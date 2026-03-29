@@ -4431,7 +4431,7 @@ adr_index:
       - serverclaw
     summary: We will use n8n as the external app connector fabric for ServerClaw.
     filename: 0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md
-    implemented_version: 0.130.50
+    implemented_version: 0.177.79
   - adr: '0260'
     title: Nextcloud As The Canonical Personal Data Plane For ServerClaw
     status: Accepted

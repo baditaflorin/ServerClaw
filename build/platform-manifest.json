@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.78",
-  "platform_version": "0.130.53",
-  "generated_at": "2026-03-29T13:08:12Z",
-  "next_refresh_at": "2026-03-29T14:08:12Z",
+  "repo_version": "0.177.79",
+  "platform_version": "0.130.54",
+  "generated_at": "2026-03-29T13:51:20Z",
+  "next_refresh_at": "2026-03-29T14:51:20Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -1350,7 +1350,7 @@
       },
       {
         "id": "converge-n8n",
-        "description": "Converge n8n on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress.",
+        "description": "Converge the n8n connector fabric on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress for ServerClaw adapters.",
         "tags": [
           "converge-n8n",
           "guest-live",
@@ -4211,10 +4211,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.77",
+    "last_version": "0.177.78",
     "deployed_at": "2026-03-29",
-    "summary": "implemented ADR 0265 by replacing mutable remote validation mirrors with immutable content-addressed repository snapshots, fresh per-run build-server namespaces, and repository-shape-safe remote schema and dependency checks on the newest exact `main`",
-    "release_notes_url": "docs/release-notes/0.177.78.md"
+    "summary": "implemented ADR 0259 by reaffirming the governed n8n lane as the ServerClaw external connector fabric, hardening the runtime for proxmox_florin-scoped topology, private postgres reachability, and fresh-worktree edge publication, and recording a latest-main live-apply replay with protected editor and webhook verification",
+    "release_notes_url": "docs/release-notes/0.177.79.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

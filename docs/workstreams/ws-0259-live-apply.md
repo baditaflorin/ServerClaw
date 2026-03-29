@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0259](../adr/0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md)
 - Title: Re-verify the governed n8n lane as the external app connector fabric for ServerClaw
-- Status: ready_for_merge
-- Implemented In Repo Version: not yet
-- Live Applied In Platform Version: 0.130.50
+- Status: live_applied
+- Implemented In Repo Version: 0.177.79
+- Live Applied In Platform Version: 0.130.54
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/adr-0259-live-apply`
@@ -40,6 +40,7 @@
 - `tests/test_restore_verification.py`
 - `workstreams.yaml`
 - `receipts/live-applies/2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-live-apply.json`
+- `receipts/live-applies/2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply.json`
 
 ## Expected Live Surfaces
 
@@ -63,29 +64,28 @@
 
 ## Live Apply Outcome
 
-- Exact-main replay succeeded from source commit
-  `8751d7f0f784794320994e6aca8a7cd9af0e423b`, rebased on top of
-  `origin/main` commit `90c3b26f93fbfe6ffdaecd74fdc422cfcf10281f`
-  (`VERSION` `0.177.76`, integrated platform baseline `0.130.51`), with final
+- The merged exact-main replay succeeded from source commit
+  `c54fe1c579551248792f064e4e281d00aebf6bd0` on top of `origin/main` commit
+  `4a1f518ab7b0f7e5a997110f55c683a6700c1667`
+  (`VERSION` `0.177.79`, integrated platform baseline `0.130.53`), with final
   recap
   `docker-runtime-lv3 ok=117 changed=2 failed=0 skipped=32`,
   `postgres-lv3 ok=47 changed=0 failed=0 skipped=7`,
   `nginx-lv3 ok=37 changed=2 failed=0 skipped=8`, and
   `localhost ok=18 changed=0 failed=0 skipped=3`.
-- The branch-local live apply fixed the real replay blockers surfaced during the
-  first run: `n8n` now reads topology from `hostvars['proxmox_florin']`, uses
-  host networking to reach `postgres-lv3` across the private guest network, and
-  skips unrelated generated static-site syncs when publishing through the
-  shared NGINX edge from a fresh worktree.
-- Focused regression and repo-facing validation also passed on the rebased
-  head: `24` targeted tests passed across the n8n metadata, playbook, runtime,
+- The workstream fixed the real replay blockers surfaced during the first
+  branch-local run: `n8n` now reads topology from
+  `hostvars['proxmox_florin']`, uses host networking to reach `postgres-lv3`
+  across the private guest network, and skips unrelated generated static-site
+  syncs when publishing through the shared NGINX edge from a fresh worktree.
+- Focused regression and repo-facing validation passed on the workstream head:
+  `24` targeted tests passed across the n8n metadata, playbook, runtime,
   idempotency, and artifact-cache guardrails; `make syntax-check-n8n` passed;
   and the service-specific guardrails remained green for interface contracts,
   standby capacity, service redundancy, and immutable guest replacement.
-- The repo-wide validation sweep also required migrating a pre-existing
-  restore-readiness warm-up loop onto the shared retry framework so the
-  `check_ad_hoc_retry.py` gate now passes on the same branch that carries the
-  ADR 0259 live-apply evidence.
+- The exact-main replay advanced the integrated platform baseline from
+  `0.130.53` to `0.130.54` and recorded a canonical mainline receipt for the
+  merged truth.
 
 ## Live Evidence
 
@@ -108,11 +108,11 @@
 
 ## Mainline Integration Outcome
 
-- Pending the main-only integration surfaces:
-  `VERSION`, release sections in `changelog.md`, the top-level `README.md`
-  integrated status summary, `versions/stack.yaml`, and a final exact-main
-  receipt after merge to `main`.
-- The branch-local `make validate` sweep now clears every non-release stage and
-  stops only at generated canonical truth for `changelog.md`, which is
-  expected until those protected merge-to-`main` surfaces are updated in the
-  final integration step.
+- Release `0.177.79` was cut on 2026-03-29 from the merged mainline integration
+  worktree.
+- `VERSION`, `changelog.md`, `README.md`, `versions/stack.yaml`, and
+  `workstreams.yaml` were updated from main, and the exact-main receipt
+  `2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply`
+  now records the integrated live-apply truth.
+- The integrated platform version advanced to `0.130.54` after the exact-main
+  replay and verification steps completed.

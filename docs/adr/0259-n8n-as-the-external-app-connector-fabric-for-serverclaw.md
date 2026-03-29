@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: not yet
+- Implemented In Repo Version: 0.177.79
 - Implemented In Platform Version: 0.130.50
 - Implemented On: 2026-03-29
 - Date: 2026-03-28
@@ -72,20 +72,23 @@ We will use **n8n** as the external app connector fabric for ServerClaw.
 
 ## Implementation Notes
 
-The live platform implementation was re-verified on 2026-03-29 by replaying
-`make converge-n8n` from source commit
-`8751d7f0f784794320994e6aca8a7cd9af0e423b`, rebased on top of latest
-`origin/main` commit `90c3b26f93fbfe6ffdaecd74fdc422cfcf10281f`
-(`VERSION` `0.177.76`, platform baseline `0.130.51`). The branch-local proof
-covers the protected editor redirect, unauthenticated webhook ingress,
-guest-local readiness and owner-login checks, and the repo-managed runtime
-adjustments that pin topology lookups to `proxmox_florin`, run `n8n` in
-host-network mode, and avoid unrelated shared static-site sync prerequisites in
-fresh worktrees.
+The first live platform verification for this ADR became true on 2026-03-29 at
+platform version `0.130.50`, which is why the ADR records that first verified
+platform version instead of the later integrated replay.
 
-The main-only integration files still remain pending until merge:
-`VERSION`, release sections in `changelog.md`, the top-level `README.md`
-integrated status summary, and `versions/stack.yaml`.
+That branch-local live apply was followed by an exact-main replay on 2026-03-29
+from source commit `c54fe1c579551248792f064e4e281d00aebf6bd0` on top of latest
+`origin/main` commit `4a1f518ab7b0f7e5a997110f55c683a6700c1667`
+(`VERSION` `0.177.79`, integrated platform baseline `0.130.53`). The exact-main
+proof re-ran `make converge-n8n`, confirmed the protected editor redirect,
+confirmed unauthenticated webhook ingress still reaches n8n without the browser
+auth redirect, verified guest-local readiness and owner-login on
+`docker-runtime-lv3`, and re-confirmed the repo-managed runtime adjustments that
+pin topology lookups to `proxmox_florin`, run `n8n` in host-network mode, and
+avoid unrelated shared static-site sync prerequisites in fresh worktrees.
+
+The integrated mainline replay advanced the platform baseline to `0.130.54` and
+recorded a canonical mainline receipt for the merged truth.
 
 ## References
 
