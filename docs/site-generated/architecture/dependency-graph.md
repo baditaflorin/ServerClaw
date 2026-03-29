@@ -4,6 +4,10 @@ portal_display: full
 tags:
   - architecture
   - dependency-graph
+pagefind_section: architecture
+pagefind_audience:
+  - contributors
+  - operators
 ---
 
 !!! note "Sensitivity: INTERNAL"
@@ -17,7 +21,8 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, Mail Platform, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
+<<<<<<< HEAD
+| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, Mail Platform, Mailpit, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
 | `2` | Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Excalidraw, Gitea, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Open WebUI, Outline, Plane, Public Status Page, Semaphore, ServerClaw, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway |
 | `4` | Ops Portal |
@@ -35,6 +40,7 @@ graph TD
     harbor["Harbor\nTier 1"]
     headscale["Headscale\nTier 1"]
     mail_platform["Mail Platform\nTier 1"]
+    mailpit["Mailpit\nTier 1"]
     realtime["Netdata Realtime Metrics\nTier 1"]
     nginx_edge["NGINX Edge\nTier 1"]
     nomad["Nomad\nTier 1"]
@@ -106,6 +112,7 @@ graph TD
     headscale -->|soft| nginx_edge
     homepage -->|hard| keycloak
     homepage -->|hard| nginx_edge
+    keycloak -->|soft| mailpit
     keycloak -->|soft| nginx_edge
     keycloak -->|startup_only| openbao
     keycloak -->|hard| postgres
