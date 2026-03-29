@@ -7,10 +7,10 @@
 
 schema_version: 1
 generated: '2026-03-29'
-total_adrs: 279
+total_adrs: 281
 implementation_status_summary:
   Implemented: 225
-  Partial: 4
+  Partial: 6
   Not Implemented: 49
   Deprecated: 1
 concerns:
@@ -33,6 +33,7 @@ concerns:
     - '0167'
     - 0168
     - 0181
+    - '0224'
     - '0254'
   api:
     - 0049
@@ -245,6 +246,7 @@ concerns:
     - '0260'
     - '0261'
     - '0270'
+    - '0274'
   release:
     - 0008
     - '0110'
@@ -3830,6 +3832,21 @@ adr_index:
     summary: We will centralize HA and replication intent in one canonical topology
     filename: 0223-canonical-ha-topology-catalog-and-reusable-automation-profiles.md
   - adr: '0224'
+    title: Self-Service Repo Intake And Agent-Assisted Deployments
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-28'
+    concern: agent-discovery
+    keywords:
+      - self-service
+      - repo
+      - intake
+      - agent-assisted
+      - deployments
+    summary: We will extend the existing ADR 0194 Coolify deploy path instead of introducing
+    filename: 0224-self-service-repo-intake-and-agent-assisted-deployments.md
+    implemented_version: 0.177.31
+  - adr: '0224'
     title: Server-Resident Operations As The Default Control Model
     status: Accepted
     implementation_status: Implemented
@@ -4602,3 +4619,21 @@ adr_index:
       - concordance
     summary: We will require public endpoint admission control that proves concordance
     filename: 0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md
+  - adr: '0274'
+    title: Governed Base Image Mirrors And Warm Caches For Repo Deployments
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - governed
+      - base
+      - image
+      - mirrors
+      - warm
+      - caches
+      - repo
+      - deployments
+    summary: We will add a cache-first base-image policy for governed repo deployments.
+    filename: 0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments.md
+    implemented_version: 0.177.31

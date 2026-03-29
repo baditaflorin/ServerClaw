@@ -144,7 +144,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.66` |
+| Repository version | `0.177.67` |
 | Platform version | `0.130.46` |
 | Observed check date | `2026-03-28` |
 | Observed OS | `Debian 13` |
@@ -216,8 +216,8 @@ Template VM: `9000` `debian13-cloud-template`
 | `control_metadata_witness` | `2026-03-27-adr-0181-control-metadata-witness-live-apply` |
 | `control_plane_lanes` | `2026-03-22-adr-0045-control-plane-communication-lanes-live-apply` |
 | `control_plane_recovery` | `2026-03-28-adr-0231-local-secret-delivery-live-apply` |
-| `coolify` | `2026-03-28-adr-0194-coolify-paas-deploy-from-repo-mainline-live-apply` |
-| `coolify_apps` | `2026-03-28-adr-0194-coolify-paas-deploy-from-repo-mainline-live-apply` |
+| `coolify` | `2026-03-29-adr-0224-coolify-dns-mirror-edge-and-education-mainline-live-apply` |
+| `coolify_apps` | `2026-03-29-adr-0224-coolify-dns-mirror-edge-and-education-mainline-live-apply` |
 | `deadlock_detector` | `2026-03-26-adr-0162-deadlock-detector-live-apply` |
 | `dependency_graph_runtime` | `2026-03-26-adr-0117-dependency-graph-live-apply` |
 | `dify` | `2026-03-28-adr-0197-dify-mainline-live-apply` |
@@ -913,6 +913,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0221: Role-Based Node Pools And Placement Boundaries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0221-role-based-node-pools-and-placement-boundaries.md)
 - [ADR 0222: Failover Authority And Service Endpoint Separation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0222-failover-authority-and-service-endpoint-separation.md)
 - [ADR 0223: Canonical HA Topology Catalog And Reusable Automation Profiles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0223-canonical-ha-topology-catalog-and-reusable-automation-profiles.md)
+- [ADR 0224: Self-Service Repo Intake And Agent-Assisted Deployments](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md)
 - [ADR 0224: Server-Resident Operations As The Default Control Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0224-server-resident-operations-as-the-default-control-model.md)
 - [ADR 0225: Server-Resident Reconciliation Via Ansible Pull](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0225-server-resident-reconciliation-via-ansible-pull.md)
 - [ADR 0226: Systemd Units, Timers, And Paths For Host-Resident Control Loops](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md)
@@ -963,6 +964,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0271: Backup Coverage Assertion Ledger And Backup-Of-Backup Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0271-backup-coverage-assertion-ledger-and-backup-of-backup-policy.md)
 - [ADR 0272: Restore Readiness Ladders And Stateful Warm-Up Verification Profiles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md)
 - [ADR 0273: Public Endpoint Admission Control For DNS Catalog And Certificate Concordance](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md)
+- [ADR 0274: Governed Base Image Mirrors And Warm Caches For Repo Deployments](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -1133,6 +1135,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0207: Anti-Corruption Layers At Provider Boundaries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0207-anti-corruption-layers-at-provider-boundaries.md)
 - [Workstream WS-0211: Shared Policy Packs And Rule Registries Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0211-shared-policy-packs-and-rule-registries.md)
 - [Workstream ADR 0214: HA And Replication Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0214-ha-replication-architecture-bundle.md)
+- [Workstream ADR 0224: Self-Service Repo Intake And Agent-Assisted Deployments](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md)
 - [Workstream ADR 0224: Server-Resident Operations Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0224-server-resident-operations-architecture-bundle.md)
 - [Workstream ADR 0234: Human User Experience Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md)
 - [Workstream ADR 0244: Runtime Assurance Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0244-runtime-assurance-architecture-bundle.md)
@@ -1212,7 +1215,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.66` |
+| Repository version | `0.177.67` |
 | Platform version | `0.130.46` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1438,6 +1441,7 @@ This repository is intentionally opinionated:
 | `0212` | Replaceability scorecards and vendor exit plans live apply | `merged` | [ws-0212-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0212-live-apply.md) |
 | `0214` | HA and replication architecture bundle for production and staging | `merged` | [adr-0214-ha-replication-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0214-ha-replication-architecture-bundle.md) |
 | `0224` | Live apply ADR 0224 server-resident operations as the default control model | `live_applied` | [ws-0224-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0224-live-apply.md) |
+| `0224` | Self-service repo intake and agent-assisted app deployments | `live_applied` | [adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md) |
 | `0224` | Server-resident operations architecture bundle | `merged` | [adr-0224-server-resident-operations-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0224-server-resident-operations-architecture-bundle.md) |
 | `0226` | Live apply ADR 0226 systemd host-resident control-loop supervision | `live_applied` | [ws-0226-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0226-live-apply.md) |
 | `0226` | Finalize ADR 0226 exact-main evidence on origin/main | `merged` | [ws-0226-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0226-main-merge.md) |

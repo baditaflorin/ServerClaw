@@ -38,7 +38,16 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             self.defaults["postgres_ha"],
             "{{ hostvars[public_edge_control_plane_host].postgres_ha }}",
         )
-        self.assertEqual(self.defaults["public_edge_service_topology"], "{{ platform_service_topology }}")
+        public_edge_service_topology_expr = self.defaults["public_edge_service_topology"]
+        self.assertIn(
+            "hostvars[public_edge_control_plane_host].public_edge_service_topology",
+            public_edge_service_topology_expr,
+        )
+        self.assertIn(
+            "hostvars[public_edge_control_plane_host].platform_service_topology",
+            public_edge_service_topology_expr,
+        )
+        self.assertIn("default(platform_service_topology)", public_edge_service_topology_expr)
         self.assertEqual(self.defaults["public_edge_dns_hetzner_plugin_version"], "3.0.0")
         self.assertEqual(
             self.defaults["public_edge_dns_hetzner_credentials_file"],

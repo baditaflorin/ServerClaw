@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.66",
+  "repo_version": "0.177.67",
   "platform_version": "0.130.46",
-  "generated_at": "2026-03-29T02:49:15Z",
-  "next_refresh_at": "2026-03-29T03:49:15Z",
+  "generated_at": "2026-03-29T03:05:48Z",
+  "next_refresh_at": "2026-03-29T04:05:48Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -81,7 +81,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://apps.lv3.org",
-        "last_live_apply": "2026-03-28T00:00:00Z"
+        "last_live_apply": "2026-03-29T00:00:00Z"
       },
       "dify": {
         "service_name": "Dify",
@@ -4157,10 +4157,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.65",
+    "last_version": "0.177.66",
     "deployed_at": "2026-03-29",
-    "summary": "rolled out AG Grid Community on the Windmill operator access roster so dense operator data now has governed sorting, filtering, pagination, column control, and keyboard navigation",
-    "release_notes_url": "docs/release-notes/0.177.66.md"
+    "summary": "implemented ADR 0224 by extending the governed Coolify lane with private-repo Docker Compose intake, wildcard app DNS publication, HTTPS wildcard edge routing, and Docker pull hardening that keeps education-wemeshup serving the full 1056-activity catalog from main",
+    "release_notes_url": "docs/release-notes/0.177.67.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

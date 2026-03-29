@@ -1,0 +1,8 @@
+{
+  "created_at": "2026-03-28T21:20:33.314297+00:00",
+  "bypass": "skip_remote_gate",
+  "reason": "normal git push did not advance the branch and this workstream still inherits the previously documented remote-gate blocker around stale generated surfaces owned by older integration work",
+  "source": "pre-push-hook",
+  "branch": "codex/ws-0224-repo-intake",
+  "commit": "478b3972451bfcebc369b87c03c15fcbaec1ed06"
+}
