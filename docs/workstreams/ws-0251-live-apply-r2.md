@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0251](../adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md)
 - Title: Live apply stage-scoped smoke suites and promotion-gate enforcement from latest `origin/main`
-- Status: merged
+- Status: live_applied
 - Implemented In Repo Version: 0.177.84
-- Live Applied In Platform Version: N/A
+- Live Applied In Platform Version: 0.130.58
 - Implemented On: 2026-03-29
-- Live Applied On: N/A
+- Live Applied On: 2026-03-29
 - Branch: `codex/ws-0251-live-apply-r2`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply-r2`
 - Owner: codex
@@ -179,62 +179,27 @@
   `ansible-playbook` replay itself later stops in the Windmill schedule-sync
   phase because that targeted recovery path bypasses the scoped runner's
   controller-side `PyYAML` dependency shell
-
-## Live Apply Blocker
-
-- the shared worker checkout on `docker-runtime-lv3` did not remain on this
-  worktree snapshot through verification
-- after the replay, `/srv/proxmox_florin_server/scripts/promotion_pipeline.py`
-  and `/srv/proxmox_florin_server/scripts/ops_portal/runtime_assurance.py`
-  matched `origin/main`, `scripts/stage_smoke.py` was missing, and
-  `scripts/gate_status.py` had drifted to a newer branch-local variant that
-  imports `gate_bypass_waivers`
-- direct reproduction on `docker-runtime-lv3`:
+- 2026-03-29
+  `receipts/live-applies/evidence/2026-03-29-adr-0251-exact-main-durable-verification.txt`
+  confirms the blocker is now resolved on current `origin/main`: the live
+  worker checkout on `docker-runtime-lv3` keeps `scripts/stage_smoke.py`, both
+  `promotion_pipeline.py` and `ops_portal/runtime_assurance.py` import it,
   `python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server`
-  failed with `ModuleNotFoundError: No module named 'gate_bypass_waivers'`
-- this is consistent with concurrent branch-local replays clobbering the
-  shared Windmill worker checkout on `docker-runtime-lv3`; the role expanded a
-  staged archive during this run, but the verified guest hashes no longer
-  matched the ADR 0251 worktree by the time the Windmill gate-status script ran
-- the live API gateway on `docker-runtime-lv3` is also subject to the same
-  shared-host drift: it was first recovered to the current repo and current
-  `origin/main` hash `ce9f9ff50a64f2edbad20eced497f25efa5d5baffc2d181169c7025841b35853`,
-  then later reverted to
-  `acc8a2750d95323ca8337265064e082d1f0ae0e8c6fc63ca4a2b3dae116242f7`,
-  which removes `/v1/platform/runtime-assurance` from the live gateway and
-  forces the ops portal back onto the degraded fallback banner during final
-  verification
-- the exact-main gateway rerun confirms the overwrite is coming from another
-  branch-local replay, not from this worktree: while this branch expected
-  `ce9f…`, the live host and container stayed on `acc8…`, and local controller
-  process inspection showed a concurrent `ws-0257-main-merge` `playbooks/api-gateway.yml`
-  replay targeting the same host during the same verification window
-- the latest clean-window rerun confirms the newer config-bundle fix is real
-  but still not stable against concurrent older replays: this worktree's green
-  `2026-03-29-adr-0251-api-gateway-runtime-assurance-config-fix-rerun` replay
-  verifies the authenticated runtime-assurance route during the play itself,
-  then a fresh `ws-0262-openfga-keycloak-live-apply` gateway replay starts
-  again and leaves the shared host with `environment-topology.json` present
-  but `runtime-assurance-matrix.json` missing, which immediately restores the
-  ops-portal degraded fallback banner and a live `500` from
-  `/v1/platform/runtime-assurance`
-- the latest targeted Windmill worker-checkout rerun confirms the repo changes
-  themselves are correct but the shared runtime host is still not stable enough
-  to claim ADR 0251 fully live: this worktree briefly restores
-  `scripts/stage_smoke.py`, the `stage_smoke` import in
-  `/srv/proxmox_florin_server/scripts/promotion_pipeline.py`, and the updated
-  `gate-status` wrapper, but an overlapping
-  `ws-0266-main-integration-r2` `windmill.yml` replay on the same
-  `docker-runtime-lv3` guest removes `scripts/stage_smoke.py` and reverts the
-  worker checkout before a durable negative-path promotion proof can be
-  recorded
+  returns `status: ok`, the exact-main promotion gate rejects the real staged
+  `grafana` receipt with the ADR 0251 reason that no active staging smoke suite
+  is declared, and the authenticated runtime-assurance gateway plus local
+  ops-portal runtime-assurance partial both verify cleanly on platform version
+  `0.130.58`
+
+## Live Apply Resolution
+
+- the original shared-worker drift was cleared by the later exact-main Windmill
+  convergence now present on current `origin/main`
+- the current live worker checkout, gate-status wrapper, promotion gate, API
+  gateway runtime-assurance route, and local ops-portal runtime-assurance panel
+  all verify from the same exact-main platform state recorded in
+  `2026-03-29-adr-0251-exact-main-durable-verification.txt`
 
 ## Remaining Steps
 
-- replay `windmill` from an uncontended exact-main checkout after the current
-  concurrent `windmill.yml` writers stop clobbering `/srv/proxmox_florin_server`
-  on `docker-runtime-lv3`
-- only after that clean-window replay holds through verification: mark
-  ADR 0251 fully implemented, set `workstreams.yaml` `live_applied: true`, and
-  update `versions/stack.yaml` live evidence plus the integrated README live
-  status to the verified platform truth
+- none; ADR 0251 is fully live on platform version `0.130.58`

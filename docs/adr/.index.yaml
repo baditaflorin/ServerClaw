@@ -4331,7 +4331,7 @@ adr_index:
       - gates
     summary: We will require stage-scoped smoke suites for active services and wire them
     filename: 0251-stage-scoped-smoke-suites-and-promotion-gates.md
-    implemented_version: 0.177.86
+    implemented_version: 0.177.84
   - adr: '0252'
     title: Route And DNS Publication Assertion Ledger
     status: Accepted

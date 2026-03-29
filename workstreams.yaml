@@ -46,7 +46,7 @@ workstreams:
   - id: ws-0274-artifact-cache-plane
     adr: "0295"
     title: Shared artifact cache plane and dedicated cache VM roadmap
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/ws-0274-artifact-cache-plane
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-artifact-cache-plane
@@ -488,6 +488,7 @@ workstreams:
         api_gateway_postrebase_rerun: 2026-03-29-adr-0251-api-gateway-postrebase-rerun
         api_gateway_runtime_assurance_fix_attempt: 2026-03-29-adr-0251-api-gateway-runtime-assurance-config-fix
         api_gateway_runtime_assurance_fix_rerun: 2026-03-29-adr-0251-api-gateway-runtime-assurance-config-fix-rerun
+        exact_main_durable_verification: 2026-03-29-adr-0251-exact-main-durable-verification
   - id: ws-0255-live-apply
     adr: "0255"
     title: ADR 0255 live apply from latest origin/main

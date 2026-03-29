@@ -1,0 +1,43 @@
+ADR 0251 exact-main durable verification
+Date: 2026-03-29
+Verified exact-main commit: 430e364e2a810ccd6463e201fd8b7d41fed95676
+Verified platform version on origin/main: 0.130.58
+
+Worker checkout on docker-runtime-lv3:
+- stage_smoke_present=True
+- promotion_imports_stage_smoke=True
+- portal_runtime_assurance_imports_stage_smoke=True
+
+Windmill worker gate status:
+- python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server
+- status=ok
+- post_merge_run.status=passed
+- post_merge_run.executed_at=2026-03-29T18:02:34.106505+00:00
+
+Promotion gate negative-path proof from exact-main:
+- local exact-main and live worker exact-main both returned gate_decision=rejected for:
+  service=grafana
+  staging_receipt=receipts/live-applies/staging/2026-03-27-adr-0183-staging-live-apply.json
+- both outputs included the ADR 0251 reason:
+  service 'grafana' does not declare an active staging smoke suite
+- both outputs also reported:
+  staging receipt is older than 24 hours
+
+Authenticated runtime-assurance API on current main:
+- url=https://api.lv3.org/v1/platform/runtime-assurance
+- status=200
+- generated_at=2026-03-29T19:22:44Z
+- summary.total=45
+- summary.pass=19
+- summary.degraded=26
+- summary.failed=0
+- summary.unknown=0
+- entries_count=45
+
+Local ops-portal partials on docker-runtime-lv3:
+- overview status=200 degraded_banner=False has_bindings=False
+- runtime_assurance status=200 degraded_banner=False has_bindings=True
+
+Conclusion:
+ADR 0251 is fully live on the current exact-main platform state. The first
+verified platform version where this is true is 0.130.58.
