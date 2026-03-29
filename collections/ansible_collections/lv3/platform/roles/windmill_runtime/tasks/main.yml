@@ -1852,8 +1852,7 @@
   loop: "{{ windmill_seed_schedules }}"
   loop_control:
     label: "{{ item.path }}"
-  register: windmill_seed_schedule_enabled_sync
-  changed_when: "'UPDATE 1' in (windmill_seed_schedule_enabled_sync.stdout | default(''))"
+  changed_when: false
   no_log: true
 
 - name: Run the Windmill seeded healthcheck script
