@@ -61,6 +61,7 @@ platform_port_assignments:
   n8n_port: 5678
   coolify_dashboard_port: 8000
   coolify_proxy_port: 80
+  coolify_proxy_tls_port: 443
   coolify_host_proxy_port: 8012
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008

@@ -1,9 +1,10 @@
 # ADR 0224: Self-Service Repo Intake And Agent-Assisted Deployments
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Status: Accepted
+- Implementation Status: Partial
+- Implemented In Repo Version: 0.177.31
+- Implemented In Platform Version: 0.130.35
+- Implemented On: 2026-03-28
 - Date: 2026-03-28
 
 ## Context
@@ -27,24 +28,43 @@ workflow now being requested:
 The first target repository is private:
 `git@github.com:baditaflorin/education_wemeshup.git`.
 
-Observed on 2026-03-28:
+Observed across 2026-03-28 and 2026-03-29:
 
 - GitHub SSH access from the controller works for that repository.
-- The committed remote `HEAD` currently contains only `.gitignore` and
-  `index.html`.
-- A separate local working tree on the operator Mac contains uncommitted Vite
-  application changes, but that branch-local work is not yet the deployable Git
-  truth and currently fails `npm run build` because
-  `src/domain/catalog.js` is missing.
+- The committed upstream `main` has now moved to a Docker Compose-backed
+  application with `postgres`, `catalog-api`, and `catalog-web`, and the
+  public route `education-wemeshup.apps.lv3.org` is already governed by the
+  ADR 0194 Coolify lane.
+- The first production pull of the newer app shape surfaced two repeatable
+  transient failure classes that do not require a human to redesign the
+  deployment:
+  - Docker Hub anonymous-token timeouts while resolving base images
+  - temporary Alpine package-index failures during runtime image assembly
+- The companion application repository merged PR `#2` to remove the external
+  Dockerfile frontend pin and PR `#3` to harden Alpine runtime package
+  installation retries.
 
-That means the first production-safe slice must target the committed Git
-revision, not a dirty local checkout, while still leaving room for later
-compose-based and agent-repaired application flows.
+That means the next safe slice is no longer "static page first". It is a
+governed repo-deploy path that can pull the latest committed Dockerized app,
+survive common transient build-network failures, and expose the same behavior
+through a non-chat operator surface later.
 
 ## Decision
 
 We will extend the existing ADR 0194 Coolify deploy path instead of introducing
 a second bespoke app-deployment engine.
+
+We will also treat the existing workflow and command catalogs as the current
+operator-grade contract, and the existing interactive ops portal architecture as
+the future browser entry point for this flow. In practice, that means:
+
+- today, the supported non-chat entry points are the catalog-backed
+  `make coolify-manage ...` and `python3 scripts/lv3_cli.py deploy-repo ...`
+  commands
+- tomorrow, the authenticated form or catalog UI should be added on top of the
+  ADR 0093 portal and ADR 0092 gateway, calling the same governed contract
+- we do not create a second deployment subsystem just because the eventual user
+  interface is a browser instead of a terminal
 
 The future self-service flow should be built from five explicit layers:
 
@@ -102,9 +122,30 @@ The first thin slice for this architecture is intentionally small:
 
 - deploy the committed `education_wemeshup` GitHub repository as a private-repo
   smoke test
-- treat it as a static-site deployment that serves the committed `index.html`
-- postpone compose-first and app-refactor deployment until the upstream
-  repository actually commits the new runtime shape
+- use the existing Coolify repo wrapper, private deploy-key bootstrap, and
+  wildcard DNS publication instead of creating an ad hoc path
+- harden the deploy wrapper for transient registry and package-mirror failures
+  that should be retried automatically
+
+### 6. Current implementation slice
+
+This ADR is now `Partial`, not `Not Implemented`, because the current platform
+already has a meaningful first slice in place:
+
+- machine-readable execution surface:
+  `config/workflow-catalog.json` and `config/command-catalog.json`
+- operator entry points:
+  `make coolify-manage ACTION=deploy-repo ...` and
+  `python3 scripts/lv3_cli.py deploy-repo ...`
+- governed runtime behavior:
+  private GitHub deploy-key bootstrap, Docker Compose domain mapping,
+  wildcard `*.apps.lv3.org` DNS publication, stale same-app deployment
+  cancellation, bounded automatic retry of transient Coolify deployment
+  failures, and Docker build-lane hardening through governed Docker daemon
+  resolver plus registry-mirror settings on `coolify-lv3`
+- still missing:
+  the authenticated intake form, environment catalog UI, and policy-driven
+  operator workflow at `ops.lv3.org`
 
 ## Consequences
 
@@ -114,6 +155,8 @@ The first thin slice for this architecture is intentionally small:
 - intake UX, deployment policy, and agent execution stay separable
 - repeated repo onboarding can scale through catalog entries and contracts
 - private-repo handling becomes explicit instead of implicit operator state
+- the current non-chat operator path already exists, so the future browser flow
+  can wrap a governed contract instead of reverse-engineering shell snippets
 
 **Negative / Trade-offs**
 
@@ -125,6 +168,8 @@ The first thin slice for this architecture is intentionally small:
 
 - This ADR does not replace ADR 0194 or remove Coolify from the deployment
   path.
+- This ADR does not require Codex chat as the operator surface; terminal and
+  future portal flows both use the same governed contract.
 - This ADR does not authorize direct deployment from an operator's uncommitted
   local filesystem.
 - This ADR does not make agent repair fully autonomous; it adds a governed lane
@@ -133,6 +178,9 @@ The first thin slice for this architecture is intentionally small:
 ## Related ADRs
 
 - ADR 0156: Agent session workspace isolation
+- ADR 0035: Workflow catalog and machine-readable execution contracts
+- ADR 0048: Command catalog and approval gates
+- ADR 0093: Interactive ops portal with live actions
 - ADR 0185: Branch-scoped ephemeral preview environments
 - ADR 0194: Coolify PaaS deploy from repo
 - ADR 0204: Self-correcting automation loops

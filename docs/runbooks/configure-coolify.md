@@ -120,6 +120,14 @@ Expected results:
 - public app hostnames under `*.apps.lv3.org` resolve through Hetzner DNS without manual per-app record creation
 - the private GitHub wrapper run creates or reuses a local SSH keypair, a GitHub
   repo deploy key, and a Coolify private key before triggering the deployment
+- the governed deploy wrapper cancels stale queued or in-progress deployments
+  for the same application before it starts the next fresh rollout
+- the governed deploy wrapper retries transient Docker registry and Alpine
+  package-mirror failures up to three total attempts by default while preserving
+  one command entry point for the operator
+- the `coolify-lv3` Docker daemon now pins explicit public resolvers plus the
+  approved Docker Hub mirror `https://mirror.gcr.io` so fresh repo deployments
+  do not depend on the guest resolver state or anonymous origin pulls alone
 - Docker Compose applications must use `--compose-domain SERVICE=DOMAIN`
   instead of the top-level `--domain` or `--subdomain` flags
 - the wildcard `*.apps.lv3.org` edge must proxy to the Coolify VM over
@@ -131,6 +139,11 @@ Expected results:
 - `apps.lv3.org` returns `404` until an apex app is assigned
 
 If public DNS has not propagated to the controller yet, keep using `--resolve` against `65.108.75.123` for verification and record that separately from DNS visibility.
+
+If you replay `make configure-edge-publication` from a fresh worktree, generate
+the shared static site inputs first with `make generate-changelog-portal docs`.
+The edge role syncs `build/changelog-portal/` and `build/docs-portal/` as part
+of the canonical public surface set.
 
 ## Controller-Local Artifacts
 
@@ -148,6 +161,35 @@ These files are generated or refreshed by the repo-managed automation and are no
 - `coolify.lv3.org` is protected by the shared oauth2-proxy and Keycloak edge flow.
 - the Coolify API is consumed from the controller through the Proxmox host Tailscale TCP proxy, not over the public edge
 - `*.apps.lv3.org` is intentionally public because it is the published application ingress lane
+
+## Operator Surfaces
+
+Current non-chat operator entry points:
+
+```bash
+make coolify-manage ACTION=deploy-repo COOLIFY_ARGS='--repo git@github.com:baditaflorin/education_wemeshup.git --branch main --source private-deploy-key --app-name education-wemeshup --build-pack dockercompose --docker-compose-location /compose.yaml --compose-domain catalog-web=education-wemeshup.apps.lv3.org --wait'
+```
+
+```bash
+python3 scripts/lv3_cli.py deploy-repo \
+  --repo git@github.com:baditaflorin/education_wemeshup.git \
+  --source private-deploy-key \
+  --app-name education-wemeshup \
+  --build-pack dockercompose \
+  --docker-compose-location /compose.yaml \
+  --compose-domain catalog-web=education-wemeshup.apps.lv3.org \
+  --wait
+```
+
+For the future browser-driven path, use the existing ADR 0093 ops portal and
+ADR 0092 gateway as the intake surface. The portal form should submit the same
+catalog-backed `deploy-repo` contract instead of inventing a second deployment
+engine or depending on an assistant session.
+
+The missing hardening gap exposed by repeated public-registry flakeouts is now
+tracked separately in ADR 0274. The operator/browser surface is already
+covered by existing ADRs; the next supply-path step is cache-first base-image
+warming for the approved deployment catalog.
 
 ## Rollback
 

@@ -6,12 +6,12 @@
 # ============================================================================
 
 schema_version: 1
-generated: '2026-03-28'
-total_adrs: 229
+generated: '2026-03-29'
+total_adrs: 230
 implementation_status_summary:
   Implemented: 198
-  Partial: 3
-  Not Implemented: 27
+  Partial: 5
+  Not Implemented: 26
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -203,6 +203,7 @@ concerns:
     - '0217'
     - 0218
     - '0222'
+    - '0274'
   release:
     - 0008
     - '0110'
@@ -3756,8 +3757,8 @@ adr_index:
     filename: 0223-canonical-ha-topology-catalog-and-reusable-automation-profiles.md
   - adr: '0224'
     title: Self-Service Repo Intake And Agent-Assisted Deployments
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Accepted
+    implementation_status: Partial
     date: '2026-03-28'
     concern: agent-discovery
     keywords:
@@ -3768,3 +3769,22 @@ adr_index:
       - deployments
     summary: We will extend the existing ADR 0194 Coolify deploy path instead of introducing
     filename: 0224-self-service-repo-intake-and-agent-assisted-deployments.md
+    implemented_version: 0.177.31
+  - adr: '0274'
+    title: Governed Base Image Mirrors And Warm Caches For Repo Deployments
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - governed
+      - base
+      - image
+      - mirrors
+      - warm
+      - caches
+      - repo
+      - deployments
+    summary: We will add a cache-first base-image policy for governed repo deployments.
+    filename: 0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments.md
+    implemented_version: 0.177.31

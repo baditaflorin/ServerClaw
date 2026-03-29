@@ -57,6 +57,7 @@ PORT_KEYS = (
     "n8n_port",
     "coolify_dashboard_port",
     "coolify_proxy_port",
+    "coolify_proxy_tls_port",
     "coolify_host_proxy_port",
     "open_webui_port",
     "open_webui_host_proxy_port",
@@ -403,8 +404,8 @@ def build_service_urls(
         port_map["internal"] = ports["coolify_dashboard_port"]
         port_map["controller"] = ports["coolify_host_proxy_port"]
     elif service_id == "coolify_apps":
-        urls["internal"] = service_url("http", private_ip, ports["coolify_proxy_port"])
-        port_map["internal"] = ports["coolify_proxy_port"]
+        urls["internal"] = service_url("https", private_ip, ports["coolify_proxy_tls_port"])
+        port_map["internal"] = ports["coolify_proxy_tls_port"]
     elif service_id == "open_webui":
         urls["internal"] = service_url("http", private_ip, ports["open_webui_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["open_webui_host_proxy_port"])

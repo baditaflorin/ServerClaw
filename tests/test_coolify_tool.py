@@ -233,6 +233,86 @@ def test_parse_compose_domain_mapping_normalizes_domain() -> None:
     }
 
 
+def test_transient_deployment_failure_reason_detects_registry_timeout() -> None:
+    deployment = {
+        "status": "failed",
+        "logs": json.dumps(
+            [
+                {
+                    "output": 'failed to fetch anonymous token: Get "https://auth.docker.io/token": dial tcp 104.18.43.178:443: i/o timeout'
+                }
+            ]
+        ),
+    }
+
+    assert tool.transient_deployment_failure_reason(deployment) == "docker-registry-auth-timeout"
+
+
+def test_transient_deployment_failure_reason_detects_go_proxy_timeout() -> None:
+    deployment = {
+        "status": "failed",
+        "logs": json.dumps(
+            [
+                {
+                    "output": 'go: dario.cat/mergo@v1.0.1: Get "https://proxy.golang.org/dario.cat/mergo/@v/v1.0.1.mod": dial tcp: lookup proxy.golang.org on 1.1.1.1:53: read udp 172.17.0.4:46641->1.1.1.1:53: i/o timeout'
+                }
+            ]
+        ),
+    }
+
+    assert tool.transient_deployment_failure_reason(deployment) == "upstream-registry-timeout"
+
+
+def test_transient_deployment_failure_reason_detects_npm_cli_abrupt_exit() -> None:
+    deployment = {
+        "status": "failed",
+        "logs": json.dumps(
+            [
+                {"command": "npm ci --no-audit --no-fund --loglevel=warn"},
+                {"output": "npm error Exit handler never called!"},
+            ]
+        ),
+    }
+
+    assert tool.transient_deployment_failure_reason(deployment) == "npm-cli-abrupt-exit"
+
+
+def test_cancel_active_deployments_for_application_cancels_only_queued_and_in_progress(tmp_path: Path) -> None:
+    client = make_client(tmp_path)
+    cancelled: list[str] = []
+
+    def fake_deployments() -> list[dict[str, Any]]:
+        return [
+            {"application_name": "education-wemeshup", "deployment_uuid": "deploy-queued", "status": "queued"},
+            {"application_name": "education-wemeshup", "deployment_uuid": "deploy-running", "status": "in_progress"},
+            {"application_name": "education-wemeshup", "deployment_uuid": "deploy-finished", "status": "finished"},
+            {"application_name": "repo-smoke", "deployment_uuid": "deploy-other", "status": "queued"},
+        ]
+
+    def fake_cancel_deployment(deployment_uuid: str) -> dict[str, Any]:
+        cancelled.append(deployment_uuid)
+        return {"deployment_uuid": deployment_uuid, "status": "cancelled-by-user"}
+
+    client.deployments = fake_deployments  # type: ignore[method-assign]
+    client.cancel_deployment = fake_cancel_deployment  # type: ignore[method-assign]
+
+    result = tool.cancel_active_deployments_for_application(client, application_name="education-wemeshup")
+
+    assert cancelled == ["deploy-queued", "deploy-running"]
+    assert result == [
+        {
+            "deployment_uuid": "deploy-queued",
+            "previous_status": "queued",
+            "status": "cancelled-by-user",
+        },
+        {
+            "deployment_uuid": "deploy-running",
+            "previous_status": "in_progress",
+            "status": "cancelled-by-user",
+        },
+    ]
+
+
 def test_normalize_repo_location_adds_leading_slash() -> None:
     assert tool.normalize_repo_location("compose.yaml") == "/compose.yaml"
     assert tool.normalize_repo_location("/docker/frontend.Dockerfile") == "/docker/frontend.Dockerfile"
@@ -375,3 +455,194 @@ def test_command_deploy_repo_bootstraps_private_deploy_key(monkeypatch, tmp_path
     ]
     assert output["github_deploy_key"]["title"] == "coolify-baditaflorin-education-wemeshup"
     assert output["coolify_private_key"]["uuid"] == "key-1"
+
+
+def test_command_deploy_repo_retries_transient_failures(monkeypatch, tmp_path: Path, capsys) -> None:
+    auth_path = tmp_path / "admin-auth.json"
+    auth_path.write_text(
+        json.dumps(
+            {
+                "controller_url": "http://127.0.0.1:8000",
+                "api_token": "token",
+                "destination_uuid": "dest-1",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    deploy_calls: list[dict[str, Any]] = []
+
+    class FakeClient:
+        def __init__(self, auth: dict[str, Any]) -> None:
+            self.auth = auth
+
+        def ensure_project(self, name: str, description: str | None = None) -> dict[str, Any]:
+            return {"uuid": "project-1", "name": name}
+
+        def ensure_environment(self, project_uuid: str, environment_name: str) -> dict[str, Any]:
+            return {"uuid": "env-1", "name": environment_name}
+
+        def resolve_server(self, server_uuid: str | None) -> dict[str, Any]:
+            return {"uuid": "server-1", "name": "coolify-lv3"}
+
+        def ensure_application(self, **kwargs: Any) -> dict[str, Any]:
+            return {"uuid": "app-1", "name": kwargs["app_name"]}
+
+        def deploy_application(self, application_uuid: str, *, force: bool = False) -> str:
+            deploy_calls.append({"application_uuid": application_uuid, "force": force})
+            return f"deploy-{len(deploy_calls)}"
+
+        def deployment(self, deployment_uuid: str) -> dict[str, Any]:
+            if deployment_uuid == "deploy-1":
+                return {
+                    "status": "failed",
+                    "logs": [
+                        {
+                            "output": 'failed to fetch anonymous token: Get "https://auth.docker.io/token": dial tcp 104.18.43.178:443: i/o timeout'
+                        }
+                    ],
+                }
+            return {"status": "finished", "deployment_uuid": deployment_uuid}
+
+    monkeypatch.setattr(tool, "CoolifyClient", FakeClient)
+    monkeypatch.setattr(tool.time, "sleep", lambda seconds: None)
+
+    exit_code = tool.main(
+        [
+            "--auth-file",
+            str(auth_path),
+            "deploy-repo",
+            "--repo",
+            "https://github.com/coollabsio/coolify-examples",
+            "--branch",
+            "main",
+            "--base-directory",
+            "/static",
+            "--app-name",
+            "repo-smoke",
+            "--build-pack",
+            "static",
+            "--subdomain",
+            "repo-smoke",
+            "--wait",
+            "--timeout",
+            "60",
+            "--retry-delay",
+            "0",
+        ]
+    )
+
+    output = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert deploy_calls == [
+        {"application_uuid": "app-1", "force": False},
+        {"application_uuid": "app-1", "force": False},
+    ]
+    assert output["status"] == "finished"
+    assert output["deployment_uuid"] == "deploy-2"
+    assert output["attempts"] == [
+        {
+            "attempt": 1,
+            "deployment_uuid": "deploy-1",
+            "status": "failed",
+            "retry_reason": "docker-registry-auth-timeout",
+        },
+        {
+            "attempt": 2,
+            "deployment_uuid": "deploy-2",
+            "status": "finished",
+        },
+    ]
+
+
+def test_command_deploy_repo_cancels_active_deployments_before_redeploy(monkeypatch, tmp_path: Path, capsys) -> None:
+    auth_path = tmp_path / "admin-auth.json"
+    auth_path.write_text(
+        json.dumps(
+            {
+                "controller_url": "http://127.0.0.1:8000",
+                "api_token": "token",
+                "destination_uuid": "dest-1",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    cancelled: list[str] = []
+    deploy_calls: list[dict[str, Any]] = []
+
+    class FakeClient:
+        def __init__(self, auth: dict[str, Any]) -> None:
+            self.auth = auth
+
+        def ensure_project(self, name: str, description: str | None = None) -> dict[str, Any]:
+            return {"uuid": "project-1", "name": name}
+
+        def ensure_environment(self, project_uuid: str, environment_name: str) -> dict[str, Any]:
+            return {"uuid": "env-1", "name": environment_name}
+
+        def resolve_server(self, server_uuid: str | None) -> dict[str, Any]:
+            return {"uuid": "server-1", "name": "coolify-lv3"}
+
+        def ensure_application(self, **kwargs: Any) -> dict[str, Any]:
+            return {"uuid": "app-1", "name": kwargs["app_name"]}
+
+        def deployments(self) -> list[dict[str, Any]]:
+            return [
+                {"application_name": "education-wemeshup", "deployment_uuid": "deploy-old", "status": "queued"},
+                {"application_name": "repo-smoke", "deployment_uuid": "deploy-other", "status": "queued"},
+            ]
+
+        def cancel_deployment(self, deployment_uuid: str) -> dict[str, Any]:
+            cancelled.append(deployment_uuid)
+            return {"deployment_uuid": deployment_uuid, "status": "cancelled-by-user"}
+
+        def deploy_application(self, application_uuid: str, *, force: bool = False) -> str:
+            deploy_calls.append({"application_uuid": application_uuid, "force": force})
+            return "deploy-new"
+
+        def deployment(self, deployment_uuid: str) -> dict[str, Any]:
+            return {"status": "finished", "deployment_uuid": deployment_uuid}
+
+    monkeypatch.setattr(tool, "CoolifyClient", FakeClient)
+
+    exit_code = tool.main(
+        [
+            "--auth-file",
+            str(auth_path),
+            "deploy-repo",
+            "--repo",
+            "git@github.com:baditaflorin/education_wemeshup.git",
+            "--branch",
+            "main",
+            "--source",
+            "private-deploy-key",
+            "--app-name",
+            "education-wemeshup",
+            "--build-pack",
+            "dockercompose",
+            "--docker-compose-location",
+            "compose.yaml",
+            "--compose-domain",
+            "catalog-web=education-wemeshup.apps.lv3.org",
+            "--private-key-uuid",
+            "key-1",
+            "--wait",
+            "--timeout",
+            "60",
+        ]
+    )
+
+    output = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert cancelled == ["deploy-old"]
+    assert deploy_calls == [{"application_uuid": "app-1", "force": False}]
+    assert output["cancelled_deployments"] == [
+        {
+            "deployment_uuid": "deploy-old",
+            "previous_status": "queued",
+            "status": "cancelled-by-user",
+        }
+    ]

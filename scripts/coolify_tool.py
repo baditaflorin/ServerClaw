@@ -279,8 +279,14 @@ class CoolifyClient:
             raise RuntimeError(f"Coolify did not queue a deployment for application {application_uuid}: {response}")
         return str(deployment_uuid)
 
+    def deployments(self) -> list[dict[str, Any]]:
+        return self._request("GET", "/api/v1/deployments")
+
     def deployment(self, deployment_uuid: str) -> dict[str, Any]:
         return self._request("GET", f"/api/v1/deployments/{deployment_uuid}")
+
+    def cancel_deployment(self, deployment_uuid: str) -> dict[str, Any]:
+        return self._request("POST", f"/api/v1/deployments/{deployment_uuid}/cancel", expected=(200,))
 
     def ensure_project(self, name: str, description: str | None = None) -> dict[str, Any]:
         for project in self.projects():
@@ -556,6 +562,100 @@ def parse_compose_domain_mapping(value: str) -> dict[str, str]:
     return {"name": service_name.strip(), "domain": app_url_for_domain(raw_domain.strip())}
 
 
+def deployment_log_text(deployment: dict[str, Any]) -> str:
+    fragments: list[str] = []
+
+    def append(value: Any) -> None:
+        if value is None:
+            return
+        text = str(value).strip()
+        if text:
+            fragments.append(text)
+
+    append(deployment.get("status"))
+    append(deployment.get("status_description"))
+    append(deployment.get("error"))
+    logs = deployment.get("logs", [])
+    if isinstance(logs, str):
+        stripped = logs.strip()
+        if stripped.startswith("[") or stripped.startswith("{"):
+            try:
+                logs = json.loads(stripped)
+            except json.JSONDecodeError:
+                append(logs)
+                logs = []
+        else:
+            append(logs)
+            logs = []
+    if isinstance(logs, list):
+        for entry in logs:
+            if not isinstance(entry, dict):
+                continue
+            append(entry.get("command"))
+            append(entry.get("output"))
+    return "\n".join(fragments)
+
+
+def transient_deployment_failure_reason(deployment: dict[str, Any]) -> str | None:
+    if str(deployment.get("status", "")).lower() != "failed":
+        return None
+    text = deployment_log_text(deployment).lower()
+    if not text:
+        return None
+    if "failed to fetch anonymous token" in text and any(
+        marker in text for marker in ("auth.docker.io", "registry.docker.io", "docker.io")
+    ):
+        return "docker-registry-auth-timeout"
+    if "temporary error (try again later)" in text and "dl-cdn.alpinelinux.org" in text:
+        return "alpine-package-mirror-temporary-error"
+    if "apkindex" in text and "no such package" in text and "dl-cdn.alpinelinux.org" in text:
+        return "alpine-package-index-unavailable"
+    if "i/o timeout" in text and any(
+        marker in text
+        for marker in (
+            "auth.docker.io",
+            "registry.docker.io",
+            "docker.io",
+            "dl-cdn.alpinelinux.org",
+            "proxy.golang.org",
+            "sum.golang.org",
+            "registry.npmjs.org",
+        )
+    ):
+        return "upstream-registry-timeout"
+    if "npm error exit handler never called!" in text and "npm ci" in text:
+        return "npm-cli-abrupt-exit"
+    return None
+
+
+def cancel_active_deployments_for_application(
+    client: CoolifyClient,
+    *,
+    application_name: str,
+) -> list[dict[str, Any]]:
+    if not hasattr(client, "deployments") or not hasattr(client, "cancel_deployment"):
+        return []
+    cancelled: list[dict[str, Any]] = []
+    for deployment in client.deployments():
+        if deployment.get("application_name") != application_name:
+            continue
+        status = str(deployment.get("status", "")).lower()
+        if status not in {"queued", "in_progress"}:
+            continue
+        deployment_uuid = str(deployment.get("deployment_uuid") or "").strip()
+        if not deployment_uuid:
+            continue
+        response = client.cancel_deployment(deployment_uuid)
+        cancelled.append(
+            {
+                "deployment_uuid": deployment_uuid,
+                "previous_status": status,
+                "status": response.get("status", "cancelled-by-user"),
+            }
+        )
+    return cancelled
+
+
 def wait_for_deployment(client: CoolifyClient, deployment_uuid: str, timeout_seconds: int) -> dict[str, Any]:
     deadline = time.monotonic() + timeout_seconds
     while time.monotonic() < deadline:
@@ -689,11 +789,9 @@ def command_deploy_repo(args: argparse.Namespace) -> int:
         docker_compose_domains=compose_domains,
         publish_directory=args.publish_directory,
     )
-    deployment_uuid = client.deploy_application(str(application["uuid"]), force=args.force)
     result = {
       "application_uuid": str(application["uuid"]),
       "application_name": args.app_name,
-      "deployment_uuid": deployment_uuid,
       "domains": domains,
       "source": source,
       "repository": repo_for_coolify,
@@ -702,6 +800,11 @@ def command_deploy_repo(args: argparse.Namespace) -> int:
       "server_uuid": str(server["uuid"]),
       "destination_uuid": destination_uuid,
     }
+    cancelled_deployments = cancel_active_deployments_for_application(client, application_name=args.app_name)
+    if cancelled_deployments:
+        result["cancelled_deployments"] = cancelled_deployments
+    deployment_uuid = client.deploy_application(str(application["uuid"]), force=args.force)
+    result["deployment_uuid"] = deployment_uuid
     if compose_domains:
         result["compose_domains"] = compose_domains
     if github_deploy_key is not None:
@@ -715,13 +818,37 @@ def command_deploy_repo(args: argparse.Namespace) -> int:
             "uuid": coolify_private_key.get("uuid"),
             "name": coolify_private_key.get("name"),
         }
+    attempts: list[dict[str, Any]] = []
     if args.wait:
-        deployment = wait_for_deployment(client, deployment_uuid, args.timeout)
-        result["deployment"] = deployment
-        result["status"] = deployment.get("status")
-        if result["status"] != "finished":
+        max_attempts = max(1, args.max_deploy_attempts)
+        retry_delay = max(0, args.retry_delay)
+        for attempt_number in range(1, max_attempts + 1):
+            if attempt_number > 1:
+                deployment_uuid = client.deploy_application(str(application["uuid"]), force=args.force)
+                result["deployment_uuid"] = deployment_uuid
+            deployment = wait_for_deployment(client, deployment_uuid, args.timeout)
+            status = str(deployment.get("status", ""))
+            retry_reason = transient_deployment_failure_reason(deployment)
+            attempt_record = {
+                "attempt": attempt_number,
+                "deployment_uuid": deployment_uuid,
+                "status": status,
+            }
+            if retry_reason:
+                attempt_record["retry_reason"] = retry_reason
+            attempts.append(attempt_record)
+            result["deployment"] = deployment
+            result["status"] = status
+            if status == "finished":
+                break
+            if retry_reason and attempt_number < max_attempts:
+                if retry_delay:
+                    time.sleep(retry_delay)
+                continue
+            result["attempts"] = attempts
             print(json.dumps(result, indent=2, sort_keys=True))
             raise RuntimeError(f"Deployment {deployment_uuid} finished with status {result['status']}")
+        result["attempts"] = attempts
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0
 
@@ -769,6 +896,18 @@ def build_parser() -> argparse.ArgumentParser:
     deploy_parser.add_argument("--wait", action="store_true", help="Wait for the deployment result.")
     deploy_parser.add_argument("--timeout", type=int, default=900, help="Wait timeout in seconds.")
     deploy_parser.add_argument("--force", action="store_true", help="Force a rebuild without cache.")
+    deploy_parser.add_argument(
+        "--max-deploy-attempts",
+        type=int,
+        default=3,
+        help="Retry transient deployment failures up to this many total attempts when --wait is enabled.",
+    )
+    deploy_parser.add_argument(
+        "--retry-delay",
+        type=int,
+        default=15,
+        help="Seconds to wait before retrying a transient deployment failure.",
+    )
     deploy_parser.set_defaults(func=command_deploy_repo)
 
     return parser

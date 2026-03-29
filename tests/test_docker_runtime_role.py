@@ -15,10 +15,25 @@ ROLE_TASKS = (
     / "tasks"
     / "main.yml"
 )
+ROLE_DEFAULTS = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "docker_runtime"
+    / "defaults"
+    / "main.yml"
+)
 
 
 def load_tasks() -> list[dict]:
     return yaml.safe_load(ROLE_TASKS.read_text())
+
+
+def load_defaults() -> dict:
+    return yaml.safe_load(ROLE_DEFAULTS.read_text())
 
 
 def test_docker_runtime_patches_nftables_before_starting_docker() -> None:
@@ -55,3 +70,11 @@ def test_docker_runtime_patches_nftables_one_rule_per_cidr() -> None:
     assert patch_rules["ansible.builtin.lineinfile"]["line"] == "    {{ item }}"
     assert patch_rules["loop"] == "{{ docker_runtime_container_forward_rules }}"
     assert reload_rules["changed_when"] == "docker_runtime_nftables_forward_patch.results | selectattr('changed') | list | length > 0"
+
+
+def test_docker_runtime_defaults_pin_governed_resolvers_and_registry_mirror() -> None:
+    defaults = load_defaults()
+    daemon_config = defaults["docker_runtime_daemon_config"]
+
+    assert daemon_config["dns"] == ["1.1.1.1", "8.8.8.8"]
+    assert daemon_config["registry-mirrors"] == ["https://mirror.gcr.io"]

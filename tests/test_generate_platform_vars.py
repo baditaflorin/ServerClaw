@@ -138,6 +138,7 @@ def test_build_service_urls_include_coolify_controller_and_apps_endpoints() -> N
     ports = {
         "coolify_dashboard_port": 8000,
         "coolify_proxy_port": 80,
+        "coolify_proxy_tls_port": 443,
         "coolify_host_proxy_port": 8012,
     }
     host_vars = {"management_tailscale_ipv4": "100.64.0.1"}
@@ -166,10 +167,10 @@ def test_build_service_urls_include_coolify_controller_and_apps_endpoints() -> N
         "internal": "http://10.10.10.70:8000",
         "controller": "http://100.64.0.1:8012",
     }
-    assert app_port_map == {"internal": 80}
+    assert app_port_map == {"internal": 443}
     assert app_urls == {
         "public": "https://apps.lv3.org",
-        "internal": "http://10.10.10.70:80",
+        "internal": "https://10.10.10.70:443",
     }
 
 

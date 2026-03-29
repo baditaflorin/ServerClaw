@@ -36,7 +36,7 @@
   become: true
   gather_facts: true
   vars_files:
-    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
   tags:
     - tier-1
     - automation
@@ -70,7 +70,7 @@
   become: true
   gather_facts: true
   vars_files:
-    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
   tags:
     - tier-1
     - automation
@@ -87,7 +87,7 @@
   become: false
   gather_facts: false
   vars_files:
-    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
   tags:
     - tier-1
     - automation
@@ -107,7 +107,7 @@
   become: true
   gather_facts: false
   vars_files:
-    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
   tags:
     - tier-2
     - automation
@@ -152,7 +152,7 @@
   become: true
   gather_facts: true
   vars_files:
-    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
   tags:
     - tier-1
     - automation

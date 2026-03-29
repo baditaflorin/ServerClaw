@@ -68,7 +68,7 @@
   become: true
   gather_facts: true
   vars_files:
-    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
 
   pre_tasks:
     - name: Run shared preflight checks

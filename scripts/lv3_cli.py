@@ -402,6 +402,8 @@ def resolve_deploy_repo_command(
     wait: bool,
     force: bool,
     timeout: int,
+    max_deploy_attempts: int,
+    retry_delay: int,
 ) -> CommandPlan:
     coolify_args: list[str] = [
         "--repo",
@@ -449,6 +451,10 @@ def resolve_deploy_repo_command(
         coolify_args.append("--force")
     if timeout != 900:
         coolify_args.extend(["--timeout", str(timeout)])
+    if max_deploy_attempts != 3:
+        coolify_args.extend(["--max-deploy-attempts", str(max_deploy_attempts)])
+    if retry_delay != 15:
+        coolify_args.extend(["--retry-delay", str(retry_delay)])
 
     return CommandPlan(
         label=f"deploy-repo {app_name}",
@@ -2542,6 +2548,8 @@ def build_parser() -> argparse.ArgumentParser:
     deploy_repo.add_argument("--wait", action="store_true")
     deploy_repo.add_argument("--force", action="store_true")
     deploy_repo.add_argument("--timeout", type=int, default=900)
+    deploy_repo.add_argument("--max-deploy-attempts", type=int, default=3)
+    deploy_repo.add_argument("--retry-delay", type=int, default=15)
     deploy_repo.add_argument("--dry-run", action="store_true")
     deploy_repo.add_argument("--explain", action="store_true")
 
@@ -2944,6 +2952,8 @@ def main(argv: list[str] | None = None) -> int:
                 wait=args.wait,
                 force=args.force,
                 timeout=args.timeout,
+                max_deploy_attempts=args.max_deploy_attempts,
+                retry_delay=args.retry_delay,
             ),
             dry_run=args.dry_run,
             explain=args.explain,
