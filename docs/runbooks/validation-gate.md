@@ -36,6 +36,13 @@ Inspect the configured checks and the last recorded outcomes:
 make gate-status
 ```
 
+Inspect the lane catalog and the current lane selection for this checkout:
+
+```bash
+python3 scripts/validation_lanes.py --list
+python3 scripts/validation_lanes.py --resolve
+```
+
 Run the fast local hook set across the whole checkout:
 
 ```bash
@@ -44,28 +51,35 @@ uvx --from pre-commit pre-commit run --all-files
 
 ## Gate Definition
 
-The authoritative gate manifest is [config/validation-gate.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/validation-gate.json).
+The authoritative gate surfaces are:
 
-It defines these blocking checks:
+- [config/validation-gate.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/validation-gate.json)
+- [config/validation-lanes.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/validation-lanes.yaml)
 
-- `ansible-lint`
-- `yaml-lint`
-- `type-check`
-- `integration-tests`
-- `schema-validation`
-- `ansible-syntax`
-- `policy-validation`
-- `tofu-validate`
-- `packer-validate`
-- `security-scan`
-- `artifact-secret-scan`
-- `service-completeness`
+`config/validation-gate.json` still declares the runnable checks, container images, and commands.
+`config/validation-lanes.yaml` now maps changed repo surfaces to ADR 0264 validation lanes and keeps only a small fast set of global invariants blocking for every run.
 
-`scripts/run_gate.py` reads that manifest and executes the checks in parallel via [scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/parallel_check.py).
+The always-blocking fast global invariants are:
+
+- `workstream-surfaces`
+- `agent-standards`
+
+The lane-scoped checks are grouped into these blocking lanes:
+
+- `documentation-and-adr`
+- `repository-structure-and-schema`
+- `generated-artifact-and-canonical-truth`
+- `service-syntax-and-unit`
+- `remote-builder`
+- `live-apply-and-promotion`
+
+[scripts/run_gate.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/run_gate.py) now reads both files, resolves changed files against the lane catalog, and executes only the blocking lane checks plus the fast global invariants. If a changed file does not match any declared surface class, the gate widens safely back to all lanes instead of silently skipping protection.
+
+[scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/parallel_check.py) still performs the container-backed execution once the blocking check set is resolved.
+
+ADR 0230 adds `policy-validation`, which runs [scripts/policy_checks.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/policy_checks.py) against the shared `policy/` bundle and verifies the OPA or Conftest toolchain cache under `LV3_POLICY_TOOLCHAIN_ROOT`. That check now participates in the `repository-structure-and-schema` lane across the controller path, the build-server `remote-validate` path, and the worker-side Windmill post-merge gate.
 
 Repo-managed validation installs third-party Ansible collections from the public `release_galaxy` server by default, so local Docker fallback does not depend on resolving the private `galaxy.lv3.org` endpoint just to lint or syntax-check the checkout.
-
-ADR 0230 adds `policy-validation`, which runs [scripts/policy_checks.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/policy_checks.py) against the shared `policy/` bundle and verifies the OPA or Conftest toolchain cache under `LV3_POLICY_TOOLCHAIN_ROOT`. The same manifest-backed check now runs in the local gate, the build-server `remote-validate` path, and the worker-side Windmill post-merge gate.
 
 The `schema-validation` stage now also runs [scripts/provider_boundary_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/provider_boundary_catalog.py) so ADR 0207 provider-boundary guards fail the gate if a declared boundary leaks raw provider payload selectors beyond its translation step.
 
@@ -93,7 +107,12 @@ The gate writes the last local or remote-triggered run to:
 
 - `.local/validation-gate/last-run.json`
 
-That payload now includes a `session_workspace` object so operators can tell which controller session or worktree produced the latest result.
+That payload now includes:
+
+- `session_workspace` so operators can tell which controller session or worktree produced the latest result
+- `lane_selection` so operators can see which lanes and checks blocked for that run
+- `lane_results` so passed lanes publish reusable green-path summaries
+- `fast_global_results` so the always-blocking invariants are visible separately from the selected lanes
 
 The Windmill post-merge gate writes its most recent result to:
 
@@ -109,11 +128,11 @@ Windmill should call:
 python3 config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox_florin_server
 ```
 
-That workflow is seeded into the `lv3` workspace as `f/lv3/post_merge_gate`, re-runs the same `config/validation-gate.json` manifest after merge on `main`, and records the result in the worker checkout.
+That workflow is seeded into the `lv3` workspace as `f/lv3/post_merge_gate`, re-runs the same lane-aware validation catalog after merge on `main`, and records the result in the worker checkout.
 
 If the worker cannot pull the registry-backed `check-runner` images and the manifest run fails with a runner-image error, the post-merge script falls back to a worker-safe local subset:
 
-- `./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals`
+- `./scripts/validate_repo.sh workstream-surfaces agent-standards generated-vars role-argument-specs json alert-rules generated-docs generated-portals`
 - `uv run --with pyyaml python3 scripts/provider_boundary_catalog.py --validate`
 
 That fallback intentionally omits the full `data-models` stage because mirrored worker checkouts can lack the complete historical git ancestry needed to validate every live-apply receipt `source_commit`, even when the ADR 0207 provider-boundary contract itself is healthy.

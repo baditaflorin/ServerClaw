@@ -1,4 +1,20 @@
 {
+  "workstream-surfaces": {
+    "description": "Validate the current branch against its declared workstream ownership manifest and shared-surface contract.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "command": "./scripts/validate_repo.sh workstream-surfaces",
+    "working_dir": "/workspace",
+    "timeout_seconds": 120
+  },
+  "agent-standards": {
+    "description": "Enforce the ADR 0163 through ADR 0168 agent handoff, ADR index, and workstream registration standards.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "command": "./scripts/validate_repo.sh agent-standards",
+    "working_dir": "/workspace",
+    "timeout_seconds": 120
+  },
   "ansible-lint": {
     "description": "Run the repo-managed ansible-lint policy against playbooks and the packaged collection.",
     "severity": "error",
@@ -32,6 +48,22 @@
     "command": "python scripts/validate_dependency_direction.py >/dev/null",
     "working_dir": "/workspace",
     "timeout_seconds": 120
+  },
+  "generated-docs": {
+    "description": "Regenerate the canonical generated documentation surfaces and fail if committed status docs drift.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "command": "./scripts/validate_repo.sh generated-docs",
+    "working_dir": "/workspace",
+    "timeout_seconds": 240
+  },
+  "generated-portals": {
+    "description": "Regenerate the portal build outputs and fail if committed publication artifacts drift.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "command": "./scripts/validate_repo.sh generated-portals",
+    "working_dir": "/workspace",
+    "timeout_seconds": 300
   },
   "packer-validate": {
     "description": "Validate all Packer templates when the repo carries them; otherwise report a no-op pass.",
@@ -106,7 +138,7 @@
     "description": "Type check the gate orchestration code and the manifest-backed Docker runner surfaces.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/python:3.12.10",
-    "command": "mypy --cache-dir /tmp/mypy-cache scripts/parallel_check.py scripts/run_gate.py scripts/gate_status.py scripts/log_gate_bypass.py scripts/policy_checks.py scripts/policy_toolchain.py config/windmill/scripts/post-merge-gate.py tests/test_parallel_check.py tests/test_validation_gate.py tests/test_policy_checks.py tests/test_command_catalog.py",
+    "command": "mypy --cache-dir /tmp/mypy-cache scripts/parallel_check.py scripts/run_gate.py scripts/gate_status.py scripts/log_gate_bypass.py scripts/policy_checks.py scripts/policy_toolchain.py scripts/validation_lanes.py config/windmill/scripts/post-merge-gate.py tests/test_parallel_check.py tests/test_validation_gate.py tests/test_validation_lanes.py tests/test_policy_checks.py tests/test_command_catalog.py",
     "working_dir": "/workspace",
     "timeout_seconds": 180
   },

@@ -5,11 +5,18 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from scripts import validation_lanes
+
 
 DEFAULT_MANIFEST = Path("config/validation-gate.json")
+DEFAULT_LANE_CATALOG = Path("config/validation-lanes.yaml")
 DEFAULT_LAST_RUN = Path(".local/validation-gate/last-run.json")
 DEFAULT_POST_MERGE_RUN = Path(".local/validation-gate/post-merge-last-run.json")
 DEFAULT_BYPASS_DIR = Path("receipts/gate-bypasses")
@@ -47,14 +54,32 @@ def build_status_payload(
     last_run_path: Path,
     post_merge_run_path: Path,
     bypass_dir: Path,
+    lane_catalog_path: Path | None = None,
 ) -> dict[str, Any]:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     last_run = load_optional_json(last_run_path)
     post_merge_run = load_optional_json(post_merge_run_path)
     bypass = latest_bypass_receipt(bypass_dir)
+    resolved_lane_catalog_path = lane_catalog_path or manifest_path.parent / DEFAULT_LANE_CATALOG.name
+    enabled_lanes: list[dict[str, Any]] = []
+    if resolved_lane_catalog_path.is_file():
+        catalog = validation_lanes.load_catalog(
+            catalog_path=resolved_lane_catalog_path,
+            manifest_checks=set(manifest),
+        )
+        enabled_lanes = [
+            {
+                "id": lane_id,
+                "title": lane.title,
+                "checks": list(lane.checks),
+            }
+            for lane_id, lane in catalog.lanes.items()
+        ]
 
     payload = {
         "manifest_path": str(manifest_path),
+        "lane_catalog_path": str(resolved_lane_catalog_path) if resolved_lane_catalog_path.is_file() else None,
+        "enabled_lanes": enabled_lanes,
         "enabled_checks": [
             {
                 "id": check_id,
@@ -84,10 +109,20 @@ def print_run_summary(label: str, payload: dict[str, Any] | None) -> None:
         f"{label}: {payload.get('status', 'unknown')} at {payload.get('executed_at', 'unknown')} "
         f"via {payload.get('source', 'unknown')}"
     )
+    lane_selection = payload.get("lane_selection")
+    if isinstance(lane_selection, dict):
+        selected_lanes = lane_selection.get("selected_lanes", [])
+        if isinstance(selected_lanes, list) and selected_lanes:
+            print(f"  selected lanes: {', '.join(str(item) for item in selected_lanes)}")
 
 
 def print_status_text(payload: dict[str, Any]) -> None:
     print(f"Validation gate manifest: {payload['manifest_path']}")
+    if payload.get("enabled_lanes"):
+        print("Validation lanes:")
+        for lane in payload["enabled_lanes"]:
+            checks = ", ".join(lane.get("checks", []))
+            print(f"  - {lane['id']}: {lane['title']} [{checks}]")
     print("Enabled checks:")
     for check in payload["enabled_checks"]:
         print(f"  - {check['id']} [{check['severity']}]: {check['description']}")

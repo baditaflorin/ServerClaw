@@ -9,6 +9,8 @@ from typing import Any, TypedDict
 
 
 LOCAL_FALLBACK_STAGES = [
+    "workstream-surfaces",
+    "agent-standards",
     "generated-vars",
     "role-argument-specs",
     "json",

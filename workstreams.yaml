@@ -718,6 +718,83 @@ workstreams:
         plus certificate admission
       release_bump: patch
       included_in_repo_version: 0.177.56
+  - id: ws-0264-live-apply
+    adr: "0264"
+    title: Failure-domain-isolated validation lanes live apply
+    status: in_progress
+    owner: codex
+    branch: codex/adr-0264-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0264-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0264-live-apply.md
+    depends_on:
+      - ws-0264-receipt-driven-resilience-adrs
+      - adr-0087-validation-gate
+      - adr-0167-workstream-handoff-protocol
+      - adr-0173-workstream-surface-ownership-manifest
+    conflicts_with: []
+    shared_surfaces:
+      - docs/adr/0264-failure-domain-isolated-validation-lanes.md
+      - docs/workstreams/ws-0264-live-apply.md
+      - docs/runbooks/validation-gate.md
+      - .config-locations.yaml
+      - docs/adr/.index.yaml
+      - config/build-server.json
+      - config/validation-gate.json
+      - config/validation-lanes.yaml
+      - config/workflow-catalog.json
+      - scripts/run_gate.py
+      - scripts/gate_status.py
+      - scripts/validate_repo.sh
+      - scripts/validation_lanes.py
+      - config/windmill/scripts/post-merge-gate.py
+      - config/windmill/scripts/gate-status.py
+      - tests/test_validation_gate.py
+      - tests/test_validation_gate_windmill.py
+      - tests/test_validation_lanes.py
+      - workstreams.yaml
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: validation_lane_docs
+          paths:
+            - docs/adr/0264-failure-domain-isolated-validation-lanes.md
+            - docs/workstreams/ws-0264-live-apply.md
+            - docs/runbooks/validation-gate.md
+            - .config-locations.yaml
+          mode: exclusive
+        - id: validation_lane_catalog
+          paths:
+            - config/build-server.json
+            - config/validation-gate.json
+            - config/validation-lanes.yaml
+            - config/workflow-catalog.json
+            - config/windmill/scripts/post-merge-gate.py
+            - config/windmill/scripts/gate-status.py
+          mode: exclusive
+        - id: validation_lane_runtime
+          paths:
+            - scripts/run_gate.py
+            - scripts/gate_status.py
+            - scripts/validate_repo.sh
+            - scripts/validation_lanes.py
+          mode: exclusive
+        - id: validation_lane_tests
+          paths:
+            - tests/test_validation_gate.py
+            - tests/test_validation_gate_windmill.py
+            - tests/test_validation_lanes.py
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false
   - id: ws-0253-live-apply
     adr: "0253"
     title: Unified runtime assurance scoreboard live apply

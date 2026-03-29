@@ -452,9 +452,24 @@ service_configuration:
     validation: "python3 scripts/gate_status.py --repo-path ."
     related_files:
       - "config/build-server.json: remote-validate and remote-pre-push command wiring"
+      - "config/validation-lanes.yaml: ADR 0264 lane-to-surface catalog that selects blocking checks"
       - "config/check-runner-manifest.json: runner-image check definitions"
       - "scripts/run_gate.py: gate orchestrator"
+      - "scripts/validation_lanes.py: lane catalog loader and selector"
       - "scripts/policy_checks.py: ADR 0230 policy-validation stage"
+      - "docs/runbooks/validation-gate.md: operator procedure"
+
+  config/validation-lanes.yaml:
+    purpose: ADR 0264 failure-domain-isolated validation-lane catalog
+    owner: human
+    format: YAML
+    use_for: Mapping mutable repository surface classes to blocking validation lanes and fast global invariants
+    update_when: Adjusting lane coverage, fast-global invariants, or the changed-surface routing policy
+    validation: "python3 scripts/validation_lanes.py --validate"
+    related_files:
+      - "config/validation-gate.json: runnable check manifest consumed by the lanes"
+      - "scripts/validation_lanes.py: catalog loader, validator, and lane resolver"
+      - "scripts/run_gate.py: lane-aware gate orchestrator"
       - "docs/runbooks/validation-gate.md: operator procedure"
 
   config/build-server.json:
@@ -467,6 +482,7 @@ service_configuration:
     related_files:
       - "config/check-runner-manifest.json: runner image check definitions consumed by remote validate"
       - "config/validation-gate.json: authoritative enabled gate checks"
+      - "config/validation-lanes.yaml: ADR 0264 lane-selection contract"
       - "scripts/remote_exec.sh: dispatch wrapper"
 
   config/check-runner-manifest.json:

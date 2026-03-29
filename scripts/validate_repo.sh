@@ -397,6 +397,7 @@ validate_dependency_direction() {
 validate_data_models() {
   echo "Repository data model validation"
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/ansible_scope_runner.py" validate >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/validation_lanes.py" --validate >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_timeout_hierarchy.py" >/dev/null
   "$PYTHON_BIN" "$REPO_ROOT/scripts/check_hardcoded_timeouts.py" >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/provider_boundary_catalog.py" --validate >/dev/null
