@@ -393,10 +393,10 @@
     mode: "0644"
     directory_mode: "0755"
   loop:
-    - src: "{{ ops_portal_service_dir }}/ops_portal"
-      dest: "{{ ops_portal_build_context_dir }}/ops_portal"
-    - src: "{{ ops_portal_service_dir }}/search_fabric"
-      dest: "{{ ops_portal_build_context_dir }}/search_fabric"
+    - src: "{{ ops_portal_service_dir }}/ops_portal/"
+      dest: "{{ ops_portal_build_context_dir }}/ops_portal/"
+    - src: "{{ ops_portal_service_dir }}/search_fabric/"
+      dest: "{{ ops_portal_build_context_dir }}/search_fabric/"
   loop_control:
     label: "{{ item.dest | replace(ops_portal_build_context_dir ~ '/', '') }}"
 

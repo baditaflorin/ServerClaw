@@ -104,3 +104,11 @@
       - "'Bindings' in ops_portal_verify_runtime_assurance.content"
       - "'Runbook' in ops_portal_verify_runtime_assurance.content or 'No active service/environment bindings' in ops_portal_verify_runtime_assurance.content"
     fail_msg: "Ops portal runtime assurance matrix partial did not render the ADR 0244 view."
+
+- name: Assert the runtime assurance matrix panel is not degraded
+  ansible.builtin.assert:
+    that:
+      - "'Runtime assurance data is degraded:' not in ops_portal_verify_runtime_assurance.content"
+    fail_msg: >-
+      Ops portal runtime assurance matrix partial rendered with degraded live
+      gateway data instead of the authenticated runtime assurance view.

@@ -85,6 +85,10 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert "Sync the clean ops portal Docker build-context directories" in tasks
     assert "Sync the clean ops portal Docker build-context root files" in tasks
     assert "remote_src: true" in tasks
+    assert 'src: "{{ ops_portal_service_dir }}/ops_portal/"' in tasks
+    assert 'dest: "{{ ops_portal_build_context_dir }}/ops_portal/"' in tasks
+    assert 'src: "{{ ops_portal_service_dir }}/search_fabric/"' in tasks
+    assert 'dest: "{{ ops_portal_build_context_dir }}/search_fabric/"' in tasks
     assert "{{ ops_portal_build_context_dir }}/publication_contract.py" in tasks
     assert "{{ ops_portal_build_context_dir }}/requirements.txt" in tasks
     assert "{{ ops_portal_build_context_dir }}/Dockerfile" in tasks
@@ -114,6 +118,8 @@ def test_ops_portal_verify_checks_launcher_and_runtime_assurance_partials() -> N
     assert "Verify the runtime assurance matrix partial renders locally" in verify_tasks
     assert '/partials/runtime-assurance' in verify_tasks
     assert "Ops portal runtime assurance matrix partial did not render the ADR 0244 view." in verify_tasks
+    assert "Assert the runtime assurance matrix panel is not degraded" in verify_tasks
+    assert "'Runtime assurance data is degraded:' not in ops_portal_verify_runtime_assurance.content" in verify_tasks
 
 
 def test_ops_portal_runtime_file_sources_include_launcher_partial() -> None:
