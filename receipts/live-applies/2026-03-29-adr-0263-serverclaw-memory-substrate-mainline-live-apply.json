@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0263-serverclaw-memory-substrate-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T21:30:12Z",
+  "recorded_by": "codex",
+  "source_commit": "7fe9af77cf7b842884533dde6b2b1af64857fe0d",
+  "repo_version_context": "0.177.87",
+  "platform_version_context": "0.130.59",
+  "workflow_id": "adr-0263-serverclaw-memory-substrate-mainline-live-apply",
+  "adr": "0263",
+  "summary": "Replayed ADR 0263 from the synchronized 0.177.87 mainline worktree by converging the governed rag-context wrapper on docker-runtime-lv3, reapplying the ServerClaw memory schema and corpus mirrors, building the platform-context API with the role-managed host-network classic-builder path, and re-verifying cited context retrieval plus semantic-and-keyword memory recall through both the role and the external operator CLI.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "platform-context-api",
+      "address": "http://100.64.0.1:8010"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0263 regression coverage on the synchronized mainline head",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml python -m pytest tests/test_rag_context_runtime_role.py tests/test_generate_platform_vars.py -q` returned `31 passed in 1.24s` on commit `7fe9af77cf7b842884533dde6b2b1af64857fe0d` after the latest origin/main merge."
+    },
+    {
+      "check": "Rag-context syntax and repo gate verification on the synchronized head",
+      "result": "pass",
+      "observed": "`ansible-playbook -i inventory/hosts.yml playbooks/services/rag-context.yml --syntax-check --private-key .local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` passed, `./scripts/validate_repo.sh data-models workstream-surfaces agent-standards` passed after the ADR 0263 ownership metadata refresh, and `make check-canonical-truth` returned `Canonical truth OK`."
+    },
+    {
+      "check": "Exact-main ADR 0263 replay from the synchronized 0.177.87 branch head",
+      "result": "pass",
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=rag-context env=production` succeeded with `LV3_RUN_ID=e6fa9fca7a534939928bc8c0938756b2`, ansible scope run id `9e8dcfe46d20419fb39c464891acd29c`, trace id `3a088906b6a84a9bae17eb26dac49daf`, and final recap `docker-runtime-lv3 : ok=119 changed=19 unreachable=0 failed=0 skipped=21` plus `proxmox_florin : ok=42 changed=7 unreachable=0 failed=0 skipped=15`."
+    },
+    {
+      "check": "External health and operator CLI memory smoke after the exact-main replay",
+      "result": "pass",
+      "observed": "`curl -sf http://100.64.0.1:8010/healthz` returned `{\"status\":\"ok\",\"collection\":\"platform_context\",\"memory_collection\":\"serverclaw_memory\",\"memory_enabled\":true}`; `uv run --with pyyaml python scripts/lv3_cli.py query-platform-context \"what retrieval backend is active for platform context\" --json` returned a cited first match at `docs/adr/0198-qdrant-vector-search-semantic-rag.md`; and a CLI create/query/delete smoke cycle for memory id `1f03ab41-1e97-4537-896e-4e7bd3ae2693` confirmed `matched_backends` `keyword` and `semantic` before deletion."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0263-qdrant-postgresql-and-local-search-as-the-serverclaw-memory-substrate.md",
+    "docs/workstreams/adr-0263-serverclaw-memory-substrate.md",
+    "docs/runbooks/serverclaw-memory-substrate.md",
+    "docs/runbooks/rag-platform-context.md",
+    "playbooks/services/rag-context.yml",
+    "collections/ansible_collections/lv3/platform/roles/rag_context_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/rag_context_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/rag_context_runtime/tasks/verify.yml",
+    "inventory/group_vars/platform.yml",
+    "scripts/generate_platform_vars.py",
+    "scripts/platform_context_service.py",
+    "scripts/lv3_cli.py",
+    "tests/test_generate_platform_vars.py",
+    "tests/test_platform_context_service.py",
+    "tests/test_lv3_cli.py",
+    "tests/test_rag_context_runtime_role.py",
+    "workstreams.yaml",
+    "receipts/live-applies/evidence/2026-03-29-adr-0263-serverclaw-memory-substrate-mainline-live-apply.txt"
+  ],
+  "notes": [
+    "This receipt is the canonical exact-main live-apply proof for ADR 0263 and supports the first platform-version bump where the ServerClaw memory substrate becomes true on main.",
+    "The final successful replay came after earlier branch-local failures exposed three real defects: missing `script_bootstrap.py` packaging inside the image, reliance on `docker compose up --build` despite Docker bridge drift on docker-runtime-lv3, and stale compose-network recovery requirements for local Ollama.",
+    "The current governed path intentionally skips the full inline mirrored-corpus rebuild during production live apply; use `python3 scripts/index_platform_knowledge.py --api-url http://100.64.0.1:8010 --api-token-file .local/platform-context/api-token.txt` as the explicit maintenance rebuild when a full corpus refresh is required."
+  ]
+}

@@ -3382,7 +3382,7 @@ gitea_private_base_url: http://10.10.10.20:3003
 gitea_controller_url: http://100.64.0.1:3009
 platform_context_internal_port: 8010
 platform_context_host_proxy_port: 8010
-platform_context_private_url: http://10.10.10.20:8010
+platform_context_private_url: http://127.0.0.1:8010
 platform_context_controller_url: http://100.64.0.1:8010
 portainer_host_proxy_port: 9444
 portainer_controller_url: https://100.64.0.1:9444

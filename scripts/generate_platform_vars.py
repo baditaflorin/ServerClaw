@@ -836,7 +836,7 @@ def build_platform_vars(
         "gitea_controller_url": gitea_service["urls"]["controller"],
         "platform_context_internal_port": resolved_ports["platform_context_internal_port"],
         "platform_context_host_proxy_port": resolved_ports["platform_context_host_proxy_port"],
-        "platform_context_private_url": platform_context_service["urls"]["internal"],
+        "platform_context_private_url": f"http://127.0.0.1:{resolved_ports['platform_context_internal_port']}",
         "platform_context_controller_url": platform_context_service["urls"]["controller"],
         "portainer_host_proxy_port": resolved_ports["portainer_host_proxy_port"],
         "portainer_controller_url": portainer_service["urls"]["controller"],

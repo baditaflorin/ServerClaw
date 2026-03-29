@@ -54,6 +54,7 @@ Expected:
 - anonymous protected requests return `AUTH_TOKEN_MISSING`
 - invalid or expired credentials return `AUTH_TOKEN_INVALID` or `AUTH_TOKEN_EXPIRED`
 - missing routes or resources return `INPUT_*` codes
+- missing ServerClaw memory ids return `INPUT_UNKNOWN_MEMORY_ENTRY`
 - dependency or runtime outages return `INFRA_*` codes
 
 ## Maintenance Rules
