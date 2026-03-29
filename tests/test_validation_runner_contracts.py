@@ -105,3 +105,11 @@ def test_evaluate_lane_eligibility_reports_missing_runtime(tmp_path: Path) -> No
 
     assert result.eligible is False
     assert any("docker" in reason for reason in result.reasons)
+
+
+def test_repo_catalog_covers_current_gate_and_build_server_contracts(monkeypatch) -> None:
+    module = load_module("validation_runner_contracts_repo_catalog")
+    catalog = module.load_contract_catalog()
+    monkeypatch.setattr(module, "_validate_schema", lambda _catalog: None)
+
+    module.validate_contract_catalog(catalog)

@@ -19,8 +19,8 @@ workstreams:
     title: Validation runner capability contracts and environment attestation
     status: ready_for_merge
     owner: codex
-    branch: codex/ws-0266-validation-runner-capability-contracts
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0266-validation-runner-capability-contracts
+    branch: codex/ws-0266-main-integration-r3
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0266-main-integration-r2
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0266-validation-runner-capability-contracts-live-apply.md
     depends_on:
       - adr-0082-remote-build-gateway

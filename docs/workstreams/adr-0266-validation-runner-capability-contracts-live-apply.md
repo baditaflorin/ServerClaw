@@ -7,8 +7,8 @@
 - Live Applied In Platform Version: branch-local verification on platform 0.130.54; exact-main replay pending
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
-- Branch: `codex/ws-0266-validation-runner-capability-contracts`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0266-validation-runner-capability-contracts`
+- Branch: `codex/ws-0266-main-integration-r3`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0266-main-integration-r2`
 - Owner: codex
 - Depends On: `adr-0082-remote-build-gateway`, `adr-0083-docker-check-runner`, `adr-0087-validation-gate`, `adr-0156-agent-session-workspace-isolation`, `adr-0227-bounded-command-execution-via-systemd-run-and-approved-wrappers`
 - Conflicts With: none
