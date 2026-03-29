@@ -126,6 +126,9 @@ def test_control_plane_recovery_uses_dedicated_windmill_backup_dsn() -> None:
     assert 'LoadCredential=openbao-token:' in service_text
     assert 'LoadCredential=windmill-db-dsn:' in service_text
     assert "openbao_systemd_credentials" in tasks_text
+    assert "Start the local OpenBao service when host-native secret delivery finds the API unavailable" in helper_text
+    assert "common_openbao_systemd_credentials_compose_file" in helper_text
+    assert "- openbao" in helper_text
     assert 'systemctl\n      - start' in tasks_text
     assert 'command: "{{ control_plane_recovery_runtime_backup_script }}"' not in tasks_text
     assert 'sink "file"' in helper_config_text
