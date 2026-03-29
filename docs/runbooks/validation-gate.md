@@ -55,9 +55,11 @@ The authoritative gate surfaces are:
 
 - [config/validation-gate.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/validation-gate.json)
 - [config/validation-lanes.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/validation-lanes.yaml)
+- [config/validation-runner-contracts.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/validation-runner-contracts.json)
 
 `config/validation-gate.json` still declares the runnable checks, container images, and commands.
 `config/validation-lanes.yaml` now maps changed repo surfaces to ADR 0264 validation lanes and keeps only a small fast set of global invariants blocking for every run.
+`config/validation-runner-contracts.json` adds the ADR 0266 runner capability catalog so each gate run can attest the active runner and fail closed as `runner_unavailable` when the requested checks are not eligible on that execution surface.
 
 The always-blocking fast global invariants are:
 
@@ -73,9 +75,9 @@ The lane-scoped checks are grouped into these blocking lanes:
 - `remote-builder`
 - `live-apply-and-promotion`
 
-[scripts/run_gate.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/run_gate.py) now reads both files, resolves changed files against the lane catalog, and executes only the blocking lane checks plus the fast global invariants. If a changed file does not match any declared surface class, the gate widens safely back to all lanes instead of silently skipping protection.
+[scripts/run_gate.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/run_gate.py) now reads the lane catalog and the runner-contract catalog, resolves changed files against the lane catalog, and executes only the blocking lane checks plus the fast global invariants. If a changed file does not match any declared surface class, the gate widens safely back to all lanes instead of silently skipping protection. If the selected runner contract cannot satisfy a requested check, the gate records that check as `runner_unavailable` before the Docker runner path starts.
 
-[scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/parallel_check.py) still performs the container-backed execution once the blocking check set is resolved.
+[scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/parallel_check.py) still performs the container-backed execution once the blocking check set is resolved, and now classifies Docker-daemon, image-pull, and missing-runner failures as `runner_unavailable` instead of reporting them as content failures.
 
 Live-apply receipts under `receipts/live-applies/` are now a declared surface class, so receipt-only updates stay in the repository-structure-and-schema plus generated-artifact-and-canonical-truth lanes instead of widening the gate back to every lane.
 
@@ -110,10 +112,12 @@ That path records a receipt under [receipts/gate-bypasses](/Users/live/Documents
 The gate writes the last local or remote-triggered run to:
 
 - `.local/validation-gate/last-run.json`
+- `.local/validation-gate/remote-validate-last-run.json`
 
-That payload now includes:
+Those payloads now include:
 
 - `session_workspace` so operators can tell which controller session or worktree produced the latest result
+- `runner.id`, `runner.capability_contract`, and `runner.environment_attestation` so operators can see the attested execution surface, tooling, network class, and scratch-space guarantees used for that run
 - `lane_selection` so operators can see which lanes and checks blocked for that run
 - `lane_results` so passed lanes publish reusable green-path summaries
 - `fast_global_results` so the always-blocking invariants are visible separately from the selected lanes
@@ -122,7 +126,7 @@ The Windmill post-merge gate writes its most recent result to:
 
 - `.local/validation-gate/post-merge-last-run.json`
 
-`make gate-status` reads both files when present.
+`make gate-status` reads all three files when present.
 
 ## Windmill Post-Merge Gate
 
@@ -132,7 +136,7 @@ Windmill should call:
 python3 config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox_florin_server
 ```
 
-That workflow is seeded into the `lv3` workspace as `f/lv3/post_merge_gate`, re-runs the same lane-aware validation catalog after merge on `main`, and records the result in the worker checkout.
+That workflow is seeded into the `lv3` workspace as `f/lv3/post_merge_gate`, re-runs the same lane-aware validation catalog after merge on `main`, records the result in the worker checkout, and forces `LV3_VALIDATION_RUNNER_ID=windmill-post-merge-worker` so the recorded payload names the worker runner contract instead of inheriting a controller-local default.
 
 If the worker cannot pull the registry-backed `check-runner` images and the manifest run fails with a runner-image error, the post-merge script falls back to a worker-safe local subset:
 
@@ -151,6 +155,7 @@ When the replay starts from a repo-scoped non-primary git worktree, `playbooks/w
 - if `make install-hooks` fails during `pre-commit` bootstrap, rerun it with working internet access so `pre-commit` can fetch hook environments
 - if the build server is unreachable, rerun `make pre-push-gate`; the wrapper already falls back to local Docker execution
 - if the local Docker fallback is running on an emulated platform such as Apple Silicon with amd64 runner images, expect the `ansible-lint` and `ansible-syntax` stages to take several minutes; the manifest timeout budget is intentionally higher for those checks than for the lighter Python-only stages
+- if `make remote-validate` or `make pre-push-gate` records `runner_unavailable`, treat that as runner drift or admission failure first and inspect the recorded `runner.environment_attestation` plus `runner_unavailable_reason` fields before debugging repository content
 - if two remote gate runs appear to reuse one checkout, set distinct `LV3_SESSION_ID` values and rerun so each session gets its own build-server workspace
 - if a remote gate run fails with `fatal: not a git repository`, treat it as a validator regression rather than a checkout-shape requirement; the build-server path now uses immutable no-git snapshots and the affected check should be fixed to reason about repository content instead
 - if the Windmill post-merge gate points at an older mirrored worker tree without the canonical generated-doc inputs, replay `windmill_runtime` first so `/srv/proxmox_florin_server` includes the full worker-safe validation surface before rerunning the gate

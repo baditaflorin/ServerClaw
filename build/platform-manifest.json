@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.87",
+  "repo_version": "0.177.88",
   "platform_version": "0.130.59",
-  "generated_at": "2026-03-29T21:57:24Z",
-  "next_refresh_at": "2026-03-29T22:57:24Z",
+  "generated_at": "2026-03-29T22:03:58Z",
+  "next_refresh_at": "2026-03-29T23:03:58Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -482,18 +482,6 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.118.189.95:8020",
-        "last_live_apply": "2026-03-29T00:00:00Z",
-        "slo_status": "unknown"
-      },
-      "serverclaw": {
-        "service_name": "ServerClaw",
-        "status": "healthy",
-        "score": 0.95,
-        "safe_to_act": true,
-        "source": "repo_evidence",
-        "reason": "Repository evidence is complete enough for normal automation.",
-        "lifecycle_status": "active",
-        "primary_url": "https://chat.lv3.org",
         "last_live_apply": "2026-03-29T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -1813,32 +1801,6 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-semaphore.md"
-      },
-      {
-        "id": "converge-serverclaw",
-        "description": "Deploy the first public ServerClaw surface on coolify-lv3, reconcile its dedicated Keycloak client, and publish chat.lv3.org through the shared edge.",
-        "tags": [
-          "converge-serverclaw",
-          "host-and-guest-live",
-          "mutation",
-          "preflight",
-          "validated"
-        ],
-        "risk_class": "HIGH",
-        "automation_eligible": true,
-        "agent_trust_required": "T3",
-        "execution_class": "mutation",
-        "live_impact": "host_and_guest_live",
-        "budget": {
-          "max_duration_seconds": 1800,
-          "max_steps": 320,
-          "max_concurrent_instances": 1,
-          "max_touched_hosts": 3,
-          "max_restarts": 0,
-          "max_rollback_depth": 1,
-          "escalation_action": "notify_and_abort"
-        },
-        "runbook": "docs/runbooks/configure-serverclaw.md"
       },
       {
         "id": "converge-step-ca",
@@ -3880,16 +3842,6 @@
         ]
       },
       {
-        "id": "configure-serverclaw",
-        "title": "Configure ServerClaw",
-        "agent_trust_required": "T3",
-        "steps": 0,
-        "path": "docs/runbooks/configure-serverclaw.md",
-        "workflow_ids": [
-          "converge-serverclaw"
-        ]
-      },
-      {
         "id": "configure-step-ca",
         "title": "Configure step-ca",
         "agent_trust_required": "T3",
@@ -4460,10 +4412,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.86",
+    "last_version": "0.177.87",
     "deployed_at": "2026-03-29",
-    "summary": "records ADR 0251 exact-main durable verification on the latest realistic origin/main by marking the stage-scoped smoke suite and promotion-gate workflow fully live, preserving the live worker checkout, gate-status, runtime-assurance, and ops-portal verification on release 0.177.87 while the current verified platform baseline remains 0.130.59",
-    "release_notes_url": "docs/release-notes/0.177.87.md"
+    "summary": "implemented ADR 0266 by adding declared validation-runner contracts, per-run environment attestation, runner-aware gate scheduling, and recorded build handoff evidence across the remote build server, controller fallback, and worker post-merge paths repaired the managed OPA and Conftest bootstrap so stale cross-platform cache entries are replaced automatically before repo policy validation runs",
+    "release_notes_url": "docs/release-notes/0.177.88.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

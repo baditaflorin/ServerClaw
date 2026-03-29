@@ -31,11 +31,12 @@ def test_gate_status_wrapper_reads_repo_status_payload(tmp_path: Path) -> None:
     (repo_root / ".local" / "validation-gate").mkdir(parents=True)
     (repo_root / "scripts" / "gate_status.py").write_text(
         """
-def build_status_payload(*, manifest_path, last_run_path, post_merge_run_path, bypass_dir):
+def build_status_payload(*, manifest_path, last_run_path, remote_validate_run_path, post_merge_run_path, bypass_dir):
     return {
         "manifest_path": str(manifest_path),
         "enabled_checks": [],
         "last_run": {"status": "passed"},
+        "remote_validate_run": {"status": "passed"},
         "post_merge_run": None,
         "latest_bypass": None,
         "bypass_dir": str(bypass_dir),

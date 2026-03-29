@@ -29,7 +29,7 @@
   },
   "type-check": {
     "image": "registry.lv3.org/check-runner/python:3.12.10",
-    "command": "mypy scripts/parallel_check.py scripts/policy_checks.py scripts/policy_toolchain.py config/windmill/scripts/check-runner-rebuild.py tests/test_parallel_check.py tests/test_policy_checks.py tests/test_command_catalog.py",
+    "command": "mypy scripts/parallel_check.py scripts/policy_checks.py scripts/policy_toolchain.py scripts/validation_runner_contracts.py config/windmill/scripts/check-runner-rebuild.py tests/test_parallel_check.py tests/test_policy_checks.py tests/test_command_catalog.py tests/test_validation_runner_contracts.py",
     "working_dir": "/workspace",
     "timeout_seconds": 120,
     "cache_mounts": ["pip"]

@@ -10,6 +10,7 @@ The laptop remains the editor and orchestrator. The build server becomes the CPU
 
 - `scripts/remote_exec.sh`
 - `config/build-server.json`
+- `config/validation-runner-contracts.json`
 - `.rsync-exclude`
 - `inventory/build_server.yml`
 - `Makefile`
@@ -21,6 +22,7 @@ The laptop remains the editor and orchestrator. The build server becomes the CPU
 3. `.rsync-exclude` is reviewed so secrets never leave the controller.
 4. The build server has `rsync`, `bash`, and whichever toolchain the selected command needs.
 5. If you want containerized execution, the corresponding runner image metadata exists in `config/check-runner-manifest.json`.
+6. The selected command's `runner_id` and `local_fallback_runner_id` both resolve in `config/validation-runner-contracts.json`.
 
 ## Initial Setup
 
@@ -60,6 +62,12 @@ Full validation on the build server:
 make remote-validate
 ```
 
+That run now records `.local/validation-gate/remote-validate-last-run.json` in the local checkout after the build-server copy is synced back. The payload includes:
+
+- the selected validation runner id
+- the declared capability contract for that runner
+- the per-run environment attestation for architecture, tooling, container runtime, network class, and scratch-space guarantees
+
 Run the full pre-push gate remotely, but allow local fallback if the build server is offline:
 
 ```bash
@@ -93,6 +101,8 @@ scripts/remote_exec.sh remote-lint --local-fallback
 ```
 
 Fallback mode intentionally runs the repo-defined local command, not the remote Docker path.
+
+When the wrapper falls back locally, it now switches `LV3_VALIDATION_RUNNER_ID` to the command's declared `local_fallback_runner_id` before executing the repo command. That keeps the recorded status payload and gate attestation honest about which runner actually executed the validation.
 
 When that local command re-enters the repo through `bash -lc`, the gateway now exports `LV3_VALIDATE_PYTHON_BIN` from the invoking shell when it can. `scripts/validate_repo.sh` then resolves its direct Python validators against that Python 3.10+ interpreter so local fallback does not silently regress to the login shell's default `python3`.
 
@@ -129,6 +139,7 @@ Review `.rsync-exclude` before adding any new local secret material.
 | host is reachable but the build VM is not | missing or broken ProxyCommand jump path | verify the Proxmox host hop to `100.64.0.1` and the guest target `10.10.10.30` |
 | rsync fails before SSH starts | missing `rsync` locally or remotely | install `rsync` on both ends |
 | command runs remotely but not in Docker | runner manifest missing for that label | add `config/check-runner-manifest.json` in ADR 0083 or keep using shell mode |
+| a gate payload reports `runner_unavailable` | the selected runner contract does not satisfy the requested lane, or the attested Docker/tooling/runtime state was unavailable | inspect `.local/validation-gate/*.json`, then compare the `runner.capability_contract` and `runner.environment_attestation` blocks |
 | local fallback runs unexpectedly | SSH connectivity probe failed | inspect key permissions, host reachability, and `ConnectTimeout=5` behavior |
 | local fallback fails on `int | None` or another modern type annotation | the login shell resolved an older Python for direct validators | export `LV3_VALIDATE_PYTHON_BIN=/absolute/path/to/python3.10+` and rerun |
 | snapshot upload fails before the remote command starts | missing `rsync`, a full remote disk, or a permission problem in `.lv3-snapshots/` | rerun `make check-build-server`, confirm the session root is writable, and clean the affected session directory if needed |
@@ -139,4 +150,4 @@ Review `.rsync-exclude` before adding any new local secret material.
 
 - `check-build-server` is intentionally a dry-run snapshot upload plus SSH health check. It should be safe to run repeatedly.
 - the gateway preserves a stable session namespace per checkout by default; set `LV3_SESSION_ID` when you need a human-readable namespace for debugging or live verification
-- ADR 0083 extends this gateway with pinned check-runner images. Until then, commands without runner metadata execute as managed remote shell commands.
+- ADR 0266 adds runner capability contracts and per-run attestation on top of ADR 0083. Commands without runner metadata still execute as managed remote shell commands, but the governed validation paths now record the runner identity they actually used.

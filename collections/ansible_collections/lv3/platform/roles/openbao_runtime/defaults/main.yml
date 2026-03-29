@@ -52,6 +52,8 @@ openbao_tls_renewal_timer_path: "/etc/systemd/system/{{ openbao_tls_renewal_time
 openbao_tls_renewal_on_calendar: "*:0/15"
 openbao_tls_renewal_randomized_delay_seconds: 60
 openbao_tls_reload_command: "docker compose --file {{ openbao_compose_file }} restart openbao"
+openbao_runtime_chain_recheck_retries: 30
+openbao_runtime_chain_recheck_delay_seconds: 2
 openbao_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao
 openbao_init_local_file: "{{ openbao_local_artifact_dir }}/init.json"
 openbao_ops_password_local_file: "{{ openbao_local_artifact_dir }}/ops-password.txt"

@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "source": "windmill-post-merge-local-fallback",
+  "executed_at": "2026-03-29T19:37:24.365664+00:00",
+  "runner_id": "windmill-post-merge-worker",
+  "runner_surface": "windmill_worker",
+  "cpu_architecture": "x86_64",
+  "check_statuses": {
+    "local-fallback": "passed"
+  }
+}
