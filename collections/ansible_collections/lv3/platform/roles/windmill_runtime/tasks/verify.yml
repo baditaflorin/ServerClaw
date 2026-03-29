@@ -62,7 +62,9 @@
   register: windmill_verify_validation_gate_status
   retries: 3
   delay: 10
-  until: windmill_verify_validation_gate_status.rc == 0
+  until:
+    - windmill_verify_validation_gate_status.rc == 0
+    - windmill_verify_validation_gate_status.stdout | trim | length > 0
   changed_when: false
   failed_when: false
   no_log: true
