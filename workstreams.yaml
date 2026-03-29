@@ -65,7 +65,10 @@ workstreams:
       - docs/runbooks/health-probe-contracts.md
       - docs/runbooks/playbook-execution-model.md
       - Makefile
+      - config/ansible-execution-scopes.yaml
+      - config/command-catalog.json
       - config/health-probe-catalog.json
+      - config/workflow-catalog.json
       - playbooks/docker-publication-assurance.yml
       - playbooks/tasks/post-verify.yml
       - playbooks/tasks/docker-publication-assert.yml
@@ -112,7 +115,10 @@ workstreams:
             - docs/runbooks/health-probe-contracts.md
             - docs/runbooks/playbook-execution-model.md
             - Makefile
+            - config/ansible-execution-scopes.yaml
+            - config/command-catalog.json
             - config/health-probe-catalog.json
+            - config/workflow-catalog.json
             - playbooks/docker-publication-assurance.yml
             - playbooks/tasks/post-verify.yml
             - playbooks/tasks/docker-publication-assert.yml

@@ -512,6 +512,9 @@ syntax-check-guest-network-policy:
 syntax-check-docker-runtime:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/docker-runtime.yml --syntax-check
 
+syntax-check-docker-publication-assurance:
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/docker-publication-assurance.yml --syntax-check
+
 syntax-check-backup-vm:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/backup-vm.yml --syntax-check
 
