@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-29'
 total_adrs: 304
 implementation_status_summary:
-  Implemented: 231
+  Implemented: 232
   Partial: 7
-  Not Implemented: 65
+  Not Implemented: 64
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4617,7 +4617,7 @@ adr_index:
   - adr: '0272'
     title: Restore Readiness Ladders And Stateful Warm-Up Verification Profiles
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: api
     keywords:
@@ -4630,6 +4630,7 @@ adr_index:
       - profiles
     summary: We will verify restores through readiness ladders and
     filename: 0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md
+    implemented_version: 0.177.75
   - adr: '0273'
     title: Public Endpoint Admission Control For DNS Catalog And Certificate Concordance
     status: Accepted

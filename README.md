@@ -145,8 +145,8 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.74` |
-| Platform version | `0.130.50` |
+| Repository version | `0.177.75` |
+| Platform version | `0.130.51` |
 | Observed check date | `2026-03-29` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -268,7 +268,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `operator_access_runbooks` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_validation` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_workflows` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
-| `ops_portal` | `2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-live-apply` |
+| `ops_portal` | `2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-latest-main-revalidation` |
 | `ops_portal_visualizations` | `2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply` |
 | `outline` | `2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply` |
 | `plane` | `2026-03-28-adr-0193-plane-mainline-live-apply` |
@@ -283,6 +283,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `public_edge_publication` | `2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-live-apply` |
 | `realtime` | `2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply` |
 | `remote_build_gateway` | `2026-03-26-adr-0156-agent-session-workspace-isolation-live-apply` |
+| `restore_verification` | `2026-03-29-adr-0272-restore-readiness-mainline-live-apply` |
 | `route_dns_assertion_ledger` | `2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
 | `runtime_state_semantics` | `2026-03-28-adr-0246-runtime-state-semantics-live-apply` |
@@ -1237,6 +1238,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0250-live-apply: Live Apply ADR 0250 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0250-live-apply.md)
 - [Workstream WS-0252: Route And DNS Publication Assertion Ledger Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0252-live-apply.md)
 - [Workstream WS-0253: Unified Runtime Assurance Scoreboard Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0253-live-apply.md)
+- [Workstream ws-0272-live-apply: ADR 0272 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0272-live-apply.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -1254,8 +1256,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.74` |
-| Platform version | `0.130.50` |
+| Repository version | `0.177.75` |
+| Platform version | `0.130.51` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1518,6 +1520,7 @@ This repository is intentionally opinionated:
 | `0253` | Unified runtime assurance scoreboard live apply | `live_applied` | [ws-0253-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0253-live-apply.md) |
 | `0254` | ServerClaw architecture bundle | `merged` | [adr-0254-serverclaw-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0254-serverclaw-architecture-bundle.md) |
 | `0264` | Receipt-driven resilience architecture bundle | `merged` | [adr-0264-receipt-driven-resilience-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md) |
+| `0272` | Restore readiness ladders and stateful warm-up verification profiles | `live_applied` | [ws-0272-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0272-live-apply.md) |
 | `0295` | Shared artifact cache plane and dedicated cache VM roadmap | `merged` | [adr-0295-artifact-cache-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md) |
 <!-- END GENERATED: merged-workstreams -->
 

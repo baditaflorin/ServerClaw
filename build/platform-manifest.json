@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.74",
-  "platform_version": "0.130.50",
-  "generated_at": "2026-03-29T11:35:23Z",
-  "next_refresh_at": "2026-03-29T12:35:23Z",
+  "repo_version": "0.177.75",
+  "platform_version": "0.130.51",
+  "generated_at": "2026-03-29T12:00:18Z",
+  "next_refresh_at": "2026-03-29T13:00:18Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -48,7 +48,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://10.10.10.60:8007",
-        "last_live_apply": "2026-03-28T00:00:00Z"
+        "last_live_apply": "2026-03-29T00:00:00Z"
       },
       "changelog_portal": {
         "service_name": "Deployment History Portal",
@@ -3215,7 +3215,7 @@
         "id": "backup-restore-verification",
         "title": "Backup Restore Verification",
         "agent_trust_required": "T2",
-        "steps": 11,
+        "steps": 13,
         "path": "docs/runbooks/backup-restore-verification.md",
         "workflow_ids": [
           "restore-verification"
@@ -4175,10 +4175,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.73",
+    "last_version": "0.177.74",
     "deployed_at": "2026-03-29",
-    "summary": "records ADR 0237 exact-main evidence on the current mainline by preserving the verified schema-first React Hook Form and Zod operator-admin rollout while the later ADR 0241 and ADR 0228 receipts remain the canonical live evidence for the shared operator_access and windmill surfaces",
-    "release_notes_url": "docs/release-notes/0.177.74.md"
+    "summary": "implements ADR 0272 by adding governed restore-readiness ladders, per-service warm-up profiles, ladder-aware restore receipts, and verified live restore evidence for the protected guests",
+    "release_notes_url": "docs/release-notes/0.177.75.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

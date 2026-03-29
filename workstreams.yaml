@@ -156,7 +156,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implements ADR 0272 by adding governed restore-readiness ladders, per-service warm-up profiles, ladder-aware restore receipts, and verified live restore evidence for the protected guests
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.75
       latest_receipts:
         restore_verification: 2026-03-29-adr-0272-restore-readiness-mainline-live-apply
   - id: ws-0224-repo-intake
