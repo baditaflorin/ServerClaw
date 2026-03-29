@@ -268,6 +268,7 @@ playbooks:
       - inventory/host_vars/proxmox_florin.yml
   playbooks/services/build-artifact-cache.yml:
     playbook_id: build-artifact-cache
+    canonical_service_id: docker_build
     mutation_scope: host
     shared_surfaces:
       - service:build-artifact-cache

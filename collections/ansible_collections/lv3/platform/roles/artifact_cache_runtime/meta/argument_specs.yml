@@ -29,6 +29,11 @@ argument_specs:
         required: true
         description:
           - Internal listener address bound by every registry mirror.
+      artifact_cache_network_mode:
+        type: str
+        required: false
+        description:
+          - Docker networking mode used by each registry mirror container.
       artifact_cache_registry_image:
         type: str
         required: true
