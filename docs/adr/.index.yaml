@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-29'
 total_adrs: 314
 implementation_status_summary:
-  Implemented: 241
-  Partial: 7
-  Not Implemented: 65
+  Implemented: 242
+  Partial: 8
+  Not Implemented: 63
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4309,7 +4309,7 @@ adr_index:
   - adr: '0251'
     title: Stage-Scoped Smoke Suites And Promotion Gates
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Partial
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -4320,6 +4320,7 @@ adr_index:
       - gates
     summary: We will require stage-scoped smoke suites for active services and wire them
     filename: 0251-stage-scoped-smoke-suites-and-promotion-gates.md
+    implemented_version: 0.177.84
   - adr: '0252'
     title: Route And DNS Publication Assertion Ledger
     status: Accepted
@@ -4513,7 +4514,7 @@ adr_index:
   - adr: '0264'
     title: Failure-Domain-Isolated Validation Lanes
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -4522,6 +4523,7 @@ adr_index:
       - lanes
     summary: We will split repository and promotion validation into failure-domain-isolated
     filename: 0264-failure-domain-isolated-validation-lanes.md
+    implemented_version: 0.177.84
   - adr: '0265'
     title: Immutable Validation Snapshots For Remote Builders And Schema Checks
     status: Accepted

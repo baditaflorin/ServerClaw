@@ -35,7 +35,8 @@ The current dimensions are:
 - `Auth` — protected browser journey proof when required
 - `TLS` — dedicated HTTPS or TLS assurance evidence when required
 - `Logs` — central log-ingestion and queryability proof when required
-- `Smoke` — latest matched stage-scoped live-apply or smoke receipt
+- `Smoke` — latest receipt that satisfies the declared or inherited
+  stage-scoped smoke suite for that service and environment
 
 ## State Rules
 
@@ -81,3 +82,7 @@ From an operator browser:
   rollup should stay `unknown` or `degraded` instead of optimistic green
 - a green scoreboard row does not replace logs, receipts, or runbooks; it only
   tells you which proof sources are currently aligned
+- active environments inherit a default smoke suite that requires at least one
+  passing `smoke`-labelled verification item unless the service declares an
+  explicit `smoke_suites` override in
+  `config/service-capability-catalog.json`

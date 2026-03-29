@@ -4,6 +4,8 @@ from datetime import UTC, datetime
 from typing import Any
 from urllib.parse import urlparse
 
+from stage_smoke import declared_smoke_suites, latest_matching_smoke_receipt, receipt_passed as smoke_receipt_passed
+
 
 DEFAULT_OWNER_TEAM = "lv3-platform"
 RECEIPT_FRESHNESS_DAYS = 30
@@ -296,6 +298,8 @@ def build_runtime_assurance_models(
             auth_receipt = _latest_keyword_receipt(matched_receipts, AUTH_KEYWORDS)
             tls_receipt = _latest_keyword_receipt(matched_receipts, TLS_KEYWORDS)
             log_receipt = _latest_keyword_receipt(matched_receipts, LOG_KEYWORDS)
+            smoke_suites = declared_smoke_suites(service, environment)
+            smoke_receipt, matched_smoke_suite_ids = latest_matching_smoke_receipt(matched_receipts, smoke_suites)
 
             http_url = _http_url_for_environment(service, binding)
             expected_host = str(binding.get("subdomain") or service.get("subdomain") or _host_from_url(http_url) or "")
@@ -594,18 +598,50 @@ def build_runtime_assurance_models(
                     required=True,
                 )
 
-            if latest_receipt is None or not _receipt_passed(latest_receipt):
+            if not smoke_suites:
+                smoke = _dimension(
+                    dimension_id="smoke",
+                    label="Smoke",
+                    state="failed",
+                    detail="No stage-scoped smoke suite is declared for this active service environment.",
+                    last_verified=None,
+                    next_action="Declare at least one stage-scoped smoke suite before trusting this environment as stage-ready.",
+                    required=True,
+                )
+            elif smoke_receipt is None:
+                detail = (
+                    "No successful stage-scoped smoke receipt is currently matched for this service."
+                    if not matched_receipts
+                    else "Receipts exist for this service, but none satisfy the declared smoke suite."
+                )
                 smoke = _dimension(
                     dimension_id="smoke",
                     label="Smoke",
                     state="unknown",
-                    detail="No successful stage-scoped smoke receipt is currently matched for this service.",
+                    detail=detail,
                     last_verified=None,
                     next_action="Replay the service live apply or smoke path so the primary capability is proven explicitly.",
                     required=True,
                 )
+            elif not smoke_receipt_passed(smoke_receipt):
+                recorded_on = str(smoke_receipt.get("recorded_at") or smoke_receipt.get("recorded_on") or smoke_receipt.get("applied_on") or "")
+                smoke = _dimension(
+                    dimension_id="smoke",
+                    label="Smoke",
+                    state="failed",
+                    detail=(
+                        "The latest matched smoke receipt failed one or more required verification checks for "
+                        + ", ".join(matched_smoke_suite_ids)
+                        + "."
+                    ),
+                    last_verified=recorded_on or None,
+                    next_action="Repair the service and replay the declared smoke suite before treating this environment as healthy.",
+                    required=True,
+                )
             else:
-                recorded_on = str(latest_receipt.get("recorded_on") or latest_receipt.get("applied_on") or "")
+                recorded_on = str(
+                    smoke_receipt.get("recorded_at") or smoke_receipt.get("recorded_on") or smoke_receipt.get("applied_on") or ""
+                )
                 recorded_at = parse_timestamp(recorded_on)
                 age_days = None if recorded_at is None else max(0, int((datetime.now(UTC) - recorded_at).total_seconds() // 86400))
                 if age_days is not None and age_days <= RECEIPT_FRESHNESS_DAYS:
@@ -613,7 +649,11 @@ def build_runtime_assurance_models(
                         dimension_id="smoke",
                         label="Smoke",
                         state="pass",
-                        detail="The latest matched live receipt still falls inside the freshness window for stage smoke proof.",
+                        detail=(
+                            "The latest matched smoke receipt satisfies the declared stage smoke suite: "
+                            + ", ".join(matched_smoke_suite_ids)
+                            + "."
+                        ),
                         last_verified=recorded_on,
                         next_action="No immediate action.",
                         required=True,
@@ -623,7 +663,9 @@ def build_runtime_assurance_models(
                         dimension_id="smoke",
                         label="Smoke",
                         state="degraded",
-                        detail="A successful smoke receipt exists, but it is older than the preferred freshness window.",
+                        detail=(
+                            "A successful declared smoke receipt exists, but it is older than the preferred freshness window."
+                        ),
                         last_verified=recorded_on,
                         next_action="Replay the stage smoke path to refresh user-meaningful proof for this service.",
                         required=True,

@@ -115,6 +115,7 @@
     - "{{ ops_portal_service_dir }}/ops_portal"
     - "{{ ops_portal_service_dir }}/search_fabric"
     - "{{ ops_portal_service_dir }}/publication_contract.py"
+    - "{{ ops_portal_service_dir }}/stage_smoke.py"
     - "{{ ops_portal_service_dir }}/requirements.txt"
 
 - name: Ensure the ops portal application root exists
@@ -333,6 +334,8 @@
   loop:
     - src: "{{ ops_portal_repo_root }}/scripts/publication_contract.py"
       dest: "{{ ops_portal_service_dir }}/publication_contract.py"
+    - src: "{{ ops_portal_repo_root }}/scripts/stage_smoke.py"
+      dest: "{{ ops_portal_service_dir }}/stage_smoke.py"
     - src: "{{ ops_portal_repo_root }}/requirements/ops-portal.txt"
       dest: "{{ ops_portal_service_dir }}/requirements.txt"
   loop_control:
@@ -365,10 +368,12 @@
     - "{{ ops_portal_service_dir }}/._ops_portal"
     - "{{ ops_portal_service_dir }}/._search_fabric"
     - "{{ ops_portal_service_dir }}/._publication_contract.py"
+    - "{{ ops_portal_service_dir }}/._stage_smoke.py"
     - "{{ ops_portal_service_dir }}/._requirements.txt"
     - "{{ ops_portal_build_context_dir }}/._ops_portal"
     - "{{ ops_portal_build_context_dir }}/._search_fabric"
     - "{{ ops_portal_build_context_dir }}/._publication_contract.py"
+    - "{{ ops_portal_build_context_dir }}/._stage_smoke.py"
     - "{{ ops_portal_build_context_dir }}/._requirements.txt"
     - "{{ ops_portal_build_context_dir }}/._Dockerfile"
 
@@ -380,6 +385,7 @@
     - "{{ ops_portal_build_context_dir }}/Dockerfile"
     - "{{ ops_portal_build_context_dir }}/ops_portal"
     - "{{ ops_portal_build_context_dir }}/publication_contract.py"
+    - "{{ ops_portal_build_context_dir }}/stage_smoke.py"
     - "{{ ops_portal_build_context_dir }}/requirements.txt"
     - "{{ ops_portal_build_context_dir }}/search_fabric"
 
@@ -413,6 +419,8 @@
       dest: "{{ ops_portal_build_context_dir }}/Dockerfile"
     - src: "{{ ops_portal_service_dir }}/publication_contract.py"
       dest: "{{ ops_portal_build_context_dir }}/publication_contract.py"
+    - src: "{{ ops_portal_service_dir }}/stage_smoke.py"
+      dest: "{{ ops_portal_build_context_dir }}/stage_smoke.py"
     - src: "{{ ops_portal_service_dir }}/requirements.txt"
       dest: "{{ ops_portal_build_context_dir }}/requirements.txt"
   loop_control:
@@ -441,6 +449,7 @@
     - "{{ ops_portal_build_context_dir }}/Dockerfile"
     - "{{ ops_portal_build_context_dir }}/requirements.txt"
     - "{{ ops_portal_build_context_dir }}/publication_contract.py"
+    - "{{ ops_portal_build_context_dir }}/stage_smoke.py"
     - "{{ ops_portal_build_context_dir }}/ops_portal/app.py"
     - "{{ ops_portal_build_context_dir }}/search_fabric/__init__.py"
   register: ops_portal_build_context_manifest
@@ -451,8 +460,9 @@
       - ops_portal_build_context_manifest.results | map(attribute='stat.exists') | min
     fail_msg: >-
       Ops portal build context is incomplete. Expected Dockerfile, requirements,
-      publication contract helper, app module, and search fabric package to be
-      present in {{ ops_portal_build_context_dir }} before docker compose up.
+      publication contract helper, stage smoke helper, app module, and search
+      fabric package to be present in {{ ops_portal_build_context_dir }} before
+      docker compose up.
 
 - name: Build and start the ops portal stack
   ansible.builtin.command:

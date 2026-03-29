@@ -211,11 +211,14 @@ windmill_worker_repo_secret_files:
 windmill_worker_checkout_checksum_file: "{{ windmill_site_dir }}/worker-checkout.sha256"
 windmill_worker_checkout_integrity_files:
   - Makefile
+  - config/validation-gate.json
+  - config/validation-lanes.yaml
   - scripts/policy_checks.py
   - scripts/policy_toolchain.py
   - scripts/command_catalog.py
   - scripts/gate_status.py
   - config/windmill/scripts/gate-status.py
+  - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
 windmill_worker_checkout_sync_paths:
   - README.md
   - VERSION

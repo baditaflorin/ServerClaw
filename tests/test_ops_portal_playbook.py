@@ -33,6 +33,7 @@ def test_ops_portal_runtime_clears_previous_build_context_before_sync() -> None:
         "{{ ops_portal_service_dir }}/ops_portal",
         "{{ ops_portal_service_dir }}/search_fabric",
         "{{ ops_portal_service_dir }}/publication_contract.py",
+        "{{ ops_portal_service_dir }}/stage_smoke.py",
         "{{ ops_portal_service_dir }}/requirements.txt",
     ]
 

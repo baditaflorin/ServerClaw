@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -23,6 +24,31 @@ def test_ops_portal_package_import_works_in_container_layout() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     package_root = repo_root / "scripts"
     env = os.environ | {"PYTHONPATH": str(package_root)}
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "from ops_portal.app import PortalSettings; print(PortalSettings.__name__)",
+        ],
+        capture_output=True,
+        check=False,
+        env=env,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == "PortalSettings"
+
+
+def test_ops_portal_package_import_works_in_image_build_layout(tmp_path: Path) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    image_root = tmp_path / "image"
+    image_root.mkdir()
+    shutil.copytree(repo_root / "scripts" / "ops_portal", image_root / "ops_portal")
+    shutil.copytree(repo_root / "scripts" / "search_fabric", image_root / "search_fabric")
+    shutil.copy2(repo_root / "scripts" / "publication_contract.py", image_root / "publication_contract.py")
+    shutil.copy2(repo_root / "scripts" / "stage_smoke.py", image_root / "stage_smoke.py")
+    env = os.environ | {"PYTHONPATH": str(image_root)}
     result = subprocess.run(
         [
             sys.executable,

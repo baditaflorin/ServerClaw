@@ -35,6 +35,17 @@ VERIFY_TASKS_PATH = (
     / "tasks"
     / "verify.yml"
 )
+SYNC_TREE_TASKS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "api_gateway_runtime"
+    / "tasks"
+    / "sync_tree.yml"
+)
 COMPOSE_TEMPLATE_PATH = (
     REPO_ROOT
     / "collections"
@@ -58,6 +69,7 @@ ENV_TEMPLATE_PATH = (
     / "api-gateway.env.j2"
 )
 REQUIREMENTS_PATH = REPO_ROOT / "requirements" / "api-gateway.txt"
+MAKEFILE_PATH = REPO_ROOT / "Makefile"
 
 
 def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
@@ -82,6 +94,8 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "dest: execution-lanes.yaml" in defaults
     assert "api_gateway_runtime_assurance_matrix_src" in defaults
     assert "dest: runtime-assurance-matrix.json" in defaults
+    assert "api_gateway_environment_topology_src" in defaults
+    assert "dest: environment-topology.json" in defaults
     assert "api_gateway_database_name: windmill" in defaults
     assert "api_gateway_database_user: windmill_admin" in defaults
     assert "api_gateway_windmill_service_topology" in defaults
@@ -161,6 +175,7 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
     tasks = TASKS_PATH.read_text(encoding="utf-8")
     verify_tasks = VERIFY_TASKS_PATH.read_text(encoding="utf-8")
+    sync_tree_tasks = SYNC_TREE_TASKS_PATH.read_text(encoding="utf-8")
     requirements = REQUIREMENTS_PATH.read_text(encoding="utf-8")
 
     assert "scripts/maintenance_window_tool.py" in defaults
@@ -193,6 +208,11 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "Sync the staged repo trees required by the API gateway runtime" in tasks
     assert "Ensure nested parent directories for managed API gateway source files exist" in tasks
     assert "ansible.builtin.include_tasks: sync_tree.yml" in tasks
+    assert "Derive a per-run guest archive path for {{ api_gateway_tree_sync_spec.name }}" in sync_tree_tasks
+    assert "api_gateway_tree_remote_archive_path" in sync_tree_tasks
+    assert "(api_gateway_tree_archive_local.path | basename)" in sync_tree_tasks
+    assert 'dest: "{{ api_gateway_tree_remote_archive_path }}"' in sync_tree_tasks
+    assert 'tar -xzf "{{ api_gateway_tree_remote_archive_path }}"' in sync_tree_tasks
     assert "Remove stale API gateway build-context ignore files" in tasks
     assert "{{ api_gateway_service_dir }}/.dockerignore" in tasks
     assert "Ensure the API gateway receipts build-context tree exists" not in tasks
@@ -202,6 +222,11 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "Remove stale managed API gateway config bundle entries" in tasks
     assert "ansible.builtin.meta: reset_connection" in tasks
     assert "Check whether the API gateway container sees the runtime config bundle" in tasks
+    assert "database not open" in tasks
+    assert "api_gateway_docker_builder_database_missing" in tasks
+    assert "api_gateway_docker_recoverable_start_failure" in tasks
+    assert "Restart Docker to restore the container engine before retrying the API gateway start" in tasks
+    assert "Retry the API gateway stack start after Docker engine recovery" in tasks
     assert "/v1/platform/runtime-assurance" in verify_tasks
     assert "runtime assurance endpoint returns a report envelope" in verify_tasks
     assert "Check whether the controller-local legacy platform context token exists" in verify_tasks
@@ -238,3 +263,10 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "COPY windmill ./windmill" in tasks
     assert "COPY workstreams.yaml ./workstreams.yaml" in tasks
     assert "psycopg[binary]==" in requirements
+
+
+def test_converge_api_gateway_passes_worktree_repo_root() -> None:
+    makefile = MAKEFILE_PATH.read_text(encoding="utf-8")
+
+    assert "converge-api-gateway:" in makefile
+    assert "-e api_gateway_repo_root=$(REPO_ROOT)" in makefile

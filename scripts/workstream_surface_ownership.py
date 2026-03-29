@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import argparse
 import fnmatch
+import json
+import os
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -208,6 +210,9 @@ def _run_git(repo_root: Path, *args: str, check: bool = True) -> str:
 
 
 def detect_current_branch(repo_root: Path) -> str:
+    env_branch = os.environ.get("LV3_SNAPSHOT_BRANCH", "").strip()
+    if env_branch:
+        return env_branch
     return _run_git(repo_root, "rev-parse", "--abbrev-ref", "HEAD")
 
 
@@ -233,6 +238,20 @@ def resolve_base_ref(repo_root: Path, registry: dict[str, Any], explicit_base_re
 
 
 def _collect_changed_files(repo_root: Path, base_ref: str) -> list[str]:
+    raw_override = os.environ.get("LV3_VALIDATION_CHANGED_FILES_JSON", "").strip()
+    if raw_override:
+        payload = json.loads(raw_override)
+        if not isinstance(payload, list):
+            raise ValueError("LV3_VALIDATION_CHANGED_FILES_JSON must be a JSON array")
+        changed_files: set[str] = set()
+        for index, item in enumerate(payload):
+            if not isinstance(item, str) or not item.strip():
+                raise ValueError(
+                    f"LV3_VALIDATION_CHANGED_FILES_JSON[{index}] must be a non-empty string"
+                )
+            changed_files.add(item.strip().replace("\\", "/"))
+        return sorted(changed_files)
+
     merge_base = _run_git(repo_root, "merge-base", base_ref, "HEAD")
     changed: set[str] = set()
     commands = (

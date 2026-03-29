@@ -4,8 +4,10 @@
 
 ## Summary
 - implemented ADR 0254 by publishing the first dedicated ServerClaw chat surface on chat.lv3.org with Keycloak-backed sign-in and repo-managed Ollama plus SearXNG integrations
+- implemented ADR 0264 by partitioning the validation gate into failure-domain-isolated lanes, propagating lane context and changed-surface evidence through the build-server and worker fallback paths, and re-verifying the newest exact-main pre-push plus post-merge automation flow
 
 ## Platform Impact
+- platform version advances to 0.130.58 after the exact-main ADR 0264 replay re-verifies the lane-aware build-server pre-push gate, gate-status reporting, remote validation context propagation, and worker-side post-merge fallback on top of the 0.130.57 baseline
 - introduces the first dedicated ServerClaw chat surface on chat.lv3.org as integrated mainline truth, with the synchronized latest-main replay and canonical platform-version receipt completed in the same workstream
 
 ## Upgrade Guide
