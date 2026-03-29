@@ -2,8 +2,8 @@
 
 - ADR: [ADR 0246](../adr/0246-startup-readiness-liveness-and-degraded-state-semantics.md)
 - Title: Apply startup, readiness, liveness, and degraded-state semantics to the live runtime-assurance paths
-- Status: ready
-- Implemented In Repo Version: not yet
+- Status: live_applied
+- Implemented In Repo Version: 0.177.60
 - Live Applied In Platform Version: 0.130.44
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
@@ -42,8 +42,12 @@
 - live source commit: `dc0624974fff094ff0f50a096ea5c411d64d53bf`
 - local observation artifact: `.local/platform-observation/ws-0246-verify/check-service-health.json`
 
-## Merge-To-Main Reminder
+## Mainline Integration Outcome
 
-- protected integration files remain deferred on this branch: `VERSION`, release sections in `changelog.md`, the top-level `README.md` integrated summary, and `versions/stack.yaml`
-- mainline integration still needs the release/version bump, changelog and release-note updates, `README.md` truth refresh, `versions/stack.yaml` and `build/platform-manifest.json` regeneration, and the final `Implemented In Repo Version` update
-- the only rebased `origin/main` changes pulled into this worktree were ADR 0250 monitoring surfaces that had already been live-applied on platform version `0.130.44`, so no extra monitoring replay was required here
+- merged to `main` in repository version `0.177.60`
+- updated `VERSION`, `changelog.md`, `RELEASE.md`, `docs/release-notes/0.177.60.md`, `docs/release-notes/README.md`, `README.md`, `versions/stack.yaml`, `build/platform-manifest.json`, and `docs/diagrams/agent-coordination-map.excalidraw` only during the final mainline integration step
+- preserved platform version `0.130.44` because the verified ADR 0246 live replay already ran on the current platform baseline, and the rebased `origin/main` additions from ADR 0242 and ADR 0253 had already been live-applied separately
+
+## Merge-To-Main Notes
+
+- remaining for merge to `main`: none

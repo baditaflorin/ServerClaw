@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Implementation Status: Live applied
-- Implemented In Repo Version: not yet
+- Implemented In Repo Version: 0.177.60
 - Implemented In Platform Version: 0.130.44
 - Implemented On: 2026-03-28
 - Date: 2026-03-28
@@ -71,5 +71,6 @@ We will standardize four service-health semantics for runtime assurance:
   `windmill` and `api_gateway` runtime paths on `docker-runtime-lv3`, then
   rechecking the structured observation output and authenticated platform
   health endpoints for `api_gateway`, `platform_context_api`, and `windmill`.
-- `Implemented In Repo Version` remains `not yet` until the protected release
-  and canonical-truth files are updated during the final merge-to-main step.
+- The final mainline integration recorded the first merged repository truth in
+  `0.177.60` without a platform-version bump because the verified ADR 0246 live
+  replay already ran on the current `0.130.44` platform baseline.
