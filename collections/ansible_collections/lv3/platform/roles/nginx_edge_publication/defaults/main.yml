@@ -151,8 +151,9 @@ public_edge_security_headers_overrides:
   ops.lv3.org:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
-      object-src 'none'; script-src 'self' 'unsafe-inline' https://unpkg.com;
-      style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:;
+      object-src 'none'; script-src 'self' https://unpkg.com;
+      style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https://unpkg.com;
+      font-src 'self' data: https://unpkg.com;
       connect-src 'self'; manifest-src 'self'
   sso.lv3.org:
     content_security_policy: >-

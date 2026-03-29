@@ -1,12 +1,12 @@
-# Release 0.177.71
+# Release 0.177.72
 
 - Date: 2026-03-29
 
 ## Summary
-- replayed ADR 0228 from exact origin/main, kept Windmill as the default browser-first and API-first operations surface on CE v1.662.0, fixed Python 3.11 compatibility for the worker-local generated-portals fallback, and re-verified the green post-merge gate plus representative seeded workflows
+- implemented ADR 0234 by live-applying the shared PatternFly shell on the interactive ops portal, including the masthead, responsive navigation, shared state primitives, and the public-edge CSP allowance for the pinned PatternFly asset
 
 ## Platform Impact
-- Platform version advances to 0.130.49 after the exact-main ADR 0228 replay re-verifies Windmill as the default browser-first and API-first operations surface on CE v1.662.0, including the Python 3.11-safe worker generated-portals fallback and a green post-merge fallback on the live worker checkout.
+- Platform version advances to 0.130.50 after ADR 0234 live-applies the shared PatternFly shell and responsive navigation on ops.lv3.org, preserves the authenticated public-edge contract, and re-verifies the branch-safe replay hardening from the latest origin/main baseline.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

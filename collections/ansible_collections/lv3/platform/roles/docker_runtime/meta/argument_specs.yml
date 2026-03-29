@@ -38,6 +38,18 @@ argument_specs:
         required: false
         description:
           - Public edge hostnames that should resolve internally to the shared edge VM from Docker guests.
+      docker_runtime_registry_mirrors:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Optional Docker registry mirror URLs applied to the daemon config.
+      docker_runtime_insecure_registries:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Optional host:port registries that Docker should treat as insecure HTTP endpoints.
       docker_runtime_apt_key_url:
         type: str
         required: true

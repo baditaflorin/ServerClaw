@@ -40,7 +40,7 @@ DOCKERFILE_TEMPLATE_PATH = (
 def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     tasks = TASKS_PATH.read_text(encoding="utf-8")
 
-    assert "Reset the synced ops portal application tree before refresh" in tasks
+    assert "Remove stale ops portal service sources before sync" in tasks
     assert "Discover the ops portal application directories on the controller" in tasks
     assert "Sync the ops portal application files" in tasks
     assert 'src: "{{ item.path }}"' in tasks

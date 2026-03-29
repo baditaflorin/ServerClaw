@@ -11,6 +11,7 @@ Recover the interactive ops portal runtime when `ops.lv3.org` or the local `http
 - the portal shell loads but the chart panels stay blank or never repaint after section refreshes
 - the overview loads but the runtime assurance scoreboard section is missing or
   empty
+- the portal loads but the masthead, sidebar, or state components render unstyled as plain HTML
 - the login flow redirects to `/oauth2/callback?...error=invalid_scope`
 - the Keycloak login form accepts a submit and then renders `We are sorry... Unexpected error when handling authentication request to identity provider.`
 - password reset or required-action flows claim success but the reset email never arrives
@@ -55,15 +56,9 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 
 If the logs show `Acquisition timeout while waiting for new connection`, the JDBC pool is wedged. If a restart then fails with `No chain/target/match by that name`, Docker's nat chain on `docker-runtime-lv3` is missing and Keycloak must be recreated after Docker itself is restarted.
 
-6. If the shell loads but charts are blank, verify the same-origin portal
-   bundle and mirrored dependency graph are present:
-
-```bash
-ssh ops@100.118.189.95 'ssh ops@10.10.10.20 "docker exec ops-portal ls /app/ops_portal/static && ls /opt/ops-portal/data/config/dependency-graph.json"'
-```
-
-5. If the shell renders but the ECharts panels stay blank, verify the same-origin
-   runtime assets and mirrored topology file are present inside the container:
+6. If the shell renders but charts stay blank or the shared PatternFly shell is
+   unstyled, verify the same-origin runtime assets and mirrored topology file
+   are present inside the container:
 
 ```bash
 ssh ops@100.118.189.95 'ssh ops@10.10.10.20 "docker exec ops-portal ls /app/ops_portal/static && ls /opt/ops-portal/data/config/dependency-graph.json"'
@@ -76,6 +71,35 @@ ssh ops@100.118.189.95 'ssh ops@10.10.10.20 "docker exec ops-portal ls /app/ops_
 ```bash
 make converge-ops-portal
 ```
+
+If a branch-local worktree replay must stay off the protected canonical-truth
+path and `make live-apply-service service=ops_portal ...` fails closed before
+mutation because it would rewrite `README.md` or `versions/stack.yaml`, use the
+governed scoped replay sequence directly and point the runtime sync at the
+exact worktree:
+
+```bash
+TRACE_ID=$(python3 -c 'import uuid; print(uuid.uuid4().hex)')
+RUN_ID="$TRACE_ID"
+REPO=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/<worktree>
+BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
+
+export LV3_RUN_ID="$RUN_ID"
+export ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local
+export ANSIBLE_REMOTE_TEMP=/tmp
+
+uvx --from pyyaml python "$REPO/scripts/interface_contracts.py" --check-live-apply "service:ops_portal"
+python3 "$REPO/scripts/promotion_pipeline.py" --emit-bypass-event --service "ops_portal" --actor-id "${USER:-unknown}" --correlation-id "break-glass:service:ops_portal:$(date -u +%Y%m%dT%H%M%SZ)"
+uv run --with pyyaml python "$REPO/scripts/standby_capacity.py" --service "ops_portal"
+uv run --with pyyaml --with jsonschema python "$REPO/scripts/service_redundancy.py" --check-live-apply --service "ops_portal"
+uv run --with pyyaml --with jsonschema python "$REPO/scripts/immutable_guest_replacement.py" --check-live-apply --service "ops_portal" --allow-in-place-mutation
+ANSIBLE_HOST_KEY_CHECKING=False "$REPO/scripts/run_with_namespace.sh" uvx --from pyyaml python "$REPO/scripts/ansible_scope_runner.py" run --inventory "$REPO/inventory/hosts.yml" --run-id "$RUN_ID" --playbook "$REPO/playbooks/services/ops_portal.yml" --env production -- --private-key "$BOOTSTRAP_KEY" -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id="$TRACE_ID" -e bypass_promotion=true -e ops_portal_repo_root="$REPO"
+```
+
+Keep the explicit `-e ops_portal_repo_root="$REPO"` override. Without it, the
+controller-side sync can read from the top-level checkout instead of the active
+worktree and fail on missing live inputs such as `runtime_assurance.py` or
+`portal.js`.
 
 If a Codex-managed local replay exits with signal `15` before the first remote
 task output appears, treat that as a controller-local interruption rather than
@@ -138,10 +162,25 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   'cd /opt/ops-portal && sudo docker compose up -d --build --remove-orphans'
 ```
 
-4. If the runtime is healthy locally but the public hostname fails, re-apply the edge:
+4. If the runtime is healthy locally but the public hostname fails, re-apply the
+   edge. For branch-local replays, keep the contract gate on
+   `service:public-edge` and then call the service playbook directly because
+   `standby_capacity.py`, `service_redundancy.py`, and
+   `immutable_guest_replacement.py` do not catalogue `public-edge`:
 
 ```bash
-ansible-playbook playbooks/public-edge.yml
+TRACE_ID=$(python3 -c 'import uuid; print(uuid.uuid4().hex)')
+RUN_ID="$TRACE_ID"
+REPO=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/<worktree>
+BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
+
+export LV3_RUN_ID="$RUN_ID"
+export ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local
+export ANSIBLE_REMOTE_TEMP=/tmp
+
+uvx --from pyyaml python "$REPO/scripts/interface_contracts.py" --check-live-apply "service:public-edge"
+python3 "$REPO/scripts/promotion_pipeline.py" --emit-bypass-event --service "public-edge" --actor-id "${USER:-unknown}" --correlation-id "break-glass:service:public-edge:$(date -u +%Y%m%dT%H%M%SZ)"
+ANSIBLE_HOST_KEY_CHECKING=False "$REPO/scripts/run_with_namespace.sh" uvx --from pyyaml python "$REPO/scripts/ansible_scope_runner.py" run --inventory "$REPO/inventory/hosts.yml" --run-id "$RUN_ID" --playbook "$REPO/playbooks/services/public-edge.yml" --env production -- --private-key "$BOOTSTRAP_KEY" -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id="$TRACE_ID" -e bypass_promotion=true
 ```
 
 5. If gateway-backed actions fail while the UI shell loads, confirm the configured `GATEWAY_URL` from `/opt/ops-portal/ops-portal.env` and verify the API gateway separately before restarting the portal.
@@ -156,8 +195,13 @@ ansible-playbook playbooks/public-edge.yml
    container, then re-apply the portal runtime so the mirrored data and assets
    are rebuilt together.
 
-8. If the callback includes `error=invalid_scope`, verify the rendered oauth2-proxy config on `nginx-lv3` does not request a custom `groups` scope. The portal relies on a client-mapped `groups` claim, so the requested scope must stay `openid profile email` unless a real Keycloak client scope named `groups` is added and assigned.
-9. If the auth failure is actually Keycloak, recover the runtime from the Proxmox host through the guest agent:
+8. If the shared PatternFly shell is unstyled or the mobile navigation drawer
+   stops responding, verify the published CSP still allows the pinned
+   `https://unpkg.com/@patternfly/patternfly@5.4.0/patternfly.min.css` asset
+   and that `/static/portal.js` loads from the same origin.
+
+9. If the callback includes `error=invalid_scope`, verify the rendered oauth2-proxy config on `nginx-lv3` does not request a custom `groups` scope. The portal relies on a client-mapped `groups` claim, so the requested scope must stay `openid profile email` unless a real Keycloak client scope named `groups` is added and assigned.
+10. If the auth failure is actually Keycloak, recover the runtime from the Proxmox host through the guest agent:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
@@ -171,14 +215,14 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   \"qm guest exec 120 -- /bin/sh -lc 'cd /opt/keycloak && docker compose up -d --force-recreate keycloak'\"
 ```
 
-10. Re-verify the IdP and portal redirect path:
+11. Re-verify the IdP and portal redirect path:
 
 ```bash
 curl -I https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
 curl -I https://ops.lv3.org/oauth2/sign_in
 ```
 
-11. If login is healthy but password-reset mail is still broken, verify the realm SMTP path and the private relay on `docker-runtime-lv3`:
+12. If login is healthy but password-reset mail is still broken, verify the realm SMTP path and the private relay on `docker-runtime-lv3`:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \

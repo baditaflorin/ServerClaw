@@ -9,3 +9,14 @@ root = "{{ build_server_buildkit_cache_dir }}"
   all = true
   keepDuration = "{{ build_server_buildkit_keep_duration_hours }}h"
   keepBytes = {{ build_server_buildkit_keep_bytes }}
+{% for registry_host, registry in build_server_buildkit_registry_mirrors.items() %}
+
+[registry."{{ registry_host }}"]
+  mirrors = [{% for mirror in registry.mirrors %}"{{ mirror }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+{% if registry.http | default(false) %}
+  http = true
+{% endif %}
+{% if registry.insecure | default(false) %}
+  insecure = true
+{% endif %}
+{% endfor %}

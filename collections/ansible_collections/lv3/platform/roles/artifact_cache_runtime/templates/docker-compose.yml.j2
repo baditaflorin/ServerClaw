@@ -1,0 +1,17 @@
+services:
+{% for mirror in artifact_cache_registry_mirrors.values() %}
+  {{ mirror.service_name }}:
+    image: {{ artifact_cache_registry_image }}
+    container_name: {{ mirror.container_name }}
+    restart: unless-stopped
+    ports:
+      - "{{ artifact_cache_bind_host }}:{{ mirror.bind_port }}:5000"
+    environment:
+      REGISTRY_HTTP_ADDR: 0.0.0.0:5000
+      REGISTRY_LOG_LEVEL: warn
+      REGISTRY_PROXY_REMOTEURL: {{ mirror.upstream_registry }}
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
+    volumes:
+      - "{{ mirror.storage_path }}:/var/lib/registry"
+{% endfor %}

@@ -38,6 +38,9 @@ docker_runtime_public_edge_host_aliases: >-
     ) | unique | sort
   }}
 
+docker_runtime_registry_mirrors:
+  - https://mirror.gcr.io
+docker_runtime_insecure_registries: []
 docker_runtime_daemon_config:
   live-restore: true
   log-driver: json-file
@@ -47,8 +50,8 @@ docker_runtime_daemon_config:
   dns:
     - "1.1.1.1"
     - "8.8.8.8"
-  registry-mirrors:
-    - "https://mirror.gcr.io"
+  registry-mirrors: "{{ docker_runtime_registry_mirrors }}"
+  insecure-registries: "{{ docker_runtime_insecure_registries }}"
   default-address-pools:
     - base: 172.16.0.0/12
       size: 24
