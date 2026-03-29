@@ -409,13 +409,13 @@ workstreams:
         DAV publication, and verified personal-data-plane replay on the latest
         realistic origin/main baseline
       release_bump: patch
-      included_in_repo_version: 0.177.87
+      included_in_repo_version: 0.177.89
       latest_receipts:
         nextcloud: 2026-03-29-adr-0260-nextcloud-personal-data-plane-mainline-live-apply
   - id: ws-0260-main-integration
     adr: "0260"
     title: Integrate ADR 0260 exact-main replay onto current origin/main
-    status: in_progress
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0260-main-integration
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0260-main-integration

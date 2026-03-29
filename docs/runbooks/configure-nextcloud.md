@@ -67,7 +67,7 @@ ansible docker-runtime-lv3 \
   --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
   -m shell \
-  -a 'curl -fsS http://127.0.0.1:8084/status.php'
+  -a 'curl -fsS http://10.10.10.20:8084/status.php'
 ```
 
 Guest-local cron mode:
@@ -109,6 +109,8 @@ These files are generated and mirrored by the repo-managed roles. They are not c
 - Large uploads depend on both the shared edge publication settings and the Nextcloud PHP limits staying aligned at `16G`.
 - CalDAV and CardDAV clients must use the published `/.well-known/caldav` and `/.well-known/carddav` redirects rather than hard-coding internal DAV paths.
 - Background jobs must remain in `cron` mode because the repo-managed cron sidecar is the supported automation path.
+- The governed Nextcloud workflow now repairs stale compose-network state before restart and restores missing Docker bridge filter chains before the runtime verification step, so a missing `0.0.0.0:8084` listener or broken container egress should be handled by rerunning the managed path rather than by manual Docker surgery.
+- If the host loses the `DOCKER` or `DOCKER-FORWARD` nftables chains after an out-of-band Docker restart or firewall drift, rerun `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=nextcloud env=production` on `main` so the repo-managed bridge-chain recovery and publication assurance checks restore the canonical state.
 
 ## Rollback
 
