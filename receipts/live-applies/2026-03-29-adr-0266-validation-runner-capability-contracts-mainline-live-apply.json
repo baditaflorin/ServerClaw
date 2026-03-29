@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-03-29",
   "recorded_on": "2026-03-29",
-  "recorded_at": "2026-03-29T19:12:00Z",
+  "recorded_at": "2026-03-29T19:39:25Z",
   "recorded_by": "codex",
-  "source_commit": "a92ffbcea9e7da39e0f0e2107fb12ede7863f750",
+  "source_commit": "478917c8edc0fdc02f0d3d82bf777b21d1faf069",
   "repo_version_context": "0.177.85",
   "platform_version_context": "0.130.59",
   "workflow_id": "adr-0266-validation-runner-capability-contracts-mainline-live-apply",
   "adr": "0266",
-  "summary": "Integrated ADR 0266 on synchronized main release 0.177.85 by carrying the validation-runner capability catalog, per-run environment attestation, runner-aware lane admission, and worker-safe post-merge replay surfaces onto the latest origin/main baseline, with platform version 0.130.59 reserved for the exact-main verification set.",
+  "summary": "Integrated ADR 0266 on synchronized main release 0.177.85 by replaying the runner-capability catalog and environment-attestation path from exact-main commit 478917c8 on top of origin/main 430e364, re-verifying the build-server gate and pre-push automation on the declared build runner, and proving the worker post-merge gate records `runner_unavailable` plus a passing bounded local fallback when registry-backed runner images are unavailable, establishing platform version 0.130.59.",
   "targets": [
     {
       "kind": "host",
@@ -41,17 +41,22 @@
     {
       "check": "Latest origin/main baseline and protected release cut",
       "result": "pass",
-      "observed": "`git fetch origin --prune` confirmed the newest published `origin/main` baseline remained commit `430e364e2a810ccd6463e201fd8b7d41fed95676`; the exact-main ADR 0266 replay source is commit `a92ffbcea9e7da39e0f0e2107fb12ede7863f750` on top of that head, and the protected release cut carried repository version `0.177.85`."
+      "observed": "`git fetch origin --prune` confirmed the newest published `origin/main` baseline remained commit `430e364e2a810ccd6463e201fd8b7d41fed95676`; after refreshing the protected mainline truth and receipt surfaces, the exact-main ADR 0266 replay source was committed as `478917c8edc0fdc02f0d3d82bf777b21d1faf069` on top of that head, and the protected release cut carried repository version `0.177.85`."
     },
     {
       "check": "Integrated ADR 0266 regression sweep",
       "result": "pass",
-      "observed": "`uv run --with pytest --with pyyaml pytest -q tests/test_validation_runner_contracts.py tests/test_validation_gate.py tests/test_parallel_check.py tests/test_post_merge_gate.py` returned `25 passed in 4.12s`, and `uv run --with jsonschema python3 scripts/validation_runner_contracts.py --validate` returned `Validation runner contracts OK` after the exact-main lane-catalog coverage fix."
+      "observed": "`uv run --with pytest --with pyyaml pytest -q tests/test_canonical_truth.py tests/test_release_manager.py tests/test_validation_runner_contracts.py tests/test_validation_gate.py tests/test_parallel_check.py tests/test_post_merge_gate.py` returned `37 passed in 4.53s`; `./scripts/validate_repo.sh generated-docs workstream-surfaces agent-standards` passed after regenerating canonical truth plus diagrams; `uv run --with pyyaml python3 scripts/canonical_truth.py --check` returned `Canonical truth OK`; and `uv run --with pyyaml --with jsonschema python3 scripts/validate_repository_data_models.py --validate` returned `Repository data models OK`."
     },
     {
-      "check": "Exact-main build-server and worker verification",
+      "check": "Exact-main build-server validation replay",
       "result": "pass",
-      "observed": "The exact-main evidence bundle under `receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-*` records the synchronized `check-build-server`, `remote-validate`, `pre-push-gate`, `gate-status`, Windmill runtime replay, and worker-side `post-merge-gate.py` plus `gate-status.py` runs used to finalize this receipt."
+      "observed": "`make check-build-server` passed from commit `478917c8`, verified SSH reachability to `ops@10.10.10.30`, and confirmed immutable snapshot upload for `codex/ws-0266-main-integration-r3@478917c8edc0fdc02f0d3d82bf777b21d1faf069`. `make remote-validate` then passed at `2026-03-29T19:17:36.500717+00:00` on runner `build-server-validation` with selected lanes `repository-structure-and-schema`, `generated-artifact-and-canonical-truth`, and `service-syntax-and-unit`. `make pre-push-gate` passed at `2026-03-29T19:20:48.970790+00:00` on the same runner with all 20 blocking checks green, and `make gate-status` reported both exact-main build-server runs from the committed tree."
+    },
+    {
+      "check": "Windmill replay and worker-local post-merge verification",
+      "result": "pass",
+      "observed": "To avoid the controller-local Xcode Python 3.9 selecting a runtime without `datetime.UTC`, the exact-main Windmill replay was run as `UV_PYTHON=/opt/homebrew/bin/python3 make converge-windmill`; that replay refreshed the worker checkout, schedules, and seeded healthcheck, but the role's final localhost JSON assertion around `f/lv3/gate-status` failed after the script output became non-parseable. The authoritative worker proof then came from direct commands on `docker-runtime-lv3`: `python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server` returned `status: ok` with `post_merge_run.executed_at=2026-03-29T19:37:24.365664+00:00`, and `python3 config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox_florin_server` returned `status: passed` with `source=windmill-post-merge-local-fallback`. That worker receipt shows the primary manifest path correctly classified runner-image pull failures from `registry.lv3.org` as `runner_unavailable` while the bounded local fallback commands `./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals` and `uv run --with pyyaml python3 scripts/provider_boundary_catalog.py --validate` both returned `0`."
     }
   ],
   "evidence_refs": [
@@ -109,6 +114,7 @@
   "notes": [
     "This receipt supersedes the earlier branch-local receipt `2026-03-29-adr-0266-validation-runner-capability-contracts-live-apply` as the canonical source for repository version `0.177.85` and platform version `0.130.59`.",
     "The exact-main replay first exposed missing lane declarations for ADR 0264-added checks in `config/validation-runner-contracts.json`; the canonical ADR 0266 implementation now includes those runner-contract entries before the final replay evidence is recorded.",
-    "The evidence bundle for this receipt is finalized on the synchronized mainline integration branch rather than the earlier isolated workstream branch so the release cut, canonical truth, and worker replay all refer to the same latest-main tree."
+    "The evidence bundle for this receipt is finalized on the synchronized mainline integration branch rather than the earlier isolated workstream branch so the release cut, canonical truth, and worker replay all refer to the same latest-main tree.",
+    "The Windmill role-level verification still has a brittle JSON assertion around the seeded `f/lv3/gate-status` script output. The platform itself was re-verified through the direct worker-side `gate-status.py` and `post-merge-gate.py` commands, so the remaining gap is a repo-managed verification wrapper issue rather than an ADR 0266 live-state regression."
   ]
 }
