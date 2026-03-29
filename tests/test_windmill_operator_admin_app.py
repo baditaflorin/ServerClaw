@@ -320,7 +320,8 @@ def test_operator_admin_raw_app_lockfile_and_runtime_sync_contract() -> None:
     assert "- name: Install frontend dependencies for repo-managed Windmill raw apps" in runtime_tasks
     assert "register: windmill_seed_raw_app_frontend_install" in runtime_tasks
     assert "npm ci --no-audit --no-fund" in runtime_tasks
-    assert "npm install --no-package-lock --no-audit --no-fund" in runtime_tasks
+    assert 'missing package-lock.json for {{ item.path }}' in runtime_tasks
+    assert "npm install --no-package-lock --no-audit --no-fund" not in runtime_tasks
     assert '"{{ windmill_seed_app_sync_dir.path }}:/workspace"' in runtime_tasks
     assert runtime_tasks.count("retries: 3") >= 2
     assert runtime_tasks.count("delay: 5") >= 2
@@ -565,7 +566,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Install frontend dependencies for repo-managed Windmill raw apps" in tasks
     assert "register: windmill_seed_raw_app_frontend_install" in tasks
     assert "npm ci --no-audit --no-fund" in tasks
-    assert "npm install --no-package-lock --no-audit --no-fund" in tasks
+    assert 'missing package-lock.json for {{ item.path }}' in tasks
+    assert "npm install --no-package-lock --no-audit --no-fund" not in tasks
     assert "npm ci --prefix" not in tasks
     assert "npm install --prefix" not in tasks
     assert tasks.count("retries: 3") >= 2
