@@ -550,6 +550,51 @@ groups:
           description: https://grafana.lv3.org:443/ has less than 14 days remaining
             before certificate expiry.
           runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_harbor_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="harbor-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: harbor
+          assurance_id: harbor-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: harbor-public HTTPS probe is failing.
+          description: https://registry.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_harbor_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="harbor-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: harbor
+          assurance_id: harbor-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: harbor-public TLS certificate is approaching expiry.
+          description: https://registry.lv3.org:443/ has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_harbor_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="harbor-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: harbor
+          assurance_id: harbor-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: harbor-public TLS certificate is within the critical expiry window.
+          description: https://registry.lv3.org:443/ has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
       - alert: HTTPSProbeFailed_headscale_public
         expr: probe_success{job="https-tls-blackbox",assurance_id="headscale-public"}
           == 0
@@ -867,6 +912,51 @@ groups:
             window.
           description: https://nginx.lv3.org:443/ has less than 14 days remaining
             before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_nomad_internal
+        expr: probe_success{job="https-tls-blackbox",assurance_id="nomad-internal"}
+          == 0
+        for: 5m
+        labels:
+          service_id: nomad
+          assurance_id: nomad-internal
+          environment: production
+          scope: internal
+          severity: critical
+        annotations:
+          summary: nomad-internal HTTPS probe is failing.
+          description: https://100.64.0.1:8013/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_nomad_internal
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="nomad-internal"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: nomad
+          assurance_id: nomad-internal
+          environment: production
+          scope: internal
+          severity: warning
+        annotations:
+          summary: nomad-internal TLS certificate is approaching expiry.
+          description: https://100.64.0.1:8013/ has less than 21 days remaining before
+            certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_nomad_internal
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="nomad-internal"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: nomad
+          assurance_id: nomad-internal
+          environment: production
+          scope: internal
+          severity: critical
+        annotations:
+          summary: nomad-internal TLS certificate is within the critical expiry window.
+          description: https://100.64.0.1:8013/ has less than 14 days remaining before
+            certificate expiry.
           runbook_url: docs/runbooks/https-tls-assurance.md
       - alert: HTTPSProbeFailed_openbao_internal
         expr: probe_success{job="https-tls-blackbox",assurance_id="openbao-internal"}

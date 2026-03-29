@@ -10,7 +10,7 @@
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
     probe_hostname: ''
-    certificate_id: ''
+    certificate_id: api-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
@@ -46,7 +46,7 @@
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
     probe_hostname: ''
-    certificate_id: ''
+    certificate_id: changelog-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
@@ -64,7 +64,7 @@
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
     probe_hostname: ''
-    certificate_id: ''
+    certificate_id: coolify-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
@@ -82,7 +82,7 @@
     auth_requirement: none
     probe_module: http_2xx_follow_redirects
     probe_hostname: ''
-    certificate_id: ''
+    certificate_id: apps-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
@@ -100,7 +100,7 @@
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
     probe_hostname: ''
-    certificate_id: ''
+    certificate_id: agents-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
@@ -154,7 +154,7 @@
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
     probe_hostname: ''
-    certificate_id: ''
+    certificate_id: docs-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
@@ -172,7 +172,7 @@
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
     probe_hostname: ''
-    certificate_id: ''
+    certificate_id: logs-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
@@ -190,7 +190,7 @@
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
     probe_hostname: ''
-    certificate_id: ''
+    certificate_id: draw-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
@@ -215,6 +215,24 @@
     policy_critical: '14'
     display_url: https://grafana.lv3.org:443/
 - targets:
+    - https://registry.lv3.org:443/
+  labels:
+    assurance_id: harbor-public
+    service_id: harbor
+    service_name: Harbor
+    environment: production
+    scope: public
+    exposure: edge-published
+    auth_requirement: none
+    probe_module: http_2xx_follow_redirects
+    probe_hostname: ''
+    certificate_id: registry-edge
+    expected_issuer: letsencrypt
+    policy_unit: days
+    policy_warn: '21'
+    policy_critical: '14'
+    display_url: https://registry.lv3.org:443/
+- targets:
     - https://headscale.lv3.org:443/
   labels:
     assurance_id: headscale-public
@@ -226,7 +244,7 @@
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
     probe_hostname: ''
-    certificate_id: ''
+    certificate_id: headscale-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
@@ -244,7 +262,7 @@
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
     probe_hostname: ''
-    certificate_id: ''
+    certificate_id: home-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
@@ -280,7 +298,7 @@
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
     probe_hostname: ''
-    certificate_id: ''
+    certificate_id: langfuse-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
@@ -316,7 +334,7 @@
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
     probe_hostname: ''
-    certificate_id: ''
+    certificate_id: n8n-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
@@ -340,6 +358,24 @@
     policy_warn: '21'
     policy_critical: '14'
     display_url: https://nginx.lv3.org:443/
+- targets:
+    - https://100.64.0.1:8013/
+  labels:
+    assurance_id: nomad-internal
+    service_id: nomad
+    service_name: Nomad
+    environment: production
+    scope: internal
+    exposure: private-only
+    auth_requirement: private_network
+    probe_module: http_2xx_follow_redirects_insecure_tls
+    probe_hostname: ''
+    certificate_id: ''
+    expected_issuer: any
+    policy_unit: days
+    policy_warn: '21'
+    policy_critical: '14'
+    display_url: https://100.64.0.1:8013/
 - targets:
     - https://100.64.0.1:8200/v1/sys/health
   labels:
@@ -370,7 +406,7 @@
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
     probe_hostname: ''
-    certificate_id: ''
+    certificate_id: ops-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
@@ -388,7 +424,7 @@
     auth_requirement: upstream_auth
     probe_module: http_2xx_follow_redirects
     probe_hostname: ''
-    certificate_id: ''
+    certificate_id: wiki-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
@@ -406,7 +442,7 @@
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
     probe_hostname: ''
-    certificate_id: ''
+    certificate_id: tasks-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
@@ -478,7 +514,7 @@
     auth_requirement: edge_oidc
     probe_module: http_2xx_follow_redirects
     probe_hostname: ''
-    certificate_id: ''
+    certificate_id: realtime-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
@@ -496,7 +532,7 @@
     auth_requirement: none
     probe_module: http_2xx_follow_redirects
     probe_hostname: ''
-    certificate_id: ''
+    certificate_id: status-edge
     expected_issuer: letsencrypt
     policy_unit: days
     policy_warn: '21'
