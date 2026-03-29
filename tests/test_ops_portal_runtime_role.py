@@ -13,6 +13,17 @@ TASKS_PATH = (
     / "tasks"
     / "main.yml"
 )
+DEFAULTS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "ops_portal_runtime"
+    / "defaults"
+    / "main.yml"
+)
 DOCKERFILE_TEMPLATE_PATH = (
     REPO_ROOT
     / "collections"
@@ -32,6 +43,7 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert "Reset the synced ops portal application tree before refresh" in tasks
     assert "Discover the ops portal application directories on the controller" in tasks
     assert "Sync the ops portal application files" in tasks
+    assert 'src: "{{ item.path }}"' in tasks
     assert "Ensure the ops portal overlay directories exist" in tasks
     assert "Sync critical ops portal runtime files explicitly" in tasks
     assert "Reset the synced search fabric package tree before refresh" in tasks
@@ -43,6 +55,8 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert 'directory_mode: "0755"' in tasks
     assert "Discover macOS metadata files in the synced ops portal data tree" in tasks
     assert "Remove macOS metadata files from the synced ops portal data tree" in tasks
+    assert "lookup('ansible.builtin.file', item.path)" not in tasks
+    assert "lookup('ansible.builtin.file', item.src)" not in tasks
 
 
 def test_ops_portal_dockerfile_depends_on_synced_helper_files() -> None:
@@ -71,3 +85,9 @@ def test_ops_portal_verify_checks_launcher_partial() -> None:
     assert '/partials/launcher' in verify_tasks
     assert "Application Launcher" in verify_tasks
     assert "Search destinations, pin favorites, and reopen recent paths from one shared masthead control." in verify_tasks
+
+
+def test_ops_portal_runtime_file_sources_include_launcher_partial() -> None:
+    defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
+
+    assert "scripts/ops_portal/templates/partials/launcher.html" in defaults
