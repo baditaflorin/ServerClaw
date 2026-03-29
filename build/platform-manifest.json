@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.84",
   "platform_version": "0.130.58",
-  "generated_at": "2026-03-29T17:41:31Z",
-  "next_refresh_at": "2026-03-29T18:41:31Z",
+  "generated_at": "2026-03-29T20:35:57Z",
+  "next_refresh_at": "2026-03-29T21:35:57Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -470,6 +470,18 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.118.189.95:8020",
+        "last_live_apply": "2026-03-29T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "serverclaw": {
+        "service_name": "ServerClaw",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://chat.lv3.org",
         "last_live_apply": "2026-03-29T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -1763,6 +1775,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-semaphore.md"
+      },
+      {
+        "id": "converge-serverclaw",
+        "description": "Deploy the first public ServerClaw surface on coolify-lv3, reconcile its dedicated Keycloak client, and publish chat.lv3.org through the shared edge.",
+        "tags": [
+          "converge-serverclaw",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-serverclaw.md"
       },
       {
         "id": "converge-step-ca",
@@ -3769,6 +3807,16 @@
         ]
       },
       {
+        "id": "configure-serverclaw",
+        "title": "Configure ServerClaw",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-serverclaw.md",
+        "workflow_ids": [
+          "converge-serverclaw"
+        ]
+      },
+      {
         "id": "configure-step-ca",
         "title": "Configure step-ca",
         "agent_trust_required": "T3",
@@ -4340,7 +4388,7 @@
   "recent_changes": {
     "last_version": "0.177.83",
     "deployed_at": "2026-03-29",
-    "summary": "implemented ADR 0264 by partitioning the validation gate into failure-domain-isolated lanes, propagating lane context and changed-surface evidence through the build-server and worker fallback paths, and re-verifying the newest exact-main pre-push plus post-merge automation flow",
+    "summary": "implemented ADR 0254 by publishing the first dedicated ServerClaw chat surface on chat.lv3.org with Keycloak-backed sign-in and repo-managed Ollama plus SearXNG integrations implemented ADR 0264 by partitioning the validation gate into failure-domain-isolated lanes, propagating lane context and changed-surface evidence through the build-server and worker fallback paths, and re-verifying the newest exact-main pre-push plus post-merge automation flow",
     "release_notes_url": "docs/release-notes/0.177.84.md"
   },
   "agentic_architecture": {

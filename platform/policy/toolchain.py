@@ -134,8 +134,19 @@ def _conftest_expected_sha256(asset_name: str) -> str:
     raise RuntimeError(f"missing checksum entry for {asset_name} in Conftest release metadata")
 
 
-def _managed_tool_path(install_root: Path, tool_name: str, version: str) -> Path:
-    return install_root / tool_name / version / tool_name
+def _platform_dirname(system: str, machine: str) -> str:
+    return f"{system}-{machine}"
+
+
+def _managed_tool_path(
+    install_root: Path,
+    tool_name: str,
+    version: str,
+    *,
+    system: str,
+    machine: str,
+) -> Path:
+    return install_root / tool_name / version / _platform_dirname(system, machine) / tool_name
 
 
 def _ensure_opa(install_root: Path) -> ToolBinary:
@@ -144,7 +155,13 @@ def _ensure_opa(install_root: Path) -> ToolBinary:
 
     system, machine = _platform_key()
     asset_name = _opa_asset_name(system, machine)
-    target = _managed_tool_path(install_root, "opa", OPA_VERSION)
+    target = _managed_tool_path(
+        install_root,
+        "opa",
+        OPA_VERSION,
+        system=system,
+        machine=machine,
+    )
     if not target.is_file():
         payload = _download_bytes(f"{OPA_RELEASE_BASE}/{asset_name}")
         expected_sha = _opa_expected_sha256(asset_name)
@@ -167,7 +184,13 @@ def _ensure_conftest(install_root: Path) -> ToolBinary:
 
     system, machine = _platform_key()
     asset_name = _conftest_asset_name(system, machine)
-    target = _managed_tool_path(install_root, "conftest", CONFTEST_VERSION)
+    target = _managed_tool_path(
+        install_root,
+        "conftest",
+        CONFTEST_VERSION,
+        system=system,
+        machine=machine,
+    )
     if not target.is_file():
         payload = _download_bytes(f"{CONFTEST_RELEASE_BASE}/{asset_name}")
         expected_sha = _conftest_expected_sha256(asset_name)

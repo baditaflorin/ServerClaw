@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-03-29",
   "recorded_on": "2026-03-29",
-  "recorded_at": "2026-03-29T16:41:59Z",
+  "recorded_at": "2026-03-29T20:56:38Z",
   "recorded_by": "codex",
-  "source_commit": "54622948a39fa6632058b63536204188e5040753",
+  "source_commit": "39a7bd06302c7e5ab19a78d9a74a86377e09586d",
   "repo_version_context": "0.177.84",
   "platform_version_context": "0.130.58",
   "workflow_id": "adr-0254-serverclaw-distinct-product-surface-mainline-live-apply",
   "adr": "0254",
-  "summary": "Integrated ADR 0254 on synchronized main release 0.177.84 by replaying make converge-serverclaw from source commit 54622948 on top of origin/main commit 8871117b, preserving the dedicated ServerClaw chat surface on chat.lv3.org, reaffirming the Proxmox and guest firewall lanes for the Coolify runtime, and re-verifying the internal upstream path, bootstrap admin sign-in, and public HTTPS entrypoint end to end.",
+  "summary": "Integrated ADR 0254 on synchronized main release 0.177.84 by replaying make converge-serverclaw from refreshed merge commit 39a7bd06 on top of origin/main commit 430e364e, preserving the dedicated ServerClaw chat surface on chat.lv3.org, re-verifying the Proxmox and guest firewall lanes plus internal and public runtime paths end to end, and proving the build-server plus Windmill validation-gate automation paths from the merged worktree.",
   "targets": [
     {
       "kind": "host",
@@ -47,12 +47,12 @@
     {
       "check": "Focused ADR 0254 regression and syntax-check slice",
       "result": "pass",
-      "observed": "`uv run --with pytest --with pyyaml pytest -q tests/test_linux_guest_firewall_role.py tests/test_serverclaw_playbook.py tests/test_coolify_playbook.py tests/test_open_webui_runtime_role.py tests/test_keycloak_runtime_role.py tests/test_nginx_edge_publication_role.py tests/test_openbao_compose_env_helper.py` returned `38 passed in 2.34s`, and `make syntax-check-serverclaw` passed on the refreshed latest-main integration worktree before the release cut."
+      "observed": "`uv run --with pytest --with pyyaml pytest -q tests/test_linux_guest_firewall_role.py tests/test_serverclaw_playbook.py tests/test_coolify_playbook.py tests/test_open_webui_runtime_role.py tests/test_keycloak_runtime_role.py tests/test_nginx_edge_publication_role.py tests/test_openbao_compose_env_helper.py` returned `38 passed in 2.34s`, `make syntax-check-serverclaw` passed on the refreshed latest-main integration worktree, and `uv run --with pytest pytest -q tests/test_policy_checks.py` returned `4 passed in 0.84s` after the validation-path fix."
     },
     {
       "check": "Exact-main ServerClaw converge replay",
       "result": "pass",
-      "observed": "`make converge-serverclaw` completed successfully from source commit `54622948a39fa6632058b63536204188e5040753`, merged on top of `origin/main` commit `8871117b40466b7907a33992f44ca7d83a3e9409`, with recap `coolify-lv3 ok=58 changed=0 failed=0 skipped=16`, `docker-runtime-lv3 ok=63 changed=0 failed=0 skipped=7`, `nginx-lv3 ok=38 changed=2 failed=0 skipped=8`, and `proxmox_florin ok=229 changed=0 failed=0 skipped=111`."
+      "observed": "`make converge-serverclaw` completed successfully from refreshed merge commit `39a7bd06302c7e5ab19a78d9a74a86377e09586d`, merged on top of `origin/main` commit `430e364e2a810ccd6463e201fd8b7d41fed95676`, with recap `coolify-lv3 ok=58 changed=0 failed=0 skipped=16`, `docker-runtime-lv3 ok=63 changed=0 failed=0 skipped=7`, `nginx-lv3 ok=39 changed=4 failed=0 skipped=7`, and `proxmox_florin ok=230 changed=3 failed=0 skipped=110`."
     },
     {
       "check": "Internal proxy and firewall path verification",
@@ -68,6 +68,11 @@
       "check": "Public ServerClaw edge verification",
       "result": "pass",
       "observed": "`curl -I --max-time 15 http://chat.lv3.org/` returned `HTTP/1.1 308 Permanent Redirect` with `Location: https://chat.lv3.org/`, and `curl -I --max-time 15 https://chat.lv3.org/` returned `HTTP/2 200` with the repo-managed security headers and `content-type: text/html; charset=utf-8`."
+    },
+    {
+      "check": "Repo automation and validation gates",
+      "result": "pass",
+      "observed": "`make validate` passed after regenerating `docs/diagrams/agent-coordination-map.excalidraw`, `docs/diagrams/service-dependency-graph.excalidraw`, and `build/platform-manifest.json`; `make pre-push-gate` passed at `2026-03-29T20:41:15.857152+00:00` via `build-server`; `make gate-status` reported the latest build-server and Windmill runs as `passed`; and `make post-merge-gate` passed at `2026-03-29T20:56:38.536104+00:00` after scoping cached ADR 0230 policy binaries by platform and raising the `yaml-lint` timeout to `240` seconds for local amd64-container replays on arm64 hosts."
     }
   ],
   "evidence_refs": [
@@ -75,15 +80,21 @@
     "RELEASE.md",
     "VERSION",
     "changelog.md",
+    "build/platform-manifest.json",
     "versions/stack.yaml",
     "workstreams.yaml",
+    "config/check-runner-manifest.json",
+    "config/validation-gate.json",
     "docs/adr/0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3.md",
     "docs/adr/.index.yaml",
+    "docs/diagrams/agent-coordination-map.excalidraw",
+    "docs/diagrams/service-dependency-graph.excalidraw",
     "docs/workstreams/ws-0254-live-apply.md",
     "docs/workstreams/ws-0254-main-merge.md",
     "docs/runbooks/configure-serverclaw.md",
     "docs/release-notes/0.177.84.md",
     "docs/release-notes/README.md",
+    "platform/policy/toolchain.py",
     "playbooks/serverclaw.yml",
     "collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/templates/nftables.conf.j2",
     "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml",
@@ -94,12 +105,14 @@
     "tests/test_open_webui_runtime_role.py",
     "tests/test_keycloak_runtime_role.py",
     "tests/test_nginx_edge_publication_role.py",
+    "tests/test_policy_checks.py",
     "receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-live-apply.json",
     "receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply.json"
   ],
   "notes": [
     "This receipt supersedes the branch-local receipt `2026-03-29-adr-0254-serverclaw-distinct-product-surface-live-apply` as the canonical mainline truth after release 0.177.84 was applied and re-verified from the integrated worktree.",
     "Release 0.177.84 is the first repo version that includes ADR 0254, and platform version 0.130.58 is the first integrated platform version that records the synchronized latest-main replay for the ADR.",
-    "The earlier branch-local receipt remains preserved as the first latest-main candidate replay and still documents the debugging path that uncovered the Proxmox firewall refresh gap plus the remapped-port guest nftables forwarding bug."
+    "The earlier branch-local receipt remains preserved as the first latest-main candidate replay and still documents the debugging path that uncovered the Proxmox firewall refresh gap plus the remapped-port guest nftables forwarding bug.",
+    "The final integration also refreshed the repo automation path so cached ADR 0230 policy binaries are platform-specific and the post-merge `yaml-lint` budget covers local amd64-container replays on arm64 hosts."
   ]
 }

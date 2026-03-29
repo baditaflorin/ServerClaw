@@ -103,3 +103,18 @@ def test_run_decodes_non_utf8_subprocess_output(monkeypatch) -> None:
 
     assert "stdout ok" in message
     assert "stderr byte" in message
+
+
+def test_managed_tool_path_is_platform_scoped() -> None:
+    module = load_module("policy_toolchain_module_paths", "platform/policy/toolchain.py")
+
+    install_root = REPO_ROOT / ".local" / "policy-toolchain"
+    path = module._managed_tool_path(
+        install_root,
+        "opa",
+        module.OPA_VERSION,
+        system="linux",
+        machine="amd64",
+    )
+
+    assert path == install_root / "opa" / module.OPA_VERSION / "linux-amd64" / "opa"
