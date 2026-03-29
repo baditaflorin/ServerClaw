@@ -11,6 +11,7 @@ def write_json(path: Path, payload: dict) -> None:
 
 def matrix_catalog() -> dict:
     return {
+        "$schema": "docs/schema/runtime-assurance-matrix.schema.json",
         "schema_version": "1.0.0",
         "dimensions": {
             "declared_runtime": {"title": "Declared Runtime", "description": "Runtime witness exists."},

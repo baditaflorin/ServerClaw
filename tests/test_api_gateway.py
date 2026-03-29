@@ -338,6 +338,7 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
     write_json(
         tmp_path / "config" / "runtime-assurance-matrix.json",
         {
+            "$schema": "docs/schema/runtime-assurance-matrix.schema.json",
             "schema_version": "1.0.0",
             "dimensions": {
                 "declared_runtime": {
