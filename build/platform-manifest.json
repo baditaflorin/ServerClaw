@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.73",
   "platform_version": "0.130.50",
-  "generated_at": "2026-03-29T11:16:17Z",
-  "next_refresh_at": "2026-03-29T12:16:17Z",
+  "generated_at": "2026-03-29T11:46:28Z",
+  "next_refresh_at": "2026-03-29T12:46:28Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -48,7 +48,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://10.10.10.60:8007",
-        "last_live_apply": "2026-03-28T00:00:00Z"
+        "last_live_apply": "2026-03-29T00:00:00Z"
       },
       "changelog_portal": {
         "service_name": "Deployment History Portal",
@@ -594,6 +594,32 @@
           "escalation_action": "abort_silently"
         },
         "runbook": "docs/runbooks/token-lifecycle-management.md"
+      },
+      {
+        "id": "backup-coverage-ledger",
+        "description": "Run the ADR 0271 backup coverage ledger against the live Proxmox backup jobs and storage listings, write one receipt, and surface uncovered assets explicitly in DR readiness reporting.",
+        "tags": [
+          "backup-coverage-ledger",
+          "diagnostic",
+          "host-live",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "diagnostic",
+        "live_impact": "host_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 80,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/backup-coverage-ledger.md"
       },
       {
         "id": "capacity-report",
@@ -3212,6 +3238,16 @@
         ]
       },
       {
+        "id": "backup-coverage-ledger",
+        "title": "Backup Coverage Ledger",
+        "agent_trust_required": "T2",
+        "steps": 6,
+        "path": "docs/runbooks/backup-coverage-ledger.md",
+        "workflow_ids": [
+          "backup-coverage-ledger"
+        ]
+      },
+      {
         "id": "backup-restore-verification",
         "title": "Backup Restore Verification",
         "agent_trust_required": "T2",
@@ -3286,7 +3322,7 @@
         "id": "configure-backup-vm",
         "title": "Configure Backup VM",
         "agent_trust_required": "T3",
-        "steps": 9,
+        "steps": 10,
         "path": "docs/runbooks/configure-backup-vm.md",
         "workflow_ids": [
           "configure-backup-vm"
