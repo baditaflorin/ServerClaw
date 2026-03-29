@@ -49,6 +49,11 @@ from shared_policy_packs import (
     SHARED_POLICY_PACKS_SCHEMA_PATH,
     load_shared_policy_packs,
 )
+from runtime_assurance import (
+    SCHEMA_PATH as RUNTIME_ASSURANCE_SCHEMA_PATH,
+    load_runtime_assurance_catalog,
+    validate_runtime_assurance_catalog,
+)
 from validate_ephemeral_vmid import validate_ephemeral_vmid_ranges
 from generate_slo_rules import outputs_match as slo_outputs_match
 from immutable_guest_replacement import load_guest_replacement_catalog, validate_guest_replacement_catalog
@@ -2630,6 +2635,11 @@ def validate_persona_catalog() -> None:
 
     if default_count != 1:
         raise ValueError("config/persona-catalog.json must declare exactly one default persona")
+
+
+def validate_runtime_assurance_matrix_data() -> None:
+    payload = load_runtime_assurance_catalog()
+    validate_runtime_assurance_catalog(payload, schema_path=RUNTIME_ASSURANCE_SCHEMA_PATH)
 
 
 def validate_preview_environment_profiles() -> None:
