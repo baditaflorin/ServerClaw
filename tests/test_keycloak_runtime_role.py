@@ -93,10 +93,30 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
         for task in tasks
         if task.get("name") == "Wait for the Docker daemon to answer after networking recovery"
     )
+    replace_cleanup = next(
+        task
+        for task in tasks
+        if task.get("name") == "Remove stale Keycloak compose replacement containers before recovery"
+    )
+    openbao_agent_recreate = next(
+        task
+        for task in tasks
+        if task.get("name") == "Force-recreate the Keycloak OpenBao agent after Docker networking recovery"
+    )
+    runtime_env_wait = next(
+        task
+        for task in tasks
+        if task.get("name") == "Wait for the Keycloak runtime env file after OpenBao agent recovery"
+    )
     force_recreate = next(
         task
         for task in tasks
-        if task.get("name") == "Force-recreate the Keycloak stack after Docker networking recovery"
+        if task.get("name") == "Force-recreate the Keycloak service after Docker networking recovery"
+    )
+    force_recreate_fact = next(
+        task
+        for task in tasks
+        if task.get("name") == "Record whether the Keycloak startup needs a force recreate"
     )
     readiness_probe = next(
         task
@@ -109,10 +129,20 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     assert docker_info["ansible.builtin.command"]["argv"] == ["docker", "info", "--format", '{{ "{{.ServerVersion}}" }}']
     assert env_render["register"] == "keycloak_env_template"
     assert compose_render["register"] == "keycloak_compose_template"
+    assert "com.docker.compose.project=keycloak" in replace_cleanup["ansible.builtin.shell"]
+    assert "com.docker.compose.replace" in replace_cleanup["ansible.builtin.shell"]
+    assert openbao_agent_recreate["ansible.builtin.command"]["argv"][-4:] == ["up", "-d", "--force-recreate", "openbao-agent"]
+    assert 'grep -Fqx "KC_DB_URL_HOST={{ keycloak_database_host }}" "{{ keycloak_env_file }}"' in runtime_env_wait["ansible.builtin.shell"]
+    assert (
+        'grep -Fqx "KC_BOOTSTRAP_ADMIN_USERNAME={{ keycloak_bootstrap_admin_username }}" "{{ keycloak_env_file }}"'
+        in runtime_env_wait["ansible.builtin.shell"]
+    )
     assert readiness_probe["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
     assert "--force-recreate" in force_recreate["ansible.builtin.command"]["argv"]
+    assert "--no-deps" in force_recreate["ansible.builtin.command"]["argv"]
+    assert force_recreate["ansible.builtin.command"]["argv"][-1] == "keycloak"
     assert force_recreate["until"] == "keycloak_up.rc == 0"
-    force_recreate_expression = tasks[tasks.index(force_recreate) - 1]["ansible.builtin.set_fact"]["keycloak_force_recreate"]
+    force_recreate_expression = force_recreate_fact["ansible.builtin.set_fact"]["keycloak_force_recreate"]
     assert "keycloak_docker_nat_chain.rc != 0" in force_recreate_expression
     assert "keycloak_local_http_port_probe.failed" in force_recreate_expression
     assert "keycloak_readiness_probe.status" in force_recreate_expression
@@ -137,8 +167,14 @@ def test_role_verifies_internal_mail_network_connectivity() -> None:
         "ahostsv4",
         "{{ keycloak_mail_platform_submission_host }}",
     ]
+    assert resolve_task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
+    assert resolve_task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
+    assert resolve_task["until"] == "keycloak_mail_submission_host_lookup.rc == 0"
     assert "{{ keycloak_mail_platform_submission_host }}" in connect_task["ansible.builtin.shell"]
     assert "{{ keycloak_mail_platform_submission_port }}" in connect_task["ansible.builtin.shell"]
+    assert connect_task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
+    assert connect_task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
+    assert connect_task["until"] == "keycloak_mail_submission_probe.rc == 0"
 
 
 def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile() -> None:
@@ -203,7 +239,7 @@ def test_realm_reconciliation_retries_repo_managed_keycloak_modules() -> None:
         if any(key.startswith("community.general.keycloak_") for key in task)
     ]
     assert defaults["keycloak_admin_connection_timeout"] == 60
-    assert defaults["keycloak_admin_reconciliation_retries"] == 6
+    assert defaults["keycloak_admin_reconciliation_retries"] == 24
     assert defaults["keycloak_admin_reconciliation_delay"] == 5
     for task in community_tasks:
         assert task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
@@ -304,7 +340,7 @@ def test_role_manages_the_outline_automation_identity() -> None:
     assert defaults["keycloak_repo_user_reconciliation_retries"] == 24
     assert defaults["keycloak_repo_user_reconciliation_delay"] == 5
     assert defaults["keycloak_admin_connection_timeout"] == 60
-    assert defaults["keycloak_local_admin_url"] == "http://{{ ansible_host }}:{{ keycloak_internal_http_port }}"
+    assert defaults["keycloak_local_admin_url"] == "http://127.0.0.1:{{ keycloak_local_http_port }}"
     assert defaults["keycloak_repo_user_admin_url"] == "{{ keycloak_local_admin_url }}"
     assert admin_token_task["ansible.builtin.uri"]["url"] == (
         "{{ keycloak_repo_user_admin_url }}/realms/master/protocol/openid-connect/token"

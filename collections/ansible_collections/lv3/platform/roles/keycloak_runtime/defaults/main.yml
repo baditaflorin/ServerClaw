@@ -114,10 +114,10 @@ keycloak_service_account_realm_role_mappings:
     roles:
       - name: platform-read
 keycloak_public_base_url: "https://{{ keycloak_service_topology.public_hostname }}"
-keycloak_local_admin_url: "http://{{ ansible_host }}:{{ keycloak_internal_http_port }}"
+keycloak_local_admin_url: "http://127.0.0.1:{{ keycloak_local_http_port }}"
 keycloak_repo_user_admin_url: "{{ keycloak_local_admin_url }}"
 keycloak_admin_connection_timeout: 60
-keycloak_admin_reconciliation_retries: 6
+keycloak_admin_reconciliation_retries: 24
 keycloak_admin_reconciliation_delay: 5
 keycloak_startup_probe_retries: 60
 keycloak_startup_probe_delay: 5

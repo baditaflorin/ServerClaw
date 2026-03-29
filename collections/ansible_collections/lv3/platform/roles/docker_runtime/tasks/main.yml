@@ -200,9 +200,9 @@
   ansible.builtin.command: iptables -t nat -S DOCKER
   register: docker_runtime_nat_chain_assert
   changed_when: false
-  failed_when: docker_runtime_nat_chain_assert.rc != 0
-  retries: 3
-  delay: 1
+  failed_when: false
+  retries: "{{ docker_runtime_chain_recheck_retries }}"
+  delay: "{{ docker_runtime_chain_recheck_delay_seconds }}"
   until: docker_runtime_nat_chain_assert.rc == 0
   when: docker_runtime_require_nat_chain | bool
 
@@ -210,10 +210,56 @@
   ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
   register: docker_runtime_forward_chain_assert
   changed_when: false
-  failed_when: docker_runtime_forward_chain_assert.rc != 0
-  retries: 3
-  delay: 1
+  failed_when: false
+  retries: "{{ docker_runtime_chain_recheck_retries }}"
+  delay: "{{ docker_runtime_chain_recheck_delay_seconds }}"
   until: docker_runtime_forward_chain_assert.rc == 0
+  when: docker_runtime_require_nat_chain | bool
+
+- name: Restart Docker when required chains remain unstable after recheck
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted
+  when:
+    - docker_runtime_require_nat_chain | bool
+    - docker_runtime_nat_chain_assert.rc != 0 or docker_runtime_forward_chain_assert.rc != 0
+
+- name: Final recheck Docker nat chain after fallback restart
+  ansible.builtin.command: iptables -t nat -S DOCKER
+  register: docker_runtime_nat_chain_final_recheck
+  changed_when: false
+  failed_when: docker_runtime_nat_chain_final_recheck.rc not in [0, 1]
+  retries: "{{ docker_runtime_chain_recheck_retries }}"
+  delay: "{{ docker_runtime_chain_recheck_delay_seconds }}"
+  until: docker_runtime_nat_chain_final_recheck.rc == 0
+  when:
+    - docker_runtime_require_nat_chain | bool
+    - docker_runtime_nat_chain_assert.rc != 0 or docker_runtime_forward_chain_assert.rc != 0
+
+- name: Final recheck Docker forward chain after fallback restart
+  ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
+  register: docker_runtime_forward_chain_final_recheck
+  changed_when: false
+  failed_when: docker_runtime_forward_chain_final_recheck.rc not in [0, 1]
+  retries: "{{ docker_runtime_chain_recheck_retries }}"
+  delay: "{{ docker_runtime_chain_recheck_delay_seconds }}"
+  until: docker_runtime_forward_chain_final_recheck.rc == 0
+  when:
+    - docker_runtime_require_nat_chain | bool
+    - docker_runtime_nat_chain_assert.rc != 0 or docker_runtime_forward_chain_assert.rc != 0
+
+- name: Final assert Docker nat chain is present
+  ansible.builtin.command: iptables -t nat -S DOCKER
+  register: docker_runtime_nat_chain_final_assert
+  changed_when: false
+  failed_when: docker_runtime_nat_chain_final_assert.rc != 0
+  when: docker_runtime_require_nat_chain | bool
+
+- name: Final assert Docker filter forward chain is present
+  ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
+  register: docker_runtime_forward_chain_final_assert
+  changed_when: false
+  failed_when: docker_runtime_forward_chain_final_assert.rc != 0
   when: docker_runtime_require_nat_chain | bool
 
 - name: Verify Docker runtime health probes

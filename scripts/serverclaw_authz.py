@@ -7,6 +7,7 @@ import base64
 import json
 import subprocess
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -46,6 +47,10 @@ def detect_common_repo_root(repo_root: Path) -> Path:
 
 
 COMMON_REPO_ROOT = detect_common_repo_root(REPO_ROOT)
+
+HTTP_TIMEOUT_SECONDS = 10
+HTTP_RETRY_ATTEMPTS = 6
+HTTP_RETRY_DELAY_SECONDS = 5
 
 
 class AuthzError(RuntimeError):
@@ -99,6 +104,9 @@ def http_json(
     json_body: Any | None = None,
     form_body: dict[str, str] | None = None,
     expected_status: int | tuple[int, ...] = 200,
+    timeout_seconds: int = HTTP_TIMEOUT_SECONDS,
+    retries: int = HTTP_RETRY_ATTEMPTS,
+    retry_delay_seconds: int = HTTP_RETRY_DELAY_SECONDS,
 ) -> Any:
     body = None
     request_headers = dict(headers or {})
@@ -111,18 +119,28 @@ def http_json(
         body = urllib.parse.urlencode(form_body).encode("utf-8")
         request_headers["content-type"] = "application/x-www-form-urlencoded"
     request = urllib.request.Request(url, data=body, headers=request_headers, method=method)
-    try:
-        with urllib.request.urlopen(request) as response:
-            payload = response.read().decode("utf-8")
-            if isinstance(expected_status, tuple):
-                if response.status not in expected_status:
+    last_error: Exception | None = None
+    for attempt in range(max(retries, 1)):
+        try:
+            with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
+                payload = response.read().decode("utf-8")
+                if isinstance(expected_status, tuple):
+                    if response.status not in expected_status:
+                        raise AuthzError(f"{method} {url} returned unexpected status {response.status}")
+                elif response.status != expected_status:
                     raise AuthzError(f"{method} {url} returned unexpected status {response.status}")
-            elif response.status != expected_status:
-                raise AuthzError(f"{method} {url} returned unexpected status {response.status}")
-            return response.status, json.loads(payload) if payload else {}
-    except urllib.error.HTTPError as exc:
-        detail = exc.read().decode("utf-8", errors="replace")
-        raise AuthzError(f"{method} {url} failed with status {exc.code}: {detail}") from exc
+                return response.status, json.loads(payload) if payload else {}
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace")
+            raise AuthzError(f"{method} {url} failed with status {exc.code}: {detail}") from exc
+        except (TimeoutError, urllib.error.URLError, OSError) as exc:
+            last_error = exc
+            if attempt == max(retries, 1) - 1:
+                break
+            if retry_delay_seconds > 0:
+                time.sleep(retry_delay_seconds)
+    assert last_error is not None
+    raise AuthzError(f"{method} {url} failed after {max(retries, 1)} attempts: {last_error}") from last_error
 
 
 def bearer_headers(preshared_key: str) -> dict[str, str]:

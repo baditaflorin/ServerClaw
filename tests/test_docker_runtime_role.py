@@ -61,16 +61,30 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert forward_recheck["retries"] == "{{ docker_runtime_chain_recheck_retries }}"
     assert forward_recheck["delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
     assert forward_recheck["until"] == "docker_runtime_forward_chain_recheck.rc == 0"
+    fallback_restart = next(task for task in tasks if task["name"] == "Restart Docker when required chains remain unstable after recheck")
+    nat_final_recheck = next(task for task in tasks if task["name"] == "Final recheck Docker nat chain after fallback restart")
+    forward_final_recheck = next(task for task in tasks if task["name"] == "Final recheck Docker forward chain after fallback restart")
+    nat_final_assert = next(task for task in tasks if task["name"] == "Final assert Docker nat chain is present")
+    forward_final_assert = next(task for task in tasks if task["name"] == "Final assert Docker filter forward chain is present")
     nat_assert = next(task for task in tasks if task["name"] == "Assert Docker nat chain is present")
     forward_assert = next(task for task in tasks if task["name"] == "Assert Docker filter forward chain is present")
     assert nat_assert["ansible.builtin.command"] == "iptables -t nat -S DOCKER"
-    assert nat_assert["retries"] == 3
-    assert nat_assert["delay"] == 1
+    assert nat_assert["retries"] == "{{ docker_runtime_chain_recheck_retries }}"
+    assert nat_assert["delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
     assert nat_assert["until"] == "docker_runtime_nat_chain_assert.rc == 0"
     assert forward_assert["ansible.builtin.command"] == "iptables -t filter -S DOCKER-FORWARD"
-    assert forward_assert["retries"] == 3
-    assert forward_assert["delay"] == 1
+    assert forward_assert["retries"] == "{{ docker_runtime_chain_recheck_retries }}"
+    assert forward_assert["delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
     assert forward_assert["until"] == "docker_runtime_forward_chain_assert.rc == 0"
+    assert fallback_restart["ansible.builtin.systemd"]["name"] == "docker"
+    assert nat_final_recheck["until"] == "docker_runtime_nat_chain_final_recheck.rc == 0"
+    assert nat_final_recheck["retries"] == "{{ docker_runtime_chain_recheck_retries }}"
+    assert nat_final_recheck["delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
+    assert forward_final_recheck["until"] == "docker_runtime_forward_chain_final_recheck.rc == 0"
+    assert forward_final_recheck["retries"] == "{{ docker_runtime_chain_recheck_retries }}"
+    assert forward_final_recheck["delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
+    assert nat_final_assert["ansible.builtin.command"] == "iptables -t nat -S DOCKER"
+    assert forward_final_assert["ansible.builtin.command"] == "iptables -t filter -S DOCKER-FORWARD"
 
 
 def test_docker_runtime_patches_nftables_rule_block_once() -> None:
