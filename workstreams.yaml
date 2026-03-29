@@ -2691,7 +2691,7 @@ workstreams:
   - id: ws-0236-main-merge
     adr: "0236"
     title: Integrate ADR 0236 TanStack Query server-state feedback into origin/main
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/ws-0236-main-merge
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0236-mainline
@@ -2707,7 +2707,7 @@ workstreams:
       - VERSION
       - changelog.md
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.76.md
+      - docs/release-notes/0.177.81.md
       - versions/stack.yaml
       - build/platform-manifest.json
       - docs/diagrams/agent-coordination-map.excalidraw
@@ -2744,7 +2744,7 @@ workstreams:
             - VERSION
             - changelog.md
             - docs/release-notes/README.md
-            - docs/release-notes/0.177.76.md
+            - docs/release-notes/0.177.81.md
             - versions/stack.yaml
             - build/platform-manifest.json
             - docs/diagrams/agent-coordination-map.excalidraw
@@ -2772,7 +2772,7 @@ workstreams:
             - receipts/live-applies/2026-03-29-adr-0236-tanstack-query-mainline-live-apply.json
           mode: exclusive
     ready_to_merge: true
-    live_applied: false
+    live_applied: true
     canonical_truth:
       changelog_entry: records ADR 0236 exact-main evidence on the current
         mainline by preserving the verified TanStack Query operator-admin
@@ -2781,6 +2781,7 @@ workstreams:
         worker-readiness converge path while the later ADR 0241 and ADR 0228
         receipts remain canonical for the broader shared surfaces
       release_bump: patch
+      included_in_repo_version: 0.177.81
   - id: ws-0240-live-apply
     adr: "0240"
     title: Live apply operator visualization panels via Apache ECharts

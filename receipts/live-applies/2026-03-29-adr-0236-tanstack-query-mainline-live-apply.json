@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0236-tanstack-query-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T15:20:00Z",
+  "recorded_by": "codex",
+  "source_commit": "f7a0bdcd1c0a28dd54562e656b762cbed75bc121",
+  "repo_version_context": "0.177.80",
+  "platform_version_context": "0.130.54",
+  "workflow_id": "adr-0236-tanstack-query-mainline-live-apply",
+  "adr": "0236",
+  "summary": "Re-verified ADR 0236 from the latest origin/main baseline by replaying the Windmill operator admin raw app with TanStack Query, hardening the shared Windmill verification path against transient worker and PostgreSQL readiness races, and correcting mixed worker-checkout gate-status imports until the exact-main live app matched the branch again.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Windmill private app route",
+      "address": "http://100.64.0.1:8005/apps/get/p/f/lv3/operator_access_admin"
+    },
+    {
+      "kind": "windmill_script",
+      "name": "Windmill operator roster",
+      "address": "f/lv3/operator_roster"
+    },
+    {
+      "kind": "windmill_script",
+      "name": "Windmill validation gate status",
+      "address": "f/lv3/gate-status"
+    },
+    {
+      "kind": "windmill_script",
+      "name": "Windmill healthcheck",
+      "address": "f/lv3/windmill_healthcheck"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused Windmill validation slice",
+      "result": "pass",
+      "observed": "The rebased integration worktree passed `tests/test_validation_gate_windmill.py`, `tests/test_validation_gate.py`, `tests/test_world_state_repo_surfaces.py`, `tests/test_backup_coverage_ledger_windmill.py`, `tests/test_windmill_default_operations_surface.py`, and `tests/test_windmill_operator_admin_app.py` with `36 passed`."
+    },
+    {
+      "check": "Exact-main Windmill converge",
+      "result": "pass",
+      "observed": "`make converge-windmill` completed successfully from the exact-main worktree with `docker-runtime-lv3 ok=248 changed=45 failed=0`, `postgres-lv3 ok=65 changed=1 failed=0`, and `proxmox_florin ok=38 changed=7 failed=0`."
+    },
+    {
+      "check": "Live operator admin app publish",
+      "result": "pass",
+      "observed": "Windmill reported app path `f/lv3/operator_access_admin`, summary `LV3 operator access admin console`, version `48`, and edit timestamp `2026-03-29T15:11:20.200263Z`. The private app route returned `HTTP 200`, and the deployed raw app payload contained `@tanstack/react-query`, `QueryClientProvider`, `useQuery`, `useMutation`, `invalidateQueries`, `60_000`, and `45_000`."
+    },
+    {
+      "check": "Live operator roster and health scripts",
+      "result": "pass",
+      "observed": "`f/lv3/operator_roster` returned `{status: \"ok\", operator_count: 1, active_count: 1, inactive_count: 0}` and `f/lv3/windmill_healthcheck` returned `{probe: \"ws-0236-post-converge\", workspace: \"lv3\", job_id_present: true}` after the replay."
+    },
+    {
+      "check": "Live validation gate status",
+      "result": "pass",
+      "observed": "`f/lv3/gate-status` returned `status: ok`, exposed the governed validation-gate manifest, preserved the existing latest bypass receipt, and returned an empty warning/release-blocker waiver summary instead of crashing when the worker checkout lacked the optional `gate_bypass_waivers` helper."
+    },
+    {
+      "check": "Concurrent worker drift and startup race recovery",
+      "result": "pass",
+      "observed": "The exact-main replay corrected a shared-worker mismatch where `/srv/proxmox_florin_server/scripts/gate_status.py` had advanced to a branch-local import of `gate_bypass_waivers` without the companion module in the checkout. The Windmill wrapper now prepends the repo `scripts/` directory to `sys.path` and injects a safe empty waiver-summary fallback only when that helper is absent. The replay also added retries for transient Postgres SQL readiness and default operations script seeding so concurrent live applies no longer fail on short-lived startup windows."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0236-server-state-and-mutation-feedback-via-tanstack-query.md",
+    "docs/workstreams/ws-0236-live-apply.md",
+    "docs/workstreams/ws-0236-main-merge.md",
+    "docs/runbooks/windmill-operator-access-admin.md",
+    "docs/runbooks/configure-windmill.md",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_postgres/tasks/main.yml",
+    "config/windmill/scripts/gate-status.py",
+    "config/windmill/apps/f/lv3/operator_access_admin.raw_app/index.tsx",
+    "config/windmill/apps/f/lv3/operator_access_admin.raw_app/App.tsx",
+    "tests/test_validation_gate_windmill.py",
+    "tests/test_windmill_default_operations_surface.py",
+    "tests/test_windmill_operator_admin_app.py",
+    "tests/test_world_state_repo_surfaces.py",
+    "receipts/live-applies/2026-03-29-adr-0236-tanstack-query-mainline-live-apply.json",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "ADR 0236 itself first became true earlier on the branch-local live apply from 2026-03-28, which is why the ADR metadata still records platform version 0.130.43 as the first live platform version where the decision became true.",
+    "This exact-main receipt revalidates ADR 0236 from repo version 0.177.80 on top of platform version 0.130.54 before the protected release surfaces move to release 0.177.81 and integrated platform version 0.130.55.",
+    "The broader `operator_access` and `windmill` latest-receipt pointers remain owned by the later ADR 0241 and ADR 0228 mainline receipts; this receipt is canonical evidence for ADR 0236 itself.",
+    "No manual server mutation was retained outside the repo-managed converges; the live platform was corrected by rerunning the exact-main Windmill automation until the deployed app and validation wrappers matched the branch again."
+  ]
+}

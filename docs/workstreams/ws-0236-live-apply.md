@@ -2,10 +2,11 @@
 
 - ADR: [ADR 0236](../adr/0236-server-state-and-mutation-feedback-via-tanstack-query.md)
 - Title: live apply TanStack Query server-state conventions on the Windmill operator access admin app
-- Status: ready
+- Status: live_applied
 - Implemented Commit: `d21fb7c4ee93151cd3eb57f3dff09a3fa0d2022d`
+- Implemented In Repo Version: `0.177.81`
 - Live Applied In Platform Version: `0.130.43`
-- Implemented On: 2026-03-28
+- Implemented On: 2026-03-29
 - Live Applied On: 2026-03-28
 - Branch: `codex/ws-0236-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0236-live-apply`
@@ -75,5 +76,9 @@
 
 ## Merge-To-Main Notes
 
-- remaining for merge to `main`: update ADR 0236 metadata and regenerate `docs/adr/.index.yaml`, then update the protected integration files `VERSION`, `changelog.md`, `RELEASE.md`, `docs/release-notes/0.177.57.md`, `docs/release-notes/README.md`, `versions/stack.yaml`, `build/platform-manifest.json`, and any README status text that should reflect the merged-main truth
-- the final branch-side `pre-push-gate` replay already passed `dependency-graph` after regenerating `docs/diagrams/agent-coordination-map.excalidraw`; only the protected `build/platform-manifest.json` refresh remains for a fully green gate on `main`
+- mainline integration completed in `ws-0236-main-merge`, which carries the
+  exact-main replay into release `0.177.81`
+- `receipts/live-applies/2026-03-29-adr-0236-tanstack-query-mainline-live-apply.json`
+  records the later exact-main replay from repo version `0.177.80` on top of
+  platform version `0.130.54` while this workstream retains the original
+  branch-local live-apply evidence from `2026-03-28`
