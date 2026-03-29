@@ -29,11 +29,13 @@
     WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"
     WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
   register: windmill_verify_healthcheck
-  retries: 3
-  delay: 10
-  until: windmill_verify_healthcheck.rc == 0
   changed_when: false
   failed_when: false
+  retries: 4
+  delay: 15
+  until:
+    - windmill_verify_healthcheck.rc == 0
+    - (windmill_verify_healthcheck.stdout | default('') | trim | length) > 0
   no_log: true
 
 - name: Assert the Windmill seeded healthcheck result
@@ -72,13 +74,13 @@
     WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"
     WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
   register: windmill_verify_validation_gate_status
-  retries: 3
-  delay: 10
-  until:
-    - windmill_verify_validation_gate_status.rc == 0
-    - windmill_verify_validation_gate_status.stdout | trim | length > 0
   changed_when: false
   failed_when: false
+  retries: 10
+  delay: 5
+  until:
+    - windmill_verify_validation_gate_status.rc == 0
+    - (windmill_verify_validation_gate_status.stdout | default('') | trim | length) > 0
   no_log: true
 
 - name: Assert the Windmill validation gate status result

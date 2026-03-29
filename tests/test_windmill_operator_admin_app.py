@@ -101,7 +101,8 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "workstreams.yaml",
         "roles",
     }.issubset(set(defaults["windmill_worker_checkout_sync_paths"]))
-    assert defaults["windmill_worker_checkout_checksum_file"] == "{{ windmill_site_dir }}/worker-checkout.sha256"
+    assert "worker-checkout-" in defaults["windmill_worker_checkout_checksum_file"]
+    assert "windmill_worker_repo_checkout_host_path | basename" in defaults["windmill_worker_checkout_checksum_file"]
     assert "windmill_worker_checkout_prune_preserve_paths" in defaults_text
     assert "windmill_worker_repo_mutable_files" in defaults_text
     assert "windmill_worker_runtime_writable_directories" in defaults_text
@@ -365,6 +366,7 @@ def test_windmill_worker_checkout_archive_builder_avoids_macos_xattrs() -> None:
     assert "LV3_WINDMILL_PRESERVE_PATHS_JSON" in runtime_tasks
     assert "is_preserved" in runtime_tasks
     assert 'candidate.rglob("*")' in runtime_tasks
+    assert "candidate.is_dir() and not candidate.is_symlink()" in runtime_tasks
     assert "tar.add(path, arcname=archive_key" not in runtime_tasks
     assert "tar -czf" not in runtime_tasks
 
@@ -641,6 +643,10 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert '{{ windmill_worker_repo_checkout_host_path }}/platform' in tasks
     assert "Ensure repo-backed Windmill runtime paths stay writable after checkout sync" in tasks
     assert "Ensure the Windmill worker checkout mutable directories exist with write access" in tasks
+    assert "Collect controller-side bootstrap sources for Windmill worker mutable files" in tasks
+    assert "Collect guest-side presence for Windmill worker mutable files" in tasks
+    assert "Bootstrap missing Windmill worker mutable files from the controller checkout when available" in tasks
+    assert "Create missing Windmill worker mutable file placeholders when no controller bootstrap file exists" in tasks
     assert "Ensure the Windmill worker checkout mutable files remain writable for Windmill jobs" in tasks
     assert "Ensure the Windmill worker checkout secret directories exist" in tasks
     assert "Mirror the Windmill worker checkout bootstrap secret files" in tasks

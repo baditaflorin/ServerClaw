@@ -198,7 +198,7 @@
         candidate = repo_root / relative_root
         if not candidate.exists():
             continue
-        if candidate.is_file():
+        if candidate.is_file() or candidate.is_symlink():
             if skip_path(candidate):
                 continue
             relative_path = candidate.relative_to(repo_root)
@@ -213,10 +213,10 @@
             relative_path = child.relative_to(repo_root)
             if is_preserved(relative_path):
                 continue
-            if child.is_dir():
+            if child.is_dir() and not child.is_symlink():
                 add_directory(child)
                 continue
-            if child.is_file():
+            if child.is_file() or child.is_symlink():
                 manifest_entries.add(relative_path.as_posix())
 
     manifest_path.write_text(
@@ -300,7 +300,7 @@
                     if not candidate.exists():
                         continue
                     paths = [candidate]
-                    if candidate.is_dir():
+                    if candidate.is_dir() and not candidate.is_symlink():
                         paths.extend(sorted(candidate.rglob("*")))
                     for path in paths:
                         relative_path = path.relative_to(repo_root)
@@ -489,7 +489,11 @@
         candidate = repo_root / relative_root
         if not candidate.exists():
             continue
-        files = [candidate] if candidate.is_file() else sorted(path for path in candidate.rglob("*") if path.is_file())
+        files = (
+            [candidate]
+            if (candidate.is_file() or candidate.is_symlink())
+            else sorted(path for path in candidate.rglob("*") if path.is_file())
+        )
         for child in files:
             relative_path = child.relative_to(repo_root).as_posix()
             if child.name == ".DS_Store" or child.name.startswith("._"):
@@ -553,10 +557,10 @@
     removed = []
     for relative_root in sync_paths:
         candidate = repo_root / relative_root
-        if not candidate.exists() or not candidate.is_dir():
+        if not candidate.exists() or not candidate.is_dir() or candidate.is_symlink():
             continue
         for child in sorted(
-            (path for path in candidate.rglob("*") if path.is_dir()),
+            (path for path in candidate.rglob("*") if path.is_dir() and not path.is_symlink()),
             key=lambda path: len(path.relative_to(repo_root).parts),
             reverse=True,
         ):
@@ -633,6 +637,54 @@
     state: directory
     mode: "{{ item.mode }}"
   loop: "{{ windmill_worker_repo_mutable_directories }}"
+
+- name: Collect controller-side bootstrap sources for Windmill worker mutable files
+  ansible.builtin.stat:
+    path: >-
+      {{
+        windmill_worker_checkout_repo_root_local_dir
+        ~ '/'
+        ~ (
+          item.path
+          | regex_replace('^' ~ (windmill_worker_repo_checkout_host_path | regex_escape) ~ '/?', '')
+        )
+      }}
+  delegate_to: localhost
+  become: false
+  loop: "{{ windmill_worker_repo_mutable_files }}"
+  register: windmill_worker_repo_mutable_files_local
+
+- name: Collect guest-side presence for Windmill worker mutable files
+  ansible.builtin.stat:
+    path: "{{ item.path }}"
+  loop: "{{ windmill_worker_repo_mutable_files }}"
+  register: windmill_worker_repo_mutable_files_remote
+
+- name: Bootstrap missing Windmill worker mutable files from the controller checkout when available
+  ansible.builtin.copy:
+    src: "{{ windmill_worker_repo_mutable_files_local.results[item].stat.path }}"
+    dest: "{{ windmill_worker_repo_mutable_files[item].path }}"
+    mode: "{{ windmill_worker_repo_mutable_files[item].mode }}"
+  loop: "{{ range(0, windmill_worker_repo_mutable_files | length) | list }}"
+  loop_control:
+    label: "{{ windmill_worker_repo_mutable_files[item].path }}"
+  when:
+    - not (windmill_worker_repo_mutable_files_remote.results[item].stat.exists | default(false))
+    - windmill_worker_repo_mutable_files_local.results[item].stat.exists | default(false)
+
+- name: Create missing Windmill worker mutable file placeholders when no controller bootstrap file exists
+  ansible.builtin.file:
+    path: "{{ windmill_worker_repo_mutable_files[item].path }}"
+    state: touch
+    mode: "{{ windmill_worker_repo_mutable_files[item].mode }}"
+    access_time: preserve
+    modification_time: preserve
+  loop: "{{ range(0, windmill_worker_repo_mutable_files | length) | list }}"
+  loop_control:
+    label: "{{ windmill_worker_repo_mutable_files[item].path }}"
+  when:
+    - not (windmill_worker_repo_mutable_files_remote.results[item].stat.exists | default(false))
+    - not (windmill_worker_repo_mutable_files_local.results[item].stat.exists | default(false))
 
 - name: Ensure the Windmill worker checkout mutable files remain writable for Windmill jobs
   ansible.builtin.file:
