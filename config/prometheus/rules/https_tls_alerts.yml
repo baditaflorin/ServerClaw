@@ -822,6 +822,52 @@ groups:
           description: https://mail.lv3.org:443/ has less than 14 days remaining before
             certificate expiry.
           runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_matrix_synapse_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="matrix-synapse-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: matrix_synapse
+          assurance_id: matrix-synapse-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: matrix-synapse-public HTTPS probe is failing.
+          description: https://matrix.lv3.org:443/ is no longer completing a healthy
+            HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_matrix_synapse_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="matrix-synapse-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: matrix_synapse
+          assurance_id: matrix-synapse-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: matrix-synapse-public TLS certificate is approaching expiry.
+          description: https://matrix.lv3.org:443/ has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_matrix_synapse_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="matrix-synapse-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: matrix_synapse
+          assurance_id: matrix-synapse-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: matrix-synapse-public TLS certificate is within the critical expiry
+            window.
+          description: https://matrix.lv3.org:443/ has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
       - alert: HTTPSProbeFailed_n8n_public
         expr: probe_success{job="https-tls-blackbox",assurance_id="n8n-public"} ==
           0
