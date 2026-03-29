@@ -159,6 +159,46 @@ groups:
           summary: grafana-availability has less than 10% error budget remaining
           description: Grafana remains reachable through the public LV3 edge.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_harbor_availability
+        expr: (slo:harbor_availability:error_rate_5m > (14 * 0.005000)) and (slo:harbor_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: harbor
+          slo_id: harbor-availability
+          indicator: availability
+        annotations:
+          summary: harbor-availability is burning its error budget at 14x
+          description: Harbor remains reachable through the shared LV3 edge for image
+            pulls, pushes, and operator access.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_harbor_availability
+        expr: slo:harbor_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: harbor
+          slo_id: harbor-availability
+          indicator: availability
+        annotations:
+          summary: harbor-availability is burning its error budget at 3x
+          description: Harbor remains reachable through the shared LV3 edge for image
+            pulls, pushes, and operator access.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_harbor_availability
+        expr: slo:harbor_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: harbor
+          slo_id: harbor-availability
+          indicator: availability
+        annotations:
+          summary: harbor-availability has less than 10% error budget remaining
+          description: Harbor remains reachable through the shared LV3 edge for image
+            pulls, pushes, and operator access.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_homepage_availability
         expr: (slo:homepage_availability:error_rate_5m > (14 * 0.005000)) and (slo:homepage_availability:error_rate_1h
           > (14 * 0.005000))
@@ -198,46 +238,6 @@ groups:
           summary: homepage-availability has less than 10% error budget remaining
           description: The unified operator dashboard remains reachable through the
             authenticated LV3 edge.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOFastBurn_realtime_availability
-        expr: (slo:realtime_availability:error_rate_5m > (14 * 0.010000)) and (slo:realtime_availability:error_rate_1h
-          > (14 * 0.010000))
-        for: 2m
-        labels:
-          severity: critical
-          service_id: realtime
-          slo_id: realtime-availability
-          indicator: availability
-        annotations:
-          summary: realtime-availability is burning its error budget at 14x
-          description: The Netdata parent remains reachable on monitoring-lv3 for
-            real-time streamed platform metrics.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOSlowBurn_realtime_availability
-        expr: slo:realtime_availability:error_rate_1h > (3 * 0.010000)
-        for: 60m
-        labels:
-          severity: warning
-          service_id: realtime
-          slo_id: realtime-availability
-          indicator: availability
-        annotations:
-          summary: realtime-availability is burning its error budget at 3x
-          description: The Netdata parent remains reachable on monitoring-lv3 for
-            real-time streamed platform metrics.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOBudgetCritical_realtime_availability
-        expr: slo:realtime_availability:budget_remaining < 0.10
-        for: 10m
-        labels:
-          severity: critical
-          service_id: realtime
-          slo_id: realtime-availability
-          indicator: availability
-        annotations:
-          summary: realtime-availability has less than 10% error budget remaining
-          description: The Netdata parent remains reachable on monitoring-lv3 for
-            real-time streamed platform metrics.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_keycloak_availability
         expr: (slo:keycloak_availability:error_rate_5m > (14 * 0.003000)) and (slo:keycloak_availability:error_rate_1h
@@ -316,46 +316,6 @@ groups:
           summary: keycloak-latency has less than 10% error budget remaining
           description: Keycloak discovery responds in under 500ms for 95% of probes.
           runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOFastBurn_harbor_availability
-        expr: (slo:harbor_availability:error_rate_5m > (14 * 0.005000)) and (slo:harbor_availability:error_rate_1h
-          > (14 * 0.005000))
-        for: 2m
-        labels:
-          severity: critical
-          service_id: harbor
-          slo_id: harbor-availability
-          indicator: availability
-        annotations:
-          summary: harbor-availability is burning its error budget at 14x
-          description: Harbor remains reachable through the shared LV3 edge for image
-            pulls, pushes, and operator access.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOSlowBurn_harbor_availability
-        expr: slo:harbor_availability:error_rate_1h > (3 * 0.005000)
-        for: 60m
-        labels:
-          severity: warning
-          service_id: harbor
-          slo_id: harbor-availability
-          indicator: availability
-        annotations:
-          summary: harbor-availability is burning its error budget at 3x
-          description: Harbor remains reachable through the shared LV3 edge for image
-            pulls, pushes, and operator access.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOBudgetCritical_harbor_availability
-        expr: slo:harbor_availability:budget_remaining < 0.10
-        for: 10m
-        labels:
-          severity: critical
-          service_id: harbor
-          slo_id: harbor-availability
-          indicator: availability
-        annotations:
-          summary: harbor-availability has less than 10% error budget remaining
-          description: Harbor remains reachable through the shared LV3 edge for image
-            pulls, pushes, and operator access.
-          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_langfuse_availability
         expr: (slo:langfuse_availability:error_rate_5m > (14 * 0.005000)) and (slo:langfuse_availability:error_rate_1h
           > (14 * 0.005000))
@@ -395,6 +355,46 @@ groups:
           summary: langfuse-availability has less than 10% error budget remaining
           description: Langfuse remains reachable through the public LV3 edge for
             trace ingestion and operator access.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_matrix_synapse_availability
+        expr: (slo:matrix_synapse_availability:error_rate_5m > (14 * 0.005000)) and
+          (slo:matrix_synapse_availability:error_rate_1h > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: matrix_synapse
+          slo_id: matrix-synapse-availability
+          indicator: availability
+        annotations:
+          summary: matrix-synapse-availability is burning its error budget at 14x
+          description: Matrix Synapse remains reachable on the public client versions
+            endpoint.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_matrix_synapse_availability
+        expr: slo:matrix_synapse_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: matrix_synapse
+          slo_id: matrix-synapse-availability
+          indicator: availability
+        annotations:
+          summary: matrix-synapse-availability is burning its error budget at 3x
+          description: Matrix Synapse remains reachable on the public client versions
+            endpoint.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_matrix_synapse_availability
+        expr: slo:matrix_synapse_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: matrix_synapse
+          slo_id: matrix-synapse-availability
+          indicator: availability
+        annotations:
+          summary: matrix-synapse-availability has less than 10% error budget remaining
+          description: Matrix Synapse remains reachable on the public client versions
+            endpoint.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_netbox_availability
         expr: (slo:netbox_availability:error_rate_5m > (14 * 0.005000)) and (slo:netbox_availability:error_rate_1h
@@ -590,6 +590,46 @@ groups:
           description: Outline remains reachable through the public LV3 edge for living
             knowledge browsing and sync automation.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_plane_availability
+        expr: (slo:plane_availability:error_rate_5m > (14 * 0.010000)) and (slo:plane_availability:error_rate_1h
+          > (14 * 0.010000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: plane
+          slo_id: plane-availability
+          indicator: availability
+        annotations:
+          summary: plane-availability is burning its error budget at 14x
+          description: Plane remains reachable through the public LV3 edge for ADR
+            board tracking and issue synchronization.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_plane_availability
+        expr: slo:plane_availability:error_rate_1h > (3 * 0.010000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: plane
+          slo_id: plane-availability
+          indicator: availability
+        annotations:
+          summary: plane-availability is burning its error budget at 3x
+          description: Plane remains reachable through the public LV3 edge for ADR
+            board tracking and issue synchronization.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_plane_availability
+        expr: slo:plane_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: plane
+          slo_id: plane-availability
+          indicator: availability
+        annotations:
+          summary: plane-availability has less than 10% error budget remaining
+          description: Plane remains reachable through the public LV3 edge for ADR
+            board tracking and issue synchronization.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_platform_context_api_availability
         expr: (slo:platform_context_api_availability:error_rate_5m > (14 * 0.010000))
           and (slo:platform_context_api_availability:error_rate_1h > (14 * 0.010000))
@@ -632,6 +672,46 @@ groups:
             remaining
           description: The platform context API remains reachable for agent-assisted
             operator workflows.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_realtime_availability
+        expr: (slo:realtime_availability:error_rate_5m > (14 * 0.010000)) and (slo:realtime_availability:error_rate_1h
+          > (14 * 0.010000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: realtime
+          slo_id: realtime-availability
+          indicator: availability
+        annotations:
+          summary: realtime-availability is burning its error budget at 14x
+          description: The Netdata parent remains reachable on monitoring-lv3 for
+            real-time streamed platform metrics.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_realtime_availability
+        expr: slo:realtime_availability:error_rate_1h > (3 * 0.010000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: realtime
+          slo_id: realtime-availability
+          indicator: availability
+        annotations:
+          summary: realtime-availability is burning its error budget at 3x
+          description: The Netdata parent remains reachable on monitoring-lv3 for
+            real-time streamed platform metrics.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_realtime_availability
+        expr: slo:realtime_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: realtime
+          slo_id: realtime-availability
+          indicator: availability
+        annotations:
+          summary: realtime-availability has less than 10% error budget remaining
+          description: The Netdata parent remains reachable on monitoring-lv3 for
+            real-time streamed platform metrics.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_semaphore_availability
         expr: (slo:semaphore_availability:error_rate_5m > (14 * 0.005000)) and (slo:semaphore_availability:error_rate_1h
@@ -826,44 +906,4 @@ groups:
         annotations:
           summary: windmill-availability has less than 10% error budget remaining
           description: Windmill API stays reachable for scheduled automation.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOFastBurn_plane_availability
-        expr: (slo:plane_availability:error_rate_5m > (14 * 0.010000)) and (slo:plane_availability:error_rate_1h
-          > (14 * 0.010000))
-        for: 2m
-        labels:
-          severity: critical
-          service_id: plane
-          slo_id: plane-availability
-          indicator: availability
-        annotations:
-          summary: plane-availability is burning its error budget at 14x
-          description: Plane remains reachable through the public LV3 edge for ADR
-            board tracking and issue synchronization.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOSlowBurn_plane_availability
-        expr: slo:plane_availability:error_rate_1h > (3 * 0.010000)
-        for: 60m
-        labels:
-          severity: warning
-          service_id: plane
-          slo_id: plane-availability
-          indicator: availability
-        annotations:
-          summary: plane-availability is burning its error budget at 3x
-          description: Plane remains reachable through the public LV3 edge for ADR
-            board tracking and issue synchronization.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOBudgetCritical_plane_availability
-        expr: slo:plane_availability:budget_remaining < 0.10
-        for: 10m
-        labels:
-          severity: critical
-          service_id: plane
-          slo_id: plane-availability
-          indicator: availability
-        annotations:
-          summary: plane-availability has less than 10% error budget remaining
-          description: Plane remains reachable through the public LV3 edge for ADR
-            board tracking and issue synchronization.
           runbook: docs/runbooks/slo-tracking.md

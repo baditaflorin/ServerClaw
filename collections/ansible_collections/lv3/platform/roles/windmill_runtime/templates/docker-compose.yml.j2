@@ -42,9 +42,13 @@ services:
     restart: unless-stopped
     privileged: true
     user: "0:0"
+{% if windmill_worker_network_mode == 'host' %}
+    network_mode: {{ windmill_worker_network_mode }}
+{% else %}
     networks:
       - default
       - openbao_runtime
+{% endif %}
     env_file:
       - {{ windmill_env_file }}
     environment:
@@ -69,9 +73,13 @@ services:
     image: {{ windmill_image }}
     restart: unless-stopped
     user: "0:0"
+{% if windmill_worker_network_mode == 'host' %}
+    network_mode: {{ windmill_worker_network_mode }}
+{% else %}
     networks:
       - default
       - openbao_runtime
+{% endif %}
     env_file:
       - {{ windmill_env_file }}
     environment:
@@ -112,7 +120,9 @@ volumes:
   worker_logs: null
   lsp_cache: null
 
+{% if windmill_worker_network_mode != 'host' %}
 networks:
   openbao_runtime:
     external: true
     name: {{ windmill_openbao_runtime_network }}
+{% endif %}

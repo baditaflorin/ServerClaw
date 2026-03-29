@@ -1,14 +1,12 @@
-# Release 0.177.84
+# Release 0.177.87
 
 - Date: 2026-03-29
 
 ## Summary
-- implemented ADR 0254 by publishing the first dedicated ServerClaw chat surface on chat.lv3.org with Keycloak-backed sign-in and repo-managed Ollama plus SearXNG integrations
-- implemented ADR 0264 by partitioning the validation gate into failure-domain-isolated lanes, propagating lane context and changed-surface evidence through the build-server and worker fallback paths, and re-verifying the newest exact-main pre-push plus post-merge automation flow
+- records ADR 0251 exact-main durable verification on the latest realistic origin/main by marking the stage-scoped smoke suite and promotion-gate workflow fully live, preserving the live worker checkout, gate-status, runtime-assurance, and ops-portal verification on release 0.177.87 while the current verified platform baseline remains 0.130.59
 
 ## Platform Impact
-- platform version advances to 0.130.58 after the exact-main ADR 0264 replay re-verifies the lane-aware build-server pre-push gate, gate-status reporting, remote validation context propagation, and worker-side post-merge fallback on top of the 0.130.57 baseline
-- introduces the first dedicated ServerClaw chat surface on chat.lv3.org as integrated mainline truth, with the synchronized latest-main replay and canonical platform-version receipt completed in the same workstream
+- no additional platform-version bump; this release records ADR 0251 exact-main durable verification on the already-verified 0.130.59 platform baseline, promotes the canonical mainline receipt for stage-smoke and promotion-gate evidence, and marks ADR 0251 fully live on main
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

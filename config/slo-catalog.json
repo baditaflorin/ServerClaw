@@ -44,6 +44,16 @@
       "description": "Grafana remains reachable through the public LV3 edge."
     },
     {
+      "id": "harbor-availability",
+      "service_id": "harbor",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://registry.lv3.org/api/v2.0/ping",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Harbor remains reachable through the shared LV3 edge for image pulls, pushes, and operator access."
+    },
+    {
       "id": "homepage-availability",
       "service_id": "homepage",
       "indicator": "availability",
@@ -52,16 +62,6 @@
       "target_url": "https://home.lv3.org",
       "probe_module": "http_2xx_follow_redirects",
       "description": "The unified operator dashboard remains reachable through the authenticated LV3 edge."
-    },
-    {
-      "id": "realtime-availability",
-      "service_id": "realtime",
-      "indicator": "availability",
-      "objective_percent": 99.0,
-      "window_days": 30,
-      "target_url": "http://10.10.10.40:19999/api/v1/info",
-      "probe_module": "http_2xx_follow_redirects",
-      "description": "The Netdata parent remains reachable on monitoring-lv3 for real-time streamed platform metrics."
     },
     {
       "id": "keycloak-availability",
@@ -85,16 +85,6 @@
       "description": "Keycloak discovery responds in under 500ms for 95% of probes."
     },
     {
-      "id": "harbor-availability",
-      "service_id": "harbor",
-      "indicator": "availability",
-      "objective_percent": 99.5,
-      "window_days": 30,
-      "target_url": "https://registry.lv3.org/api/v2.0/ping",
-      "probe_module": "http_2xx_follow_redirects",
-      "description": "Harbor remains reachable through the shared LV3 edge for image pulls, pushes, and operator access."
-    },
-    {
       "id": "langfuse-availability",
       "service_id": "langfuse",
       "indicator": "availability",
@@ -103,6 +93,16 @@
       "target_url": "https://langfuse.lv3.org/api/public/health",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Langfuse remains reachable through the public LV3 edge for trace ingestion and operator access."
+    },
+    {
+      "id": "matrix-synapse-availability",
+      "service_id": "matrix_synapse",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://matrix.lv3.org/_matrix/client/versions",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Matrix Synapse remains reachable on the public client versions endpoint."
     },
     {
       "id": "netbox-availability",
@@ -155,6 +155,16 @@
       "description": "Outline remains reachable through the public LV3 edge for living knowledge browsing and sync automation."
     },
     {
+      "id": "plane-availability",
+      "service_id": "plane",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "https://tasks.lv3.org/",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Plane remains reachable through the public LV3 edge for ADR board tracking and issue synchronization."
+    },
+    {
       "id": "platform-context-api-availability",
       "service_id": "platform_context_api",
       "indicator": "availability",
@@ -163,6 +173,16 @@
       "target_url": "http://10.10.10.20:8010/healthz",
       "probe_module": "http_2xx_follow_redirects",
       "description": "The platform context API remains reachable for agent-assisted operator workflows."
+    },
+    {
+      "id": "realtime-availability",
+      "service_id": "realtime",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.40:19999/api/v1/info",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The Netdata parent remains reachable on monitoring-lv3 for real-time streamed platform metrics."
     },
     {
       "id": "semaphore-availability",
@@ -213,16 +233,6 @@
       "target_url": "http://10.10.10.20:8000/api/version",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Windmill API stays reachable for scheduled automation."
-    },
-    {
-      "id": "plane-availability",
-      "service_id": "plane",
-      "indicator": "availability",
-      "objective_percent": 99.0,
-      "window_days": 30,
-      "target_url": "https://tasks.lv3.org/",
-      "probe_module": "http_2xx_follow_redirects",
-      "description": "Plane remains reachable through the public LV3 edge for ADR board tracking and issue synchronization."
     }
   ]
 }

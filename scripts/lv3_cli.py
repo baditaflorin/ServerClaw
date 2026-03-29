@@ -20,18 +20,17 @@ import urllib.parse
 import urllib.request
 import webbrowser
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Iterable
 
 import yaml
+from script_bootstrap import ensure_repo_root_on_path
 
-CODE_ROOT = Path(__file__).resolve().parent.parent
+CODE_ROOT = ensure_repo_root_on_path(__file__)
 REPO_ROOT = CODE_ROOT
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
 
+from platform.datetime_compat import UTC, datetime, timedelta
 from controller_automation_toolkit import resolve_repo_local_path
 from dependency_graph import dependency_summary, load_dependency_graph
 from environment_catalog import environment_choices, primary_environment

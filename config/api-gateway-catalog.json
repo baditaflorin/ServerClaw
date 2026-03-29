@@ -80,6 +80,17 @@
       "healthcheck_path": "/health"
     },
     {
+      "id": "matrix_synapse",
+      "name": "Matrix Synapse",
+      "upstream": "http://10.10.10.20:8008",
+      "gateway_prefix": "/v1/matrix-synapse",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/_matrix/client/versions"
+    },
+    {
       "id": "mattermost",
       "name": "Mattermost",
       "upstream": "http://10.10.10.20:8065",
@@ -111,28 +122,6 @@
       "strip_prefix": true,
       "timeout_seconds": 30,
       "healthcheck_path": "/health"
-    },
-    {
-      "id": "serverclaw",
-      "name": "ServerClaw",
-      "upstream": "http://10.10.10.70:8096",
-      "gateway_prefix": "/v1/serverclaw",
-      "auth": "keycloak_jwt",
-      "required_role": "platform-read",
-      "strip_prefix": true,
-      "timeout_seconds": 30,
-      "healthcheck_path": "/"
-    },
-    {
-      "id": "plane",
-      "name": "Plane",
-      "upstream": "http://10.10.10.20:8093",
-      "gateway_prefix": "/v1/plane",
-      "auth": "keycloak_jwt",
-      "required_role": "platform-operator",
-      "strip_prefix": true,
-      "timeout_seconds": 30,
-      "healthcheck_path": "/"
     },
     {
       "id": "openbao",
@@ -168,6 +157,17 @@
       "healthcheck_path": "/_health"
     },
     {
+      "id": "plane",
+      "name": "Plane",
+      "upstream": "http://10.10.10.20:8093",
+      "gateway_prefix": "/v1/plane",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/"
+    },
+    {
       "id": "platform_context_api",
       "name": "Platform Context API",
       "upstream": "http://10.10.10.20:8010",
@@ -191,17 +191,6 @@
       "healthcheck_path": "/api/status"
     },
     {
-      "id": "semaphore",
-      "name": "Semaphore",
-      "upstream": "http://10.10.10.20:3004",
-      "gateway_prefix": "/v1/semaphore",
-      "auth": "keycloak_jwt",
-      "required_role": "platform-operator",
-      "strip_prefix": true,
-      "timeout_seconds": 30,
-      "healthcheck_path": "/api/ping"
-    },
-    {
       "id": "realtime",
       "name": "Realtime Metrics",
       "upstream": "http://10.10.10.40:19999",
@@ -211,6 +200,17 @@
       "strip_prefix": true,
       "timeout_seconds": 30,
       "healthcheck_path": "/api/v1/info"
+    },
+    {
+      "id": "semaphore",
+      "name": "Semaphore",
+      "upstream": "http://10.10.10.20:3004",
+      "gateway_prefix": "/v1/semaphore",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/api/ping"
     },
     {
       "id": "uptime_kuma",

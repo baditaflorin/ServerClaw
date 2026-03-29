@@ -38,11 +38,14 @@ def test_windmill_runtime_only_rechecks_nat_chain_when_port_publishing_is_enable
 
     assert defaults["windmill_server_network_mode"] == "host"
     assert defaults["windmill_server_requires_docker_nat"] == "{{ windmill_server_network_mode != 'host' }}"
-    assert defaults["windmill_worker_api_base_url"] == "http://windmill_server:8000"
+    assert defaults["windmill_worker_network_mode"] == "{{ windmill_server_network_mode }}"
+    assert "127.0.0.1" in defaults["windmill_worker_api_base_url"]
     assert "network_mode: {{ windmill_server_network_mode }}" in compose_template
+    assert "network_mode: {{ windmill_worker_network_mode }}" in compose_template
     assert 'ports:' not in compose_template
     assert "WINDMILL_BASE_URL: {{ windmill_private_base_url }}" in compose_template
     assert "Recheck Docker nat chain before Windmill startup" in tasks
+    assert "Wait for the Windmill worker containers to be running" in tasks
     assert "failed_when: windmill_docker_nat_chain_recheck.rc not in [0, 1]" in tasks
     assert "retries: 5" in tasks
     assert "delay: 2" in tasks

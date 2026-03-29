@@ -75,6 +75,11 @@ platform_host:
         listen_port: 8066
         upstream_host: 10.10.10.20
         upstream_port: 8065
+      - name: matrix-synapse
+        listen_address: 100.64.0.1
+        listen_port: 8015
+        upstream_host: 10.10.10.20
+        upstream_port: 8008
       - name: gitea
         listen_address: 100.64.0.1
         listen_port: 3009
@@ -155,6 +160,8 @@ platform_ports:
   nomad_host_proxy_port: 8013
   mattermost_server_port: 8065
   mattermost_host_proxy_port: 8066
+  matrix_synapse_port: 8008
+  matrix_synapse_host_proxy_port: 8015
   gitea_http_port: 3003
   gitea_host_proxy_port: 3009
   netbox_server_port: 8082
@@ -218,6 +225,8 @@ platform_port_assignments:
   nomad_host_proxy_port: 8013
   mattermost_server_port: 8065
   mattermost_host_proxy_port: 8066
+  matrix_synapse_port: 8008
+  matrix_synapse_host_proxy_port: 8015
   gitea_http_port: 3003
   gitea_host_proxy_port: 3009
   netbox_server_port: 8082
@@ -1319,6 +1328,39 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8065
       controller: http://100.64.0.1:8066
+  matrix_synapse:
+    service_name: matrix-synapse
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: matrix.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: matrix
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8008
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8015
+    service_id: matrix_synapse
+    ports:
+      internal: 8008
+      controller: 8015
+    urls:
+      public: https://matrix.lv3.org
+      internal: http://10.10.10.20:8008
+      controller: http://100.64.0.1:8015
   netbox:
     service_name: netbox
     owning_vm: docker-runtime-lv3
@@ -2033,6 +2075,10 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: matrix
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: langfuse
       type: A
       value: 65.108.75.123
@@ -2151,6 +2197,7 @@ platform_management_allowed_tcp_ports:
   - 8008
   - 8011
   - 8066
+  - 8015
   - 8010
   - 9444
   - 443
@@ -2591,6 +2638,39 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8065
       controller: http://100.64.0.1:8066
+  matrix_synapse:
+    service_name: matrix-synapse
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: matrix.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: matrix
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8008
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8015
+    service_id: matrix_synapse
+    ports:
+      internal: 8008
+      controller: 8015
+    urls:
+      public: https://matrix.lv3.org
+      internal: http://10.10.10.20:8008
+      controller: http://100.64.0.1:8015
   netbox:
     service_name: netbox
     owning_vm: docker-runtime-lv3
@@ -3303,6 +3383,11 @@ mattermost_server_port: 8065
 mattermost_host_proxy_port: 8066
 mattermost_private_base_url: http://10.10.10.20:8065
 mattermost_controller_url: http://100.64.0.1:8066
+matrix_synapse_port: 8008
+matrix_synapse_host_proxy_port: 8015
+matrix_synapse_private_base_url: http://10.10.10.20:8008
+matrix_synapse_controller_url: http://100.64.0.1:8015
+matrix_synapse_public_url: https://matrix.lv3.org
 gitea_http_port: 3003
 gitea_host_proxy_port: 3009
 gitea_root_url: http://git.lv3.org:3009
@@ -3338,6 +3423,7 @@ proxmox_management_allowed_tcp_ports:
   - 8008
   - 8011
   - 8066
+  - 8015
   - 8010
   - 9444
   - 443

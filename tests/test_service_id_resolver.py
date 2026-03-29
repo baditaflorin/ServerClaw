@@ -19,3 +19,7 @@ def test_resolve_service_id_maps_public_edge_playbook_to_nginx_edge() -> None:
 def test_resolve_service_id_keeps_canonical_service_ids_stable() -> None:
     assert service_id_resolver.resolve_service_id("nginx_edge") == "nginx_edge"
     assert service_id_resolver.resolve_service_id("platform_context_api") == "platform_context_api"
+
+
+def test_resolve_service_id_maps_build_artifact_cache_playbook_to_docker_build() -> None:
+    assert service_id_resolver.resolve_service_id("build-artifact-cache") == "docker_build"

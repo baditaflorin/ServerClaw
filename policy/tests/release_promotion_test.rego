@@ -13,12 +13,14 @@ base_input := {
     "approved": true,
     "reasons": [],
   },
-  "stage_smoke_gate": {
-    "declared": true,
-    "matched_suite_ids": ["default-primary-smoke"],
-    "reason": "",
-  },
   "service_id": "grafana",
+  "smoke_gate": {
+    "enforced": false,
+    "failed_suite_ids": [],
+    "missing_suite_ids": [],
+    "reasons": [],
+    "required_suite_ids": [],
+  },
   "slo_gate": {
     "blocking_budget_messages": [],
     "checked": true,
@@ -68,13 +70,15 @@ test_promotion_policy_rejects_missing_stage_smoke_suite if {
   decision := promotion.decision with input as object.union(
     base_input,
     {
-      "stage_smoke_gate": {
-        "declared": false,
-        "matched_suite_ids": [],
-        "reason": "service 'grafana' does not declare an active staging smoke suite",
+      "smoke_gate": {
+        "enforced": true,
+        "failed_suite_ids": [],
+        "missing_suite_ids": ["staging-grafana-primary-path"],
+        "reasons": ["staging smoke suites missing from staged receipt: staging-grafana-primary-path"],
+        "required_suite_ids": ["staging-grafana-primary-path"],
       },
     },
   )
   decision.gate_decision == "rejected"
-  decision.reasons[_] == "service 'grafana' does not declare an active staging smoke suite"
+  decision.reasons[_] == "staging smoke suites missing from staged receipt: staging-grafana-primary-path"
 }

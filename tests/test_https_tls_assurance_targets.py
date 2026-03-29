@@ -31,6 +31,24 @@ def test_internal_ip_targets_use_hostname_override_when_certificate_server_name_
     assert proxmox_internal["testssl_ip"] == "100.64.0.1"
 
 
+def test_public_targets_prefer_uptime_kuma_monitor_url_when_present() -> None:
+    discovered = {item["id"]: item for item in targets.discover_https_tls_targets()}
+    matrix_public = discovered["matrix-synapse-public"]
+
+    assert matrix_public["probe_url"] == "https://10.10.10.10:443/_matrix/client/versions"
+    assert matrix_public["probe_hostname"] == "matrix.lv3.org"
+    assert matrix_public["display_url"] == "https://matrix.lv3.org:443/_matrix/client/versions"
+
+
+def test_public_targets_probe_through_internal_edge_with_hostname_override() -> None:
+    discovered = {item["id"]: item for item in targets.discover_https_tls_targets()}
+    proxmox_public = discovered["proxmox-ui-public"]
+
+    assert proxmox_public["probe_url"] == "https://10.10.10.10:443/"
+    assert proxmox_public["probe_hostname"] == "proxmox.lv3.org"
+    assert proxmox_public["display_url"] == "https://proxmox.lv3.org:443/"
+
+
 def test_generated_alert_rules_include_day_and_hour_expiry_windows() -> None:
     discovered = targets.discover_https_tls_targets()
     payload = targets.build_prometheus_alert_rules(discovered)

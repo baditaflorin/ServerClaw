@@ -8,6 +8,28 @@ from .conftest import auth_header, http_request, require_url
 pytestmark = pytest.mark.integration
 
 
+def test_gateway_public_healthz_and_openapi_are_available(integration_config) -> None:
+    gateway_url = require_url(
+        integration_config.gateway_url,
+        "LV3_INTEGRATION_GATEWAY_URL is required for platform API checks",
+    )
+    health_response = http_request(
+        "GET",
+        f"{gateway_url}/healthz",
+        verify=integration_config.verify_tls,
+    )
+    assert health_response.status_code == 200, health_response.text
+    assert health_response.json()["status"] == "ok"
+
+    openapi_response = http_request(
+        "GET",
+        f"{gateway_url}/openapi.json",
+        verify=integration_config.verify_tls,
+    )
+    assert openapi_response.status_code == 200, openapi_response.text
+    assert str(openapi_response.json().get("openapi", "")).startswith("3.")
+
+
 def test_service_catalog_returns_expected_services(keycloak_token: str, integration_config, catalog_services) -> None:
     gateway_url = require_url(
         integration_config.gateway_url,

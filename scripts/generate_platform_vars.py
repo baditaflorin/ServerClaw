@@ -44,6 +44,8 @@ PORT_KEYS = (
     "nomad_host_proxy_port",
     "mattermost_server_port",
     "mattermost_host_proxy_port",
+    "matrix_synapse_port",
+    "matrix_synapse_host_proxy_port",
     "gitea_http_port",
     "gitea_host_proxy_port",
     "netbox_server_port",
@@ -368,6 +370,11 @@ def build_service_urls(
         urls["controller"] = service_url("http", tailscale_ipv4, ports["mattermost_host_proxy_port"])
         port_map["internal"] = ports["mattermost_server_port"]
         port_map["controller"] = ports["mattermost_host_proxy_port"]
+    elif service_id == "matrix_synapse":
+        urls["internal"] = service_url("http", private_ip, ports["matrix_synapse_port"])
+        urls["controller"] = service_url("http", tailscale_ipv4, ports["matrix_synapse_host_proxy_port"])
+        port_map["internal"] = ports["matrix_synapse_port"]
+        port_map["controller"] = ports["matrix_synapse_host_proxy_port"]
     elif service_id == "gitea":
         urls["internal"] = service_url("http", private_ip, ports["gitea_http_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["gitea_host_proxy_port"])
@@ -662,6 +669,7 @@ def build_platform_vars(
     monitoring_service = service_topology["grafana"]
     mail_service = service_topology["mail_platform"]
     mattermost_service = service_topology["mattermost"]
+    matrix_synapse_service = service_topology["matrix_synapse"]
     gitea_service = service_topology["gitea"]
     netbox_service = service_topology["netbox"]
     open_webui_service = service_topology["open_webui"]
@@ -773,6 +781,7 @@ def build_platform_vars(
             resolved_ports["open_webui_host_proxy_port"],
             resolved_ports["plane_host_proxy_port"],
             resolved_ports["mattermost_host_proxy_port"],
+            resolved_ports["matrix_synapse_host_proxy_port"],
             resolved_ports["platform_context_host_proxy_port"],
             resolved_ports["portainer_host_proxy_port"],
             443,
@@ -807,6 +816,11 @@ def build_platform_vars(
         "mattermost_host_proxy_port": resolved_ports["mattermost_host_proxy_port"],
         "mattermost_private_base_url": mattermost_service["urls"]["internal"],
         "mattermost_controller_url": mattermost_service["urls"]["controller"],
+        "matrix_synapse_port": resolved_ports["matrix_synapse_port"],
+        "matrix_synapse_host_proxy_port": resolved_ports["matrix_synapse_host_proxy_port"],
+        "matrix_synapse_private_base_url": matrix_synapse_service["urls"]["internal"],
+        "matrix_synapse_controller_url": matrix_synapse_service["urls"]["controller"],
+        "matrix_synapse_public_url": matrix_synapse_service["urls"]["public"],
         "gitea_http_port": resolved_ports["gitea_http_port"],
         "gitea_host_proxy_port": resolved_ports["gitea_host_proxy_port"],
         "gitea_root_url": gitea_service["urls"].get("public", gitea_service["urls"]["controller"]),
@@ -842,6 +856,7 @@ def build_platform_vars(
             resolved_ports["open_webui_host_proxy_port"],
             resolved_ports["plane_host_proxy_port"],
             resolved_ports["mattermost_host_proxy_port"],
+            resolved_ports["matrix_synapse_host_proxy_port"],
             resolved_ports["platform_context_host_proxy_port"],
             resolved_ports["portainer_host_proxy_port"],
             443,

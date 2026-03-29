@@ -18,6 +18,8 @@ Converge the repo-managed unified platform API gateway on `docker-runtime-lv3` a
 python3 scripts/api_gateway_catalog.py --validate
 uv run --with pyyaml python scripts/validate_timeout_hierarchy.py
 uv run --with pytest --with fastapi==0.116.1 --with httpx==0.28.1 --with uvicorn==0.35.0 --with pyyaml==6.0.2 --with cryptography==45.0.6 pytest tests/test_api_gateway.py tests/test_api_gateway_catalog.py
+uv run --with pytest --with fastapi==0.116.1 --with httpx==0.28.1 --with uvicorn==0.35.0 --with pyyaml==6.0.2 --with cryptography==45.0.6 --with jinja2==3.1.5 --with itsdangerous==2.2.0 --with python-multipart==0.0.20 pytest -q tests/test_declared_live_attestation.py tests/test_api_gateway.py tests/test_interactive_ops_portal.py
+uv run --with pyyaml python3 scripts/declared_live_attestation.py --repo-root . --service api_gateway --format json --timeout-seconds 5
 ```
 
 ## Converge
@@ -53,7 +55,14 @@ From an operator workstation with a valid Keycloak token:
 curl https://api.lv3.org/healthz
 curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/health
 curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/services
+curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/attestation
+curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/attestation/api_gateway
 ```
+
+Expected:
+
+- `/v1/platform/attestation` returns a summary plus per-service declared-to-live witness records
+- `/v1/platform/attestation/api_gateway` returns the single-service witness record for the gateway surface
 
 ## Notes
 
