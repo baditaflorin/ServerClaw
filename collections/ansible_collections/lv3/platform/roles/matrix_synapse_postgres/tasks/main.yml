@@ -155,6 +155,102 @@
   changed_when: false
   when: matrix_synapse_postgres_writable_check.stdout | trim == "1"
 
+- name: Read the current Matrix Synapse database locale
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - >-
+        SELECT datcollate || '|' || datctype
+        FROM pg_database
+        WHERE datname = '{{ matrix_synapse_database_name }}'
+  register: matrix_synapse_postgres_database_locale
+  changed_when: false
+  when:
+    - matrix_synapse_postgres_writable_check.stdout | trim == "1"
+    - matrix_synapse_postgres_database_check.stdout == "1"
+
+- name: Record whether the Matrix Synapse database locale requires recreation
+  ansible.builtin.set_fact:
+    matrix_synapse_postgres_database_needs_locale_recreation: >-
+      {{
+        matrix_synapse_postgres_database_locale.stdout | trim
+        != matrix_synapse_database_collation ~ '|' ~ matrix_synapse_database_ctype
+      }}
+  when:
+    - matrix_synapse_postgres_writable_check.stdout | trim == "1"
+    - matrix_synapse_postgres_database_check.stdout == "1"
+
+- name: Count non-system tables in the Matrix Synapse database before locale correction
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ matrix_synapse_database_name }}"
+      - -Atqc
+      - >-
+        SELECT COUNT(*)
+        FROM information_schema.tables
+        WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
+  register: matrix_synapse_postgres_non_system_table_count
+  changed_when: false
+  when:
+    - matrix_synapse_postgres_writable_check.stdout | trim == "1"
+    - matrix_synapse_postgres_database_needs_locale_recreation | default(false)
+
+- name: Assert the Matrix Synapse database can be recreated to correct its locale
+  ansible.builtin.assert:
+    that:
+      - matrix_synapse_postgres_non_system_table_count.stdout | trim | int == 0
+    fail_msg: >-
+      Matrix Synapse database locale drifted from the required
+      {{ matrix_synapse_database_collation }}/{{ matrix_synapse_database_ctype }}
+      setting after tables were created. Manual migration is required before rerunning
+      automation.
+  when:
+    - matrix_synapse_postgres_writable_check.stdout | trim == "1"
+    - matrix_synapse_postgres_database_needs_locale_recreation | default(false)
+
+- name: Terminate active Matrix Synapse database sessions before locale correction
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - postgres
+      - -Atqc
+      - >-
+        SELECT pg_terminate_backend(pid)
+        FROM pg_stat_activity
+        WHERE datname = '{{ matrix_synapse_database_name }}'
+          AND pid <> pg_backend_pid()
+  changed_when: false
+  when:
+    - matrix_synapse_postgres_writable_check.stdout | trim == "1"
+    - matrix_synapse_postgres_database_needs_locale_recreation | default(false)
+
+- name: Drop the Matrix Synapse database when locale correction is required
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - postgres
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "DROP DATABASE {{ matrix_synapse_database_name }}"
+  changed_when: true
+  when:
+    - matrix_synapse_postgres_writable_check.stdout | trim == "1"
+    - matrix_synapse_postgres_database_needs_locale_recreation | default(false)
+
 - name: Create the Matrix Synapse PostgreSQL database
   become: true
   become_user: postgres
@@ -167,10 +263,42 @@
       - >-
         CREATE DATABASE {{ matrix_synapse_database_name }}
         OWNER {{ matrix_synapse_database_user }}
+        TEMPLATE {{ matrix_synapse_database_template }}
+        LC_COLLATE '{{ matrix_synapse_database_collation }}'
+        LC_CTYPE '{{ matrix_synapse_database_ctype }}'
   changed_when: true
   when:
     - matrix_synapse_postgres_writable_check.stdout | trim == "1"
-    - matrix_synapse_postgres_database_check.stdout != "1"
+    - >-
+      matrix_synapse_postgres_database_check.stdout != "1"
+      or matrix_synapse_postgres_database_needs_locale_recreation | default(false)
+
+- name: Read the Matrix Synapse database locale after convergence
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - >-
+        SELECT datcollate || '|' || datctype
+        FROM pg_database
+        WHERE datname = '{{ matrix_synapse_database_name }}'
+  register: matrix_synapse_postgres_database_locale_after
+  changed_when: false
+  when: matrix_synapse_postgres_writable_check.stdout | trim == "1"
+
+- name: Assert the Matrix Synapse database locale matches the required setting
+  ansible.builtin.assert:
+    that:
+      - >-
+        matrix_synapse_postgres_database_locale_after.stdout | trim
+        == matrix_synapse_database_collation ~ '|' ~ matrix_synapse_database_ctype
+    fail_msg: >-
+      Matrix Synapse database locale must be
+      {{ matrix_synapse_database_collation }}/{{ matrix_synapse_database_ctype }}
+      for Synapse startup compatibility.
+  when: matrix_synapse_postgres_writable_check.stdout | trim == "1"
 
 - name: Ensure the Matrix Synapse database owner is correct
   become: true
