@@ -52,6 +52,11 @@ HETZNER_DNS_API_TOKEN=... make database-dns
 
 This creates or updates `database.lv3.org` so it resolves to the Proxmox host Tailscale IPv4.
 
+ADR 0098 defines a future PostgreSQL HA VIP, but its
+`Implemented In Platform Version` remains `not yet`. Until that live cutover is
+performed, the governed truth for `database.lv3.org` remains the Proxmox host
+Tailscale proxy and ADR 0252 verifies that publication.
+
 ## Connect To PostgreSQL
 
 From a device that is already on the same tailnet:
@@ -65,7 +70,7 @@ For real remote use, replace `dbname` and `user` with an application-specific Po
 For local administrative access on the VM itself:
 
 ```bash
-ssh -J ops@100.118.189.95 ops@10.10.10.50
+ssh -J ops@100.64.0.1 ops@10.10.10.50
 sudo -u postgres psql
 ```
 
@@ -74,25 +79,25 @@ sudo -u postgres psql
 Confirm the VM exists on Proxmox:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo qm config 150'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo qm config 150'
 ```
 
 Confirm the guest services are enabled:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'ssh -o StrictHostKeyChecking=no ops@10.10.10.50 "sudo systemctl status postgresql nftables --no-pager"'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.50 "sudo systemctl status postgresql nftables --no-pager"'
 ```
 
 Confirm PostgreSQL is listening only on loopback and the guest private IP:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'ssh -o StrictHostKeyChecking=no ops@10.10.10.50 "sudo -u postgres psql -Atqc \"SHOW listen_addresses\" && sudo ss -ltnp | grep 5432"'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.50 "sudo -u postgres psql -Atqc \"SHOW listen_addresses\" && sudo ss -ltnp | grep 5432"'
 ```
 
 Confirm the `ops` role exists for local peer administration:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'ssh -o StrictHostKeyChecking=no ops@10.10.10.50 "sudo -u postgres psql -Atqc \"SELECT rolname, rolcreatedb, rolcreaterole, rolsuper FROM pg_roles WHERE rolname = '\''ops'\''\""'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.50 "sudo -u postgres psql -Atqc \"SELECT rolname, rolcreatedb, rolcreaterole, rolsuper FROM pg_roles WHERE rolname = '\''ops'\''\""'
 ```
 
 Confirm that the DNS record resolves to the Proxmox host Tailscale IP:

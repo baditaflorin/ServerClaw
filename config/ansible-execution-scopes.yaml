@@ -35,6 +35,13 @@ playbooks:
     shared_surfaces:
       - service:database-dns
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/route-dns-assertion-ledger.yml:
+    playbook_id: route-dns-assertion-ledger
+    mutation_scope: platform
+    shared_surfaces:
+      - service:subdomain-catalog
+      - config/subdomain-catalog.json
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/docker-runtime.yml:
     playbook_id: docker-runtime
     mutation_scope: host
