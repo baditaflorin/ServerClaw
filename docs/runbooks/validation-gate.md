@@ -63,6 +63,8 @@ It defines these blocking checks:
 
 `scripts/run_gate.py` reads that manifest and executes the checks in parallel via [scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/parallel_check.py).
 
+Repo-managed validation installs third-party Ansible collections from the public `release_galaxy` server by default, so local Docker fallback does not depend on resolving the private `galaxy.lv3.org` endpoint just to lint or syntax-check the checkout.
+
 ADR 0230 adds `policy-validation`, which runs [scripts/policy_checks.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/policy_checks.py) against the shared `policy/` bundle and verifies the OPA or Conftest toolchain cache under `LV3_POLICY_TOOLCHAIN_ROOT`. The same manifest-backed check now runs in the local gate, the build-server `remote-validate` path, and the worker-side Windmill post-merge gate.
 
 The `schema-validation` stage now also runs [scripts/provider_boundary_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/provider_boundary_catalog.py) so ADR 0207 provider-boundary guards fail the gate if a declared boundary leaks raw provider payload selectors beyond its translation step.
@@ -125,6 +127,7 @@ When the replay starts from a repo-scoped non-primary git worktree, `playbooks/w
 
 - if `make install-hooks` fails during `pre-commit` bootstrap, rerun it with working internet access so `pre-commit` can fetch hook environments
 - if the build server is unreachable, rerun `make pre-push-gate`; the wrapper already falls back to local Docker execution
+- if the local Docker fallback is running on an emulated platform such as Apple Silicon with amd64 runner images, expect the `ansible-lint` and `ansible-syntax` stages to take several minutes; the manifest timeout budget is intentionally higher for those checks than for the lighter Python-only stages
 - if two remote gate runs appear to reuse one checkout, set distinct `LV3_SESSION_ID` values and rerun so each session gets its own build-server workspace
 - if a remote gate run fails with `fatal: not a git repository`, treat it as a validator regression rather than a checkout-shape requirement; the build-server path now uses immutable no-git snapshots and the affected check should be fixed to reason about repository content instead
 - if the Windmill post-merge gate points at an older mirrored worker tree without the canonical generated-doc inputs, replay `windmill_runtime` first so `/srv/proxmox_florin_server` includes the full worker-safe validation surface before rerunning the gate
