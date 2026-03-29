@@ -323,6 +323,42 @@
         or (keycloak_readiness_probe.status | default(0)) != 200
       }}
 
+- name: Reset the Keycloak stack before a force recreate
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ keycloak_compose_file }}"
+      - down
+      - --remove-orphans
+  args:
+    chdir: "{{ keycloak_site_dir }}"
+  register: keycloak_force_recreate_down
+  failed_when: false
+  changed_when: >-
+    'Stopping' in keycloak_force_recreate_down.stdout
+    or 'Removing' in keycloak_force_recreate_down.stdout
+    or 'Network' in keycloak_force_recreate_down.stdout
+    or 'Stopping' in keycloak_force_recreate_down.stderr
+    or 'Removing' in keycloak_force_recreate_down.stderr
+    or 'Network' in keycloak_force_recreate_down.stderr
+  when: keycloak_force_recreate
+
+- name: Remove stale Keycloak compose networks after the reset
+  ansible.builtin.shell: |
+    set -euo pipefail
+    stale_networks="$(docker network ls -q --filter name={{ keycloak_compose_network_name }})"
+    if [ -n "${stale_networks}" ]; then
+      docker network rm ${stale_networks}
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: keycloak_force_recreate_network_cleanup
+  changed_when: "'changed' in keycloak_force_recreate_network_cleanup.stdout"
+  when: keycloak_force_recreate
+
 - name: Force-recreate the Keycloak stack after Docker networking recovery
   ansible.builtin.command:
     argv:

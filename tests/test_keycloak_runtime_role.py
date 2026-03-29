@@ -21,6 +21,8 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_mail_platform_submission_host"] == "lv3-mail-stalwart"
     assert defaults["keycloak_mail_platform_submission_port"] == 1587
     assert defaults["keycloak_mail_platform_submission_starttls"] is False
+    assert defaults["keycloak_compose_project_name"] == "keycloak"
+    assert defaults["keycloak_compose_network_name"] == "{{ keycloak_compose_project_name }}_default"
     assert defaults["keycloak_mail_platform_docker_network_name"] == "mail-platform_default"
     assert defaults["keycloak_langfuse_client_id"] == "langfuse"
     assert defaults["keycloak_langfuse_client_secret_local_file"].endswith("/.local/keycloak/langfuse-client-secret.txt")
@@ -94,6 +96,15 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
         for task in tasks
         if task.get("name") == "Force-recreate the Keycloak stack after Docker networking recovery"
     )
+    force_recreate_fact = next(
+        task for task in tasks if task.get("name") == "Record whether the Keycloak startup needs a force recreate"
+    )
+    force_recreate_down = next(
+        task for task in tasks if task.get("name") == "Reset the Keycloak stack before a force recreate"
+    )
+    network_cleanup = next(
+        task for task in tasks if task.get("name") == "Remove stale Keycloak compose networks after the reset"
+    )
     readiness_probe = next(
         task
         for task in tasks
@@ -106,9 +117,20 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     assert env_render["register"] == "keycloak_env_template"
     assert compose_render["register"] == "keycloak_compose_template"
     assert readiness_probe["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
+    assert force_recreate_down["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "compose",
+        "--file",
+        "{{ keycloak_compose_file }}",
+        "down",
+        "--remove-orphans",
+    ]
+    assert force_recreate_down["when"] == "keycloak_force_recreate"
+    assert "{{ keycloak_compose_network_name }}" in network_cleanup["ansible.builtin.shell"]
+    assert network_cleanup["when"] == "keycloak_force_recreate"
     assert "--force-recreate" in force_recreate["ansible.builtin.command"]["argv"]
     assert force_recreate["until"] == "keycloak_up.rc == 0"
-    force_recreate_expression = tasks[tasks.index(force_recreate) - 1]["ansible.builtin.set_fact"]["keycloak_force_recreate"]
+    force_recreate_expression = force_recreate_fact["ansible.builtin.set_fact"]["keycloak_force_recreate"]
     assert "keycloak_docker_nat_chain.rc != 0" in force_recreate_expression
     assert "keycloak_local_http_port_probe.failed" in force_recreate_expression
     assert "keycloak_readiness_probe.status" in force_recreate_expression
