@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/persona-catalog.schema.json",
+  "title": "Persona Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "personas"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "docs/schema/persona-catalog.schema.json"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "personas": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "description",
+          "default",
+          "focus_purposes",
+          "default_favorites"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "focus_purposes": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "operate",
+                "observe",
+                "learn",
+                "plan",
+                "administer"
+              ]
+            }
+          },
+          "default_favorites": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^(service|workflow):[A-Za-z0-9:_-]+$"
+            }
+          }
+        }
+      }
+    }
+  }
+}

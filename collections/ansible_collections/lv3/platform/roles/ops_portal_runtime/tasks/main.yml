@@ -153,7 +153,7 @@
 
 - name: Sync the ops portal application files
   ansible.builtin.copy:
-    content: "{{ lookup('ansible.builtin.file', item.path) }}"
+    src: "{{ item.path }}"
     dest: "{{ ops_portal_service_dir }}/ops_portal/{{ item.path | replace(ops_portal_repo_root ~ '/scripts/ops_portal/', '') }}"
     owner: root
     group: root
@@ -171,7 +171,7 @@
 
 - name: Sync critical ops portal runtime files explicitly
   ansible.builtin.copy:
-    content: "{{ lookup('ansible.builtin.file', item.src) }}"
+    src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     owner: root
     group: root
@@ -242,7 +242,7 @@
 
 - name: Sync the shared search fabric files
   ansible.builtin.copy:
-    content: "{{ lookup('ansible.builtin.file', item.path) }}"
+    src: "{{ item.path }}"
     dest: "{{ ops_portal_service_dir }}/search_fabric/{{ item.path | replace(ops_portal_repo_root ~ '/scripts/search_fabric/', '') }}"
     owner: root
     group: root
@@ -287,7 +287,7 @@
 
 - name: Sync the ops portal service build inputs explicitly
   ansible.builtin.copy:
-    content: "{{ lookup('ansible.builtin.file', item.src) }}"
+    src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     owner: root
     group: root

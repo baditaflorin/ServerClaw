@@ -14,7 +14,7 @@ from typing import Any
 
 import httpx
 from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -104,6 +104,460 @@ EDGE_META = {
     "soft": {"color": "#7d8597", "line_type": "dotted", "width": 1.6},
 }
 
+LAUNCHER_PURPOSE_ORDER = ("operate", "observe", "learn", "plan", "administer")
+LAUNCHER_PURPOSE_LABELS = {
+    "operate": "Operate",
+    "observe": "Observe",
+    "learn": "Learn",
+    "plan": "Plan",
+    "administer": "Administer",
+}
+LAUNCHER_PURPOSE_BY_CATEGORY = {
+    "automation": "operate",
+    "communication": "plan",
+    "data": "learn",
+    "infrastructure": "administer",
+    "observability": "observe",
+    "security": "administer",
+    "access": "administer",
+}
+LAUNCHER_PURPOSE_OVERRIDES = {
+    "changelog_portal": "learn",
+    "coolify": "operate",
+    "coolify_apps": "operate",
+    "docs_portal": "learn",
+    "gitea": "plan",
+    "grafana": "observe",
+    "headscale": "administer",
+    "homepage": "operate",
+    "keycloak": "administer",
+    "langfuse": "observe",
+    "netbox": "plan",
+    "ops_portal": "operate",
+    "outline": "learn",
+    "plane": "plan",
+    "portainer": "administer",
+    "proxmox_ui": "administer",
+    "realtime": "observe",
+    "status_page": "observe",
+    "uptime_kuma": "observe",
+    "windmill": "operate",
+}
+LAUNCHER_PERSONAS_BY_PURPOSE = {
+    "operate": ["operator", "administrator"],
+    "observe": ["observer", "operator"],
+    "learn": ["planner", "operator"],
+    "plan": ["planner", "operator"],
+    "administer": ["administrator", "operator"],
+}
+DEFAULT_PERSONA_CATALOG = {
+    "personas": [
+        {
+            "id": "operator",
+            "name": "Operator",
+            "description": "Day-to-day runtime operations and service switching.",
+            "default": True,
+            "focus_purposes": ["operate", "observe", "learn"],
+            "default_favorites": [
+                "service:ops_portal",
+                "service:homepage",
+                "service:grafana",
+                "service:docs_portal",
+                "workflow:gate-status",
+            ],
+        },
+        {
+            "id": "observer",
+            "name": "Observer",
+            "description": "Monitoring, drift, assurance, and incident triage.",
+            "default": False,
+            "focus_purposes": ["observe", "operate", "administer"],
+            "default_favorites": [
+                "service:grafana",
+                "service:realtime",
+                "service:dozzle",
+                "service:status_page",
+                "workflow:continuous-drift-detection",
+            ],
+        },
+        {
+            "id": "planner",
+            "name": "Planner",
+            "description": "Planning work, reviewing docs, and coordinating changes.",
+            "default": False,
+            "focus_purposes": ["plan", "learn", "operate"],
+            "default_favorites": [
+                "service:plane",
+                "service:outline",
+                "service:docs_portal",
+                "service:netbox",
+                "service:gitea",
+            ],
+        },
+        {
+            "id": "administrator",
+            "name": "Administrator",
+            "description": "Identity, secrets, control-plane, and platform administration.",
+            "default": False,
+            "focus_purposes": ["administer", "operate", "observe"],
+            "default_favorites": [
+                "service:keycloak",
+                "service:openbao",
+                "service:proxmox_ui",
+                "service:portainer",
+                "workflow:converge-ops-portal",
+            ],
+        },
+    ]
+}
+LAUNCHER_RECENT_LIMIT = 6
+LAUNCHER_FAVORITE_LIMIT = 8
+
+
+def browser_usable_url(value: Any) -> str | None:
+    if not isinstance(value, str):
+        return None
+    candidate = value.strip()
+    if candidate.startswith(("http://", "https://")):
+        return candidate
+    return None
+
+
+def launcher_purpose_for_service(service: dict[str, Any]) -> str:
+    service_id = str(service.get("id", ""))
+    if service_id in LAUNCHER_PURPOSE_OVERRIDES:
+        return LAUNCHER_PURPOSE_OVERRIDES[service_id]
+    category = str(service.get("category", ""))
+    return LAUNCHER_PURPOSE_BY_CATEGORY.get(category, "operate")
+
+
+def default_launcher_personas(purpose: str) -> list[str]:
+    return list(LAUNCHER_PERSONAS_BY_PURPOSE.get(purpose, ["operator"]))
+
+
+def normalize_persona_catalog(payload: Any) -> list[dict[str, Any]]:
+    if not isinstance(payload, dict):
+        payload = DEFAULT_PERSONA_CATALOG
+    raw_personas = payload.get("personas")
+    if not isinstance(raw_personas, list) or not raw_personas:
+        raw_personas = DEFAULT_PERSONA_CATALOG["personas"]
+
+    personas: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
+    for item in raw_personas:
+        if not isinstance(item, dict):
+            continue
+        persona_id = item.get("id")
+        name = item.get("name")
+        description = item.get("description")
+        if not isinstance(persona_id, str) or not persona_id.strip():
+            continue
+        if not isinstance(name, str) or not name.strip():
+            continue
+        if persona_id in seen_ids:
+            continue
+        seen_ids.add(persona_id)
+        focus_purposes = [
+            purpose
+            for purpose in item.get("focus_purposes", [])
+            if isinstance(purpose, str) and purpose in LAUNCHER_PURPOSE_ORDER
+        ]
+        default_favorites = [
+            favorite
+            for favorite in item.get("default_favorites", [])
+            if isinstance(favorite, str) and favorite.strip()
+        ]
+        personas.append(
+            {
+                "id": persona_id.strip(),
+                "name": name.strip(),
+                "description": description.strip()
+                if isinstance(description, str) and description.strip()
+                else "No description recorded.",
+                "default": bool(item.get("default")),
+                "focus_purposes": focus_purposes,
+                "default_favorites": default_favorites,
+            }
+        )
+
+    if not personas:
+        return normalize_persona_catalog(DEFAULT_PERSONA_CATALOG)
+    if not any(persona["default"] for persona in personas):
+        personas[0]["default"] = True
+    return personas
+
+
+def default_persona_id(personas: list[dict[str, Any]]) -> str:
+    for persona in personas:
+        if persona.get("default"):
+            return str(persona["id"])
+    return str(personas[0]["id"]) if personas else "operator"
+
+
+def launcher_matches_query(entry: dict[str, Any], query: str) -> bool:
+    if not query:
+        return True
+    haystack = normalize_text(" ".join(str(item) for item in entry.get("search_tokens", []) if item))
+    return all(token in haystack for token in normalize_text(query).split())
+
+
+def launcher_entry_visible(entry: dict[str, Any], persona_id: str, query: str) -> bool:
+    personas = entry.get("personas", [])
+    return persona_id in personas and launcher_matches_query(entry, query)
+
+
+def decorate_launcher_entry(
+    entry: dict[str, Any],
+    favorite_ids: set[str],
+    recent_ids: set[str],
+) -> dict[str, Any]:
+    model = dict(entry)
+    model["is_favorite"] = entry["id"] in favorite_ids
+    model["is_recent"] = entry["id"] in recent_ids
+    return model
+
+
+def build_launcher_groups(
+    entries: list[dict[str, Any]],
+    *,
+    persona: dict[str, Any],
+    favorite_ids: set[str],
+    recent_ids: set[str],
+    query: str,
+) -> list[dict[str, Any]]:
+    grouped: dict[str, list[dict[str, Any]]] = {purpose: [] for purpose in LAUNCHER_PURPOSE_ORDER}
+    for entry in entries:
+        if not launcher_entry_visible(entry, str(persona["id"]), query):
+            continue
+        grouped[entry["purpose"]].append(decorate_launcher_entry(entry, favorite_ids, recent_ids))
+
+    ordered_purposes: list[str] = []
+    for purpose in persona.get("focus_purposes", []):
+        if purpose not in ordered_purposes:
+            ordered_purposes.append(purpose)
+    for purpose in LAUNCHER_PURPOSE_ORDER:
+        if purpose not in ordered_purposes:
+            ordered_purposes.append(purpose)
+
+    groups: list[dict[str, Any]] = []
+    for purpose in ordered_purposes:
+        items = sorted(grouped.get(purpose, []), key=lambda item: (item["kind"], item["name"]))
+        if not items:
+            continue
+        groups.append(
+            {
+                "purpose": purpose,
+                "label": LAUNCHER_PURPOSE_LABELS[purpose],
+                "entries": items,
+            }
+        )
+    return groups
+
+
+def normalize_session_item_ids(value: Any, valid_entry_ids: set[str], *, limit: int) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    normalized: list[str] = []
+    for item in value:
+        if not isinstance(item, str):
+            continue
+        if item not in valid_entry_ids:
+            continue
+        if item in normalized:
+            continue
+        normalized.append(item)
+        if len(normalized) >= limit:
+            break
+    return normalized
+
+
+def ensure_launcher_preferences(
+    session: dict[str, Any],
+    personas: list[dict[str, Any]],
+    valid_entry_ids: set[str],
+) -> dict[str, Any]:
+    persona_index = {str(persona["id"]): persona for persona in personas}
+    selected_persona = session.get("launcher_persona")
+    if selected_persona not in persona_index:
+        selected_persona = default_persona_id(personas)
+        session["launcher_persona"] = selected_persona
+
+    seeded = bool(session.get("launcher_preferences_seeded"))
+    favorites = normalize_session_item_ids(
+        session.get("launcher_favorites"),
+        valid_entry_ids,
+        limit=LAUNCHER_FAVORITE_LIMIT,
+    )
+    recents = normalize_session_item_ids(
+        session.get("launcher_recent"),
+        valid_entry_ids,
+        limit=LAUNCHER_RECENT_LIMIT,
+    )
+
+    if not seeded and not favorites:
+        favorites = normalize_session_item_ids(
+            persona_index[selected_persona].get("default_favorites", []),
+            valid_entry_ids,
+            limit=LAUNCHER_FAVORITE_LIMIT,
+        )
+        session["launcher_preferences_seeded"] = True
+
+    session["launcher_favorites"] = favorites
+    session["launcher_recent"] = recents
+    return {
+        "selected_persona": persona_index[selected_persona],
+        "favorite_ids": favorites,
+        "recent_ids": recents,
+    }
+
+
+def toggle_launcher_favorite(session: dict[str, Any], item_id: str, valid_entry_ids: set[str]) -> None:
+    favorites = normalize_session_item_ids(
+        session.get("launcher_favorites"),
+        valid_entry_ids,
+        limit=LAUNCHER_FAVORITE_LIMIT,
+    )
+    if item_id in favorites:
+        favorites = [favorite for favorite in favorites if favorite != item_id]
+    elif item_id in valid_entry_ids:
+        favorites = [item_id, *favorites]
+    session["launcher_favorites"] = favorites[:LAUNCHER_FAVORITE_LIMIT]
+    session["launcher_preferences_seeded"] = True
+
+
+def record_launcher_recent(session: dict[str, Any], item_id: str, valid_entry_ids: set[str]) -> None:
+    if item_id not in valid_entry_ids:
+        return
+    recents = normalize_session_item_ids(
+        session.get("launcher_recent"),
+        valid_entry_ids,
+        limit=LAUNCHER_RECENT_LIMIT,
+    )
+    recents = [item_id, *[recent for recent in recents if recent != item_id]]
+    session["launcher_recent"] = recents[:LAUNCHER_RECENT_LIMIT]
+
+
+def build_launcher_entries(
+    services: list[dict[str, Any]],
+    publications: list[dict[str, Any]],
+    workflows: dict[str, Any],
+) -> list[dict[str, Any]]:
+    publications_by_service: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for publication in publications:
+        service_id = publication.get("service_id")
+        if isinstance(service_id, str) and service_id:
+            publications_by_service[service_id].append(publication)
+
+    entries: list[dict[str, Any]] = []
+
+    for service in services:
+        if service.get("lifecycle_status") != "active":
+            continue
+        href = browser_usable_url(service.get("public_url")) or browser_usable_url(service.get("internal_url"))
+        if href is None:
+            continue
+        service_id = str(service.get("id", "")).strip()
+        if not service_id:
+            continue
+        purpose = launcher_purpose_for_service(service)
+        publications_for_service = publications_by_service.get(service_id, [])
+        primary_publication = next(
+            (
+                publication
+                for publication in sorted(publications_for_service, key=lambda item: item.get("fqdn", ""))
+                if publication.get("status") == "active"
+            ),
+            publications_for_service[0] if publications_for_service else {},
+        )
+        publication_payload = primary_publication.get("publication", {})
+        access_model = publication_payload.get("access_model", service.get("exposure", "unknown"))
+        audience = publication_payload.get("audience", "operator")
+        fqdn = primary_publication.get("fqdn") or service.get("subdomain") or ""
+        description = str(service.get("description", "")).strip()
+        tags = service.get("tags") if isinstance(service.get("tags"), list) else []
+        entries.append(
+            {
+                "id": f"service:{service_id}",
+                "kind": "service",
+                "kind_label": "Service",
+                "name": str(service.get("name", service_id)),
+                "description": description,
+                "href": "/" if service_id == "ops_portal" else href,
+                "purpose": purpose,
+                "purpose_label": LAUNCHER_PURPOSE_LABELS[purpose],
+                "personas": default_launcher_personas(purpose),
+                "summary_line": " / ".join(str(item) for item in (fqdn, audience, access_model) if item),
+                "badges": [
+                    str(service.get("category", "uncategorized")),
+                    str(audience),
+                    str(access_model),
+                ],
+                "search_tokens": [
+                    service_id,
+                    service.get("name", ""),
+                    description,
+                    fqdn,
+                    access_model,
+                    audience,
+                    *tags,
+                ],
+            }
+        )
+
+    for workflow_id, workflow in workflows.items():
+        if not isinstance(workflow, dict):
+            continue
+        human_navigation = workflow.get("human_navigation")
+        if not isinstance(human_navigation, dict):
+            continue
+        launcher = human_navigation.get("launcher")
+        if not isinstance(launcher, dict) or not launcher.get("enabled"):
+            continue
+        href = browser_usable_url(launcher.get("href")) or (
+            str(launcher.get("href", "")).strip() if isinstance(launcher.get("href"), str) else ""
+        )
+        if not href:
+            continue
+        purpose = str(launcher.get("purpose", "operate"))
+        if purpose not in LAUNCHER_PURPOSE_LABELS:
+            purpose = "operate"
+        personas = [
+            persona_id
+            for persona_id in launcher.get("personas", [])
+            if isinstance(persona_id, str) and persona_id.strip()
+        ] or default_launcher_personas(purpose)
+        label = str(launcher.get("label") or workflow.get("description") or workflow_id)
+        description = str(launcher.get("description") or workflow.get("description") or "").strip()
+        tags = workflow.get("tags") if isinstance(workflow.get("tags"), list) else []
+        entries.append(
+            {
+                "id": f"workflow:{workflow_id}",
+                "kind": "workflow",
+                "kind_label": "Workflow",
+                "name": label,
+                "description": description,
+                "href": href,
+                "purpose": purpose,
+                "purpose_label": LAUNCHER_PURPOSE_LABELS[purpose],
+                "personas": personas,
+                "summary_line": str(workflow.get("owner_runbook", "")).strip(),
+                "badges": [
+                    "workflow",
+                    str(workflow.get("execution_class", "unknown")),
+                    str(workflow.get("live_impact", "unknown")),
+                ],
+                "search_tokens": [
+                    workflow_id,
+                    label,
+                    description,
+                    workflow.get("owner_runbook", ""),
+                    *tags,
+                ],
+            }
+        )
+
+    return sorted(entries, key=lambda item: (LAUNCHER_PURPOSE_ORDER.index(item["purpose"]), item["kind"], item["name"]))
+
 
 @dataclass(frozen=True)
 class PortalSettings:
@@ -111,6 +565,7 @@ class PortalSettings:
     session_secret: str
     static_api_token: str | None
     service_catalog_path: Path
+    persona_catalog_path: Path
     publication_registry_path: Path
     workflow_catalog_path: Path
     changelog_path: Path
@@ -130,6 +585,9 @@ class PortalSettings:
             static_api_token=os.getenv("OPS_PORTAL_STATIC_API_TOKEN") or None,
             service_catalog_path=Path(
                 os.getenv("OPS_PORTAL_SERVICE_CATALOG", data_root / "config" / "service-capability-catalog.json")
+            ),
+            persona_catalog_path=Path(
+                os.getenv("OPS_PORTAL_PERSONA_CATALOG", data_root / "config" / "persona-catalog.json")
             ),
             publication_registry_path=Path(
                 os.getenv(
@@ -292,9 +750,18 @@ class PortalRepository:
         payload = load_json_file(self.settings.service_catalog_path, {"services": []})
         return payload.get("services", [])
 
+    def load_persona_catalog(self) -> list[dict[str, Any]]:
+        payload = load_json_file(self.settings.persona_catalog_path, DEFAULT_PERSONA_CATALOG)
+        return normalize_persona_catalog(payload)
+
     def load_publication_registry(self) -> list[dict[str, Any]]:
         payload = load_json_file(self.settings.publication_registry_path, {"publications": []})
         return registry_entries(payload)
+
+    def load_workflow_definitions(self) -> dict[str, Any]:
+        payload = load_json_file(self.settings.workflow_catalog_path, {"workflows": {}})
+        workflows = payload.get("workflows", {})
+        return workflows if isinstance(workflows, dict) else {}
 
     def load_capability_contract_catalog(self) -> list[dict[str, Any]]:
         contract_path = self.settings.service_catalog_path.parent / "capability-contract-catalog.json"
@@ -951,6 +1418,56 @@ def build_runbook_models(runbooks: list[dict[str, Any]]) -> list[dict[str, Any]]
     return combined[:6]
 
 
+async def build_launcher_panel_context(request: Request, *, query: str = "") -> dict[str, Any]:
+    await ensure_session(request)
+    repository: PortalRepository = request.app.state.repository
+
+    services = repository.load_service_catalog()
+    publications = repository.load_publication_registry()
+    workflows = repository.load_workflow_definitions()
+    personas = repository.load_persona_catalog()
+
+    entries = build_launcher_entries(services, publications, workflows)
+    valid_entry_ids = {entry["id"] for entry in entries}
+    preferences = ensure_launcher_preferences(request.session, personas, valid_entry_ids)
+    selected_persona = preferences["selected_persona"]
+    favorite_ids = set(preferences["favorite_ids"])
+    recent_ids = set(preferences["recent_ids"])
+    entry_index = {entry["id"]: entry for entry in entries}
+
+    favorites = [
+        decorate_launcher_entry(entry_index[item_id], favorite_ids, recent_ids)
+        for item_id in preferences["favorite_ids"]
+        if item_id in entry_index and launcher_entry_visible(entry_index[item_id], str(selected_persona["id"]), query)
+    ]
+    recents = [
+        decorate_launcher_entry(entry_index[item_id], favorite_ids, recent_ids)
+        for item_id in preferences["recent_ids"]
+        if item_id in entry_index and launcher_entry_visible(entry_index[item_id], str(selected_persona["id"]), query)
+    ]
+    groups = build_launcher_groups(
+        entries,
+        persona=selected_persona,
+        favorite_ids=favorite_ids,
+        recent_ids=recent_ids,
+        query=query,
+    )
+
+    return {
+        "request": request,
+        "launcher": {
+            "query": query,
+            "personas": personas,
+            "selected_persona": selected_persona,
+            "favorites": favorites,
+            "recents": recents,
+            "groups": groups,
+            "match_count": sum(len(group["entries"]) for group in groups),
+            "entry_index": entry_index,
+        },
+    }
+
+
 def normalize_agent_coordination(payload: dict[str, Any] | None) -> dict[str, Any]:
     if not isinstance(payload, dict):
         return {"summary": {"count": 0, "active": 0, "blocked": 0, "escalated": 0, "completing": 0}, "entries": []}
@@ -1001,6 +1518,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     session = await ensure_session(request)
     repository: PortalRepository = request.app.state.repository
     gateway: Any = request.app.state.gateway_client
+    launcher_context = await build_launcher_panel_context(request)
 
     services = repository.load_service_catalog()
     publications = repository.load_publication_registry()
@@ -1089,6 +1607,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "search_results": [],
         "search_query": "",
         "search_collection": "",
+        "launcher": launcher_context["launcher"],
     }
 
 
@@ -1133,6 +1652,11 @@ def create_app(
         context = await build_dashboard_context(request)
         return templates.TemplateResponse(request=request, name="index.html", context=context)
 
+    @app.get("/partials/launcher", response_class=HTMLResponse)
+    async def launcher_partial(request: Request, query: str = "") -> HTMLResponse:
+        context = await build_launcher_panel_context(request, query=query)
+        return templates.TemplateResponse(request=request, name="partials/launcher.html", context=context)
+
     @app.get("/partials/overview", response_class=HTMLResponse)
     async def overview_partial(request: Request) -> HTMLResponse:
         context = await build_dashboard_context(request)
@@ -1172,6 +1696,41 @@ def create_app(
                 yield sse_encode(event["event"], event["data"])
 
         return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+    @app.post("/actions/launcher/favorites/{item_id}", response_class=HTMLResponse)
+    async def toggle_launcher_favorite_action(
+        request: Request,
+        item_id: str,
+        query: str = Form(default=""),
+    ) -> HTMLResponse:
+        context = await build_launcher_panel_context(request, query=query)
+        entry_index = context["launcher"]["entry_index"]
+        if item_id in entry_index:
+            toggle_launcher_favorite(request.session, item_id, set(entry_index))
+            context = await build_launcher_panel_context(request, query=query)
+        return templates.TemplateResponse(request=request, name="partials/launcher.html", context=context)
+
+    @app.post("/actions/launcher/persona/{persona_id}", response_class=HTMLResponse)
+    async def select_launcher_persona_action(
+        request: Request,
+        persona_id: str,
+        query: str = Form(default=""),
+    ) -> HTMLResponse:
+        context = await build_launcher_panel_context(request, query=query)
+        personas = context["launcher"]["personas"]
+        if any(str(persona["id"]) == persona_id for persona in personas):
+            request.session["launcher_persona"] = persona_id
+            context = await build_launcher_panel_context(request, query=query)
+        return templates.TemplateResponse(request=request, name="partials/launcher.html", context=context)
+
+    @app.get("/launcher/go/{item_id}")
+    async def launcher_go(request: Request, item_id: str) -> RedirectResponse:
+        context = await build_launcher_panel_context(request)
+        entry = context["launcher"]["entry_index"].get(item_id)
+        if entry is None:
+            return RedirectResponse(url="/", status_code=303)
+        record_launcher_recent(request.session, item_id, set(context["launcher"]["entry_index"]))
+        return RedirectResponse(url=str(entry["href"]), status_code=303)
 
     @app.post("/actions/services/{service_id}/health-check", response_class=HTMLResponse)
     async def health_check_action(request: Request, service_id: str) -> HTMLResponse:

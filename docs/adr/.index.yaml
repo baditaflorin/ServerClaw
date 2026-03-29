@@ -4025,7 +4025,7 @@ adr_index:
   - adr: '0235'
     title: Cross-Application Launcher And Favorites Via PatternFly Application Launcher
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4037,6 +4037,7 @@ adr_index:
       - launcher
     summary: We will standardize on the PatternFly Application Launcher as the default
     filename: 0235-cross-application-launcher-and-favorites-via-patternfly-application-launcher.md
+    implemented_version: 0.177.70
   - adr: '0236'
     title: Server-State And Mutation Feedback Via TanStack Query
     status: Accepted

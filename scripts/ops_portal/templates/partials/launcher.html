@@ -1,0 +1,154 @@
+<div id="launcher-panel" class="launcher-panel" aria-label="Platform application launcher">
+  <div class="launcher-toolbar">
+    <div>
+      <p class="section-kicker">Application Launcher</p>
+      <h2>Switch tools without leaving the shared shell</h2>
+      <p class="muted">Search destinations, pin favorites, and reopen recent paths from one shared masthead control.</p>
+    </div>
+    <span class="pill">{{ launcher.match_count }} matches</span>
+  </div>
+
+  <form class="launcher-search-form" hx-get="/partials/launcher" hx-target="#launcher-panel" hx-swap="outerHTML">
+    <label class="form-label" for="launcher-query">Search destinations</label>
+    <div class="launcher-search-row">
+      <input
+        id="launcher-query"
+        name="query"
+        value="{{ launcher.query }}"
+        placeholder="grafana, docs, drift, keycloak, plane">
+      <button class="action-button" type="submit">Search</button>
+    </div>
+  </form>
+
+  <div class="launcher-persona-row">
+    {% for persona in launcher.personas %}
+    <form
+      hx-post="/actions/launcher/persona/{{ persona.id }}"
+      hx-target="#launcher-panel"
+      hx-swap="outerHTML">
+      <input type="hidden" name="query" value="{{ launcher.query }}">
+      <button
+        class="persona-chip {% if persona.id == launcher.selected_persona.id %}active{% endif %}"
+        type="submit">
+        {{ persona.name }}
+      </button>
+    </form>
+    {% endfor %}
+  </div>
+  <p class="muted launcher-persona-copy">{{ launcher.selected_persona.description }}</p>
+
+  {% if launcher.favorites %}
+  <section class="launcher-section">
+    <div class="launcher-section-head">
+      <h3>Favorites</h3>
+      <span class="pill">{{ launcher.favorites|length }}</span>
+    </div>
+    <div class="launcher-entry-grid">
+      {% for entry in launcher.favorites %}
+      <article class="launcher-entry">
+        <div class="launcher-entry-copy">
+          <a class="launcher-entry-link" href="/launcher/go/{{ entry.id }}">{{ entry.name }}</a>
+          <p class="muted">{{ entry.description }}</p>
+          {% if entry.summary_line %}
+          <p class="launcher-summary">{{ entry.summary_line }}</p>
+          {% endif %}
+          <div class="launcher-badges">
+            <span class="launcher-badge highlighted">{{ entry.purpose_label }}</span>
+            {% for badge in entry.badges %}
+            <span class="launcher-badge">{{ badge }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        <form
+          hx-post="/actions/launcher/favorites/{{ entry.id }}"
+          hx-target="#launcher-panel"
+          hx-swap="outerHTML">
+          <input type="hidden" name="query" value="{{ launcher.query }}">
+          <button class="favorite-toggle" type="submit" aria-label="Remove {{ entry.name }} from favorites">★</button>
+        </form>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if launcher.recents %}
+  <section class="launcher-section">
+    <div class="launcher-section-head">
+      <h3>Recent Destinations</h3>
+      <span class="pill">{{ launcher.recents|length }}</span>
+    </div>
+    <div class="launcher-entry-grid compact">
+      {% for entry in launcher.recents %}
+      <article class="launcher-entry">
+        <div class="launcher-entry-copy">
+          <a class="launcher-entry-link" href="/launcher/go/{{ entry.id }}">{{ entry.name }}</a>
+          {% if entry.summary_line %}
+          <p class="launcher-summary">{{ entry.summary_line }}</p>
+          {% endif %}
+        </div>
+        <form
+          hx-post="/actions/launcher/favorites/{{ entry.id }}"
+          hx-target="#launcher-panel"
+          hx-swap="outerHTML">
+          <input type="hidden" name="query" value="{{ launcher.query }}">
+          <button
+            class="favorite-toggle {% if entry.is_favorite %}active{% endif %}"
+            type="submit"
+            aria-label="{% if entry.is_favorite %}Remove{% else %}Add{% endif %} {{ entry.name }} {% if entry.is_favorite %}from{% else %}to{% endif %} favorites">
+            {% if entry.is_favorite %}★{% else %}☆{% endif %}
+          </button>
+        </form>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% for group in launcher.groups %}
+  <section class="launcher-section">
+    <div class="launcher-section-head">
+      <h3>{{ group.label }}</h3>
+      <span class="pill">{{ group.entries|length }}</span>
+    </div>
+    <div class="launcher-entry-grid">
+      {% for entry in group.entries %}
+      <article class="launcher-entry">
+        <div class="launcher-entry-copy">
+          <a class="launcher-entry-link" href="/launcher/go/{{ entry.id }}">{{ entry.name }}</a>
+          <p class="muted">{{ entry.description }}</p>
+          {% if entry.summary_line %}
+          <p class="launcher-summary">{{ entry.summary_line }}</p>
+          {% endif %}
+          <div class="launcher-badges">
+            <span class="launcher-badge highlighted">{{ entry.kind_label }}</span>
+            {% for badge in entry.badges %}
+            <span class="launcher-badge">{{ badge }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        <form
+          hx-post="/actions/launcher/favorites/{{ entry.id }}"
+          hx-target="#launcher-panel"
+          hx-swap="outerHTML">
+          <input type="hidden" name="query" value="{{ launcher.query }}">
+          <button
+            class="favorite-toggle {% if entry.is_favorite %}active{% endif %}"
+            type="submit"
+            aria-label="{% if entry.is_favorite %}Remove{% else %}Add{% endif %} {{ entry.name }} {% if entry.is_favorite %}from{% else %}to{% endif %} favorites">
+            {% if entry.is_favorite %}★{% else %}☆{% endif %}
+          </button>
+        </form>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+
+  {% if launcher.match_count == 0 %}
+  <div class="launcher-empty">
+    <strong>No destinations matched.</strong>
+    <span>Try a broader query or switch persona to reopen more surfaces.</span>
+  </div>
+  {% endif %}
+</div>

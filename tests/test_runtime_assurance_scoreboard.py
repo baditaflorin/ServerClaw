@@ -143,3 +143,50 @@ def test_runtime_assurance_builder_keeps_missing_proof_visible() -> None:
     assert by_dimension["tls_posture"]["state"] == "degraded"
     assert by_dimension["log_queryability"]["state"] == "unknown"
     assert by_dimension["smoke"]["state"] == "unknown"
+
+
+def test_runtime_assurance_builder_handles_missing_health_entry_without_crashing() -> None:
+    services = [
+        {
+            "id": "ops_portal",
+            "name": "Operations Portal",
+            "category": "operations",
+            "lifecycle_status": "active",
+            "vm": "docker-runtime-lv3",
+            "public_url": "https://ops.lv3.org",
+            "subdomain": "ops.lv3.org",
+            "runbook": "docs/runbooks/platform-operations-portal.md",
+            "adr": "0235",
+            "environments": {
+                "production": {
+                    "status": "active",
+                    "url": "https://ops.lv3.org",
+                    "subdomain": "ops.lv3.org",
+                }
+            },
+        }
+    ]
+    publications = [
+        {
+            "service_id": "ops_portal",
+            "environment": "production",
+            "status": "active",
+            "fqdn": "ops.lv3.org",
+            "publication": {"access_model": "upstream-auth"},
+            "adapter": {"repo_route_service_id": "ops_portal", "tls": {"provider": "letsencrypt"}},
+        }
+    ]
+    health_payload = {"services": []}
+
+    rows, summary = build_runtime_assurance_models(services, publications, health_payload, [])
+
+    assert summary["unknown_count"] == 1
+    assert rows[0]["overall_state"] == "unknown"
+    by_dimension = {dimension["id"]: dimension for dimension in rows[0]["dimensions"]}
+    assert by_dimension["existence"]["state"] == "unknown"
+    assert by_dimension["runtime_health"]["state"] == "unknown"
+    assert by_dimension["route_truth"]["state"] == "unknown"
+    assert by_dimension["auth_journey"]["state"] == "unknown"
+    assert by_dimension["tls_posture"]["state"] == "unknown"
+    assert by_dimension["log_queryability"]["state"] == "unknown"
+    assert by_dimension["smoke"]["state"] == "unknown"

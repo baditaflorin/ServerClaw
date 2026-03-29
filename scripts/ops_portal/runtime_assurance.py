@@ -289,7 +289,8 @@ def build_runtime_assurance_models(
         for environment, binding in _active_environments(service):
             publications_for_env = publications_by_key.get((service_id, environment), [])
             health_entry = health_map.get(service_id) if environment == "production" else None
-            signal_map = _signal_map(health_entry or {})
+            health_entry_data = health_entry if isinstance(health_entry, dict) else {}
+            signal_map = _signal_map(health_entry_data)
             matched_receipts = _matched_receipts(receipts, service_id, environment=environment)
             latest_receipt = _latest_receipt(matched_receipts)
             auth_receipt = _latest_keyword_receipt(matched_receipts, AUTH_KEYWORDS)
@@ -316,8 +317,10 @@ def build_runtime_assurance_models(
             requires_logs = has_http_surface or str(service.get("category", "")) in LOG_REQUIRED_CATEGORIES
 
             health_probe = signal_map.get("health_probe", {})
-            health_reason = str(health_entry.get("reason") or health_probe.get("reason") or "No current health-composite reason.")
-            health_computed_at = str(health_entry.get("computed_at") or "")
+            health_reason = str(
+                health_entry_data.get("reason") or health_probe.get("reason") or "No current health-composite reason."
+            )
+            health_computed_at = str(health_entry_data.get("computed_at") or "")
 
             if health_entry is None:
                 existence = _dimension(
@@ -373,7 +376,9 @@ def build_runtime_assurance_models(
                     required=True,
                 )
             else:
-                composite_status = str(health_entry.get("composite_status") or health_entry.get("status") or "unknown").strip().lower()
+                composite_status = str(
+                    health_entry_data.get("composite_status") or health_entry_data.get("status") or "unknown"
+                ).strip().lower()
                 if composite_status == "healthy":
                     runtime_health = _dimension(
                         dimension_id="runtime_health",
