@@ -58,7 +58,7 @@
     argv:
       - docker
       - inspect
-      - "{{ openbao_container_name }}"
+      - "{{ openbao_container_name | default('lv3-openbao') }}"
       - --format
       - '{{ "{{json .NetworkSettings.Networks}}" }}'
   register: common_openbao_compose_env_container_networks
@@ -70,7 +70,7 @@
     argv:
       - docker
       - inspect
-      - "{{ openbao_container_name }}"
+      - "{{ openbao_container_name | default('lv3-openbao') }}"
       - --format
       - '{{ "{{json .NetworkSettings.Ports}}" }}'
   register: common_openbao_compose_env_container_ports
@@ -103,7 +103,7 @@
       - docker
       - network
       - inspect
-      - "{{ openbao_site_dir | basename }}_default"
+      - "{{ (openbao_site_dir | default('/opt/openbao')) | basename }}_default"
   register: common_openbao_compose_env_network
   changed_when: false
   failed_when: common_openbao_compose_env_network.rc not in [0, 1]
@@ -115,7 +115,7 @@
       - docker
       - rm
       - -f
-      - "{{ openbao_container_name }}"
+      - "{{ openbao_container_name | default('lv3-openbao') }}"
   register: common_openbao_compose_env_container_remove
   changed_when: common_openbao_compose_env_container_remove.rc == 0
   failed_when: common_openbao_compose_env_container_remove.rc not in [0, 1]
@@ -127,7 +127,7 @@
       - docker
       - network
       - rm
-      - "{{ openbao_site_dir | basename }}_default"
+      - "{{ (openbao_site_dir | default('/opt/openbao')) | basename }}_default"
   register: common_openbao_compose_env_network_remove
   changed_when: common_openbao_compose_env_network_remove.rc == 0
   failed_when: common_openbao_compose_env_network_remove.rc not in [0, 1]
@@ -141,13 +141,13 @@
       - docker
       - compose
       - --file
-      - "{{ openbao_compose_file }}"
+      - "{{ openbao_compose_file | default('/opt/openbao/docker-compose.yml') }}"
       - up
       - -d
       - --remove-orphans
       - --force-recreate
   args:
-    chdir: "{{ openbao_site_dir }}"
+    chdir: "{{ openbao_site_dir | default('/opt/openbao') }}"
   register: common_openbao_compose_env_recovery_up
   changed_when: >-
     'Creating' in common_openbao_compose_env_recovery_up.stdout
