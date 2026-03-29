@@ -10,7 +10,7 @@
         msg: "Starting mail platform live verification for {{ playbook_execution_env }}."
 
 - name: Prepare the mail verification target state
-  hosts: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
   become: true
   gather_facts: true
 
@@ -47,7 +47,7 @@
       when: playbook_execution_env == 'staging'
 
 - name: Send the SMTP verification probe
-  hosts: "{{ playbook_execution_host_patterns.monitoring[playbook_execution_env] }}"
+  hosts: "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
   become: true
   gather_facts: true
 
@@ -125,7 +125,7 @@
       when: playbook_execution_env == 'staging'
 
 - name: Verify the SMTP verification outcome
-  hosts: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
   become: true
   gather_facts: true
 

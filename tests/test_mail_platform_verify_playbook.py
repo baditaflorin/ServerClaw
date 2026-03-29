@@ -29,9 +29,9 @@ def test_collection_playbook_keeps_environment_aware_runtime_targeting() -> None
     send_play = plays[2]
     verify_play = plays[3]
 
-    assert prepare_play["hosts"] == "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
-    assert send_play["hosts"] == "{{ playbook_execution_host_patterns.monitoring[playbook_execution_env] }}"
-    assert verify_play["hosts"] == "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+    assert prepare_play["hosts"] == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+    assert send_play["hosts"] == "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
+    assert verify_play["hosts"] == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
 
 
 def test_collection_playbook_adds_staging_mailpit_probe_flow() -> None:
