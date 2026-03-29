@@ -160,7 +160,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.84` |
+| Repository version | `0.177.85` |
 | Platform version | `0.130.58` |
 | Observed check date | `2026-03-29` |
 | Observed OS | `Debian 13` |
@@ -199,6 +199,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `langfuse.lv3.org` | `langfuse` | `edge-published` | `docker-runtime-lv3` |
 | `logs.lv3.org` | `dozzle` | `edge-published` | `docker-runtime-lv3` |
 | `mail.lv3.org` | `mail-platform` | `informational-only` | `docker-runtime-lv3` |
+| `matrix.lv3.org` | `matrix-synapse` | `edge-published` | `docker-runtime-lv3` |
 | `n8n.lv3.org` | `n8n` | `edge-published` | `docker-runtime-lv3` |
 | `nginx.lv3.org` | `nginx-edge` | `edge-static` | `nginx-lv3` |
 | `ops.lv3.org` | `ops-portal` | `edge-published` | `docker-runtime-lv3` |
@@ -259,6 +260,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `local_search_and_indexing_fabric` | `2026-03-29-adr-0239-browser-local-search-post-merge-replay` |
 | `log_queryability_canary` | `2026-03-28-adr-0250-log-queryability-canary-live-apply` |
 | `mail_platform` | `2026-03-24-keycloak-password-reset-mail-live-apply` |
+| `matrix_synapse` | `2026-03-29-adr-0255-matrix-synapse-live-apply` |
 | `mattermost` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `monitoring` | `2026-03-28-adr-0250-log-queryability-canary-live-apply` |
 | `mutation_audit` | `2026-03-23-adr-0066-mutation-audit-live-apply` |
@@ -565,6 +567,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Keycloak](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-keycloak.md)
 - [Configure Langfuse](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-langfuse.md)
 - [Configure Mail Platform](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-mail-platform.md)
+- [Configure Matrix Synapse](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-matrix-synapse.md)
 - [Configure Mattermost](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-mattermost.md)
 - [Configure n8n](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-n8n.md)
 - [Configure NetBox](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-netbox.md)
@@ -1282,6 +1285,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0252-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0252-main-merge.md)
 - [Workstream ws-0252-mainline-replay](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0252-mainline-replay.md)
 - [Workstream WS-0253: Unified Runtime Assurance Scoreboard Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0253-live-apply.md)
+- [Workstream ws-0255-live-apply: ADR 0255 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0255-live-apply.md)
 - [Workstream WS-0259: n8n Connector Fabric Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0259-live-apply.md)
 - [Workstream ws-0259-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0259-main-merge.md)
 - [Workstream ws-0264-live-apply: Live Apply ADR 0264 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0264-live-apply.md)
@@ -1307,7 +1311,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.84` |
+| Repository version | `0.177.85` |
 | Platform version | `0.130.58` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1577,6 +1581,7 @@ This repository is intentionally opinionated:
 | `0252` | Re-verify ADR 0252 from the latest origin/main and prepare final merge surfaces | `live_applied` | [ws-0252-mainline-replay.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0252-mainline-replay.md) |
 | `0253` | Unified runtime assurance scoreboard live apply | `live_applied` | [ws-0253-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0253-live-apply.md) |
 | `0254` | ServerClaw architecture bundle | `merged` | [adr-0254-serverclaw-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0254-serverclaw-architecture-bundle.md) |
+| `0255` | ADR 0255 live apply from latest origin/main | `live_applied` | [ws-0255-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0255-live-apply.md) |
 | `0259` | Live apply n8n as the external app connector fabric for ServerClaw | `live_applied` | [ws-0259-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0259-live-apply.md) |
 | `0259` | Integrate ADR 0259 exact-main replay onto current origin/main | `merged` | [ws-0259-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0259-main-merge.md) |
 | `0264` | Failure-domain-isolated validation lanes live apply | `live_applied` | [ws-0264-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0264-live-apply.md) |

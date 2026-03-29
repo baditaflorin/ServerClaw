@@ -599,7 +599,7 @@ workstreams:
         edge publication at matrix.lv3.org, and branch-verified live-apply
         evidence for the runtime, login, and monitoring paths
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.85
       latest_receipts:
         matrix_synapse: 2026-03-29-adr-0255-matrix-synapse-live-apply
   - id: ws-0224-repo-intake
