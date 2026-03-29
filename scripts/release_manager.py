@@ -10,10 +10,14 @@ import subprocess
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
-from platform.datetime_compat import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from script_bootstrap import ensure_repo_root_on_path
+
+ensure_repo_root_on_path(__file__)
+
+from platform.datetime_compat import UTC, datetime
 import canonical_truth
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path, run_command
 from generate_release_notes import (

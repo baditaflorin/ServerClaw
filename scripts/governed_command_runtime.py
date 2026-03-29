@@ -11,10 +11,14 @@ import pwd
 import shlex
 import subprocess
 import sys
-from platform.datetime_compat import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from script_bootstrap import ensure_repo_root_on_path
+
+ensure_repo_root_on_path(__file__)
+
+from platform.datetime_compat import UTC, datetime
 
 def utc_now_iso() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")

@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0251](../adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md)
 - Title: Live apply stage-scoped smoke suites and promotion gates from the latest `origin/main`
-- Status: in_progress
-- Implemented In Repo Version: pending
-- Live Applied In Platform Version: pending
-- Implemented On: pending
-- Live Applied On: pending
+- Status: live_applied
+- Implemented In Repo Version: 0.177.79
+- Live Applied In Platform Version: 0.130.54
+- Implemented On: 2026-03-29
+- Live Applied On: 2026-03-29
 - Branch: `codex/ws-0251-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply`
 - Owner: codex
@@ -35,13 +35,25 @@
 - `scripts/integration_suite.py`
 - `scripts/promotion_pipeline.py`
 - `scripts/live_apply_receipts.py`
+- `scripts/script_bootstrap.py`
+- `scripts/windmill_run_wait_result.py`
 - `config/service-capability-catalog.json`
 - `collections/ansible_collections/lv3/platform/roles/windmill_runtime/`
+- `playbooks/windmill.yml`
 - `config/windmill/scripts/stage-smoke-suites.py`
+- `config/windmill/scripts/windmill_integration_env.py`
+- `platform/datetime_compat.py`
+- `platform/enum_compat.py`
+- `platform/ansible/__init__.py`
+- `platform/scheduler/windmill_client.py`
 - `docs/runbooks/environment-promotion-pipeline.md`
 - `docs/runbooks/integration-test-suite.md`
 - `docs/runbooks/live-apply-receipts-and-verification-evidence.md`
 - `docs/runbooks/configure-windmill.md`
+- `tests/test_windmill_integration_wrappers.py`
+- `tests/test_windmill_operator_admin_app.py`
+- `tests/test_windmill_playbook.py`
+- `tests/test_script_bootstrap.py`
 
 ## Expected Live Surfaces
 
@@ -56,6 +68,28 @@
 - `make converge-windmill` plus live Windmill job execution of the seeded smoke-suite wrapper
 - committed live-apply receipt and evidence files for the verified production smoke run
 
+## Verification
+
+- `uv run --with pytest --with pyyaml pytest -q tests/test_windmill_integration_wrappers.py tests/test_integration_suite.py tests/test_stage_smoke_suites.py tests/test_windmill_playbook.py tests/test_windmill_default_operations_surface.py tests/test_backup_coverage_ledger.py tests/test_backup_coverage_ledger_windmill.py tests/test_disaster_recovery.py` returned `24 passed` after the latest worker-local wrapper and checkout-sync fixes.
+- `uv run --with pytest pytest -q tests/test_windmill_operator_admin_app.py tests/test_windmill_playbook.py tests/test_windmill_default_operations_surface.py` returned `18 passed` after the hidden `.gitea` worker sync fix.
+- `./scripts/validate_repo.sh agent-standards` and `ANSIBLE_HOME=$PWD/.ansible-home-apply ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --syntax-check` both passed from this isolated worktree.
+- `make converge-windmill` succeeded twice from the latest `origin/main`-based branch head, with committed evidence in `receipts/live-applies/evidence/2026-03-29-adr-0251-converge-windmill-rerun-12.txt` and `receipts/live-applies/evidence/2026-03-29-adr-0251-converge-windmill-rerun-13.txt`.
+- Controller-side `scripts/windmill_run_wait_result.py` successfully ran `f/lv3/stage-smoke-suites` against the live platform and the returned payload resolved `windmill_url` to the worker-local `http://127.0.0.1:8000` path.
+- Worker-side `python3 scripts/policy_checks.py --validate`, `python3 scripts/command_catalog.py --check-approval --command converge-windmill --requester-class human_operator --approver-classes human_operator --validation-passed --preflight-passed --receipt-planned`, and `python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server` all passed after the worker checkout began mirroring `.gitea/workflows`.
+- A direct helper replay of `f/lv3/windmill_healthcheck` returned `status: ok` with `hostname: docker-runtime-lv3`, proving the current live Windmill runtime is still healthy after the ADR 0251 replay.
+
+## Live Apply Outcome
+
+- ADR 0251 is live on production through the repo-managed stage smoke suite catalog, promotion-gate receipt enforcement, and the seeded Windmill `f/lv3/stage-smoke-suites` wrapper.
+- The live apply also hardened the worker runtime around current Python packaging drift by adding compatibility helpers, worker-local Windmill env discovery, and hidden workflow checkout sync for worker-side approval validation.
+- The canonical branch-local evidence is recorded in `receipts/live-applies/2026-03-29-adr-0251-stage-smoke-suites-live-apply.json`.
+
+## Mainline Integration Outcome
+
+- Release `0.177.79` is the first repository version that records ADR 0251 implemented on `main`.
+- Platform version `0.130.54` is the first verified live platform version with stage-scoped smoke suites enforced in the promotion path and runnable through the live Windmill worker checkout.
+- Protected integration files are updated only during the final `main` integration step, and this workstream no longer leaves any merge-only follow-up behind.
+
 ## Merge-To-Main Notes
 
-- protected integration files will wait until the final verified merge-to-main step
+- remaining for merge to `main`: none

@@ -9,21 +9,18 @@ import shlex
 import socket
 import subprocess
 import time
+import sys
 from contextlib import contextmanager
 from dataclasses import dataclass
-from platform.datetime_compat import UTC, datetime
 from pathlib import Path
-import sys
 from typing import Any
 
+from script_bootstrap import ensure_repo_root_on_path
+
+REPO_ROOT = ensure_repo_root_on_path(__file__)
+
+from platform.datetime_compat import UTC, datetime
 from controller_automation_toolkit import load_json, load_yaml, repo_path
-
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
-    del sys.modules["platform"]
 
 from platform.events import build_envelope
 from platform.retry import async_with_retry, policy_for_surface

@@ -14,10 +14,14 @@ import urllib.parse
 import urllib.request
 import uuid
 from copy import deepcopy
-from platform.datetime_compat import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from script_bootstrap import ensure_repo_root_on_path
+
+ensure_repo_root_on_path(__file__)
+
+from platform.datetime_compat import UTC, datetime
 from controller_automation_toolkit import emit_cli_error, repo_path, write_json
 from publication_contract import (
     publication_access_model,

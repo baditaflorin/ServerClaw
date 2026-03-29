@@ -5,15 +5,12 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from platform.datetime_compat import UTC, datetime
 from pathlib import Path
+from script_bootstrap import ensure_repo_root_on_path
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
-    del sys.modules["platform"]
+REPO_ROOT = ensure_repo_root_on_path(__file__)
 
+from platform.datetime_compat import UTC, datetime
 from platform.agent import AgentCoordinationStore
 
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "receipts" / "agent-coordination"
