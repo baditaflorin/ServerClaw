@@ -1,0 +1,64 @@
+---
+# Purpose: Verify the Matrix Synapse runtime and bootstrap login locally after convergence.
+# Use case: Imported by the matrix_synapse_runtime role and the shared post-verify workflow.
+#
+# Inputs (required):
+#   - matrix_synapse_internal_base_url (str, required): Guest-local base URL for verification.
+#   - matrix_synapse_admin_localpart (str, required): Bootstrap admin localpart.
+#   - matrix_synapse_admin_user_id (str, required): Expected fully-qualified Matrix user id.
+#   - matrix_synapse_ops_password (str, required): Bootstrap admin password mirrored by the runtime role.
+#
+# Inputs (optional):
+#   - none
+#
+# Outputs:
+#   - Local HTTP readiness and password login verification for Matrix Synapse.
+#
+# Idempotency: Fully idempotent
+#              Verification-only tasks do not mutate runtime state.
+#
+# Dependencies:
+#   - ADR 0255: Matrix Synapse As The Canonical ServerClaw Conversation Hub
+#   - Role: matrix_synapse_runtime — sets the facts consumed here.
+#
+# Related ADRs: 0165, 0255
+# Related Runbooks: docs/runbooks/configure-matrix-synapse.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-29
+- name: Verify the Matrix Synapse client versions endpoint
+  ansible.builtin.uri:
+    url: "{{ matrix_synapse_internal_base_url }}/_matrix/client/versions"
+    method: GET
+    status_code: 200
+  register: matrix_synapse_verify_versions
+  retries: 24
+  delay: 5
+  until: matrix_synapse_verify_versions.status == 200
+  changed_when: false
+
+- name: Verify Matrix Synapse ops admin sign-in works
+  ansible.builtin.uri:
+    url: "{{ matrix_synapse_internal_base_url }}/_matrix/client/v3/login"
+    method: POST
+    body_format: json
+    body:
+      type: m.login.password
+      identifier:
+        type: m.id.user
+        user: "{{ matrix_synapse_admin_localpart }}"
+      password: "{{ matrix_synapse_ops_password }}"
+    return_content: true
+    status_code: 200
+  register: matrix_synapse_verify_login
+  changed_when: false
+  no_log: true
+
+- name: Assert the Matrix Synapse sign-in returned the expected account
+  ansible.builtin.assert:
+    that:
+      - matrix_synapse_verify_login.json.user_id == matrix_synapse_admin_user_id
+      - (matrix_synapse_verify_login.json.access_token | default('')) | length > 0
+    fail_msg: >-
+      Matrix Synapse answered locally, but the repo-managed ops admin account could not authenticate.
+  no_log: true

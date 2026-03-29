@@ -73,6 +73,10 @@
           "status": "active",
           "url": "https://api.lv3.org",
           "subdomain": "api.lv3.org",
+          "stage_ready": true,
+          "smoke_suite_ids": [
+            "production-api-gateway-operator-path"
+          ],
           "notes": "Repository automation is ready; live publication still requires apply from main."
         }
       }
@@ -542,6 +546,47 @@
           "status": "active",
           "url": "https://mail.lv3.org",
           "subdomain": "mail.lv3.org"
+        }
+      }
+    },
+    {
+      "id": "matrix_synapse",
+      "name": "Matrix Synapse",
+      "description": "Repo-managed Matrix Synapse runtime that serves as the canonical ServerClaw conversation hub.",
+      "category": "communication",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8008",
+      "public_url": "https://matrix.lv3.org",
+      "subdomain": "matrix.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Matrix Synapse Public",
+      "health_probe_id": "matrix_synapse",
+      "image_catalog_ids": [
+        "matrix_synapse_runtime"
+      ],
+      "secret_catalog_ids": [
+        "matrix_synapse_database_password",
+        "matrix_synapse_ops_password",
+        "matrix_synapse_registration_shared_secret",
+        "matrix_synapse_signing_key"
+      ],
+      "adr": "0255",
+      "runbook": "docs/runbooks/configure-matrix-synapse.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-matrix-synapse/lv3-matrix-synapse",
+      "tags": [
+        "matrix",
+        "synapse",
+        "serverclaw",
+        "conversation"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://matrix.lv3.org",
+          "subdomain": "matrix.lv3.org",
+          "notes": "The public Matrix client API is edge-published while authentication stays inside Synapse and federation remains disabled for ADR 0255."
         }
       }
     },
@@ -1557,7 +1602,11 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "http://100.64.0.1:8005"
+          "url": "http://100.64.0.1:8005",
+          "stage_ready": true,
+          "smoke_suite_ids": [
+            "production-windmill-primary-path"
+          ]
         }
       }
     },

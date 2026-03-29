@@ -4,6 +4,10 @@ import argparse
 import json
 import sys
 
+from script_bootstrap import ensure_repo_root_on_path
+
+ensure_repo_root_on_path(__file__)
+
 from controller_automation_toolkit import emit_cli_error
 from platform.llm.retrieval import PlatformContextRetriever, default_platform_context_token_file, default_platform_context_url
 

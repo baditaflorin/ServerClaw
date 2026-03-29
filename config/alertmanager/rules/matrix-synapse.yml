@@ -1,0 +1,13 @@
+groups:
+  - name: lv3-matrix-synapse
+    rules:
+      - alert: MatrixSynapseDown
+        expr: probe_success{service="matrix_synapse",probe_kind="readiness"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: matrix_synapse
+        annotations:
+          summary: Matrix Synapse is unreachable on the repo-managed client API path.
+          description: The Matrix Synapse readiness probe on docker-runtime-lv3 has been failing for at least two minutes.
+          runbook_url: https://docs.lv3.org/runbooks/configure-matrix-synapse/

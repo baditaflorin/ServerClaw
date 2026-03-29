@@ -11,6 +11,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from script_bootstrap import ensure_repo_root_on_path
+
+ensure_repo_root_on_path(__file__)
+
 from canonical_errors import ErrorRegistry, PlatformHTTPError
 from dependency_graph import compute_impact, graph_to_dict, load_dependency_graph
 from fastapi import Depends, FastAPI, Header, Query, Request

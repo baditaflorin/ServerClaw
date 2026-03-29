@@ -16,6 +16,10 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+from script_bootstrap import ensure_repo_root_on_path
+
+ensure_repo_root_on_path(__file__)
+
 from controller_automation_toolkit import emit_cli_error, load_json
 from platform.retry import PlatformRetryError, RetryClass, RetryPolicy, with_retry
 

@@ -8,7 +8,7 @@ import socket
 import threading
 import urllib.error
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from platform.datetime_compat import UTC, datetime
 from pathlib import Path
 from typing import Any, Callable
 

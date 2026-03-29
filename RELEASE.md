@@ -1,12 +1,12 @@
-# Release 0.177.84
+# Release 0.177.86
 
 - Date: 2026-03-29
 
 ## Summary
-- implemented ADR 0264 by partitioning the validation gate into failure-domain-isolated lanes, propagating lane context and changed-surface evidence through the build-server and worker fallback paths, and re-verifying the newest exact-main pre-push plus post-merge automation flow
+- implemented ADR 0251 by declaring stage-scoped smoke suites, enforcing structured smoke evidence on staged promotion receipts, seeding Windmill with the same repo-managed smoke runner used for live verification, and carrying the latest worker-runtime hardening needed for the exact-main replay path
 
 ## Platform Impact
-- platform version advances to 0.130.58 after the exact-main ADR 0264 replay re-verifies the lane-aware build-server pre-push gate, gate-status reporting, remote validation context propagation, and worker-side post-merge fallback on top of the 0.130.57 baseline
+- no live platform version bump yet; this release carries ADR 0251 onto `main` while the canonical platform baseline remains 0.130.58 until the exact-main Windmill replay records the new stage-smoke and promotion receipts
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

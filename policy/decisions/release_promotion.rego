@@ -16,13 +16,8 @@ deny["staging receipt verification is not clean"] if {
 }
 
 deny[msg] if {
-  not input.stage_smoke_gate.declared
-  msg := input.stage_smoke_gate.reason
-}
-
-deny["staging receipt does not satisfy a declared stage smoke suite"] if {
-  input.stage_smoke_gate.declared
-  count(input.stage_smoke_gate.matched_suite_ids) == 0
+  some reason in input.smoke_gate.reasons
+  msg := reason
 }
 
 deny[msg] if {

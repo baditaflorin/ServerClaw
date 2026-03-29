@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.84",
+  "repo_version": "0.177.86",
   "platform_version": "0.130.58",
-  "generated_at": "2026-03-29T17:41:31Z",
-  "next_refresh_at": "2026-03-29T18:41:31Z",
+  "generated_at": "2026-03-29T19:54:44Z",
+  "next_refresh_at": "2026-03-29T20:54:44Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -244,6 +244,18 @@
         "lifecycle_status": "active",
         "primary_url": "https://mail.lv3.org",
         "last_live_apply": "2026-03-29T00:00:00Z"
+      },
+      "matrix_synapse": {
+        "service_name": "Matrix Synapse",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://matrix.lv3.org",
+        "last_live_apply": "2026-03-29T00:00:00Z",
+        "slo_status": "unknown"
       },
       "mattermost": {
         "service_name": "Mattermost",
@@ -1295,6 +1307,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-mail-platform.md"
+      },
+      {
+        "id": "converge-matrix-synapse",
+        "description": "Converge Matrix Synapse on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish matrix.lv3.org through the shared edge, and expose the private controller proxy on the Proxmox host.",
+        "tags": [
+          "converge-matrix-synapse",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 350,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 4,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-matrix-synapse.md"
       },
       {
         "id": "converge-mattermost",
@@ -3067,6 +3105,31 @@
         "runbook": "docs/runbooks/configure-semaphore.md"
       },
       {
+        "id": "stage-smoke-suites",
+        "description": "Run the repo-managed ADR 0251 smoke suites for a declared service and environment using the shared integration-suite engine.",
+        "tags": [
+          "diagnostic",
+          "guest-live",
+          "stage-smoke-suites",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "diagnostic",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 200,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/integration-test-suite.md"
+      },
+      {
         "id": "subdomain-exposure-audit",
         "description": "Run the ADR 0139 subdomain exposure registry plus ADR 0252 route and DNS publication audit, check public DNS, private routes, TLS, and edge auth behavior, and store one receipt.",
         "tags": [
@@ -3595,6 +3658,16 @@
         ]
       },
       {
+        "id": "configure-matrix-synapse",
+        "title": "Configure Matrix Synapse",
+        "agent_trust_required": "T3",
+        "steps": 9,
+        "path": "docs/runbooks/configure-matrix-synapse.md",
+        "workflow_ids": [
+          "converge-matrix-synapse"
+        ]
+      },
+      {
         "id": "configure-mattermost",
         "title": "Configure Mattermost",
         "agent_trust_required": "T3",
@@ -3802,7 +3875,7 @@
         "id": "configure-windmill",
         "title": "Configure Windmill",
         "agent_trust_required": "T3",
-        "steps": 23,
+        "steps": 24,
         "path": "docs/runbooks/configure-windmill.md",
         "workflow_ids": [
           "converge-windmill"
@@ -3853,7 +3926,7 @@
         "id": "environment-promotion-pipeline",
         "title": "Environment Promotion Pipeline",
         "agent_trust_required": "T3",
-        "steps": 22,
+        "steps": 23,
         "path": "docs/runbooks/environment-promotion-pipeline.md",
         "workflow_ids": [
           "deploy-and-promote"
@@ -3940,7 +4013,8 @@
         "steps": 0,
         "path": "docs/runbooks/integration-test-suite.md",
         "workflow_ids": [
-          "nightly-integration-tests"
+          "nightly-integration-tests",
+          "stage-smoke-suites"
         ]
       },
       {
@@ -4338,10 +4412,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.83",
+    "last_version": "0.177.85",
     "deployed_at": "2026-03-29",
-    "summary": "implemented ADR 0264 by partitioning the validation gate into failure-domain-isolated lanes, propagating lane context and changed-surface evidence through the build-server and worker fallback paths, and re-verifying the newest exact-main pre-push plus post-merge automation flow",
-    "release_notes_url": "docs/release-notes/0.177.84.md"
+    "summary": "implemented ADR 0251 by declaring stage-scoped smoke suites, enforcing structured smoke evidence on staged promotion receipts, seeding Windmill with the same repo-managed smoke runner used for live verification, and carrying the latest worker-runtime hardening needed for the exact-main replay path",
+    "release_notes_url": "docs/release-notes/0.177.86.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

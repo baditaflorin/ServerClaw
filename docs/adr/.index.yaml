@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-29'
 total_adrs: 314
 implementation_status_summary:
-  Implemented: 241
-  Partial: 8
-  Not Implemented: 64
+  Implemented: 243
+  Partial: 7
+  Not Implemented: 63
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4309,7 +4309,7 @@ adr_index:
   - adr: '0251'
     title: Stage-Scoped Smoke Suites And Promotion Gates
     status: Accepted
-    implementation_status: Partial
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -4320,7 +4320,7 @@ adr_index:
       - gates
     summary: We will require stage-scoped smoke suites for active services and wire them
     filename: 0251-stage-scoped-smoke-suites-and-promotion-gates.md
-    implemented_version: 0.177.84
+    implemented_version: 0.177.86
   - adr: '0252'
     title: Route And DNS Publication Assertion Ledger
     status: Accepted
@@ -4370,7 +4370,7 @@ adr_index:
   - adr: '0255'
     title: Matrix Synapse As The Canonical ServerClaw Conversation Hub
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4383,6 +4383,7 @@ adr_index:
       - hub
     summary: We will use Matrix Synapse as the canonical conversation hub for
     filename: 0255-matrix-synapse-as-the-canonical-serverclaw-conversation-hub.md
+    implemented_version: 0.177.85
   - adr: '0256'
     title: Mautrix Bridges For External Chat Channel Adapters
     status: Accepted

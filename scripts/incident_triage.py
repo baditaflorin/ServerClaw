@@ -16,6 +16,10 @@ import uuid
 from pathlib import Path
 from typing import Any
 
+from script_bootstrap import ensure_repo_root_on_path
+
+ensure_repo_root_on_path(__file__)
+
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path, write_json
 from maintenance_window_tool import list_active_windows_best_effort
 from mutation_audit import build_event, emit_event_best_effort, resolve_local_sink_path

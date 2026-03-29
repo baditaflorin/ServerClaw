@@ -454,6 +454,58 @@
         "timeout_seconds": 3600
       }
     },
+    "stage-smoke-suites": {
+      "description": "Run the ADR 0251 declared stage-scoped smoke suites for one governed service and environment.",
+      "workflow_id": "stage-smoke-suites",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "service",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "make stage-smoke-suites STAGE_SMOKE_ARGS or Windmill payload",
+          "description": "Service id whose declared smoke_suite_ids should be executed."
+        },
+        {
+          "name": "environment",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "make stage-smoke-suites STAGE_SMOKE_ARGS or Windmill payload",
+          "description": "Environment binding resolved from config/service-capability-catalog.json."
+        },
+        {
+          "name": "suite_ids",
+          "kind": "operator_parameter",
+          "required": false,
+          "source": "Windmill payload or repeated --suite-id CLI flags",
+          "description": "Optional explicit suite ids when operators need to replay a subset of the declared smoke paths."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes before relying on the smoke evidence for promotion or live-apply proof",
+        "The selected service/environment binding declares smoke_suite_ids in config/service-capability-catalog.json",
+        "The worker or controller can resolve and reach the target endpoints required by the selected smoke suite"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the aggregate smoke report path and copy the receipt_smoke_suites block into the linked live-apply or staged receipt when the result becomes a gate."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the smoke runner cannot resolve active endpoints for the selected service/environment or if any declared smoke suite returns failed or skipped.",
+          "Stop if the requested suite ids do not match the service/environment binding that is supposed to provide stage-ready proof."
+        ],
+        "rollback_guidance": [
+          "Do not promote or declare the environment stage-ready until the smoke suite passes from the repo-managed runner.",
+          "If the failure follows a deploy, replay the service converge or rollback-safe verification path before rerunning the smoke suites."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
     "subdomain-exposure-audit": {
       "description": "Run the ADR 0139 subdomain exposure audit against the governed public catalog and record one receipt.",
       "workflow_id": "subdomain-exposure-audit",
@@ -1209,6 +1261,51 @@
       "execution": {
         "profile": "docker_runtime_systemd_make",
         "timeout_seconds": 1500
+      }
+    },
+    "converge-matrix-synapse": {
+      "description": "Converge Matrix Synapse, its PostgreSQL backend, the host-side controller proxy, and the shared-edge publication for matrix.lv3.org.",
+      "workflow_id": "converge-matrix-synapse",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to publish matrix.lv3.org and reconcile the shared edge certificate coverage."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-matrix-synapse passes",
+        "make validate passes before the apply",
+        "The public/auth boundary and intentional no-federation scope are reviewed before live rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, public and controller client-version checks, bootstrap-admin login verification, mirrored secret artifacts, and confirmation that federation was intentionally left disabled."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if PostgreSQL, Matrix Synapse runtime, the host-side proxy, or the shared-edge publication fails verification.",
+          "Stop if the rollout exposes an unintended federation listener or drifts from the documented upstream-auth publication model."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Matrix Synapse runtime and edge configuration from version control before retrying.",
+          "Do not hand-edit the homeserver config, admin user, or edge route outside the repo to compensate for a failed rollout."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
       }
     },
     "converge-openbao": {

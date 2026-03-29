@@ -1,9 +1,10 @@
 # ADR 0255: Matrix Synapse As The Canonical ServerClaw Conversation Hub
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Live on production from main
+- Implemented In Repo Version: 0.177.85
+- Implemented In Platform Version: 0.130.58
+- Implemented On: 2026-03-29
 - Date: 2026-03-28
 
 ## Context

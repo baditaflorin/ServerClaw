@@ -1,0 +1,4 @@
+# Purpose: Route the live-apply service target for Matrix Synapse to the canonical playbook entrypoint.
+# Use case: Used by service-scoped live-apply automation and interface-contract validation.
+---
+- import_playbook: ../matrix-synapse.yml

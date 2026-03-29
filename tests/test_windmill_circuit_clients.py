@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import urllib.error
 import urllib.request
 
@@ -94,8 +95,12 @@ def test_scheduler_windmill_client_retries_401_with_bootstrap_login(monkeypatch:
         auth_header = request.headers.get("Authorization")
         calls.append((request.full_url, auth_header))
         if request.full_url.endswith("/api/auth/login"):
+            assert json.loads(request.data.decode("utf-8")) == {
+                "email": "superadmin_secret@windmill.dev",
+                "password": "managed-secret",
+            }
             return FakeResponse("session-token")
-        if auth_header == "Bearer managed-secret":
+        if auth_header == "Bearer stale-session-token":
             raise urllib.error.HTTPError(
                 request.full_url,
                 401,
@@ -114,7 +119,8 @@ def test_scheduler_windmill_client_retries_401_with_bootstrap_login(monkeypatch:
 
     client = HttpWindmillClient(
         base_url="https://windmill.example.test",
-        token="managed-secret",
+        token="stale-session-token",
+        bootstrap_secret="managed-secret",
     )
     client._internal_api_retry_policy = None
 
@@ -123,7 +129,7 @@ def test_scheduler_windmill_client_retries_401_with_bootstrap_login(monkeypatch:
         "running": True,
     }
     assert calls == [
-        ("https://windmill.example.test/api/w/lv3/scripts/get/p/f%2Flv3%2Fdeploy-and-promote", "Bearer managed-secret"),
+        ("https://windmill.example.test/api/w/lv3/scripts/get/p/f%2Flv3%2Fdeploy-and-promote", "Bearer stale-session-token"),
         ("https://windmill.example.test/api/auth/login", None),
         ("https://windmill.example.test/api/w/lv3/scripts/get/p/f%2Flv3%2Fdeploy-and-promote", "Bearer session-token"),
         ("https://windmill.example.test/api/w/lv3/jobs/run/h/hash-123", "Bearer session-token"),
@@ -212,10 +218,10 @@ def test_scheduler_windmill_client_waits_for_job_result(monkeypatch: pytest.Monk
             return FakeResponse('{"path":"f/lv3/deploy-and-promote","hash":"abc123"}')
         if request.full_url.endswith("/api/w/lv3/jobs/run/h/abc123"):
             return FakeResponse('"job-123"')
-        if request.full_url.endswith("/api/w/lv3/jobs_u/get/job-123"):
+        if request.full_url.endswith("/api/w/lv3/jobs_u/completed/get_result_maybe/job-123?get_started=true"):
             poll_count["count"] += 1
             if poll_count["count"] == 1:
-                return FakeResponse('{"running": true}')
+                return FakeResponse('{"completed": false, "started": false, "result": null}')
             return FakeResponse('{"completed": true, "success": true, "result": {"status": "ok"}}')
         raise AssertionError(request.full_url)
 
