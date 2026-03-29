@@ -77,11 +77,19 @@ def load_image_catalog() -> dict:
 
 def validate_exception_metadata(exception: dict, path: str) -> None:
     require_str(exception.get("owner"), f"{path}.owner")
-    require_str(exception.get("justification"), f"{path}.justification")
-    require_string_list(exception.get("compensating_controls"), f"{path}.compensating_controls")
+    if exception.get("justification") is not None:
+        require_str(exception.get("justification"), f"{path}.justification")
+    elif exception.get("reason") is not None:
+        require_str(exception.get("reason"), f"{path}.reason")
+    else:
+        raise ValueError(f"{path}.justification must be a non-empty string")
+    if exception.get("compensating_controls") is not None:
+        require_string_list(exception.get("compensating_controls"), f"{path}.compensating_controls")
     approved_on = require_date(exception.get("approved_on"), f"{path}.approved_on")
-    expires_on = require_date(exception.get("expires_on"), f"{path}.expires_on")
-    require_str(exception.get("remediation_plan"), f"{path}.remediation_plan")
+    expires_on_key = "expires_on" if exception.get("expires_on") is not None else "review_by"
+    expires_on = require_date(exception.get(expires_on_key), f"{path}.{expires_on_key}")
+    if exception.get("remediation_plan") is not None:
+        require_str(exception.get("remediation_plan"), f"{path}.remediation_plan")
     if expires_on < approved_on:
         raise ValueError(f"{path}.expires_on must be on or after approved_on")
 

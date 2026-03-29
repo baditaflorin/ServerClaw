@@ -35,3 +35,15 @@ def test_validate_exception_metadata_rejects_empty_controls() -> None:
             },
             "images.example.exception",
         )
+
+
+def test_validate_exception_metadata_accepts_reason_and_review_by() -> None:
+    policy.validate_exception_metadata(
+        {
+            "owner": "Platform operations",
+            "reason": "Temporary exception while the latest approved upstream digest still reports critical findings.",
+            "approved_on": "2026-03-29",
+            "review_by": "2026-04-12",
+        },
+        "images.example.exception",
+    )

@@ -3599,9 +3599,9 @@ workstreams:
   - id: ws-0269-live-apply
     adr: "0269"
     title: Vulnerability budgets and image-host freshness promotion gates
-    status: ready_for_merge
+    status: in_progress
     owner: codex
-    branch: codex/adr-0269-live-apply
+    branch: codex/adr-0269-main-integration
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0269-live-apply
     doc: /Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0269-live-apply/docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
     depends_on:
@@ -3674,35 +3674,15 @@ workstreams:
             - docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
             - config/vulnerability-budget-policy.json
             - config/image-catalog.json
-            - config/windmill/scripts/gate-status.py
             - docs/schema/vulnerability-budget-policy.schema.json
             - scripts/vulnerability_budget.py
-            - scripts/promotion_pipeline.py
             - scripts/security_posture_report.py
             - scripts/container_image_policy.py
             - scripts/upgrade_container_image.py
             - scripts/validate_repository_data_models.py
-            - scripts/gate_status.py
-            - policy/decisions/release_promotion.rego
-            - policy/tests/release_promotion_test.rego
-            - Makefile
-            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
-            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
-            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
-            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
-            - docs/runbooks/configure-windmill.md
             - docs/runbooks/vulnerability-budget-gates.md
             - docs/runbooks/container-image-policy.md
             - docs/runbooks/security-posture-reporting.md
-            - docs/runbooks/environment-promotion-pipeline.md
-            - tests/test_vulnerability_budget.py
-            - tests/test_container_image_policy.py
-            - tests/test_promotion_pipeline.py
-            - tests/test_security_posture_report.py
-            - tests/test_validation_gate.py
-            - tests/test_windmill_operator_admin_app.py
-            - tests/test_openbao_compose_env_helper.py
-            - tests/test_compose_runtime_secret_injection.py
           mode: exclusive
         - id: adr_0269_registry_contracts
           paths:
@@ -3713,14 +3693,8 @@ workstreams:
           paths:
             - receipts/security-reports/20260329T*.json
             - receipts/live-applies/2026-03-29-adr-0269-vulnerability-budget-gates-live-apply.json
-            - receipts/live-applies/2026-03-29-adr-0269-vulnerability-budget-gates-mainline-live-apply.json
             - receipts/live-applies/2026-03-29-adr-0269-windmill-isolated-checkout-live-apply.json
             - receipts/live-applies/evidence/2026-03-29-adr-0269-*.txt
-          mode: exclusive
-        - id: adr_0269_generated_portal_surfaces
-          paths:
-            - docs/diagrams/agent-coordination-map.excalidraw
-            - receipts/ops-portal-snapshot.html
           mode: exclusive
         - id: adr_0269_mainline_integration
           paths:
@@ -3731,11 +3705,12 @@ workstreams:
             - changelog.md
             - versions/stack.yaml
             - build/platform-manifest.json
-            - docs/release-notes/README.md
-            - docs/release-notes/0.177.8[45].md
+            - docs/release-notes/*.md
+            - docs/diagrams/agent-coordination-map.excalidraw
             - receipts/live-applies/2026-03-29-adr-0269-vulnerability-budget-gates-mainline-live-apply.json
-          mode: exclusive
-    ready_to_merge: true
+          mode: shared_contract
+          contract: release-mainline-cut-v1
+    ready_to_merge: false
     live_applied: true
   - id: ws-0253-live-apply
     adr: "0253"

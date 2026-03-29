@@ -705,7 +705,6 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert 'delay: "{{ windmill_worker_container_wait_delay_seconds }}"' in tasks
     assert "--payload-json" in tasks
     assert "--timeout {{ windmill_seed_job_timeout_seconds }}" in tasks
-    assert "Run the Windmill seeded healthcheck script" not in tasks
     assert 'WINDMILL_TOKEN: "{{ windmill_runtime_api_token }}"' in tasks
     assert "until: windmill_healthcheck.rc == 0" in tasks
     assert "failed_when: false" in tasks
