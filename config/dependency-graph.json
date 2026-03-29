@@ -129,6 +129,15 @@
       "adr": "0011"
     },
     {
+      "id": "harbor",
+      "service": "harbor",
+      "name": "Harbor",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "security",
+      "adr": "0201"
+    },
+    {
       "id": "keycloak",
       "service": "keycloak",
       "name": "Keycloak",
@@ -558,6 +567,18 @@
       "to": "nginx_edge",
       "type": "soft",
       "description": "Public access to grafana.lv3.org depends on the shared NGINX edge; private reachability remains available if the edge is degraded."
+    },
+    {
+      "from": "harbor",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Operator browser sign-in to registry.lv3.org depends on the shared Keycloak OIDC path, while robot credentials still support governed automation."
+    },
+    {
+      "from": "harbor",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public reachability for registry.lv3.org depends on the shared NGINX edge publication path."
     },
     {
       "from": "keycloak",

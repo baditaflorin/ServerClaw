@@ -85,6 +85,14 @@
         "logs.lv3.org"
       ],
       "notes": "Reserved for the Dozzle real-time container log surface."
+    },
+    {
+      "prefix": "registry",
+      "owner_adr": "0201",
+      "allowed_fqdns": [
+        "registry.lv3.org"
+      ],
+      "notes": "Reserved for the Harbor-backed container registry surface."
     }
   ],
   "subdomains": [
@@ -303,6 +311,23 @@
         "auto_renew": true
       },
       "notes": "Unified service dashboard published through the shared NGINX edge and protected by the repo-managed Keycloak oauth2-proxy flow."
+    },
+    {
+      "fqdn": "registry.lv3.org",
+      "service_id": "harbor",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "none",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0201",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Harbor registry published through the shared NGINX edge with browser sign-in delegated at the Harbor application layer."
     },
     {
       "fqdn": "langfuse.lv3.org",

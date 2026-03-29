@@ -65,6 +65,7 @@ PORT_KEYS = (
     "platform_context_host_proxy_port",
     "homepage_port",
     "ops_portal_port",
+    "harbor_port",
     "plane_port",
     "plane_host_proxy_port",
     "ntopng_http_port",
@@ -332,6 +333,9 @@ def build_service_urls(
     elif service_id == "dify":
         urls["internal"] = service_url("http", private_ip, ports["dify_port"])
         port_map["internal"] = ports["dify_port"]
+    elif service_id == "harbor":
+        urls["internal"] = service_url("http", private_ip, ports["harbor_port"])
+        port_map["internal"] = ports["harbor_port"]
     elif service_id == "plane":
         urls["internal"] = service_url("http", private_ip, ports["plane_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["plane_host_proxy_port"])

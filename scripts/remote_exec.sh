@@ -603,6 +603,7 @@ run_remote_command() {
     local docker_socket_path=""
     local docker_env_args=()
     local docker_cache_args=()
+    local image_ready_cmd=""
 
     mapfile -t docker_env_args < <(remote_docker_env_args)
     mapfile -t docker_cache_args < <(remote_runner_cache_args)
@@ -618,7 +619,10 @@ run_remote_command() {
     fi
     docker_cmd+=("$DOCKER_IMAGE" "bash" "-lc" "$REMOTE_COMMAND")
 
-    remote_payload="$(timeout_prefix)$(render_command "${docker_cmd[@]}")"
+    printf -v image_ready_cmd "%sbash -lc %q" \
+      "$(timeout_prefix)" \
+      "docker image inspect $(quote_shell "$DOCKER_IMAGE") >/dev/null 2>&1 || docker pull $(quote_shell "$DOCKER_IMAGE") >/dev/null"
+    remote_payload="$image_ready_cmd && $(render_command "${docker_cmd[@]}")"
     printf -v remote_payload "cd %q && %s" "$WORKSPACE_ROOT" "$remote_payload"
 
     if [[ "$VERBOSE" == "1" ]]; then

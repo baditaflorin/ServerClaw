@@ -69,6 +69,7 @@ platform_port_assignments:
   platform_context_host_proxy_port: 8010
   homepage_port: 3090
   ops_portal_port: 8092
+  harbor_port: 8095
   ntopng_http_port: 3000
   ntopng_proxy_port: 3001
   portainer_https_port: 9443
@@ -533,6 +534,11 @@ network_policy:
           ports:
             - 8092
           description: Reverse proxy access to the interactive ops portal
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 8095
+          description: Edge access to the Harbor registry and operator UI
         - source: nginx-lv3
           protocol: tcp
           ports:
@@ -1478,6 +1484,32 @@ lv3_service_topology:
       tls: true
       kind: proxy
       upstream: http://10.10.10.20:8091
+  harbor:
+    service_name: harbor
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: registry.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    dns:
+      managed: true
+      visibility: public
+      name: registry
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: "http://10.10.10.20:{{ platform_port_assignments.harbor_port }}"
+      client_max_body_size: 0
+      chunked_transfer_encoding: true
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 900
+      proxy_send_timeout_seconds: 900
   ops_portal:
     service_name: ops-portal
     owning_vm: docker-runtime-lv3

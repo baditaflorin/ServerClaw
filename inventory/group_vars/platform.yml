@@ -171,6 +171,7 @@ platform_ports:
   platform_context_host_proxy_port: 8010
   homepage_port: 3090
   ops_portal_port: 8092
+  harbor_port: 8095
   plane_port: 8093
   plane_host_proxy_port: 8011
   ntopng_http_port: 3000
@@ -227,6 +228,7 @@ platform_port_assignments:
   platform_context_host_proxy_port: 8010
   homepage_port: 3090
   ops_portal_port: 8092
+  harbor_port: 8095
   plane_port: 8093
   plane_host_proxy_port: 8011
   ntopng_http_port: 3000
@@ -1696,6 +1698,38 @@ platform_service_topology:
     ports: {}
     urls:
       public: https://sso.lv3.org
+  harbor:
+    service_name: harbor
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: registry.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    dns:
+      managed: true
+      visibility: public
+      name: registry
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8095
+      client_max_body_size: 0
+      chunked_transfer_encoding: true
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 900
+      proxy_send_timeout_seconds: 900
+    service_id: harbor
+    ports:
+      internal: 8095
+    urls:
+      public: https://registry.lv3.org
+      internal: http://10.10.10.20:8095
   ops_portal:
     service_name: ops-portal
     owning_vm: docker-runtime-lv3
@@ -1966,6 +2000,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: sso
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: registry
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -2870,6 +2908,38 @@ public_edge_service_topology:
     ports: {}
     urls:
       public: https://sso.lv3.org
+  harbor:
+    service_name: harbor
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: registry.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    dns:
+      managed: true
+      visibility: public
+      name: registry
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8095
+      client_max_body_size: 0
+      chunked_transfer_encoding: true
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 900
+      proxy_send_timeout_seconds: 900
+    service_id: harbor
+    ports:
+      internal: 8095
+    urls:
+      public: https://registry.lv3.org
+      internal: http://10.10.10.20:8095
   ops_portal:
     service_name: ops-portal
     owning_vm: docker-runtime-lv3
@@ -3177,5 +3247,6 @@ coolify_host_proxy_port: 8012
 open_webui_port: 8088
 homepage_port: 3090
 ops_portal_port: 8092
+harbor_port: 8095
 ntopng_http_port: 3000
 portainer_https_port: 9443

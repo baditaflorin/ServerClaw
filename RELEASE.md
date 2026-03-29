@@ -1,12 +1,12 @@
-# Release 0.177.63
+# Release 0.177.64
 
 - Date: 2026-03-29
 
 ## Summary
-- implemented ADR 0252 by governing route assertions, DNS record sets, apex publication truth, and private-route verification through one shared route and DNS assertion ledger
+- records ADR 0240 exact-main evidence on the current mainline by preserving the verified Apache ECharts operator visualization rollout, refreshed release surfaces, and the current ops-portal platform baseline after the mainline replay
 
 ## Platform Impact
-- records ADR 0252 route and DNS publication assertion ledger on main while preserving the current integrated platform baseline at 0.130.45; the ADR first became true on platform 0.130.43 during the verified live apply
+- platform version advances to 0.130.46 after the exact-main ADR 0240 replay re-verifies the Apache ECharts-backed operator visualization panels on ops.lv3.org while preserving the authenticated edge contract on top of the 0.130.45 baseline
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

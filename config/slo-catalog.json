@@ -85,6 +85,16 @@
       "description": "Keycloak discovery responds in under 500ms for 95% of probes."
     },
     {
+      "id": "harbor-availability",
+      "service_id": "harbor",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://registry.lv3.org/api/v2.0/ping",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Harbor remains reachable through the shared LV3 edge for image pulls, pushes, and operator access."
+    },
+    {
       "id": "langfuse-availability",
       "service_id": "langfuse",
       "indicator": "availability",
