@@ -223,7 +223,7 @@ class FakeGatewayClient:
 
 
 @pytest.fixture()
-def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
+def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]:
     data_root = tmp_path / "data"
     (data_root / "config").mkdir(parents=True)
     (data_root / "receipts" / "live-applies").mkdir(parents=True)
@@ -502,7 +502,13 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
     )
     gateway = FakeGatewayClient()
     app = create_app(settings, gateway_client=gateway)
-    return TestClient(app), gateway
+    return TestClient(app), gateway, data_root
+
+
+@pytest.fixture()
+def portal_client(portal_runtime: tuple[TestClient, FakeGatewayClient, Path]) -> tuple[TestClient, FakeGatewayClient]:
+    client, gateway, _data_root = portal_runtime
+    return client, gateway
 
 
 def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
@@ -560,6 +566,21 @@ def test_dashboard_uses_same_origin_static_stylesheet(portal_client: tuple[TestC
     assert '<link rel="stylesheet" href="/static/portal.css">' in response.text
     assert '<script src="/static/portal.js" defer></script>' in response.text
     assert 'https://unpkg.com/echarts@5.6.0/dist/echarts.min.js' in response.text
+
+
+def test_dashboard_ignores_macos_metadata_receipts(
+    portal_runtime: tuple[TestClient, FakeGatewayClient, Path],
+) -> None:
+    client, _gateway, data_root = portal_runtime
+    (data_root / "receipts" / "live-applies" / "._2026-03-25-ops-portal.json").write_bytes(b"\xa3")
+    (data_root / "receipts" / "drift-reports" / "._latest.json").write_bytes(b"\xa3")
+
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert "Interactive Ops Portal" in response.text
+    assert "Dashboard permissions drifted" in response.text
+    assert "Applied ops portal runtime" in response.text
 
 
 def test_build_health_mix_chart_groups_service_tones() -> None:

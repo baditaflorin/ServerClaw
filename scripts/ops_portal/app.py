@@ -74,6 +74,19 @@ def load_json_file(path: Path, default: Any) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def is_macos_metadata_file(path: Path) -> bool:
+    return path.name == ".DS_Store" or path.name.startswith("._")
+
+
+def load_optional_json_document(path: Path) -> Any | None:
+    if is_macos_metadata_file(path):
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return None
+
+
 def normalize_text(value: str) -> str:
     return " ".join("".join(ch.lower() if ch.isalnum() else " " for ch in value).split())
 
@@ -334,9 +347,8 @@ class PortalRepository:
     def latest_drift_report(self) -> dict[str, Any]:
         reports = sorted(self.settings.drift_receipts_dir.glob("*.json"), reverse=True)
         for report in reports:
-            try:
-                payload = json.loads(report.read_text(encoding="utf-8"))
-            except json.JSONDecodeError:
+            payload = load_optional_json_document(report)
+            if not isinstance(payload, dict):
                 continue
             payload["_path"] = str(report)
             return payload
@@ -367,9 +379,8 @@ class PortalRepository:
         service_keywords = self._service_keywords(services)
         receipts: list[dict[str, Any]] = []
         for receipt_path in sorted(self.settings.live_applies_dir.rglob("*.json"), reverse=True):
-            try:
-                receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
-            except json.JSONDecodeError:
+            receipt = load_optional_json_document(receipt_path)
+            if not isinstance(receipt, dict):
                 continue
             text = normalize_text(json.dumps(receipt, sort_keys=True))
             matched = []

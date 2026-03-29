@@ -253,6 +253,23 @@
     directory_mode: "0755"
   loop: "{{ ops_portal_directory_sources }}"
 
+- name: Discover macOS metadata files in the synced ops portal data tree
+  ansible.builtin.find:
+    paths: "{{ ops_portal_data_dir }}"
+    recurse: true
+    file_type: file
+    hidden: true
+    patterns:
+      - "._*"
+      - ".DS_Store"
+  register: ops_portal_data_metadata_files
+
+- name: Remove macOS metadata files from the synced ops portal data tree
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ ops_portal_data_metadata_files.files }}"
+
 - name: Sync the ops portal service build inputs explicitly
   ansible.builtin.copy:
     content: "{{ lookup('ansible.builtin.file', item.src) }}"
