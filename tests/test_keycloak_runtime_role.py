@@ -218,6 +218,35 @@ def test_role_manages_outline_client_secret() -> None:
     assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_outline_client_secret_local_file }}"
 
 
+def test_role_manages_serverclaw_client_secret() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    tasks = load_tasks()
+    realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
+    serverclaw_client_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Ensure the ServerClaw OAuth client exists"
+    )
+    read_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the ServerClaw client secret")
+    mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the ServerClaw client secret to the control machine")
+    assert defaults["keycloak_serverclaw_client_id"] == "serverclaw"
+    assert defaults["keycloak_serverclaw_client_secret_local_file"].endswith("/.local/keycloak/serverclaw-client-secret.txt")
+    assert defaults["keycloak_serverclaw_root_url"] == "https://chat.lv3.org"
+    assert defaults["keycloak_serverclaw_post_logout_redirect_uris"] == [
+        "{{ keycloak_serverclaw_root_url }}",
+        "{{ keycloak_serverclaw_root_url }}/",
+    ]
+    assert serverclaw_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_serverclaw_client_id }}"
+    assert serverclaw_client_task["community.general.keycloak_client"]["redirect_uris"] == [
+        "{{ keycloak_serverclaw_root_url }}/oauth/oidc/callback"
+    ]
+    assert serverclaw_client_task["community.general.keycloak_client"]["valid_post_logout_redirect_uris"] == (
+        "{{ keycloak_serverclaw_post_logout_redirect_uris }}"
+    )
+    assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == (
+        "{{ keycloak_serverclaw_client_id }}"
+    )
+    assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_serverclaw_client_secret_local_file }}"
+
+
 def test_role_manages_the_outline_automation_identity() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     tasks = load_tasks()

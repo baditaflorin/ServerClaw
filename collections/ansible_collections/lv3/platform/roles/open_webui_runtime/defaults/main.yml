@@ -20,6 +20,7 @@ open_webui_admin_email: ops@lv3.org
 open_webui_internal_base_url: "{{ platform_service_topology | platform_service_url('open_webui', 'internal') }}"
 open_webui_controller_url: "{{ platform_service_topology | platform_service_url('open_webui', 'controller') }}"
 open_webui_webui_url: "{{ open_webui_controller_url }}"
+open_webui_webui_name: Open WebUI
 open_webui_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui
 open_webui_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt
 open_webui_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/webui-secret-key.txt
@@ -32,6 +33,10 @@ open_webui_oidc_client_id: ""
 open_webui_oidc_provider_url: ""
 open_webui_oidc_provider_name: Keycloak
 open_webui_oidc_scopes: openid email profile
+open_webui_oidc_redirect_uri: "{{ open_webui_webui_url }}/oauth/oidc/callback"
+open_webui_enable_login_form: "{{ not (open_webui_enable_oidc | bool) }}"
+open_webui_enable_password_auth: "{{ not (open_webui_enable_oidc | bool) }}"
+open_webui_default_user_role: pending
 open_webui_enable_openai_api: false
 open_webui_enable_ollama_api: false
 open_webui_ollama_base_url: http://host.docker.internal:11434
@@ -43,4 +48,13 @@ open_webui_web_search_concurrent_requests: 1
 open_webui_bypass_web_search_web_loader: true
 open_webui_default_models: ""
 open_webui_default_pinned_models: ""
+open_webui_user_permissions_workspace_knowledge_access: false
+open_webui_user_permissions_workspace_prompts_access: false
+open_webui_user_permissions_workspace_tools_access: false
+open_webui_user_permissions_workspace_skills_access: false
+open_webui_cors_allow_origin: ""
+open_webui_session_cookie_same_site: ""
+open_webui_auth_cookie_same_site: ""
+open_webui_session_cookie_secure: false
+open_webui_auth_cookie_secure: false
 open_webui_audit_log_level: METADATA

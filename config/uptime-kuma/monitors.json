@@ -313,6 +313,19 @@
     ]
   },
   {
+    "name": "ServerClaw",
+    "type": "http",
+    "url": "https://chat.lv3.org",
+    "description": "Public ServerClaw assistant surface published through the shared NGINX edge.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
     "name": "n8n Public Health",
     "type": "http",
     "url": "https://n8n.lv3.org/healthz",

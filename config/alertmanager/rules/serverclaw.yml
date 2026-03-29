@@ -1,0 +1,13 @@
+groups:
+  - name: lv3-serverclaw
+    rules:
+      - alert: ServerClawDown
+        expr: probe_success{service="serverclaw",probe_kind="readiness"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: serverclaw
+        annotations:
+          summary: ServerClaw is unreachable on the published runtime path.
+          description: The ServerClaw readiness probe on coolify-lv3 has been failing for at least two minutes.
+          runbook_url: https://docs.lv3.org/runbooks/configure-serverclaw/

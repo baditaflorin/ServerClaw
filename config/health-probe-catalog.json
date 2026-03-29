@@ -1438,6 +1438,64 @@
         }
       }
     },
+    "serverclaw": {
+      "service_name": "serverclaw",
+      "owning_vm": "coolify-lv3",
+      "role": "open_webui_runtime",
+      "verify_file": "roles/open_webui_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "ServerClaw startup completes once the repo-managed bootstrap admin can still sign in on the local listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8096/api/v1/auths/signin",
+        "method": "POST",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The ServerClaw root page responds on the local listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8096",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The repo-managed ServerClaw bootstrap admin can sign in successfully on the runtime VM.",
+        "timeout_seconds": 120,
+        "retries": 1,
+        "delay_seconds": 0,
+        "url": "http://127.0.0.1:8096/api/v1/auths/signin",
+        "method": "POST",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "ServerClaw",
+          "type": "http",
+          "url": "https://chat.lv3.org",
+          "description": "Public ServerClaw assistant surface published through the shared NGINX edge.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
     "searxng": {
       "service_name": "searxng",
       "owning_vm": "docker-runtime-lv3",

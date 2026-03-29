@@ -1556,6 +1556,34 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8088
       controller: http://100.64.0.1:8008
+  serverclaw:
+    service_name: serverclaw
+    owning_vm: coolify-lv3
+    private_ip: 10.10.10.70
+    public_hostname: chat.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: chat
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3')
+        | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.serverclaw_port
+        }}
+    service_id: serverclaw
+    ports: {}
+    urls:
+      public: https://chat.lv3.org
   ollama:
     service_name: ollama
     owning_vm: docker-runtime-lv3
@@ -2024,6 +2052,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: draw
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: chat
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -2796,6 +2828,34 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8088
       controller: http://100.64.0.1:8008
+  serverclaw:
+    service_name: serverclaw
+    owning_vm: coolify-lv3
+    private_ip: 10.10.10.70
+    public_hostname: chat.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: chat
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3')
+        | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.serverclaw_port
+        }}
+    service_id: serverclaw
+    ports: {}
+    urls:
+      public: https://chat.lv3.org
   ollama:
     service_name: ollama
     owning_vm: docker-runtime-lv3

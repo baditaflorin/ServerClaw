@@ -460,6 +460,21 @@
         "/opt/plane/data/minio"
       ],
       "notes": "Plane attachment uploads and exported artifacts are persisted in the local MinIO-backed object store on docker-runtime-lv3."
+    },
+    {
+      "id": "serverclaw-workspace-store",
+      "service": "serverclaw",
+      "name": "ServerClaw workspace and chat state",
+      "class": "confidential",
+      "retention_days": 90,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "/opt/serverclaw/data",
+        "https://chat.lv3.org"
+      ],
+      "notes": "ServerClaw persists chat history, workspace metadata, uploaded knowledge artifacts, and user-facing assistant settings in its Open WebUI data volume on coolify-lv3."
     }
   ]
 }

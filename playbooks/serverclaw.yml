@@ -1,0 +1,183 @@
+---
+# Playbook: serverclaw.yml
+# Purpose: Converge the first live ServerClaw surface, its Keycloak OIDC client, and the authenticated public edge publication on chat.lv3.org.
+# Use case: Run during ServerClaw deployment, upgrade, or recovery when the chat-first assistant surface must match repo truth.
+#
+# Inputs (required):
+#   - env (str, required): Target environment selector used by the scoped Ansible wrapper.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): SSH path to managed guests.
+#
+# Outputs:
+#   - ServerClaw is deployed on coolify-lv3, the dedicated Keycloak client secret is mirrored locally, and chat.lv3.org is published through the shared edge.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - ADR 0254: ServerClaw is the distinct self-hosted assistant product surface on LV3.
+#   - Requires: docker-runtime-lv3, coolify-lv3, and nginx-lv3 to already exist and remain reachable.
+#   - Role: lv3.platform.keycloak_runtime - provisions the dedicated ServerClaw OIDC client.
+#   - Role: lv3.platform.open_webui_runtime - converges the isolated ServerClaw runtime on coolify-lv3.
+#
+# Related ADRs: 0060, 0097, 0145, 0148, 0254
+# Related Runbooks: docs/runbooks/configure-serverclaw.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-29
+
+- name: Ensure Hetzner DNS publication for ServerClaw
+  hosts: proxmox_hosts
+  become: false
+  gather_facts: false
+  tags:
+    - tier-1
+    - access
+    - service-serverclaw
+
+  tasks:
+    - name: Ensure Hetzner DNS records are present
+      ansible.builtin.include_role:
+        name: lv3.platform.hetzner_dns_records
+        apply:
+          delegate_to: localhost
+          become: false
+      run_once: true
+
+- name: Converge the ServerClaw Keycloak client on the Docker runtime VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - access
+    - service-serverclaw
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.keycloak_runtime
+
+- name: Converge ServerClaw on the Coolify runtime VM
+  hosts: "{{ 'coolify-lv3' if (env | default('production')) == 'production' else 'coolify-staging-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - access
+    - service-serverclaw
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.serverclaw
+        playbook_execution_audit_target: serverclaw
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.coolify[playbook_execution_env] }}"
+
+    - name: Assert the Coolify runtime Docker engine is available
+      ansible.builtin.command:
+        argv:
+          - docker
+          - info
+          - --format
+          - '{{ "{{.ServerVersion}}" }}'
+      changed_when: false
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.open_webui_runtime
+      vars:
+        open_webui_site_dir: /opt/serverclaw
+        open_webui_data_dir: /opt/serverclaw/data
+        open_webui_secret_dir: /etc/lv3/serverclaw
+        open_webui_compose_file: /opt/serverclaw/docker-compose.yml
+        open_webui_env_file: /run/lv3-secrets/serverclaw/runtime.env
+        open_webui_legacy_env_file: /opt/serverclaw/serverclaw.env
+        open_webui_openbao_agent_dir: /opt/serverclaw/openbao
+        open_webui_openbao_agent_container_name: serverclaw-openbao-agent
+        open_webui_openbao_secret_path: services/serverclaw/runtime-env
+        open_webui_openbao_policy_name: lv3-service-serverclaw-runtime
+        open_webui_openbao_approle_name: serverclaw-runtime
+        open_webui_container_name: serverclaw
+        open_webui_port: "{{ platform_service_topology.serverclaw.ports.internal }}"
+        open_webui_image: "{{ serverclaw_image }}"
+        open_webui_admin_name: "{{ serverclaw_admin_name }}"
+        open_webui_admin_email: "{{ serverclaw_admin_email }}"
+        open_webui_internal_base_url: "{{ platform_service_topology.serverclaw.urls.internal }}"
+        open_webui_controller_url: "{{ serverclaw_public_url }}"
+        open_webui_webui_url: "{{ serverclaw_public_url }}"
+        open_webui_webui_name: "{{ serverclaw_webui_name }}"
+        open_webui_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/serverclaw
+        open_webui_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/serverclaw/admin-password.txt
+        open_webui_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/serverclaw/webui-secret-key.txt
+        open_webui_provider_env_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/serverclaw/provider.env
+        open_webui_oidc_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-client-secret.txt
+        open_webui_admin_password_remote_file: /etc/lv3/serverclaw/admin-password.txt
+        open_webui_secret_key_remote_file: /etc/lv3/serverclaw/webui-secret-key.txt
+        open_webui_enable_oidc: "{{ serverclaw_enable_oidc }}"
+        open_webui_enable_login_form: "{{ serverclaw_enable_login_form }}"
+        open_webui_enable_password_auth: "{{ serverclaw_enable_password_auth }}"
+        open_webui_default_user_role: "{{ serverclaw_default_user_role }}"
+        open_webui_oidc_client_id: "{{ serverclaw_oidc_client_id }}"
+        open_webui_oidc_provider_url: "{{ serverclaw_oidc_provider_url }}"
+        open_webui_enable_ollama_api: "{{ serverclaw_enable_ollama_api }}"
+        open_webui_ollama_base_url: "{{ serverclaw_ollama_base_url }}"
+        open_webui_enable_web_search: "{{ serverclaw_enable_web_search }}"
+        open_webui_searxng_query_url: "{{ serverclaw_searxng_query_url }}"
+        open_webui_default_models: "{{ serverclaw_default_models }}"
+        open_webui_default_pinned_models: "{{ serverclaw_default_pinned_models }}"
+        open_webui_user_permissions_workspace_knowledge_access: "{{ serverclaw_workspace_knowledge_access }}"
+        open_webui_user_permissions_workspace_prompts_access: "{{ serverclaw_workspace_prompts_access }}"
+        open_webui_user_permissions_workspace_tools_access: "{{ serverclaw_workspace_tools_access }}"
+        open_webui_user_permissions_workspace_skills_access: "{{ serverclaw_workspace_skills_access }}"
+        open_webui_cors_allow_origin: "{{ serverclaw_cors_allow_origin }}"
+        open_webui_session_cookie_same_site: "{{ serverclaw_session_cookie_same_site }}"
+        open_webui_auth_cookie_same_site: "{{ serverclaw_auth_cookie_same_site }}"
+        open_webui_session_cookie_secure: "{{ serverclaw_session_cookie_secure }}"
+        open_webui_auth_cookie_secure: "{{ serverclaw_auth_cookie_secure }}"
+
+  post_tasks:
+    - name: Run shared post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: serverclaw
+        playbook_execution_post_verify_audit_action: playbook.verify.serverclaw
+
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: serverclaw
+
+- name: Publish ServerClaw through the NGINX edge
+  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+  tags:
+    - tier-2
+    - access
+    - service-serverclaw
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.nginx_edge_publication
