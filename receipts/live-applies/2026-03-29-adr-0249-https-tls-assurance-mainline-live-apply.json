@@ -6,7 +6,7 @@
   "recorded_on": "2026-03-29",
   "recorded_at": "2026-03-29T15:27:39Z",
   "recorded_by": "codex",
-  "source_commit": "ecec4e4cf951715d08d8b93ccf66e80434c4c33d",
+  "source_commit": "5d59c7aa08b00179bf8414f68c1bef650739c6e3",
   "repo_version_context": "0.177.80",
   "platform_version_context": "0.130.54",
   "workflow_id": "adr-0249-https-tls-assurance-mainline-live-apply",
@@ -90,7 +90,7 @@
   ],
   "notes": [
     "The earlier 2026-03-28 branch-local receipt remains in the repo as historical comparison evidence, but this 2026-03-29 mainline replay is the canonical receipt carried into `main`.",
-    "While the 2026-03-29 production testssl.sh replay was running, origin/main advanced by ADR-only commits `49952dc7` and `c0acb8a8`; the workstream was rebased onto them without another live replay because those commits only changed ADR documents and the generated ADR index.",
-    "This exact-main receipt is carried into `main` by release `0.177.81`, and platform version `0.130.55` is the first integrated platform version that records the merged ADR 0249 HTTPS/TLS assurance replay."
+    "After this receipt was first recorded, origin/main advanced through the ADR 0236 exact-main replay and release `0.177.81` / platform `0.130.55`; once ADR 0249 was rebased onto that latest mainline, a refreshed live server check still reported the same 33 active HTTPS/TLS targets and 99 rules on monitoring-lv3, so no second monitoring replay was required before merge.",
+    "This exact-main receipt is carried into `main` by release `0.177.82`, and platform version `0.130.56` is the first integrated platform version that records the merged ADR 0249 HTTPS/TLS assurance replay."
   ]
 }

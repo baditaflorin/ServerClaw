@@ -3,8 +3,8 @@
 - ADR: [ADR 0249](../adr/0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md)
 - Title: live apply HTTPS and TLS assurance through Prometheus blackbox probes and periodic `testssl.sh` scans
 - Status: live_applied
-- Implemented In Repo Version: 0.177.81
-- Live Applied In Platform Version: 0.130.55
+- Implemented In Repo Version: 0.177.82
+- Live Applied In Platform Version: 0.130.56
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0249-live-apply`
@@ -41,5 +41,5 @@
 ## Notes For The Next Assistant
 
 - The canonical merge-to-main receipt is `receipts/live-applies/2026-03-29-adr-0249-https-tls-assurance-mainline-live-apply.json`; the older 2026-03-28 branch-local receipt remains as historical comparison evidence.
-- While the 2026-03-29 `testssl.sh` replay was running, `origin/main` advanced by ADR-only commits `49952dc7` and `c0acb8a8`; this workstream was rebased onto them without another live replay because those commits only changed ADR documents and the generated ADR index.
+- While ADR 0249 was being integrated, `origin/main` advanced through the ADR 0236 exact-main replay and release `0.177.81` / platform `0.130.55`; after rebasing onto that current mainline, a refreshed live server check still reported the same ADR 0249 monitoring state with 33 active HTTPS/TLS targets and 99 rules, so no second monitoring replay was required before merge.
 - The 2026-03-29 60-second production replay completed faster and with fewer timeouts than the earlier 2026-03-28 comparison baseline, so this branch keeps the 60-second default.
