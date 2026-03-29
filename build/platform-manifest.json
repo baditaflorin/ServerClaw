@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.86",
+  "repo_version": "0.177.87",
   "platform_version": "0.130.59",
-  "generated_at": "2026-03-29T20:22:23Z",
-  "next_refresh_at": "2026-03-29T21:22:23Z",
+  "generated_at": "2026-03-29T20:46:28Z",
+  "next_refresh_at": "2026-03-29T21:46:28Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4412,10 +4412,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.85",
+    "last_version": "0.177.86",
     "deployed_at": "2026-03-29",
-    "summary": "implemented ADR 0251 by declaring stage-scoped smoke suites, enforcing structured smoke evidence on staged promotion receipts, seeding Windmill with the same repo-managed smoke runner used for live verification, and carrying the latest worker-runtime hardening needed for the exact-main replay path",
-    "release_notes_url": "docs/release-notes/0.177.86.md"
+    "summary": "records ADR 0251 exact-main durable verification on the latest realistic origin/main by marking the stage-scoped smoke suite and promotion-gate workflow fully live, preserving the live worker checkout, gate-status, runtime-assurance, and ops-portal verification on release 0.177.87 while the current verified platform baseline remains 0.130.59",
+    "release_notes_url": "docs/release-notes/0.177.87.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

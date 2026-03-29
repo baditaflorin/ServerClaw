@@ -89,12 +89,7 @@ windmill_ledger_postgres_password: >-
     | trim
   }}
 windmill_ledger_dsn: >-
-  {%- set password = windmill_ledger_postgres_password | trim -%}
-  {%- if password | length == 0 -%}
-  {{ "" }}
-  {%- else -%}
-  postgresql://{{ windmill_ledger_postgres_user }}:{{ password | urlencode | replace('/', '%2F') }}@{{ windmill_ledger_postgres_host }}:{{ windmill_ledger_postgres_port }}/{{ windmill_ledger_postgres_database }}?sslmode=disable
-  {%- endif -%}
+  {%- set password = windmill_ledger_postgres_password | trim -%}{%- if password | length == 0 -%}{{ "" }}{%- else -%}postgresql://{{ windmill_ledger_postgres_user }}:{{ password | urlencode | replace('/', '%2F') }}@{{ windmill_ledger_postgres_host }}:{{ windmill_ledger_postgres_port }}/{{ windmill_ledger_postgres_database }}?sslmode=disable{%- endif -%}
 windmill_ledger_nats_username: jetstream-admin
 windmill_ledger_nats_host: "{{ ansible_host }}"
 windmill_ledger_nats_port: 4222
@@ -106,12 +101,7 @@ windmill_ledger_nats_password: >-
     | trim
   }}
 windmill_ledger_nats_url: >-
-  {%- set password = windmill_ledger_nats_password | trim -%}
-  {%- if password | length == 0 -%}
-  {{ "" }}
-  {%- else -%}
-  nats://{{ windmill_ledger_nats_username }}:{{ password | urlencode | replace('/', '%2F') }}@{{ windmill_ledger_nats_host }}:{{ windmill_ledger_nats_port }}
-  {%- endif -%}
+  {%- set password = windmill_ledger_nats_password | trim -%}{%- if password | length == 0 -%}{{ "" }}{%- else -%}nats://{{ windmill_ledger_nats_username }}:{{ password | urlencode | replace('/', '%2F') }}@{{ windmill_ledger_nats_host }}:{{ windmill_ledger_nats_port }}{%- endif -%}
 windmill_superadmin_secret_remote_file: "{{ windmill_secret_dir }}/superadmin-secret"
 windmill_local_artifact_dir: "{{ windmill_controller_repo_common_root ~ '/.local/windmill' }}"
 windmill_superadmin_secret_local_file: "{{ windmill_local_artifact_dir }}/superadmin-secret.txt"
