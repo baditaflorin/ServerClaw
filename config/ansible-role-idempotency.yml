@@ -154,6 +154,12 @@ roles:
   mattermost_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  matrix_synapse_postgres:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  matrix_synapse_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   monitoring_mattermost_notifications:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
