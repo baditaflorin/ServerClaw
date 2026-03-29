@@ -1,0 +1,62 @@
+---
+- name: Read OpenBao seal status before {{ openbao_unseal_context | default('managed verification') }}
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: openbao_runtime_seal_status
+  retries: 12
+  delay: 2
+  until: openbao_runtime_seal_status.status == 200
+  changed_when: false
+
+- name: Unseal OpenBao when it becomes sealed during {{ openbao_unseal_context | default('managed verification') }}
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/unseal"
+    method: POST
+    body_format: json
+    body:
+      key: "{{ item }}"
+    status_code: 200
+  loop: "{{ openbao_unseal_init_payload.keys_base64[: (openbao_init_key_threshold | int)] }}"
+  register: openbao_runtime_reseal_recovery
+  retries: 6
+  delay: 2
+  until: openbao_runtime_reseal_recovery.status == 200
+  when: openbao_runtime_seal_status.json.sealed | bool
+  no_log: true
+
+- name: Confirm OpenBao is unsealed before {{ openbao_unseal_context | default('managed verification') }}
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: openbao_runtime_unsealed_status
+  retries: 12
+  delay: 2
+  until: openbao_runtime_unsealed_status.status == 200
+  changed_when: false
+
+- name: Assert OpenBao is unsealed before {{ openbao_unseal_context | default('managed verification') }}
+  ansible.builtin.assert:
+    that:
+      - not (openbao_runtime_unsealed_status.json.sealed | bool)
+    fail_msg: >-
+      OpenBao remained sealed before {{ openbao_unseal_context | default('managed verification') }}.
+
+- name: Wait for OpenBao to become active before {{ openbao_unseal_context | default('managed verification') }}
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"
+    method: GET
+    status_code:
+      - 200
+      - 429
+      - 472
+      - 473
+  register: openbao_runtime_active_health
+  retries: 24
+  delay: 5
+  until: openbao_runtime_active_health.status in [200, 429, 472, 473]
+  changed_when: false

@@ -148,17 +148,26 @@
     group: "{{ openbao_runtime_gid }}"
     mode: "0644"
 
+- name: Check whether the OpenBao external TLS certificate remains fresh enough
+  ansible.builtin.command:
+    argv:
+      - openssl
+      - x509
+      - -checkend
+      - "{{ openbao_tls_cert_renew_before_seconds | string }}"
+      - -noout
+      - -in
+      - "{{ openbao_tls_server_cert_host_file }}"
+  register: openbao_tls_certificate_freshness
+  changed_when: false
+  failed_when: false
+
 - name: Issue or renew the OpenBao external TLS certificate
   vars:
     mutation_audit_action: issue.openbao_tls_certificate
     mutation_audit_target: openbao-runtime
   ansible.builtin.shell: |
     set -euo pipefail
-    if [ -s "{{ openbao_tls_server_cert_host_file }}" ] && \
-      openssl x509 -checkend {{ openbao_tls_cert_renew_before_seconds }} -noout -in "{{ openbao_tls_server_cert_host_file }}" >/dev/null 2>&1; then
-      exit 0
-    fi
-
     step ca certificate \
       --force \
       --provisioner services \
@@ -181,6 +190,7 @@
     executable: /bin/bash
   register: openbao_tls_certificate_issue
   changed_when: "'changed' in openbao_tls_certificate_issue.stdout"
+  when: openbao_tls_certificate_freshness.rc != 0
   no_log: true
   tags:
     - mutation
@@ -1125,6 +1135,12 @@
   delegate_to: localhost
   become: false
   no_log: true
+
+- name: Ensure OpenBao remains unsealed before authentication verification
+  ansible.builtin.include_tasks: ensure_unsealed.yml
+  vars:
+    openbao_unseal_context: authentication verification
+    openbao_unseal_init_payload: "{{ openbao_init_payload }}"
 
 - name: Verify userpass login for the ops operator
   ansible.builtin.uri:

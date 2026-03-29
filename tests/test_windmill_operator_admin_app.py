@@ -462,7 +462,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Removed stale immutable files from the Windmill worker checkout" in tasks
     assert "Remove the remote manifest for the Windmill worker checkout contents" in tasks
     assert "Remove the local manifest for the Windmill worker checkout contents" in tasks
-    assert "windmill_worker_checkout_manifest_remote_file" in tasks
+    assert "windmill_worker_checkout_manifest_remote.path" in tasks
     assert "windmill_worker_checkout_prune_preserve_paths" in tasks
     assert "scripts/windmill_run_wait_result.py" in tasks
     assert "--payload-json" in tasks
