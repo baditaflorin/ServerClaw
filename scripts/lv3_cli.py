@@ -36,6 +36,7 @@ from dependency_graph import dependency_summary, load_dependency_graph
 from environment_catalog import environment_choices, primary_environment
 from platform.conflict import IntentConflictRegistry
 from repo_package_loader import load_repo_package
+from repo_deploy_profiles import profile_by_id
 import runbook_executor
 
 try:
@@ -487,6 +488,45 @@ def resolve_deploy_repo_command(
             "ACTION=deploy-repo",
             f"COOLIFY_ARGS={command_string(coolify_args)}",
         ],
+    )
+
+
+def resolve_deploy_repo_profile_command(
+    *,
+    profile_id: str,
+    branch: str | None,
+    wait: bool,
+    force: bool,
+    timeout: int,
+    max_deploy_attempts: int,
+    retry_delay: int,
+) -> CommandPlan:
+    _, profile = profile_by_id(profile_id)
+    extra_args: list[str] = []
+    if branch:
+        extra_args.extend(["--branch", branch])
+    if wait:
+        extra_args.append("--wait")
+    if force:
+        extra_args.append("--force")
+    if timeout != 900:
+        extra_args.extend(["--timeout", str(timeout)])
+    if max_deploy_attempts != 3:
+        extra_args.extend(["--max-deploy-attempts", str(max_deploy_attempts)])
+    if retry_delay != 15:
+        extra_args.extend(["--retry-delay", str(retry_delay)])
+
+    command = [
+        "make",
+        "deploy-repo-profile",
+        f"PROFILE={profile_id}",
+    ]
+    if extra_args:
+        command.append(f"DEPLOY_PROFILE_ARGS={command_string(extra_args)}")
+    return CommandPlan(
+        label=f"deploy-repo-profile {profile['app_name']}",
+        route="controller local -> repo deploy profile catalog -> Coolify API wrapper",
+        command=command,
     )
 
 
@@ -2581,6 +2621,20 @@ def build_parser() -> argparse.ArgumentParser:
     deploy_repo.add_argument("--timeout", type=int, default=900)
     deploy_repo.add_argument("--max-deploy-attempts", type=int, default=3)
     deploy_repo.add_argument("--retry-delay", type=int, default=15)
+
+    deploy_repo_profile = subparsers.add_parser(
+        "deploy-repo-profile",
+        help="Deploy one named repo-deploy profile through the governed Coolify wrapper.",
+    )
+    deploy_repo_profile.add_argument("profile")
+    deploy_repo_profile.add_argument("--branch", help="Override the catalog branch.")
+    deploy_repo_profile.add_argument("--wait", action="store_true")
+    deploy_repo_profile.add_argument("--force", action="store_true")
+    deploy_repo_profile.add_argument("--timeout", type=int, default=900)
+    deploy_repo_profile.add_argument("--max-deploy-attempts", type=int, default=3)
+    deploy_repo_profile.add_argument("--retry-delay", type=int, default=15)
+    deploy_repo_profile.add_argument("--dry-run", action="store_true")
+    deploy_repo_profile.add_argument("--explain", action="store_true")
     deploy_repo.add_argument("--dry-run", action="store_true")
     deploy_repo.add_argument("--explain", action="store_true")
 
@@ -2980,6 +3034,21 @@ def main(argv: list[str] | None = None) -> int:
                 docker_compose_location=args.docker_compose_location,
                 compose_domains=args.compose_domain,
                 publish_directory=args.publish_directory,
+                wait=args.wait,
+                force=args.force,
+                timeout=args.timeout,
+                max_deploy_attempts=args.max_deploy_attempts,
+                retry_delay=args.retry_delay,
+            ),
+            dry_run=args.dry_run,
+            explain=args.explain,
+            no_color=no_color,
+        )
+    if args.command == "deploy-repo-profile":
+        return run_plan(
+            resolve_deploy_repo_profile_command(
+                profile_id=args.profile,
+                branch=args.branch,
                 wait=args.wait,
                 force=args.force,
                 timeout=args.timeout,

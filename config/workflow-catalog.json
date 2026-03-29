@@ -4224,6 +4224,51 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "deploy-repo-profile": {
+      "description": "Deploy one named repo-deploy profile through the governed Coolify lane without restating raw repository, domain, and compose arguments.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "deploy-repo-profile",
+        "command": "make deploy-repo-profile PROFILE=education-wemeshup-production DEPLOY_PROFILE_ARGS='--wait'"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "coolify_admin_auth"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/configure-coolify.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/repo-deploy-catalog.json",
+        "docs/schema/repo-deploy-catalog.schema.json",
+        "scripts/repo_deploy_profiles.py",
+        "scripts/coolify_tool.py",
+        "scripts/lv3_cli.py"
+      ],
+      "outputs": [
+        "A named repo-deploy profile expands into the governed Coolify deployment contract and refreshes one approved application from committed upstream Git state."
+      ],
+      "verification_commands": [
+        "python3 scripts/repo_deploy_profiles.py show education-wemeshup-production",
+        "make deploy-repo-profile PROFILE=education-wemeshup-production DEPLOY_PROFILE_ARGS='--wait'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "configure-backup-vm": {
       "description": "Converge the dedicated backup VM, host-side PBS integration, and the optional ADR 0100 off-site copy of backup-lv3.",
       "lifecycle_status": "active",
