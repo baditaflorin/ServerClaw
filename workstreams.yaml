@@ -161,12 +161,6 @@ workstreams:
     ready_to_merge: true
     live_applied: true
     canonical_truth:
-      changelog_entry: implemented ADR 0282 by adding Mailpit as the private
-        SMTP development interceptor, wiring staging SMTP consumers to the
-        dev-tools relay contract, and verifying guest-network message capture
-        end to end
-      release_bump: patch
-      included_in_repo_version: null
       latest_receipts:
         mailpit: 2026-03-30-adr-0282-mailpit-live-apply
   - id: ws-0266-validation-runner-capability-contracts
