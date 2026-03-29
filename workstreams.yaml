@@ -739,7 +739,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implements ADR 0232 by adding the private Nomad scheduler, controller-local TLS and ACL bootstrap, Proxmox proxy and firewall wiring, and repo-managed smoke jobs for durable batch and long-running internal workloads
       release_bump: patch
-      included_in_repo_version: 0.177.64
+      included_in_repo_version: 0.177.65
       latest_receipts:
         nomad_scheduler: 2026-03-29-adr-0232-nomad-mainline-live-apply
   - id: ws-0232-main-merge
@@ -787,7 +787,7 @@ workstreams:
       - VERSION
       - changelog.md
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.64.md
+      - docs/release-notes/0.177.65.md
       - versions/stack.yaml
       - build/platform-manifest.json
       - docs/site-generated/architecture/dependency-graph.md
@@ -818,7 +818,7 @@ workstreams:
             - VERSION
             - changelog.md
             - docs/release-notes/README.md
-            - docs/release-notes/0.177.64.md
+            - docs/release-notes/0.177.65.md
             - versions/stack.yaml
             - build/platform-manifest.json
             - docs/site-generated/architecture/dependency-graph.md

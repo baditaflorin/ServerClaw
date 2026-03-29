@@ -3,7 +3,7 @@
 - ADR: [ADR 0232](../adr/0232-nomad-for-durable-batch-and-long-running-internal-jobs.md)
 - Title: Live apply and end-to-end verification for the private Nomad scheduler
 - Status: live_applied
-- Implemented In Repo Version: 0.177.64
+- Implemented In Repo Version: 0.177.65
 - Live Applied In Platform Version: 0.130.44
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
@@ -46,18 +46,18 @@
   failed closed at the immutable guest replacement guard, then succeeded with
   `ALLOW_IN_PLACE_MUTATION=true` as the documented ADR 0191 narrow exception
 - the final exact-main recap was `docker-build-lv3 ok=83 changed=5 failed=0`,
-  `docker-runtime-lv3 ok=92 changed=2 failed=0`,
+  `docker-runtime-lv3 ok=95 changed=5 failed=0`,
   `localhost ok=12 changed=0 failed=0`,
   `monitoring-lv3 ok=98 changed=2 failed=0`, and
-  `proxmox_florin ok=50 changed=1 failed=0`
+  `proxmox_florin ok=51 changed=4 failed=0`
 - post-replay verification re-confirmed leader `"10.10.10.40:4647"`, nodes
   `docker-runtime-lv3 ready runtime` and `docker-build-lv3 ready build`, the
   smoke service deployment as `successful`, and the durable batch marker
-  timestamp `2026-03-29T01:57:54+00:00`
+  timestamp `2026-03-29T02:19:07+00:00`
 
 ## Mainline Integration Outcome
 
-- recorded in repository version `0.177.64`
+- recorded in repository version `0.177.65`
 - kept the platform baseline at `0.130.44` because the verified replay was
   performed from the current live `origin/main` base
 - promoted canonical receipt
