@@ -81,17 +81,26 @@
 
 - `uv run --with pytest python -m pytest -q tests/test_mailpit_runtime_role.py tests/test_mailpit_playbook.py tests/test_keycloak_runtime_role.py tests/test_mail_platform_verify_playbook.py`
 - `make syntax-check-mailpit`
+- `uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py validate`
 - `uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --run-id ws0282syntax --playbook playbooks/services/mailpit.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check`
 - `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=mailpit env=production`
 - `ansible-playbook -i inventory/hosts.yml playbooks/mail-platform-verify.yml --private-key .local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e env=staging --syntax-check`
+- `./scripts/validate_repo.sh workstream-surfaces agent-standards health-probes`
+- `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
+- `make check-canonical-truth`
+- `make validate-generated-slo`
+- `make validate-generated-docs`
+- `make validate-generated-portals`
 
 ## Results
 
-- Branch-local live apply succeeded from commit `ae60394c67d15486f7d64a90b327bac4ad0e7174`.
+- Branch-local live apply succeeded from rebased commit `bd15ecd2965e4e6213f0608f5bf8d9dae9ee1594`.
 - Receipt: `receipts/live-applies/2026-03-30-adr-0282-mailpit-live-apply.json`
 - The first governed replay exposed a real role-contract bug (`platform service catalog must be a mapping`); commit `ae60394c67d15486f7d64a90b327bac4ad0e7174` repaired the topology lookup and the second replay completed cleanly.
-- `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=mailpit env=production` finished with `docker-runtime-lv3 : ok=95 changed=7 unreachable=0 failed=0 skipped=17 rescued=0 ignored=0`.
+- `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=mailpit env=production` finished with `docker-runtime-lv3 : ok=96 changed=5 unreachable=0 failed=0 skipped=16 rescued=0 ignored=0`.
+- The full validation sweep now passes on the rebased worktree, including the scoped runner, canonical-truth check, generated SLO rules, generated docs, and generated portals.
 - Independent post-apply Ansible verification on `docker-runtime-lv3` returned Mailpit info with `Version=v1.29.5`, and a second probe from `monitoring-lv3` sent SMTP to `10.10.10.20:1025` and confirmed one captured message through `http://10.10.10.20:8025/api/v1/messages`.
+- Generated architecture surfaces were reconciled on the branch by regenerating `docs/diagrams/*.excalidraw` and removing a stray conflict marker from `docs/site-generated/architecture/dependency-graph.md`, allowing `make validate-generated-docs` to pass.
 
 ## Merge-To-Main Notes
 

@@ -21,7 +21,6 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-<<<<<<< HEAD
 | `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, Mail Platform, Mailpit, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
 | `2` | Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Excalidraw, Gitea, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Open WebUI, Outline, Plane, Public Status Page, Semaphore, ServerClaw, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway |
