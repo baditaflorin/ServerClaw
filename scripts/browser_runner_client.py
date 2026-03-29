@@ -35,6 +35,17 @@ def build_headers(
     return headers
 
 
+def normalize_session_payload(payload: dict[str, Any] | str) -> dict[str, Any]:
+    if isinstance(payload, str):
+        try:
+            payload = json.loads(payload)
+        except json.JSONDecodeError as exc:
+            raise ValueError("session payload string must contain a JSON object") from exc
+    if not isinstance(payload, dict):
+        raise ValueError("session payload must be a JSON object")
+    return payload
+
+
 def request_json(
     base_url: str,
     path: str,
@@ -75,11 +86,12 @@ def get_health(
 
 def run_session(
     base_url: str,
-    payload: dict[str, Any],
+    payload: dict[str, Any] | str,
     *,
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
     headers: dict[str, str] | None = None,
 ) -> dict[str, Any]:
+    payload = normalize_session_payload(payload)
     return request_json(
         base_url,
         "/sessions",

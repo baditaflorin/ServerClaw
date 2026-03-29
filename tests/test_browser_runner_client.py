@@ -72,6 +72,23 @@ def test_run_session_posts_json_payload() -> None:
     assert ("Authorization", "Bearer test") in captured["headers"].items()
 
 
+def test_run_session_accepts_stringified_json_payload() -> None:
+    captured: dict[str, object] = {}
+
+    def fake_urlopen(request, timeout=0):  # noqa: ANN001
+        captured["body"] = json.loads(request.data.decode("utf-8"))
+        return FakeResponse({"status": "ok", "run_id": "abc123"})
+
+    with patch("urllib.request.urlopen", side_effect=fake_urlopen):
+        payload = browser_runner_client.run_session(
+            "http://browser-runner.test",
+            json.dumps({"url": "https://example.com", "timeout_seconds": 12}),
+        )
+
+    assert payload == {"status": "ok", "run_id": "abc123"}
+    assert captured["body"] == {"url": "https://example.com", "timeout_seconds": 12}
+
+
 def test_get_health_requests_healthz_endpoint() -> None:
     with patch("urllib.request.urlopen", return_value=FakeResponse({"status": "ok"})) as mocked:
         payload = browser_runner_client.get_health("http://browser-runner.test")
