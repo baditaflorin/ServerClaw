@@ -852,6 +852,47 @@
       }
     },
     {
+      "id": "nextcloud",
+      "name": "Nextcloud",
+      "description": "Repo-managed personal data plane for durable files, attachments, and DAV-backed calendars, contacts, and tasks.",
+      "category": "data",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8084",
+      "public_url": "https://cloud.lv3.org",
+      "subdomain": "cloud.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Nextcloud Public Status",
+      "health_probe_id": "nextcloud",
+      "image_catalog_ids": [
+        "nextcloud_runtime",
+        "nextcloud_redis_runtime"
+      ],
+      "secret_catalog_ids": [
+        "nextcloud_database_password",
+        "nextcloud_admin_password",
+        "nextcloud_redis_password"
+      ],
+      "adr": "0260",
+      "runbook": "docs/runbooks/configure-nextcloud.md",
+      "tags": [
+        "files",
+        "webdav",
+        "caldav",
+        "carddav",
+        "personal-data"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://cloud.lv3.org",
+          "subdomain": "cloud.lv3.org",
+          "notes": "Published through the shared NGINX edge while Nextcloud itself enforces session, login, and DAV discovery behavior."
+        }
+      }
+    },
+    {
       "id": "open_webui",
       "name": "Open WebUI",
       "description": "Private operator and agent workbench for governed platform interactions.",

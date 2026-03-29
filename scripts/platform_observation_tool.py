@@ -42,6 +42,7 @@ from platform.health.semantics import (
     classify_runtime_state,
     legacy_status_for_runtime_state,
 )
+from scripts.docker_publication_assurance import build_remote_command
 from tls_cert_probe import collect_certificate_results
 
 
@@ -359,6 +360,7 @@ def build_service_probes(catalog: dict[str, Any]) -> list[dict[str, Any]]:
                     "target": service["owning_vm"],
                     "phase": phase,
                     "definition": service[phase],
+                    "service_definition": service,
                 }
             )
     return probes
@@ -386,7 +388,7 @@ def execute_structured_probe(context: dict[str, Any], probe: dict[str, Any]) -> 
             "stderr": truncate(result.stderr),
             "ok": ok,
         }
-        return ok, detail
+        return apply_docker_publication_assertion(context, probe, runner, target, ok, detail)
 
     if kind == "command":
         command = join_argv(probe_definition["argv"])
@@ -405,7 +407,7 @@ def execute_structured_probe(context: dict[str, Any], probe: dict[str, Any]) -> 
             "stderr": truncate(result.stderr),
             "ok": ok,
         }
-        return ok, detail
+        return apply_docker_publication_assertion(context, probe, runner, target, ok, detail)
 
     if kind == "http":
         command = build_http_probe_command(probe_definition)
@@ -426,7 +428,7 @@ def execute_structured_probe(context: dict[str, Any], probe: dict[str, Any]) -> 
             "stderr": truncate(result.stderr),
             "ok": ok,
         }
-        return ok, detail
+        return apply_docker_publication_assertion(context, probe, runner, target, ok, detail)
 
     if kind == "tcp":
         command = build_tcp_probe_command(probe_definition)
@@ -445,9 +447,62 @@ def execute_structured_probe(context: dict[str, Any], probe: dict[str, Any]) -> 
             "stderr": truncate(result.stderr),
             "ok": ok,
         }
-        return ok, detail
+        return apply_docker_publication_assertion(context, probe, runner, target, ok, detail)
 
     raise ValueError(f"Unsupported structured probe kind: {kind}")
+
+
+def apply_docker_publication_assertion(
+    context: dict[str, Any],
+    probe: dict[str, Any],
+    runner: str,
+    target: str,
+    probe_ok: bool,
+    detail: dict[str, Any],
+) -> tuple[bool, dict[str, Any]]:
+    service_definition = probe.get("service_definition")
+    if probe.get("phase") != "readiness" or not isinstance(service_definition, dict):
+        return probe_ok, detail
+
+    readiness = service_definition.get("readiness")
+    if not isinstance(readiness, dict):
+        return probe_ok, detail
+
+    contract = readiness.get("docker_publication")
+    if not isinstance(contract, dict):
+        return probe_ok, detail
+
+    command = join_argv(
+        build_remote_command(
+            service_id=probe["service_id"],
+            service_probe=service_definition,
+            contract=contract,
+            heal=False,
+        )
+    )
+    result = execute_runner(context, runner, target, command)
+    try:
+        publication_payload = json.loads(result.stdout) if result.stdout else {}
+    except json.JSONDecodeError:
+        publication_payload = {"ok": False, "summary": truncate(result.stdout)}
+
+    publication_ok = result.returncode == 0 and publication_payload.get("ok") is True
+    detail["docker_publication"] = {
+        "ok": publication_ok,
+        "summary": publication_payload.get("summary", ""),
+        "container_name": contract.get("container_name"),
+    }
+    if probe_ok and publication_ok:
+        return True, detail
+
+    detail["ok"] = False
+    detail["stderr"] = truncate(
+        publication_payload.get("summary")
+        or result.stderr
+        or detail.get("stderr", "")
+        or "docker publication contract failed"
+    )
+    return False, detail
 
 
 def load_active_degradations() -> dict[str, list[dict[str, Any]]]:

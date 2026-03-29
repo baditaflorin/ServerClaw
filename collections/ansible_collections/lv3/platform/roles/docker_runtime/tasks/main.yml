@@ -1,4 +1,25 @@
 ---
+# Purpose: Install and configure Docker Engine, its network prerequisites, and the publication assurance helper on managed Debian guests.
+# Use case: Run from the docker_runtime role during converge of the shared Docker hosts.
+#
+# Inputs (required):
+#   - docker_runtime_prereq_packages, docker_runtime_conflicting_packages, docker_runtime_engine_packages
+#   - docker_runtime_admin_users, docker_runtime_apt_key_url, docker_runtime_apt_keyring_path
+#   - docker_runtime_apt_repo_file, docker_runtime_apt_repo_uri
+#
+# Inputs (optional):
+#   - docker_runtime_* overrides for daemon config, public-edge aliases, bridge-chain checks, and helper install path.
+#
+# Outputs:
+#   - Docker Engine installed, configured, and prepared for bridge/NAT recovery and service publication verification.
+#
+# Idempotency: Fully idempotent
+#              Package, file, and service tasks reconcile managed state and only change the host when drift exists.
+#
+# Dependencies:
+#   - ADR 0023: Docker runtime VM baseline.
+#   - ADR 0270: Docker publication self-healing and port-programming assertions.
+#   - Role: lv3.platform.common - shared assertion, directory, and bridge-chain helpers.
 - name: Validate Docker runtime inputs
   ansible.builtin.include_role:
     name: lv3.platform.common
@@ -84,6 +105,15 @@
     dest: /etc/docker/daemon.json
     mode: "0644"
   notify: Restart Docker
+
+- name: Install the Docker publication assurance helper
+  ansible.builtin.copy:
+    content: "{{ lookup('ansible.builtin.file', (inventory_dir | dirname) ~ '/scripts/docker_publication_assurance.py') }}"
+    dest: "{{ docker_runtime_publication_assurance_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+
 - name: Check whether nftables config exists
   ansible.builtin.stat:
     path: "{{ docker_runtime_nftables_config_file }}"
@@ -154,67 +184,15 @@
 - name: Flush Docker handlers before chain health checks
   ansible.builtin.meta: flush_handlers
 
-- name: Check whether Docker nat chain exists
-  ansible.builtin.command: iptables -t nat -S DOCKER
-  register: docker_runtime_nat_chain_check
-  changed_when: false
-  failed_when: docker_runtime_nat_chain_check.rc not in [0, 1]
-  when: docker_runtime_require_nat_chain | bool
-
-- name: Check whether Docker forward chain exists
-  ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
-  register: docker_runtime_forward_chain_check
-  changed_when: false
-  failed_when: docker_runtime_forward_chain_check.rc not in [0, 1]
-  when: docker_runtime_require_nat_chain | bool
-
-- name: Restart Docker when required chains are missing
-  ansible.builtin.systemd:
-    name: docker
-    state: restarted
-  when:
-    - docker_runtime_require_nat_chain | bool
-    - docker_runtime_nat_chain_check.rc == 1 or docker_runtime_forward_chain_check.rc == 1
-
-- name: Recheck Docker nat chain after restart
-  ansible.builtin.command: iptables -t nat -S DOCKER
-  register: docker_runtime_nat_chain_recheck
-  changed_when: false
-  failed_when: docker_runtime_nat_chain_recheck.rc not in [0, 1]
-  retries: "{{ docker_runtime_chain_recheck_retries }}"
-  delay: "{{ docker_runtime_chain_recheck_delay_seconds }}"
-  until: docker_runtime_nat_chain_recheck.rc == 0
-  when: docker_runtime_require_nat_chain | bool
-
-- name: Recheck Docker forward chain after restart
-  ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
-  register: docker_runtime_forward_chain_recheck
-  changed_when: false
-  failed_when: docker_runtime_forward_chain_recheck.rc not in [0, 1]
-  retries: "{{ docker_runtime_chain_recheck_retries }}"
-  delay: "{{ docker_runtime_chain_recheck_delay_seconds }}"
-  until: docker_runtime_forward_chain_recheck.rc == 0
-  when: docker_runtime_require_nat_chain | bool
-
-- name: Assert Docker nat chain is present
-  ansible.builtin.command: iptables -t nat -S DOCKER
-  register: docker_runtime_nat_chain_assert
-  changed_when: false
-  failed_when: docker_runtime_nat_chain_assert.rc != 0
-  retries: 3
-  delay: 1
-  until: docker_runtime_nat_chain_assert.rc == 0
-  when: docker_runtime_require_nat_chain | bool
-
-- name: Assert Docker filter forward chain is present
-  ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
-  register: docker_runtime_forward_chain_assert
-  changed_when: false
-  failed_when: docker_runtime_forward_chain_assert.rc != 0
-  retries: 3
-  delay: 1
-  until: docker_runtime_forward_chain_assert.rc == 0
-  when: docker_runtime_require_nat_chain | bool
+- name: Ensure Docker bridge networking chains are present
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_bridge_chains
+  vars:
+    common_docker_bridge_chains_service_name: docker
+    common_docker_bridge_chains_require_nat_chain: "{{ docker_runtime_require_nat_chain }}"
+    common_docker_bridge_chains_retries: "{{ docker_runtime_chain_recheck_retries }}"
+    common_docker_bridge_chains_delay: "{{ docker_runtime_chain_recheck_delay_seconds }}"
 
 - name: Verify Docker runtime health probes
   ansible.builtin.import_tasks: verify.yml

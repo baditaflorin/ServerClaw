@@ -43,6 +43,373 @@ workstreams:
     canonical_truth:
       latest_receipts:
         artifact_cache_plane: 2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply
+  - id: ws-0260-live-apply
+    adr: "0260"
+    title: Live-apply ADR 0260 Nextcloud personal data plane from latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0260-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0260-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0260-live-apply.md
+    depends_on:
+      - adr-0206-ports-and-adapters-for-external-integrations
+      - adr-0259-n8n-as-the-external-app-connector-fabric-for-serverclaw
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0260-live-apply.md
+      - docs/adr/0260-nextcloud-as-the-canonical-personal-data-plane-for-serverclaw.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/configure-nextcloud.md
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - scripts/generate_platform_vars.py
+      - scripts/restore_verification.py
+      - config/ansible-execution-scopes.yaml
+      - config/ansible-role-idempotency.yml
+      - config/service-capability-catalog.json
+      - config/subdomain-catalog.json
+      - config/health-probe-catalog.json
+      - config/secret-catalog.json
+      - config/controller-local-secrets.json
+      - config/data-catalog.json
+      - config/dependency-graph.json
+      - config/service-redundancy-catalog.json
+      - config/slo-catalog.json
+      - config/service-completeness.json
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - config/capability-contract-catalog.json
+      - config/replaceability-review-catalog.json
+      - config/image-catalog.json
+      - config/grafana/dashboards/nextcloud.json
+      - config/grafana/dashboards/slo-overview.json
+      - config/alertmanager/rules/nextcloud.yml
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/slo_rules.yml
+      - config/uptime-kuma/monitors.json
+      - Makefile
+      - playbooks/nextcloud.yml
+      - playbooks/services/nextcloud.yml
+      - collections/ansible_collections/lv3/platform/playbooks/nextcloud.yml
+      - collections/ansible_collections/lv3/platform/playbooks/services/nextcloud.yml
+      - collections/ansible_collections/lv3/platform/plugins/filter/service_topology.py
+      - collections/ansible_collections/lv3/platform/roles/nextcloud_postgres/**
+      - collections/ansible_collections/lv3/platform/roles/nextcloud_runtime/**
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/**
+      - tests/test_nextcloud_playbook.py
+      - tests/test_nextcloud_runtime_role.py
+      - tests/test_generate_platform_vars.py
+      - tests/test_nginx_edge_publication_role.py
+      - tests/test_service_topology_filters.py
+      - tests/test_postgres_vm_access_policy.py
+      - tests/test_interface_contracts.py
+      - receipts/image-scans/2026-03-29-nextcloud-runtime.json
+      - receipts/image-scans/2026-03-29-nextcloud-runtime.trivy.json
+      - receipts/image-scans/2026-03-29-nextcloud-redis-runtime.json
+      - receipts/image-scans/2026-03-29-nextcloud-redis-runtime.trivy.json
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_contract
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: nextcloud_repo_surface
+          paths:
+            - docs/workstreams/ws-0260-live-apply.md
+            - docs/adr/0260-nextcloud-as-the-canonical-personal-data-plane-for-serverclaw.md
+            - docs/runbooks/configure-nextcloud.md
+            - playbooks/nextcloud.yml
+            - playbooks/services/nextcloud.yml
+            - collections/ansible_collections/lv3/platform/playbooks/nextcloud.yml
+            - collections/ansible_collections/lv3/platform/playbooks/services/nextcloud.yml
+            - collections/ansible_collections/lv3/platform/roles/nextcloud_postgres/**
+            - collections/ansible_collections/lv3/platform/roles/nextcloud_runtime/**
+            - config/grafana/dashboards/nextcloud.json
+            - config/alertmanager/rules/nextcloud.yml
+            - receipts/image-scans/2026-03-29-nextcloud-runtime.json
+            - receipts/image-scans/2026-03-29-nextcloud-runtime.trivy.json
+            - receipts/image-scans/2026-03-29-nextcloud-redis-runtime.json
+            - receipts/image-scans/2026-03-29-nextcloud-redis-runtime.trivy.json
+            - tests/test_nextcloud_playbook.py
+            - tests/test_nextcloud_runtime_role.py
+          mode: exclusive
+        - id: nextcloud_platform_catalog_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - scripts/generate_platform_vars.py
+            - scripts/restore_verification.py
+            - config/ansible-execution-scopes.yaml
+            - config/ansible-role-idempotency.yml
+            - config/service-capability-catalog.json
+            - config/subdomain-catalog.json
+            - config/health-probe-catalog.json
+            - config/secret-catalog.json
+            - config/controller-local-secrets.json
+            - config/data-catalog.json
+            - config/dependency-graph.json
+            - config/service-redundancy-catalog.json
+            - config/slo-catalog.json
+            - config/service-completeness.json
+            - config/workflow-catalog.json
+            - config/command-catalog.json
+            - config/capability-contract-catalog.json
+            - config/replaceability-review-catalog.json
+            - config/image-catalog.json
+            - config/grafana/dashboards/slo-overview.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/uptime-kuma/monitors.json
+            - Makefile
+            - collections/ansible_collections/lv3/platform/plugins/filter/service_topology.py
+            - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2
+            - tests/test_generate_platform_vars.py
+            - tests/test_nginx_edge_publication_role.py
+            - tests/test_service_topology_filters.py
+            - tests/test_postgres_vm_access_policy.py
+            - tests/test_interface_contracts.py
+          mode: shared_contract
+          contract: nextcloud-platform-catalogs-v1
+        - id: nextcloud_live_apply_receipts
+          paths:
+            - receipts/live-applies/*nextcloud*
+          mode: shared_contract
+          contract: live-apply-receipts-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0260 by deploying repo-managed Nextcloud
+        on docker-runtime-lv3 with a dedicated postgres backend, shared-edge
+        DAV publication, and verified personal-data-plane replay on the latest
+        realistic origin/main baseline
+      release_bump: patch
+      included_in_repo_version: 0.177.87
+      latest_receipts:
+        nextcloud: 2026-03-29-adr-0260-nextcloud-personal-data-plane-mainline-live-apply
+  - id: ws-0260-main-integration
+    adr: "0260"
+    title: Integrate ADR 0260 exact-main replay onto current origin/main
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0260-main-integration
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0260-main-integration
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0260-main-integration.md
+    depends_on:
+      - ws-0260-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0260-main-integration.md
+      - docs/workstreams/ws-0260-live-apply.md
+      - docs/adr/0260-nextcloud-as-the-canonical-personal-data-plane-for-serverclaw.md
+      - docs/adr/.index.yaml
+      - docs/adr/0094-developer-portal-and-documentation-site.md
+      - docs/runbooks/configure-nextcloud.md
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.87.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/site-generated/architecture/dependency-graph.md
+      - Makefile
+      - playbooks/docker-publication-assurance.yml
+      - playbooks/tasks/docker-publication-assert.yml
+      - playbooks/tasks/post-verify.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - docs/runbooks/docker-publication-assurance.md
+      - docs/runbooks/health-probe-contracts.md
+      - docs/runbooks/playbook-execution-model.md
+      - docs/workstreams/adr-0270-docker-publication-self-healing-and-port-programming-assertions.md
+      - collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml
+      - collections/ansible_collections/lv3/platform/playbooks/tasks/post-verify.yml
+      - scripts/generate_platform_vars.py
+      - scripts/docker_publication_assurance.py
+      - scripts/platform_observation_tool.py
+      - scripts/restore_verification.py
+      - scripts/validate_repository_data_models.py
+      - playbooks/nextcloud.yml
+      - playbooks/services/nextcloud.yml
+      - collections/ansible_collections/lv3/platform/playbooks/nextcloud.yml
+      - collections/ansible_collections/lv3/platform/playbooks/services/nextcloud.yml
+      - collections/ansible_collections/lv3/platform/plugins/filter/service_topology.py
+      - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/meta/argument_specs.yml
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/verify.yml
+      - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/nextcloud_postgres/**
+      - collections/ansible_collections/lv3/platform/roles/nextcloud_runtime/**
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2
+      - config/alertmanager/rules/nextcloud.yml
+      - config/ansible-execution-scopes.yaml
+      - config/ansible-role-idempotency.yml
+      - config/capability-contract-catalog.json
+      - config/certificate-catalog.json
+      - config/command-catalog.json
+      - config/controller-local-secrets.json
+      - config/data-catalog.json
+      - config/dependency-graph.json
+      - config/grafana/dashboards/nextcloud.json
+      - config/grafana/dashboards/slo-overview.json
+      - config/health-probe-catalog.json
+      - config/image-catalog.json
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/slo_rules.yml
+      - config/replaceability-review-catalog.json
+      - config/secret-catalog.json
+      - config/service-capability-catalog.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      - config/slo-catalog.json
+      - config/subdomain-catalog.json
+      - config/subdomain-exposure-registry.json
+      - config/uptime-kuma/monitors.json
+      - config/workflow-catalog.json
+      - tests/test_docker_runtime_role.py
+      - tests/test_docker_publication_assurance.py
+      - tests/test_docker_publication_assurance_playbook.py
+      - tests/test_generate_platform_vars.py
+      - tests/test_interface_contracts.py
+      - tests/test_linux_guest_firewall_role.py
+      - tests/test_nextcloud_playbook.py
+      - tests/test_nextcloud_runtime_role.py
+      - tests/test_nginx_edge_publication_role.py
+      - tests/test_platform_observation_tool.py
+      - tests/test_postgres_vm_access_policy.py
+      - tests/test_post_verify_tasks.py
+      - tests/test_service_topology_filters.py
+      - receipts/image-scans/2026-03-29-nextcloud-runtime.json
+      - receipts/image-scans/2026-03-29-nextcloud-runtime.trivy.json
+      - receipts/image-scans/2026-03-29-nextcloud-redis-runtime.json
+      - receipts/image-scans/2026-03-29-nextcloud-redis-runtime.trivy.json
+      - receipts/live-applies/2026-03-29-adr-0260-nextcloud-personal-data-plane-mainline-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: adr_0260_main_integration
+          paths:
+            - docs/workstreams/ws-0260-main-integration.md
+            - docs/workstreams/ws-0260-live-apply.md
+            - docs/adr/0260-nextcloud-as-the-canonical-personal-data-plane-for-serverclaw.md
+            - docs/adr/0094-developer-portal-and-documentation-site.md
+            - docs/runbooks/configure-nextcloud.md
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.87.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/site-generated/architecture/dependency-graph.md
+            - Makefile
+            - playbooks/docker-publication-assurance.yml
+            - playbooks/tasks/docker-publication-assert.yml
+            - playbooks/tasks/post-verify.yml
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - docs/runbooks/docker-publication-assurance.md
+            - docs/runbooks/health-probe-contracts.md
+            - docs/runbooks/playbook-execution-model.md
+            - docs/workstreams/adr-0270-docker-publication-self-healing-and-port-programming-assertions.md
+            - collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml
+            - collections/ansible_collections/lv3/platform/playbooks/tasks/post-verify.yml
+            - scripts/generate_platform_vars.py
+            - scripts/docker_publication_assurance.py
+            - scripts/platform_observation_tool.py
+            - scripts/restore_verification.py
+            - scripts/validate_repository_data_models.py
+            - playbooks/nextcloud.yml
+            - playbooks/services/nextcloud.yml
+            - collections/ansible_collections/lv3/platform/playbooks/nextcloud.yml
+            - collections/ansible_collections/lv3/platform/playbooks/services/nextcloud.yml
+            - collections/ansible_collections/lv3/platform/plugins/filter/service_topology.py
+            - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+            - collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/docker_runtime/meta/argument_specs.yml
+            - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/verify.yml
+            - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/nextcloud_postgres/**
+            - collections/ansible_collections/lv3/platform/roles/nextcloud_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2
+            - config/alertmanager/rules/nextcloud.yml
+            - config/ansible-execution-scopes.yaml
+            - config/ansible-role-idempotency.yml
+            - config/capability-contract-catalog.json
+            - config/certificate-catalog.json
+            - config/command-catalog.json
+            - config/controller-local-secrets.json
+            - config/data-catalog.json
+            - config/dependency-graph.json
+            - config/grafana/dashboards/nextcloud.json
+            - config/grafana/dashboards/slo-overview.json
+            - config/health-probe-catalog.json
+            - config/image-catalog.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/replaceability-review-catalog.json
+            - config/secret-catalog.json
+            - config/service-capability-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/slo-catalog.json
+            - config/subdomain-catalog.json
+            - config/subdomain-exposure-registry.json
+            - config/uptime-kuma/monitors.json
+            - config/workflow-catalog.json
+            - tests/test_docker_runtime_role.py
+            - tests/test_docker_publication_assurance.py
+            - tests/test_docker_publication_assurance_playbook.py
+            - tests/test_generate_platform_vars.py
+            - tests/test_interface_contracts.py
+            - tests/test_linux_guest_firewall_role.py
+            - tests/test_nextcloud_playbook.py
+            - tests/test_nextcloud_runtime_role.py
+            - tests/test_nginx_edge_publication_role.py
+            - tests/test_platform_observation_tool.py
+            - tests/test_postgres_vm_access_policy.py
+            - tests/test_post_verify_tasks.py
+            - tests/test_service_topology_filters.py
+            - receipts/image-scans/2026-03-29-nextcloud-runtime.json
+            - receipts/image-scans/2026-03-29-nextcloud-runtime.trivy.json
+            - receipts/image-scans/2026-03-29-nextcloud-redis-runtime.json
+            - receipts/image-scans/2026-03-29-nextcloud-redis-runtime.trivy.json
+            - receipts/live-applies/2026-03-29-adr-0260-nextcloud-personal-data-plane-mainline-live-apply.json
+          mode: shared_contract
+          contract: adr-0260-main-integration-v1
+    ready_to_merge: false
+    live_applied: false
   - id: ws-0274-artifact-cache-plane
     adr: "0295"
     title: Shared artifact cache plane and dedicated cache VM roadmap

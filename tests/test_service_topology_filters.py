@@ -60,6 +60,39 @@ def test_edge_sites_preserve_proxy_hardening_fields() -> None:
     ]
 
 
+def test_edge_sites_preserve_exact_redirects() -> None:
+    filters = load_module()
+    sites = filters.service_topology_edge_sites(
+        {
+            "nextcloud": {
+                "public_hostname": "cloud.lv3.org",
+                "edge": {
+                    "enabled": True,
+                    "tls": True,
+                    "kind": "proxy",
+                    "upstream": "http://10.10.10.20:8084",
+                    "exact_redirects": [
+                        {"path": "/.well-known/carddav", "target": "/remote.php/dav/", "status": 301},
+                        {"path": "/.well-known/caldav", "target": "/remote.php/dav/", "status": 301},
+                    ],
+                },
+            }
+        }
+    )
+
+    assert sites == [
+        {
+            "hostname": "cloud.lv3.org",
+            "kind": "proxy",
+            "upstream": "http://10.10.10.20:8084",
+            "exact_redirects": [
+                {"path": "/.well-known/carddav", "target": "/remote.php/dav/", "status": 301},
+                {"path": "/.well-known/caldav", "target": "/remote.php/dav/", "status": 301},
+            ],
+        }
+    ]
+
+
 def test_platform_inventory_points_headscale_edge_at_proxmox_internal_bridge() -> None:
     platform_vars = yaml.safe_load(PLATFORM_VARS_PATH.read_text())
     headscale = platform_vars["platform_service_topology"]["headscale"]

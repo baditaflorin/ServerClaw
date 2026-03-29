@@ -1,0 +1,41 @@
+---
+nextcloud_site_dir: /opt/nextcloud
+nextcloud_data_dir: "{{ nextcloud_site_dir }}/data/html"
+nextcloud_redis_data_dir: "{{ nextcloud_site_dir }}/data/redis"
+nextcloud_secret_dir: /etc/lv3/nextcloud
+nextcloud_compose_file: "{{ nextcloud_site_dir }}/docker-compose.yml"
+nextcloud_env_file: "{{ compose_runtime_secret_root }}/nextcloud/runtime.env"
+nextcloud_legacy_env_file: "{{ nextcloud_site_dir }}/nextcloud.env"
+nextcloud_openbao_agent_dir: "{{ nextcloud_site_dir }}/openbao"
+nextcloud_openbao_agent_image: "{{ openbao_agent_image }}"
+nextcloud_openbao_agent_container_name: nextcloud-openbao-agent
+nextcloud_openbao_secret_path: services/nextcloud/runtime-env
+nextcloud_openbao_policy_name: lv3-service-nextcloud-runtime
+nextcloud_openbao_approle_name: nextcloud-runtime
+nextcloud_container_name: nextcloud-app
+nextcloud_cron_container_name: nextcloud-cron
+nextcloud_redis_container_name: nextcloud-redis
+nextcloud_image: "{{ container_image_catalog.images.nextcloud_runtime.ref }}"
+nextcloud_redis_image: "{{ container_image_catalog.images.nextcloud_redis_runtime.ref }}"
+nextcloud_port: "{{ platform_service_topology | platform_service_port('nextcloud', 'internal') }}"
+nextcloud_internal_base_url: "{{ platform_service_topology | platform_service_url('nextcloud', 'internal') }}"
+nextcloud_public_base_url: "{{ platform_service_topology.nextcloud.urls.public }}"
+nextcloud_public_hostname: "{{ platform_service_topology.nextcloud.public_hostname }}"
+nextcloud_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+nextcloud_database_port: 5432
+nextcloud_database_name: nextcloud
+nextcloud_database_user: nextcloud
+nextcloud_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nextcloud/database-password.txt
+nextcloud_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nextcloud
+nextcloud_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nextcloud/admin-password.txt
+nextcloud_redis_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nextcloud/redis-password.txt
+nextcloud_admin_password_remote_file: "{{ nextcloud_secret_dir }}/admin-password.txt"
+nextcloud_redis_password_remote_file: "{{ nextcloud_secret_dir }}/redis-password.txt"
+nextcloud_admin_user: ops
+nextcloud_trusted_proxies:
+  - "{{ hostvars['proxmox_florin'].proxmox_public_edge_ipv4 }}"
+nextcloud_php_memory_limit: 1024M
+nextcloud_php_upload_limit: 16G
+nextcloud_overwrite_protocol: https
+nextcloud_occ_command_retries: 5
+nextcloud_occ_command_delay_seconds: 5

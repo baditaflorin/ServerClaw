@@ -1,4 +1,23 @@
 ---
+# Purpose: Provide default Docker runtime, bridge-chain recovery, and publication assurance inputs for managed Debian guests.
+# Use case: Loaded whenever the docker_runtime role configures or verifies a managed Docker host.
+#
+# Inputs (required):
+#   - None. Inventory and playbooks may override these defaults.
+#
+# Inputs (optional):
+#   - docker_runtime_* inventory overrides for packages, daemon config, bridge-chain timing, and publication helper paths.
+#
+# Outputs:
+#   - Canonical default variables used by the docker_runtime role.
+#
+# Idempotency: Fully idempotent
+#              Defaults only declare data and do not mutate host state directly.
+#
+# Dependencies:
+#   - ADR 0023: Docker runtime VM baseline.
+#   - ADR 0270: Docker publication self-healing and port-programming assertions.
+#   - Role: lv3.platform.docker_runtime - consumes these defaults during converge and verify.
 docker_runtime_prereq_packages:
   - ca-certificates
   - curl
@@ -64,6 +83,7 @@ docker_runtime_chain_recheck_retries: 30
 docker_runtime_chain_recheck_delay_seconds: 2
 docker_runtime_nftables_config_file: /etc/nftables.conf
 docker_runtime_container_forward_compat_enabled: true
+docker_runtime_publication_assurance_script_path: /usr/local/bin/lv3-docker-publication-assurance
 docker_runtime_container_forward_source_cidrs:
   - 172.16.0.0/12
   - 192.168.0.0/16

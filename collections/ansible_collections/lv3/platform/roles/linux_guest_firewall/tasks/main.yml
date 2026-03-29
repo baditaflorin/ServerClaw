@@ -60,3 +60,10 @@
     connect_timeout: 5
     sleep: 2
   when: linux_guest_firewall_config.changed
+
+- name: Ensure Docker bridge networking remains available after firewall evaluation
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_bridge_chains
+  vars:
+    common_docker_bridge_chains_service_name: docker

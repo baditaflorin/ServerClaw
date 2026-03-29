@@ -108,6 +108,33 @@ argument_specs:
         default: active
         description:
           - Expected output from `systemctl is-active` when verification is enabled.
+  docker_bridge_chains:
+    short_description: Ensure Docker bridge networking chains exist when Docker is active on the target host.
+    options:
+      common_docker_bridge_chains_service_name:
+        type: str
+        required: false
+        default: docker
+        description:
+          - Name of the Docker systemd unit whose bridge chains should be rechecked.
+      common_docker_bridge_chains_require_nat_chain:
+        type: bool
+        required: false
+        default: true
+        description:
+          - Whether the helper should also require the nat DOCKER chain in addition to DOCKER-FORWARD.
+      common_docker_bridge_chains_retries:
+        type: int
+        required: false
+        default: 10
+        description:
+          - Number of retries used when waiting for Docker to recreate its bridge chains after a restart.
+      common_docker_bridge_chains_delay:
+        type: int
+        required: false
+        default: 2
+        description:
+          - Delay in seconds between Docker bridge chain recheck attempts.
   wait_port:
     short_description: Wait for a TCP listener with shared retry defaults.
     options:

@@ -50,7 +50,7 @@ The active host patterns live in [inventory/group_vars/all.yml](/Users/live/Docu
 
 ## Shared Post-Verify
 
-`playbooks/tasks/post-verify.yml` loads [config/health-probe-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/health-probe-catalog.json) and executes the declared liveness and readiness probes for the service being converged.
+`playbooks/tasks/post-verify.yml` loads [config/health-probe-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/health-probe-catalog.json), executes the declared liveness probe, optionally repairs any declared Docker publication contract, and then runs the readiness probe for the service being converged.
 
 Current probe kinds:
 
@@ -58,6 +58,8 @@ Current probe kinds:
 - `tcp`
 - `command`
 - `systemd`
+
+If `readiness.docker_publication` is present for a Docker-hosted service, `playbooks/tasks/docker-publication-assert.yml` runs `/usr/local/bin/lv3-docker-publication-assurance` on the owning guest before readiness is allowed to pass. That helper verifies the declared bridge networks, host-side port bindings, and listener reachability, and it may repair missing Docker publication primitives before the normal readiness probe runs.
 
 The current catalog covers the priority services wired into this workstream:
 
