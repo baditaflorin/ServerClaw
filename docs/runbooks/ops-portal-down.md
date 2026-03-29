@@ -77,6 +77,11 @@ ssh ops@100.118.189.95 'ssh ops@10.10.10.20 "docker exec ops-portal ls /app/ops_
 make converge-ops-portal
 ```
 
+If a Codex-managed local replay exits with signal `15` before the first remote
+task output appears, treat that as a controller-local interruption rather than
+proof that the guest apply failed. Move to the staged service/data resync below
+instead of assuming the runtime itself rejected the change.
+
 2. If `/health` returns `200` but `/partials/overview` does not include the
    runtime assurance section, treat that as a failed portal converge and replay
    the runtime before trusting the shell.

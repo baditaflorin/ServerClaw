@@ -1,8 +1,8 @@
 # ADR 0240: Operator Visualization Panels Via Apache ECharts
 
 - Status: Accepted
-- Implementation Status: Live applied
-- Implemented In Repo Version: pending main merge from 0.177.58 base
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.63
 - Implemented In Platform Version: 0.130.44
 - Implemented On: 2026-03-28
 - Date: 2026-03-28

@@ -3,7 +3,7 @@
 - ADR: [ADR 0240](../adr/0240-operator-visualization-panels-via-apache-echarts.md)
 - Title: Live apply Apache ECharts-backed operator visualization panels in the interactive ops portal
 - Status: live_applied
-- Implemented In Repo Version: pending main merge
+- Implemented In Repo Version: 0.177.63
 - Live Applied In Platform Version: `0.130.44`
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
@@ -64,23 +64,35 @@
 
 ## Mainline Integration Outcome
 
-- pending main merge, release bump, and merged-main replay from `origin/main`
+- release `0.177.63` carries ADR 0240 onto `main`
+- the exact-main replay from the integrated `0.177.63` candidate is recorded in
+  `receipts/live-applies/2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply.json`
+- the current platform baseline after the exact-main replay is `0.130.46`
 
 ## Live Evidence
 
 - branch-local live-apply receipt: `receipts/live-applies/2026-03-28-adr-0240-operator-visualization-panels-live-apply.json`
+- mainline replay receipt: `receipts/live-applies/2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply.json`
 - branch-local guest health: `curl -fsS http://127.0.0.1:8092/health` returned `{"status":"ok"}` and `docker ps --filter name=ops-portal --format "{{.Names}} {{.Status}}"` reported `ops-portal Up ...`
 - branch-local runtime hashes: `sha256sum scripts/ops_portal/app.py scripts/ops_portal/templates/partials/overview.html scripts/ops_portal/static/portal.css scripts/ops_portal/static/portal.js scripts/ops_portal/runtime_assurance.py requirements/ops-portal.txt` matched the same hash set under `/opt/ops-portal/service/...` on `docker-runtime-lv3`
 - mirrored topology input: `/opt/ops-portal/data/config/dependency-graph.json`
 - served chart runtime: `curl -fsS http://127.0.0.1:8092/static/portal.js | grep -E "echarts|data-echart-target"`
 - served chart markup: `curl -fsS http://127.0.0.1:8092/partials/overview | grep -E "Runtime Assurance|data-echart-target"`
 - public edge verification: `curl -k -I https://ops.lv3.org` returned `302` to `/oauth2/sign_in?rd=https://ops.lv3.org/`
+- merged-main replay verification on 2026-03-29 confirmed `/opt/ops-portal/service/ops_portal/app.py`, `static/portal.js`, and `templates/partials/overview.html` matched the repository hashes after the container rebuild, `curl -fsS http://10.10.10.20:8092/health` returned `{"status":"ok"}`, and `curl -ks https://ops.lv3.org/health` returned `{"status":"ok"}`
 
 ## Automation Notes
 
-- `make converge-ops-portal` was validated from the rebased branch and confirmed the role-level overlay fix, but the long-running scoped replay from this workstation could not be brought to a stable clean finish because later runs were interrupted locally with signal `15` before the guest-local runtime hashes changed
-- another agent integrating this work onto `main` should rerun `make converge-ops-portal` from a stable session after the merge, then cut the canonical merged-main receipt and protected-file updates from that replay
+- `make converge-ops-portal` and the equivalent direct mutation playbook launch
+  were both re-tested from the integrated mainline candidate; in this Codex
+  environment they still received local exit `143` / signal `15` before the
+  remote apply could emit its first task output
+- because that controller-local interruption persisted even after the release
+  cut, the canonical merged-main replay used the documented staged
+  service/data-sync fallback on `docker-runtime-lv3` before rebuilding the
+  `ops-portal` container in place
 
 ## Merge-To-Main Notes
 
-- still required on `main`: bump `VERSION`, update `changelog.md`, cut the next release note, update the top-level `README.md` integrated status summary, update `versions/stack.yaml` with the canonical platform version after a merged-main replay, and record a merged-main receipt after rerunning `make converge-ops-portal` from `main`
+- completed in release `0.177.63`; no additional ADR 0240 merge-to-main work
+  remains beyond future maintenance replays
