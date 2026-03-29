@@ -582,8 +582,16 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "windmill_worker_checkout_manifest_remote.path" in tasks
     assert "windmill_worker_checkout_prune_preserve_paths" in tasks
     assert "Create a temporary Windmill seed app sync directory" in tasks
+    assert "Create a controller-local staging directory for the Windmill app sync root" in tasks
+    assert "Stage the repo-managed Windmill app sync root without ignored frontend build artifacts" in tasks
     assert "Remove the temporary Windmill seed app sync directory" in tasks
+    assert "Remove the controller-local Windmill app sync staging directory" in tasks
     assert "windmill_seed_app_sync_dir.path" in tasks
+    assert "windmill_seed_app_sync_root_local.path" in tasks
+    assert "dir-merge,- .gitignore" in tasks
+    assert "--exclude" in tasks
+    assert ".DS_Store" in tasks
+    assert "rsync" in tasks
     assert "scripts/windmill_run_wait_result.py" in tasks
     assert "--payload-json" in tasks
     assert "--timeout {{ windmill_seed_job_timeout_seconds }}" in tasks

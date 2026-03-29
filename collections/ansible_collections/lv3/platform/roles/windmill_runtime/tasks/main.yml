@@ -1791,9 +1791,35 @@
   when: (windmill_seed_raw_apps | default([])) | length > 0
   register: windmill_seed_app_sync_dir
 
+- name: Create a controller-local staging directory for the Windmill app sync root
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: .windmill-app-sync
+  when: (windmill_seed_raw_apps | default([])) | length > 0
+  delegate_to: localhost
+  become: false
+  register: windmill_seed_app_sync_root_local
+
+- name: Stage the repo-managed Windmill app sync root without ignored frontend build artifacts
+  ansible.builtin.command:
+    argv:
+      - rsync
+      - -a
+      - --delete
+      - --exclude
+      - .DS_Store
+      - --filter
+      - dir-merge,- .gitignore
+      - "{{ windmill_seed_app_repo_root_local_dir }}/"
+      - "{{ windmill_seed_app_sync_root_local.path }}/"
+  when: (windmill_seed_raw_apps | default([])) | length > 0
+  delegate_to: localhost
+  become: false
+  changed_when: false
+
 - name: Copy the repo-managed Windmill app sync root
   ansible.builtin.copy:
-    src: "{{ windmill_seed_app_repo_root_local_dir }}/"
+    src: "{{ windmill_seed_app_sync_root_local.path }}/"
     dest: "{{ windmill_seed_app_sync_dir.path }}/"
     mode: preserve
   when: (windmill_seed_raw_apps | default([])) | length > 0
@@ -1894,6 +1920,14 @@
     path: "{{ windmill_seed_app_sync_dir.path }}"
     state: absent
   when: (windmill_seed_raw_apps | default([])) | length > 0
+
+- name: Remove the controller-local Windmill app sync staging directory
+  ansible.builtin.file:
+    path: "{{ windmill_seed_app_sync_root_local.path }}"
+    state: absent
+  when: (windmill_seed_raw_apps | default([])) | length > 0
+  delegate_to: localhost
+  become: false
 
 - name: Create a local manifest path for repo-managed Windmill schedules
   ansible.builtin.tempfile:
