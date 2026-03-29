@@ -541,6 +541,24 @@
 - targets:
     - https://10.10.10.10:443/
   labels:
+    assurance_id: serverclaw-public
+    service_id: serverclaw
+    service_name: ServerClaw
+    environment: production
+    scope: public
+    exposure: edge-published
+    auth_requirement: upstream_auth
+    probe_module: http_2xx_follow_redirects
+    probe_hostname: chat.lv3.org
+    certificate_id: chat-edge
+    expected_issuer: letsencrypt
+    policy_unit: days
+    policy_warn: '21'
+    policy_critical: '14'
+    display_url: https://chat.lv3.org:443/
+- targets:
+    - https://10.10.10.10:443/
+  labels:
     assurance_id: status-page-public
     service_id: status_page
     service_name: Public Status Page

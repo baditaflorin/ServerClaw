@@ -69,6 +69,12 @@
       mode: "0755"
     - path: "{{ open_webui_secret_dir }}"
       mode: "0700"
+    - path: "{{ open_webui_env_file | dirname }}"
+      mode: "0700"
+    - path: "{{ open_webui_openbao_agent_dir }}"
+      mode: "0700"
+      enabled: "{{ open_webui_enable_openbao_agent | bool }}"
+  when: item.enabled | default(true) | bool
 
 - name: Generate the Open WebUI admin password
   ansible.builtin.shell: |
@@ -186,6 +192,7 @@
     common_openbao_compose_env_image: "{{ open_webui_openbao_agent_image }}"
     common_openbao_compose_env_legacy_env_files:
       - "{{ open_webui_legacy_env_file }}"
+  when: open_webui_enable_openbao_agent | bool
   no_log: true
 
 - name: Render the Open WebUI environment file

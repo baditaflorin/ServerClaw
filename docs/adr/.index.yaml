@@ -4365,7 +4365,7 @@ adr_index:
   - adr: '0254'
     title: ServerClaw As A Distinct Self-Hosted Agent Product On LV3
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: agent-discovery
     keywords:

@@ -208,6 +208,7 @@
       - platform
   delegate_to: localhost
   become: false
+  changed_when: true
 
 - name: Remove the existing shared platform package before unpacking the refreshed archive
   ansible.builtin.file:
@@ -268,6 +269,7 @@
       }}
   delegate_to: localhost
   become: false
+  changed_when: true
 
 - name: Remove the existing platform context corpus bundle paths before unpacking the refreshed archive
   ansible.builtin.file:
