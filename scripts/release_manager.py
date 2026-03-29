@@ -374,6 +374,42 @@ def sync_outline_knowledge_surface() -> None:
         raise ValueError(f"outline knowledge sync failed: {detail}")
 
 
+def refresh_generated_truth_surfaces() -> None:
+    commands = [
+        (
+            "platform manifest",
+            [
+                "uv",
+                "run",
+                "--with",
+                "pyyaml",
+                "--with",
+                "jsonschema",
+                "python3",
+                str(repo_path("scripts", "platform_manifest.py")),
+                "--write",
+            ],
+        ),
+        (
+            "generated diagrams",
+            [
+                "uv",
+                "run",
+                "--with",
+                "pyyaml",
+                "python3",
+                str(repo_path("scripts", "generate_diagrams.py")),
+                "--write",
+            ],
+        ),
+    ]
+    for label, command in commands:
+        result = run_command(command, cwd=REPO_ROOT)
+        if result.returncode != 0:
+            detail = (result.stderr or result.stdout or "unknown error").strip()
+            raise ValueError(f"failed to refresh {label}: {detail}")
+
+
 def write_release(version: str, *, platform_impact: str, released_on: str | None = None) -> dict[str, Any]:
     blockers = release_blockers_result(load_version_semantics())
     if not blockers.met:
@@ -403,6 +439,7 @@ def write_release(version: str, *, platform_impact: str, released_on: str | None
     )
     canonical_truth.mark_pending_workstreams_released(version)
     canonical_truth.write_assembled_truth(update_readme=True)
+    refresh_generated_truth_surfaces()
     sync_outline_knowledge_surface()
     return {"version": version, "notes": notes}
 
