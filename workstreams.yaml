@@ -76,12 +76,12 @@ workstreams:
             - docs/adr/.index.yaml
           mode: shared_contract
           contract: adr-index-generator-v1
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: true
     canonical_truth:
       changelog_entry: implemented ADR 0224 by extending the governed Coolify lane with private-repo Docker Compose intake, wildcard app DNS publication, HTTPS wildcard edge routing, and Docker pull hardening that keeps education-wemeshup serving the full 1056-activity catalog from main
       release_bump: patch
-      included_in_repo_version: 0.177.67
+      included_in_repo_version: 0.177.68
       latest_receipts:
         coolify: 2026-03-29-adr-0224-coolify-dns-mirror-edge-and-education-mainline-live-apply
         coolify_apps: 2026-03-29-adr-0224-coolify-dns-mirror-edge-and-education-mainline-live-apply
