@@ -5,6 +5,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 VALIDATE_REPO_SCRIPT = REPO_ROOT / "scripts" / "validate_repo.sh"
 CHECK_ROLE_ARGUMENT_SPECS_SCRIPT = REPO_ROOT / "scripts" / "check_role_argument_specs.sh"
+PYTHON_WITH_PACKAGES_SCRIPT = REPO_ROOT / "scripts" / "run_python_with_packages.sh"
 
 
 def test_validate_repo_supports_shared_ansible_collection_cache() -> None:
@@ -12,8 +13,12 @@ def test_validate_repo_supports_shared_ansible_collection_cache() -> None:
 
     assert "LV3_ANSIBLE_COLLECTIONS_DIR" in script
     assert "LV3_ANSIBLE_COLLECTIONS_SHA_FILE" in script
+    assert "LV3_ANSIBLE_GALAXY_SERVER" in script
     assert "sha256sum \"$requirements_file\"" in script
+    assert 'galaxy_server_args=(--server "$LV3_ANSIBLE_GALAXY_SERVER")' in script
     assert "cmp -s" in script
+    assert '"MANIFEST.json"' in script
+    assert '"galaxy.yml"' in script
 
 
 def test_validate_repo_runs_tofu_validation_when_present() -> None:
@@ -42,6 +47,13 @@ def test_validate_repo_supports_workstream_surface_stage() -> None:
 
     assert "workstream-surfaces" in script
     assert "scripts/workstream_surface_ownership.py" in script
+
+
+def test_validate_repo_uses_python_package_runner_for_yaml_validators() -> None:
+    script = VALIDATE_REPO_SCRIPT.read_text()
+
+    assert "scripts/run_python_with_packages.sh" in script
+    assert '"$REPO_ROOT/scripts/run_python_with_packages.sh"' in script
 
 
 def test_validate_repo_runs_public_endpoint_admission_check() -> None:
@@ -76,7 +88,7 @@ def test_validate_repo_json_stage_skips_missing_remote_artifacts() -> None:
 def test_validate_repo_generated_portals_stage_does_not_require_make() -> None:
     script = VALIDATE_REPO_SCRIPT.read_text()
 
-    assert 'run --with-requirements "$REPO_ROOT/requirements/docs.txt"' in script
+    assert 'run_python_with_requirements "$REPO_ROOT/requirements/docs.txt"' in script
     assert "build_docs_portal.py" in script
     assert '--generated-dir "$generated_docs_dir"' in script
     assert 'generated_portal_output_dir="$(mktemp -d "${TMPDIR:-/tmp}/lv3-docs-portal.XXXXXX")"' in script
@@ -172,3 +184,10 @@ def test_check_role_argument_specs_still_flags_populated_roles_without_meta(tmp_
 
     assert result.returncode == 1
     assert "Missing meta/argument_specs.yml for bad_role" in result.stderr
+
+
+def test_python_package_runner_handles_pyyaml_module_mapping() -> None:
+    script = PYTHON_WITH_PACKAGES_SCRIPT.read_text(encoding="utf-8")
+
+    assert 'pyyaml)' in script
+    assert 'echo "yaml"' in script

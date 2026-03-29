@@ -17,6 +17,14 @@ from typing import Iterable
 
 DEFAULT_MANIFEST = Path("config/check-runner-manifest.json")
 SPINNER_FRAMES = "|/-\\"
+PASSTHROUGH_ENV_VARS = (
+    "LV3_SNAPSHOT_ID",
+    "LV3_SNAPSHOT_GENERATED_AT",
+    "LV3_SNAPSHOT_SOURCE_COMMIT",
+    "LV3_SNAPSHOT_BRANCH",
+    "LV3_VALIDATION_BASE_REF",
+    "LV3_VALIDATION_CHANGED_FILES_JSON",
+)
 RUNNER_UNAVAILABLE_MARKERS = (
     "cannot connect to the docker daemon",
     "error during connect",
@@ -144,6 +152,10 @@ def build_docker_command(
     for index, safe_directory in enumerate(safe_directories):
         env_args.extend(["-e", f"GIT_CONFIG_KEY_{index}=safe.directory"])
         env_args.extend(["-e", f"GIT_CONFIG_VALUE_{index}={safe_directory}"])
+    for env_name in PASSTHROUGH_ENV_VARS:
+        value = os.environ.get(env_name)
+        if value:
+            env_args.extend(["-e", f"{env_name}={value}"])
     git_metadata_file = workspace / ".git"
     if git_metadata_file.is_file():
         gitdir_line = git_metadata_file.read_text(encoding="utf-8").strip()

@@ -153,6 +153,146 @@ def test_run_gate_writes_status_file(tmp_path: Path, capsys) -> None:
     assert [check["id"] for check in payload["checks"]] == ["alpha", "beta"]
 
 
+def test_run_gate_auto_selects_docs_lane_checks(tmp_path: Path) -> None:
+    run_gate = load_module("run_gate_docs_lane", "scripts/run_gate.py")
+    repo_root = tmp_path / "repo"
+    (repo_root / "config").mkdir(parents=True)
+    (repo_root / "docs" / "adr").mkdir(parents=True)
+    manifest_path = repo_root / "config" / "validation-gate.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "workstream-surfaces": {
+                    "description": "ownership",
+                    "severity": "error",
+                    "image": "example/python:latest",
+                    "command": "printf workstream",
+                    "working_dir": "/workspace",
+                    "timeout_seconds": 30,
+                },
+                "agent-standards": {
+                    "description": "agent standards",
+                    "severity": "error",
+                    "image": "example/python:latest",
+                    "command": "printf standards",
+                    "working_dir": "/workspace",
+                    "timeout_seconds": 30,
+                },
+                "documentation-index": {
+                    "description": "documentation index",
+                    "severity": "error",
+                    "image": "example/python:latest",
+                    "command": "printf docs-index",
+                    "working_dir": "/workspace",
+                    "timeout_seconds": 30,
+                },
+                "security-scan": {
+                    "description": "security",
+                    "severity": "error",
+                    "image": "example/security:latest",
+                    "command": "printf security",
+                    "working_dir": "/workspace",
+                    "timeout_seconds": 30,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    lane_catalog_path = repo_root / "config" / "validation-lanes.yaml"
+    lane_catalog_path.write_text(
+        "\n".join(
+            [
+                "schema_version: 1.0.0",
+                "primary_branch: main",
+                "unknown_surface_policy: all_lanes",
+                "fast_global_checks:",
+                "  - workstream-surfaces",
+                "  - agent-standards",
+                "lanes:",
+                "  documentation-and-adr:",
+                "    title: Documentation",
+                "    description: Doc lane",
+                "    checks:",
+                "      - documentation-index",
+                "  remote-builder:",
+                "    title: Remote builder",
+                "    description: Builder lane",
+                "    checks:",
+                "      - security-scan",
+                "surface_classes:",
+                "  - surface_id: docs",
+                "    title: Docs",
+                "    paths:",
+                "      - docs/adr/*.md",
+                "    required_lanes:",
+                "      - documentation-and-adr",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    doc_path = repo_root / "docs" / "adr" / "0264-test.md"
+    doc_path.write_text("# ADR test\n", encoding="utf-8")
+    status_path = repo_root / ".local" / "validation-gate" / "last-run.json"
+    fake_docker = tmp_path / "fake-docker"
+    runner_contracts = tmp_path / "validation-runner-contracts.json"
+    write_fake_docker(fake_docker)
+    write_runner_contracts(
+        runner_contracts,
+        lane_ids=[
+            "workstream-surfaces",
+            "agent-standards",
+            "documentation-index",
+            "security-scan",
+        ],
+    )
+
+    subprocess.run(["git", "init", str(repo_root)], check=True, capture_output=True, text=True)
+    subprocess.run(["git", "-C", str(repo_root), "config", "user.email", "codex@example.com"], check=True)
+    subprocess.run(["git", "-C", str(repo_root), "config", "user.name", "Codex"], check=True)
+    subprocess.run(["git", "-C", str(repo_root), "add", "."], check=True)
+    subprocess.run(["git", "-C", str(repo_root), "commit", "-m", "initial"], check=True, capture_output=True, text=True)
+    base_branch = subprocess.run(
+        ["git", "-C", str(repo_root), "branch", "--show-current"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    subprocess.run(["git", "-C", str(repo_root), "checkout", "-b", "codex/docs-change"], check=True, capture_output=True, text=True)
+    doc_path.write_text("# ADR test\n\nUpdated.\n", encoding="utf-8")
+
+    exit_code = run_gate.main(
+        [
+            "--manifest",
+            str(manifest_path),
+            "--workspace",
+            str(repo_root),
+            "--lane-catalog",
+            str(lane_catalog_path),
+            "--docker-binary",
+            str(fake_docker),
+            "--status-file",
+            str(status_path),
+            "--base-ref",
+            base_branch,
+            "--runner-id",
+            "test-runner",
+            "--runner-contracts",
+            str(runner_contracts),
+        ]
+    )
+
+    assert exit_code == 0
+    payload = json.loads(status_path.read_text(encoding="utf-8"))
+    assert payload["requested_checks"] == ["workstream-surfaces", "agent-standards", "documentation-index"]
+    assert payload["lane_selection"]["selected_lanes"] == ["documentation-and-adr"]
+    assert payload["lane_selection"]["unknown_files"] == []
+    assert payload["lane_results"][0]["green_path_summary"] == (
+        "Documentation passed for 1 changed file(s) via documentation-index."
+    )
+    assert payload["runner"]["id"] == "test-runner"
+
+
 def test_run_gate_reports_runner_unavailable_without_crashing(tmp_path: Path, capsys) -> None:
     run_gate = load_module("run_gate_runner_unavailable", "scripts/run_gate.py")
     manifest_path = tmp_path / "validation-gate.json"
@@ -264,26 +404,7 @@ def test_gate_status_reports_latest_bypass_and_runs(tmp_path: Path, capsys) -> N
     )
     last_run = tmp_path / "last-run.json"
     last_run.write_text(
-        json.dumps(
-            {
-                "status": "passed",
-                "executed_at": "2026-03-23T12:00:00+00:00",
-                "source": "manual",
-                "runner": {"id": "controller-local-validation"},
-            }
-        ),
-        encoding="utf-8",
-    )
-    remote_validate = tmp_path / "remote-validate-last-run.json"
-    remote_validate.write_text(
-        json.dumps(
-            {
-                "status": "passed",
-                "executed_at": "2026-03-23T12:30:00+00:00",
-                "source": "build-server-validate",
-                "runner": {"id": "build-server-validation"},
-            }
-        ),
+        json.dumps({"status": "passed", "executed_at": "2026-03-23T12:00:00+00:00", "source": "manual"}),
         encoding="utf-8",
     )
     post_merge = tmp_path / "post-merge-last-run.json"
@@ -306,8 +427,6 @@ def test_gate_status_reports_latest_bypass_and_runs(tmp_path: Path, capsys) -> N
             str(manifest_path),
             "--last-run",
             str(last_run),
-            "--remote-validate-run",
-            str(remote_validate),
             "--post-merge-run",
             str(post_merge),
             "--bypass-dir",
@@ -320,7 +439,6 @@ def test_gate_status_reports_latest_bypass_and_runs(tmp_path: Path, capsys) -> N
     captured = capsys.readouterr()
     assert exit_code == 0
     assert "Last gate run: passed" in captured.out
-    assert "Last remote validate run: passed" in captured.out
     assert "Last post-merge gate run: failed" in captured.out
     assert "Latest bypass receipt:" in captured.out
 
@@ -347,8 +465,6 @@ def test_gate_status_supports_json_output(tmp_path: Path, capsys) -> None:
             str(manifest_path),
             "--last-run",
             str(tmp_path / "missing-last-run.json"),
-            "--remote-validate-run",
-            str(tmp_path / "missing-remote-validate.json"),
             "--post-merge-run",
             str(tmp_path / "missing-post-merge.json"),
             "--bypass-dir",
@@ -370,7 +486,6 @@ def test_gate_status_supports_json_output(tmp_path: Path, capsys) -> None:
         }
     ]
     assert payload["last_run"] is None
-    assert payload["remote_validate_run"] is None
     assert payload["post_merge_run"] is None
     assert payload["latest_bypass"] is None
 
@@ -386,3 +501,17 @@ def test_gate_status_workflow_catalog_and_windmill_seed_align() -> None:
 
     assert "config/windmill/scripts/gate-status.py" in catalog["workflows"]["gate-status"]["implementation_refs"]
     assert "f/lv3/gate-status" in script_paths
+
+
+def test_gate_status_reexecs_via_python_package_runner_when_yaml_is_missing() -> None:
+    script = (REPO_ROOT / "scripts" / "gate_status.py").read_text(encoding="utf-8")
+
+    assert "LV3_GATE_STATUS_PYYAML_BOOTSTRAPPED" in script
+    assert "run_python_with_packages.sh" in script
+
+
+def test_run_gate_reexecs_via_python_package_runner_when_yaml_is_missing() -> None:
+    script = (REPO_ROOT / "scripts" / "run_gate.py").read_text(encoding="utf-8")
+
+    assert "LV3_RUN_GATE_PYYAML_BOOTSTRAPPED" in script
+    assert "run_python_with_packages.sh" in script

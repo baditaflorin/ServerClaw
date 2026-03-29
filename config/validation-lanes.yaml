@@ -1,0 +1,186 @@
+schema_version: 1.0.0
+primary_branch: main
+unknown_surface_policy: all_lanes
+fast_global_checks:
+  - workstream-surfaces
+  - agent-standards
+lanes:
+  documentation-and-adr:
+    title: Documentation and ADR lane
+    description: Validate ADR metadata, runbooks, and workstream notes without widening into unrelated generated-asset sweeps.
+    checks:
+      - documentation-index
+  repository-structure-and-schema:
+    title: Repository structure and schema lane
+    description: Validate repository catalogs, data models, cross-surface policy contracts, and alert-rule generation.
+    checks:
+      - yaml-lint
+      - schema-validation
+      - policy-validation
+      - alert-rule-validation
+      - dependency-direction
+  generated-artifact-and-canonical-truth:
+    title: Generated artifact and canonical-truth lane
+    description: Validate generated portals, dependency diagrams, and publication-safe artifact surfaces.
+    checks:
+      - generated-docs
+      - generated-portals
+      - dependency-graph
+      - artifact-secret-scan
+  service-syntax-and-unit:
+    title: Service-specific syntax and unit lane
+    description: Validate service automation syntax, lint, typed orchestration helpers, and service completeness contracts.
+    checks:
+      - ansible-syntax
+      - ansible-lint
+      - type-check
+      - service-completeness
+  remote-builder:
+    title: Remote builder lane
+    description: Validate build-runner images, infrastructure roots, and heavyweight scanner surfaces.
+    checks:
+      - packer-validate
+      - tofu-validate
+      - security-scan
+  live-apply-and-promotion:
+    title: Live-apply and promotion lane
+    description: Validate promotion-facing runtime verification and post-merge automation entrypoints.
+    checks:
+      - integration-tests
+surface_classes:
+  - surface_id: docs_markdown
+    title: ADR, runbook, and workstream markdown
+    paths:
+      - AGENTS.md
+      - docs/adr/*.md
+      - docs/runbooks/*.md
+      - docs/workstreams/*.md
+      - docs/release-notes/*.md
+      - mkdocs.yml
+    required_lanes:
+      - documentation-and-adr
+  - surface_id: generated_truth
+    title: Generated documentation and canonical-truth surfaces
+    paths:
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - versions/*.yaml
+      - docs/diagrams/*
+      - build/platform-manifest.json
+      - scripts/build_docs_portal.py
+      - scripts/canonical_truth.py
+      - scripts/generate_changelog_portal.py
+      - scripts/generate_dependency_diagram.py
+      - scripts/generate_diagrams.py
+      - scripts/generate_ops_portal.py
+      - scripts/generate_status_docs.py
+      - scripts/published_artifact_secret_scan.py
+    required_lanes:
+      - documentation-and-adr
+      - generated-artifact-and-canonical-truth
+  - surface_id: live_apply_receipts
+    title: Live-apply receipts and evidence payloads
+    paths:
+      - receipts/live-applies/*.json
+      - receipts/live-applies/*.md
+      - receipts/live-applies/evidence/*
+      - receipts/live-applies/evidence/**/*
+    required_lanes:
+      - repository-structure-and-schema
+      - generated-artifact-and-canonical-truth
+  - surface_id: repository_catalogs
+    title: Repository structure, schemas, and policy catalogs
+    paths:
+      - .config-locations.yaml
+      - .repo-structure.yaml
+      - docs/adr/.index.yaml
+      - docs/schema/*
+      - docs/schema/**/*
+      - workstreams.yaml
+      - config/*.json
+      - config/*.yaml
+      - config/*.yml
+      - config/**/*.json
+      - config/**/*.yaml
+      - config/**/*.yml
+      - policy/*
+      - policy/**/*
+      - scripts/data_catalog.py
+      - scripts/environment_topology.py
+      - scripts/policy_checks.py
+      - scripts/policy_toolchain.py
+      - scripts/provider_boundary_catalog.py
+      - scripts/service_catalog.py
+      - scripts/subdomain_catalog.py
+      - scripts/validate_alert_rules.py
+      - scripts/validate_dependency_direction.py
+      - scripts/validate_repo.sh
+      - scripts/validate_repository_data_models.py
+      - scripts/validate_timeout_hierarchy.py
+      - scripts/validation_lanes.py
+      - scripts/workstream_surface_ownership.py
+    required_lanes:
+      - repository-structure-and-schema
+  - surface_id: validation_gate_automation
+    title: Validation gate and remote execution automation
+    paths:
+      - .githooks/pre-push
+      - config/build-server.json
+      - config/check-runner-manifest.json
+      - config/validation-gate.json
+      - config/validation-lanes.yaml
+      - config/workflow-catalog.json
+      - config/windmill/scripts/gate-status.py
+      - config/windmill/scripts/post-merge-gate.py
+      - scripts/gate_status.py
+      - scripts/log_gate_bypass.py
+      - scripts/parallel_check.py
+      - scripts/remote_exec.sh
+      - scripts/run_gate.py
+      - tests/test_parallel_check.py
+      - tests/test_remote_exec.py
+      - tests/test_validation_gate.py
+      - tests/test_validation_gate_windmill.py
+      - tests/test_validation_lanes.py
+    required_lanes:
+      - repository-structure-and-schema
+      - remote-builder
+      - live-apply-and-promotion
+  - surface_id: service_automation
+    title: Service automation, inventory, and runtime code
+    paths:
+      - collections/ansible_collections/**/*
+      - inventory/*.yml
+      - inventory/**/*.yml
+      - platform/**/*.py
+      - playbooks/*.yml
+      - playbooks/**/*.yml
+      - roles/**/*
+      - scripts/*.py
+      - scripts/*.sh
+      - tests/*.py
+      - tests/**/*.py
+    required_lanes:
+      - repository-structure-and-schema
+      - service-syntax-and-unit
+  - surface_id: builder_runtime
+    title: Builder images and infrastructure roots
+    paths:
+      - docker/check-runners/**/*
+      - packer/**/*
+      - tofu/**/*
+    required_lanes:
+      - remote-builder
+  - surface_id: promotion_runtime
+    title: Promotion and worker verification automation
+    paths:
+      - config/windmill/**/*.py
+      - config/windmill/**/*.yaml
+      - config/windmill/**/*.yml
+      - requirements/integration-tests.txt
+      - scripts/integration_suite.py
+      - tests/integration/**/*
+    required_lanes:
+      - live-apply-and-promotion

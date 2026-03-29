@@ -52,6 +52,8 @@ RUN_WORKSPACE_ROOT=""
 REMOTE_SNAPSHOT_ARCHIVE=""
 REMOTE_RUN_ROOT=""
 SNAPSHOT_BUILD_DIR=""
+LV3_VALIDATION_BASE_REF="${LV3_VALIDATION_BASE_REF:-}"
+LV3_VALIDATION_CHANGED_FILES_JSON="${LV3_VALIDATION_CHANGED_FILES_JSON:-}"
 
 SSH_BASE_CMD=()
 
@@ -194,6 +196,85 @@ load_session_workspace() {
   [[ -n "$WORKSPACE_ROOT" ]] || fail "failed to derive a session-scoped remote workspace path"
 }
 
+compute_validation_lane_context() {
+  local base_ref=""
+  local current_branch=""
+
+  case "$COMMAND_LABEL" in
+    pre-push-gate|remote-pre-push|remote-validate)
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+
+  current_branch="$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+  if [[ "$current_branch" == "main" || "$current_branch" == "HEAD" || -z "$current_branch" ]]; then
+    return 0
+  fi
+
+  base_ref="$("$PYTHON_BIN" - "$REPO_ROOT" <<'PY'
+import subprocess
+import sys
+from pathlib import Path
+
+repo_root = Path(sys.argv[1])
+remote_candidate = "origin/main"
+remote_exists = subprocess.run(
+    ["git", "-C", str(repo_root), "show-ref", "--verify", "--quiet", f"refs/remotes/{remote_candidate}"],
+    check=False,
+)
+print(remote_candidate if remote_exists.returncode == 0 else "main")
+PY
+)"
+
+  LV3_VALIDATION_BASE_REF="$base_ref"
+  LV3_VALIDATION_CHANGED_FILES_JSON="$("$PYTHON_BIN" - "$REPO_ROOT" "$base_ref" <<'PY'
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+repo_root = Path(sys.argv[1])
+base_ref = sys.argv[2]
+
+merge_base = subprocess.run(
+    ["git", "-C", str(repo_root), "merge-base", base_ref, "HEAD"],
+    check=False,
+    capture_output=True,
+    text=True,
+)
+if merge_base.returncode != 0:
+    print("[]")
+    raise SystemExit(0)
+
+merge_base_sha = merge_base.stdout.strip()
+changed: set[str] = set()
+commands = (
+    ["diff", "--name-only", f"{merge_base_sha}..HEAD"],
+    ["diff", "--name-only"],
+    ["diff", "--cached", "--name-only"],
+    ["ls-files", "--others", "--exclude-standard"],
+)
+for command in commands:
+    result = subprocess.run(
+        ["git", "-C", str(repo_root), *command],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        continue
+    for line in result.stdout.splitlines():
+        normalized = line.strip().replace("\\", "/")
+        if normalized:
+            changed.add(normalized)
+
+print(json.dumps(sorted(changed)))
+PY
+)"
+}
+
 build_ssh_command() {
   SSH_BASE_CMD=("$SSH_BIN" "-o" "ConnectTimeout=$CONNECT_TIMEOUT" "-o" "BatchMode=yes")
   if [[ -n "$SSH_KEY_PATH" ]]; then
@@ -290,7 +371,9 @@ remote_env_exports() {
     LV3_SNAPSHOT_GENERATED_AT \
     LV3_SNAPSHOT_SOURCE_COMMIT \
     LV3_SNAPSHOT_BRANCH \
-    LV3_SNAPSHOT_FILE_COUNT; do
+    LV3_SNAPSHOT_FILE_COUNT \
+    LV3_VALIDATION_BASE_REF \
+    LV3_VALIDATION_CHANGED_FILES_JSON; do
     if [[ -n "${!name:-}" ]]; then
       printf -v prefix "%sexport %s=%q; " "$prefix" "$name" "${!name}"
     fi
@@ -337,7 +420,9 @@ remote_docker_env_args() {
     LV3_SNAPSHOT_GENERATED_AT \
     LV3_SNAPSHOT_SOURCE_COMMIT \
     LV3_SNAPSHOT_BRANCH \
-    LV3_SNAPSHOT_FILE_COUNT; do
+    LV3_SNAPSHOT_FILE_COUNT \
+    LV3_VALIDATION_BASE_REF \
+    LV3_VALIDATION_CHANGED_FILES_JSON; do
     if [[ -n "${!name:-}" ]]; then
       args+=("-e" "$name=${!name}")
     fi
@@ -622,6 +707,7 @@ main() {
   parse_args "$@"
   load_command_configuration
   load_session_workspace
+  compute_validation_lane_context
   build_ssh_command
   trap cleanup_snapshot_build_dir EXIT
 

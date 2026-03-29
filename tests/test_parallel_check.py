@@ -149,6 +149,33 @@ def test_build_docker_command_mounts_declared_caches(
     assert "TRIVY_CACHE_DIR=/var/lib/trivy" in command
 
 
+def test_build_docker_command_forwards_validation_context(tmp_path: Path, monkeypatch) -> None:
+    parallel_check = load_parallel_check_module()
+    monkeypatch.setenv("LV3_SNAPSHOT_BRANCH", "codex/adr-0264-live-apply")
+    monkeypatch.setenv("LV3_VALIDATION_BASE_REF", "origin/main")
+    monkeypatch.setenv(
+        "LV3_VALIDATION_CHANGED_FILES_JSON",
+        '["config/validation-gate.json", "scripts/run_gate.py"]',
+    )
+
+    check = parallel_check.CheckDefinition(
+        label="workstream-surfaces",
+        image="registry.lv3.org/check-runner/python:3.12.10",
+        command="./scripts/validate_repo.sh workstream-surfaces",
+        working_dir="/workspace",
+        timeout_seconds=30,
+    )
+
+    command = parallel_check.build_docker_command(check, tmp_path, "docker")
+
+    assert "LV3_SNAPSHOT_BRANCH=codex/adr-0264-live-apply" in command
+    assert "LV3_VALIDATION_BASE_REF=origin/main" in command
+    assert (
+        'LV3_VALIDATION_CHANGED_FILES_JSON=["config/validation-gate.json", "scripts/run_gate.py"]'
+        in command
+    )
+
+
 def test_run_checks_returns_non_zero_when_any_check_fails(tmp_path: Path) -> None:
     parallel_check = load_parallel_check_module()
     fake_docker = tmp_path / "fake-docker"
