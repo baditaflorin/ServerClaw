@@ -3,8 +3,8 @@
 - ADR: [ADR 0245](../adr/0245-declared-to-live-service-attestation.md)
 - Title: declared-to-live service attestation through shared runtime evidence, gateway APIs, and ops-portal visibility
 - Status: live_applied
-- Implemented In Repo Version: 0.177.64
-- Live Applied In Platform Version: 0.130.45
+- Implemented In Repo Version: 0.177.65
+- Live Applied In Platform Version: 0.130.46
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0245-live-apply`
@@ -20,12 +20,12 @@
 - derive attestation from declared runtime metadata plus live witness sources that already exist on the platform
 - expose the attestation through a repo-managed CLI entrypoint and the platform API gateway
 - surface the attestation in the interactive ops portal so operators can inspect failures without reading raw JSON
-- replay the live apply from this isolated worktree and record verification evidence in the branch without touching protected release files
+- replay the live apply from this isolated worktree, record verification evidence in the branch, and then refresh the protected release files only during the final exact-main recut
 
 ## Non-Goals
 
 - building the full ADR 0253 runtime-assurance scoreboard in this workstream
-- changing `VERSION`, `changelog.md`, top-level `README.md`, or `versions/stack.yaml` on the workstream branch
+- rewriting protected release files before the final exact-main recut on the latest `origin/main` baseline
 - claiming a new canonical platform version before the final merge-to-`main` step
 
 ## Expected Repo Surfaces
@@ -60,22 +60,24 @@
 ## Verification
 
 - `uv run --with pytest --with fastapi==0.116.1 --with httpx==0.28.1 --with uvicorn==0.35.0 --with pyyaml==6.0.2 --with cryptography==45.0.6 --with jinja2==3.1.5 --with itsdangerous==2.2.0 --with python-multipart==0.0.20 pytest -q tests/test_declared_live_attestation.py tests/test_api_gateway.py tests/test_interactive_ops_portal.py tests/test_ops_portal_runtime_role.py`
-  returned `39 passed in 11.10s` on the merged latest-`origin/main` branch tip after the ops-portal runtime recovery hardening landed.
+  returned `43 passed in 8.07s` on the merged latest-`origin/main` branch tip after the ADR 0240 portal changes landed on top of the ADR 0245 runtime hardening.
 - `python3 -m py_compile platform/runtime_assurance/declared_live_attestation.py scripts/declared_live_attestation.py scripts/api_gateway/main.py scripts/ops_portal/app.py scripts/ops_portal/runtime_assurance.py`,
   `make syntax-check-api-gateway`, and `make syntax-check-ops-portal` all passed on 2026-03-29.
 - `make preflight WORKFLOW=converge-api-gateway` and `make preflight WORKFLOW=converge-ops-portal` both passed from this worktree on 2026-03-29.
+- `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `./scripts/validate_repo.sh agent-standards`, and `git diff --check` all passed on the final `0.177.65` candidate state.
+- `make validate` progressed past the earlier `config/ansible-role-idempotency.yml` failure once `harbor_runtime` was added to the tracked-role registry, then exited on seven unrelated ansible-lint warnings in `control_plane_recovery`, `monitoring_vm`, `openbao_runtime`, and `windmill_runtime` that pre-existed this ADR 0245 workstream.
 - The repo-managed API gateway live replay completed successfully with final recap `docker-runtime-lv3 : ok=234 changed=106 unreachable=0 failed=0 skipped=37 rescued=0 ignored=0`, and the live gateway then verified `HTTP 401` for unauthenticated `GET /v1/platform/attestation` plus authenticated `HTTP 200` for both `/v1/platform/attestation` and `/v1/platform/attestation/api_gateway`.
 - The live attestation payload for `api_gateway` proved the declared runtime witness, route witness, and receipt witness, and the authenticated summary showed the shared production attestation rollup under the new contract.
 - The live ops portal verified `HTTP 200` for `http://127.0.0.1:8092/health`, `HTTP 200` for `http://127.0.0.1:8092/`, `HTTP 200` for `http://127.0.0.1:8092/partials/overview`, and `HTTP 302` for public `https://ops.lv3.org/` back to the expected `/oauth2/sign_in` path.
 - Concurrent controller-side applies from other workstreams on the shared `ops-portal` surface interrupted the outer repo-managed replay path during this workstream. The final live state was recovered by syncing the exact branch Dockerfile, portal application files, and templates into `/opt/ops-portal/service` on `docker-runtime-lv3`, rebuilding with `docker compose --file /opt/ops-portal/docker-compose.yml up -d --build --force-recreate --remove-orphans`, and then re-verifying the internal and public portal surfaces end to end.
-- The final exact-main replay from committed source `0fc12d6caebe09b797bfafd85b5b3cbf71fe3e74` completed successfully with `make converge-api-gateway env=production ANSIBLE_TRACE_ARGS='-e bypass_promotion=true'` reporting `docker-runtime-lv3 : ok=242 changed=111 unreachable=0 failed=0 skipped=35 rescued=0 ignored=0` and `make converge-ops-portal env=production ANSIBLE_TRACE_ARGS='-e bypass_promotion=true'` reporting `docker-runtime-lv3 : ok=126 changed=18 unreachable=0 failed=0 skipped=13 rescued=0 ignored=0`.
-- After that exact-main replay, public `https://api.lv3.org/healthz` returned `HTTP 200`, unauthenticated `HEAD https://api.lv3.org/v1/platform/attestation` returned `HTTP 401`, authenticated `GET /v1/platform/attestation` returned a `44`-service summary with `api_gateway` attested, guest-local `http://127.0.0.1:8092/health`, `/`, and `/partials/overview` all returned `HTTP 200`, public `https://ops.lv3.org/health` returned `HTTP 200`, and public `https://ops.lv3.org/` returned `HTTP 302` to `/oauth2/sign_in`.
+- The final exact-main replay from committed source `0f9fad63d9a32a4723fdfdcbb7f0bb363e8df4ed` completed successfully with `make converge-api-gateway env=production ANSIBLE_TRACE_ARGS='-e bypass_promotion=true'` reporting `docker-runtime-lv3 : ok=242 changed=111 unreachable=0 failed=0 skipped=35 rescued=0 ignored=0` and `make converge-ops-portal env=production ANSIBLE_TRACE_ARGS='-e bypass_promotion=true'` reporting `docker-runtime-lv3 : ok=129 changed=17 unreachable=0 failed=0 skipped=14 rescued=0 ignored=0`.
+- After that exact-main replay, public `https://api.lv3.org/healthz` returned `HTTP 200`, unauthenticated `HEAD https://api.lv3.org/v1/platform/attestation` returned `HTTP 401`, authenticated `GET /v1/platform/attestation` returned a `44`-service summary with `api_gateway` attested, authenticated `GET /v1/platform/attestation/api_gateway` returned `HTTP 200` with `service_id=api_gateway` and `status=attested`, guest-local `http://127.0.0.1:8092/health`, `/`, and `/partials/overview` all returned `HTTP 200`, public `https://ops.lv3.org/health` returned `HTTP 200`, and public `https://ops.lv3.org/` returned `HTTP 302` to `/oauth2/sign_in`.
 
 ## Mainline Integration
 
-- release `0.177.64` now records ADR 0245 in repository truth on top of the current `origin/main` baseline
+- release `0.177.65` now records ADR 0245 in repository truth on top of the refreshed `origin/main` baseline that already carried ADR 0240 at `0.177.64`
 - the canonical live-apply receipt for this workstream is `receipts/live-applies/2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply.json`
-- the exact-main gateway and ops-portal replays are complete from committed source `0fc12d6caebe09b797bfafd85b5b3cbf71fe3e74`, and the recorded receipt preserves the current mainline platform baseline at `0.130.45`
+- the exact-main gateway and ops-portal replays are complete from committed source `0f9fad63d9a32a4723fdfdcbb7f0bb363e8df4ed`, and the recorded receipt preserves the current mainline platform baseline at `0.130.46`
 
 ## Notes For The Next Assistant
 

@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-03-29",
   "recorded_on": "2026-03-29",
-  "recorded_at": "2026-03-29T02:05:04Z",
+  "recorded_at": "2026-03-29T02:36:38Z",
   "recorded_by": "codex",
-  "source_commit": "0fc12d6caebe09b797bfafd85b5b3cbf71fe3e74",
-  "repo_version_context": "0.177.64",
-  "platform_version_context": "0.130.45",
+  "source_commit": "0f9fad63d9a32a4723fdfdcbb7f0bb363e8df4ed",
+  "repo_version_context": "0.177.65",
+  "platform_version_context": "0.130.46",
   "workflow_id": "adr-0245-declared-to-live-service-attestation-live-apply",
   "adr": "0245",
-  "summary": "Replayed ADR 0245 from the exact committed 0.177.64 mainline candidate by converging the shared API gateway and interactive ops portal on docker-runtime-lv3, publishing the declared-to-live service attestation contract through the authenticated gateway surfaces, and re-verifying both the internal portal runtime and the public edges while preserving the current mainline platform baseline.",
+  "summary": "Replayed ADR 0245 from the exact committed 0.177.65 mainline candidate by converging the shared API gateway and interactive ops portal on docker-runtime-lv3, publishing the declared-to-live service attestation contract through the authenticated gateway surfaces, and re-verifying both the internal portal runtime and the public edges while preserving the current mainline platform baseline.",
   "targets": [
     {
       "kind": "guest",
@@ -34,22 +34,22 @@
     {
       "check": "Focused ADR 0245 regression slice",
       "result": "pass",
-      "observed": "uv run --with pytest --with fastapi==0.116.1 --with httpx==0.28.1 --with uvicorn==0.35.0 --with pyyaml==6.0.2 --with cryptography==45.0.6 --with jinja2==3.1.5 --with itsdangerous==2.2.0 --with python-multipart==0.0.20 pytest -q tests/test_declared_live_attestation.py tests/test_api_gateway.py tests/test_interactive_ops_portal.py tests/test_ops_portal_runtime_role.py returned 39 passed in 11.10s, python3 -m py_compile platform/runtime_assurance/declared_live_attestation.py scripts/declared_live_attestation.py scripts/api_gateway/main.py scripts/ops_portal/app.py scripts/ops_portal/runtime_assurance.py passed, and make syntax-check-api-gateway plus make syntax-check-ops-portal both passed."
+      "observed": "uv run --with pytest --with fastapi==0.116.1 --with httpx==0.28.1 --with uvicorn==0.35.0 --with pyyaml==6.0.2 --with cryptography==45.0.6 --with jinja2==3.1.5 --with itsdangerous==2.2.0 --with python-multipart==0.0.20 pytest -q tests/test_declared_live_attestation.py tests/test_api_gateway.py tests/test_interactive_ops_portal.py tests/test_ops_portal_runtime_role.py returned 43 passed in 8.07s, python3 -m py_compile platform/runtime_assurance/declared_live_attestation.py scripts/declared_live_attestation.py scripts/api_gateway/main.py scripts/ops_portal/app.py scripts/ops_portal/runtime_assurance.py passed, and make syntax-check-api-gateway plus make syntax-check-ops-portal both passed."
     },
     {
       "check": "Repository automation validation gates",
       "result": "pass",
-      "observed": "make preflight WORKFLOW=converge-api-gateway and make preflight WORKFLOW=converge-ops-portal passed from the isolated worktree, ./scripts/validate_repo.sh shell passed after the SC2295 fix in scripts/validate_repo.sh, and ./scripts/validate_repo.sh agent-standards plus uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate were rerun successfully after this receipt landed."
+      "observed": "make preflight WORKFLOW=converge-api-gateway and make preflight WORKFLOW=converge-ops-portal passed from the isolated worktree, ./scripts/validate_repo.sh shell passed after the SC2295 fix in scripts/validate_repo.sh, and ./scripts/validate_repo.sh agent-standards plus uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate both passed on the final 0.177.65 candidate."
     },
     {
       "check": "Exact-commit gateway replay",
       "result": "pass",
-      "observed": "make converge-api-gateway env=production ANSIBLE_TRACE_ARGS='-e bypass_promotion=true' completed successfully from source commit 0fc12d6caebe09b797bfafd85b5b3cbf71fe3e74 with recap docker-runtime-lv3 : ok=242 changed=111 unreachable=0 failed=0 skipped=35 rescued=0 ignored=0."
+      "observed": "make converge-api-gateway env=production ANSIBLE_TRACE_ARGS='-e bypass_promotion=true' completed successfully from source commit 0f9fad63d9a32a4723fdfdcbb7f0bb363e8df4ed with recap docker-runtime-lv3 : ok=242 changed=111 unreachable=0 failed=0 skipped=35 rescued=0 ignored=0."
     },
     {
       "check": "Exact-commit ops portal replay",
       "result": "pass",
-      "observed": "make converge-ops-portal env=production ANSIBLE_TRACE_ARGS='-e bypass_promotion=true' completed successfully from source commit 0fc12d6caebe09b797bfafd85b5b3cbf71fe3e74 with recap docker-runtime-lv3 : ok=126 changed=18 unreachable=0 failed=0 skipped=13 rescued=0 ignored=0."
+      "observed": "make converge-ops-portal env=production ANSIBLE_TRACE_ARGS='-e bypass_promotion=true' completed successfully from source commit 0f9fad63d9a32a4723fdfdcbb7f0bb363e8df4ed with recap docker-runtime-lv3 : ok=129 changed=17 unreachable=0 failed=0 skipped=14 rescued=0 ignored=0."
     },
     {
       "check": "Declared-to-live gateway contract verification",
@@ -60,6 +60,11 @@
       "check": "Ops portal internal and public verification",
       "result": "pass",
       "observed": "From docker-runtime-lv3 reached through the current Proxmox jump path, GET http://127.0.0.1:8092/health returned HTTP/1.1 200 with {\"status\":\"ok\"}, GET http://127.0.0.1:8092/ returned HTTP/1.1 200 and still contained Runtime Assurance, GET http://127.0.0.1:8092/partials/overview returned HTTP/1.1 200 and still contained Runtime Assurance, GET https://ops.lv3.org/health returned HTTP/2 200 with {\"status\":\"ok\"}, and HEAD https://ops.lv3.org/ returned HTTP/2 302 redirecting to /oauth2/sign_in as expected for the protected operator shell."
+    },
+    {
+      "check": "Full repository validate wrapper",
+      "result": "partial",
+      "observed": "make validate progressed past the earlier config/ansible-role-idempotency.yml blocker once harbor_runtime was added to the tracked-role registry, then exited with seven unrelated ansible-lint warnings in collections/ansible_collections/lv3/platform/roles/control_plane_recovery/defaults/main.yml, collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml, collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml, and collections/ansible_collections/lv3/platform/roles/windmill_runtime/{defaults/main.yml,tasks/main.yml}. The wrapper still completed the downstream idempotency, shell, JSON, compose runtime env guard, and retry guard steps before returning exit 1."
     }
   ],
   "evidence_refs": [
@@ -84,8 +89,8 @@
     "versions/stack.yaml"
   ],
   "notes": [
-    "This exact-main receipt is the first canonical live-apply evidence for ADR 0245 and records the replay from the committed 0.177.64 candidate rather than the earlier branch-local verification passes.",
-    "The verified mainline platform baseline remained 0.130.45 during this replay; the release cut records ADR 0245 in repo truth without claiming a new platform version bump.",
+    "This exact-main receipt is the first canonical live-apply evidence for ADR 0245 and records the replay from the committed 0.177.65 candidate after 0.177.64 had already been consumed by ADR 0240 mainline integration.",
+    "The verified mainline platform baseline remained 0.130.46 during this replay; the release cut records ADR 0245 in repo truth without claiming a new platform version bump.",
     "The ops-portal recovery runbook was updated in the same branch because the older hardcoded Proxmox jump address no longer matched the live management path discovered during verification."
   ]
 }
