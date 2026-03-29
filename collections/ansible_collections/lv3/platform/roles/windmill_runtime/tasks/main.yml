@@ -2080,6 +2080,10 @@
     label: "{{ item.path }}"
   changed_when: false
   no_log: true
+
+- name: Wait for Windmill workers to register before seeded healthcheck execution
+  ansible.builtin.import_tasks: wait_for_workers.yml
+
 - name: Run the Windmill seeded healthcheck script
   ansible.builtin.shell: >
     python3 {{ (windmill_worker_checkout_repo_root_local_dir ~ '/scripts/windmill_run_wait_result.py') | quote }}

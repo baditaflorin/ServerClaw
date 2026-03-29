@@ -515,6 +515,9 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     verify_tasks = (
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml"
     ).read_text()
+    wait_for_workers_tasks = (
+        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/wait_for_workers.yml"
+    ).read_text()
     compose_template = (
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2"
     ).read_text()
@@ -657,8 +660,13 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "--payload-json" in tasks
     assert "--timeout {{ windmill_seed_job_timeout_seconds }}" in tasks
     assert "' not found' in (windmill_up.stderr | default(''))" in tasks
-    assert "Wait for Windmill workers to register" in verify_tasks
-    assert "/api/workers/list" in verify_tasks
+    assert "Wait for Windmill workers to register before seeded healthcheck execution" in tasks
+    assert "import_tasks: wait_for_workers.yml" in tasks
+    assert "Wait for Windmill workers to register before verification" in verify_tasks
+    assert "import_tasks: wait_for_workers.yml" in verify_tasks
+    assert "Wait for Windmill workers to register" in wait_for_workers_tasks
+    assert "/api/workers/list" in wait_for_workers_tasks
+    assert "windmill_registered_workers" in wait_for_workers_tasks
     assert "--path {{ windmill_validation_gate_status_script_path | quote }}" in verify_tasks
     assert "Run the Windmill validation gate status script" in verify_tasks
     assert "Assert the Windmill validation gate status result" in verify_tasks
