@@ -268,7 +268,8 @@ def test_execute_profiled_smoke_tests_retries_until_required_checks_pass(monkeyp
         ]
     )
     monkeypatch.setattr(rv, "execute_smoke_tests", lambda *_args, **_kwargs: next(attempts))
-    monkeypatch.setattr(rv.time, "sleep", lambda *_args, **_kwargs: None)
+    sleep_calls: list[int] = []
+    monkeypatch.setattr(rv.time, "sleep", lambda seconds: sleep_calls.append(int(seconds)))
 
     outcome = rv.execute_profiled_smoke_tests(
         {"restored_guests": {"docker-runtime-lv3": "10.20.10.100"}},
@@ -282,6 +283,7 @@ def test_execute_profiled_smoke_tests_retries_until_required_checks_pass(monkeyp
     assert outcome.network_dependency_ready_after_attempt == 2
     assert outcome.service_warm_up_ready_after_attempt == 2
     assert outcome.tests[0]["status"] == "pass"
+    assert sleep_calls == [90, 30]
 
 
 def test_build_report_counts_highest_completed_stages() -> None:

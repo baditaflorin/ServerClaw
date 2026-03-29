@@ -162,7 +162,7 @@ workstreams:
   - id: ws-0224-repo-intake
     adr: "0224"
     title: Self-service repo intake and agent-assisted app deployments
-    status: live_applied
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0224-repo-intake
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0224-repo-intake
@@ -970,6 +970,99 @@ workstreams:
         Playwright, OpenFGA, and a PostgreSQL-Qdrant-search memory stack
       release_bump: patch
       included_in_repo_version: 0.177.59
+  - id: ws-0259-live-apply
+    adr: "0259"
+    title: Live apply n8n as the external app connector fabric for ServerClaw
+    status: ready_for_merge
+    owner: codex
+    branch: codex/adr-0259-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0259-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0259-live-apply.md
+    depends_on:
+      - adr-0151-n8n
+      - adr-0206-ports-and-adapters
+      - adr-0254-serverclaw
+      - adr-0258-temporal
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0259-live-apply.md
+      - docs/adr/0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/configure-n8n.md
+      - playbooks/n8n.yml
+      - collections/ansible_collections/lv3/platform/playbooks/n8n.yml
+      - collections/ansible_collections/lv3/platform/roles/n8n_runtime/
+      - config/ansible-role-idempotency.yml
+      - config/service-capability-catalog.json
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - scripts/restore_verification.py
+      - tests/test_n8n_playbook.py
+      - tests/test_n8n_runtime_role.py
+      - tests/test_restore_verification.py
+      - tests/test_validate_service_catalog.py
+      - tests/test_n8n_metadata.py
+      - receipts/live-applies/2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0259_index_contract
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: adr_0259_docs
+          paths:
+            - docs/adr/0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md
+            - docs/workstreams/ws-0259-live-apply.md
+          mode: exclusive
+        - id: adr_0259_runtime_surfaces
+          paths:
+            - docs/runbooks/configure-n8n.md
+            - config/ansible-role-idempotency.yml
+            - tests/test_n8n_metadata.py
+            - tests/test_validate_service_catalog.py
+            - tests/test_n8n_playbook.py
+            - tests/test_n8n_runtime_role.py
+            - receipts/live-applies/2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-live-apply.json
+          mode: exclusive
+        - id: adr_0259_n8n_runtime_contract
+          paths:
+            - playbooks/n8n.yml
+            - collections/ansible_collections/lv3/platform/playbooks/n8n.yml
+            - collections/ansible_collections/lv3/platform/roles/n8n_runtime/*
+          mode: shared_contract
+          contract: n8n-runtime-v1
+        - id: adr_0259_catalog_contract
+          paths:
+            - config/service-capability-catalog.json
+            - config/workflow-catalog.json
+            - config/command-catalog.json
+          mode: shared_contract
+          contract: service-catalog-governance-v1
+        - id: adr_0259_repo_validation_contract
+          paths:
+            - scripts/restore_verification.py
+            - tests/test_restore_verification.py
+          mode: shared_contract
+          contract: repo-retry-guard-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0259 by reaffirming the governed n8n
+        lane as the ServerClaw external connector fabric, hardening the runtime
+        for proxmox_florin-scoped topology, private postgres reachability, and
+        fresh-worktree edge publication, and recording a latest-main live-apply
+        replay with protected editor and webhook verification
+      release_bump: patch
+      included_in_repo_version: null
+      latest_receipts:
+        n8n: 2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-live-apply
   - id: ws-0244-runtime-assurance-adrs
     adr: "0244"
     title: Runtime assurance architecture bundle

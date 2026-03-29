@@ -1873,7 +1873,7 @@
       }
     },
     "converge-n8n": {
-      "description": "Converge n8n with PostgreSQL persistence and publish it at n8n.lv3.org while keeping the editor behind edge auth and public webhooks reachable.",
+      "description": "Converge n8n with PostgreSQL persistence and publish it at n8n.lv3.org as the governed ServerClaw connector fabric while keeping the editor behind edge auth and public webhooks reachable.",
       "workflow_id": "converge-n8n",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -1896,11 +1896,11 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-n8n passes",
         "make validate passes before the apply",
-        "The public webhook exposure and editor auth boundary are reviewed before live rollout"
+        "The public webhook exposure, editor auth boundary, and thin-adapter rule for ServerClaw are reviewed before live rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the source commit, n8n.lv3.org health verification, local readiness, owner sign-in verification, and public webhook reachability."
+        "notes": "Record the source commit, n8n.lv3.org health verification, local readiness, owner sign-in verification, public webhook reachability, and the protected editor redirect."
       },
       "failure_guidance": {
         "stop_conditions": [
