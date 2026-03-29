@@ -1525,10 +1525,7 @@ workstreams:
   - id: ws-0234-live-apply
     adr: "0234"
     title: Live apply shared human app shell and navigation via PatternFly
-    status: in_progress
-    blockers:
-      - "2026-03-29T00:18:47Z: competing ops-portal live applies continued to write /opt/ops-portal/service after or during ws-0234 replays; guest hashes matched ws-0244-live-apply instead of ws-0234-live-apply-r2."
-      - "2026-03-29T00:18:47Z: repo-side replay hardening is ready, including ops_portal_runtime cleanup of macOS ._* sidecars plus focused test coverage, but truthful live verification is still blocked by external SIGTERM/concurrent portal applies."
+    status: live_applied
     owner: codex
     branch: codex/ws-0234-live-apply-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0234-live-apply-r2
@@ -1566,7 +1563,7 @@ workstreams:
       - tests/test_ops_portal_runtime_role.py
       - tests/test_ops_portal_playbook.py
       - tests/test_security_headers_audit.py
-      - receipts/live-applies/2026-03-28-adr-0234-patternfly-shell-live-apply.json
+      - receipts/live-applies/2026-03-29-adr-0234-patternfly-shell-live-apply.json
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -1606,10 +1603,19 @@ workstreams:
             - tests/test_ops_portal_runtime_role.py
             - tests/test_ops_portal_playbook.py
             - tests/test_security_headers_audit.py
-            - receipts/live-applies/2026-03-28-adr-0234-patternfly-shell-live-apply.json
+            - receipts/live-applies/2026-03-29-adr-0234-patternfly-shell-live-apply.json
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0234 by live-applying the shared
+        PatternFly shell on the interactive ops portal, including the
+        masthead, responsive navigation, shared state primitives, and the
+        public-edge CSP allowance for the pinned PatternFly asset
+      release_bump: patch
+      included_in_repo_version: 0.177.72
+      latest_receipts:
+        ops_portal: 2026-03-29-adr-0234-patternfly-shell-live-apply
   - id: ws-0242-live-apply
     adr: "0242"
     title: Guided human onboarding live apply via Shepherd tours

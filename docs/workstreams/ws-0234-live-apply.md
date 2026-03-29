@@ -3,11 +3,11 @@
 - ADR: [ADR 0234](../adr/0234-shared-human-app-shell-and-navigation-via-patternfly.md)
 - Title: Live apply the shared human app shell and navigation contract on the
   interactive ops portal
-- Status: in_progress
-- Implemented In Repo Version: N/A
-- Live Applied In Platform Version: N/A
-- Implemented On: N/A
-- Live Applied On: N/A
+- Status: live_applied
+- Implemented In Repo Version: 0.177.72
+- Live Applied In Platform Version: 0.130.50
+- Implemented On: 2026-03-29
+- Live Applied On: 2026-03-29
 - Branch: `codex/ws-0234-live-apply-r2`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0234-live-apply-r2`
 - Owner: codex
@@ -73,7 +73,7 @@
 - `tests/test_ops_portal_runtime_role.py`
 - `tests/test_ops_portal_playbook.py`
 - `tests/test_security_headers_audit.py`
-- `receipts/live-applies/2026-03-28-adr-0234-patternfly-shell-live-apply.json`
+- `receipts/live-applies/2026-03-29-adr-0234-patternfly-shell-live-apply.json`
 - `workstreams.yaml`
 
 ## Expected Live Surfaces
@@ -88,42 +88,77 @@
 
 ## Verification
 
-- `uv run --with pytest --with pyyaml --with jsonschema --with-requirements requirements/ops-portal.txt python -m pytest -q tests/test_interactive_ops_portal.py tests/test_nginx_edge_publication_role.py tests/test_ops_portal_runtime_role.py tests/test_ops_portal_playbook.py tests/test_ops_portal.py tests/test_security_headers_audit.py`
-- `make syntax-check-ops-portal`
-- `./scripts/validate_repo.sh workstream-surfaces agent-standards`
-- live replay from this isolated worktree for the ops portal runtime and the
-  shared edge publication path, followed by guest-local and published-browser
-  verification
+- `uv run --with pytest --with pyyaml --with jsonschema --with-requirements requirements/ops-portal.txt python -m pytest -q tests/test_interactive_ops_portal.py tests/test_nginx_edge_publication_role.py tests/test_ops_portal_runtime_role.py tests/test_ops_portal_playbook.py tests/test_ops_portal.py tests/test_security_headers_audit.py` returned `48 passed`.
+- `make syntax-check-ops-portal` passed.
+- `./scripts/validate_repo.sh workstream-surfaces agent-standards` passed on the isolated workstream branch before the final integration step.
+- `make live-apply-service service=ops_portal ...` failed closed on the
+  workstream branch because canonical-truth generation would have rewritten the
+  protected `README.md` and `versions/stack.yaml` surfaces, so the live replay
+  used the governed direct sequence: `interface_contracts.py`,
+  `promotion_pipeline.py`, `standby_capacity.py`,
+  `service_redundancy.py`, `immutable_guest_replacement.py`, then
+  `scripts/ansible_scope_runner.py` on
+  `playbooks/services/ops_portal.yml`.
+- The direct scoped replay had to pass
+  `-e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0234-live-apply-r2`.
+  Without that override the controller-side sync read from the top-level repo
+  checkout and failed on missing service inputs such as
+  `scripts/ops_portal/runtime_assurance.py`,
+  `scripts/ops_portal/static/portal.js`, and
+  `scripts/ops_portal/templates/partials/launcher.html`.
+- The final ops-portal replay completed with
+  `docker-runtime-lv3 ok=130 changed=14 failed=0 skipped=15`.
+- The public-edge replay used `service:public-edge` for
+  `interface_contracts.py`, emitted the promotion bypass event for
+  `public-edge`, and then ran `scripts/ansible_scope_runner.py` on
+  `playbooks/services/public-edge.yml` because the capacity, redundancy, and
+  immutable-guest guard scripts intentionally do not catalogue
+  `public-edge`. That replay completed with
+  `nginx-lv3 ok=61 changed=4 failed=0 skipped=14`.
+- After rebasing the worktree onto `origin/main` commit
+  `73fb0ec1336d7b5540f51590f4b4f9a3a136577c`, guest-local hashes and the public
+  edge headers still matched the verified ADR 0234 rollout because the newly
+  landed mainline commits were ADR-document changes outside the portal replay
+  surfaces.
 
-## Notes For The Next Assistant
+## Live Apply Outcome
 
-- the live portal runtime is the first concrete ADR 0234 surface; keep follow-up
-  work focused on extending the same shell primitives rather than cloning them
-  into a second custom layout
-- if the page loads unstyled after deploy, check the ops portal CSP first
-  because the shared shell depends on the pinned PatternFly asset URL
-- the protected `README.md`, `VERSION`, `changelog.md`, `versions/stack.yaml`,
-  and release-note updates still belong to the final integration step
-- as of `2026-03-29T00:18:47Z`, repo validation for the branch-local replay
-  hardening is in good shape:
-  `48 passed` on the focused portal/CSP/runtime/playbook/security test set,
-  `make syntax-check-ops-portal`,
-  and `./scripts/validate_repo.sh workstream-surfaces agent-standards`
-- the live blocker is still concurrency, not repo code review:
-  repeated remote portal files matched
-  `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0244-live-apply`
-  instead of this worktree, and one visible competing launcher was
-  `.../.worktrees/ws-0244-live-apply/playbooks/ops-portal.yml`
-- the branch now removes macOS `._*` AppleDouble sidecars from the synced
-  portal build context in
-  `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml`;
-  that cleanup is covered in `tests/test_ops_portal_playbook.py`, while the
-  rebased runtime sync contract is covered in `tests/test_ops_portal_runtime_role.py`
-- the next attempt should start by killing or pausing every competing
-  `ops-portal` live apply that references `playbooks/ops-portal.yml` or
-  `playbooks/services/ops_portal.yml`, then replay from this worktree and
-  verify that guest hashes match:
-  `scripts/ops_portal/app.py` ->
-  `542bd2b239f9fa95656727b3907f967059d4d99426482748fdb68e7f8e6b05d9`
-  and `scripts/ops_portal/templates/base.html` ->
-  `6bfb8a834b6fa916deb610ebeadb1df11831cf93abe52b8b4390c369c70aba6d`
+- ADR 0234 is live on `ops.lv3.org` and on the guest-local
+  `docker-runtime-lv3` listener, with the shared PatternFly shell, masthead,
+  responsive navigation, and shared state components rendered from the
+  interactive ops portal.
+- The published edge now permits the pinned PatternFly stylesheet while keeping
+  the authenticated ops portal redirect and the repo-managed same-origin
+  JavaScript shell helpers intact.
+- The ops-portal runtime replay now removes macOS `._*` AppleDouble sidecars
+  from synced data and service trees before the container rebuild, preventing
+  stale local filesystem metadata from polluting branch-local live applies.
+- Competing `ops_portal` branch-local replays still share
+  `/opt/ops-portal/service` on `docker-runtime-lv3`, so truthful live applies
+  must obtain an uncontended replay window before asserting guest hashes.
+
+## Live Evidence
+
+- live-apply receipt:
+  `receipts/live-applies/2026-03-29-adr-0234-patternfly-shell-live-apply.json`
+- controller context:
+  `receipts/live-applies/evidence/2026-03-29-adr-0234-controller-context.txt`
+- guest-local hash and shell proof:
+  `receipts/live-applies/evidence/2026-03-29-adr-0234-live-hashes.txt`
+- public-edge header proof:
+  `receipts/live-applies/evidence/2026-03-29-adr-0234-public-edge-check.txt`
+
+## Mainline Integration Outcome
+
+- merged to `main` in repository version `0.177.72`
+- updated `VERSION`, `changelog.md`, `RELEASE.md`,
+  `docs/release-notes/0.177.72.md`, `docs/release-notes/README.md`,
+  `versions/stack.yaml`, `build/platform-manifest.json`, `README.md`, and the
+  ADR/workstream metadata only during the final integration step
+- advanced the platform version to `0.130.50` after the rebased latest-main
+  proof kept the guest hashes and public-edge CSP evidence aligned with the
+  verified PatternFly shell rollout
+
+## Merge-To-Main Notes
+
+- remaining for merge to `main`: none

@@ -72,6 +72,35 @@ ssh ops@100.118.189.95 'ssh ops@10.10.10.20 "docker exec ops-portal ls /app/ops_
 make converge-ops-portal
 ```
 
+If a branch-local worktree replay must stay off the protected canonical-truth
+path and `make live-apply-service service=ops_portal ...` fails closed before
+mutation because it would rewrite `README.md` or `versions/stack.yaml`, use the
+governed scoped replay sequence directly and point the runtime sync at the
+exact worktree:
+
+```bash
+TRACE_ID=$(python3 -c 'import uuid; print(uuid.uuid4().hex)')
+RUN_ID="$TRACE_ID"
+REPO=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/<worktree>
+BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
+
+export LV3_RUN_ID="$RUN_ID"
+export ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local
+export ANSIBLE_REMOTE_TEMP=/tmp
+
+uvx --from pyyaml python "$REPO/scripts/interface_contracts.py" --check-live-apply "service:ops_portal"
+python3 "$REPO/scripts/promotion_pipeline.py" --emit-bypass-event --service "ops_portal" --actor-id "${USER:-unknown}" --correlation-id "break-glass:service:ops_portal:$(date -u +%Y%m%dT%H%M%SZ)"
+uv run --with pyyaml python "$REPO/scripts/standby_capacity.py" --service "ops_portal"
+uv run --with pyyaml --with jsonschema python "$REPO/scripts/service_redundancy.py" --check-live-apply --service "ops_portal"
+uv run --with pyyaml --with jsonschema python "$REPO/scripts/immutable_guest_replacement.py" --check-live-apply --service "ops_portal" --allow-in-place-mutation
+ANSIBLE_HOST_KEY_CHECKING=False "$REPO/scripts/run_with_namespace.sh" uvx --from pyyaml python "$REPO/scripts/ansible_scope_runner.py" run --inventory "$REPO/inventory/hosts.yml" --run-id "$RUN_ID" --playbook "$REPO/playbooks/services/ops_portal.yml" --env production -- --private-key "$BOOTSTRAP_KEY" -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id="$TRACE_ID" -e bypass_promotion=true -e ops_portal_repo_root="$REPO"
+```
+
+Keep the explicit `-e ops_portal_repo_root="$REPO"` override. Without it, the
+controller-side sync can read from the top-level checkout instead of the active
+worktree and fail on missing live inputs such as `runtime_assurance.py` or
+`portal.js`.
+
 If a Codex-managed local replay exits with signal `15` before the first remote
 task output appears, treat that as a controller-local interruption rather than
 proof that the guest apply failed. Move to the staged service/data resync below
@@ -133,10 +162,25 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   'cd /opt/ops-portal && sudo docker compose up -d --build --remove-orphans'
 ```
 
-4. If the runtime is healthy locally but the public hostname fails, re-apply the edge:
+4. If the runtime is healthy locally but the public hostname fails, re-apply the
+   edge. For branch-local replays, keep the contract gate on
+   `service:public-edge` and then call the service playbook directly because
+   `standby_capacity.py`, `service_redundancy.py`, and
+   `immutable_guest_replacement.py` do not catalogue `public-edge`:
 
 ```bash
-ansible-playbook playbooks/public-edge.yml
+TRACE_ID=$(python3 -c 'import uuid; print(uuid.uuid4().hex)')
+RUN_ID="$TRACE_ID"
+REPO=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/<worktree>
+BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
+
+export LV3_RUN_ID="$RUN_ID"
+export ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local
+export ANSIBLE_REMOTE_TEMP=/tmp
+
+uvx --from pyyaml python "$REPO/scripts/interface_contracts.py" --check-live-apply "service:public-edge"
+python3 "$REPO/scripts/promotion_pipeline.py" --emit-bypass-event --service "public-edge" --actor-id "${USER:-unknown}" --correlation-id "break-glass:service:public-edge:$(date -u +%Y%m%dT%H%M%SZ)"
+ANSIBLE_HOST_KEY_CHECKING=False "$REPO/scripts/run_with_namespace.sh" uvx --from pyyaml python "$REPO/scripts/ansible_scope_runner.py" run --inventory "$REPO/inventory/hosts.yml" --run-id "$RUN_ID" --playbook "$REPO/playbooks/services/public-edge.yml" --env production -- --private-key "$BOOTSTRAP_KEY" -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id="$TRACE_ID" -e bypass_promotion=true
 ```
 
 5. If gateway-backed actions fail while the UI shell loads, confirm the configured `GATEWAY_URL` from `/opt/ops-portal/ops-portal.env` and verify the API gateway separately before restarting the portal.
