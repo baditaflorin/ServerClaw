@@ -194,6 +194,9 @@ def test_release_status_snapshot_reports_blockers(release_repo: Path) -> None:
 
 
 def test_release_cut_updates_core_release_files(release_repo: Path) -> None:
+    refreshed: list[str] = []
+    release_manager.refresh_generated_truth_surfaces = lambda: refreshed.append("generated")
+
     exit_code = release_manager.main(
         [
             "--bump",
@@ -214,6 +217,7 @@ def test_release_cut_updates_core_release_files(release_repo: Path) -> None:
     assert (release_repo / "RELEASE.md").exists()
     assert (release_repo / "docs" / "release-notes" / "0.1.1.md").exists()
     assert "[0.1.1](" in (release_repo / "docs" / "release-notes" / "README.md").read_text()
+    assert refreshed == ["generated"]
 
 
 def test_release_cut_can_infer_bump_from_canonical_truth_metadata(release_repo: Path) -> None:

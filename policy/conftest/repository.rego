@@ -106,6 +106,49 @@ deny contains msg if {
 }
 
 deny contains msg if {
+  some check_id, _check in input.validation_gate
+  not object.get(input.validation_runner_contracts.lanes, check_id, null)
+  msg := sprintf(
+    "validation gate check %q must exist in config/validation-runner-contracts.json.lanes",
+    [check_id],
+  )
+}
+
+deny contains msg if {
+  some command_id, command in input.build_server_config.commands
+  runner_id := object.get(command, "runner_id", "")
+  runner_id != ""
+  not object.get(input.validation_runner_contracts.runners, runner_id, null)
+  msg := sprintf(
+    "build-server command %q references unknown runner_id %q",
+    [command_id, runner_id],
+  )
+}
+
+deny contains msg if {
+  some command_id, command in input.build_server_config.commands
+  fallback_runner_id := object.get(command, "local_fallback_runner_id", "")
+  fallback_runner_id != ""
+  not object.get(input.validation_runner_contracts.runners, fallback_runner_id, null)
+  msg := sprintf(
+    "build-server command %q references unknown local_fallback_runner_id %q",
+    [command_id, fallback_runner_id],
+  )
+}
+
+deny contains msg if {
+  some command_id, command in input.build_server_config.commands
+  validation_lanes := object.get(command, "validation_lanes", [])
+  validation_lanes != "all-validation-gate-checks"
+  some lane_id in validation_lanes
+  not object.get(input.validation_runner_contracts.lanes, lane_id, null)
+  msg := sprintf(
+    "build-server command %q references unknown validation lane %q",
+    [command_id, lane_id],
+  )
+}
+
+deny contains msg if {
   some service in input.service_catalog.services
   service.exposure == "edge-published"
   not has_nonempty_string(object.get(service, "public_url", ""))

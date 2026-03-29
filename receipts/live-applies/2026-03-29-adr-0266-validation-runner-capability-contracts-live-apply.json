@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0266-validation-runner-capability-contracts-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T14:46:25Z",
+  "recorded_by": "codex",
+  "source_commit": "d9a1739742269ca9a24d02fadca1735a89c8af77",
+  "repo_version_context": "0.177.79",
+  "platform_version_context": "0.130.54",
+  "workflow_id": "adr-0266-validation-runner-capability-contracts-live-apply",
+  "adr": "0266",
+  "summary": "Verified ADR 0266 on the latest-main workstream branch by declaring validation-runner contracts, recording per-run environment attestations on the build-server and pre-push gate paths, and proving the rebased branch end to end against the remote build gateway.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-build-lv3",
+      "vmid": 130,
+      "address": "10.10.10.30"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "remote-build-gateway",
+      "address": "100.64.0.1 -> 10.10.10.30"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Build-server workspace and immutable snapshot handoff",
+      "result": "pass",
+      "observed": "`make check-build-server` passed from commit `d9a17397`, verified SSH reachability to `ops@10.10.10.30`, created the session workspace `/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0266-validation-runner-capability-contracts-8be65b3b1f/repo`, and confirmed immutable snapshot upload for the rebased branch."
+    },
+    {
+      "check": "Remote validation runner attestation",
+      "result": "pass",
+      "observed": "`make remote-validate` passed from commit `d9a17397`; `.local/validation-gate/remote-validate-last-run.json` recorded `source=build-server-validate`, `runner.id=build-server-validation`, `cpu_architecture=x86_64`, and all six requested validation lanes passing on the build server."
+    },
+    {
+      "check": "Full pre-push gate replay",
+      "result": "pass",
+      "observed": "`make pre-push-gate` passed from commit `d9a17397`; `.local/validation-gate/last-run.json` recorded `source=build-server`, `runner.id=build-server-validation`, and all 15 configured gate checks passing on the rebased workstream branch."
+    }
+  ],
+  "evidence_refs": [
+    "workstreams.yaml",
+    "docs/workstreams/adr-0266-validation-runner-capability-contracts-live-apply.md",
+    "docs/adr/0266-validation-runner-capability-contracts-and-environment-attestation.md",
+    "docs/runbooks/remote-build-gateway.md",
+    "docs/runbooks/validation-gate.md",
+    "config/validation-runner-contracts.json",
+    "docs/schema/validation-runner-contracts.schema.json",
+    "scripts/validation_runner_contracts.py",
+    "scripts/run_gate.py",
+    "scripts/parallel_check.py",
+    "scripts/remote_exec.sh",
+    "config/windmill/scripts/post-merge-gate.py",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-check-build-server.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-controller-runner-context.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-remote-validate.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-remote-validate-last-run.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-remote-validate-summary.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-pre-push-gate.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-pre-push-last-run.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-pre-push-summary.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-gate-status.txt",
+    "receipts/live-applies/2026-03-29-adr-0266-validation-runner-capability-contracts-live-apply.json"
+  ],
+  "notes": [
+    "This receipt records branch-local proof on top of the latest origin/main lineage before protected release files were updated on main.",
+    "The canonical mainline replay still remains to be recorded under receipts/live-applies/2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply.json after merge, release, and worker post-merge verification.",
+    "versions/stack.yaml, VERSION, changelog.md, RELEASE.md, docs/release-notes, and ADR implementation-version metadata intentionally remain unchanged on this workstream branch."
+  ]
+}
