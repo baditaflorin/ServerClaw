@@ -94,6 +94,8 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "dest: execution-lanes.yaml" in defaults
     assert "api_gateway_runtime_assurance_matrix_src" in defaults
     assert "dest: runtime-assurance-matrix.json" in defaults
+    assert "api_gateway_environment_topology_src" in defaults
+    assert "dest: environment-topology.json" in defaults
     assert "api_gateway_database_name: windmill" in defaults
     assert "api_gateway_database_user: windmill_admin" in defaults
     assert "api_gateway_windmill_service_topology" in defaults

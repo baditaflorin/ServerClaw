@@ -137,6 +137,29 @@
   gets through the rebuild but still fails the final runtime-assurance route
   verification because another concurrent `api-gateway` replay clobbered the
   host back to the older `acc8…` implementation during verification
+- 2026-03-29 this branch now carries one additional exact-main gateway fix:
+  `api_gateway_runtime/defaults/main.yml` explicitly manages
+  `config/environment-topology.json` alongside
+  `config/runtime-assurance-matrix.json`, and
+  `tests/test_api_gateway_runtime_role.py` covers that extra bundle member
+- 2026-03-29
+  `receipts/live-applies/evidence/2026-03-29-adr-0251-api-gateway-runtime-assurance-config-fix.txt`
+  shows the first replay of that bundle fix; it gets through the config sync
+  but loses the Docker build context again while another branch replays the
+  same gateway host concurrently
+- 2026-03-29
+  `receipts/live-applies/evidence/2026-03-29-adr-0251-api-gateway-runtime-assurance-config-fix-rerun.txt`
+  captures a clean-window rerun that completes successfully end to end,
+  including the role's authenticated runtime-assurance verification, before a
+  fresh concurrent `ws-0262-openfga-keycloak-live-apply` replay lands on the
+  same host immediately afterward
+- 2026-03-29
+  `receipts/live-applies/evidence/2026-03-29-adr-0251-ops-portal-live-apply-postgateway.txt`
+  plus direct post-apply inspection show the resulting live drift clearly: the
+  portal partial falls back to the degraded banner again, the host keeps
+  `environment-topology.json`, but `/opt/api-gateway/config/runtime-assurance-matrix.json`
+  disappears from both the host bind mount and the running container after the
+  later concurrent gateway replay
 
 ## Live Apply Blocker
 
@@ -167,16 +190,25 @@
   `ce9f…`, the live host and container stayed on `acc8…`, and local controller
   process inspection showed a concurrent `ws-0257-main-merge` `playbooks/api-gateway.yml`
   replay targeting the same host during the same verification window
+- the latest clean-window rerun confirms the newer config-bundle fix is real
+  but still not stable against concurrent older replays: this worktree's green
+  `2026-03-29-adr-0251-api-gateway-runtime-assurance-config-fix-rerun` replay
+  verifies the authenticated runtime-assurance route during the play itself,
+  then a fresh `ws-0262-openfga-keycloak-live-apply` gateway replay starts
+  again and leaves the shared host with `environment-topology.json` present
+  but `runtime-assurance-matrix.json` missing, which immediately restores the
+  ops-portal degraded fallback banner and a live `500` from
+  `/v1/platform/runtime-assurance`
 
 ## Remaining Steps
 
 - fetch and rebase onto the latest `origin/main` before any final integration:
   during this run the worktree moved again and `origin/main` is now
-  `7f1bbe50518fd30a78a2ce5f7ee5f410ba07b0ea` as of 2026-03-29
+  `8871117b40466b7907a33992f44ca7d83a3e9409` as of 2026-03-29
 - re-run `api-gateway`, then the exact `ops_portal` and `windmill` live applies
-  from an uncontended latest-main checkout and verify the guest hashes
-  immediately after each replay so the shared host cannot drift between apply
-  and proof
+  from an uncontended latest-main checkout and verify the guest hashes and the
+  live config bind mounts immediately after each replay so the shared host
+  cannot drift between apply and proof
 - update ADR 0251 metadata, refresh `docs/adr/.index.yaml`, and mark
   `workstreams.yaml` `live_applied: true` only after the live hashes and public
   behavior match the final merged tree
