@@ -28,6 +28,8 @@ platform_context_site_dir: /opt/platform-context
 platform_context_service_dir: "{{ platform_context_site_dir }}/service"
 platform_context_corpus_dir: "{{ platform_context_site_dir }}/corpus"
 platform_context_data_dir: "{{ platform_context_site_dir }}/qdrant"
+platform_context_memory_index_dir: "{{ platform_context_site_dir }}/memory-search-index"
+platform_context_memory_index_path: "{{ platform_context_memory_index_dir }}/documents.json"
 platform_context_secret_dir: /etc/lv3/platform-context
 platform_context_compose_file: "{{ platform_context_site_dir }}/docker-compose.yml"
 platform_context_env_file: "{{ compose_runtime_secret_root }}/platform-context/runtime.env"
@@ -44,16 +46,26 @@ platform_context_api_token_local_file: "{{ platform_context_local_artifact_dir }
 platform_context_internal_port: 8010
 platform_context_host_proxy_port: 8010
 platform_context_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ platform_context_host_proxy_port }}"
-platform_context_private_url: "http://{{ ansible_host }}:{{ platform_context_internal_port }}"
+platform_context_private_url: "http://127.0.0.1:{{ platform_context_internal_port }}"
 platform_context_qdrant_image: qdrant/qdrant:v1.15.1
 platform_context_api_image_name: lv3-platform-context-api
 platform_context_qdrant_collection: platform_context
+platform_context_memory_collection: serverclaw_memory
 platform_context_embedding_backend: ollama
 platform_context_embedding_model: nomic-embed-text
 platform_context_embedding_dimension: 0
 platform_context_verify_rebuild_local: false
 platform_context_seed_when_degraded: true
 platform_context_verification_question: what retrieval backend is active for platform context
+platform_context_memory_verification_scope_kind: workspace
+platform_context_memory_verification_scope_id: adr-0263-smoke
+platform_context_memory_verification_object_type: note
+platform_context_memory_verification_title: ADR 0263 smoke memory substrate
+platform_context_memory_verification_content: >-
+  ServerClaw memory substrate smoke entry proving PostgreSQL structured state,
+  Qdrant semantic recall, and local keyword recall on the live private
+  retrieval runtime.
+platform_context_memory_verification_query: serverclaw memory substrate smoke qdrant local search
 platform_context_seed_sources:
   - docs/adr/0070-rag-context-for-platform-queries.md
   - docs/adr/0145-ollama-for-local-llm-inference.md
@@ -61,6 +73,35 @@ platform_context_seed_sources:
   - docs/runbooks/rag-platform-context.md
 platform_context_ollama_url: "http://{{ ansible_host }}:{{ ollama_api_port | default(11434) }}"
 platform_context_repo_root: "{{ playbook_dir | dirname }}"
+platform_context_shared_local_root: >-
+  {{
+    (
+      lookup(
+        'ansible.builtin.pipe',
+        'git -C ' ~ (platform_context_repo_root | quote) ~ ' rev-parse --path-format=absolute --git-common-dir'
+      )
+      | dirname
+    )
+    ~ '/.local'
+  }}
+platform_context_database_name: windmill
+platform_context_database_user: windmill_admin
+platform_context_database_inventory_host: >-
+  {{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}
+platform_context_database_host: "{{ hostvars[platform_context_database_inventory_host].ansible_host }}"
+platform_context_database_port: 5432
+platform_context_database_password_local_file: "{{ platform_context_shared_local_root }}/windmill/database-password.txt"
+platform_context_memory_dsn: >-
+  postgres://{{ platform_context_database_user }}:{{
+    (
+      lookup('ansible.builtin.file', platform_context_database_password_local_file, errors='ignore')
+      | default('', true)
+      | trim
+    )
+    | urlencode
+    | replace('/', '%2F')
+  }}@{{ platform_context_database_host }}:{{ platform_context_database_port }}/{{ platform_context_database_name }}?sslmode=disable
+platform_context_search_fabric_source_dir: "{{ platform_context_repo_root }}/scripts/search_fabric"
 platform_context_corpus_sources:
   - src: "{{ platform_context_repo_root }}/docs/adr"
     dest: docs/adr
@@ -95,6 +136,8 @@ platform_context_service_sources:
     dest: platform_context_corpus.py
   - src: "{{ platform_context_repo_root }}/scripts/platform_context_service.py"
     dest: platform_context_service.py
+  - src: "{{ platform_context_repo_root }}/scripts/script_bootstrap.py"
+    dest: script_bootstrap.py
   - src: "{{ platform_context_repo_root }}/scripts/dependency_graph.py"
     dest: scripts/dependency_graph.py
   - src: "{{ platform_context_repo_root }}/scripts/slo_tracking.py"

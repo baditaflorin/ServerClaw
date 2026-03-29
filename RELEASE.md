@@ -1,12 +1,12 @@
 # Release 0.177.89
 
-- Date: 2026-03-30
+- Date: 2026-03-29
 
 ## Summary
-- extends ADR 0224 by adding named repo-deploy profiles, a governed deploy-repo-profile operator path, and the verified 2026-03-30 education_wemeshup upstream refresh so production can be updated from upstream main without retyping raw Coolify arguments
+- implements ADR 0263 by making the governed ServerClaw memory substrate live on the private platform-context runtime with PostgreSQL canonical memory records, Qdrant semantic recall, local keyword search, CLI memory operations, and exact-main replay evidence on `docker-runtime-lv3`
 
 ## Platform Impact
-- no live platform version bump; this release adds named repo-deploy profiles for governed upstream app refreshes and records the 2026-03-30 education_wemeshup production refresh on the existing 0.130.59 platform baseline
+- advances the verified platform baseline to 0.130.60 by promoting the ADR 0263 exact-main live-apply receipt for the private ServerClaw memory substrate on docker-runtime-lv3, verified through the private :8010 health and CLI memory smoke path
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)
