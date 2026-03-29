@@ -1,0 +1,22 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0266-validation-runner-capability-contracts/scripts/remote_exec.sh pre-push-gate --local-fallback
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+
+CHECK                STATUS DURATION(s)
+alert-rule-validation passed 2.00
+ansible-lint          passed 146.73
+ansible-syntax        passed 87.53
+artifact-secret-scan  passed 2.95
+dependency-direction  passed 2.15
+dependency-graph      passed 2.63
+integration-tests     passed 1.89
+packer-validate       passed 6.41
+policy-validation     passed 1.75
+schema-validation     passed 12.26
+security-scan         passed 10.19
+service-completeness  passed 1.51
+tofu-validate         passed 1.56
+type-check            passed 3.92
+yaml-lint             passed 11.34

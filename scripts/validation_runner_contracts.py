@@ -77,7 +77,7 @@ def load_contract_catalog(path: Path = CONTRACT_CATALOG_PATH) -> dict[str, Any]:
 
 def _validate_schema(catalog: dict[str, Any]) -> None:
     try:
-        import jsonschema
+        import jsonschema  # type: ignore[import-untyped]
     except ModuleNotFoundError as exc:  # pragma: no cover - runtime guard
         raise RuntimeError(
             "Missing dependency: jsonschema. Run via 'uv run --with pyyaml --with jsonschema python ...'."
