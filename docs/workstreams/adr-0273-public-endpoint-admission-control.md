@@ -45,7 +45,7 @@
 - `tests/test_validate_repo_cache.py`
 - `docs/site-generated/architecture/dependency-graph.md`
 - `docs/diagrams/agent-coordination-map.excalidraw`
-- `receipts/subdomain-exposure-audit/20260329T121318Z.json`
+- `receipts/subdomain-exposure-audit/20260329T122810Z.json`
 - `receipts/live-applies/2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply.json`
 
 ## Expected Live Surfaces
@@ -64,14 +64,17 @@
 
 ## Live Apply Outcome
 
-- the protected release cut advanced the rebased latest-main tree from
-  repository version `0.177.75` to `0.177.76`, and the synchronized replay of
-  this exact-main candidate establishes platform version `0.130.52` for ADR
-  0273
-- `make route-dns-assertion-ledger env=production` completed successfully with
+- after `git fetch origin` advanced the exact-main baseline to
+  `2da64d1c36ebca0f1aea4a0e3c65f762d0da2ae1`, the protected release cut on the
+  rebased tree still advanced repository version `0.177.75` to `0.177.76`, and
+  the synchronized replay of that exact-main candidate establishes platform
+  version `0.130.52` for ADR 0273
+- after rebasing onto the merged `origin/main` tip,
+  `make route-dns-assertion-ledger env=production` completed successfully with
   `localhost ok=56 changed=0 failed=0 skipped=24`, proving the admission gate
   remains idempotent when the live DNS state is already aligned
-- `make configure-edge-publication env=production` completed successfully with
+- after rebasing onto the merged `origin/main` tip,
+  `make configure-edge-publication env=production` completed successfully with
   `nginx-lv3 ok=61 changed=3 failed=0 skipped=14`; the exact-main run rebuilt
   the docs and changelog portals, published the generated static directories,
   revalidated the shared-edge certificate inputs, rendered the final NGINX
@@ -88,8 +91,8 @@
   `langfuse.lv3.org`, `logs.lv3.org`, `lv3.org`, `n8n.lv3.org`,
   `nginx.lv3.org`, `ops.lv3.org`, `realtime.lv3.org`, `registry.lv3.org`,
   `status.lv3.org`, `tasks.lv3.org`, and `wiki.lv3.org`
-- `make subdomain-exposure-audit` wrote
-  `receipts/subdomain-exposure-audit/20260329T121318Z.json`; the remaining
+- the post-rebase `make subdomain-exposure-audit` rerun wrote
+  `receipts/subdomain-exposure-audit/20260329T122810Z.json`; the remaining
   findings are still only the pre-existing `git.lv3.org` DNS warnings, not ADR
   0273 regressions
 
@@ -100,11 +103,11 @@
 - isolated-worktree branch-local receipt:
   `receipts/live-applies/2026-03-29-adr-0273-public-endpoint-admission-control-live-apply.json`
 - final audit receipt:
-  `receipts/subdomain-exposure-audit/20260329T121318Z.json`
+  `receipts/subdomain-exposure-audit/20260329T122810Z.json`
 - final direct probes:
   `curl -I https://lv3.org`, `curl -I https://docs.lv3.org`,
   `curl -I https://ops.lv3.org`, and
-  `echo | openssl s_client -servername docs.lv3.org -connect docs.lv3.org:443 2>/dev/null | openssl x509 -noout -issuer -subject -ext subjectAltName`
+  `echo | openssl s_client -servername docs.lv3.org -connect docs.lv3.org:443 2>/dev/null | openssl x509 -noout -issuer -subject -text`
 
 ## Mainline Integration Outcome
 
@@ -116,5 +119,5 @@
   `docs/release-notes/README.md`
 - the canonical mainline evidence for this integration is
   `receipts/live-applies/2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply.json`,
-  with `receipts/subdomain-exposure-audit/20260329T121318Z.json` preserved as
-  the final post-release audit proof
+  with `receipts/subdomain-exposure-audit/20260329T122810Z.json` preserved as
+  the final post-rebase audit proof
