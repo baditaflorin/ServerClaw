@@ -85,3 +85,22 @@
       - "'Application Launcher' in ops_portal_verify_launcher.content"
       - "'Search destinations, pin favorites, and reopen recent paths from one shared masthead control.' in ops_portal_verify_launcher.content"
     fail_msg: "Ops portal launcher partial rendered without the expected launcher surface."
+
+- name: Verify the runtime assurance matrix partial renders locally
+  ansible.builtin.uri:
+    url: "http://{{ ops_portal_verify_address }}:{{ ops_portal_internal_port }}/partials/runtime-assurance"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: ops_portal_verify_runtime_assurance
+  changed_when: false
+  retries: 18
+  delay: 5
+  until: ops_portal_verify_runtime_assurance.status == 200
+
+- name: Assert the runtime assurance matrix panel is present
+  ansible.builtin.assert:
+    that:
+      - "'Bindings' in ops_portal_verify_runtime_assurance.content"
+      - "'Runbook' in ops_portal_verify_runtime_assurance.content or 'No active service/environment bindings' in ops_portal_verify_runtime_assurance.content"
+    fail_msg: "Ops portal runtime assurance matrix partial did not render the ADR 0244 view."

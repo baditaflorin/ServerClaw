@@ -2,6 +2,17 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+DEFAULTS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "ops_portal_runtime"
+    / "defaults"
+    / "main.yml"
+)
 TASKS_PATH = (
     REPO_ROOT
     / "collections"
@@ -13,7 +24,7 @@ TASKS_PATH = (
     / "tasks"
     / "main.yml"
 )
-DEFAULTS_PATH = (
+VERIFY_TASKS_PATH = (
     REPO_ROOT
     / "collections"
     / "ansible_collections"
@@ -21,8 +32,8 @@ DEFAULTS_PATH = (
     / "platform"
     / "roles"
     / "ops_portal_runtime"
-    / "defaults"
-    / "main.yml"
+    / "tasks"
+    / "verify.yml"
 )
 DOCKERFILE_TEMPLATE_PATH = (
     REPO_ROOT
@@ -35,11 +46,26 @@ DOCKERFILE_TEMPLATE_PATH = (
     / "templates"
     / "Dockerfile.j2"
 )
+COMPOSE_TEMPLATE_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "ops_portal_runtime"
+    / "templates"
+    / "docker-compose.yml.j2"
+)
 
 
 def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
+    defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
     tasks = TASKS_PATH.read_text(encoding="utf-8")
+    compose_template = COMPOSE_TEMPLATE_PATH.read_text(encoding="utf-8")
 
+    assert 'ops_portal_build_context_dir: "{{ ops_portal_site_dir }}/build-context"' in defaults
+    assert "ops_portal_build_context_dir" in tasks
     assert "Remove stale ops portal service sources before sync" in tasks
     assert "Discover the ops portal application directories on the controller" in tasks
     assert "Sync the ops portal application files" in tasks
@@ -53,10 +79,20 @@ def test_ops_portal_role_replaces_stale_build_context_before_sync() -> None:
     assert '{{ ops_portal_repo_root }}/requirements/ops-portal.txt' in tasks
     assert "Sync the ops portal directory-backed data sources" in tasks
     assert 'directory_mode: "0755"' in tasks
+    assert "Remove stale ops portal build-context ignore and metadata files" in tasks
+    assert "{{ ops_portal_build_context_dir }}/._publication_contract.py" in tasks
+    assert "Remove stale ops portal build-context entries before sync" in tasks
+    assert "Sync the clean ops portal Docker build-context directories" in tasks
+    assert "Sync the clean ops portal Docker build-context root files" in tasks
+    assert "remote_src: true" in tasks
+    assert "{{ ops_portal_build_context_dir }}/publication_contract.py" in tasks
+    assert "{{ ops_portal_build_context_dir }}/requirements.txt" in tasks
+    assert "{{ ops_portal_build_context_dir }}/Dockerfile" in tasks
     assert "Discover macOS metadata files in the synced ops portal data tree" in tasks
     assert "Remove macOS metadata files from the synced ops portal data tree" in tasks
     assert "lookup('ansible.builtin.file', item.path)" not in tasks
     assert "lookup('ansible.builtin.file', item.src)" not in tasks
+    assert "context: {{ ops_portal_build_context_dir }}" in compose_template
 
 
 def test_ops_portal_dockerfile_depends_on_synced_helper_files() -> None:
@@ -68,23 +104,16 @@ def test_ops_portal_dockerfile_depends_on_synced_helper_files() -> None:
     assert "COPY search_fabric ./search_fabric" in dockerfile
 
 
-def test_ops_portal_verify_checks_launcher_partial() -> None:
-    verify_tasks = (
-        REPO_ROOT
-        / "collections"
-        / "ansible_collections"
-        / "lv3"
-        / "platform"
-        / "roles"
-        / "ops_portal_runtime"
-        / "tasks"
-        / "verify.yml"
-    ).read_text(encoding="utf-8")
+def test_ops_portal_verify_checks_launcher_and_runtime_assurance_partials() -> None:
+    verify_tasks = VERIFY_TASKS_PATH.read_text(encoding="utf-8")
 
     assert "Verify the application launcher partial renders locally" in verify_tasks
     assert '/partials/launcher' in verify_tasks
     assert "Application Launcher" in verify_tasks
     assert "Search destinations, pin favorites, and reopen recent paths from one shared masthead control." in verify_tasks
+    assert "Verify the runtime assurance matrix partial renders locally" in verify_tasks
+    assert '/partials/runtime-assurance' in verify_tasks
+    assert "Ops portal runtime assurance matrix partial did not render the ADR 0244 view." in verify_tasks
 
 
 def test_ops_portal_runtime_file_sources_include_launcher_partial() -> None:

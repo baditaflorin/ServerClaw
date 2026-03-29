@@ -7,6 +7,7 @@
     common_assert_vars_required:
       - ops_portal_site_dir
       - ops_portal_service_dir
+      - ops_portal_build_context_dir
       - ops_portal_data_dir
       - ops_portal_secret_dir
       - ops_portal_compose_file
@@ -42,6 +43,8 @@
       - path: "{{ ops_portal_site_dir }}"
         mode: "0755"
       - path: "{{ ops_portal_service_dir }}"
+        mode: "0755"
+      - path: "{{ ops_portal_build_context_dir }}"
         mode: "0755"
       - path: "{{ ops_portal_data_dir }}"
         mode: "0755"
@@ -140,6 +143,8 @@
     group: root
     mode: "0755"
   loop: "{{ ops_portal_source_directories.files | sort(attribute='path') }}"
+  loop_control:
+    label: "{{ item.path | replace(ops_portal_repo_root ~ '/scripts/ops_portal/', '') }}"
   when: item.path != ops_portal_repo_root ~ '/scripts/ops_portal'
 
 - name: Discover the ops portal application files on the controller
@@ -164,6 +169,8 @@
     group: root
     mode: "0644"
   loop: "{{ ops_portal_source_files.files | sort(attribute='path') }}"
+  loop_control:
+    label: "{{ item.path | replace(ops_portal_repo_root ~ '/scripts/ops_portal/', '') }}"
 
 - name: Ensure the ops portal overlay directories exist
   ansible.builtin.file:
@@ -214,6 +221,8 @@
     group: root
     mode: "0755"
   loop: "{{ search_fabric_source_directories.files | sort(attribute='path') }}"
+  loop_control:
+    label: "{{ item.path | replace(ops_portal_repo_root ~ '/scripts/search_fabric/', '') }}"
   when: item.path != ops_portal_repo_root ~ '/scripts/search_fabric'
 
 - name: Discover the search fabric files on the controller
@@ -253,6 +262,8 @@
     group: root
     mode: "0644"
   loop: "{{ search_fabric_source_files.files | sort(attribute='path') }}"
+  loop_control:
+    label: "{{ item.path | replace(ops_portal_repo_root ~ '/scripts/search_fabric/', '') }}"
 
 - name: Discover macOS metadata sidecars in synced ops portal sources
   ansible.builtin.find:
@@ -278,6 +289,8 @@
     group: root
     mode: "0644"
   loop: "{{ ops_portal_file_sources }}"
+  loop_control:
+    label: "{{ item.dest | replace(ops_portal_data_dir ~ '/', '') }}"
 
 - name: Sync the ops portal directory-backed data sources
   ansible.builtin.copy:
@@ -288,6 +301,8 @@
     mode: "0644"
     directory_mode: "0755"
   loop: "{{ ops_portal_directory_sources }}"
+  loop_control:
+    label: "{{ item.dest | replace(ops_portal_data_dir ~ '/', '') }}"
 
 - name: Discover macOS metadata files in the synced ops portal data tree
   ansible.builtin.find:
@@ -318,6 +333,8 @@
       dest: "{{ ops_portal_service_dir }}/publication_contract.py"
     - src: "{{ ops_portal_repo_root }}/requirements/ops-portal.txt"
       dest: "{{ ops_portal_service_dir }}/requirements.txt"
+  loop_control:
+    label: "{{ item.dest | replace(ops_portal_service_dir ~ '/', '') }}"
 
 - name: Discover macOS metadata files in the synced ops portal service tree
   ansible.builtin.find:
@@ -335,6 +352,69 @@
     path: "{{ item.path }}"
     state: absent
   loop: "{{ ops_portal_service_metadata_files.files }}"
+
+- name: Remove stale ops portal build-context ignore and metadata files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ ops_portal_service_dir }}/.dockerignore"
+    - "{{ ops_portal_build_context_dir }}/.dockerignore"
+    - "{{ ops_portal_service_dir }}/._ops_portal"
+    - "{{ ops_portal_service_dir }}/._search_fabric"
+    - "{{ ops_portal_service_dir }}/._publication_contract.py"
+    - "{{ ops_portal_service_dir }}/._requirements.txt"
+    - "{{ ops_portal_build_context_dir }}/._ops_portal"
+    - "{{ ops_portal_build_context_dir }}/._search_fabric"
+    - "{{ ops_portal_build_context_dir }}/._publication_contract.py"
+    - "{{ ops_portal_build_context_dir }}/._requirements.txt"
+    - "{{ ops_portal_build_context_dir }}/._Dockerfile"
+
+- name: Remove stale ops portal build-context entries before sync
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ ops_portal_build_context_dir }}/Dockerfile"
+    - "{{ ops_portal_build_context_dir }}/ops_portal"
+    - "{{ ops_portal_build_context_dir }}/publication_contract.py"
+    - "{{ ops_portal_build_context_dir }}/requirements.txt"
+    - "{{ ops_portal_build_context_dir }}/search_fabric"
+
+- name: Sync the clean ops portal Docker build-context directories
+  ansible.builtin.copy:
+    remote_src: true
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+    directory_mode: "0755"
+  loop:
+    - src: "{{ ops_portal_service_dir }}/ops_portal"
+      dest: "{{ ops_portal_build_context_dir }}/ops_portal"
+    - src: "{{ ops_portal_service_dir }}/search_fabric"
+      dest: "{{ ops_portal_build_context_dir }}/search_fabric"
+  loop_control:
+    label: "{{ item.dest | replace(ops_portal_build_context_dir ~ '/', '') }}"
+
+- name: Sync the clean ops portal Docker build-context root files
+  ansible.builtin.copy:
+    remote_src: true
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - src: "{{ ops_portal_service_dir }}/Dockerfile"
+      dest: "{{ ops_portal_build_context_dir }}/Dockerfile"
+    - src: "{{ ops_portal_service_dir }}/publication_contract.py"
+      dest: "{{ ops_portal_build_context_dir }}/publication_contract.py"
+    - src: "{{ ops_portal_service_dir }}/requirements.txt"
+      dest: "{{ ops_portal_build_context_dir }}/requirements.txt"
+  loop_control:
+    label: "{{ item.dest | replace(ops_portal_build_context_dir ~ '/', '') }}"
 
 - name: Normalize the synced ops portal application tree ownership
   ansible.builtin.file:
@@ -356,11 +436,11 @@
   ansible.builtin.stat:
     path: "{{ item }}"
   loop:
-    - "{{ ops_portal_service_dir }}/Dockerfile"
-    - "{{ ops_portal_service_dir }}/requirements.txt"
-    - "{{ ops_portal_service_dir }}/publication_contract.py"
-    - "{{ ops_portal_service_dir }}/ops_portal/app.py"
-    - "{{ ops_portal_service_dir }}/search_fabric/__init__.py"
+    - "{{ ops_portal_build_context_dir }}/Dockerfile"
+    - "{{ ops_portal_build_context_dir }}/requirements.txt"
+    - "{{ ops_portal_build_context_dir }}/publication_contract.py"
+    - "{{ ops_portal_build_context_dir }}/ops_portal/app.py"
+    - "{{ ops_portal_build_context_dir }}/search_fabric/__init__.py"
   register: ops_portal_build_context_manifest
 
 - name: Assert the ops portal build context is complete
@@ -370,7 +450,7 @@
     fail_msg: >-
       Ops portal build context is incomplete. Expected Dockerfile, requirements,
       publication contract helper, app module, and search fabric package to be
-      present in {{ ops_portal_service_dir }} before docker compose up.
+      present in {{ ops_portal_build_context_dir }} before docker compose up.
 
 - name: Build and start the ops portal stack
   ansible.builtin.command:
