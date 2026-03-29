@@ -1760,9 +1760,6 @@
     WM_TOKEN: "{{ windmill_bootstrap_session_token }}"
     BASE_INTERNAL_URL: "{{ windmill_runtime_api_base_url }}"
   changed_when: false
-  retries: 3
-  delay: 5
-  until: windmill_seed_raw_app_sync.rc == 0
   when: (windmill_seed_raw_apps | default([])) | length > 0
   tags:
     - mutation
