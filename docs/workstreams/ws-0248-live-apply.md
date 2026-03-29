@@ -112,6 +112,16 @@
   page because it cannot provide `id_token_hint`; the verifier now submits that
   live confirmation form and proves both `home.lv3.org` and `wiki.lv3.org`
   require fresh Keycloak login afterward.
+- `./scripts/validate_repo.sh data-models`, `uv run --with pyyaml --with jsonschema python scripts/generate_diagrams.py --check`,
+  and `./scripts/validate_repo.sh agent-standards` all passed after the receipt
+  workflow id was normalized to the accepted legacy ADR live-apply form and the
+  generated coordination diagram was refreshed from the current workstream
+  counts.
+- `make validate-generated-docs` still reports a stale `README.md`, but the
+  pending diff is limited to adding this workstream to the generated document
+  index and merged-workstreams table. Those README mutations remain deferred to
+  the merge-to-`main` integration step because this branch must not rewrite the
+  protected top-level status surfaces.
 
 ## Live Evidence
 

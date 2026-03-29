@@ -9,7 +9,7 @@
   "source_commit": "7b0bd0230482ef077c17714ad224364badf3171b",
   "repo_version_context": "0.177.63",
   "platform_version_context": "0.130.45",
-  "workflow_id": "adr-0248-live-apply",
+  "workflow_id": "adr-0248-session-logout-authority-live-apply",
   "adr": "0248",
   "summary": "Applied ADR 0248 from the latest origin/main-based worktree by replaying the Keycloak, Outline, and public-edge publication paths, wiring the shared logout endpoints through oauth2-proxy and Keycloak, and verifying the final shared-edge plus Outline browser logout journey end to end.",
   "targets": [
