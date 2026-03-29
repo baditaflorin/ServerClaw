@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0201-harbor-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T01:04:46Z",
+  "recorded_by": "codex",
+  "source_commit": "5c06b8efc2067943abc8d7138a1e6e11ea5c74df",
+  "repo_version_context": "0.177.61",
+  "platform_version_context": "0.130.44",
+  "workflow_id": "adr-0201-harbor-mainline-live-apply",
+  "adr": "0201",
+  "summary": "Integrated ADR 0201 on top of repo release 0.177.61 by replaying the Harbor converge path from exact mainline state, adding one final Harbor admin API readiness recycle before OIDC bootstrap when published port 8095 is stale, and re-verifying registry.lv3.org, Harbor's runtime-local auth surface, and docker-build check-runner pulls end to end.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-build-lv3",
+      "vmid": 130,
+      "address": "10.10.10.30"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Harbor public API",
+      "address": "https://registry.lv3.org/api/v2.0/ping"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Harbor public registry auth surface",
+      "address": "https://registry.lv3.org/v2/"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Harbor runtime-local admin API",
+      "address": "http://127.0.0.1:8095/api/v2.0/ping"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Exact-main Harbor regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml --with jsonschema python -m pytest -q tests/test_harbor_runtime_role.py` returned `5 passed`, covering the new Harbor OIDC readiness recycle path that probes `127.0.0.1:8095` before OIDC bootstrap and forces one Harbor recycle when the admin API is unreachable even though Harbor containers still appear present."
+    },
+    {
+      "check": "Exact-main Harbor replay",
+      "result": "pass",
+      "observed": "`make converge-harbor` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0246-main-push` after commit `5c06b8ef`, preserving the exact-main Harbor runtime, OIDC defaults, and shared `registry.lv3.org` edge publication while recovering from the earlier stale published-port state."
+    },
+    {
+      "check": "Public Harbor API and registry auth challenge",
+      "result": "pass",
+      "observed": "`curl -fsS --max-time 20 https://registry.lv3.org/api/v2.0/ping` returned `Pong`, and `curl -skI --max-time 20 https://registry.lv3.org/v2/` returned `HTTP/2 401` with `docker-distribution-api-version: registry/2.0`, `www-authenticate: Bearer realm=\"https://registry.lv3.org/service/token\",service=\"harbor-registry\"`, and request id `ae9ece81-8195-46c2-ac2e-12d01e8751e1`."
+    },
+    {
+      "check": "Runtime-local Harbor admin API and registry auth challenge",
+      "result": "pass",
+      "observed": "Via the repo-managed SSH ProxyCommand through `ops@100.64.0.1`, `curl -fsS --max-time 20 http://127.0.0.1:8095/api/v2.0/ping` on `docker-runtime-lv3` returned `Pong`, and `curl -sSI --max-time 20 http://127.0.0.1:8095/v2/` returned `HTTP/1.1 401 Unauthorized` with `Docker-Distribution-Api-Version: registry/2.0` and request id `b5efc0f0-f6d0-44ae-9c38-e10a0527cd4d`."
+    },
+    {
+      "check": "Docker-build check-runner pull from Harbor",
+      "result": "pass",
+      "observed": "Via the same repo-managed SSH ProxyCommand, `docker pull registry.lv3.org/check-runner/python:3.12.10` on `docker-build-lv3` completed with digest `sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff`, and `docker image inspect` reported `[\"registry.lv3.org/check-runner/python@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff\"]`."
+    }
+  ],
+  "evidence_refs": [
+    "collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/",
+    "collections/ansible_collections/lv3/platform/roles/docker_runtime/",
+    "docs/adr/0201-harbor-container-registry-with-cve-scanning.md",
+    "docs/runbooks/configure-harbor.md",
+    "docs/workstreams/ws-0201-live-apply.md",
+    "docs/workstreams/ws-0201-main-merge.md",
+    "receipts/live-applies/2026-03-28-adr-0201-harbor-live-apply.json",
+    "receipts/live-applies/2026-03-29-adr-0201-harbor-mainline-live-apply.json",
+    "tests/test_harbor_runtime_role.py",
+    "tests/test_docker_runtime_role.py",
+    "tests/test_nginx_edge_publication_role.py",
+    "tests/test_remote_exec.py",
+    "tests/test_generate_platform_vars.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "The earlier branch-local receipt remains preserved as the first isolated-worktree Harbor proof, but this mainline receipt is the canonical source for release 0.177.62 and the platform bump that follows from the exact-main replay.",
+    "ADR 0201 first became true on platform version 0.130.43; this receipt records the later integrated mainline replay that advances the current platform baseline to 0.130.45 after Harbor was re-applied and re-verified from `main`.",
+    "The integrated release step that follows this receipt updates `VERSION`, `RELEASE.md`, `changelog.md`, `docs/release-notes/*`, `README.md`, `build/platform-manifest.json`, `versions/stack.yaml`, and the ADR and workstream metadata to record Harbor as merged mainline truth."
+  ]
+}

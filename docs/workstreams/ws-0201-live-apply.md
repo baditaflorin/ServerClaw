@@ -52,8 +52,10 @@
 - On the latest replay from rebased `origin/main`, `make converge-harbor` completed with `docker-runtime-lv3 : ok=126 changed=10 failed=0 skipped=20` and `nginx-lv3 : ok=39 changed=4 failed=0 skipped=10`.
 - The latest replay re-verified `curl -fsS https://registry.lv3.org/api/v2.0/ping` => `Pong`, `curl -I https://registry.lv3.org/v2/` => `HTTP/2 401`, and `docker pull registry.lv3.org/check-runner/python:3.12.10` on `docker-build-lv3` => `registry.lv3.org/check-runner/python@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff`.
 - The Harbor replay also proved the new runtime recovery path: stale Harbor containers are now removed with a Docker daemon restart fallback, Harbor recovery now treats a missing published `8095 -> 8080` binding as unhealthy even when container health still reports `starting`, and the Harbor OIDC bootstrap now retries until Harbor finishes recovering from the compose recycle.
+- The exact-main follow-up on `main` added one more Harbor readiness guard before OIDC bootstrap: if the published Harbor admin configuration API on `127.0.0.1:8095` is unreachable, the role now forces one Harbor recycle, waits for Harbor ping locally, and re-probes before continuing, which prevented the mainline replay from stalling on a stale published-port state.
+- The mainline replay from commit `5c06b8ef` re-verified the public Harbor API and registry auth challenge, the runtime-local Harbor API and `/v2/` auth challenge on `docker-runtime-lv3`, and a fresh `docker pull registry.lv3.org/check-runner/python:3.12.10` on `docker-build-lv3` with digest `sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff`.
 
-## Remaining For Merge To `main`
+## Merge Follow-Through
 
-- update the protected integration files on the synchronized `main` branch: `VERSION`, release sections in `changelog.md`, canonical observed state in `versions/stack.yaml`, and the top-level `README.md` integrated status summary
-- rerun `make remote-validate` and `make remote-pre-push` from the synchronized `main` branch after canonical truth and `README.md` are updated there
+- `main` now carries the Harbor runtime recovery hardening from commit `5c06b8ef`, the protected release-truth surfaces were recut in repo version `0.177.62`, and the canonical exact-main receipt is `receipts/live-applies/2026-03-29-adr-0201-harbor-mainline-live-apply.json`.
+- ADR 0201 first became true on platform version `0.130.43`; the release and stack metadata that follow this workstream record the current integrated mainline platform baseline as `0.130.45`.
