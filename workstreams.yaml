@@ -43,6 +43,114 @@ workstreams:
     canonical_truth:
       latest_receipts:
         artifact_cache_plane: 2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply
+  - id: ws-0270-live-apply
+    adr: "0270"
+    title: Docker publication self-healing and port-programming assertions
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0270-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0270-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0270-docker-publication-self-healing-and-port-programming-assertions.md
+    depends_on:
+      - adr-0023-docker-runtime-vm-baseline
+      - adr-0036-live-apply-receipts-and-verification-evidence
+      - adr-0246-startup-readiness-liveness-and-degraded-state-semantics
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/adr-0270-docker-publication-self-healing-and-port-programming-assertions.md
+      - docs/adr/0270-docker-publication-self-healing-and-port-programming-assertions.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/docker-publication-assurance.md
+      - docs/runbooks/health-probe-contracts.md
+      - docs/runbooks/playbook-execution-model.md
+      - Makefile
+      - config/health-probe-catalog.json
+      - playbooks/docker-publication-assurance.yml
+      - playbooks/tasks/post-verify.yml
+      - playbooks/tasks/docker-publication-assert.yml
+      - collections/ansible_collections/lv3/platform/playbooks/tasks/post-verify.yml
+      - collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/meta/argument_specs.yml
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/verify.yml
+      - scripts/docker_publication_assurance.py
+      - scripts/platform_observation_tool.py
+      - scripts/validate_repository_data_models.py
+      - tests/test_docker_publication_assurance.py
+      - tests/test_docker_publication_assurance_playbook.py
+      - tests/test_docker_runtime_role.py
+      - tests/test_platform_observation_tool.py
+      - tests/test_post_verify_tasks.py
+      - receipts/live-applies/
+      - VERSION
+      - changelog.md
+      - RELEASE.md
+      - README.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/release-notes/README.md
+      - docs/release-notes/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: docker_publication_assurance_runtime
+          paths:
+            - docs/workstreams/adr-0270-docker-publication-self-healing-and-port-programming-assertions.md
+            - docs/adr/0270-docker-publication-self-healing-and-port-programming-assertions.md
+            - docs/runbooks/docker-publication-assurance.md
+            - docs/runbooks/health-probe-contracts.md
+            - docs/runbooks/playbook-execution-model.md
+            - Makefile
+            - config/health-probe-catalog.json
+            - playbooks/docker-publication-assurance.yml
+            - playbooks/tasks/post-verify.yml
+            - playbooks/tasks/docker-publication-assert.yml
+            - collections/ansible_collections/lv3/platform/playbooks/tasks/post-verify.yml
+            - collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml
+            - collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/docker_runtime/meta/argument_specs.yml
+            - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/verify.yml
+            - scripts/docker_publication_assurance.py
+            - scripts/platform_observation_tool.py
+            - scripts/validate_repository_data_models.py
+            - tests/test_docker_publication_assurance.py
+            - tests/test_docker_publication_assurance_playbook.py
+            - tests/test_docker_runtime_role.py
+            - tests/test_platform_observation_tool.py
+            - tests/test_post_verify_tasks.py
+            - receipts/live-applies/
+          mode: exclusive
+        - id: docker_publication_integration_surfaces
+          paths:
+            - VERSION
+            - changelog.md
+            - RELEASE.md
+            - README.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/release-notes/README.md
+            - docs/release-notes/
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false
+    canonical_truth:
+      changelog_entry: implemented ADR 0270 by adding a shared Docker publication assurance helper, catalog-declared host publication contracts, post-verify repair hooks, and read-only observation checks for managed Docker services
+      release_bump: patch
+      included_in_repo_version: null
+      latest_receipts:
+        docker_publication: 2026-03-29-adr-0270-docker-publication-self-healing-and-port-programming-assertions-mainline-live-apply
   - id: ws-0274-artifact-cache-plane
     adr: "0295"
     title: Shared artifact cache plane and dedicated cache VM roadmap

@@ -1433,6 +1433,52 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-docker-publication-assurance": {
+      "description": "Converge the shared ADR 0270 Docker publication assurance helper on managed Docker guests and verify every declared publication contract before readiness is trusted.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-docker-publication-assurance",
+        "command": "make converge-docker-publication-assurance"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-docker-publication-assurance"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/docker-publication-assurance.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/docker-publication-assurance.yml",
+        "playbooks/tasks/docker-publication-assert.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml",
+        "scripts/docker_publication_assurance.py",
+        "config/health-probe-catalog.json"
+      ],
+      "outputs": [
+        "The Docker publication assurance helper installed on managed Docker guests plus repaired and verified publication contracts for services that declare readiness.docker_publication."
+      ],
+      "verification_commands": [
+        "make syntax-check-docker-publication-assurance",
+        "make converge-docker-publication-assurance env=production"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-postgres-vm": {
       "description": "Converge the dedicated PostgreSQL guest baseline on postgres-lv3.",
       "lifecycle_status": "active",

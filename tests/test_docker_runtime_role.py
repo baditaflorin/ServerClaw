@@ -26,6 +26,17 @@ ROLE_DEFAULTS = (
     / "defaults"
     / "main.yml"
 )
+ROLE_VERIFY = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "docker_runtime"
+    / "tasks"
+    / "verify.yml"
+)
 
 
 def load_tasks() -> list[dict]:
@@ -34,6 +45,10 @@ def load_tasks() -> list[dict]:
 
 def load_defaults() -> dict:
     return yaml.safe_load(ROLE_DEFAULTS.read_text())
+
+
+def load_verify() -> list[dict]:
+    return yaml.safe_load(ROLE_VERIFY.read_text())
 
 
 def test_docker_runtime_patches_nftables_before_starting_docker() -> None:
@@ -97,6 +112,7 @@ def test_docker_runtime_defaults_pin_governed_resolvers_and_registry_mirror() ->
     daemon_config = defaults["docker_runtime_daemon_config"]
 
     assert defaults["docker_runtime_registry_mirrors"] == ["https://mirror.gcr.io"]
+    assert defaults["docker_runtime_publication_assurance_script_path"] == "/usr/local/bin/lv3-docker-publication-assurance"
     assert defaults["docker_runtime_insecure_registries"] == []
     assert daemon_config["dns"] == ["1.1.1.1", "8.8.8.8"]
     assert daemon_config["registry-mirrors"] == "{{ docker_runtime_registry_mirrors }}"
@@ -106,3 +122,27 @@ def test_docker_runtime_defaults_pin_governed_resolvers_and_registry_mirror() ->
         {"base": "192.168.0.0/16", "size": 24},
         {"base": "10.200.0.0/16", "size": 24},
     ]
+
+
+def test_docker_runtime_installs_publication_assurance_helper_before_chain_checks() -> None:
+    tasks = load_tasks()
+    install_task = next(task for task in tasks if task["name"] == "Install the Docker publication assurance helper")
+    nftables_check_task = next(task for task in tasks if task["name"] == "Check whether nftables config exists")
+
+    assert install_task["ansible.builtin.copy"]["dest"] == "{{ docker_runtime_publication_assurance_script_path }}"
+    assert "scripts/docker_publication_assurance.py" in install_task["ansible.builtin.copy"]["content"]
+    assert tasks.index(install_task) < tasks.index(nftables_check_task)
+
+
+def test_docker_runtime_verify_checks_publication_assurance_helper_is_executable() -> None:
+    verify_tasks = load_verify()
+    verify_task = next(
+        task for task in verify_tasks if task["name"] == "Verify the Docker publication assurance helper is installed"
+    )
+
+    assert verify_task["ansible.builtin.command"]["argv"] == [
+        "test",
+        "-x",
+        "{{ docker_runtime_publication_assurance_script_path }}",
+    ]
+    assert verify_task["changed_when"] is False

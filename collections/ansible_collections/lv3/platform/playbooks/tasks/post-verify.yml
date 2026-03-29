@@ -40,6 +40,15 @@
     playbook_execution_probe: "{{ playbook_execution_service_probe.liveness }}"
   when: inventory_hostname == playbook_execution_service_probe.owning_vm
 
+- name: Repair Docker publication before readiness verification
+  ansible.builtin.include_tasks: docker-publication-assert.yml
+  vars:
+    playbook_execution_docker_publication_contract: "{{ playbook_execution_service_probe.readiness.docker_publication }}"
+  when:
+    - inventory_hostname == playbook_execution_service_probe.owning_vm
+    - playbook_execution_service_probe.readiness is defined
+    - playbook_execution_service_probe.readiness.docker_publication is defined
+
 - name: Run readiness verification
   ansible.builtin.include_tasks: verify-probe.yml
   vars:
