@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.74",
   "platform_version": "0.130.50",
-  "generated_at": "2026-03-29T11:35:23Z",
-  "next_refresh_at": "2026-03-29T12:35:23Z",
+  "generated_at": "2026-03-29T12:01:38Z",
+  "next_refresh_at": "2026-03-29T13:01:38Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3869,7 +3869,7 @@
         "id": "platform-operations-portal",
         "title": "Platform Operations Portal",
         "agent_trust_required": "T3",
-        "steps": 12,
+        "steps": 16,
         "path": "docs/runbooks/platform-operations-portal.md",
         "workflow_ids": [
           "converge-ops-portal"
