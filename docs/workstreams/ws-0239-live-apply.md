@@ -3,7 +3,7 @@
 - ADR: [ADR 0239](../adr/0239-browser-local-search-experience-via-pagefind.md)
 - Title: Live apply browser-local docs search via Pagefind on `docs.lv3.org`
 - Status: live_applied
-- Implemented In Repo Version: pending main integration
+- Implemented In Repo Version: 0.177.62
 - Live Applied In Platform Version: 0.130.43
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
@@ -67,6 +67,12 @@
 - live verification on `nginx-lv3` confirmed `pagefind/pagefind-entry.json`, `pagefind/pagefind-ui.js`, and `pagefind/pagefind-ui.css` on the published docs tree, while the deployed HTML carries `pagefind/pagefind-ui.js`, `id="pagefind-search"`, and `data-pagefind-filter="section"` without the earlier dependency-graph frontmatter leak
 - external verification confirmed `https://docs.lv3.org/` still returns `302` to `/oauth2/sign_in` with `X-Robots-Tag: noindex, nofollow`, preserving the existing authenticated edge contract while serving the new browser-local search assets behind the auth gate
 
-## Merge-To-Main Notes
+## Mainline Integration Notes
 
-- remaining for merge to `main`: bump `VERSION`, update `changelog.md`, refresh the top-level `README.md` integrated status summary, and update `versions/stack.yaml` to point the docs portal/search truth at receipt `2026-03-28-adr-0239-browser-local-search-live-apply.json`
+- release `0.177.62` is the first merged repo version that carries ADR 0239 on
+  `origin/main`
+- the exact-main replay on `2026-03-29` re-verified the authenticated edge
+  redirect plus the published Pagefind assets under receipt
+  `2026-03-29-adr-0239-browser-local-search-mainline-live-apply.json`
+- the current live platform baseline after that exact-main replay is
+  `0.130.45`

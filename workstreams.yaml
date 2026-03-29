@@ -759,7 +759,7 @@ workstreams:
   - id: ws-0239-live-apply
     adr: "0239"
     title: Live apply browser-local search experience via Pagefind
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/ws-0239-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0239-live-apply
@@ -826,15 +826,106 @@ workstreams:
           mode: shared_contract
           contract: live-apply-receipts-v1
     ready_to_merge: true
-    live_applied: false
+    live_applied: true
     canonical_truth:
       changelog_entry: implements ADR 0239 by publishing a Pagefind-backed
         browser-local search experience for docs.lv3.org, including section,
         audience, service, capability, sensitivity, and tag facets from the
         generated portal corpus
       release_bump: patch
+      included_in_repo_version: 0.177.62
       latest_receipts:
-        docs_portal: 2026-03-28-adr-0239-browser-local-search-live-apply
+        docs_portal: 2026-03-29-adr-0239-browser-local-search-mainline-live-apply
+  - id: ws-0239-main-merge
+    adr: "0239"
+    title: Integrate ADR 0239 browser-local search into origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0239-main-merge-r2
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0239-main-merge-r2
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0239-main-merge.md
+    depends_on:
+      - ws-0239-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0239-main-merge.md
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.62.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/adr/.index.yaml
+      - docs/adr/0239-browser-local-search-experience-via-pagefind.md
+      - docs/workstreams/ws-0239-live-apply.md
+      - docs/runbooks/deployment-history-portal.md
+      - docs/runbooks/developer-portal.md
+      - docs/site-generated/architecture/dependency-graph.md
+      - Makefile
+      - mkdocs.yml
+      - requirements/docs.txt
+      - scripts/generate_docs_site.py
+      - scripts/build_docs_portal.py
+      - scripts/validate_repo.sh
+      - docs/theme-overrides/**
+      - tests/test_docs_site.py
+      - receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json
+      - receipts/live-applies/2026-03-29-adr-0239-browser-local-search-mainline-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws_0239_main_merge_doc
+          paths:
+            - docs/workstreams/ws-0239-main-merge.md
+          mode: exclusive
+        - id: adr_0239_mainline_truth
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.62.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+          mode: exclusive
+        - id: adr_0239_main_merge_surfaces
+          paths:
+            - docs/adr/.index.yaml
+            - docs/adr/0239-browser-local-search-experience-via-pagefind.md
+            - docs/workstreams/ws-0239-live-apply.md
+            - docs/runbooks/deployment-history-portal.md
+            - docs/runbooks/developer-portal.md
+            - docs/site-generated/architecture/dependency-graph.md
+            - Makefile
+            - mkdocs.yml
+            - requirements/docs.txt
+            - scripts/generate_docs_site.py
+            - scripts/build_docs_portal.py
+            - scripts/validate_repo.sh
+            - docs/theme-overrides/**
+            - tests/test_docs_site.py
+            - receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json
+            - receipts/live-applies/2026-03-29-adr-0239-browser-local-search-mainline-live-apply.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: records ADR 0239 exact-main evidence on the current
+        mainline by preserving the verified Pagefind browser-local docs search
+        rollout, refreshed release surfaces, and the current platform baseline
+        after the exact-main replay
+      release_bump: patch
+      included_in_repo_version: 0.177.62
+      latest_receipts:
+        docs_portal: 2026-03-29-adr-0239-browser-local-search-mainline-live-apply
   - id: ws-0241-live-apply
     adr: "0241"
     title: Live apply ADR 0241 rich content and inline knowledge editing via Tiptap
@@ -898,7 +989,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0241 by adding a Tiptap-backed bounded-knowledge editor to the repo-managed Windmill operator-access admin surface, regenerating the raw-app dependency lock, and hardening governed Windmill live replay from concurrent non-primary worktrees
       release_bump: patch
-      included_in_repo_version: 0.177.61
+      included_in_repo_version: 0.177.62
       latest_receipts:
         operator_access: 2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply
         windmill: 2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply

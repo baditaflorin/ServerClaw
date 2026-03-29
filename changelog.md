@@ -12,11 +12,15 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 
 ## Unreleased
 
+- records ADR 0239 exact-main evidence on the current mainline by preserving the verified Pagefind browser-local docs search rollout, refreshed release surfaces, and the current platform baseline after the exact-main replay
+
 ## Latest Release
 
-- [0.177.61 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.61.md)
+- [0.177.62 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.62.md)
 
 ## Previous Releases
+
+- [0.177.61 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.61.md)
 
 - [0.177.60 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.60.md)
 
