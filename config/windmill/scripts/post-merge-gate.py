@@ -1,7 +1,9 @@
 import argparse
 import json
+import os
 import shlex
 import subprocess
+import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -29,6 +31,7 @@ RUNNER_IMAGE_ERROR_MARKERS = (
     "unsupported manifest media type",
     "Unable to find image 'registry.lv3.org/check-runner/",
 )
+VALIDATION_RUNNER_ID = "windmill-post-merge-worker"
 
 
 class CommandResult(TypedDict):
@@ -51,6 +54,32 @@ def _runner_image_pull_failed(stdout: str, stderr: str) -> bool:
     return any(marker in combined for marker in RUNNER_IMAGE_ERROR_MARKERS)
 
 
+def _load_runner_context(repo_root: Path) -> dict[str, Any]:
+    command = [
+        sys.executable or "python3",
+        str(repo_root / "scripts" / "validation_runner_contracts.py"),
+        "--runner",
+        VALIDATION_RUNNER_ID,
+        "--workspace",
+        str(repo_root),
+        "--format",
+        "json",
+    ]
+    result = _run(command, cwd=repo_root)
+    if result.returncode != 0:
+        return {
+            "id": VALIDATION_RUNNER_ID,
+            "load_error": result.stderr.strip() or result.stdout.strip() or f"command exited {result.returncode}",
+        }
+    try:
+        return json.loads(result.stdout)
+    except json.JSONDecodeError:
+        return {
+            "id": VALIDATION_RUNNER_ID,
+            "load_error": result.stdout.strip() or "runner context did not return JSON",
+        }
+
+
 def _fallback_status_payload(
     *,
     repo_root: Path,
@@ -59,6 +88,7 @@ def _fallback_status_payload(
     returncode: int,
     duration_seconds: float,
     commands: list[CommandResult],
+    runner_context: dict[str, Any],
 ) -> dict[str, Any]:
     return {
         "status": status,
@@ -66,6 +96,7 @@ def _fallback_status_payload(
         "workspace": str(repo_root),
         "manifest": str(manifest_path),
         "executed_at": datetime.now(timezone.utc).isoformat(),
+        "runner": runner_context,
         "checks": [
             {
                 "id": "local-fallback",
@@ -111,6 +142,7 @@ def _run_local_fallback(repo_root: Path, manifest_path: Path, status_path: Path)
             break
 
     duration_seconds = time.monotonic() - started
+    runner_context = _load_runner_context(repo_root)
     fallback_status = _fallback_status_payload(
         repo_root=repo_root,
         manifest_path=manifest_path,
@@ -118,6 +150,7 @@ def _run_local_fallback(repo_root: Path, manifest_path: Path, status_path: Path)
         returncode=returncode,
         duration_seconds=duration_seconds,
         commands=command_results,
+        runner_context=runner_context,
     )
     status_path.parent.mkdir(parents=True, exist_ok=True)
     status_path.write_text(json.dumps(fallback_status, indent=2) + "\n", encoding="utf-8")
@@ -160,7 +193,15 @@ def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
         "windmill-post-merge",
         "--print-json",
     ]
-    result = _run(command, cwd=repo_root)
+    previous_runner_id = os.environ.get("LV3_VALIDATION_RUNNER_ID")
+    os.environ["LV3_VALIDATION_RUNNER_ID"] = VALIDATION_RUNNER_ID
+    try:
+        result = _run(command, cwd=repo_root)
+    finally:
+        if previous_runner_id is None:
+            os.environ.pop("LV3_VALIDATION_RUNNER_ID", None)
+        else:
+            os.environ["LV3_VALIDATION_RUNNER_ID"] = previous_runner_id
     payload: dict[str, Any] = {
         "status": "ok" if result.returncode == 0 else "error",
         "command": " ".join(shlex.quote(part) for part in command),

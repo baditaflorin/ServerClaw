@@ -107,6 +107,7 @@ def main(repo_path: str = "/srv/proxmox_florin_server") -> dict:
     payload = module.build_status_payload(
         manifest_path=repo_root / "config" / "validation-gate.json",
         last_run_path=repo_root / ".local" / "validation-gate" / "last-run.json",
+        remote_validate_run_path=repo_root / ".local" / "validation-gate" / "remote-validate-last-run.json",
         post_merge_run_path=repo_root / ".local" / "validation-gate" / "post-merge-last-run.json",
         bypass_dir=repo_root / "receipts" / "gate-bypasses",
     )

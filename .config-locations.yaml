@@ -238,6 +238,20 @@ inventory:
 
 automation:
 
+  config/validation-runner-contracts.json:
+    purpose: Canonical ADR 0266 catalog of validation runner capability contracts, supported lanes, and runtime attestation expectations
+    owner: human
+    format: JSON
+    use_for: Declaring which runners may execute each validation lane across controller-local fallback, the remote build server, and the worker post-merge gate
+    update_when: Adding a new validation runner, changing lane eligibility, or tightening runner capability requirements
+    update_by: Agent or human implementing ADR 0266 validation-runner changes
+    validation: "uv run --with pyyaml --with jsonschema python3 scripts/validation_runner_contracts.py --validate"
+    related_files:
+      - "docs/schema/validation-runner-contracts.schema.json: Schema for the validation runner contract catalog"
+      - "scripts/validation_runner_contracts.py: Contract validation, attestation, and lane eligibility helper"
+      - "config/build-server.json: Remote build-server command routing and runner identities"
+      - "docs/runbooks/remote-build-gateway.md: Operator procedure for remote validation"
+
   keys/gitea-release-bundle-cosign.pub:
     purpose: Committed ADR 0233 Cosign public verifier for signed private Gitea release bundles
     owner: human

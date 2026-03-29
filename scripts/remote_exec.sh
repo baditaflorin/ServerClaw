@@ -36,6 +36,9 @@ BUILD_SERVER_ANSIBLE_COLLECTION_CACHE=""
 BUILD_SERVER_ANSIBLE_REQUIREMENTS_SHA_FILE=""
 BUILD_SERVER_APT_PROXY_URL=""
 RUNNER_CACHE_MOUNTS_NL=""
+RUNNER_ID=""
+LOCAL_FALLBACK_RUNNER_ID=""
+STATUS_FILE=""
 LV3_RUN_ID="${LV3_RUN_ID:-}"
 LV3_SESSION_ID="${LV3_SESSION_ID:-}"
 LV3_SESSION_SLUG="${LV3_SESSION_SLUG:-}"
@@ -44,6 +47,7 @@ LV3_SESSION_NATS_PREFIX="${LV3_SESSION_NATS_PREFIX:-}"
 LV3_SESSION_STATE_NAMESPACE="${LV3_SESSION_STATE_NAMESPACE:-}"
 LV3_SESSION_RECEIPT_SUFFIX="${LV3_SESSION_RECEIPT_SUFFIX:-}"
 LV3_REMOTE_WORKSPACE_ROOT="${LV3_REMOTE_WORKSPACE_ROOT:-}"
+LV3_VALIDATION_RUNNER_ID="${LV3_VALIDATION_RUNNER_ID:-}"
 RUN_WORKSPACE_ROOT=""
 REMOTE_SNAPSHOT_ARCHIVE=""
 REMOTE_RUN_ROOT=""
@@ -163,6 +167,9 @@ shell_assign("TIMEOUT_SECONDS", timeout_seconds)
 shell_assign("SKIP_DOCKER", "true" if command_spec.get("skip_docker", False) else "false")
 shell_assign("MOUNT_DOCKER_SOCKET", "true" if command_spec.get("mount_docker_socket", False) else "false")
 shell_assign("BUILTIN_ACTION", command_spec.get("builtin", ""))
+shell_assign("RUNNER_ID", command_spec.get("runner_id", ""))
+shell_assign("LOCAL_FALLBACK_RUNNER_ID", command_spec.get("local_fallback_runner_id", ""))
+shell_assign("STATUS_FILE", command_spec.get("status_file", ""))
 shell_assign(
     "RUNNER_CACHE_MOUNTS_NL",
     "\n".join(str(item) for item in runner_spec.get("cache_mounts", [])),
@@ -277,6 +284,7 @@ remote_env_exports() {
     LV3_SESSION_STATE_NAMESPACE \
     LV3_SESSION_RECEIPT_SUFFIX \
     LV3_REMOTE_WORKSPACE_ROOT \
+    LV3_VALIDATION_RUNNER_ID \
     LV3_SNAPSHOT_ID \
     LV3_SNAPSHOT_MANIFEST \
     LV3_SNAPSHOT_GENERATED_AT \
@@ -323,6 +331,7 @@ remote_docker_env_args() {
     LV3_SESSION_STATE_NAMESPACE \
     LV3_SESSION_RECEIPT_SUFFIX \
     LV3_REMOTE_WORKSPACE_ROOT \
+    LV3_VALIDATION_RUNNER_ID \
     LV3_SNAPSHOT_ID \
     LV3_SNAPSHOT_MANIFEST \
     LV3_SNAPSHOT_GENERATED_AT \
@@ -418,16 +427,10 @@ sync_remote_gate_status_back() {
   local local_status=""
   local status_workspace_root="${RUN_WORKSPACE_ROOT:-$WORKSPACE_ROOT}"
 
-  case "$COMMAND_LABEL" in
-    pre-push-gate|remote-pre-push)
-      ;;
-    *)
-      return 0
-      ;;
-  esac
+  [[ -n "$STATUS_FILE" ]] || return 0
 
-  remote_status="$status_workspace_root/.local/validation-gate/last-run.json"
-  local_status="$REPO_ROOT/.local/validation-gate/last-run.json"
+  remote_status="$status_workspace_root/$STATUS_FILE"
+  local_status="$REPO_ROOT/$STATUS_FILE"
   mkdir -p "$(dirname "$local_status")"
 
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "cat $(quote_shell "$remote_status")" > "$local_status" 2>/dev/null || true
@@ -486,6 +489,9 @@ run_local_command() {
   echo "remote_exec: running local fallback for $COMMAND_LABEL" >&2
   (
     cd "$REPO_ROOT"
+    if [[ -n "$LOCAL_FALLBACK_RUNNER_ID" ]]; then
+      export LV3_VALIDATION_RUNNER_ID="$LOCAL_FALLBACK_RUNNER_ID"
+    fi
     if [[ -z "${LV3_VALIDATE_PYTHON_BIN:-}" ]]; then
       export LV3_VALIDATE_PYTHON_BIN
       LV3_VALIDATE_PYTHON_BIN="$(command -v python3 2>/dev/null || true)"
@@ -551,6 +557,9 @@ run_remote_command() {
   LV3_REMOTE_WORKSPACE_ROOT="$RUN_WORKSPACE_ROOT"
   LV3_SESSION_LOCAL_ROOT="$RUN_WORKSPACE_ROOT/.local/session-workspaces/$LV3_SESSION_SLUG"
   export LV3_SNAPSHOT_MANIFEST="$REMOTE_RUN_ROOT/metadata/manifest.json"
+  if [[ -n "$RUNNER_ID" ]]; then
+    export LV3_VALIDATION_RUNNER_ID="$RUNNER_ID"
+  fi
 
   remote_prefix="$(remote_env_exports)"
   timeout_cmd="$(timeout_prefix)"

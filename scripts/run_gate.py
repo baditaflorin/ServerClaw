@@ -16,6 +16,11 @@ if __package__ in {None, ""}:
 
 from scripts import parallel_check
 from scripts.session_workspace import resolve_session_workspace
+from scripts.validation_runner_contracts import (
+    CONTRACT_CATALOG_PATH,
+    build_runner_context,
+    load_contract_catalog,
+)
 
 
 DEFAULT_MANIFEST = Path("config/validation-gate.json")
@@ -66,6 +71,17 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="Execution source label recorded in the status payload.",
     )
     parser.add_argument(
+        "--runner-id",
+        default=os.environ.get("LV3_VALIDATION_RUNNER_ID", "controller-local-validation"),
+        help="Validation runner contract id to attest and evaluate for this gate run.",
+    )
+    parser.add_argument(
+        "--runner-contracts",
+        type=Path,
+        default=CONTRACT_CATALOG_PATH,
+        help="Path to the validation runner contract catalog.",
+    )
+    parser.add_argument(
         "--print-json",
         action="store_true",
         help="Emit the final status payload as JSON after the human-readable summary.",
@@ -97,6 +113,7 @@ def build_status_payload(
     selected_checks: list[parallel_check.CheckDefinition],
     manifest_metadata: dict[str, Any],
     results: list[parallel_check.CheckResult],
+    runner_context: dict[str, Any],
 ) -> dict[str, Any]:
     passed = all(result.status == "passed" for result in results)
     session_workspace = resolve_session_workspace(repo_root=workspace)
@@ -113,6 +130,7 @@ def build_status_payload(
         },
         "manifest": str(manifest_path.resolve()),
         "executed_at": datetime.now(timezone.utc).isoformat(),
+        "runner": runner_context,
         "checks": [
             {
                 "id": result.label,
@@ -122,6 +140,7 @@ def build_status_payload(
                 "returncode": result.returncode,
                 "duration_seconds": round(result.duration_seconds, 2),
                 "docker_command": result.docker_command,
+                "runner_unavailable_reason": result.stderr if result.status == "runner_unavailable" else None,
             }
             for result in results
         ],
@@ -138,21 +157,50 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv or sys.argv[1:])
     manifest_metadata, manifest = load_gate_manifest(args.manifest)
     checks = resolve_requested_checks(manifest, args.checks)
-    results = parallel_check.run_checks(
-        checks,
-        args.workspace.resolve(),
+    workspace = args.workspace.resolve()
+    runner_catalog = load_contract_catalog(args.runner_contracts)
+    runner_context = build_runner_context(
+        runner_catalog,
+        runner_id=args.runner_id,
+        workspace=workspace,
+        lanes=[check.label for check in checks],
+    )
+
+    runner_unavailable_results = {
+        check.label: parallel_check.CheckResult(
+            label=check.label,
+            status="runner_unavailable",
+            returncode=69,
+            duration_seconds=0.0,
+            stdout="",
+            stderr="; ".join(runner_context["lane_evaluations"][check.label]["reasons"]),
+            docker_command=[],
+        )
+        for check in checks
+        if not runner_context["lane_evaluations"][check.label]["eligible"]
+    }
+    runnable_checks = [check for check in checks if check.label not in runner_unavailable_results]
+    executed_results = parallel_check.run_checks(
+        runnable_checks,
+        workspace,
         args.docker_binary,
         args.jobs,
-    )
+    ) if runnable_checks else []
+    executed_by_label = {result.label: result for result in executed_results}
+    results = [
+        runner_unavailable_results.get(check.label, executed_by_label[check.label])
+        for check in checks
+    ]
     parallel_check.print_summary(results)
 
     payload = build_status_payload(
         source=args.source,
-        workspace=args.workspace,
+        workspace=workspace,
         manifest_path=args.manifest,
         selected_checks=checks,
         manifest_metadata=manifest_metadata,
         results=results,
+        runner_context=runner_context,
     )
     write_status(args.status_file, payload)
 

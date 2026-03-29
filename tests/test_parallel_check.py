@@ -177,6 +177,22 @@ def test_run_checks_returns_non_zero_when_any_check_fails(tmp_path: Path) -> Non
     assert results[1].returncode == 1
 
 
+def test_execute_check_marks_missing_docker_as_runner_unavailable(tmp_path: Path) -> None:
+    parallel_check = load_parallel_check_module()
+    check = parallel_check.CheckDefinition(
+        label="schema-validation",
+        image="example/schema:latest",
+        command="true",
+        working_dir="/workspace",
+        timeout_seconds=30,
+    )
+
+    result = parallel_check.execute_check(check, tmp_path, str(tmp_path / "missing-docker"))
+
+    assert result.status == "runner_unavailable"
+    assert result.returncode == 127
+
+
 def test_main_supports_all_checks(tmp_path: Path, capsys) -> None:
     parallel_check = load_parallel_check_module()
     manifest_path = tmp_path / "manifest.json"

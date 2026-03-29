@@ -45,6 +45,42 @@ def write_fake_docker(path: Path) -> None:
     path.chmod(0o755)
 
 
+def write_runner_contracts(path: Path, *, lane_ids: list[str], runner_id: str = "test-runner") -> None:
+    path.write_text(
+        json.dumps(
+            {
+                "$schema": "docs/schema/validation-runner-contracts.schema.json",
+                "schema_version": "1.0.0",
+                "lanes": {
+                    lane_id: {
+                        "description": f"{lane_id} lane",
+                        "requires_container_runtime": True,
+                        "required_tools": ["docker", "python3", "tar"],
+                        "allowed_network_reachability_classes": ["controller_local"],
+                        "allowed_cpu_architectures": ["arm64", "x86_64"],
+                        "require_scratch_cleanup_guarantee": True,
+                    }
+                    for lane_id in lane_ids
+                },
+                "runners": {
+                    runner_id: {
+                        "description": "test runner",
+                        "execution_surface": "controller_local",
+                        "cpu_architectures": ["arm64", "x86_64"],
+                        "emulation_support": [],
+                        "container_runtime": {"engine": "docker", "supported": True},
+                        "required_tools": ["docker", "python3", "tar"],
+                        "network_reachability_class": "controller_local",
+                        "scratch_cleanup_guarantee": "temp workspace",
+                        "supported_validation_lanes": lane_ids,
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
 def test_run_gate_writes_status_file(tmp_path: Path, capsys) -> None:
     run_gate = load_module("run_gate", "scripts/run_gate.py")
     manifest_path = tmp_path / "validation-gate.json"
@@ -73,7 +109,9 @@ def test_run_gate_writes_status_file(tmp_path: Path, capsys) -> None:
     )
     status_path = tmp_path / "last-run.json"
     fake_docker = tmp_path / "fake-docker"
+    runner_contracts = tmp_path / "validation-runner-contracts.json"
     write_fake_docker(fake_docker)
+    write_runner_contracts(runner_contracts, lane_ids=["alpha", "beta"])
 
     exit_code = run_gate.main(
         [
@@ -87,6 +125,10 @@ def test_run_gate_writes_status_file(tmp_path: Path, capsys) -> None:
             str(status_path),
             "--source",
             "test",
+            "--runner-id",
+            "test-runner",
+            "--runner-contracts",
+            str(runner_contracts),
         ]
     )
     captured = capsys.readouterr()
@@ -96,6 +138,7 @@ def test_run_gate_writes_status_file(tmp_path: Path, capsys) -> None:
     payload = json.loads(status_path.read_text(encoding="utf-8"))
     assert payload["status"] == "passed"
     assert payload["source"] == "test"
+    assert payload["runner"]["id"] == "test-runner"
     assert payload["session_workspace"]["session_slug"]
     assert payload["session_workspace"]["local_state_root"].endswith(
         f".local/session-workspaces/{payload['session_workspace']['session_slug']}"
@@ -149,7 +192,26 @@ def test_gate_status_reports_latest_bypass_and_runs(tmp_path: Path, capsys) -> N
     )
     last_run = tmp_path / "last-run.json"
     last_run.write_text(
-        json.dumps({"status": "passed", "executed_at": "2026-03-23T12:00:00+00:00", "source": "manual"}),
+        json.dumps(
+            {
+                "status": "passed",
+                "executed_at": "2026-03-23T12:00:00+00:00",
+                "source": "manual",
+                "runner": {"id": "controller-local-validation"},
+            }
+        ),
+        encoding="utf-8",
+    )
+    remote_validate = tmp_path / "remote-validate-last-run.json"
+    remote_validate.write_text(
+        json.dumps(
+            {
+                "status": "passed",
+                "executed_at": "2026-03-23T12:30:00+00:00",
+                "source": "build-server-validate",
+                "runner": {"id": "build-server-validation"},
+            }
+        ),
         encoding="utf-8",
     )
     post_merge = tmp_path / "post-merge-last-run.json"
@@ -172,6 +234,8 @@ def test_gate_status_reports_latest_bypass_and_runs(tmp_path: Path, capsys) -> N
             str(manifest_path),
             "--last-run",
             str(last_run),
+            "--remote-validate-run",
+            str(remote_validate),
             "--post-merge-run",
             str(post_merge),
             "--bypass-dir",
@@ -184,6 +248,7 @@ def test_gate_status_reports_latest_bypass_and_runs(tmp_path: Path, capsys) -> N
     captured = capsys.readouterr()
     assert exit_code == 0
     assert "Last gate run: passed" in captured.out
+    assert "Last remote validate run: passed" in captured.out
     assert "Last post-merge gate run: failed" in captured.out
     assert "Latest bypass receipt:" in captured.out
 
@@ -210,6 +275,8 @@ def test_gate_status_supports_json_output(tmp_path: Path, capsys) -> None:
             str(manifest_path),
             "--last-run",
             str(tmp_path / "missing-last-run.json"),
+            "--remote-validate-run",
+            str(tmp_path / "missing-remote-validate.json"),
             "--post-merge-run",
             str(tmp_path / "missing-post-merge.json"),
             "--bypass-dir",
@@ -231,6 +298,7 @@ def test_gate_status_supports_json_output(tmp_path: Path, capsys) -> None:
         }
     ]
     assert payload["last_run"] is None
+    assert payload["remote_validate_run"] is None
     assert payload["post_merge_run"] is None
     assert payload["latest_bypass"] is None
 

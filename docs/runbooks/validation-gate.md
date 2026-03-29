@@ -45,6 +45,7 @@ uvx --from pre-commit pre-commit run --all-files
 ## Gate Definition
 
 The authoritative gate manifest is [config/validation-gate.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/validation-gate.json).
+Runner eligibility and attestation truth now live in [config/validation-runner-contracts.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/validation-runner-contracts.json).
 
 It defines these blocking checks:
 
@@ -62,6 +63,7 @@ It defines these blocking checks:
 - `service-completeness`
 
 `scripts/run_gate.py` reads that manifest and executes the checks in parallel via [scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/parallel_check.py).
+It also records the selected validation runner contract plus a per-run environment attestation under the top-level `runner` key in every status payload.
 
 Repo-managed validation installs third-party Ansible collections from the public `release_galaxy` server by default, so local Docker fallback does not depend on resolving the private `galaxy.lv3.org` endpoint just to lint or syntax-check the checkout.
 
@@ -92,14 +94,19 @@ That path records a receipt under [receipts/gate-bypasses](/Users/live/Documents
 The gate writes the last local or remote-triggered run to:
 
 - `.local/validation-gate/last-run.json`
+- `.local/validation-gate/remote-validate-last-run.json`
 
-That payload now includes a `session_workspace` object so operators can tell which controller session or worktree produced the latest result.
+Those payloads now include:
+
+- a `session_workspace` object so operators can tell which controller session or worktree produced the result
+- a `runner.id` field naming the attested runner contract
+- `runner.capability_contract` and `runner.environment_attestation` blocks for architecture, tooling, container runtime, network class, and scratch-space guarantees
 
 The Windmill post-merge gate writes its most recent result to:
 
 - `.local/validation-gate/post-merge-last-run.json`
 
-`make gate-status` reads both files when present.
+`make gate-status` now reads all three files when present.
 
 ## Windmill Post-Merge Gate
 
@@ -110,6 +117,7 @@ python3 config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox_flor
 ```
 
 That workflow is seeded into the `lv3` workspace as `f/lv3/post_merge_gate`, re-runs the same `config/validation-gate.json` manifest after merge on `main`, and records the result in the worker checkout.
+The worker-side replay now forces `LV3_VALIDATION_RUNNER_ID=windmill-post-merge-worker`, so the recorded payload names the worker runner contract instead of inheriting a controller-local default.
 
 If the worker cannot pull the registry-backed `check-runner` images and the manifest run fails with a runner-image error, the post-merge script falls back to a worker-safe local subset:
 
@@ -128,6 +136,7 @@ When the replay starts from a repo-scoped non-primary git worktree, `playbooks/w
 - if `make install-hooks` fails during `pre-commit` bootstrap, rerun it with working internet access so `pre-commit` can fetch hook environments
 - if the build server is unreachable, rerun `make pre-push-gate`; the wrapper already falls back to local Docker execution
 - if the local Docker fallback is running on an emulated platform such as Apple Silicon with amd64 runner images, expect the `ansible-lint` and `ansible-syntax` stages to take several minutes; the manifest timeout budget is intentionally higher for those checks than for the lighter Python-only stages
+- if `make remote-validate` passes but the synced status payload shows `runner_unavailable`, treat that as validation infrastructure drift rather than a content failure and inspect the `runner.environment_attestation` block first
 - if two remote gate runs appear to reuse one checkout, set distinct `LV3_SESSION_ID` values and rerun so each session gets its own build-server workspace
 - if a remote gate run fails with `fatal: not a git repository`, treat it as a validator regression rather than a checkout-shape requirement; the build-server path now uses immutable no-git snapshots and the affected check should be fixed to reason about repository content instead
 - if the Windmill post-merge gate points at an older mirrored worker tree without the canonical generated-doc inputs, replay `windmill_runtime` first so `/srv/proxmox_florin_server` includes the full worker-safe validation surface before rerunning the gate

@@ -50,11 +50,13 @@ def test_build_repository_context_includes_policy_surfaces() -> None:
     module = load_module("policy_checks_module", "scripts/policy_checks.py")
     context = module.build_repository_context(REPO_ROOT)
 
+    assert "build_server_config" in context
     assert "command_catalog" in context
     assert "workflow_catalog" in context
     assert "service_catalog" in context
     assert "validation_gate" in context
     assert "check_runner_manifest" in context
+    assert "validation_runner_contracts" in context
     assert "promote-to-production" in context["command_catalog"]["commands"]
 
 

@@ -106,7 +106,7 @@
     "description": "Type check the gate orchestration code and the manifest-backed Docker runner surfaces.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/python:3.12.10",
-    "command": "mypy --cache-dir /tmp/mypy-cache scripts/parallel_check.py scripts/run_gate.py scripts/gate_status.py scripts/log_gate_bypass.py scripts/policy_checks.py scripts/policy_toolchain.py config/windmill/scripts/post-merge-gate.py tests/test_parallel_check.py tests/test_validation_gate.py tests/test_policy_checks.py tests/test_command_catalog.py",
+    "command": "mypy --cache-dir /tmp/mypy-cache scripts/parallel_check.py scripts/run_gate.py scripts/gate_status.py scripts/log_gate_bypass.py scripts/policy_checks.py scripts/policy_toolchain.py scripts/validation_runner_contracts.py config/windmill/scripts/post-merge-gate.py tests/test_parallel_check.py tests/test_validation_gate.py tests/test_policy_checks.py tests/test_command_catalog.py tests/test_validation_runner_contracts.py",
     "working_dir": "/workspace",
     "timeout_seconds": 180
   },
