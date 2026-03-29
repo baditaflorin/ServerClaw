@@ -404,12 +404,13 @@ workstreams:
     ready_to_merge: true
     live_applied: true
     canonical_truth:
-      changelog_entry: implemented ADR 0260 by deploying repo-managed Nextcloud
-        on docker-runtime-lv3 with a dedicated postgres backend, shared-edge
-        DAV publication, and verified personal-data-plane replay on the latest
-        realistic origin/main baseline
+      changelog_entry: implemented ADR 0260 by re-verifying repo-managed
+        Nextcloud on docker-runtime-lv3 with a dedicated postgres backend,
+        shared-edge DAV publication, and synchronized recovery for stale
+        compose networks, Docker bridge chains, and detached local OpenBao
+        publication on the latest realistic origin/main baseline
       release_bump: patch
-      included_in_repo_version: 0.177.89
+      included_in_repo_version: 0.177.91
       latest_receipts:
         nextcloud: 2026-03-29-adr-0260-nextcloud-personal-data-plane-mainline-live-apply
   - id: ws-0260-main-integration
