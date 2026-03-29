@@ -512,6 +512,8 @@ def rewrite_markdown_links(content: str, source_path: Path, target_site_path: Pa
         link = raw_link.strip()
         if link.startswith(("http://", "https://", "mailto:", "tel:", "#")):
             return match.group(0)
+        if any(marker in link for marker in ("{{", "}}", "{%", "%}")):
+            return match.group(0)
 
         target, anchor = (link.split("#", 1) + [""])[:2]
         resolved = resolve_repo_target(source_path, target)

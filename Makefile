@@ -156,6 +156,7 @@ runbook-executor:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/runbook_executor.py $(RUNBOOK_EXECUTOR_ARGS)
 
 post-merge-gate:
+	$(MAKE) preflight WORKFLOW=post-merge-gate
 	python3 $(REPO_ROOT)/config/windmill/scripts/post-merge-gate.py --repo-path $(REPO_ROOT)
 
 integration-tests:
@@ -1015,6 +1016,7 @@ promote:
 
 live-apply-group:
 	@test -n "$(group)" || (echo "set group=<group-id>"; exit 1)
+	$(MAKE) preflight WORKFLOW=live-apply-group
 	$(MAKE) check-canonical-truth
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/interface_contracts.py --check-live-apply "group:$(group)"
 	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])bypass_promotion=true([[:space:]]|$$)'; then \
@@ -1025,6 +1027,7 @@ live-apply-group:
 
 live-apply-service:
 	@test -n "$(service)" || (echo "set service=<service-id>"; exit 1)
+	$(MAKE) preflight WORKFLOW=live-apply-service
 	$(MAKE) check-canonical-truth
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/interface_contracts.py --check-live-apply "service:$(service)"
 	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])bypass_promotion=true([[:space:]]|$$)'; then \
@@ -1036,6 +1039,7 @@ live-apply-service:
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/services/$(service).yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 
 live-apply-site:
+	$(MAKE) preflight WORKFLOW=live-apply-site
 	$(MAKE) check-canonical-truth
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/interface_contracts.py --check-live-apply "site:site"
 	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])bypass_promotion=true([[:space:]]|$$)'; then \
@@ -1046,6 +1050,7 @@ live-apply-site:
 
 live-apply-waves:
 	@test -n "$(manifest)" || (echo "set manifest=config/dependency-waves/<plan>.yaml"; exit 1)
+	$(MAKE) preflight WORKFLOW=live-apply-waves
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/dependency_wave_apply.py --manifest "$(manifest)" --env "$(or $(env),production)" $(if $(CATALOG),--catalog "$(CATALOG)",) $(if $(EXTRA_ARGS),--extra-args "$(EXTRA_ARGS)",) $(WAVE_ARGS)
 
 live-apply-train-status:

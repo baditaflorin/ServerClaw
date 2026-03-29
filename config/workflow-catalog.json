@@ -189,7 +189,11 @@
         "command": "make post-merge-gate"
       },
       "preflight": {
-        "required": false
+        "required": true,
+        "required_secret_ids": [],
+        "bootstrap_manifest_ids": [
+          "controller-local-base"
+        ]
       },
       "validation_targets": [],
       "live_impact": "repo_only",
@@ -821,6 +825,10 @@
         "required": true,
         "required_secret_ids": [
           "bootstrap_ssh_private_key"
+        ],
+        "bootstrap_manifest_ids": [
+          "controller-local-base",
+          "shared-edge-generated-portals"
         ]
       },
       "validation_targets": [
@@ -1758,7 +1766,11 @@
         "command": "make merge-config-changes"
       },
       "preflight": {
-        "required": false
+        "required": true,
+        "required_secret_ids": [],
+        "bootstrap_manifest_ids": [
+          "controller-local-base"
+        ]
       },
       "validation_targets": [
         "validate-data-models"
@@ -4421,6 +4433,158 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "live-apply-group": {
+      "description": "Run one grouped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "live-apply-group",
+        "command": "make live-apply-group group=observability env=production"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [],
+        "bootstrap_manifest_ids": [
+          "controller-local-base",
+          "shared-edge-generated-portals"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/playbook-execution-model.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/workflow-catalog.json",
+        "config/worktree-bootstrap-manifests.json",
+        "docs/runbooks/controller-local-secrets-and-preflight.md",
+        "docs/runbooks/playbook-execution-model.md",
+        "scripts/preflight_controller_local.py",
+        "scripts/workflow_catalog.py",
+        "scripts/interface_contracts.py",
+        "scripts/service_redundancy.py"
+      ],
+      "outputs": [
+        "A grouped live-apply wrapper that repairs required generated artifacts up front, then runs the selected group playbook through the governed shared entrypoint."
+      ],
+      "verification_commands": [
+        "make preflight WORKFLOW=live-apply-group",
+        "make live-apply-group group=observability env=staging EXTRA_ARGS='--syntax-check'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "live-apply-service": {
+      "description": "Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "live-apply-service",
+        "command": "make live-apply-service service=public-edge env=production"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [],
+        "bootstrap_manifest_ids": [
+          "controller-local-base",
+          "shared-edge-generated-portals"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/playbook-execution-model.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/workflow-catalog.json",
+        "config/worktree-bootstrap-manifests.json",
+        "docs/runbooks/controller-local-secrets-and-preflight.md",
+        "docs/runbooks/playbook-execution-model.md",
+        "scripts/preflight_controller_local.py",
+        "scripts/workflow_catalog.py",
+        "scripts/interface_contracts.py",
+        "scripts/service_redundancy.py",
+        "scripts/immutable_guest_replacement.py"
+      ],
+      "outputs": [
+        "A service live-apply wrapper that repairs required generated artifacts up front, then runs the selected service playbook through the governed shared entrypoint."
+      ],
+      "verification_commands": [
+        "make preflight WORKFLOW=live-apply-service",
+        "make live-apply-service service=public-edge env=staging EXTRA_ARGS='--syntax-check'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "live-apply-site": {
+      "description": "Run the full site live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "live-apply-site",
+        "command": "make live-apply-site env=production"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [],
+        "bootstrap_manifest_ids": [
+          "controller-local-base",
+          "shared-edge-generated-portals"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/playbook-execution-model.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/site.yml",
+        "config/workflow-catalog.json",
+        "config/worktree-bootstrap-manifests.json",
+        "docs/runbooks/controller-local-secrets-and-preflight.md",
+        "docs/runbooks/playbook-execution-model.md",
+        "scripts/preflight_controller_local.py",
+        "scripts/workflow_catalog.py",
+        "scripts/interface_contracts.py",
+        "scripts/service_redundancy.py"
+      ],
+      "outputs": [
+        "A full-site live-apply wrapper that repairs required generated artifacts up front, then runs the shared site convergence path."
+      ],
+      "verification_commands": [
+        "make preflight WORKFLOW=live-apply-site",
+        "make live-apply-site env=staging EXTRA_ARGS='--syntax-check'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 3600,
+        "max_steps": 450,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 8,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "live-apply-waves": {
       "description": "Execute one reviewed dependency-wave manifest so each wave acquires its locks up front and runs its playbooks in parallel.",
       "lifecycle_status": "active",
@@ -4433,6 +4597,10 @@
         "required": true,
         "required_secret_ids": [
           "bootstrap_ssh_private_key"
+        ],
+        "bootstrap_manifest_ids": [
+          "controller-local-base",
+          "shared-edge-generated-portals"
         ]
       },
       "validation_targets": [

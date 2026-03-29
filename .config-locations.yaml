@@ -329,8 +329,21 @@ automation:
     validation: "python3 scripts/workflow_catalog.py --validate"
     related_files:
       - "config/command-catalog.json: command layer that references these workflow ids"
+      - "config/worktree-bootstrap-manifests.json: generated-artifact and local-helper bootstrap inputs referenced by workflow preflight"
       - "config/windmill/scripts/: worker-side wrappers for selected workflows"
       - "docs/runbooks/command-catalog-and-approval-gates.md: operator procedure"
+
+  config/worktree-bootstrap-manifests.json:
+    purpose: Canonical fresh-worktree bootstrap manifest catalog for generated artifacts and controller-local helper inputs
+    owner: human
+    format: JSON
+    use_for: Declaring which governed workflows may auto-materialize generated artifacts and which local helper paths must fail early
+    update_when: Adding or changing worktree bootstrap requirements for a governed workflow
+    validation: "uv run --with pyyaml python scripts/workflow_catalog.py --validate"
+    related_files:
+      - "config/workflow-catalog.json: workflows that reference bootstrap manifest ids"
+      - "scripts/preflight_controller_local.py: controller-side preflight executor"
+      - "docs/runbooks/controller-local-secrets-and-preflight.md: operator procedure"
 
   config/persona-catalog.json:
     purpose: Canonical persona catalog for shared human launcher defaults and purpose-focused navigation

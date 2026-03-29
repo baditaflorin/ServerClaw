@@ -39,6 +39,10 @@ markdown_extensions:
   - pymdownx.tabbed:
       alternate_style: true
 
+validation:
+  nav:
+    omitted_files: ignore
+
 nav:
   - Home: index.md
   - Services:

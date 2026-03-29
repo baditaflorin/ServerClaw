@@ -102,7 +102,7 @@ See API reference at `{{ service.api_docs_url }}`.
 
 ## Related ADR
 
-[ADR {{ service.adr }}](../architecture/decisions/{{ service.adr_slug }}.md)
+ADR {{ service.adr }} -> ../architecture/decisions/{{ service.adr_slug }}.md
 ```
 
 ### OpenAPI rendering
