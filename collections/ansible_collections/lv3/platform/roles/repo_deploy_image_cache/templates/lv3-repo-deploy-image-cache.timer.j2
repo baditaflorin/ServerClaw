@@ -1,0 +1,9 @@
+[Unit]
+Description=Refresh approved repo-deploy base images on the Coolify deployment lane
+
+[Timer]
+OnCalendar={{ repo_deploy_image_cache_on_calendar }}
+Persistent=true
+
+[Install]
+WantedBy=timers.target

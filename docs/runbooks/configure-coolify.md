@@ -140,6 +140,10 @@ Expected results:
 - the `coolify-lv3` Docker daemon now pins explicit public resolvers plus the
   approved Docker Hub mirror `https://mirror.gcr.io` so fresh repo deployments
   do not depend on the guest resolver state or anonymous origin pulls alone
+- the approved repo-deploy base-image set now renders into
+  `/opt/repo-deploy-image-cache/seed-plan.json`, refreshes through
+  `lv3-repo-deploy-image-cache.timer`, and records its latest warm receipt at
+  `/opt/repo-deploy-image-cache/warm-status.json`
 - Docker Compose applications must use `--compose-domain SERVICE=DOMAIN`
   instead of the top-level `--domain` or `--subdomain` flags
 - the wildcard `*.apps.lv3.org` edge must proxy to the Coolify VM over
@@ -167,6 +171,18 @@ of the canonical public surface set.
 - `.local/coolify/deployments/`
 
 These files are generated or refreshed by the repo-managed automation and are not committed.
+
+## Repo-Deploy Base Image Cache
+
+ADR 0274 is now implemented on `coolify-lv3` through the approved profile
+catalog and scheduled warm-cache surface documented in
+`docs/runbooks/repo-deploy-base-image-cache.md`.
+
+Use that runbook when:
+
+- changing the approved base-image set for governed repo deployments
+- checking whether the warm receipt is still inside the freshness bound
+- verifying that `coolify-lv3` is ready for the next repo-backed deployment
 
 ## Access Model
 
@@ -214,12 +230,11 @@ ADR 0092 gateway as the intake surface. The portal form should submit the same
 catalog-backed `deploy-repo` contract instead of inventing a second deployment
 engine or depending on an assistant session.
 
-The missing hardening gap exposed by repeated public-registry flakeouts is
-already codified by ADR 0274. The operator/browser surface is covered by ADR
-0224; the next supply-path step is cache-first base-image warming for the
-approved deployment catalog and image bundles declared in
-`config/repo-deploy-catalog.json`.
-
+ADR 0274 now closes the supply-path hardening gap exposed by repeated
+public-registry flakeouts: the approved deployment catalog maps to a governed
+base-image profile set in `config/repo-deploy-base-image-profiles.json`, and
+`coolify-lv3` keeps that set warm through the cache-first contract documented
+in `docs/runbooks/repo-deploy-base-image-cache.md`.
 ## Rollback
 
 - revert the repo change

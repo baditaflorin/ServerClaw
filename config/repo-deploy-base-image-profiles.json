@@ -1,0 +1,64 @@
+{
+  "$schema": "docs/schema/repo-deploy-base-image-profiles.schema.json",
+  "schema_version": "1.0.0",
+  "profiles": [
+    {
+      "id": "coolify-dockercompose-go-static-web",
+      "name": "Coolify Docker Compose Go API and static web",
+      "description": "Approved profile for the current education_wemeshup Docker Compose deployment lane on coolify-lv3.",
+      "deployment_lane": "coolify",
+      "allowed_build_packs": [
+        "dockercompose"
+      ],
+      "freshness_hours": 24,
+      "repositories": [
+        {
+          "id": "education-wemeshup",
+          "repo": "github.com/baditaflorin/education_wemeshup",
+          "branch": "main",
+          "notes": "Derived from the repo's current compose and Dockerfile base-image refs on 2026-03-30."
+        }
+      ],
+      "bundles": [
+        {
+          "id": "language-build-images",
+          "concern": "language_build",
+          "images": [
+            {
+              "id": "go-build",
+              "ref": "mirror.gcr.io/library/golang:1.25.0-alpine3.21"
+            },
+            {
+              "id": "node-build",
+              "ref": "mirror.gcr.io/library/node:22.14.0-bookworm-slim"
+            }
+          ]
+        },
+        {
+          "id": "runtime-base-images",
+          "concern": "runtime_base",
+          "images": [
+            {
+              "id": "alpine-runtime",
+              "ref": "mirror.gcr.io/library/alpine:3.21.3"
+            },
+            {
+              "id": "nginx-unprivileged-runtime",
+              "ref": "mirror.gcr.io/nginxinc/nginx-unprivileged:1.27.5-alpine3.21"
+            }
+          ]
+        },
+        {
+          "id": "stateful-service-images",
+          "concern": "stateful_service",
+          "images": [
+            {
+              "id": "postgres-runtime",
+              "ref": "docker.io/library/postgres:17.4-alpine3.21"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

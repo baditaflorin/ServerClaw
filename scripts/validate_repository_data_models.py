@@ -82,6 +82,8 @@ from workstream_surface_ownership import validate_registry as validate_workstrea
 from platform.config_merge import validate_merge_eligible_catalog
 from preview_environment import load_profile_catalog, validate_profile_catalog
 from repo_deploy_profiles import load_repo_deploy_catalog, validate_repo_deploy_catalog
+from repo_deploy_image_cache import load_profile_catalog as load_repo_deploy_base_image_profile_catalog
+from repo_deploy_image_cache import validate_profile_catalog as validate_repo_deploy_base_image_profile_catalog
 from validation_runner_contracts import (
     load_contract_catalog as load_validation_runner_contract_catalog,
     validate_contract_catalog as validate_validation_runner_contract_catalog,
@@ -117,6 +119,8 @@ REPO_DEPLOY_CATALOG_SCHEMA_PATH = repo_path("docs", "schema", "repo-deploy-catal
 REPLACEABILITY_REVIEW_CATALOG_PATH = repo_path("config", "replaceability-review-catalog.json")
 VERSION_SEMANTICS_PATH = repo_path("config", "version-semantics.json")
 WORKSTREAMS_PATH = repo_path("workstreams.yaml")
+REPO_DEPLOY_BASE_IMAGE_PROFILES_PATH = repo_path("config", "repo-deploy-base-image-profiles.json")
+REPO_DEPLOY_BASE_IMAGE_PROFILES_SCHEMA_PATH = repo_path("docs", "schema", "repo-deploy-base-image-profiles.schema.json")
 TRIAGE_RULES_PATH = repo_path("config", "triage-rules.yaml")
 TRIAGE_AUTO_CHECK_ALLOWLIST_PATH = repo_path("config", "triage-auto-check-allowlist.yaml")
 CHANGELOG_REDACTION_PATH = repo_path("config", "changelog-redaction.yaml")
@@ -2689,6 +2693,13 @@ def validate_preview_environment_profiles() -> None:
     validate_profile_catalog(load_profile_catalog())
 
 
+def validate_repo_deploy_base_image_profiles() -> None:
+    payload = load_repo_deploy_base_image_profile_catalog(REPO_DEPLOY_BASE_IMAGE_PROFILES_PATH)
+    validate_repo_deploy_base_image_profile_catalog(payload, path=REPO_DEPLOY_BASE_IMAGE_PROFILES_PATH)
+    schema = load_json(REPO_DEPLOY_BASE_IMAGE_PROFILES_SCHEMA_PATH)
+    jsonschema.validate(instance=payload, schema=schema)
+
+
 def validate_replaceability_review_data() -> None:
     payload = load_replaceability_review_catalog(REPLACEABILITY_REVIEW_CATALOG_PATH)
     validate_replaceability_review_catalog(payload)
@@ -2751,6 +2762,7 @@ def validate_repository_data_models() -> int:
     validate_runtime_assurance_matrix_data()
     validate_repo_deploy_catalog_data()
     validate_preview_environment_profiles()
+    validate_repo_deploy_base_image_profiles()
     validate_ephemeral_pool_catalog()
     validate_restore_readiness_profiles()
     validate_replaceability_review_data()

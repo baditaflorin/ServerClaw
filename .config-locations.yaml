@@ -6,11 +6,11 @@
 #          modifying any configuration.
 # Usage:   Find the section matching your concern; read 'use_for' and
 #          'update_when' before touching any file.
-# Updated: 2026-03-29
+# Updated: 2026-03-30
 # ============================================================================
 
 schema_version: 1
-last_updated: "2026-03-29"
+last_updated: "2026-03-30"
 
 agent_quick_reference:
   find_config: "Check this file → find your concern section → read 'use_for'"
@@ -107,6 +107,19 @@ infrastructure_state:
     related_files:
       - "docs/schema/preview-environment-profiles.schema.json: Schema for the profile catalog"
       - "scripts/preview_environment.py: Lifecycle automation for create/validate/destroy"
+
+  config/repo-deploy-base-image-profiles.json:
+    purpose: Canonical ADR 0274 catalog of approved repo-deploy base-image bundles, freshness windows, and deployment-lane profile bindings
+    owner: human
+    format: JSON
+    use_for: Declaring which base images must be prewarmed before governed Coolify repo deployments run
+    update_when: Adding or changing an approved repo-deploy profile, its image bundles, or its freshness budget
+    update_by: Agent or human implementing ADR 0274 repo-deploy cache policy
+    validation: "uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate"
+    related_files:
+      - "docs/schema/repo-deploy-base-image-profiles.schema.json: Schema for the approved profile catalog"
+      - "scripts/repo_deploy_image_cache.py: Catalog planner, warm helper, and receipt verifier"
+      - "docs/runbooks/repo-deploy-base-image-cache.md: Operator procedure"
 
   config/correction-loops.json:
     purpose: Canonical ADR 0204 registry of governed self-correcting automation loops and their workflow selectors

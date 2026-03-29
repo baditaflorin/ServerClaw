@@ -39,6 +39,7 @@ def test_coolify_playbook_covers_vm_provision_guest_runtime_and_edge() -> None:
     assert guest_roles == [
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.docker_runtime",
+        "lv3.platform.repo_deploy_image_cache",
         "lv3.platform.coolify_runtime",
     ]
 
