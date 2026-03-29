@@ -4378,6 +4378,7 @@ adr_index:
       - lv3
     summary: We will define ServerClaw as a distinct product surface on top of the LV3
     filename: 0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3.md
+    implemented_version: 0.177.91
   - adr: '0255'
     title: Matrix Synapse As The Canonical ServerClaw Conversation Hub
     status: Accepted

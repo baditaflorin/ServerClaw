@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.92",
   "platform_version": "0.130.60",
-  "generated_at": "2026-03-29T23:22:14Z",
-  "next_refresh_at": "2026-03-30T00:22:14Z",
+  "generated_at": "2026-03-29T23:27:16Z",
+  "next_refresh_at": "2026-03-30T00:27:16Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -59,7 +59,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://changelog.lv3.org",
-        "last_live_apply": "2026-03-29T00:00:00Z"
+        "last_live_apply": "2026-03-30T00:00:00Z"
       },
       "coolify": {
         "service_name": "Coolify",
@@ -125,7 +125,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://docs.lv3.org",
-        "last_live_apply": "2026-03-29T00:00:00Z"
+        "last_live_apply": "2026-03-30T00:00:00Z"
       },
       "dozzle": {
         "service_name": "Dozzle",
@@ -312,7 +312,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://nginx.lv3.org",
-        "last_live_apply": "2026-03-29T00:00:00Z",
+        "last_live_apply": "2026-03-30T00:00:00Z",
         "slo_status": "unknown"
       },
       "nomad": {

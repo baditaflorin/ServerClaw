@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0254](../adr/0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3.md)
 - Title: Integrate ADR 0254 exact-main replay onto `origin/main`
-- Status: `ready_for_merge`
-- Included In Repo Version: not yet
-- Platform Version Observed During Merge: 0.130.60 on latest `origin/main` before the final replay
-- Release Date: not yet
-- Live Applied On: not yet from merged `main`
+- Status: `merged`
+- Included In Repo Version: `0.177.91`
+- Platform Version Observed During Merge: `0.130.60` on `origin/main` commit `72ee92ef77cae2cf73e3c42168b2e193984c05c1`
+- Release Date: `2026-03-30`
+- Live Applied On: `2026-03-30` from merged `main`
 - Branch: `codex/ws-0254-main-merge`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0254-main-merge`
 - Owner: codex
@@ -42,26 +42,26 @@ commit, and record the canonical mainline live-apply receipt before pushing
 - `platform/policy/toolchain.py`
 - `tests/test_policy_checks.py`
 - `receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply.json`
+- `receipts/live-applies/2026-03-30-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply.json`
+- `receipts/live-applies/evidence/2026-03-30-adr-0254-mainline-live-apply.txt`
 
 ## Verification
 
-- `git fetch origin --prune` most recently refreshed this worktree onto `origin/main` commit `f965aa3101fa2cd2260a8e6fda165f366365ed80`, which currently carries repository version `0.177.90` and platform version `0.130.60`.
-- `git diff origin/main -- inventory/group_vars/platform.yml inventory/host_vars/proxmox_florin.yml playbooks/serverclaw.yml docs/runbooks/configure-serverclaw.md collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/templates/nftables.conf.j2 collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml` confirmed current `main` still lacks the ADR 0254 ServerClaw topology, playbook, runbook, guest-firewall rule, and public-edge publication contract.
-- Regenerating the dependent catalogs and diagrams restored the current branch truth after merging `origin/main`; `python3 scripts/validate_service_completeness.py --validate` passed, and `uv run --with pyyaml --with jsonschema python scripts/platform_manifest.py --check` passed.
-- `receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-live-apply.json` preserves the first branch-local proof where the dedicated `chat.lv3.org` surface, internal `8096` lane, and bootstrap admin sign-in all succeeded before later `origin/main` drift.
-- `receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply.json` plus `receipts/live-applies/evidence/2026-03-29-adr-0254-*.txt` preserve the later pre-merge gap where the merged-main lane was not yet durable on current `origin/main`.
-- The merged branch now also carries the ADR 0266 validation-runner contract hardening plus the ADR 0263 ServerClaw memory-substrate rollout from current `origin/main`; a fresh exact-main `make converge-serverclaw` replay from this merged branch is still required before any later platform-truth update for ADR 0254.
+- `git push origin HEAD:main` advanced `origin/main` from `9102f1c6a0118cc7857831de95bb9f625d761738` to `72ee92ef77cae2cf73e3c42168b2e193984c05c1` after the remote pre-push gate passed `agent-standards`, `alert-rule-validation`, `ansible-lint`, `ansible-syntax`, `artifact-secret-scan`, `dependency-direction`, `dependency-graph`, `documentation-index`, `generated-docs`, `generated-portals`, `integration-tests`, `packer-validate`, `policy-validation`, `schema-validation`, `security-scan`, `service-completeness`, `tofu-validate`, `type-check`, `workstream-surfaces`, and `yaml-lint`
+- the exact-main replay `make converge-serverclaw` then completed successfully from merged `main` with recap `coolify-lv3 ok=60 changed=4 failed=0 skipped=14`, `docker-runtime-lv3 ok=63 changed=0 failed=0 skipped=7`, `nginx-lv3 ok=39 changed=4 failed=0 skipped=7`, and `proxmox_florin ok=241 changed=6 failed=0 skipped=108`
+- host verification on `proxmox_florin` confirmed `/etc/pve/firewall/170.fw` still contains `17:IN ACCEPT -source 10.10.10.10/32 -p tcp -dport 8096`
+- internal edge verification confirmed `nc -vz -w 5 10.10.10.70 8096` from `nginx-lv3` succeeds and `curl -sk -D - https://127.0.0.1/ -H 'Host: chat.lv3.org' -o /dev/null` now returns `HTTP/2 200`
+- guest-local runtime verification on `coolify-lv3` confirmed `curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8096/` returns `200`, and bootstrap admin sign-in returns `{"email":"ops@lv3.org","role":"admin","token_type":"Bearer","has_token":true}`
+- public verification confirmed `curl -Ik http://chat.lv3.org/` now returns `HTTP/1.1 308 Permanent Redirect` with `Location: https://chat.lv3.org/`, and `curl -Ik https://chat.lv3.org/` returns `HTTP/2 200`
+- the final validation sweep passed `live_apply_receipts.py --validate`, `validate_repository_data_models.py --validate`, `canonical_truth.py --check`, `subdomain_exposure_audit.py --validate`, `platform_manifest.py --check`, and `agent-standards`; `workstream-surfaces` now returns the expected terminal-branch guard because `codex/ws-0254-main-merge` is no longer an active owner once its status flips to `merged`
+- the earlier branch-local pass and later pre-merge gap remain preserved in the March 29 receipts, and the final merged-main truth is now recorded in `receipts/live-applies/2026-03-30-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply.json` plus `receipts/live-applies/evidence/2026-03-30-adr-0254-mainline-live-apply.txt`
 
 ## Current State
 
-- The ADR 0254 branch implementation is complete and validated, and the branch-local live proof remains preserved in the first receipt.
-- This integration branch is now refreshed onto current `origin/main` commit `f965aa3101fa2cd2260a8e6fda165f366365ed80`, so the next realistic repository release is the post-`0.177.90` patch cut from this merged tree.
-- The latest exact-main proof is still pending from this merged branch, so shared release files and platform-version claims remain intentionally provisional until that replay succeeds from the refreshed base.
+- ADR 0254 is now merged to `origin/main` in repository version `0.177.91`
+- the exact-main replay succeeded from merged `main`, so the dedicated `chat.lv3.org` surface is now durable under repo-managed reconciliation on the current platform version `0.130.60`
+- ADR metadata, release notes, stack truth, workstream state, and the final mainline receipt now agree with the verified live platform state
 
 ## Remaining For Merge-To-Main
 
-- merge this branch onto the latest `origin/main`
-- cut the next patch release from merged `main`
-- replay `make converge-serverclaw` from that merged `main` checkout
-- verify both the internal `nginx-lv3 -> 10.10.10.70:8096` lane and public `https://chat.lv3.org/`
-- update `VERSION`, `changelog.md`, `docs/release-notes/`, `versions/stack.yaml`, `README.md`, ADR 0254 metadata, and the mainline receipt only after that replay is clean
+- none
