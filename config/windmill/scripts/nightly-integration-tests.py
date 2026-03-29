@@ -12,6 +12,12 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from windmill_integration_env import integration_env_overrides
+
 
 def post_json_webhook(url: str, payload: dict[str, Any]) -> None:
     request = urllib.request.Request(
@@ -63,6 +69,10 @@ def execute_suite(repo_root: Path, environment: str, report_file: Path) -> dict[
     if str(scripts_dir) not in sys.path:
         sys.path.insert(0, str(scripts_dir))
 
+    overrides = integration_env_overrides(repo_root)
+    for name, value in overrides.items():
+        os.environ.setdefault(name, value)
+
     import integration_suite
 
     try:
@@ -97,6 +107,7 @@ def execute_suite(repo_root: Path, environment: str, report_file: Path) -> dict[
         text=True,
         capture_output=True,
         check=False,
+        env={**os.environ, **overrides},
     )
     if report_file.exists():
         return json.loads(report_file.read_text(encoding="utf-8"))

@@ -483,6 +483,11 @@ windmill_seed_scripts:
     language: python3
     summary: ADR 0105 weekly capacity report
     description: Repo-managed Windmill wrapper that renders the weekly platform capacity summary payload from the committed model.
+  - path: f/lv3/backup_coverage_ledger
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/backup-coverage-ledger.py"
+    language: python3
+    summary: ADR 0271 backup coverage ledger
+    description: Repo-managed Windmill wrapper that records current Proxmox backup coverage, writes a receipt, and surfaces uncovered governed assets.
   - path: f/lv3/collection_publish
     local_file: "{{ inventory_dir }}/../config/windmill/scripts/collection-publish.py"
     language: python3

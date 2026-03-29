@@ -169,6 +169,21 @@ def env_override(name: str) -> str | None:
     return normalize_url(os.environ.get(name))
 
 
+def proc_env_override(*names: str, proc_environ_path: Path = Path("/proc/1/environ")) -> str | None:
+    if not proc_environ_path.exists():
+        return None
+    try:
+        entries = proc_environ_path.read_bytes().split(b"\0")
+    except OSError:
+        return None
+    for name in names:
+        prefix = f"{name}=".encode("utf-8")
+        for entry in entries:
+            if entry.startswith(prefix):
+                return normalize_url(entry.split(b"=", 1)[1].decode("utf-8", errors="ignore"))
+    return None
+
+
 def load_service_catalog(repo_root: Path) -> dict[str, Any]:
     return load_json(repo_root / "config" / "service-capability-catalog.json")
 
@@ -211,6 +226,8 @@ def resolve_targets(repo_root: Path, environment: str) -> SuiteTargets:
         postgres_dsn=os.environ.get("LV3_INTEGRATION_POSTGRES_DSN")
         or resolve_service_url(catalog, "postgres", environment),
         windmill_url=env_override("LV3_INTEGRATION_WINDMILL_URL")
+        or env_override("LV3_WINDMILL_BASE_URL")
+        or proc_env_override("LV3_WINDMILL_BASE_URL", "BASE_URL")
         or resolve_service_url(catalog, "windmill", environment),
     )
 

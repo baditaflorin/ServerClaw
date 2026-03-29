@@ -79,6 +79,12 @@ Core target resolution:
 - `LV3_INTEGRATION_TEMPO_QUERY_URL`
 - `LV3_INTEGRATION_VERIFY_TLS`
 
+Worker-side Windmill runs also honor `LV3_WINDMILL_BASE_URL` as the default
+Windmill target when no explicit `LV3_INTEGRATION_WINDMILL_URL` override is
+set, and the Windmill wrappers fall back to the guest-local health probe URL
+from `config/health-probe-catalog.json` when the job sandbox does not expose
+that worker env variable directly.
+
 Authentication and API access:
 
 - `LV3_TEST_RUNNER_USERNAME`

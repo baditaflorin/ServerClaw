@@ -5,9 +5,17 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shlex
 import subprocess
+import sys
 from pathlib import Path
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from windmill_integration_env import integration_env_overrides
 
 
 def main(
@@ -41,12 +49,15 @@ def main(
     for suite_id in [item.strip() for item in suite_ids.split(",") if item.strip()]:
         command.extend(["--suite-id", suite_id])
 
+    command_env = dict(os.environ)
+    command_env.update(integration_env_overrides(repo_root))
     completed = subprocess.run(
         command,
         cwd=repo_root,
         text=True,
         capture_output=True,
         check=False,
+        env=command_env,
     )
     payload = {
         "status": "ok" if completed.returncode == 0 else "error",
