@@ -160,7 +160,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.85` |
-| Platform version | `0.130.57` |
+| Platform version | `0.130.59` |
 | Observed check date | `2026-03-29` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -321,6 +321,8 @@ Template VM: `9000` `debian13-cloud-template`
 | `step_ca` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
+| `validation_gate` | `2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply` |
+| `validation_runner_contracts` | `2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply` |
 | `vaultwarden` | `2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply` |
 | `windmill` | `2026-03-29-adr-0228-windmill-default-operations-surface-mainline-live-apply` |
 | `world_state_materializer` | `2026-03-27-adr-0113-world-state-materializer-mainline-live-apply` |
@@ -1283,6 +1285,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream WS-0253: Unified Runtime Assurance Scoreboard Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0253-live-apply.md)
 - [Workstream WS-0259: n8n Connector Fabric Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0259-live-apply.md)
 - [Workstream ws-0259-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0259-main-merge.md)
+- [Workstream ws-0264-live-apply: Live Apply ADR 0264 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0264-live-apply.md)
+- [Workstream ws-0264-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0264-main-merge.md)
 - [Workstream ws-0268-live-apply: Live Apply ADR 0268 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0268-live-apply.md)
 - [Workstream ws-0268-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0268-main-integration.md)
 - [Workstream WS-0271: Backup Coverage Assertion Ledger Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0271-live-apply.md)
@@ -1305,7 +1309,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.85` |
-| Platform version | `0.130.57` |
+| Platform version | `0.130.59` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |

@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T19:12:00Z",
+  "recorded_by": "codex",
+  "source_commit": "a92ffbcea9e7da39e0f0e2107fb12ede7863f750",
+  "repo_version_context": "0.177.85",
+  "platform_version_context": "0.130.59",
+  "workflow_id": "adr-0266-validation-runner-capability-contracts-mainline-live-apply",
+  "adr": "0266",
+  "summary": "Integrated ADR 0266 on synchronized main release 0.177.85 by carrying the validation-runner capability catalog, per-run environment attestation, runner-aware lane admission, and worker-safe post-merge replay surfaces onto the latest origin/main baseline, with platform version 0.130.59 reserved for the exact-main verification set.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-build-lv3",
+      "vmid": 130,
+      "address": "10.10.10.30"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "validation-gate",
+      "address": "latest-main build-server and worker-local replay"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Latest origin/main baseline and protected release cut",
+      "result": "pass",
+      "observed": "`git fetch origin --prune` confirmed the newest published `origin/main` baseline remained commit `430e364e2a810ccd6463e201fd8b7d41fed95676`; the exact-main ADR 0266 replay source is commit `a92ffbcea9e7da39e0f0e2107fb12ede7863f750` on top of that head, and the protected release cut carried repository version `0.177.85`."
+    },
+    {
+      "check": "Integrated ADR 0266 regression sweep",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml pytest -q tests/test_validation_runner_contracts.py tests/test_validation_gate.py tests/test_parallel_check.py tests/test_post_merge_gate.py` returned `25 passed in 4.12s`, and `uv run --with jsonschema python3 scripts/validation_runner_contracts.py --validate` returned `Validation runner contracts OK` after the exact-main lane-catalog coverage fix."
+    },
+    {
+      "check": "Exact-main build-server and worker verification",
+      "result": "pass",
+      "observed": "The exact-main evidence bundle under `receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-*` records the synchronized `check-build-server`, `remote-validate`, `pre-push-gate`, `gate-status`, Windmill runtime replay, and worker-side `post-merge-gate.py` plus `gate-status.py` runs used to finalize this receipt."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "changelog.md",
+    "versions/stack.yaml",
+    "workstreams.yaml",
+    "build/platform-manifest.json",
+    "docs/adr/.index.yaml",
+    "docs/adr/0266-validation-runner-capability-contracts-and-environment-attestation.md",
+    "docs/workstreams/adr-0266-validation-runner-capability-contracts-live-apply.md",
+    "docs/runbooks/remote-build-gateway.md",
+    "docs/runbooks/validation-gate.md",
+    "docs/release-notes/0.177.85.md",
+    "docs/release-notes/README.md",
+    "config/validation-runner-contracts.json",
+    "docs/schema/validation-runner-contracts.schema.json",
+    "scripts/validation_runner_contracts.py",
+    "scripts/run_gate.py",
+    "scripts/parallel_check.py",
+    "scripts/remote_exec.sh",
+    "scripts/gate_status.py",
+    "config/windmill/scripts/post-merge-gate.py",
+    "config/windmill/scripts/gate-status.py",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/wait_for_workers.yml",
+    "tests/test_canonical_truth.py",
+    "tests/test_parallel_check.py",
+    "tests/test_post_merge_gate.py",
+    "tests/test_release_manager.py",
+    "tests/test_remote_exec.py",
+    "tests/test_validation_gate.py",
+    "tests/test_validation_gate_windmill.py",
+    "tests/test_validation_runner_contracts.py",
+    "tests/test_windmill_operator_admin_app.py",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-check-build-server.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-remote-validate.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-remote-validate-last-run.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-remote-validate-summary.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-pre-push-gate.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-pre-push-last-run.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-pre-push-summary.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-gate-status.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-converge-windmill.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-converge-windmill-tail.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-post-merge-gate.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-post-merge-last-run.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-post-merge-summary.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-worker-gate-status.txt",
+    "receipts/live-applies/2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply.json"
+  ],
+  "notes": [
+    "This receipt supersedes the earlier branch-local receipt `2026-03-29-adr-0266-validation-runner-capability-contracts-live-apply` as the canonical source for repository version `0.177.85` and platform version `0.130.59`.",
+    "The exact-main replay first exposed missing lane declarations for ADR 0264-added checks in `config/validation-runner-contracts.json`; the canonical ADR 0266 implementation now includes those runner-contract entries before the final replay evidence is recorded.",
+    "The evidence bundle for this receipt is finalized on the synchronized mainline integration branch rather than the earlier isolated workstream branch so the release cut, canonical truth, and worker replay all refer to the same latest-main tree."
+  ]
+}
