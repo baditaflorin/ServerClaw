@@ -2971,6 +2971,51 @@
         "timeout_seconds": 1200
       }
     },
+    "deploy-repo-profile": {
+      "description": "Refresh one named repo-deploy profile through the governed Coolify lane without retyping raw repository or domain arguments.",
+      "workflow_id": "deploy-repo-profile",
+      "scope": "external_service",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "coolify_admin_auth",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-local Coolify auth JSON used by the repo-managed wrapper."
+        },
+        {
+          "name": "PROFILE",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "config/repo-deploy-catalog.json",
+          "description": "Named repo-deploy profile id such as education-wemeshup-production."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=deploy-repo-profile passes",
+        "make validate passes before a mutating profile deployment",
+        "The requested profile exists in config/repo-deploy-catalog.json and stays within the documented Coolify server, project, and apps ingress boundary"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the profile id, affected application, upstream revision when known, and the resulting deployment verification."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the named profile is missing or expands to undeclared repository, domain, or compose settings.",
+          "Stop if the Coolify auth artifact is invalid or the requested profile deployment fails."
+        ],
+        "rollback_guidance": [
+          "Use the same named profile or the generic governed deploy wrapper to replay a known-good branch from committed Git state.",
+          "Avoid compensating with manual Coolify UI edits that are not represented in the repo deploy catalog."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
     "configure-backup-vm": {
       "description": "Converge the dedicated backup VM and its managed Proxmox Backup Server integration.",
       "workflow_id": "configure-backup-vm",

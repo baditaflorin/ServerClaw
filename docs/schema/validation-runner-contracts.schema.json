@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/validation-runner-contracts.schema.json",
+  "title": "Validation Runner Contracts",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "lanes",
+    "runners"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "docs/schema/validation-runner-contracts.schema.json"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "lanes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/lane"
+      },
+      "propertyNames": {
+        "pattern": "^[a-z0-9][a-z0-9_-]*$"
+      }
+    },
+    "runners": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/runner"
+      },
+      "propertyNames": {
+        "pattern": "^[a-z0-9][a-z0-9_-]*$"
+      }
+    }
+  },
+  "$defs": {
+    "stringList": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "lane": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "description",
+        "requires_container_runtime",
+        "required_tools",
+        "allowed_network_reachability_classes",
+        "allowed_cpu_architectures",
+        "require_scratch_cleanup_guarantee"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requires_container_runtime": {
+          "type": "boolean"
+        },
+        "required_tools": {
+          "$ref": "#/$defs/stringList"
+        },
+        "allowed_network_reachability_classes": {
+          "$ref": "#/$defs/stringList"
+        },
+        "allowed_cpu_architectures": {
+          "$ref": "#/$defs/stringList"
+        },
+        "require_scratch_cleanup_guarantee": {
+          "type": "boolean"
+        }
+      }
+    },
+    "containerRuntime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "engine",
+        "supported"
+      ],
+      "properties": {
+        "engine": {
+          "type": "string",
+          "minLength": 1
+        },
+        "supported": {
+          "type": "boolean"
+        }
+      }
+    },
+    "runner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "description",
+        "execution_surface",
+        "cpu_architectures",
+        "emulation_support",
+        "container_runtime",
+        "required_tools",
+        "network_reachability_class",
+        "scratch_cleanup_guarantee",
+        "supported_validation_lanes"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "execution_surface": {
+          "type": "string",
+          "enum": [
+            "controller_local",
+            "build_server_remote",
+            "windmill_worker"
+          ]
+        },
+        "cpu_architectures": {
+          "$ref": "#/$defs/stringList"
+        },
+        "emulation_support": {
+          "$ref": "#/$defs/stringList"
+        },
+        "container_runtime": {
+          "$ref": "#/$defs/containerRuntime"
+        },
+        "required_tools": {
+          "$ref": "#/$defs/stringList"
+        },
+        "network_reachability_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scratch_cleanup_guarantee": {
+          "type": "string",
+          "minLength": 1
+        },
+        "supported_validation_lanes": {
+          "$ref": "#/$defs/stringList"
+        }
+      }
+    }
+  }
+}
