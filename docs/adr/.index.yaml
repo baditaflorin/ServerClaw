@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-29'
 total_adrs: 279
 implementation_status_summary:
-  Implemented: 221
+  Implemented: 222
   Partial: 4
-  Not Implemented: 53
+  Not Implemented: 52
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3512,7 +3512,7 @@ adr_index:
     summary: 'Migrate registry.lv3.org from bare Docker registry to Harbor (github.com/goharbor/harbor). Harbor adds: Trivy-powered
       vu'
     filename: 0201-harbor-container-registry-with-cve-scanning.md
-    implemented_version: 0.177.62
+    implemented_version: 0.177.63
   - adr: '0202'
     title: Excalidraw Auto Generated Architecture Diagrams
     status: Accepted
@@ -4066,7 +4066,7 @@ adr_index:
   - adr: 0239
     title: Browser-Local Search Experience Via Pagefind
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: documentation
     keywords:
@@ -4076,6 +4076,7 @@ adr_index:
       - pagefind
     summary: We will use Pagefind as the default browser-local search layer for static or
     filename: 0239-browser-local-search-experience-via-pagefind.md
+    implemented_version: 0.177.62
   - adr: '0240'
     title: Operator Visualization Panels Via Apache ECharts
     status: Accepted

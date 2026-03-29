@@ -7,11 +7,11 @@
   "recorded_at": "2026-03-29T01:04:46Z",
   "recorded_by": "codex",
   "source_commit": "5c06b8efc2067943abc8d7138a1e6e11ea5c74df",
-  "repo_version_context": "0.177.61",
-  "platform_version_context": "0.130.44",
+  "repo_version_context": "0.177.62",
+  "platform_version_context": "0.130.45",
   "workflow_id": "adr-0201-harbor-mainline-live-apply",
   "adr": "0201",
-  "summary": "Integrated ADR 0201 on top of repo release 0.177.61 by replaying the Harbor converge path from exact mainline state, adding one final Harbor admin API readiness recycle before OIDC bootstrap when published port 8095 is stale, and re-verifying registry.lv3.org, Harbor's runtime-local auth surface, and docker-build check-runner pulls end to end.",
+  "summary": "Integrated ADR 0201 on top of synchronized repo release 0.177.62 by replaying `make converge-harbor` again after the latest-main Harbor probe regressed to `registry.lv3.org -> nginx.lv3.org` and `127.0.0.1:8095` went dark, preserving the exact-main OIDC readiness recycle and re-verifying registry.lv3.org, Harbor's runtime-local auth surface, and docker-build check-runner pulls end to end on the already-current platform baseline 0.130.45.",
   "targets": [
     {
       "kind": "host",
@@ -60,19 +60,19 @@
       "observed": "`uv run --with pytest --with pyyaml --with jsonschema python -m pytest -q tests/test_harbor_runtime_role.py` returned `5 passed`, covering the new Harbor OIDC readiness recycle path that probes `127.0.0.1:8095` before OIDC bootstrap and forces one Harbor recycle when the admin API is unreachable even though Harbor containers still appear present."
     },
     {
-      "check": "Exact-main Harbor replay",
+      "check": "Synchronized latest-main Harbor replay",
       "result": "pass",
-      "observed": "`make converge-harbor` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0246-main-push` after commit `5c06b8ef`, preserving the exact-main Harbor runtime, OIDC defaults, and shared `registry.lv3.org` edge publication while recovering from the earlier stale published-port state."
+      "observed": "After `origin/main` advanced to repo release `0.177.62`, the first Harbor probe failed with `308 Permanent Redirect` to `https://nginx.lv3.org/...` and `127.0.0.1:8095` unavailable on `docker-runtime-lv3`; replaying `make converge-harbor` from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0246-main-push` repaired the latest-main state with final recap `docker-runtime-lv3 : ok=127 changed=8 failed=0 skipped=20` and `nginx-lv3 : ok=38 changed=3 failed=0 skipped=11`."
     },
     {
       "check": "Public Harbor API and registry auth challenge",
       "result": "pass",
-      "observed": "`curl -fsS --max-time 20 https://registry.lv3.org/api/v2.0/ping` returned `Pong`, and `curl -skI --max-time 20 https://registry.lv3.org/v2/` returned `HTTP/2 401` with `docker-distribution-api-version: registry/2.0`, `www-authenticate: Bearer realm=\"https://registry.lv3.org/service/token\",service=\"harbor-registry\"`, and request id `ae9ece81-8195-46c2-ac2e-12d01e8751e1`."
+      "observed": "`curl -fsS --max-time 20 https://registry.lv3.org/api/v2.0/ping` returned `Pong`, and `curl -skI --max-time 20 https://registry.lv3.org/v2/` returned `HTTP/2 401` with `docker-distribution-api-version: registry/2.0`, `www-authenticate: Bearer realm=\"https://registry.lv3.org/service/token\",service=\"harbor-registry\"`, and request id `724291f0-dcf8-4da7-8e2a-332f26d0a4d5`."
     },
     {
       "check": "Runtime-local Harbor admin API and registry auth challenge",
       "result": "pass",
-      "observed": "Via the repo-managed SSH ProxyCommand through `ops@100.64.0.1`, `curl -fsS --max-time 20 http://127.0.0.1:8095/api/v2.0/ping` on `docker-runtime-lv3` returned `Pong`, and `curl -sSI --max-time 20 http://127.0.0.1:8095/v2/` returned `HTTP/1.1 401 Unauthorized` with `Docker-Distribution-Api-Version: registry/2.0` and request id `b5efc0f0-f6d0-44ae-9c38-e10a0527cd4d`."
+      "observed": "Via the repo-managed SSH ProxyCommand through `ops@100.64.0.1`, `curl -fsS --max-time 20 http://127.0.0.1:8095/api/v2.0/ping` on `docker-runtime-lv3` returned `Pong`, and `curl -sSI --max-time 20 http://127.0.0.1:8095/v2/` returned `HTTP/1.1 401 Unauthorized` with `Docker-Distribution-Api-Version: registry/2.0` and request id `be09b03a-3bc7-4625-b204-5d83a9e38e70`."
     },
     {
       "check": "Docker-build check-runner pull from Harbor",
@@ -98,8 +98,8 @@
     "workstreams.yaml"
   ],
   "notes": [
-    "The earlier branch-local receipt remains preserved as the first isolated-worktree Harbor proof, but this mainline receipt is the canonical source for release 0.177.62 and the platform bump that follows from the exact-main replay.",
-    "ADR 0201 first became true on platform version 0.130.43; this receipt records the later integrated mainline replay that advances the current platform baseline to 0.130.45 after Harbor was re-applied and re-verified from `main`.",
-    "The integrated release step that follows this receipt updates `VERSION`, `RELEASE.md`, `changelog.md`, `docs/release-notes/*`, `README.md`, `build/platform-manifest.json`, `versions/stack.yaml`, and the ADR and workstream metadata to record Harbor as merged mainline truth."
+    "The earlier branch-local receipt remains preserved as the first isolated-worktree Harbor proof, but this mainline receipt is the canonical source for release 0.177.63 after the synchronized latest-main replay repaired the Harbor regression that appeared once ADR 0239 advanced origin/main.",
+    "ADR 0201 first became true on platform version 0.130.43; this receipt records the later synchronized latest-main replay that preserves the current platform baseline at 0.130.45 while keeping Harbor healthy on top of the newer mainline repository state.",
+    "The integrated release step that follows this receipt updates `VERSION`, `RELEASE.md`, `changelog.md`, `docs/release-notes/*`, `README.md`, `build/platform-manifest.json`, `versions/stack.yaml`, and the ADR and workstream metadata to record Harbor as merged mainline truth on top of release 0.177.62."
   ]
 }
