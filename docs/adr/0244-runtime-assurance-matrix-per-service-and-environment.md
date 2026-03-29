@@ -1,9 +1,10 @@
 # ADR 0244: Runtime Assurance Matrix Per Service And Environment
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Live applied
+- Implemented In Repo Version: pending main merge
+- Implemented In Platform Version: 0.130.44
+- Implemented On: 2026-03-29
 - Date: 2026-03-28
 
 ## Context

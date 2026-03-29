@@ -1201,7 +1201,7 @@ workstreams:
   - id: ws-0244-live-apply
     adr: "0244"
     title: Live apply runtime assurance matrix per service and environment
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0244-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0244-live-apply
@@ -1238,9 +1238,12 @@ workstreams:
       - tests/test_api_gateway.py
       - tests/test_api_gateway_runtime_role.py
       - tests/test_interactive_ops_portal.py
+      - tests/test_ops_portal_runtime_role.py
       - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/verify.yml
-      - receipts/live-applies/2026-03-28-adr-0244-runtime-assurance-matrix-live-apply.json
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+      - receipts/live-applies/2026-03-29-adr-0244-runtime-assurance-matrix-live-apply.json
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -1273,22 +1276,30 @@ workstreams:
             - tests/test_api_gateway.py
             - tests/test_api_gateway_runtime_role.py
             - tests/test_interactive_ops_portal.py
+            - tests/test_ops_portal_runtime_role.py
             - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/main.yml
             - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/verify.yml
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
           mode: shared_contract
           contract: runtime-assurance-adapters-v1
         - id: live_apply_evidence
           paths:
-            - receipts/live-applies/2026-03-28-adr-0244-runtime-assurance-matrix-live-apply.json
+            - receipts/live-applies/2026-03-29-adr-0244-runtime-assurance-matrix-live-apply.json
           mode: shared_contract
           contract: live-apply-receipts-v1
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
     canonical_truth:
-      changelog_entry: implements ADR 0244 by declaring one stage-aware runtime
-        assurance matrix per service and environment and publishing the
-        resulting rollup through the operator control surfaces
+      changelog_entry: live-applied ADR 0244 by restoring the governed runtime
+        assurance matrix through the authenticated API gateway and ops portal,
+        hardening the runtime sync path against metadata sidecars, and fixing
+        the gateway helper packaging gap that blocked rebuilt containers
       release_bump: patch
+      included_in_repo_version: 0.177.61
+      latest_receipts:
+        api_gateway: 2026-03-29-adr-0244-runtime-assurance-matrix-live-apply
+        ops_portal: 2026-03-29-adr-0244-runtime-assurance-matrix-live-apply
   - id: ws-0237-live-apply
     adr: "0237"
     title: Live apply schema-first human forms via React Hook Form and Zod
