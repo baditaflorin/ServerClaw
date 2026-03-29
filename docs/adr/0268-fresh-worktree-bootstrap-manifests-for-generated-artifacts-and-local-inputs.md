@@ -1,9 +1,10 @@
 # ADR 0268: Fresh-Worktree Bootstrap Manifests For Generated Artifacts And Local Inputs
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.81
 - Implemented In Platform Version: N/A
+- Implemented On: 2026-03-29
 - Date: 2026-03-28
 
 ## Context

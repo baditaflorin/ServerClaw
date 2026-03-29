@@ -189,7 +189,96 @@ workstreams:
     canonical_truth:
       changelog_entry: integrated ADR 0268 by adding machine-readable fresh-worktree bootstrap manifests, automatic generated-artifact repair, and governed live-apply preflight wiring so isolated worktrees stop failing mid-run on missing local inputs
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.81
+  - id: ws-0268-main-integration
+    adr: "0268"
+    title: Integrate ADR 0268 exact-main replay onto current origin/main
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0268-main-integration
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0268-main-integration
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0268-main-integration.md
+    depends_on:
+      - ws-0268-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - .config-locations.yaml
+      - Makefile
+      - mkdocs.yml
+      - config/command-catalog.json
+      - config/correction-loops.json
+      - config/workflow-catalog.json
+      - config/worktree-bootstrap-manifests.json
+      - docs/adr/0094-developer-portal-and-documentation-site.md
+      - docs/workstreams/ws-0268-main-integration.md
+      - docs/workstreams/ws-0268-live-apply.md
+      - docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/controller-local-secrets-and-preflight.md
+      - docs/runbooks/playbook-execution-model.md
+      - docs/release-process.md
+      - docs/site-generated/architecture/dependency-graph.md
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.81.md
+      - versions/stack.yaml
+      - receipts/ops-portal-snapshot.html
+      - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply.json
+      - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply.json
+      - scripts/generate_docs_site.py
+      - scripts/preflight_controller_local.py
+      - scripts/workflow_catalog.py
+      - scripts/worktree_bootstrap.py
+      - tests/test_docs_site.py
+      - tests/test_preflight_controller_local.py
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0268_mainline_integration
+          paths:
+            - .config-locations.yaml
+            - Makefile
+            - mkdocs.yml
+            - config/command-catalog.json
+            - config/correction-loops.json
+            - config/workflow-catalog.json
+            - config/worktree-bootstrap-manifests.json
+            - docs/adr/0094-developer-portal-and-documentation-site.md
+            - docs/workstreams/ws-0268-main-integration.md
+            - docs/workstreams/ws-0268-live-apply.md
+            - docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
+            - docs/adr/.index.yaml
+            - docs/runbooks/controller-local-secrets-and-preflight.md
+            - docs/runbooks/playbook-execution-model.md
+            - docs/release-process.md
+            - docs/site-generated/architecture/dependency-graph.md
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.81.md
+            - versions/stack.yaml
+            - receipts/ops-portal-snapshot.html
+            - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply.json
+            - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply.json
+            - scripts/generate_docs_site.py
+            - scripts/preflight_controller_local.py
+            - scripts/workflow_catalog.py
+            - scripts/worktree_bootstrap.py
+            - tests/test_docs_site.py
+            - tests/test_preflight_controller_local.py
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false
   - id: ws-0272-live-apply
     adr: "0272"
     title: Restore readiness ladders and stateful warm-up verification profiles
