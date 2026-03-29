@@ -71,5 +71,16 @@
 
 - keep ADR 0254 honest: this workstream implements the first distinct product
   surface, not the full 0255-0263 bundle
+- `serverclaw` runs on `coolify-lv3`, so the current live apply renders its
+  runtime env directly and leaves the shared OpenBao sidecar disabled there;
+  the managed OpenBao automation listener is still host-local to
+  `docker-runtime-lv3`
+- the shared post-verify `health-probe-catalog.json` checks for `open_webui`
+  and `serverclaw` now stay on non-auth local HTTP surfaces; the admin
+  sign-in assertion remains in the role-level Open WebUI verification tasks
+- the shared `nginx_edge_publication` replay for this workstream must opt out
+  of unrelated generated static-site syncs (`docs-portal`, `changelog-portal`)
+  so a fresh separate worktree can publish `chat.lv3.org` without prebuilding
+  other portals
 - if shared integration files wait until merge-to-main, record the exact follow-on
   deltas in the receipt and this document

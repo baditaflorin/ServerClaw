@@ -1387,12 +1387,12 @@
       "verify_file": "roles/open_webui_runtime/tasks/verify.yml",
       "startup": {
         "kind": "http",
-        "description": "Open WebUI startup completes once the repo-managed admin sign-in path succeeds locally.",
+        "description": "Open WebUI startup completes once the local HTTP surface answers on the runtime VM.",
         "timeout_seconds": 120,
         "retries": 24,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8088/api/v1/auths/signin",
-        "method": "POST",
+        "url": "http://127.0.0.1:8088",
+        "method": "GET",
         "expected_status": [
           200
         ]
@@ -1411,12 +1411,12 @@
       },
       "readiness": {
         "kind": "http",
-        "description": "The repo-managed Open WebUI admin account can sign in successfully.",
+        "description": "The Open WebUI local listener still answers after the role-level admin sign-in verification completes.",
         "timeout_seconds": 120,
         "retries": 1,
         "delay_seconds": 0,
-        "url": "http://127.0.0.1:8088/api/v1/auths/signin",
-        "method": "POST",
+        "url": "http://127.0.0.1:8088",
+        "method": "GET",
         "expected_status": [
           200
         ]
@@ -1445,12 +1445,12 @@
       "verify_file": "roles/open_webui_runtime/tasks/verify.yml",
       "startup": {
         "kind": "http",
-        "description": "ServerClaw startup completes once the repo-managed bootstrap admin can still sign in on the local listener.",
+        "description": "ServerClaw startup completes once the local HTTP surface answers on the runtime VM.",
         "timeout_seconds": 120,
         "retries": 24,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8096/api/v1/auths/signin",
-        "method": "POST",
+        "url": "http://127.0.0.1:8096",
+        "method": "GET",
         "expected_status": [
           200
         ]
@@ -1469,12 +1469,12 @@
       },
       "readiness": {
         "kind": "http",
-        "description": "The repo-managed ServerClaw bootstrap admin can sign in successfully on the runtime VM.",
+        "description": "The ServerClaw local listener still answers after the role-level admin sign-in verification completes.",
         "timeout_seconds": 120,
         "retries": 1,
         "delay_seconds": 0,
-        "url": "http://127.0.0.1:8096/api/v1/auths/signin",
-        "method": "POST",
+        "url": "http://127.0.0.1:8096",
+        "method": "GET",
         "expected_status": [
           200
         ]

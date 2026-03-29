@@ -8,6 +8,7 @@ open_webui_legacy_env_file: "{{ open_webui_site_dir }}/open-webui.env"
 open_webui_openbao_agent_dir: "{{ open_webui_site_dir }}/openbao"
 open_webui_openbao_agent_image: "{{ openbao_agent_image }}"
 open_webui_openbao_agent_container_name: open-webui-openbao-agent
+open_webui_enable_openbao_agent: true
 open_webui_openbao_secret_path: services/open-webui/runtime-env
 open_webui_openbao_policy_name: lv3-service-open-webui-runtime
 open_webui_openbao_approle_name: open-webui-runtime

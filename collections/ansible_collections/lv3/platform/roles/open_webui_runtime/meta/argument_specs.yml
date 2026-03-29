@@ -103,6 +103,11 @@ argument_specs:
         required: true
         description:
           - Guest-local file that stores the application secret key.
+      open_webui_enable_openbao_agent:
+        type: bool
+        required: false
+        description:
+          - Whether the managed OpenBao Agent sidecar is enabled for runtime secret refresh.
       open_webui_enable_oidc:
         type: bool
         required: false

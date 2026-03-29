@@ -75,6 +75,10 @@
   hosts: "{{ 'coolify-lv3' if (env | default('production')) == 'production' else 'coolify-staging-lv3' }}"
   become: true
   gather_facts: true
+  vars:
+    serverclaw_control_plane_host: "{{ groups['proxmox_hosts'][0] }}"
+    proxmox_guests: "{{ hostvars[serverclaw_control_plane_host].proxmox_guests }}"
+    platform_service_topology: "{{ hostvars[serverclaw_control_plane_host].platform_service_topology }}"
   tags:
     - tier-2
     - access
@@ -111,11 +115,13 @@
         open_webui_legacy_env_file: /opt/serverclaw/serverclaw.env
         open_webui_openbao_agent_dir: /opt/serverclaw/openbao
         open_webui_openbao_agent_container_name: serverclaw-openbao-agent
+        open_webui_enable_openbao_agent: false
         open_webui_openbao_secret_path: services/serverclaw/runtime-env
         open_webui_openbao_policy_name: lv3-service-serverclaw-runtime
         open_webui_openbao_approle_name: serverclaw-runtime
         open_webui_container_name: serverclaw
         open_webui_port: "{{ platform_service_topology.serverclaw.ports.internal }}"
+        open_webui_host_proxy_port: "{{ platform_port_assignments.serverclaw_port }}"
         open_webui_image: "{{ serverclaw_image }}"
         open_webui_admin_name: "{{ serverclaw_admin_name }}"
         open_webui_admin_email: "{{ serverclaw_admin_email }}"
@@ -186,3 +192,5 @@
 
   roles:
     - role: lv3.platform.nginx_edge_publication
+      vars:
+        public_edge_sync_generated_static_dirs: false

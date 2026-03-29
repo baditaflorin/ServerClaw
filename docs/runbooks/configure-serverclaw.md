@@ -47,7 +47,7 @@ make converge-serverclaw
 Verify the runtime container and generated files on `coolify-lv3`:
 
 ```bash
-ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml coolify-lv3 -m shell -a 'docker compose --file /opt/serverclaw/docker-compose.yml ps && sudo ls -ld /opt/serverclaw /opt/serverclaw/data /etc/lv3/serverclaw /opt/serverclaw/openbao /run/lv3-secrets/serverclaw && sudo test ! -e /opt/serverclaw/serverclaw.env' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml coolify-lv3 -m shell -a 'docker compose --file /opt/serverclaw/docker-compose.yml ps && sudo ls -ld /opt/serverclaw /opt/serverclaw/data /etc/lv3/serverclaw /run/lv3-secrets/serverclaw && sudo test ! -e /opt/serverclaw/serverclaw.env' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
 Verify the rendered runtime env enables Keycloak, Ollama, and web search:
@@ -72,5 +72,6 @@ ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory
 
 - Keep `WEBUI_URL=https://chat.lv3.org` aligned with the live hostname before changing the OIDC client contract.
 - Treat `.local/serverclaw/` and `.local/keycloak/serverclaw-client-secret.txt` as sensitive controller-only material.
+- ServerClaw currently renders `/run/lv3-secrets/serverclaw/runtime.env` directly on `coolify-lv3` instead of running the shared OpenBao sidecar there, because the managed OpenBao automation listener remains host-local to `docker-runtime-lv3`.
 - ServerClaw intentionally reuses the existing Ollama and SearXNG backends instead of standing up a separate model or search tier for ADR 0254.
 - Matrix, channel bridges, delegated OpenFGA authorization, and the richer memory plane remain follow-on work for the adjacent ServerClaw ADRs.
