@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-03-29",
   "recorded_on": "2026-03-29",
-  "recorded_at": "2026-03-29T20:56:38Z",
+  "recorded_at": "2026-03-29T21:52:34Z",
   "recorded_by": "codex",
-  "source_commit": "39a7bd06302c7e5ab19a78d9a74a86377e09586d",
-  "repo_version_context": "0.177.84",
-  "platform_version_context": "0.130.58",
+  "source_commit": "dc1db990c5ff532d5be69d63eb0a64a08f1bce6b",
+  "repo_version_context": "0.177.87",
+  "platform_version_context": "0.130.59",
   "workflow_id": "adr-0254-serverclaw-distinct-product-surface-mainline-live-apply",
   "adr": "0254",
-  "summary": "Integrated ADR 0254 on synchronized main release 0.177.84 by replaying make converge-serverclaw from refreshed merge commit 39a7bd06 on top of origin/main commit 430e364e, preserving the dedicated ServerClaw chat surface on chat.lv3.org, re-verifying the Proxmox and guest firewall lanes plus internal and public runtime paths end to end, and proving the build-server plus Windmill validation-gate automation paths from the merged worktree.",
+  "summary": "Revalidated ADR 0254 against the latest origin/main commit bae420263872e079fdc34f7f755a6984a3cd5949 and confirmed the branch implementation is correct but exact-main durability is still partial: Proxmox still exposes the 8096 host firewall lane, coolify-lv3 still serves ServerClaw locally and accepts bootstrap admin sign-in, yet current mainline truth still lacks the ServerClaw topology so the coolify guest firewall has drifted back to {80,443,8000} for nginx-lv3 and public https://chat.lv3.org/ currently redirects to https://nginx.lv3.org/ until merge-to-main and replay from merged main.",
   "targets": [
     {
       "kind": "host",
@@ -45,74 +45,67 @@
   ],
   "verification": [
     {
-      "check": "Focused ADR 0254 regression and syntax-check slice",
+      "check": "Latest origin/main contract gap",
       "result": "pass",
-      "observed": "`uv run --with pytest --with pyyaml pytest -q tests/test_linux_guest_firewall_role.py tests/test_serverclaw_playbook.py tests/test_coolify_playbook.py tests/test_open_webui_runtime_role.py tests/test_keycloak_runtime_role.py tests/test_nginx_edge_publication_role.py tests/test_openbao_compose_env_helper.py` returned `38 passed in 2.34s`, `make syntax-check-serverclaw` passed on the refreshed latest-main integration worktree, and `uv run --with pytest pytest -q tests/test_policy_checks.py` returned `4 passed in 0.84s` after the validation-path fix."
+      "observed": "`git diff --stat origin/main -- inventory/group_vars/platform.yml inventory/host_vars/proxmox_florin.yml playbooks/serverclaw.yml docs/runbooks/configure-serverclaw.md collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/templates/nftables.conf.j2 collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml` shows current `origin/main` still lacks the ADR 0254 topology, playbook, runbook, guest-firewall, and public-edge publication surfaces that keep `chat.lv3.org` durable under server-resident reconciliation."
     },
     {
-      "check": "Exact-main ServerClaw converge replay",
+      "check": "Focused ADR 0254 validation and generated truth refresh",
       "result": "pass",
-      "observed": "`make converge-serverclaw` completed successfully from refreshed merge commit `39a7bd06302c7e5ab19a78d9a74a86377e09586d`, merged on top of `origin/main` commit `430e364e2a810ccd6463e201fd8b7d41fed95676`, with recap `coolify-lv3 ok=58 changed=0 failed=0 skipped=16`, `docker-runtime-lv3 ok=63 changed=0 failed=0 skipped=7`, `nginx-lv3 ok=39 changed=4 failed=0 skipped=7`, and `proxmox_florin ok=230 changed=3 failed=0 skipped=110`."
+      "observed": "After regenerating the dependent catalogs and diagrams on top of current `origin/main`, `python3 scripts/validate_service_completeness.py --validate` passed and `uv run --with pyyaml --with jsonschema python scripts/platform_manifest.py --check` passed, confirming the branch still carries internally consistent ADR 0254 truth after the latest merge refresh."
     },
     {
-      "check": "Internal proxy and firewall path verification",
+      "check": "Host firewall lane remains declared",
       "result": "pass",
-      "observed": "`Debian-trixie-latest-amd64-base`, kernel `6.17.13-2-pve`, and `pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)` remained active on `proxmox_florin`; `/etc/pve/firewall/170.fw` still contained `17:IN ACCEPT -source 10.10.10.10/32 -p tcp -dport 8096`; `nc -vz -w 5 10.10.10.70 8096` from `nginx-lv3` succeeded; and `curl -sv --max-time 5 http://10.10.10.70:8096/ -o /dev/null` from `nginx-lv3` returned `HTTP/1.1 200 OK` from `uvicorn`."
+      "observed": "A fresh host probe on `proxmox_florin` still returned `PRETTY_NAME=Debian GNU/Linux 13 (trixie)`, kernel `6.17.13-2-pve`, `pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)`, and `/etc/pve/firewall/170.fw` line `17:IN ACCEPT -source 10.10.10.10/32 -p tcp -dport 8096`."
     },
     {
-      "check": "Guest-local bootstrap admin sign-in",
+      "check": "Guest-local ServerClaw runtime and bootstrap auth",
       "result": "pass",
-      "observed": "A guest-local sign-in request on `coolify-lv3` to `http://127.0.0.1:8096/api/v1/auths/signin` returned JSON for `ops@lv3.org` with `role\":\"admin\"` and a bearer token, confirming the runtime remained healthy after the synchronized exact-main replay."
+      "observed": "Fresh `coolify-lv3` checks still returned `WEBUI_URL=https://chat.lv3.org`, `CORS_ALLOW_ORIGIN=https://chat.lv3.org`, the expected OIDC, Ollama, and SearXNG endpoints in `/run/lv3-secrets/serverclaw/runtime.env`, a healthy `serverclaw` container on `0.0.0.0:8096->8080`, local `HTTP/1.1 200 OK` from `http://127.0.0.1:8096/`, and JSON for `ops@lv3.org` with `role\":\"admin\"` plus a bearer token from `http://127.0.0.1:8096/api/v1/auths/signin`."
+    },
+    {
+      "check": "Internal nginx-to-coolify edge lane",
+      "result": "partial",
+      "observed": "Fresh `coolify-lv3` nftables output now shows `ip saddr 10.10.10.10 tcp dport { 80, 443, 8000 } accept` without `8096`, while `nft` still carries a local DNAT rule for tcp/8096 and the app stays healthy. A fresh `nginx-lv3` probe therefore timed out on `10.10.10.70:8096`, proving the guest-firewall lane has drifted even though the host firewall and the app itself are still good."
     },
     {
       "check": "Public ServerClaw edge verification",
-      "result": "pass",
-      "observed": "`curl -I --max-time 15 http://chat.lv3.org/` returned `HTTP/1.1 308 Permanent Redirect` with `Location: https://chat.lv3.org/`, and `curl -I --max-time 15 https://chat.lv3.org/` returned `HTTP/2 200` with the repo-managed security headers and `content-type: text/html; charset=utf-8`."
+      "result": "partial",
+      "observed": "Fresh public probes now return `HTTP/1.1 308 Permanent Redirect` on `http://chat.lv3.org/` and `HTTP/2 308` with `location: https://nginx.lv3.org/` on `https://chat.lv3.org/`; the public hostname is therefore still falling back to the generic edge redirect instead of the dedicated ServerClaw app."
     },
     {
-      "check": "Repo automation and validation gates",
+      "check": "Repo automation carry-forward fixes",
       "result": "pass",
-      "observed": "`make validate` passed after regenerating `docs/diagrams/agent-coordination-map.excalidraw`, `docs/diagrams/service-dependency-graph.excalidraw`, and `build/platform-manifest.json`; `make pre-push-gate` passed at `2026-03-29T20:41:15.857152+00:00` via `build-server`; `make gate-status` reported the latest build-server and Windmill runs as `passed`; and `make post-merge-gate` passed at `2026-03-29T20:56:38.536104+00:00` after scoping cached ADR 0230 policy binaries by platform and raising the `yaml-lint` timeout to `240` seconds for local amd64-container replays on arm64 hosts."
+      "observed": "The branch still carries the repo automation fixes uncovered during this workstream: `platform/policy/toolchain.py` now scopes cached OPA and Conftest binaries by platform, and `config/check-runner-manifest.json` plus `config/validation-gate.json` now give `yaml-lint` a `240` second timeout for local amd64-container replays on arm64 hosts."
     }
   ],
   "evidence_refs": [
-    "README.md",
-    "RELEASE.md",
-    "VERSION",
-    "changelog.md",
     "build/platform-manifest.json",
-    "versions/stack.yaml",
     "workstreams.yaml",
+    "versions/stack.yaml",
     "config/check-runner-manifest.json",
     "config/validation-gate.json",
     "docs/adr/0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3.md",
-    "docs/adr/.index.yaml",
-    "docs/diagrams/agent-coordination-map.excalidraw",
-    "docs/diagrams/service-dependency-graph.excalidraw",
     "docs/workstreams/ws-0254-live-apply.md",
     "docs/workstreams/ws-0254-main-merge.md",
     "docs/runbooks/configure-serverclaw.md",
-    "docs/release-notes/0.177.84.md",
-    "docs/release-notes/README.md",
     "platform/policy/toolchain.py",
     "playbooks/serverclaw.yml",
     "collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/templates/nftables.conf.j2",
     "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml",
     "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml",
-    "tests/test_linux_guest_firewall_role.py",
-    "tests/test_serverclaw_playbook.py",
-    "tests/test_coolify_playbook.py",
-    "tests/test_open_webui_runtime_role.py",
-    "tests/test_keycloak_runtime_role.py",
-    "tests/test_nginx_edge_publication_role.py",
-    "tests/test_policy_checks.py",
     "receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-live-apply.json",
-    "receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply.json"
+    "receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply.json",
+    "receipts/live-applies/evidence/2026-03-29-adr-0254-origin-main-gap.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0254-host-firewall-check.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0254-coolify-runtime-check.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0254-edge-drift-check.txt"
   ],
   "notes": [
-    "This receipt supersedes the branch-local receipt `2026-03-29-adr-0254-serverclaw-distinct-product-surface-live-apply` as the canonical mainline truth after release 0.177.84 was applied and re-verified from the integrated worktree.",
-    "Release 0.177.84 is the first repo version that includes ADR 0254, and platform version 0.130.58 is the first integrated platform version that records the synchronized latest-main replay for the ADR.",
-    "The earlier branch-local receipt remains preserved as the first latest-main candidate replay and still documents the debugging path that uncovered the Proxmox firewall refresh gap plus the remapped-port guest nftables forwarding bug.",
-    "The final integration also refreshed the repo automation path so cached ADR 0230 policy binaries are platform-specific and the post-merge `yaml-lint` budget covers local amd64-container replays on arm64 hosts."
+    "This receipt now records the latest exact-main candidate state before merge; it is intentionally not a final merged-main pass receipt yet.",
+    "The earlier branch-local receipt remains preserved as the first latest-main candidate replay that initially proved the dedicated ServerClaw surface.",
+    "Durable repair remains: merge ADR 0254 to main, cut the next patch release, replay `make converge-serverclaw` from merged main, then update shared release files plus `versions/stack.yaml` only after `chat.lv3.org` serves the app again.",
+    "Targeted coolify and nginx slice replays can temporarily restore the path before merge, but server-resident reconciliation following current main can still revert it until the topology merges."
   ]
 }

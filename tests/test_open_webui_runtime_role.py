@@ -89,22 +89,31 @@ def test_verify_tasks_skip_password_signin_when_password_auth_is_disabled() -> N
     assert assert_task["when"] == "open_webui_enable_password_auth | bool"
 
 
-def test_shared_open_webui_probes_stay_on_non_auth_http_surfaces() -> None:
+def test_open_webui_and_serverclaw_probes_match_their_runtime_contracts() -> None:
     probes = load_health_probes()
 
-    for service_id, url in (
-        ("open_webui", "http://127.0.0.1:8088"),
-        ("serverclaw", "http://127.0.0.1:8096"),
-    ):
-        startup = probes[service_id]["startup"]
-        readiness = probes[service_id]["readiness"]
+    open_webui_startup = probes["open_webui"]["startup"]
+    open_webui_readiness = probes["open_webui"]["readiness"]
 
-        assert startup["method"] == "GET"
-        assert startup["url"] == url
-        assert "body" not in startup
-        assert "body_format" not in startup
+    assert open_webui_startup["method"] == "POST"
+    assert open_webui_startup["url"] == "http://127.0.0.1:8088/api/v1/auths/signin"
+    assert "body" not in open_webui_startup
+    assert "body_format" not in open_webui_startup
 
-        assert readiness["method"] == "GET"
-        assert readiness["url"] == url
-        assert "body" not in readiness
-        assert "body_format" not in readiness
+    assert open_webui_readiness["method"] == "POST"
+    assert open_webui_readiness["url"] == "http://127.0.0.1:8088/api/v1/auths/signin"
+    assert "body" not in open_webui_readiness
+    assert "body_format" not in open_webui_readiness
+
+    serverclaw_startup = probes["serverclaw"]["startup"]
+    serverclaw_readiness = probes["serverclaw"]["readiness"]
+
+    assert serverclaw_startup["method"] == "GET"
+    assert serverclaw_startup["url"] == "http://127.0.0.1:8096"
+    assert "body" not in serverclaw_startup
+    assert "body_format" not in serverclaw_startup
+
+    assert serverclaw_readiness["method"] == "GET"
+    assert serverclaw_readiness["url"] == "http://127.0.0.1:8096"
+    assert "body" not in serverclaw_readiness
+    assert "body_format" not in serverclaw_readiness

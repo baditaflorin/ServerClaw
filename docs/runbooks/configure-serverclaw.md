@@ -76,6 +76,55 @@ Verify the bootstrap admin can still sign in through the local runtime path:
 ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml coolify-lv3 -m shell -a "curl -s -X POST http://127.0.0.1:8096/api/v1/auths/signin -H 'Content-Type: application/json' -d '{\"email\":\"ops@lv3.org\",\"password\":\"'\"$(sudo cat /etc/lv3/serverclaw/admin-password.txt)\"'\"}'" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
+## Drift Recovery
+
+If `curl -I https://chat.lv3.org/` returns a redirect to
+`https://nginx.lv3.org/` or `nc -vz -w 5 10.10.10.70 8096` from `nginx-lv3`
+times out while `curl http://127.0.0.1:8096/` on `coolify-lv3` still returns
+`HTTP/1.1 200 OK`, the ServerClaw runtime is healthy but the shared edge path
+has drifted.
+
+Check the current guest-firewall allowlist on `coolify-lv3`:
+
+```bash
+ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml coolify-lv3 -b -m shell -a 'nft list ruleset | grep -n "10.10.10.10.*dport"' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+```
+
+Durable repair:
+
+- merge ADR 0254 to `main`
+- replay `make converge-serverclaw` from that merged `main` checkout, because
+  the server-resident reconciliation path follows `main`
+
+Temporary pre-merge recovery when you need the branch implementation live again
+before the merge cut:
+
+```bash
+uvx --from pyyaml python scripts/ansible_scope_runner.py run \
+  --inventory inventory/hosts.yml \
+  --run-id "$(uuidgen | tr '[:upper:]' '[:lower:]')" \
+  --playbook playbooks/serverclaw.yml \
+  --env production \
+  -- \
+  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
+  --limit coolify-lv3
+
+uvx --from pyyaml python scripts/ansible_scope_runner.py run \
+  --inventory inventory/hosts.yml \
+  --run-id "$(uuidgen | tr '[:upper:]' '[:lower:]')" \
+  --playbook playbooks/serverclaw.yml \
+  --env production \
+  -- \
+  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
+  --limit nginx-lv3
+```
+
+After either repair path, re-run the internal `nc` check from `nginx-lv3` and
+the public `curl -I https://chat.lv3.org/` probe to confirm the dedicated chat
+surface is back in place.
+
 ## Operating Notes
 
 - Keep `WEBUI_URL=https://chat.lv3.org` aligned with the live hostname before changing the OIDC client contract.

@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0254](../adr/0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3.md)
 - Title: Deploy the first honest live ServerClaw surface on LV3
-- Status: live_applied
-- Implemented In Repo Version: 0.177.84
-- Live Applied In Platform Version: 0.130.58
+- Status: implemented
+- Implemented In Repo Version: not yet
+- Live Applied In Platform Version: branch-local proof only on 2026-03-29; exact-main mainline replay not yet recorded
 - Implemented On: 2026-03-29
-- Live Applied On: 2026-03-29
+- Live Applied On: 2026-03-29 (branch-local)
 - Branch: `codex/ws-0254-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0254-live-apply`
 - Owner: codex
@@ -49,7 +49,7 @@
 
 - this workstream owns the ServerClaw live-apply automation, its branch-local receipt, and the operational runbook updates for the first public chat surface
 - protected release files remained untouched here until the later `ws-0254-main-merge` integration step
-- the exact-main follow-through now records both the branch-local receipt and the canonical mainline receipt for the same ADR
+- exact-main follow-through moved to `ws-0254-main-merge` after later `origin/main` advances made the earlier canonical-mainline claims unrealistic
 
 ## Verification
 
@@ -64,17 +64,20 @@
 - the branch-local latest-main replay from source commit `c0576e42f6d4d776fd2d550aaaab1f9b93376cfd` on top of `origin/main` commit `7f1bbe50518fd30a78a2ce5f7ee5f410ba07b0ea` completed successfully with recap `coolify-lv3 ok=58 changed=0 failed=0 skipped=16`, `docker-runtime-lv3 ok=66 changed=3 failed=0 skipped=4`, `nginx-lv3 ok=38 changed=2 failed=0 skipped=8`, and `proxmox_florin ok=229 changed=0 failed=0 skipped=111`
 - the branch-local verification proved `pve-manager/9.1.6/71482d1833ded40a` remained active, `/etc/pve/firewall/170.fw` still contained the `8096` ingress rule for `10.10.10.10/32`, `nc -vz -w 5 10.10.10.70 8096` from `nginx-lv3` succeeded, `curl -sv --max-time 5 http://10.10.10.70:8096/ -o /dev/null` returned `HTTP/1.1 200 OK`, guest-local sign-in on `coolify-lv3` returned `ops@lv3.org` with `role":"admin"`, and public `chat.lv3.org` checks returned `HTTP/1.1 308` on HTTP plus `HTTP/2 200` on HTTPS
 - that first live proof is preserved in `receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-live-apply.json`
-- after `origin/main` advanced to `8871117b40466b7907a33992f44ca7d83a3e9409`, the protected integration step cut repository version `0.177.84` and replayed `make converge-serverclaw` again from source commit `54622948a39fa6632058b63536204188e5040753`
-- the synchronized exact-main replay completed with recap `coolify-lv3 ok=58 changed=0 failed=0 skipped=16`, `docker-runtime-lv3 ok=63 changed=0 failed=0 skipped=7`, `nginx-lv3 ok=38 changed=2 failed=0 skipped=8`, and `proxmox_florin ok=229 changed=0 failed=0 skipped=111`, making platform version `0.130.58` the first canonical integrated platform version for ADR 0254
+- after `origin/main` advanced further to commit `bae420263872e079fdc34f7f755a6984a3cd5949` with repository version `0.177.87` and platform version `0.130.59`, verification showed current `main` still does not carry the ADR 0254 topology, playbook, runbook, guest-firewall rule, or public-edge publication contract
+- the latest March 29, 2026 checks therefore show a mixed state: `proxmox_florin` still exposes the host firewall lane, `coolify-lv3` still serves `http://127.0.0.1:8096/` and accepts bootstrap admin sign-in, but the guest nftables allowlist has drifted back to `{ 80, 443, 8000 }` for `10.10.10.10`, `nginx-lv3` times out on `10.10.10.70:8096`, and public `https://chat.lv3.org/` redirects to `https://nginx.lv3.org/`
+- the latest exact-main candidate evidence is preserved in `receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply.json` as a partial pre-merge record, not as final merged-main truth
 
 ## Merge Criteria
 
 - the dedicated `chat.lv3.org` surface remains distinct from the operator-only Open WebUI deployment
 - the Proxmox guest firewall, Coolify guest nftables policy, and shared NGINX edge all preserve the `8096` ServerClaw path from the merged exact-main replay
-- ADR 0254 metadata, workstream state, and receipts all record both the branch-local proof and the canonical mainline receipt without overstating the rest of the 0255-0263 architecture bundle
+- ADR 0254 metadata, workstream state, and receipts record the current partial latest-main state without claiming a merged-main receipt until it is true
+- the final merge step replays `make converge-serverclaw` from merged `main`, verifies `chat.lv3.org` returns the app instead of the generic `nginx.lv3.org` redirect, and only then updates shared release files plus `versions/stack.yaml`
 
-## Exact-Main Outcome
+## Remaining For Merge-To-Main
 
-- repository version `0.177.84` is the first integrated repo release that carries ADR 0254
-- platform version `0.130.58` is the first integrated platform version that records the synchronized latest-main replay and verification for ADR 0254
-- the canonical mainline proof now lives in `receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply.json`, while the earlier branch-local receipt remains preserved as the first latest-main candidate replay
+- merge `codex/ws-0254-main-merge` onto the latest `origin/main`
+- cut the next patch release from merged `main`
+- replay `make converge-serverclaw` from that merged `main` checkout so server-resident reconciliation and repo truth agree
+- update ADR 0254 metadata, protected release files, `versions/stack.yaml`, and the mainline receipt only after `chat.lv3.org` and the internal `10.10.10.70:8096` lane are both healthy from merged `main`

@@ -2377,7 +2377,7 @@ workstreams:
   - id: ws-0254-live-apply
     adr: "0254"
     title: Live apply ADR 0254 ServerClaw
-    status: live_applied
+    status: implemented
     owner: codex
     branch: codex/ws-0254-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0254-live-apply
@@ -2521,12 +2521,6 @@ workstreams:
           contract: serverclaw-live-apply-v1
     ready_to_merge: true
     live_applied: true
-    canonical_truth:
-      changelog_entry: implemented ADR 0254 by publishing the first dedicated ServerClaw chat surface on chat.lv3.org with Keycloak-backed sign-in and repo-managed Ollama plus SearXNG integrations
-      release_bump: patch
-      included_in_repo_version: 0.177.84
-      latest_receipts:
-        serverclaw: 2026-03-29-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply
   - id: ws-0254-main-merge
     adr: "0254"
     title: Integrate ADR 0254 exact-main replay onto current origin/main
@@ -2594,7 +2588,7 @@ workstreams:
       - VERSION
       - changelog.md
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.84.md
+      - docs/release-notes/*.md
       - versions/stack.yaml
       - build/platform-manifest.json
       - docs/diagrams/agent-coordination-map.excalidraw
@@ -2610,6 +2604,7 @@ workstreams:
           contract: workstream-registry-v1
         - id: adr_0254_main_merge_carryover
           paths:
+            - docs/workstreams/ws-0254-live-apply.md
             - docs/runbooks/configure-serverclaw.md
             - playbooks/serverclaw.yml
             - inventory/group_vars/all.yml
@@ -2657,7 +2652,6 @@ workstreams:
         - id: adr_0254_main_merge
           paths:
             - docs/workstreams/ws-0254-main-merge.md
-            - docs/workstreams/ws-0254-live-apply.md
             - docs/adr/0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3.md
             - docs/adr/.index.yaml
             - docs/site-generated/architecture/dependency-graph.md
@@ -2666,7 +2660,7 @@ workstreams:
             - VERSION
             - changelog.md
             - docs/release-notes/README.md
-            - docs/release-notes/0.177.84.md
+            - docs/release-notes/*.md
             - versions/stack.yaml
             - build/platform-manifest.json
             - config/check-runner-manifest.json
@@ -2679,11 +2673,11 @@ workstreams:
             - tests/test_policy_checks.py
           mode: exclusive
     ready_to_merge: true
-    live_applied: true
+    live_applied: false
     canonical_truth:
-      changelog_entry: records ADR 0254 exact-main evidence on release 0.177.84 by replaying make converge-serverclaw from the synchronized latest-main commit, preserving the dedicated ServerClaw chat surface on chat.lv3.org, and re-verifying the internal firewall lane plus guest-local admin sign-in from merged mainline truth
+      changelog_entry: implements ADR 0254 by carrying the dedicated ServerClaw chat surface on chat.lv3.org onto current mainline truth, preserving the governed 8096 edge lane to coolify-lv3, and recording the first exact-main receipt once the merged replay is clean
       release_bump: patch
-      included_in_repo_version: 0.177.84
+      included_in_repo_version: null
       latest_receipts:
         serverclaw: 2026-03-29-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply
   - id: ws-0244-runtime-assurance-adrs
