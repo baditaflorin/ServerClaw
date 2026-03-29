@@ -631,7 +631,7 @@ workstreams:
   - id: ws-0252-mainline-replay
     adr: "0252"
     title: Re-verify ADR 0252 from the latest origin/main and prepare final merge surfaces
-    status: in-progress
+    status: in_progress
     owner: codex
     branch: codex/ws-0252-live-apply-r4
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0252-live-apply-r4

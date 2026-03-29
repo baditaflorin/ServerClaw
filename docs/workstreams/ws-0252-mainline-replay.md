@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0252](../adr/0252-route-and-dns-publication-assertion-ledger.md)
 - Title: Re-verify ADR 0252 from the latest `origin/main` and stage final merge surfaces
-- Status: in_progress (`live_applied: true`, awaiting merge to `main`)
+- Status: `in_progress` (`live_applied: true`, awaiting merge to `main`)
 - Repo Version Observed During Replay: 0.177.72
 - Platform Version Observed During Replay: 0.130.49
 - Live Applied On: 2026-03-29
