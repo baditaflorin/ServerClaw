@@ -177,3 +177,17 @@ def test_receipt_environment_for_path_accepts_catalog_driven_subdirectories(
         )
         == "preview"
     )
+
+
+def test_iter_receipt_paths_skips_nested_evidence_json(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    receipts_dir = tmp_path / "receipts" / "live-applies"
+    receipts_dir.mkdir(parents=True, exist_ok=True)
+    tracked_receipt = receipts_dir / "2026-03-29-adr-0251-stage-smoke-live-apply.json"
+    tracked_receipt.write_text("{}", encoding="utf-8")
+    evidence_json = receipts_dir / "evidence" / "2026-03-29-adr-0251-gate-status-live.json"
+    evidence_json.parent.mkdir(parents=True, exist_ok=True)
+    evidence_json.write_text("{}", encoding="utf-8")
+
+    monkeypatch.setattr(live_apply_receipts, "RECEIPTS_DIR", receipts_dir)
+
+    assert live_apply_receipts.iter_receipt_paths() == [tracked_receipt]

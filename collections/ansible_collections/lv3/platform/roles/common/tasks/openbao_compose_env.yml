@@ -65,7 +65,7 @@
       - 501
       - 503
   register: common_openbao_compose_env_api_health
-  retries: 24
+  retries: 48
   delay: 5
   until: common_openbao_compose_env_api_health.status in [200, 429, 472, 473, 501, 503]
   changed_when: false
@@ -128,7 +128,7 @@
       - 472
       - 473
   register: common_openbao_compose_env_health
-  retries: 24
+  retries: 48
   delay: 5
   until: common_openbao_compose_env_health.status in [200, 429, 472, 473]
   changed_when: false

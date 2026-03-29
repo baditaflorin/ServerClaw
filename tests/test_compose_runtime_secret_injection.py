@@ -130,6 +130,8 @@ def test_control_plane_recovery_uses_dedicated_windmill_backup_dsn() -> None:
     assert "docker run --rm --name" in helper_service_text
     assert "--entrypoint {{ common_openbao_systemd_credentials_container_entrypoint }}" in helper_service_text
     assert "common_openbao_systemd_credentials_secret_path" in helper_text
+    assert "register: common_openbao_systemd_credentials_api_health\n  retries: 48\n  delay: 5" in helper_text
+    assert "register: common_openbao_systemd_credentials_health\n  retries: 48\n  delay: 5" in helper_text
 
 
 def test_mail_gateway_image_includes_telemetry_module() -> None:

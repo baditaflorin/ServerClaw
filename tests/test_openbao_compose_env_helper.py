@@ -33,3 +33,5 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     assert "until: common_openbao_compose_env_current_secret.status in [200, 404]" in tasks
     assert "- name: Read the current OpenBao policy for the runtime AppRole" in tasks
     assert "until: common_openbao_compose_env_current_policy.status in [200, 404]" in tasks
+    assert "register: common_openbao_compose_env_api_health\n  retries: 48\n  delay: 5" in tasks
+    assert "register: common_openbao_compose_env_health\n  retries: 48\n  delay: 5" in tasks

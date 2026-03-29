@@ -68,7 +68,13 @@ def validate_source_commit(commit: str, path: Path) -> None:
 
 
 def iter_receipt_paths() -> list[Path]:
-    return sorted(RECEIPTS_DIR.rglob("*.json"))
+    receipt_paths: list[Path] = []
+    for path in RECEIPTS_DIR.rglob("*.json"):
+        relative = path.relative_to(RECEIPTS_DIR)
+        if "evidence" in relative.parts:
+            continue
+        receipt_paths.append(path)
+    return sorted(receipt_paths)
 
 
 def receipt_environment_for_path(path: Path) -> str:

@@ -710,12 +710,18 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "--path {{ windmill_validation_gate_status_script_path | quote }}" in verify_tasks
     assert "Run the Windmill validation gate status script" in verify_tasks
     assert "Assert the Windmill validation gate status result" in verify_tasks
+    assert "Parse the Windmill validation gate status result" in verify_tasks
     assert "Verify the Windmill default operations scripts are seeded" in verify_tasks
     assert 'WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"' in verify_tasks
     assert 'Authorization: "Bearer {{ windmill_runtime_api_token }}"' in verify_tasks
     assert "until: windmill_verify_healthcheck.rc == 0" in verify_tasks
+    assert "windmill_verify_healthcheck.stdout | trim | length > 0" in verify_tasks
+    assert "windmill_verify_healthcheck_payload" in verify_tasks
     assert "windmill_verify_validation_gate_status.rc == 0" in verify_tasks
     assert "windmill_verify_validation_gate_status.stdout | trim | length > 0" in verify_tasks
+    assert "windmill_verify_validation_gate_status_payload" in verify_tasks
+    assert "windmill_verify_stage_smoke_suites.stdout | trim | length > 0" in verify_tasks
+    assert "windmill_verify_stage_smoke_suites_payload" in verify_tasks
     assert "failed_when: false" in verify_tasks
     assert "retries: 6" in verify_tasks
     assert "windmill_verify_default_operations_scripts.status == 200" in verify_tasks
