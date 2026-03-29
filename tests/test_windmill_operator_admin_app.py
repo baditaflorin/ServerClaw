@@ -68,6 +68,9 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "scripts/gate_status.py",
         "config/windmill/scripts/gate-status.py",
     ]
+    assert defaults["windmill_seed_repo_root_local_dir"] == "{{ windmill_worker_checkout_repo_root_local_dir }}"
+    assert defaults["windmill_seed_script_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/scripts"
+    assert defaults["windmill_seed_app_repo_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
     assert {
         "README.md",
         "VERSION",
@@ -334,7 +337,12 @@ def test_windmill_worker_checkout_archive_builder_avoids_macos_xattrs() -> None:
     assert "mtime=0" in runtime_tasks
     assert "tarfile.GNU_FORMAT" in runtime_tasks
     assert "member.pax_headers = {}" in runtime_tasks
+    assert "tar.gettarinfo" in runtime_tasks
+    assert "tar.addfile" in runtime_tasks
+    assert "LV3_WINDMILL_PRESERVE_PATHS_JSON" in runtime_tasks
+    assert "is_preserved" in runtime_tasks
     assert 'candidate.rglob("*")' in runtime_tasks
+    assert "tar.add(path, arcname=archive_key" not in runtime_tasks
     assert "tar -czf" not in runtime_tasks
 
 
@@ -564,13 +572,20 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "BASE_INTERNAL_URL" in tasks
     assert "windmill_runtime_api_base_url" in tasks
     assert "Build the local staging archive for the Windmill worker checkout" in tasks
-    assert "COPYFILE_DISABLE=1" in tasks
-    assert "COPY_EXTENDED_ATTRIBUTES_DISABLE=1" in tasks
-    assert "--exclude='._*'" in tasks
-    assert "--exclude='*/._*'" in tasks
-    assert "--exclude='.DS_Store'" in tasks
-    assert "--exclude='*/.DS_Store'" in tasks
-    assert "--dereference" in tasks
+    assert "python3 - <<'PY'" in tasks
+    assert "gzip.GzipFile" in tasks
+    assert "mtime=0" in tasks
+    assert "tarfile.GNU_FORMAT" in tasks
+    assert "member.pax_headers = {}" in tasks
+    assert "tar.gettarinfo" in tasks
+    assert "tar.addfile" in tasks
+    assert "LV3_WINDMILL_PRESERVE_PATHS_JSON" in tasks
+    assert "is_preserved" in tasks
+    assert 'candidate.rglob("*")' in tasks
+    assert "COPYFILE_DISABLE=1" not in tasks
+    assert "COPY_EXTENDED_ATTRIBUTES_DISABLE=1" not in tasks
+    assert "tar.add(path, arcname=archive_key" not in tasks
+    assert "tar -czf" not in tasks
     assert "changed_when: false" in tasks
     assert "Expand the staged Windmill worker checkout on the guest" in tasks
     assert "Find stale macOS metadata files in the Windmill worker checkout" in tasks
@@ -654,6 +669,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "windmill_seed_app_repo_root_local_dir" in tasks
     assert "windmill_worker_checkout_checksum_file" in tasks
     assert "windmill_worker_checkout_repo_root_local_dir" in tasks
+    assert "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_scripts.py" in tasks
+    assert "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_schedules.py" in tasks
     assert "windmill_worker_checkout_sync_paths" in tasks
     assert (
         defaults["windmill_seed_app_repo_root_local_dir"]

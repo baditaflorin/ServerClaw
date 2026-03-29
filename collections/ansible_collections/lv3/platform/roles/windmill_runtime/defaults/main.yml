@@ -314,6 +314,8 @@ windmill_operator_manager_env:
   LV3_STEP_CA_SSH_REGISTER_COMMAND: "{{ lookup('ansible.builtin.env', 'LV3_STEP_CA_SSH_REGISTER_COMMAND') | default('', true) }}"
   LV3_STEP_CA_SSH_REVOKE_COMMAND: "{{ lookup('ansible.builtin.env', 'LV3_STEP_CA_SSH_REVOKE_COMMAND') | default('', true) }}"
   LV3_MATTERMOST_WEBHOOK: "{{ lookup('ansible.builtin.env', 'LV3_MATTERMOST_WEBHOOK') | default('', true) }}"
+windmill_seed_repo_root_local_dir: "{{ windmill_worker_checkout_repo_root_local_dir }}"
+windmill_seed_script_root_local_dir: "{{ windmill_seed_repo_root_local_dir }}/config/windmill/scripts"
 windmill_seed_app_repo_root_local_dir: "{{ windmill_worker_checkout_repo_root_local_dir }}/config/windmill/apps"
 windmill_seed_app_sync_dir: "{{ windmill_site_dir }}/seed-apps"
 windmill_mutation_audit_dir: "{{ platform_log_dir }}"
@@ -323,77 +325,77 @@ windmill_integration_test_runner_password_local_file: >-
   {{ windmill_controller_repo_common_root }}/.local/integration-tests/test-runner-password.txt
 windmill_seed_scripts:
   - path: f/lv3/gate-status
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/gate-status.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/gate-status.py"
     language: python3
     summary: Validation gate status
     description: Repo-managed Windmill wrapper that returns the latest repository validation gate status as structured JSON.
   - path: f/lv3/windmill_healthcheck
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/lv3-healthcheck.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/lv3-healthcheck.py"
     language: python3
     summary: LV3 Windmill healthcheck
     description: Repo-managed verification script for Windmill runtime and worker execution.
   - path: f/lv3/scheduler_watchdog_loop
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/scheduler-watchdog-loop.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/scheduler-watchdog-loop.py"
     language: python3
     summary: ADR 0170 scheduler watchdog loop
     description: Repo-managed helper that runs the budget watchdog against active mutation jobs every 10 seconds.
   - path: f/lv3/platform_observation_loop
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/platform-observation-loop.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/platform-observation-loop.py"
     language: python3
     summary: LV3 observation loop summary helper
     description: Repo-managed Windmill helper for ADR 0071 observation-loop summaries and later scheduler activation.
   - path: f/lv3/lane_scheduler
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/lane-scheduler.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/lane-scheduler.py"
     language: python3
     summary: ADR 0154 execution lane scheduler
     description: Repo-managed worker that dequeues VM-scoped execution intents when a lane has free capacity and submits them to Windmill.
   - path: f/lv3/scheduler_watchdog
-    local_file: "{{ inventory_dir }}/../windmill/scheduler/watchdog-loop.py"
+    local_file: "{{ windmill_seed_repo_root_local_dir }}/windmill/scheduler/watchdog-loop.py"
     language: python3
     summary: ADR 0119 scheduler watchdog
     description: Repo-managed worker that releases active scheduler state for completed or budget-violating Windmill jobs.
   - path: f/lv3/platform_findings_daily_digest
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/platform-findings-daily-digest.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/platform-findings-daily-digest.py"
     language: python3
     summary: LV3 findings daily digest helper
     description: Repo-managed Windmill helper that formats ADR 0071 findings into Markdown for operator review.
   - path: f/lv3/config_merge/merge_config_changes
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/merge-config-changes.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/merge-config-changes.py"
     language: python3
     summary: Merge staged config registry changes
     description: Repo-managed ADR 0158 helper that merges pending change rows from config_change_staging into the merge-eligible registry files.
   - path: f/lv3/rebuild_rag_index
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/rebuild-rag-index.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/rebuild-rag-index.py"
     language: python3
     summary: Rebuild the LV3 platform context index
     description: Repo-managed Windmill script that triggers a local-corpus rebuild on the private platform context API.
   - path: f/lv3/rebuild_search_index
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/rebuild-search-index.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/rebuild-search-index.py"
     language: python3
     summary: Rebuild the LV3 local search fabric index
     description: Repo-managed Windmill helper that rebuilds the ADR 0121 local search index from repository-backed collections.
   - path: f/lv3/upgrade_container_image
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/upgrade-container-image.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/upgrade-container-image.py"
     language: python3
     summary: LV3 container image upgrade workflow
     description: Repo-managed wrapper for catalog-based image upgrades, receipts, and optional converges.
   - path: f/lv3/deploy_and_promote
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/deploy-and-promote.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/deploy-and-promote.py"
     language: python3
     summary: LV3 deploy and promote workflow
     description: Repo-managed wrapper for ADR 0073 staging gate evaluation, production promotion, and receipt generation.
   - path: f/lv3/mutation_audit_emit
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/lv3-mutation-audit.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/lv3-mutation-audit.py"
     language: python3
     summary: LV3 mutation audit helper
     description: Repo-managed helper that emits a structured mutation audit event from a Windmill job.
   - path: f/lv3/warm_build_cache
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/warm-build-cache.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/warm-build-cache.py"
     language: python3
     summary: Warm the LV3 build caches
     description: Repo-managed helper that refreshes Docker, pip, Packer, and Ansible collection caches and rewrites config/build-cache-manifest.json.
   - path: f/lv3/build_cache_maintenance
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/build-cache-maintenance.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/build-cache-maintenance.py"
     language: python3
     summary: Maintain the LV3 build caches
     description: Repo-managed helper that purges the shared pip cache and checks the apt-cacher-ng report endpoint on the build server.
@@ -483,57 +485,57 @@ windmill_seed_scripts:
     summary: ADR 0080 maintenance window
     description: Repo-managed Windmill wrapper that opens or closes one governed maintenance window through the shared protocol.
   - path: f/lv3/ephemeral_vm_reaper
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/ephemeral-vm-reaper.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/ephemeral-vm-reaper.py"
     language: python3
     summary: ADR 0106 ephemeral VM lifecycle reaper
     description: Repo-managed worker that sweeps the governed 910-979 ephemeral VM pool, retags unowned VMs with a one-hour grace period, and destroys expired VMs.
   - path: f/lv3/ephemeral_pool_reconciler
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/ephemeral-pool-reconciler.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/ephemeral-pool-reconciler.py"
     language: python3
     summary: ADR 0186 ephemeral fixture pool reconciler
     description: Repo-managed worker that keeps the declared prewarmed fixture pools topped up, records spillover decisions, and preserves one warm spare per common fixture profile when local capacity allows.
   - path: f/lv3/fault-injection
-    local_file: "{{ playbook_dir }}/../config/windmill/scripts/fault-injection.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/fault-injection.py"
     language: python3
     summary: ADR 0171 controlled fault injection
     description: Repo-managed Windmill wrapper that runs the bounded Keycloak and OpenBao fault-injection subset on docker-runtime-lv3.
   - path: f/lv3/network-impairment-matrix
-    local_file: "{{ playbook_dir }}/../config/windmill/scripts/network-impairment-matrix.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/network-impairment-matrix.py"
     language: python3
     summary: ADR 0189 network impairment matrix
     description: Repo-managed Windmill wrapper that renders the staging, preview, fixture, standby, and recovery network-impairment matrix from the released checkout.
   - path: f/lv3/disaster_recovery_runbook
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/disaster-recovery-runbook.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/disaster-recovery-runbook.py"
     language: python3
     summary: ADR 0100 disaster recovery runbook
     description: Repo-managed helper that renders the ordered LV3 disaster recovery plan and records the runbook invocation path.
   - path: f/lv3/operator_onboard
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/operator-onboard.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/operator-onboard.py"
     language: python3
     summary: ADR 0108 operator onboarding
     description: Repo-managed wrapper that provisions one human operator across Keycloak, OpenBao, step-ca, Tailscale, and Mattermost.
   - path: f/lv3/operator_offboard
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/operator-offboard.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/operator-offboard.py"
     language: python3
     summary: ADR 0108 operator off-boarding
     description: Repo-managed wrapper that disables one human operator across the managed identity systems while preserving audit history.
   - path: f/lv3/sync_operators
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/sync-operators.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/sync-operators.py"
     language: python3
     summary: ADR 0108 operator roster reconciliation
     description: Repo-managed wrapper that reconciles the merged operator roster into the live identity systems.
   - path: f/lv3/quarterly_access_review
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/quarterly-access-review.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/quarterly-access-review.py"
     language: python3
     summary: ADR 0108 quarterly access review
     description: Repo-managed helper that builds the operator access review summary for scheduled or manual review.
   - path: f/lv3/operator_roster
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/operator-roster.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/operator-roster.py"
     language: python3
     summary: Operator roster reader
     description: Repo-managed helper that returns a sanitized snapshot of config/operators.yaml for browser-first admin tooling.
   - path: f/lv3/operator_inventory
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/operator-inventory.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/operator-inventory.py"
     language: python3
     summary: Operator access inventory
     description: Repo-managed helper that runs the operator inventory report and returns structured JSON for the admin app.
@@ -543,77 +545,77 @@ windmill_seed_scripts:
     summary: ADR 0241 operator rich notes mutation
     description: Repo-managed wrapper that persists bounded markdown notes for one operator through the governed roster mutation path.
   - path: f/lv3/world_state/refresh_proxmox_vms
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/world-state/refresh-proxmox-vms.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/world-state/refresh-proxmox-vms.py"
     language: python3
     summary: Refresh world-state Proxmox VM inventory
     description: Repo-managed ADR 0113 worker that refreshes the canonical Proxmox VM inventory surface.
   - path: f/lv3/world_state/refresh_service_health
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/world-state/refresh-service-health.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/world-state/refresh-service-health.py"
     language: python3
     summary: Refresh world-state service health
     description: Repo-managed ADR 0113 worker that refreshes service health from the platform capability catalog and live probes.
   - path: f/lv3/world_state/refresh_container_inventory
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/world-state/refresh-container-inventory.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/world-state/refresh-container-inventory.py"
     language: python3
     summary: Refresh world-state container inventory
     description: Repo-managed ADR 0113 worker that refreshes runtime container inventory from the Docker host.
   - path: f/lv3/world_state/refresh_netbox_topology
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/world-state/refresh-netbox-topology.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/world-state/refresh-netbox-topology.py"
     language: python3
     summary: Refresh world-state NetBox topology
     description: Repo-managed ADR 0113 worker that refreshes the canonical NetBox topology surface.
   - path: f/lv3/world_state/refresh_dns_records
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/world-state/refresh-dns-records.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/world-state/refresh-dns-records.py"
     language: python3
     summary: Refresh world-state DNS records
     description: Repo-managed ADR 0113 worker that refreshes canonical DNS publication state.
   - path: f/lv3/world_state/refresh_tls_certs
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/world-state/refresh-tls-certs.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/world-state/refresh-tls-certs.py"
     language: python3
     summary: Refresh world-state TLS certificates
     description: Repo-managed ADR 0113 worker that refreshes TLS certificate expiry inventory.
   - path: f/lv3/world_state/refresh_opentofu_drift
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/world-state/refresh-opentofu-drift.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/world-state/refresh-opentofu-drift.py"
     language: python3
     summary: Refresh world-state OpenTofu drift
     description: Repo-managed ADR 0113 worker that refreshes the OpenTofu drift summary surface.
   - path: f/lv3/world_state/refresh_openbao_secret_expiry
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/world-state/refresh-openbao-leases.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/world-state/refresh-openbao-leases.py"
     language: python3
     summary: Refresh world-state OpenBao secret expiry
     description: Repo-managed ADR 0113 worker that refreshes OpenBao lease and secret expiry metadata.
   - path: f/lv3/world_state/refresh_maintenance_windows
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/world-state/refresh-maintenance-windows.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/world-state/refresh-maintenance-windows.py"
     language: python3
     summary: Refresh world-state maintenance windows
     description: Repo-managed ADR 0113 worker that refreshes active maintenance windows.
   - path: f/lv3/graph/import_from_catalog
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/graph/import-from-catalog.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/graph/import-from-catalog.py"
     language: python3
     summary: Rebuild the dependency graph from repo metadata
     description: Repo-managed ADR 0117 worker that rebuilds graph.nodes and graph.edges from the service catalog, workflow catalog, and dependency manifest.
   - path: f/lv3/graph/import_from_netbox
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/graph/import-from-netbox.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/graph/import-from-netbox.py"
     language: python3
     summary: Rebuild the dependency graph from NetBox world state
     description: Repo-managed ADR 0117 worker that rebuilds graph.nodes and graph.edges after folding in the latest NetBox topology and DNS world-state surfaces.
   - path: f/lv3/graph/propagate_health
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/graph/propagate-health.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/graph/propagate-health.py"
     language: python3
     summary: Emit derived health degradation events
     description: Repo-managed ADR 0117 helper that walks dependency descendants for degraded upstream services and emits derived_health_degraded events plus ledger records.
   - path: f/lv3/health/refresh_composite
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/health/refresh-composite.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/health/refresh-composite.py"
     language: python3
     summary: Refresh the platform health composite index
     description: Repo-managed ADR 0128 worker that aggregates service health, SLO, drift, incident, maintenance, and mutation signals into the canonical composite index.
   - path: f/lv3/detect_deadlocks
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/detect-deadlocks.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/detect-deadlocks.py"
     language: python3
     summary: ADR 0162 distributed deadlock detector
     description: Repo-managed ADR 0162 worker that scans the lock registry, intent queue, and coordination map for deadlock cycles and requeues the lowest-priority participant.
   - path: f/lv3/intent_queue_dispatcher
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/intent-queue-dispatcher.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/intent-queue-dispatcher.py"
     language: python3
     summary: ADR 0155 queued intent dispatcher
     description: Repo-managed ADR 0155 worker that replays queued intents once their blocking workflow or resource claims are released.
