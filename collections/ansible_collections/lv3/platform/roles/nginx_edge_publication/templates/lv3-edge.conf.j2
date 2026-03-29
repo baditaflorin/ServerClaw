@@ -130,6 +130,11 @@ server {
 {% set blocked_exact_paths = site.blocked_exact_paths | default([]) %}
 {% set server_sent_events = site.server_sent_events | default(false) %}
 {% set prefix_proxy_routes = site.prefix_proxy_routes | default([]) %}
+{% set client_max_body_size = site.client_max_body_size | default(none) %}
+{% set chunked_transfer_encoding = site.chunked_transfer_encoding | default(false) %}
+{% set proxy_request_buffering = site.proxy_request_buffering | default(true) %}
+{% set proxy_read_timeout_seconds = site.proxy_read_timeout_seconds | default(300) %}
+{% set proxy_send_timeout_seconds = site.proxy_send_timeout_seconds | default(proxy_read_timeout_seconds) %}
 server {
     listen 80;
     listen [::]:80;
@@ -142,6 +147,12 @@ server {
 {{ render_security_headers(site, false) }}
 
     root {{ public_edge_static_root }};
+{% if client_max_body_size is not none %}
+    client_max_body_size {{ client_max_body_size }};
+{% endif %}
+{% if chunked_transfer_encoding %}
+    chunked_transfer_encoding on;
+{% endif %}
 
     location /.well-known/acme-challenge/ {
         root {{ public_edge_acme_root }};
@@ -171,6 +182,9 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
+        proxy_request_buffering {{ 'on' if proxy_request_buffering else 'off' }};
+        proxy_connect_timeout 60s;
+        proxy_send_timeout {{ proxy_send_timeout_seconds }}s;
 {% if server_sent_events %}
         proxy_set_header Connection '';
         proxy_buffering off;
@@ -181,7 +195,7 @@ server {
         proxy_set_header Connection $connection_upgrade;
         proxy_redirect http:// https://;
         proxy_buffering off;
-        proxy_read_timeout 300s;
+        proxy_read_timeout {{ proxy_read_timeout_seconds }}s;
 {% endif %}
     }
 
@@ -201,7 +215,7 @@ server {
         proxy_set_header Connection $connection_upgrade;
         proxy_redirect http:// https://;
         proxy_buffering off;
-        proxy_read_timeout 300s;
+        proxy_read_timeout {{ proxy_read_timeout_seconds }}s;
 {% for header_name in proxy_hide_headers %}
         proxy_hide_header {{ header_name }};
 {% endfor %}
@@ -217,6 +231,9 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
+        proxy_request_buffering {{ 'on' if proxy_request_buffering else 'off' }};
+        proxy_connect_timeout 60s;
+        proxy_send_timeout {{ proxy_send_timeout_seconds }}s;
 {% if server_sent_events %}
         proxy_set_header Connection '';
         proxy_buffering off;
@@ -227,7 +244,7 @@ server {
         proxy_set_header Connection $connection_upgrade;
         proxy_redirect http:// https://;
         proxy_buffering off;
-        proxy_read_timeout 300s;
+        proxy_read_timeout {{ proxy_read_timeout_seconds }}s;
 {% endif %}
     }
 {% else %}
@@ -254,6 +271,12 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/{{ public_edge_cert_name }}/privkey.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_prefer_server_ciphers off;
+{% if client_max_body_size is not none %}
+    client_max_body_size {{ client_max_body_size }};
+{% endif %}
+{% if chunked_transfer_encoding %}
+    chunked_transfer_encoding on;
+{% endif %}
 
 {% if protected_site %}
 {% for path in protected_site.unauthenticated_paths | default([]) %}
@@ -285,7 +308,7 @@ server {
         proxy_set_header X-Forwarded-Port $server_port;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
-        proxy_read_timeout 300s;
+        proxy_read_timeout {{ proxy_read_timeout_seconds }}s;
 {% for header_name in proxy_hide_headers %}
         proxy_hide_header {{ header_name }};
 {% endfor %}
@@ -341,6 +364,9 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
+        proxy_request_buffering {{ 'on' if proxy_request_buffering else 'off' }};
+        proxy_connect_timeout 60s;
+        proxy_send_timeout {{ proxy_send_timeout_seconds }}s;
 {% if server_sent_events %}
         proxy_set_header Connection '';
         proxy_buffering off;
@@ -351,7 +377,7 @@ server {
         proxy_set_header Connection $connection_upgrade;
         proxy_redirect http:// https://;
         proxy_buffering off;
-        proxy_read_timeout 300s;
+        proxy_read_timeout {{ proxy_read_timeout_seconds }}s;
 {% endif %}
 {% for header_name in proxy_hide_headers %}
         proxy_hide_header {{ header_name }};
@@ -384,7 +410,7 @@ server {
         proxy_set_header Connection $connection_upgrade;
         proxy_redirect http:// https://;
         proxy_buffering off;
-        proxy_read_timeout 300s;
+        proxy_read_timeout {{ proxy_read_timeout_seconds }}s;
 {% for header_name in proxy_hide_headers %}
         proxy_hide_header {{ header_name }};
 {% endfor %}
@@ -410,6 +436,9 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
+        proxy_request_buffering {{ 'on' if proxy_request_buffering else 'off' }};
+        proxy_connect_timeout 60s;
+        proxy_send_timeout {{ proxy_send_timeout_seconds }}s;
 {% if server_sent_events %}
         proxy_set_header Connection '';
         proxy_buffering off;
@@ -420,7 +449,7 @@ server {
         proxy_set_header Connection $connection_upgrade;
         proxy_redirect http:// https://;
         proxy_buffering off;
-        proxy_read_timeout 300s;
+        proxy_read_timeout {{ proxy_read_timeout_seconds }}s;
 {% endif %}
 {% for header_name in proxy_hide_headers %}
         proxy_hide_header {{ header_name }};

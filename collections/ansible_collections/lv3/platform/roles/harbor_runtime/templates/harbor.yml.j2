@@ -1,0 +1,59 @@
+# Configuration file of Harbor
+hostname: {{ harbor_public_hostname }}
+
+http:
+  port: {{ harbor_http_port }}
+
+external_url: {{ harbor_public_base_url }}
+
+harbor_admin_password: {{ harbor_admin_password }}
+
+database:
+  password: {{ harbor_database_password }}
+  max_idle_conns: 100
+  max_open_conns: 900
+  conn_max_lifetime: 5m
+  conn_max_idle_time: 0
+
+data_volume: {{ harbor_data_dir }}
+
+trivy:
+  ignore_unfixed: {{ 'true' if harbor_trivy_ignore_unfixed else 'false' }}
+  skip_update: false
+  skip_java_db_update: false
+  db_repository: ghcr.io/aquasecurity/trivy-db
+  java_db_repository: ghcr.io/aquasecurity/trivy-java-db
+  offline_scan: false
+  security_check: {{ harbor_trivy_security_check }}
+  insecure: false
+  timeout: 10m0s
+
+jobservice:
+  max_job_workers: 10
+  max_job_duration_hours: 24
+  job_loggers:
+    - STD_OUTPUT
+    - FILE
+  logger_sweeper_duration: 1
+
+notification:
+  webhook_job_max_retry: 3
+  webhook_job_http_client_timeout: 3
+
+log:
+  level: info
+  local:
+    rotate_count: 50
+    rotate_size: 200M
+    location: {{ harbor_log_dir }}
+
+proxy:
+  http_proxy:
+  https_proxy:
+  no_proxy: 127.0.0.1,localhost,{{ harbor_public_hostname }}
+  components:
+    - core
+    - jobservice
+    - trivy
+
+_version: {{ harbor_installer_version }}

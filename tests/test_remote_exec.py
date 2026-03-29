@@ -223,7 +223,10 @@ def test_remote_exec_uses_docker_runner_metadata(tmp_path: Path) -> None:
     assert f"{REMOTE_WORKSPACE_ROOT}:/workspace" in completed.stderr
     assert "GIT_CONFIG_KEY_0=safe.directory" in completed.stderr
     assert "GIT_CONFIG_VALUE_0=/workspace" in completed.stderr
-    assert "docker run" in completed.ssh_log.read_text()  # type: ignore[attr-defined]
+    ssh_log = completed.ssh_log.read_text()  # type: ignore[attr-defined]
+    assert "bash -lc" in ssh_log
+    assert "check-runner/ansible:0.1.0" in ssh_log
+    assert "docker run" in ssh_log
     assert "--checksum" in completed.rsync_log.read_text()  # type: ignore[attr-defined]
 
 

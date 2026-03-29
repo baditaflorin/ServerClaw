@@ -243,6 +243,36 @@
       "notes": "Repositories, issues, webhook configuration, and audit metadata are operational records that should remain restorable for multi-year incident and change reconstruction."
     },
     {
+      "id": "harbor-registry-metadata",
+      "service": "harbor",
+      "name": "Harbor registry metadata and scan results",
+      "class": "confidential",
+      "retention_days": 90,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Harbor PostgreSQL database",
+        "/opt/harbor/data/database"
+      ],
+      "notes": "Harbor stores project metadata, robot-account policy, replication state, and vulnerability scan findings that support supply-chain auditing and recovery."
+    },
+    {
+      "id": "harbor-registry-artifacts",
+      "service": "harbor",
+      "name": "Harbor registry artifacts and chart storage",
+      "class": "confidential",
+      "retention_days": 90,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "/opt/harbor/data/registry",
+        "/opt/harbor/data/chart_storage"
+      ],
+      "notes": "Private container images, OCI artifacts, and retained charts are durable release assets that must remain recoverable through the managed retention window."
+    },
+    {
       "id": "vaultwarden-shared-vault",
       "service": "vaultwarden",
       "name": "Vaultwarden shared credential vault",

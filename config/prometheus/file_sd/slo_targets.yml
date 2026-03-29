@@ -55,6 +55,13 @@
     indicator: latency
     probe_module: http_2xx_follow_redirects
 - targets:
+    - https://registry.lv3.org/api/v2.0/ping
+  labels:
+    service_id: harbor
+    slo_id: harbor-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - https://langfuse.lv3.org/api/public/health
   labels:
     service_id: langfuse
