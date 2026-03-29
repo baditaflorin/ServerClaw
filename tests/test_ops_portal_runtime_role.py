@@ -110,8 +110,8 @@ def test_ops_portal_dockerfile_depends_on_synced_helper_files() -> None:
     assert "COPY requirements.txt ./requirements.txt" in dockerfile
     assert "COPY publication_contract.py ./publication_contract.py" in dockerfile
     assert "COPY stage_smoke.py ./stage_smoke.py" in dockerfile
-    assert "COPY ops_portal ./ops_portal" in dockerfile
-    assert "COPY search_fabric ./search_fabric" in dockerfile
+    assert "COPY ops_portal/ ./ops_portal/" in dockerfile
+    assert "COPY search_fabric/ ./search_fabric/" in dockerfile
 
 
 def test_ops_portal_verify_checks_launcher_and_runtime_assurance_partials() -> None:
