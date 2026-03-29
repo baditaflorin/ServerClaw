@@ -96,6 +96,8 @@ CAPACITY_MODEL_PATH = repo_path("config", "capacity-model.json")
 CAPACITY_MODEL_SCHEMA_PATH = repo_path("docs", "schema", "capacity-model.schema.json")
 EPHEMERAL_POOL_CATALOG_PATH = repo_path("config", "ephemeral-capacity-pools.json")
 EPHEMERAL_POOL_SCHEMA_PATH = repo_path("docs", "schema", "ephemeral-capacity-pools.schema.json")
+RESTORE_READINESS_PROFILE_PATH = repo_path("config", "restore-readiness-profiles.json")
+RESTORE_READINESS_PROFILE_SCHEMA_PATH = repo_path("docs", "schema", "restore-readiness-profiles.schema.json")
 PERSONA_CATALOG_PATH = repo_path("config", "persona-catalog.json")
 PERSONA_CATALOG_SCHEMA_PATH = repo_path("docs", "schema", "persona-catalog.schema.json")
 REPLACEABILITY_REVIEW_CATALOG_PATH = repo_path("config", "replaceability-review-catalog.json")
@@ -1470,6 +1472,56 @@ def validate_ephemeral_pool_catalog() -> None:
     require_str(schema.get("title"), "docs/schema/ephemeral-capacity-pools.schema.json.title")
 
 
+def validate_restore_readiness_profiles() -> None:
+    payload = load_json(RESTORE_READINESS_PROFILE_PATH)
+    schema = load_json(RESTORE_READINESS_PROFILE_SCHEMA_PATH)
+    jsonschema.validate(instance=payload, schema=schema)
+
+    require_str(payload.get("$schema"), "config/restore-readiness-profiles.json.$schema")
+    if payload["$schema"] != "docs/schema/restore-readiness-profiles.schema.json":
+        raise ValueError(
+            "config/restore-readiness-profiles.json.$schema must reference docs/schema/restore-readiness-profiles.schema.json"
+        )
+    require_semver(payload.get("schema_version"), "config/restore-readiness-profiles.json.schema_version")
+
+    profiles = require_mapping(payload.get("profiles"), "config/restore-readiness-profiles.json.profiles")
+    expected_profile_ids = {"backup-vm", "docker-runtime", "postgres"}
+    if set(profiles.keys()) != expected_profile_ids:
+        raise ValueError(
+            "config/restore-readiness-profiles.json.profiles must define exactly backup-vm, docker-runtime, and postgres"
+        )
+
+    synthetic_catalog = load_json(repo_path("config", "synthetic-transaction-catalog.json"))
+    synthetic_targets = require_mapping(
+        synthetic_catalog.get("targets"),
+        "config/synthetic-transaction-catalog.json.targets",
+    )
+
+    for profile_id, raw_profile in profiles.items():
+        path = f"config/restore-readiness-profiles.json.profiles.{profile_id}"
+        profile = require_mapping(raw_profile, path)
+        require_str(profile.get("description"), f"{path}.description")
+        require_int(profile.get("initial_wait_seconds"), f"{path}.initial_wait_seconds", 0)
+        require_int(profile.get("max_attempts"), f"{path}.max_attempts", 1)
+        require_int(profile.get("retry_delay_seconds"), f"{path}.retry_delay_seconds", 0)
+        network_checks = require_string_list(profile.get("network_dependency_checks"), f"{path}.network_dependency_checks")
+        if not network_checks:
+            raise ValueError(f"{path}.network_dependency_checks must not be empty")
+        require_identifier(profile.get("service_class"), f"{path}.service_class")
+
+        synthetic_replay = require_mapping(profile.get("synthetic_replay"), f"{path}.synthetic_replay")
+        enabled = require_bool(synthetic_replay.get("enabled"), f"{path}.synthetic_replay.enabled")
+        target_id = synthetic_replay.get("target_id")
+        if enabled:
+            target_id = require_str(target_id, f"{path}.synthetic_replay.target_id")
+            if target_id not in synthetic_targets:
+                raise ValueError(
+                    f"{path}.synthetic_replay.target_id references unknown target '{target_id}'"
+                )
+        elif target_id is not None:
+            require_str(target_id, f"{path}.synthetic_replay.target_id")
+
+
 def validate_error_registry() -> None:
     payload = require_mapping(load_yaml(ERROR_REGISTRY_PATH), str(ERROR_REGISTRY_PATH))
     require_semver(payload.get("schema_version"), "config/error-codes.yaml.schema_version")
@@ -2623,6 +2675,7 @@ def validate_repository_data_models() -> int:
     validate_persona_catalog()
     validate_preview_environment_profiles()
     validate_ephemeral_pool_catalog()
+    validate_restore_readiness_profiles()
     validate_replaceability_review_data()
     load_public_surface_scan_policy()
     validate_vm_template_manifest(host_vars_context["proxmox_vm_templates"])

@@ -121,6 +121,19 @@ infrastructure_state:
       - "scripts/correction_loops.py: Selector resolution and validation helper"
       - "config/workflow-catalog.json: Workflows that must be covered by the correction-loop selectors"
 
+  config/restore-readiness-profiles.json:
+    purpose: Canonical ADR 0272 catalog of restore-readiness ladders and stateful warm-up profiles for protected restore targets
+    owner: human
+    format: JSON
+    use_for: Declaring per-service-class warm-up timing, dependency-stage checks, and optional synthetic replay requirements for restore verification
+    update_when: Adding a new restore target, changing the warm-up budget for a protected class, or changing which checks advance each ladder stage
+    update_by: Agent or human implementing ADR 0272 restore semantics
+    validation: "uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate"
+    related_files:
+      - "docs/schema/restore-readiness-profiles.schema.json: JSON schema for restore-readiness profiles"
+      - "scripts/restore_verification.py: restore ladder execution and receipt generation"
+      - "docs/runbooks/backup-restore-verification.md: operator procedure"
+
   receipts/preview-environments/:
     purpose: Durable branch-local evidence for completed preview create/validate/destroy cycles
     owner: automation

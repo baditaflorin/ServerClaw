@@ -1,0 +1,48 @@
+{
+  "$schema": "docs/schema/restore-readiness-profiles.schema.json",
+  "schema_version": "1.0.0",
+  "profiles": {
+    "backup-vm": {
+      "description": "Treat the PBS listener as the dependency gate, then require datastore enumeration before the restore is considered warmed up.",
+      "initial_wait_seconds": 15,
+      "max_attempts": 4,
+      "network_dependency_checks": [
+        "backup_pbs_port"
+      ],
+      "retry_delay_seconds": 15,
+      "service_class": "stateful-backup-datastore",
+      "synthetic_replay": {
+        "enabled": false
+      }
+    },
+    "docker-runtime": {
+      "description": "Allow the restored control-plane runtime time to settle, require Keycloak, NetBox, and Windmill to answer locally, then replay the governed post-restore control-plane reads.",
+      "initial_wait_seconds": 90,
+      "max_attempts": 10,
+      "network_dependency_checks": [
+        "keycloak_ready",
+        "netbox_ready",
+        "windmill_ready"
+      ],
+      "retry_delay_seconds": 30,
+      "service_class": "stateful-control-plane-runtime",
+      "synthetic_replay": {
+        "enabled": true,
+        "target_id": "restore-docker-runtime"
+      }
+    },
+    "postgres": {
+      "description": "Require local PostgreSQL readiness before the schema and dump checks can promote the restore into the warmed-up stage.",
+      "initial_wait_seconds": 10,
+      "max_attempts": 3,
+      "network_dependency_checks": [
+        "postgres_ready"
+      ],
+      "retry_delay_seconds": 10,
+      "service_class": "stateful-database",
+      "synthetic_replay": {
+        "enabled": false
+      }
+    }
+  }
+}

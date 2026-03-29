@@ -62,7 +62,7 @@ live_apply_evidence:
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
     semaphore: 2026-03-25-adr-0149-semaphore-live-apply
     searxng: 2026-03-26-adr-0148-searxng-live-apply
-    ops_portal: 2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-live-apply
+    ops_portal: 2026-03-29-adr-0253-unified-runtime-assurance-scoreboard-latest-main-revalidation
     ollama: 2026-03-27-adr-0176-inventory-sharding-mainline-live-apply
     operator_access: 2026-03-29-adr-0241-rich-content-and-inline-knowledge-editing-live-apply
     preview_environment: 2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z
@@ -111,6 +111,7 @@ live_apply_evidence:
     nomad_scheduler: 2026-03-29-adr-0232-nomad-mainline-live-apply
     route_dns_assertion_ledger: 2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-live-apply
     session_logout_authority: 2026-03-29-adr-0248-session-logout-authority-mainline-live-apply
+    restore_verification: 2026-03-29-adr-0272-restore-readiness-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated

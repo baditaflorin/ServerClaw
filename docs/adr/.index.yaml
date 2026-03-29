@@ -4618,7 +4618,7 @@ adr_index:
   - adr: '0272'
     title: Restore Readiness Ladders And Stateful Warm-Up Verification Profiles
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: api
     keywords:
@@ -4631,6 +4631,7 @@ adr_index:
       - profiles
     summary: We will verify restores through readiness ladders and
     filename: 0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md
+    implemented_version: 0.177.75
   - adr: '0273'
     title: Public Endpoint Admission Control For DNS Catalog And Certificate Concordance
     status: Accepted

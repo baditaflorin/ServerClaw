@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.75",
   "platform_version": "0.130.51",
-  "generated_at": "2026-03-29T12:00:04Z",
-  "next_refresh_at": "2026-03-29T13:00:04Z",
+  "generated_at": "2026-03-29T12:08:59Z",
+  "next_refresh_at": "2026-03-29T13:08:59Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3251,7 +3251,7 @@
         "id": "backup-restore-verification",
         "title": "Backup Restore Verification",
         "agent_trust_required": "T2",
-        "steps": 11,
+        "steps": 13,
         "path": "docs/runbooks/backup-restore-verification.md",
         "workflow_ids": [
           "restore-verification"
@@ -4213,7 +4213,7 @@
   "recent_changes": {
     "last_version": "0.177.74",
     "deployed_at": "2026-03-29",
-    "summary": "implemented ADR 0271 by adding a receipt-backed backup coverage ledger, extending nightly PBS protection to coolify-lv3 on VM 170, and surfacing the remaining backup-lv3 off-site gap explicitly in disaster recovery readiness",
+    "summary": "implemented ADR 0271 by adding a receipt-backed backup coverage ledger, extending nightly PBS protection to coolify-lv3 on VM 170, and surfacing the remaining backup-lv3 off-site gap explicitly in disaster recovery readiness implements ADR 0272 by adding governed restore-readiness ladders, per-service warm-up profiles, ladder-aware restore receipts, and verified live restore evidence for the protected guests",
     "release_notes_url": "docs/release-notes/0.177.75.md"
   },
   "agentic_architecture": {

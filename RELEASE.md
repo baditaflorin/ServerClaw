@@ -4,9 +4,10 @@
 
 ## Summary
 - implemented ADR 0271 by adding a receipt-backed backup coverage ledger, extending nightly PBS protection to coolify-lv3 on VM 170, and surfacing the remaining backup-lv3 off-site gap explicitly in disaster recovery readiness
+- implements ADR 0272 by adding governed restore-readiness ladders, per-service warm-up profiles, ladder-aware restore receipts, and verified live restore evidence for the protected guests
 
 ## Platform Impact
-- Platform version moves to 0.130.51 because ADR 0271 is replayed live from the merged mainline worktree, extending governed PBS coverage to coolify-lv3 and publishing receipt-backed backup coverage evidence while keeping the off-site backup-lv3 gap explicit.
+- Platform version moves to 0.130.51 because the exact-main ADR 0271 and ADR 0272 replays landed together on the newest origin/main baseline, adding governed backup coverage and restore-readiness evidence while keeping the remaining off-site and restore-health gaps explicit.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)
