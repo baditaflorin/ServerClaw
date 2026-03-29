@@ -17,7 +17,7 @@ workstreams:
   - id: ws-0296-education-refresh
     adr: "0224"
     title: Refresh education_wemeshup from upstream main through a named repo-deploy profile
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0296-education-refresh
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-education-refresh
@@ -42,6 +42,7 @@ workstreams:
       - config/correction-loops.json
       - tests/test_lv3_cli.py
       - tests/test_repo_deploy_profiles.py
+      - receipts/live-applies/2026-03-30-adr-0224-education-repo-profile-refresh-live-apply.json
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -73,8 +74,12 @@ workstreams:
             - tests/test_lv3_cli.py
           mode: shared_contract
           contract: repo-deploy-profile-integration-v1
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      latest_receipts:
+        coolify_apps: 2026-03-30-adr-0224-education-repo-profile-refresh-live-apply
+        education_wemeshup: 2026-03-30-adr-0224-education-repo-profile-refresh-live-apply
   - id: ws-0295-live-apply
     adr: "0295"
     title: Live apply the shared artifact cache plane from latest origin/main
