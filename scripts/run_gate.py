@@ -126,6 +126,23 @@ def _unique_in_order(values: list[str] | tuple[str, ...]) -> tuple[str, ...]:
     return tuple(ordered)
 
 
+def resolve_changed_files_override() -> tuple[str, ...] | None:
+    raw_payload = os.environ.get("LV3_VALIDATION_CHANGED_FILES_JSON", "").strip()
+    if not raw_payload:
+        return None
+    payload = json.loads(raw_payload)
+    if not isinstance(payload, list):
+        raise ValueError("LV3_VALIDATION_CHANGED_FILES_JSON must be a JSON array")
+    changed_files: list[str] = []
+    for index, item in enumerate(payload):
+        if not isinstance(item, str) or not item.strip():
+            raise ValueError(
+                f"LV3_VALIDATION_CHANGED_FILES_JSON[{index}] must be a non-empty string"
+            )
+        changed_files.append(item.strip())
+    return tuple(changed_files)
+
+
 def resolve_gate_selection(
     *,
     args: argparse.Namespace,
@@ -143,15 +160,25 @@ def resolve_gate_selection(
         catalog_path=lane_catalog_path,
         manifest_checks=set(manifest),
     )
-    selection = validation_lanes.resolve_selection_for_repo(
-        catalog,
-        set(manifest),
-        repo_root=args.workspace.resolve(),
-        base_ref=args.base_ref,
-        explicit_checks=tuple(args.checks),
-        explicit_lanes=tuple(requested_lanes),
-        force_all_lanes=args.all_lanes,
-    )
+    changed_files_override = resolve_changed_files_override()
+    if changed_files_override is not None and not args.checks and not requested_lanes and not args.all_lanes:
+        selection = validation_lanes.resolve_selection_from_changed_files(
+            catalog,
+            set(manifest),
+            changed_files=changed_files_override,
+            branch=validation_lanes.detect_current_branch(args.workspace.resolve()),
+            base_ref=args.base_ref or os.environ.get("LV3_VALIDATION_BASE_REF"),
+        )
+    else:
+        selection = validation_lanes.resolve_selection_for_repo(
+            catalog,
+            set(manifest),
+            repo_root=args.workspace.resolve(),
+            base_ref=args.base_ref,
+            explicit_checks=tuple(args.checks),
+            explicit_lanes=tuple(requested_lanes),
+            force_all_lanes=args.all_lanes,
+        )
     checks = [manifest[label] for label in selection.blocking_checks]
     return checks, catalog, selection
 
@@ -251,7 +278,7 @@ def build_status_payload(
 ) -> dict[str, Any]:
     passed = all(result.status == "passed" for result in results)
     session_workspace = resolve_session_workspace(repo_root=workspace)
-    payload = {
+    payload: dict[str, Any] = {
         "status": "passed" if passed else "failed",
         "source": source,
         "workspace": str(workspace.resolve()),

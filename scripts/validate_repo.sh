@@ -128,9 +128,16 @@ configure_validation_commands() {
   YAMLLINT_CMD=(yamllint)
 }
 
+ensure_validation_commands_configured() {
+  if [[ ${#ANSIBLE_PLAYBOOK_CMD[@]} -eq 0 || ${#ANSIBLE_GALAXY_CMD[@]} -eq 0 || ${#ANSIBLE_LINT_CMD[@]} -eq 0 || ${#YAMLLINT_CMD[@]} -eq 0 ]]; then
+    configure_validation_commands
+  fi
+}
+
 run_uv_python() {
   local packages=()
 
+  ensure_uv
   if [[ "$HAS_UV" != true ]]; then
     echo "uv is required for this validation stage but is not available in the current runtime." >&2
     exit 1
@@ -196,8 +203,6 @@ load_lines_into_array() {
   done
 }
 
-configure_validation_commands
-
 install_collections() {
   local requirements_file="$REPO_ROOT/collections/requirements.yml"
   local current_sha_file=""
@@ -205,6 +210,7 @@ install_collections() {
   local lock_fd=""
 
   [[ -f "$requirements_file" ]] || return 0
+  ensure_validation_commands_configured
 
   mkdir -p "$ANSIBLE_COLLECTIONS_DIR"
   mkdir -p "$(dirname "$ANSIBLE_COLLECTIONS_SHA_FILE")"
@@ -281,6 +287,7 @@ validate_yaml() {
   if [[ ${#yaml_files[@]} -eq 0 ]]; then
     return 0
   fi
+  ensure_validation_commands_configured
   (
     cd "$REPO_ROOT"
     "${YAMLLINT_CMD[@]}" -c .yamllint "${yaml_files[@]}"

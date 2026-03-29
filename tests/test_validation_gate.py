@@ -128,11 +128,11 @@ def test_run_gate_auto_selects_docs_lane_checks(tmp_path: Path) -> None:
                     "working_dir": "/workspace",
                     "timeout_seconds": 30,
                 },
-                "generated-docs": {
-                    "description": "generated docs",
+                "documentation-index": {
+                    "description": "documentation index",
                     "severity": "error",
                     "image": "example/python:latest",
-                    "command": "printf docs",
+                    "command": "printf docs-index",
                     "working_dir": "/workspace",
                     "timeout_seconds": 30,
                 },
@@ -163,7 +163,7 @@ def test_run_gate_auto_selects_docs_lane_checks(tmp_path: Path) -> None:
                 "    title: Documentation",
                 "    description: Doc lane",
                 "    checks:",
-                "      - generated-docs",
+                "      - documentation-index",
                 "  remote-builder:",
                 "    title: Remote builder",
                 "    description: Builder lane",
@@ -220,11 +220,11 @@ def test_run_gate_auto_selects_docs_lane_checks(tmp_path: Path) -> None:
 
     assert exit_code == 0
     payload = json.loads(status_path.read_text(encoding="utf-8"))
-    assert payload["requested_checks"] == ["workstream-surfaces", "agent-standards", "generated-docs"]
+    assert payload["requested_checks"] == ["workstream-surfaces", "agent-standards", "documentation-index"]
     assert payload["lane_selection"]["selected_lanes"] == ["documentation-and-adr"]
     assert payload["lane_selection"]["unknown_files"] == []
     assert payload["lane_results"][0]["green_path_summary"] == (
-        "Documentation passed for 1 changed file(s) via generated-docs."
+        "Documentation passed for 1 changed file(s) via documentation-index."
     )
 
 

@@ -15,6 +15,14 @@
     "working_dir": "/workspace",
     "timeout_seconds": 120
   },
+  "documentation-index": {
+    "description": "Verify that the generated ADR index is current for documentation and workstream changes.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "command": "uv run --with pyyaml python3 scripts/generate_adr_index.py --check >/dev/null",
+    "working_dir": "/workspace",
+    "timeout_seconds": 120
+  },
   "ansible-lint": {
     "description": "Run the repo-managed ansible-lint policy against playbooks and the packaged collection.",
     "severity": "error",

@@ -742,6 +742,7 @@ workstreams:
       - config/validation-gate.json
       - config/validation-lanes.yaml
       - config/workflow-catalog.json
+      - scripts/remote_exec.sh
       - scripts/run_gate.py
       - scripts/gate_status.py
       - scripts/validate_repo.sh
@@ -782,6 +783,7 @@ workstreams:
           mode: exclusive
         - id: validation_lane_runtime
           paths:
+            - scripts/remote_exec.sh
             - scripts/run_gate.py
             - scripts/gate_status.py
             - scripts/validate_repo.sh

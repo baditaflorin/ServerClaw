@@ -55,7 +55,7 @@ def test_docs_change_selects_docs_lane_without_remote_builder() -> None:
     assert selection.blocking_checks == (
         "workstream-surfaces",
         "agent-standards",
-        "generated-docs",
+        "documentation-index",
     )
     assert "remote-builder" not in selection.selected_lanes
     assert "security-scan" not in selection.blocking_checks

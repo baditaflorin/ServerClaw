@@ -7,9 +7,9 @@ fast_global_checks:
 lanes:
   documentation-and-adr:
     title: Documentation and ADR lane
-    description: Validate ADR metadata, runbooks, workstream notes, and generated docs surfaces for documentation-focused changes.
+    description: Validate ADR metadata, runbooks, and workstream notes without widening into unrelated generated-asset sweeps.
     checks:
-      - generated-docs
+      - documentation-index
   repository-structure-and-schema:
     title: Repository structure and schema lane
     description: Validate repository catalogs, data models, cross-surface policy contracts, and alert-rule generation.
@@ -23,6 +23,7 @@ lanes:
     title: Generated artifact and canonical-truth lane
     description: Validate generated portals, dependency diagrams, and publication-safe artifact surfaces.
     checks:
+      - generated-docs
       - generated-portals
       - dependency-graph
       - artifact-secret-scan
