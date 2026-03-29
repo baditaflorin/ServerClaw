@@ -540,9 +540,9 @@ workstreams:
         access roster so dense operator data now has governed sorting,
         filtering, pagination, column control, and keyboard navigation
       release_bump: patch
-      included_in_repo_version: 0.177.63
+      included_in_repo_version: null
       latest_receipts:
-        operator_access_admin: 2026-03-28-adr-0238-operator-grid-live-apply
+        operator_access: 2026-03-28-adr-0238-operator-grid-live-apply
         windmill: 2026-03-28-adr-0238-operator-grid-live-apply
   - id: ws-0246-live-apply
     adr: "0246"

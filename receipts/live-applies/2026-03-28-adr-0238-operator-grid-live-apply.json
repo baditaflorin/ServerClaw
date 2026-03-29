@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-03-29",
   "recorded_on": "2026-03-29",
-  "recorded_at": "2026-03-29T02:01:01Z",
+  "recorded_at": "2026-03-29T02:32:09Z",
   "recorded_by": "codex",
-  "source_commit": "d89bfe52a5efb733f947f887fcb2e574ea364883",
-  "repo_version_context": "0.177.63",
-  "platform_version_context": "0.130.45",
+  "source_commit": "5ee26b59794b337865ef3eb18da0a4d8f0ecd066",
+  "repo_version_context": "0.177.65",
+  "platform_version_context": "0.130.46",
   "workflow_id": "adr-0238-operator-grid-live-apply",
   "adr": "0238",
-  "summary": "Applied ADR 0238 on the live Windmill operator access surface by replacing the roster table with AG Grid Community, tying raw-app seeding to the active worktree, extracting a lightweight Windmill helper client that works under plain python, replaying the full Windmill converge from the isolated ws-0238 worktree, and re-verifying the live app, helper, workers, and schedule contracts end to end.",
+  "summary": "Applied ADR 0238 on the live Windmill operator access surface by replacing the roster table with AG Grid Community, tying raw-app seeding to the active worktree, extracting a lightweight Windmill helper client that works under plain python, replaying the full Windmill converge from the isolated ws-0238 worktree, and re-verifying the live app, helper, workers, and schedule contracts end to end before rebasing the branch cleanly onto the current origin/main 0.177.65 baseline.",
   "targets": [
     {
       "kind": "guest",
@@ -29,17 +29,17 @@
     {
       "check": "Focused repo validation and raw app compile",
       "result": "pass",
-      "observed": "`uv run --with-requirements requirements/api-gateway.txt --with pytest python -m pytest tests/test_windmill_operator_admin_app.py tests/test_config_merge_windmill.py tests/test_windmill_circuit_clients.py tests/test_runbook_use_cases.py tests/test_world_state_repo_surfaces.py tests/test_api_gateway.py -q` passed with `75 passed in 5.21s`. `python3 -m py_compile platform/scheduler/__init__.py platform/scheduler/windmill_client.py platform/scheduler/scheduler.py scripts/windmill_run_wait_result.py` passed, and the isolated raw-app bundle check `tmpdir=\"$(mktemp -d)\" && mkdir -p \"$tmpdir/f/lv3\" && rsync -a config/windmill/apps/f/lv3/operator_access_admin.raw_app/ \"$tmpdir/f/lv3/operator_access_admin.raw_app/\" && cd \"$tmpdir/f/lv3/operator_access_admin.raw_app\" && npm ci && npx tsc --noEmit` completed successfully."
+      "observed": "`uv run --with-requirements requirements/api-gateway.txt --with pytest python -m pytest tests/test_windmill_operator_admin_app.py tests/test_config_merge_windmill.py tests/test_windmill_circuit_clients.py tests/test_runbook_use_cases.py tests/test_world_state_repo_surfaces.py tests/test_api_gateway.py -q` passed with `75 passed in 14.90s`. `python3 -m py_compile platform/scheduler/__init__.py platform/scheduler/windmill_client.py platform/scheduler/scheduler.py scripts/windmill_run_wait_result.py` passed, and the isolated raw-app bundle check `tmpdir=\"$(mktemp -d)\" && mkdir -p \"$tmpdir/f/lv3\" && rsync -a config/windmill/apps/f/lv3/operator_access_admin.raw_app/ \"$tmpdir/f/lv3/operator_access_admin.raw_app/\" && cd \"$tmpdir/f/lv3/operator_access_admin.raw_app\" && npm ci && npx tsc --noEmit` completed successfully."
     },
     {
       "check": "Windmill workflow automation and validation gates",
       "result": "pass",
-      "observed": "`make syntax-check-windmill`, `make preflight WORKFLOW=converge-windmill`, and `./scripts/validate_repo.sh workstream-surfaces agent-standards yaml json role-argument-specs ansible-syntax data-models` all passed after the ws-0238 ownership manifest was expanded to include the helper, scheduler, runbook, and test surfaces touched during the live apply."
+      "observed": "`make syntax-check-windmill`, `make preflight WORKFLOW=converge-windmill`, `./scripts/validate_repo.sh workstream-surfaces agent-standards yaml json role-argument-specs ansible-syntax data-models`, `uv run --with pyyaml --with jsonschema python scripts/platform_manifest.py --check`, and `uv run --with jsonschema python scripts/generate_dependency_diagram.py --check` all passed after the ws-0238 ownership manifest was expanded to include the helper, scheduler, runbook, and test surfaces touched during the live apply. `uv run --with pyyaml python scripts/generate_diagrams.py --check` was also exercised and reported the expected stale `docs/diagrams/agent-coordination-map.excalidraw` output, which remains deferred to the protected mainline integration step."
     },
     {
       "check": "Replayed Windmill converge from the isolated ws-0238 worktree",
       "result": "pass",
-      "observed": "`make converge-windmill` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0238-live-apply` with `docker-runtime-lv3 : ok=234 changed=46 failed=0`, `postgres-lv3 : ok=63 changed=1 failed=0`, and `proxmox_florin : ok=36 changed=4 failed=0`. The successful run copied the repo-managed app sync root, installed raw-app dependencies, pushed the raw app, converged schedules, and passed the seeded Windmill healthcheck plus validation-gate checks."
+      "observed": "`make converge-windmill` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0238-live-apply` with `docker-runtime-lv3 : ok=238 changed=48 failed=0`, `postgres-lv3 : ok=63 changed=1 failed=0`, and `proxmox_florin : ok=36 changed=4 failed=0`. The successful run copied the repo-managed app sync root, installed raw-app dependencies, pushed the raw app, converged schedules, and passed the seeded Windmill healthcheck plus validation-gate checks."
     },
     {
       "check": "Live AG Grid operator app payload",
@@ -86,6 +86,7 @@
     "The first replay after the source-root repair then hit a transient guest-side Docker failure during `docker run ... npm ci` with `error waiting for container: unexpected EOF`. A direct repro succeeded immediately afterward, and the role now retries both the raw-app dependency install and `wmill sync push` before failing the converge.",
     "The controller-side helper path also needed hardening: Windmill no longer reliably answers `jobs/run_wait_result/p/...` by script path, so `scripts/windmill_run_wait_result.py` now submits by script path, falls back to a script hash when necessary, polls `jobs_u/get/<job_id>`, and degrades cleanly when the richer YAML-backed retry and timeout registries are unavailable under plain `python3`.",
     "Before the schedule helper repair landed, `f/lv3/scheduler_watchdog_loop_every_10s` had to be re-enabled once through the Windmill API so the runtime matched the repo intent. The successful helper-based converge now preserves that `enabled: true` contract without the earlier raw SQL flag patching.",
-    "A one-time API probe temporarily wrote placeholder summary and `dsn` values onto `f/lv3/world_state/refresh_container_inventory_every_minute` while testing the update endpoint against a late-arriving script target. The successful replay restored the repo-managed schedule summary, description, `script_path`, and real runtime `dsn` value."
+    "A one-time API probe temporarily wrote placeholder summary and `dsn` values onto `f/lv3/world_state/refresh_container_inventory_every_minute` while testing the update endpoint against a late-arriving script target. The successful replay restored the repo-managed schedule summary, description, `script_path`, and real runtime `dsn` value.",
+    "This receipt keeps the original `2026-03-28` identifier from the first branch-local live-apply file, but its verification block and metadata were refreshed on 2026-03-29 after replaying the converge and then rebasing the branch cleanly onto the current origin/main `0.177.65` baseline."
   ]
 }
