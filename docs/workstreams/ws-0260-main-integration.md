@@ -36,10 +36,22 @@ the synchronized tree, and only then merge and push `main`.
 - `build/platform-manifest.json`
 - `docs/site-generated/architecture/dependency-graph.md`
 - `Makefile`
+- `playbooks/docker-publication-assurance.yml`
+- `playbooks/tasks/docker-publication-assert.yml`
+- `playbooks/tasks/post-verify.yml`
 - `inventory/host_vars/proxmox_florin.yml`
 - `inventory/group_vars/platform.yml`
+- `docs/runbooks/docker-publication-assurance.md`
+- `docs/runbooks/health-probe-contracts.md`
+- `docs/runbooks/playbook-execution-model.md`
+- `docs/workstreams/adr-0270-docker-publication-self-healing-and-port-programming-assertions.md`
+- `collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml`
+- `collections/ansible_collections/lv3/platform/playbooks/tasks/post-verify.yml`
 - `scripts/generate_platform_vars.py`
+- `scripts/docker_publication_assurance.py`
+- `scripts/platform_observation_tool.py`
 - `scripts/restore_verification.py`
+- `scripts/validate_repository_data_models.py`
 - `playbooks/nextcloud.yml`
 - `playbooks/services/nextcloud.yml`
 - `collections/ansible_collections/lv3/platform/playbooks/nextcloud.yml`
@@ -48,7 +60,10 @@ the synchronized tree, and only then merge and push `main`.
 - `collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml`
 - `collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml`
 - `collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml`
+- `collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml`
+- `collections/ansible_collections/lv3/platform/roles/docker_runtime/meta/argument_specs.yml`
 - `collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml`
+- `collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/verify.yml`
 - `collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml`
 - `collections/ansible_collections/lv3/platform/roles/nextcloud_postgres/**`
 - `collections/ansible_collections/lv3/platform/roles/nextcloud_runtime/**`
@@ -80,13 +95,17 @@ the synchronized tree, and only then merge and push `main`.
 - `config/uptime-kuma/monitors.json`
 - `config/workflow-catalog.json`
 - `tests/test_docker_runtime_role.py`
+- `tests/test_docker_publication_assurance.py`
+- `tests/test_docker_publication_assurance_playbook.py`
 - `tests/test_generate_platform_vars.py`
 - `tests/test_interface_contracts.py`
 - `tests/test_linux_guest_firewall_role.py`
 - `tests/test_nextcloud_playbook.py`
 - `tests/test_nextcloud_runtime_role.py`
 - `tests/test_nginx_edge_publication_role.py`
+- `tests/test_platform_observation_tool.py`
 - `tests/test_postgres_vm_access_policy.py`
+- `tests/test_post_verify_tasks.py`
 - `tests/test_service_topology_filters.py`
 - `receipts/image-scans/2026-03-29-nextcloud-runtime.json`
 - `receipts/image-scans/2026-03-29-nextcloud-runtime.trivy.json`
@@ -104,6 +123,9 @@ the synchronized tree, and only then merge and push `main`.
 - rerun the focused regression slice, `make converge-nextcloud`, and the
   public plus guest-local Nextcloud verification path from this synchronized
   integration worktree
+- carry the Docker publication self-healing helper and contract wiring needed
+  to recover host-side bridge/NAT loss that leaves `nextcloud-app` running
+  without a published `8084` listener or container egress to Postgres
 - run repository automation and validation gates end to end before merging to
   `main` and pushing `origin/main`
 

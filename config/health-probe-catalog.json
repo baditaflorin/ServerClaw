@@ -169,7 +169,19 @@
         "method": "GET",
         "expected_status": [
           200
-        ]
+        ],
+        "docker_publication": {
+          "container_name": "coolify",
+          "bindings": [
+            {
+              "host": "10.10.10.70",
+              "port": 8000
+            }
+          ],
+          "required_networks": [
+            "coolify"
+          ]
+        }
       },
       "uptime_kuma": {
         "enabled": false,
@@ -255,7 +267,13 @@
         "method": "GET",
         "expected_status": [
           200
-        ]
+        ],
+        "docker_publication": {
+          "container_name": "dify-nginx",
+          "required_networks": [
+            "dify_default"
+          ]
+        }
       },
       "uptime_kuma": {
         "enabled": true,
@@ -473,7 +491,13 @@
           "-x",
           "/opt/gitea/data/git/repositories/ops/proxmox_florin_server.git/custom_hooks/pre-receive"
         ],
-        "success_rc": 0
+        "success_rc": 0,
+        "docker_publication": {
+          "container_name": "gitea",
+          "required_networks": [
+            "gitea_runtime_default"
+          ]
+        }
       },
       "uptime_kuma": {
         "enabled": true,
@@ -568,7 +592,19 @@
         "method": "GET",
         "expected_status": [
           200
-        ]
+        ],
+        "docker_publication": {
+          "container_name": "nginx",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 8095
+            }
+          ],
+          "required_networks": [
+            "harbor_harbor"
+          ]
+        }
       },
       "uptime_kuma": {
         "enabled": true,
@@ -665,7 +701,13 @@
         "method": "GET",
         "expected_status": [
           200
-        ]
+        ],
+        "docker_publication": {
+          "container_name": "homepage",
+          "required_networks": [
+            "homepage_default"
+          ]
+        }
       },
       "uptime_kuma": {
         "enabled": true,
@@ -723,7 +765,20 @@
         "method": "GET",
         "expected_status": [
           200
-        ]
+        ],
+        "docker_publication": {
+          "container_name": "keycloak-keycloak-1",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 8091
+            }
+          ],
+          "required_networks": [
+            "keycloak_default",
+            "mail-platform_default"
+          ]
+        }
       },
       "tls_certificate_ids": [
         "keycloak-edge"
@@ -784,7 +839,19 @@
         "method": "GET",
         "expected_status": [
           200
-        ]
+        ],
+        "docker_publication": {
+          "container_name": "langfuse-web",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 3002
+            }
+          ],
+          "required_networks": [
+            "langfuse_default"
+          ]
+        }
       },
       "uptime_kuma": {
         "enabled": true,
@@ -1055,7 +1122,19 @@
         "method": "GET",
         "expected_status": [
           200
-        ]
+        ],
+        "docker_publication": {
+          "container_name": "nextcloud-app",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 8084
+            }
+          ],
+          "required_networks": [
+            "nextcloud_default"
+          ]
+        }
       },
       "uptime_kuma": {
         "enabled": true,
@@ -1416,7 +1495,19 @@
         "method": "GET",
         "expected_status": [
           200
-        ]
+        ],
+        "docker_publication": {
+          "container_name": "lv3-openbao",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 8200
+            }
+          ],
+          "required_networks": [
+            "openbao_default"
+          ]
+        }
       },
       "tls_certificate_ids": [
         "openbao-proxy"
@@ -1511,7 +1602,19 @@
         "method": "GET",
         "expected_status": [
           200
-        ]
+        ],
+        "docker_publication": {
+          "container_name": "outline",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 3006
+            }
+          ],
+          "required_networks": [
+            "outline_default"
+          ]
+        }
       },
       "uptime_kuma": {
         "enabled": true,
@@ -1981,7 +2084,13 @@
           "--not-after",
           "1h"
         ],
-        "success_rc": 0
+        "success_rc": 0,
+        "docker_publication": {
+          "container_name": "step-ca",
+          "required_networks": [
+            "step-ca_default"
+          ]
+        }
       },
       "tls_certificate_ids": [
         "step-ca-proxy"
@@ -2084,7 +2193,20 @@
         "expected_status": [
           200
         ],
-        "validate_tls": false
+        "validate_tls": false,
+        "docker_publication": {
+          "container_name": "vaultwarden",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 8222
+            }
+          ],
+          "derive_bindings_from_probes": false,
+          "required_networks": [
+            "vaultwarden_default"
+          ]
+        }
       },
       "tls_certificate_ids": [
         "vaultwarden-private"

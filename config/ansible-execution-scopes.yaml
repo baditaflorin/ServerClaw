@@ -48,6 +48,13 @@ playbooks:
     shared_surfaces:
       - service:docker-runtime
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/docker-publication-assurance.yml:
+    playbook_id: docker-publication-assurance
+    mutation_scope: platform
+    shared_surfaces:
+      - service:docker-publication-assurance
+      - config/health-probe-catalog.json
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/harbor.yml:
     playbook_id: harbor
     mutation_scope: platform
