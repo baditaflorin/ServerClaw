@@ -2595,6 +2595,7 @@ workstreams:
       - docs/diagrams/service-dependency-graph.excalidraw
       - receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-live-apply.json
       - receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-03-29-adr-0254-*.txt
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -2670,6 +2671,7 @@ workstreams:
             - platform/policy/toolchain.py
             - receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-live-apply.json
             - receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-03-29-adr-0254-*.txt
             - tests/test_policy_checks.py
           mode: exclusive
     ready_to_merge: true
