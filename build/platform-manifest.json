@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.68",
-  "platform_version": "0.130.46",
-  "generated_at": "2026-03-29T03:27:32Z",
-  "next_refresh_at": "2026-03-29T04:27:32Z",
+  "repo_version": "0.177.69",
+  "platform_version": "0.130.47",
+  "generated_at": "2026-03-29T03:51:03Z",
+  "next_refresh_at": "2026-03-29T04:51:03Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3427,7 +3427,7 @@
         "id": "configure-keycloak",
         "title": "Configure Keycloak",
         "agent_trust_required": "T3",
-        "steps": 9,
+        "steps": 10,
         "path": "docs/runbooks/configure-keycloak.md",
         "workflow_ids": [
           "converge-keycloak"
@@ -4175,10 +4175,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.67",
+    "last_version": "0.177.68",
     "deployed_at": "2026-03-29",
-    "summary": "implemented ADR 0224 by extending the governed Coolify lane with private-repo Docker Compose intake, wildcard app DNS publication, HTTPS wildcard edge routing, and Docker pull hardening that keeps education-wemeshup serving the full 1056-activity catalog from main",
-    "release_notes_url": "docs/release-notes/0.177.68.md"
+    "summary": "records ADR 0248 exact-main evidence by preserving the shared Keycloak logout authority, oauth2-proxy cleanup flow, and app-surface sign-out alignment after the merged-main replay",
+    "release_notes_url": "docs/release-notes/0.177.69.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

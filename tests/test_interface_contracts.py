@@ -48,6 +48,24 @@ def test_workstream_registry_contract_accepts_in_progress_status(
     assert any(contract["contract_id"] == "workstream-registry-v1" for contract in contracts)
 
 
+def test_workstream_registry_contract_accepts_ready_for_merge_status(
+    tmp_path: Path, monkeypatch
+) -> None:
+    workstreams_path = tmp_path / "workstreams.yaml"
+    workstreams_path.write_text(
+        (REPO_ROOT / "workstreams.yaml")
+        .read_text(encoding="utf-8")
+        .replace("status: merged", "status: ready_for_merge", 1),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(interface_contracts, "WORKSTREAMS_PATH", workstreams_path)
+
+    contracts = interface_contracts.validate_contracts()
+
+    assert any(contract["contract_id"] == "workstream-registry-v1" for contract in contracts)
+
+
 def test_converge_workflow_contract_validates() -> None:
     contracts = validate_contracts()
     assert any(contract["contract_id"] == "converge-workflow-live-apply-v1" for contract in contracts)

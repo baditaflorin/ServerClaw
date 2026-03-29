@@ -1,5 +1,5 @@
 ---
-public_edge_oidc_auth_version: 7.13.0
+public_edge_oidc_auth_version: 7.15.1
 public_edge_oidc_auth_download_url: >-
   https://github.com/oauth2-proxy/oauth2-proxy/releases/download/v{{ public_edge_oidc_auth_version }}/oauth2-proxy-v{{ public_edge_oidc_auth_version }}.linux-amd64.tar.gz
 public_edge_oidc_auth_binary_path: /usr/local/bin/oauth2-proxy
