@@ -35,6 +35,7 @@ make configure-backup-vm
 7. Converges the nightly backup job `backup-lv3-nightly`.
 8. Optionally converges the off-site storage entry `lv3-backup-offsite`.
 9. Optionally converges the off-site backup job `backup-lv3-offsite` for VM `160`.
+10. Leaves the ADR 0271 backup coverage ledger ready to verify the governed VM set, including `coolify-lv3` on VM `170`.
 
 ## Optional Off-Site Inputs
 
@@ -74,6 +75,8 @@ Verify the backup job:
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo pvesh get /cluster/backup/backup-lv3-nightly --output-format json-pretty'
 ```
 
+The governed nightly PBS job should now cover VMIDs `110,120,130,140,150,170`.
+
 Verify the optional off-site job when enabled:
 
 ```bash
@@ -84,6 +87,13 @@ Run one ad hoc backup for validation:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo vzdump 110 --storage lv3-backup-pbs --mode snapshot --compress zstd --notification-mode notification-system'
+```
+
+Render the ADR 0271 ledger after any backup-job change so uncovered assets are
+explicit:
+
+```bash
+make backup-coverage-ledger
 ```
 
 ## Restore-Oriented Check

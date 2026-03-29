@@ -1980,6 +1980,59 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "backup-coverage-ledger": {
+      "description": "Run the ADR 0271 backup coverage ledger against the live Proxmox backup jobs and storage listings, write one receipt, and surface uncovered assets explicitly in DR readiness reporting.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "backup-coverage-ledger",
+        "command": "make backup-coverage-ledger"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "host_live",
+      "owner_runbook": "docs/runbooks/backup-coverage-ledger.md",
+      "implementation_refs": [
+        "Makefile",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_backups/defaults/main.yml",
+        "config/windmill/scripts/backup-coverage-ledger.py",
+        "docs/runbooks/backup-coverage-ledger.md",
+        "docs/runbooks/configure-backup-vm.md",
+        "docs/runbooks/disaster-recovery.md",
+        "receipts/backup-coverage",
+        "scripts/backup_coverage_ledger.py",
+        "scripts/generate_dr_report.py",
+        "tests/test_backup_coverage_ledger.py",
+        "tests/test_backup_coverage_ledger_windmill.py",
+        "tests/test_disaster_recovery.py"
+      ],
+      "outputs": [
+        "A dated backup-coverage receipt that records governed assets, the current Proxmox backup job coverage, the latest observed backup evidence, and any uncovered or degraded assets.",
+        "DR readiness output that names uncovered assets directly instead of hiding them behind the generic off-site backup check."
+      ],
+      "verification_commands": [
+        "python3 -m py_compile scripts/backup_coverage_ledger.py config/windmill/scripts/backup-coverage-ledger.py",
+        "uv run --with pytest --with pyyaml pytest tests/test_backup_coverage_ledger.py tests/test_backup_coverage_ledger_windmill.py tests/test_disaster_recovery.py -q",
+        "uv run --with pyyaml python scripts/backup_coverage_ledger.py --format json"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 80,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "security-posture-scan": {
       "description": "Run the ADR 0102 Lynis and Trivy security posture workflow, store a receipt, and publish security events.",
       "lifecycle_status": "active",
