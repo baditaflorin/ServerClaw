@@ -56,3 +56,22 @@ def test_ops_portal_dockerfile_depends_on_synced_helper_files() -> None:
     assert "COPY publication_contract.py ./publication_contract.py" in dockerfile
     assert "COPY ops_portal ./ops_portal" in dockerfile
     assert "COPY search_fabric ./search_fabric" in dockerfile
+
+
+def test_ops_portal_verify_checks_launcher_partial() -> None:
+    verify_tasks = (
+        REPO_ROOT
+        / "collections"
+        / "ansible_collections"
+        / "lv3"
+        / "platform"
+        / "roles"
+        / "ops_portal_runtime"
+        / "tasks"
+        / "verify.yml"
+    ).read_text(encoding="utf-8")
+
+    assert "Verify the application launcher partial renders locally" in verify_tasks
+    assert '/partials/launcher' in verify_tasks
+    assert "Application Launcher" in verify_tasks
+    assert "Search destinations, pin favorites, and reopen recent paths from one shared masthead control." in verify_tasks
