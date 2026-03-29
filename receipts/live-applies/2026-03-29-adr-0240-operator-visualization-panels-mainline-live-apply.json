@@ -6,7 +6,7 @@
   "recorded_on": "2026-03-29",
   "recorded_at": "2026-03-29T01:43:04Z",
   "recorded_by": "codex",
-  "source_commit": "fe75e1985a0315052ad0c036ba62bd0e33843728",
+  "source_commit": "8a57fffa990809fd24b40b400dc28f0740a32da3",
   "repo_version_context": "0.177.64",
   "platform_version_context": "0.130.46",
   "workflow_id": "adr-0240-operator-visualization-panels-mainline-live-apply",
