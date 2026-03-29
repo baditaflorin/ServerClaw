@@ -105,7 +105,7 @@ workstreams:
   - id: ws-0253-live-apply
     adr: "0253"
     title: Unified runtime assurance scoreboard live apply
-    status: live_applied
+    status: ready
     owner: codex
     branch: codex/ws-0253-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0253-live-apply
@@ -196,7 +196,7 @@ workstreams:
   - id: ws-0245-live-apply
     adr: "0245"
     title: Declared-to-live service attestation live apply
-    status: in_progress
+    status: ready
     owner: codex
     branch: codex/ws-0245-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0245-live-apply
@@ -208,6 +208,7 @@ workstreams:
       - adr-0244-runtime-assurance-matrix-per-service-and-environment
     conflicts_with: []
     shared_surfaces:
+      - .repo-structure.yaml
       - workstreams.yaml
       - docs/workstreams/ws-0245-live-apply.md
       - docs/adr/0245-declared-to-live-service-attestation.md
@@ -215,14 +216,18 @@ workstreams:
       - docs/runbooks/configure-api-gateway.md
       - docs/runbooks/platform-operations-portal.md
       - docs/runbooks/validate-repository-automation.md
-      - receipts/live-applies/
+      - receipts/live-applies/2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply.json
       - platform/runtime_assurance/**
       - scripts/declared_live_attestation.py
       - scripts/api_gateway/main.py
       - scripts/ops_portal/**
+      - scripts/validate_repo.sh
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/Dockerfile.j2
       - tests/test_declared_live_attestation.py
       - tests/test_api_gateway.py
       - tests/test_interactive_ops_portal.py
+      - tests/test_ops_portal_runtime_role.py
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -237,22 +242,38 @@ workstreams:
           contract: adr-index-v1
         - id: adr_0245_live_apply
           paths:
+            - .repo-structure.yaml
             - docs/workstreams/ws-0245-live-apply.md
             - docs/adr/0245-declared-to-live-service-attestation.md
             - docs/runbooks/configure-api-gateway.md
             - docs/runbooks/platform-operations-portal.md
             - docs/runbooks/validate-repository-automation.md
-            - receipts/live-applies/
+            - receipts/live-applies/2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply.json
             - platform/runtime_assurance/**
             - scripts/declared_live_attestation.py
             - scripts/api_gateway/main.py
             - scripts/ops_portal/**
+            - scripts/validate_repo.sh
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/Dockerfile.j2
             - tests/test_declared_live_attestation.py
             - tests/test_api_gateway.py
             - tests/test_interactive_ops_portal.py
-          mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+            - tests/test_ops_portal_runtime_role.py
+          mode: shared_contract
+          contract: adr-0245-live-apply-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0245 by surfacing declared-to-live service
+        attestation through shared runtime witnesses, authenticated gateway
+        APIs, and ops-portal visibility while hardening the live ops-portal
+        sync and build path for separate-worktree replay
+      release_bump: patch
+      included_in_repo_version: null
+      latest_receipts:
+        api_gateway: 2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply
+        ops_portal: 2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply
   - id: ws-0254-serverclaw-adrs
     adr: "0254"
     title: ServerClaw architecture bundle

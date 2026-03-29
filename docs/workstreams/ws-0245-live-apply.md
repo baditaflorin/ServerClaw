@@ -1,14 +1,18 @@
-# Workstream ws-0245-live-apply: ADR 0245 Live Apply From Latest `origin/main`
+# Workstream WS-0245: Declared-To-Live Service Attestation Live Apply
 
 - ADR: [ADR 0245](../adr/0245-declared-to-live-service-attestation.md)
 - Title: declared-to-live service attestation through shared runtime evidence, gateway APIs, and ops-portal visibility
-- Status: in_progress
+- Status: ready
+- Implemented In Repo Version: not yet
+- Live Applied In Platform Version: 0.130.45
+- Implemented On: 2026-03-29
+- Live Applied On: 2026-03-29
 - Branch: `codex/ws-0245-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0245-live-apply`
 - Owner: codex
 - Depends On: `adr-0075-service-capability-catalog`, `adr-0113-world-state-materializer`, `adr-0123-service-uptime-contracts`, `adr-0244-runtime-assurance-matrix-per-service-and-environment`
 - Conflicts With: none
-- Shared Surfaces: `platform/runtime_assurance/**`, `scripts/declared_live_attestation.py`, `scripts/api_gateway/main.py`, `scripts/ops_portal/**`, `tests/test_declared_live_attestation.py`, `tests/test_api_gateway.py`, `tests/test_interactive_ops_portal.py`, `docs/adr/0245-declared-to-live-service-attestation.md`, `docs/adr/.index.yaml`, `docs/runbooks/configure-api-gateway.md`, `docs/runbooks/platform-operations-portal.md`, `docs/runbooks/validate-repository-automation.md`, `receipts/live-applies/`, `workstreams.yaml`
+- Shared Surfaces: `.repo-structure.yaml`, `platform/runtime_assurance/**`, `scripts/declared_live_attestation.py`, `scripts/api_gateway/main.py`, `scripts/ops_portal/**`, `scripts/validate_repo.sh`, `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml`, `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/Dockerfile.j2`, `tests/test_declared_live_attestation.py`, `tests/test_api_gateway.py`, `tests/test_interactive_ops_portal.py`, `tests/test_ops_portal_runtime_role.py`, `docs/adr/0245-declared-to-live-service-attestation.md`, `docs/adr/.index.yaml`, `docs/runbooks/configure-api-gateway.md`, `docs/runbooks/platform-operations-portal.md`, `docs/runbooks/validate-repository-automation.md`, `receipts/live-applies/2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply.json`, `workstreams.yaml`
 
 ## Scope
 
@@ -27,20 +31,24 @@
 ## Expected Repo Surfaces
 
 - `platform/runtime_assurance/**`
+- `.repo-structure.yaml`
 - `scripts/declared_live_attestation.py`
 - `scripts/api_gateway/main.py`
 - `scripts/ops_portal/**`
+- `scripts/validate_repo.sh`
+- `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml`
+- `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/Dockerfile.j2`
 - `tests/test_declared_live_attestation.py`
 - `tests/test_api_gateway.py`
 - `tests/test_interactive_ops_portal.py`
+- `tests/test_ops_portal_runtime_role.py`
 - `docs/adr/0245-declared-to-live-service-attestation.md`
 - `docs/workstreams/ws-0245-live-apply.md`
 - `docs/adr/.index.yaml`
 - `docs/runbooks/configure-api-gateway.md`
 - `docs/runbooks/platform-operations-portal.md`
 - `docs/runbooks/validate-repository-automation.md`
-- `receipts/live-applies/2026-03-28-adr-0245-declared-to-live-service-attestation-live-apply.json`
-- `receipts/live-applies/evidence/2026-03-28-adr-0245-declared-to-live-service-attestation-production.json`
+- `receipts/live-applies/2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply.json`
 - `workstreams.yaml`
 
 ## Expected Live Surfaces
@@ -51,22 +59,23 @@
 
 ## Verification
 
-- `uv run --with pytest --with fastapi==0.116.1 --with httpx==0.28.1 --with uvicorn==0.35.0 --with pyyaml==6.0.2 --with cryptography==45.0.6 --with jinja2==3.1.5 --with itsdangerous==2.2.0 --with python-multipart==0.0.20 pytest -q tests/test_declared_live_attestation.py tests/test_api_gateway.py tests/test_interactive_ops_portal.py`
-- `python3 -m py_compile scripts/declared_live_attestation.py scripts/api_gateway/main.py scripts/ops_portal/app.py`
-- `uv run --with pyyaml python3 scripts/declared_live_attestation.py --repo-root . --format json`
-- `make syntax-check-api-gateway`
-- `make syntax-check-ops-portal`
-- `./scripts/validate_repo.sh agent-standards`
-- `make validate`
-- live apply the changed services from this worktree and verify the declared-to-live contract through the live gateway and ops portal surfaces
+- `uv run --with pytest --with fastapi==0.116.1 --with httpx==0.28.1 --with uvicorn==0.35.0 --with pyyaml==6.0.2 --with cryptography==45.0.6 --with jinja2==3.1.5 --with itsdangerous==2.2.0 --with python-multipart==0.0.20 pytest -q tests/test_declared_live_attestation.py tests/test_api_gateway.py tests/test_interactive_ops_portal.py tests/test_ops_portal_runtime_role.py`
+  returned `39 passed in 11.10s` on the merged latest-`origin/main` branch tip after the ops-portal runtime recovery hardening landed.
+- `python3 -m py_compile platform/runtime_assurance/declared_live_attestation.py scripts/declared_live_attestation.py scripts/api_gateway/main.py scripts/ops_portal/app.py scripts/ops_portal/runtime_assurance.py`,
+  `make syntax-check-api-gateway`, and `make syntax-check-ops-portal` all passed on 2026-03-29.
+- `make preflight WORKFLOW=converge-api-gateway` and `make preflight WORKFLOW=converge-ops-portal` both passed from this worktree on 2026-03-29.
+- The repo-managed API gateway live replay completed successfully with final recap `docker-runtime-lv3 : ok=234 changed=106 unreachable=0 failed=0 skipped=37 rescued=0 ignored=0`, and the live gateway then verified `HTTP 401` for unauthenticated `GET /v1/platform/attestation` plus authenticated `HTTP 200` for both `/v1/platform/attestation` and `/v1/platform/attestation/api_gateway`.
+- The live attestation payload for `api_gateway` proved the declared runtime witness, route witness, and receipt witness, and the authenticated summary showed the shared production attestation rollup under the new contract.
+- The live ops portal verified `HTTP 200` for `http://127.0.0.1:8092/health`, `HTTP 200` for `http://127.0.0.1:8092/`, `HTTP 200` for `http://127.0.0.1:8092/partials/overview`, and `HTTP 302` for public `https://ops.lv3.org/` back to the expected `/oauth2/sign_in` path.
+- Concurrent controller-side applies from other workstreams on the shared `ops-portal` surface interrupted the outer repo-managed replay path during this workstream. The final live state was recovered by syncing the exact branch Dockerfile, portal application files, and templates into `/opt/ops-portal/service` on `docker-runtime-lv3`, rebuilding with `docker compose --file /opt/ops-portal/docker-compose.yml up -d --build --force-recreate --remove-orphans`, and then re-verifying the internal and public portal surfaces end to end.
 
-## Merge Criteria
+## Mainline Integration
 
-- active production services emit a deterministic attestation record with concrete witness evidence
-- edge-published services require separate route proof in addition to runtime presence proof
-- the branch records the live-apply receipt, ADR metadata, and merge-to-main notes needed for a safe later integration
+- protected integration files still remain for the exact-main merge step: `README.md`, `VERSION`, `RELEASE.md`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/0.177.63.md`, `versions/stack.yaml`, and `build/platform-manifest.json`
+- the canonical live-apply receipt for this workstream is `receipts/live-applies/2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply.json`
+- exact-main integration should point both `api_gateway` and `ops_portal` latest-receipt truth to that receipt while preserving the current mainline platform baseline at `0.130.45`
 
-## Notes
+## Notes For The Next Assistant
 
-- protected integration files stay untouched on this workstream branch even if the live apply is fully verified
-- update this document with concrete command transcripts, receipts, and merge-to-main leftovers once the implementation and replay complete
+- the two live surfaces were verified on 2026-03-29, but the `ops-portal` apply path is shared with other active workstreams; re-check for concurrent applies before treating a replay interruption as an ADR 0245 regression
+- the role hardening in `ops_portal_runtime` now matters for exact-worktree replay from separate macOS worktrees: it creates directory-backed receipt destinations before copy, syncs the shared `search_fabric` package explicitly, and preserves the package layout in the Docker build context
