@@ -72,7 +72,8 @@ def test_validate_repo_generated_portals_stage_does_not_require_make() -> None:
     assert 'run --with-requirements "$REPO_ROOT/requirements/docs.txt"' in script
     assert "build_docs_portal.py" in script
     assert '--generated-dir "$generated_docs_dir"' in script
-    assert '--output-dir "$REPO_ROOT/build/docs-portal"' in script
+    assert 'generated_portal_output_dir="$(mktemp -d "${TMPDIR:-/tmp}/lv3-docs-portal.XXXXXX")"' in script
+    assert '--output-dir "$generated_portal_output_dir"' in script
     assert 'make -C "$REPO_ROOT" docs' not in script
 
 
