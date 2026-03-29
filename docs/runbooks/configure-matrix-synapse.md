@@ -65,4 +65,5 @@ Run these checks after converge:
 - This rollout intentionally keeps Matrix Synapse client-facing but non-federating. The repo-managed listener publishes client APIs only and does not expose a federation listener on `8448`.
 - Authentication remains inside Synapse itself. `matrix.lv3.org` is published through the shared edge with TLS, but it is not wrapped in the shared oauth2-proxy browser flow.
 - The host-side controller proxy is intended for governed operator and automation access. It mirrors the same client API surface over Tailscale at `http://100.64.0.1:8015`.
+- The host-side controller proxy binds to the Tailscale address `100.64.0.1:8015`, not to `127.0.0.1:8015`, so host-local verification should target the Tailscale address explicitly.
 - The mirrored server signing key is a recovery artifact. Rotating it changes the homeserver identity contract and must be planned explicitly instead of happening as a routine secret rollover.

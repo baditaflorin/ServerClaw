@@ -2,7 +2,11 @@
 
 - ADR: [ADR 0255](../adr/0255-matrix-synapse-as-the-canonical-serverclaw-conversation-hub.md)
 - Title: repo-managed Matrix Synapse deployment, live apply, verification, and merge-safe evidence capture
-- Status: in_progress
+- Status: live_applied
+- Implemented In Repo Version: not yet
+- Live Applied In Platform Version: not yet
+- Implemented On: 2026-03-29
+- Live Applied On: 2026-03-29
 - Branch: `codex/adr-0255-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0255-live-apply`
 - Owner: codex
@@ -85,4 +89,50 @@
 
 ## Outcome
 
-- Pending implementation, live apply, and final mainline integration.
+- After rebasing onto `origin/main` commit
+  `8871117b40466b7907a33992f44ca7d83a3e9409`, the branch replay succeeded from
+  source commit `450a8cde9b88c0f29e7c6feddcec5c38bf97667b` with repository
+  version context `0.177.83` and integrated platform baseline `0.130.57`.
+- `make converge-matrix-synapse` completed successfully with final recap
+  `docker-runtime-lv3 ok=128 changed=2 failed=0`,
+  `localhost ok=18 changed=0 failed=0`,
+  `nginx-lv3 ok=39 changed=5 failed=0`,
+  `postgres-lv3 ok=51 changed=0 failed=0`, and
+  `proxmox_florin ok=31 changed=4 failed=0`.
+- The matching `make converge-monitoring` replay also completed successfully so
+  the new Matrix HTTPS/TLS assurance artifacts became live, with final recap
+  `backup-lv3 ok=14 changed=0 failed=0`,
+  `coolify-lv3 ok=14 changed=0 failed=0`,
+  `docker-build-lv3 ok=46 changed=0 failed=0`,
+  `docker-runtime-lv3 ok=72 changed=2 failed=0`,
+  `monitoring-lv3 ok=400 changed=11 failed=0`,
+  `nginx-lv3 ok=150 changed=3 failed=0`,
+  `postgres-lv3 ok=38 changed=0 failed=0`, and
+  `proxmox_florin ok=101 changed=3 failed=0`.
+- Focused Matrix regression coverage and the full repository automation gate
+  passed on the rebased branch head: `26` targeted tests passed, `make
+  syntax-check-matrix-synapse` passed, the HTTPS/TLS assurance and diagram
+  generators were current, and `make pre-push-gate` completed successfully.
+- Protected mainline integration surfaces still remain pending from this branch:
+  `VERSION`, `changelog.md`, `README.md`, `versions/stack.yaml`, release-note
+  surfaces, and the canonical exact-main receipt after merge to `main`.
+
+## Live Evidence
+
+- `https://matrix.lv3.org/_matrix/client/versions` returned `status 200` from
+  `server nginx` with `versions_count 20`.
+- Password login against `https://matrix.lv3.org/_matrix/client/v3/login`
+  returned `status 200`, `user_id @ops:matrix.lv3.org`,
+  `home_server matrix.lv3.org`, and well-known base
+  `https://matrix.lv3.org/`.
+- `http://100.64.0.1:8015/_matrix/client/versions` returned `status 200` with
+  `server Synapse/1.150.0`, and `sudo ss -ltnp` on `proxmox_florin` confirmed
+  the controller listener is bound on `100.64.0.1:8015`.
+- `sudo docker compose --file /opt/matrix-synapse/docker-compose.yml ps
+  --format json` on `docker-runtime-lv3` showed
+  `matrixdotorg/synapse:v1.150.0` in `running` state with status
+  `Up About an hour (healthy)`, plus the `openbao-agent` sidecar healthy.
+- Prometheus on `monitoring-lv3` reported `matrix_rule_loaded True` and
+  `matrix_target_active True` for assurance id `matrix-synapse-public`, and the
+  live files were present at `/etc/prometheus/file_sd/https-tls-targets.yml`
+  and `/etc/prometheus/rules/https-tls-alerts.yml`.
