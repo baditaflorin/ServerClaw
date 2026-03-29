@@ -121,6 +121,11 @@ The repository now also ships ADR 0194 Coolify repo-deploy automation live on pr
 The repository now also ships ADR 0199 Outline living knowledge wiki live on production: `https://wiki.lv3.org` is published through the shared NGINX edge, the Keycloak-backed `outline.automation` bootstrap path is repo-managed, and the 2026-03-28 merged-main replay re-verified the five governed living-knowledge collections end to end.
 The developer portal generator now stamps published docs pages with sensitivity metadata, keeps `RESTRICTED` ADRs and runbooks summary-only in portal output, and leaves `CONFIDENTIAL` documents source-only until a dedicated admin-view path exists.
 Portal access is now authentication-by-default on the live platform: `ops.lv3.org`, `docs.lv3.org`, and `changelog.lv3.org` are gated by the shared Keycloak edge auth flow, and Grafana no longer serves anonymous dashboards.
+ADR 0239 browser-local search is now live on `main`: `docs.lv3.org` publishes
+Pagefind bundles for the generated docs corpus, the header search opens the
+Pagefind-backed modal, and the latest exact-main replay re-verified both the
+authenticated `302` edge contract and the published search assets on
+`nginx-lv3`.
 ADR 0134 changelog redaction is now live on the shared authenticated edge: the published deployment-history view masks emails, private IPs, internal hostnames, and inline secret material before changelog data reaches `changelog.lv3.org`.
 ADR 0102 security posture reporting is now live on production: the Windmill-compatible weekly security scan can execute end to end from the worker checkout through the private Proxmox jump path, and committed receipts now include both the first production report and the verified worker replay from 2026-03-26.
 The repository now also ships ADR 0142 public-surface security scanning: `make public-surface-security-scan ENV=production` writes structured receipts under `receipts/security-scan/`, uses `testssl.sh` and `nuclei` container runners for the live public HTTP or HTTPS surface, and can publish high or critical findings on `platform.security.*`; the live weekly schedule still requires apply from `main`.
@@ -137,8 +142,8 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.61` |
-| Platform version | `0.130.44` |
+| Repository version | `0.177.62` |
+| Platform version | `0.130.45` |
 | Observed check date | `2026-03-28` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -214,6 +219,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `dependency_graph_runtime` | `2026-03-26-adr-0117-dependency-graph-live-apply` |
 | `dify` | `2026-03-28-adr-0197-dify-mainline-live-apply` |
 | `docker_runtime` | `2026-03-22-adr-0023-docker-runtime-live-apply` |
+| `docs_portal` | `2026-03-29-adr-0239-browser-local-search-post-merge-replay` |
 | `dozzle` | `2026-03-26-adr-0150-dozzle-live-apply` |
 | `excalidraw` | `2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply` |
 | `failure_domain_policy` | `2026-03-27-adr-0184-failure-domain-labels-live-apply` |
@@ -228,7 +234,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `keycloak` | `2026-03-26-adr-0171-fault-injection-live-apply` |
 | `keycloak_operator_access` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `langfuse` | `2026-03-26-adr-0146-langfuse-live-apply` |
-| `local_search_and_indexing_fabric` | `2026-03-26-adr-0121-search-indexing-fabric-live-apply` |
+| `local_search_and_indexing_fabric` | `2026-03-29-adr-0239-browser-local-search-post-merge-replay` |
 | `log_queryability_canary` | `2026-03-28-adr-0250-log-queryability-canary-live-apply` |
 | `mail_platform` | `2026-03-24-keycloak-password-reset-mail-live-apply` |
 | `mattermost` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
@@ -1163,6 +1169,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream WS-0233: Signed Release Bundles Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0233-live-apply.md)
 - [Workstream ws-0233-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0233-main-merge.md)
 - [Workstream WS-0235: Cross-Application Launcher Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0235-live-apply.md)
+- [Workstream WS-0239: Browser-Local Search Experience Via Pagefind Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0239-live-apply.md)
+- [Workstream ws-0239-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0239-main-merge.md)
 - [Workstream WS-0241: Rich Content And Inline Knowledge Editing Via Tiptap Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0241-live-apply.md)
 - [Workstream ws-0241-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0241-main-merge.md)
 - [Workstream WS-0242: Guided Human Onboarding Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0242-live-apply.md)
@@ -1188,8 +1196,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.61` |
-| Platform version | `0.130.44` |
+| Repository version | `0.177.62` |
+| Platform version | `0.130.45` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1421,6 +1429,8 @@ This repository is intentionally opinionated:
 | `0233` | Live apply signed release bundles via Gitea Releases and Cosign | `live_applied` | [ws-0233-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0233-live-apply.md) |
 | `0233` | Integrate ADR 0233 signed release bundles into origin/main | `merged` | [ws-0233-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0233-main-merge.md) |
 | `0234` | Human user experience architecture bundle | `merged` | [adr-0234-human-user-experience-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md) |
+| `0239` | Live apply browser-local search experience via Pagefind | `live_applied` | [ws-0239-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0239-live-apply.md) |
+| `0239` | Integrate ADR 0239 browser-local search into origin/main | `merged` | [ws-0239-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0239-main-merge.md) |
 | `0241` | Live apply ADR 0241 rich content and inline knowledge editing via Tiptap | `live_applied` | [ws-0241-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0241-live-apply.md) |
 | `0241` | Integrate ADR 0241 rich content and inline knowledge editing into origin/main | `merged` | [ws-0241-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0241-main-merge.md) |
 | `0242` | Guided human onboarding live apply via Shepherd tours | `live_applied` | [ws-0242-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0242-live-apply.md) |

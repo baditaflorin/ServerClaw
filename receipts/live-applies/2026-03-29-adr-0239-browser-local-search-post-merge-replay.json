@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0239-browser-local-search-post-merge-replay",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T01:15:24Z",
+  "recorded_by": "codex",
+  "source_commit": "48b8a79b02480f3cefa1b76e1e5ba88db9098cc6",
+  "repo_version_context": "0.177.62",
+  "platform_version_context": "0.130.45",
+  "workflow_id": "adr-0239-browser-local-search-mainline-live-apply",
+  "adr": "0239",
+  "summary": "After `origin/main` accepted ADR 0239, a latest-server check found that `nginx-lv3` was still serving the older MkDocs search bundle without the Pagefind publication or the `0.177.62` release page, so the exact merged mainline commit was replayed again through `make deploy-docs-portal` and re-verified on both the authenticated edge and the published docs tree.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Developer portal",
+      "address": "https://docs.lv3.org/"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Post-merge drift detection on the live docs tree",
+      "result": "pass",
+      "observed": "After `git fetch origin --prune` confirmed `HEAD` and `origin/main` were both `48b8a79b02480f3cefa1b76e1e5ba88db9098cc6`, guest-local checks on `nginx-lv3` showed `/var/www/lv3-generated/docs-portal` still lacked `pagefind/pagefind-entry.json`, `pagefind/pagefind-ui.js`, `pagefind/pagefind-ui.css`, and `releases/0.177.62/index.html` even though the authenticated public edge still answered `302` behind OAuth."
+    },
+    {
+      "check": "Exact merged-main replay",
+      "result": "pass",
+      "observed": "`make deploy-docs-portal` rebuilt the docs portal with Pagefind reporting `Indexed 784 pages`, `Indexed 15027 words`, and `Indexed 6 filters`, then replayed the shared edge publication from source commit `48b8a79b02480f3cefa1b76e1e5ba88db9098cc6` with `LV3_RUN_ID=12349b9b76a24ed384af3c6650184963`, playbook run id `6e1f04fed42347009d0c9be9f6a1db45`, and recap `nginx-lv3 ok=63 changed=6 failed=0 skipped=12`."
+    },
+    {
+      "check": "Guest-local verification after replay",
+      "result": "pass",
+      "observed": "Direct guest checks on `nginx-lv3` confirmed `/var/www/lv3-generated/docs-portal/pagefind/pagefind-entry.json`, `pagefind/pagefind-ui.js`, and `pagefind/pagefind-ui.css`; the published home page contains `id=\"pagefind-search\"` plus `pagefind/pagefind-ui.js`; `releases/0.177.62/index.html` contains `0.130.45`; and `architecture/dependency-graph/index.html` contains `data-pagefind-filter=\"section\"` without the earlier raw frontmatter leak."
+    },
+    {
+      "check": "External authenticated edge contract",
+      "result": "pass",
+      "observed": "`curl -ksSI https://docs.lv3.org/` returned `HTTP/2 302` with `location: https://docs.lv3.org/oauth2/sign_in?rd=https://docs.lv3.org/` and `x-robots-tag: noindex, nofollow` after the replay."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "build/platform-manifest.json",
+    "docs/workstreams/ws-0239-live-apply.md",
+    "docs/workstreams/ws-0239-main-merge.md",
+    "receipts/live-applies/2026-03-28-adr-0239-browser-local-search-live-apply.json",
+    "receipts/live-applies/2026-03-29-adr-0239-browser-local-search-mainline-live-apply.json",
+    "receipts/live-applies/2026-03-29-adr-0239-browser-local-search-post-merge-replay.json",
+    "versions/stack.yaml",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This receipt supersedes `2026-03-29-adr-0239-browser-local-search-mainline-live-apply` as the latest canonical docs-search evidence because it records the replay from the final merged `origin/main` commit after the stale live docs tree was detected.",
+    "The platform version stays at `0.130.45` because this replay restores the merged `0.177.62` publication rather than introducing a new platform capability."
+  ]
+}

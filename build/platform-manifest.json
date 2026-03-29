@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.61",
-  "platform_version": "0.130.44",
-  "generated_at": "2026-03-29T00:19:17Z",
-  "next_refresh_at": "2026-03-29T01:19:17Z",
+  "repo_version": "0.177.62",
+  "platform_version": "0.130.45",
+  "generated_at": "2026-03-29T01:17:11Z",
+  "next_refresh_at": "2026-03-29T02:17:11Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4062,10 +4062,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.60",
+    "last_version": "0.177.61",
     "deployed_at": "2026-03-29",
-    "summary": "implemented ADR 0241 by adding a Tiptap-backed bounded-knowledge editor to the repo-managed Windmill operator-access admin surface, regenerating the raw-app dependency lock, and hardening governed Windmill live replay from concurrent non-primary worktrees",
-    "release_notes_url": "docs/release-notes/0.177.61.md"
+    "summary": "records ADR 0239 exact-main evidence on the current mainline by preserving the verified Pagefind browser-local docs search rollout, refreshed release surfaces, and the current platform baseline after the exact-main replay",
+    "release_notes_url": "docs/release-notes/0.177.62.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
