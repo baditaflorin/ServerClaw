@@ -17,7 +17,7 @@ workstreams:
   - id: ws-0296-education-refresh
     adr: "0224"
     title: Refresh education_wemeshup from upstream main through a named repo-deploy profile
-    status: live_applied
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0296-education-refresh
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-education-refresh

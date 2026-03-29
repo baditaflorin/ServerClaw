@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0194](../adr/0194-coolify-paas-deploy-from-repo.md), [ADR 0224](../adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md), [ADR 0274](../adr/0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments.md)
 - Title: Pull the latest `education_wemeshup` release through the governed Coolify lane and codify the repeatable operator path as a named profile
-- Status: live_applied
+- Status: ready_for_merge
 - Implemented In Repo Version: `0.177.87`
 - Live Applied In Platform Version: `0.130.59`
 - Implemented On: 2026-03-30
