@@ -20,3 +20,11 @@
   register: docker_runtime_info
   changed_when: false
   failed_when: docker_runtime_info.stdout | trim == ""
+
+- name: Verify the Docker publication assurance helper is installed
+  ansible.builtin.command:
+    argv:
+      - test
+      - -x
+      - "{{ docker_runtime_publication_assurance_script_path }}"
+  changed_when: false

@@ -84,6 +84,15 @@
     dest: /etc/docker/daemon.json
     mode: "0644"
   notify: Restart Docker
+
+- name: Install the Docker publication assurance helper
+  ansible.builtin.copy:
+    content: "{{ lookup('ansible.builtin.file', (inventory_dir | dirname) ~ '/scripts/docker_publication_assurance.py') }}"
+    dest: "{{ docker_runtime_publication_assurance_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+
 - name: Check whether nftables config exists
   ansible.builtin.stat:
     path: "{{ docker_runtime_nftables_config_file }}"

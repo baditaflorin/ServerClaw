@@ -902,6 +902,28 @@ def validate_probe_definition(probe: Any, path: str) -> None:
         require_str(probe.get("unit"), f"{path}.unit")
         require_str(probe.get("expected_state"), f"{path}.expected_state")
 
+    if "docker_publication" in probe:
+        docker_publication = require_mapping(probe.get("docker_publication"), f"{path}.docker_publication")
+        require_str(docker_publication.get("container_name"), f"{path}.docker_publication.container_name")
+        if "required_networks" in docker_publication:
+            require_string_list(docker_publication.get("required_networks"), f"{path}.docker_publication.required_networks")
+        if "bindings" in docker_publication:
+            bindings = require_list(docker_publication.get("bindings"), f"{path}.docker_publication.bindings")
+            for index, binding in enumerate(bindings):
+                binding = require_mapping(binding, f"{path}.docker_publication.bindings[{index}]")
+                require_str(binding.get("host"), f"{path}.docker_publication.bindings[{index}].host")
+                require_int(binding.get("port"), f"{path}.docker_publication.bindings[{index}].port", 1)
+        if "derive_bindings_from_probes" in docker_publication:
+            require_bool(docker_publication.get("derive_bindings_from_probes"), f"{path}.docker_publication.derive_bindings_from_probes")
+        if "require_nat_chain" in docker_publication:
+            require_bool(docker_publication.get("require_nat_chain"), f"{path}.docker_publication.require_nat_chain")
+        if "require_forward_chain" in docker_publication:
+            require_bool(docker_publication.get("require_forward_chain"), f"{path}.docker_publication.require_forward_chain")
+        if "working_directory" in docker_publication:
+            require_str(docker_publication.get("working_directory"), f"{path}.docker_publication.working_directory")
+        if "compose_files" in docker_publication:
+            require_string_list(docker_publication.get("compose_files"), f"{path}.docker_publication.compose_files")
+
 
 def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
     catalog = require_mapping(

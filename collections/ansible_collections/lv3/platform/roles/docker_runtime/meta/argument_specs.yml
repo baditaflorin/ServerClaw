@@ -80,3 +80,8 @@ argument_specs:
         required: false
         description:
           - Docker daemon configuration rendered into `/etc/docker/daemon.json`.
+      docker_runtime_publication_assurance_script_path:
+        type: path
+        required: false
+        description:
+          - Destination path for the repo-managed Docker publication assurance helper installed on managed Docker guests.
