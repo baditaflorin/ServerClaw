@@ -266,6 +266,7 @@ directories:
     key_files:
       "faults/network_impairment_matrix.py": "ADR 0189 typed loader and execution helpers for governed network impairment profiles"
       "policy/engine.py": "ADR 0230 shared OPA evaluation helpers for command approval and promotion gating"
+      "runtime_assurance/declared_live_attestation.py": "ADR 0245 declared-to-live witness collection shared by the CLI and API gateway"
 
   keys:
     purpose: SSH keys and cryptographic material (bootstrap and automation)

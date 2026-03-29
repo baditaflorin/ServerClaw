@@ -7,11 +7,11 @@
 
 schema_version: 1
 generated: '2026-03-29'
-total_adrs: 314
+total_adrs: 324
 implementation_status_summary:
-  Implemented: 243
-  Partial: 7
-  Not Implemented: 63
+  Implemented: 244
+  Partial: 8
+  Not Implemented: 71
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -69,6 +69,7 @@ concerns:
     - '0204'
     - '0221'
     - 0228
+    - '0306'
   bootstrap:
     - '0001'
     - '0003'
@@ -113,6 +114,7 @@ concerns:
     - '0275'
     - 0287
     - 0295
+    - '0305'
   documentation:
     - '0074'
     - 0081
@@ -276,12 +278,17 @@ concerns:
     - 0290
     - 0291
     - 0292
+    - 0298
+    - 0299
+    - '0303'
   release:
     - 0008
     - '0110'
     - '0120'
     - '0155'
     - '0246'
+    - 0297
+    - '0304'
   resilience:
     - '0163'
     - '0167'
@@ -310,12 +317,15 @@ concerns:
     - 0248
     - 0249
     - '0262'
+    - '0300'
+    - '0301'
   storage:
     - '0020'
     - '0051'
     - 0099
     - '0271'
     - '0274'
+    - '0302'
   testing:
     - '0111'
     - 0187
@@ -4216,7 +4226,7 @@ adr_index:
   - adr: '0245'
     title: Declared-To-Live Service Attestation
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: testing
     keywords:
@@ -4225,6 +4235,7 @@ adr_index:
       - attestation
     summary: We will require declared-to-live service attestation for every active
     filename: 0245-declared-to-live-service-attestation.md
+    implemented_version: 0.177.72
   - adr: '0246'
     title: Startup, Readiness, Liveness, And Degraded State Semantics
     status: Accepted
@@ -5207,3 +5218,172 @@ adr_index:
       - adoption
     summary: We will adopt artifact caching in two phases.
     filename: 0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md
+  - adr: 0297
+    title: Renovate Bot As The Automated Stack Version Upgrade Proposer
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: release
+    keywords:
+      - renovate
+      - bot
+      - as
+      - automated
+      - stack
+      - version
+      - upgrade
+      - proposer
+    summary: We will deploy Renovate Bot as a scheduled Gitea Actions job on
+    filename: 0297-renovate-bot-as-the-automated-stack-version-upgrade-proposer.md
+  - adr: 0298
+    title: Syft And Grype For Platform-Wide SBOM Generation And Continuous CVE Scanning
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - syft
+      - grype
+      - platform-wide
+      - sbom
+      - generation
+      - continuous
+      - cve
+      - scanning
+    summary: We will deploy Syft and Grype as Gitea Actions CI steps and as a
+    filename: 0298-syft-and-grype-for-platform-wide-sbom-generation-and-continuous-cve-scanning.md
+  - adr: 0299
+    title: Ntfy As The Self-Hosted Push Notification Channel For Programmatic Alert Delivery
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - ntfy
+      - as
+      - self-hosted
+      - push
+      - notification
+      - channel
+      - programmatic
+      - alert
+    summary: We will formalise ntfy as the platform's self-hosted push notification channel
+    filename: 0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md
+  - adr: '0300'
+    title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: security
+    keywords:
+      - falco
+      - container
+      - runtime
+      - syscall
+      - security
+      - monitoring
+      - autonomous
+      - anomaly
+    summary: We will deploy Falco as a systemd service on each production VM, using the
+    filename: 0300-falco-for-container-runtime-syscall-security-monitoring-and-autonomous-anomaly-detection.md
+  - adr: '0301'
+    title: Semgrep For SAST And Application Code Security Scanning In The CI Gate
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: security
+    keywords:
+      - semgrep
+      - sast
+      - application
+      - code
+      - security
+      - scanning
+      - ci
+      - gate
+    summary: We will integrate Semgrep as a required step in the Gitea Actions CI
+    filename: 0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md
+  - adr: '0302'
+    title: Restic For Encrypted File-Level Backup Of Platform Configuration And State Artifacts
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: storage
+    keywords:
+      - restic
+      - encrypted
+      - file-level
+      - backup
+      - platform
+      - configuration
+      - state
+      - artifacts
+    summary: We will deploy Restic as a scheduled backup agent for platform configuration
+    filename: 0302-restic-for-encrypted-file-level-backup-of-platform-configuration-and-state-artifacts.md
+  - adr: '0303'
+    title: pgaudit For PostgreSQL Query And Privilege Change Audit Logging
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - pgaudit
+      - postgresql
+      - query
+      - privilege
+      - change
+      - audit
+      - logging
+    summary: We will enable pgaudit on the production PostgreSQL instance and configure it
+    filename: 0303-pgaudit-for-postgresql-query-and-privilege-change-audit-logging.md
+  - adr: '0304'
+    title: Atlas For Declarative Database Schema Migration Versioning And Pre-Migration Linting
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: release
+    keywords:
+      - atlas
+      - declarative
+      - database
+      - schema
+      - migration
+      - versioning
+      - pre-migration
+      - linting
+    summary: We will integrate Atlas as the migration linting and drift detection layer
+    filename: 0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md
+  - adr: '0305'
+    title: k6 For Continuous Load Testing And SLO Error Budget Burn Validation
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: ci-cd
+    keywords:
+      - k6
+      - continuous
+      - load
+      - testing
+      - slo
+      - error
+      - budget
+      - burn
+    summary: We will integrate k6 as the platform's load testing and SLO budget burn
+    filename: 0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
+  - adr: '0306'
+    title: Checkov For IaC Policy Compliance Scanning Of OpenTofu, Compose, And Ansible
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: automation
+    keywords:
+      - checkov
+      - iac
+      - policy
+      - compliance
+      - scanning
+      - opentofu
+      - compose
+      - ansible
+    summary: We will integrate Checkov as a required CI gate step for all IaC surfaces in
+    filename: 0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md

@@ -109,6 +109,11 @@ from platform.events import build_envelope
 from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 from platform.logging import clear_context, generate_trace_id, get_logger, set_context
 from platform.retry import async_with_retry, policy_for_surface
+from platform.runtime_assurance import (
+    ServiceAttestationNotFoundError,
+    collect_declared_live_attestations,
+    collect_declared_live_service_attestation,
+)
 from platform.timeouts import TimeoutContext, resolve_timeout_seconds
 from platform.use_cases.runbooks import RunbookRunStore, RunbookSurfaceError, RunbookUseCaseService, WindmillWorkflowRunner
 from platform.world_state.client import SurfaceNotFoundError, WorldStateClient, WorldStateUnavailable
@@ -847,6 +852,21 @@ class GatewayRuntime:
                 return service
         raise ServiceHealthNotFoundError(service_id)
 
+    def collect_platform_attestation(self, environment: str = "production") -> dict[str, Any]:
+        return collect_declared_live_attestations(
+            repo_root=self.config.repo_root,
+            environment=environment,
+            world_state_dsn=self.config.world_state_dsn,
+        )
+
+    def collect_platform_service_attestation(self, service_id: str, environment: str = "production") -> dict[str, Any]:
+        return collect_declared_live_service_attestation(
+            service_id,
+            repo_root=self.config.repo_root,
+            environment=environment,
+            world_state_dsn=self.config.world_state_dsn,
+        )
+
     def collect_runtime_assurance(self) -> dict[str, Any]:
         return build_runtime_assurance_report(
             repo_root=self.config.repo_root,
@@ -1383,6 +1403,38 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
             services.append(item)
         await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
         return {"count": len(services), "services": services}
+
+    @app.get("/v1/platform/attestation")
+    async def platform_attestation(
+        request: Request,
+        environment: str = Query(default="production"),
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        payload = await asyncio.to_thread(runtime.collect_platform_attestation, environment)
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return payload
+
+    @app.get("/v1/platform/attestation/{service_id}")
+    async def platform_service_attestation(
+        service_id: str,
+        request: Request,
+        environment: str = Query(default="production"),
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        try:
+            payload = await asyncio.to_thread(runtime.collect_platform_service_attestation, service_id, environment)
+        except ServiceAttestationNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return payload
 
     @app.get("/v1/platform/degradations")
     async def platform_degradations(
