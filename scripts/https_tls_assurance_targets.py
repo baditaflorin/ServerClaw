@@ -135,6 +135,36 @@ def public_monitor_url(service_url: str, health_probe: dict[str, Any] | None) ->
     return normalize_url(monitor_url)
 
 
+def public_edge_connect_host(services: list[dict[str, Any]]) -> str | None:
+    for service in services:
+        service_id = service.get("id")
+        if not isinstance(service_id, str) or service_id != "nginx_edge":
+            continue
+        internal_url = service.get("internal_url")
+        if not isinstance(internal_url, str) or not internal_url.startswith(("http://", "https://")):
+            continue
+        parsed = urlparse(internal_url)
+        if parsed.hostname and is_ip_address(parsed.hostname):
+            return parsed.hostname
+    return None
+
+
+def public_probe_target_url(
+    service_url: str,
+    probe_url: str,
+    *,
+    connect_host: str | None,
+) -> tuple[str, str]:
+    if not connect_host:
+        return normalize_url(probe_url), ""
+
+    public_host = urlparse(service_url).hostname or urlparse(probe_url).hostname
+    if not public_host or is_ip_address(public_host):
+        return normalize_url(probe_url), ""
+
+    return normalize_url(url_with_host(probe_url, connect_host)), public_host
+
+
 def policy_from_certificate(certificate: dict[str, Any] | None, *, provider: str) -> dict[str, int | str]:
     if certificate is not None:
         policy = require_mapping(certificate.get("policy"), f"certificate[{certificate['id']}].policy")
@@ -263,6 +293,7 @@ def discover_https_tls_targets(environment: str = DEFAULT_ENVIRONMENT) -> list[d
     subdomains = load_subdomain_catalog(environment=environment)
     certificates = load_certificate_catalog()
     health_probes = load_health_probe_catalog()
+    edge_connect_host = public_edge_connect_host(services)
 
     targets: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
@@ -315,10 +346,23 @@ def discover_https_tls_targets(environment: str = DEFAULT_ENVIRONMENT) -> list[d
             elif subdomain_entry:
                 tls_provider = str(require_mapping(subdomain_entry.get("tls", {}), f"subdomain[{host}].tls").get("provider", "any"))
 
-            probe_url = preferred_probe_url(service, service_url=normalized_url, scope=scope, health_probe=health_probe)
+            preferred_public_url = preferred_probe_url(
+                service,
+                service_url=normalized_url,
+                scope=scope,
+                health_probe=health_probe,
+            )
+            display_url = preferred_public_url if preferred_public_url != normalized_url else normalized_url
+            probe_url = preferred_public_url
             probe_hostname = ""
             testssl_url = normalized_url
             testssl_ip = ""
+            if scope == "public":
+                probe_url, probe_hostname = public_probe_target_url(
+                    normalized_url,
+                    preferred_public_url,
+                    connect_host=edge_connect_host,
+                )
             if certificate is not None:
                 endpoint = require_mapping(certificate.get("endpoint"), f"certificate[{certificate['id']}].endpoint")
                 server_name = require_str(endpoint.get("server_name"), f"certificate[{certificate['id']}].endpoint.server_name")
@@ -349,7 +393,7 @@ def discover_https_tls_targets(environment: str = DEFAULT_ENVIRONMENT) -> list[d
                     "probe_url": probe_url,
                     "probe_hostname": probe_hostname,
                     "probe_module": determine_probe_module(expected_issuer=tls_provider, host=host),
-                    "display_url": probe_url if probe_url != normalized_url else normalized_url,
+                    "display_url": display_url,
                     "testssl_url": testssl_url,
                     "testssl_ip": testssl_ip,
                     "certificate_id": certificate["id"] if certificate else "",
