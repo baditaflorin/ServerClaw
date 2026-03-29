@@ -517,6 +517,93 @@
       "runbook": "docs/runbooks/maintenance-windows.md"
     },
     {
+      "name": "list-serverclaw-skills",
+      "title": "List ServerClaw Skills",
+      "description": "Resolve the repo-managed ServerClaw SKILL.md packs with bundled, shared, and workspace-local precedence plus mirrored third-party review state.",
+      "category": "observe",
+      "transport": "controller_local",
+      "endpoint": "repo://scripts/serverclaw_skill_packs.py",
+      "auth": "repo-read",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "workspace_id": {
+            "type": "string"
+          },
+          "skill_id": {
+            "type": "string"
+          },
+          "include_imported": {
+            "type": "boolean"
+          },
+          "include_prompt_manifest": {
+            "type": "boolean"
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "workspace_id",
+          "default_workspace_id",
+          "active_skill_count",
+          "active_skills",
+          "shadowed_skills",
+          "imported_skills",
+          "prompt_manifest"
+        ],
+        "properties": {
+          "workspace_id": {
+            "type": "string"
+          },
+          "default_workspace_id": {
+            "type": "string"
+          },
+          "active_skill_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "active_skills": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "shadowed_skills": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "imported_skills": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "prompt_manifest": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "list_serverclaw_skills"
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "runbook": "docs/runbooks/serverclaw-skills.md"
+    },
+    {
       "name": "export-mcp-tools",
       "title": "Export MCP Tools",
       "description": "Export the governed tool registry as MCP-compatible tool definitions.",
