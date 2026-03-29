@@ -39,6 +39,7 @@ public_edge_service_topology: >-
         | default(platform_service_topology)
       )
   }}
+public_edge_session_authority: "{{ platform_session_authority }}"
 public_edge_certbot_email: baditaflorin@gmail.com
 public_edge_cert_name: lv3-edge
 public_edge_acme_challenge_method: webroot
@@ -159,6 +160,12 @@ public_edge_security_headers_overrides:
       object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
       img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://sso.lv3.org;
       frame-src 'self'; manifest-src 'self'
+  wiki.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
+      img-src 'self' data: https: blob:; font-src 'self' data:;
+      connect-src 'self' https://wiki.lv3.org; manifest-src 'self'
   status.lv3.org:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';

@@ -10,6 +10,7 @@ It covers:
 - Keycloak runtime deployment on `docker-runtime-lv3`
 - public DNS and edge publication at `https://sso.lv3.org`
 - repo-managed realm, groups, initial named operator account, and confidential clients
+- repo-managed post-logout redirect URI contracts for `ops-portal-oauth`, `grafana-oauth`, and `outline`
 - repo-managed realm SMTP settings for password resets and required-action mail through `lv3-mail-stalwart:1587` on the shared mail Docker network, with STARTTLS disabled
 - Grafana OIDC configuration against the shared Keycloak broker
 - controller-local recovery and client-secret artifacts mirrored under `.local/keycloak/`
@@ -40,6 +41,7 @@ The workflow manages these live surfaces:
 - internal Keycloak mail submission endpoint `lv3-mail-stalwart:1587` on the shared mail Docker network
 - named operator account `florin.badita`
 - confidential OIDC client `grafana-oauth`
+- shared logout authority return paths rooted at `https://ops.lv3.org/.well-known/lv3/session/`
 - confidential agent client `lv3-agent-hub`
 - Grafana generic OAuth redirect path at `https://grafana.lv3.org/login/generic_oauth`
 
@@ -65,6 +67,7 @@ Run these checks after converge:
 4. `curl -I https://grafana.lv3.org/login/generic_oauth`
 5. `curl -s --data "grant_type=client_credentials&client_id=lv3-agent-hub&client_secret=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/lv3-agent-hub-client-secret.txt)" https://sso.lv3.org/realms/lv3/protocol/openid-connect/token`
 6. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker exec keycloak-keycloak-1 getent ahostsv4 lv3-mail-stalwart && docker exec keycloak-keycloak-1 /bin/bash -lc '"'"'"'"'"'"'"'"'timeout 15 bash -lc "exec 3<>/dev/tcp/lv3-mail-stalwart/1587"'"'"'"'"'"'"'"'"''`
+7. `uv run --with playwright python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/session_logout_verify.py --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline.automation-password.txt`
 
 ## TOTP Recovery
 
@@ -108,6 +111,8 @@ The password recovery action:
 
 - Keycloak is the shared SSO broker. It does not replace OpenBao for secrets or `step-ca` for SSH and internal TLS.
 - Grafana is the first repo-managed consumer of the shared OIDC flow in this rollout. Future app integrations should reuse the same realm and identity taxonomy instead of creating app-local password stores.
+- The shared browser-session logout contract depends on the edge publication and app-local consumers being current as well as Keycloak. After changing post-logout redirect URIs here, replay `make configure-edge-publication` and any affected service playbooks before relying on end-to-end logout verification.
+- The shared edge and Grafana flows now complete Keycloak logout without an interactive confirmation page because the shared proxy logout path can provide `id_token_hint`. Outline is the current declared gap: its app-local logout reaches the Keycloak confirmation page and then returns through `https://ops.lv3.org/.well-known/lv3/session/proxy-logout`. Treat that confirmation page as expected current behavior until Outline can provide an `id_token_hint`.
 - The Keycloak master bootstrap admin remains a break-glass recovery identity and should not become a routine human login.
 - The named operator account is created with a bootstrap password and a required `CONFIGURE_TOTP` action so MFA enrollment happens on first successful interactive login.
 - Password resets and required-action mail use `lv3-mail-stalwart:1587` over the shared `mail-platform_default` Docker network. This avoids Docker host-port hairpin failures and avoids STARTTLS certificate mismatch on the internal container DNS name.

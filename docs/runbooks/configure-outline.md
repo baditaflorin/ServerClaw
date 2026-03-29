@@ -10,6 +10,7 @@ The Outline workflow converges:
 - the Outline runtime, Redis cache, and MinIO attachment store on `docker-runtime-lv3`
 - the public hostname `wiki.lv3.org` on the shared NGINX edge
 - the dedicated Keycloak OIDC client used by the Outline sign-in flow
+- the shared logout handoff from Outline to Keycloak and then to the shared `oauth2-proxy` cookie-cleanup endpoint on `ops.lv3.org`
 - the controller-local Outline API token and the initial living knowledge collections
 
 ## Preconditions
@@ -29,6 +30,12 @@ HETZNER_DNS_API_TOKEN=... make live-apply-service service=outline env=production
 ```
 
 This is the required path for the authoritative platform-version bump because `make live-apply-service` updates the canonical truth surfaces after the merged-main replay.
+
+On a non-`main` workstream branch, expect that target to stop at the canonical
+truth gate if protected shared integration files such as `README.md` would need
+refreshing. That stop is expected branch-local behavior; use the direct scoped
+runner below and record the evidence in the workstream receipt instead of
+editing protected release truth on the branch.
 
 On a workstream branch where protected integration files must remain untouched, run the service playbook directly:
 
@@ -70,6 +77,15 @@ The role performs the first Outline admin bootstrap without browser interaction 
 4. pruning the default `Welcome` collection after bootstrap
 5. syncing the living collection landing pages and indexes while deleting duplicate managed landing docs if they drift in
 
+Outline logout remains app-local first, but the repo-managed `OIDC_LOGOUT_URI` now hands the browser to Keycloak with a declared post-logout return path through `https://ops.lv3.org/.well-known/lv3/session/proxy-logout` so shared edge cookies are cleared before the final logged-out landing page.
+
+The real live logout path should be verified through the authenticated UI
+account menu, not by assuming `GET /logout` fully exercises the browser flow.
+Today Outline still lands on the Keycloak confirmation page because it cannot
+provide `id_token_hint`; after that confirmation, the browser is returned
+through the shared proxy-cleanup path and both `home.lv3.org` and
+`wiki.lv3.org` must require fresh Keycloak login.
+
 ## Syncing knowledge surfaces
 
 To refresh the living knowledge docs on demand:
@@ -91,6 +107,7 @@ Repository and syntax checks:
 ```bash
 python3 scripts/validate_service_completeness.py --service outline
 uv run --with pytest python -m pytest tests/test_outline_runtime_role.py tests/test_outline_playbook.py tests/test_outline_sync.py tests/test_keycloak_runtime_role.py tests/test_release_manager.py tests/test_generate_platform_vars.py
+uv run --with pyyaml --with jsonschema python -m unittest tests.test_grafana_sso_role tests.test_session_logout_verify
 ./scripts/validate_repo.sh agent-standards
 ./scripts/validate_repo.sh generated-portals
 uvx --from pyyaml python scripts/interface_contracts.py --check-live-apply service:outline
@@ -103,6 +120,8 @@ Runtime verification:
 ```bash
 curl -fsS https://wiki.lv3.org/_health
 python3 scripts/sync_docs_to_outline.py verify --base-url https://wiki.lv3.org
+uv run --with playwright python scripts/session_logout_verify.py \
+  --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline.automation-password.txt
 ```
 
 The verify command asserts that the required collections exist and that the repo-managed landing docs were published successfully. A successful sync keeps the top-level collection set at `ADRs`, `Runbooks`, `Incident Postmortems`, `Agent Findings`, and `Architecture`.

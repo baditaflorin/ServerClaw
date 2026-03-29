@@ -2,6 +2,7 @@
 # Purpose: Default runtime inputs for the Outline knowledge wiki.
 
 outline_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('outline') }}"
+outline_session_authority: "{{ platform_session_authority }}"
 outline_site_dir: /opt/outline
 outline_data_dir: "{{ outline_site_dir }}/data"
 outline_minio_data_dir: "{{ outline_data_dir }}/minio"
@@ -51,7 +52,8 @@ outline_keycloak_issuer: https://sso.lv3.org/realms/lv3
 outline_keycloak_auth_uri: https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth
 outline_keycloak_token_uri: https://sso.lv3.org/realms/lv3/protocol/openid-connect/token
 outline_keycloak_userinfo_uri: https://sso.lv3.org/realms/lv3/protocol/openid-connect/userinfo
-outline_keycloak_logout_uri: https://sso.lv3.org/realms/lv3/protocol/openid-connect/logout
+outline_keycloak_logout_uri: >-
+  {{ outline_session_authority.keycloak_logout_url }}?client_id={{ outline_keycloak_client_id }}&post_logout_redirect_uri={{ outline_session_authority.shared_proxy_cleanup_url | urlencode }}
 outline_keycloak_username_claim: preferred_username
 outline_keycloak_scopes: openid profile email
 outline_bootstrap_username: outline.automation

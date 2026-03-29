@@ -19,11 +19,14 @@ class PublicEdgeOidcAuthRoleTests(unittest.TestCase):
         self.assertNotIn("groups", self.defaults["public_edge_oidc_auth_scope"].split())
         self.assertEqual(self.defaults["public_edge_oidc_auth_cookie_domain"], ".lv3.org")
         self.assertEqual(self.defaults["public_edge_oidc_auth_probe_hostname"], "ops.lv3.org")
+        self.assertEqual(self.defaults["public_edge_oidc_auth_version"], "7.15.1")
 
     def test_template_renders_scope_and_group_filtering(self) -> None:
         self.assertIn('scope = "{{ public_edge_oidc_auth_scope }}"', self.template)
         self.assertIn("allowed_groups =", self.template)
         self.assertIn("pass_access_token = true", self.template)
+        self.assertIn("pass_authorization_header = true", self.template)
+        self.assertIn("set_authorization_header = true", self.template)
 
 
 if __name__ == "__main__":

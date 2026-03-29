@@ -3,10 +3,10 @@
 - Date: 2026-03-29
 
 ## Summary
-- implemented ADR 0235 by adding a PatternFly-style cross-application launcher to the interactive ops portal, with catalog-backed purpose grouping, persona filtering, favorites, and recent destinations across first-party browser surfaces
+- records ADR 0248 exact-main evidence by preserving the shared Keycloak logout authority, oauth2-proxy cleanup flow, and app-surface sign-out alignment after the merged-main replay
 
 ## Platform Impact
-- platform version advances to 0.130.47 after the exact-main ADR 0235 replay re-verifies the PatternFly-style cross-application launcher and session-scoped favorites on ops.lv3.org while preserving the authenticated edge contract on top of the 0.130.46 baseline
+- platform version advances to 0.130.47 after the exact-main ADR 0248 replay re-verifies the shared Keycloak logout authority, oauth2-proxy cleanup flow, and Outline logout handoff on top of the 0.130.46 baseline
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)
