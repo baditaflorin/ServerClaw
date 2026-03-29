@@ -553,6 +553,11 @@ network_policy:
             - 9998
             - 11434
           description: Private guest-to-guest document rendering, extraction, and agent API traffic
+        - source: host
+          protocol: tcp
+          ports:
+            - 9998
+          description: Proxmox host verification and controller-side access to the private Tika extraction API
         - source: 172.16.0.0/12
           protocol: tcp
           ports:
