@@ -156,6 +156,8 @@ api_gateway_sources:
     dest: maintenance_window_tool.py
   - src: "{{ api_gateway_repo_root }}/scripts/slo_tracking.py"
     dest: slo_tracking.py
+  - src: "{{ api_gateway_repo_root }}/scripts/runtime_assurance.py"
+    dest: runtime_assurance.py
   - src: "{{ api_gateway_repo_root }}/scripts/api_gateway/__init__.py"
     dest: api_gateway/__init__.py
   - src: "{{ api_gateway_repo_root }}/scripts/api_gateway/main.py"

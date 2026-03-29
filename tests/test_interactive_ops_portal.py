@@ -593,6 +593,9 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
         + "\n",
         encoding="utf-8",
     )
+    (data_root / "receipts" / "live-applies" / "._2026-03-24-grafana-runtime-assurance.json").write_bytes(
+        b"\xa3\x00\x00not-json"
+    )
     (data_root / "receipts" / "drift-reports" / "latest.json").write_text(
         json.dumps(
             {
@@ -611,6 +614,7 @@ def portal_runtime(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient, Path]
         + "\n",
         encoding="utf-8",
     )
+    (data_root / "receipts" / "drift-reports" / "._latest.json").write_bytes(b"\xa3\x00\x00not-json")
 
     settings = PortalSettings(
         gateway_url="http://gateway.invalid",
@@ -704,6 +708,18 @@ def test_runtime_assurance_scoreboard_renders_service_rows(
     assert "Keycloak" in response.text
     assert "production" in response.text
     assert "lv3-platform" in response.text
+
+
+def test_dashboard_ignores_metadata_sidecars_in_receipts(
+    portal_client: tuple[TestClient, FakeGatewayClient],
+) -> None:
+    client, _gateway = portal_client
+
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert "Recent Live Applies" in response.text
+    assert "Dashboard permissions drifted" in response.text
 
 
 def test_dashboard_uses_same_origin_static_stylesheet(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:

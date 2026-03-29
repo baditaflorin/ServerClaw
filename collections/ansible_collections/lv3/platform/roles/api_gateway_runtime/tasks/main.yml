@@ -226,6 +226,7 @@
       COPY api_gateway_catalog.py ./api_gateway_catalog.py
       COPY maintenance_window_tool.py ./maintenance_window_tool.py
       COPY slo_tracking.py ./slo_tracking.py
+      COPY runtime_assurance.py ./runtime_assurance.py
       COPY api_gateway ./api_gateway
       COPY collections ./collections
       COPY docs ./docs

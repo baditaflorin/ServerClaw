@@ -165,6 +165,7 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
 
     assert "scripts/maintenance_window_tool.py" in defaults
     assert "scripts/slo_tracking.py" in defaults
+    assert "scripts/runtime_assurance.py" in defaults
     assert "api_gateway_tree_sync_specs" in defaults
     assert ".githooks/pre-push" in defaults
     assert ".github/workflows/validate.yml" in defaults
@@ -212,6 +213,7 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "COPY ansible.cfg ./ansible.cfg" in tasks
     assert "COPY maintenance_window_tool.py ./maintenance_window_tool.py" in tasks
     assert "COPY slo_tracking.py ./slo_tracking.py" in tasks
+    assert "COPY runtime_assurance.py ./runtime_assurance.py" in tasks
     assert "COPY collections ./collections" in tasks
     assert "COPY docs ./docs" in tasks
     assert "COPY inventory ./inventory" in tasks

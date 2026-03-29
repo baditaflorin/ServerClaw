@@ -69,9 +69,12 @@ def humanize_timestamp(value: str | None) -> str:
 
 
 def load_json_file(path: Path, default: Any) -> Any:
-    if not path.exists():
+    if not path.exists() or is_macos_metadata_file(path):
         return default
-    return json.loads(path.read_text(encoding="utf-8"))
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return default
 
 
 def is_macos_metadata_file(path: Path) -> bool:

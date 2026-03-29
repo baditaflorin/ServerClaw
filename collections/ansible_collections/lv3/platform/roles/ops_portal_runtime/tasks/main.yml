@@ -189,6 +189,8 @@
     group: root
     mode: "0644"
   loop: "{{ ops_portal_runtime_file_sources }}"
+  loop_control:
+    label: "{{ item.dest | replace(ops_portal_service_dir ~ '/', '') }}"
 
 - name: Reset the synced search fabric package tree before refresh
   ansible.builtin.file:
