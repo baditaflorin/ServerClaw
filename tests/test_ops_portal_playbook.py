@@ -37,6 +37,24 @@ def test_ops_portal_runtime_clears_previous_build_context_before_sync() -> None:
     ]
 
 
+def test_ops_portal_runtime_removes_macos_metadata_sidecars_after_sync() -> None:
+    tasks = yaml.safe_load((ROLE_TASKS_PATH / "main.yml").read_text())
+    discover_task = next(
+        task for task in tasks if task["name"] == "Discover macOS metadata sidecars in synced ops portal sources"
+    )
+    cleanup_task = next(
+        task for task in tasks if task["name"] == "Remove macOS metadata sidecars from synced ops portal sources"
+    )
+
+    assert discover_task["ansible.builtin.find"]["paths"] == "{{ ops_portal_service_dir }}"
+    assert discover_task["ansible.builtin.find"]["patterns"] == "._*"
+    assert discover_task["ansible.builtin.find"]["recurse"] is True
+
+    assert cleanup_task["ansible.builtin.file"]["state"] == "absent"
+    assert cleanup_task["loop"] == "{{ ops_portal_metadata_sidecars.files }}"
+    assert cleanup_task["when"] == "ops_portal_metadata_sidecars.matched | int > 0"
+
+
 def test_ops_portal_runtime_retries_local_health_and_root_checks() -> None:
     tasks = yaml.safe_load((ROLE_TASKS_PATH / "verify.yml").read_text())
     health_task = next(task for task in tasks if task["name"] == "Verify the ops portal health endpoint responds locally")

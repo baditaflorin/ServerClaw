@@ -107,3 +107,27 @@
 - the branch carries a generated `README.md` document-index update only because
   `check-canonical-truth` blocked `make live-apply-service` until that derived
   index was current; the top-level integrated status summary remains untouched
+- as of `2026-03-29T00:18:47Z`, repo validation for the branch-local replay
+  hardening is in good shape:
+  `26 passed` on the focused portal/CSP/playbook/security test set,
+  `make syntax-check-ops-portal`,
+  `./scripts/validate_repo.sh workstream-surfaces agent-standards`,
+  and `4 passed` for `tests/test_ops_portal_playbook.py` after the sidecar
+  cleanup patch
+- the live blocker is still concurrency, not repo code review:
+  repeated remote portal files matched
+  `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0244-live-apply`
+  instead of this worktree, and one visible competing launcher was
+  `.../.worktrees/ws-0244-live-apply/playbooks/ops-portal.yml`
+- the branch now removes macOS `._*` AppleDouble sidecars from the synced
+  portal build context in
+  `collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml`;
+  that cleanup is covered in `tests/test_ops_portal_playbook.py`
+- the next attempt should start by killing or pausing every competing
+  `ops-portal` live apply that references `playbooks/ops-portal.yml` or
+  `playbooks/services/ops_portal.yml`, then replay from this worktree and
+  verify that guest hashes match:
+  `scripts/ops_portal/app.py` ->
+  `542bd2b239f9fa95656727b3907f967059d4d99426482748fdb68e7f8e6b05d9`
+  and `scripts/ops_portal/templates/base.html` ->
+  `6bfb8a834b6fa916deb610ebeadb1df11831cf93abe52b8b4390c369c70aba6d`

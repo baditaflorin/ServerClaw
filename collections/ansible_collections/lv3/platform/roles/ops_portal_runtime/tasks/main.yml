@@ -254,6 +254,22 @@
     mode: "0644"
   loop: "{{ search_fabric_source_files.files | sort(attribute='path') }}"
 
+- name: Discover macOS metadata sidecars in synced ops portal sources
+  ansible.builtin.find:
+    paths: "{{ ops_portal_service_dir }}"
+    patterns: "._*"
+    recurse: true
+  register: ops_portal_metadata_sidecars
+
+- name: Remove macOS metadata sidecars from synced ops portal sources
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ ops_portal_metadata_sidecars.files }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: ops_portal_metadata_sidecars.matched | int > 0
+
 - name: Sync the ops portal file-backed data sources
   ansible.builtin.copy:
     src: "{{ item.src }}"

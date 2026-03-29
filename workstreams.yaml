@@ -1526,6 +1526,9 @@ workstreams:
     adr: "0234"
     title: Live apply shared human app shell and navigation via PatternFly
     status: in_progress
+    blockers:
+      - "2026-03-29T00:18:47Z: competing ops-portal live applies continued to write /opt/ops-portal/service after or during ws-0234 replays; guest hashes matched ws-0244-live-apply instead of ws-0234-live-apply-r2."
+      - "2026-03-29T00:18:47Z: repo-side replay hardening is ready, including ops_portal_runtime cleanup of macOS ._* sidecars plus focused test coverage, but truthful live verification is still blocked by external SIGTERM/concurrent portal applies."
     owner: codex
     branch: codex/ws-0234-live-apply-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0234-live-apply-r2
