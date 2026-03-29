@@ -188,7 +188,9 @@ def main(argv: list[str] | None = None) -> int:
     ) if runnable_checks else []
     executed_by_label = {result.label: result for result in executed_results}
     results = [
-        runner_unavailable_results.get(check.label, executed_by_label[check.label])
+        runner_unavailable_results[check.label]
+        if check.label in runner_unavailable_results
+        else executed_by_label[check.label]
         for check in checks
     ]
     parallel_check.print_summary(results)
