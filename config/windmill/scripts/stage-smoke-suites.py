@@ -4,18 +4,12 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
 import shlex
 import subprocess
-import sys
 from pathlib import Path
-
-SCRIPT_DIR = Path(__file__).resolve().parent
-if str(SCRIPT_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPT_DIR))
-
-from windmill_integration_env import integration_env_overrides
 
 
 def main(
@@ -50,7 +44,7 @@ def main(
         command.extend(["--suite-id", suite_id])
 
     command_env = dict(os.environ)
-    command_env.update(integration_env_overrides(repo_root))
+    command_env.update(load_integration_env_overrides(repo_root))
     completed = subprocess.run(
         command,
         cwd=repo_root,
@@ -74,6 +68,22 @@ def main(
         except json.JSONDecodeError:
             pass
     return payload
+
+
+def load_integration_env_overrides(repo_root: Path) -> dict[str, str]:
+    helper_path = repo_root / "config" / "windmill" / "scripts" / "windmill_integration_env.py"
+    if not helper_path.exists():
+        return {}
+    spec = importlib.util.spec_from_file_location("lv3_windmill_integration_env", helper_path)
+    if spec is None or spec.loader is None:
+        return {}
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    resolver = getattr(module, "integration_env_overrides", None)
+    if not callable(resolver):
+        return {}
+    overrides = resolver(repo_root)
+    return overrides if isinstance(overrides, dict) else {}
 
 
 if __name__ == "__main__":

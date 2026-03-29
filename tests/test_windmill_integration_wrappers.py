@@ -23,6 +23,7 @@ def load_module(name: str, relative_path: str):
 
 def write_health_probe_catalog(repo_root: Path, windmill_probe_url: str = "http://127.0.0.1:8000/api/version") -> None:
     (repo_root / "config").mkdir(parents=True, exist_ok=True)
+    (repo_root / "config" / "windmill" / "scripts").mkdir(parents=True, exist_ok=True)
     (repo_root / "config" / "health-probe-catalog.json").write_text(
         json.dumps(
             {
@@ -37,6 +38,16 @@ def write_health_probe_catalog(repo_root: Path, windmill_probe_url: str = "http:
             indent=2,
         )
         + "\n",
+        encoding="utf-8",
+    )
+    (
+        repo_root
+        / "config"
+        / "windmill"
+        / "scripts"
+        / "windmill_integration_env.py"
+    ).write_text(
+        (REPO_ROOT / "config" / "windmill" / "scripts" / "windmill_integration_env.py").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
 
