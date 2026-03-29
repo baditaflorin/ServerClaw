@@ -2,8 +2,8 @@
 
 - ADR: [ADR 0237](../adr/0237-schema-first-human-forms-via-react-hook-form-and-zod.md)
 - Title: Live apply schema-first Windmill operator admin forms via React Hook Form and Zod
-- Status: ready
-- Implemented In Repo Version: Pending merge to main
+- Status: live_applied
+- Implemented In Repo Version: 0.177.74
 - Live Applied In Platform Version: 0.130.43
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
@@ -75,8 +75,9 @@
 
 ## Mainline Integration
 
-- this workstream intentionally leaves `VERSION`, release sections in `changelog.md`, `README.md`, `RELEASE.md`, release notes, `build/platform-manifest.json`, and `versions/stack.yaml` untouched until the protected mainline integration step
+- release `0.177.74` now carries this workstream onto `origin/main`
+- the later ADR 0241 and ADR 0228 receipts remain the canonical latest live evidence for the shared `operator_access` and `windmill` surfaces, so this workstream keeps its first-live proof but does not replace those top-level receipt pointers
 
 ## Merge-To-Main Notes
 
-- remaining for merge to `main`: merge this branch, bump `VERSION`, update `changelog.md`, `README.md`, `RELEASE.md`, release notes, `build/platform-manifest.json`, and `versions/stack.yaml`, then regenerate any required generated artifacts and push the integrated `main`
+- completed by `ws-0237-main-merge` in release `0.177.74`
