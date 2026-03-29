@@ -2,8 +2,8 @@
 
 - ADR: [ADR 0194](../adr/0194-coolify-paas-deploy-from-repo.md), [ADR 0224](../adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md), [ADR 0274](../adr/0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments.md)
 - Title: Pull the latest `education_wemeshup` release through the governed Coolify lane and codify the repeatable operator path as a named profile
-- Status: ready_for_merge
-- Implemented In Repo Version: `0.177.87`
+- Status: merged
+- Implemented In Repo Version: `0.177.88`
 - Live Applied In Platform Version: `0.130.59`
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
@@ -19,7 +19,7 @@
 - verify the latest upstream `education_wemeshup` `main` revision before deployment
 - codify the governed operator path as a named repo-deploy profile instead of retyping raw Coolify arguments
 - use the named profile to refresh production and verify the public taxonomy still serves more than 1000 activities
-- record the live apply and leave the branch ready for follow-on integration
+- record the live apply and carry the governed refresh path onto mainline truth
 
 ## Non-Goals
 

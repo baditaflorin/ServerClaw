@@ -17,7 +17,7 @@ workstreams:
   - id: ws-0296-education-refresh
     adr: "0224"
     title: Refresh education_wemeshup from upstream main through a named repo-deploy profile
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/ws-0296-education-refresh
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-education-refresh
@@ -77,6 +77,9 @@ workstreams:
     ready_to_merge: true
     live_applied: true
     canonical_truth:
+      changelog_entry: extends ADR 0224 by adding named repo-deploy profiles, a governed deploy-repo-profile operator path, and the verified 2026-03-30 education_wemeshup upstream refresh so production can be updated from upstream main without retyping raw Coolify arguments
+      release_bump: patch
+      included_in_repo_version: 0.177.88
       latest_receipts:
         coolify_apps: 2026-03-30-adr-0224-education-repo-profile-refresh-live-apply
         education_wemeshup: 2026-03-30-adr-0224-education-repo-profile-refresh-live-apply
