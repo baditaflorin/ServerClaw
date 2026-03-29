@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-30'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 247
+  Implemented: 249
   Partial: 7
-  Not Implemented: 69
+  Not Implemented: 67
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4365,7 +4365,7 @@ adr_index:
   - adr: '0254'
     title: ServerClaw As A Distinct Self-Hosted Agent Product On LV3
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: agent-discovery
     keywords:
@@ -4378,6 +4378,7 @@ adr_index:
       - lv3
     summary: We will define ServerClaw as a distinct product surface on top of the LV3
     filename: 0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3.md
+    implemented_version: 0.177.91
   - adr: '0255'
     title: Matrix Synapse As The Canonical ServerClaw Conversation Hub
     status: Accepted
@@ -4557,7 +4558,7 @@ adr_index:
   - adr: '0266'
     title: Validation Runner Capability Contracts And Environment Attestation
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -4569,6 +4570,7 @@ adr_index:
       - attestation
     summary: We will require every local or remote validation runner to publish a
     filename: 0266-validation-runner-capability-contracts-and-environment-attestation.md
+    implemented_version: 0.177.88
   - adr: '0267'
     title: Expiring Gate Bypass Waivers With Structured Reason Codes
     status: Accepted

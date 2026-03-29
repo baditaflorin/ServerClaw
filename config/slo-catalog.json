@@ -145,6 +145,16 @@
       "description": "Open WebUI remains reachable on the private runtime network."
     },
     {
+      "id": "serverclaw-availability",
+      "service_id": "serverclaw",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "https://chat.lv3.org",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "ServerClaw remains reachable through the public LV3 edge for chat-first assistant access."
+    },
+    {
       "id": "outline-availability",
       "service_id": "outline",
       "indicator": "availability",

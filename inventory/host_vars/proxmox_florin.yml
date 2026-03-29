@@ -72,6 +72,7 @@ platform_port_assignments:
   coolify_host_proxy_port: 8012
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
+  serverclaw_port: 8096
   api_gateway_internal_port: 8083
   platform_context_internal_port: 8010
   platform_context_host_proxy_port: 8010
@@ -739,6 +740,7 @@ network_policy:
             - 80
             - 443
             - 8000
+            - 8096
           description: Shared edge publication for the Coolify dashboard and wildcard app ingress
     postgres-lv3:
       allowed_inbound:
@@ -1457,6 +1459,28 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ open_webui_controller_url }}"
+  serverclaw:
+    service_name: serverclaw
+    owning_vm: coolify-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: chat.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: chat
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.serverclaw_port }}"
   ollama:
     service_name: ollama
     owning_vm: docker-runtime-lv3

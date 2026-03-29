@@ -3,7 +3,7 @@
 - ADR: [ADR 0260](../adr/0260-nextcloud-as-the-canonical-personal-data-plane-for-serverclaw.md)
 - Title: Integrate ADR 0260 exact-main replay onto `origin/main`
 - Status: `ready_for_merge`
-- Included In Repo Version: 0.177.91
+- Included In Repo Version: 0.177.92
 - Platform Version Observed During Integration: 0.130.61
 - Release Date: 2026-03-30
 - Live Applied On: 2026-03-30
@@ -27,7 +27,7 @@ branch-local proof authoritative on `main`.
 - `RELEASE.md`
 - `VERSION`
 - `changelog.md`
-- `docs/release-notes/0.177.91.md`
+- `docs/release-notes/0.177.92.md`
 - `docs/release-notes/README.md`
 - `versions/stack.yaml`
 - `build/platform-manifest.json`

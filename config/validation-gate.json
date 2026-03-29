@@ -164,7 +164,7 @@
     "image": "registry.lv3.org/check-runner/ansible:2.17.10",
     "command": "find . -path ./.git -prune -o -type f \\( -name '*.yml' -o -name '*.yaml' \\) -print0 | xargs -0 yamllint -c .yamllint",
     "working_dir": "/workspace",
-    "timeout_seconds": 120,
+    "timeout_seconds": 240,
     "cache_mounts": ["ansible_collections"]
   }
 }

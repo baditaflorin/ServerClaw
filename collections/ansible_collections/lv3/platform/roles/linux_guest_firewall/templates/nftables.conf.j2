@@ -68,7 +68,7 @@ table inet filter {
     type filter hook forward priority 0;
     policy drop;
     ct state established,related accept
-{% if guest_role_map[inventory_hostname] in ['docker-runtime', 'docker-build'] %}
+{% if guest_role_map[inventory_hostname] in ['docker-runtime', 'docker-build'] or guest_policy.allow_container_forwarding | default(false) %}
     ip saddr 172.16.0.0/12 accept
 {% for rule in guest_policy.allowed_inbound %}
 {{ render_forward_rule(rule) }}

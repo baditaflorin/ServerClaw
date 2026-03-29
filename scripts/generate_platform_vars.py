@@ -68,6 +68,7 @@ PORT_KEYS = (
     "coolify_host_proxy_port",
     "open_webui_port",
     "open_webui_host_proxy_port",
+    "serverclaw_port",
     "api_gateway_internal_port",
     "platform_context_internal_port",
     "platform_context_host_proxy_port",
@@ -521,6 +522,9 @@ def build_service_urls(
         urls["controller"] = service_url("http", tailscale_ipv4, ports["open_webui_host_proxy_port"])
         port_map["internal"] = ports["open_webui_port"]
         port_map["controller"] = ports["open_webui_host_proxy_port"]
+    elif service_id == "serverclaw":
+        urls["internal"] = service_url("http", private_ip, ports["serverclaw_port"])
+        port_map["internal"] = ports["serverclaw_port"]
     elif service_id == "api_gateway":
         urls["internal"] = service_url("http", private_ip, ports["api_gateway_internal_port"])
         port_map["internal"] = ports["api_gateway_internal_port"]

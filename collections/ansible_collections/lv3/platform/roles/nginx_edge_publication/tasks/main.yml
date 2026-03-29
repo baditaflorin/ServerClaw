@@ -1,4 +1,23 @@
 ---
+- name: Resolve public edge site and certificate catalogs
+  ansible.builtin.set_fact:
+    public_edge_certificate_domains: >-
+      {{
+        (
+          (public_edge_service_topology | service_topology_edge_certificate_domains)
+          + (public_edge_extra_sites | map(attribute='hostname') | list)
+          + public_edge_additional_certificate_domains
+        ) | unique
+      }}
+    public_edge_sites: >-
+      {{
+        (
+          public_edge_extra_sites
+          + (public_edge_service_topology | service_topology_edge_sites)
+        )
+        | unique(attribute='hostname')
+      }}
+
 - name: Validate public edge publication inputs
   ansible.builtin.assert:
     that:

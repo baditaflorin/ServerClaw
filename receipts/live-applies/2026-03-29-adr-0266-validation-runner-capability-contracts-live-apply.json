@@ -74,7 +74,7 @@
   ],
   "notes": [
     "This receipt records branch-local proof on top of the latest origin/main lineage before protected release files were updated on main.",
-    "The canonical mainline replay still remains to be recorded under receipts/live-applies/2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply.json after merge, release, and worker post-merge verification.",
-    "versions/stack.yaml, VERSION, changelog.md, RELEASE.md, docs/release-notes, and ADR implementation-version metadata intentionally remain unchanged on this workstream branch."
+    "The canonical mainline replay is now recorded under receipts/live-applies/2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply.json and supersedes this branch-local proof as the durable source of truth.",
+    "versions/stack.yaml, VERSION, changelog.md, RELEASE.md, docs/release-notes, and ADR implementation-version metadata were intentionally withheld from this branch-local proof and updated only during the final mainline closeout."
   ]
 }
