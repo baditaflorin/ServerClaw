@@ -3,6 +3,7 @@ services:
     image: {{ gotenberg_runtime_image }}
     container_name: {{ gotenberg_runtime_container_name }}
     restart: unless-stopped
+    network_mode: bridge
     ports:
       - "{{ gotenberg_runtime_port }}:{{ gotenberg_runtime_container_port }}"
     environment:

@@ -13047,6 +13047,7 @@ workstreams:
       - config/data-catalog.json
       - config/command-catalog.json
       - config/workflow-catalog.json
+      - config/ansible-execution-scopes.yaml
       - config/prometheus/file_sd/slo_targets.yml
       - config/prometheus/rules/slo_alerts.yml
       - config/prometheus/rules/slo_rules.yml
@@ -13103,6 +13104,7 @@ workstreams:
             - config/data-catalog.json
             - config/command-catalog.json
             - config/workflow-catalog.json
+            - config/ansible-execution-scopes.yaml
             - config/prometheus/file_sd/slo_targets.yml
             - config/prometheus/rules/slo_alerts.yml
             - config/prometheus/rules/slo_rules.yml

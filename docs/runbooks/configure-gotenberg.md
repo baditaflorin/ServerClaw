@@ -55,7 +55,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
   ops@10.10.10.20 \
-  'html=$(mktemp --suffix=.html); pdf=$(mktemp); trap '\''rm -f "$html" "$pdf"'\'' EXIT; printf "<html><body><h1>LV3 Gotenberg runbook</h1></body></html>" >"$html"; curl -fsS -o "$pdf" -F files=@"$html" http://127.0.0.1:3007/forms/chromium/convert/html; head -c 4 "$pdf"'
+  'html=$(mktemp --suffix=.html); pdf=$(mktemp); trap '\''rm -f "$html" "$pdf"'\'' EXIT; printf "<html><body><h1>LV3 Gotenberg runbook</h1></body></html>" >"$html"; curl -fsS -o "$pdf" -F "files=@${html};filename=index.html;type=text/html" http://127.0.0.1:3007/forms/chromium/convert/html; head -c 4 "$pdf"'
 ```
 
 Verify the LibreOffice route returns a PDF from a text document:
@@ -87,7 +87,7 @@ trap 'rm -f "$html" "$pdf"' EXIT
 printf '<html><body><h1>LV3 Gateway Render Check</h1></body></html>' >"$html"
 curl -fsS -o "$pdf" \
   -H "Authorization: Bearer $LV3_TOKEN" \
-  -F files=@"$html" \
+  -F "files=@${html};filename=index.html;type=text/html" \
   https://api.lv3.org/v1/gotenberg/forms/chromium/convert/html
 head -c 4 "$pdf"
 ```

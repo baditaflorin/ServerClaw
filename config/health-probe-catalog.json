@@ -530,7 +530,7 @@
         "argv": [
           "/bin/bash",
           "-lc",
-          "set -euo pipefail; html=$(mktemp --suffix=.html); pdf=$(mktemp); trap 'rm -f \"$html\" \"$pdf\"' EXIT; printf '<html><body><h1>LV3 Gotenberg readiness</h1></body></html>' >\"$html\"; curl -fsS -o \"$pdf\" -F files=@\"$html\" http://127.0.0.1:3007/forms/chromium/convert/html; head -c 4 \"$pdf\" | grep -q '%PDF'"
+          "set -euo pipefail; html=$(mktemp --suffix=.html); pdf=$(mktemp); trap 'rm -f \"$html\" \"$pdf\"' EXIT; printf '<html><body><h1>LV3 Gotenberg readiness</h1></body></html>' >\"$html\"; curl -fsS -o \"$pdf\" -F \"files=@${html};filename=index.html;type=text/html\" http://127.0.0.1:3007/forms/chromium/convert/html; head -c 4 \"$pdf\" | grep -q '%PDF'"
         ],
         "success_rc": 0
       },

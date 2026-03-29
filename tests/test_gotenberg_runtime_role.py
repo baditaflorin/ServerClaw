@@ -16,6 +16,7 @@ HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 API_GATEWAY_CATALOG_PATH = REPO_ROOT / "config" / "api-gateway-catalog.json"
+ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
 
 
 def load_yaml(path: Path) -> list[dict] | dict:
@@ -74,6 +75,7 @@ def test_verify_tasks_cover_health_chromium_and_libreoffice_paths() -> None:
         task for task in verify if task["name"] == "Verify the Gotenberg Chromium HTML conversion route renders a PDF"
     )
     assert "/forms/chromium/convert/html" in chromium_task["ansible.builtin.shell"]
+    assert "filename=index.html" in chromium_task["ansible.builtin.shell"]
     libreoffice_task = next(
         task for task in verify if task["name"] == "Verify the Gotenberg LibreOffice conversion route renders a PDF"
     )
@@ -83,6 +85,7 @@ def test_verify_tasks_cover_health_chromium_and_libreoffice_paths() -> None:
 def test_compose_template_publishes_private_port_and_prestarts_renderers() -> None:
     template = COMPOSE_TEMPLATE.read_text()
 
+    assert "network_mode: bridge" in template
     assert '"{{ gotenberg_runtime_port }}:{{ gotenberg_runtime_container_port }}"' in template
     assert "CHROMIUM_AUTO_START" in template
     assert "LIBREOFFICE_AUTO_START" in template
@@ -152,3 +155,12 @@ def test_api_gateway_catalog_exposes_the_authenticated_gotenberg_route() -> None
     assert route["upstream"] == "http://10.10.10.20:3007"
     assert route["auth"] == "keycloak_jwt"
     assert route["healthcheck_path"] == "/health"
+
+
+def test_ansible_execution_scopes_registers_the_direct_gotenberg_playbook() -> None:
+    scopes = yaml.safe_load(ANSIBLE_EXECUTION_SCOPES_PATH.read_text())
+    entry = scopes["playbooks"]["playbooks/gotenberg.yml"]
+
+    assert entry["playbook_id"] == "gotenberg"
+    assert entry["mutation_scope"] == "host"
+    assert "service:gotenberg" in entry["shared_surfaces"]
