@@ -158,6 +158,10 @@ def test_common_docker_bridge_chains_warms_control_socket_before_restarting() ->
 
 def test_docker_runtime_patches_nftables_rule_block_once() -> None:
     tasks = load_tasks()
+    daemon_stat = next(task for task in tasks if task["name"] == "Check whether the current Docker daemon config exists")
+    daemon_slurp = next(task for task in tasks if task["name"] == "Read the current Docker daemon config")
+    daemon_fact = next(task for task in tasks if task["name"] == "Record whether Docker currently has live-restore enabled")
+    daemon_render = next(task for task in tasks if task["name"] == "Render Docker daemon configuration")
     build_rules = next(task for task in tasks if task["name"] == "Build the Docker bridge forward-compat rule block")
     patch_rules = next(task for task in tasks if task["name"] == "Patch nftables forward policy for Docker bridge egress")
     assert_rules = next(task for task in tasks if task["name"] == "Assert the Docker bridge forward-compat rule is present")
@@ -165,6 +169,11 @@ def test_docker_runtime_patches_nftables_rule_block_once() -> None:
         task for task in tasks if task["name"] == "Apply Docker bridge forward-compat rules live without reloading nftables"
     )
 
+    assert "docker_runtime_container_forward_rule_lines" in build_rules["ansible.builtin.set_fact"]
+    assert daemon_stat["ansible.builtin.stat"]["path"] == "/etc/docker/daemon.json"
+    assert daemon_slurp["when"] == "docker_runtime_daemon_config_stat.stat.exists"
+    assert "docker_runtime_previous_live_restore_enabled" in daemon_fact["ansible.builtin.set_fact"]
+    assert daemon_render["register"] == "docker_runtime_daemon_config_render"
     assert "docker_runtime_container_forward_rule_lines" in build_rules["ansible.builtin.set_fact"]
     assert "docker_runtime_container_forward_rule_block" in build_rules["ansible.builtin.set_fact"]
     assert patch_rules["ansible.builtin.lineinfile"]["line"] == "    ip saddr {{ item }} accept"
@@ -208,6 +217,7 @@ def test_docker_runtime_defaults_pin_governed_resolvers_and_registry_mirror() ->
         "{{ inventory_dir ~ '/../scripts/docker_publication_assurance.py' }}"
     )
     assert defaults["docker_runtime_insecure_registries"] == []
+    assert daemon_config["live-restore"] is False
     assert daemon_config["dns"] == ["1.1.1.1", "8.8.8.8"]
     assert daemon_config["registry-mirrors"] == "{{ docker_runtime_registry_mirrors }}"
     assert daemon_config["insecure-registries"] == "{{ docker_runtime_insecure_registries }}"

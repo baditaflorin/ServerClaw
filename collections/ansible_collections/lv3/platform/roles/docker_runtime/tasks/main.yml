@@ -102,11 +102,36 @@
     - docker_runtime_public_edge_ipv4 | default('') | length > 0
     - item | length > 0
 
+- name: Check whether the current Docker daemon config exists
+  ansible.builtin.stat:
+    path: /etc/docker/daemon.json
+  register: docker_runtime_daemon_config_stat
+
+- name: Read the current Docker daemon config
+  ansible.builtin.slurp:
+    src: /etc/docker/daemon.json
+  register: docker_runtime_daemon_config_raw
+  when: docker_runtime_daemon_config_stat.stat.exists
+
+- name: Record whether Docker currently has live-restore enabled
+  ansible.builtin.set_fact:
+    docker_runtime_previous_live_restore_enabled: >-
+      {{
+        (
+          (
+            (docker_runtime_daemon_config_raw.content | default('e30='))
+            | b64decode
+            | from_json
+          ).get('live-restore', false)
+        ) | bool
+      }}
+
 - name: Render Docker daemon configuration
   ansible.builtin.template:
     src: daemon.json.j2
     dest: /etc/docker/daemon.json
     mode: "0644"
+  register: docker_runtime_daemon_config_render
   notify: Restart Docker
 
 - name: Install the Docker publication assurance helper

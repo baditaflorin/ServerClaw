@@ -114,6 +114,7 @@ windmill_private_base_url: "http://{{ windmill_service_topology.private_ip }}:{{
 windmill_base_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
 windmill_runtime_api_base_url: "http://127.0.0.1:{{ windmill_server_port }}"
 windmill_worker_network_mode: "{{ windmill_server_network_mode }}"
+windmill_requires_docker_bridge_chains: true
 windmill_worker_api_base_url: >-
   {{ 'http://127.0.0.1:' ~ windmill_server_port if windmill_worker_network_mode == 'host' else 'http://windmill_server:8000' }}
 windmill_healthcheck_script_path: f/lv3/windmill_healthcheck
@@ -503,6 +504,11 @@ windmill_seed_scripts:
     language: python3
     summary: ADR 0142 public surface security scan
     description: Repo-managed Windmill wrapper that runs the public-surface security scan and stores one receipt.
+  - path: f/lv3/weekly_https_tls_assurance
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/https-tls-assurance.py"
+    language: python3
+    summary: ADR 0249 HTTPS and TLS assurance
+    description: Repo-managed Windmill wrapper that runs the recurring HTTPS and TLS assurance workflow and stores the classified receipt set.
   - path: f/lv3/audit_token_inventory
     local_file: "{{ inventory_dir }}/../config/windmill/scripts/audit-token-inventory.py"
     language: python3

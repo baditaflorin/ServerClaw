@@ -61,7 +61,7 @@ docker_runtime_registry_mirrors:
   - https://mirror.gcr.io
 docker_runtime_insecure_registries: []
 docker_runtime_daemon_config:
-  live-restore: true
+  live-restore: false
   log-driver: json-file
   log-opts:
     max-size: "10m"

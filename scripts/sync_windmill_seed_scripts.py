@@ -54,6 +54,17 @@ class SyncTransportError(RetryableSyncError):
     pass
 
 
+def is_retryable_windmill_backend_error(message: str) -> bool:
+    normalized = message.lower()
+    return (
+        "error communicating with database" in normalized
+        or "connection reset by peer" in normalized
+        or "connection closed unexpectedly" in normalized
+        or "broken pipe" in normalized
+        or "database is starting up" in normalized
+    )
+
+
 def login_with_bootstrap_secret(
     base_url: str,
     secret: str,
@@ -126,7 +137,11 @@ def request_json_or_text(
     except (urllib.error.URLError, http.client.HTTPException, OSError, TimeoutError) as exc:
         raise SyncTransportError(f"{method} {path} transport error: {exc}") from exc
     if status not in expected_statuses:
-        error_cls = RetryableSyncError if status >= 500 or status in (408, 429) else SyncError
+        error_cls = (
+            RetryableSyncError
+            if status >= 500 or status in (408, 429) or is_retryable_windmill_backend_error(body)
+            else SyncError
+        )
         raise error_cls(f"{method} {path} returned {status}: {body[:500]}")
     return status, body
 

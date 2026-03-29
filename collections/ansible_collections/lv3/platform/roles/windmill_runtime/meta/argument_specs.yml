@@ -53,6 +53,11 @@ argument_specs:
         required: false
         description:
           - Whether the Windmill server startup depends on Docker-managed nat port publishing.
+      windmill_requires_docker_bridge_chains:
+        type: bool
+        required: false
+        description:
+          - Whether any part of the Windmill compose stack depends on Docker bridge nat and filter chains.
       windmill_base_url:
         type: str
         required: true

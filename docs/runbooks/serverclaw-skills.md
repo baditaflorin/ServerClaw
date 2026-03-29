@@ -14,15 +14,15 @@ resolves them with explicit repository-managed precedence:
 
 ## Canonical Sources
 
-- skill catalog: [config/serverclaw/skill-packs.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-openclaw-skills/config/serverclaw/skill-packs.yaml)
-- approved refs: [config/serverclaw/approved-port-refs.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-openclaw-skills/config/serverclaw/approved-port-refs.json)
-- bundled skills: [config/serverclaw/skills/bundled](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-openclaw-skills/config/serverclaw/skills/bundled)
-- shared skills: [config/serverclaw/skills/shared](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-openclaw-skills/config/serverclaw/skills/shared)
-- workspace skills: [config/serverclaw/workspaces](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-openclaw-skills/config/serverclaw/workspaces)
-- mirrored imports: [config/serverclaw/skills/imported](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-openclaw-skills/config/serverclaw/skills/imported)
-- resolver module: [platform/use_cases/serverclaw_skills.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-openclaw-skills/platform/use_cases/serverclaw_skills.py)
-- CLI: [scripts/serverclaw_skill_packs.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-openclaw-skills/scripts/serverclaw_skill_packs.py)
-- governed tool: [config/agent-tool-registry.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-openclaw-skills/config/agent-tool-registry.json)
+- skill catalog: [config/serverclaw/skill-packs.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/serverclaw/skill-packs.yaml)
+- approved refs: [config/serverclaw/approved-port-refs.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/serverclaw/approved-port-refs.json)
+- bundled skills: [config/serverclaw/skills/bundled](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/serverclaw/skills/bundled)
+- shared skills: [config/serverclaw/skills/shared](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/serverclaw/skills/shared)
+- workspace skills: [config/serverclaw/workspaces](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/serverclaw/workspaces)
+- mirrored imports: [config/serverclaw/skills/imported](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/serverclaw/skills/imported)
+- resolver module: [platform/use_cases/serverclaw_skills.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/use_cases/serverclaw_skills.py)
+- CLI: [scripts/serverclaw_skill_packs.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/serverclaw_skill_packs.py)
+- governed tool: [config/agent-tool-registry.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/agent-tool-registry.json)
 
 ## Directory Contract
 
