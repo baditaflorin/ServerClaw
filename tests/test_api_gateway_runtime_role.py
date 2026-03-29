@@ -69,6 +69,7 @@ ENV_TEMPLATE_PATH = (
     / "api-gateway.env.j2"
 )
 REQUIREMENTS_PATH = REPO_ROOT / "requirements" / "api-gateway.txt"
+MAKEFILE_PATH = REPO_ROOT / "Makefile"
 
 
 def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
@@ -255,3 +256,10 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "COPY windmill ./windmill" in tasks
     assert "COPY workstreams.yaml ./workstreams.yaml" in tasks
     assert "psycopg[binary]==" in requirements
+
+
+def test_converge_api_gateway_passes_worktree_repo_root() -> None:
+    makefile = MAKEFILE_PATH.read_text(encoding="utf-8")
+
+    assert "converge-api-gateway:" in makefile
+    assert "-e api_gateway_repo_root=$(REPO_ROOT)" in makefile
