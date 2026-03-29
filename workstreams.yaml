@@ -607,7 +607,7 @@ workstreams:
   - id: ws-0255-main-integration
     adr: "0255"
     title: Integrate ADR 0255 exact-main replay onto current origin/main
-    status: merged
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0255-main-integration-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0255-main-integration
