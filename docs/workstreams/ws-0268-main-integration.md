@@ -2,10 +2,11 @@
 
 - ADR: [ADR 0268](../adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md)
 - Title: Integrate ADR 0268 exact-main replay onto `origin/main`
-- Status: `in_progress`
+- Status: `live_applied`
 - Included In Repo Version: 0.177.81
-- Platform Version Observed During Integration: 0.130.54
+- Platform Version Observed During Integration: 0.130.55
 - Release Date: 2026-03-29
+- Live Applied On: 2026-03-29
 - Branch: `codex/ws-0268-main-integration`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0268-main-integration`
 - Owner: codex
@@ -30,6 +31,7 @@ canonical mainline evidence.
 - `config/correction-loops.json`
 - `config/workflow-catalog.json`
 - `config/worktree-bootstrap-manifests.json`
+- `scripts/canonical_truth.py`
 - `docs/adr/0094-developer-portal-and-documentation-site.md`
 - `docs/runbooks/controller-local-secrets-and-preflight.md`
 - `docs/runbooks/playbook-execution-model.md`
@@ -38,6 +40,8 @@ canonical mainline evidence.
 - `docs/workstreams/ws-0268-live-apply.md`
 - `docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md`
 - `docs/adr/.index.yaml`
+- `build/platform-manifest.json`
+- `docs/diagrams/agent-coordination-map.excalidraw`
 - `docs/site-generated/architecture/dependency-graph.md`
 - `README.md`
 - `RELEASE.md`
@@ -54,29 +58,44 @@ canonical mainline evidence.
 - `scripts/workflow_catalog.py`
 - `scripts/worktree_bootstrap.py`
 - `tests/test_docs_site.py`
+- `tests/test_canonical_truth.py`
 - `tests/test_preflight_controller_local.py`
 - `tests/test_service_id_resolver.py`
 
 ## Verification
 
 - `git fetch origin --prune` confirmed the newest available `origin/main`
-  baseline is commit `9416fec683e90bf340baf54ec9eb70df84e57482`.
-- The integrated worktree cherry-picked the ADR 0268 implementation commit and
-  the branch-local live-apply receipt onto that baseline before cutting the
-  protected release files for `0.177.81`.
-- `uv run --with pyyaml python scripts/generate_adr_index.py --write`,
-  `uv run --with pyyaml python scripts/canonical_truth.py --write`, and
-  `uv run --with pyyaml python scripts/workflow_catalog.py --validate` all
-  completed successfully on the integration worktree.
-- `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
-  and `git diff --check` both passed before the exact-main replay.
-- `./scripts/validate_repo.sh agent-standards` reached the expected branch
-  registration warning that this workstream file and registry entry resolve.
+  baseline remained commit `9416fec683e90bf340baf54ec9eb70df84e57482` while
+  the protected release cut advanced repository version `0.177.80` to
+  `0.177.81`.
+- The exact-main source commit `7f7aee838baa7e835c880ffbfcbc777ac6bb96ff`
+  repaired the `public-edge` to `nginx_edge` alias in
+  `config/ansible-execution-scopes.yaml`, refreshed the generated ops-portal
+  snapshot, and preserved a clean latest-main replay source.
+- `make immutable-guest-replacement-plan service=public-edge` confirmed the
+  documented ADR 0191 narrow exception rule for `nginx_edge` on `nginx-lv3`,
+  including the `inactive_edge_peer` validation mode and the `120m` rollback
+  window.
+- `scripts/canonical_truth.py` was updated so capability receipt precedence now
+  follows the integrated repo version instead of ADR number, allowing the
+  newer `0.177.81` exact-main public-edge receipt to override the older
+  `0.177.77` edge receipt for `versions/stack.yaml.live_apply_evidence`.
+- `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=public-edge env=production`
+  rebuilt the missing `build/ops-portal/`, `build/changelog-portal/`, and
+  `build/docs-portal/` directories from a clean worktree and completed
+  successfully with final recap `nginx-lv3 : ok=61 changed=5 failed=0`.
+- `curl -I --max-time 20 https://grafana.lv3.org` returned `HTTP/2 302` to
+  `/login`, `curl -I --max-time 20 https://nginx.lv3.org` returned `HTTP/2 200`,
+  and both `https://docs.lv3.org` and `https://changelog.lv3.org` returned
+  `HTTP/2 302` to their expected `oauth2/sign_in` paths afterward.
 
-## Remaining
+## Outcome
 
-- commit the protected release and metadata surfaces for repository version
-  `0.177.81`
-- replay the merged-main production edge publication from that release commit
-- record the canonical mainline receipt, advance the platform version, and push
-  `origin/main`
+- Release `0.177.81` now carries both the ADR 0268 implementation and the
+  exact-main wrapper verification onto `main`.
+- Platform version `0.130.55` is the first integrated platform version that
+  records the canonical `live-apply-service service=public-edge` replay from
+  the synchronized latest-main source commit.
+- `receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply.json`
+  is the canonical exact-main proof, while the branch-local receipt remains
+  preserved as the first isolated-worktree replay.

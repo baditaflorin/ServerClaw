@@ -4,7 +4,7 @@
 - Title: Add bootstrap manifests for generated artifacts and controller-local inputs, then verify the fresh-worktree apply path end to end
 - Status: live_applied
 - Implemented In Repo Version: 0.177.81
-- Live Applied In Platform Version: 0.130.54
+- Live Applied In Platform Version: 0.130.55
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
 - Branch: `codex/ws-0268-live-apply`
@@ -78,7 +78,10 @@
 - `make configure-edge-publication env=production` completed successfully after the repaired bootstrap path, with `nginx-lv3 ok=61 changed=4 failed=0`
 - `curl -I https://grafana.lv3.org`, `curl -I https://nginx.lv3.org`, `curl -I https://docs.lv3.org`, and `curl -I https://changelog.lv3.org` all returned healthy responses after the replay
 - the branch-local live-apply evidence is recorded in `receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply.json`
-- the integrated release cut on the latest available `origin/main` advanced the repository version to `0.177.81`; the exact-main replay and canonical mainline receipt remain the last step before the protected platform version can advance
+- the integrated release cut on the latest available `origin/main` advanced the repository version to `0.177.81`
+- the exact-main replay from commit `7f7aee838baa7e835c880ffbfcbc777ac6bb96ff` first exposed a guard-chain alias gap between the `public-edge` playbook id and the canonical `nginx_edge` service id, then succeeded after the execution-scope alias was added and the documented `ALLOW_IN_PLACE_MUTATION=true` ADR 0191 narrow exception was acknowledged for `nginx_edge`
+- `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=public-edge env=production` rebuilt the missing portal directories from a clean worktree and completed successfully with `nginx-lv3 ok=61 changed=5 failed=0`
+- the canonical mainline evidence is recorded in `receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply.json`, and platform version `0.130.55` is the first integrated platform version that records ADR 0268 as verified from the latest synchronized mainline
 
 ## Merge Criteria
 
@@ -86,13 +89,8 @@
 - the generic `live-apply-*` entrypoints invoke the bootstrap preflight before mutating anything
 - ADR 0268 metadata records repository implementation plus live-apply evidence, while merge-only release files remain deferred until integration
 
-## Remaining For Exact-Main Verification
+## Exact-Main Outcome
 
-- replay the merged-main production apply from the `0.177.81` release commit
-- record the canonical mainline receipt and update `versions/stack.yaml` to the resulting platform version
-- fast-forward local `main` and push `origin/main` once the exact-main verification is committed
-
-## Notes For The Next Assistant
-
-- verify the committed receipt and ADR metadata match the exact latest `origin/main` commit this worktree started from
-- if the latest-main integration step needs protected release-file updates, do them only after the workstream branch has been fully validated and merged cleanly
+- the exact-main production replay now has canonical evidence from the generic `live-apply-service` wrapper, not just from the branch-local direct `configure-edge-publication` path
+- the fresh-worktree bootstrap manifests remain the reason the shared edge replay can start safely from an empty generated-artifact state
+- the merge-to-main follow-through after this doc update is operational only: fast-forward `main`, push `origin/main`, and retain both the branch-local and canonical mainline receipts

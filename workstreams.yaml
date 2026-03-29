@@ -197,7 +197,7 @@ workstreams:
   - id: ws-0268-main-integration
     adr: "0268"
     title: Integrate ADR 0268 exact-main replay onto current origin/main
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0268-main-integration
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0268-main-integration
@@ -215,11 +215,14 @@ workstreams:
       - config/correction-loops.json
       - config/workflow-catalog.json
       - config/worktree-bootstrap-manifests.json
+      - scripts/canonical_truth.py
       - docs/adr/0094-developer-portal-and-documentation-site.md
       - docs/workstreams/ws-0268-main-integration.md
       - docs/workstreams/ws-0268-live-apply.md
       - docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
       - docs/adr/.index.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
       - docs/runbooks/controller-local-secrets-and-preflight.md
       - docs/runbooks/playbook-execution-model.md
       - docs/release-process.md
@@ -236,6 +239,7 @@ workstreams:
       - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply.json
       - scripts/generate_docs_site.py
       - scripts/preflight_controller_local.py
+      - tests/test_canonical_truth.py
       - scripts/workflow_catalog.py
       - scripts/worktree_bootstrap.py
       - tests/test_docs_site.py
@@ -258,11 +262,14 @@ workstreams:
             - config/correction-loops.json
             - config/workflow-catalog.json
             - config/worktree-bootstrap-manifests.json
+            - scripts/canonical_truth.py
             - docs/adr/0094-developer-portal-and-documentation-site.md
             - docs/workstreams/ws-0268-main-integration.md
             - docs/workstreams/ws-0268-live-apply.md
             - docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
             - docs/adr/.index.yaml
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
             - docs/runbooks/controller-local-secrets-and-preflight.md
             - docs/runbooks/playbook-execution-model.md
             - docs/release-process.md
@@ -279,14 +286,21 @@ workstreams:
             - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply.json
             - scripts/generate_docs_site.py
             - scripts/preflight_controller_local.py
+            - tests/test_canonical_truth.py
             - scripts/workflow_catalog.py
             - scripts/worktree_bootstrap.py
             - tests/test_docs_site.py
             - tests/test_preflight_controller_local.py
             - tests/test_service_id_resolver.py
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: records ADR 0268 exact-main evidence on release 0.177.81 by replaying the generic public-edge live-apply wrapper from a clean worktree, preserving fresh-worktree bootstrap repair, and fixing the public-edge to nginx_edge guard-chain alias so the full governed path can run end to end
+      release_bump: patch
+      included_in_repo_version: 0.177.81
+      latest_receipts:
+        public_edge_publication: 2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply
   - id: ws-0272-live-apply
     adr: "0272"
     title: Restore readiness ladders and stateful warm-up verification profiles

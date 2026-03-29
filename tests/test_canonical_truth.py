@@ -191,6 +191,38 @@ def test_assemble_stack_updates_repo_version_and_latest_receipts(canonical_repo:
     assert "api_gateway: 2026-03-26-adr-0163-retry-taxonomy-live-apply" in updated
 
 
+def test_assemble_latest_receipts_prefers_newer_repo_version_over_higher_adr(canonical_repo: Path) -> None:
+    items = [
+        canonical_truth.WorkstreamCanonicalTruth(
+            workstream_id="ws-0273-mainline",
+            adr="0273",
+            title="Older integrated edge receipt",
+            status="live_applied",
+            changelog_entry=None,
+            release_bump=None,
+            included_in_repo_version="0.177.77",
+            latest_receipts={"public_edge_publication": "older-edge-receipt"},
+        ),
+        canonical_truth.WorkstreamCanonicalTruth(
+            workstream_id="ws-0268-mainline",
+            adr="0268",
+            title="Newer integrated edge receipt",
+            status="live_applied",
+            changelog_entry=None,
+            release_bump=None,
+            included_in_repo_version="0.177.81",
+            latest_receipts={"public_edge_publication": "newer-edge-receipt"},
+        ),
+    ]
+
+    latest = canonical_truth.assemble_latest_receipts(
+        items,
+        stack_path=canonical_repo / "versions" / "stack.yaml",
+    )
+
+    assert latest["public_edge_publication"] == "newer-edge-receipt"
+
+
 def test_mark_pending_workstreams_released_sets_repo_version(canonical_repo: Path) -> None:
     changed = canonical_truth.mark_pending_workstreams_released("0.10.1")
 

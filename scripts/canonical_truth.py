@@ -225,7 +225,14 @@ def assemble_latest_receipts(
     )
     assembled = {str(key): str(value) for key, value in current_mapping.items()}
     items = workstreams if workstreams is not None else load_workstream_canonical_truth()
-    for item in sorted(items, key=lambda candidate: (int(candidate.adr), candidate.workstream_id)):
+    for item in sorted(
+        items,
+        key=lambda candidate: (
+            parse_semver(candidate.included_in_repo_version) if candidate.included_in_repo_version else (0, 0, 0),
+            int(candidate.adr),
+            candidate.workstream_id,
+        ),
+    ):
         if item.status != LIVE_APPLIED_STATUS:
             continue
         for capability, receipt_id in item.latest_receipts.items():

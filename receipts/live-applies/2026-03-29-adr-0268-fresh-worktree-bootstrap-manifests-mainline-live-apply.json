@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T15:16:57Z",
+  "recorded_by": "codex",
+  "source_commit": "7f7aee838baa7e835c880ffbfcbc777ac6bb96ff",
+  "repo_version_context": "0.177.81",
+  "platform_version_context": "0.130.54",
+  "workflow_id": "adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply",
+  "adr": "0268",
+  "summary": "Integrated ADR 0268 on synchronized main release 0.177.81 by replaying the generic public-edge live-apply wrapper from a clean worktree, proving the bootstrap manifests rebuilt the shared portal artifacts before mutation began, fixing the public-edge to nginx_edge guard-chain alias so the full governed path runs end to end, and establishing platform version 0.130.55 with the shared edge healthy afterward.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "nginx.lv3.org",
+      "address": "https://nginx.lv3.org"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "docs.lv3.org",
+      "address": "https://docs.lv3.org"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "changelog.lv3.org",
+      "address": "https://changelog.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Latest origin/main baseline and protected release cut",
+      "result": "pass",
+      "observed": "`git fetch origin --prune` confirmed the newest published `origin/main` baseline remained commit `9416fec683e90bf340baf54ec9eb70df84e57482`; the exact-main ADR 0268 replay source was commit `7f7aee838baa7e835c880ffbfcbc777ac6bb96ff` on top of that head, and the protected release cut carried repository version `0.177.81`."
+    },
+    {
+      "check": "Public-edge guard chain and immutable-replacement exception",
+      "result": "pass",
+      "observed": "`make immutable-guest-replacement-plan service=public-edge` resolved the playbook to canonical service `nginx_edge` and confirmed the documented ADR 0191 narrow exception rule for `nginx-lv3`; `uv run --with pyyaml python scripts/standby_capacity.py --service public-edge` returned `Decision: approved`; `uv run --with pyyaml --with jsonschema python scripts/service_redundancy.py --check-live-apply --service public-edge` reported `nginx_edge: declared R1 -> platform R1 -> implemented R0 [gate=unproven]`; and `uv run --with pyyaml --with jsonschema python scripts/immutable_guest_replacement.py --check-live-apply --service public-edge --allow-in-place-mutation` confirmed the acknowledged in-place mutation override for this exact-main replay."
+    },
+    {
+      "check": "Exact-main generic wrapper replay from a clean worktree",
+      "result": "pass",
+      "observed": "After removing `build/ops-portal/`, `build/changelog-portal/`, and `build/docs-portal/`, `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=public-edge env=production` rebuilt all three directories through the ADR 0268 bootstrap manifests, passed canonical truth plus the full guard chain, and completed successfully with final recap `nginx-lv3 : ok=61 changed=5 unreachable=0 failed=0 skipped=14 rescued=0 ignored=0`."
+    },
+    {
+      "check": "Public edge verification after exact-main replay",
+      "result": "pass",
+      "observed": "`curl -I --max-time 20 https://grafana.lv3.org` returned `HTTP/2 302` to `/login`; `curl -I --max-time 20 https://nginx.lv3.org` returned `HTTP/2 200`; and both `https://docs.lv3.org` and `https://changelog.lv3.org` returned `HTTP/2 302` to their expected `oauth2/sign_in` paths with the shared `x-robots-tag: noindex, nofollow` headers intact."
+    },
+    {
+      "check": "Repo automation and validation sweep on the integrated tree",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with-requirements requirements/docs.txt --with pyyaml python -m pytest -q tests/test_docs_site.py tests/test_preflight_controller_local.py tests/test_correction_loops.py tests/test_ansible_execution_scopes.py tests/test_service_id_resolver.py tests/test_canonical_truth.py` returned `31 passed in 127.04s`; `uv run --with pyyaml python scripts/workflow_catalog.py --validate` returned `Workflow catalog OK`; `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate` returned `Repository data models OK`; `./scripts/validate_repo.sh agent-standards generated-docs generated-portals` passed after regenerating `docs/site-generated/architecture/dependency-graph.md` and `docs/diagrams/agent-coordination-map.excalidraw`; and `git diff --check` passed on the integrated `0.177.81` tree."
+    }
+  ],
+  "evidence_refs": [
+    "README.md",
+    "RELEASE.md",
+    "VERSION",
+    "changelog.md",
+    "versions/stack.yaml",
+    "workstreams.yaml",
+    "build/platform-manifest.json",
+    "docs/adr/.index.yaml",
+    "docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md",
+    "docs/workstreams/ws-0268-live-apply.md",
+    "docs/workstreams/ws-0268-main-integration.md",
+    "docs/runbooks/controller-local-secrets-and-preflight.md",
+    "docs/runbooks/playbook-execution-model.md",
+    "docs/release-process.md",
+    "docs/release-notes/0.177.81.md",
+    "docs/release-notes/README.md",
+    "config/ansible-execution-scopes.yaml",
+    "config/command-catalog.json",
+    "config/correction-loops.json",
+    "config/workflow-catalog.json",
+    "config/worktree-bootstrap-manifests.json",
+    "Makefile",
+    "scripts/preflight_controller_local.py",
+    "scripts/workflow_catalog.py",
+    "scripts/worktree_bootstrap.py",
+    "tests/test_docs_site.py",
+    "tests/test_preflight_controller_local.py",
+    "tests/test_service_id_resolver.py",
+    "receipts/ops-portal-snapshot.html",
+    "receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply.json",
+    "receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply.json"
+  ],
+  "notes": [
+    "This receipt supersedes the earlier branch-local receipt `2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply` as the canonical source for repository version `0.177.81` and platform version `0.130.55`, while preserving that first isolated-worktree proof.",
+    "The exact-main replay surfaced one last contract gap: the generic wrapper advertised `service=public-edge`, but the downstream guard scripts validate the canonical service catalog id `nginx_edge`; source commit `7f7aee838baa7e835c880ffbfcbc777ac6bb96ff` fixed that execution-scope alias before the successful replay.",
+    "The exact-main wrapper replay intentionally used `ALLOW_IN_PLACE_MUTATION=true` as the documented ADR 0191 narrow exception for `nginx_edge`; the default production path for future edge changes remains immutable guest replacement."
+  ]
+}
