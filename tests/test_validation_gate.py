@@ -103,6 +103,131 @@ def test_run_gate_writes_status_file(tmp_path: Path, capsys) -> None:
     assert [check["id"] for check in payload["checks"]] == ["alpha", "beta"]
 
 
+def test_run_gate_auto_selects_docs_lane_checks(tmp_path: Path) -> None:
+    run_gate = load_module("run_gate_docs_lane", "scripts/run_gate.py")
+    repo_root = tmp_path / "repo"
+    (repo_root / "config").mkdir(parents=True)
+    (repo_root / "docs" / "adr").mkdir(parents=True)
+    manifest_path = repo_root / "config" / "validation-gate.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "workstream-surfaces": {
+                    "description": "ownership",
+                    "severity": "error",
+                    "image": "example/python:latest",
+                    "command": "printf workstream",
+                    "working_dir": "/workspace",
+                    "timeout_seconds": 30,
+                },
+                "agent-standards": {
+                    "description": "agent standards",
+                    "severity": "error",
+                    "image": "example/python:latest",
+                    "command": "printf standards",
+                    "working_dir": "/workspace",
+                    "timeout_seconds": 30,
+                },
+                "documentation-index": {
+                    "description": "documentation index",
+                    "severity": "error",
+                    "image": "example/python:latest",
+                    "command": "printf docs-index",
+                    "working_dir": "/workspace",
+                    "timeout_seconds": 30,
+                },
+                "security-scan": {
+                    "description": "security",
+                    "severity": "error",
+                    "image": "example/security:latest",
+                    "command": "printf security",
+                    "working_dir": "/workspace",
+                    "timeout_seconds": 30,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    lane_catalog_path = repo_root / "config" / "validation-lanes.yaml"
+    lane_catalog_path.write_text(
+        "\n".join(
+            [
+                "schema_version: 1.0.0",
+                "primary_branch: main",
+                "unknown_surface_policy: all_lanes",
+                "fast_global_checks:",
+                "  - workstream-surfaces",
+                "  - agent-standards",
+                "lanes:",
+                "  documentation-and-adr:",
+                "    title: Documentation",
+                "    description: Doc lane",
+                "    checks:",
+                "      - documentation-index",
+                "  remote-builder:",
+                "    title: Remote builder",
+                "    description: Builder lane",
+                "    checks:",
+                "      - security-scan",
+                "surface_classes:",
+                "  - surface_id: docs",
+                "    title: Docs",
+                "    paths:",
+                "      - docs/adr/*.md",
+                "    required_lanes:",
+                "      - documentation-and-adr",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    doc_path = repo_root / "docs" / "adr" / "0264-test.md"
+    doc_path.write_text("# ADR test\n", encoding="utf-8")
+    status_path = repo_root / ".local" / "validation-gate" / "last-run.json"
+    fake_docker = tmp_path / "fake-docker"
+    write_fake_docker(fake_docker)
+
+    subprocess.run(["git", "init", str(repo_root)], check=True, capture_output=True, text=True)
+    subprocess.run(["git", "-C", str(repo_root), "config", "user.email", "codex@example.com"], check=True)
+    subprocess.run(["git", "-C", str(repo_root), "config", "user.name", "Codex"], check=True)
+    subprocess.run(["git", "-C", str(repo_root), "add", "."], check=True)
+    subprocess.run(["git", "-C", str(repo_root), "commit", "-m", "initial"], check=True, capture_output=True, text=True)
+    base_branch = subprocess.run(
+        ["git", "-C", str(repo_root), "branch", "--show-current"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    subprocess.run(["git", "-C", str(repo_root), "checkout", "-b", "codex/docs-change"], check=True, capture_output=True, text=True)
+    doc_path.write_text("# ADR test\n\nUpdated.\n", encoding="utf-8")
+
+    exit_code = run_gate.main(
+        [
+            "--manifest",
+            str(manifest_path),
+            "--workspace",
+            str(repo_root),
+            "--lane-catalog",
+            str(lane_catalog_path),
+            "--docker-binary",
+            str(fake_docker),
+            "--status-file",
+            str(status_path),
+            "--base-ref",
+            base_branch,
+        ]
+    )
+
+    assert exit_code == 0
+    payload = json.loads(status_path.read_text(encoding="utf-8"))
+    assert payload["requested_checks"] == ["workstream-surfaces", "agent-standards", "documentation-index"]
+    assert payload["lane_selection"]["selected_lanes"] == ["documentation-and-adr"]
+    assert payload["lane_selection"]["unknown_files"] == []
+    assert payload["lane_results"][0]["green_path_summary"] == (
+        "Documentation passed for 1 changed file(s) via documentation-index."
+    )
+
+
 def test_log_gate_bypass_writes_receipt(tmp_path: Path) -> None:
     receipt_dir = tmp_path / "receipts"
     completed = subprocess.run(
@@ -246,3 +371,17 @@ def test_gate_status_workflow_catalog_and_windmill_seed_align() -> None:
 
     assert "config/windmill/scripts/gate-status.py" in catalog["workflows"]["gate-status"]["implementation_refs"]
     assert "f/lv3/gate-status" in script_paths
+
+
+def test_gate_status_reexecs_via_python_package_runner_when_yaml_is_missing() -> None:
+    script = (REPO_ROOT / "scripts" / "gate_status.py").read_text(encoding="utf-8")
+
+    assert "LV3_GATE_STATUS_PYYAML_BOOTSTRAPPED" in script
+    assert "run_python_with_packages.sh" in script
+
+
+def test_run_gate_reexecs_via_python_package_runner_when_yaml_is_missing() -> None:
+    script = (REPO_ROOT / "scripts" / "run_gate.py").read_text(encoding="utf-8")
+
+    assert "LV3_RUN_GATE_PYYAML_BOOTSTRAPPED" in script
+    assert "run_python_with_packages.sh" in script

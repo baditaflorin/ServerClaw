@@ -1367,6 +1367,78 @@
       "notes": "Published as an informational HTTPS surface on the shared edge while the live mail service itself is reached over SMTP submission and IMAPS."
     },
     {
+      "fqdn": "matrix.lv3.org",
+      "service_id": "matrix_synapse",
+      "environment": "production",
+      "status": "active",
+      "owner_adr": "0255",
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "upstream-auth",
+        "audience": "operator"
+      },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "upstream_auth",
+        "route_target": {
+          "service_id": "matrix_synapse",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.matrix_synapse_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "matrix_synapse",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "noindex": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.matrix_synapse_port }}"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": true,
+      "notes": "The public hostname terminates at the shared edge and forwards only the Matrix client listener; authentication is enforced by Synapse and federation stays disabled for this ADR."
+    },
+    {
       "fqdn": "n8n.lv3.org",
       "service_id": "n8n",
       "environment": "production",
@@ -2507,12 +2579,12 @@
     }
   ],
   "summary": {
-    "catalog_total": 35,
-    "active_total": 31,
-    "active_public_total": 27,
+    "catalog_total": 36,
+    "active_total": 32,
+    "active_public_total": 28,
     "active_private_total": 4,
     "planned_total": 4,
-    "shared_edge_total": 26,
+    "shared_edge_total": 27,
     "platform_sso_total": 13
   }
 }

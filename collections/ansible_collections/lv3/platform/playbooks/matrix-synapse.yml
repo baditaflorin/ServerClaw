@@ -1,0 +1,186 @@
+---
+# Playbook: matrix-synapse.yml
+# Purpose: Converge the repo-managed Matrix Synapse runtime, PostgreSQL backend, controller proxy, and public edge publication for ADR 0255.
+# Use case: Run during Matrix Synapse deployment, upgrade, or recovery when the canonical ServerClaw conversation hub must match repo truth.
+#
+# Inputs (required):
+#   - env (str, required): Target environment selector used by the scoped Ansible wrapper.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): SSH path to managed guests.
+#
+# Outputs:
+#   - Matrix Synapse converged on docker-runtime-lv3, PostgreSQL access prepared on postgres-lv3, a host-side Tailscale proxy published on proxmox_florin, and matrix.lv3.org published through the shared edge.
+#
+# Idempotency: Fully idempotent
+#              Runtime secrets, signing material, and the bootstrap admin account are reused when present, and repeat runs reconcile the same service contract.
+#
+# Dependencies:
+#   - ADR 0255: Matrix Synapse As The Canonical ServerClaw Conversation Hub
+#   - Requires: OpenBao, docker-runtime-lv3, postgres-lv3, the shared NGINX edge, and Hetzner DNS publication to be reachable
+#   - Role: matrix_synapse_postgres — provisions the Matrix Synapse database and role
+#   - Role: matrix_synapse_runtime — deploys Matrix Synapse, seeds bootstrap secrets, and verifies local login
+#
+# Related ADRs: 0149, 0152, 0255
+# Related Runbooks: docs/runbooks/configure-matrix-synapse.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-29
+
+- name: Converge the Tailscale operator proxy for Matrix Synapse
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - automation
+    - service-matrix-synapse
+
+  roles:
+    - role: lv3.platform.proxmox_tailscale_proxy
+    - role: lv3.platform.proxmox_security
+      vars:
+        proxmox_security_manage_acme: false
+
+- name: Ensure Hetzner DNS publication for Matrix Synapse
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    subdomain_catalog_path: "{{ playbook_dir }}/../config/subdomain-catalog.json"
+    inventory_defaults_path: "{{ playbook_dir }}/../inventory/group_vars/all.yml"
+    subdomain_fqdn: matrix.lv3.org
+
+  tasks:
+    - name: Load controller defaults
+      ansible.builtin.include_vars:
+        file: "{{ inventory_defaults_path }}"
+
+    - name: Load the subdomain catalog
+      ansible.builtin.include_vars:
+        file: "{{ subdomain_catalog_path }}"
+        name: subdomain_catalog
+
+    - name: Select the Matrix Synapse subdomain entry
+      ansible.builtin.set_fact:
+        selected_subdomain: >-
+          {{
+            (
+              subdomain_catalog.subdomains
+              | selectattr('fqdn', 'equalto', subdomain_fqdn)
+              | list
+              | first
+            ) | default({})
+          }}
+
+    - name: Assert the Matrix Synapse subdomain is catalogued
+      ansible.builtin.assert:
+        that:
+          - selected_subdomain != {}
+          - selected_subdomain.status in ['active', 'planned']
+          - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
+        fail_msg: >-
+          matrix.lv3.org must exist in config/subdomain-catalog.json before live apply.
+
+    - name: Derive the managed Hetzner record name
+      ansible.builtin.set_fact:
+        selected_subdomain_record_name: >-
+          {{
+            '@'
+            if selected_subdomain.fqdn == hetzner_dns_zone_name
+            else (
+              selected_subdomain.fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
+            )
+          }}
+
+    - name: Converge the Matrix Synapse Hetzner DNS record
+      ansible.builtin.include_role:
+        name: lv3.platform.hetzner_dns_record
+      vars:
+        hetzner_dns_record_zone_name: "{{ hetzner_dns_zone_name }}"
+        hetzner_dns_record_name: "{{ selected_subdomain_record_name }}"
+        hetzner_dns_record_type: A
+        hetzner_dns_record_value: "{{ selected_subdomain.target }}"
+        hetzner_dns_record_ttl: "{{ selected_subdomain.ttl | default(60) }}"
+
+- name: Converge PostgreSQL access for Matrix Synapse
+  hosts: postgres-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-matrix-synapse
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - postgres-lv3
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.postgres_vm
+    - role: lv3.platform.matrix_synapse_postgres
+
+- name: Converge Matrix Synapse on the Docker runtime VM
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-matrix-synapse
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.matrix-synapse
+        playbook_execution_audit_target: matrix_synapse
+        required_hosts:
+          - docker-runtime-lv3
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.matrix_synapse_runtime
+
+  post_tasks:
+    - name: Run shared Matrix Synapse post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: matrix_synapse
+        playbook_execution_post_verify_audit_action: playbook.verify.matrix-synapse
+
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: matrix_synapse
+
+- name: Publish Matrix Synapse through the NGINX edge
+  hosts: nginx-lv3
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../../../../../inventory/group_vars/platform.yml"
+  tags:
+    - tier-2
+    - automation
+    - service-matrix-synapse
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - nginx-lv3
+
+  roles:
+    - role: lv3.platform.nginx_edge_publication

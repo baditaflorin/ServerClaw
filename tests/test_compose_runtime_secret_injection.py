@@ -7,6 +7,7 @@ ROLE_RUNTIME_PATHS = {
     "windmill_runtime": "/run/lv3-secrets/windmill/runtime.env",
     "keycloak_runtime": "/run/lv3-secrets/keycloak/runtime.env",
     "mattermost_runtime": "/run/lv3-secrets/mattermost/runtime.env",
+    "matrix_synapse_runtime": "/run/lv3-secrets/matrix-synapse/runtime.env",
     "open_webui_runtime": "/run/lv3-secrets/open-webui/runtime.env",
     "netbox_runtime": "/run/lv3-secrets/netbox/runtime.env",
     "plane_runtime": "/run/lv3-secrets/plane/runtime.env",
@@ -154,3 +155,4 @@ def test_ops_portal_image_includes_publication_contract_helper() -> None:
     app_text = (REPO_ROOT / "scripts" / "ops_portal" / "app.py").read_text()
     assert "from publication_contract import registry_entries" in app_text
     assert "COPY publication_contract.py ./publication_contract.py" in dockerfile_text
+    assert "COPY stage_smoke.py ./stage_smoke.py" in dockerfile_text

@@ -7,11 +7,11 @@
 
 schema_version: 1
 generated: '2026-03-29'
-total_adrs: 304
+total_adrs: 314
 implementation_status_summary:
-  Implemented: 232
-  Partial: 7
-  Not Implemented: 64
+  Implemented: 242
+  Partial: 8
+  Not Implemented: 63
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -41,7 +41,11 @@ concerns:
     - '0075'
     - '0145'
     - '0272'
+    - 0285
+    - 0286
     - 0287
+    - 0289
+    - 0292
     - 0294
   automation:
     - '0030'
@@ -107,6 +111,7 @@ concerns:
     - '0267'
     - 0269
     - '0275'
+    - 0287
     - 0295
   documentation:
     - '0074'
@@ -146,6 +151,7 @@ concerns:
     - '0250'
     - 0258
     - 0280
+    - 0293
   networking:
     - '0015'
     - '0021'
@@ -264,7 +270,9 @@ concerns:
     - 0285
     - 0286
     - 0288
+    - 0288
     - 0289
+    - 0290
     - 0290
     - 0291
     - 0292
@@ -335,6 +343,8 @@ concerns:
     - '0157'
     - 0191
     - '0223'
+    - 0284
+    - 0291
     - 0296
 discovery_queries:
   how do we bootstrap:
@@ -4065,7 +4075,7 @@ adr_index:
   - adr: '0236'
     title: Server-State And Mutation Feedback Via TanStack Query
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4076,6 +4086,7 @@ adr_index:
       - query
     summary: We will use TanStack Query as the default server-state and mutation-feedback
     filename: 0236-server-state-and-mutation-feedback-via-tanstack-query.md
+    implemented_version: 0.177.81
   - adr: '0237'
     title: Schema-First Human Forms Via React Hook Form And Zod
     status: Accepted
@@ -4189,7 +4200,7 @@ adr_index:
   - adr: '0244'
     title: Runtime Assurance Matrix Per Service And Environment
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4201,6 +4212,7 @@ adr_index:
       - environment
     summary: We will govern runtime assurance through a service-by-environment assurance
     filename: 0244-runtime-assurance-matrix-per-service-and-environment.md
+    implemented_version: 0.177.80
   - adr: '0245'
     title: Declared-To-Live Service Attestation
     status: Accepted
@@ -4265,7 +4277,7 @@ adr_index:
   - adr: 0249
     title: HTTPS And TLS Assurance Via Blackbox Exporter And testssl.sh
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: security
     keywords:
@@ -4278,6 +4290,7 @@ adr_index:
       - sh
     summary: We will use Prometheus Blackbox Exporter for recurring protocol-level probe
     filename: 0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md
+    implemented_version: 0.177.82
   - adr: '0250'
     title: Log Ingestion And Queryability Canaries Via Loki Canary
     status: Accepted
@@ -4297,7 +4310,7 @@ adr_index:
   - adr: '0251'
     title: Stage-Scoped Smoke Suites And Promotion Gates
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Partial
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -4308,6 +4321,7 @@ adr_index:
       - gates
     summary: We will require stage-scoped smoke suites for active services and wire them
     filename: 0251-stage-scoped-smoke-suites-and-promotion-gates.md
+    implemented_version: 0.177.84
   - adr: '0252'
     title: Route And DNS Publication Assertion Ledger
     status: Accepted
@@ -4357,7 +4371,7 @@ adr_index:
   - adr: '0255'
     title: Matrix Synapse As The Canonical ServerClaw Conversation Hub
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4370,6 +4384,7 @@ adr_index:
       - hub
     summary: We will use Matrix Synapse as the canonical conversation hub for
     filename: 0255-matrix-synapse-as-the-canonical-serverclaw-conversation-hub.md
+    implemented_version: 0.177.85
   - adr: '0256'
     title: Mautrix Bridges For External Chat Channel Adapters
     status: Accepted
@@ -4419,7 +4434,7 @@ adr_index:
   - adr: 0259
     title: n8n As The External App Connector Fabric For ServerClaw
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4432,6 +4447,7 @@ adr_index:
       - serverclaw
     summary: We will use n8n as the external app connector fabric for ServerClaw.
     filename: 0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md
+    implemented_version: 0.177.79
   - adr: '0260'
     title: Nextcloud As The Canonical Personal Data Plane For ServerClaw
     status: Accepted
@@ -4499,7 +4515,7 @@ adr_index:
   - adr: '0264'
     title: Failure-Domain-Isolated Validation Lanes
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -4508,10 +4524,11 @@ adr_index:
       - lanes
     summary: We will split repository and promotion validation into failure-domain-isolated
     filename: 0264-failure-domain-isolated-validation-lanes.md
+    implemented_version: 0.177.84
   - adr: '0265'
     title: Immutable Validation Snapshots For Remote Builders And Schema Checks
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -4524,6 +4541,7 @@ adr_index:
       - checks
     summary: We will run remote builder and schema validation against immutable repository
     filename: 0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+    implemented_version: 0.177.78
   - adr: '0266'
     title: Validation Runner Capability Contracts And Environment Attestation
     status: Accepted
@@ -4558,7 +4576,7 @@ adr_index:
   - adr: 0268
     title: Fresh-Worktree Bootstrap Manifests For Generated Artifacts And Local Inputs
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: bootstrap
     keywords:
@@ -4571,6 +4589,7 @@ adr_index:
       - inputs
     summary: We will require a bootstrap manifest for every fresh worktree path that can
     filename: 0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
+    implemented_version: 0.177.83
   - adr: 0269
     title: Vulnerability Budgets And Image-Host Freshness Promotion Gates
     status: Accepted
@@ -4636,7 +4655,7 @@ adr_index:
   - adr: '0273'
     title: Public Endpoint Admission Control For DNS Catalog And Certificate Concordance
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: networking
     keywords:
@@ -4650,6 +4669,7 @@ adr_index:
       - concordance
     summary: We will require public endpoint admission control that proves concordance
     filename: 0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md
+    implemented_version: 0.177.77
   - adr: '0274'
     title: Governed Base Image Mirrors And Warm Caches For Repo Deployments
     status: Accepted
@@ -4825,6 +4845,22 @@ adr_index:
     summary: We will deploy Plausible Analytics as the privacy-first web traffic
     filename: 0283-plausible-analytics-as-the-privacy-first-web-traffic-analytics-layer.md
   - adr: 0284
+    title: Netbox As The Network IPAM And Topology Source Of Truth
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: vm-topology
+    keywords:
+      - netbox
+      - as
+      - network
+      - ipam
+      - topology
+      - source
+      - truth
+    summary: We will deploy Netbox as the single authoritative source of truth for
+    filename: 0284-netbox-as-the-network-ipam-and-topology-source-of-truth.md
+  - adr: 0284
     title: Piper TTS As The CPU Neural Text-To-Speech Service
     status: Accepted
     implementation_status: Not Implemented
@@ -4840,6 +4876,21 @@ adr_index:
       - service
     summary: We will deploy Piper TTS as the canonical CPU neural text-to-speech service.
     filename: 0284-piper-tts-as-the-cpu-neural-text-to-speech-service.md
+  - adr: 0285
+    title: Paperless-ngx As The Document Management And Archive API
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - paperless-ngx
+      - as
+      - document
+      - management
+      - archive
+      - api
+    summary: We will deploy Paperless-ngx as the document management and archive API
+    filename: 0285-paperless-ngx-as-the-document-management-and-archive-api.md
   - adr: 0285
     title: Whisper ASR As The CPU Speech-To-Text Service
     status: Accepted
@@ -4871,6 +4922,22 @@ adr_index:
       - extraction
     summary: We will deploy Tesseract OCR as a REST service to fill the image-OCR gap
     filename: 0286-tesseract-ocr-service-for-scanned-image-text-extraction.md
+  - adr: 0286
+    title: Vikunja As The Task And Project Management REST API
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - vikunja
+      - as
+      - task
+      - project
+      - management
+      - rest
+      - api
+    summary: We will deploy Vikunja as the task and project management REST API for
+    filename: 0286-vikunja-as-the-task-and-project-management-rest-api.md
   - adr: 0287
     title: LiteLLM As The Unified LLM API Proxy And Router
     status: Deprecated
@@ -4887,6 +4954,22 @@ adr_index:
       - router
     summary: We will deploy LiteLLM as the unified LLM API proxy and router.
     filename: 0287-litellm-as-the-unified-llm-api-proxy-and-router.md
+  - adr: 0287
+    title: Woodpecker CI As The API-Driven Continuous Integration Server
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: ci-cd
+    keywords:
+      - woodpecker
+      - ci
+      - as
+      - api-driven
+      - continuous
+      - integration
+      - server
+    summary: We will deploy Woodpecker CI as the platform's event-driven continuous
+    filename: 0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md
   - adr: 0288
     title: Crawl4AI As The LLM-Optimised Web Content Crawler
     status: Accepted
@@ -4902,6 +4985,39 @@ adr_index:
       - crawler
     summary: We will deploy Crawl4AI as the LLM-optimised web content crawler.
     filename: 0288-crawl4ai-as-the-llm-optimised-web-content-crawler.md
+  - adr: 0288
+    title: Flagsmith As The Feature Flag And Remote Configuration Service
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - flagsmith
+      - as
+      - feature
+      - flag
+      - remote
+      - configuration
+      - service
+    summary: We will deploy Flagsmith as the feature flag and remote configuration
+    filename: 0288-flagsmith-as-the-feature-flag-and-remote-configuration-service.md
+  - adr: 0289
+    title: Directus As The REST And GraphQL Data API Layer Over Postgres
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - directus
+      - as
+      - rest
+      - graphql
+      - data
+      - api
+      - layer
+      - over
+    summary: We will deploy Directus as the REST and GraphQL data API layer for
+    filename: 0289-directus-as-the-rest-graphql-data-api-layer-over-postgres.md
   - adr: 0289
     title: Label Studio As The Human-In-The-Loop Data Annotation Platform
     status: Accepted
@@ -4935,6 +5051,20 @@ adr_index:
       - registry
     summary: We will deploy MLflow as the machine learning experiment tracker and model
     filename: 0290-mlflow-as-the-machine-learning-experiment-tracker-and-model-registry.md
+  - adr: 0290
+    title: Redpanda As The Kafka-Compatible Streaming Platform
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: platform
+    keywords:
+      - redpanda
+      - as
+      - kafka-compatible
+      - streaming
+      - platform
+    summary: We will deploy Redpanda as the Kafka-compatible streaming platform for
+    filename: 0290-redpanda-as-the-kafka-compatible-streaming-platform.md
   - adr: 0291
     title: JupyterHub As The Interactive Notebook Environment
     status: Accepted
@@ -4949,6 +5079,23 @@ adr_index:
       - environment
     summary: We will deploy JupyterHub as the shared interactive notebook environment.
     filename: 0291-jupyterhub-as-the-interactive-notebook-environment.md
+  - adr: 0291
+    title: SFTPGo As The Managed File Transfer Service With REST Provisioning
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: vm-topology
+    keywords:
+      - sftpgo
+      - as
+      - managed
+      - file
+      - transfer
+      - service
+      - rest
+      - provisioning
+    summary: We will deploy SFTPGo as the managed file transfer service for all SFTP,
+    filename: 0291-sftpgo-as-the-managed-file-transfer-service-with-rest-provisioning.md
   - adr: 0292
     title: Apache Superset As The SQL-First Business Intelligence Layer
     status: Accepted
@@ -4965,6 +5112,22 @@ adr_index:
       - layer
     summary: We will deploy Apache Superset as the shared SQL-first business intelligence
     filename: 0292-apache-superset-as-the-sql-first-business-intelligence-layer.md
+  - adr: 0292
+    title: Lago As The Usage Metering And Billing API Layer
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: api
+    keywords:
+      - lago
+      - as
+      - usage
+      - metering
+      - billing
+      - api
+      - layer
+    summary: We will deploy Lago as the usage metering and billing API layer for
+    filename: 0292-lago-as-the-usage-metering-and-billing-api-layer.md
   - adr: 0293
     title: Livekit As The Real-Time Audio And Voice Channel For Agents
     status: Accepted
@@ -4981,6 +5144,22 @@ adr_index:
       - agents
     summary: We will deploy Livekit as the real-time audio and voice channel for agent
     filename: 0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md
+  - adr: 0293
+    title: Temporal As The Durable Workflow And Task Queue Engine
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-29'
+    concern: monitoring
+    keywords:
+      - temporal
+      - as
+      - durable
+      - workflow
+      - task
+      - queue
+      - engine
+    summary: We will deploy Temporal as the durable workflow engine for long-running,
+    filename: 0293-temporal-as-the-durable-workflow-and-task-queue-engine.md
   - adr: 0294
     title: One-API As The Unified LLM API Proxy And Router
     status: Accepted

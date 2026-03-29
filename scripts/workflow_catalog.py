@@ -20,6 +20,11 @@ from correction_loops import (
     resolve_workflow_correction_loop,
     validate_correction_loop_catalog,
 )
+from worktree_bootstrap import (
+    load_bootstrap_catalog,
+    resolve_workflow_manifest_ids,
+    validate_bootstrap_catalog,
+)
 
 ALLOWED_ENTRYPOINT_KINDS = {"make_target"}
 ALLOWED_LIVE_IMPACTS = {
@@ -143,11 +148,14 @@ def validate_secret_manifest(manifest: dict) -> None:
         raise ValueError("secret manifest must define an object-valued 'secrets' key")
 
 
-def validate_workflow_catalog(catalog: dict, secret_manifest: dict) -> None:
+def validate_workflow_catalog(catalog: dict, secret_manifest: dict, bootstrap_catalog: dict | None = None) -> None:
     workflows = catalog.get("workflows")
     secrets = secret_manifest["secrets"]
     make_targets = parse_make_targets()
     defaults = load_workflow_defaults()
+    if bootstrap_catalog is None:
+        bootstrap_catalog = load_bootstrap_catalog()
+    validate_bootstrap_catalog(bootstrap_catalog)
     defaults_payload = defaults.get("default_budget")
     if not isinstance(defaults_payload, dict):
         raise ValueError("config/workflow-defaults.yaml must define default_budget")
@@ -259,6 +267,15 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict) -> None:
                     raise ValueError(
                         f"workflow '{workflow_id}' references unknown secret '{secret_id}'"
                     )
+        bootstrap_manifest_ids = preflight.get("bootstrap_manifest_ids", [])
+        if not isinstance(bootstrap_manifest_ids, list):
+            raise ValueError(f"workflow '{workflow_id}' field 'bootstrap_manifest_ids' must be a list")
+        for index, manifest_id in enumerate(bootstrap_manifest_ids):
+            if not isinstance(manifest_id, str) or not manifest_id.strip():
+                raise ValueError(
+                    f"workflow '{workflow_id}' bootstrap_manifest_ids[{index}] must be a non-empty string"
+                )
+        resolve_workflow_manifest_ids(bootstrap_catalog, workflow)
 
         validation_targets = workflow.get("validation_targets")
         if not isinstance(validation_targets, list):
@@ -426,6 +443,16 @@ def show_workflow(catalog: dict, workflow_id: str) -> int:
                 print(f"  - {field}: {secret_id}")
     else:
         print("Preflight secrets: none")
+    bootstrap_catalog = load_bootstrap_catalog()
+    validate_bootstrap_catalog(bootstrap_catalog)
+    manifest_ids = resolve_workflow_manifest_ids(bootstrap_catalog, workflow)
+    if manifest_ids:
+        print("Bootstrap manifests:")
+        for manifest_id in manifest_ids:
+            manifest = bootstrap_catalog["manifests"][manifest_id]
+            print(f"  - {manifest_id}: {manifest['description']}")
+    else:
+        print("Bootstrap manifests: none")
 
     print("Implementation refs:")
     for path_str in workflow["implementation_refs"]:
@@ -471,7 +498,9 @@ def main() -> int:
         secret_manifest = load_secret_manifest()
         validate_secret_manifest(secret_manifest)
         catalog = load_workflow_catalog()
-        validate_workflow_catalog(catalog, secret_manifest)
+        bootstrap_catalog = load_bootstrap_catalog()
+        validate_bootstrap_catalog(bootstrap_catalog)
+        validate_workflow_catalog(catalog, secret_manifest, bootstrap_catalog)
         if CORRECTION_LOOP_CATALOG_PATH.exists():
             correction_catalog = load_correction_loop_catalog()
             validate_correction_loop_catalog(correction_catalog, catalog)

@@ -24,6 +24,8 @@ make live-apply-site env=production
 
 The legacy top-level playbooks remain in place and still work. They now either import the decomposed service playbooks or use the shared task files directly.
 
+Before the generic `live-apply-group`, `live-apply-service`, `live-apply-site`, and `live-apply-waves` wrappers enter their interface, redundancy, or Ansible execution checks, they now call the controller-local bootstrap preflight. That bootstrap step can materialize declared generated artifacts such as the shared edge portal directories before the live replay starts.
+
 ## Environment Resolution
 
 `env` defaults to `production`.

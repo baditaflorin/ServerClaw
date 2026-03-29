@@ -9,6 +9,19 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
+def _normalize_seed_local_file(path: str) -> str:
+    normalized = path
+    replacements = (
+        ("{{ windmill_seed_script_root_local_dir }}/", "config/windmill/scripts/"),
+        ("{{ windmill_seed_repo_root_local_dir }}/", ""),
+        ("{{ inventory_dir }}/../", ""),
+        ("{{ playbook_dir }}/../", ""),
+    )
+    for old, new in replacements:
+        normalized = normalized.replace(old, new)
+    return normalized
+
+
 def test_all_workflow_catalog_windmill_wrappers_are_seeded() -> None:
     defaults = yaml.safe_load(
         (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
@@ -16,7 +29,7 @@ def test_all_workflow_catalog_windmill_wrappers_are_seeded() -> None:
     catalog = json.loads((REPO_ROOT / "config/workflow-catalog.json").read_text())
 
     seeded_files = {
-        entry["local_file"].replace("{{ inventory_dir }}/../", "").replace("{{ playbook_dir }}/../", "")
+        _normalize_seed_local_file(entry["local_file"])
         for entry in defaults["windmill_seed_scripts"]
         if isinstance(entry, dict) and "local_file" in entry
     }
@@ -69,6 +82,11 @@ def test_default_operations_surface_verification_paths_are_declared() -> None:
     assert expected_paths.issubset(set(defaults["windmill_default_operations_surface_script_paths"]))
     assert "windmill_default_operations_surface_script_paths" in verify_tasks
     assert "/api/w/{{ windmill_workspace_id }}/scripts/get/p/" in verify_tasks
+    assert "status_code:" in verify_tasks
+    assert "failed_when: false" in verify_tasks
+    assert "retries: 6" in verify_tasks
+    assert "delay: 5" in verify_tasks
+    assert "until:" in verify_tasks
 
 
 def test_default_operations_surface_preserves_token_lifecycle_runtime_root() -> None:

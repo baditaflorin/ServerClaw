@@ -236,6 +236,7 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
                     "lifecycle_status": "active",
                     "vm": "postgres-lv3",
                     "vmid": 150,
+                    "exposure": "private-only",
                     "internal_url": "postgres://10.10.10.55:5432",
                     "health_probe_id": "postgres",
                     "adr": "0098",
@@ -293,6 +294,163 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
                     "workflow_id": "deploy-and-promote",
                 }
             }
+        },
+    )
+    write_json(
+        tmp_path / "config" / "environment-topology.json",
+        {
+            "schema_version": "1.0.0",
+            "environments": [
+                {
+                    "id": "production",
+                    "name": "Production",
+                    "status": "active",
+                    "base_domain": "lv3.org",
+                }
+            ],
+        },
+    )
+    write_json(
+        tmp_path / "config" / "subdomain-exposure-registry.json",
+        {
+            "schema_version": "2.0.0",
+            "publications": [
+                {
+                    "fqdn": "api.lv3.org",
+                    "service_id": "api_gateway",
+                    "environment": "production",
+                    "status": "active",
+                    "publication": {
+                        "delivery_model": "shared-edge",
+                        "access_model": "platform-sso",
+                        "audience": "operator",
+                    },
+                    "adapter": {
+                        "tls": {
+                            "provider": "letsencrypt",
+                            "cert_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem",
+                        }
+                    },
+                }
+            ],
+        },
+    )
+    write_json(
+        tmp_path / "config" / "runtime-assurance-matrix.json",
+        {
+            "$schema": "docs/schema/runtime-assurance-matrix.schema.json",
+            "schema_version": "1.0.0",
+            "dimensions": {
+                "declared_runtime": {
+                    "title": "Declared Runtime",
+                    "description": "The service has a current runtime witness."
+                },
+                "health": {
+                    "title": "Health",
+                    "description": "The live health composite reports the service."
+                },
+                "route": {
+                    "title": "Route",
+                    "description": "The declared route matches a live surface."
+                },
+                "tls": {
+                    "title": "TLS",
+                    "description": "The service has HTTPS proof where required."
+                },
+                "smoke": {
+                    "title": "Smoke",
+                    "description": "A recent governed smoke receipt exists."
+                },
+                "browser_journey": {
+                    "title": "Browser Journey",
+                    "description": "A recent browser journey receipt exists."
+                },
+                "log_queryability": {
+                    "title": "Log Queryability",
+                    "description": "A recent log-query receipt exists."
+                },
+            },
+            "profiles": {
+                "private_service": {
+                    "title": "Private Service",
+                    "description": "Private non-browser service",
+                    "dimension_classes": {
+                        "declared_runtime": "required",
+                        "health": "required",
+                        "route": "required",
+                        "tls": "n_a",
+                        "smoke": "required",
+                        "browser_journey": "n_a",
+                        "log_queryability": "best_effort",
+                    },
+                },
+                "private_browser_surface": {
+                    "title": "Private Browser Surface",
+                    "description": "Private browser service",
+                    "dimension_classes": {
+                        "declared_runtime": "required",
+                        "health": "required",
+                        "route": "required",
+                        "tls": "n_a",
+                        "smoke": "required",
+                        "browser_journey": "required",
+                        "log_queryability": "best_effort",
+                    },
+                },
+                "edge_informational_surface": {
+                    "title": "Edge Informational Surface",
+                    "description": "Edge informational service",
+                    "dimension_classes": {
+                        "declared_runtime": "required",
+                        "health": "required",
+                        "route": "required",
+                        "tls": "required",
+                        "smoke": "best_effort",
+                        "browser_journey": "n_a",
+                        "log_queryability": "best_effort",
+                    },
+                },
+                "edge_browser_surface": {
+                    "title": "Edge Browser Surface",
+                    "description": "Interactive browser service",
+                    "dimension_classes": {
+                        "declared_runtime": "required",
+                        "health": "required",
+                        "route": "required",
+                        "tls": "required",
+                        "smoke": "required",
+                        "browser_journey": "required",
+                        "log_queryability": "best_effort",
+                    },
+                },
+                "edge_api_surface": {
+                    "title": "Edge API Surface",
+                    "description": "Published API surface",
+                    "dimension_classes": {
+                        "declared_runtime": "required",
+                        "health": "required",
+                        "route": "required",
+                        "tls": "required",
+                        "smoke": "required",
+                        "browser_journey": "n_a",
+                        "log_queryability": "best_effort",
+                    },
+                },
+            },
+            "default_profile_by_exposure": {
+                "edge-published": "edge_browser_surface",
+                "edge-static": "edge_informational_surface",
+                "informational-only": "edge_informational_surface",
+                "private-only": "private_service",
+            },
+            "service_overrides": {
+                "api_gateway": {"profile": "edge_api_surface"}
+            },
+            "freshness_days_by_dimension": {
+                "smoke": 30,
+                "browser_journey": 30,
+                "log_queryability": 45,
+            },
         },
     )
     write_yaml(
@@ -474,6 +632,25 @@ steps:
         tmp_path / "receipts" / "drift-reports" / "2026-03-23-test.json",
         {"summary": {"status": "warn", "warn_count": 1, "critical_count": 0}},
     )
+    write_json(
+        tmp_path / "receipts" / "live-applies" / "2026-03-23-windmill-runtime-assurance.json",
+        {
+            "receipt_id": "receipt-windmill-runtime-assurance",
+            "summary": "Applied windmill production smoke and log query verification",
+            "workflow_id": "live-apply-service service=windmill env=production",
+            "recorded_on": "2026-03-23T18:15:00Z",
+            "verification": [
+                {"check": "smoke test", "observed": "Smoke test passed", "result": "pass"},
+                {"check": "log query", "observed": "Loki log query succeeded", "result": "pass"},
+            ],
+            "notes": [
+                "windmill smoke check and log query proof recorded for production",
+            ],
+        },
+    )
+    (tmp_path / "receipts" / "live-applies" / "._2026-03-23-windmill-runtime-assurance.json").write_bytes(
+        b"\x00\x05\x16\x07AppleDouble-binary-sidecar"
+    )
     graph_dsn = prepare_graph_db(tmp_path / "graph.sqlite3")
     world_state_dsn = prepare_world_state_db(tmp_path / "world-state.sqlite3")
     write_json(
@@ -615,6 +792,17 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
                     missing_attestation = await client.get("/v1/platform/attestation/unknown", headers=headers)
                     assert missing_attestation.status_code == 404
                     assert missing_attestation.json()["error"]["code"] == "INPUT_UNKNOWN_SERVICE"
+
+                    runtime_assurance = await client.get("/v1/platform/runtime-assurance", headers=headers)
+                    assert runtime_assurance.status_code == 200
+                    assert runtime_assurance.json()["summary"]["total"] == 3
+                    windmill_assurance = next(
+                        item
+                        for item in runtime_assurance.json()["entries"]
+                        if item["service_id"] == "windmill"
+                    )
+                    assert windmill_assurance["overall_status"] == "pass"
+                    assert windmill_assurance["profile_id"] == "private_service"
 
                     postgres_health = await client.get("/v1/platform/health/postgres", headers=headers)
                     assert postgres_health.status_code == 200

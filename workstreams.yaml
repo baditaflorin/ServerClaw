@@ -93,6 +93,216 @@ workstreams:
         cache VM from ADR 0296 as a later live-apply step
       release_bump: patch
       included_in_repo_version: 0.177.73
+  - id: ws-0268-live-apply
+    adr: "0268"
+    title: Fresh-worktree bootstrap manifests live apply
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0268-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0268-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0268-live-apply.md
+    depends_on:
+      - adr-0034-controller-local-secret-manifest-and-preflight
+      - adr-0035-workflow-catalog-and-machine-readable-execution-contracts
+      - adr-0079-playbook-decomposition-and-shared-execution-model
+      - adr-0167-agent-handoff-and-context-preservation
+      - adr-0211-shared-policy-packs-and-rule-registries
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/adr/0094-developer-portal-and-documentation-site.md
+      - docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
+      - docs/workstreams/ws-0268-live-apply.md
+      - docs/runbooks/controller-local-secrets-and-preflight.md
+      - docs/runbooks/playbook-execution-model.md
+      - docs/release-process.md
+      - .config-locations.yaml
+      - Makefile
+      - mkdocs.yml
+      - config/ansible-execution-scopes.yaml
+      - config/command-catalog.json
+      - config/correction-loops.json
+      - config/workflow-catalog.json
+      - config/worktree-bootstrap-manifests.json
+      - docs/site-generated/architecture/dependency-graph.md
+      - receipts/ops-portal-snapshot.html
+      - scripts/generate_docs_site.py
+      - scripts/preflight_controller_local.py
+      - scripts/worktree_bootstrap.py
+      - scripts/workflow_catalog.py
+      - tests/test_docs_site.py
+      - tests/test_preflight_controller_local.py
+      - tests/test_service_id_resolver.py
+      - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0268_repo_surface
+          paths:
+            - docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
+            - docs/workstreams/ws-0268-live-apply.md
+            - docs/runbooks/controller-local-secrets-and-preflight.md
+            - docs/runbooks/playbook-execution-model.md
+            - docs/release-process.md
+            - .config-locations.yaml
+            - config/worktree-bootstrap-manifests.json
+            - config/ansible-execution-scopes.yaml
+            - scripts/preflight_controller_local.py
+            - scripts/worktree_bootstrap.py
+            - tests/test_preflight_controller_local.py
+            - tests/test_service_id_resolver.py
+            - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply.json
+          mode: exclusive
+        - id: docs_portal_generation_contract
+          paths:
+            - docs/adr/0094-developer-portal-and-documentation-site.md
+            - docs/site-generated/architecture/dependency-graph.md
+            - mkdocs.yml
+            - receipts/ops-portal-snapshot.html
+            - scripts/generate_docs_site.py
+            - tests/test_docs_site.py
+          mode: shared_contract
+          contract: docs-portal-generation-v1
+        - id: workflow_catalog_contract
+          paths:
+            - config/workflow-catalog.json
+            - scripts/workflow_catalog.py
+          mode: shared_contract
+          contract: workflow-catalog-v1
+        - id: command_catalog_contract
+          paths:
+            - config/command-catalog.json
+          mode: shared_contract
+          contract: command-catalog-v1
+        - id: live_apply_entrypoints_contract
+          paths:
+            - Makefile
+          mode: shared_contract
+          contract: live-apply-entrypoints-v1
+        - id: self_correction_contract
+          paths:
+            - config/correction-loops.json
+          mode: shared_contract
+          contract: self-correction-loop-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: integrated ADR 0268 by adding machine-readable fresh-worktree bootstrap manifests, automatic generated-artifact repair, and governed live-apply preflight wiring so isolated worktrees stop failing mid-run on missing local inputs
+      release_bump: patch
+      included_in_repo_version: 0.177.83
+      latest_receipts:
+        public_edge_publication: 2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply
+  - id: ws-0268-main-integration
+    adr: "0268"
+    title: Integrate ADR 0268 exact-main replay onto current origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0268-main-integration
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0268-main-integration
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0268-main-integration.md
+    depends_on:
+      - ws-0268-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - .config-locations.yaml
+      - Makefile
+      - mkdocs.yml
+      - config/ansible-execution-scopes.yaml
+      - config/command-catalog.json
+      - config/correction-loops.json
+      - config/workflow-catalog.json
+      - config/worktree-bootstrap-manifests.json
+      - scripts/canonical_truth.py
+      - docs/adr/0094-developer-portal-and-documentation-site.md
+      - docs/workstreams/ws-0268-main-integration.md
+      - docs/workstreams/ws-0268-live-apply.md
+      - docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
+      - docs/adr/.index.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/runbooks/controller-local-secrets-and-preflight.md
+      - docs/runbooks/playbook-execution-model.md
+      - docs/release-process.md
+      - docs/site-generated/architecture/dependency-graph.md
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.83.md
+      - versions/stack.yaml
+      - receipts/ops-portal-snapshot.html
+      - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply.json
+      - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply.json
+      - scripts/generate_docs_site.py
+      - scripts/preflight_controller_local.py
+      - tests/test_canonical_truth.py
+      - scripts/workflow_catalog.py
+      - scripts/worktree_bootstrap.py
+      - tests/test_docs_site.py
+      - tests/test_preflight_controller_local.py
+      - tests/test_service_id_resolver.py
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0268_mainline_integration
+          paths:
+            - .config-locations.yaml
+            - Makefile
+            - mkdocs.yml
+            - config/ansible-execution-scopes.yaml
+            - config/command-catalog.json
+            - config/correction-loops.json
+            - config/workflow-catalog.json
+            - config/worktree-bootstrap-manifests.json
+            - scripts/canonical_truth.py
+            - docs/adr/0094-developer-portal-and-documentation-site.md
+            - docs/workstreams/ws-0268-main-integration.md
+            - docs/workstreams/ws-0268-live-apply.md
+            - docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md
+            - docs/adr/.index.yaml
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/runbooks/controller-local-secrets-and-preflight.md
+            - docs/runbooks/playbook-execution-model.md
+            - docs/release-process.md
+            - docs/site-generated/architecture/dependency-graph.md
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.83.md
+            - versions/stack.yaml
+            - receipts/ops-portal-snapshot.html
+            - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-live-apply.json
+            - receipts/live-applies/2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply.json
+            - scripts/generate_docs_site.py
+            - scripts/preflight_controller_local.py
+            - tests/test_canonical_truth.py
+            - scripts/workflow_catalog.py
+            - scripts/worktree_bootstrap.py
+            - tests/test_docs_site.py
+            - tests/test_preflight_controller_local.py
+            - tests/test_service_id_resolver.py
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: records ADR 0268 exact-main evidence on release 0.177.83 by replaying the generic public-edge live-apply wrapper from a clean worktree, preserving fresh-worktree bootstrap repair, and fixing the public-edge to nginx_edge guard-chain alias so the full governed path can run end to end
+      release_bump: patch
+      included_in_repo_version: 0.177.83
+      latest_receipts:
+        public_edge_publication: 2026-03-29-adr-0268-fresh-worktree-bootstrap-manifests-mainline-live-apply
   - id: ws-0272-live-apply
     adr: "0272"
     title: Restore readiness ladders and stateful warm-up verification profiles
@@ -159,10 +369,434 @@ workstreams:
       included_in_repo_version: 0.177.75
       latest_receipts:
         restore_verification: 2026-03-29-adr-0272-restore-readiness-mainline-live-apply
+  - id: ws-0251-live-apply-r2
+    adr: "0251"
+    title: Stage-scoped smoke suites and promotion-gate live apply
+    status: merged
+    owner: codex
+    branch: codex/ws-0251-live-apply-r2
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply-r2
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0251-live-apply-r2.md
+    depends_on:
+      - adr-0073-promotion-gate
+      - adr-0111-integration-test-suite
+      - adr-0244-runtime-assurance-matrix
+      - adr-0253-runtime-assurance-scoreboard
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0251-live-apply-r2.md
+      - docs/adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md
+      - docs/adr/.index.yaml
+      - docs/schema/service-capability-catalog.schema.json
+      - scripts/stage_smoke.py
+      - scripts/service_catalog.py
+      - scripts/promotion_pipeline.py
+      - scripts/ops_portal/runtime_assurance.py
+      - policy/decisions/release_promotion.rego
+      - policy/tests/release_promotion_test.rego
+      - docs/runbooks/environment-promotion-pipeline.md
+      - docs/runbooks/runtime-assurance-scoreboard.md
+      - docs/runbooks/service-capability-catalog.md
+      - tests/test_stage_smoke.py
+      - tests/test_promotion_pipeline.py
+      - tests/test_runtime_assurance_scoreboard.py
+      - tests/test_validate_service_catalog.py
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: adr_0251_live_apply
+          paths:
+            - docs/workstreams/ws-0251-live-apply-r2.md
+            - docs/adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md
+            - docs/schema/service-capability-catalog.schema.json
+            - scripts/stage_smoke.py
+            - scripts/service_catalog.py
+            - scripts/promotion_pipeline.py
+            - scripts/ops_portal/runtime_assurance.py
+            - policy/decisions/release_promotion.rego
+            - policy/tests/release_promotion_test.rego
+            - docs/runbooks/environment-promotion-pipeline.md
+            - docs/runbooks/runtime-assurance-scoreboard.md
+            - docs/runbooks/service-capability-catalog.md
+            - tests/test_stage_smoke.py
+            - tests/test_promotion_pipeline.py
+            - tests/test_runtime_assurance_scoreboard.py
+            - tests/test_validate_service_catalog.py
+            - receipts/live-applies/
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: implement ADR 0251 by enforcing stage-scoped smoke suites
+        in both the promotion gate and the runtime-assurance scoreboard, with a
+        repo-managed default suite for active environments and live proof from
+        the updated operator workflow surfaces
+      release_bump: patch
+      included_in_repo_version: 0.177.84
+      latest_receipts:
+        windmill_attempt: 2026-03-29-adr-0251-windmill-live-apply
+        windmill_worker_drift: 2026-03-29-adr-0251-windmill-worker-drift
+        windmill_worker_checkout_rerun: 2026-03-29-adr-0251-windmill-worker-checkout-rerun
+        ops_portal_attempt: 2026-03-29-adr-0251-ops-portal-live-apply-rerun
+        ops_portal_postgateway: 2026-03-29-adr-0251-ops-portal-live-apply-postgateway
+        api_gateway_drift_recovery: 2026-03-29-adr-0251-api-gateway-drift-recovery
+        api_gateway_drift_recur: 2026-03-29-adr-0251-api-gateway-drift-recur
+        api_gateway_mainline_attempt: 2026-03-29-adr-0251-api-gateway-mainline-live-apply
+        api_gateway_mainline_rerun: 2026-03-29-adr-0251-api-gateway-mainline-live-apply-rerun
+        api_gateway_postrebase_rerun: 2026-03-29-adr-0251-api-gateway-postrebase-rerun
+        api_gateway_runtime_assurance_fix_attempt: 2026-03-29-adr-0251-api-gateway-runtime-assurance-config-fix
+        api_gateway_runtime_assurance_fix_rerun: 2026-03-29-adr-0251-api-gateway-runtime-assurance-config-fix-rerun
+  - id: ws-0255-live-apply
+    adr: "0255"
+    title: ADR 0255 live apply from latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/adr-0255-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0255-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0255-live-apply.md
+    depends_on:
+      - adr-0023-docker-runtime-vm-baseline
+      - adr-0026-dedicated-postgresql-vm-baseline
+      - adr-0077-compose-runtime-secrets-injection
+      - adr-0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3
+    conflicts_with: []
+    shared_surfaces:
+      - docs/adr/0255-matrix-synapse-as-the-canonical-serverclaw-conversation-hub.md
+      - docs/workstreams/ws-0255-live-apply.md
+      - docs/runbooks/configure-matrix-synapse.md
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - config/service-capability-catalog.json
+      - config/certificate-catalog.json
+      - config/health-probe-catalog.json
+      - config/subdomain-catalog.json
+      - config/subdomain-exposure-registry.json
+      - config/secret-catalog.json
+      - config/controller-local-secrets.json
+      - config/image-catalog.json
+      - config/api-gateway-catalog.json
+      - config/dependency-graph.json
+      - config/slo-catalog.json
+      - config/data-catalog.json
+      - config/service-completeness.json
+      - config/uptime-kuma/monitors.json
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - config/service-redundancy-catalog.json
+      - config/ansible-execution-scopes.yaml
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/slo_rules.yml
+      - config/grafana/dashboards/slo-overview.json
+      - playbooks/matrix-synapse.yml
+      - playbooks/services/matrix-synapse.yml
+      - collections/ansible_collections/lv3/platform/playbooks/matrix-synapse.yml
+      - collections/ansible_collections/lv3/platform/roles/matrix_synapse_postgres/
+      - collections/ansible_collections/lv3/platform/roles/matrix_synapse_runtime/
+      - scripts/generate_platform_vars.py
+      - scripts/validate_repo.sh
+      - tests/test_generate_platform_vars.py
+      - tests/test_compose_runtime_secret_injection.py
+      - tests/test_edge_publication_playbooks.py
+      - tests/test_postgres_vm_access_policy.py
+      - tests/test_matrix_synapse_playbook.py
+      - tests/test_matrix_synapse_runtime_role.py
+      - receipts/image-scans/2026-03-29-matrix-synapse-runtime.json
+      - receipts/image-scans/2026-03-29-matrix-synapse-runtime.trivy.json
+      - workstreams.yaml
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: matrix_synapse_docs
+          paths:
+            - docs/adr/0255-matrix-synapse-as-the-canonical-serverclaw-conversation-hub.md
+            - docs/workstreams/ws-0255-live-apply.md
+            - docs/runbooks/configure-matrix-synapse.md
+          mode: exclusive
+        - id: matrix_synapse_platform_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - scripts/generate_platform_vars.py
+            - tests/test_generate_platform_vars.py
+          mode: shared_contract
+          contract: platform-topology-v1
+        - id: matrix_synapse_shared_catalog_contract
+          paths:
+            - config/ansible-execution-scopes.yaml
+            - config/service-capability-catalog.json
+            - config/certificate-catalog.json
+            - config/health-probe-catalog.json
+            - config/subdomain-catalog.json
+            - config/subdomain-exposure-registry.json
+            - config/secret-catalog.json
+            - config/controller-local-secrets.json
+            - config/image-catalog.json
+            - config/api-gateway-catalog.json
+            - config/dependency-graph.json
+            - config/slo-catalog.json
+            - config/data-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/uptime-kuma/monitors.json
+            - config/workflow-catalog.json
+            - config/command-catalog.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/grafana/dashboards/slo-overview.json
+          mode: shared_contract
+          contract: service-catalogs-v1
+        - id: matrix_synapse_shared_validation_contract
+          paths:
+            - Makefile
+            - scripts/validate_repo.sh
+            - tests/test_compose_runtime_secret_injection.py
+            - tests/test_edge_publication_playbooks.py
+            - tests/test_postgres_vm_access_policy.py
+          mode: shared_contract
+          contract: repository-automation-v1
+        - id: matrix_synapse_runtime_surfaces
+          paths:
+            - config/alertmanager/rules/matrix-synapse.yml
+            - config/grafana/dashboards/matrix-synapse.json
+            - playbooks/matrix-synapse.yml
+            - playbooks/services/matrix-synapse.yml
+            - collections/ansible_collections/lv3/platform/playbooks/matrix-synapse.yml
+            - collections/ansible_collections/lv3/platform/roles/matrix_synapse_postgres/
+            - collections/ansible_collections/lv3/platform/roles/matrix_synapse_runtime/
+            - tests/test_matrix_synapse_playbook.py
+            - tests/test_matrix_synapse_runtime_role.py
+            - receipts/image-scans/2026-03-29-matrix-synapse-runtime.json
+            - receipts/image-scans/2026-03-29-matrix-synapse-runtime.trivy.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0255 by adding repo-managed Matrix
+        Synapse as the canonical ServerClaw conversation hub with
+        postgres-backed persistence, a Tailscale-only controller proxy, public
+        edge publication at matrix.lv3.org, and exact-main verified live-apply
+        evidence for the runtime, login, and monitoring paths
+      release_bump: patch
+      included_in_repo_version: 0.177.85
+      latest_receipts:
+        matrix_synapse: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
+        public_edge_publication: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
+        https_tls_assurance: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
+  - id: ws-0255-main-integration
+    adr: "0255"
+    title: Integrate ADR 0255 exact-main replay onto current origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0255-main-integration-r2
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0255-main-integration
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0255-main-integration.md
+    depends_on:
+      - ws-0255-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/adr/.index.yaml
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.85.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/diagrams/service-dependency-graph.excalidraw
+      - docs/site-generated/architecture/dependency-graph.md
+      - Makefile
+      - docs/adr/0255-matrix-synapse-as-the-canonical-serverclaw-conversation-hub.md
+      - docs/runbooks/configure-matrix-synapse.md
+      - docs/workstreams/ws-0255-live-apply.md
+      - docs/workstreams/ws-0255-main-integration.md
+      - inventory/group_vars/platform.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - playbooks/matrix-synapse.yml
+      - playbooks/services/matrix-synapse.yml
+      - collections/ansible_collections/lv3/platform/playbooks/matrix-synapse.yml
+      - collections/ansible_collections/lv3/platform/roles/matrix_synapse_postgres/
+      - collections/ansible_collections/lv3/platform/roles/matrix_synapse_runtime/
+      - config/alertmanager/rules/matrix-synapse.yml
+      - config/ansible-execution-scopes.yaml
+      - config/api-gateway-catalog.json
+      - config/certificate-catalog.json
+      - config/command-catalog.json
+      - config/controller-local-secrets.json
+      - config/data-catalog.json
+      - config/dependency-graph.json
+      - config/grafana/dashboards/matrix-synapse.json
+      - config/grafana/dashboards/slo-overview.json
+      - config/health-probe-catalog.json
+      - config/image-catalog.json
+      - config/prometheus/file_sd/https_tls_targets.yml
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/https_tls_alerts.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/slo_rules.yml
+      - config/secret-catalog.json
+      - config/service-capability-catalog.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      - config/slo-catalog.json
+      - config/subdomain-catalog.json
+      - config/subdomain-exposure-registry.json
+      - config/uptime-kuma/monitors.json
+      - config/workflow-catalog.json
+      - receipts/image-scans/2026-03-29-matrix-synapse-runtime.json
+      - receipts/image-scans/2026-03-29-matrix-synapse-runtime.trivy.json
+      - receipts/live-applies/2026-03-29-adr-0255-matrix-synapse-live-apply.json
+      - receipts/live-applies/2026-03-29-adr-0255-matrix-synapse-mainline-live-apply.json
+      - scripts/generate_platform_vars.py
+      - scripts/https_tls_assurance_targets.py
+      - scripts/validate_repo.sh
+      - tests/test_compose_runtime_secret_injection.py
+      - tests/test_edge_publication_makefile.py
+      - tests/test_edge_publication_playbooks.py
+      - tests/test_generate_platform_vars.py
+      - tests/test_https_tls_assurance_targets.py
+      - tests/test_matrix_synapse_playbook.py
+      - tests/test_matrix_synapse_postgres_role.py
+      - tests/test_matrix_synapse_runtime_role.py
+      - tests/test_postgres_vm_access_policy.py
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: integration_truth
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.85.md
+            - versions/stack.yaml
+          mode: shared_contract
+          contract: main-integration-truth-v1
+        - id: matrix_synapse_mainline_generated_state
+          paths:
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/diagrams/service-dependency-graph.excalidraw
+            - docs/site-generated/architecture/dependency-graph.md
+          mode: shared_contract
+          contract: matrix-synapse-mainline-generated-v1
+        - id: matrix_synapse_platform_contract
+          paths:
+            - inventory/group_vars/platform.yml
+            - inventory/host_vars/proxmox_florin.yml
+            - scripts/generate_platform_vars.py
+            - tests/test_generate_platform_vars.py
+          mode: shared_contract
+          contract: platform-topology-v1
+        - id: matrix_synapse_shared_catalog_contract
+          paths:
+            - config/ansible-execution-scopes.yaml
+            - config/service-capability-catalog.json
+            - config/certificate-catalog.json
+            - config/health-probe-catalog.json
+            - config/subdomain-catalog.json
+            - config/subdomain-exposure-registry.json
+            - config/secret-catalog.json
+            - config/controller-local-secrets.json
+            - config/image-catalog.json
+            - config/api-gateway-catalog.json
+            - config/dependency-graph.json
+            - config/slo-catalog.json
+            - config/data-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/uptime-kuma/monitors.json
+            - config/workflow-catalog.json
+            - config/command-catalog.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/grafana/dashboards/slo-overview.json
+          mode: shared_contract
+          contract: service-catalogs-v1
+        - id: matrix_synapse_shared_validation_contract
+          paths:
+            - Makefile
+            - scripts/validate_repo.sh
+            - tests/test_compose_runtime_secret_injection.py
+            - tests/test_edge_publication_makefile.py
+            - tests/test_edge_publication_playbooks.py
+            - tests/test_postgres_vm_access_policy.py
+          mode: shared_contract
+          contract: repository-automation-v1
+        - id: adr_0255_mainline_integration
+          paths:
+            - docs/adr/0255-matrix-synapse-as-the-canonical-serverclaw-conversation-hub.md
+            - docs/runbooks/configure-matrix-synapse.md
+            - docs/workstreams/ws-0255-live-apply.md
+            - docs/workstreams/ws-0255-main-integration.md
+            - playbooks/matrix-synapse.yml
+            - playbooks/services/matrix-synapse.yml
+            - collections/ansible_collections/lv3/platform/playbooks/matrix-synapse.yml
+            - collections/ansible_collections/lv3/platform/roles/matrix_synapse_postgres/*
+            - collections/ansible_collections/lv3/platform/roles/matrix_synapse_runtime/*
+            - config/alertmanager/rules/matrix-synapse.yml
+            - config/grafana/dashboards/matrix-synapse.json
+            - config/prometheus/file_sd/https_tls_targets.yml
+            - config/prometheus/rules/https_tls_alerts.yml
+            - receipts/image-scans/2026-03-29-matrix-synapse-runtime.json
+            - receipts/image-scans/2026-03-29-matrix-synapse-runtime.trivy.json
+            - receipts/live-applies/2026-03-29-adr-0255-matrix-synapse-live-apply.json
+            - receipts/live-applies/2026-03-29-adr-0255-matrix-synapse-mainline-live-apply.json
+            - scripts/https_tls_assurance_targets.py
+            - tests/test_https_tls_assurance_targets.py
+            - tests/test_matrix_synapse_playbook.py
+            - tests/test_matrix_synapse_postgres_role.py
+            - tests/test_matrix_synapse_runtime_role.py
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: records ADR 0255 exact-main evidence on release 0.177.85 by carrying Matrix Synapse onto the latest available origin/main, preserving the canonical public and controller login proofs, and correcting public HTTPS assurance from monitoring-lv3 to probe the internal edge while still validating the public hostname
+      release_bump: patch
+      included_in_repo_version: 0.177.85
+      latest_receipts:
+        matrix_synapse: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
+        public_edge_publication: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
+        https_tls_assurance: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
   - id: ws-0224-repo-intake
     adr: "0224"
     title: Self-service repo intake and agent-assisted app deployments
-    status: live_applied
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0224-repo-intake
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0224-repo-intake
@@ -420,6 +1054,250 @@ workstreams:
         plus certificate admission
       release_bump: patch
       included_in_repo_version: 0.177.56
+  - id: ws-0264-live-apply
+    adr: "0264"
+    title: Failure-domain-isolated validation lanes live apply
+    status: live_applied
+    owner: codex
+    branch: codex/adr-0264-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0264-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0264-live-apply.md
+    depends_on:
+      - ws-0264-receipt-driven-resilience-adrs
+      - adr-0087-validation-gate
+      - adr-0167-workstream-handoff-protocol
+      - adr-0173-workstream-surface-ownership-manifest
+    conflicts_with: []
+    shared_surfaces:
+      - docs/adr/0264-failure-domain-isolated-validation-lanes.md
+      - docs/workstreams/ws-0264-live-apply.md
+      - docs/runbooks/validation-gate.md
+      - .config-locations.yaml
+      - docs/adr/.index.yaml
+      - config/build-server.json
+      - config/validation-gate.json
+      - config/validation-lanes.yaml
+      - config/workflow-catalog.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - scripts/parallel_check.py
+      - scripts/remote_exec.sh
+      - scripts/run_gate.py
+      - scripts/run_python_with_packages.sh
+      - scripts/gate_status.py
+      - scripts/validate_repo.sh
+      - scripts/workstream_surface_ownership.py
+      - scripts/validation_lanes.py
+      - config/windmill/scripts/post-merge-gate.py
+      - config/windmill/scripts/gate-status.py
+      - tests/test_parallel_check.py
+      - tests/test_validate_repo_cache.py
+      - tests/test_validation_gate.py
+      - tests/test_validation_gate_windmill.py
+      - tests/test_validation_lanes.py
+      - tests/test_workstream_surface_ownership.py
+      - receipts/live-applies/2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply.json
+      - workstreams.yaml
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: validation_lane_docs
+          paths:
+            - docs/adr/0264-failure-domain-isolated-validation-lanes.md
+            - docs/workstreams/ws-0264-live-apply.md
+            - docs/runbooks/validation-gate.md
+            - .config-locations.yaml
+          mode: exclusive
+        - id: validation_lane_catalog
+          paths:
+            - config/build-server.json
+            - config/validation-gate.json
+            - config/validation-lanes.yaml
+            - config/workflow-catalog.json
+            - config/windmill/scripts/post-merge-gate.py
+            - config/windmill/scripts/gate-status.py
+          mode: exclusive
+        - id: validation_lane_generated_artifacts
+          paths:
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: exclusive
+        - id: validation_lane_runtime
+          paths:
+            - scripts/parallel_check.py
+            - scripts/remote_exec.sh
+            - scripts/run_gate.py
+            - scripts/run_python_with_packages.sh
+            - scripts/gate_status.py
+            - scripts/validate_repo.sh
+            - scripts/workstream_surface_ownership.py
+            - scripts/validation_lanes.py
+          mode: exclusive
+        - id: validation_lane_tests
+          paths:
+            - tests/test_parallel_check.py
+            - tests/test_validate_repo_cache.py
+            - tests/test_validation_gate.py
+            - tests/test_validation_gate_windmill.py
+            - tests/test_validation_lanes.py
+            - tests/test_workstream_surface_ownership.py
+          mode: exclusive
+        - id: validation_lane_live_apply_evidence
+          paths:
+            - receipts/live-applies/2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0264 by partitioning the validation gate
+        into failure-domain-isolated lanes, propagating lane context and
+        changed-surface evidence through the build-server and worker fallback
+        paths, and re-verifying the newest exact-main pre-push plus post-merge
+        automation flow
+      release_bump: patch
+      included_in_repo_version: 0.177.84
+      latest_receipts:
+        validation_gate: 2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply
+  - id: ws-0264-main-merge
+    adr: "0264"
+    title: Integrate ADR 0264 failure-domain-isolated validation lanes onto origin/main
+    status: merged
+    owner: codex
+    branch: codex/adr-0264-main-integration
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0264-main-integration
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0264-main-merge.md
+    depends_on:
+      - ws-0264-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0264-main-merge.md
+      - docs/workstreams/ws-0264-live-apply.md
+      - docs/adr/0264-failure-domain-isolated-validation-lanes.md
+      - docs/runbooks/validation-gate.md
+      - .config-locations.yaml
+      - docs/adr/.index.yaml
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.84.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - config/validation-gate.json
+      - config/validation-lanes.yaml
+      - config/workflow-catalog.json
+      - config/windmill/scripts/post-merge-gate.py
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+      - scripts/gate_status.py
+      - scripts/parallel_check.py
+      - scripts/remote_exec.sh
+      - scripts/run_gate.py
+      - scripts/run_python_with_packages.sh
+      - scripts/validate_repo.sh
+      - scripts/validation_lanes.py
+      - scripts/workstream_surface_ownership.py
+      - tests/test_parallel_check.py
+      - tests/test_config_merge_repo_surfaces.py
+      - tests/test_post_merge_gate.py
+      - tests/test_validate_repo_cache.py
+      - tests/test_validation_gate.py
+      - tests/test_validation_lanes.py
+      - tests/test_windmill_operator_admin_app.py
+      - tests/test_workstream_surface_ownership.py
+      - receipts/live-applies/2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: adr_0264_main_merge_doc
+          paths:
+            - docs/workstreams/ws-0264-main-merge.md
+          mode: exclusive
+        - id: validation_lane_docs
+          paths:
+            - docs/adr/0264-failure-domain-isolated-validation-lanes.md
+            - docs/workstreams/ws-0264-live-apply.md
+            - docs/runbooks/validation-gate.md
+            - .config-locations.yaml
+          mode: exclusive
+        - id: validation_lane_catalog
+          paths:
+            - config/validation-gate.json
+            - config/validation-lanes.yaml
+            - config/workflow-catalog.json
+            - config/windmill/scripts/post-merge-gate.py
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+          mode: exclusive
+        - id: adr_0264_mainline_truth
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.84.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: exclusive
+        - id: validation_lane_runtime
+          paths:
+            - scripts/gate_status.py
+            - scripts/parallel_check.py
+            - scripts/remote_exec.sh
+            - scripts/run_gate.py
+            - scripts/run_python_with_packages.sh
+            - scripts/validate_repo.sh
+            - scripts/validation_lanes.py
+            - scripts/workstream_surface_ownership.py
+          mode: exclusive
+        - id: validation_lane_tests
+          paths:
+            - tests/test_parallel_check.py
+            - tests/test_config_merge_repo_surfaces.py
+            - tests/test_post_merge_gate.py
+            - tests/test_validate_repo_cache.py
+            - tests/test_validation_gate.py
+            - tests/test_validation_lanes.py
+            - tests/test_windmill_operator_admin_app.py
+            - tests/test_workstream_surface_ownership.py
+          mode: exclusive
+        - id: adr_0264_main_merge_receipt
+          paths:
+            - receipts/live-applies/2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: records ADR 0264 exact-main evidence on release 0.177.84
+        by replaying the lane-aware validation gate through Windmill,
+        hardening worker schedule sync plus gitless fallback behavior, and
+        proving the dedicated validation_gate receipt on the synchronized
+        latest-main tree
+      release_bump: patch
+      included_in_repo_version: 0.177.84
+      latest_receipts:
+        validation_gate: 2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply
   - id: ws-0253-live-apply
     adr: "0253"
     title: Unified runtime assurance scoreboard live apply
@@ -549,6 +1427,35 @@ workstreams:
       - tests/test_api_gateway.py
       - tests/test_interactive_ops_portal.py
       - tests/test_ops_portal_runtime_role.py
+  - id: ws-0265-live-apply
+    adr: "0265"
+    title: Immutable validation snapshots for remote builders and schema checks
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0265-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0265-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+    depends_on:
+      - adr-0082-remote-build-execution-gateway
+      - adr-0083-docker-check-runners-for-repository-validation
+      - adr-0156-agent-session-workspace-isolation
+      - adr-0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/adr-0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+      - docs/adr/0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+      - docs/adr/.index.yaml
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/runbooks/remote-build-gateway.md
+      - docs/runbooks/validation-gate.md
+      - docs/runbooks/validate-repository-automation.md
+      - docs/runbooks/agent-session-workspace-isolation.md
+      - scripts/remote_exec.sh
+      - scripts/repository_snapshot.py
+      - scripts/validate_repository_data_models.py
+      - tests/test_remote_exec.py
+      - tests/test_repository_snapshot.py
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -556,7 +1463,7 @@ workstreams:
             - workstreams.yaml
           mode: shared_contract
           contract: workstream-registry-v1
-        - id: adr_index_contract
+        - id: adr_index_registry
           paths:
             - docs/adr/.index.yaml
           mode: shared_contract
@@ -584,6 +1491,21 @@ workstreams:
             - tests/test_ops_portal_runtime_role.py
           mode: shared_contract
           contract: adr-0245-live-apply-v1
+        - id: adr_0265_live_apply
+          paths:
+            - docs/workstreams/adr-0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+            - docs/adr/0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/runbooks/remote-build-gateway.md
+            - docs/runbooks/validation-gate.md
+            - docs/runbooks/validate-repository-automation.md
+            - docs/runbooks/agent-session-workspace-isolation.md
+            - scripts/remote_exec.sh
+            - scripts/repository_snapshot.py
+            - scripts/validate_repository_data_models.py
+            - tests/test_remote_exec.py
+            - tests/test_repository_snapshot.py
+          mode: exclusive
     ready_to_merge: true
     live_applied: true
     canonical_truth:
@@ -779,7 +1701,7 @@ workstreams:
       - VERSION
       - changelog.md
       - docs/release-notes/README.md
-      - docs/release-notes/0.177.76.md
+      - docs/release-notes/0.177.77.md
       - versions/stack.yaml
       - build/platform-manifest.json
       - receipts/live-applies/2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply.json
@@ -803,7 +1725,7 @@ workstreams:
             - VERSION
             - changelog.md
             - docs/release-notes/README.md
-            - docs/release-notes/0.177.76.md
+            - docs/release-notes/0.177.77.md
             - versions/stack.yaml
             - build/platform-manifest.json
             - receipts/live-applies/2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply.json
@@ -811,6 +1733,98 @@ workstreams:
           mode: exclusive
     ready_to_merge: true
     live_applied: false
+  - id: ws-0273-public-endpoint-admission
+    adr: "0273"
+    title: Live apply ADR 0273 public endpoint admission control
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0273-public-endpoint-admission-control
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0273-public-endpoint-admission-control
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0273-public-endpoint-admission-control.md
+    depends_on:
+      - adr-0101-automated-certificate-lifecycle-management
+      - adr-0139-subdomain-exposure-audit-and-registry
+      - adr-0252-route-and-dns-publication-assertion-ledger
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.77.md
+      - docs/workstreams/adr-0273-public-endpoint-admission-control.md
+      - docs/adr/0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/configure-edge-publication.md
+      - docs/runbooks/subdomain-exposure-audit.md
+      - config/certificate-catalog.json
+      - Makefile
+      - scripts/subdomain_exposure_audit.py
+      - scripts/validate_repo.sh
+      - tests/test_subdomain_exposure_audit.py
+      - tests/test_edge_publication_makefile.py
+      - tests/test_validate_repo_cache.py
+      - docs/site-generated/architecture/dependency-graph.md
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - receipts/subdomain-exposure-audit/
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_contract
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: adr_0273_live_apply
+          paths:
+            - docs/workstreams/adr-0273-public-endpoint-admission-control.md
+            - docs/adr/0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md
+            - docs/runbooks/configure-edge-publication.md
+            - docs/runbooks/subdomain-exposure-audit.md
+            - config/certificate-catalog.json
+            - Makefile
+            - scripts/subdomain_exposure_audit.py
+            - scripts/validate_repo.sh
+            - tests/test_subdomain_exposure_audit.py
+            - tests/test_edge_publication_makefile.py
+            - tests/test_validate_repo_cache.py
+            - docs/site-generated/architecture/dependency-graph.md
+            - receipts/subdomain-exposure-audit/
+            - receipts/live-applies/
+          mode: exclusive
+        - id: adr_0273_mainline_release_contract
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.77.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0273 by turning public hostname, edge route,
+        DNS, and certificate-plan concordance into an enforced admission gate for
+        edge and route-ledger replays
+      release_bump: patch
+      included_in_repo_version: 0.177.77
+      latest_receipts:
+        public_endpoint_admission_control: 2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply
+        public_edge_publication: 2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply
+        route_dns_assertion_ledger: 2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply
   - id: ws-0254-serverclaw-adrs
     adr: "0254"
     title: ServerClaw architecture bundle
@@ -897,6 +1911,154 @@ workstreams:
         Playwright, OpenFGA, and a PostgreSQL-Qdrant-search memory stack
       release_bump: patch
       included_in_repo_version: 0.177.59
+  - id: ws-0259-live-apply
+    adr: "0259"
+    title: Live apply n8n as the external app connector fabric for ServerClaw
+    status: live_applied
+    owner: codex
+    branch: codex/adr-0259-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0259-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0259-live-apply.md
+    depends_on:
+      - adr-0151-n8n
+      - adr-0206-ports-and-adapters
+      - adr-0254-serverclaw
+      - adr-0258-temporal
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0259-live-apply.md
+      - docs/adr/0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/configure-n8n.md
+      - playbooks/n8n.yml
+      - collections/ansible_collections/lv3/platform/playbooks/n8n.yml
+      - collections/ansible_collections/lv3/platform/roles/n8n_runtime/
+      - config/ansible-role-idempotency.yml
+      - config/service-capability-catalog.json
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - scripts/restore_verification.py
+      - tests/test_n8n_playbook.py
+      - tests/test_n8n_runtime_role.py
+      - tests/test_restore_verification.py
+      - tests/test_validate_service_catalog.py
+      - tests/test_n8n_metadata.py
+      - receipts/live-applies/2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-live-apply.json
+      - receipts/live-applies/2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0259_index_contract
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: adr_0259_docs
+          paths:
+            - docs/adr/0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md
+            - docs/workstreams/ws-0259-live-apply.md
+          mode: exclusive
+        - id: adr_0259_runtime_surfaces
+          paths:
+            - docs/runbooks/configure-n8n.md
+            - config/ansible-role-idempotency.yml
+            - tests/test_n8n_metadata.py
+            - tests/test_validate_service_catalog.py
+            - tests/test_n8n_playbook.py
+            - tests/test_n8n_runtime_role.py
+            - receipts/live-applies/2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-live-apply.json
+            - receipts/live-applies/2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply.json
+          mode: exclusive
+        - id: adr_0259_n8n_runtime_contract
+          paths:
+            - playbooks/n8n.yml
+            - collections/ansible_collections/lv3/platform/playbooks/n8n.yml
+            - collections/ansible_collections/lv3/platform/roles/n8n_runtime/*
+          mode: shared_contract
+          contract: n8n-runtime-v1
+        - id: adr_0259_catalog_contract
+          paths:
+            - config/service-capability-catalog.json
+            - config/workflow-catalog.json
+            - config/command-catalog.json
+          mode: shared_contract
+          contract: service-catalog-governance-v1
+        - id: adr_0259_repo_validation_contract
+          paths:
+            - scripts/restore_verification.py
+            - tests/test_restore_verification.py
+          mode: shared_contract
+          contract: repo-retry-guard-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0259 by reaffirming the governed n8n
+        lane as the ServerClaw external connector fabric, hardening the runtime
+        for proxmox_florin-scoped topology, private postgres reachability, and
+        fresh-worktree edge publication, and recording a latest-main live-apply
+        replay with protected editor and webhook verification
+      release_bump: patch
+      included_in_repo_version: 0.177.79
+      latest_receipts:
+        n8n: 2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply
+  - id: ws-0259-main-merge
+    adr: "0259"
+    title: Integrate ADR 0259 exact-main replay onto current origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0259-main-integration
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0259-main-integration
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0259-main-merge.md
+    depends_on:
+      - ws-0259-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0259-main-merge.md
+      - docs/workstreams/ws-0259-live-apply.md
+      - docs/adr/0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md
+      - docs/adr/.index.yaml
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.80.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - receipts/live-applies/2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0259_main_merge
+          paths:
+            - docs/workstreams/ws-0259-main-merge.md
+            - docs/workstreams/ws-0259-live-apply.md
+            - docs/adr/0259-n8n-as-the-external-app-connector-fabric-for-serverclaw.md
+            - docs/adr/.index.yaml
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.80.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - receipts/live-applies/2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
   - id: ws-0244-runtime-assurance-adrs
     adr: "0244"
     title: Runtime assurance architecture bundle
@@ -977,6 +2139,193 @@ workstreams:
         gates, route truth, and one operator-facing assurance rollup
       release_bump: patch
       included_in_repo_version: 0.177.51
+  - id: ws-0244-live-apply
+    adr: "0244"
+    title: Live apply runtime assurance matrix per service and environment
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0244-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0244-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0244-live-apply.md
+    depends_on:
+      - adr-0064-health-probes
+      - adr-0075-service-capability-catalog
+      - adr-0092-api-gateway
+      - adr-0093-interactive-ops-portal
+      - adr-0113-world-state-materializer
+      - adr-0123-uptime-contracts
+      - adr-0133-portal-auth-default
+      - adr-0142-public-surface-scan
+      - adr-0169-structured-logs
+      - adr-0190-synthetic-replay
+      - adr-0214-prod-staging-cells
+      - adr-0244-runtime-assurance-adrs
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0244-live-apply.md
+      - docs/adr/0244-runtime-assurance-matrix-per-service-and-environment.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/runtime-assurance-matrix.md
+      - config/runtime-assurance-matrix.json
+      - docs/schema/runtime-assurance-matrix.schema.json
+      - scripts/runtime_assurance.py
+      - scripts/validate_repository_data_models.py
+      - scripts/api_gateway/main.py
+      - scripts/ops_portal/app.py
+      - scripts/ops_portal/templates/index.html
+      - scripts/ops_portal/templates/partials/runtime_assurance.html
+      - tests/test_runtime_assurance.py
+      - tests/test_api_gateway.py
+      - tests/test_api_gateway_runtime_role.py
+      - tests/test_interactive_ops_portal.py
+      - tests/test_ops_portal_runtime_role.py
+      - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/verify.yml
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+      - receipts/live-applies/2026-03-29-adr-0244-runtime-assurance-matrix-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: adr_0244_live_apply
+          paths:
+            - docs/workstreams/ws-0244-live-apply.md
+            - docs/adr/0244-runtime-assurance-matrix-per-service-and-environment.md
+            - docs/runbooks/runtime-assurance-matrix.md
+            - config/runtime-assurance-matrix.json
+            - docs/schema/runtime-assurance-matrix.schema.json
+            - scripts/runtime_assurance.py
+            - scripts/validate_repository_data_models.py
+            - tests/test_runtime_assurance.py
+          mode: exclusive
+        - id: runtime_assurance_adapters
+          paths:
+            - scripts/api_gateway/main.py
+            - scripts/ops_portal/app.py
+            - scripts/ops_portal/templates/index.html
+            - scripts/ops_portal/templates/partials/runtime_assurance.html
+            - tests/test_api_gateway.py
+            - tests/test_api_gateway_runtime_role.py
+            - tests/test_interactive_ops_portal.py
+            - tests/test_ops_portal_runtime_role.py
+            - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/verify.yml
+            - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+          mode: shared_contract
+          contract: runtime-assurance-adapters-v1
+        - id: live_apply_evidence
+          paths:
+            - receipts/live-applies/2026-03-29-adr-0244-runtime-assurance-matrix-live-apply.json
+          mode: shared_contract
+          contract: live-apply-receipts-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: live-applied ADR 0244 by restoring the governed runtime
+        assurance matrix through the authenticated API gateway and ops portal,
+        hardening the runtime sync path against metadata sidecars, and fixing
+        the gateway helper packaging gap that blocked rebuilt containers
+      release_bump: patch
+      included_in_repo_version: 0.177.61
+      latest_receipts:
+        api_gateway: 2026-03-29-adr-0244-runtime-assurance-matrix-live-apply
+        ops_portal: 2026-03-29-adr-0244-runtime-assurance-matrix-live-apply
+  - id: ws-0249-live-apply
+    adr: "0249"
+    title: Live apply HTTPS and TLS assurance through blackbox exporter and testssl.sh
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0249-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0249-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0249-live-apply.md
+    depends_on:
+      - adr-0096-slo-tracking
+      - adr-0101-certificate-lifecycle
+      - adr-0142-public-surface-security-scan
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0249-live-apply.md
+      - docs/adr/0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/https-tls-assurance.md
+      - docs/runbooks/monitoring-stack.md
+      - config/prometheus/file_sd/https_tls_targets.yml
+      - config/prometheus/rules/https_tls_alerts.yml
+      - config/workflow-catalog.json
+      - config/windmill/scripts/https-tls-assurance.py
+      - scripts/https_tls_assurance_targets.py
+      - scripts/generate_https_tls_assurance.py
+      - scripts/https_tls_assurance.py
+      - scripts/public_surface_scan.py
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
+      - tests/test_https_tls_assurance_targets.py
+      - tests/test_monitoring_vm_role.py
+      - receipts/https-tls-assurance/**
+      - receipts/live-applies/**
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: adr_0249_live_apply
+          paths:
+            - docs/workstreams/ws-0249-live-apply.md
+            - docs/adr/0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md
+            - docs/runbooks/https-tls-assurance.md
+            - docs/runbooks/monitoring-stack.md
+            - config/prometheus/file_sd/https_tls_targets.yml
+            - config/prometheus/rules/https_tls_alerts.yml
+            - config/workflow-catalog.json
+            - config/windmill/scripts/https-tls-assurance.py
+            - scripts/https_tls_assurance_targets.py
+            - scripts/generate_https_tls_assurance.py
+            - scripts/https_tls_assurance.py
+            - scripts/public_surface_scan.py
+            - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
+            - tests/test_https_tls_assurance_targets.py
+            - tests/test_monitoring_vm_role.py
+            - receipts/https-tls-assurance/**
+            - receipts/live-applies/**
+          mode: exclusive
+        - id: integration_release_surfaces
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+          mode: shared_contract
+          contract: mainline-release-integration-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0249 by generating repo-managed HTTPS and TLS assurance probes plus Prometheus expiry alerts from the shared service catalogs, recording periodic testssl.sh receipts from the same target set, and hardening the monitoring replay defaults that guest observability and Loki log shipping depend on
+      release_bump: patch
+      included_in_repo_version: 0.177.82
+      latest_receipts:
+        https_tls_assurance: 2026-03-29-adr-0249-https-tls-assurance-mainline-live-apply
   - id: ws-0237-live-apply
     adr: "0237"
     title: Live apply schema-first human forms via React Hook Form and Zod
@@ -1192,6 +2541,87 @@ workstreams:
       included_in_repo_version: 0.177.66
       latest_receipts:
         operator_access: 2026-03-28-adr-0238-operator-grid-live-apply
+  - id: ws-0244-main-merge
+    adr: "0244"
+    title: Integrate ADR 0244 runtime assurance matrix into origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0244-main-merge-r3
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0244-main-merge-r3
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0244-main-merge.md
+    depends_on:
+      - ws-0244-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0244-main-merge.md
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.79.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/adr/.index.yaml
+      - docs/adr/0244-runtime-assurance-matrix-per-service-and-environment.md
+      - docs/workstreams/ws-0244-live-apply.md
+      - docs/runbooks/runtime-assurance-matrix.md
+      - config/runtime-assurance-matrix.json
+      - docs/schema/runtime-assurance-matrix.schema.json
+      - scripts/runtime_assurance.py
+      - scripts/api_gateway/main.py
+      - scripts/ops_portal/app.py
+      - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/verify.yml
+      - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml
+      - tests/test_runtime_assurance.py
+      - tests/test_api_gateway.py
+      - tests/test_api_gateway_runtime_role.py
+      - tests/test_interactive_ops_portal.py
+      - tests/test_ops_portal_runtime_role.py
+      - receipts/live-applies/2026-03-29-adr-0244-runtime-assurance-matrix-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws_0244_main_merge_doc
+          paths:
+            - docs/workstreams/ws-0244-main-merge.md
+          mode: exclusive
+        - id: adr_0244_mainline_truth
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.79.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+          mode: exclusive
+        - id: adr_0244_main_merge_surfaces
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: records ADR 0244 exact-main evidence on the current
+        mainline by preserving the verified service-by-environment runtime
+        assurance matrix, the authenticated gateway plus portal rollup, and the
+        corrected latest-main replay after concurrent live drift and
+        docker-runtime disk-pressure recovery
+      release_bump: patch
+      included_in_repo_version: 0.177.80
+      latest_receipts:
+        api_gateway: 2026-03-29-adr-0244-runtime-assurance-matrix-live-apply
+        ops_portal: 2026-03-29-adr-0244-runtime-assurance-matrix-live-apply
   - id: ws-0238-main-integration
     adr: "0238"
     title: Integrate ADR 0238 operator grid into origin/main
@@ -2211,6 +3641,173 @@ workstreams:
       changelog_entry: records ADR 0242 exact-main evidence on the current mainline by preserving the verified Shepherd-tour rollout, refreshed release surfaces, and operator-access onboarding truth while the live platform baseline remains 0.130.44
       release_bump: patch
       included_in_repo_version: 0.177.58
+  - id: ws-0236-live-apply
+    adr: "0236"
+    title: Live apply TanStack Query server-state conventions on the Windmill operator admin app
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0236-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0236-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0236-live-apply.md
+    depends_on:
+      - adr-0122-windmill-operator-access-admin
+      - adr-0209-use-case-services-and-thin-delivery-adapters
+      - adr-0234-human-user-experience-architecture-bundle
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0236-live-apply.md
+      - docs/adr/0236-server-state-and-mutation-feedback-via-tanstack-query.md
+      - docs/adr/.index.yaml
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/runbooks/windmill-operator-access-admin.md
+      - docs/runbooks/configure-windmill.md
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+      - config/windmill/apps/f/lv3/operator_access_admin.raw_app/package.json
+      - config/windmill/apps/f/lv3/operator_access_admin.raw_app/index.tsx
+      - config/windmill/apps/f/lv3/operator_access_admin.raw_app/App.tsx
+      - config/windmill/apps/f/lv3/operator_access_admin.raw_app/index.css
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+      - tests/test_openbao_compose_env_helper.py
+      - tests/test_windmill_operator_admin_app.py
+      - receipts/live-applies/2026-03-28-adr-0236-tanstack-query-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0236_live_apply
+          paths:
+            - docs/workstreams/ws-0236-live-apply.md
+            - docs/adr/0236-server-state-and-mutation-feedback-via-tanstack-query.md
+            - docs/runbooks/windmill-operator-access-admin.md
+            - docs/runbooks/configure-windmill.md
+            - config/windmill/apps/f/lv3/operator_access_admin.raw_app/package.json
+            - config/windmill/apps/f/lv3/operator_access_admin.raw_app/index.tsx
+            - config/windmill/apps/f/lv3/operator_access_admin.raw_app/App.tsx
+            - config/windmill/apps/f/lv3/operator_access_admin.raw_app/index.css
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+            - tests/test_openbao_compose_env_helper.py
+            - tests/test_windmill_operator_admin_app.py
+          mode: exclusive
+        - id: adr_index_contract
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: openbao_compose_env_helper_contract
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+          mode: shared_contract
+          contract: openbao-compose-env-helper-v1
+        - id: generated_diagrams_contract
+          paths:
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: mainline-release-integration-v1
+        - id: live_apply_evidence
+          paths:
+            - receipts/live-applies/2026-03-28-adr-0236-tanstack-query-live-apply.json
+          mode: shared_contract
+          contract: live-apply-receipts-v1
+    ready_to_merge: true
+    live_applied: true
+  - id: ws-0236-main-merge
+    adr: "0236"
+    title: Integrate ADR 0236 TanStack Query server-state feedback into origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0236-main-merge
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0236-mainline
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0236-main-merge.md
+    depends_on:
+      - ws-0236-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0236-main-merge.md
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.81.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/adr/.index.yaml
+      - docs/adr/0236-server-state-and-mutation-feedback-via-tanstack-query.md
+      - docs/workstreams/ws-0236-live-apply.md
+      - docs/runbooks/configure-windmill.md
+      - docs/runbooks/windmill-operator-access-admin.md
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+      - config/windmill/apps/f/lv3/operator_access_admin.raw_app/package.json
+      - config/windmill/apps/f/lv3/operator_access_admin.raw_app/index.tsx
+      - config/windmill/apps/f/lv3/operator_access_admin.raw_app/App.tsx
+      - config/windmill/apps/f/lv3/operator_access_admin.raw_app/index.css
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+      - tests/test_openbao_compose_env_helper.py
+      - tests/test_windmill_operator_admin_app.py
+      - receipts/live-applies/2026-03-28-adr-0236-tanstack-query-live-apply.json
+      - receipts/live-applies/2026-03-29-adr-0236-tanstack-query-mainline-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ws_0236_main_merge_doc
+          paths:
+            - docs/workstreams/ws-0236-main-merge.md
+          mode: exclusive
+        - id: integration_release_surfaces
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.81.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: exclusive
+        - id: adr_index_contract
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: adr_0236_main_merge_surfaces
+          paths:
+            - docs/adr/0236-server-state-and-mutation-feedback-via-tanstack-query.md
+            - docs/workstreams/ws-0236-live-apply.md
+            - docs/runbooks/configure-windmill.md
+            - docs/runbooks/windmill-operator-access-admin.md
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+            - config/windmill/apps/f/lv3/operator_access_admin.raw_app/package.json
+            - config/windmill/apps/f/lv3/operator_access_admin.raw_app/index.tsx
+            - config/windmill/apps/f/lv3/operator_access_admin.raw_app/App.tsx
+            - config/windmill/apps/f/lv3/operator_access_admin.raw_app/index.css
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+            - tests/test_openbao_compose_env_helper.py
+            - tests/test_windmill_operator_admin_app.py
+            - receipts/live-applies/2026-03-28-adr-0236-tanstack-query-live-apply.json
+            - receipts/live-applies/2026-03-29-adr-0236-tanstack-query-mainline-live-apply.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: records ADR 0236 exact-main evidence on the current
+        mainline by preserving the verified TanStack Query operator-admin
+        rollout, explicit roster and inventory feedback states, query
+        invalidation, and the hardened Windmill raw-app dependency plus
+        worker-readiness converge path while the later ADR 0241 and ADR 0228
+        receipts remain canonical for the broader shared surfaces
+      release_bump: patch
+      included_in_repo_version: 0.177.81
   - id: ws-0240-live-apply
     adr: "0240"
     title: Live apply operator visualization panels via Apache ECharts

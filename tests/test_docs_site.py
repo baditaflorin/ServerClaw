@@ -160,6 +160,27 @@ class DocsSiteTests(unittest.TestCase):
         finally:
             shutil.rmtree(temp_dir)
 
+    def test_render_portal_document_preserves_template_url_links(self) -> None:
+        temp_dir = Path(tempfile.mkdtemp(prefix="docs-site-test-"))
+        try:
+            path = temp_dir / "templated.md"
+            path.write_text(
+                "# Templated ADR\n\n"
+                "**Published URL**: [{{ service.public_url }}]({{ service.public_url }})\n\n"
+                "See [API reference]({{ service.api_docs_url }}).\n",
+                encoding="utf-8",
+            )
+
+            document = docs_site.build_portal_document(path)
+            rendered = docs_site.render_portal_document(document, Path("architecture/decisions/templated.md"))
+
+            self.assertIn("[{{ service.public_url }}]({{ service.public_url }})", rendered)
+            self.assertIn("[API reference]({{ service.api_docs_url }})", rendered)
+            self.assertNotIn("../../architecture/decisions/{{ service.public_url }}", rendered)
+            self.assertNotIn("../../architecture/decisions/{{ service.api_docs_url }}", rendered)
+        finally:
+            shutil.rmtree(temp_dir)
+
     def test_mkdocs_build_uses_global_robots_override(self) -> None:
         mkdocs_config = (REPO_ROOT / "mkdocs.yml").read_text(encoding="utf-8")
         override_template = (REPO_ROOT / "docs" / "theme-overrides" / "main.html").read_text(encoding="utf-8")
@@ -167,6 +188,7 @@ class DocsSiteTests(unittest.TestCase):
         search_override = (REPO_ROOT / "docs" / "theme-overrides" / "partials" / "search.html").read_text(encoding="utf-8")
 
         self.assertIn("custom_dir: docs/theme-overrides", mkdocs_config)
+        self.assertIn("validation:\n  nav:\n    omitted_files: ignore", mkdocs_config)
         self.assertNotIn("\n  - search\n", mkdocs_config)
         self.assertIn('<meta name="robots" content="noindex, nofollow">', override_template)
         self.assertIn("pagefind/pagefind-ui.js", override_template)

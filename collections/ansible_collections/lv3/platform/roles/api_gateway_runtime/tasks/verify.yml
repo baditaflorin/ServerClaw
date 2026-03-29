@@ -33,6 +33,13 @@
   become: false
   register: api_gateway_verify_client_secret_stat
 
+- name: Check whether the controller-local legacy platform context token exists
+  ansible.builtin.stat:
+    path: "{{ api_gateway_platform_context_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: api_gateway_platform_context_token_stat
+
 - name: Read the controller-local API gateway verification client secret
   ansible.builtin.slurp:
     src: "{{ api_gateway_verify_client_secret_local_file }}"
@@ -42,26 +49,72 @@
   when: api_gateway_verify_client_secret_stat.stat.exists
   no_log: true
 
-- name: Request a Keycloak bearer token for API gateway verification
-  ansible.builtin.uri:
-    url: "{{ api_gateway_keycloak_verify_base_url }}/realms/lv3/protocol/openid-connect/token"
-    method: POST
-    body_format: form-urlencoded
-    body:
-      grant_type: client_credentials
-      client_id: "{{ api_gateway_verify_client_id }}"
-      client_secret: "{{ api_gateway_verify_client_secret_raw.content | b64decode | trim }}"
-    status_code: 200
-  register: api_gateway_verify_token_response
-  when: api_gateway_verify_client_secret_stat.stat.exists
+- name: Read the controller-local legacy platform context token
+  ansible.builtin.slurp:
+    src: "{{ api_gateway_platform_context_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: api_gateway_platform_context_token_raw
+  when: api_gateway_platform_context_token_stat.stat.exists
   no_log: true
-  changed_when: false
 
-- name: Record the API gateway verification bearer token
+- name: Default the Keycloak API gateway verification token request status
+  ansible.builtin.set_fact:
+    api_gateway_verify_keycloak_request_succeeded: false
+
+- name: Request a Keycloak bearer token for API gateway verification
+  when: api_gateway_verify_client_secret_stat.stat.exists
+  block:
+    - name: Request a Keycloak bearer token for API gateway verification
+      ansible.builtin.uri:
+        url: "{{ api_gateway_keycloak_verify_base_url }}/realms/lv3/protocol/openid-connect/token"
+        method: POST
+        body_format: form-urlencoded
+        body:
+          grant_type: client_credentials
+          client_id: "{{ api_gateway_verify_client_id }}"
+          client_secret: "{{ api_gateway_verify_client_secret_raw.content | b64decode | trim }}"
+        status_code: 200
+      register: api_gateway_verify_token_response
+      no_log: true
+      changed_when: false
+
+    - name: Record whether the Keycloak verification token request returned an access token
+      ansible.builtin.set_fact:
+        api_gateway_verify_keycloak_request_succeeded: >-
+          {{ (api_gateway_verify_token_response.json.access_token | default('')) | length > 0 }}
+  rescue:
+    - name: Mark the Keycloak verification token request as unavailable
+      ansible.builtin.set_fact:
+        api_gateway_verify_keycloak_request_succeeded: false
+
+- name: Record the API gateway verification bearer token from Keycloak
   ansible.builtin.set_fact:
     api_gateway_verify_access_token: "{{ api_gateway_verify_token_response.json.access_token }}"
-  when: api_gateway_verify_client_secret_stat.stat.exists
+  when:
+    - api_gateway_verify_client_secret_stat.stat.exists
+    - api_gateway_verify_keycloak_request_succeeded
   no_log: true
+
+- name: Record the API gateway verification bearer token from the legacy platform context
+  ansible.builtin.set_fact:
+    api_gateway_verify_access_token: "{{ api_gateway_platform_context_token_raw.content | b64decode | trim }}"
+  when:
+    - api_gateway_platform_context_token_stat.stat.exists
+    - not (
+        api_gateway_verify_client_secret_stat.stat.exists
+        and api_gateway_verify_keycloak_request_succeeded
+      )
+  no_log: true
+
+- name: Assert that an authenticated API gateway verification token is available
+  ansible.builtin.assert:
+    that:
+      - api_gateway_verify_access_token is defined
+      - api_gateway_verify_access_token | length > 0
+    fail_msg: >-
+      API gateway verification requires either the Keycloak client secret or the
+      legacy platform context token to validate authenticated platform routes.
 
 - name: Verify the authenticated platform service catalog endpoint succeeds with a real bearer token
   ansible.builtin.uri:
@@ -71,5 +124,22 @@
       Authorization: "Bearer {{ api_gateway_verify_access_token }}"
     status_code: 200
   register: api_gateway_platform_services_check
-  when: api_gateway_verify_client_secret_stat.stat.exists
   changed_when: false
+
+- name: Verify the authenticated runtime assurance endpoint succeeds with a real bearer token
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ api_gateway_internal_port }}/v1/platform/runtime-assurance"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ api_gateway_verify_access_token }}"
+    status_code: 200
+  register: api_gateway_runtime_assurance_check
+  changed_when: false
+
+- name: Assert the runtime assurance endpoint returns a report envelope
+  ansible.builtin.assert:
+    that:
+      - api_gateway_runtime_assurance_check.json.generated_at is defined
+      - api_gateway_runtime_assurance_check.json.summary is defined
+      - api_gateway_runtime_assurance_check.json.entries is defined
+    fail_msg: "API gateway runtime assurance verification did not return the expected report envelope."

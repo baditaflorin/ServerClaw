@@ -19,7 +19,10 @@
         "workflow_ids": [
           "adr-0077-compose-runtime-secrets-live-apply",
           "deploy-uptime-kuma",
-          "install-proxmox"
+          "install-proxmox",
+          "live-apply-group",
+          "live-apply-service",
+          "live-apply-site"
         ]
       },
       "invariant": "The governed host or service converge path leaves repo-managed infrastructure aligned with inventory intent and any declared post-verify probe healthy.",

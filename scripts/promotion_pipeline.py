@@ -44,6 +44,7 @@ from dependency_graph import (
 )
 from platform.logging import get_logger, set_context
 from platform.policy.engine import evaluate_promotion_gate_policy
+from stage_smoke import declared_smoke_suites, matched_smoke_suite_ids
 from slo_tracking import build_slo_status_entries, default_prometheus_url, find_budget_breaches
 from standby_capacity import evaluate_service_standby
 from workflow_catalog import (
@@ -308,6 +309,8 @@ def check_promotion_gate(
         reasons.append("staging receipt verification is not clean")
 
     service = service_index[service_id]
+    stage_smoke_suites = declared_smoke_suites(service, "staging")
+    matched_stage_smoke_suite_ids = matched_smoke_suite_ids(stage_receipt, stage_smoke_suites)
     aliases = service_aliases(service_id, service)
     blocking_findings = [
         finding
@@ -325,6 +328,15 @@ def check_promotion_gate(
     policy_input = {
         "service_id": service_id,
         "approval": approval,
+        "stage_smoke_gate": {
+            "declared": bool(stage_smoke_suites),
+            "reason": (
+                ""
+                if stage_smoke_suites
+                else f"service '{service_id}' does not declare an active staging smoke suite"
+            ),
+            "matched_suite_ids": matched_stage_smoke_suite_ids,
+        },
         "staging_receipt": {
             "age_hours": age.total_seconds() / 3600.0,
             "verification_passed": stage_health["passed"],
@@ -355,6 +367,13 @@ def check_promotion_gate(
         "playbook": service_id,
         "staging_receipt": str(receipt_relative_path(staging_receipt_path)),
         "staging_health_check": stage_health,
+        "stage_smoke_gate": {
+            "declared_suite_ids": [
+                str(item.get("id") or f"suite-{index + 1}")
+                for index, item in enumerate(stage_smoke_suites)
+            ],
+            "matched_suite_ids": matched_stage_smoke_suite_ids,
+        },
         "approval": approval,
         "blocking_findings": blocking_findings,
         "capacity_gate": {
@@ -629,7 +648,10 @@ def promote_service(
             {
                 "check": "Staging gate",
                 "result": "pass",
-                "observed": f"The staged receipt `{gate['staging_receipt']}` was recent, clean, and had no blocking critical findings.",
+                "observed": (
+                    f"The staged receipt `{gate['staging_receipt']}` was recent, clean, had no blocking critical "
+                    f"findings, and matched the declared smoke suite(s): {', '.join(gate['stage_smoke_gate']['matched_suite_ids'])}."
+                ),
             },
             {
                 "check": "Production apply",

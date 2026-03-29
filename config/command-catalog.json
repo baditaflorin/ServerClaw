@@ -1211,6 +1211,51 @@
         "timeout_seconds": 1500
       }
     },
+    "converge-matrix-synapse": {
+      "description": "Converge Matrix Synapse, its PostgreSQL backend, the host-side controller proxy, and the shared-edge publication for matrix.lv3.org.",
+      "workflow_id": "converge-matrix-synapse",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to publish matrix.lv3.org and reconcile the shared edge certificate coverage."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-matrix-synapse passes",
+        "make validate passes before the apply",
+        "The public/auth boundary and intentional no-federation scope are reviewed before live rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, public and controller client-version checks, bootstrap-admin login verification, mirrored secret artifacts, and confirmation that federation was intentionally left disabled."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if PostgreSQL, Matrix Synapse runtime, the host-side proxy, or the shared-edge publication fails verification.",
+          "Stop if the rollout exposes an unintended federation listener or drifts from the documented upstream-auth publication model."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Matrix Synapse runtime and edge configuration from version control before retrying.",
+          "Do not hand-edit the homeserver config, admin user, or edge route outside the repo to compensate for a failed rollout."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
     "converge-openbao": {
       "description": "Converge the private OpenBao runtime, seeded auth identities, Transit, and PostgreSQL dynamic-credential integration.",
       "workflow_id": "converge-openbao",
@@ -1873,7 +1918,7 @@
       }
     },
     "converge-n8n": {
-      "description": "Converge n8n with PostgreSQL persistence and publish it at n8n.lv3.org while keeping the editor behind edge auth and public webhooks reachable.",
+      "description": "Converge n8n with PostgreSQL persistence and publish it at n8n.lv3.org as the governed ServerClaw connector fabric while keeping the editor behind edge auth and public webhooks reachable.",
       "workflow_id": "converge-n8n",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -1896,11 +1941,11 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-n8n passes",
         "make validate passes before the apply",
-        "The public webhook exposure and editor auth boundary are reviewed before live rollout"
+        "The public webhook exposure, editor auth boundary, and thin-adapter rule for ServerClaw are reviewed before live rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the source commit, n8n.lv3.org health verification, local readiness, owner sign-in verification, and public webhook reachability."
+        "notes": "Record the source commit, n8n.lv3.org health verification, local readiness, owner sign-in verification, public webhook reachability, and the protected editor redirect."
       },
       "failure_guidance": {
         "stop_conditions": [
@@ -2467,6 +2512,134 @@
       "execution": {
         "profile": "docker_runtime_systemd_make",
         "timeout_seconds": 1500
+      }
+    },
+    "live-apply-group": {
+      "description": "Run one grouped ADR 0079 live-apply wrapper after bootstrap preflight restores any required generated artifacts for the fresh worktree.",
+      "workflow_id": "live-apply-group",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used by the grouped live-apply wrapper."
+        },
+        {
+          "name": "group",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "Makefile",
+          "description": "Group playbook id under playbooks/groups/."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=live-apply-group passes",
+        "make validate passes before the apply",
+        "Any service or edge publication covered by the selected group already has its repo-managed topology and DNS intent committed"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the selected group, the source commit, and the final grouped play recap together with any public-edge verification that the group touched."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if bootstrap preflight cannot materialize the required generated artifacts or if any grouped play fails.",
+          "Stop if the selected grouped replay would leave a publication or service health check in a degraded state."
+        ],
+        "rollback_guidance": [
+          "Replay the last known-good grouped configuration from version control before retrying.",
+          "Do not bypass the shared bootstrap preflight by launching grouped playbooks manually from an unprepared worktree."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
+    "live-apply-service": {
+      "description": "Run one service-scoped ADR 0079 live-apply wrapper after bootstrap preflight restores any required generated artifacts for the fresh worktree.",
+      "workflow_id": "live-apply-service",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used by the service live-apply wrapper."
+        },
+        {
+          "name": "service",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "Makefile",
+          "description": "Service playbook id under playbooks/services/."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=live-apply-service passes",
+        "make validate passes before the apply",
+        "Any service-specific topology, DNS, and health-probe intent is already committed in the repo"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the selected service, the source commit, and the final service play recap together with any endpoint verification that the service touched."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if bootstrap preflight cannot materialize the required generated artifacts or if the selected service replay fails.",
+          "Stop if interface, redundancy, or immutable-replacement guards fail before Ansible starts."
+        ],
+        "rollback_guidance": [
+          "Replay the last known-good service configuration from version control before retrying.",
+          "Do not bypass the shared bootstrap preflight by running the service playbook manually from an unprepared worktree."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
+    "live-apply-site": {
+      "description": "Run the full ADR 0079 site live-apply wrapper after bootstrap preflight restores any required generated artifacts for the fresh worktree.",
+      "workflow_id": "live-apply-site",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used by the full-site live-apply wrapper."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=live-apply-site passes",
+        "make validate passes before the apply",
+        "The worktree is an intentional current-main or reviewed integration checkout before the full-site replay starts"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit and the full-site play recap, including any generated-publication artifacts that were materialized during bootstrap."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if bootstrap preflight cannot materialize the required generated artifacts or if the full-site replay fails.",
+          "Stop if the full-site replay would leave host, guest, or publication state inconsistent with the declared repo truth."
+        ],
+        "rollback_guidance": [
+          "Use the documented rollback or bounded replay path for the affected services before retrying the full-site apply.",
+          "Do not skip the shared bootstrap preflight when replaying a site-wide converge from a fresh worktree."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 3600
       }
     },
     "live-apply-waves": {

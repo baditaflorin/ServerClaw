@@ -217,6 +217,7 @@
   register: n8n_docker_nat_chain_check
   changed_when: false
   failed_when: n8n_docker_nat_chain_check.rc not in [0, 1]
+  when: n8n_requires_docker_nat | bool
 
 - name: Check whether the Docker forward chain exists before n8n startup
   ansible.builtin.command:
@@ -227,12 +228,15 @@
   register: n8n_docker_forward_chain_check
   changed_when: false
   failed_when: n8n_docker_forward_chain_check.rc not in [0, 1]
+  when: n8n_requires_docker_nat | bool
 
 - name: Restart Docker when the nat or forward chain is missing before n8n startup
   ansible.builtin.service:
     name: docker
     state: restarted
-  when: n8n_docker_nat_chain_check.rc == 1 or n8n_docker_forward_chain_check.rc == 1
+  when: >-
+    n8n_requires_docker_nat | bool
+    and (n8n_docker_nat_chain_check.rc == 1 or n8n_docker_forward_chain_check.rc == 1)
 
 - name: Recheck the Docker nat chain before n8n startup
   ansible.builtin.command:
@@ -247,6 +251,7 @@
   retries: 6
   delay: 2
   until: n8n_docker_nat_chain_recheck.rc == 0
+  when: n8n_requires_docker_nat | bool
 
 - name: Recheck the Docker forward chain before n8n startup
   ansible.builtin.command:
@@ -259,6 +264,7 @@
   retries: 6
   delay: 2
   until: n8n_docker_forward_chain_recheck.rc == 0
+  when: n8n_requires_docker_nat | bool
 
 - name: Assert Docker bridge chains are present before n8n startup
   ansible.builtin.assert:
@@ -266,6 +272,7 @@
       - n8n_docker_nat_chain_recheck.rc == 0
       - n8n_docker_forward_chain_recheck.rc == 0
     fail_msg: "Docker is running but the nat DOCKER or filter DOCKER-FORWARD chain is missing; n8n bridge networking will fail."
+  when: n8n_requires_docker_nat | bool
 
 - name: Start the n8n runtime and recover Docker bridge-chain failures
   block:

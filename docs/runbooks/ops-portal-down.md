@@ -128,7 +128,10 @@ instead of assuming the runtime itself rejected the change.
 
 3. If a replay is interrupted and the guest still serves stale portal sources,
    compare the repo hashes with the guest-local runtime and then resync the
-   exact service payload through a temporary directory before rebuilding:
+   exact service payload through a temporary directory before rebuilding. If
+   `/opt/ops-portal/docker-compose.yml` already points at
+   `/opt/ops-portal/build-context`, compare and refresh both the service tree
+   and the mirrored build context:
 
 ```bash
 sha256sum scripts/ops_portal/app.py scripts/ops_portal/templates/partials/overview.html \
@@ -138,7 +141,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   -o IdentitiesOnly=yes \
   -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p' \
   ops@10.10.10.20 \
-  'sha256sum /opt/ops-portal/service/ops_portal/app.py /opt/ops-portal/service/ops_portal/templates/partials/overview.html /opt/ops-portal/service/ops_portal/static/portal.css /opt/ops-portal/service/ops_portal/static/portal.js'
+  'sha256sum /opt/ops-portal/service/ops_portal/app.py /opt/ops-portal/service/ops_portal/templates/partials/overview.html /opt/ops-portal/service/ops_portal/static/portal.css /opt/ops-portal/service/ops_portal/static/portal.js /opt/ops-portal/build-context/ops_portal/app.py /opt/ops-portal/build-context/ops_portal/templates/partials/overview.html /opt/ops-portal/build-context/ops_portal/static/portal.css /opt/ops-portal/build-context/ops_portal/static/portal.js'
 
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
@@ -170,6 +173,19 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   ops@10.10.10.20 \
   'sudo install -m 0644 /dev/stdin /opt/ops-portal/service/requirements.txt' \
   < requirements/ops-portal.txt
+
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p' \
+  ops@10.10.10.20 \
+  'sudo rm -rf /opt/ops-portal/build-context/ops_portal /opt/ops-portal/build-context/search_fabric /opt/ops-portal/build-context/publication_contract.py /opt/ops-portal/build-context/requirements.txt /opt/ops-portal/build-context/Dockerfile \
+   && sudo mkdir -p /opt/ops-portal/build-context \
+   && sudo cp -R /opt/ops-portal/service/ops_portal /opt/ops-portal/build-context/ops_portal \
+   && sudo cp -R /opt/ops-portal/service/search_fabric /opt/ops-portal/build-context/search_fabric \
+   && sudo cp /opt/ops-portal/service/publication_contract.py /opt/ops-portal/build-context/publication_contract.py \
+   && sudo cp /opt/ops-portal/service/requirements.txt /opt/ops-portal/build-context/requirements.txt \
+   && sudo cp /opt/ops-portal/service/Dockerfile /opt/ops-portal/build-context/Dockerfile \
+   && grep -F "context: /opt/ops-portal/build-context" /opt/ops-portal/docker-compose.yml'
 
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \

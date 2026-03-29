@@ -49,6 +49,11 @@ from shared_policy_packs import (
     SHARED_POLICY_PACKS_SCHEMA_PATH,
     load_shared_policy_packs,
 )
+from runtime_assurance import (
+    SCHEMA_PATH as RUNTIME_ASSURANCE_SCHEMA_PATH,
+    load_runtime_assurance_catalog,
+    validate_runtime_assurance_catalog,
+)
 from validate_ephemeral_vmid import validate_ephemeral_vmid_ranges
 from generate_slo_rules import outputs_match as slo_outputs_match
 from immutable_guest_replacement import load_guest_replacement_catalog, validate_guest_replacement_catalog
@@ -83,6 +88,7 @@ HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 UPTIME_MONITORS_PATH = repo_path("config", "uptime-kuma", "monitors.json")
 HEALTH_PROBE_CATALOG_PATH = repo_path("config", "health-probe-catalog.json")
 CERTIFICATE_CATALOG_PATH = repo_path("config", "certificate-catalog.json")
+SERVICE_CAPABILITY_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
 SECRET_CATALOG_PATH = repo_path("config", "secret-catalog.json")
 SEED_DATA_CATALOG_PATH = repo_path("config", "seed-data-catalog.json")
 TOKEN_POLICY_PATH = repo_path("config", "token-policy.yaml")
@@ -364,9 +370,10 @@ def validate_no_tracked_env_files() -> None:
     if completed.returncode == 0:
         tracked = [line.strip() for line in completed.stdout.splitlines() if line.strip()]
     else:
-        # Some remote validation runners materialize git worktrees through an
-        # alternate `.git-remote/` layout that breaks `git ls-files`. Fall back
-        # to a repository scan so the no-.env invariant still holds there.
+        # Immutable remote validation snapshots deliberately omit `.git`
+        # metadata, and some older worker mirrors used an alternate
+        # `.git-remote/` layout that also breaks `git ls-files`. Fall back to a
+        # repository scan so the no-.env invariant still holds in both modes.
         ignored_dirs = {".ansible", ".claude", ".git", ".git-remote", ".local", ".venv", ".worktrees"}
         tracked = []
         for path in REPO_ROOT.rglob("*.env"):
@@ -997,6 +1004,24 @@ def validate_certificate_catalog(host_vars_context: dict[str, Any]) -> None:
         raise ValueError("config/certificate-catalog.json.certificates must not be empty")
 
     topology = host_vars_context["topology"]
+    service_capability_catalog = require_mapping(
+        load_json(SERVICE_CAPABILITY_CATALOG_PATH),
+        str(SERVICE_CAPABILITY_CATALOG_PATH),
+    )
+    allowed_service_ids = set(topology)
+    allowed_service_ids.update(
+        require_identifier(
+            entry.get("id"),
+            f"config/service-capability-catalog.json.services[{index}].id",
+        )
+        for index, entry in enumerate(
+            require_list(
+                service_capability_catalog.get("services"),
+                "config/service-capability-catalog.json.services",
+            )
+        )
+        for entry in [require_mapping(entry, f"config/service-capability-catalog.json.services[{index}]")]
+    )
     certificate_ids: set[str] = set()
     for index, item in enumerate(certificates):
         path = f"config/certificate-catalog.json.certificates[{index}]"
@@ -1007,7 +1032,7 @@ def validate_certificate_catalog(host_vars_context: dict[str, Any]) -> None:
         certificate_ids.add(certificate_id)
 
         service_id = require_identifier(item.get("service_id"), f"{path}.service_id")
-        if service_id not in topology:
+        if service_id not in allowed_service_ids:
             raise ValueError(f"{path}.service_id references unknown platform service '{service_id}'")
 
         require_enum(item.get("status"), f"{path}.status", {"active", "planned"})
@@ -2612,6 +2637,11 @@ def validate_persona_catalog() -> None:
         raise ValueError("config/persona-catalog.json must declare exactly one default persona")
 
 
+def validate_runtime_assurance_matrix_data() -> None:
+    payload = load_runtime_assurance_catalog()
+    validate_runtime_assurance_catalog(payload, schema_path=RUNTIME_ASSURANCE_SCHEMA_PATH)
+
+
 def validate_preview_environment_profiles() -> None:
     validate_profile_catalog(load_profile_catalog())
 
@@ -2673,6 +2703,7 @@ def validate_repository_data_models() -> int:
     validate_capacity_model_schema()
     validate_capacity_model()
     validate_persona_catalog()
+    validate_runtime_assurance_matrix_data()
     validate_preview_environment_profiles()
     validate_ephemeral_pool_catalog()
     validate_restore_readiness_profiles()

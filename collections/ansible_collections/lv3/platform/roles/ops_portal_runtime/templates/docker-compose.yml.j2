@@ -1,7 +1,7 @@
 services:
   ops-portal:
     build:
-      context: {{ ops_portal_service_dir }}
+      context: {{ ops_portal_build_context_dir }}
       network: host
     image: {{ ops_portal_service_image_name }}:latest
     container_name: {{ ops_portal_container_name }}

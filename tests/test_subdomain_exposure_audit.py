@@ -50,7 +50,11 @@ class SubdomainExposureAuditTests(unittest.TestCase):
             ]
         }
 
-        findings = audit.collect_repo_findings(registry)
+        findings = audit.collect_repo_findings(
+            registry,
+            certificate_catalog={"certificates": []},
+            edge_certificate_domains=set(),
+        )
 
         self.assertEqual(findings[0]["severity"], "CRITICAL")
         self.assertIn("platform-sso", findings[0]["detail"])
@@ -67,9 +71,106 @@ class SubdomainExposureAuditTests(unittest.TestCase):
             ]
         }
 
-        findings = audit.collect_repo_findings(registry)
+        findings = audit.collect_repo_findings(
+            registry,
+            certificate_catalog={"certificates": []},
+            edge_certificate_domains=set(),
+        )
 
         self.assertEqual(findings, [])
+
+    def test_repo_findings_flag_missing_certificate_catalog_entry_for_public_hostname(self) -> None:
+        registry = {
+            "zone_name": "lv3.org",
+            "publications": [
+                {
+                    "fqdn": "docs.lv3.org",
+                    "service_id": "docs_portal",
+                    "status": "active",
+                    "environment": "production",
+                    "publication": {"access_model": "platform-sso", "delivery_model": "shared-edge"},
+                    "adapter": {
+                        "edge_auth": {"provider": "oauth2_proxy"},
+                        "tls": {"provider": "letsencrypt"},
+                    },
+                }
+            ],
+        }
+
+        findings = audit.collect_repo_findings(
+            registry,
+            certificate_catalog={"certificates": []},
+            edge_certificate_domains={"docs.lv3.org"},
+        )
+
+        self.assertEqual(findings[0]["check"], "certificate_plan")
+        self.assertEqual(findings[0]["severity"], "CRITICAL")
+        self.assertEqual(findings[0]["finding"], "catalog_public_hostname_missing_from_certificate_catalog")
+
+    def test_repo_findings_flag_public_certificate_catalog_entry_without_catalogued_hostname(self) -> None:
+        registry = {
+            "zone_name": "lv3.org",
+            "publications": [],
+        }
+
+        findings = audit.collect_repo_findings(
+            registry,
+            certificate_catalog={
+                "certificates": [
+                    {
+                        "id": "docs-edge",
+                        "service_id": "docs_portal",
+                        "endpoint": {
+                            "host": "docs.lv3.org",
+                            "port": 443,
+                            "server_name": "docs.lv3.org",
+                        },
+                    }
+                ]
+            },
+            edge_certificate_domains=set(),
+        )
+
+        self.assertEqual(findings[0]["finding"], "certificate_catalog_public_hostname_missing_from_endpoint_catalog")
+
+    def test_repo_findings_flag_shared_edge_hostname_missing_from_rendered_certificate_domains(self) -> None:
+        registry = {
+            "zone_name": "lv3.org",
+            "publications": [
+                {
+                    "fqdn": "ops.lv3.org",
+                    "service_id": "ops_portal",
+                    "status": "active",
+                    "environment": "production",
+                    "publication": {"access_model": "platform-sso", "delivery_model": "shared-edge"},
+                    "adapter": {
+                        "edge_auth": {"provider": "oauth2_proxy"},
+                        "tls": {"provider": "letsencrypt"},
+                    },
+                }
+            ],
+        }
+
+        findings = audit.collect_repo_findings(
+            registry,
+            certificate_catalog={
+                "certificates": [
+                    {
+                        "id": "ops-edge",
+                        "service_id": "ops_portal",
+                        "expected_issuer": "letsencrypt",
+                        "endpoint": {
+                            "host": "ops.lv3.org",
+                            "port": 443,
+                            "server_name": "ops.lv3.org",
+                        },
+                    }
+                ]
+            },
+            edge_certificate_domains=set(),
+        )
+
+        self.assertEqual(findings[0]["finding"], "catalog_public_hostname_missing_from_shared_edge_certificate_domains")
 
     def test_zone_findings_compare_full_record_sets(self) -> None:
         registry = {

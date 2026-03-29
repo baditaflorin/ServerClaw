@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.76",
-  "platform_version": "0.130.51",
-  "generated_at": "2026-03-29T12:32:16Z",
-  "next_refresh_at": "2026-03-29T13:32:16Z",
+  "repo_version": "0.177.85",
+  "platform_version": "0.130.58",
+  "generated_at": "2026-03-29T19:32:07Z",
+  "next_refresh_at": "2026-03-29T20:32:07Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -244,6 +244,18 @@
         "lifecycle_status": "active",
         "primary_url": "https://mail.lv3.org",
         "last_live_apply": "2026-03-29T00:00:00Z"
+      },
+      "matrix_synapse": {
+        "service_name": "Matrix Synapse",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://matrix.lv3.org",
+        "last_live_apply": "2026-03-29T00:00:00Z",
+        "slo_status": "unknown"
       },
       "mattermost": {
         "service_name": "Mattermost",
@@ -1297,6 +1309,32 @@
         "runbook": "docs/runbooks/configure-mail-platform.md"
       },
       {
+        "id": "converge-matrix-synapse",
+        "description": "Converge Matrix Synapse on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish matrix.lv3.org through the shared edge, and expose the private controller proxy on the Proxmox host.",
+        "tags": [
+          "converge-matrix-synapse",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 350,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 4,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-matrix-synapse.md"
+      },
+      {
         "id": "converge-mattermost",
         "description": "Converge Mattermost on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, expose the operator-only Tailscale proxy on the Proxmox host, and seed the repo-managed collaboration channels and incoming webhooks.",
         "tags": [
@@ -1350,7 +1388,7 @@
       },
       {
         "id": "converge-n8n",
-        "description": "Converge n8n on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress.",
+        "description": "Converge the n8n connector fabric on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress for ServerClaw adapters.",
         "tags": [
           "converge-n8n",
           "guest-live",
@@ -2249,6 +2287,84 @@
         "runbook": "docs/runbooks/install-proxmox.md"
       },
       {
+        "id": "live-apply-group",
+        "description": "Run one grouped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.",
+        "tags": [
+          "host-and-guest-live",
+          "live-apply-group",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 4,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/playbook-execution-model.md"
+      },
+      {
+        "id": "live-apply-service",
+        "description": "Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.",
+        "tags": [
+          "host-and-guest-live",
+          "live-apply-service",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 4,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/playbook-execution-model.md"
+      },
+      {
+        "id": "live-apply-site",
+        "description": "Run the full site live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.",
+        "tags": [
+          "host-and-guest-live",
+          "live-apply-site",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 3600,
+          "max_steps": 450,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 8,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/playbook-execution-model.md"
+      },
+      {
         "id": "live-apply-waves",
         "description": "Execute one reviewed dependency-wave manifest so each wave acquires its locks up front and runs its playbooks in parallel.",
         "tags": [
@@ -2281,6 +2397,7 @@
           "guest-live",
           "merge-config-changes",
           "mutation",
+          "preflight",
           "validated"
         ],
         "risk_class": "HIGH",
@@ -2536,6 +2653,7 @@
         "tags": [
           "diagnostic",
           "post-merge-gate",
+          "preflight",
           "repo-only"
         ],
         "risk_class": "LOW",
@@ -3190,6 +3308,31 @@
         "runbook": "docs/runbooks/capacity-model.md"
       },
       {
+        "id": "weekly-https-tls-assurance",
+        "description": "Run the ADR 0249 HTTPS/TLS assurance scan, store a receipt, and keep deeper TLS posture evidence alongside the recurring blackbox probes.",
+        "tags": [
+          "diagnostic",
+          "repo-only",
+          "validated",
+          "weekly-https-tls-assurance"
+        ],
+        "risk_class": "LOW",
+        "automation_eligible": true,
+        "agent_trust_required": "T1",
+        "execution_class": "diagnostic",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 3600,
+          "max_steps": 200,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/https-tls-assurance.md"
+      },
+      {
         "id": "weekly-security-scan",
         "description": "Run the ADR 0142 public-surface security scan, store a receipt, and publish high or critical findings.",
         "tags": [
@@ -3490,6 +3633,16 @@
         ]
       },
       {
+        "id": "configure-matrix-synapse",
+        "title": "Configure Matrix Synapse",
+        "agent_trust_required": "T3",
+        "steps": 9,
+        "path": "docs/runbooks/configure-matrix-synapse.md",
+        "workflow_ids": [
+          "converge-matrix-synapse"
+        ]
+      },
+      {
         "id": "configure-mattermost",
         "title": "Configure Mattermost",
         "agent_trust_required": "T3",
@@ -3748,7 +3901,7 @@
         "id": "environment-promotion-pipeline",
         "title": "Environment Promotion Pipeline",
         "agent_trust_required": "T3",
-        "steps": 20,
+        "steps": 22,
         "path": "docs/runbooks/environment-promotion-pipeline.md",
         "workflow_ids": [
           "deploy-and-promote"
@@ -3798,6 +3951,16 @@
         ]
       },
       {
+        "id": "https-tls-assurance",
+        "title": "HTTPS And TLS Assurance",
+        "agent_trust_required": "T1",
+        "steps": 5,
+        "path": "docs/runbooks/https-tls-assurance.md",
+        "workflow_ids": [
+          "weekly-https-tls-assurance"
+        ]
+      },
+      {
         "id": "incident-triage-engine",
         "title": "Incident Triage Engine",
         "agent_trust_required": "T1",
@@ -3843,7 +4006,7 @@
         "id": "monitoring-stack",
         "title": "Monitoring Stack Runbook",
         "agent_trust_required": "T3",
-        "steps": 21,
+        "steps": 22,
         "path": "docs/runbooks/monitoring-stack.md",
         "workflow_ids": [
           "converge-monitoring"
@@ -3909,6 +4072,18 @@
         "path": "docs/runbooks/platform-operations-portal.md",
         "workflow_ids": [
           "converge-ops-portal"
+        ]
+      },
+      {
+        "id": "playbook-execution-model",
+        "title": "Playbook Execution Model",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/playbook-execution-model.md",
+        "workflow_ids": [
+          "live-apply-group",
+          "live-apply-service",
+          "live-apply-site"
         ]
       },
       {
@@ -4211,10 +4386,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.75",
+    "last_version": "0.177.84",
     "deployed_at": "2026-03-29",
-    "summary": "records ADR 0252 exact-main evidence on the current mainline by refreshing the latest route, edge, and Vaultwarden receipts and documenting the HTTP/1.1 Vaultwarden verification form while the integrated platform baseline remains 0.130.51 and the original first-implementation truth stays anchored at repo version 0.177.68 on platform version 0.130.43",
-    "release_notes_url": "docs/release-notes/0.177.76.md"
+    "summary": "implemented ADR 0255 by adding repo-managed Matrix Synapse as the canonical ServerClaw conversation hub with postgres-backed persistence, a Tailscale-only controller proxy, public edge publication at matrix.lv3.org, and exact-main verification for runtime, login, and monitoring coverage",
+    "release_notes_url": "docs/release-notes/0.177.85.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

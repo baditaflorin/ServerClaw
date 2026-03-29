@@ -49,21 +49,22 @@ make converge-monitoring
 4. Configures a managed Prometheus service with the remote-write receiver enabled plus the `exemplar-storage` and `native-histograms` features required by Tempo span metrics and service-graph metrics.
 5. Configures Alertmanager routing for severity-based notification delivery into Mattermost and the private ntfy paging gateway.
 6. Configures the blackbox exporter plus generated HTTP and TCP probe jobs from `config/health-probe-catalog.json`.
-7. Configures Tempo with local-block storage, a 7-day trace retention window, and metrics generation into Prometheus.
-8. Configures the OpenTelemetry collector as the shared OTLP ingestion path for internal services and automation.
-9. Initializes InfluxDB with the `lv3` organization and the `proxmox` bucket.
-10. Creates separate InfluxDB tokens for Proxmox metric writes and Grafana bucket reads.
-11. Provisions Grafana datasources for InfluxDB, Loki, Prometheus, and Tempo automatically.
-12. Creates a dedicated guest-writer token for guest-side telemetry and mirrors it to `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/guest-writer.token`.
-13. Renders the managed dashboard JSON from repo and imports the overview plus VM detail dashboards into Grafana over the local Grafana API.
-14. Creates or updates the Proxmox metric server `influxdb-http` to send metrics to `10.10.10.40:8086`.
-15. Converges shared guest observability plumbing for service-level Telegraf on managed guests that ship into InfluxDB.
-16. Converges `nginx-lv3` with loopback-only `stub_status` as a thin extension on top of that shared guest observability framework.
-17. Converges `docker-build-lv3` with a repo-managed Docker CLI wrapper plus Telegraf shipping build count and duration events as another thin extension on the same framework.
-18. Converges `docker-runtime-lv3` with Telegraf's Docker input plugin so container CPU, memory, network, status, and health data land in InfluxDB and the managed runtime detail dashboard.
-19. Exposes a shared OTLP endpoint for traced internal services such as the private mail gateway.
-20. Installs Grafana Alloy on `proxmox_florin` and every managed guest, labels log streams consistently, and ships host journald, guest journald, NGINX file logs, and Docker container logs into Loki.
-21. Installs Loki Canary on `monitoring-lv3`, scrapes its assurance metrics in Prometheus, imports the `LV3 Log Canary` Grafana dashboard, and alerts when the log-path canary stops being writable or queryable.
+7. Configures generated HTTPS and TLS assurance probes plus expiry alert rules from the service, subdomain, certificate, and health-probe catalogs.
+8. Configures Tempo with local-block storage, a 7-day trace retention window, and metrics generation into Prometheus.
+9. Configures the OpenTelemetry collector as the shared OTLP ingestion path for internal services and automation.
+10. Initializes InfluxDB with the `lv3` organization and the `proxmox` bucket.
+11. Creates separate InfluxDB tokens for Proxmox metric writes and Grafana bucket reads.
+12. Provisions Grafana datasources for InfluxDB, Loki, Prometheus, and Tempo automatically.
+13. Creates a dedicated guest-writer token for guest-side telemetry and mirrors it to `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/guest-writer.token`.
+14. Renders the managed dashboard JSON from repo and imports the overview plus VM detail dashboards into Grafana over the local Grafana API.
+15. Creates or updates the Proxmox metric server `influxdb-http` to send metrics to `10.10.10.40:8086`.
+16. Converges shared guest observability plumbing for service-level Telegraf on managed guests that ship into InfluxDB.
+17. Converges `nginx-lv3` with loopback-only `stub_status` as a thin extension on top of that shared guest observability framework.
+18. Converges `docker-build-lv3` with a repo-managed Docker CLI wrapper plus Telegraf shipping build count and duration events as another thin extension on the same framework.
+19. Converges `docker-runtime-lv3` with Telegraf's Docker input plugin so container CPU, memory, network, status, and health data land in InfluxDB and the managed runtime detail dashboard.
+20. Exposes a shared OTLP endpoint for traced internal services such as the private mail gateway.
+21. Installs Grafana Alloy on `proxmox_florin` and every managed guest, labels log streams consistently, and ships host journald, guest journald, NGINX file logs, and Docker container logs into Loki.
+22. Installs Loki Canary on `monitoring-lv3`, scrapes its assurance metrics in Prometheus, imports the `LV3 Log Canary` Grafana dashboard, and alerts when the log-path canary stops being writable or queryable.
 
 ## Operator Access Flow
 

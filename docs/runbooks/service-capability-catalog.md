@@ -11,6 +11,8 @@ It answers:
 - how operators reach it
 - which runbook owns it
 - which health probe, images, and secrets are attached to it
+- which stage-scoped smoke suite should count as user-meaningful proof for each
+  active environment
 - which dependency failures are expected to degrade it and what the declared fallback mode is
 - which redundancy declaration to consult in `config/service-redundancy-catalog.json`
 
@@ -24,7 +26,9 @@ Update the catalog when:
 4. its runbook or ADR changes
 5. its health probe, image, or secret references change
 6. its graceful-degradation declarations change
-7. its redundancy declaration moves to a different VM, standby type, or recovery path
+7. it needs an explicit stage smoke-suite override instead of the inherited
+   default smoke proof
+8. its redundancy declaration moves to a different VM, standby type, or recovery path
 
 The catalog is the input for:
 
@@ -58,6 +62,9 @@ Validation checks:
 - generated monitor bindings stay aligned with `config/health-probe-catalog.json`
 - referenced health probes, images, and secrets exist
 - degradation-mode declarations use valid dependency types, unique dependency ids per service, and `fault:*` verification references
+- explicit `smoke_suites` overrides declare at least one receipt keyword or
+  verification token, and active environments still resolve at least one smoke
+  suite even when they inherit the repo-managed default
 - active services match the canonical host/service topology where applicable
 
 ## Querying All Services
@@ -73,6 +80,10 @@ make show-service SERVICE=grafana
 ```
 
 This prints the lifecycle state, VM, URLs, health probe, image or secret references, degradation modes, runbook, dashboard, and tags for the selected service.
+
+For active environments, `show-service` also prints the effective smoke-suite
+contract and whether it is explicitly declared or inherited from the default
+ADR 0251 rule.
 
 For the redundancy tier, implemented redundancy claim, recovery objective, backup sources, failover metadata, and rehearsal evidence, query the paired catalog:
 

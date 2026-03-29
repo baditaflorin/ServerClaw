@@ -125,6 +125,11 @@ try:
 except ImportError:  # pragma: no cover - packaged import path
     from scripts.search_fabric import SearchClient
 
+try:
+    from scripts.runtime_assurance import build_runtime_assurance_report
+except ImportError:  # pragma: no cover - packaged import path
+    from runtime_assurance import build_runtime_assurance_report
+
 
 HTTP_LOGGER = get_logger("api_gateway", "http", name="lv3.api_gateway.http")
 RUNTIME_LOGGER = get_logger("api_gateway", "runtime", name="lv3.api_gateway.runtime")
@@ -862,6 +867,17 @@ class GatewayRuntime:
             world_state_dsn=self.config.world_state_dsn,
         )
 
+    def collect_runtime_assurance(self) -> dict[str, Any]:
+        return build_runtime_assurance_report(
+            repo_root=self.config.repo_root,
+            service_catalog=self.primary_service_catalog(),
+            publication_registry=json_file(
+                self.config.repo_root / "config" / "subdomain-exposure-registry.json",
+                {"publications": []},
+            ),
+            health_payload=self.collect_platform_health(),
+        )
+
 
 def build_config() -> GatewayConfig:
     repo_root = Path(os.environ.get("LV3_GATEWAY_REPO_ROOT", REPO_ROOT))
@@ -1347,6 +1363,19 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
             payload = await asyncio.to_thread(runtime.collect_platform_service_health, service_id)
         except ServiceHealthNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return payload
+
+    @app.get("/v1/platform/runtime-assurance")
+    async def platform_runtime_assurance(
+        request: Request,
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        payload = await asyncio.to_thread(runtime.collect_runtime_assurance)
         await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
         return payload
 

@@ -1,0 +1,151 @@
+{
+  "$id": "https://lv3.org/schema/runtime-assurance-matrix.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Runtime assurance matrix",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "dimensions",
+    "profiles",
+    "default_profile_by_exposure"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "docs/schema/runtime-assurance-matrix.schema.json"
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "dimensions": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]+$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "description"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "profiles": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]+$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "description",
+          "dimension_classes"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dimension_classes": {
+            "type": "object",
+            "minProperties": 1,
+            "propertyNames": {
+              "pattern": "^[a-z][a-z0-9_]+$"
+            },
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "required",
+                "best_effort",
+                "n_a"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "default_profile_by_exposure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "edge-published",
+        "edge-static",
+        "informational-only",
+        "private-only"
+      ],
+      "properties": {
+        "edge-published": {
+          "type": "string",
+          "minLength": 1
+        },
+        "edge-static": {
+          "type": "string",
+          "minLength": 1
+        },
+        "informational-only": {
+          "type": "string",
+          "minLength": 1
+        },
+        "private-only": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "service_overrides": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]+$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "profile"
+        ],
+        "properties": {
+          "profile": {
+            "type": "string",
+            "minLength": 1
+          },
+          "notes": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "freshness_days_by_dimension": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]+$"
+      },
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 1
+      }
+    }
+  }
+}

@@ -1,12 +1,12 @@
-# Release 0.177.76
+# Release 0.177.85
 
 - Date: 2026-03-29
 
 ## Summary
-- records ADR 0252 exact-main evidence on the current mainline by refreshing the latest route, edge, and Vaultwarden receipts and documenting the HTTP/1.1 Vaultwarden verification form while the integrated platform baseline remains 0.130.51 and the original first-implementation truth stays anchored at repo version 0.177.68 on platform version 0.130.43
+- implemented ADR 0255 by adding repo-managed Matrix Synapse as the canonical ServerClaw conversation hub with postgres-backed persistence, a Tailscale-only controller proxy, public edge publication at matrix.lv3.org, and exact-main verification for runtime, login, and monitoring coverage
 
 ## Platform Impact
-- no live platform version bump; this release records the verified ADR 0252 exact-main replay while the current mainline platform baseline remains 0.130.51 and the new mainline receipt becomes canonical for the governed route, edge, and private Vaultwarden evidence
+- platform version remains 0.130.58 after the exact-main ADR 0255 replay re-verifies Matrix Synapse publication, controller access on 100.64.0.1:8015, and monitoring coverage on top of the already-verified ADR 0264 mainline baseline
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

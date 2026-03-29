@@ -18,15 +18,17 @@
       "implementation_refs": [
         "Makefile",
         "config/control-plane-lanes.json",
+        "config/validation-lanes.yaml",
         "scripts/controller_automation_toolkit.py",
         "scripts/control_plane_lanes.py",
         "scripts/validate_repo.sh",
+        "scripts/validation_lanes.py",
         "scripts/generate_status_docs.py",
         "scripts/validate_repository_data_models.py",
         ".github/workflows/validate.yml"
       ],
       "outputs": [
-        "Repository validation result across syntax, YAML, Ansible lint, shell, JSON, canonical data-model, and generated-document checks."
+        "Repository validation result across syntax, YAML, Ansible lint, shell, JSON, canonical data-model, generated-document checks, and the ADR 0264 lane-catalog contract."
       ],
       "verification_commands": [
         "make validate"
@@ -104,13 +106,15 @@
         "Makefile",
         "config/build-server.json",
         "config/validation-gate.json",
+        "config/validation-lanes.yaml",
         "scripts/remote_exec.sh",
         "scripts/run_gate.py",
+        "scripts/validation_lanes.py",
         "scripts/parallel_check.py",
         ".githooks/pre-push"
       ],
       "outputs": [
-        "A blocking pass or fail result across the nine configured pre-push validation checks, together with a recorded last-run status payload."
+        "A lane-aware blocking pass or fail result across the fast global invariants plus the selected ADR 0264 validation lanes, together with a recorded last-run status payload."
       ],
       "verification_commands": [
         "make pre-push-gate",
@@ -144,13 +148,15 @@
       "implementation_refs": [
         "Makefile",
         "config/validation-gate.json",
+        "config/validation-lanes.yaml",
         "config/windmill/scripts/gate-status.py",
         "scripts/gate_status.py",
+        "scripts/validation_lanes.py",
         "scripts/log_gate_bypass.py",
         "receipts/gate-bypasses/.gitkeep"
       ],
       "outputs": [
-        "A human-readable or machine-readable summary of enabled validation checks, the last local gate run, the last post-merge gate run, and the latest explicit bypass receipt."
+        "A human-readable or machine-readable summary of enabled validation checks and lanes, the last local gate run, the last post-merge gate run, and the latest explicit bypass receipt."
       ],
       "verification_commands": [
         "make gate-status",
@@ -189,7 +195,11 @@
         "command": "make post-merge-gate"
       },
       "preflight": {
-        "required": false
+        "required": true,
+        "required_secret_ids": [],
+        "bootstrap_manifest_ids": [
+          "controller-local-base"
+        ]
       },
       "validation_targets": [],
       "live_impact": "repo_only",
@@ -197,11 +207,13 @@
       "implementation_refs": [
         "Makefile",
         "config/validation-gate.json",
+        "config/validation-lanes.yaml",
         "config/windmill/scripts/post-merge-gate.py",
-        "scripts/run_gate.py"
+        "scripts/run_gate.py",
+        "scripts/validation_lanes.py"
       ],
       "outputs": [
-        "A post-merge pass or fail result for the same validation manifest used by the interactive pre-push gate."
+        "A post-merge lane-aware pass or fail result for the same validation manifest and ADR 0264 lane catalog used by the interactive pre-push gate."
       ],
       "verification_commands": [
         "make post-merge-gate"
@@ -821,6 +833,10 @@
         "required": true,
         "required_secret_ids": [
           "bootstrap_ssh_private_key"
+        ],
+        "bootstrap_manifest_ids": [
+          "controller-local-base",
+          "shared-edge-generated-portals"
         ]
       },
       "validation_targets": [
@@ -1758,7 +1774,11 @@
         "command": "make merge-config-changes"
       },
       "preflight": {
-        "required": false
+        "required": true,
+        "required_secret_ids": [],
+        "bootstrap_manifest_ids": [
+          "controller-local-base"
+        ]
       },
       "validation_targets": [
         "validate-data-models"
@@ -2128,6 +2148,55 @@
         "python3 -m py_compile scripts/public_surface_scan.py config/windmill/scripts/weekly-security-scan.py",
         "python3 scripts/public_surface_scan.py --env production --skip-testssl --skip-nuclei --print-report-json",
         "uv run --with pytest --with pyyaml --with nats-py pytest -q tests/test_public_surface_scan.py"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 3600,
+        "max_steps": 200,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 0,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
+    },
+    "weekly-https-tls-assurance": {
+      "description": "Run the ADR 0249 HTTPS/TLS assurance scan, store a receipt, and keep deeper TLS posture evidence alongside the recurring blackbox probes.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "https-tls-assurance",
+        "command": "make https-tls-assurance ENV=production"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/https-tls-assurance.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/prometheus/file_sd/https_tls_targets.yml",
+        "config/prometheus/rules/https_tls_alerts.yml",
+        "config/windmill/scripts/https-tls-assurance.py",
+        "config/workflow-catalog.json",
+        "docs/runbooks/https-tls-assurance.md",
+        "receipts/https-tls-assurance",
+        "scripts/generate_https_tls_assurance.py",
+        "scripts/https_tls_assurance.py",
+        "scripts/https_tls_assurance_targets.py"
+      ],
+      "outputs": [
+        "A timestamped HTTPS/TLS assurance receipt covering the declared HTTPS surface set with raw testssl artifacts and classified TLS findings."
+      ],
+      "verification_commands": [
+        "python3 -m py_compile scripts/https_tls_assurance_targets.py scripts/generate_https_tls_assurance.py scripts/https_tls_assurance.py config/windmill/scripts/https-tls-assurance.py",
+        "uv run --with pyyaml python scripts/generate_https_tls_assurance.py --check",
+        "uv run --with pyyaml python scripts/https_tls_assurance.py --env production --skip-testssl --print-report-json",
+        "uv run --with pytest --with pyyaml pytest -q tests/test_https_tls_assurance_targets.py tests/test_monitoring_vm_role.py tests/test_https_tls_assurance_windmill_wrapper.py"
       ],
       "execution_class": "diagnostic",
       "budget": {
@@ -2759,6 +2828,67 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-matrix-synapse": {
+      "description": "Converge Matrix Synapse on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish matrix.lv3.org through the shared edge, and expose the private controller proxy on the Proxmox host.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-matrix-synapse",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-matrix-synapse"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "matrix_synapse_database_password",
+          "matrix_synapse_ops_password",
+          "matrix_synapse_registration_shared_secret",
+          "matrix_synapse_signing_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-matrix-synapse"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-matrix-synapse.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/matrix-synapse.yml",
+        "playbooks/services/matrix-synapse.yml",
+        "roles/matrix_synapse_postgres",
+        "roles/matrix_synapse_runtime",
+        "roles/proxmox_tailscale_proxy",
+        "roles/proxmox_security",
+        "roles/nginx_edge_publication",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/uptime-kuma/monitors.json",
+        "config/grafana/dashboards/matrix-synapse.json",
+        "config/alertmanager/rules/matrix-synapse.yml"
+      ],
+      "outputs": [
+        "A repo-managed Matrix Synapse runtime on docker-runtime-lv3 with PostgreSQL persistence, a private controller proxy on the Proxmox host, and a public client API at matrix.lv3.org while federation remains disabled."
+      ],
+      "verification_commands": [
+        "make syntax-check-matrix-synapse",
+        "curl -fsS https://matrix.lv3.org/_matrix/client/versions",
+        "curl -fsS http://100.64.0.1:8015/_matrix/client/versions",
+        "python3 -c 'import json,pathlib,urllib.request; password=pathlib.Path(\"/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/ops-password.txt\").read_text().strip(); data=json.dumps({\"type\":\"m.login.password\",\"identifier\":{\"type\":\"m.id.user\",\"user\":\"ops\"},\"password\":password}).encode(); req=urllib.request.Request(\"http://100.64.0.1:8015/_matrix/client/v3/login\", data=data, headers={\"Content-Type\":\"application/json\"}); print(urllib.request.urlopen(req).read().decode())'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 350,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-ops-portal": {
       "description": "Converge the interactive ops portal on docker-runtime-lv3 so the browser control plane stays aligned with the shared API gateway contracts.",
       "lifecycle_status": "active",
@@ -2889,7 +3019,7 @@
       }
     },
     "converge-n8n": {
-      "description": "Converge n8n on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress.",
+      "description": "Converge the n8n connector fabric on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress for ServerClaw adapters.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -2924,11 +3054,13 @@
         "config/uptime-kuma/monitors.json"
       ],
       "outputs": [
-        "A repo-managed n8n runtime on docker-runtime-lv3 with PostgreSQL persistence and public webhook ingress while the editor remains behind the shared edge auth flow."
+        "A repo-managed n8n runtime on docker-runtime-lv3 with PostgreSQL persistence, public webhook ingress for thin ServerClaw adapters, and a protected editor path behind the shared edge auth flow."
       ],
       "verification_commands": [
         "make syntax-check-n8n",
         "curl -fsS https://n8n.lv3.org/healthz",
+        "curl -sSI https://n8n.lv3.org/",
+        "curl -sSI https://n8n.lv3.org/webhook-test/serverclaw-connector-smoke",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'curl -fsS http://127.0.0.1:5678/healthz/readiness'"
       ],
       "execution_class": "mutation",
@@ -4370,6 +4502,158 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "live-apply-group": {
+      "description": "Run one grouped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "live-apply-group",
+        "command": "make live-apply-group group=observability env=production"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [],
+        "bootstrap_manifest_ids": [
+          "controller-local-base",
+          "shared-edge-generated-portals"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/playbook-execution-model.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/workflow-catalog.json",
+        "config/worktree-bootstrap-manifests.json",
+        "docs/runbooks/controller-local-secrets-and-preflight.md",
+        "docs/runbooks/playbook-execution-model.md",
+        "scripts/preflight_controller_local.py",
+        "scripts/workflow_catalog.py",
+        "scripts/interface_contracts.py",
+        "scripts/service_redundancy.py"
+      ],
+      "outputs": [
+        "A grouped live-apply wrapper that repairs required generated artifacts up front, then runs the selected group playbook through the governed shared entrypoint."
+      ],
+      "verification_commands": [
+        "make preflight WORKFLOW=live-apply-group",
+        "make live-apply-group group=observability env=staging EXTRA_ARGS='--syntax-check'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "live-apply-service": {
+      "description": "Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "live-apply-service",
+        "command": "make live-apply-service service=public-edge env=production"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [],
+        "bootstrap_manifest_ids": [
+          "controller-local-base",
+          "shared-edge-generated-portals"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/playbook-execution-model.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/workflow-catalog.json",
+        "config/worktree-bootstrap-manifests.json",
+        "docs/runbooks/controller-local-secrets-and-preflight.md",
+        "docs/runbooks/playbook-execution-model.md",
+        "scripts/preflight_controller_local.py",
+        "scripts/workflow_catalog.py",
+        "scripts/interface_contracts.py",
+        "scripts/service_redundancy.py",
+        "scripts/immutable_guest_replacement.py"
+      ],
+      "outputs": [
+        "A service live-apply wrapper that repairs required generated artifacts up front, then runs the selected service playbook through the governed shared entrypoint."
+      ],
+      "verification_commands": [
+        "make preflight WORKFLOW=live-apply-service",
+        "make live-apply-service service=public-edge env=staging EXTRA_ARGS='--syntax-check'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "live-apply-site": {
+      "description": "Run the full site live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "live-apply-site",
+        "command": "make live-apply-site env=production"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [],
+        "bootstrap_manifest_ids": [
+          "controller-local-base",
+          "shared-edge-generated-portals"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/playbook-execution-model.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/site.yml",
+        "config/workflow-catalog.json",
+        "config/worktree-bootstrap-manifests.json",
+        "docs/runbooks/controller-local-secrets-and-preflight.md",
+        "docs/runbooks/playbook-execution-model.md",
+        "scripts/preflight_controller_local.py",
+        "scripts/workflow_catalog.py",
+        "scripts/interface_contracts.py",
+        "scripts/service_redundancy.py"
+      ],
+      "outputs": [
+        "A full-site live-apply wrapper that repairs required generated artifacts up front, then runs the shared site convergence path."
+      ],
+      "verification_commands": [
+        "make preflight WORKFLOW=live-apply-site",
+        "make live-apply-site env=staging EXTRA_ARGS='--syntax-check'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 3600,
+        "max_steps": 450,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 8,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "live-apply-waves": {
       "description": "Execute one reviewed dependency-wave manifest so each wave acquires its locks up front and runs its playbooks in parallel.",
       "lifecycle_status": "active",
@@ -4382,6 +4666,10 @@
         "required": true,
         "required_secret_ids": [
           "bootstrap_ssh_private_key"
+        ],
+        "bootstrap_manifest_ids": [
+          "controller-local-base",
+          "shared-edge-generated-portals"
         ]
       },
       "validation_targets": [

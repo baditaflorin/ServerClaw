@@ -33,6 +33,7 @@ from drift_lib import (
     utc_now,
 )
 from mutation_audit import build_event, emit_event_best_effort
+from platform.retry import MaxRetriesExceeded, PlatformRetryError, RetryClass, RetryPolicy, with_retry
 from smoke_tests import backup_vm_smoke, docker_runtime_smoke, postgres_smoke
 import synthetic_transaction_replay
 import seed_data_snapshots
@@ -709,13 +710,32 @@ def execute_profiled_smoke_tests(
     network_dependency_ready_after_attempt: int | None = None
     service_warm_up_ready_after_attempt: int | None = None
     started = time.monotonic()
+    retry_policy = RetryPolicy(
+        max_attempts=profile.max_attempts,
+        base_delay_s=float(profile.retry_delay_seconds),
+        max_delay_s=float(profile.retry_delay_seconds),
+        multiplier=1.0,
+        jitter=False,
+        transient_max=0,
+    )
 
-    for attempt in range(1, profile.max_attempts + 1):
-        latest_tests = execute_smoke_tests(
-            context,
-            target,
-            execution_mode=execution_mode,
-        )
+    def run_smoke_attempt() -> list[dict[str, Any]]:
+        nonlocal latest_tests, network_dependency_ready_after_attempt, service_warm_up_ready_after_attempt
+
+        attempt = len(attempts) + 1
+        try:
+            latest_tests = execute_smoke_tests(
+                context,
+                target,
+                execution_mode=execution_mode,
+            )
+        except Exception as exc:  # noqa: BLE001
+            raise PlatformRetryError(
+                f"failed to execute warm-up smoke tests for {target.vm_name}: {exc}",
+                code="platform:restore_warm_up_execution_failed",
+                retry_class=RetryClass.FATAL,
+            ) from exc
+
         network_dependency_ready = tests_pass_named(latest_tests, profile.network_dependency_checks)
         service_warm_up_ready = overall_from_tests(latest_tests) == "pass"
         attempts.append(
@@ -733,9 +753,23 @@ def execute_profiled_smoke_tests(
             network_dependency_ready_after_attempt = attempt
         if service_warm_up_ready:
             service_warm_up_ready_after_attempt = attempt
-            break
-        if attempt < profile.max_attempts and profile.retry_delay_seconds > 0:
-            time.sleep(profile.retry_delay_seconds)
+            return latest_tests
+        raise PlatformRetryError(
+            f"service-specific warm-up not ready for {target.vm_name} after attempt {attempt}",
+            code="platform:restore_warm_up_pending",
+            retry_class=RetryClass.BACKOFF,
+            retry_after=float(profile.retry_delay_seconds),
+        )
+
+    try:
+        latest_tests = with_retry(
+            run_smoke_attempt,
+            policy=retry_policy,
+            error_context=f"restore readiness warm-up for {target.vm_name}",
+            sleep_fn=time.sleep,
+        )
+    except MaxRetriesExceeded:
+        pass
 
     return WarmUpOutcome(
         tests=latest_tests,

@@ -35,34 +35,18 @@ def test_host_inventory_proxy_ports_reference_platform_port_assignments() -> Non
     assert "listen_port: \"{{ platform_port_assignments.platform_context_host_proxy_port }}\"" in host_vars_text
 
 
-def test_role_restarts_changed_socket_units_after_rendering() -> None:
-    tasks = load_tasks()
-    enable_task = next(
-        task for task in tasks if task.get("name") == "Enable Proxmox Tailscale proxy sockets"
-    )
-    listener_check = next(
-        task
-        for task in tasks
-        if task.get("name") == "Check whether Proxmox Tailscale proxy sockets are listening on the declared address"
-    )
-    restart_task = next(
-        task
-        for task in tasks
-        if task.get("name")
-        == "Restart Proxmox Tailscale proxy sockets when their unit changed or listener is missing"
-    )
+def test_role_recycles_active_services_before_restarting_changed_sockets() -> None:
+    tasks_text = ROLE_TASKS.read_text()
 
-    assert enable_task["ansible.builtin.systemd"]["enabled"] is True
-    assert "state" not in enable_task["ansible.builtin.systemd"]
-    assert "(%[^:]+)?:" in listener_check["ansible.builtin.shell"]
-    assert 'systemctl stop "lv3-tailscale-proxy-{{ item.name }}.service" || true' in restart_task["ansible.builtin.shell"]
-    assert 'systemctl stop "lv3-tailscale-proxy-{{ item.name }}.socket" || true' in restart_task["ansible.builtin.shell"]
-    assert 'systemctl start "lv3-tailscale-proxy-{{ item.name }}.socket"' in restart_task["ansible.builtin.shell"]
-    assert "proxmox_tailscale_proxy_sockets.results" in restart_task["vars"]["proxmox_tailscale_socket_unit_changed"]
-    assert "proxmox_tailscale_proxy_socket_listeners.results" in restart_task["vars"][
-        "proxmox_tailscale_socket_listener_missing"
-    ]
-    assert (
-        restart_task["changed_when"]
-        == "proxmox_tailscale_socket_unit_changed or proxmox_tailscale_socket_listener_missing"
+    assert "Stop active Proxmox Tailscale proxy services before restarting changed sockets" in tasks_text
+    assert tasks_text.index("Read active Proxmox Tailscale proxy service command lines") < tasks_text.index(
+        "Stop active Proxmox Tailscale proxy services before restarting changed sockets"
     )
+    assert tasks_text.index("Read current Proxmox Tailscale proxy socket states") < tasks_text.index(
+        "Stop active Proxmox Tailscale proxy services before restarting changed sockets"
+    )
+    assert tasks_text.index("Stop active Proxmox Tailscale proxy services before restarting changed sockets") < tasks_text.index(
+        "Enable and start Proxmox Tailscale proxy sockets"
+    )
+    assert "proxmox_tailscale_socket_unit_changed" in tasks_text
+    assert "proxmox_tailscale_socket_state != 'active'" in tasks_text

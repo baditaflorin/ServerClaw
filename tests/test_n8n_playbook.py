@@ -26,3 +26,12 @@ def test_n8n_dns_stage_converges_only_the_n8n_subdomain_record() -> None:
 
     task_names = {task["name"] for task in tasks}
     assert "Ensure Hetzner DNS records are present" not in task_names
+
+
+def test_n8n_edge_publication_skips_unrelated_static_site_syncs() -> None:
+    plays = yaml.safe_load(PLAYBOOK_PATH.read_text())
+    edge_play = next(
+        play for play in plays if {"role": "lv3.platform.nginx_edge_publication"} in play.get("roles", [])
+    )
+
+    assert edge_play["vars"]["public_edge_sync_generated_static_dirs"] is False

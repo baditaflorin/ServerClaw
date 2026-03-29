@@ -217,6 +217,24 @@
     mode: "0644"
   notify: Restart Prometheus
 
+- name: Copy Prometheus HTTPS/TLS assurance alert rules
+  ansible.builtin.copy:
+    src: "{{ monitoring_prometheus_https_tls_alerts_source_file }}"
+    dest: "{{ monitoring_prometheus_https_tls_alerts_file }}"
+    owner: root
+    group: prometheus
+    mode: "0644"
+  notify: Restart Prometheus
+
+- name: Copy Prometheus HTTPS/TLS assurance probe targets
+  ansible.builtin.copy:
+    src: "{{ monitoring_prometheus_https_tls_targets_source_file }}"
+    dest: "{{ monitoring_prometheus_https_tls_targets_file }}"
+    owner: root
+    group: prometheus
+    mode: "0644"
+  notify: Restart Prometheus
+
 - name: Generate Grafana admin password
   ansible.builtin.shell: |
     set -euo pipefail

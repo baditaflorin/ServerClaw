@@ -29,3 +29,7 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     assert "common_openbao_compose_env_agent_template_content" in tasks
     assert "ansible.builtin.copy" in tasks
     assert "ansible.builtin.template" in tasks
+    assert "- name: Read the current runtime secret payload from OpenBao" in tasks
+    assert "until: common_openbao_compose_env_current_secret.status in [200, 404]" in tasks
+    assert "- name: Read the current OpenBao policy for the runtime AppRole" in tasks
+    assert "until: common_openbao_compose_env_current_policy.status in [200, 404]" in tasks

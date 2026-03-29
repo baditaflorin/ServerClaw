@@ -56,18 +56,21 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_worker_checkout_repo_root_local_dir"].strip().startswith("{{\n  (playbook_dir ~ '/..')")
     assert "inventory_dir" in defaults["windmill_worker_checkout_repo_root_local_dir"]
     assert "playbook_dir" in defaults["windmill_worker_checkout_repo_root_local_dir"]
-    assert (
-        defaults["windmill_seed_app_repo_root_local_dir"]
-        == "{{ windmill_worker_checkout_repo_root_local_dir }}/config/windmill/apps"
-    )
+    assert defaults["windmill_seed_app_repo_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
     assert defaults["windmill_worker_checkout_integrity_files"] == [
         "Makefile",
+        "config/validation-gate.json",
+        "config/validation-lanes.yaml",
         "scripts/policy_checks.py",
         "scripts/policy_toolchain.py",
         "scripts/command_catalog.py",
         "scripts/gate_status.py",
         "config/windmill/scripts/gate-status.py",
+        "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
     ]
+    assert defaults["windmill_seed_repo_root_local_dir"] == "{{ windmill_worker_checkout_repo_root_local_dir }}"
+    assert defaults["windmill_seed_script_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/scripts"
+    assert defaults["windmill_seed_app_repo_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
     assert {
         "README.md",
         "VERSION",
@@ -167,6 +170,7 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     package = json.loads((app_dir / "package.json").read_text())
     lock_config = yaml.safe_load(lock_path.read_text())
     package_lock = json.loads((app_dir / "package-lock.json").read_text())
+    index_source = (app_dir / "index.tsx").read_text()
     app_source = (app_dir / "App.tsx").read_text()
     schema_source = (app_dir / "schemas.ts").read_text()
     tour_source = (app_dir / "touring.ts").read_text()
@@ -175,6 +179,7 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert package["dependencies"]["@hookform/resolvers"] == "^5.1.1"
     assert package["dependencies"]["ag-grid-community"] == "35.2.0"
     assert package["dependencies"]["ag-grid-react"] == "35.2.0"
+    assert package["dependencies"]["@tanstack/react-query"] == "^5.85.1"
     assert package["dependencies"]["react"] == "19.0.0"
     assert package["dependencies"]["react-hook-form"] == "^7.69.0"
     assert package["dependencies"]["shepherd.js"] == "15.2.2"
@@ -184,6 +189,8 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert package["dependencies"]["zod"] == "^4.3.6"
     assert lock_config["version"] == "v2"
     assert "f/lv3/operator_access_admin.raw_app+__app_hash" in lock_config["locks"]
+    assert "QueryClient" in index_source
+    assert "QueryClientProvider" in index_source
     assert "Operator Access Admin" in app_source
     assert "AgGridReact" in app_source
     assert "Task-specific Shepherd tours for first-run operators" in app_source
@@ -194,6 +201,14 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert "rowSelection={rosterRowSelection}" in app_source
     assert "paginationPageSizeSelector={[10, 25, 50]}" in app_source
     assert "includeHiddenColumnsInQuickFilter={true}" in app_source
+    assert "useQuery" in app_source
+    assert "useMutation" in app_source
+    assert "queryKeys.operatorRoster()" in app_source
+    assert "queryKeys.operatorInventoryRoot()" in app_source
+    assert "invalidateQueries" in app_source
+    assert "refetchInterval: 60_000" in app_source
+    assert "refetchInterval: selectedOperatorId ? 45_000 : false" in app_source
+    assert "Mutations now invalidate TanStack Query cache entries" in app_source
     assert "isRosterPayload" in app_source
     assert "candidate.status === \"ok\" && Array.isArray(candidate.operators)" in app_source
     assert "extractRosterError" in app_source
@@ -220,6 +235,7 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert 'const ONBOARD_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/operator-onboarding/`;' in tour_source
     assert 'const OFFBOARD_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/operator-offboarding/`;' in tour_source
     assert 'const ADMIN_RUNBOOK_URL = `${DOCS_BASE_URL}/runbooks/windmill-operator-access-admin/`;' in tour_source
+    assert package_lock["packages"][""]["dependencies"]["@tanstack/react-query"] == "^5.85.1"
     assert package_lock["packages"][""]["dependencies"]["ag-grid-community"] == "35.2.0"
     assert package_lock["packages"][""]["dependencies"]["ag-grid-react"] == "35.2.0"
     assert package_lock["packages"][""]["dependencies"]["react-hook-form"] == "^7.69.0"
@@ -310,6 +326,24 @@ def test_operator_admin_raw_app_lockfile_and_runtime_sync_contract() -> None:
         "- name: Sync repo-managed Windmill raw apps"
     )
     assert "windmill_seed_app_repo_root_local_dir" in argument_specs["argument_specs"]["main"]["options"]
+
+
+def test_windmill_worker_checkout_archive_builder_avoids_macos_xattrs() -> None:
+    runtime_tasks = (
+        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml"
+    ).read_text()
+
+    assert "gzip.GzipFile" in runtime_tasks
+    assert "mtime=0" in runtime_tasks
+    assert "tarfile.GNU_FORMAT" in runtime_tasks
+    assert "member.pax_headers = {}" in runtime_tasks
+    assert "tar.gettarinfo" in runtime_tasks
+    assert "tar.addfile" in runtime_tasks
+    assert "LV3_WINDMILL_PRESERVE_PATHS_JSON" in runtime_tasks
+    assert "is_preserved" in runtime_tasks
+    assert 'candidate.rglob("*")' in runtime_tasks
+    assert "tar.add(path, arcname=archive_key" not in runtime_tasks
+    assert "tar -czf" not in runtime_tasks
 
 
 def test_operator_roster_script_returns_sanitized_roster(tmp_path: Path) -> None:
@@ -484,6 +518,9 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     verify_tasks = (
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml"
     ).read_text()
+    wait_for_workers_tasks = (
+        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/wait_for_workers.yml"
+    ).read_text()
     compose_template = (
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2"
     ).read_text()
@@ -509,6 +546,9 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "WINDMILL_TOKEN" in tasks
     assert "Sync repo-managed Windmill schedules" in tasks
     assert "scripts/sync_windmill_seed_schedules.py" in tasks
+    assert tasks.count("uv") >= 2
+    assert tasks.count("--with") >= 2
+    assert tasks.count("pyyaml") >= 2
     assert "--path {{ windmill_healthcheck_script_path | quote }}" in tasks
     assert '. "{{ windmill_env_file }}"' not in tasks
     assert "Converge repo-managed Windmill schedule enabled flags" in tasks
@@ -527,6 +567,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert tasks.index("Install frontend dependencies for repo-managed Windmill raw apps") < tasks.index(
         "Sync repo-managed Windmill raw apps"
     )
+    assert '"{{ windmill_seed_app_sync_dir.path }}:/workspace"' in tasks
+    assert '"{{ windmill_seed_app_sync_dir }}:/workspace"' not in tasks
     assert "wmill sync push" in tasks
     assert "--skip-scripts" in tasks
     assert "--includes \"{{ item.sync_pattern }}\"" in tasks
@@ -538,13 +580,20 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "BASE_INTERNAL_URL" in tasks
     assert "windmill_runtime_api_base_url" in tasks
     assert "Build the local staging archive for the Windmill worker checkout" in tasks
-    assert "COPYFILE_DISABLE=1" in tasks
-    assert "COPY_EXTENDED_ATTRIBUTES_DISABLE=1" in tasks
-    assert "--exclude='._*'" in tasks
-    assert "--exclude='*/._*'" in tasks
-    assert "--exclude='.DS_Store'" in tasks
-    assert "--exclude='*/.DS_Store'" in tasks
-    assert "--dereference" in tasks
+    assert "python3 - <<'PY'" in tasks
+    assert "gzip.GzipFile" in tasks
+    assert "mtime=0" in tasks
+    assert "tarfile.GNU_FORMAT" in tasks
+    assert "member.pax_headers = {}" in tasks
+    assert "tar.gettarinfo" in tasks
+    assert "tar.addfile" in tasks
+    assert "LV3_WINDMILL_PRESERVE_PATHS_JSON" in tasks
+    assert "is_preserved" in tasks
+    assert 'candidate.rglob("*")' in tasks
+    assert "COPYFILE_DISABLE=1" not in tasks
+    assert "COPY_EXTENDED_ATTRIBUTES_DISABLE=1" not in tasks
+    assert "tar.add(path, arcname=archive_key" not in tasks
+    assert "tar -czf" not in tasks
     assert "changed_when: false" in tasks
     assert "Expand the staged Windmill worker checkout on the guest" in tasks
     assert "Find stale macOS metadata files in the Windmill worker checkout" in tasks
@@ -580,6 +629,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Collect controller-side integrity checksums for Windmill worker checkout sentinels" in tasks
     assert "Collect guest-side integrity checksums for Windmill worker checkout sentinels" in tasks
     assert "Flag the Windmill worker checkout for refresh when integrity sentinels drift" in tasks
+    assert "Re-collect guest-side integrity checksums after Windmill worker checkout refresh" in tasks
+    assert "Assert the refreshed Windmill worker checkout integrity sentinels match controller state" in tasks
     assert "windmill_worker_checkout_integrity_mismatch" in tasks
     assert "windmill_worker_checkout_sync_paths" in tasks
     assert "Create a local manifest path for the Windmill worker checkout contents" in tasks
@@ -617,22 +668,31 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "--payload-json" in tasks
     assert "--timeout {{ windmill_seed_job_timeout_seconds }}" in tasks
     assert "' not found' in (windmill_up.stderr | default(''))" in tasks
-    assert "Wait for Windmill workers to register" in verify_tasks
-    assert "/api/workers/list" in verify_tasks
+    assert "Wait for Windmill workers to register before seeded healthcheck execution" in tasks
+    assert "import_tasks: wait_for_workers.yml" in tasks
+    assert "Wait for Windmill workers to register before verification" in verify_tasks
+    assert "import_tasks: wait_for_workers.yml" in verify_tasks
+    assert "Wait for Windmill workers to register" in wait_for_workers_tasks
+    assert "/api/workers/list" in wait_for_workers_tasks
+    assert "windmill_registered_workers" in wait_for_workers_tasks
     assert "--path {{ windmill_validation_gate_status_script_path | quote }}" in verify_tasks
     assert "Run the Windmill validation gate status script" in verify_tasks
     assert "Assert the Windmill validation gate status result" in verify_tasks
+    assert "Verify the Windmill default operations scripts are seeded" in verify_tasks
+    assert "failed_when: false" in verify_tasks
+    assert "retries: 6" in verify_tasks
+    assert "windmill_verify_default_operations_scripts.status == 200" in verify_tasks
+    assert "windmill_verify_default_operations_scripts.json | default({})" in verify_tasks
     assert "delegate_to: localhost" in tasks
     assert "become: false" in tasks
     assert "Decide whether the Windmill worker checkout needs to be refreshed" in tasks
     assert "windmill_seed_app_repo_root_local_dir" in tasks
     assert "windmill_worker_checkout_checksum_file" in tasks
     assert "windmill_worker_checkout_repo_root_local_dir" in tasks
+    assert "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_scripts.py" in tasks
+    assert "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_schedules.py" in tasks
     assert "windmill_worker_checkout_sync_paths" in tasks
-    assert (
-        defaults["windmill_seed_app_repo_root_local_dir"]
-        == "{{ windmill_worker_checkout_repo_root_local_dir }}/config/windmill/apps"
-    )
+    assert defaults["windmill_seed_app_repo_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
     assert defaults["windmill_worker_repo_checkout_host_path"] == "/srv/proxmox_florin_server"
     assert defaults["windmill_worker_repo_checkout_container_path"] == "/srv/proxmox_florin_server"
     assert "{{ windmill_worker_repo_checkout_host_path }}:{{ windmill_worker_repo_checkout_container_path }}" in compose_template

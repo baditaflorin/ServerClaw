@@ -1,8 +1,8 @@
 # ADR 0251: Stage-Scoped Smoke Suites And Promotion Gates
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
+- Implementation Status: Partial
+- Implemented In Repo Version: 0.177.84
 - Implemented In Platform Version: N/A
 - Date: 2026-03-28
 

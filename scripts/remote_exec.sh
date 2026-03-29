@@ -44,6 +44,12 @@ LV3_SESSION_NATS_PREFIX="${LV3_SESSION_NATS_PREFIX:-}"
 LV3_SESSION_STATE_NAMESPACE="${LV3_SESSION_STATE_NAMESPACE:-}"
 LV3_SESSION_RECEIPT_SUFFIX="${LV3_SESSION_RECEIPT_SUFFIX:-}"
 LV3_REMOTE_WORKSPACE_ROOT="${LV3_REMOTE_WORKSPACE_ROOT:-}"
+RUN_WORKSPACE_ROOT=""
+REMOTE_SNAPSHOT_ARCHIVE=""
+REMOTE_RUN_ROOT=""
+SNAPSHOT_BUILD_DIR=""
+LV3_VALIDATION_BASE_REF="${LV3_VALIDATION_BASE_REF:-}"
+LV3_VALIDATION_CHANGED_FILES_JSON="${LV3_VALIDATION_CHANGED_FILES_JSON:-}"
 
 SSH_BASE_CMD=()
 
@@ -183,6 +189,85 @@ load_session_workspace() {
   [[ -n "$WORKSPACE_ROOT" ]] || fail "failed to derive a session-scoped remote workspace path"
 }
 
+compute_validation_lane_context() {
+  local base_ref=""
+  local current_branch=""
+
+  case "$COMMAND_LABEL" in
+    pre-push-gate|remote-pre-push|remote-validate)
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+
+  current_branch="$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+  if [[ "$current_branch" == "main" || "$current_branch" == "HEAD" || -z "$current_branch" ]]; then
+    return 0
+  fi
+
+  base_ref="$("$PYTHON_BIN" - "$REPO_ROOT" <<'PY'
+import subprocess
+import sys
+from pathlib import Path
+
+repo_root = Path(sys.argv[1])
+remote_candidate = "origin/main"
+remote_exists = subprocess.run(
+    ["git", "-C", str(repo_root), "show-ref", "--verify", "--quiet", f"refs/remotes/{remote_candidate}"],
+    check=False,
+)
+print(remote_candidate if remote_exists.returncode == 0 else "main")
+PY
+)"
+
+  LV3_VALIDATION_BASE_REF="$base_ref"
+  LV3_VALIDATION_CHANGED_FILES_JSON="$("$PYTHON_BIN" - "$REPO_ROOT" "$base_ref" <<'PY'
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+repo_root = Path(sys.argv[1])
+base_ref = sys.argv[2]
+
+merge_base = subprocess.run(
+    ["git", "-C", str(repo_root), "merge-base", base_ref, "HEAD"],
+    check=False,
+    capture_output=True,
+    text=True,
+)
+if merge_base.returncode != 0:
+    print("[]")
+    raise SystemExit(0)
+
+merge_base_sha = merge_base.stdout.strip()
+changed: set[str] = set()
+commands = (
+    ["diff", "--name-only", f"{merge_base_sha}..HEAD"],
+    ["diff", "--name-only"],
+    ["diff", "--cached", "--name-only"],
+    ["ls-files", "--others", "--exclude-standard"],
+)
+for command in commands:
+    result = subprocess.run(
+        ["git", "-C", str(repo_root), *command],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        continue
+    for line in result.stdout.splitlines():
+        normalized = line.strip().replace("\\", "/")
+        if normalized:
+            changed.add(normalized)
+
+print(json.dumps(sorted(changed)))
+PY
+)"
+}
+
 build_ssh_command() {
   SSH_BASE_CMD=("$SSH_BIN" "-o" "ConnectTimeout=$CONNECT_TIMEOUT" "-o" "BatchMode=yes")
   if [[ -n "$SSH_KEY_PATH" ]]; then
@@ -194,11 +279,6 @@ build_ssh_command() {
       SSH_BASE_CMD+=("$option")
     done <<< "$SSH_OPTIONS_NL"
   fi
-}
-
-worktree_git_checkout() {
-  [[ -f "$REPO_ROOT/.git" ]] || return 1
-  grep -q '^gitdir:' "$REPO_ROOT/.git"
 }
 
 quote_shell() {
@@ -214,6 +294,36 @@ render_command() {
 timeout_prefix() {
   if [[ -n "$TIMEOUT_SECONDS" && "$TIMEOUT_SECONDS" != "0" ]]; then
     printf "timeout --foreground %s " "${TIMEOUT_SECONDS}s"
+  fi
+}
+
+cleanup_snapshot_build_dir() {
+  [[ -n "$SNAPSHOT_BUILD_DIR" ]] || return 0
+  rm -rf "$SNAPSHOT_BUILD_DIR"
+  SNAPSHOT_BUILD_DIR=""
+}
+
+build_snapshot() {
+  [[ -n "${LV3_SNAPSHOT_ID:-}" ]] && [[ -n "${LV3_SNAPSHOT_ARCHIVE:-}" ]] && return 0
+
+  SNAPSHOT_BUILD_DIR="$(mktemp -d "${TMPDIR:-/tmp}/lv3-repo-snapshot.XXXXXX")"
+  eval "$(
+    "$PYTHON_BIN" "$REPO_ROOT/scripts/repository_snapshot.py" build \
+      --repo-root "$REPO_ROOT" \
+      --exclude-file "$RSYNC_EXCLUDE_FILE" \
+      --output-dir "$SNAPSHOT_BUILD_DIR" \
+      --format shell
+  )"
+
+  REMOTE_SNAPSHOT_ARCHIVE="$WORKSPACE_ROOT/.lv3-snapshots/${LV3_SNAPSHOT_ID}.tar.gz"
+  REMOTE_RUN_ROOT="$WORKSPACE_ROOT/.lv3-runs/$(date -u +%Y%m%dT%H%M%SZ)-${LV3_SNAPSHOT_ID:0:12}"
+  RUN_WORKSPACE_ROOT="$REMOTE_RUN_ROOT/repo"
+  export LV3_SNAPSHOT_ID LV3_SNAPSHOT_ARCHIVE LV3_SNAPSHOT_GENERATED_AT \
+    LV3_SNAPSHOT_SOURCE_COMMIT LV3_SNAPSHOT_BRANCH LV3_SNAPSHOT_FILE_COUNT
+
+  if [[ "$VERBOSE" == "1" ]]; then
+    echo "remote_exec: built immutable snapshot ${LV3_SNAPSHOT_ID} from ${LV3_SNAPSHOT_BRANCH}@${LV3_SNAPSHOT_SOURCE_COMMIT}" >&2
+    echo "remote_exec: remote run namespace ${RUN_WORKSPACE_ROOT}" >&2
   fi
 }
 
@@ -247,7 +357,15 @@ remote_env_exports() {
     LV3_SESSION_NATS_PREFIX \
     LV3_SESSION_STATE_NAMESPACE \
     LV3_SESSION_RECEIPT_SUFFIX \
-    LV3_REMOTE_WORKSPACE_ROOT; do
+    LV3_REMOTE_WORKSPACE_ROOT \
+    LV3_SNAPSHOT_ID \
+    LV3_SNAPSHOT_MANIFEST \
+    LV3_SNAPSHOT_GENERATED_AT \
+    LV3_SNAPSHOT_SOURCE_COMMIT \
+    LV3_SNAPSHOT_BRANCH \
+    LV3_SNAPSHOT_FILE_COUNT \
+    LV3_VALIDATION_BASE_REF \
+    LV3_VALIDATION_CHANGED_FILES_JSON; do
     if [[ -n "${!name:-}" ]]; then
       printf -v prefix "%sexport %s=%q; " "$prefix" "$name" "${!name}"
     fi
@@ -287,7 +405,15 @@ remote_docker_env_args() {
     LV3_SESSION_NATS_PREFIX \
     LV3_SESSION_STATE_NAMESPACE \
     LV3_SESSION_RECEIPT_SUFFIX \
-    LV3_REMOTE_WORKSPACE_ROOT; do
+    LV3_REMOTE_WORKSPACE_ROOT \
+    LV3_SNAPSHOT_ID \
+    LV3_SNAPSHOT_MANIFEST \
+    LV3_SNAPSHOT_GENERATED_AT \
+    LV3_SNAPSHOT_SOURCE_COMMIT \
+    LV3_SNAPSHOT_BRANCH \
+    LV3_SNAPSHOT_FILE_COUNT \
+    LV3_VALIDATION_BASE_REF \
+    LV3_VALIDATION_CHANGED_FILES_JSON; do
     if [[ -n "${!name:-}" ]]; then
       args+=("-e" "$name=${!name}")
     fi
@@ -375,6 +501,7 @@ local_mesh_diagnostic() {
 sync_remote_gate_status_back() {
   local remote_status=""
   local local_status=""
+  local status_workspace_root="${RUN_WORKSPACE_ROOT:-$WORKSPACE_ROOT}"
 
   case "$COMMAND_LABEL" in
     pre-push-gate|remote-pre-push)
@@ -384,7 +511,7 @@ sync_remote_gate_status_back() {
       ;;
   esac
 
-  remote_status="$WORKSPACE_ROOT/.local/validation-gate/last-run.json"
+  remote_status="$status_workspace_root/.local/validation-gate/last-run.json"
   local_status="$REPO_ROOT/.local/validation-gate/last-run.json"
   mkdir -p "$(dirname "$local_status")"
 
@@ -394,7 +521,7 @@ sync_remote_gate_status_back() {
 ensure_remote_workspace() {
   local session_root="$WORKSPACE_ROOT_BASE/.lv3-session-workspaces"
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" \
-    "mkdir -p $(quote_shell "$WORKSPACE_ROOT") $(quote_shell "$session_root") && find $(quote_shell "$session_root") -mindepth 1 -maxdepth 1 -type d ! -name $(quote_shell "$LV3_SESSION_SLUG") -mtime +2 -exec rm -rf {} + >/dev/null 2>&1 || true" \
+    "mkdir -p $(quote_shell "$WORKSPACE_ROOT") $(quote_shell "$WORKSPACE_ROOT/.lv3-snapshots") $(quote_shell "$WORKSPACE_ROOT/.lv3-runs") $(quote_shell "$session_root") && find $(quote_shell "$session_root") -mindepth 1 -maxdepth 1 -type d ! -name $(quote_shell "$LV3_SESSION_SLUG") -mtime +2 -exec rm -rf {} + >/dev/null 2>&1 || true && find $(quote_shell "$WORKSPACE_ROOT/.lv3-runs") -mindepth 1 -maxdepth 1 -type d -mtime +2 -exec rm -rf {} + >/dev/null 2>&1 || true && find $(quote_shell "$WORKSPACE_ROOT/.lv3-snapshots") -mindepth 1 -maxdepth 1 -type f -mtime +2 -delete >/dev/null 2>&1 || true" \
     >/dev/null
 }
 
@@ -402,103 +529,20 @@ remote_remove_paths() {
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "rm -rf $* || sudo -n rm -rf $*" >/dev/null
 }
 
-prune_remote_workspace_stale_paths() {
-  local stale_paths=()
-
-  if [[ ! -e "$REPO_ROOT/scripts/cases" ]]; then
-    stale_paths+=("$WORKSPACE_ROOT/scripts/cases")
-  fi
-
-  [[ "${#stale_paths[@]}" -gt 0 ]] || return 0
-  remote_remove_paths "$(printf '%q ' "${stale_paths[@]}")"
-}
-
-sync_worktree_git_metadata() {
-  local ssh_wrapper="$1"
-  local remote_git_root="$WORKSPACE_ROOT/.git-remote"
-  local worktree_git_dir=""
-  local common_git_dir=""
-  local worktree_path=""
-  local common_path=""
-  local worktree_paths=(
-    HEAD
-    index
-    ORIG_HEAD
-    logs/HEAD
-    config.worktree
-  )
-  local common_paths=(
-    config
-    packed-refs
-    refs
-    info
-    shallow
-  )
-
-  worktree_git_checkout || return 0
-
-  worktree_git_dir="$(git -C "$REPO_ROOT" rev-parse --path-format=absolute --git-dir)"
-  common_git_dir="$(git -C "$REPO_ROOT" rev-parse --path-format=absolute --git-common-dir)"
-
+prepare_remote_run_namespace() {
+  local remote_manifest_path="$REMOTE_RUN_ROOT/metadata/manifest.json"
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" \
-    "mkdir -p $(quote_shell "$remote_git_root/worktree") $(quote_shell "$remote_git_root/common") $(quote_shell "$remote_git_root/common/objects/info") $(quote_shell "$remote_git_root/common/objects/pack")" \
-    >/dev/null
-
-  for worktree_path in "${worktree_paths[@]}"; do
-    if [[ ! -e "$worktree_git_dir/$worktree_path" ]]; then
-      remote_remove_paths "$(quote_shell "$remote_git_root/worktree/$worktree_path")"
-      continue
-    fi
-    (
-      cd "$worktree_git_dir"
-      "$RSYNC_BIN" \
-        --archive \
-        --delete \
-        --relative \
-        -e "$ssh_wrapper" \
-        "./$worktree_path" \
-        "$REMOTE_HOST:$remote_git_root/worktree/"
-    ) || return $?
-  done
-
-  # Remote validation uses tracked-file and ref metadata; mirroring the entire
-  # object database from a shared local worktree is too expensive because this
-  # repo currently carries a large loose-object set. Git still expects the
-  # common object-store directories to exist, so ensure those empty paths are
-  # present even when we intentionally skip object contents.
-  for common_path in "${common_paths[@]}"; do
-    if [[ ! -e "$common_git_dir/$common_path" ]]; then
-      remote_remove_paths "$(quote_shell "$remote_git_root/common/$common_path")"
-      continue
-    fi
-    (
-      cd "$common_git_dir"
-      "$RSYNC_BIN" \
-        --archive \
-        --delete \
-        --relative \
-        -e "$ssh_wrapper" \
-        "./$common_path" \
-        "$REMOTE_HOST:$remote_git_root/common/"
-    ) || return $?
-  done
-
-  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" \
-    "printf '%s\n' '../common' > $(quote_shell "$remote_git_root/worktree/commondir") && printf '%s\n' $(quote_shell "$WORKSPACE_ROOT/.git") > $(quote_shell "$remote_git_root/worktree/gitdir") && printf '%s\n' 'gitdir: .git-remote/worktree' > $(quote_shell "$WORKSPACE_ROOT/.git")" \
+    "rm -rf $(quote_shell "$REMOTE_RUN_ROOT") && mkdir -p $(quote_shell "$REMOTE_RUN_ROOT") && tar -xzf $(quote_shell "$REMOTE_SNAPSHOT_ARCHIVE") -C $(quote_shell "$REMOTE_RUN_ROOT") && test -f $(quote_shell "$remote_manifest_path")" \
     >/dev/null
 }
 
-sync_workspace() {
+sync_snapshot() {
   local dry_run="${1:-false}"
   local rc=0
   local ssh_wrapper=""
   local rsync_args=(
     "--archive"
     "--checksum"
-    "--delete"
-    "--force"
-    "--exclude=.git-remote/"
-    "--exclude-from=$RSYNC_EXCLUDE_FILE"
   )
 
   [[ "$dry_run" == "true" ]] && rsync_args+=("--dry-run" "--verbose")
@@ -512,20 +556,11 @@ sync_workspace() {
   } > "$ssh_wrapper"
   chmod 700 "$ssh_wrapper"
 
-  prune_remote_workspace_stale_paths || {
-    rm -f "$ssh_wrapper"
-    return $?
-  }
-
   "$RSYNC_BIN" \
     "${rsync_args[@]}" \
     -e "$ssh_wrapper" \
-    "$REPO_ROOT/" \
-    "$REMOTE_HOST:$WORKSPACE_ROOT/" || rc=$?
-
-  if [[ "$rc" -eq 0 ]]; then
-    sync_worktree_git_metadata "$ssh_wrapper" || rc=$?
-  fi
+    "$LV3_SNAPSHOT_ARCHIVE" \
+    "$REMOTE_HOST:$REMOTE_SNAPSHOT_ARCHIVE" || rc=$?
 
   rm -f "$ssh_wrapper"
   return "$rc"
@@ -553,8 +588,9 @@ run_builtin_check_build_server() {
   ensure_remote_workspace
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "cd $(quote_shell "$WORKSPACE_ROOT") && pwd"
 
-  echo "Checking rsync dry-run with excludes from $RSYNC_EXCLUDE_FILE"
-  sync_workspace true
+  build_snapshot
+  echo "Checking immutable snapshot dry-run upload from $LV3_SNAPSHOT_BRANCH@$LV3_SNAPSHOT_SOURCE_COMMIT"
+  sync_snapshot true
 }
 
 run_remote_command() {
@@ -562,9 +598,6 @@ run_remote_command() {
   local remote_prefix=""
   local timeout_cmd=""
   local rc=0
-
-  remote_prefix="$(remote_env_exports)"
-  timeout_cmd="$(timeout_prefix)"
 
   if [[ "$BUILTIN_ACTION" == "check-build-server" ]]; then
     run_builtin_check_build_server
@@ -580,25 +613,43 @@ run_remote_command() {
     return 1
   fi
 
-  if ! sync_workspace false; then
+  build_snapshot
+
+  if ! sync_snapshot false; then
     if [[ "$LOCAL_FALLBACK" == "true" ]]; then
-      echo "remote_exec: remote sync failed, falling back locally for $COMMAND_LABEL" >&2
+      echo "remote_exec: snapshot upload failed, falling back locally for $COMMAND_LABEL" >&2
       run_local_command
       return $?
     fi
     return 1
   fi
 
+  if ! prepare_remote_run_namespace; then
+    if [[ "$LOCAL_FALLBACK" == "true" ]]; then
+      echo "remote_exec: remote snapshot unpack failed, falling back locally for $COMMAND_LABEL" >&2
+      run_local_command
+      return $?
+    fi
+    return 1
+  fi
+
+  LV3_REMOTE_WORKSPACE_ROOT="$RUN_WORKSPACE_ROOT"
+  LV3_SESSION_LOCAL_ROOT="$RUN_WORKSPACE_ROOT/.local/session-workspaces/$LV3_SESSION_SLUG"
+  export LV3_SNAPSHOT_MANIFEST="$REMOTE_RUN_ROOT/metadata/manifest.json"
+
+  remote_prefix="$(remote_env_exports)"
+  timeout_cmd="$(timeout_prefix)"
+
   if [[ "$SKIP_DOCKER" == "true" || -z "$DOCKER_IMAGE" ]]; then
     printf -v remote_payload "cd %q && %sbash -lc %q" \
-      "$WORKSPACE_ROOT" \
+      "$RUN_WORKSPACE_ROOT" \
       "$remote_prefix$timeout_cmd" \
       "$REMOTE_COMMAND"
   else
     local docker_cmd=(
       docker run --rm
       --workdir "$RUNNER_WORKDIR"
-      -v "$WORKSPACE_ROOT:$RUNNER_WORKDIR"
+      -v "$RUN_WORKSPACE_ROOT:$RUNNER_WORKDIR"
     )
     local docker_socket_path=""
     local docker_env_args=()
@@ -623,7 +674,7 @@ run_remote_command() {
       "$(timeout_prefix)" \
       "docker image inspect $(quote_shell "$DOCKER_IMAGE") >/dev/null 2>&1 || docker pull $(quote_shell "$DOCKER_IMAGE") >/dev/null"
     remote_payload="$image_ready_cmd && $(render_command "${docker_cmd[@]}")"
-    printf -v remote_payload "cd %q && %s" "$WORKSPACE_ROOT" "$remote_payload"
+    printf -v remote_payload "cd %q && %s" "$RUN_WORKSPACE_ROOT" "$remote_payload"
 
     if [[ "$VERBOSE" == "1" ]]; then
       echo "Remote docker command: $(render_command "${docker_cmd[@]}")" >&2
@@ -647,7 +698,9 @@ main() {
   parse_args "$@"
   load_command_configuration
   load_session_workspace
+  compute_validation_lane_context
   build_ssh_command
+  trap cleanup_snapshot_build_dir EXIT
 
   if remote_reachable; then
     run_remote_command

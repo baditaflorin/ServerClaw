@@ -1,0 +1,96 @@
+---
+# Purpose: Declare the validated input contract for the matrix_synapse_runtime role.
+# Use case: Used by Ansible argument validation before converging Matrix Synapse runtime state on docker-runtime-lv3.
+#
+# Inputs (required):
+#   - matrix_synapse_site_dir (path, required): Runtime root directory.
+#   - matrix_synapse_data_dir (path, required): Persistent data directory mounted into the Synapse container.
+#   - matrix_synapse_secret_dir (path, required): Guest-side secret directory.
+#   - matrix_synapse_compose_file (path, required): Managed compose file path.
+#   - matrix_synapse_env_file (path, required): Managed runtime environment file path.
+#   - matrix_synapse_homeserver_config_file (path, required): Managed Synapse config path.
+#   - matrix_synapse_port (int, required): Internal Synapse listener port.
+#   - matrix_synapse_internal_base_url (str, required): Guest-local base URL used for verification.
+#   - matrix_synapse_controller_url (str, required): Host-controller access URL.
+#   - matrix_synapse_public_base_url (str, required): Public Matrix base URL.
+#   - matrix_synapse_database_password_local_file (path, required): Controller-local database password artifact.
+#   - matrix_synapse_ops_password_local_file (path, required): Controller-local bootstrap admin password artifact.
+#
+# Inputs (optional):
+#   - matrix_synapse_disable_federation (bool, optional): Whether the listener remains client-only.
+#   - matrix_synapse_trusted_key_servers (list, optional): Trusted key servers retained for upstream key lookup.
+#
+# Outputs:
+#   - Argument-spec validation metadata for the matrix_synapse_runtime role.
+#
+# Idempotency: Fully idempotent
+#              This file only declares validation metadata.
+#
+# Dependencies:
+#   - ADR 0255: Matrix Synapse As The Canonical ServerClaw Conversation Hub
+#   - Role: matrix_synapse_runtime — validates inputs before runtime convergence.
+#
+# Related ADRs: 0165, 0255
+# Related Runbooks: docs/runbooks/configure-matrix-synapse.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-29
+argument_specs:
+  main:
+    short_description: Converge Matrix Synapse on docker-runtime-lv3.
+    options:
+      matrix_synapse_site_dir:
+        type: path
+        required: true
+      matrix_synapse_data_dir:
+        type: path
+        required: true
+      matrix_synapse_secret_dir:
+        type: path
+        required: true
+      matrix_synapse_compose_file:
+        type: path
+        required: true
+      matrix_synapse_env_file:
+        type: path
+        required: true
+      matrix_synapse_homeserver_config_file:
+        type: path
+        required: true
+      matrix_synapse_container_name:
+        type: str
+        required: true
+      matrix_synapse_port:
+        type: int
+        required: true
+      matrix_synapse_host_proxy_port:
+        type: int
+        required: true
+      matrix_synapse_internal_base_url:
+        type: str
+        required: true
+      matrix_synapse_controller_url:
+        type: str
+        required: true
+      matrix_synapse_public_base_url:
+        type: str
+        required: true
+      matrix_synapse_database_password_local_file:
+        type: path
+        required: true
+      matrix_synapse_ops_password_local_file:
+        type: path
+        required: true
+      matrix_synapse_registration_shared_secret_local_file:
+        type: path
+        required: true
+      matrix_synapse_signing_key_local_file:
+        type: path
+        required: true
+      matrix_synapse_disable_federation:
+        type: bool
+        required: false
+      matrix_synapse_trusted_key_servers:
+        type: list
+        elements: str
+        required: false

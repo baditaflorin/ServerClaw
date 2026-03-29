@@ -156,3 +156,22 @@ def test_validate_branch_rejects_undeclared_paths(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="outside declared owned surfaces"):
         ownership.validate_branch_ownership(repo_root=repo, base_ref="main")
+
+
+def test_validate_branch_uses_snapshot_env_without_git_metadata(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = tmp_path / "repo"
+    write(repo / "scripts" / "workstream_surface_ownership.py", "print('changed')\n")
+    write(repo / "docs" / "workstreams" / "adr-0173.md", "# doc\n")
+    write(repo / "workstreams.yaml", yaml.safe_dump(build_registry(), sort_keys=False))
+
+    monkeypatch.setenv("LV3_SNAPSHOT_BRANCH", "codex/adr-0173-ownership-manifest")
+    monkeypatch.setenv(
+        "LV3_VALIDATION_CHANGED_FILES_JSON",
+        '["scripts/workstream_surface_ownership.py"]',
+    )
+
+    changed_files = ownership.validate_branch_ownership(repo_root=repo)
+
+    assert changed_files == ["scripts/workstream_surface_ownership.py"]

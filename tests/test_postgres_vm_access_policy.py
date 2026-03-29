@@ -11,6 +11,7 @@ POSTGRES_CLIENT_PLAYBOOKS = [
     REPO_ROOT / "playbooks" / "keycloak.yml",
     REPO_ROOT / "playbooks" / "langfuse.yml",
     REPO_ROOT / "playbooks" / "mattermost.yml",
+    REPO_ROOT / "playbooks" / "matrix-synapse.yml",
     REPO_ROOT / "playbooks" / "n8n.yml",
     REPO_ROOT / "playbooks" / "outline.yml",
     REPO_ROOT / "playbooks" / "plane.yml",

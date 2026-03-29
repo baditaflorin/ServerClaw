@@ -1,9 +1,10 @@
 # ADR 0264: Failure-Domain-Isolated Validation Lanes
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.177.84
+- Implemented In Platform Version: 0.130.58
+- Implemented On: 2026-03-29
 - Date: 2026-03-28
 
 ## Context

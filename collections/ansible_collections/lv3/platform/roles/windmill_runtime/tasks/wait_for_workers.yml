@@ -1,0 +1,22 @@
+---
+- name: Wait for Windmill workers to register
+  ansible.builtin.uri:
+    url: "{{ windmill_base_url }}/api/workers/list"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ windmill_bootstrap_session_token }}"
+    status_code: 200
+  register: windmill_registered_workers
+  retries: 18
+  delay: 5
+  until: (windmill_registered_workers.json | length) >= 1
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  no_log: true
+
+- name: Assert Windmill workers are registered
+  ansible.builtin.assert:
+    that:
+      - (windmill_registered_workers.json | length) >= 1
+    fail_msg: "Windmill API is reachable, but no workers are registered to execute seeded scripts."

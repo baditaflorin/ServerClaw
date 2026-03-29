@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0.0",
+  "manifests": {
+    "controller-local-base": {
+      "description": "Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.",
+      "optional_read_only_caches": [
+        {
+          "id": "ansible_validation_cache",
+          "kind": "directory",
+          "path": ".ansible/validation",
+          "description": "Shared Ansible validation cache that a fresh worktree may reuse without mutating it."
+        },
+        {
+          "id": "packer_plugin_cache",
+          "kind": "directory",
+          "path": ".local/packer-plugin-cache",
+          "description": "Optional repo-local Packer plugin cache reused across isolated worktrees."
+        }
+      ]
+    },
+    "shared-edge-generated-portals": {
+      "description": "Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.",
+      "generated_artifacts": [
+        {
+          "id": "ops_portal",
+          "kind": "directory",
+          "path": "build/ops-portal",
+          "materialize_command": "make generate-ops-portal",
+          "description": "Generated ops portal static bundle required by shared edge publication."
+        },
+        {
+          "id": "changelog_portal",
+          "kind": "directory",
+          "path": "build/changelog-portal",
+          "materialize_command": "make generate-changelog-portal",
+          "description": "Generated changelog portal required by shared edge publication."
+        },
+        {
+          "id": "docs_portal",
+          "kind": "directory",
+          "path": "build/docs-portal",
+          "materialize_command": "make docs",
+          "description": "Generated documentation portal required by shared edge publication."
+        }
+      ]
+    }
+  }
+}

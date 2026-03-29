@@ -166,6 +166,18 @@
     repo_root = Path(os.environ["LV3_WINDMILL_REPO_ROOT"])
     manifest_path = Path(os.environ["LV3_WINDMILL_MANIFEST_PATH"])
     sync_paths = json.loads(os.environ["LV3_WINDMILL_SYNC_PATHS_JSON"])
+    preserve_prefixes = tuple(
+        entry.rstrip("/")
+        for entry in json.loads(os.environ["LV3_WINDMILL_PRESERVE_PATHS_JSON"])
+        if entry and entry != "."
+    )
+
+    def is_preserved(path: Path) -> bool:
+        path_text = path.as_posix().rstrip("/")
+        return any(
+            path_text == prefix or path_text.startswith(f"{prefix}/")
+            for prefix in preserve_prefixes
+        )
 
     manifest_entries = set()
 
@@ -189,17 +201,23 @@
         if candidate.is_file():
             if skip_path(candidate):
                 continue
-            manifest_entries.add(candidate.relative_to(repo_root).as_posix())
+            relative_path = candidate.relative_to(repo_root)
+            if is_preserved(relative_path):
+                continue
+            manifest_entries.add(relative_path.as_posix())
             continue
         add_directory(candidate)
         for child in sorted(candidate.rglob("*")):
             if skip_path(child):
                 continue
+            relative_path = child.relative_to(repo_root)
+            if is_preserved(relative_path):
+                continue
             if child.is_dir():
                 add_directory(child)
                 continue
             if child.is_file():
-                manifest_entries.add(child.relative_to(repo_root).as_posix())
+                manifest_entries.add(relative_path.as_posix())
 
     manifest_path.write_text(
         "".join(f"{entry}\n" for entry in sorted(manifest_entries)),
@@ -212,6 +230,7 @@
     LV3_WINDMILL_REPO_ROOT: "{{ windmill_worker_checkout_repo_root_local_dir }}"
     LV3_WINDMILL_MANIFEST_PATH: "{{ windmill_worker_checkout_manifest_local.path }}"
     LV3_WINDMILL_SYNC_PATHS_JSON: "{{ windmill_worker_checkout_sync_paths | to_json }}"
+    LV3_WINDMILL_PRESERVE_PATHS_JSON: "{{ windmill_worker_checkout_prune_preserve_paths | to_json }}"
   delegate_to: localhost
   become: false
   changed_when: false
@@ -222,19 +241,86 @@
     mutation_audit_target: "{{ windmill_worker_repo_checkout_host_path }}"
   ansible.builtin.shell: |
     set -euo pipefail
-    export COPYFILE_DISABLE=1
-    export COPY_EXTENDED_ATTRIBUTES_DISABLE=1
-    tar \
-      --dereference \
-      --exclude='._*' \
-      --exclude='*/._*' \
-      --exclude='.DS_Store' \
-      --exclude='*/.DS_Store' \
-      -C "{{ windmill_worker_checkout_repo_root_local_dir }}" \
-      -czf "{{ windmill_worker_checkout_archive_local.path }}" \
-      {{ windmill_worker_checkout_sync_paths | map('quote') | join(' ') }}
+    python3 - <<'PY'
+    import gzip
+    import json
+    import os
+    import tarfile
+    from pathlib import Path
+
+    repo_root = Path(os.environ["LV3_WINDMILL_REPO_ROOT"])
+    archive_path = Path(os.environ["LV3_WINDMILL_ARCHIVE_PATH"])
+    sync_paths = json.loads(os.environ["LV3_WINDMILL_SYNC_PATHS_JSON"])
+    preserve_prefixes = tuple(
+        entry.rstrip("/")
+        for entry in json.loads(os.environ["LV3_WINDMILL_PRESERVE_PATHS_JSON"])
+        if entry and entry != "."
+    )
+
+    def should_skip(path: Path) -> bool:
+        return any(part == ".DS_Store" or part.startswith("._") for part in path.parts)
+
+    def is_preserved(path: Path) -> bool:
+        path_text = path.as_posix().rstrip("/")
+        return any(
+            path_text == prefix or path_text.startswith(f"{prefix}/")
+            for prefix in preserve_prefixes
+        )
+
+    def normalize_member(member: tarfile.TarInfo):
+        if should_skip(Path(member.name)):
+            return None
+        member.uid = 0
+        member.gid = 0
+        member.uname = ""
+        member.gname = ""
+        member.pax_headers = {}
+        return member
+
+    def add_archive_member(tar: tarfile.TarFile, path: Path, archive_key: str):
+        member = tar.gettarinfo(str(path), arcname=archive_key)
+        member = normalize_member(member)
+        if member is None:
+            return
+        if member.isreg():
+            with path.open("rb") as file_obj:
+                tar.addfile(member, file_obj)
+            return
+        tar.addfile(member)
+
+    archive_path.parent.mkdir(parents=True, exist_ok=True)
+    archive_path.unlink(missing_ok=True)
+
+    seen = set()
+    with archive_path.open("wb") as raw_file:
+        with gzip.GzipFile(filename="", mode="wb", fileobj=raw_file, mtime=0) as gzip_file:
+            with tarfile.open(fileobj=gzip_file, mode="w", format=tarfile.GNU_FORMAT) as tar:
+                for relative_root in sync_paths:
+                    candidate = repo_root / relative_root
+                    if not candidate.exists():
+                        continue
+                    paths = [candidate]
+                    if candidate.is_dir():
+                        paths.extend(sorted(candidate.rglob("*")))
+                    for path in paths:
+                        relative_path = path.relative_to(repo_root)
+                        if should_skip(relative_path):
+                            continue
+                        if is_preserved(relative_path):
+                            continue
+                        archive_key = relative_path.as_posix()
+                        if archive_key in seen:
+                            continue
+                        add_archive_member(tar, path, archive_key)
+                        seen.add(archive_key)
+    PY
   args:
     executable: /bin/bash
+  environment:
+    LV3_WINDMILL_REPO_ROOT: "{{ windmill_worker_checkout_repo_root_local_dir }}"
+    LV3_WINDMILL_ARCHIVE_PATH: "{{ windmill_worker_checkout_archive_local.path }}"
+    LV3_WINDMILL_SYNC_PATHS_JSON: "{{ windmill_worker_checkout_sync_paths | to_json }}"
+    LV3_WINDMILL_PRESERVE_PATHS_JSON: "{{ windmill_worker_checkout_prune_preserve_paths | to_json }}"
   delegate_to: localhost
   become: false
   changed_when: false
@@ -506,6 +592,33 @@
     msg: "Removed stale immutable empty directories from the Windmill worker checkout"
   when: windmill_worker_checkout_stale_dirs.stdout | trim | length > 0
   changed_when: false
+
+- name: Re-collect guest-side integrity checksums after Windmill worker checkout refresh
+  ansible.builtin.stat:
+    path: "{{ windmill_worker_repo_checkout_host_path }}/{{ item.item }}"
+    checksum_algorithm: sha256
+  loop: "{{ windmill_worker_checkout_integrity_local.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  register: windmill_worker_checkout_integrity_remote_post_sync
+  when: windmill_worker_checkout_needs_refresh | bool
+
+- name: Assert the refreshed Windmill worker checkout integrity sentinels match controller state
+  ansible.builtin.assert:
+    that:
+      - windmill_worker_checkout_integrity_remote_post_sync.results[item].stat.exists | default(false)
+      - >-
+        (windmill_worker_checkout_integrity_remote_post_sync.results[item].stat.checksum | default(''))
+        ==
+        (windmill_worker_checkout_integrity_local.results[item].stat.checksum | default(''))
+    fail_msg: >-
+      Windmill worker checkout sentinel
+      {{ windmill_worker_checkout_integrity_local.results[item].item }}
+      does not match the controller workspace after sync.
+  loop: "{{ range(0, windmill_worker_checkout_integrity_local.results | length) | list }}"
+  loop_control:
+    label: "{{ windmill_worker_checkout_integrity_local.results[item].item }}"
+  when: windmill_worker_checkout_needs_refresh | bool
 
 - name: Ensure repo-backed Windmill runtime paths stay writable after checkout sync
   ansible.builtin.include_role:
@@ -1756,7 +1869,7 @@
       - --with
       - pyyaml
       - python3
-      - "{{ inventory_dir }}/../scripts/sync_windmill_seed_scripts.py"
+      - "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_scripts.py"
       - --base-url
       - "{{ windmill_private_base_url }}"
       - --workspace
@@ -1951,8 +2064,13 @@
     mutation_audit_emit_on_success: true
   ansible.builtin.command:
     argv:
+      - uv
+      - run
+      - --no-project
+      - --with
+      - pyyaml
       - python3
-      - "{{ inventory_dir }}/../scripts/sync_windmill_seed_schedules.py"
+      - "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_schedules.py"
       - --base-url
       - "{{ windmill_private_base_url }}"
       - --workspace
@@ -1994,9 +2112,13 @@
     label: "{{ item.path }}"
   changed_when: false
   no_log: true
+
+- name: Wait for Windmill workers to register before seeded healthcheck execution
+  ansible.builtin.import_tasks: wait_for_workers.yml
+
 - name: Run the Windmill seeded healthcheck script
   ansible.builtin.shell: >
-    python3 {{ (playbook_dir | dirname ~ '/scripts/windmill_run_wait_result.py') | quote }}
+    python3 {{ (windmill_worker_checkout_repo_root_local_dir ~ '/scripts/windmill_run_wait_result.py') | quote }}
     --base-url {{ windmill_base_url | quote }}
     --workspace {{ windmill_workspace_id | quote }}
     --path {{ windmill_healthcheck_script_path | quote }}

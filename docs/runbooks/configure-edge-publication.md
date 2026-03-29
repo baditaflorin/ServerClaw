@@ -20,6 +20,11 @@ cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
 make configure-edge-publication env=production
 ```
 
+The make target now runs the ADR 0273 public-endpoint admission check before
+touching `nginx-lv3`. It fails fast when the subdomain catalog, generated
+publication registry, shared-edge certificate domain set, and
+`config/certificate-catalog.json` disagree.
+
 ## Verification
 
 ```bash
@@ -46,6 +51,9 @@ Expected result:
 
 ## Notes
 
+- `uvx --from pyyaml python scripts/subdomain_exposure_audit.py --validate` is
+  the repo-side admission gate for public endpoint changes. Use it directly
+  when validating a branch before a live replay.
 - `make configure-edge-publication` regenerates the shared `build/changelog-portal/` and `build/docs-portal/` artifacts before pushing them to the edge, so a fresh worktree does not need a separate manual portal/docs build step.
 - This runbook does not publish Proxmox UI itself. The `proxmox.lv3.org` edge page is intentionally informational because Proxmox administration remains private and Tailscale-based.
 - When only the NGINX edge config needs to change and the generated portal directories are already current on the guest, rerun `playbooks/public-edge.yml` from `Check whether the public edge certificate exists` to skip the slow static-directory copy and force the config render, validation, and reload path.

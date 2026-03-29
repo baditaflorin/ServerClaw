@@ -7,6 +7,7 @@ VALIDATION_CACHE_DIR="${LV3_VALIDATION_CACHE_DIR:-$REPO_ROOT/.ansible/validation
 ANSIBLE_COLLECTIONS_DIR="${LV3_ANSIBLE_COLLECTIONS_DIR:-$VALIDATION_CACHE_DIR/collections}"
 ANSIBLE_COLLECTIONS_SHA_FILE="${LV3_ANSIBLE_COLLECTIONS_SHA_FILE:-$VALIDATION_CACHE_DIR/requirements.sha}"
 PYTHON_BIN="${LV3_VALIDATE_PYTHON_BIN:-}"
+VALIDATION_GALAXY_SERVER="${LV3_VALIDATION_GALAXY_SERVER:-${LV3_ANSIBLE_GALAXY_SERVER:-release_galaxy}}"
 UV_CMD=(uv)
 ANSIBLE_PLAYBOOK_CMD=()
 ANSIBLE_GALAXY_CMD=()
@@ -127,24 +128,54 @@ configure_validation_commands() {
   YAMLLINT_CMD=(yamllint)
 }
 
+ensure_validation_commands_configured() {
+  if [[ ${#ANSIBLE_PLAYBOOK_CMD[@]} -eq 0 || ${#ANSIBLE_GALAXY_CMD[@]} -eq 0 || ${#ANSIBLE_LINT_CMD[@]} -eq 0 || ${#YAMLLINT_CMD[@]} -eq 0 ]]; then
+    configure_validation_commands
+  fi
+}
+
 run_uv_python() {
   local packages=()
 
-  if [[ "$HAS_UV" != true ]]; then
-    echo "uv is required for this validation stage but is not available in the current runtime." >&2
-    exit 1
-  fi
+  resolve_python_bin
 
   while [[ $# -gt 0 ]]; do
     if [[ "$1" == "--" ]]; then
       shift
       break
     fi
-    packages+=(--with "$1")
+    packages+=("$1")
     shift
   done
 
-  "${UV_CMD[@]}" run "${packages[@]}" python3 "$@"
+  "$REPO_ROOT/scripts/run_python_with_packages.sh" "${packages[@]}" -- "$@"
+}
+
+run_python_with_requirements() {
+  local requirements_file="$1"
+  shift
+
+  resolve_python_bin
+  ensure_uv
+  if [[ "$HAS_UV" == true ]]; then
+    "${UV_CMD[@]}" run --with-requirements "$requirements_file" python3 "$@"
+    return 0
+  fi
+
+  local pip_args=(
+    -m
+    pip
+    install
+    --quiet
+    --disable-pip-version-check
+    -r
+    "$requirements_file"
+  )
+  if "$PYTHON_BIN" -m pip --help 2>/dev/null | grep -q -- "--break-system-packages"; then
+    pip_args=( -m pip install --quiet --disable-pip-version-check --break-system-packages -r "$requirements_file" )
+  fi
+  "$PYTHON_BIN" "${pip_args[@]}"
+  "$PYTHON_BIN" "$@"
 }
 
 tracked_files() {
@@ -195,15 +226,15 @@ load_lines_into_array() {
   done
 }
 
-configure_validation_commands
-
 install_collections() {
   local requirements_file="$REPO_ROOT/collections/requirements.yml"
   local current_sha_file=""
   local lock_file="${ANSIBLE_COLLECTIONS_SHA_FILE}.lock"
   local lock_fd=""
+  local galaxy_server_args=()
 
   [[ -f "$requirements_file" ]] || return 0
+  ensure_validation_commands_configured
 
   mkdir -p "$ANSIBLE_COLLECTIONS_DIR"
   mkdir -p "$(dirname "$ANSIBLE_COLLECTIONS_SHA_FILE")"
@@ -218,18 +249,54 @@ install_collections() {
   sha256sum "$requirements_file" > "$current_sha_file"
   if [[ -s "$ANSIBLE_COLLECTIONS_SHA_FILE" ]] && find "$ANSIBLE_COLLECTIONS_DIR" -mindepth 1 -print -quit | grep -q .; then
     if cmp -s "$current_sha_file" "$ANSIBLE_COLLECTIONS_SHA_FILE"; then
-      rm -f "$current_sha_file"
-      if [[ -n "$lock_fd" ]]; then
-        flock -u "$lock_fd"
-        eval "exec ${lock_fd}>&-"
+      if "$REPO_ROOT/scripts/run_python_with_packages.sh" pyyaml -- - "$requirements_file" "$ANSIBLE_COLLECTIONS_DIR" <<'PY'
+import sys
+from pathlib import Path
+
+import yaml
+
+requirements_path = Path(sys.argv[1])
+collections_dir = Path(sys.argv[2])
+payload = yaml.safe_load(requirements_path.read_text(encoding="utf-8")) or {}
+collections = payload.get("collections", [])
+
+for entry in collections:
+    if isinstance(entry, str):
+        name = entry.strip()
+    elif isinstance(entry, dict):
+        raw_name = entry.get("name", "")
+        name = raw_name.strip() if isinstance(raw_name, str) else ""
+    else:
+        raise SystemExit(1)
+    if not name or "." not in name:
+        raise SystemExit(1)
+    namespace, collection = name.split(".", 1)
+    collection_root = collections_dir / "ansible_collections" / namespace / collection
+    if not collection_root.is_dir():
+        raise SystemExit(1)
+    if not (collection_root / "MANIFEST.json").is_file() and not (collection_root / "galaxy.yml").is_file():
+        raise SystemExit(1)
+PY
+      then
+        rm -f "$current_sha_file"
+        if [[ -n "$lock_fd" ]]; then
+          flock -u "$lock_fd"
+          eval "exec ${lock_fd}>&-"
+        fi
+        return 0
       fi
-      return 0
     fi
   fi
 
+  if [[ -n "${LV3_ANSIBLE_GALAXY_SERVER:-}" ]]; then
+    galaxy_server_args=(--server "$LV3_ANSIBLE_GALAXY_SERVER")
+  fi
+
   "${ANSIBLE_GALAXY_CMD[@]}" collection install \
+    "${galaxy_server_args[@]}" \
     -r "$requirements_file" \
     -p "$ANSIBLE_COLLECTIONS_DIR" \
+    --server "$VALIDATION_GALAXY_SERVER" \
     --force-with-deps \
     >/dev/null
   cp "$current_sha_file" "$ANSIBLE_COLLECTIONS_SHA_FILE"
@@ -279,6 +346,7 @@ validate_yaml() {
   if [[ ${#yaml_files[@]} -eq 0 ]]; then
     return 0
   fi
+  ensure_validation_commands_configured
   (
     cd "$REPO_ROOT"
     "${YAMLLINT_CMD[@]}" -c .yamllint "${yaml_files[@]}"
@@ -395,6 +463,7 @@ validate_dependency_direction() {
 validate_data_models() {
   echo "Repository data model validation"
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/ansible_scope_runner.py" validate >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/validation_lanes.py" --validate >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_timeout_hierarchy.py" >/dev/null
   "$PYTHON_BIN" "$REPO_ROOT/scripts/check_hardcoded_timeouts.py" >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/provider_boundary_catalog.py" --validate >/dev/null
@@ -407,6 +476,7 @@ validate_data_models() {
   run_uv_python pyyaml jsonschema -- "$REPO_ROOT/scripts/service_catalog.py" --validate >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/environment_topology.py" --validate >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/subdomain_catalog.py" --validate >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/subdomain_exposure_audit.py" --validate >/dev/null
   "$PYTHON_BIN" "$REPO_ROOT/scripts/validate_service_completeness.py" --validate >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/agent_tool_registry.py" --export-mcp >/dev/null
   "$PYTHON_BIN" "$REPO_ROOT/scripts/mutation_audit.py" --validate-schema >/dev/null
@@ -446,8 +516,8 @@ validate_generated_portals() {
   generated_docs_dir="$(mktemp -d "${TMPDIR:-/tmp}/lv3-docs-site.XXXXXX")"
   generated_portal_output_dir="$(mktemp -d "${TMPDIR:-/tmp}/lv3-docs-portal.XXXXXX")"
   trap 'rm -rf "$generated_docs_dir" "$generated_portal_output_dir"' RETURN
-  "${UV_CMD[@]}" run --with-requirements "$REPO_ROOT/requirements/docs.txt" \
-    python3 "$REPO_ROOT/scripts/build_docs_portal.py" --generated-dir "$generated_docs_dir" --output-dir "$generated_portal_output_dir" \
+  run_python_with_requirements "$REPO_ROOT/requirements/docs.txt" \
+    "$REPO_ROOT/scripts/build_docs_portal.py" --generated-dir "$generated_docs_dir" --output-dir "$generated_portal_output_dir" \
     >/dev/null
 }
 
@@ -467,6 +537,7 @@ validate_health_probes() {
     plane_runtime
     windmill_runtime
     mattermost_runtime
+    matrix_synapse_runtime
     mail_platform_runtime
     nginx_edge_publication
     ntfy_runtime
@@ -498,6 +569,7 @@ validate_health_probes() {
 validate_alert_rules() {
   echo "Alert rule validation"
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_slo_rules.py" --check >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_https_tls_assurance.py" --check >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_alert_rules.py"
 }
 

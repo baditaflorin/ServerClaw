@@ -1,7 +1,9 @@
 # Subdomain Exposure Audit
 
-This runbook covers the ADR 0139 subdomain exposure registry and the ADR 0252
-route and DNS publication assertion ledger workflow.
+This runbook covers the ADR 0139 subdomain exposure registry, the ADR 0252
+route and DNS publication assertion ledger workflow, and the ADR 0273
+public-endpoint admission gate that ties DNS, edge publication, and
+certificate planning together.
 
 ## Repo Surfaces
 
@@ -33,6 +35,10 @@ Each registry entry also carries:
 - `evidence_plan`: which live probes should run for DNS, Hetzner zone state,
   HTTP auth, private routes, and TLS
 
+ADR 0273 extends the repo-side audit to require that every active or planned
+public TLS hostname is also present in `config/certificate-catalog.json` and in
+the rendered shared-edge certificate domain set before merge or live apply.
+
 Refresh it after catalog or edge-routing changes:
 
 ```bash
@@ -44,6 +50,9 @@ Validation fails if the committed registry drifts from the generated output:
 ```bash
 uvx --from pyyaml python scripts/subdomain_exposure_audit.py --validate
 ```
+
+That validation is now the public-endpoint admission gate used by
+`make configure-edge-publication` and `make route-dns-assertion-ledger`.
 
 ## Live Audit
 
@@ -57,7 +66,8 @@ make subdomain-exposure-audit
 This performs six checks:
 
 1. repo contract validation between the canonical publication model and the
-   repo-managed edge auth adapter wiring
+   repo-managed edge auth adapter wiring plus the certificate-catalog and
+   shared-edge certificate-domain plan
 2. live public DNS resolution for production hostnames that should already be
    active
 3. Hetzner DNS zone record-set comparison when `HETZNER_DNS_API_TOKEN` is
@@ -76,6 +86,9 @@ Typical findings:
 - `subdomain_resolves_publicly_but_is_not_tracked_active`
 - `active_subdomain_missing_expected_public_resolution`
 - `catalog_requires_edge_oidc_but_route_is_not_protected`
+- `catalog_public_hostname_missing_from_certificate_catalog`
+- `catalog_public_hostname_missing_from_shared_edge_certificate_domains`
+- `certificate_catalog_public_hostname_missing_from_endpoint_catalog`
 - `undeclared_subdomain_present_in_zone`
 - `edge_oidc_not_enforced_on_live_probe`
 - `active_subdomain_zone_records_do_not_match_expected_set`
@@ -92,6 +105,11 @@ Treat CRITICAL findings as exposure drift that should block further public-surfa
 - If the canonical publication model says `platform-sso` but the edge route is
   not protected, update `roles/nginx_edge_publication/defaults/main.yml` and
   re-run the audit.
+- If a public TLS hostname is missing from `config/certificate-catalog.json`,
+  add the certificate-plan entry in the same branch before replaying any live
+  DNS or edge change.
+- If a shared-edge hostname is missing from the rendered certificate domain set,
+  fix the repo-managed edge site inputs before rerunning `make configure-edge-publication`.
 - If Hetzner DNS exposes a hostname that is absent from the catalog, either catalog and govern it immediately or remove the DNS record.
 - If an active hostname no longer resolves publicly, verify Hetzner DNS, the shared edge IP target, and recent DNS-management changes before changing the catalog.
 - If the governed drift set is known and should be reconciled directly, run

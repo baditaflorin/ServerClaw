@@ -120,6 +120,12 @@ playbooks:
     shared_surfaces:
       - service:mattermost
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/matrix-synapse.yml:
+    playbook_id: matrix-synapse
+    mutation_scope: platform
+    shared_surfaces:
+      - service:matrix-synapse
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/n8n.yml:
     playbook_id: n8n
     mutation_scope: platform
@@ -200,6 +206,7 @@ playbooks:
       - config/subdomain-catalog.json
   playbooks/public-edge.yml:
     playbook_id: public-edge
+    canonical_service_id: nginx_edge
     mutation_scope: host
     shared_surfaces:
       - service:public-edge

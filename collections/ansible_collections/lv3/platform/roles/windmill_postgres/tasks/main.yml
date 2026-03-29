@@ -91,6 +91,24 @@
       - "SELECT CASE WHEN pg_is_in_recovery() THEN 0 ELSE 1 END"
   register: windmill_postgres_writable_check
   changed_when: false
+  retries: 12
+  delay: 5
+  until: windmill_postgres_writable_check.rc == 0
+
+- name: Wait for local PostgreSQL SQL readiness before Windmill role reconciliation
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - SELECT 1
+  register: windmill_postgres_local_sql_probe
+  changed_when: false
+  retries: 12
+  delay: 5
+  until: windmill_postgres_local_sql_probe.stdout | trim == "1"
+  when: windmill_postgres_writable_check.stdout | trim == "1"
 
 - name: Check whether the Windmill support role already exists
   become: true
