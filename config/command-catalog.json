@@ -2829,6 +2829,44 @@
         "timeout_seconds": 1200
       }
     },
+    "route-dns-assertion-ledger": {
+      "description": "Reconcile the governed ADR 0252 route and DNS assertion ledger drift set through the Hetzner DNS API.",
+      "workflow_id": "route-dns-assertion-ledger",
+      "scope": "external_service",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Hetzner DNS token used for the governed route-ledger reconcile."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=route-dns-assertion-ledger passes",
+        "make validate passes before the apply",
+        "The subdomain catalog, exposure registry, and host topology already represent the intended asserted record set"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the reconciled record set, the retired stale records, and the follow-up exposure audit or direct DNS verification."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the Hetzner API request fails or the resulting zone state does not match the governed record set.",
+          "Stop if the change would broaden a private-only route into public exposure or retire a hostname that still has declared repo ownership."
+        ],
+        "rollback_guidance": [
+          "Reapply the last known-good route-ledger state from the repo before retrying.",
+          "Keep apex and shared DNS drift corrections inside the governed playbook instead of manual provider edits."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
+      }
+    },
     "provision-subdomain": {
       "description": "Publish one catalogued lv3.org hostname through the governed DNS and edge-publication workflow.",
       "workflow_id": "provision-subdomain",

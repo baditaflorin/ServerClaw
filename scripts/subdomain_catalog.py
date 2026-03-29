@@ -2,6 +2,7 @@
 
 import argparse
 import re
+import socket
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
@@ -17,6 +18,7 @@ ALLOWED_STATUSES = {"active", "planned", "reserved", "retiring"}
 ALLOWED_EXPOSURES = {"edge-published", "informational-only", "private-only"}
 ALLOWED_TLS_PROVIDERS = {"letsencrypt", "step-ca", "none"}
 ALLOWED_AUTH_REQUIREMENTS = {"none", "edge_oidc", "upstream_auth", "private_network"}
+ALLOWED_DNS_RECORD_TYPES = {"A", "AAAA", "CNAME"}
 EDGE_ROUTE_EXPOSURES = {"edge-published", "informational-only"}
 PROVISIONABLE_STATUSES = {"active", "planned"}
 HOSTNAME_PATTERN = re.compile(r"^[a-z0-9-]+(\.[a-z0-9-]+)+$")
@@ -83,6 +85,54 @@ def require_adr_id(value: Any, path: str) -> str:
     if not re.fullmatch(r"\d{4}", value):
         raise ValueError(f"{path} must be a four-digit ADR id")
     return value
+
+
+def require_dns_record_type(value: Any, path: str) -> str:
+    value = require_str(value, path)
+    if value not in ALLOWED_DNS_RECORD_TYPES:
+        raise ValueError(f"{path} must be one of {sorted(ALLOWED_DNS_RECORD_TYPES)}")
+    return value
+
+
+def infer_dns_record_type(target: str) -> str:
+    try:
+        socket.inet_pton(socket.AF_INET, target)
+        return "A"
+    except OSError:
+        pass
+    try:
+        socket.inet_pton(socket.AF_INET6, target)
+        return "AAAA"
+    except OSError:
+        return "CNAME"
+
+
+def expected_dns_records_for_entry(entry: dict[str, Any], path: str) -> list[dict[str, str]]:
+    target = require_str(entry.get("target"), f"{path}.target")
+    records = entry.get("expected_dns_records")
+    if records is None:
+        return [{"type": infer_dns_record_type(target), "value": target}]
+
+    parsed_records: list[dict[str, str]] = []
+    for index, record in enumerate(require_list(records, f"{path}.expected_dns_records")):
+        record = require_mapping(record, f"{path}.expected_dns_records[{index}]")
+        parsed_records.append(
+            {
+                "type": require_dns_record_type(
+                    record.get("type"),
+                    f"{path}.expected_dns_records[{index}].type",
+                ),
+                "value": require_str(
+                    record.get("value"),
+                    f"{path}.expected_dns_records[{index}].value",
+                ),
+            }
+        )
+    if not parsed_records:
+        raise ValueError(f"{path}.expected_dns_records must not be empty when declared")
+    if target not in {record["value"] for record in parsed_records}:
+        raise ValueError(f"{path}.target must match one declared expected_dns_records value")
+    return parsed_records
 
 
 def load_subdomain_catalog() -> dict[str, Any]:
@@ -207,6 +257,10 @@ def collect_edge_route_hostnames(
             collect_site_hostnames(site, f"public_edge_extra_sites[{index}]", allow_wildcards=True)
         )
 
+    apex_hostname = public_edge_defaults.get("public_edge_apex_hostname")
+    if apex_hostname is not None:
+        hostnames.add(require_hostname(apex_hostname, "public_edge_apex_hostname"))
+
     return hostnames
 
 
@@ -308,7 +362,7 @@ def validate_subdomain_catalog(
                 f"{sorted(ALLOWED_AUTH_REQUIREMENTS)}"
             )
 
-        require_str(entry.get("target"), f"subdomains[{index}].target")
+        expected_dns_records_for_entry(entry, f"subdomains[{index}]")
         require_adr_id(entry.get("owner_adr"), f"subdomains[{index}].owner_adr")
         if "service_id" in entry and entry["service_id"] not in services and status == "active":
             raise ValueError(

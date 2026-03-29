@@ -6,6 +6,7 @@
       - hetzner_dns_record_name | length > 0
       - hetzner_dns_record_type | length > 0
       - hetzner_dns_record_value | length > 0
+      - hetzner_dns_record_state in ['present', 'absent']
       - (lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim) | length > 0
     fail_msg: >-
       Set {{ hetzner_dns_api_token_env_var }} before running the Hetzner DNS record playbook.
@@ -104,9 +105,46 @@
             | list
           )
           if (hetzner_dns_record_value_match_regex | default('') | length > 0)
-          else dns_provider_boundary_exact_records
+          else (
+            dns_provider_boundary_same_name_type_records
+            if hetzner_dns_record_state == 'present'
+            else dns_provider_boundary_exact_records
+          )
         )
       }}
+
+- name: Assert that only one canonical DNS record match exists
+  ansible.builtin.assert:
+    that:
+      - dns_provider_boundary_matching_records | length <= 1
+    fail_msg: >-
+      Multiple Hetzner DNS records matched {{ hetzner_dns_record_name }} {{ hetzner_dns_record_type }}
+      for managed identity {{ hetzner_dns_record_value_match_regex | default(hetzner_dns_record_value) }}.
+
+- name: Delete the canonical DNS record when it is retired
+  ansible.builtin.uri:
+    url: "{{ hetzner_dns_api_url }}/records/{{ dns_provider_boundary_matching_records[0].provider_ref }}"
+    method: DELETE
+    headers:
+      Auth-API-Token: "{{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
+    status_code:
+      - 200
+      - 204
+      - 429
+      - 500
+      - 502
+      - 503
+      - 504
+  register: hetzner_dns_record_delete_response
+  when:
+    - hetzner_dns_record_state == 'absent'
+    - dns_provider_boundary_matching_records | length == 1
+  retries: 5
+  delay: 2
+  until: hetzner_dns_record_delete_response.status in [200, 204]
+  failed_when: hetzner_dns_record_delete_response.status not in [200, 204]
+  changed_when: true
+  no_log: true
 
 - name: Create the canonical DNS record when absent
   ansible.builtin.uri:
@@ -124,7 +162,19 @@
     status_code:
       - 200
       - 201
-  when: dns_provider_boundary_matching_records | length == 0
+      - 429
+      - 500
+      - 502
+      - 503
+      - 504
+  register: hetzner_dns_record_create_response
+  when:
+    - hetzner_dns_record_state == 'present'
+    - dns_provider_boundary_matching_records | length == 0
+  retries: 5
+  delay: 2
+  until: hetzner_dns_record_create_response.status in [200, 201]
+  failed_when: hetzner_dns_record_create_response.status not in [200, 201]
   changed_when: true
   no_log: true
 
@@ -141,18 +191,22 @@
       type: "{{ hetzner_dns_record_type }}"
       value: "{{ hetzner_dns_record_value }}"
       ttl: "{{ hetzner_dns_record_ttl | int }}"
-    status_code: 200
+    status_code:
+      - 200
+      - 429
+      - 500
+      - 502
+      - 503
+      - 504
+  register: hetzner_dns_record_update_response
   when:
+    - hetzner_dns_record_state == 'present'
     - dns_provider_boundary_matching_records | length == 1
     - dns_provider_boundary_matching_records[0].record_value != hetzner_dns_record_value
       or (dns_provider_boundary_matching_records[0].record_ttl | int) != (hetzner_dns_record_ttl | int)
+  retries: 5
+  delay: 2
+  until: hetzner_dns_record_update_response.status == 200
+  failed_when: hetzner_dns_record_update_response.status != 200
   changed_when: true
   no_log: true
-
-- name: Assert that only one canonical DNS record match exists
-  ansible.builtin.assert:
-    that:
-      - dns_provider_boundary_matching_records | length <= 1
-    fail_msg: >-
-      Multiple Hetzner DNS records matched {{ hetzner_dns_record_name }} {{ hetzner_dns_record_type }}
-      for managed identity {{ hetzner_dns_record_value_match_regex | default(hetzner_dns_record_value) }}.

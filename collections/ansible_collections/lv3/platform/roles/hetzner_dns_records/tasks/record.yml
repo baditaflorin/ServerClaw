@@ -31,7 +31,11 @@
             | list
           )
           if (hetzner_dns_record.value_match_regex is defined)
-          else dns_provider_boundary_exact_records
+          else (
+            dns_provider_boundary_same_name_type_records
+            if (hetzner_dns_record.state | default('present')) == 'present'
+            else dns_provider_boundary_exact_records
+          )
         )
       }}
 
@@ -43,6 +47,39 @@
       Multiple Hetzner DNS records matched {{ hetzner_dns_record.name }} {{ hetzner_dns_record.type }}
       for managed identity {{ hetzner_dns_record.value_match_regex | default(hetzner_dns_record.value) }}.
       Clean up duplicates before rerunning automation.
+
+- name: Assert the desired DNS record state is supported
+  ansible.builtin.assert:
+    that:
+      - (hetzner_dns_record.state | default('present')) in ['present', 'absent']
+    fail_msg: >-
+      Unsupported Hetzner DNS record state {{ hetzner_dns_record.state | default('present') }}
+      for {{ hetzner_dns_record.name }} {{ hetzner_dns_record.type }}.
+
+- name: Delete the canonical DNS record when it is retired
+  ansible.builtin.uri:
+    url: "{{ hetzner_dns_api_base_url }}/records/{{ dns_provider_boundary_matching_records[0].provider_ref }}"
+    method: DELETE
+    headers:
+      Auth-API-Token: "{{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
+    status_code:
+      - 200
+      - 204
+      - 429
+      - 500
+      - 502
+      - 503
+      - 504
+  register: hetzner_dns_record_delete_response
+  when:
+    - (hetzner_dns_record.state | default('present')) == 'absent'
+    - dns_provider_boundary_matching_records | length == 1
+  retries: 5
+  delay: 2
+  until: hetzner_dns_record_delete_response.status in [200, 204]
+  failed_when: hetzner_dns_record_delete_response.status not in [200, 204]
+  changed_when: true
+  no_log: true
 
 - name: Create the canonical DNS record when it does not exist
   ansible.builtin.uri:
@@ -60,7 +97,20 @@
     status_code:
       - 200
       - 201
-  when: dns_provider_boundary_matching_records | length == 0
+      - 429
+      - 500
+      - 502
+      - 503
+      - 504
+  register: hetzner_dns_record_create_response
+  when:
+    - (hetzner_dns_record.state | default('present')) == 'present'
+    - dns_provider_boundary_matching_records | length == 0
+  retries: 5
+  delay: 2
+  until: hetzner_dns_record_create_response.status in [200, 201]
+  failed_when: hetzner_dns_record_create_response.status not in [200, 201]
+  changed_when: true
   no_log: true
 
 - name: Update the canonical DNS record when drift is detected
@@ -79,11 +129,23 @@
     status_code:
       - 200
       - 201
+      - 429
+      - 500
+      - 502
+      - 503
+      - 504
+  register: hetzner_dns_record_update_response
   when:
+    - (hetzner_dns_record.state | default('present')) == 'present'
     - dns_provider_boundary_matching_records | length == 1
     - dns_provider_boundary_matching_records[0].record_value != hetzner_dns_record.value
       or (
         dns_provider_boundary_matching_records[0].record_ttl
         | int
       ) != (hetzner_dns_record.ttl | default(60) | int)
+  retries: 5
+  delay: 2
+  until: hetzner_dns_record_update_response.status in [200, 201]
+  failed_when: hetzner_dns_record_update_response.status not in [200, 201]
+  changed_when: true
   no_log: true

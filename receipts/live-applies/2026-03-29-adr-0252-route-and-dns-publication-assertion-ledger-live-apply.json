@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_by": "codex",
+  "source_commit": "2fb27abe6c0cb3dd318cb53846d35079246026a0",
+  "repo_version_context": "0.177.54",
+  "workflow_id": "adr-0252-route-and-dns-publication-assertion-ledger-live-apply",
+  "adr": "0252",
+  "summary": "Implemented ADR 0252 from an isolated latest-origin/main worktree by reconciling the governed Hetzner DNS drift set, repairing the private Vaultwarden publication path, re-expanding the shared edge certificate for mail.lv3.org, and re-running the route-and-DNS exposure audit end to end.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "lv3.org",
+      "address": "https://lv3.org/"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "mail.lv3.org",
+      "address": "https://mail.lv3.org/"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "database.lv3.org",
+      "address": "100.64.0.1:5432"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "vault.lv3.org",
+      "address": "https://vault.lv3.org/alive"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused ADR 0252 regression and live-fix coverage",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml pytest -q tests/test_proxmox_tailscale_proxy_role.py tests/test_vaultwarden_runtime_role.py` returned `9 passed in 1.93s`, and `uv run --with pytest --with pyyaml pytest -q tests/test_subdomain_exposure_audit.py tests/test_proxmox_tailscale_proxy_role.py tests/test_vaultwarden_runtime_role.py` returned `22 passed in 1.35s` after the private-route and short-lived TLS audit fixes."
+    },
+    {
+      "check": "Governed route ledger DNS reconcile",
+      "result": "pass",
+      "observed": "`make route-dns-assertion-ledger` completed successfully from the isolated worktree with final recap `localhost ok=60 changed=0 failed=0 skipped=20`, leaving `lv3.org` and `mail.lv3.org` on `65.108.75.123`, `database.lv3.org` and `vault.lv3.org` on `100.64.0.1`, and removing the stale apex `AAAA`, `autoconfig`, `notify`, and `www` records."
+    },
+    {
+      "check": "Vaultwarden private route recovery and replay",
+      "result": "pass",
+      "observed": "`make converge-vaultwarden` completed successfully after the branch fixed Tailscale socket listener detection and Docker bridge/network recovery, with final recap `docker-runtime-lv3 ok=105 changed=5 failed=0 skipped=14 rescued=1`, `postgres-lv3 ok=42 changed=0 failed=0 skipped=7`, and `proxmox_florin ok=40 changed=9 failed=0 skipped=13`; `curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt -Is https://vault.lv3.org/alive` then returned `HTTP/1.1 200 OK`."
+    },
+    {
+      "check": "Shared edge publication and certificate expansion",
+      "result": "pass",
+      "observed": "`make configure-edge-publication` completed successfully with `nginx-lv3 ok=62 changed=5 failed=0 skipped=13`, `curl -I https://mail.lv3.org` returned `HTTP/2 200`, `curl -I https://lv3.org` returned `HTTP/2 308` redirecting to `https://nginx.lv3.org/`, and the live certificate SAN set now includes `DNS:mail.lv3.org`."
+    },
+    {
+      "check": "Final route and DNS publication audit",
+      "result": "partial",
+      "observed": "`make subdomain-exposure-audit` wrote audit run `d45fbd4e-f07a-4b07-8c94-5ba73cef0298` at `2026-03-29T00:04:34.903617Z`; the ADR 0252 governed drift set passed, while the audit still reported unrelated pre-existing findings for `git.lv3.org` (`active_subdomain_missing_expected_public_resolution`, `active_catalog_subdomain_missing_from_zone`) and `registry.lv3.org` (`undeclared_subdomain_present_in_zone`)."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0252-route-and-dns-publication-assertion-ledger.md",
+    "docs/runbooks/configure-edge-publication.md",
+    "docs/runbooks/configure-postgres-vm.md",
+    "docs/runbooks/subdomain-exposure-audit.md",
+    "docs/runbooks/subdomain-governance.md",
+    "docs/workstreams/ws-0252-live-apply.md",
+    "inventory/host_vars/proxmox_florin.yml",
+    "inventory/group_vars/platform.yml",
+    "playbooks/route-dns-assertion-ledger.yml",
+    "scripts/subdomain_catalog.py",
+    "scripts/subdomain_exposure_audit.py",
+    "config/subdomain-catalog.json",
+    "config/subdomain-exposure-registry.json",
+    "collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml",
+    "collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/vaultwarden_runtime/tasks/main.yml",
+    "receipts/live-applies/2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-live-apply.json",
+    "receipts/subdomain-exposure-audit/20260329T000434Z.json",
+    "tests/test_edge_publication_makefile.py",
+    "tests/test_hetzner_dns_record_role.py",
+    "tests/test_hetzner_dns_records_role.py",
+    "tests/test_proxmox_tailscale_proxy_role.py",
+    "tests/test_subdomain_catalog.py",
+    "tests/test_subdomain_exposure_audit.py",
+    "tests/test_vaultwarden_runtime_role.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "During diagnosis, direct Hetzner DNS API PUT and POST requests were used to inspect and partially correct provider state before the final idempotent `make route-dns-assertion-ledger` replay. The committed playbook remains the durable mutation path and the final zone state now matches it.",
+    "The successful Vaultwarden replay required two branch fixes discovered during live apply: accept `%tailscale0`-style listener output when verifying proxy sockets, and recover stale Docker bridge or missing compose-network state before retrying `docker compose up`.",
+    "The live branch intentionally defers protected integration files to the final mainline step: `VERSION`, the numbered release section in `changelog.md`, the top-level `README.md` status summary, and `versions/stack.yaml` still need the merge-to-main update.",
+    "Audit run `d45fbd4e-f07a-4b07-8c94-5ba73cef0298` still reports pre-existing out-of-scope drift for `git.lv3.org` and `registry.lv3.org`; ADR 0252 verification for the governed apex, mail, database, and vault routes succeeded."
+  ]
+}

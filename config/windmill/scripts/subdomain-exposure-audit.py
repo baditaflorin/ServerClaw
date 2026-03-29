@@ -36,6 +36,8 @@ def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
         "--check-registry",
         "--include-live-dns",
         "--include-http-auth",
+        "--include-private-routes",
+        "--include-tls",
         "--include-hetzner-zone",
         "--write-receipt",
         "--print-report-json",

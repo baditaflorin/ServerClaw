@@ -38,10 +38,22 @@ cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
 HETZNER_DNS_API_TOKEN=... make provision-subdomain FQDN=ops.lv3.org
 ```
 
+## Reconcile Governed DNS Drift
+
+Use the ADR 0252 ledger workflow when the governed DNS drift set already exists
+in the catalog and should be reconciled as one audited bundle instead of as a
+single-hostname change:
+
+```bash
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+HETZNER_DNS_API_TOKEN=... make route-dns-assertion-ledger
+```
+
 ## Exposure Audit
 
 The governed catalog is now paired with a derived canonical publication registry
-and live audit.
+and live audit. That derived registry now includes route assertions and evidence
+planning for DNS, zone state, HTTP auth, private routes, and TLS.
 
 Use it after catalog or edge-routing changes:
 
@@ -60,12 +72,18 @@ What the target does:
 - converges the DNS record through `roles/hetzner_dns_record`
 - translates raw Hetzner provider payloads into canonical DNS facts before any matching or drift decisions are made
 - if the FQDN already has a repo-managed edge route, re-runs `configure-edge-publication` so NGINX and the shared certificate set stay aligned
+- if the governed change belongs to the ADR 0252 drift set, the dedicated
+  `route-dns-assertion-ledger` workflow should be preferred over ad hoc single
+  hostname edits
 
 ## Constraints
 
 - `make provision-subdomain` is not a shortcut for inventing new hostnames outside the repo. The FQDN must already be declared in the catalog.
 - Edge publication only works for hostnames that already have a repo-managed route definition through service topology or `public_edge_extra_sites`.
 - Reserved first-label prefixes are enforced from the catalog. If a hostname uses a reserved prefix, it must be explicitly allowlisted in `reserved_prefixes`.
+- Apex, tailnet-only, and other shared route assertions should be reconciled
+  through the ADR 0252 ledger workflow once they are part of the governed drift
+  set.
 
 ## Lifecycle
 
@@ -81,5 +99,7 @@ What the target does:
 
 1. Mark the catalog entry `status: retiring`.
 2. Remove or redirect the repo-managed edge route if one exists.
-3. Remove the DNS record through the same managed workflow.
+3. Remove the DNS record through the same managed workflow. Use
+   `route-dns-assertion-ledger` when the hostname is already modeled in the ADR
+   0252 governed drift set.
 4. Delete the catalog entry only after the hostname is no longer expected anywhere in service or edge topology.
