@@ -102,6 +102,31 @@ def test_openbao_runtime_retries_policy_reads_during_startup_recovery() -> None:
     assert "until: openbao_current_policies.status in [200, 404]" in tasks
 
 
+def test_openbao_runtime_renders_rotatable_secret_keys_dynamically() -> None:
+    tasks = TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "- name: Seed dedicated rotatable secrets into OpenBao" in tasks
+    assert "(item.value.openbao_field):" in tasks
+    assert "register: openbao_seed_rotatable_secret_result" in tasks
+    assert "until: openbao_seed_rotatable_secret_result.status == 200" in tasks
+    assert "\"{{ item.value.openbao_field }}\":" not in tasks
+    assert "(openbao_rotation_metadata.last_rotated_metadata_key):" in tasks
+    assert "(openbao_rotation_metadata.rotated_by_metadata_key): 'openbao-seed'" in tasks
+
+
+def test_openbao_runtime_retries_seed_state_reads_during_recovery() -> None:
+    tasks = TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "- name: Read current controller Proxmox API secret" in tasks
+    assert "- name: Read current controller monitoring secret" in tasks
+    assert "- name: Read current mail platform runtime secret" in tasks
+    assert "- name: Read current dedicated rotatable secrets from OpenBao" in tasks
+    assert "until: openbao_controller_proxmox_api_current.status in [200, 404]" in tasks
+    assert "until: openbao_controller_monitoring_current.status in [200, 404]" in tasks
+    assert "until: openbao_mail_platform_runtime_current.status in [200, 404]" in tasks
+    assert "until: openbao_rotatable_secret_current.status in [200, 404]" in tasks
+
+
 def test_openbao_playbook_refreshes_secret_ids_from_local_artifacts() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text(encoding="utf-8"))
     refresh_play = next(
