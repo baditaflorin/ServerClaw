@@ -369,6 +369,81 @@ workstreams:
       included_in_repo_version: 0.177.75
       latest_receipts:
         restore_verification: 2026-03-29-adr-0272-restore-readiness-mainline-live-apply
+  - id: ws-0251-live-apply-r2
+    adr: "0251"
+    title: Stage-scoped smoke suites and promotion-gate live apply
+    status: in-progress
+    owner: codex
+    branch: codex/ws-0251-live-apply-r2
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply-r2
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0251-live-apply-r2.md
+    depends_on:
+      - adr-0073-promotion-gate
+      - adr-0111-integration-test-suite
+      - adr-0244-runtime-assurance-matrix
+      - adr-0253-runtime-assurance-scoreboard
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0251-live-apply-r2.md
+      - docs/adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md
+      - docs/adr/.index.yaml
+      - docs/schema/service-capability-catalog.schema.json
+      - scripts/stage_smoke.py
+      - scripts/service_catalog.py
+      - scripts/promotion_pipeline.py
+      - scripts/ops_portal/runtime_assurance.py
+      - policy/decisions/release_promotion.rego
+      - policy/tests/release_promotion_test.rego
+      - docs/runbooks/environment-promotion-pipeline.md
+      - docs/runbooks/runtime-assurance-scoreboard.md
+      - docs/runbooks/service-capability-catalog.md
+      - tests/test_stage_smoke.py
+      - tests/test_promotion_pipeline.py
+      - tests/test_runtime_assurance_scoreboard.py
+      - tests/test_validate_service_catalog.py
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: adr_0251_live_apply
+          paths:
+            - docs/workstreams/ws-0251-live-apply-r2.md
+            - docs/adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md
+            - docs/schema/service-capability-catalog.schema.json
+            - scripts/stage_smoke.py
+            - scripts/service_catalog.py
+            - scripts/promotion_pipeline.py
+            - scripts/ops_portal/runtime_assurance.py
+            - policy/decisions/release_promotion.rego
+            - policy/tests/release_promotion_test.rego
+            - docs/runbooks/environment-promotion-pipeline.md
+            - docs/runbooks/runtime-assurance-scoreboard.md
+            - docs/runbooks/service-capability-catalog.md
+            - tests/test_stage_smoke.py
+            - tests/test_promotion_pipeline.py
+            - tests/test_runtime_assurance_scoreboard.py
+            - tests/test_validate_service_catalog.py
+            - receipts/live-applies/
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false
+    canonical_truth:
+      changelog_entry: implement ADR 0251 by enforcing stage-scoped smoke suites
+        in both the promotion gate and the runtime-assurance scoreboard, with a
+        repo-managed default suite for active environments and live proof from
+        the updated operator workflow surfaces
+      release_bump: patch
+      included_in_repo_version: null
   - id: ws-0224-repo-intake
     adr: "0224"
     title: Self-service repo intake and agent-assisted app deployments

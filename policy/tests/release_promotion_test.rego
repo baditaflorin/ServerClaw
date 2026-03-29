@@ -13,6 +13,11 @@ base_input := {
     "approved": true,
     "reasons": [],
   },
+  "stage_smoke_gate": {
+    "declared": true,
+    "matched_suite_ids": ["default-primary-smoke"],
+    "reason": "",
+  },
   "service_id": "grafana",
   "slo_gate": {
     "blocking_budget_messages": [],
@@ -57,4 +62,19 @@ test_promotion_policy_rejects_slo_budget_breach if {
   )
   decision.gate_decision == "rejected"
   decision.reasons[_] == "SLO error budget below 10%: grafana-availability (4.00% remaining)"
+}
+
+test_promotion_policy_rejects_missing_stage_smoke_suite if {
+  decision := promotion.decision with input as object.union(
+    base_input,
+    {
+      "stage_smoke_gate": {
+        "declared": false,
+        "matched_suite_ids": [],
+        "reason": "service 'grafana' does not declare an active staging smoke suite",
+      },
+    },
+  )
+  decision.gate_decision == "rejected"
+  decision.reasons[_] == "service 'grafana' does not declare an active staging smoke suite"
 }
