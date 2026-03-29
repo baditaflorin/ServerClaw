@@ -2,7 +2,11 @@
 
 - ADR: [ADR 0249](../adr/0249-https-and-tls-assurance-via-blackbox-exporter-and-testssl-sh.md)
 - Title: live apply HTTPS and TLS assurance through Prometheus blackbox probes and periodic `testssl.sh` scans
-- Status: in-progress
+- Status: live_applied
+- Implemented In Repo Version: 0.177.54
+- Live Applied In Platform Version: 0.130.43
+- Implemented On: 2026-03-28
+- Live Applied On: 2026-03-28
 - Branch: `codex/ws-0249-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0249-live-apply`
 - Owner: codex
@@ -23,11 +27,18 @@
 
 ## Verification
 
-- pending live replay
+- `python3 -m py_compile scripts/https_tls_assurance.py config/windmill/scripts/https-tls-assurance.py`
+- `uv run --with pytest --with pyyaml pytest -q tests/test_https_tls_assurance_windmill_wrapper.py tests/test_https_tls_assurance_targets.py tests/test_monitoring_vm_role.py tests/test_guest_observability_role.py tests/test_guest_log_shipping_playbook.py tests/test_loki_log_agent_role.py` returned `19 passed in 0.36s`
+- `make validate-generated-https-tls-assurance`
+- `make syntax-check-monitoring`
+- `./scripts/validate_repo.sh alert-rules agent-standards`
+- `make preflight WORKFLOW=converge-monitoring`
+- `make converge-monitoring`
+- SSH verification on `monitoring-lv3` confirmed the Prometheus HTTPS/TLS targets file, alert rules file, active monitoring services, 31 active `https-tls-blackbox` targets, and 93 loaded `https_tls_assurance` rules
+- `make https-tls-assurance ENV=production` recorded branch-local receipts for both the accepted 60-second timeout budget and the rejected 120-second experiment
 
 ## Notes For The Next Assistant
 
-- The branch-local implementation is in progress from the latest `origin/main`
-  worktree created on `2026-03-28`.
-- The protected integration files still need to wait for the final merge-to-main
-  step after the live replay is verified.
+- The branch-local live apply is complete and recorded in `receipts/live-applies/2026-03-28-adr-0249-https-tls-assurance-live-apply.json`.
+- The protected integration files still need to wait for the final merge-to-main step on the latest `origin/main`.
+- The 2026-03-28 timeout comparison showed that raising `testssl.sh` from 60 seconds to 120 seconds increased timeout findings from 16 to 26 surfaces and nearly doubled total runtime, so this branch intentionally keeps the 60-second default.

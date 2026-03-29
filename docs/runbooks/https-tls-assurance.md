@@ -28,9 +28,12 @@ Run the deeper TLS posture scan:
 make https-tls-assurance ENV=production
 ```
 
-The scheduled and `make` paths default to a 120-second per-target `testssl.sh`
+The scheduled and `make` paths default to a 60-second per-target `testssl.sh`
 timeout so the sequential 31-surface production scan stays within the weekly
-workflow budget. Override it when a slower manual replay is intentional:
+workflow budget. A branch-local replay on 2026-03-28 showed that raising the
+timeout to 120 seconds increased the timeout count from 16 to 26 surfaces while
+nearly doubling total runtime, so 60 seconds remains the default and longer
+manual replays stay opt-in:
 
 ```bash
 make https-tls-assurance ENV=production HTTPS_TLS_TIMEOUT_SECONDS=180
@@ -40,7 +43,7 @@ Or call the Python entrypoints directly:
 
 ```bash
 uv run --with pyyaml python scripts/generate_https_tls_assurance.py --write
-uv run --with pyyaml python scripts/https_tls_assurance.py --env production --timeout-seconds 120 --print-report-json
+uv run --with pyyaml python scripts/https_tls_assurance.py --env production --timeout-seconds 60 --print-report-json
 ```
 
 ## What the workflow does

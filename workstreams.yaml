@@ -1303,7 +1303,7 @@ workstreams:
   - id: ws-0249-live-apply
     adr: "0249"
     title: Live apply HTTPS and TLS assurance through blackbox exporter and testssl.sh
-    status: in-progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0249-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0249-live-apply
@@ -1377,7 +1377,14 @@ workstreams:
             - docs/release-notes/*.md
           mode: shared_contract
           contract: mainline-release-integration-v1
-    ready_to_merge: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0249 by generating repo-managed HTTPS and TLS assurance probes plus Prometheus expiry alerts from the shared service catalogs, recording periodic testssl.sh receipts from the same target set, and hardening the monitoring replay defaults that guest observability and Loki log shipping depend on
+      release_bump: patch
+      included_in_repo_version: null
+      latest_receipts:
+        https_tls_assurance: 2026-03-28-adr-0249-https-tls-assurance-live-apply
     live_applied: false
   - id: ws-0237-live-apply
     adr: "0237"
