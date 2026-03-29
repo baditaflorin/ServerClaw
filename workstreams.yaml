@@ -1355,13 +1355,17 @@ workstreams:
       - config/service-capability-catalog.json
       - config/health-probe-catalog.json
       - config/subdomain-catalog.json
+      - config/subdomain-exposure-registry.json
+      - config/certificate-catalog.json
       - config/api-gateway-catalog.json
       - config/dependency-graph.json
       - config/slo-catalog.json
       - config/grafana/dashboards/slo-overview.json
       - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/file_sd/https_tls_targets.yml
       - config/prometheus/rules/slo_alerts.yml
       - config/prometheus/rules/slo_rules.yml
+      - config/prometheus/rules/https_tls_alerts.yml
       - config/data-catalog.json
       - config/secret-catalog.json
       - config/image-catalog.json
@@ -1421,13 +1425,17 @@ workstreams:
             - config/service-capability-catalog.json
             - config/health-probe-catalog.json
             - config/subdomain-catalog.json
+            - config/subdomain-exposure-registry.json
+            - config/certificate-catalog.json
             - config/api-gateway-catalog.json
             - config/dependency-graph.json
             - config/slo-catalog.json
             - config/grafana/dashboards/slo-overview.json
             - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/file_sd/https_tls_targets.yml
             - config/prometheus/rules/slo_alerts.yml
             - config/prometheus/rules/slo_rules.yml
+            - config/prometheus/rules/https_tls_alerts.yml
             - config/data-catalog.json
             - config/secret-catalog.json
             - config/image-catalog.json
@@ -1468,7 +1476,7 @@ workstreams:
       release_bump: patch
       included_in_repo_version: 0.177.84
       latest_receipts:
-        serverclaw: 2026-03-29-adr-0254-serverclaw-distinct-product-surface-live-apply
+        serverclaw: 2026-03-29-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply
   - id: ws-0254-main-merge
     adr: "0254"
     title: Integrate ADR 0254 exact-main replay onto current origin/main
@@ -1486,6 +1494,7 @@ workstreams:
       - docs/workstreams/ws-0254-live-apply.md
       - docs/adr/0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3.md
       - docs/adr/.index.yaml
+      - docs/site-generated/architecture/dependency-graph.md
       - docs/runbooks/configure-serverclaw.md
       - playbooks/serverclaw.yml
       - inventory/group_vars/all.yml
@@ -1494,13 +1503,17 @@ workstreams:
       - config/service-capability-catalog.json
       - config/health-probe-catalog.json
       - config/subdomain-catalog.json
+      - config/subdomain-exposure-registry.json
+      - config/certificate-catalog.json
       - config/api-gateway-catalog.json
       - config/dependency-graph.json
       - config/slo-catalog.json
       - config/grafana/dashboards/slo-overview.json
       - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/file_sd/https_tls_targets.yml
       - config/prometheus/rules/slo_alerts.yml
       - config/prometheus/rules/slo_rules.yml
+      - config/prometheus/rules/https_tls_alerts.yml
       - config/data-catalog.json
       - config/secret-catalog.json
       - config/image-catalog.json
@@ -1552,13 +1565,17 @@ workstreams:
             - config/service-capability-catalog.json
             - config/health-probe-catalog.json
             - config/subdomain-catalog.json
+            - config/subdomain-exposure-registry.json
+            - config/certificate-catalog.json
             - config/api-gateway-catalog.json
             - config/dependency-graph.json
             - config/slo-catalog.json
             - config/grafana/dashboards/slo-overview.json
             - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/file_sd/https_tls_targets.yml
             - config/prometheus/rules/slo_alerts.yml
             - config/prometheus/rules/slo_rules.yml
+            - config/prometheus/rules/https_tls_alerts.yml
             - config/data-catalog.json
             - config/secret-catalog.json
             - config/image-catalog.json
@@ -1590,6 +1607,7 @@ workstreams:
             - docs/workstreams/ws-0254-live-apply.md
             - docs/adr/0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3.md
             - docs/adr/.index.yaml
+            - docs/site-generated/architecture/dependency-graph.md
             - README.md
             - RELEASE.md
             - VERSION
@@ -1603,7 +1621,13 @@ workstreams:
             - receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply.json
           mode: exclusive
     ready_to_merge: true
-    live_applied: false
+    live_applied: true
+    canonical_truth:
+      changelog_entry: records ADR 0254 exact-main evidence on release 0.177.84 by replaying make converge-serverclaw from the synchronized latest-main commit, preserving the dedicated ServerClaw chat surface on chat.lv3.org, and re-verifying the internal firewall lane plus guest-local admin sign-in from merged mainline truth
+      release_bump: patch
+      included_in_repo_version: 0.177.84
+      latest_receipts:
+        serverclaw: 2026-03-29-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply
   - id: ws-0244-runtime-assurance-adrs
     adr: "0244"
     title: Runtime assurance architecture bundle
