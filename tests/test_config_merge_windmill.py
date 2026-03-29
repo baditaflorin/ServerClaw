@@ -171,6 +171,45 @@ def test_sync_helper_reports_missing_token(monkeypatch: pytest.MonkeyPatch, tmp_
     assert json.loads(captured.err)["reason"] == "WINDMILL_TOKEN is required"
 
 
+def test_sync_helper_uses_configured_http_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
+    module = load_module("sync_helper_timeout", SYNC_HELPER_PATH)
+    captured: dict[str, object] = {}
+
+    class FakeResponse:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self) -> bytes:
+            return b'{"path":"f/lv3/operator_onboard","content":"print(\\"ok\\")"}'
+
+    def fake_urlopen(request, timeout):
+        captured["url"] = request.full_url
+        captured["timeout"] = timeout
+        return FakeResponse()
+
+    monkeypatch.setattr(module.urllib.request, "urlopen", fake_urlopen)
+
+    status, body = module.request_json_or_text(
+        base_url="http://windmill.internal",
+        workspace="lv3",
+        token="token",
+        path="scripts/get/p/f%2Flv3%2Foperator_onboard",
+        method="GET",
+        expected_statuses=(200,),
+        timeout_s=7.5,
+    )
+
+    assert status == 200
+    assert json.loads(body)["path"] == "f/lv3/operator_onboard"
+    assert captured["timeout"] == 7.5
+    assert captured["url"] == "http://windmill.internal/api/w/lv3/scripts/get/p/f%2Flv3%2Foperator_onboard"
+
+
 def test_sync_helper_retries_connection_reset_during_create(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -514,7 +553,7 @@ def test_sync_helper_retries_remote_disconnect(monkeypatch: pytest.MonkeyPatch, 
 def test_sync_helper_marks_remote_disconnect_as_transport_error(monkeypatch: pytest.MonkeyPatch) -> None:
     module = load_module("sync_helper_transport_error", SYNC_HELPER_PATH)
 
-    def fake_urlopen(_request):
+    def fake_urlopen(_request, timeout=None):
         raise http.client.RemoteDisconnected("Remote end closed connection without response")
 
     monkeypatch.setattr(module.urllib.request, "urlopen", fake_urlopen)
@@ -847,7 +886,7 @@ def test_sync_helper_retries_with_bootstrap_login_on_401(monkeypatch: pytest.Mon
 
     calls: list[tuple[str, str | None]] = []
 
-    def fake_urlopen(request):
+    def fake_urlopen(request, timeout=None):
         auth_header = request.headers.get("Authorization")
         calls.append((request.full_url, auth_header))
         if request.full_url.endswith("/api/auth/login"):
