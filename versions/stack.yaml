@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.89
-platform_version: 0.130.59
+repo_version: 0.177.90
+platform_version: 0.130.60
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -110,6 +110,7 @@ live_apply_evidence:
     harbor: 2026-03-29-adr-0201-harbor-mainline-live-apply
     ops_portal_visualizations: 2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply
     nomad_scheduler: 2026-03-29-adr-0232-nomad-mainline-live-apply
+    serverclaw_memory: 2026-03-29-adr-0263-serverclaw-memory-substrate-mainline-live-apply
     route_dns_assertion_ledger: 2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply
     session_logout_authority: 2026-03-29-adr-0248-session-logout-authority-mainline-live-apply
     restore_verification: 2026-03-29-adr-0272-restore-readiness-mainline-live-apply
@@ -1036,8 +1037,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.89
+    current: 0.177.90
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.59
+    current: 0.130.60
     meaning: intended platform release for the actual server configuration

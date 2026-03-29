@@ -207,6 +207,12 @@ def test_build_platform_vars_includes_plane_publication_topology() -> None:
     assert plane["urls"]["controller"] == "http://100.64.0.1:8011"
 
 
+def test_build_platform_vars_uses_loopback_for_guest_local_platform_context_verification() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+
+    assert platform_vars["platform_context_private_url"] == "http://127.0.0.1:8010"
+
+
 def test_build_platform_vars_includes_matrix_synapse_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     matrix_synapse = platform_vars["platform_service_topology"]["matrix_synapse"]

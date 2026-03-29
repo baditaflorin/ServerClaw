@@ -48,6 +48,14 @@ error_codes:
     description: Requested platform service is not defined.
     docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
     context_fields: [service_id]
+  INPUT_UNKNOWN_MEMORY_ENTRY:
+    http_status: 404
+    severity: info
+    category: input
+    retry_advice: none
+    description: Requested ServerClaw memory entry is not defined.
+    docs_url: https://github.com/baditaflorin/proxmox_florin_server/blob/main/docs/runbooks/platform-api-error-codes.md
+    context_fields: [memory_id]
   INPUT_UNKNOWN_WORKFLOW:
     http_status: 404
     severity: info
