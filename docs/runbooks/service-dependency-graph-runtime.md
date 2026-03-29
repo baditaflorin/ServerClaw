@@ -88,7 +88,7 @@ python3 config/windmill/scripts/graph/propagate-health.py \
 
 The worker inspects degraded or down upstream services, walks their graph descendants, and emits `derived_health_degraded` events only for dependents whose own probes are still passing. If `LV3_LEDGER_DSN` is configured, it also writes `graph.health_propagated` records into `ledger.events`.
 
-For ad hoc `run_wait_result` API calls, pass `dsn` and `world_state_dsn` explicitly in the request body instead of relying on ambient worker environment defaults.
+For ad hoc Windmill helper runs, pass `dsn` and `world_state_dsn` explicitly in `--payload-json` instead of relying on ambient worker environment defaults.
 
 ## Notes
 
