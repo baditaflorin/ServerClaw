@@ -206,6 +206,9 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "runtime assurance endpoint returns a report envelope" in verify_tasks
     assert "Check whether the controller-local legacy platform context token exists" in verify_tasks
     assert "Read the controller-local legacy platform context token" in verify_tasks
+    assert "Default the Keycloak API gateway verification token request status" in verify_tasks
+    assert "Record whether the Keycloak verification token request returned an access token" in verify_tasks
+    assert "Mark the Keycloak verification token request as unavailable" in verify_tasks
     assert "Record the API gateway verification bearer token from the legacy platform context" in verify_tasks
     assert "API gateway verification requires either the Keycloak client secret or the" in verify_tasks
     assert "{{ api_gateway_service_dir }}/.githooks" in tasks
