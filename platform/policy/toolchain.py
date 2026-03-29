@@ -5,6 +5,7 @@ import io
 import os
 import shutil
 import stat
+import subprocess
 import tarfile
 import tempfile
 import urllib.request
@@ -111,6 +112,25 @@ def _install_binary(target: Path, payload: bytes) -> None:
     tmp_path.replace(target)
 
 
+def _managed_binary_is_usable(target: Path, probes: list[list[str]]) -> bool:
+    if not target.is_file() or not os.access(target, os.X_OK):
+        return False
+
+    for probe_args in probes:
+        try:
+            result = subprocess.run(
+                [str(target), *probe_args],
+                capture_output=True,
+                check=False,
+                timeout=15,
+            )
+        except (OSError, subprocess.SubprocessError):
+            continue
+        if result.returncode == 0:
+            return True
+    return False
+
+
 def _extract_tar_binary(payload: bytes, member_name: str) -> bytes:
     with tarfile.open(fileobj=io.BytesIO(payload), mode="r:gz") as archive:
         member = archive.getmember(member_name)
@@ -145,7 +165,7 @@ def _ensure_opa(install_root: Path) -> ToolBinary:
     system, machine = _platform_key()
     asset_name = _opa_asset_name(system, machine)
     target = _managed_tool_path(install_root, "opa", OPA_VERSION)
-    if not target.is_file():
+    if not _managed_binary_is_usable(target, [["version"]]):
         payload = _download_bytes(f"{OPA_RELEASE_BASE}/{asset_name}")
         expected_sha = _opa_expected_sha256(asset_name)
         observed_sha = _sha256(payload)
@@ -168,7 +188,7 @@ def _ensure_conftest(install_root: Path) -> ToolBinary:
     system, machine = _platform_key()
     asset_name = _conftest_asset_name(system, machine)
     target = _managed_tool_path(install_root, "conftest", CONFTEST_VERSION)
-    if not target.is_file():
+    if not _managed_binary_is_usable(target, [["--version"], ["version"]]):
         payload = _download_bytes(f"{CONFTEST_RELEASE_BASE}/{asset_name}")
         expected_sha = _conftest_expected_sha256(asset_name)
         observed_sha = _sha256(payload)

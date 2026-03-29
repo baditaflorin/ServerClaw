@@ -58,6 +58,7 @@ workstreams:
       - config/windmill/scripts/post-merge-gate.py
       - config/windmill/scripts/gate-status.py
       - policy/conftest/repository.rego
+      - platform/policy/toolchain.py
       - docs/diagrams/agent-coordination-map.excalidraw
       - docs/runbooks/configure-openbao.md
       - docs/runbooks/remote-build-gateway.md
@@ -135,6 +136,7 @@ workstreams:
             - config/windmill/scripts/post-merge-gate.py
             - config/windmill/scripts/gate-status.py
             - policy/conftest/repository.rego
+            - platform/policy/toolchain.py
             - docs/diagrams/agent-coordination-map.excalidraw
             - docs/runbooks/configure-openbao.md
             - docs/runbooks/remote-build-gateway.md

@@ -46,6 +46,20 @@ def write_fake_tool(path: Path, record_path: Path) -> None:
     path.chmod(0o755)
 
 
+def make_fake_tool_payload(name: str) -> bytes:
+    return (
+        "\n".join(
+            [
+                "#!/usr/bin/env python3",
+                "import sys",
+                f"print('{name} ready')",
+                "raise SystemExit(0)",
+            ]
+        )
+        + "\n"
+    ).encode("utf-8")
+
+
 def test_build_repository_context_includes_policy_surfaces() -> None:
     module = load_module("policy_checks_module", "scripts/policy_checks.py")
     context = module.build_repository_context(REPO_ROOT)
@@ -105,3 +119,50 @@ def test_run_decodes_non_utf8_subprocess_output(monkeypatch) -> None:
 
     assert "stdout ok" in message
     assert "stderr byte" in message
+
+
+def test_ensure_policy_toolchain_replaces_stale_cross_platform_binaries(
+    tmp_path: Path, monkeypatch
+) -> None:
+    toolchain_module = load_module("policy_toolchain_module_refresh", "platform/policy/toolchain.py")
+    install_root = tmp_path / "toolchain"
+    stale_opa = install_root / "opa" / toolchain_module.OPA_VERSION / "opa"
+    stale_conftest = install_root / "conftest" / toolchain_module.CONFTEST_VERSION / "conftest"
+
+    stale_opa.parent.mkdir(parents=True, exist_ok=True)
+    stale_conftest.parent.mkdir(parents=True, exist_ok=True)
+    for path in (stale_opa, stale_conftest):
+        path.write_bytes(b"\x7fELF stale linux binary")
+        path.chmod(0o755)
+
+    monkeypatch.setenv("LV3_POLICY_TEST_PLATFORM", "darwin/arm64")
+
+    downloads = {
+        f"{toolchain_module.OPA_RELEASE_BASE}/{toolchain_module._opa_asset_name('darwin', 'arm64')}": make_fake_tool_payload(
+            "opa"
+        ),
+        f"{toolchain_module.CONFTEST_RELEASE_BASE}/{toolchain_module._conftest_asset_name('darwin', 'arm64')}": b"fake conftest archive",
+    }
+
+    def fake_download_bytes(url: str) -> bytes:
+        return downloads[url]
+
+    def fake_opa_expected_sha(asset_name: str) -> str:
+        return toolchain_module._sha256(downloads[f"{toolchain_module.OPA_RELEASE_BASE}/{asset_name}"])
+
+    def fake_conftest_expected_sha(asset_name: str) -> str:
+        return toolchain_module._sha256(downloads[f"{toolchain_module.CONFTEST_RELEASE_BASE}/{asset_name}"])
+
+    def fake_extract_tar_binary(payload: bytes, member_name: str) -> bytes:
+        assert member_name == "conftest"
+        return make_fake_tool_payload("conftest")
+
+    monkeypatch.setattr(toolchain_module, "_download_bytes", fake_download_bytes)
+    monkeypatch.setattr(toolchain_module, "_opa_expected_sha256", fake_opa_expected_sha)
+    monkeypatch.setattr(toolchain_module, "_conftest_expected_sha256", fake_conftest_expected_sha)
+    monkeypatch.setattr(toolchain_module, "_extract_tar_binary", fake_extract_tar_binary)
+
+    toolchain = toolchain_module.ensure_policy_toolchain(install_root=install_root)
+
+    assert "ready" in subprocess.check_output([str(toolchain.opa.path), "version"], text=True)
+    assert "ready" in subprocess.check_output([str(toolchain.conftest.path), "--version"], text=True)
