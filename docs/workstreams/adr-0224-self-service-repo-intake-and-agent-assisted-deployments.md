@@ -3,7 +3,7 @@
 - ADR: [ADR 0224](../adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md)
 - Title: Extend the current Coolify repo-deploy lane into a catalog-driven
   self-service intake flow
-- Status: ready
+- Status: live_applied
 - Branch: `codex/ws-0224-repo-intake`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0224-repo-intake`
 - Owner: codex
