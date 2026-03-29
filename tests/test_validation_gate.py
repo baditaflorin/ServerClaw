@@ -371,3 +371,17 @@ def test_gate_status_workflow_catalog_and_windmill_seed_align() -> None:
 
     assert "config/windmill/scripts/gate-status.py" in catalog["workflows"]["gate-status"]["implementation_refs"]
     assert "f/lv3/gate-status" in script_paths
+
+
+def test_gate_status_reexecs_via_python_package_runner_when_yaml_is_missing() -> None:
+    script = (REPO_ROOT / "scripts" / "gate_status.py").read_text(encoding="utf-8")
+
+    assert "LV3_GATE_STATUS_PYYAML_BOOTSTRAPPED" in script
+    assert "run_python_with_packages.sh" in script
+
+
+def test_run_gate_reexecs_via_python_package_runner_when_yaml_is_missing() -> None:
+    script = (REPO_ROOT / "scripts" / "run_gate.py").read_text(encoding="utf-8")
+
+    assert "LV3_RUN_GATE_PYYAML_BOOTSTRAPPED" in script
+    assert "run_python_with_packages.sh" in script

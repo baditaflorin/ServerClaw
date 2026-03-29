@@ -16,7 +16,24 @@ if __package__ in {None, ""}:
 
 from scripts import parallel_check
 from scripts.session_workspace import resolve_session_workspace
-from scripts import validation_lanes
+try:
+    from scripts import validation_lanes
+except ModuleNotFoundError as exc:
+    if exc.name != "yaml" or os.environ.get("LV3_RUN_GATE_PYYAML_BOOTSTRAPPED") == "1":
+        raise
+    helper_path = Path(__file__).resolve().with_name("run_python_with_packages.sh")
+    if not helper_path.is_file():
+        raise
+    os.environ["LV3_RUN_GATE_PYYAML_BOOTSTRAPPED"] = "1"
+    entrypoint = Path(sys.argv[0])
+    if not entrypoint.is_absolute():
+        entrypoint = (Path.cwd() / entrypoint).resolve()
+    if not entrypoint.is_file():
+        entrypoint = Path(__file__).resolve()
+    os.execv(
+        str(helper_path),
+        [str(helper_path), "pyyaml", "--", str(entrypoint), *sys.argv[1:]],
+    )
 
 
 DEFAULT_MANIFEST = Path("config/validation-gate.json")

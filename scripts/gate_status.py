@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -12,7 +13,19 @@ from typing import Any
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts import validation_lanes
+try:
+    from scripts import validation_lanes
+except ModuleNotFoundError as exc:
+    if exc.name != "yaml" or os.environ.get("LV3_GATE_STATUS_PYYAML_BOOTSTRAPPED") == "1":
+        raise
+    helper_path = Path(__file__).resolve().with_name("run_python_with_packages.sh")
+    if not helper_path.is_file():
+        raise
+    os.environ["LV3_GATE_STATUS_PYYAML_BOOTSTRAPPED"] = "1"
+    os.execv(
+        str(helper_path),
+        [str(helper_path), "pyyaml", "--", str(Path(__file__).resolve()), *sys.argv[1:]],
+    )
 
 
 DEFAULT_MANIFEST = Path("config/validation-gate.json")

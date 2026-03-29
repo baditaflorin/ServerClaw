@@ -30,6 +30,9 @@ LOCAL_PROVIDER_BOUNDARY_COMMAND = [
 RUNNER_IMAGE_ERROR_MARKERS = (
     "unsupported manifest media type",
     "Unable to find image 'registry.lv3.org/check-runner/",
+    "docker: error during connect:",
+    "Cannot connect to the Docker daemon",
+    "docker.sock/_ping",
 )
 
 

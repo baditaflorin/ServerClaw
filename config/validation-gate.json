@@ -19,7 +19,7 @@
     "description": "Verify that the generated ADR index is current for documentation and workstream changes.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/python:3.12.10",
-    "command": "uv run --with pyyaml python3 scripts/generate_adr_index.py --check >/dev/null",
+    "command": "./scripts/run_python_with_packages.sh pyyaml -- scripts/generate_adr_index.py --check >/dev/null",
     "working_dir": "/workspace",
     "timeout_seconds": 120
   },
@@ -27,7 +27,7 @@
     "description": "Run the repo-managed ansible-lint policy against playbooks and the packaged collection.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/ansible:2.17.10",
-    "command": "mkdir -p .ansible/validation/lint-collections && LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/lint-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/lint-requirements.sha ./scripts/validate_repo.sh ansible-lint",
+    "command": "mkdir -p .ansible/validation/lint-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/lint-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/lint-requirements.sha ./scripts/validate_repo.sh ansible-lint",
     "working_dir": "/workspace",
     "timeout_seconds": 600,
     "cache_mounts": ["ansible_collections"]
@@ -36,7 +36,7 @@
     "description": "Syntax check every tracked playbook outside the shared playbook task includes.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/ansible:2.17.10",
-    "command": "mkdir -p .ansible/validation/syntax-collections && LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/syntax-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/syntax-requirements.sha ./scripts/validate_repo.sh ansible-syntax",
+    "command": "mkdir -p .ansible/validation/syntax-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/syntax-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/syntax-requirements.sha ./scripts/validate_repo.sh ansible-syntax",
     "working_dir": "/workspace",
     "timeout_seconds": 600,
     "cache_mounts": ["ansible_collections"]

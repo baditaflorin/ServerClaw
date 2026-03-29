@@ -137,22 +137,18 @@ ensure_validation_commands_configured() {
 run_uv_python() {
   local packages=()
 
-  ensure_uv
-  if [[ "$HAS_UV" != true ]]; then
-    echo "uv is required for this validation stage but is not available in the current runtime." >&2
-    exit 1
-  fi
+  resolve_python_bin
 
   while [[ $# -gt 0 ]]; do
     if [[ "$1" == "--" ]]; then
       shift
       break
     fi
-    packages+=(--with "$1")
+    packages+=("$1")
     shift
   done
 
-  "${UV_CMD[@]}" run "${packages[@]}" python3 "$@"
+  "$REPO_ROOT/scripts/run_python_with_packages.sh" "${packages[@]}" -- "$@"
 }
 
 tracked_files() {
@@ -208,6 +204,7 @@ install_collections() {
   local current_sha_file=""
   local lock_file="${ANSIBLE_COLLECTIONS_SHA_FILE}.lock"
   local lock_fd=""
+  local galaxy_server_args=()
 
   [[ -f "$requirements_file" ]] || return 0
   ensure_validation_commands_configured
@@ -225,16 +222,51 @@ install_collections() {
   sha256sum "$requirements_file" > "$current_sha_file"
   if [[ -s "$ANSIBLE_COLLECTIONS_SHA_FILE" ]] && find "$ANSIBLE_COLLECTIONS_DIR" -mindepth 1 -print -quit | grep -q .; then
     if cmp -s "$current_sha_file" "$ANSIBLE_COLLECTIONS_SHA_FILE"; then
-      rm -f "$current_sha_file"
-      if [[ -n "$lock_fd" ]]; then
-        flock -u "$lock_fd"
-        eval "exec ${lock_fd}>&-"
+      if "$REPO_ROOT/scripts/run_python_with_packages.sh" pyyaml -- - "$requirements_file" "$ANSIBLE_COLLECTIONS_DIR" <<'PY'
+import sys
+from pathlib import Path
+
+import yaml
+
+requirements_path = Path(sys.argv[1])
+collections_dir = Path(sys.argv[2])
+payload = yaml.safe_load(requirements_path.read_text(encoding="utf-8")) or {}
+collections = payload.get("collections", [])
+
+for entry in collections:
+    if isinstance(entry, str):
+        name = entry.strip()
+    elif isinstance(entry, dict):
+        raw_name = entry.get("name", "")
+        name = raw_name.strip() if isinstance(raw_name, str) else ""
+    else:
+        raise SystemExit(1)
+    if not name or "." not in name:
+        raise SystemExit(1)
+    namespace, collection = name.split(".", 1)
+    collection_root = collections_dir / "ansible_collections" / namespace / collection
+    if not collection_root.is_dir():
+        raise SystemExit(1)
+    if not (collection_root / "MANIFEST.json").is_file() and not (collection_root / "galaxy.yml").is_file():
+        raise SystemExit(1)
+PY
+      then
+        rm -f "$current_sha_file"
+        if [[ -n "$lock_fd" ]]; then
+          flock -u "$lock_fd"
+          eval "exec ${lock_fd}>&-"
+        fi
+        return 0
       fi
-      return 0
     fi
   fi
 
+  if [[ -n "${LV3_ANSIBLE_GALAXY_SERVER:-}" ]]; then
+    galaxy_server_args=(--server "$LV3_ANSIBLE_GALAXY_SERVER")
+  fi
+
   "${ANSIBLE_GALAXY_CMD[@]}" collection install \
+    "${galaxy_server_args[@]}" \
     -r "$requirements_file" \
     -p "$ANSIBLE_COLLECTIONS_DIR" \
     --server "$VALIDATION_GALAXY_SERVER" \

@@ -194,7 +194,7 @@ compute_validation_lane_context() {
   local current_branch=""
 
   case "$COMMAND_LABEL" in
-    pre-push-gate|remote-pre-push)
+    pre-push-gate|remote-pre-push|remote-validate)
       ;;
     *)
       return 0
