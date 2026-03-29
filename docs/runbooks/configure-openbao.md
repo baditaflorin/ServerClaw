@@ -54,6 +54,10 @@ The converge creates these controller-local files:
 
 Treat the entire `.local/openbao/` subtree as recovery material and keep it out of git.
 
+The persisted AppRole JSON artifacts now carry reusable secret IDs within their
+existing `15m` TTL so concurrent controller-side automation and parallel agent
+worktrees do not invalidate each other by consuming a shared single-use file.
+
 ## Verification
 
 Basic runtime checks:
@@ -78,6 +82,10 @@ secret_id="$(jq -r '.secret_id' /Users/live/Documents/GITHUB_PROJECTS/proxmox_fl
 token="$(curl -fsS --request POST --data "{\"role_id\":\"$role_id\",\"secret_id\":\"$secret_id\"}" http://127.0.0.1:8201/v1/auth/approle/login | jq -r '.auth.client_token')"
 curl -fsS --header "X-Vault-Token: $token" http://127.0.0.1:8201/v1/database/creds/postgres-readonly
 ```
+
+If the AppRole login starts returning `invalid role or secret ID`, the artifact
+has usually expired rather than being permanently broken. Refresh it with
+`make converge-openbao` and retry.
 
 Controller-side mTLS verification for the private OpenBao API:
 

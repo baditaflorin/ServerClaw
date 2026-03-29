@@ -105,6 +105,12 @@ def test_openbao_runtime_retries_seal_status_during_restart_window() -> None:
     assert "changed_when: false" in tasks
 
 
+def test_openbao_runtime_persisted_approles_use_reusable_secret_ids() -> None:
+    defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
+
+    assert defaults.count("secret_id_num_uses: 0") >= 3
+
+
 def test_openbao_runtime_rechecks_seal_state_before_auth_verification() -> None:
     tasks = TASKS_PATH.read_text(encoding="utf-8")
     ensure_unsealed_tasks = ENSURE_UNSEALED_TASKS_PATH.read_text(encoding="utf-8")

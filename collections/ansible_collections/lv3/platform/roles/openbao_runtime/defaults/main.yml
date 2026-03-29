@@ -97,7 +97,7 @@ openbao_approles:
     token_max_ttl: 1h
     token_num_uses: 0
     secret_id_ttl: 15m
-    secret_id_num_uses: 1
+    secret_id_num_uses: 0
     local_file: "{{ openbao_controller_approle_local_file }}"
   - name: mail-platform
     policies:
@@ -106,7 +106,7 @@ openbao_approles:
     token_max_ttl: 1h
     token_num_uses: 0
     secret_id_ttl: 15m
-    secret_id_num_uses: 1
+    secret_id_num_uses: 0
     local_file: "{{ openbao_mail_platform_approle_local_file }}"
   - name: secret-rotation
     policies:
@@ -115,7 +115,7 @@ openbao_approles:
     token_max_ttl: 1h
     token_num_uses: 0
     secret_id_ttl: 15m
-    secret_id_num_uses: 1
+    secret_id_num_uses: 0
     local_file: "{{ openbao_secret_rotation_approle_local_file }}"
 openbao_transit_keys:
   - controller-automation
