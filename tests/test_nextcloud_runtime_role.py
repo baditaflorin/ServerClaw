@@ -80,6 +80,53 @@ def test_runtime_occ_mutations_retry_when_docker_exec_is_transiently_unavailable
     assert redis_password_task["until"] == "nextcloud_redis_password_result.rc == 0"
 
 
+def test_runtime_resets_stale_compose_networks_before_retrying_startup() -> None:
+    tasks = load_tasks(ROLE_TASKS)
+    network_inspect = next(
+        task for task in tasks if task.get("name") == "Check whether the Nextcloud compose network exists"
+    )
+    container_inspect = next(
+        task for task in tasks if task.get("name") == "Check whether the Nextcloud app container already exists"
+    )
+    reset_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Reset stale Nextcloud compose resources when the compose network is missing"
+    )
+    startup = next(
+        task for task in tasks if task.get("name") == "Start the Nextcloud runtime and recover stale compose networks"
+    )
+
+    assert network_inspect["ansible.builtin.command"]["argv"] == ["docker", "network", "inspect", "nextcloud_default"]
+    assert container_inspect["ansible.builtin.command"]["argv"] == ["docker", "inspect", "{{ nextcloud_container_name }}"]
+    assert reset_task["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
+    assert reset_task["when"] == [
+        "nextcloud_container_inspect.rc == 0",
+        "nextcloud_compose_network_inspect.rc != 0",
+    ]
+
+    start_task = next(task for task in startup["block"] if task.get("name") == "Start the Nextcloud runtime")
+    network_missing_fact = next(
+        task for task in startup["rescue"] if task.get("name") == "Flag stale Nextcloud compose networks after startup failure"
+    )
+    retry_reset = next(
+        task
+        for task in startup["rescue"]
+        if task.get("name") == "Reset stale Nextcloud compose resources after startup failure"
+    )
+    retry_start = next(
+        task for task in startup["rescue"] if task.get("name") == "Retry Nextcloud startup after resetting stale compose resources"
+    )
+
+    assert start_task["ansible.builtin.command"]["argv"][-3:] == ["up", "-d", "--remove-orphans"]
+    assert "failed to create endpoint" in network_missing_fact["ansible.builtin.set_fact"]["nextcloud_compose_network_missing"]
+    assert "does not exist" in network_missing_fact["ansible.builtin.set_fact"]["nextcloud_compose_network_missing"]
+    assert retry_reset["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
+    assert retry_reset["when"] == "nextcloud_compose_network_missing"
+    assert retry_start["ansible.builtin.command"]["argv"][-4:] == ["up", "-d", "--remove-orphans", "--force-recreate"]
+    assert retry_start["when"] == "nextcloud_compose_network_missing"
+
+
 def test_postgres_role_provisions_named_database_and_role() -> None:
     tasks = load_tasks(POSTGRES_TASKS)
     create_role = next(task for task in tasks if task.get("name") == "Create the Nextcloud database role")

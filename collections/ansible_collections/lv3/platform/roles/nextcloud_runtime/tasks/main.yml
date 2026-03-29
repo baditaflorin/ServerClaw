@@ -247,24 +247,122 @@
     or 'Downloaded newer image' in nextcloud_pull.stdout
     or 'Pull complete' in nextcloud_pull.stdout
 
-- name: Start the Nextcloud runtime
+- name: Check whether the Nextcloud compose network exists
+  ansible.builtin.command:
+    argv:
+      - docker
+      - network
+      - inspect
+      - nextcloud_default
+  register: nextcloud_compose_network_inspect
+  changed_when: false
+  failed_when: nextcloud_compose_network_inspect.rc not in [0, 1]
+
+- name: Check whether the Nextcloud app container already exists
+  ansible.builtin.command:
+    argv:
+      - docker
+      - inspect
+      - "{{ nextcloud_container_name }}"
+  register: nextcloud_container_inspect
+  changed_when: false
+  failed_when: nextcloud_container_inspect.rc not in [0, 1]
+
+- name: Reset stale Nextcloud compose resources when the compose network is missing
   ansible.builtin.command:
     argv:
       - docker
       - compose
       - --file
       - "{{ nextcloud_compose_file }}"
-      - up
-      - -d
+      - down
       - --remove-orphans
   args:
     chdir: "{{ nextcloud_site_dir }}"
-  register: nextcloud_compose_up
+  register: nextcloud_compose_down_stale_network
   changed_when: >-
-    'Creating' in nextcloud_compose_up.stdout
-    or 'Starting' in nextcloud_compose_up.stdout
-    or 'Recreating' in nextcloud_compose_up.stdout
-    or 'Running' in nextcloud_compose_up.stdout
+    'Stopping' in nextcloud_compose_down_stale_network.stdout
+    or 'Removing' in nextcloud_compose_down_stale_network.stdout
+  when:
+    - nextcloud_container_inspect.rc == 0
+    - nextcloud_compose_network_inspect.rc != 0
+
+- name: Start the Nextcloud runtime and recover stale compose networks
+  block:
+    - name: Start the Nextcloud runtime
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ nextcloud_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ nextcloud_site_dir }}"
+      register: nextcloud_compose_up
+      changed_when: >-
+        'Creating' in nextcloud_compose_up.stdout
+        or 'Starting' in nextcloud_compose_up.stdout
+        or 'Recreating' in nextcloud_compose_up.stdout
+        or 'Running' in nextcloud_compose_up.stdout
+  rescue:
+    - name: Flag stale Nextcloud compose networks after startup failure
+      ansible.builtin.set_fact:
+        nextcloud_compose_network_missing: >-
+          {{
+            'failed to create endpoint' in (nextcloud_compose_up.stderr | default(''))
+            and 'does not exist' in (nextcloud_compose_up.stderr | default(''))
+          }}
+
+    - name: Reset stale Nextcloud compose resources after startup failure
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ nextcloud_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ nextcloud_site_dir }}"
+      register: nextcloud_compose_down_retry
+      changed_when: >-
+        'Stopping' in nextcloud_compose_down_retry.stdout
+        or 'Removing' in nextcloud_compose_down_retry.stdout
+      when: nextcloud_compose_network_missing
+
+    - name: Retry Nextcloud startup after resetting stale compose resources
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ nextcloud_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+          - --force-recreate
+      args:
+        chdir: "{{ nextcloud_site_dir }}"
+      register: nextcloud_compose_up_retry
+      changed_when: >-
+        'Creating' in nextcloud_compose_up_retry.stdout
+        or 'Starting' in nextcloud_compose_up_retry.stdout
+        or 'Recreating' in nextcloud_compose_up_retry.stdout
+        or 'Running' in nextcloud_compose_up_retry.stdout
+      when: nextcloud_compose_network_missing
+
+    - name: Re-raise unexpected Nextcloud startup failures
+      ansible.builtin.fail:
+        msg: >-
+          {{
+            nextcloud_compose_up.stderr
+            | default(nextcloud_compose_up.stdout)
+            | default('Unknown Nextcloud compose startup failure.')
+          }}
+      when: not nextcloud_compose_network_missing
 
 - name: Wait for Nextcloud local status
   ansible.builtin.uri:
