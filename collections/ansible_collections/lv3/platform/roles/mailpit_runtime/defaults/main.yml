@@ -1,5 +1,5 @@
 ---
-mailpit_service_topology: "{{ platform_service_topology | platform_service('mailpit') }}"
+mailpit_service_topology: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service('mailpit') }}"
 mailpit_site_dir: /opt/dev-tools/mailpit
 mailpit_compose_file: "{{ mailpit_site_dir }}/docker-compose.yml"
 mailpit_container_name: mailpit

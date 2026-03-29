@@ -14,6 +14,7 @@ COMPOSE_TEMPLATE = REPO_ROOT / "roles" / "mailpit_runtime" / "templates" / "dock
 def test_defaults_define_private_mailpit_runtime_contract() -> None:
     defaults = yaml.safe_load(ROLE_DEFAULTS.read_text())
 
+    assert defaults["mailpit_service_topology"] == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service('mailpit') }}"
     assert defaults["mailpit_site_dir"] == "/opt/dev-tools/mailpit"
     assert defaults["mailpit_compose_file"] == "{{ mailpit_site_dir }}/docker-compose.yml"
     assert defaults["mailpit_container_name"] == "mailpit"
