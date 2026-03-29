@@ -3,7 +3,7 @@
 - ADR: [ADR 0228](../adr/0228-windmill-as-the-default-browser-and-api-operations-surface.md)
 - Title: Integrate ADR 0228 live apply into `origin/main`
 - Status: in_progress
-- Included In Repo Version: 0.177.67
+- Included In Repo Version: 0.177.68
 - Platform Version Observed During Merge: 0.130.47
 - Release Date: 2026-03-29
 - Branch: `codex/ws-0228-main-merge`
@@ -27,7 +27,7 @@ fully integrated result to `origin/main`.
 - `changelog.md`
 - `RELEASE.md`
 - `docs/release-notes/README.md`
-- `docs/release-notes/0.177.67.md`
+- `docs/release-notes/0.177.68.md`
 - `versions/stack.yaml`
 - `README.md`
 - `build/platform-manifest.json`
@@ -50,4 +50,4 @@ fully integrated result to `origin/main`.
 
 - latest `origin/main` through commit `bd696876` is merged into this worktree branch, including the intervening ADR 0238 operator-grid release surfaces on top of the earlier ADR 0240 and ADR 0232 mainline updates
 - the exact-main Windmill replay from commit `1130f6b01d0a78ae5b8775d1c89fef01cb7de2e0` now completes successfully with the hash-backed seeded-script path, stale worker-directory pruning, and synchronized raw-app lockfile
-- the merged candidate now targets repository version `0.177.67` because ADR 0238 already cut `0.177.66`; the remaining steps are the exact-head Windmill replay from this merged branch, the final receipt and canonical receipt references, validation reruns, push to `origin/main`, and server-resident reconciliation verification
+- the merged candidate now targets repository version `0.177.68` because ADR 0224 has now claimed `0.177.67`; the remaining steps are the exact-head Windmill replay from this merged branch, the final receipt and canonical receipt references, validation reruns, push to `origin/main`, and server-resident reconciliation verification

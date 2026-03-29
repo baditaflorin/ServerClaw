@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.67",
+  "repo_version": "0.177.68",
   "platform_version": "0.130.47",
-  "generated_at": "2026-03-29T03:12:23Z",
-  "next_refresh_at": "2026-03-29T04:12:23Z",
+  "generated_at": "2026-03-29T03:22:39Z",
+  "next_refresh_at": "2026-03-29T04:22:39Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -81,7 +81,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://apps.lv3.org",
-        "last_live_apply": "2026-03-28T00:00:00Z"
+        "last_live_apply": "2026-03-29T00:00:00Z"
       },
       "dify": {
         "service_name": "Dify",
@@ -4157,10 +4157,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.66",
+    "last_version": "0.177.67",
     "deployed_at": "2026-03-29",
     "summary": "records ADR 0228 exact-main evidence on the current mainline by verifying Windmill as the default browser-first and API-first operations surface, hardening seeded script and raw-app synchronization on CE v1.662.0, and refreshing the protected canonical truth after the exact-main replay",
-    "release_notes_url": "docs/release-notes/0.177.67.md"
+    "release_notes_url": "docs/release-notes/0.177.68.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

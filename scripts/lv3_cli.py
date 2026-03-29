@@ -405,6 +405,7 @@ def resolve_deploy_repo_command(
     *,
     repo: str,
     branch: str,
+    source: str,
     app_name: str,
     project: str,
     environment: str,
@@ -412,15 +413,28 @@ def resolve_deploy_repo_command(
     domain: str | None,
     subdomain: str | None,
     build_pack: str,
+    ports: str,
+    description: str | None,
+    private_key_uuid: str | None,
+    deploy_key_name: str | None,
+    deploy_key_path: str | None,
+    dockerfile_location: str | None,
+    docker_compose_location: str | None,
+    compose_domains: list[str] | None,
+    publish_directory: str | None,
     wait: bool,
     force: bool,
     timeout: int,
+    max_deploy_attempts: int,
+    retry_delay: int,
 ) -> CommandPlan:
     coolify_args: list[str] = [
         "--repo",
         repo,
         "--branch",
         branch,
+        "--source",
+        source,
         "--app-name",
         app_name,
         "--project",
@@ -429,6 +443,8 @@ def resolve_deploy_repo_command(
         environment,
         "--build-pack",
         build_pack,
+        "--ports",
+        ports,
     ]
     if base_directory:
         coolify_args.extend(["--base-directory", base_directory])
@@ -436,12 +452,32 @@ def resolve_deploy_repo_command(
         coolify_args.extend(["--domain", domain])
     if subdomain:
         coolify_args.extend(["--subdomain", subdomain])
+    if description:
+        coolify_args.extend(["--description", description])
+    if private_key_uuid:
+        coolify_args.extend(["--private-key-uuid", private_key_uuid])
+    if deploy_key_name:
+        coolify_args.extend(["--deploy-key-name", deploy_key_name])
+    if deploy_key_path:
+        coolify_args.extend(["--deploy-key-path", deploy_key_path])
+    if dockerfile_location:
+        coolify_args.extend(["--dockerfile-location", dockerfile_location])
+    if docker_compose_location:
+        coolify_args.extend(["--docker-compose-location", docker_compose_location])
+    for compose_domain in compose_domains or []:
+        coolify_args.extend(["--compose-domain", compose_domain])
+    if publish_directory:
+        coolify_args.extend(["--publish-directory", publish_directory])
     if wait:
         coolify_args.append("--wait")
     if force:
         coolify_args.append("--force")
     if timeout != 900:
         coolify_args.extend(["--timeout", str(timeout)])
+    if max_deploy_attempts != 3:
+        coolify_args.extend(["--max-deploy-attempts", str(max_deploy_attempts)])
+    if retry_delay != 15:
+        coolify_args.extend(["--retry-delay", str(retry_delay)])
 
     return CommandPlan(
         label=f"deploy-repo {app_name}",
@@ -2524,6 +2560,7 @@ def build_parser() -> argparse.ArgumentParser:
     deploy_repo = subparsers.add_parser("deploy-repo", help="Deploy one repository through the governed Coolify wrapper.")
     deploy_repo.add_argument("--repo", required=True, help="Repository URL.")
     deploy_repo.add_argument("--branch", default="main", help="Repository branch.")
+    deploy_repo.add_argument("--source", default="auto", choices=["auto", "public", "private-deploy-key"])
     deploy_repo.add_argument("--base-directory", help="Optional base directory inside the repository.")
     deploy_repo.add_argument("--app-name", default="repo-smoke", help="Coolify application name.")
     deploy_repo.add_argument("--project", default="LV3 Apps", help="Coolify project name.")
@@ -2531,9 +2568,20 @@ def build_parser() -> argparse.ArgumentParser:
     deploy_repo.add_argument("--domain", help="Full domain URL, for example http://apps.lv3.org.")
     deploy_repo.add_argument("--subdomain", help="Subdomain under apps.lv3.org, for example hello.")
     deploy_repo.add_argument("--build-pack", default="static", choices=["nixpacks", "static", "dockerfile", "dockercompose"])
+    deploy_repo.add_argument("--ports", default="80", help="Comma-separated exposed ports.")
+    deploy_repo.add_argument("--description", help="Optional Coolify application description.")
+    deploy_repo.add_argument("--private-key-uuid", help="Existing Coolify private key UUID.")
+    deploy_repo.add_argument("--deploy-key-name", help="Deploy key label to reuse or create.")
+    deploy_repo.add_argument("--deploy-key-path", help="Local SSH private key path used for deploy-key bootstrap.")
+    deploy_repo.add_argument("--dockerfile-location", help="Repository-relative Dockerfile path.")
+    deploy_repo.add_argument("--docker-compose-location", help="Repository-relative Docker Compose path.")
+    deploy_repo.add_argument("--compose-domain", action="append", help="Map one compose service to one domain using SERVICE=DOMAIN.")
+    deploy_repo.add_argument("--publish-directory", help="Static publish directory for static builds.")
     deploy_repo.add_argument("--wait", action="store_true")
     deploy_repo.add_argument("--force", action="store_true")
     deploy_repo.add_argument("--timeout", type=int, default=900)
+    deploy_repo.add_argument("--max-deploy-attempts", type=int, default=3)
+    deploy_repo.add_argument("--retry-delay", type=int, default=15)
     deploy_repo.add_argument("--dry-run", action="store_true")
     deploy_repo.add_argument("--explain", action="store_true")
 
@@ -2916,6 +2964,7 @@ def main(argv: list[str] | None = None) -> int:
             resolve_deploy_repo_command(
                 repo=args.repo,
                 branch=args.branch,
+                source=args.source,
                 app_name=args.app_name,
                 project=args.project,
                 environment=args.environment,
@@ -2923,9 +2972,20 @@ def main(argv: list[str] | None = None) -> int:
                 domain=args.domain,
                 subdomain=args.subdomain,
                 build_pack=args.build_pack,
+                ports=args.ports,
+                description=args.description,
+                private_key_uuid=args.private_key_uuid,
+                deploy_key_name=args.deploy_key_name,
+                deploy_key_path=args.deploy_key_path,
+                dockerfile_location=args.dockerfile_location,
+                docker_compose_location=args.docker_compose_location,
+                compose_domains=args.compose_domain,
+                publish_directory=args.publish_directory,
                 wait=args.wait,
                 force=args.force,
                 timeout=args.timeout,
+                max_deploy_attempts=args.max_deploy_attempts,
+                retry_delay=args.retry_delay,
             ),
             dry_run=args.dry_run,
             explain=args.explain,
