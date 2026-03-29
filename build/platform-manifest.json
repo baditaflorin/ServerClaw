@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.65",
+  "repo_version": "0.177.66",
   "platform_version": "0.130.46",
-  "generated_at": "2026-03-29T02:21:18Z",
-  "next_refresh_at": "2026-03-29T03:21:18Z",
+  "generated_at": "2026-03-29T02:49:15Z",
+  "next_refresh_at": "2026-03-29T03:49:15Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4157,10 +4157,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.64",
+    "last_version": "0.177.65",
     "deployed_at": "2026-03-29",
-    "summary": "implements ADR 0232 by adding the private Nomad scheduler, controller-local TLS and ACL bootstrap, Proxmox proxy and firewall wiring, and repo-managed smoke jobs for durable batch and long-running internal workloads",
-    "release_notes_url": "docs/release-notes/0.177.65.md"
+    "summary": "rolled out AG Grid Community on the Windmill operator access roster so dense operator data now has governed sorting, filtering, pagination, column control, and keyboard navigation",
+    "release_notes_url": "docs/release-notes/0.177.66.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

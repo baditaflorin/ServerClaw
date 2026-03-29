@@ -3,7 +3,7 @@
 - ADR: [ADR 0238](../adr/0238-data-dense-operator-grids-via-ag-grid-community.md)
 - Title: Live apply AG Grid Community on the Windmill operator access roster
 - Status: live_applied
-- Implemented In Repo Version: N/A
+- Implemented In Repo Version: 0.177.66
 - Live Applied In Platform Version: 0.130.46
 - Implemented On: 2026-03-29
 - Live Applied On: 2026-03-29
@@ -87,19 +87,18 @@
 - The follow-up verification fixed the controller-side helper contract too: `scripts/windmill_run_wait_result.py` now works under plain `python3`, submits by script path, falls back to script hash when needed, and polls `jobs_u/get/<job_id>` until the workflow reaches a terminal state.
 - The workstream branch rebased cleanly onto the latest `origin/main` again after ADR 0232 recut `0.177.65`; because that mainline move only touched release, README, diagram, and ADR 0232 surfaces, the verified ADR 0238 code delta remained unchanged on the Windmill runtime paths listed above.
 
+## Mainline Integration Outcome
+
+- release `0.177.66` carries ADR 0238 onto `main`
+- the protected release surfaces were regenerated on top of `origin/main` `0.177.65`, including `README.md`, `docs/diagrams/agent-coordination-map.excalidraw`, `build/platform-manifest.json`, and `docs/release-notes/0.177.66.md`
+- the integrated platform baseline remains `0.130.46`
+
 ## Protected Integration Files Deferred
 
-- `VERSION`
-- `changelog.md`
-- top-level `README.md`
-- `versions/stack.yaml`
-- `docs/diagrams/agent-coordination-map.excalidraw`
-- `docs/release-notes/*`
-- `build/platform-manifest.json`
+- none; merged to main in repository version `0.177.66`
 
 ## Merge-To-Main Notes
 
-- The current `origin/main` baseline after the ADR 0232 exact-main replay is repository version `0.177.65` with platform baseline `0.130.46`; the final ws-0238 integration should therefore cut the next patch release, not reuse the already-consumed `0.177.64` or `0.177.65` release surfaces.
-- The mainline integration still needs to flip `ws-0238-live-apply` from `implemented` to `live_applied` in `workstreams.yaml`, regenerate `README.md`, `docs/diagrams/agent-coordination-map.excalidraw`, `build/platform-manifest.json`, and `docs/release-notes/*`, then update `versions/stack.yaml` so `windmill` and `operator_access` both point at this receipt while the platform baseline remains `0.130.46`.
-- Rebase this workstream on the latest `origin/main` before the integration commit, then carry the live receipt and verification summary onto the protected release surfaces without rewriting unrelated concurrent work.
-- The branch-local live receipt should also note that `f/lv3/scheduler_watchdog_loop_every_10s` was corrected once through the Windmill API before the helper fix landed, and that a one-time manual probe temporarily wrote placeholder values onto `f/lv3/world_state/refresh_container_inventory_every_minute` before the successful converge restored the repo-managed schedule contract.
+- completed on top of `origin/main` `0.177.65` by cutting release `0.177.66`
+- `versions/stack.yaml` now records repository version `0.177.66`, while the broader top-level `windmill` and `operator_access` receipt pointers continue to be governed by the later ADR 0241 canonical-truth rollout
+- the branch-local live receipt still documents that `f/lv3/scheduler_watchdog_loop_every_10s` was corrected once through the Windmill API before the helper fix landed, and that a one-time manual probe temporarily wrote placeholder values onto `f/lv3/world_state/refresh_container_inventory_every_minute` before the successful converge restored the repo-managed schedule contract
