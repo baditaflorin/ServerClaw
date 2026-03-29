@@ -284,6 +284,23 @@
     path: "{{ matrix_synapse_log_config_file }}"
   register: matrix_synapse_log_config_stat
 
+- name: Pre-pull the Matrix Synapse image when bootstrap artifacts are missing
+  ansible.builtin.command:
+    argv:
+      - docker
+      - pull
+      - "{{ matrix_synapse_image }}"
+  register: matrix_synapse_initial_pull
+  retries: 3
+  delay: 15
+  until: matrix_synapse_initial_pull.rc == 0
+  changed_when: >-
+    'Downloaded newer image' in matrix_synapse_initial_pull.stdout
+    or 'Pull complete' in matrix_synapse_initial_pull.stdout
+  when:
+    - not matrix_synapse_signing_key_stat.stat.exists
+      or not matrix_synapse_log_config_stat.stat.exists
+
 - name: Generate the initial Matrix Synapse signing material and log config
   ansible.builtin.command:
     argv:
@@ -326,6 +343,9 @@
   args:
     chdir: "{{ matrix_synapse_site_dir }}"
   register: matrix_synapse_pull
+  retries: 3
+  delay: 15
+  until: matrix_synapse_pull.rc == 0
   changed_when: >-
     'Pulling' in matrix_synapse_pull.stdout
     or 'Downloaded newer image' in matrix_synapse_pull.stdout

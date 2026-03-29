@@ -50,9 +50,30 @@ def test_matrix_synapse_homeserver_template_is_client_only_and_x_forwarded() -> 
 
 
 def test_matrix_synapse_runtime_generates_signing_material_and_bootstrap_user() -> None:
+    tasks = yaml.safe_load(TASKS_FILE.read_text())
     task_file = TASKS_FILE.read_text()
+    bootstrap_pull_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Pre-pull the Matrix Synapse image when bootstrap artifacts are missing"
+    )
+    generate_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Generate the initial Matrix Synapse signing material and log config"
+    )
+    compose_pull_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Pull the Matrix Synapse image"
+    )
 
     assert "Generate the initial Matrix Synapse signing material and log config" in task_file
     assert "register_new_matrix_user" in task_file
     assert "--exists-ok" in task_file
     assert "Mirror the Matrix Synapse signing key to the control machine" in task_file
+    assert bootstrap_pull_task["retries"] == 3
+    assert bootstrap_pull_task["until"] == "matrix_synapse_initial_pull.rc == 0"
+    assert tasks.index(bootstrap_pull_task) < tasks.index(generate_task)
+    assert compose_pull_task["retries"] == 3
+    assert compose_pull_task["until"] == "matrix_synapse_pull.rc == 0"
