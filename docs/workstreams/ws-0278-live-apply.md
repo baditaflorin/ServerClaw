@@ -3,8 +3,8 @@
 - ADR: [ADR 0278](../adr/0278-gotenberg-as-the-document-to-pdf-rendering-service.md)
 - Title: private Gotenberg document-to-PDF rendering service live apply
 - Status: live_applied
-- Implemented In Repo Version: N/A
-- Live Applied In Platform Version: 0.130.59
+- Implemented In Repo Version: 0.177.92
+- Live Applied In Platform Version: 0.130.61
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0278-live-apply`
@@ -54,8 +54,9 @@
   `receipts/live-applies/evidence/2026-03-30-ws-0278-gateway-health.txt`,
   `receipts/live-applies/evidence/2026-03-30-ws-0278-gateway-chromium.txt`
 
-## Remaining For Mainline Integration
+## Mainline Integration Resolution
 
-- rebase or replay this work onto the newest `origin/main`, because the remote mainline advanced again while this workstream was converging and verifying
-- update the protected integration files only from that exact-main integration step: `VERSION`, release surfaces in `changelog.md`, the top-level `README.md` status summary, `versions/stack.yaml`, and the generated canonical-truth outputs that depend on them
-- rerun the generated-doc and canonical-truth gates from the exact-main tree, then perform the authoritative exact-main Gotenberg replay before pushing `origin/main`
+- exact-main integration completed from repo version `0.177.92`, and the canonical platform version now advances to `0.130.61`
+- the first merged-main replay from commit `8704a9798` failed because the Docker runtime role reloaded the full nftables ruleset, flushed Docker-managed tables, and left the `DOCKER` nat chain unavailable during Gotenberg startup
+- commit `e1b0ceb64` fixed the Docker runtime replay path by applying the forward-compat rules live without reloading the full nftables ruleset, after which the authoritative merged-main replay succeeded
+- the canonical mainline receipt is `receipts/live-applies/2026-03-30-adr-0278-gotenberg-mainline-live-apply.json`, and the merged-main verification evidence is preserved in the `2026-03-30-ws-0278-merged-main-*` files
