@@ -1,9 +1,10 @@
 # ADR 0275: Apache Tika Server For Document Text Extraction In The RAG Pipeline
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Live applied
+- Implemented In Repo Version: pending merge to `main` (validated from repo version `0.177.101`)
+- Implemented In Platform Version: pending exact-main replay from merged `main` (currently observed on platform version `0.130.68`; first live apply completed on `0.130.63`)
+- Implemented On: 2026-03-30
 - Date: 2026-03-29
 
 ## Context

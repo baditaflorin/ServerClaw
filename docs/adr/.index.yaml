@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-30'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 258
+  Implemented: 259
   Partial: 7
-  Not Implemented: 58
+  Not Implemented: 57
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4724,7 +4724,7 @@ adr_index:
   - adr: '0275'
     title: Apache Tika Server For Document Text Extraction In The RAG Pipeline
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: ci-cd
     keywords:
@@ -4738,6 +4738,7 @@ adr_index:
       - pipeline
     summary: We will deploy Apache Tika Server as the canonical document extraction
     filename: 0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline.md
+    implemented_version: 0.177.101
   - adr: '0276'
     title: NATS JetStream As The Platform Event Bus
     status: Accepted
