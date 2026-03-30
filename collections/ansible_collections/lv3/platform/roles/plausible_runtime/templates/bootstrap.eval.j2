@@ -13,7 +13,7 @@ site_specs = [
 {% endfor %}
 ]
 
-{result, _changed?} =
+{:ok, {result, _changed?}} =
   Repo.transaction(fn ->
     existing_user = Repo.get_by(Auth.User, email: email)
 

@@ -51,7 +51,7 @@
       - exec
       - "{{ plausible_container_name }}"
       - bin/plausible
-      - eval
+      - rpc
       - "{{ lookup('ansible.builtin.template', 'verify.eval.j2') | trim }}"
   register: plausible_verify_bootstrap
   changed_when: false
@@ -101,7 +101,7 @@
       - exec
       - "{{ plausible_container_name }}"
       - bin/plausible
-      - eval
+      - rpc
       - "{{ lookup('ansible.builtin.template', 'event-check.eval.j2') | trim }}"
   register: plausible_event_check
   retries: 24

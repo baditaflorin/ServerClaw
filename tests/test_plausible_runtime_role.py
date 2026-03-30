@@ -68,6 +68,7 @@ def test_plausible_runtime_tasks_manage_openbao_compose_and_port_recovery() -> N
     assert force_recreate_task["ansible.builtin.command"]["argv"][-2:] == ["--force-recreate", "--remove-orphans"]
     assert force_recreate_task["when"] == "plausible_port_binding_check.stdout | trim == \"\""
     assert bootstrap_task["ansible.builtin.command"]["argv"][:4] == ["docker", "exec", "{{ plausible_container_name }}", "bin/plausible"]
+    assert bootstrap_task["ansible.builtin.command"]["argv"][4] == "rpc"
     assert verify_task["ansible.builtin.import_tasks"] == "verify.yml"
 
 
@@ -90,6 +91,7 @@ def test_plausible_verify_task_checks_tracker_and_synthetic_event_ingestion() ->
         "{{ plausible_container_name }}",
         "bin/plausible",
     ]
+    assert event_check_task["ansible.builtin.command"]["argv"][4] == "rpc"
     assert event_check_task["until"] == "(plausible_event_check.stdout | trim | from_json).seen"
 
 
@@ -109,5 +111,6 @@ def test_plausible_runtime_templates_render_public_urls_and_repo_managed_site_ch
     assert '[[ with secret "kv/data/{{ plausible_openbao_secret_path }}" ]]' in ctmpl_template
     assert "Teams.get_or_create(user)" in bootstrap_template
     assert "Sites.create(user" in bootstrap_template
+    assert "{:ok, {result, _changed?}} =" in bootstrap_template
     assert "missing_sites" in verify_template
     assert 'path = "{{ plausible_verify_path }}"' in event_check_template

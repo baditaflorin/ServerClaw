@@ -60,7 +60,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   -o StrictHostKeyChecking=no \
   -o UserKnownHostsFile=/dev/null \
   ops@10.10.10.20 \
-  'sudo docker exec plausible bin/plausible eval "import Ecto.Query; site = Plausible.Sites.get_by_domain!(\"nginx.lv3.org\"); seen = Plausible.ClickhouseRepo.exists?(from e in \"events_v2\", where: e.site_id == ^site.id and e.pathname == ^\"/plausible-smoke\"); IO.puts(Jason.encode!(%{seen: seen}))"'
+  'sudo docker exec plausible bin/plausible rpc "import Ecto.Query; site = Plausible.Sites.get_by_domain!(\"nginx.lv3.org\"); seen = Plausible.ClickhouseRepo.exists?(from e in \"events_v2\", where: e.site_id == ^site.id and e.pathname == ^\"/plausible-smoke\"); IO.puts(Jason.encode!(%{seen: seen}))"'
 ```
 
 The last command verifies that one synthetic event has reached Plausible's ClickHouse-backed event store for the seeded `nginx.lv3.org` site.

@@ -305,7 +305,7 @@
       - exec
       - "{{ plausible_container_name }}"
       - bin/plausible
-      - eval
+      - rpc
       - "{{ lookup('ansible.builtin.template', 'bootstrap.eval.j2') | trim }}"
   register: plausible_bootstrap
   changed_when: >-
