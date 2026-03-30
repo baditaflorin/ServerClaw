@@ -51,7 +51,17 @@ This is the authoritative exact-main replay path because `make live-apply-servic
 is what updates the canonical release and platform truth surfaces.
 
 On a non-`main` workstream branch where protected release files must remain
-untouched, run the service playbook directly:
+untouched, prefer the service-scoped converge target:
+
+```bash
+HETZNER_DNS_API_TOKEN=... make converge-jupyterhub env=production
+```
+
+That entrypoint keeps the protected release files untouched and now repairs the
+shared edge-generated portal artifacts during `make preflight` so a fresh
+worktree does not fail later inside `nginx_edge_publication`.
+
+If you need to run the playbook directly instead of the make target:
 
 ```bash
 HETZNER_DNS_API_TOKEN=... \
@@ -67,6 +77,11 @@ ANSIBLE_REMOTE_TEMP=/tmp \
   --private-key ./.local/ssh/hetzner_llm_agents_ed25519 \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
+
+Before the direct playbook path, run either `make preflight
+WORKFLOW=live-apply-service` or `make generate-edge-static-sites` so
+`build/changelog-portal/` and `build/docs-portal/` exist for the shared edge
+publication role.
 
 ## Generated Local Artifacts
 

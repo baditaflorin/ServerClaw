@@ -3196,6 +3196,9 @@
           "bootstrap_ssh_private_key",
           "hetzner_dns_api_token"
         ],
+        "bootstrap_manifest_ids": [
+          "shared-edge-generated-portals"
+        ],
         "generated_secret_ids": [
           "keycloak_jupyterhub_client_secret",
           "jupyterhub_service_api_token",
