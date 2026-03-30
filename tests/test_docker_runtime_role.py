@@ -120,11 +120,15 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     )
     assert "docker_runtime_pre_restart_container_names" in confirm_recovery["ansible.builtin.command"]["argv"]
     assert "TRANSIENT_DOCKER_NETWORK_ERRORS" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "STALE_COMPOSE_ENDPOINT_ERRORS" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "No chain/target/match by that name" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "failed to create endpoint" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "run_with_retry(command, cwd=working_dir or None)" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'remove_command = ["docker", "rm", "-f", *container_names]' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'recovery_command.extend(["up", "-d", "--force-recreate", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "com.docker.compose.project.working_dir" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "docker_compose_up" in recover_containers["ansible.builtin.command"]["argv"][2]
-    assert 'command.extend(["up", "-d", *sorted(services)])' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'command.extend(["up", "-d", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert confirm_recovery["retries"] == "{{ docker_runtime_container_recovery_retries }}"
     assert confirm_recovery["delay"] == "{{ docker_runtime_container_recovery_delay_seconds }}"
 

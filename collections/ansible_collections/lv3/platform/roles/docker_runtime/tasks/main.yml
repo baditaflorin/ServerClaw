@@ -336,6 +336,10 @@
             "No chain/target/match by that name",
             "driver failed programming external connectivity",
         )
+        STALE_COMPOSE_ENDPOINT_ERRORS = (
+            "failed to create endpoint",
+            "does not exist",
+        )
 
 
         def run_with_retry(command, cwd=None, attempts=3, delay_seconds=3):
@@ -372,7 +376,13 @@
             service = labels.get("com.docker.compose.service") or ""
 
             if working_dir and service:
-                compose_groups.setdefault((working_dir, config_files), set()).add(service)
+                compose_group = compose_groups.setdefault(
+                    (working_dir, config_files),
+                    {"services": set(), "container_names": set()},
+                )
+                compose_group["services"].add(service)
+                if name:
+                    compose_group["container_names"].add(name)
                 continue
 
             if name:
@@ -384,21 +394,64 @@
             run_with_retry(["docker", "start", *direct_start])
             actions.append({"type": "docker_start", "containers": direct_start})
 
-        for (working_dir, config_files), services in sorted(compose_groups.items()):
+        for (working_dir, config_files), compose_group in sorted(compose_groups.items()):
             command = ["docker", "compose"]
             config_file_list = [value for value in config_files.split(",") if value]
             for config_file in config_file_list:
                 command.extend(["--file", config_file])
-            command.extend(["up", "-d", *sorted(services)])
-            run_with_retry(command, cwd=working_dir or None)
-            actions.append(
-                {
-                    "type": "docker_compose_up",
-                    "working_dir": working_dir,
-                    "config_files": config_file_list,
-                    "services": sorted(services),
-                }
-            )
+            services = sorted(compose_group["services"])
+            container_names = sorted(compose_group["container_names"])
+            command.extend(["up", "-d", *services])
+
+            try:
+                run_with_retry(command, cwd=working_dir or None)
+                actions.append(
+                    {
+                        "type": "docker_compose_up",
+                        "working_dir": working_dir,
+                        "config_files": config_file_list,
+                        "services": services,
+                    }
+                )
+            except subprocess.CalledProcessError as exc:
+                stderr = exc.stderr or ""
+                if not (
+                    container_names
+                    and all(marker in stderr for marker in STALE_COMPOSE_ENDPOINT_ERRORS)
+                ):
+                    raise
+
+                remove_command = ["docker", "rm", "-f", *container_names]
+                remove_result = subprocess.run(remove_command, text=True, capture_output=True)
+                if remove_result.returncode != 0 and "No such container" not in (remove_result.stderr or ""):
+                    raise subprocess.CalledProcessError(
+                        remove_result.returncode,
+                        remove_command,
+                        output=remove_result.stdout,
+                        stderr=remove_result.stderr,
+                    ) from exc
+                actions.append(
+                    {
+                        "type": "docker_rm_stale_compose_containers",
+                        "working_dir": working_dir,
+                        "config_files": config_file_list,
+                        "containers": container_names,
+                    }
+                )
+
+                recovery_command = ["docker", "compose"]
+                for config_file in config_file_list:
+                    recovery_command.extend(["--file", config_file])
+                recovery_command.extend(["up", "-d", "--force-recreate", *services])
+                run_with_retry(recovery_command, cwd=working_dir or None)
+                actions.append(
+                    {
+                        "type": "docker_compose_up_force_recreate",
+                        "working_dir": working_dir,
+                        "config_files": config_file_list,
+                        "services": services,
+                    }
+                )
 
         json.dump({"actions": actions}, sys.stdout)
     stdin: >-
