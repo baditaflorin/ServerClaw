@@ -8,7 +8,7 @@
 - Owner: codex
 - Depends On: `adr-0068`, `adr-0077`, `adr-0083`, `adr-0087`, `adr-0119`, `adr-0143`, `adr-0229`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0297`, `docs/workstreams/ws-0297-live-apply.md`, `docs/runbooks/configure-gitea.md`, `docs/runbooks/configure-openbao.md`, `docs/runbooks/configure-renovate.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `.gitea/workflows/renovate.yml`, `.gitea/workflows/release-bundle.yml`, `renovate.json`, `scripts/validate_repo.sh`, `scripts/validate_renovate_contract.py`, `scripts/renovate_runtime_token.py`, `scripts/renovate_stack_digest_guard.py`, `collections/ansible_collections/lv3/platform/roles/common/`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runner/`, `tests/`, `receipts/live-applies/`, `workstreams.yaml`
+- Shared Surfaces: `docs/adr/0297`, `docs/workstreams/ws-0297-live-apply.md`, `docs/runbooks/configure-gitea.md`, `docs/runbooks/configure-openbao.md`, `docs/runbooks/configure-renovate.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `.gitea/workflows/renovate.yml`, `.gitea/workflows/release-bundle.yml`, `renovate.json`, `scripts/validate_repo.sh`, `scripts/validate_renovate_contract.py`, `scripts/renovate_runtime_token.py`, `scripts/renovate_stack_digest_guard.py`, `platform/repo.py`, `README.md`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `collections/ansible_collections/lv3/platform/roles/common/`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runner/`, `tests/`, `receipts/live-applies/`, `workstreams.yaml`
 
 ## Scope
 
@@ -41,6 +41,10 @@
 - `scripts/validate_renovate_contract.py`
 - `scripts/renovate_runtime_token.py`
 - `scripts/renovate_stack_digest_guard.py`
+- `platform/repo.py`
+- `README.md`
+- `build/platform-manifest.json`
+- `docs/diagrams/agent-coordination-map.excalidraw`
 - `scripts/generate_platform_vars.py`
 - `.ansible-lint-ignore`
 - `config/ansible-role-idempotency.yml`
@@ -77,6 +81,7 @@
 - the Gitea/OpenBao/runner plumbing is now live on the current platform: `make converge-openbao` succeeded after publishing the private OpenBao HTTP listener on `10.10.10.20:8201`, and `make converge-gitea` then completed successfully with the Renovate bot account plus runner credential bundle in place
 - the live replay uncovered and repaired shared dependency drift outside the narrow ADR 0297 surface: Docker worktree path handling, PostgreSQL reserved connection budgeting, Keycloak realm-object retries, mail-platform stale-network recovery, and OpenBao credential helper recovery now match the settled live estate on this branch
 - branch-local evidence already proves the runner host renders `/opt/gitea-runner/credentials/renovate/renovate.env`, the runner container sees `/var/run/lv3/renovate/renovate.env`, and the Gitea admin API returns an active `renovate-bot` identity
+- the synchronized validation rerun also refreshed shared generated surfaces and one repo-local typing affordance that now belong to this documented branch boundary: the README document index picked up the Renovate runbook and workstream entries, the platform manifest and agent-coordination map refreshed to current truth, and `platform/repo.py` now carries the explicit untyped `yaml` import annotation required by the latest mainline type-check lane
 - the remaining end-to-end proof is on the repository boundary, not the runtime plumbing: the private Gitea repo `ops/proxmox_florin_server` is a separate internal snapshot on commit `9f988bf58f6f02c4add3c6292c65fbed929edac9`, so the branch still needs a governed private Gitea push plus a Renovate workflow dispatch before the workflow itself can be recorded as verified
 
 ## Pending Verification

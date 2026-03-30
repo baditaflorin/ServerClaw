@@ -16889,6 +16889,9 @@ workstreams:
       - docs/workstreams/ws-0297-live-apply.md
       - docs/adr/0297-renovate-bot-as-the-automated-stack-version-upgrade-proposer.md
       - docs/adr/.index.yaml
+      - README.md
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
       - docs/runbooks/configure-gitea.md
       - docs/runbooks/configure-openbao.md
       - docs/runbooks/configure-renovate.md
@@ -16901,6 +16904,7 @@ workstreams:
       - scripts/validate_renovate_contract.py
       - scripts/renovate_runtime_token.py
       - scripts/renovate_stack_digest_guard.py
+      - platform/repo.py
       - scripts/generate_platform_vars.py
       - .ansible-lint-ignore
       - config/ansible-role-idempotency.yml
@@ -16950,10 +16954,18 @@ workstreams:
             - scripts/validate_renovate_contract.py
             - scripts/renovate_runtime_token.py
             - scripts/renovate_stack_digest_guard.py
+            - platform/repo.py
             - tests/test_renovate_automation.py
             - receipts/live-applies/2026-03-30-adr-0297-renovate-live-apply.json
             - receipts/live-applies/evidence/2026-03-30-ws-0297-*
           mode: exclusive
+        - id: adr_0297_generated_truth_support
+          paths:
+            - README.md
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: latest-main-generated-truth-v1
         - id: gitea_openbao_runner_shared_contract
           paths:
             - inventory/host_vars/proxmox_florin.yml
