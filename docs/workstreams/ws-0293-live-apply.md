@@ -126,11 +126,13 @@
 - The merged-tree repository automation path is recorded in
   `receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-remote-validate-0.177.109.txt`
   and
-  `receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-pre-push-gate-0.177.109.txt`;
-  every substantive lane passed, and the only non-pass was the expected
-  `workstream-surfaces` guard because `codex/ws-0293-mainline-replay` is the
-  temporary exact-main replay branch rather than a terminal workstream branch
-  registered in `workstreams.yaml`.
+  `receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-pre-push-gate-0.177.109.txt`,
+  while the final detached exact-main promotion replay is recorded in
+  `receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-remote-validate-detached-0.177.109.txt`
+  and
+  `receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-pre-push-gate-detached-0.177.109.txt`.
+  The detached replay passed every lane, including `workstream-surfaces`, from
+  the same committed tree that was promoted to `main`.
 - The final mainline replay also hardened the Temporal namespace retention
   reconciliation path so repeated exact-main runs now retry cleanly during
   admin-tools startup and skip unnecessary namespace updates when the declared

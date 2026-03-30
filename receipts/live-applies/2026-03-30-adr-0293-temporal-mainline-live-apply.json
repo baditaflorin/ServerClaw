@@ -71,7 +71,7 @@
     {
       "check": "Merged-tree repository automation wrappers",
       "result": "pass",
-      "observed": "The integrated tree passed `release_manager.py status`, `canonical_truth.py --check`, `platform_manifest.py --check`, `validate_repository_data_models.py --validate`, `live_apply_receipts.py --validate`, `git diff --check`, and `./scripts/validate_repo.sh agent-standards data-models generated-docs`. Both `make remote-validate` and `make pre-push-gate` also passed every substantive lane and failed only the expected terminal `workstream-surfaces` guard because branch `codex/ws-0293-mainline-replay` is the temporary exact-main integration branch and not a registered terminal workstream branch in `workstreams.yaml`."
+      "observed": "The integrated tree passed `release_manager.py status`, `canonical_truth.py --check`, `platform_manifest.py --check`, `validate_repository_data_models.py --validate`, `live_apply_receipts.py --validate`, `git diff --check`, and `./scripts/validate_repo.sh agent-standards data-models generated-docs`. The first branch-local wrapper runs showed every substantive lane passing with only `workstream-surfaces` blocked by the temporary `codex/ws-0293-mainline-replay` branch name. Re-running both wrappers from the same committed tree in detached `HEAD` promotion context produced fully passing evidence in `receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-remote-validate-detached-0.177.109.txt` and `receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-pre-push-gate-detached-0.177.109.txt`, including `workstream-surfaces`."
     }
   ],
   "evidence_refs": [
@@ -117,12 +117,13 @@
     "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-validate-repo-r2-0.177.109.txt",
     "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-remote-validate-0.177.109.txt",
     "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-pre-push-gate-0.177.109.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-remote-validate-detached-0.177.109.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-pre-push-gate-detached-0.177.109.txt",
     "receipts/live-applies/2026-03-30-adr-0293-temporal-mainline-live-apply.json"
   ],
   "notes": [
     "This receipt supersedes the branch-local ADR 0293 receipt as the canonical mainline proof for Temporal on release `0.177.109`.",
     "The exact-main replay surfaced and fixed the namespace retention reconciliation edge case: repeated mainline replays now retry admin-tools namespace calls while Temporal settles and skip no-op retention updates when `168h` is already present.",
-    "The source commit will be updated to the final integration commit once the exact-main branch state is committed and pushed to `origin/main`.",
-    "The wrapper-gate evidence also records the only remaining branch-local non-pass before the `main` push: `workstream-surfaces` intentionally fails for the temporary integration branch `codex/ws-0293-mainline-replay` because it is not the terminal workstream branch registered in `workstreams.yaml`."
+    "The branch-local wrapper evidence is retained for auditability, but the detached exact-main promotion evidence is the final gate proof used for the `main` push."
   ]
 }
