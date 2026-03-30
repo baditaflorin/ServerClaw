@@ -202,6 +202,13 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - http://10.10.10.20:3008/healthz
+  labels:
+    service_id: tesseract_ocr
+    slo_id: tesseract-ocr-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - https://uptime.lv3.org
   labels:
     service_id: uptime_kuma

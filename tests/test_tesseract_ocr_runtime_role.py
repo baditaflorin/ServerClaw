@@ -98,7 +98,7 @@ def test_inventory_opens_private_tesseract_ocr_access_to_host_guest_and_monitori
 
     assert host_vars["platform_port_assignments"]["tesseract_ocr_port"] == 3008
     docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
-    assert 3008 in next(rule for rule in docker_runtime_rules if rule["source"] == "host")["ports"]
+    assert 3008 in next(rule for rule in docker_runtime_rules if rule["source"] == "host" and 3008 in rule["ports"])["ports"]
     assert 3008 in next(rule for rule in docker_runtime_rules if rule["source"] == "all_guests" and 3008 in rule["ports"])["ports"]
     assert 3008 in next(rule for rule in docker_runtime_rules if rule["source"] == "172.16.0.0/12" and 3008 in rule["ports"])["ports"]
     assert 3008 in next(rule for rule in docker_runtime_rules if rule["source"] == "monitoring-lv3" and 3008 in rule["ports"])["ports"]

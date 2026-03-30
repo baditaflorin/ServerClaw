@@ -1159,6 +1159,46 @@ groups:
             docker-runtime-lv3 for synchronous document text and metadata extraction
             workflows.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_tesseract_ocr_availability
+        expr: (slo:tesseract_ocr_availability:error_rate_5m > (14 * 0.010000)) and
+          (slo:tesseract_ocr_availability:error_rate_1h > (14 * 0.010000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: tesseract_ocr
+          slo_id: tesseract-ocr-availability
+          indicator: availability
+        annotations:
+          summary: tesseract-ocr-availability is burning its error budget at 14x
+          description: The private Tesseract OCR runtime remains reachable on docker-runtime-lv3
+            for scanned-image and image-only document fallback extraction.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_tesseract_ocr_availability
+        expr: slo:tesseract_ocr_availability:error_rate_1h > (3 * 0.010000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: tesseract_ocr
+          slo_id: tesseract-ocr-availability
+          indicator: availability
+        annotations:
+          summary: tesseract-ocr-availability is burning its error budget at 3x
+          description: The private Tesseract OCR runtime remains reachable on docker-runtime-lv3
+            for scanned-image and image-only document fallback extraction.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_tesseract_ocr_availability
+        expr: slo:tesseract_ocr_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: tesseract_ocr
+          slo_id: tesseract-ocr-availability
+          indicator: availability
+        annotations:
+          summary: tesseract-ocr-availability has less than 10% error budget remaining
+          description: The private Tesseract OCR runtime remains reachable on docker-runtime-lv3
+            for scanned-image and image-only document fallback extraction.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_uptime_kuma_availability
         expr: (slo:uptime_kuma_availability:error_rate_5m > (14 * 0.001000)) and (slo:uptime_kuma_availability:error_rate_1h
           > (14 * 0.001000))
