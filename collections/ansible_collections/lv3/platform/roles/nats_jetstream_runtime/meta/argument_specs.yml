@@ -1,0 +1,40 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the private NATS JetStream runtime for ADR 0276.
+    options:
+      nats_jetstream_image:
+        type: str
+        required: true
+      nats_jetstream_site_dir:
+        type: path
+        required: true
+      nats_jetstream_config_dir:
+        type: path
+        required: true
+      nats_jetstream_data_dir:
+        type: path
+        required: true
+      nats_jetstream_compose_file:
+        type: path
+        required: true
+      nats_jetstream_config_file:
+        type: path
+        required: true
+      nats_jetstream_admin_password_local_file:
+        type: path
+        required: true
+      nats_jetstream_port:
+        type: int
+        required: true
+      nats_jetstream_monitor_port:
+        type: int
+        required: true
+      nats_jetstream_publish_allow:
+        type: list
+        elements: str
+        required: true
+      nats_jetstream_subscribe_allow:
+        type: list
+        elements: str
+        required: true

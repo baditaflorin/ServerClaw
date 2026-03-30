@@ -1,0 +1,26 @@
+server_name: {{ nats_jetstream_server_name }}
+listen: {{ nats_jetstream_listen_host }}:{{ nats_jetstream_port }}
+http: {{ nats_jetstream_monitor_host }}:{{ nats_jetstream_monitor_port }}
+
+jetstream {
+  store_dir: "/data/jetstream"
+  max_memory_store: {{ nats_jetstream_max_memory_store }}
+  max_file_store: {{ nats_jetstream_max_file_store }}
+}
+
+authorization {
+  users = [
+    {
+      user: "{{ nats_jetstream_admin_user }}"
+      password: "{{ nats_jetstream_admin_password }}"
+      permissions: {
+        publish: {
+          allow: [{% for subject in nats_jetstream_publish_allow %}"{{ subject }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+        }
+        subscribe: {
+          allow: [{% for subject in nats_jetstream_subscribe_allow %}"{{ subject }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+        }
+      }
+    }
+  ]
+}

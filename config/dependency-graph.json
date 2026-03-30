@@ -273,6 +273,15 @@
       "adr": "0232"
     },
     {
+      "id": "nats_jetstream",
+      "service": "nats_jetstream",
+      "name": "NATS JetStream",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "automation",
+      "adr": "0276"
+    },
+    {
       "id": "ntfy",
       "service": "ntfy",
       "name": "ntfy",

@@ -1,0 +1,12 @@
+services:
+  nats:
+    image: {{ nats_jetstream_image }}
+    container_name: {{ nats_jetstream_container_name }}
+    restart: unless-stopped
+    network_mode: host
+    command:
+      - --config
+      - /etc/nats/nats-server.conf
+    volumes:
+      - "{{ nats_jetstream_config_file }}:/etc/nats/nats-server.conf:ro"
+      - "{{ nats_jetstream_data_dir }}:/data"

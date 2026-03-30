@@ -127,7 +127,7 @@ ledger.write(
 )
 ```
 
-The writer publishes a `platform.ledger.event_written` message to NATS (ADR 0058) after each successful insert. Downstream consumers (the triage engine, the dashboard, the search fabric) react to these events in real time.
+The writer publishes a `platform.mutation.recorded` message to NATS (ADR 0058) after each successful insert. Downstream consumers (the triage engine, the dashboard, the search fabric) react to these events in real time.
 
 ### Replay API
 
@@ -178,7 +178,7 @@ The existing `audit_log` table from ADR 0066 is migrated to `ledger.events` via 
 - The existing controller-side emitter at [scripts/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/mutation_audit.py) now dual-writes legacy mutation events into the ledger when `LV3_LEDGER_DSN` is configured, preserving the JSONL/Loki sinks while the platform is migrated.
 - The 2026-03-26 production live apply ran the schema against the shared `postgres` database on `postgres-lv3`, found no legacy SQL `audit_log` table to migrate, and installed the compatibility `audit_log` view with zero migrated rows because the live ADR 0066 sink was still JSONL/Loki-only.
 - The same live apply verified a guest-side dual-write from `docker-runtime-lv3` into `ledger.events`, confirmed the `audit_log` compatibility view exposed that row, and confirmed the append-only trigger rejected an `UPDATE`.
-- The live NATS broker on `docker-runtime-lv3` currently grants `jetstream-admin` publish access to `platform.>` but still rejects same-principal subscriptions to `platform.ledger.event_written`, so the production verification path used successful live emits plus broker config inspection rather than a same-principal subscription capture.
+- The live NATS broker on `docker-runtime-lv3` now carries mutation fan-out on `platform.mutation.recorded` inside the existing `PLATFORM_EVENTS` stream, so downstream subscribers keep the `platform.>` retention contract while ADR 0276 adds dedicated non-platform domain streams for `secret.rotation.*` and `rag.document.*`.
 - A 2026-03-27 replay from the latest `origin/main` re-projected `LV3_LEDGER_DSN` and `LV3_LEDGER_NATS_URL` into the Windmill runtime, recovered the worker containers after a startup race, and verified a new guest-side ledger row with correlation id `ws0115-main-ledger-emit-20260327T044831Z`.
 - The 2026-03-27 replay from the latest `origin/main` confirmed the Windmill runtime ledger projection on both `/run/lv3-secrets/windmill/runtime.env` and the live worker container environment after targeted service recovery; the remaining follow-up is the broader post-restart `sync_windmill_seed_scripts.py` connection loss, not the ADR 0115 ledger wiring itself.
 

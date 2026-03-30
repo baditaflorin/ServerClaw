@@ -1,0 +1,26 @@
+---
+nats_jetstream_image: nats:2.11-alpine
+nats_jetstream_container_name: lv3-nats-jetstream
+nats_jetstream_server_name: lv3-nats-jetstream
+nats_jetstream_site_dir: /opt/nats-jetstream
+nats_jetstream_config_dir: "{{ nats_jetstream_site_dir }}/config"
+nats_jetstream_data_dir: "{{ nats_jetstream_site_dir }}/data"
+nats_jetstream_compose_file: "{{ nats_jetstream_site_dir }}/docker-compose.yml"
+nats_jetstream_config_file: "{{ nats_jetstream_config_dir }}/nats-server.conf"
+nats_jetstream_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nats
+nats_jetstream_admin_password_local_file: "{{ nats_jetstream_local_artifact_dir }}/jetstream-admin-password.txt"
+nats_jetstream_admin_user: jetstream-admin
+nats_jetstream_listen_host: 0.0.0.0
+nats_jetstream_port: 4222
+nats_jetstream_monitor_host: 127.0.0.1
+nats_jetstream_monitor_port: 8222
+nats_jetstream_monitor_health_url: "http://127.0.0.1:{{ nats_jetstream_monitor_port }}/healthz"
+nats_jetstream_publish_allow:
+  - $JS.API.>
+  - platform.>
+  - rag.document.>
+  - secret.rotation.>
+nats_jetstream_subscribe_allow:
+  - _INBOX.>
+nats_jetstream_max_memory_store: 256MB
+nats_jetstream_max_file_store: 2GB

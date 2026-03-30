@@ -50,7 +50,7 @@ class SecretRotationTests(unittest.TestCase):
                 "value_field": "value",
                 "last_rotated_metadata_key": "lv3_last_rotated",
                 "rotated_by_metadata_key": "lv3_last_rotated_by",
-                "default_event_subject": "credentials.rotated",
+                "default_event_subject": "secret.rotation.completed",
                 "default_glitchtip_component": "secret-rotation",
             },
             "rotation_contracts": {
@@ -69,7 +69,7 @@ class SecretRotationTests(unittest.TestCase):
                     "openbao_path": "services/windmill/database-password",
                     "openbao_field": "value",
                     "apply_target": "windmill_database",
-                    "event_subject": "credentials.rotated",
+                    "event_subject": "secret.rotation.completed",
                     "glitchtip_component": "windmill",
                 },
                 "windmill_superadmin_secret": {
@@ -87,7 +87,7 @@ class SecretRotationTests(unittest.TestCase):
                     "openbao_path": "services/windmill/superadmin-secret",
                     "openbao_field": "value",
                     "apply_target": "windmill_superadmin",
-                    "event_subject": "credentials.rotated",
+                    "event_subject": "secret.rotation.completed",
                     "glitchtip_component": "windmill",
                 },
             },
@@ -158,6 +158,7 @@ class SecretRotationTests(unittest.TestCase):
         )
         self.assertEqual(event["tags"]["secret_id"], "windmill_superadmin_secret")
         self.assertEqual(event["extra"]["error"], "example failure")
+        self.assertEqual(rotation_event["subject"], "secret.rotation.failed")
 
 
 if __name__ == "__main__":
