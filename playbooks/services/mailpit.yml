@@ -1,0 +1,29 @@
+---
+# Playbook: services/mailpit.yml
+# Purpose: Provide the service-scoped live-apply entrypoint for Mailpit.
+# Use case: Run through `make live-apply-service service=mailpit env=<environment>`.
+#
+# Inputs (required):
+#   - env (str, required): Deployment environment selector passed through to the imported playbook.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH routing mode for the live apply.
+#
+# Outputs:
+#   - Imports the root Mailpit playbook used by the governed service live-apply wrapper.
+#
+# Idempotency: Fully idempotent
+#              This wrapper only imports the root Mailpit playbook and does not mutate state on its own.
+#
+# Dependencies:
+#   - ADR 0282: Defines Mailpit as the non-production SMTP interceptor.
+#   - Requires: playbooks/mailpit.yml.
+#   - Role: lv3.platform.mailpit_runtime — owned by the imported playbook.
+#
+# Related ADRs: 0079, 0107, 0282
+# Related Runbooks: docs/runbooks/configure-mailpit.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+
+- import_playbook: ../mailpit.yml

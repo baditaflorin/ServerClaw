@@ -1,0 +1,20 @@
+services:
+  mailpit:
+    image: {{ mailpit_image }}
+    container_name: {{ mailpit_container_name }}
+    restart: unless-stopped
+    environment:
+      MP_UI_BIND_ADDR: 0.0.0.0:8025
+      MP_SMTP_BIND_ADDR: 0.0.0.0:1025
+      MP_DISABLE_VERSION_CHECK: "{{ 'true' if mailpit_disable_version_check else 'false' }}"
+    ports:
+      - "{{ mailpit_bind_host }}:{{ mailpit_http_port }}:8025"
+      - "{{ mailpit_loopback_bind_host }}:{{ mailpit_http_port }}:8025"
+      - "{{ mailpit_bind_host }}:{{ mailpit_smtp_port }}:1025"
+      - "{{ mailpit_loopback_bind_host }}:{{ mailpit_smtp_port }}:1025"
+    networks:
+      - default
+
+networks:
+  default:
+    name: {{ mailpit_docker_network_name }}

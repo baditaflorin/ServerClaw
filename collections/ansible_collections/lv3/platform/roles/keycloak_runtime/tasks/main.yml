@@ -36,19 +36,22 @@
       Run the Keycloak PostgreSQL converge first so the runtime can connect to postgres-lv3.
   when: not keycloak_database_password_local.stat.exists
 
-- name: Ensure the Keycloak mail submission password exists on the control machine
+- name: Ensure the Keycloak mail submission password exists on the control machine when SMTP auth is enabled
   ansible.builtin.stat:
     path: "{{ keycloak_mail_platform_submission_password_local_file }}"
   delegate_to: localhost
   become: false
   register: keycloak_mail_platform_submission_password_local
+  when: keycloak_mail_platform_submission_auth_enabled
 
-- name: Fail if the Keycloak mail submission password is missing locally
+- name: Fail if the Keycloak mail submission password is missing locally when SMTP auth is enabled
   ansible.builtin.fail:
     msg: >-
       {{ keycloak_mail_platform_submission_password_local_file }} is missing on the control machine.
       Converge the mail platform first so Keycloak can send password-reset and required-action mail.
-  when: not keycloak_mail_platform_submission_password_local.stat.exists
+  when:
+    - keycloak_mail_platform_submission_auth_enabled
+    - not keycloak_mail_platform_submission_password_local.stat.exists
 
 - name: Ensure the Keycloak runtime packages are present
   ansible.builtin.apt:
@@ -129,6 +132,18 @@
   ansible.builtin.slurp:
     src: "{{ keycloak_outline_automation_password_remote_file }}"
   register: keycloak_outline_automation_password_raw
+  no_log: true
+
+- name: Record the Keycloak mail submission password when SMTP auth is enabled
+  ansible.builtin.set_fact:
+    keycloak_mail_platform_submission_password: "{{ lookup('ansible.builtin.file', keycloak_mail_platform_submission_password_local_file) | trim }}"
+  when: keycloak_mail_platform_submission_auth_enabled
+  no_log: true
+
+- name: Default the Keycloak mail submission password when SMTP auth is disabled
+  ansible.builtin.set_fact:
+    keycloak_mail_platform_submission_password: ""
+  when: not keycloak_mail_platform_submission_auth_enabled
   no_log: true
 
 - name: Record the Keycloak runtime secrets

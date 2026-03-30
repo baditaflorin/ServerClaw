@@ -184,6 +184,15 @@ mail_platform_brevo_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/pr
 mail_platform_brevo_sender_email: "{{ mail_platform_mailbox_address }}"
 mail_platform_brevo_sender_name: Florin Mail Bridge
 mail_platform_reply_to_email: "{{ mail_platform_mailbox_address }}"
+smtp_host: lv3-mail-stalwart
+smtp_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.mail_platform_internal_submission_port | default(1587) }}"
+smtp_starttls: false
+smtp_auth_enabled: true
+smtp_username: "{{ mail_platform_mailbox_login }}"
+smtp_password_local_file: "{{ mail_platform_mailbox_password_local_file }}"
+smtp_docker_network_name: mail-platform_default
+smtp_from_address: "{{ mail_platform_mailbox_address }}"
+smtp_reply_to_address: "{{ mail_platform_reply_to_email }}"
 openbao_postgres_admin_role: openbao_rotator
 openbao_postgres_database: postgres
 openbao_tls_enabled: true

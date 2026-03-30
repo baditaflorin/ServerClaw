@@ -31,6 +31,8 @@ platform_port_assignments:
   monitoring_otlp_grpc_port: 4317
   monitoring_otlp_http_port: 4318
   netdata_port: 19999
+  mailpit_http_port: 8025
+  mailpit_smtp_port: 1025
   mail_platform_gateway_port: 8081
   mail_platform_internal_submission_port: 1587
   ntfy_port: 2586
@@ -458,6 +460,30 @@ network_policy:
             - 587
             - 993
           description: Public mail ingress forwarded by the host
+        - source: management
+          protocol: tcp
+          ports:
+            - 1025
+            - 8025
+          description: Operator access to the private Mailpit SMTP and UI listeners
+        - source: all_guests
+          protocol: tcp
+          ports:
+            - 1025
+            - 8025
+          description: Guest-network access to the Mailpit SMTP and UI listeners
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 1025
+            - 8025
+          description: Local Docker workloads using the private Mailpit SMTP and UI listeners
+        - source: 192.168.0.0/16
+          protocol: tcp
+          ports:
+            - 1025
+            - 8025
+          description: Local Docker workloads using the private Mailpit SMTP and UI listeners
         - source: 172.16.0.0/12
           protocol: tcp
           ports:
@@ -1194,6 +1220,14 @@ lv3_service_topology:
       title: LV3 Mail
       description: The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.
       meta: Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.
+  mailpit:
+    service_name: mailpit
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
   step_ca:
     service_name: step-ca
     owning_vm: docker-runtime-lv3

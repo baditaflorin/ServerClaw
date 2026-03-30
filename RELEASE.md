@@ -1,12 +1,12 @@
-# Release 0.177.95
+# Release 0.177.96
 
 - Date: 2026-03-30
 
 ## Summary
-- implements ADR 0262 by deploying the OpenFGA delegated authorization runtime, the ServerClaw bootstrap contracts, the repo-managed Keycloak runtime clients, and the API gateway registration for delegated authorization checks
+- integrates ADR 0282 into main by replaying Mailpit as the private development SMTP interceptor and the non-production SMTP contract onto the merged 0.177.95 / 0.130.63 baseline, preserving the exact-main Mailpit verification from docker-runtime-lv3 and monitoring-lv3 without advancing platform_version again
 
 ## Platform Impact
-- exact-main ADR 0262 replay establishes the first live platform version with delegated OpenFGA authorization and API gateway verification on current mainline after ADR 0270 recovery hardening
+- ADR 0282 is already live on platform version 0.130.60; this exact-main integration replays Mailpit onto the merged 0.177.95 / 0.130.63 baseline without advancing platform_version again.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

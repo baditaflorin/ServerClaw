@@ -417,6 +417,23 @@
         "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the mail-platform converge from git."
       }
     },
+    "mailpit": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Mailpit or its private SMTP capture surface cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Mailpit converge from git."
+      }
+    },
     "mattermost": {
       "tier": "R1",
       "recovery_objective": {

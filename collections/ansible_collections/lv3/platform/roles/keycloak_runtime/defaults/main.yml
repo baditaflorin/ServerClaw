@@ -46,14 +46,15 @@ keycloak_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_flori
 keycloak_bootstrap_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/bootstrap-admin-password.txt
 keycloak_operator_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/florin.badita-password.txt
 keycloak_outline_automation_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/outline.automation-password.txt
-keycloak_mail_platform_submission_username: server
-keycloak_mail_platform_submission_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/server-mailbox-password.txt
-keycloak_mail_platform_submission_host: lv3-mail-stalwart
-keycloak_mail_platform_submission_port: 1587
-keycloak_mail_platform_submission_starttls: false
-keycloak_mail_platform_docker_network_name: mail-platform_default
-keycloak_mail_platform_from_address: server@lv3.org
-keycloak_mail_platform_reply_to_address: server@lv3.org
+keycloak_mail_platform_submission_username: "{{ smtp_username }}"
+keycloak_mail_platform_submission_password_local_file: "{{ smtp_password_local_file }}"
+keycloak_mail_platform_submission_host: "{{ smtp_host }}"
+keycloak_mail_platform_submission_port: "{{ smtp_port }}"
+keycloak_mail_platform_submission_starttls: "{{ smtp_starttls }}"
+keycloak_mail_platform_submission_auth_enabled: "{{ smtp_auth_enabled }}"
+keycloak_mail_platform_docker_network_name: "{{ smtp_docker_network_name }}"
+keycloak_mail_platform_from_address: "{{ smtp_from_address }}"
+keycloak_mail_platform_reply_to_address: "{{ smtp_reply_to_address }}"
 keycloak_realm_smtp_server:
   host: "{{ keycloak_mail_platform_submission_host }}"
   port: "{{ keycloak_mail_platform_submission_port }}"
@@ -61,9 +62,9 @@ keycloak_realm_smtp_server:
   fromDisplayName: "{{ keycloak_realm_display_name }}"
   replyTo: "{{ keycloak_mail_platform_reply_to_address }}"
   replyToDisplayName: "{{ keycloak_realm_display_name }}"
-  auth: true
-  user: "{{ keycloak_mail_platform_submission_username }}"
-  password: "{{ lookup('ansible.builtin.file', keycloak_mail_platform_submission_password_local_file) | trim }}"
+  auth: "{{ keycloak_mail_platform_submission_auth_enabled }}"
+  user: "{{ keycloak_mail_platform_submission_username if keycloak_mail_platform_submission_auth_enabled else '' }}"
+  password: "{{ keycloak_mail_platform_submission_password | default('') }}"
   starttls: "{{ keycloak_mail_platform_submission_starttls }}"
   ssl: false
 keycloak_grafana_client_id: grafana-oauth

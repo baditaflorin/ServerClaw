@@ -2256,6 +2256,44 @@
         "timeout_seconds": 1500
       }
     },
+    "converge-mailpit": {
+      "description": "Converge the private Mailpit SMTP interceptor and its repo-managed capture verification path on docker-runtime-lv3.",
+      "workflow_id": "converge-mailpit",
+      "scope": "guest_runtime",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-mailpit passes",
+        "make validate passes before the apply",
+        "The private-only Mailpit exposure and the non-production SMTP override contract are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the Mailpit info endpoint, SMTP capture verification, and the staging-mail verification syntax coverage."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if Mailpit fails to start, the guest firewall does not preserve the private-only access boundary, or the SMTP probe cannot be retrieved through the REST API.",
+          "Stop if the rollout would repoint production mail workflows away from the Stalwart mail platform."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Mailpit runtime and firewall state before retrying.",
+          "Do not leave behind ad hoc Docker, firewall, or inventory overrides after a failed rollout."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
+      }
+    },
     "converge-excalidraw": {
       "description": "Converge the private Excalidraw runtime, collaboration room, and authenticated edge publication at draw.lv3.org.",
       "workflow_id": "converge-excalidraw",

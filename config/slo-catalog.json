@@ -136,6 +136,16 @@
       "description": "Langfuse remains reachable through the public LV3 edge for trace ingestion and operator access."
     },
     {
+      "id": "mailpit-availability",
+      "service_id": "mailpit",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.20:8025/api/v1/info",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Mailpit remains reachable on the private guest-network listener for staging and development SMTP capture flows."
+    },
+    {
       "id": "matrix-synapse-availability",
       "service_id": "matrix_synapse",
       "indicator": "availability",

@@ -30,6 +30,8 @@ PORT_KEYS = (
     "monitoring_otlp_grpc_port",
     "monitoring_otlp_http_port",
     "netdata_port",
+    "mailpit_http_port",
+    "mailpit_smtp_port",
     "mail_platform_gateway_port",
     "ntfy_port",
     "openfga_http_port",
@@ -487,6 +489,11 @@ def build_service_urls(
     elif service_id == "langfuse":
         urls["internal"] = service_url("http", private_ip, ports["langfuse_port"])
         port_map["internal"] = ports["langfuse_port"]
+    elif service_id == "mailpit":
+        urls["internal"] = service_url("http", private_ip, ports["mailpit_http_port"])
+        urls["smtp"] = service_url("smtp", private_ip, ports["mailpit_smtp_port"])
+        port_map["internal"] = ports["mailpit_http_port"]
+        port_map["smtp"] = ports["mailpit_smtp_port"]
     elif service_id == "dify":
         urls["internal"] = service_url("http", private_ip, ports["dify_port"])
         port_map["internal"] = ports["dify_port"]

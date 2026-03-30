@@ -24,12 +24,13 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     smtp_server = defaults["keycloak_realm_smtp_server"]
     assert defaults["keycloak_session_authority"] == "{{ platform_session_authority }}"
     assert defaults["keycloak_database_host"] == "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
-    assert defaults["keycloak_mail_platform_submission_host"] == "lv3-mail-stalwart"
-    assert defaults["keycloak_mail_platform_submission_port"] == 1587
-    assert defaults["keycloak_mail_platform_submission_starttls"] is False
+    assert defaults["keycloak_mail_platform_submission_host"] == "{{ smtp_host }}"
+    assert defaults["keycloak_mail_platform_submission_port"] == "{{ smtp_port }}"
+    assert defaults["keycloak_mail_platform_submission_starttls"] == "{{ smtp_starttls }}"
+    assert defaults["keycloak_mail_platform_submission_auth_enabled"] == "{{ smtp_auth_enabled }}"
+    assert defaults["keycloak_mail_platform_docker_network_name"] == "{{ smtp_docker_network_name }}"
     assert defaults["keycloak_compose_project_name"] == "keycloak"
     assert defaults["keycloak_compose_network_name"] == "{{ keycloak_compose_project_name }}_default"
-    assert defaults["keycloak_mail_platform_docker_network_name"] == "mail-platform_default"
     assert defaults["keycloak_langfuse_client_id"] == "langfuse"
     assert defaults["keycloak_langfuse_client_secret_local_file"].endswith("/.local/keycloak/langfuse-client-secret.txt")
     assert defaults["keycloak_serverclaw_runtime_client_id"] == "serverclaw-runtime"
@@ -52,18 +53,32 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
         "{{ keycloak_outline_root_url }}/",
         "{{ keycloak_session_authority.shared_proxy_cleanup_url }}",
     ]
+    assert smtp_server["auth"] == "{{ keycloak_mail_platform_submission_auth_enabled }}"
     assert smtp_server["host"] == "{{ keycloak_mail_platform_submission_host }}"
     assert smtp_server["port"] == "{{ keycloak_mail_platform_submission_port }}"
-    assert smtp_server["user"] == "{{ keycloak_mail_platform_submission_username }}"
+    assert smtp_server["user"] == "{{ keycloak_mail_platform_submission_username if keycloak_mail_platform_submission_auth_enabled else '' }}"
     assert smtp_server["starttls"] == "{{ keycloak_mail_platform_submission_starttls }}"
     assert smtp_server["ssl"] is False
 
 
 def test_role_requires_local_mail_submission_secret() -> None:
     tasks = load_tasks()
-    stat_task = next(task for task in tasks if task.get("name") == "Ensure the Keycloak mail submission password exists on the control machine")
-    fail_task = next(task for task in tasks if task.get("name") == "Fail if the Keycloak mail submission password is missing locally")
+    stat_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Ensure the Keycloak mail submission password exists on the control machine when SMTP auth is enabled"
+    )
+    fail_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Fail if the Keycloak mail submission password is missing locally when SMTP auth is enabled"
+    )
     assert stat_task["ansible.builtin.stat"]["path"] == "{{ keycloak_mail_platform_submission_password_local_file }}"
+    assert stat_task["when"] == "keycloak_mail_platform_submission_auth_enabled"
+    assert fail_task["when"] == [
+        "keycloak_mail_platform_submission_auth_enabled",
+        "not keycloak_mail_platform_submission_password_local.stat.exists",
+    ]
     assert "password-reset and required-action mail" in fail_task["ansible.builtin.fail"]["msg"]
 
 

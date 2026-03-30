@@ -14,6 +14,337 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0282-live-apply
+    adr: "0282"
+    title: Live apply Mailpit as the SMTP development mail interceptor from latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0282-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0282-live-apply.md
+    depends_on:
+      - adr-0041-dockerized-mail-platform-for-server-delivery-api-and-observability
+      - adr-0107-platform-extension-model
+      - adr-0165-workflow-idempotency
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/adr/.index.yaml
+      - README.md
+      - docs/workstreams/ws-0282-live-apply.md
+      - docs/adr/0282-mailpit-as-the-smtp-development-mail-interceptor.md
+      - docs/runbooks/configure-mailpit.md
+      - docs/runbooks/configure-mail-platform.md
+      - docs/site-generated/architecture/dependency-graph.md
+      - inventory/group_vars/all.yml
+      - inventory/group_vars/staging.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - collections/ansible_collections/lv3/platform/playbooks/mailpit.yml
+      - collections/ansible_collections/lv3/platform/roles/mailpit_runtime/
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/
+      - playbooks/mailpit.yml
+      - playbooks/services/mailpit.yml
+      - playbooks/mail-platform-verify.yml
+      - collections/ansible_collections/lv3/platform/playbooks/mail-platform-verify.yml
+      - config/ansible-execution-scopes.yaml
+      - config/command-catalog.json
+      - config/data-catalog.json
+      - config/dependency-graph.json
+      - config/health-probe-catalog.json
+      - config/image-catalog.json
+      - config/service-capability-catalog.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      - config/slo-catalog.json
+      - config/workflow-catalog.json
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/slo_rules.yml
+      - config/grafana/dashboards/slo-overview.json
+      - Makefile
+      - scripts/generate_platform_vars.py
+      - scripts/validate_repo.sh
+      - tests/test_keycloak_runtime_role.py
+      - tests/test_mailpit_playbook.py
+      - tests/test_mailpit_runtime_role.py
+      - tests/test_mail_platform_verify_playbook.py
+      - receipts/ops-portal-snapshot.html
+      - receipts/image-scans/
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: integration_readme_surface
+          paths:
+            - README.md
+          mode: shared_contract
+          contract: main-integration-truth-v1
+        - id: adr_0282_mailpit_surface
+          paths:
+            - docs/workstreams/ws-0282-live-apply.md
+            - docs/adr/0282-mailpit-as-the-smtp-development-mail-interceptor.md
+            - docs/runbooks/configure-mailpit.md
+            - docs/runbooks/configure-mail-platform.md
+            - inventory/group_vars/staging.yml
+            - collections/ansible_collections/lv3/platform/playbooks/mailpit.yml
+            - collections/ansible_collections/lv3/platform/roles/mailpit_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/meta/argument_specs.yml
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/templates/docker-compose.yml.j2
+            - playbooks/mailpit.yml
+            - playbooks/services/mailpit.yml
+            - playbooks/mail-platform-verify.yml
+            - collections/ansible_collections/lv3/platform/playbooks/mail-platform-verify.yml
+            - tests/test_keycloak_runtime_role.py
+            - tests/test_mailpit_playbook.py
+            - tests/test_mailpit_runtime_role.py
+            - tests/test_mail_platform_verify_playbook.py
+            - receipts/image-scans/2026-03-30-mailpit-runtime.json
+            - receipts/image-scans/2026-03-30-mailpit-runtime.trivy.json
+            - receipts/live-applies/2026-03-30-adr-0282-mailpit-live-apply.json
+            - receipts/live-applies/evidence/2026-03-30-adr-0282-mailpit-live-apply.txt
+          mode: exclusive
+        - id: docs_portal_generation_contract
+          paths:
+            - docs/site-generated/architecture/dependency-graph.md
+            - receipts/ops-portal-snapshot.html
+          mode: shared_contract
+          contract: docs-portal-generation-v1
+        - id: topology_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/all.yml
+            - inventory/group_vars/platform.yml
+            - scripts/generate_platform_vars.py
+          mode: shared_contract
+          contract: platform-topology-v1
+        - id: ansible_scope_catalog_contract
+          paths:
+            - config/ansible-execution-scopes.yaml
+          mode: shared_contract
+          contract: ansible-execution-scope-catalog-v1
+        - id: mailpit_service_catalog_contract
+          paths:
+            - config/service-capability-catalog.json
+            - config/health-probe-catalog.json
+            - config/image-catalog.json
+            - config/dependency-graph.json
+            - config/slo-catalog.json
+            - config/data-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/workflow-catalog.json
+            - config/command-catalog.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/grafana/dashboards/slo-overview.json
+          mode: shared_contract
+          contract: service-catalogs-v1
+        - id: mailpit_repository_automation_contract
+          paths:
+            - Makefile
+            - scripts/validate_repo.sh
+          mode: shared_contract
+          contract: repository-automation-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      included_in_repo_version: 0.177.95
+      latest_receipts:
+        mailpit: 2026-03-30-adr-0282-mailpit-mainline-live-apply
+  - id: ws-0282-main-merge
+    adr: "0282"
+    title: Integrate ADR 0282 Mailpit exact-main replay into current origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0282-main-merge
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-main-merge
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0282-main-merge.md
+    depends_on:
+      - ws-0282-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0282-main-merge.md
+      - docs/workstreams/ws-0282-live-apply.md
+      - docs/adr/0282-mailpit-as-the-smtp-development-mail-interceptor.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/configure-mailpit.md
+      - docs/runbooks/configure-mail-platform.md
+      - inventory/group_vars/all.yml
+      - inventory/group_vars/staging.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - collections/ansible_collections/lv3/platform/playbooks/mailpit.yml
+      - collections/ansible_collections/lv3/platform/roles/mailpit_runtime/
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/
+      - playbooks/mailpit.yml
+      - playbooks/services/mailpit.yml
+      - playbooks/mail-platform-verify.yml
+      - collections/ansible_collections/lv3/platform/playbooks/mail-platform-verify.yml
+      - config/ansible-execution-scopes.yaml
+      - config/command-catalog.json
+      - config/data-catalog.json
+      - config/dependency-graph.json
+      - config/health-probe-catalog.json
+      - config/image-catalog.json
+      - config/service-capability-catalog.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      - config/slo-catalog.json
+      - config/workflow-catalog.json
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/slo_rules.yml
+      - config/grafana/dashboards/slo-overview.json
+      - Makefile
+      - scripts/generate_platform_vars.py
+      - scripts/validate_repo.sh
+      - tests/test_keycloak_runtime_role.py
+      - tests/test_mailpit_playbook.py
+      - tests/test_mailpit_runtime_role.py
+      - tests/test_mail_platform_verify_playbook.py
+      - config/ansible-role-idempotency.yml
+      - .ansible-lint-ignore
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
+      - scripts/docker_publication_assurance.py
+      - scripts/serverclaw_authz.py
+      - scripts/remote_exec.sh
+      - tests/test_serverclaw_authz.py
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/diagrams/service-dependency-graph.excalidraw
+      - docs/diagrams/trust-tier-model.excalidraw
+      - docs/site-generated/architecture/dependency-graph.md
+      - receipts/ops-portal-snapshot.html
+      - receipts/image-scans/2026-03-30-mailpit-runtime.json
+      - receipts/image-scans/2026-03-30-mailpit-runtime.trivy.json
+      - receipts/live-applies/2026-03-30-adr-0282-mailpit-live-apply.json
+      - receipts/live-applies/evidence/2026-03-30-adr-0282-mailpit-live-apply.txt
+      - receipts/live-applies/2026-03-30-adr-0282-mailpit-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-*
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0282_main_merge_carryover
+          paths:
+            - docs/workstreams/ws-0282-live-apply.md
+            - docs/adr/0282-mailpit-as-the-smtp-development-mail-interceptor.md
+            - docs/runbooks/configure-mailpit.md
+            - docs/runbooks/configure-mail-platform.md
+            - inventory/group_vars/all.yml
+            - inventory/group_vars/staging.yml
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - collections/ansible_collections/lv3/platform/playbooks/mailpit.yml
+            - collections/ansible_collections/lv3/platform/roles/mailpit_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/meta/argument_specs.yml
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/templates/docker-compose.yml.j2
+            - playbooks/mailpit.yml
+            - playbooks/services/mailpit.yml
+            - playbooks/mail-platform-verify.yml
+            - collections/ansible_collections/lv3/platform/playbooks/mail-platform-verify.yml
+            - config/ansible-execution-scopes.yaml
+            - config/command-catalog.json
+            - config/data-catalog.json
+            - config/dependency-graph.json
+            - config/health-probe-catalog.json
+            - config/image-catalog.json
+            - config/service-capability-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/slo-catalog.json
+            - config/workflow-catalog.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/grafana/dashboards/slo-overview.json
+            - Makefile
+            - scripts/generate_platform_vars.py
+            - scripts/validate_repo.sh
+            - tests/test_keycloak_runtime_role.py
+            - tests/test_mailpit_playbook.py
+            - tests/test_mailpit_runtime_role.py
+            - tests/test_mail_platform_verify_playbook.py
+            - config/ansible-role-idempotency.yml
+            - .ansible-lint-ignore
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
+            - scripts/docker_publication_assurance.py
+            - scripts/remote_exec.sh
+            - docs/site-generated/architecture/dependency-graph.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/diagrams/service-dependency-graph.excalidraw
+            - docs/diagrams/trust-tier-model.excalidraw
+            - receipts/ops-portal-snapshot.html
+            - receipts/image-scans/2026-03-30-mailpit-runtime.json
+            - receipts/image-scans/2026-03-30-mailpit-runtime.trivy.json
+            - receipts/live-applies/2026-03-30-adr-0282-mailpit-live-apply.json
+            - receipts/live-applies/evidence/2026-03-30-adr-0282-mailpit-live-apply.txt
+          mode: shared_contract
+          contract: mailpit-live-apply-v1
+        - id: adr_0282_main_merge_shared_integration
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/adr/.index.yaml
+            - config/ansible-role-idempotency.yml
+            - .ansible-lint-ignore
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
+            - scripts/docker_publication_assurance.py
+            - scripts/remote_exec.sh
+          mode: shared_contract
+          contract: latest-main-integration-v1
+        - id: adr_0282_main_merge_retry_guard_repair
+          paths:
+            - scripts/serverclaw_authz.py
+            - tests/test_serverclaw_authz.py
+          mode: shared_contract
+          contract: retry-guard-modernization-v1
+        - id: adr_0282_main_merge
+          paths:
+            - docs/workstreams/ws-0282-main-merge.md
+            - receipts/live-applies/2026-03-30-adr-0282-mailpit-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-*
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: integrates ADR 0282 into main by replaying Mailpit as the private development SMTP interceptor and the non-production SMTP contract onto the merged 0.177.95 / 0.130.63 baseline, preserving the exact-main Mailpit verification from docker-runtime-lv3 and monitoring-lv3 without advancing platform_version again
+      release_bump: patch
+      included_in_repo_version: 0.177.96
+      latest_receipts:
+        mailpit: 2026-03-30-adr-0282-mailpit-mainline-live-apply
   - id: ws-0266-validation-runner-capability-contracts
     adr: "0266"
     title: Validation runner capability contracts and environment attestation

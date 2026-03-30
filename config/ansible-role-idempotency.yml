@@ -19,6 +19,9 @@ roles:
   build_server:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  browser_runner_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   cert_renewal_timer:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -82,6 +85,9 @@ roles:
   gitea_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  gotenberg_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   harbor_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -128,6 +134,15 @@ roles:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   mail_platform_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  mailpit_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  matrix_synapse_postgres:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  matrix_synapse_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   mattermost_postgres:
