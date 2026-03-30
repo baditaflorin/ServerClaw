@@ -2133,19 +2133,28 @@
 
 - name: Converge repo-managed Windmill schedule enabled flags
   become: true
-  ansible.builtin.shell: |
-    set -euo pipefail
-    database_url="$(awk -F= '$1 == "DATABASE_URL" { sub(/^[^=]*=/, ""); print; exit }' "{{ windmill_env_file }}")"
-    test -n "${database_url}"
-    psql "${database_url}" -v ON_ERROR_STOP=1 -Atqc \
-      "UPDATE schedule SET enabled = {{ item.enabled | default(false) | ternary('true', 'false') }} WHERE path = '{{ item.path }}' AND enabled IS DISTINCT FROM {{ item.enabled | default(false) | ternary('true', 'false') }};"
-  args:
-    executable: /bin/bash
-  loop: "{{ windmill_seed_schedules }}"
-  loop_control:
-    label: "{{ item.path }}"
+  become_user: postgres
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        UPDATE schedule
+        SET enabled = desired.enabled
+        FROM (
+          VALUES
+          {% for schedule in windmill_seed_schedules %}
+          ('{{ schedule.path | replace("'", "''") }}', {{ schedule.enabled | default(false) | ternary('TRUE', 'FALSE') }}){{ "," if not loop.last else "" }}
+          {% endfor %}
+        ) AS desired(path, enabled)
+        WHERE schedule.path = desired.path
+          AND schedule.enabled IS DISTINCT FROM desired.enabled;
   changed_when: false
-  no_log: true
 
 - name: Wait for Windmill workers to register before seeded healthcheck execution
   ansible.builtin.import_tasks: wait_for_workers.yml

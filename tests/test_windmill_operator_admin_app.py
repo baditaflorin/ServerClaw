@@ -582,10 +582,12 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert tasks.count("pyyaml") >= 2
     assert "--path {{ windmill_healthcheck_script_path | quote }}" in tasks
     assert "--path {{ windmill_stage_smoke_suites_script_path | quote }}" in verify_tasks
-    assert '$1 == "DATABASE_URL"' in tasks
-    assert '. "{{ windmill_env_file }}"' not in tasks
     assert "Converge repo-managed Windmill schedule enabled flags" in tasks
-    assert 'psql "${database_url}"' in tasks
+    assert 'delegate_to: "{{ windmill_database_inventory_host }}"' in tasks
+    assert "become_user: postgres" in tasks
+    assert '      - psql' in tasks
+    assert '      - "{{ windmill_database_name }}"' in tasks
+    assert "schedule.enabled IS DISTINCT FROM desired.enabled" in tasks
     assert "become: true" in tasks
     assert "Sync repo-managed Windmill raw apps" in tasks
     assert "Install frontend dependencies for repo-managed Windmill raw apps" in tasks
