@@ -171,11 +171,13 @@
         url: "{{ woodpecker_public_url }}/healthz"
         method: GET
         return_content: true
-        status_code: 200
+        status_code:
+          - 200
+          - 204
       register: woodpecker_public_health
       retries: 60
       delay: 5
-      until: woodpecker_public_health.status == 200
+      until: woodpecker_public_health.status in [200, 204]
       changed_when: false
 
     - name: Bootstrap the Woodpecker seed repository and auth artifacts

@@ -304,7 +304,7 @@
     {
       "id": "woodpecker",
       "name": "Woodpecker",
-      "upstream": "http://10.10.10.20:8099",
+      "upstream": "http://10.10.10.20:8102",
       "gateway_prefix": "/v1/woodpecker",
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",

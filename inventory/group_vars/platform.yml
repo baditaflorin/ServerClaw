@@ -119,7 +119,7 @@ platform_host:
         listen_address: 100.64.0.1
         listen_port: 8017
         upstream_host: 10.10.10.20
-        upstream_port: 8099
+        upstream_port: 8102
       - name: open-webui
         listen_address: 100.64.0.1
         listen_port: 8008
@@ -195,7 +195,7 @@ platform_ports:
   dozzle_agent_port: 7007
   excalidraw_port: 3095
   excalidraw_room_port: 3096
-  woodpecker_http_port: 8099
+  woodpecker_http_port: 8102
   woodpecker_host_proxy_port: 8017
   ollama_api_port: 11434
   n8n_port: 5678
@@ -275,7 +275,7 @@ platform_port_assignments:
   dozzle_agent_port: 7007
   excalidraw_port: 3095
   excalidraw_room_port: 3096
-  woodpecker_http_port: 8099
+  woodpecker_http_port: 8102
   woodpecker_host_proxy_port: 8017
   ollama_api_port: 11434
   n8n_port: 5678
@@ -1726,17 +1726,17 @@ platform_service_topology:
       tls: true
       noindex: true
       kind: proxy
-      upstream: http://10.10.10.20:8099
+      upstream: http://10.10.10.20:8102
     access:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8017
     service_id: woodpecker
     ports:
-      internal: 8099
+      internal: 8102
       controller: 8017
     urls:
       public: https://ci.lv3.org
-      internal: http://10.10.10.20:8099
+      internal: http://10.10.10.20:8102
       controller: http://100.64.0.1:8017
   outline:
     service_name: outline
@@ -3329,17 +3329,17 @@ public_edge_service_topology:
       tls: true
       noindex: true
       kind: proxy
-      upstream: http://10.10.10.20:8099
+      upstream: http://10.10.10.20:8102
     access:
       kind: tailscale-tcp-proxy
       url: http://100.64.0.1:8017
     service_id: woodpecker
     ports:
-      internal: 8099
+      internal: 8102
       controller: 8017
     urls:
       public: https://ci.lv3.org
-      internal: http://10.10.10.20:8099
+      internal: http://10.10.10.20:8102
       controller: http://100.64.0.1:8017
   outline:
     service_name: outline
@@ -4049,9 +4049,9 @@ plane_port: 8093
 plane_host_proxy_port: 8011
 plane_private_base_url: http://10.10.10.20:8093
 plane_controller_url: http://100.64.0.1:8011
-woodpecker_http_port: 8099
+woodpecker_http_port: 8102
 woodpecker_host_proxy_port: 8017
-woodpecker_private_base_url: http://10.10.10.20:8099
+woodpecker_private_base_url: http://10.10.10.20:8102
 woodpecker_controller_url: http://100.64.0.1:8017
 api_gateway_internal_port: 8083
 api_gateway_public_url: https://api.lv3.org

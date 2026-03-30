@@ -206,6 +206,17 @@
   changed_when: "'changed' in woodpecker_secret_smoke_generation.stdout"
   no_log: true
 
+- name: Wait for the Gitea controller sign-in page before Woodpecker OAuth bootstrap
+  ansible.builtin.uri:
+    url: "{{ woodpecker_gitea_api_url }}/user/login"
+    method: GET
+    status_code: 200
+  register: woodpecker_gitea_login_page
+  retries: 48
+  delay: 5
+  until: woodpecker_gitea_login_page.status == 200
+  changed_when: false
+
 - name: Prepare the Gitea OAuth application for Woodpecker
   ansible.builtin.command:
     argv:
@@ -355,11 +366,13 @@
     url: "http://127.0.0.1:{{ woodpecker_http_port }}{{ woodpecker_healthcheck_path }}"
     method: GET
     return_content: true
-    status_code: 200
+    status_code:
+      - 200
+      - 204
   register: woodpecker_health
   retries: 60
   delay: 5
-  until: woodpecker_health.status == 200
+  until: woodpecker_health.status in [200, 204]
   changed_when: false
 
 - name: Render the Woodpecker bootstrap specification locally

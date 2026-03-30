@@ -51,11 +51,13 @@
     url: "http://127.0.0.1:{{ woodpecker_http_port }}{{ woodpecker_healthcheck_path }}"
     method: GET
     return_content: true
-    status_code: 200
+    status_code:
+      - 200
+      - 204
   register: woodpecker_verify_health
   retries: 30
   delay: 5
-  until: woodpecker_verify_health.status == 200
+  until: woodpecker_verify_health.status in [200, 204]
   changed_when: false
 
 - name: Verify the Woodpecker local version endpoint

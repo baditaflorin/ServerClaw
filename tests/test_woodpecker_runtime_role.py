@@ -39,11 +39,26 @@ def test_woodpecker_templates_export_gitea_oauth_and_agent_settings() -> None:
 
 def test_woodpecker_runtime_tasks_prepare_oauth_and_render_bootstrap_spec() -> None:
     task_text = TASK_FILE.read_text()
+    task_data = yaml.safe_load(task_text)
     verify_text = VERIFY_FILE.read_text()
+    verify_data = yaml.safe_load(verify_text)
 
     assert "Prepare the Gitea OAuth application for Woodpecker" in task_text
     assert "scripts/woodpecker_bootstrap.py" in task_text
     assert "Render the Woodpecker bootstrap specification locally" in task_text
     assert "name: lv3.platform.common" in task_text
+    assert "Wait for the Gitea controller sign-in page before Woodpecker OAuth bootstrap" in task_text
     assert "Wait for the Woodpecker local health endpoint" in task_text
     assert "woodpecker_version_path" in verify_text
+
+    gitea_wait_task = next(task for task in task_data if task["name"] == "Wait for the Gitea controller sign-in page before Woodpecker OAuth bootstrap")
+    local_health_task = next(task for task in task_data if task["name"] == "Wait for the Woodpecker local health endpoint")
+    verify_health_task = next(task for task in verify_data if task["name"] == "Verify the Woodpecker local health endpoint")
+
+    assert gitea_wait_task["ansible.builtin.uri"]["url"] == "{{ woodpecker_gitea_api_url }}/user/login"
+    assert gitea_wait_task["retries"] == 48
+    assert gitea_wait_task["until"] == "woodpecker_gitea_login_page.status == 200"
+    assert local_health_task["ansible.builtin.uri"]["status_code"] == [200, 204]
+    assert local_health_task["until"] == "woodpecker_health.status in [200, 204]"
+    assert verify_health_task["ansible.builtin.uri"]["status_code"] == [200, 204]
+    assert verify_health_task["until"] == "woodpecker_verify_health.status in [200, 204]"

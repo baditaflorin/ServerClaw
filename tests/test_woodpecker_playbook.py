@@ -39,8 +39,11 @@ def test_woodpecker_root_playbook_converges_proxy_postgres_runtime_and_edge() ->
 def test_woodpecker_root_playbook_bootstraps_controller_artifacts_and_seed_repo() -> None:
     plays = yaml.safe_load(ROOT_PLAYBOOK.read_text())
     bootstrap_play = plays[5]
+    public_health_task = next(task for task in bootstrap_play["tasks"] if task["name"] == "Wait for the public Woodpecker health endpoint to answer")
 
     assert bootstrap_play["vars"]["woodpecker_seed_repo_full_name"] == "ops/proxmox_florin_server"
+    assert public_health_task["ansible.builtin.uri"]["status_code"] == [200, 204]
+    assert public_health_task["until"] == "woodpecker_public_health.status in [200, 204]"
     task_argvs = [task["ansible.builtin.command"]["argv"] for task in bootstrap_play["tasks"] if "ansible.builtin.command" in task]
 
     assert any("scripts/woodpecker_bootstrap.py" in " ".join(argv) for argv in task_argvs)

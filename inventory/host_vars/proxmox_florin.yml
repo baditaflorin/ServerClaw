@@ -69,7 +69,7 @@ platform_port_assignments:
   directus_port: 8055
   plane_port: 8093
   plane_host_proxy_port: 8011
-  woodpecker_http_port: 8099
+  woodpecker_http_port: 8102
   woodpecker_host_proxy_port: 8017
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
@@ -541,7 +541,7 @@ network_policy:
             - 8010
             - 8082
             - 8088
-            - 8099
+            - 8102
             - 8200
             - 8222
             - 8881
@@ -690,7 +690,7 @@ network_policy:
         - source: nginx-lv3
           protocol: tcp
           ports:
-            - 8099
+            - 8102
           description: Reverse proxy access to the Woodpecker public UI and API
         - source: nginx-lv3
           protocol: tcp
