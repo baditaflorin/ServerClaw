@@ -665,6 +665,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Collect controller-side integrity checksums for Windmill worker checkout sentinels" in tasks
     assert "Collect guest-side integrity checksums for Windmill worker checkout sentinels" in tasks
     assert "Flag the Windmill worker checkout for refresh when integrity sentinels drift" in tasks
+    assert "Mirror critical Windmill worker checkout integrity sentinels after refresh" in tasks
     assert "Re-collect guest-side integrity checksums after Windmill worker checkout refresh" in tasks
     assert "Assert the refreshed Windmill worker checkout integrity sentinels match controller state" in tasks
     assert "windmill_worker_checkout_integrity_mismatch" in tasks
@@ -724,6 +725,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert 'delay: "{{ windmill_worker_registration_delay_seconds }}"' in wait_for_workers_tasks
     assert 'WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"' in tasks
     assert 'WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"' in verify_tasks
+    assert "Ensure Windmill validation gate integrity file parent directories exist on the guest" in verify_tasks
     assert "Mirror Windmill validation gate integrity files to the guest before verification" in verify_tasks
     assert "--path {{ windmill_validation_gate_status_script_path | quote }}" in verify_tasks
     assert "Run the Windmill validation gate status script" in verify_tasks

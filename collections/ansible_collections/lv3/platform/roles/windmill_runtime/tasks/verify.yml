@@ -51,6 +51,15 @@
       - (windmill_verify_healthcheck.stdout | from_json).workspace == windmill_workspace_id
     fail_msg: "Windmill API responded, but the seeded healthcheck script did not return the expected result."
 
+- name: Ensure Windmill validation gate integrity file parent directories exist on the guest
+  ansible.builtin.file:
+    path: "{{ (windmill_worker_repo_checkout_host_path ~ '/' ~ item) | dirname }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ windmill_worker_checkout_integrity_files }}"
+  loop_control:
+    label: "{{ item }}"
+
 - name: Mirror Windmill validation gate integrity files to the guest before verification
   ansible.builtin.copy:
     src: "{{ windmill_worker_checkout_repo_root_local_dir }}/{{ item }}"

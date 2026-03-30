@@ -593,6 +593,16 @@
   when: windmill_worker_checkout_stale_dirs.stdout | trim | length > 0
   changed_when: false
 
+- name: Mirror critical Windmill worker checkout integrity sentinels after refresh
+  ansible.builtin.copy:
+    src: "{{ windmill_worker_checkout_repo_root_local_dir }}/{{ item.item }}"
+    dest: "{{ windmill_worker_repo_checkout_host_path }}/{{ item.item }}"
+    mode: preserve
+  loop: "{{ windmill_worker_checkout_integrity_local.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: windmill_worker_checkout_needs_refresh | bool
+
 - name: Re-collect guest-side integrity checksums after Windmill worker checkout refresh
   ansible.builtin.stat:
     path: "{{ windmill_worker_repo_checkout_host_path }}/{{ item.item }}"
