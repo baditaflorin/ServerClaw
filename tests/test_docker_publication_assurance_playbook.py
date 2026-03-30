@@ -9,6 +9,7 @@ PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "docker-publication-assurance.yml"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 EXECUTION_SCOPE_CATALOG_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
+MAKEFILE_PATH = REPO_ROOT / "Makefile"
 
 
 def test_docker_publication_assurance_playbook_targets_managed_docker_guests() -> None:
@@ -77,3 +78,10 @@ def test_docker_publication_assurance_command_catalog_declares_live_change_contr
     assert command["workflow_id"] == "converge-docker-publication-assurance"
     assert command["approval_policy"] == "standard_live_change"
     assert command["evidence"]["live_apply_receipt_required"] is True
+
+
+def test_docker_publication_assurance_make_targets_exist() -> None:
+    makefile = MAKEFILE_PATH.read_text()
+
+    assert "syntax-check-docker-publication-assurance:" in makefile
+    assert "converge-docker-publication-assurance:" in makefile

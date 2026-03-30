@@ -6,12 +6,13 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULTS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "defaults" / "main.yml"
 TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "main.yml"
+REPO_USER_TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "reconcile_repo_managed_users.yml"
 COMPOSE_TEMPLATE_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "templates" / "docker-compose.yml.j2"
 SERVERCLAW_TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "serverclaw_client.yml"
 
 
-def load_tasks() -> list[dict]:
-    return yaml.safe_load(TASKS_PATH.read_text())
+def load_tasks(path: Path = TASKS_PATH) -> list[dict]:
+    return yaml.safe_load(path.read_text())
 
 
 def load_serverclaw_tasks() -> list[dict]:
@@ -23,11 +24,12 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     smtp_server = defaults["keycloak_realm_smtp_server"]
     assert defaults["keycloak_session_authority"] == "{{ platform_session_authority }}"
     assert defaults["keycloak_database_host"] == "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
-    assert defaults["keycloak_mail_platform_submission_host"] == "{{ smtp_host }}"
-    assert defaults["keycloak_mail_platform_submission_port"] == "{{ smtp_port }}"
-    assert defaults["keycloak_mail_platform_submission_starttls"] == "{{ smtp_starttls }}"
-    assert defaults["keycloak_mail_platform_submission_auth_enabled"] == "{{ smtp_auth_enabled }}"
-    assert defaults["keycloak_mail_platform_docker_network_name"] == "{{ smtp_docker_network_name }}"
+    assert defaults["keycloak_mail_platform_submission_host"] == "lv3-mail-stalwart"
+    assert defaults["keycloak_mail_platform_submission_port"] == 1587
+    assert defaults["keycloak_mail_platform_submission_starttls"] is False
+    assert defaults["keycloak_compose_project_name"] == "keycloak"
+    assert defaults["keycloak_compose_network_name"] == "{{ keycloak_compose_project_name }}_default"
+    assert defaults["keycloak_mail_platform_docker_network_name"] == "mail-platform_default"
     assert defaults["keycloak_langfuse_client_id"] == "langfuse"
     assert defaults["keycloak_langfuse_client_secret_local_file"].endswith("/.local/keycloak/langfuse-client-secret.txt")
     assert defaults["keycloak_outline_automation_username"] == "outline.automation"
@@ -48,43 +50,16 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     ]
     assert smtp_server["host"] == "{{ keycloak_mail_platform_submission_host }}"
     assert smtp_server["port"] == "{{ keycloak_mail_platform_submission_port }}"
-    assert smtp_server["auth"] == "{{ keycloak_mail_platform_submission_auth_enabled }}"
-    assert smtp_server["user"] == "{{ keycloak_mail_platform_submission_username if keycloak_mail_platform_submission_auth_enabled else '' }}"
-    assert smtp_server["password"] == "{{ keycloak_mail_platform_submission_password | default('') }}"
+    assert smtp_server["user"] == "{{ keycloak_mail_platform_submission_username }}"
     assert smtp_server["starttls"] == "{{ keycloak_mail_platform_submission_starttls }}"
     assert smtp_server["ssl"] is False
 
 
 def test_role_requires_local_mail_submission_secret() -> None:
     tasks = load_tasks()
-    stat_task = next(
-        task
-        for task in tasks
-        if task.get("name") == "Ensure the Keycloak mail submission password exists on the control machine when SMTP auth is enabled"
-    )
-    fail_task = next(
-        task
-        for task in tasks
-        if task.get("name") == "Fail if the Keycloak mail submission password is missing locally when SMTP auth is enabled"
-    )
-    auth_enabled_password_task = next(
-        task
-        for task in tasks
-        if task.get("name") == "Record the Keycloak mail submission password when SMTP auth is enabled"
-    )
-    auth_disabled_password_task = next(
-        task
-        for task in tasks
-        if task.get("name") == "Default the Keycloak mail submission password when SMTP auth is disabled"
-    )
+    stat_task = next(task for task in tasks if task.get("name") == "Ensure the Keycloak mail submission password exists on the control machine")
+    fail_task = next(task for task in tasks if task.get("name") == "Fail if the Keycloak mail submission password is missing locally")
     assert stat_task["ansible.builtin.stat"]["path"] == "{{ keycloak_mail_platform_submission_password_local_file }}"
-    assert stat_task["when"] == "keycloak_mail_platform_submission_auth_enabled"
-    assert fail_task["when"] == [
-        "keycloak_mail_platform_submission_auth_enabled",
-        "not keycloak_mail_platform_submission_password_local.stat.exists",
-    ]
-    assert auth_enabled_password_task["when"] == "keycloak_mail_platform_submission_auth_enabled"
-    assert auth_disabled_password_task["when"] == "not keycloak_mail_platform_submission_auth_enabled"
     assert "password-reset and required-action mail" in fail_task["ansible.builtin.fail"]["msg"]
 
 
@@ -127,6 +102,15 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
         for task in tasks
         if task.get("name") == "Force-recreate the Keycloak stack after Docker networking recovery"
     )
+    force_recreate_fact = next(
+        task for task in tasks if task.get("name") == "Record whether the Keycloak startup needs a force recreate"
+    )
+    force_recreate_down = next(
+        task for task in tasks if task.get("name") == "Reset the Keycloak stack before a force recreate"
+    )
+    network_cleanup = next(
+        task for task in tasks if task.get("name") == "Remove stale Keycloak compose networks after the reset"
+    )
     readiness_probe = next(
         task
         for task in tasks
@@ -139,9 +123,20 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     assert env_render["register"] == "keycloak_env_template"
     assert compose_render["register"] == "keycloak_compose_template"
     assert readiness_probe["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
+    assert force_recreate_down["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "compose",
+        "--file",
+        "{{ keycloak_compose_file }}",
+        "down",
+        "--remove-orphans",
+    ]
+    assert force_recreate_down["when"] == "keycloak_force_recreate"
+    assert "{{ keycloak_compose_network_name }}" in network_cleanup["ansible.builtin.shell"]
+    assert network_cleanup["when"] == "keycloak_force_recreate"
     assert "--force-recreate" in force_recreate["ansible.builtin.command"]["argv"]
     assert force_recreate["until"] == "keycloak_up.rc == 0"
-    force_recreate_expression = tasks[tasks.index(force_recreate) - 1]["ansible.builtin.set_fact"]["keycloak_force_recreate"]
+    force_recreate_expression = force_recreate_fact["ansible.builtin.set_fact"]["keycloak_force_recreate"]
     assert "keycloak_docker_nat_chain.rc != 0" in force_recreate_expression
     assert "keycloak_local_http_port_probe.failed" in force_recreate_expression
     assert "keycloak_readiness_probe.status" in force_recreate_expression
@@ -200,7 +195,6 @@ def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile(
 
 def test_compose_template_joins_the_mail_platform_network() -> None:
     template = COMPOSE_TEMPLATE_PATH.read_text()
-    assert "{% if keycloak_mail_platform_docker_network_name | length > 0 %}" in template
     assert "      - mail-platform" in template
     assert "  mail-platform:" in template
     assert "    external: true" in template
@@ -303,22 +297,49 @@ def test_serverclaw_client_tasks_wait_for_keycloak_then_mirror_secret() -> None:
 def test_role_manages_the_outline_automation_identity() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     tasks = load_tasks()
+    repo_user_tasks = load_tasks(REPO_USER_TASKS_PATH)
     password_generation_task = next(task for task in tasks if task.get("name") == "Generate the Outline automation password")
     password_mirror_task = next(task for task in tasks if task.get("name") == "Mirror the Outline automation password to the control machine")
+    repo_user_reconciliation = next(task for task in tasks if task.get("name") == "Reconcile repo-managed Keycloak users")
+    include_task = next(
+        task for task in repo_user_reconciliation["block"] if task.get("name") == "Run the repo-managed Keycloak user reconciliation tasks"
+    )
+    recovery_restart_task = next(
+        task
+        for task in repo_user_reconciliation["rescue"]
+        if task.get("name") == "Recreate the Keycloak service before retrying repo-managed user reconciliation"
+    )
+    recovery_token_probe_task = next(
+        task
+        for task in repo_user_reconciliation["rescue"]
+        if task.get("name")
+        == "Wait for the Keycloak bootstrap admin token endpoint after repo-managed user reconciliation recovery"
+    )
+    recovery_retry_task = next(
+        task
+        for task in repo_user_reconciliation["rescue"]
+        if task.get("name") == "Retry the repo-managed Keycloak user reconciliation tasks after recovery"
+    )
     admin_token_task = next(
-        task for task in tasks if task.get("name") == "Request a Keycloak admin token for repo-managed user reconciliation"
+        task for task in repo_user_tasks if task.get("name") == "Request a Keycloak admin token for repo-managed user reconciliation"
     )
     platform_group_lookup_task = next(
-        task for task in tasks if task.get("name") == "Look up the lv3-platform-admins group in Keycloak"
+        task for task in repo_user_tasks if task.get("name") == "Look up the lv3-platform-admins group in Keycloak"
     )
-    operator_update_task = next(task for task in tasks if task.get("name") == "Update the named operator profile in Keycloak")
-    operator_password_task = next(task for task in tasks if task.get("name") == "Reset the named operator password in Keycloak")
+    operator_update_task = next(
+        task for task in repo_user_tasks if task.get("name") == "Update the named operator profile in Keycloak"
+    )
+    operator_password_task = next(
+        task for task in repo_user_tasks if task.get("name") == "Reset the named operator password in Keycloak"
+    )
     automation_create_task = next(
-        task for task in tasks if task.get("name") == "Create the Outline automation user in Keycloak when missing"
+        task for task in repo_user_tasks if task.get("name") == "Create the Outline automation user in Keycloak when missing"
     )
-    automation_user_task = next(task for task in tasks if task.get("name") == "Update the Outline automation user profile in Keycloak")
+    automation_user_task = next(
+        task for task in repo_user_tasks if task.get("name") == "Update the Outline automation user profile in Keycloak"
+    )
     automation_password_task = next(
-        task for task in tasks if task.get("name") == "Reset the Outline automation user password in Keycloak"
+        task for task in repo_user_tasks if task.get("name") == "Reset the Outline automation user password in Keycloak"
     )
     assert password_generation_task["ansible.builtin.shell"].count("openssl rand -base64 24") == 1
     assert password_mirror_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_outline_automation_password_local_file }}"
@@ -327,6 +348,21 @@ def test_role_manages_the_outline_automation_identity() -> None:
     assert defaults["keycloak_admin_connection_timeout"] == 30
     assert defaults["keycloak_local_admin_url"] == "http://{{ ansible_host }}:{{ keycloak_internal_http_port }}"
     assert defaults["keycloak_repo_user_admin_url"] == "{{ keycloak_local_admin_url }}"
+    assert include_task["ansible.builtin.include_tasks"] == "reconcile_repo_managed_users.yml"
+    assert recovery_restart_task["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "compose",
+        "--file",
+        "{{ keycloak_compose_file }}",
+        "up",
+        "-d",
+        "--force-recreate",
+        "--no-deps",
+        "keycloak",
+    ]
+    assert recovery_token_probe_task["retries"] == "{{ keycloak_startup_probe_retries }}"
+    assert recovery_token_probe_task["delay"] == "{{ keycloak_startup_probe_delay }}"
+    assert recovery_retry_task["ansible.builtin.include_tasks"] == "reconcile_repo_managed_users.yml"
     assert admin_token_task["ansible.builtin.uri"]["url"] == (
         "{{ keycloak_repo_user_admin_url }}/realms/master/protocol/openid-connect/token"
     )

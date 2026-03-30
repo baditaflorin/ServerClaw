@@ -1,0 +1,72 @@
+Timestamp: 2026-03-29T23:08:09Z
+
+## Public registry ping
+HTTP/2 200
+server: nginx
+date: Sun, 29 Mar 2026 23:08:09 GMT
+content-type: text/plain
+content-length: 4
+set-cookie: sid=3d95d6309c5c2c14938779faedb614ff; Path=/; HttpOnly
+x-request-id: 2993c4fe-fe02-4dab-90c1-5632eb881790
+x-robots-tag: noindex, nofollow
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+cross-origin-resource-policy: same-origin
+x-content-type-options: nosniff
+x-frame-options: DENY
+referrer-policy: strict-origin-when-cross-origin
+permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'
+x-robots-tag: noindex, nofollow
+
+Pong
+
+## Public SSO well-known status
+status=200
+
+## docker-runtime-lv3 Harbor, Keycloak, and OpenBao checks
+2026-03-29T23:08:11Z
+
+grist-openbao-agent                 Up 20 seconds (healthy)
+harbor-jobservice                   Up About a minute (healthy)
+harbor-core                         Up About a minute (healthy)
+harbor-db                           Up About a minute (healthy)
+harbor-portal                       Up About a minute (healthy)
+harbor-log                          Up About a minute (healthy)        127.0.0.1:1514->10514/tcp
+lv3-openbao                         Up 3 minutes                       0.0.0.0:8200->8200/tcp, 127.0.0.1:8201->8201/tcp
+keycloak-keycloak-1                 Up 18 minutes                      8443/tcp, 10.10.10.20:8091->8080/tcp, 127.0.0.1:18080->8080/tcp, 127.0.0.1:19000->9000/tcp
+keycloak-openbao-agent              Up 18 minutes (healthy)
+nextcloud-openbao-agent             Up 19 minutes (healthy)
+mail-platform-openbao-agent         Up 22 minutes (healthy)
+windmill-openbao-agent              Up 22 minutes (healthy)
+
+Host IP Harbor ping
+HTTP/1.1 200 OK
+Server: nginx
+Date: Sun, 29 Mar 2026 23:08:11 GMT
+Content-Type: text/plain
+Content-Length: 4
+Connection: keep-alive
+Set-Cookie: sid=ad5c74e6968f2671de2985ecde1102b2; Path=/; HttpOnly
+X-Request-Id: 55200835-929e-42e4-8f7c-95d8c6b6be4f
+X-Frame-Options: DENY
+Content-Security-Policy: frame-ancestors 'none'
+
+Pong
+Loopback Harbor ping
+HTTP/1.1 200 OK
+Server: nginx
+Date: Sun, 29 Mar 2026 23:08:11 GMT
+Content-Type: text/plain
+Content-Length: 4
+Connection: keep-alive
+Set-Cookie: sid=9b762184fcf59208f6682b0126e7e5e8; Path=/; HttpOnly
+X-Request-Id: 8447bb6a-312f-4391-ad6f-d547ec54f0e7
+X-Frame-Options: DENY
+Content-Security-Policy: frame-ancestors 'none'
+
+Pong
+Keycloak local well-known status
+status=200
+
+OpenBao local health status
+status=200

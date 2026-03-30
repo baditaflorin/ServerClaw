@@ -4622,7 +4622,7 @@ adr_index:
   - adr: '0270'
     title: Docker Publication Self-Healing And Port-Programming Assertions
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4633,6 +4633,7 @@ adr_index:
       - assertions
     summary: We will add Docker publication self-healing and port-programming
     filename: 0270-docker-publication-self-healing-and-port-programming-assertions.md
+    implemented_version: 0.177.94
   - adr: '0271'
     title: Backup Coverage Assertion Ledger And Backup-Of-Backup Policy
     status: Accepted
