@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-03-30",
   "recorded_on": "2026-03-30",
-  "recorded_at": "2026-03-30T11:05:00Z",
+  "recorded_at": "2026-03-30T11:43:00Z",
   "recorded_by": "codex",
-  "source_commit": "fad05e6af1cd920191051deaeac5d1d79116604e",
-  "repo_version_context": "0.177.100",
-  "platform_version_context": "0.130.67",
+  "source_commit": "57b077a1c4477d179731db3a7148a74f9cf9070a",
+  "repo_version_context": "0.177.101",
+  "platform_version_context": "0.130.68",
   "workflow_id": "adr-0251-stage-smoke-promotion-gates-mainline-live-apply",
   "adr": "0251",
-  "summary": "Replayed ADR 0251 from exact-main release 0.177.100 using committed source fad05e6af1cd920191051deaeac5d1d79116604e after merging the newer origin/main baseline, reran the Docker publication, step-ca, OpenBao, and Windmill converges, re-verified worker checkout parity together with the worker-local post-merge gate, confirmed the live gate-status and stage-smoke wrappers plus the authenticated runtime-assurance API, and reconfirmed that the promotion gate still rejects the stale staged grafana receipt for the expected reasons. This exact-main replay justifies advancing the verified platform baseline from 0.130.66 to 0.130.67.",
+  "summary": "Replayed ADR 0251 from exact-main release 0.177.101 using committed source 57b077a1c4477d179731db3a7148a74f9cf9070a after refreshing the merged origin/main baseline, reran the Docker publication, step-ca, OpenBao, and Windmill converges, re-verified worker checkout parity together with the worker-local post-merge gate, confirmed the live gate-status and stage-smoke wrappers plus the authenticated runtime-assurance API, and reconfirmed that the promotion gate still rejects the stale staged grafana receipt for the expected reasons. This exact-main replay justifies advancing the verified platform baseline from 0.130.67 to 0.130.68.",
   "targets": [
     {
       "kind": "host",
@@ -40,42 +40,42 @@
     {
       "check": "Exact-main Docker runtime replay",
       "result": "pass",
-      "observed": "`make converge-docker-runtime env=production` succeeded from committed source `fad05e6af1cd920191051deaeac5d1d79116604e`, with evidence in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r31-converge-docker-runtime-0.177.100.txt` and final recap `docker-runtime-lv3 : ok=85 changed=5 unreachable=0 failed=0 skipped=6`."
+      "observed": "`make converge-docker-runtime env=production` succeeded from committed source `57b077a1c4477d179731db3a7148a74f9cf9070a`, with evidence in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r43-converge-docker-runtime-0.177.101.txt` and final recap `docker-runtime-lv3 : ok=85 changed=4 unreachable=0 failed=0 skipped=6`."
     },
     {
       "check": "Exact-main step-ca replay",
       "result": "pass",
-      "observed": "`make converge-step-ca env=production` succeeded from the same committed source, with evidence in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r32-converge-step-ca-0.177.100.txt` and final recap `docker-runtime-lv3 : ok=112 changed=3`, `proxmox_florin : ok=54 changed=4`, and all declared SSH-trust guests returning `failed=0`."
+      "observed": "`make converge-step-ca env=production` succeeded from the same committed source, with evidence in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r44-converge-step-ca-0.177.101.txt` and final recap `docker-runtime-lv3 : ok=112 changed=3`, `proxmox_florin : ok=54 changed=4`, and all declared SSH-trust guests returning `failed=0`."
     },
     {
       "check": "Exact-main OpenBao replay",
       "result": "pass",
-      "observed": "`make converge-openbao env=production` succeeded with evidence in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r33-converge-openbao-0.177.100.txt`; the recap reported `docker-runtime-lv3 : ok=155 changed=6 unreachable=0 failed=0 skipped=36` and `postgres-lv3 : ok=47 changed=0 unreachable=0 failed=0 skipped=11`."
+      "observed": "`make converge-openbao env=production` succeeded with evidence in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r45-converge-openbao-0.177.101.txt`; the recap reported `docker-runtime-lv3 : ok=155 changed=6 unreachable=0 failed=0 skipped=36` and `postgres-lv3 : ok=47 changed=0 unreachable=0 failed=0 skipped=11`."
     },
     {
       "check": "Exact-main Windmill replay and worker checkout parity",
       "result": "pass",
-      "observed": "`make converge-windmill env=production` succeeded with evidence in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r34-converge-windmill-0.177.100.txt` and final recap `docker-runtime-lv3 : ok=283 changed=45 unreachable=0 failed=0 skipped=43`, `postgres-lv3 : ok=68 changed=0 unreachable=0 failed=0 skipped=15`, and `proxmox_florin : ok=41 changed=4 unreachable=0 failed=0 skipped=16`; the six sentinels in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r42-worker-checkout-hash-verify-0.177.100.txt` matched exactly between the active worktree and `/srv/proxmox_florin_server`."
+      "observed": "`make converge-windmill env=production` succeeded with evidence in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r46-converge-windmill-0.177.101.txt` and final recap `docker-runtime-lv3 : ok=283 changed=45 unreachable=0 failed=0 skipped=43`, `postgres-lv3 : ok=68 changed=0 unreachable=0 failed=0 skipped=15`, and `proxmox_florin : ok=41 changed=4 unreachable=0 failed=0 skipped=16`; the six sentinels in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r54-worker-checkout-parity-0.177.101.txt` matched exactly between the active worktree and `/srv/proxmox_florin_server`."
     },
     {
       "check": "Worker post-merge gate and live gate-status",
       "result": "pass",
-      "observed": "The worker-side `make post-merge-gate` replay passed through the intended `local-fallback` path with both commands returning `0`, recorded in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r35-post-merge-gate-worker-0.177.100.txt`; the live `f/lv3/gate-status` wrapper returned top-level `status: ok` and `post_merge_run.status: passed` with `requested_checks: [\"local-fallback\"]`, recorded in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r36-gate-status-live-post-release-0.177.100.json`."
+      "observed": "The worker-side `make post-merge-gate` replay completed successfully from `/srv/proxmox_florin_server`, recorded in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r47-post-merge-gate-0.177.101.txt`; the live `f/lv3/gate-status` wrapper then returned top-level `status: ok` and `post_merge_run.status: passed` with `requested_checks: [\"local-fallback\"]`, recorded in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r48-gate-status-0.177.101.json`, confirming the intended worker-local fallback path stayed healthy even while registry-backed runner pulls remained unavailable on the worker."
     },
     {
       "check": "Live stage-smoke suite replay",
       "result": "pass",
-      "observed": "The seeded `f/lv3/stage-smoke-suites` wrapper returned top-level `status: ok` and nested `status: passed`, with suite `production-windmill-primary-path` passing `tests/integration/test_deployment.py::test_windmill_version_endpoint_reports_version`, recorded in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r37-stage-smoke-suites-live-post-release-0.177.100.json`."
+      "observed": "The seeded `f/lv3/stage-smoke-suites` wrapper returned top-level `status: ok` and nested `status: passed`, with suite `production-windmill-primary-path` passing `tests/integration/test_deployment.py::test_windmill_version_endpoint_reports_version`, recorded in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r49-stage-smoke-suites-0.177.101.json`."
     },
     {
       "check": "Runtime assurance and current server state",
       "result": "pass",
-      "observed": "The authenticated runtime-assurance API returned `generated_at: 2026-03-30T10:58:35Z` with summary `total: 55`, `pass: 36`, `degraded: 19`, `failed: 0`, and `unknown: 0`, recorded in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r38-runtime-assurance-api-post-release-0.177.100.json`; fresh host and guest snapshots in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r40-latest-server-state-host-0.177.100.txt` and `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r41-latest-server-state-docker-runtime-0.177.100.txt` reconfirmed `pve-manager/9.1.6`, kernel `6.17.13-2-pve`, Windmill `CE v1.662.0`, and healthy unsealed OpenBao `2.5.1` on `127.0.0.1:8201`."
+      "observed": "The authenticated runtime-assurance API returned `generated_at: 2026-03-30T11:41:49Z` with summary `total: 55`, `pass: 36`, `degraded: 19`, `failed: 0`, and `unknown: 0`, recorded in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r50-runtime-assurance-0.177.101.json`; fresh host and guest snapshots in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r52-proxmox-host-state-0.177.101.txt` and `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r53-docker-runtime-state-0.177.101.txt` reconfirmed `pve-manager/9.1.6`, kernel `6.17.13-2-pve`, Windmill `CE v1.662.0`, and healthy unsealed OpenBao `2.5.1` on `127.0.0.1:8201`."
     },
     {
       "check": "Promotion gate still blocks the stale staged Grafana receipt",
       "result": "pass",
-      "observed": "Running `./scripts/run_python_with_packages.sh pyyaml -- ./scripts/promotion_pipeline.py --check-gate --service grafana --staging-receipt receipts/live-applies/staging/2026-03-27-adr-0183-staging-live-apply.json` returned `gate_decision: rejected`, with evidence in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r39-promotion-gate-check-0.177.100.txt`; the rejection reasons were Prometheus SLO query timeouts, projected vCPU commitment `36.0` exceeding target `22.5`, and staging receipt age, while `approval.approved`, `stage_smoke_gate.passed`, and `staging_health_check.passed` all remained true."
+      "observed": "Running `./scripts/run_python_with_packages.sh pyyaml -- ./scripts/promotion_pipeline.py --check-gate --service grafana --staging-receipt receipts/live-applies/staging/2026-03-27-adr-0183-staging-live-apply.json` returned `gate_decision: rejected`, with evidence in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r51-promotion-gate-0.177.101.txt`; the rejection reasons were Prometheus SLO query timeouts, projected vCPU commitment `36.0` exceeding target `22.5`, and staging receipt age, while `approval.approved`, `smoke_gate.passed`, `stage_smoke_gate.passed`, and `staging_health_check.passed` all remained true."
     }
   ],
   "evidence_refs": [
@@ -86,30 +86,32 @@
     "changelog.md",
     "versions/stack.yaml",
     "workstreams.yaml",
-    "docs/release-notes/0.177.100.md",
+    "docs/release-notes/0.177.101.md",
     "docs/runbooks/configure-windmill.md",
     "docs/runbooks/validate-repository-automation.md",
     "docs/runbooks/validation-gate.md",
     "docs/workstreams/ws-0251-live-apply.md",
     "docs/workstreams/ws-0251-main-integration-r2.md",
     "Makefile",
+    "tests/test_openbao_runtime_role.py",
     "tests/test_windmill_operator_admin_app.py",
-    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r31-converge-docker-runtime-0.177.100.txt",
-    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r32-converge-step-ca-0.177.100.txt",
-    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r33-converge-openbao-0.177.100.txt",
-    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r34-converge-windmill-0.177.100.txt",
-    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r35-post-merge-gate-worker-0.177.100.txt",
-    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r36-gate-status-live-post-release-0.177.100.json",
-    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r37-stage-smoke-suites-live-post-release-0.177.100.json",
-    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r38-runtime-assurance-api-post-release-0.177.100.json",
-    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r39-promotion-gate-check-0.177.100.txt",
-    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r40-latest-server-state-host-0.177.100.txt",
-    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r41-latest-server-state-docker-runtime-0.177.100.txt",
-    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r42-worker-checkout-hash-verify-0.177.100.txt"
+    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r43-converge-docker-runtime-0.177.101.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r44-converge-step-ca-0.177.101.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r45-converge-openbao-0.177.101.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r46-converge-windmill-0.177.101.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r47-post-merge-gate-0.177.101.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r48-gate-status-0.177.101.json",
+    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r49-stage-smoke-suites-0.177.101.json",
+    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r50-runtime-assurance-0.177.101.json",
+    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r51-promotion-gate-0.177.101.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r52-proxmox-host-state-0.177.101.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r53-docker-runtime-state-0.177.101.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r54-worker-checkout-parity-0.177.101.txt"
   ],
   "notes": [
-    "This receipt supersedes `2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply` as the canonical mainline ADR 0251 receipt for `promotion_pipeline`, `stage_smoke_suites`, and the current OpenBao follow-up verification path.",
+    "This refreshed canonical receipt keeps the existing `2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply` pointer stable while updating it to the newer exact-main `0.177.101` replay, so the `promotion_pipeline`, `stage_smoke_suites`, and `openbao` canonical truth references continue to resolve without further merge choreography.",
     "ADR metadata continues to preserve the first implementation facts `Implemented In Repo Version: 0.177.86`, `Implemented In Platform Version: 0.130.58`, and `Implemented On: 2026-03-29`; this receipt records the newer exact-main replay after origin/main advanced again on 2026-03-30.",
-    "The stale staged Grafana receipt still reported no required or observed stage-smoke suites, so this replay confirms the promotion gate remains intentionally blocking on stale-stage and capacity/SLO conditions rather than silently weakening the ADR 0251 contract."
+    "The worker-side post-merge gate intentionally exercised the local fallback because registry-backed runner image pulls were unavailable on the worker (`502 Bad Gateway`), while the live `gate-status` wrapper still recorded `post_merge_run.status: passed` and the production `stage-smoke-suites` wrapper remained green.",
+    "The docker-runtime state probe used the guest-local Windmill API on `127.0.0.1:8000/api/version`; the operator-facing private route remains published through `http://100.64.0.1:8005` and is covered by the authenticated runtime-assurance and stage-smoke evidence."
   ]
 }

@@ -2229,7 +2229,9 @@ workstreams:
         pinning the Windmill worker checkout to the active worktree during
         converge-windmill, replaying the Docker publication, step-ca,
         OpenBao, and stage-smoke verification paths on the live server, and
-        refreshing the canonical smoke-suite and promotion-gate receipt
+        refreshing the canonical smoke-suite and promotion-gate receipt after
+        the newest exact-main replay so the verified platform baseline
+        advances again
       release_bump: patch
       included_in_repo_version: 0.177.101
       latest_receipts:
