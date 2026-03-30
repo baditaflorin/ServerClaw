@@ -3,11 +3,10 @@
 - Date: 2026-03-30
 
 ## Summary
-- implements ADR 0261 by publishing the private browser-runner runtime, the governed operator gateway route, and the Dify-compatible browser-run-session tool with packaged-runtime-safe config resolution and verified smoke artifacts
 - implements ADR 0262 by deploying the OpenFGA delegated authorization runtime, the ServerClaw bootstrap contracts, the repo-managed Keycloak runtime clients, and the API gateway registration for delegated authorization checks
 
 ## Platform Impact
-- platform version advances to 0.130.63 after the exact-main ADR 0261 and ADR 0262 replay re-verifies the governed browser-runner plus delegated OpenFGA and Keycloak authorization stack on top of the 0.130.62 baseline
+- exact-main ADR 0262 replay establishes the first live platform version with delegated OpenFGA authorization and API gateway verification on current mainline after ADR 0270 recovery hardening
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

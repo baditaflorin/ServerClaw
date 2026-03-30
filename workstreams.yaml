@@ -450,6 +450,7 @@ workstreams:
       - docs/diagrams/agent-coordination-map.excalidraw
       - docs/diagrams/service-dependency-graph.excalidraw
       - docs/site-generated/architecture/dependency-graph.md
+      - docs/site-generated/architecture/dependency-graph.md
       - Makefile
       - playbooks/docker-publication-assurance.yml
       - playbooks/tasks/docker-publication-assert.yml
@@ -3943,8 +3944,8 @@ workstreams:
     title: OpenFGA and Keycloak delegated authorization live apply
     status: live_applied
     owner: codex
-    branch: codex/ws-0261-main-finish
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish
+    branch: codex/ws-0262-main-merge
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0262-main-merge
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0262-live-apply.md
     depends_on:
       - adr-0056-keycloak-for-operator-and-agent-sso
@@ -3956,8 +3957,19 @@ workstreams:
       - docs/workstreams/ws-0262-live-apply.md
       - docs/adr/0262-openfga-and-keycloak-for-delegated-serverclaw-capability-authorization.md
       - docs/adr/.index.yaml
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.95.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/diagrams/service-dependency-graph.excalidraw
       - docs/runbooks/configure-openfga.md
       - docs/runbooks/configure-keycloak.md
+      - docs/runbooks/configure-mail-platform.md
       - inventory/host_vars/proxmox_florin.yml
       - inventory/group_vars/platform.yml
       - scripts/generate_platform_vars.py
@@ -3970,6 +3982,10 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
       - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/meta/argument_specs.yml
       - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/reconcile_repo_managed_users.yml
+      - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/**
+      - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/**
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
       - config/serverclaw-authz/
       - config/service-capability-catalog.json
       - config/health-probe-catalog.json
@@ -3994,14 +4010,19 @@ workstreams:
       - config/alertmanager/rules/openfga.yml
       - receipts/image-scans/2026-03-29-openfga-runtime.json
       - receipts/image-scans/2026-03-29-openfga-runtime.trivy.json
+      - receipts/live-applies/2026-03-29-adr-0262-openfga-keycloak-live-apply.json
+      - receipts/live-applies/2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-03-29-adr-0262-*
+      - receipts/live-applies/evidence/2026-03-30-adr-0262-*
       - scripts/serverclaw_authz.py
+      - tests/test_api_gateway_runtime_role.py
+      - tests/test_edge_publication_makefile.py
       - tests/test_openfga_postgres_role.py
       - tests/test_openfga_runtime_role.py
       - tests/test_serverclaw_authz.py
       - tests/test_keycloak_runtime_role.py
-      - receipts/live-applies/2026-03-29-adr-0262-openfga-keycloak-live-apply.json
-      - receipts/live-applies/2026-03-30-adr-0262-openfga-keycloak-exact-main-live-apply.json
-      - receipts/live-applies/evidence/2026-03-30-adr-0262-*
+      - tests/test_mail_platform_runtime_role.py
+      - tests/test_openbao_runtime_role.py
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -4055,9 +4076,37 @@ workstreams:
             - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
             - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/meta/argument_specs.yml
             - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/reconcile_repo_managed_users.yml
             - tests/test_keycloak_runtime_role.py
           mode: shared_contract
           contract: keycloak-runtime-client-contract-v1
+        - id: openfga_gateway_and_prereq_replay_contract
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
+            - docs/runbooks/configure-mail-platform.md
+            - tests/test_api_gateway_runtime_role.py
+            - tests/test_edge_publication_makefile.py
+            - tests/test_mail_platform_runtime_role.py
+            - tests/test_openbao_runtime_role.py
+          mode: shared_contract
+          contract: openfga-mainline-replay-prereq-contract-v1
+        - id: openfga_main_integration_truth
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.95.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/diagrams/service-dependency-graph.excalidraw
+            - docs/site-generated/architecture/dependency-graph.md
+          mode: shared_contract
+          contract: main-integration-release-truth-v1
         - id: openfga_live_apply_surfaces
           paths:
             - docs/workstreams/ws-0262-live-apply.md
@@ -4074,14 +4123,15 @@ workstreams:
             - receipts/image-scans/2026-03-29-openfga-runtime.json
             - receipts/image-scans/2026-03-29-openfga-runtime.trivy.json
             - receipts/live-applies/2026-03-29-adr-0262-openfga-keycloak-live-apply.json
-            - receipts/live-applies/2026-03-30-adr-0262-openfga-keycloak-exact-main-live-apply.json
+            - receipts/live-applies/2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-03-29-adr-0262-*
             - receipts/live-applies/evidence/2026-03-30-adr-0262-*
             - scripts/serverclaw_authz.py
             - tests/test_openfga_postgres_role.py
             - tests/test_openfga_runtime_role.py
             - tests/test_serverclaw_authz.py
           mode: exclusive
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: true
     canonical_truth:
       changelog_entry: implements ADR 0262 by deploying the OpenFGA delegated
@@ -4091,7 +4141,9 @@ workstreams:
       release_bump: patch
       included_in_repo_version: 0.177.95
       latest_receipts:
-        openfga: 2026-03-30-adr-0262-openfga-keycloak-exact-main-live-apply
+        api_gateway: 2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply
+        keycloak: 2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply
+        openfga: 2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply
   - id: ws-0244-runtime-assurance-adrs
     adr: "0244"
     title: Runtime assurance architecture bundle

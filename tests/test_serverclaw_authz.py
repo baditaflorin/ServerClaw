@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import urllib.error
 from datetime import timedelta
 from pathlib import Path
 
@@ -101,6 +102,37 @@ def test_declared_principal_verification_uses_the_stable_keycloak_username_refer
 
     assert report["verification"] == "declared_principal"
     assert report["claims"]["preferred_username"] == "florin.badita"
+
+
+def test_http_json_retries_transient_transport_failures(monkeypatch) -> None:
+    attempts = {"count": 0}
+
+    class FakeResponse:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb) -> None:
+            return None
+
+        def read(self) -> bytes:
+            return b'{"status":"ok"}'
+
+    def fake_urlopen(request, timeout=None):
+        attempts["count"] += 1
+        if attempts["count"] < 3:
+            raise urllib.error.URLError(TimeoutError("timed out"))
+        return FakeResponse()
+
+    monkeypatch.setattr(serverclaw_authz.urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr(serverclaw_authz.time, "sleep", lambda *_args, **_kwargs: None)
+
+    status, payload = serverclaw_authz.http_json("GET", "http://example.invalid/healthz")
+
+    assert attempts["count"] == 3
+    assert status == 200
+    assert payload == {"status": "ok"}
 
 
 def test_repo_path_uses_the_shared_repo_root_for_worktree_local_artifacts(monkeypatch, tmp_path: Path) -> None:

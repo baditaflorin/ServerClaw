@@ -2831,6 +2831,9 @@
           "bootstrap_ssh_private_key",
           "hetzner_dns_api_token"
         ],
+        "bootstrap_manifest_ids": [
+          "shared-edge-generated-portals"
+        ],
         "generated_secret_ids": [
           "keycloak_database_password",
           "keycloak_bootstrap_admin_password",

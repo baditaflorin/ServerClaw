@@ -6,12 +6,13 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULTS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "defaults" / "main.yml"
 TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "main.yml"
+REPO_USER_TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "reconcile_repo_managed_users.yml"
 COMPOSE_TEMPLATE_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "templates" / "docker-compose.yml.j2"
 SERVERCLAW_TASKS_PATH = REPO_ROOT / "roles" / "keycloak_runtime" / "tasks" / "serverclaw_client.yml"
 
 
-def load_tasks() -> list[dict]:
-    return yaml.safe_load(TASKS_PATH.read_text())
+def load_tasks(path: Path = TASKS_PATH) -> list[dict]:
+    return yaml.safe_load(path.read_text())
 
 
 def load_serverclaw_tasks() -> list[dict]:
@@ -26,6 +27,8 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_mail_platform_submission_host"] == "lv3-mail-stalwart"
     assert defaults["keycloak_mail_platform_submission_port"] == 1587
     assert defaults["keycloak_mail_platform_submission_starttls"] is False
+    assert defaults["keycloak_compose_project_name"] == "keycloak"
+    assert defaults["keycloak_compose_network_name"] == "{{ keycloak_compose_project_name }}_default"
     assert defaults["keycloak_mail_platform_docker_network_name"] == "mail-platform_default"
     assert defaults["keycloak_langfuse_client_id"] == "langfuse"
     assert defaults["keycloak_langfuse_client_secret_local_file"].endswith("/.local/keycloak/langfuse-client-secret.txt")
@@ -98,16 +101,39 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
         for task in tasks
         if task.get("name") == "Wait for the Docker daemon to answer after networking recovery"
     )
-    cleanup_task = next(
-        task for task in tasks if task.get("name") == "Remove stale Keycloak compose resources before force recreate"
+    replace_cleanup = next(
+        task
+        for task in tasks
+        if task.get("name") == "Remove stale Keycloak compose replacement containers before recovery"
+    )
+    openbao_agent_recreate = next(
+        task
+        for task in tasks
+        if task.get("name") == "Force-recreate the Keycloak OpenBao agent after Docker networking recovery"
+    )
+    runtime_env_wait = next(
+        task
+        for task in tasks
+        if task.get("name") == "Wait for the Keycloak runtime env file after OpenBao agent recovery"
     )
     force_recreate = next(
         task
         for task in tasks
-        if task.get("name") == "Force-recreate the Keycloak stack after Docker networking recovery"
+        if task.get("name") == "Force-recreate the Keycloak service after Docker networking recovery"
     )
-    force_recreate_flag = next(
+    force_recreate_fact = next(
+        task
+        for task in tasks
+        if task.get("name") == "Record whether the Keycloak startup needs a force recreate"
+    )
+    force_recreate_fact = next(
         task for task in tasks if task.get("name") == "Record whether the Keycloak startup needs a force recreate"
+    )
+    force_recreate_down = next(
+        task for task in tasks if task.get("name") == "Reset the Keycloak stack before a force recreate"
+    )
+    network_cleanup = next(
+        task for task in tasks if task.get("name") == "Remove stale Keycloak compose networks after the reset"
     )
     readiness_probe = next(
         task
@@ -120,13 +146,31 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     assert docker_info["ansible.builtin.command"]["argv"] == ["docker", "info", "--format", '{{ "{{.ServerVersion}}" }}']
     assert env_render["register"] == "keycloak_env_template"
     assert compose_render["register"] == "keycloak_compose_template"
+    assert "com.docker.compose.project=keycloak" in replace_cleanup["ansible.builtin.shell"]
+    assert "com.docker.compose.replace" in replace_cleanup["ansible.builtin.shell"]
+    assert openbao_agent_recreate["ansible.builtin.command"]["argv"][-4:] == ["up", "-d", "--force-recreate", "openbao-agent"]
+    assert 'grep -Fqx "KC_DB_URL_HOST={{ keycloak_database_host }}" "{{ keycloak_env_file }}"' in runtime_env_wait["ansible.builtin.shell"]
+    assert (
+        'grep -Fqx "KC_BOOTSTRAP_ADMIN_USERNAME={{ keycloak_bootstrap_admin_username }}" "{{ keycloak_env_file }}"'
+        in runtime_env_wait["ansible.builtin.shell"]
+    )
     assert readiness_probe["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
-    assert cleanup_task["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
-    assert cleanup_task["when"] == "keycloak_force_recreate"
-    assert cleanup_task["failed_when"] is False
+    assert force_recreate_down["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "compose",
+        "--file",
+        "{{ keycloak_compose_file }}",
+        "down",
+        "--remove-orphans",
+    ]
+    assert force_recreate_down["when"] == "keycloak_force_recreate"
+    assert "{{ keycloak_compose_network_name }}" in network_cleanup["ansible.builtin.shell"]
+    assert network_cleanup["when"] == "keycloak_force_recreate"
     assert "--force-recreate" in force_recreate["ansible.builtin.command"]["argv"]
+    assert "--no-deps" in force_recreate["ansible.builtin.command"]["argv"]
+    assert force_recreate["ansible.builtin.command"]["argv"][-1] == "keycloak"
     assert force_recreate["until"] == "keycloak_up.rc == 0"
-    force_recreate_expression = force_recreate_flag["ansible.builtin.set_fact"]["keycloak_force_recreate"]
+    force_recreate_expression = force_recreate_fact["ansible.builtin.set_fact"]["keycloak_force_recreate"]
     assert "keycloak_docker_nat_chain.rc != 0" in force_recreate_expression
     assert "keycloak_local_http_port_probe.failed" in force_recreate_expression
     assert "keycloak_readiness_probe.status" in force_recreate_expression
@@ -151,8 +195,14 @@ def test_role_verifies_internal_mail_network_connectivity() -> None:
         "ahostsv4",
         "{{ keycloak_mail_platform_submission_host }}",
     ]
+    assert resolve_task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
+    assert resolve_task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
+    assert resolve_task["until"] == "keycloak_mail_submission_host_lookup.rc == 0"
     assert "{{ keycloak_mail_platform_submission_host }}" in connect_task["ansible.builtin.shell"]
     assert "{{ keycloak_mail_platform_submission_port }}" in connect_task["ansible.builtin.shell"]
+    assert connect_task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
+    assert connect_task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
+    assert connect_task["until"] == "keycloak_mail_submission_probe.rc == 0"
 
 
 def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile() -> None:
@@ -211,15 +261,22 @@ def test_realm_reconciliation_retries_repo_managed_keycloak_modules() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     tasks = load_tasks()
     realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
-    community_tasks = [
-        task
-        for task in realm_block["block"]
-        if any(key.startswith("community.general.keycloak_") for key in task)
-    ]
     assert defaults["keycloak_admin_connection_timeout"] == 60
-    assert defaults["keycloak_admin_reconciliation_retries"] == 6
+    assert defaults["keycloak_admin_reconciliation_retries"] == 24
     assert defaults["keycloak_admin_reconciliation_delay"] == 5
-    for task in community_tasks:
+    assert realm_block["module_defaults"]["group/community.general.keycloak"]["connection_timeout"] == (
+        "{{ keycloak_admin_connection_timeout }}"
+    )
+    runtime_contract_tasks = [
+        next(
+            task
+            for task in realm_block["block"]
+            if task.get("name") == "Ensure the obsolete ServerClaw operator CLI direct-grant client is absent"
+        ),
+        next(task for task in realm_block["block"] if task.get("name") == "Ensure the ServerClaw runtime client exists"),
+        next(task for task in realm_block["block"] if task.get("name") == "Read the ServerClaw runtime client secret"),
+    ]
+    for task in runtime_contract_tasks:
         assert task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
         assert task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
         assert task["until"] == f"{task['register']} is succeeded"
@@ -344,30 +401,72 @@ def test_serverclaw_client_tasks_wait_for_keycloak_then_mirror_secret() -> None:
 def test_role_manages_the_outline_automation_identity() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     tasks = load_tasks()
+    repo_user_tasks = load_tasks(REPO_USER_TASKS_PATH)
     password_generation_task = next(task for task in tasks if task.get("name") == "Generate the Outline automation password")
     password_mirror_task = next(task for task in tasks if task.get("name") == "Mirror the Outline automation password to the control machine")
+    repo_user_reconciliation = next(task for task in tasks if task.get("name") == "Reconcile repo-managed Keycloak users")
+    include_task = next(
+        task for task in repo_user_reconciliation["block"] if task.get("name") == "Run the repo-managed Keycloak user reconciliation tasks"
+    )
+    recovery_restart_task = next(
+        task
+        for task in repo_user_reconciliation["rescue"]
+        if task.get("name") == "Recreate the Keycloak service before retrying repo-managed user reconciliation"
+    )
+    recovery_token_probe_task = next(
+        task
+        for task in repo_user_reconciliation["rescue"]
+        if task.get("name")
+        == "Wait for the Keycloak bootstrap admin token endpoint after repo-managed user reconciliation recovery"
+    )
+    recovery_retry_task = next(
+        task
+        for task in repo_user_reconciliation["rescue"]
+        if task.get("name") == "Retry the repo-managed Keycloak user reconciliation tasks after recovery"
+    )
     admin_token_task = next(
-        task for task in tasks if task.get("name") == "Request a Keycloak admin token for repo-managed user reconciliation"
+        task for task in repo_user_tasks if task.get("name") == "Request a Keycloak admin token for repo-managed user reconciliation"
     )
     platform_group_lookup_task = next(
-        task for task in tasks if task.get("name") == "Look up the lv3-platform-admins group in Keycloak"
+        task for task in repo_user_tasks if task.get("name") == "Look up the lv3-platform-admins group in Keycloak"
     )
-    operator_update_task = next(task for task in tasks if task.get("name") == "Update the named operator profile in Keycloak")
-    operator_password_task = next(task for task in tasks if task.get("name") == "Reset the named operator password in Keycloak")
+    operator_update_task = next(
+        task for task in repo_user_tasks if task.get("name") == "Update the named operator profile in Keycloak"
+    )
+    operator_password_task = next(
+        task for task in repo_user_tasks if task.get("name") == "Reset the named operator password in Keycloak"
+    )
     automation_create_task = next(
-        task for task in tasks if task.get("name") == "Create the Outline automation user in Keycloak when missing"
+        task for task in repo_user_tasks if task.get("name") == "Create the Outline automation user in Keycloak when missing"
     )
-    automation_user_task = next(task for task in tasks if task.get("name") == "Update the Outline automation user profile in Keycloak")
+    automation_user_task = next(
+        task for task in repo_user_tasks if task.get("name") == "Update the Outline automation user profile in Keycloak"
+    )
     automation_password_task = next(
-        task for task in tasks if task.get("name") == "Reset the Outline automation user password in Keycloak"
+        task for task in repo_user_tasks if task.get("name") == "Reset the Outline automation user password in Keycloak"
     )
     assert password_generation_task["ansible.builtin.shell"].count("openssl rand -base64 24") == 1
     assert password_mirror_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_outline_automation_password_local_file }}"
     assert defaults["keycloak_repo_user_reconciliation_retries"] == 24
     assert defaults["keycloak_repo_user_reconciliation_delay"] == 5
     assert defaults["keycloak_admin_connection_timeout"] == 60
-    assert defaults["keycloak_local_admin_url"] == "http://{{ ansible_host }}:{{ keycloak_internal_http_port }}"
+    assert defaults["keycloak_local_admin_url"] == "http://127.0.0.1:{{ keycloak_local_http_port }}"
     assert defaults["keycloak_repo_user_admin_url"] == "{{ keycloak_local_admin_url }}"
+    assert include_task["ansible.builtin.include_tasks"] == "reconcile_repo_managed_users.yml"
+    assert recovery_restart_task["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "compose",
+        "--file",
+        "{{ keycloak_compose_file }}",
+        "up",
+        "-d",
+        "--force-recreate",
+        "--no-deps",
+        "keycloak",
+    ]
+    assert recovery_token_probe_task["retries"] == "{{ keycloak_startup_probe_retries }}"
+    assert recovery_token_probe_task["delay"] == "{{ keycloak_startup_probe_delay }}"
+    assert recovery_retry_task["ansible.builtin.include_tasks"] == "reconcile_repo_managed_users.yml"
     assert admin_token_task["ansible.builtin.uri"]["url"] == (
         "{{ keycloak_repo_user_admin_url }}/realms/master/protocol/openid-connect/token"
     )
@@ -388,49 +487,40 @@ def test_role_manages_the_outline_automation_identity() -> None:
     assert automation_password_task["ansible.builtin.uri"]["body"]["temporary"] is False
 
 
-def test_repo_managed_admin_token_is_refreshed_between_reconciliation_phases() -> None:
+def test_repo_managed_user_reconciliation_is_delegated_to_the_include_file() -> None:
     tasks = load_tasks()
+    repo_user_tasks = load_tasks(REPO_USER_TASKS_PATH)
+    repo_user_reconciliation = next(task for task in tasks if task.get("name") == "Reconcile repo-managed Keycloak users")
+    include_task = next(
+        task for task in repo_user_reconciliation["block"] if task.get("name") == "Run the repo-managed Keycloak user reconciliation tasks"
+    )
+    retry_task = next(
+        task
+        for task in repo_user_reconciliation["rescue"]
+        if task.get("name") == "Retry the repo-managed Keycloak user reconciliation tasks after recovery"
+    )
     group_token_task = next(
-        task for task in tasks if task.get("name") == "Request a Keycloak admin token for repo-managed user reconciliation"
-    )
-    operator_refresh_block = next(
         task
-        for task in tasks
-        if task.get("name") == "Refresh the repo-managed Keycloak admin headers before reconciling the named operator"
-    )
-    outline_refresh_block = next(
-        task
-        for task in tasks
-        if task.get("name") == "Refresh the repo-managed Keycloak admin headers before reconciling the Outline automation user"
+        for task in repo_user_tasks
+        if task.get("name") == "Request a Keycloak admin token for repo-managed user reconciliation"
     )
     platform_group_lookup_task = next(
-        task for task in tasks if task.get("name") == "Look up the lv3-platform-admins group in Keycloak"
+        task for task in repo_user_tasks if task.get("name") == "Look up the lv3-platform-admins group in Keycloak"
     )
-    operator_lookup_task = next(task for task in tasks if task.get("name") == "Look up the named operator in Keycloak")
-    outline_lookup_task = next(task for task in tasks if task.get("name") == "Look up the Outline automation user in Keycloak")
-
-    operator_token_task = next(
-        task
-        for task in operator_refresh_block["block"]
-        if task.get("name") == "Request a fresh Keycloak admin token for the named operator reconciliation"
-    )
-    outline_token_task = next(
-        task
-        for task in outline_refresh_block["block"]
-        if task.get("name") == "Request a fresh Keycloak admin token for the Outline automation reconciliation"
+    operator_lookup_task = next(task for task in repo_user_tasks if task.get("name") == "Look up the named operator in Keycloak")
+    outline_lookup_task = next(
+        task for task in repo_user_tasks if task.get("name") == "Look up the Outline automation user in Keycloak"
     )
 
-    for task in (group_token_task, operator_token_task, outline_token_task):
-        assert task["ansible.builtin.uri"]["timeout"] == "{{ keycloak_admin_connection_timeout }}"
-        assert task["retries"] == "{{ keycloak_repo_user_reconciliation_retries }}"
-        assert task["delay"] == "{{ keycloak_repo_user_reconciliation_delay }}"
-        assert "json.access_token" in task["until"]
-
-    assert tasks.index(group_token_task) < tasks.index(platform_group_lookup_task)
-    assert tasks.index(operator_refresh_block) < tasks.index(operator_lookup_task)
-    assert tasks.index(outline_refresh_block) < tasks.index(outline_lookup_task)
-    assert tasks.index(platform_group_lookup_task) < tasks.index(operator_refresh_block)
-    assert tasks.index(operator_lookup_task) < tasks.index(outline_refresh_block)
+    assert include_task["ansible.builtin.include_tasks"] == "reconcile_repo_managed_users.yml"
+    assert retry_task["ansible.builtin.include_tasks"] == "reconcile_repo_managed_users.yml"
+    assert group_token_task["ansible.builtin.uri"]["timeout"] == "{{ keycloak_admin_connection_timeout }}"
+    assert group_token_task["retries"] == "{{ keycloak_repo_user_reconciliation_retries }}"
+    assert group_token_task["delay"] == "{{ keycloak_repo_user_reconciliation_delay }}"
+    assert "json.access_token" in group_token_task["until"]
+    assert repo_user_tasks.index(group_token_task) < repo_user_tasks.index(platform_group_lookup_task)
+    assert repo_user_tasks.index(platform_group_lookup_task) < repo_user_tasks.index(operator_lookup_task)
+    assert repo_user_tasks.index(operator_lookup_task) < repo_user_tasks.index(outline_lookup_task)
 
 
 def test_role_manages_serverclaw_runtime_client_and_removes_the_stale_operator_direct_grant() -> None:
