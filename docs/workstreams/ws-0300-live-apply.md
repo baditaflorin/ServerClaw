@@ -12,7 +12,7 @@
 - Owner: codex
 - Depends On: `adr-0052`, `adr-0066`, `adr-0124`, `adr-0276`, `adr-0300`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0300`, `docs/workstreams/ws-0300-live-apply.md`, `docs/runbooks/configure-falco-runtime.md`, `docs/runbooks/configure-ntfy.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `config/falco/`, `config/ntfy/server.yml`, `config/event-taxonomy.yaml`, `config/workflow-catalog.json`, `config/command-catalog.json`, `config/ansible-execution-scopes.yaml`, `playbooks/falco.yml`, `playbooks/services/falco.yml`, `roles/falco_runtime`, `roles/falco_event_bridge_runtime`, `scripts/falco_event_bridge.py`, `scripts/falco_event_bridge_server.py`, `receipts/live-applies/`
+- Shared Surfaces: `docs/adr/0300`, `docs/workstreams/ws-0300-live-apply.md`, `docs/runbooks/configure-falco-runtime.md`, `docs/runbooks/configure-ntfy.md`, `.ansible-lint-ignore`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `scripts/matrix_admin_register.py`, `scripts/matrix_bridge_smoke.py`, `config/falco/`, `config/ntfy/server.yml`, `config/event-taxonomy.yaml`, `config/workflow-catalog.json`, `config/command-catalog.json`, `config/ansible-execution-scopes.yaml`, `playbooks/falco.yml`, `playbooks/services/falco.yml`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml`, `roles/falco_runtime`, `roles/falco_event_bridge_runtime`, `scripts/falco_event_bridge.py`, `scripts/falco_event_bridge_server.py`, `receipts/live-applies/`
 
 ## Scope
 
@@ -34,9 +34,12 @@
 - `docs/adr/0300-falco-for-container-runtime-syscall-security-monitoring-and-autonomous-anomaly-detection.md`
 - `docs/runbooks/configure-falco-runtime.md`
 - `docs/runbooks/configure-ntfy.md`
+- `.ansible-lint-ignore`
 - `inventory/host_vars/proxmox_florin.yml`
 - `inventory/group_vars/platform.yml`
 - `scripts/generate_platform_vars.py`
+- `scripts/matrix_admin_register.py`
+- `scripts/matrix_bridge_smoke.py`
 - `config/falco/`
 - `config/ntfy/server.yml`
 - `config/event-taxonomy.yaml`
@@ -46,6 +49,7 @@
 - `config/ansible-role-idempotency.yml`
 - `playbooks/falco.yml`
 - `playbooks/services/falco.yml`
+- `collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml`
 - `collections/ansible_collections/lv3/platform/roles/falco_runtime/`
 - `collections/ansible_collections/lv3/platform/roles/falco_event_bridge_runtime/`
 - `scripts/falco_event_bridge.py`
@@ -87,27 +91,20 @@
   `python3 scripts/command_catalog.py --validate`, and
   `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
   also pass.
-- `make validate` was replayed from this rebased worktree on `2026-03-30`; the
-  workstream-local failures are fixed, and the remaining repo-wide failure is
-  unchanged pre-existing `ansible-lint` warning debt in
-  `collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml`
-  plus
-  `collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml`.
+- The repo-wide validation replay uncovered rebased-mainline automation debt
+  outside the original Falco surfaces. This workstream now also carries the
+  minimal validation hygiene needed to keep the latest-main base green:
+  OpenBao Jinja spacing in
+  `collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml`,
+  the known `complexity[tasks]` allowance in `.ansible-lint-ignore`, and
+  retry-policy migrations in `scripts/matrix_admin_register.py` plus
+  `scripts/matrix_bridge_smoke.py`.
+- The full four-guest lock set was acquired on `2026-03-30` for `vm:120`,
+  `vm:130`, `vm:140`, and `vm:150`, so live mutation can proceed immediately
+  after the repo-wide validation rerun returns clean.
 
 ## Current Blockers
 
-- The shared lock registry still holds `vm:120` for
-  `agent:codex/ws-0277-live-apply` until `2026-03-30T14:22:24Z`.
-- The shared lock registry still holds `vm:130` for
-  `agent:codex/ws-0296-live-apply` until `2026-03-30T15:24:19Z`.
-- ADR 0300 live mutation must wait until both locks clear because this
-  workstream needs the full `vm:120`, `vm:130`, `vm:140`, and `vm:150` lock set
-  before running `make converge-falco env=production`.
-- A standard `git push` from this workstream branch currently hits the
-  pre-push gate's generated-artifact checks. The gate specifically wants:
-  `python3 scripts/generate_diagrams.py --write`,
-  `scripts/platform_manifest.py --write`, and
-  `uvx --from pyyaml python scripts/canonical_truth.py --write`.
-- The last command would rewrite the protected top-level `README.md`, so that
-  regeneration is intentionally deferred to a later merge-to-main or dedicated
-  integration step rather than being performed on this workstream branch.
+- None beyond the work still in flight: the repo-wide validation rerun,
+  `make converge-falco env=production`, smoke evidence capture, and final
+  protected-file integration on `main`.

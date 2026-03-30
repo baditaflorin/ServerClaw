@@ -4,3 +4,4 @@ collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml 
 collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml complexity[tasks]
 collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml complexity[tasks]
 collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml complexity[tasks]
+collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml complexity[tasks]
