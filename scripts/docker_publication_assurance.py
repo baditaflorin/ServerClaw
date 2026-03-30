@@ -531,7 +531,167 @@ def _remove_compose_networks(
 
 def _compose_recreate_needs_network_reset(result: CommandResult) -> bool:
     message = "\n".join(part for part in (result.stdout, result.stderr) if part).lower()
-    return result.returncode != 0 and "network" in message and "does not exist" in message
+    return result.returncode != 0 and (
+        ("network" in message and "does not exist" in message)
+        or "failed programming external connectivity" in message
+        or "unable to enable dnat rule" in message
+        or "no chain/target/match by that name" in message
+    )
+
+
+def _compose_recreate_needs_project_reset(result: CommandResult) -> bool:
+    message = "\n".join(part for part in (result.stdout, result.stderr) if part).lower()
+    return result.returncode != 0 and any(
+        marker in message
+        for marker in (
+            "cannot stop container",
+            "cannot remove container",
+            "container is restarting",
+            "is zombie",
+            "error when allocating new name",
+            "is already in use by container",
+            "name conflict",
+        )
+    )
+
+
+def _compose_recreate_had_transport_error(result: CommandResult) -> bool:
+    message = "\n".join(part for part in (result.stdout, result.stderr) if part).lower()
+    return result.returncode != 0 and "error during connect" in message and "eof" in message
+
+
+def _force_remove_compose_project_containers(
+    *,
+    compose_project: str | None,
+    command_runner: CommandRunner,
+) -> dict[str, Any]:
+    if not compose_project:
+        return {
+            "compose_project": None,
+            "container_ids": [],
+            "listed": None,
+            "removed": None,
+            "restart_docker": None,
+            "wait_for_docker": None,
+            "retry_listed": None,
+            "retry_removed": None,
+        }
+
+    label_filter = f"label=com.docker.compose.project={compose_project}"
+    list_result = command_runner(["docker", "ps", "-aq", "--filter", label_filter], None)
+    container_ids = [entry.strip() for entry in list_result.stdout.split() if entry.strip()]
+    removal_result: dict[str, Any] = {
+        "compose_project": compose_project,
+        "container_ids": container_ids,
+        "listed": _command_record(list_result),
+        "removed": None,
+        "restart_docker": None,
+        "wait_for_docker": None,
+        "retry_listed": None,
+        "retry_removed": None,
+    }
+    if list_result.returncode != 0 or not container_ids:
+        return removal_result
+
+    remove_result = command_runner(["docker", "rm", "-f", *container_ids], None)
+    removal_result["removed"] = _command_record(remove_result)
+    if remove_result.returncode == 0:
+        return removal_result
+
+    restart_result = _restart_docker(command_runner)
+    removal_result["restart_docker"] = _command_record(restart_result)
+    removal_result["wait_for_docker"] = _wait_for_docker_chain_state(
+        require_nat_chain=False,
+        require_forward_chain=False,
+        command_runner=command_runner,
+    )
+    retry_list_result = command_runner(["docker", "ps", "-aq", "--filter", label_filter], None)
+    removal_result["retry_listed"] = _command_record(retry_list_result)
+    retry_container_ids = [entry.strip() for entry in retry_list_result.stdout.split() if entry.strip()]
+    if retry_list_result.returncode != 0 or not retry_container_ids:
+        return removal_result
+
+    retry_remove_result = command_runner(["docker", "rm", "-f", *retry_container_ids], None)
+    removal_result["retry_removed"] = _command_record(retry_remove_result)
+    return removal_result
+
+
+def _reset_compose_project(
+    *,
+    report: dict[str, Any],
+    actions: list[dict[str, Any]],
+    command_runner: CommandRunner,
+    remove_project_containers: bool,
+) -> CommandResult:
+    down_result = _compose_down_project(
+        compose_working_directory=report["compose_working_directory"],
+        compose_files=report["compose_files"],
+        command_runner=command_runner,
+    )
+    actions.append({"action": "compose_reset_down", "result": _command_record(down_result)})
+    if remove_project_containers:
+        actions.append(
+            {
+                "action": "remove_compose_project_containers",
+                "result": _force_remove_compose_project_containers(
+                    compose_project=report["compose_project"],
+                    command_runner=command_runner,
+                ),
+            }
+        )
+    network_results = _remove_compose_networks(
+        network_names=report["required_networks"] + report["actual_networks"],
+        command_runner=command_runner,
+    )
+    for network_result in network_results:
+        actions.append({"action": "remove_compose_network", "result": _command_record(network_result)})
+    recreate_result = _recreate_compose_project(
+        compose_working_directory=report["compose_working_directory"],
+        compose_files=report["compose_files"],
+        command_runner=command_runner,
+    )
+    actions.append({"action": "compose_force_recreate", "result": _command_record(recreate_result)})
+    return recreate_result
+
+
+def _wait_for_publication_recovery(
+    *,
+    service_id: str,
+    service_probe: dict[str, Any],
+    contract: dict[str, Any],
+    local_ipv4s: set[str],
+    command_runner: CommandRunner,
+    listener_checker: ListenerChecker,
+    listener_timeout: float,
+    strict_listeners: bool,
+    attempts: int = 12,
+    delay_seconds: float = 2.0,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    latest = _run_checks(
+        service_id=service_id,
+        service_probe=service_probe,
+        contract=contract,
+        local_ipv4s=local_ipv4s,
+        command_runner=command_runner,
+        listener_checker=listener_checker,
+        listener_timeout=listener_timeout,
+    )
+    for attempt in range(1, attempts + 1):
+        if not _has_blocking_issues(latest, strict_listeners=strict_listeners):
+            return latest, {"settled": True, "attempts": attempt, "report": latest}
+        if attempt == attempts:
+            break
+        time.sleep(delay_seconds)
+        latest = _run_checks(
+            service_id=service_id,
+            service_probe=service_probe,
+            contract=contract,
+            local_ipv4s=local_ipv4s,
+            command_runner=command_runner,
+            listener_checker=listener_checker,
+            listener_timeout=listener_timeout,
+        )
+    return latest, {"settled": False, "attempts": attempts, "report": latest}
 
 
 def assure_docker_publication(
@@ -563,6 +723,8 @@ def assure_docker_publication(
 
     if heal and _has_blocking_issues(before, strict_listeners=True):
         latest_compose_recreate_returncode: int | None = None
+        compose_recreate_needs_project_reset = False
+        compose_recreate_had_transport_error = False
         if before["container_present"] and (before["issues"]["missing_nat_chain"] or before["issues"]["missing_forward_chain"]):
             healed = _record_docker_restart_and_wait(
                 report=before,
@@ -589,25 +751,15 @@ def assure_docker_publication(
                 command_runner=command_runner,
             )
             actions.append({"action": "compose_force_recreate", "result": _command_record(recreate_result)})
+            compose_recreate_needs_project_reset = _compose_recreate_needs_project_reset(recreate_result)
+            compose_recreate_had_transport_error = _compose_recreate_had_transport_error(recreate_result)
             if _compose_recreate_needs_network_reset(recreate_result):
-                down_result = _compose_down_project(
-                    compose_working_directory=intermediate["compose_working_directory"],
-                    compose_files=intermediate["compose_files"],
+                recreate_result = _reset_compose_project(
+                    report=intermediate,
+                    actions=actions,
                     command_runner=command_runner,
+                    remove_project_containers=False,
                 )
-                actions.append({"action": "compose_reset_down", "result": _command_record(down_result)})
-                network_results = _remove_compose_networks(
-                    network_names=intermediate["required_networks"] + intermediate["actual_networks"],
-                    command_runner=command_runner,
-                )
-                for network_result in network_results:
-                    actions.append({"action": "remove_compose_network", "result": _command_record(network_result)})
-                recreate_result = _recreate_compose_project(
-                    compose_working_directory=intermediate["compose_working_directory"],
-                    compose_files=intermediate["compose_files"],
-                    command_runner=command_runner,
-                )
-                actions.append({"action": "compose_force_recreate", "result": _command_record(recreate_result)})
             latest_compose_recreate_returncode = recreate_result.returncode
             compose_recreated = recreate_result.returncode == 0
             healed = compose_recreated or healed
@@ -654,31 +806,52 @@ def assure_docker_publication(
             )
 
             if recovery["container_present"] and _has_blocking_issues(recovery, strict_listeners=True):
-                recreate_result = _recreate_compose_project(
-                    compose_working_directory=recovery["compose_working_directory"],
-                    compose_files=recovery["compose_files"],
-                    command_runner=command_runner,
-                )
-                actions.append({"action": "compose_force_recreate", "result": _command_record(recreate_result)})
-                if _compose_recreate_needs_network_reset(recreate_result):
-                    down_result = _compose_down_project(
-                        compose_working_directory=recovery["compose_working_directory"],
-                        compose_files=recovery["compose_files"],
+                if compose_recreate_needs_project_reset:
+                    recreate_result = _reset_compose_project(
+                        report=recovery,
+                        actions=actions,
                         command_runner=command_runner,
+                        remove_project_containers=True,
                     )
-                    actions.append({"action": "compose_reset_down", "result": _command_record(down_result)})
-                    network_results = _remove_compose_networks(
-                        network_names=recovery["required_networks"] + recovery["actual_networks"],
-                        command_runner=command_runner,
-                    )
-                    for network_result in network_results:
-                        actions.append({"action": "remove_compose_network", "result": _command_record(network_result)})
+                else:
                     recreate_result = _recreate_compose_project(
                         compose_working_directory=recovery["compose_working_directory"],
                         compose_files=recovery["compose_files"],
                         command_runner=command_runner,
                     )
                     actions.append({"action": "compose_force_recreate", "result": _command_record(recreate_result)})
+                    if _compose_recreate_needs_network_reset(recreate_result):
+                        recreate_result = _reset_compose_project(
+                            report=recovery,
+                            actions=actions,
+                            command_runner=command_runner,
+                            remove_project_containers=False,
+                        )
+                latest_compose_recreate_returncode = recreate_result.returncode
+                compose_recreated = recreate_result.returncode == 0 or compose_recreated
+                healed = recreate_result.returncode == 0 or healed
+                recovery = _run_checks(
+                    service_id=service_id,
+                    service_probe=service_probe,
+                    contract=contract,
+                    local_ipv4s=local_ipv4s,
+                    command_runner=command_runner,
+                    listener_checker=listener_checker,
+                    listener_timeout=listener_timeout,
+                )
+
+            if (
+                compose_recreate_had_transport_error
+                and recovery["container_present"]
+                and recovery["configured_bindings"]
+                and recovery["issues"]["missing_port_bindings"]
+            ):
+                recreate_result = _reset_compose_project(
+                    report=recovery,
+                    actions=actions,
+                    command_runner=command_runner,
+                    remove_project_containers=True,
+                )
                 latest_compose_recreate_returncode = recreate_result.returncode
                 compose_recreated = recreate_result.returncode == 0 or compose_recreated
                 healed = recreate_result.returncode == 0 or healed
@@ -697,6 +870,23 @@ def assure_docker_publication(
     strict_listeners_after = not (
         heal and allow_listener_warmup_after_heal and (compose_recreated or compose_recreate_attempted)
     )
+    if (
+        (compose_recreated or compose_recreate_attempted)
+        and after["container_present"]
+        and after["configured_bindings"]
+        and after["issues"]["missing_port_bindings"]
+    ):
+        after, wait_result = _wait_for_publication_recovery(
+            service_id=service_id,
+            service_probe=service_probe,
+            contract=contract,
+            local_ipv4s=local_ipv4s,
+            command_runner=command_runner,
+            listener_checker=listener_checker,
+            listener_timeout=listener_timeout,
+            strict_listeners=strict_listeners_after,
+        )
+        actions.append({"action": "wait_for_publication_recovery", "result": wait_result})
     ok = not _has_blocking_issues(after, strict_listeners=strict_listeners_after)
     summary_bits: list[str] = []
     if after["issues"]["container_missing"]:

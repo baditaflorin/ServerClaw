@@ -266,8 +266,8 @@ workstreams:
     title: Docker publication self-healing and port-programming assertions
     status: ready_for_merge
     owner: codex
-    branch: codex/ws-0270-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0270-live-apply
+    branch: codex/ws-0270-main-integration
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0270-main-integration
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0270-docker-publication-self-healing-and-port-programming-assertions.md
     depends_on:
       - adr-0023-docker-runtime-vm-baseline
@@ -316,15 +316,19 @@ workstreams:
       - tests/test_openbao_compose_env_helper.py
       - tests/test_platform_observation_tool.py
       - tests/test_post_verify_tasks.py
-      - receipts/live-applies/**
+      - receipts/live-applies/2026-03-29-adr-0270-docker-publication-self-healing-and-port-programming-assertions-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-03-29-adr-0270-*
+      - receipts/live-applies/evidence/2026-03-30-adr-0270-*
       - VERSION
       - changelog.md
       - RELEASE.md
       - README.md
       - versions/stack.yaml
       - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
       - docs/release-notes/README.md
       - docs/release-notes/
+      - docs/release-notes/0.177.92.md
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -376,14 +380,17 @@ workstreams:
             - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/verify.yml
             - scripts/docker_publication_assurance.py
             - scripts/platform_observation_tool.py
-            - scripts/validate_repository_data_models.py
             - tests/test_docker_publication_assurance.py
             - tests/test_docker_publication_assurance_playbook.py
             - tests/test_docker_runtime_role.py
             - tests/test_platform_observation_tool.py
             - tests/test_post_verify_tasks.py
-            - receipts/live-applies/**
           mode: exclusive
+        - id: repo_validation_pipeline_contract
+          paths:
+            - scripts/validate_repository_data_models.py
+          mode: shared_contract
+          contract: repo-validation-pipeline-v1
         - id: openbao_publication_recovery_contract
           paths:
             - docs/runbooks/configure-openbao.md
@@ -416,15 +423,25 @@ workstreams:
             - README.md
             - versions/stack.yaml
             - build/platform-manifest.json
+            - docs/diagrams/agent-coordination-map.excalidraw
             - docs/release-notes/README.md
             - docs/release-notes/
-          mode: exclusive
+            - docs/release-notes/0.177.92.md
+          mode: shared_contract
+          contract: mainline-release-integration-v1
+        - id: live_apply_evidence
+          paths:
+            - receipts/live-applies/2026-03-29-adr-0270-docker-publication-self-healing-and-port-programming-assertions-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-03-29-adr-0270-*
+            - receipts/live-applies/evidence/2026-03-30-adr-0270-*
+          mode: shared_contract
+          contract: live-apply-receipts-v1
     ready_to_merge: true
     live_applied: true
     canonical_truth:
       changelog_entry: implemented ADR 0270 by adding a shared Docker publication assurance helper, catalog-declared host publication contracts, post-verify repair hooks, read-only observation checks, and live-apply recovery hardening for Harbor, Keycloak, and OpenBao when Docker publication drift surfaced during replay
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.92
       latest_receipts:
         docker_publication: 2026-03-29-adr-0270-docker-publication-self-healing-and-port-programming-assertions-mainline-live-apply
   - id: ws-0274-artifact-cache-plane
