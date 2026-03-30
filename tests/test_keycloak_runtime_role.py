@@ -116,15 +116,10 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
         for task in tasks
         if task.get("name") == "Restore Docker networking when the nat chain is missing before Keycloak startup"
     )
-    nat_recheck = next(
+    bridge_chain_helper = next(
         task
         for task in tasks
-        if task.get("name") == "Recheck the Docker nat chain before Keycloak startup"
-    )
-    docker_info = next(
-        task
-        for task in tasks
-        if task.get("name") == "Wait for the Docker daemon to answer after networking recovery"
+        if task.get("name") == "Ensure Docker bridge networking chains are present before Keycloak startup"
     )
     replace_cleanup = next(
         task
@@ -167,8 +162,10 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     )
     assert nat_check["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
     assert nat_restore["ansible.builtin.service"]["name"] == "docker"
-    assert nat_recheck["until"] == "keycloak_docker_nat_chain_recheck.rc == 0"
-    assert docker_info["ansible.builtin.command"]["argv"] == ["docker", "info", "--format", '{{ "{{.ServerVersion}}" }}']
+    assert bridge_chain_helper["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
+    assert bridge_chain_helper["ansible.builtin.include_role"]["tasks_from"] == "docker_bridge_chains"
+    assert bridge_chain_helper["vars"]["common_docker_bridge_chains_service_name"] == "docker"
+    assert bridge_chain_helper["vars"]["common_docker_bridge_chains_require_nat_chain"] is True
     assert env_render["register"] == "keycloak_env_template"
     assert compose_render["register"] == "keycloak_compose_template"
     assert "com.docker.compose.project=keycloak" in replace_cleanup["ansible.builtin.shell"]
@@ -202,6 +199,10 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     assert "keycloak_env_template.changed" not in force_recreate_expression
     assert "keycloak_compose_template.changed" not in force_recreate_expression
     assert "keycloak_pull.changed" not in force_recreate_expression
+    nat_assert = next(task for task in tasks if task.get("name") == "Assert Docker nat chain is present before Keycloak startup")
+    assert nat_assert["ansible.builtin.assert"]["that"] == [
+        "keycloak_docker_nat_chain.rc == 0 or (common_docker_bridge_chains_nat_verify.rc | default(1)) == 0"
+    ]
 
 
 def test_role_verifies_internal_mail_network_connectivity() -> None:
@@ -292,16 +293,36 @@ def test_realm_reconciliation_retries_repo_managed_keycloak_modules() -> None:
     assert realm_block["module_defaults"]["group/community.general.keycloak"]["connection_timeout"] == (
         "{{ keycloak_admin_connection_timeout }}"
     )
-    runtime_contract_tasks = [
-        next(
-            task
-            for task in realm_block["block"]
-            if task.get("name") == "Ensure the obsolete ServerClaw operator CLI direct-grant client is absent"
-        ),
-        next(task for task in realm_block["block"] if task.get("name") == "Ensure the ServerClaw runtime client exists"),
-        next(task for task in realm_block["block"] if task.get("name") == "Read the ServerClaw runtime client secret"),
+    retry_task_names = [
+        "Ensure the LV3 realm exists",
+        "Ensure the Keycloak realm groups exist",
+        "Ensure the Keycloak realm roles exist",
+        "Ensure realm roles are mapped to Keycloak groups",
+        "Ensure the Grafana OAuth client exists",
+        "Ensure the operations portal OAuth client exists",
+        "Ensure the Gitea OAuth client exists",
+        "Ensure the agent service client exists",
+        "Ensure the Langfuse OAuth client exists",
+        "Ensure the Outline OAuth client exists",
+        "Ensure the JupyterHub OAuth client exists",
+        "Ensure the ServerClaw OAuth client exists",
+        "Ensure the API gateway client exists",
+        "Ensure the obsolete ServerClaw operator CLI direct-grant client is absent",
+        "Ensure the ServerClaw runtime client exists",
+        "Ensure realm roles are mapped to service account users",
+        "Read the Grafana client secret",
+        "Read the operations portal client secret",
+        "Read the Gitea client secret",
+        "Read the agent client secret",
+        "Read the Langfuse client secret",
+        "Read the Outline client secret",
+        "Read the JupyterHub client secret",
+        "Read the ServerClaw client secret",
+        "Read the API gateway client secret",
+        "Read the ServerClaw runtime client secret",
     ]
-    for task in runtime_contract_tasks:
+    retry_tasks = [next(task for task in realm_block["block"] if task.get("name") == name) for name in retry_task_names]
+    for task in retry_tasks:
         assert task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
         assert task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
         assert task["until"] == f"{task['register']} is succeeded"

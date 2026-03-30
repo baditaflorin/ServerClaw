@@ -58,6 +58,16 @@
   vars:
     common_local_openbao_runtime_consumer_name: "{{ common_openbao_compose_env_service_name }}"
 
+- name: Ensure the controller-local SSH control path directory exists before OpenBao API retries
+  ansible.builtin.file:
+    path: "{{ lookup('ansible.builtin.env', 'ANSIBLE_SSH_CONTROL_PATH_DIR') }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  when: (lookup('ansible.builtin.env', 'ANSIBLE_SSH_CONTROL_PATH_DIR') | default('', true) | length) > 0
+
 - name: Wait for the local OpenBao API to answer
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"

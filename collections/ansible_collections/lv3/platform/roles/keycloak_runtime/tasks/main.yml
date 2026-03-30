@@ -283,40 +283,19 @@
     state: restarted
   when: keycloak_docker_nat_chain.rc != 0
 
-- name: Recheck the Docker nat chain before Keycloak startup
-  ansible.builtin.command:
-    argv:
-      - iptables
-      - -t
-      - nat
-      - -S
-      - DOCKER
-  register: keycloak_docker_nat_chain_recheck
-  changed_when: false
-  failed_when: keycloak_docker_nat_chain_recheck.rc not in [0, 1]
-  retries: 10
-  delay: 2
-  until: keycloak_docker_nat_chain_recheck.rc == 0
-  when: keycloak_docker_nat_chain.rc != 0
-
-- name: Wait for the Docker daemon to answer after networking recovery
-  ansible.builtin.command:
-    argv:
-      - docker
-      - info
-      - --format
-      - '{{ "{{.ServerVersion}}" }}'
-  register: keycloak_docker_info
-  changed_when: false
-  retries: 10
-  delay: 2
-  until: keycloak_docker_info.rc == 0
+- name: Ensure Docker bridge networking chains are present before Keycloak startup
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_bridge_chains
+  vars:
+    common_docker_bridge_chains_service_name: docker
+    common_docker_bridge_chains_require_nat_chain: true
   when: keycloak_docker_nat_chain.rc != 0
 
 - name: Assert Docker nat chain is present before Keycloak startup
   ansible.builtin.assert:
     that:
-      - keycloak_docker_nat_chain.rc == 0 or keycloak_docker_nat_chain_recheck.rc == 0
+      - keycloak_docker_nat_chain.rc == 0 or (common_docker_bridge_chains_nat_verify.rc | default(1)) == 0
     fail_msg: "Docker is running but the nat DOCKER chain is missing; Keycloak published ports will fail."
 
 - name: Check whether the Keycloak admin port is already published locally
@@ -684,6 +663,10 @@
       loop: "{{ keycloak_realm_groups }}"
       loop_control:
         label: "{{ item.name }}"
+      register: keycloak_realm_groups_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_realm_groups_reconcile is succeeded
 
     - name: Ensure the Keycloak realm roles exist
       community.general.keycloak_role:
@@ -702,6 +685,10 @@
       loop: "{{ keycloak_realm_roles }}"
       loop_control:
         label: "{{ item.name }}"
+      register: keycloak_realm_roles_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_realm_roles_reconcile is succeeded
 
     - name: Ensure realm roles are mapped to Keycloak groups
       community.general.keycloak_realm_rolemapping:
@@ -718,6 +705,10 @@
       loop: "{{ keycloak_group_realm_role_mappings }}"
       loop_control:
         label: "{{ item.group_name }}"
+      register: keycloak_group_realm_role_mappings_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_group_realm_role_mappings_reconcile is succeeded
 
     - name: Ensure the Grafana OAuth client exists
       community.general.keycloak_client:
@@ -759,6 +750,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_grafana_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_grafana_client_reconcile is succeeded
 
     - name: Ensure the operations portal OAuth client exists
       community.general.keycloak_client:
@@ -800,6 +795,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_ops_portal_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_ops_portal_client_reconcile is succeeded
 
     - name: Ensure the Gitea OAuth client exists
       community.general.keycloak_client:
@@ -843,6 +842,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_gitea_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_gitea_client_reconcile is succeeded
 
     - name: Ensure the agent service client exists
       community.general.keycloak_client:
@@ -866,6 +869,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_agent_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_agent_client_reconcile is succeeded
 
     - name: Ensure the Langfuse OAuth client exists
       community.general.keycloak_client:
@@ -899,6 +906,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_langfuse_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_langfuse_client_reconcile is succeeded
 
     - name: Ensure the Directus OAuth client exists
       community.general.keycloak_client:
@@ -980,6 +991,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_outline_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_outline_client_reconcile is succeeded
 
     - name: Ensure the JupyterHub OAuth client exists
       community.general.keycloak_client:
@@ -1021,6 +1036,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_jupyterhub_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_jupyterhub_client_reconcile is succeeded
 
     - name: Ensure the ServerClaw OAuth client exists
       community.general.keycloak_client:
@@ -1062,6 +1081,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_serverclaw_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_serverclaw_client_reconcile is succeeded
 
     - name: Ensure the API gateway client exists
       community.general.keycloak_client:
@@ -1085,6 +1108,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_api_gateway_client_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_api_gateway_client_reconcile is succeeded
 
     - name: Ensure the obsolete ServerClaw operator CLI direct-grant client is absent
       community.general.keycloak_client:
@@ -1155,6 +1182,10 @@
       loop: "{{ keycloak_service_account_realm_role_mappings }}"
       loop_control:
         label: "{{ item.service_account_user_client_id }}"
+      register: keycloak_service_account_realm_role_mappings_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_service_account_realm_role_mappings_reconcile is succeeded
 
     - name: Read the Grafana client secret
       community.general.keycloak_clientsecret_info:
@@ -1279,6 +1310,9 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
       register: keycloak_jupyterhub_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_jupyterhub_client_secret_info is succeeded
       no_log: true
 
     - name: Read the ServerClaw client secret

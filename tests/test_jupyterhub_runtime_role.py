@@ -62,9 +62,12 @@ def test_main_tasks_render_build_force_recreate_and_verify_runtime() -> None:
     assert "Render the JupyterHub environment file" in names
     assert "Render the JupyterHub config file" in names
     assert "Render the JupyterHub compose file" in names
+    assert "Ensure the JupyterHub hub base image is cached locally" in names
+    assert "Ensure the JupyterHub single-user base image is cached locally" in names
     assert "Build the JupyterHub hub image" in names
     assert "Build the JupyterHub single-user image" in names
     assert "Check whether the Docker nat chain exists before JupyterHub startup" in names
+    assert "Ensure Docker bridge networking chains are present before JupyterHub startup" in names
     assert "Force-recreate the JupyterHub runtime stack after Docker networking recovery" in names
     assert "Verify the JupyterHub runtime" in names
 
@@ -76,12 +79,72 @@ def test_main_tasks_render_build_force_recreate_and_verify_runtime() -> None:
     )
     assert health_probe["ansible.builtin.uri"]["url"] == "{{ jupyterhub_internal_base_url }}/hub/health"
 
+    bridge_chain_helper = next(
+        task for task in tasks if task["name"] == "Ensure Docker bridge networking chains are present before JupyterHub startup"
+    )
+    assert bridge_chain_helper["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
+    assert bridge_chain_helper["ansible.builtin.include_role"]["tasks_from"] == "docker_bridge_chains"
+    assert bridge_chain_helper["vars"]["common_docker_bridge_chains_service_name"] == "docker"
+    assert bridge_chain_helper["vars"]["common_docker_bridge_chains_require_nat_chain"] is True
+
     force_recreate = next(
         task for task in tasks if task["name"] == "Force-recreate the JupyterHub runtime stack after Docker networking recovery"
     )
     assert "--force-recreate" in force_recreate["ansible.builtin.command"]["argv"]
     assert force_recreate["register"] == "jupyterhub_force_recreate_up"
     assert force_recreate["until"] == "jupyterhub_force_recreate_up.rc == 0"
+
+    nat_assert = next(task for task in tasks if task["name"] == "Assert Docker nat chain is present before JupyterHub startup")
+    assert nat_assert["ansible.builtin.assert"]["that"] == [
+        "jupyterhub_docker_nat_chain.rc == 0 or (common_docker_bridge_chains_nat_verify.rc | default(1)) == 0"
+    ]
+
+    hub_cache = next(task for task in tasks if task["name"] == "Ensure the JupyterHub hub base image is cached locally")
+    singleuser_cache = next(task for task in tasks if task["name"] == "Ensure the JupyterHub single-user base image is cached locally")
+    hub_build = next(task for task in tasks if task["name"] == "Build the JupyterHub hub image")
+    singleuser_build = next(task for task in tasks if task["name"] == "Build the JupyterHub single-user image")
+
+    assert "docker image inspect" in hub_cache["ansible.builtin.shell"]
+    assert "docker pull" in hub_cache["ansible.builtin.shell"]
+    assert hub_cache["until"] == "jupyterhub_hub_base_image_cache.rc == 0"
+    assert hub_cache["retries"] == 5
+    assert hub_cache["delay"] == 10
+
+    assert "docker image inspect" in singleuser_cache["ansible.builtin.shell"]
+    assert "docker pull" in singleuser_cache["ansible.builtin.shell"]
+    assert singleuser_cache["until"] == "jupyterhub_singleuser_base_image_cache.rc == 0"
+    assert singleuser_cache["retries"] == 5
+    assert singleuser_cache["delay"] == 10
+
+    assert hub_build["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "build",
+        "--network",
+        "host",
+        "--pull=false",
+        "-t",
+        "{{ jupyterhub_hub_image_name }}:latest",
+        "{{ jupyterhub_hub_build_dir }}",
+    ]
+    assert hub_build["environment"] == {"DOCKER_BUILDKIT": "0", "COMPOSE_DOCKER_CLI_BUILD": "0"}
+    assert hub_build["until"] == "jupyterhub_hub_build.rc == 0"
+    assert hub_build["retries"] == 3
+    assert hub_build["delay"] == 10
+
+    assert singleuser_build["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "build",
+        "--network",
+        "host",
+        "--pull=false",
+        "-t",
+        "{{ jupyterhub_singleuser_image_name }}:latest",
+        "{{ jupyterhub_singleuser_build_dir }}",
+    ]
+    assert singleuser_build["environment"] == {"DOCKER_BUILDKIT": "0", "COMPOSE_DOCKER_CLI_BUILD": "0"}
+    assert singleuser_build["until"] == "jupyterhub_singleuser_build.rc == 0"
+    assert singleuser_build["retries"] == 3
+    assert singleuser_build["delay"] == 10
 
 
 def test_verify_tasks_cover_local_health_admin_api_and_smoke_spawn() -> None:

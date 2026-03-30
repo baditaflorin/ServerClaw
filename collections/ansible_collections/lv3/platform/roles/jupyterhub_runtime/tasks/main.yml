@@ -261,13 +261,62 @@
     mode: "0644"
   register: jupyterhub_singleuser_requirements
 
-- name: Build the JupyterHub hub image
+- name: Ensure the JupyterHub hub base image is cached locally
   ansible.builtin.shell: |
     set -euo pipefail
-    docker build --pull=false -t "{{ jupyterhub_hub_image_name }}:latest" "{{ jupyterhub_hub_build_dir }}"
+    if docker image inspect "{{ jupyterhub_hub_base_image }}" >/dev/null 2>&1; then
+      exit 0
+    fi
+    docker pull "{{ jupyterhub_hub_base_image }}" || true
+    docker image inspect "{{ jupyterhub_hub_base_image }}" >/dev/null 2>&1
   args:
     chdir: "{{ jupyterhub_site_dir }}"
     executable: /bin/bash
+  register: jupyterhub_hub_base_image_cache
+  changed_when: >-
+    'Downloaded newer image' in (jupyterhub_hub_base_image_cache.stdout | default(''))
+    or 'Pull complete' in (jupyterhub_hub_base_image_cache.stdout | default(''))
+    or 'Status: Downloaded newer image' in (jupyterhub_hub_base_image_cache.stdout | default(''))
+  retries: 5
+  delay: 10
+  until: jupyterhub_hub_base_image_cache.rc == 0
+
+- name: Ensure the JupyterHub single-user base image is cached locally
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if docker image inspect "{{ jupyterhub_singleuser_base_image }}" >/dev/null 2>&1; then
+      exit 0
+    fi
+    docker pull "{{ jupyterhub_singleuser_base_image }}" || true
+    docker image inspect "{{ jupyterhub_singleuser_base_image }}" >/dev/null 2>&1
+  args:
+    chdir: "{{ jupyterhub_site_dir }}"
+    executable: /bin/bash
+  register: jupyterhub_singleuser_base_image_cache
+  changed_when: >-
+    'Downloaded newer image' in (jupyterhub_singleuser_base_image_cache.stdout | default(''))
+    or 'Pull complete' in (jupyterhub_singleuser_base_image_cache.stdout | default(''))
+    or 'Status: Downloaded newer image' in (jupyterhub_singleuser_base_image_cache.stdout | default(''))
+  retries: 5
+  delay: 10
+  until: jupyterhub_singleuser_base_image_cache.rc == 0
+
+- name: Build the JupyterHub hub image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - build
+      - --network
+      - host
+      - --pull=false
+      - -t
+      - "{{ jupyterhub_hub_image_name }}:latest"
+      - "{{ jupyterhub_hub_build_dir }}"
+  args:
+    chdir: "{{ jupyterhub_site_dir }}"
+  environment:
+    DOCKER_BUILDKIT: "0"
+    COMPOSE_DOCKER_CLI_BUILD: "0"
   register: jupyterhub_hub_build
   changed_when: >-
     'writing image' in (jupyterhub_hub_build.stdout | lower)
@@ -276,14 +325,27 @@
     or 'naming to' in (jupyterhub_hub_build.stderr | lower)
     or 'exporting to image' in (jupyterhub_hub_build.stdout | lower)
     or 'successfully built' in (jupyterhub_hub_build.stdout | lower)
+    or 'successfully tagged' in (jupyterhub_hub_build.stdout | lower)
+  retries: 3
+  delay: 10
+  until: jupyterhub_hub_build.rc == 0
 
 - name: Build the JupyterHub single-user image
-  ansible.builtin.shell: |
-    set -euo pipefail
-    docker build --pull=false -t "{{ jupyterhub_singleuser_image_name }}:latest" "{{ jupyterhub_singleuser_build_dir }}"
+  ansible.builtin.command:
+    argv:
+      - docker
+      - build
+      - --network
+      - host
+      - --pull=false
+      - -t
+      - "{{ jupyterhub_singleuser_image_name }}:latest"
+      - "{{ jupyterhub_singleuser_build_dir }}"
   args:
     chdir: "{{ jupyterhub_site_dir }}"
-    executable: /bin/bash
+  environment:
+    DOCKER_BUILDKIT: "0"
+    COMPOSE_DOCKER_CLI_BUILD: "0"
   register: jupyterhub_singleuser_build
   changed_when: >-
     'writing image' in (jupyterhub_singleuser_build.stdout | lower)
@@ -292,6 +354,10 @@
     or 'naming to' in (jupyterhub_singleuser_build.stderr | lower)
     or 'exporting to image' in (jupyterhub_singleuser_build.stdout | lower)
     or 'successfully built' in (jupyterhub_singleuser_build.stdout | lower)
+    or 'successfully tagged' in (jupyterhub_singleuser_build.stdout | lower)
+  retries: 3
+  delay: 10
+  until: jupyterhub_singleuser_build.rc == 0
 
 - name: Pull the JupyterHub compose-managed images
   ansible.builtin.command:
@@ -327,40 +393,19 @@
     state: restarted
   when: jupyterhub_docker_nat_chain.rc != 0
 
-- name: Recheck the Docker nat chain before JupyterHub startup
-  ansible.builtin.command:
-    argv:
-      - iptables
-      - -t
-      - nat
-      - -S
-      - DOCKER
-  register: jupyterhub_docker_nat_chain_recheck
-  changed_when: false
-  failed_when: jupyterhub_docker_nat_chain_recheck.rc not in [0, 1]
-  retries: 10
-  delay: 2
-  until: jupyterhub_docker_nat_chain_recheck.rc == 0
-  when: jupyterhub_docker_nat_chain.rc != 0
-
-- name: Wait for the Docker daemon to answer after networking recovery
-  ansible.builtin.command:
-    argv:
-      - docker
-      - info
-      - --format
-      - '{{ "{{.ServerVersion}}" }}'
-  register: jupyterhub_docker_info
-  changed_when: false
-  retries: 10
-  delay: 2
-  until: jupyterhub_docker_info.rc == 0
+- name: Ensure Docker bridge networking chains are present before JupyterHub startup
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_bridge_chains
+  vars:
+    common_docker_bridge_chains_service_name: docker
+    common_docker_bridge_chains_require_nat_chain: true
   when: jupyterhub_docker_nat_chain.rc != 0
 
 - name: Assert Docker nat chain is present before JupyterHub startup
   ansible.builtin.assert:
     that:
-      - jupyterhub_docker_nat_chain.rc == 0 or jupyterhub_docker_nat_chain_recheck.rc == 0
+      - jupyterhub_docker_nat_chain.rc == 0 or (common_docker_bridge_chains_nat_verify.rc | default(1)) == 0
     fail_msg: "Docker is running but the nat DOCKER chain is missing; JupyterHub published ports will fail."
 
 - name: Check whether the JupyterHub local port is already published

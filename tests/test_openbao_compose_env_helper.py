@@ -41,6 +41,8 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     tasks = HELPER_TASKS_PATH.read_text(encoding="utf-8")
 
     assert "include_tasks: ensure_local_openbao_runtime.yml" in tasks
+    assert "- name: Ensure the controller-local SSH control path directory exists before OpenBao API retries" in tasks
+    assert "path: \"{{ lookup('ansible.builtin.env', 'ANSIBLE_SSH_CONTROL_PATH_DIR') }}\"" in tasks
     assert "- name: Read the local OpenBao seal status" in tasks
     assert "/v1/sys/seal-status" in tasks
     assert "- name: Unseal the local OpenBao API when runtime secret injection finds it sealed" in tasks
@@ -63,6 +65,8 @@ def test_systemd_helper_reuses_local_openbao_recovery() -> None:
     tasks = SYSTEMD_HELPER_TASKS_PATH.read_text(encoding="utf-8")
 
     assert "include_tasks: ensure_local_openbao_runtime.yml" in tasks
+    assert "- name: Ensure the controller-local SSH control path directory exists before OpenBao API retries" in tasks
+    assert "path: \"{{ lookup('ansible.builtin.env', 'ANSIBLE_SSH_CONTROL_PATH_DIR') }}\"" in tasks
     assert "- name: Wait for the local OpenBao API to answer" in tasks
     assert "- name: Unseal the local OpenBao API when host-native secret delivery finds it sealed" in tasks
 
