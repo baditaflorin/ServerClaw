@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.177.100
+repo_version: 0.177.101
 platform_version: 0.130.67
 
 live_apply_evidence:
@@ -1048,7 +1048,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.100
+    current: 0.177.101
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.67

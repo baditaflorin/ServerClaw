@@ -2231,7 +2231,7 @@ workstreams:
         OpenBao, and stage-smoke verification paths on the live server, and
         refreshing the canonical smoke-suite and promotion-gate receipt
       release_bump: patch
-      included_in_repo_version: 0.177.100
+      included_in_repo_version: 0.177.101
       latest_receipts:
         promotion_pipeline: 2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
         stage_smoke_suites: 2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
