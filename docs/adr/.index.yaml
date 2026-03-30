@@ -4738,7 +4738,7 @@ adr_index:
       - pipeline
     summary: We will deploy Apache Tika Server as the canonical document extraction
     filename: 0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline.md
-    implemented_version: 0.177.101
+    implemented_version: 0.177.102
   - adr: '0276'
     title: NATS JetStream As The Platform Event Bus
     status: Accepted

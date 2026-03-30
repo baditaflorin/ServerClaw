@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.101",
+  "repo_version": "0.177.102",
   "platform_version": "0.130.68",
-  "generated_at": "2026-03-30T11:49:32Z",
-  "next_refresh_at": "2026-03-30T12:49:32Z",
+  "generated_at": "2026-03-30T12:33:15Z",
+  "next_refresh_at": "2026-03-30T13:33:15Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -614,6 +614,18 @@
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9443",
         "last_live_apply": "2026-03-30T00:00:00Z"
+      },
+      "tika": {
+        "service_name": "Apache Tika",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://10.10.10.20:9998",
+        "last_live_apply": "2026-03-30T00:00:00Z",
+        "slo_status": "unknown"
       },
       "uptime_kuma": {
         "service_name": "Uptime Kuma",
@@ -2168,6 +2180,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-step-ca.md"
+      },
+      {
+        "id": "converge-tika",
+        "description": "Deploy the private Apache Tika runtime on docker-runtime-lv3 and verify the standard `/version`, `/tika`, and `/meta` extraction contracts.",
+        "tags": [
+          "converge-tika",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 220,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-tika.md"
       },
       {
         "id": "converge-vaultwarden",
@@ -4310,6 +4348,16 @@
         ]
       },
       {
+        "id": "configure-tika",
+        "title": "Configure Apache Tika",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-tika.md",
+        "workflow_ids": [
+          "converge-tika"
+        ]
+      },
+      {
         "id": "configure-vaultwarden",
         "title": "Configure Vaultwarden",
         "agent_trust_required": "T3",
@@ -4888,10 +4936,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.100",
+    "last_version": "0.177.101",
     "deployed_at": "2026-03-30",
-    "summary": "replays ADR 0251 on the latest merged mainline by pinning the Windmill worker checkout to the active worktree during converge-windmill, replaying the Docker publication, step-ca, OpenBao, and stage-smoke verification paths on the live server, and refreshing the canonical smoke-suite and promotion-gate receipt",
-    "release_notes_url": "docs/release-notes/0.177.101.md"
+    "summary": "implements ADR 0275 by bringing the private Apache Tika extraction service, host-reachability policy, and Docker compose-network recovery hardening onto main while preserving the latest verified live state from docker-runtime-lv3 because a concurrent vm:120 lock blocked a new exact-main replay",
+    "release_notes_url": "docs/release-notes/0.177.102.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

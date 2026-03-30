@@ -17,7 +17,7 @@ workstreams:
   - id: ws-0275-live-apply
     adr: "0275"
     title: ADR 0275 live apply from latest origin/main
-    status: ready_for_merge
+    status: live_applied
     owner: codex
     branch: codex/ws-0275-live-apply-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0275-live-apply-r2
@@ -150,6 +150,16 @@ workstreams:
           contract: docker-runtime-recovery-hardening-v1
     ready_to_merge: true
     live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0275 by bringing the private Apache Tika
+        extraction service, host-reachability policy, and Docker compose-network
+        recovery hardening onto main while preserving the latest verified live
+        state from docker-runtime-lv3 because a concurrent vm:120 lock blocked a
+        new exact-main replay
+      release_bump: patch
+      included_in_repo_version: 0.177.102
+      latest_receipts:
+        tika: 2026-03-30-adr-0275-apache-tika-live-apply
   - id: ws-0282-live-apply
     adr: "0282"
     title: Live apply Mailpit as the SMTP development mail interceptor from latest origin/main

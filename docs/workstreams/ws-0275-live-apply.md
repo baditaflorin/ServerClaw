@@ -2,9 +2,11 @@
 
 - ADR: [ADR 0275](../adr/0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline.md)
 - Title: private Apache Tika document extraction service live apply
-- Status: ready_for_merge
-- Implemented In Repo Version: pending merge to `main` (validated from repo version `0.177.101`)
-- Live Applied In Platform Version: pending exact-main replay from merged `main` (currently observed on platform version `0.130.68`; first live apply completed on `0.130.63`)
+- Status: live_applied
+- Included In Repo Version: 0.177.102
+- Latest Verified Receipt: `receipts/live-applies/2026-03-30-adr-0275-apache-tika-live-apply.json`
+- Live Applied In Platform Version: 0.130.63
+- Latest Observed On Platform Version: 0.130.68
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0275-live-apply-r2`
@@ -97,11 +99,8 @@
 
 ## Outcome
 
-- The rebased `0.177.101` worktree passes the targeted Tika runtime tests, generated-contract validation, workstream ownership checks, `make syntax-check-tika`, scoped syntax validation, and the service completeness/redundancy checks captured under `receipts/live-applies/evidence/2026-03-30-ws-0275-*`.
-- The structured live-apply receipt `receipts/live-applies/2026-03-30-adr-0275-apache-tika-live-apply.json` records the successful governed replay from the synchronized `0.177.96` latest-main worktree, including the ADR 0191 fail-closed guard path and the documented `ALLOW_IN_PLACE_MUTATION=true` exception replay.
+- Release `0.177.102` now records ADR 0275 on `main`, including the repo-managed Apache Tika runtime, host-reachability firewall allowance, and Docker compose-network recovery hardening.
+- The structured live-apply receipt `receipts/live-applies/2026-03-30-adr-0275-apache-tika-live-apply.json` remains the latest verified mutation receipt for this service, capturing the successful governed replay from the synchronized `0.177.96` latest-main worktree together with the ADR 0191 fail-closed guard path and the documented `ALLOW_IN_PLACE_MUTATION=true` exception replay.
 - The latest read-only server-state check on `2026-03-30T12:14:47Z` reconfirmed `Apache Tika 3.2.3`, successful `/tika` and `/meta` extraction for the HTML verification fixture, the pinned compose image digest, and a running `tika` container with start time `2026-03-30T12:13:35Z`; see `receipts/live-applies/evidence/2026-03-30-ws-0275-remote-verify-r2.txt`.
-- Exact-main replay is still blocked by another workstream's active exclusive ADR 0153 lock on `vm:120`, so the protected main-only surfaces must wait for the final synchronized merge/replay step.
-- Remaining merge-to-main follow-through:
-  cut the next patch release from the latest `origin/main` baseline
-  replay `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=tika env=production` from merged `main` after the `vm:120` lock clears
-  refresh `versions/stack.yaml`, the top-level `README.md` status summary, ADR metadata, and the canonical mainline receipt only after that merged-main replay succeeds
+- A new exact-main replay from merged `main` did not run on `2026-03-30` because another workstream kept renewing the exclusive ADR 0153 lock on `vm:120`; the repository therefore records the latest realistic live state on platform version `0.130.68` without advancing `platform_version`.
+- If a later operator replay from merged `main` is required after the `vm:120` lock clears, rerun `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=tika env=production`, capture a new canonical receipt, and only then advance `platform_version` or replace the latest receipt reference.
