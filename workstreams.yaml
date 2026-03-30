@@ -940,6 +940,14 @@ workstreams:
       - config/ansible-execution-scopes.yaml
       - config/workflow-catalog.json
       - config/command-catalog.json
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
       - tests/test_artifact_cache_runtime_role.py
       - tests/test_artifact_cache_playbook.py
       - tests/test_common_docker_bridge_chains_helper.py
@@ -1018,6 +1026,26 @@ workstreams:
             - Makefile
           mode: shared_contract
           contract: repository-automation-v1
+        - id: integration_readme_surface
+          paths:
+            - README.md
+          mode: shared_contract
+          contract: main-integration-truth-v1
+        - id: release_management_surfaces
+          paths:
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+          mode: shared_contract
+          contract: release-management-v1
+        - id: platform_truth_generation
+          paths:
+            - versions/stack.yaml
+            - build/platform-manifest.json
+          mode: shared_contract
+          contract: canonical-truth-v1
         - id: artifact_cache_docs_portal_contract
           paths:
             - docs/site-generated/architecture/dependency-graph.md
@@ -1027,7 +1055,11 @@ workstreams:
     ready_to_merge: true
     live_applied: true
     canonical_truth:
+      changelog_entry: implements ADR 0296 by provisioning artifact-cache-lv3 as the dedicated private cache-plane VM, moving docker-build-lv3 onto the dedicated 10.10.10.80 mirrors, and preserving exact-main live-apply proof for both the cache plane and the new cache guest
+      release_bump: patch
+      included_in_repo_version: 0.177.103
       latest_receipts:
+        artifact_cache_plane: 2026-03-30-adr-0296-dedicated-artifact-cache-vm-live-apply
         artifact_cache_vm: 2026-03-30-adr-0296-dedicated-artifact-cache-vm-live-apply
   - id: ws-0276-live-apply
     adr: "0276"
