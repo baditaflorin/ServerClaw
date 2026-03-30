@@ -1,9 +1,10 @@
 # ADR 0270: Docker Publication Self-Healing And Port-Programming Assertions
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.93
+- Implemented In Platform Version: 0.130.62
+- Implemented On: 2026-03-30
 - Date: 2026-03-28
 
 ## Context

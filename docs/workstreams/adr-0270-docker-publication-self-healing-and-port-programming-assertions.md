@@ -2,13 +2,13 @@
 
 - ADR: [ADR 0270](../adr/0270-docker-publication-self-healing-and-port-programming-assertions.md)
 - Title: Add a shared Docker publication assurance helper, post-verify repair hook, and live apply for managed Docker guests
-- Status: ready_for_merge
-- Implemented In Repo Version: N/A
-- Live Applied In Platform Version: 0.130.60
-- Implemented On: 2026-03-29
-- Live Applied On: 2026-03-29
-- Branch: `codex/ws-0270-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0270-live-apply`
+- Status: live_applied
+- Implemented In Repo Version: 0.177.93
+- Live Applied In Platform Version: 0.130.62
+- Implemented On: 2026-03-30
+- Live Applied On: 2026-03-30
+- Branch: `codex/ws-0270-main-integration`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0270-main-integration`
 - Owner: codex
 - Depends On: `adr-0023-docker-runtime-vm-baseline`, `adr-0036-live-apply-receipts-and-verification-evidence`, `adr-0246-startup-readiness-liveness-and-degraded-state-semantics`
 - Conflicts With: none
@@ -79,57 +79,56 @@
 
 - run focused pytest coverage for the helper, playbook wiring, role install,
   observation path, and shared post-verify tasks
-- run `./scripts/validate_repo.sh agent-standards yaml json data-models ansible-syntax role-argument-specs health-probes`
+- run `./scripts/validate_repo.sh workstream-surfaces agent-standards yaml json data-models ansible-syntax role-argument-specs health-probes generated-docs`
 - replay `make converge-docker-publication-assurance env=production` from this
   isolated latest-main worktree
 - verify the installed helper and direct publication checks on
   `docker-runtime-lv3` and `coolify-lv3`
-- record branch-local live-apply evidence and, if this branch becomes the final
-  mainline integration candidate, update the protected release surfaces and
-  exact-main receipt
+- update the protected integration surfaces on the synchronized mainline
+  integration worktree and capture the canonical exact-main receipt
 
 ## Results
 
 - The shared Docker publication assurance helper now distinguishes live
   `NetworkSettings.Ports` state from configured `HostConfig.PortBindings`,
-  resets stale compose networks when Docker reports missing bridge state, and
   retries after a Docker daemon restart when `docker compose up` dies with an
-  EOF against the control socket.
-- The final focused regression slice for the branch returned `29 passed in
-  0.92s` for `tests/test_harbor_runtime_role.py`,
-  `tests/test_keycloak_runtime_role.py`,
-  `tests/test_openbao_compose_env_helper.py`, and
-  `tests/test_docker_publication_assurance.py`, building on the earlier
-  `66 passed` multi-file branch validation captured in
-  `receipts/live-applies/evidence/2026-03-29-adr-0270-focused-pytest-post-final-fixes.txt`.
-- The full `make converge-keycloak env=production` replay succeeded after the
-  workstream split repo-managed Keycloak user reconciliation into a retryable
-  include and taught the shared OpenBao secret-delivery helpers to
-  force-recreate OpenBao when the loopback `127.0.0.1:8201` publication
-  disappears.
-- A late branch verification sweep caught Harbor regressing again with
-  `registry.lv3.org` redirecting to `https://nginx.lv3.org/...` and
-  `127.0.0.1:8095` down. The first repair replay exposed a real Harbor recovery
-  bug where stale-container cleanup assumed Docker was already reachable after a
-  compose reset; this workstream patched that task, retested it, and the final
-  `make converge-harbor env=production` replay completed with
-  `docker-runtime-lv3 : ok=126 changed=1 failed=0 skipped=26` and
-  `nginx-lv3 : ok=38 changed=3 failed=0 skipped=11`.
-- Final steady-state verification is captured in
-  `receipts/live-applies/evidence/2026-03-29-adr-0270-final-branch-verification-post-harbor-repair.txt`,
-  which shows `registry.lv3.org/api/v2.0/ping => 200`, Harbor local and host-IP
-  `8095` pings returning `Pong`, and Keycloak/OpenBao loopback health returning
-  `200`.
+  EOF against the control socket, and force-resets stale compose projects when
+  bridge, bind, or DNAT state is missing.
+- The synchronized exact-main replay from commit
+  `6bbe13b66c382d5521cc7b85cc070355558fc326` succeeded via
+  `make converge-docker-publication-assurance env=production`, with final recap
+  `coolify-lv3 : ok=69 changed=5 unreachable=0 failed=0 skipped=3 rescued=0 ignored=0`
+  and
+  `docker-runtime-lv3 : ok=115 changed=3 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0`,
+  captured in
+  `receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-docker-publication-assurance-rerun-7.txt`.
+- Post-replay diagnostics still caught Harbor in the stale-publication signature
+  where `HostConfig.PortBindings` existed but `NetworkSettings.Ports` and the
+  live `8095` listener did not. A governed follow-up
+  `make converge-harbor env=production` repaired that state on the same head
+  with final recap
+  `docker-runtime-lv3 : ok=134 changed=7 unreachable=0 failed=0 skipped=21 rescued=0 ignored=0`
+  and
+  `nginx-lv3 : ok=39 changed=3 unreachable=0 failed=0 skipped=11 rescued=0 ignored=0`,
+  captured in
+  `receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-converge-harbor-r2.txt`.
+- The synchronized targeted regression slice returned `78 passed in 27.73s` for
+  the Harbor, Keycloak, OpenBao, Docker publication, Docker runtime,
+  observation, post-verify, and Gotenberg coverage set, captured in
+  `receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-targeted-pytests-r2.txt`.
+- Final steady-state verification after the Harbor repair is captured in
+  `receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-direct-and-public-verification-r2.txt`,
+  which shows `harbor_public=Pong`, `harbor_local=Pong`,
+  `keycloak_public_issuer=https://sso.lv3.org/realms/lv3`,
+  `keycloak_local_issuer=https://sso.lv3.org/realms/lv3`,
+  OpenBao unsealed on loopback, Outline healthy locally and publicly, and
+  Langfuse health plus sign-in reachability returning success.
 
 ## Merge Follow-Through
 
-- merge this workstream onto the exact latest `origin/main`
-- update ADR 0270 metadata to `Implementation Status: Implemented`, record the
-  first repo version and first live platform version, and regenerate
-  `docs/adr/.index.yaml`
-- cut the protected integration surfaces on `main` only:
-  `VERSION`, `changelog.md`, `docs/release-notes/`, `README.md`, and
-  `versions/stack.yaml`
-- replay the merged mainline from the synchronized integration worktree,
-  capture the canonical exact-main receipt, and then mark this workstream
-  `live_applied` in `workstreams.yaml`
+- exact-main replay and receipt capture are complete on the synchronized
+  integration worktree
+- ADR metadata, runbook updates, release surfaces, and workstream state are all
+  updated for safe merge
+- final remaining steps are repository validation, merge to `main`, and push to
+  `origin/main`
