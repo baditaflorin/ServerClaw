@@ -566,7 +566,7 @@ workstreams:
   - id: ws-0283-live-apply
     adr: "0283"
     title: Live apply Plausible Analytics from latest origin/main
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0283-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0283-live-apply
@@ -679,8 +679,17 @@ workstreams:
             - receipts/live-applies/*plausible*
           mode: shared_contract
           contract: live-apply-receipts-v1
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0283 by deploying Plausible Analytics on
+        docker-runtime-lv3, publishing analytics.lv3.org through the shared
+        edge, injecting the tracker into declared public pages, and recording
+        synchronized branch-local live-apply proof before exact-main
+        integration
+      release_bump: patch
+      latest_receipts:
+        plausible_analytics: 2026-03-30-adr-0283-plausible-analytics-live-apply
   - id: ws-0295-live-apply
     adr: "0295"
     title: Live apply the shared artifact cache plane from latest origin/main
