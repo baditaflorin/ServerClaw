@@ -643,7 +643,7 @@
     {
       "id": 16,
       "type": "text",
-      "title": "grafana-availability",
+      "title": "gotenberg-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -651,7 +651,7 @@
         "y": 21
       },
       "options": {
-        "content": "### grafana-availability\n\nGrafana remains reachable through the public LV3 edge.\n\nService: `grafana`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=grafana-availability)",
+        "content": "### gotenberg-availability\n\nThe private Gotenberg document rendering API remains reachable on docker-runtime-lv3 for synchronous PDF conversion workflows.\n\nService: `gotenberg`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=gotenberg-availability)",
         "mode": "markdown"
       }
     },
@@ -694,7 +694,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:grafana_availability:success_ratio_30d",
+          "expr": "slo:gotenberg_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -758,7 +758,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:grafana_availability:budget_remaining",
+          "expr": "slo:gotenberg_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -802,7 +802,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:grafana_availability:burn_rate_1h",
+          "expr": "slo:gotenberg_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -846,7 +846,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:grafana_availability:time_to_budget_exhaustion_days",
+          "expr": "slo:gotenberg_availability:time_to_budget_exhaustion_days",
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]
@@ -854,7 +854,7 @@
     {
       "id": 21,
       "type": "text",
-      "title": "harbor-availability",
+      "title": "grafana-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -862,7 +862,7 @@
         "y": 28
       },
       "options": {
-        "content": "### harbor-availability\n\nHarbor remains reachable through the shared LV3 edge for image pulls, pushes, and operator access.\n\nService: `harbor`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=harbor-availability)",
+        "content": "### grafana-availability\n\nGrafana remains reachable through the public LV3 edge.\n\nService: `grafana`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=grafana-availability)",
         "mode": "markdown"
       }
     },
@@ -905,7 +905,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:harbor_availability:success_ratio_30d",
+          "expr": "slo:grafana_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -969,7 +969,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:harbor_availability:budget_remaining",
+          "expr": "slo:grafana_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -1013,7 +1013,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:harbor_availability:burn_rate_1h",
+          "expr": "slo:grafana_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -1057,7 +1057,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:harbor_availability:time_to_budget_exhaustion_days",
+          "expr": "slo:grafana_availability:time_to_budget_exhaustion_days",
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]
@@ -1065,7 +1065,7 @@
     {
       "id": 26,
       "type": "text",
-      "title": "homepage-availability",
+      "title": "harbor-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -1073,7 +1073,7 @@
         "y": 35
       },
       "options": {
-        "content": "### homepage-availability\n\nThe unified operator dashboard remains reachable through the authenticated LV3 edge.\n\nService: `homepage`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=homepage-availability)",
+        "content": "### harbor-availability\n\nHarbor remains reachable through the shared LV3 edge for image pulls, pushes, and operator access.\n\nService: `harbor`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=harbor-availability)",
         "mode": "markdown"
       }
     },
@@ -1116,7 +1116,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:homepage_availability:success_ratio_30d",
+          "expr": "slo:harbor_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -1180,7 +1180,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:homepage_availability:budget_remaining",
+          "expr": "slo:harbor_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -1224,7 +1224,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:homepage_availability:burn_rate_1h",
+          "expr": "slo:harbor_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -1268,7 +1268,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:homepage_availability:time_to_budget_exhaustion_days",
+          "expr": "slo:harbor_availability:time_to_budget_exhaustion_days",
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]
@@ -1276,7 +1276,7 @@
     {
       "id": 31,
       "type": "text",
-      "title": "keycloak-availability",
+      "title": "homepage-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -1284,7 +1284,7 @@
         "y": 42
       },
       "options": {
-        "content": "### keycloak-availability\n\nKeycloak discovery remains reachable for operator and service authentication.\n\nService: `keycloak`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=keycloak-availability)",
+        "content": "### homepage-availability\n\nThe unified operator dashboard remains reachable through the authenticated LV3 edge.\n\nService: `homepage`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=homepage-availability)",
         "mode": "markdown"
       }
     },
@@ -1327,7 +1327,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:keycloak_availability:success_ratio_30d",
+          "expr": "slo:homepage_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -1391,7 +1391,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:keycloak_availability:budget_remaining",
+          "expr": "slo:homepage_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -1435,7 +1435,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:keycloak_availability:burn_rate_1h",
+          "expr": "slo:homepage_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -1479,7 +1479,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:keycloak_availability:time_to_budget_exhaustion_days",
+          "expr": "slo:homepage_availability:time_to_budget_exhaustion_days",
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]
@@ -1487,7 +1487,7 @@
     {
       "id": 36,
       "type": "text",
-      "title": "keycloak-latency",
+      "title": "keycloak-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -1495,7 +1495,7 @@
         "y": 49
       },
       "options": {
-        "content": "### keycloak-latency\n\nKeycloak discovery responds in under 500ms for 95% of probes.\n\nService: `keycloak`\n\nLatency threshold: `500ms`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=keycloak-latency)",
+        "content": "### keycloak-availability\n\nKeycloak discovery remains reachable for operator and service authentication.\n\nService: `keycloak`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=keycloak-availability)",
         "mode": "markdown"
       }
     },
@@ -1538,7 +1538,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:keycloak_latency:success_ratio_30d",
+          "expr": "slo:keycloak_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -1602,7 +1602,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:keycloak_latency:budget_remaining",
+          "expr": "slo:keycloak_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -1646,7 +1646,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:keycloak_latency:burn_rate_1h",
+          "expr": "slo:keycloak_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -1690,7 +1690,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:keycloak_latency:time_to_budget_exhaustion_days",
+          "expr": "slo:keycloak_availability:time_to_budget_exhaustion_days",
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]
@@ -1698,7 +1698,7 @@
     {
       "id": 41,
       "type": "text",
-      "title": "langfuse-availability",
+      "title": "keycloak-latency",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -1706,7 +1706,7 @@
         "y": 56
       },
       "options": {
-        "content": "### langfuse-availability\n\nLangfuse remains reachable through the public LV3 edge for trace ingestion and operator access.\n\nService: `langfuse`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=langfuse-availability)",
+        "content": "### keycloak-latency\n\nKeycloak discovery responds in under 500ms for 95% of probes.\n\nService: `keycloak`\n\nLatency threshold: `500ms`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=keycloak-latency)",
         "mode": "markdown"
       }
     },
@@ -1749,7 +1749,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:langfuse_availability:success_ratio_30d",
+          "expr": "slo:keycloak_latency:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -1813,7 +1813,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:langfuse_availability:budget_remaining",
+          "expr": "slo:keycloak_latency:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -1857,7 +1857,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:langfuse_availability:burn_rate_1h",
+          "expr": "slo:keycloak_latency:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -1901,7 +1901,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:langfuse_availability:time_to_budget_exhaustion_days",
+          "expr": "slo:keycloak_latency:time_to_budget_exhaustion_days",
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]
@@ -1909,7 +1909,7 @@
     {
       "id": 46,
       "type": "text",
-      "title": "matrix-synapse-availability",
+      "title": "langfuse-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -1917,7 +1917,7 @@
         "y": 63
       },
       "options": {
-        "content": "### matrix-synapse-availability\n\nMatrix Synapse remains reachable on the public client versions endpoint.\n\nService: `matrix_synapse`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=matrix-synapse-availability)",
+        "content": "### langfuse-availability\n\nLangfuse remains reachable through the public LV3 edge for trace ingestion and operator access.\n\nService: `langfuse`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=langfuse-availability)",
         "mode": "markdown"
       }
     },
@@ -1960,7 +1960,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:matrix_synapse_availability:success_ratio_30d",
+          "expr": "slo:langfuse_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -2024,7 +2024,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:matrix_synapse_availability:budget_remaining",
+          "expr": "slo:langfuse_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -2068,7 +2068,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:matrix_synapse_availability:burn_rate_1h",
+          "expr": "slo:langfuse_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -2112,7 +2112,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:matrix_synapse_availability:time_to_budget_exhaustion_days",
+          "expr": "slo:langfuse_availability:time_to_budget_exhaustion_days",
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]
@@ -2120,7 +2120,7 @@
     {
       "id": 51,
       "type": "text",
-      "title": "netbox-availability",
+      "title": "matrix-synapse-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -2128,7 +2128,7 @@
         "y": 70
       },
       "options": {
-        "content": "### netbox-availability\n\nNetBox remains reachable for inventory, IPAM, and topology workflows.\n\nService: `netbox`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=netbox-availability)",
+        "content": "### matrix-synapse-availability\n\nMatrix Synapse remains reachable on the public client versions endpoint.\n\nService: `matrix_synapse`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=matrix-synapse-availability)",
         "mode": "markdown"
       }
     },
@@ -2171,7 +2171,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:netbox_availability:success_ratio_30d",
+          "expr": "slo:matrix_synapse_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -2235,7 +2235,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:netbox_availability:budget_remaining",
+          "expr": "slo:matrix_synapse_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -2279,7 +2279,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:netbox_availability:burn_rate_1h",
+          "expr": "slo:matrix_synapse_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -2323,7 +2323,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:netbox_availability:time_to_budget_exhaustion_days",
+          "expr": "slo:matrix_synapse_availability:time_to_budget_exhaustion_days",
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]
@@ -2331,7 +2331,7 @@
     {
       "id": 56,
       "type": "text",
-      "title": "nginx-edge-availability",
+      "title": "netbox-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -2339,7 +2339,7 @@
         "y": 77
       },
       "options": {
-        "content": "### nginx-edge-availability\n\nThe edge reverse proxy remains reachable for published services.\n\nService: `nginx_edge`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=nginx-edge-availability)",
+        "content": "### netbox-availability\n\nNetBox remains reachable for inventory, IPAM, and topology workflows.\n\nService: `netbox`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=netbox-availability)",
         "mode": "markdown"
       }
     },
@@ -2382,7 +2382,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:nginx_edge_availability:success_ratio_30d",
+          "expr": "slo:netbox_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -2446,7 +2446,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:nginx_edge_availability:budget_remaining",
+          "expr": "slo:netbox_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -2490,7 +2490,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:nginx_edge_availability:burn_rate_1h",
+          "expr": "slo:netbox_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -2534,7 +2534,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:nginx_edge_availability:time_to_budget_exhaustion_days",
+          "expr": "slo:netbox_availability:time_to_budget_exhaustion_days",
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]
@@ -2542,7 +2542,7 @@
     {
       "id": 61,
       "type": "text",
-      "title": "nextcloud-availability",
+      "title": "nginx-edge-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -2550,7 +2550,7 @@
         "y": 84
       },
       "options": {
-        "content": "### nextcloud-availability\n\nThe public Nextcloud status endpoint remains reachable for the canonical personal file and DAV data plane.\n\nService: `nextcloud`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=nextcloud-availability)",
+        "content": "### nginx-edge-availability\n\nThe edge reverse proxy remains reachable for published services.\n\nService: `nginx_edge`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=nginx-edge-availability)",
         "mode": "markdown"
       }
     },
@@ -2593,7 +2593,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:nextcloud_availability:success_ratio_30d",
+          "expr": "slo:nginx_edge_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -2657,7 +2657,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:nextcloud_availability:budget_remaining",
+          "expr": "slo:nginx_edge_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -2701,7 +2701,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:nextcloud_availability:burn_rate_1h",
+          "expr": "slo:nginx_edge_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -2745,7 +2745,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:nextcloud_availability:time_to_budget_exhaustion_days",
+          "expr": "slo:nginx_edge_availability:time_to_budget_exhaustion_days",
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]
@@ -5086,7 +5086,7 @@
         "name": "slo",
         "label": "SLO",
         "type": "custom",
-        "query": "dozzle-availability,excalidraw-availability,gitea-availability,grafana-availability,harbor-availability,homepage-availability,keycloak-availability,keycloak-latency,langfuse-availability,matrix-synapse-availability,netbox-availability,nginx-edge-availability,nextcloud-availability,open-webui-availability,serverclaw-availability,outline-availability,plane-availability,platform-context-api-availability,realtime-availability,semaphore-availability,status-page-availability,uptime-kuma-availability,vaultwarden-availability,windmill-availability",
+        "query": "dozzle-availability,excalidraw-availability,gitea-availability,gotenberg-availability,grafana-availability,harbor-availability,homepage-availability,keycloak-availability,keycloak-latency,langfuse-availability,matrix-synapse-availability,netbox-availability,nginx-edge-availability,open-webui-availability,serverclaw-availability,outline-availability,plane-availability,platform-context-api-availability,realtime-availability,semaphore-availability,status-page-availability,uptime-kuma-availability,vaultwarden-availability,windmill-availability",
         "current": {
           "selected": false,
           "text": "all",

@@ -50,6 +50,7 @@ PORT_KEYS = (
     "gitea_host_proxy_port",
     "netbox_server_port",
     "netbox_host_proxy_port",
+    "gotenberg_port",
     "searxng_port",
     "searxng_host_proxy_port",
     "langfuse_port",
@@ -466,6 +467,9 @@ def build_service_urls(
         urls["controller"] = service_url("http", tailscale_ipv4, ports["netbox_host_proxy_port"])
         port_map["internal"] = ports["netbox_server_port"]
         port_map["controller"] = ports["netbox_host_proxy_port"]
+    elif service_id == "gotenberg":
+        urls["internal"] = service_url("http", private_ip, ports["gotenberg_port"])
+        port_map["internal"] = ports["gotenberg_port"]
     elif service_id == "searxng":
         public_hostname = service.get("public_hostname")
         urls["internal"] = service_url("http", private_ip, ports["searxng_port"])

@@ -18,7 +18,7 @@ Generated from `config/dependency-graph.json`.
 | Tier | Services |
 | --- | --- |
 | `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, Mail Platform, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Excalidraw, Gitea, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, Outline, Plane, Public Status Page, Semaphore, ServerClaw, Vaultwarden, Windmill, n8n |
+| `2` | Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Excalidraw, Gitea, Gotenberg, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Open WebUI, Outline, Plane, Public Status Page, Semaphore, ServerClaw, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway |
 | `4` | Ops Portal |
 
@@ -56,13 +56,13 @@ graph TD
     dify["Dify\nTier 2"]
     excalidraw["Excalidraw\nTier 2"]
     gitea["Gitea\nTier 2"]
+    gotenberg["Gotenberg\nTier 2"]
     keycloak["Keycloak\nTier 2"]
     langfuse["Langfuse\nTier 2"]
     matrix_synapse["Matrix Synapse\nTier 2"]
     mattermost["Mattermost\nTier 2"]
     n8n["n8n\nTier 2"]
     netbox["NetBox\nTier 2"]
-    nextcloud["Nextcloud\nTier 2"]
     open_webui["Open WebUI\nTier 2"]
     outline["Outline\nTier 2"]
     plane["Plane\nTier 2"]
@@ -100,6 +100,8 @@ graph TD
     gitea -->|soft| keycloak
     gitea -->|startup_only| openbao
     gitea -->|hard| postgres
+    gotenberg -->|soft| api_gateway
+    gotenberg -->|hard| docker_runtime
     grafana -->|soft| keycloak
     grafana -->|soft| nginx_edge
     harbor -->|soft| keycloak
@@ -128,9 +130,6 @@ graph TD
     n8n -->|hard| postgres
     netbox -->|startup_only| openbao
     netbox -->|hard| postgres
-    nextcloud -->|soft| nginx_edge
-    nextcloud -->|startup_only| openbao
-    nextcloud -->|hard| postgres
     nomad -->|soft| docker_build
     nomad -->|soft| docker_runtime
     open_webui -->|soft| keycloak

@@ -516,6 +516,53 @@
         }
       }
     },
+    "gotenberg": {
+      "service_name": "gotenberg",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "gotenberg_runtime",
+      "verify_file": "roles/gotenberg_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "The Gotenberg health endpoint responds on the local listener after Chromium and LibreOffice are ready.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:3007/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The Gotenberg health endpoint responds on the local listener.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:3007/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "A minimal HTML document renders to a PDF through the Chromium conversion route.",
+        "timeout_seconds": 120,
+        "retries": 3,
+        "delay_seconds": 5,
+        "argv": [
+          "/bin/bash",
+          "-lc",
+          "set -euo pipefail; html=$(mktemp --suffix=.html); pdf=$(mktemp); trap 'rm -f \"$html\" \"$pdf\"' EXIT; printf '<html><body><h1>LV3 Gotenberg readiness</h1></body></html>' >\"$html\"; curl -fsS -o \"$pdf\" -F \"files=@${html};filename=index.html;type=text/html\" http://127.0.0.1:3007/forms/chromium/convert/html; head -c 4 \"$pdf\" | grep -q '%PDF'"
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "The Gotenberg runtime stays private to docker-runtime-lv3 and is verified through repo-managed readiness probes plus authenticated API gateway checks."
+      }
+    },
     "grafana": {
       "service_name": "grafana",
       "owning_vm": "monitoring-lv3",
