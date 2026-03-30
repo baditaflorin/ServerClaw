@@ -84,7 +84,13 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert forward_final_recheck["retries"] == "{{ docker_runtime_chain_recheck_retries }}"
     assert forward_final_recheck["delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
     assert nat_final_assert["ansible.builtin.command"] == "iptables -t nat -S DOCKER"
+    assert nat_final_assert["retries"] == "{{ docker_runtime_chain_recheck_retries }}"
+    assert nat_final_assert["delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
+    assert nat_final_assert["until"] == "docker_runtime_nat_chain_final_assert.rc == 0"
     assert forward_final_assert["ansible.builtin.command"] == "iptables -t filter -S DOCKER-FORWARD"
+    assert forward_final_assert["retries"] == "{{ docker_runtime_chain_recheck_retries }}"
+    assert forward_final_assert["delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
+    assert forward_final_assert["until"] == "docker_runtime_forward_chain_final_assert.rc == 0"
 
 
 def test_docker_runtime_patches_nftables_rule_block_once() -> None:

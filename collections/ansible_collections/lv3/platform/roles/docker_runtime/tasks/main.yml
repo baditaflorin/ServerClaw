@@ -252,14 +252,20 @@
   ansible.builtin.command: iptables -t nat -S DOCKER
   register: docker_runtime_nat_chain_final_assert
   changed_when: false
-  failed_when: docker_runtime_nat_chain_final_assert.rc != 0
+  failed_when: docker_runtime_nat_chain_final_assert.rc not in [0, 1]
+  retries: "{{ docker_runtime_chain_recheck_retries }}"
+  delay: "{{ docker_runtime_chain_recheck_delay_seconds }}"
+  until: docker_runtime_nat_chain_final_assert.rc == 0
   when: docker_runtime_require_nat_chain | bool
 
 - name: Final assert Docker filter forward chain is present
   ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
   register: docker_runtime_forward_chain_final_assert
   changed_when: false
-  failed_when: docker_runtime_forward_chain_final_assert.rc != 0
+  failed_when: docker_runtime_forward_chain_final_assert.rc not in [0, 1]
+  retries: "{{ docker_runtime_chain_recheck_retries }}"
+  delay: "{{ docker_runtime_chain_recheck_delay_seconds }}"
+  until: docker_runtime_forward_chain_final_assert.rc == 0
   when: docker_runtime_require_nat_chain | bool
 
 - name: Verify Docker runtime health probes
