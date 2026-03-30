@@ -4,6 +4,7 @@
     that:
       - postgres_vm_packages | length > 0
       - postgres_vm_postgresql_service_name | length > 0
+      - postgres_vm_max_connections | int >= 100
       - postgres_vm_listen_addresses | length > 0
       - postgres_vm_admin_role is match('^[a-z_][a-z0-9_]*$')
       - postgres_vm_max_connections | int > 0
