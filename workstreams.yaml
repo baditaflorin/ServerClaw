@@ -914,7 +914,7 @@ workstreams:
         the Coolify bootstrap and publication path, then re-verifying governed
         repo-deploy base-image warming on coolify-lv3
       release_bump: patch
-      included_in_repo_version: 0.177.102
+      included_in_repo_version: 0.177.103
       latest_receipts:
         coolify: 2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply
         repo_deploy_base_image_cache: 2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply

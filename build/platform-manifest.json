@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.102",
-  "platform_version": "0.130.68",
-  "generated_at": "2026-03-30T12:33:15Z",
-  "next_refresh_at": "2026-03-30T13:33:15Z",
+  "repo_version": "0.177.103",
+  "platform_version": "0.130.69",
+  "generated_at": "2026-03-30T13:52:03Z",
+  "next_refresh_at": "2026-03-30T14:52:03Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4936,10 +4936,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.101",
+    "last_version": "0.177.102",
     "deployed_at": "2026-03-30",
-    "summary": "implements ADR 0275 by bringing the private Apache Tika extraction service, host-reachability policy, and Docker compose-network recovery hardening onto main while preserving the latest verified live state from docker-runtime-lv3 because a concurrent vm:120 lock blocked a new exact-main replay",
-    "release_notes_url": "docs/release-notes/0.177.102.md"
+    "summary": "completed the ADR 0274 mainline live apply by hardening the Coolify bootstrap and publication path, then re-verifying governed repo-deploy base-image warming on coolify-lv3",
+    "release_notes_url": "docs/release-notes/0.177.103.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

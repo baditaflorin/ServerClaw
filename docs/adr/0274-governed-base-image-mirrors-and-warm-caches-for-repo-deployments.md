@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: 0.177.102
+- Implemented In Repo Version: 0.177.103
 - Implemented In Platform Version: 0.130.69
 - Implemented On: 2026-03-30
 - Date: 2026-03-29
@@ -73,7 +73,9 @@ The implemented live slice now exists on `coolify-lv3`:
 - `lv3-repo-deploy-image-cache.timer` keeps the approved image set fresh on a
   governed cadence
 - the refreshed exact-main Coolify replay also keeps the local publication path
-  and Docker bridge repair flow verifiable after cache refresh
+  and Docker bridge repair flow verifiable after cache refresh, including
+  separate-worktree helper installation and `nftables`-first hosts that do not
+  ship the legacy `iptables` binary
 
 ### Operator contract
 
