@@ -597,7 +597,11 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "--path {{ windmill_healthcheck_script_path | quote }}" in tasks
     assert "--path {{ windmill_stage_smoke_suites_script_path | quote }}" in verify_tasks
     assert "Converge repo-managed Windmill schedule enabled flags" in tasks
-    assert 'psql "${database_url}" -v ON_ERROR_STOP=1 <<\'SQL\'' in tasks
+    assert "become_user: postgres" in tasks
+    assert 'psql -d {{ windmill_database_name | quote }} -v ON_ERROR_STOP=1 <<\'SQL\'' in tasks
+    assert 'delegate_to: "{{ windmill_database_inventory_host }}"' in tasks
+    assert '$1 == "DATABASE_URL"' not in tasks
+    assert '. "{{ windmill_env_file }}"' not in tasks
     assert "WITH desired(path, enabled) AS (" in tasks
     assert "current.workspace_id = '{{ windmill_workspace_id | replace(\"'\", \"''\") }}'" in tasks
     assert "current.path = desired.path" in tasks

@@ -2306,11 +2306,10 @@
 
 - name: Converge repo-managed Windmill schedule enabled flags
   become: true
+  become_user: postgres
   ansible.builtin.shell: |
     set -euo pipefail
-    database_url="$(awk -F= '$1 == "DATABASE_URL" { sub(/^[^=]*=/, ""); print; exit }' "{{ windmill_env_file }}")"
-    test -n "${database_url}"
-    psql "${database_url}" -v ON_ERROR_STOP=1 <<'SQL'
+    psql -d {{ windmill_database_name | quote }} -v ON_ERROR_STOP=1 <<'SQL'
     WITH desired(path, enabled) AS (
       VALUES
       {% for schedule in windmill_seed_schedules %}
@@ -2326,6 +2325,7 @@
     SQL
   args:
     executable: /bin/bash
+  delegate_to: "{{ windmill_database_inventory_host }}"
   register: windmill_seed_schedule_enabled_converge
   changed_when: false
   retries: 3
