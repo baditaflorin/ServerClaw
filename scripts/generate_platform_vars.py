@@ -500,6 +500,11 @@ def build_service_urls(
     elif service_id == "tesseract_ocr":
         urls["internal"] = service_url("http", private_ip, ports["tesseract_ocr_port"])
         port_map["internal"] = ports["tesseract_ocr_port"]
+    elif service_id == "livekit":
+        urls["internal"] = service_url("http", private_ip, ports["livekit_signal_port"])
+        port_map["internal"] = ports["livekit_signal_port"]
+        port_map["media_tcp"] = ports["livekit_tcp_port"]
+        port_map["media_udp"] = ports["livekit_udp_port"]
     elif service_id == "semaphore":
         urls["internal"] = service_url("http", private_ip, ports["semaphore_server_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["semaphore_host_proxy_port"])

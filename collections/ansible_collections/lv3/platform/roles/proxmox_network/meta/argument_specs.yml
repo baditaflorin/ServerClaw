@@ -88,6 +88,13 @@ argument_specs:
         default: []
         description:
           - Explicit host TCP forward definitions for public ingress.
+      proxmox_public_ingress_udp_forwards:
+        type: list
+        elements: raw
+        required: false
+        default: []
+        description:
+          - Explicit host UDP forward definitions for public ingress.
       proxmox_public_edge_ipv4:
         type: str
         required: false

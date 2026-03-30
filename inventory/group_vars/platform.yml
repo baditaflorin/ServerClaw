@@ -1372,6 +1372,38 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8025
       smtp: smtp://10.10.10.20:1025
+  livekit:
+    service_name: livekit
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: livekit.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: livekit
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      upstream: http://10.10.10.20:7880
+    service_id: livekit
+    ports:
+      internal: 7880
+      media_tcp: 7881
+      media_udp: 7882
+    urls:
+      public: https://livekit.lv3.org
+      internal: http://10.10.10.20:7880
   redpanda:
     service_name: redpanda
     owning_vm: docker-runtime-lv3
@@ -3233,6 +3265,38 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8025
       smtp: smtp://10.10.10.20:1025
+  livekit:
+    service_name: livekit
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: livekit.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: livekit
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      upstream: http://10.10.10.20:7880
+    service_id: livekit
+    ports:
+      internal: 7880
+      media_tcp: 7881
+      media_udp: 7882
+    urls:
+      public: https://livekit.lv3.org
+      internal: http://10.10.10.20:7880
   redpanda:
     service_name: redpanda
     owning_vm: docker-runtime-lv3

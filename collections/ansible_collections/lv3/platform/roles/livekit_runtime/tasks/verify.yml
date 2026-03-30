@@ -1,0 +1,67 @@
+---
+# Purpose: Verify the deployed LiveKit signal and media listeners plus the repo-managed room lifecycle contract.
+# Use case: Run after LiveKit converges or during validation to prove local room management succeeds from the managed API credentials.
+# Inputs: Running LiveKit container, runtime env file, guest-local helper script, and the expected signal plus media ports.
+# Outputs: Read-only listener checks and a create/list/delete room probe against the local Twirp API.
+# Idempotency: Fully idempotent because the synthetic room is created and deleted within the same verification pass.
+# Dependencies: ADR 0165 and ADR 0293.
+- name: Verify the LiveKit signal listener is reachable locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ livekit_signal_port }}"
+    timeout: 10
+    state: started
+  changed_when: false
+
+- name: Verify the LiveKit TCP media listener is reachable locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ livekit_media_tcp_port }}"
+    timeout: 10
+    state: started
+  changed_when: false
+
+- name: Verify the LiveKit UDP media listener is present locally
+  ansible.builtin.shell: |
+    set -euo pipefail
+    ss -lunH | awk '{print $5}' | grep -Eq '(^|:){{ livekit_media_udp_port }}$'
+  args:
+    executable: /bin/bash
+  register: livekit_verify_udp_listener
+  changed_when: false
+
+- name: Verify the LiveKit room lifecycle locally
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ livekit_remote_helper_script }}"
+      - verify-room-lifecycle
+      - --url
+      - "{{ livekit_local_url }}"
+      - --runtime-env-file
+      - "{{ livekit_env_file }}"
+      - --room-prefix
+      - "{{ livekit_verify_room_prefix }}"
+      - --identity
+      - "{{ livekit_verify_identity }}"
+      - --timeout-seconds
+      - "{{ livekit_verify_timeout_seconds | string }}"
+  register: livekit_verify_room_lifecycle
+  retries: 12
+  delay: 5
+  until: >-
+    livekit_verify_room_lifecycle.rc == 0 and
+    (livekit_verify_room_lifecycle.stdout | length > 0) and
+    ((livekit_verify_room_lifecycle.stdout | from_json).verification_passed)
+  changed_when: false
+
+- name: Assert the LiveKit listeners and room lifecycle are healthy
+  ansible.builtin.assert:
+    that:
+      - livekit_verify_udp_listener.rc == 0
+      - (livekit_verify_room_lifecycle.stdout | from_json).verification_passed
+      - (livekit_verify_room_lifecycle.stdout | from_json).created
+      - (livekit_verify_room_lifecycle.stdout | from_json).listed_after_create
+      - (livekit_verify_room_lifecycle.stdout | from_json).deleted
+      - not (livekit_verify_room_lifecycle.stdout | from_json).listed_after_delete
+    fail_msg: "LiveKit answered locally, but the managed room lifecycle contract did not verify."

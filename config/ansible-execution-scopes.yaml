@@ -270,6 +270,12 @@ playbooks:
     shared_surfaces:
       - service:plausible
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/livekit.yml:
+    playbook_id: livekit
+    mutation_scope: platform
+    shared_surfaces:
+      - service:livekit
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/serverclaw.yml:
     playbook_id: serverclaw
     mutation_scope: platform

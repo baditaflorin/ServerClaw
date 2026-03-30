@@ -63,6 +63,21 @@ def test_build_platform_vars_includes_minio_publication_topology() -> None:
     assert ("minio-console", "A", "65.108.75.123", 60) in dns_records
 
 
+def test_build_platform_vars_includes_livekit_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    livekit = platform_vars["platform_service_topology"]["livekit"]
+
+    assert livekit["public_hostname"] == "livekit.lv3.org"
+    assert livekit["dns"]["name"] == "livekit"
+    assert livekit["ports"]["internal"] == 7880
+    assert livekit["ports"]["media_tcp"] == 7881
+    assert livekit["ports"]["media_udp"] == 7882
+    assert livekit["urls"]["public"] == "https://livekit.lv3.org"
+    assert livekit["urls"]["internal"] == "http://10.10.10.20:7880"
+    assert livekit["edge"]["noindex"] is True
+    assert livekit["edge"]["kind"] == "proxy"
+
+
 def test_build_platform_vars_includes_dify_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     dify = platform_vars["platform_service_topology"]["dify"]
