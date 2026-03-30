@@ -92,11 +92,14 @@ def test_role_gates_network_recovery_on_boolean_fact() -> None:
     recovery_fact = task_by_name["Record whether Harbor needs one forced network recovery recycle"][
         "ansible.builtin.set_fact"
     ]["harbor_compose_needs_recovery"]
+    stale_cleanup_script = task_by_name["Remove stale Harbor containers after the compose reset"]["ansible.builtin.shell"]
 
     assert reset_task["when"] == "(harbor_compose_assets_changed | bool) or not (harbor_runtime_healthy_before_reconcile | bool)"
     assert recycle_task["when"] == "harbor_compose_needs_recovery | bool"
     assert recreate_task["when"] == "harbor_compose_needs_recovery | bool"
-    assert "systemctl restart docker" in task_by_name["Remove stale Harbor containers after the compose reset"]["ansible.builtin.shell"]
+    assert "ensure_docker_socket()" in stale_cleanup_script
+    assert "docker info >/dev/null 2>&1" in stale_cleanup_script
+    assert "systemctl restart docker" in stale_cleanup_script
     assert ".NetworkSettings.Ports" in task_by_name["Read the Harbor published port bindings after reconciliation"][
         "ansible.builtin.command"
     ]["argv"][-1]
@@ -107,6 +110,31 @@ def test_role_gates_network_recovery_on_boolean_fact() -> None:
         "harbor_registry_port_binding_present"
     ]
     assert "or not (harbor_registry_port_binding_present | bool)" in recovery_fact
+
+
+def test_role_only_runs_harbor_prepare_when_compose_assets_need_regeneration() -> None:
+    tasks = load_yaml(ROLE_TASKS)
+    task_by_name = {task["name"]: task for task in tasks}
+
+    compose_stat_task = task_by_name["Check whether the Harbor generated compose file already exists"]
+    prepare_needed_task = task_by_name["Record whether Harbor prepare needs to regenerate compose assets"]
+    prepare_task = task_by_name["Prepare Harbor compose assets"]
+    compose_assets_changed_task = task_by_name["Record whether Harbor compose assets changed"]
+
+    prepare_needed_fact = prepare_needed_task["ansible.builtin.set_fact"]["harbor_prepare_needed"]
+    compose_assets_changed_fact = compose_assets_changed_task["ansible.builtin.set_fact"]["harbor_compose_assets_changed"]
+
+    assert compose_stat_task["ansible.builtin.stat"]["path"] == "{{ harbor_generated_compose_file }}"
+    assert "harbor_installer_download.changed" in prepare_needed_fact
+    assert "harbor_installer_unarchive.changed" in prepare_needed_fact
+    assert "harbor_config_template.changed" in prepare_needed_fact
+    assert "not harbor_generated_compose_file_stat.stat.exists" in prepare_needed_fact
+    assert prepare_task["ansible.builtin.command"]["argv"] == (
+        "{{ ['./prepare'] + (['--with-trivy'] if harbor_prepare_with_trivy else []) }}"
+    )
+    assert prepare_task["when"] == "harbor_prepare_needed | bool"
+    assert prepare_task["changed_when"] == "harbor_prepare_needed | bool"
+    assert "or harbor_prepare_needed | bool" in compose_assets_changed_fact
 
 
 def test_verify_accepts_running_services_after_ping() -> None:

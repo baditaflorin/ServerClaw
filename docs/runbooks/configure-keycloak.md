@@ -122,3 +122,9 @@ The password recovery action:
 - Because the named operator remains MFA-first, the Keycloak converge does not
   verify a repo-managed direct-grant token for that human identity.
 - Password resets and required-action mail use `lv3-mail-stalwart:1587` over the shared `mail-platform_default` Docker network. This avoids Docker host-port hairpin failures and avoids STARTTLS certificate mismatch on the internal container DNS name.
+- As of the 2026-03-29 ADR 0270 live apply, the repo-managed user reconciliation
+  path now force-recreates the Keycloak service and retries once when the local
+  admin API fails with transient `500`, JDBC acquisition timeout, or
+  connection-style outage signatures. If the replay still fails after that one
+  recycle, treat it as a real Keycloak or PostgreSQL incident rather than a
+  publication blip.

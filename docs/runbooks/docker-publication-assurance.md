@@ -31,8 +31,14 @@ that declares `readiness.docker_publication`.
 If `--heal` is enabled, the helper may:
 
 - restart Docker when the publication chains are missing
-- force-recreate the compose project for the affected container when host-side
-  port programming is still missing after the Docker restart
+- restart Docker and retry the compose recreate when `docker compose up` dies
+  with a daemon transport EOF during publication recovery
+- force-reset the compose project when host-side port programming is still
+  missing after a recreate attempt or when Docker reports restarting, zombie,
+  or name-conflict container state for the affected service
+- remove and rebuild the compose network when Docker reports
+  `failed programming external connectivity`, `Unable to enable DNAT rule`, or
+  `No chain/target/match by that name` while restoring a published port
 
 ## Direct Operator Invocation
 
@@ -69,6 +75,11 @@ uv run --with pytest --with pyyaml python -m pytest \
 
 - Prefer contract fixes in `config/health-probe-catalog.json` over one-off
   manual Docker or iptables edits.
+- If a full helper replay succeeds but one service still shows the stale
+  `HostConfig.PortBindings`-without-live-`NetworkSettings.Ports` signature,
+  rerun that service's repo-managed converge playbook so the service-specific
+  role can perform its controlled compose reset path before resorting to
+  manual Docker commands.
 - If a service binds only on the guest IP and not loopback, declare the guest
   IP explicitly under `readiness.docker_publication.bindings`.
 - If the application readiness probe intentionally targets a different port than

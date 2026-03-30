@@ -3,10 +3,10 @@
 - Date: 2026-03-30
 
 ## Summary
-- implements ADR 0262 by deploying the OpenFGA delegated authorization runtime, the ServerClaw bootstrap contracts, the repo-managed Keycloak runtime clients, and the API gateway registration for delegated authorization checks
+- implemented ADR 0270 by adding a shared Docker publication assurance helper, catalog-declared host publication contracts, post-verify repair hooks, read-only observation checks, and live-apply recovery hardening for Harbor, Keycloak, OpenBao, Outline, and Langfuse when Docker publication drift surfaced during replay
 
 ## Platform Impact
-- exact-main ADR 0262 replay establishes the first live platform version with delegated OpenFGA authorization and API gateway verification on current mainline
+- keeps platform version at 0.130.62 while integrating the already live-applied ADR 0270 Docker publication self-healing and recovery hardening on top of the 0.177.93 mainline.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

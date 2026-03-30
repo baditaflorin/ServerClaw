@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0278](../adr/0278-gotenberg-as-the-document-to-pdf-rendering-service.md)
 - Title: Integrate ADR 0278 exact-main replay onto `origin/main`
-- Status: `live_applied`
+- Status: `merged`
 - Target Repo Version: `0.177.92`
 - Platform Version Before Exact-Main Replay: `0.130.60`
 - Live Applied In Platform Version: `0.130.61`

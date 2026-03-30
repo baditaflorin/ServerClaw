@@ -38,6 +38,16 @@ argument_specs:
         required: true
         description:
           - Compose file path for the runtime stack.
+      keycloak_compose_project_name:
+        type: str
+        required: true
+        description:
+          - Compose project name used for runtime network cleanup during forced replays.
+      keycloak_compose_network_name:
+        type: str
+        required: true
+        description:
+          - Managed compose network name removed before forced Keycloak recovery replays.
       keycloak_env_file:
         type: path
         required: true
