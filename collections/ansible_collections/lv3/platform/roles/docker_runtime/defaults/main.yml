@@ -81,6 +81,8 @@ docker_runtime_daemon_config:
 docker_runtime_require_nat_chain: true
 docker_runtime_chain_recheck_retries: 30
 docker_runtime_chain_recheck_delay_seconds: 2
+docker_runtime_container_recovery_retries: 12
+docker_runtime_container_recovery_delay_seconds: 5
 docker_runtime_nftables_config_file: /etc/nftables.conf
 docker_runtime_container_forward_compat_enabled: true
 docker_runtime_controller_repo_root: >-
