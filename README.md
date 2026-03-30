@@ -181,6 +181,7 @@ The repository now also ships ADR 0197 Dify visual workflow canvas fully live on
 The repository now also ships ADR 0231 local secret delivery live on production: `docker-runtime-lv3` now serves the control-plane backup path through a repo-managed OpenBao Agent plus systemd credentials, the legacy `/etc/lv3/control-plane-recovery/openbao-backup-token.json` artifact is gone, and the 2026-03-28 replay re-verified a fresh backup generation plus restore drill on `backup-lv3`.
 The repository now also ships ADR 0137 crawl policy automation live on production: the shared public edge serves a universal `robots.txt`, emits `X-Robots-Tag: noindex, nofollow` across published hostnames, adds robots meta tags to repository-generated HTML surfaces, and includes `lv3.org` in the shared edge certificate definition.
 The repository now also ships the first ADR 0166 canonical error rollout live on production: `config/error-codes.yaml` and `scripts/canonical_errors.py` now normalize repo-managed gateway and platform-context failures behind one trace-id-backed error envelope, and the 2026-03-26 live replay from `main` verified the canonical `AUTH_TOKEN_MISSING` response on both `https://api.lv3.org/v1/health` and `http://100.64.0.1:8010/v1/platform-summary`.
+ADR 0276 NATS JetStream is now live on production from `main`: `docker-runtime-lv3` now serves the repo-managed private event bus on `10.10.10.20:4222`, the 2026-03-30 exact-main replay re-verified the `PLATFORM_EVENTS`, `RAG_DOCUMENT`, and `SECRET_ROTATION` streams after a short shared Docker-runtime correction loop, and the controller-side check/apply paths plus platform, secret-rotation, and RAG smoke publishes all completed cleanly.
 
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
@@ -188,9 +189,9 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.96` |
-| Platform version | `0.130.63` |
-| Observed check date | `2026-03-29` |
+| Repository version | `0.177.97` |
+| Platform version | `0.130.64` |
+| Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
 | Observed kernel | `6.17.13-2-pve` |
@@ -301,6 +302,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `mutation_audit` | `2026-03-23-adr-0066-mutation-audit-live-apply` |
 | `mutation_ledger` | `2026-03-27-adr-0115-mutation-ledger-mainline-live-apply` |
 | `n8n` | `2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply` |
+| `nats_jetstream` | `2026-03-30-adr-0276-nats-jetstream-event-bus-mainline-live-apply` |
 | `netbox` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `network_impairment_matrix` | `2026-03-27-adr-0189-network-impairment-matrix-live-apply` |
 | `nextcloud` | `2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply` |
@@ -431,7 +433,7 @@ password SSH disabled on host and guests
 | `maintenance-window-subjects` | `event` | `event_subject` | `platform.maintenance.*` |
 | `platform-backup-subjects` | `event` | `event_subject` | `platform.backup.restore-verification.*` |
 | `platform-world-state-events` | `event` | `event_subject` | `platform.world_state.refreshed` |
-| `platform-ledger-events` | `event` | `event_subject` | `platform.ledger.event_written` |
+| `platform-ledger-events` | `event` | `event_subject` | `platform.mutation.recorded` |
 | `platform-agent-events` | `event` | `event_subject` | `platform.agent.*` |
 | `platform-execution-events` | `event` | `event_subject` | `platform.execution.*` |
 | `platform-config-merge-events` | `event` | `event_subject` | `platform.config.*` |
@@ -471,7 +473,7 @@ password SSH disabled on host and guests
 | `maintenance-window-subjects` | `internal-only` | `event` | `platform.maintenance.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `platform-backup-subjects` | `internal-only` | `event` | `platform.backup.restore-verification.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `platform-world-state-events` | `internal-only` | `event` | `platform.world_state.refreshed` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
-| `platform-ledger-events` | `internal-only` | `event` | `platform.ledger.event_written` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
+| `platform-ledger-events` | `internal-only` | `event` | `platform.mutation.recorded` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `platform-agent-events` | `internal-only` | `event` | `platform.agent.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `platform-execution-events` | `internal-only` | `event` | `platform.execution.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `platform-config-merge-events` | `internal-only` | `event` | `platform.config.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
@@ -685,6 +687,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Monitoring Stack Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/monitoring-stack.md)
 - [Mutation Audit Log](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/mutation-audit-log.md)
 - [Mutation Ledger](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/mutation-ledger.md)
+- [NATS JetStream Event Bus](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/nats-jetstream-event-bus.md)
 - [Network Impairment Matrix](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/network-impairment-matrix.md)
 - [Network Policy Reference](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/network-policy-reference.md)
 - [Observation-to-Action Closure Loop](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/observation-to-action-closure-loop.md)
@@ -1368,6 +1371,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0268-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0268-main-integration.md)
 - [Workstream WS-0271: Backup Coverage Assertion Ledger Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0271-live-apply.md)
 - [Workstream ws-0272-live-apply: ADR 0272 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0272-live-apply.md)
+- [Workstream ws-0276-live-apply: Live Apply ADR 0276 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0276-live-apply.md)
 - [Workstream ws-0278-live-apply: ADR 0278 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0278-live-apply.md)
 - [Workstream ws-0278-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0278-main-integration.md)
 - [Workstream ws-0282-live-apply: Live Apply ADR 0282 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0282-live-apply.md)
@@ -1391,8 +1395,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.96` |
-| Platform version | `0.130.63` |
+| Repository version | `0.177.97` |
+| Platform version | `0.130.64` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1687,6 +1691,7 @@ This repository is intentionally opinionated:
 | `0271` | Backup coverage assertion ledger live apply | `live_applied` | [ws-0271-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0271-live-apply.md) |
 | `0272` | Restore readiness ladders and stateful warm-up verification profiles | `live_applied` | [ws-0272-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0272-live-apply.md) |
 | `0273` | Live apply ADR 0273 public endpoint admission control | `live_applied` | [adr-0273-public-endpoint-admission-control.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0273-public-endpoint-admission-control.md) |
+| `0276` | Live apply the NATS JetStream platform event bus from latest origin/main | `live_applied` | [ws-0276-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0276-live-apply.md) |
 | `0278` | ADR 0278 live apply from latest origin/main | `live_applied` | [ws-0278-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0278-live-apply.md) |
 | `0278` | Integrate ADR 0278 exact-main replay onto current origin/main | `merged` | [ws-0278-main-integration.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0278-main-integration.md) |
 | `0282` | Live apply Mailpit as the SMTP development mail interceptor from latest origin/main | `live_applied` | [ws-0282-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0282-live-apply.md) |

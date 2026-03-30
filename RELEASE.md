@@ -1,12 +1,12 @@
-# Release 0.177.96
+# Release 0.177.97
 
 - Date: 2026-03-30
 
 ## Summary
-- integrates ADR 0282 into main by replaying Mailpit as the private development SMTP interceptor and the non-production SMTP contract onto the merged 0.177.95 / 0.130.63 baseline, preserving the exact-main Mailpit verification from docker-runtime-lv3 and monitoring-lv3 without advancing platform_version again
+- implements ADR 0276 by bringing the private NATS JetStream runtime under repo-managed automation, preserving the live multi-principal auth contract, aligning mutation-ledger, secret-rotation, and RAG subjects with the platform event-bus stream catalog, and recording rebased live-apply proof before exact-main integration
 
 ## Platform Impact
-- ADR 0282 is already live on platform version 0.130.60; this exact-main integration replays Mailpit onto the merged 0.177.95 / 0.130.63 baseline without advancing platform_version again.
+- platform version advances to 0.130.64 after the exact-main ADR 0276 replay re-verifies the private NATS JetStream event bus on top of the 0.130.63 baseline
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

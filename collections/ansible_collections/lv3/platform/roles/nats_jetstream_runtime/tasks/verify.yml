@@ -1,0 +1,16 @@
+---
+- name: Wait for the NATS client listener
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ nats_jetstream_port }}"
+    state: started
+    timeout: 30
+
+- name: Check the NATS monitoring health endpoint
+  ansible.builtin.uri:
+    url: "{{ nats_jetstream_monitor_health_url }}"
+    status_code: 200
+  register: nats_jetstream_health
+  retries: 10
+  delay: 2
+  until: nats_jetstream_health.status == 200

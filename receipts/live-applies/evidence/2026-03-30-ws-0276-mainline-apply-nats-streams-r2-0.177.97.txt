@@ -1,0 +1,4 @@
+uv run --with pyyaml --with nats-py python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0276-live-apply/scripts/nats_streams.py --apply
+PLATFORM_EVENTS: none
+RAG_DOCUMENT: none
+SECRET_ROTATION: none

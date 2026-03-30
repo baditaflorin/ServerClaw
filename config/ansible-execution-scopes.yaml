@@ -169,6 +169,13 @@ playbooks:
     shared_surfaces:
       - service:netbox
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/nats-jetstream.yml:
+    playbook_id: nats-jetstream
+    canonical_service_id: nats_jetstream
+    mutation_scope: host
+    shared_surfaces:
+      - service:nats-jetstream
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/ntfy.yml:
     playbook_id: ntfy
     mutation_scope: host

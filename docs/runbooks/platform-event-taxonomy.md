@@ -18,7 +18,7 @@ ADR 0124 makes `config/event-taxonomy.yaml` the canonical registry for platform 
 - `platform.maintenance.*`
 - `platform.backup.restore-verification.*`
 - `platform.world_state.refreshed`
-- `platform.ledger.event_written`
+- `platform.mutation.recorded`
 
 ## Validation
 
@@ -57,7 +57,7 @@ make apply-nats-streams
 
 ## Live Apply
 
-ADR 0124 is not fully live until the internal JetStream runtime exposes the committed `PLATFORM_EVENTS` stream.
+ADR 0124 remains live only when the repo-managed NATS runtime exposes the committed `PLATFORM_EVENTS`, `RAG_DOCUMENT`, and `SECRET_ROTATION` streams.
 
 1. Run `make check-nats-streams` from a rebased `main` worktree.
 2. If the stream is missing or drifted, run `make apply-nats-streams`.
@@ -69,7 +69,7 @@ ADR 0124 is not fully live until the internal JetStream runtime exposes the comm
 
 The 2026-03-26 ADR 0124 live apply established the `PLATFORM_EVENTS` stream on the live NATS runtime and verified a canonical `platform.findings.observation` publish into that stream.
 
-That apply also exposed one runtime gap outside the repository-managed stream contract: the host-local NATS auth file at `/opt/nats-jetstream/config/nats-server.conf` still had `jetstream-admin` limited to `$JS.API.>` publishes only. Because that auth file is not yet repo-managed in this repository, the live apply required a manual server-side edit to add `platform.>` to the allow-list and a restart of the `lv3-nats-jetstream` container.
+ADR 0276 now extends that repo-managed stream contract with `RAG_DOCUMENT` for `rag.document.*` and `SECRET_ROTATION` for `secret.rotation.*`, while `platform.mutation.recorded` stays inside `PLATFORM_EVENTS` so the existing `platform.>` retention contract does not need a destructive stream migration.
 
 ## Envelope Shape
 

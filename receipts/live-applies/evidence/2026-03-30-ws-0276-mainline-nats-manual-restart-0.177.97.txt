@@ -1,0 +1,3 @@
+NAMES                STATUS
+lv3-nats-jetstream   Up 2 seconds
+{"status":"ok"}

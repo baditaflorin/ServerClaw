@@ -85,7 +85,7 @@ Before any `--apply` run:
 1. validates the catalog and selected secret id
 2. enforces the correct command contract for low-risk versus high-risk secrets
 3. invokes `playbooks/secret-rotation.yml` in plan or apply mode
-4. emits a structured `credentials.rotated` event payload on success when `SECRET_ROTATION_NATS_EVENT_URL` is configured
+4. emits a structured `secret.rotation.completed` event payload on success when `SECRET_ROTATION_NATS_EVENT_URL` is configured
 5. emits a GlitchTip-compatible error payload when `SECRET_ROTATION_GLITCHTIP_EVENT_URL` is configured and the apply fails
 
 `playbooks/secret-rotation.yml` then:

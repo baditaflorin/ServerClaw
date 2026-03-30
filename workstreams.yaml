@@ -710,6 +710,78 @@ workstreams:
     canonical_truth:
       latest_receipts:
         artifact_cache_plane: 2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply
+  - id: ws-0276-live-apply
+    adr: "0276"
+    title: Live apply the NATS JetStream platform event bus from latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0276-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0276-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0276-live-apply.md
+    depends_on:
+      - adr-0023-docker-runtime-guest
+      - adr-0065-secret-rotation-automation
+      - adr-0079-playbook-decomposition-and-shared-execution-model
+      - adr-0115-mutation-ledger
+      - adr-0124-platform-event-taxonomy
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0276-live-apply.md
+      - docs/adr/0276-nats-jetstream-as-the-platform-event-bus.md
+      - docs/runbooks/nats-jetstream-event-bus.md
+      - docs/runbooks/platform-event-taxonomy.md
+      - docs/runbooks/mutation-ledger.md
+      - docs/runbooks/mutation-audit-log.md
+      - docs/runbooks/secret-rotation-and-lifecycle.md
+      - config/nats-streams.yaml
+      - config/event-taxonomy.yaml
+      - config/control-plane-lanes.json
+      - config/secret-catalog.json
+      - config/controller-local-secrets.json
+      - config/service-capability-catalog.json
+      - config/ansible-execution-scopes.yaml
+      - playbooks/nats-jetstream.yml
+      - playbooks/services/nats-jetstream.yml
+      - collections/ansible_collections/lv3/platform/roles/nats_jetstream_runtime/
+      - scripts/nats_streams.py
+      - scripts/secret_rotation.py
+      - platform/ledger/writer.py
+      - tests/test_secret_rotation.py
+      - tests/test_service_id_resolver.py
+      - tests/unit/test_event_taxonomy.py
+      - tests/unit/test_ledger_writer.py
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0276_runtime_and_contract
+          paths:
+            - docs/adr/0276-nats-jetstream-as-the-platform-event-bus.md
+            - docs/workstreams/ws-0276-live-apply.md
+            - docs/runbooks/nats-jetstream-event-bus.md
+            - playbooks/nats-jetstream.yml
+            - playbooks/services/nats-jetstream.yml
+            - collections/ansible_collections/lv3/platform/roles/nats_jetstream_runtime/
+            - receipts/live-applies/
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0276 by bringing the private NATS
+        JetStream runtime under repo-managed automation, preserving the live
+        multi-principal auth contract, aligning mutation-ledger,
+        secret-rotation, and RAG subjects with the platform event-bus stream
+        catalog, and recording rebased live-apply proof before exact-main
+        integration
+      release_bump: patch
+      included_in_repo_version: 0.177.97
+      latest_receipts:
+        nats_jetstream: 2026-03-30-adr-0276-nats-jetstream-event-bus-mainline-live-apply
   - id: ws-0260-live-apply
     adr: "0260"
     title: Live-apply ADR 0260 Nextcloud personal data plane from latest origin/main

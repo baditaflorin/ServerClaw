@@ -309,10 +309,10 @@ domains:
             - refresh_interval_seconds
             - stale_threshold_seconds
 
-  ledger:
+  mutation:
     description: Mutation-ledger fan-out events for downstream consumers.
     topics:
-      - name: platform.ledger.event_written
+      - name: platform.mutation.recorded
         description: One mutation-ledger event row was committed.
         status: active
         delivery: at_least_once

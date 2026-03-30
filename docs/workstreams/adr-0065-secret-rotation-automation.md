@@ -15,7 +15,7 @@
 - define `config/secret-catalog.json` schema and populate with current static secrets
 - create Windmill workflow `rotate-credentials` with low-risk auto-rotation and high-risk approval gate
 - add `tasks/rotate.yml` to each service role that holds a rotatable credential
-- wire rotation events to NATS `credentials.rotated` and GlitchTip on failure
+- wire rotation events to NATS `secret.rotation.completed` and GlitchTip on failure
 - document the rotation model in `docs/runbooks/secret-rotation-and-lifecycle.md`
 
 ## Non-Goals

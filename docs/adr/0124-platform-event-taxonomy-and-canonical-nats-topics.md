@@ -42,7 +42,7 @@ The current active canonical topics are:
 - `platform.backup.restore-verification.completed`
 - `platform.backup.restore-verification.failed`
 - `platform.world_state.refreshed`
-- `platform.ledger.event_written`
+- `platform.mutation.recorded`
 
 Each published event uses the shared envelope:
 
@@ -69,7 +69,7 @@ This ADR is implemented in repository automation by:
 - adding `config/event-taxonomy.yaml` as the canonical topic registry
 - adding `config/nats-streams.yaml` for the canonical JetStream stream definition
 - adding `platform/events/taxonomy.py` to validate payloads and build the shared event envelope
-- moving remaining off-taxonomy publishers to `platform.maintenance.*`, `platform.world_state.refreshed`, and `platform.ledger.event_written`
+- moving remaining off-taxonomy publishers to `platform.maintenance.*`, `platform.world_state.refreshed`, and `platform.mutation.recorded`
 - canonicalizing observation-loop publication onto `platform.findings.observation`
 - validating both code-published topics and event-lane routing with `scripts/validate_nats_topics.py`
 - wiring the new validation into `make validate` and the local pre-push hook
