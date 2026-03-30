@@ -6,12 +6,12 @@
 # ============================================================================
 
 schema_version: 1
-generated: '2026-03-30'
+generated: '2026-03-31'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 266
+  Implemented: 269
   Partial: 6
-  Not Implemented: 51
+  Not Implemented: 48
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4984,7 +4984,7 @@ adr_index:
   - adr: 0287
     title: Woodpecker CI As The API-Driven Continuous Integration Server
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: ci-cd
     keywords:
@@ -4997,6 +4997,7 @@ adr_index:
       - server
     summary: We will deploy Woodpecker CI as the platform's event-driven continuous
     filename: 0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md
+    implemented_version: 0.177.110
   - adr: 0288
     title: Crawl4AI As The LLM-Optimised Web Content Crawler
     status: Accepted
@@ -5028,7 +5029,7 @@ adr_index:
       - service
     summary: We will deploy Flagsmith as the feature flag and remote configuration
     filename: 0288-flagsmith-as-the-feature-flag-and-remote-configuration-service.md
-    implemented_version: 0.177.108
+    implemented_version: 0.177.109
   - adr: 0289
     title: Directus As The REST And GraphQL Data API Layer Over Postgres
     status: Accepted

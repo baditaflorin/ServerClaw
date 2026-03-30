@@ -7180,6 +7180,217 @@
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]
+    },
+    {
+      "id": 171,
+      "type": "text",
+      "title": "woodpecker-availability",
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 238
+      },
+      "options": {
+        "content": "### woodpecker-availability\n\nWoodpecker stays reachable for repo-managed CI bootstrap, API inspection, and manual validation pipeline triggers.\n\nService: `woodpecker`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=woodpecker-availability)",
+        "mode": "markdown"
+      }
+    },
+    {
+      "id": 172,
+      "type": "stat",
+      "title": "30d Compliance",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lv3-prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 241
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "slo:woodpecker_availability:success_ratio_30d",
+          "legendFormat": "30d Compliance"
+        }
+      ]
+    },
+    {
+      "id": 173,
+      "type": "stat",
+      "title": "Budget Remaining",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lv3-prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 241
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.1
+              },
+              {
+                "color": "green",
+                "value": 0.5
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "slo:woodpecker_availability:budget_remaining",
+          "legendFormat": "Budget Remaining"
+        }
+      ]
+    },
+    {
+      "id": 174,
+      "type": "stat",
+      "title": "Burn Rate (1h)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lv3-prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 241
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "slo:woodpecker_availability:burn_rate_1h",
+          "legendFormat": "Burn Rate (1h)"
+        }
+      ]
+    },
+    {
+      "id": 175,
+      "type": "stat",
+      "title": "Budget Exhaustion (days)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lv3-prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 241
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "d"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "slo:woodpecker_availability:time_to_budget_exhaustion_days",
+          "legendFormat": "Budget Exhaustion (days)"
+        }
+      ]
     }
   ],
   "refresh": "1m",
@@ -7196,7 +7407,7 @@
         "name": "slo",
         "label": "SLO",
         "type": "custom",
-        "query": "browser-runner-availability,changedetection-availability,directus-availability,dozzle-availability,excalidraw-availability,gitea-availability,gotenberg-availability,grafana-availability,harbor-availability,homepage-availability,keycloak-availability,keycloak-latency,langfuse-availability,mailpit-availability,matrix-synapse-availability,netbox-availability,nextcloud-availability,nginx-edge-availability,open-webui-availability,openfga-availability,openfga-latency,outline-availability,plane-availability,platform-context-api-availability,plausible-availability,realtime-availability,semaphore-availability,serverclaw-availability,status-page-availability,tika-availability,tesseract-ocr-availability,uptime-kuma-availability,vaultwarden-availability,windmill-availability",
+        "query": "browser-runner-availability,changedetection-availability,directus-availability,dozzle-availability,excalidraw-availability,gitea-availability,gotenberg-availability,grafana-availability,harbor-availability,homepage-availability,keycloak-availability,keycloak-latency,langfuse-availability,mailpit-availability,matrix-synapse-availability,netbox-availability,nextcloud-availability,nginx-edge-availability,open-webui-availability,openfga-availability,openfga-latency,outline-availability,plane-availability,platform-context-api-availability,plausible-availability,realtime-availability,semaphore-availability,serverclaw-availability,status-page-availability,tika-availability,tesseract-ocr-availability,uptime-kuma-availability,vaultwarden-availability,windmill-availability,woodpecker-availability",
         "current": {
           "selected": false,
           "text": "all",

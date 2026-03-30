@@ -197,7 +197,7 @@ ADR 0276 NATS JetStream is now live on production from `main`: `docker-runtime-l
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.110` |
-| Platform version | `0.130.72` |
+| Platform version | `0.130.73` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -391,6 +391,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `vaultwarden` | `2026-03-29-adr-0252-route-and-dns-publication-assertion-ledger-mainline-live-apply` |
 | `vulnerability_budget_gate` | `2026-03-30-adr-0269-vulnerability-budget-gates-mainline-live-apply` |
 | `windmill` | `2026-03-29-adr-0228-windmill-default-operations-surface-mainline-live-apply` |
+| `woodpecker` | `2026-03-30-adr-0287-woodpecker-mainline-live-apply` |
 | `world_state_materializer` | `2026-03-27-adr-0113-world-state-materializer-mainline-live-apply` |
 <!-- END GENERATED: platform-status -->
 
@@ -1445,7 +1446,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.110` |
-| Platform version | `0.130.72` |
+| Platform version | `0.130.73` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |

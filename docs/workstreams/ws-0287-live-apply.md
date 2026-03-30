@@ -2,9 +2,15 @@
 
 - ADR: [ADR 0287](../adr/0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md)
 - Title: deploy Woodpecker CI as the API-driven continuous integration server
-- Status: ready_for_merge
-- Branch: `codex/ws-0287-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0287-live-apply`
+- Status: live_applied
+- Included In Repo Version: 0.177.110
+- Branch-Local Receipt: `receipts/live-applies/2026-03-30-adr-0287-woodpecker-live-apply.json`
+- Canonical Mainline Receipt: `receipts/live-applies/2026-03-30-adr-0287-woodpecker-mainline-live-apply.json`
+- Live Applied In Platform Version: 0.130.73
+- Implemented On: 2026-03-30
+- Live Applied On: 2026-03-30
+- Branch: `codex/ws-0287-mainline-final`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0287-mainline-final`
 - Owner: codex
 - Depends On: `adr-0042`, `adr-0077`, `adr-0107`, `adr-0143`
 - Conflicts With: none
@@ -79,32 +85,59 @@
 
 ## Verification
 
-- `make validate-generated-vars`
-- `make syntax-check-woodpecker`
-- `uv tool run --from ansible-lint ansible-lint playbooks/woodpecker.yml playbooks/services/woodpecker.yml collections/ansible_collections/lv3/platform/roles/woodpecker_postgres collections/ansible_collections/lv3/platform/roles/woodpecker_runtime collections/ansible_collections/lv3/platform/playbooks/woodpecker.yml`
-- `./scripts/validate_repo.sh json health-probes data-models agent-standards`
-- `uv run --with pytest --with pyyaml --with jsonschema python -m pytest tests/test_generate_platform_vars.py tests/test_postgres_vm_access_policy.py tests/test_woodpecker_playbook.py tests/test_woodpecker_runtime_role.py tests/test_woodpecker_client.py tests/test_validate_service_catalog.py tests/test_validate_service_completeness.py tests/test_subdomain_catalog.py tests/test_service_redundancy.py tests/test_workstream_surface_ownership.py tests/test_ansible_execution_scopes.py tests/test_ansible_role_idempotency.py tests/test_data_catalog.py tests/test_subdomain_exposure_audit.py -q`
-- `HETZNER_DNS_API_TOKEN=... make converge-woodpecker env=production` completed successfully on replay `r14`, converging the Proxmox proxy lane, PostgreSQL access, Woodpecker runtime, `ci.lv3.org` edge publication, a dedicated `ci.lv3.org` Let's Encrypt certificate, and the controller-local bootstrap artifacts plus seed repository secret.
-- `curl -fsS http://100.64.0.1:8017/healthz`
-- `curl -fsSI https://ci.lv3.org/healthz`
-- `openssl s_client -connect ci.lv3.org:443 -servername ci.lv3.org </dev/null 2>/dev/null | openssl x509 -noout -subject -issuer -ext subjectAltName`
-- `make woodpecker-manage ACTION=whoami`
-- `make woodpecker-manage ACTION=list-secrets WOODPECKER_ARGS='--repo ops/proxmox_florin_server'`
+- The branch-local converge from the latest realistic `origin/main`
+  baseline is recorded in
+  `receipts/live-applies/2026-03-30-adr-0287-woodpecker-live-apply.json`.
+- The first exact-main integration replay on the `0.177.110 / 0.130.72`
+  candidate succeeded and is preserved in the `r1` evidence bundle under
+  `receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r1-*`.
+- When `origin/main` advanced during the exact-main rebase, the replay lost
+  Woodpecker's controller-local secret manifest and several catalog entries.
+  The correction loop is preserved in the `r2` through `r5` evidence files:
+  the first focused pytest slice and `live-apply-service` preflight failed on
+  the same missing catalog surfaces, the recovery restored the missing
+  Woodpecker catalog and controller-local secret entries, refreshed
+  `config/uptime-kuma/monitors.json`, added the already-merged Directus roles
+  to `config/ansible-role-idempotency.yml`, and then re-ran the exact-main
+  validation lane cleanly.
+- The repaired exact-main candidate commit
+  `cbc004fd0ae22cb6ed692430438ad5f31c24458b` now has a passing focused
+  Woodpecker regression slice in
+  `receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r5-targeted-checks-0.177.110.txt`
+  with `123 passed in 9.24s`, and
+  `make syntax-check-woodpecker` passed again in
+  `receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r4-syntax-check-0.177.110.txt`.
+- The final exact-main repository automation sweep also passed in the `r6`
+  evidence bundle: live-apply receipt validation, repository data-model
+  validation, `git diff --check`, `./scripts/validate_repo.sh
+  agent-standards workstream-surfaces health-probes generated-docs
+  data-models`, `make remote-validate`, and the full `make pre-push-gate`
+  lane all completed successfully after refreshing the generated canonical
+  truth and subdomain exposure registry.
+- The repaired exact-main replay
+  `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=woodpecker env=production EXTRA_ARGS='-e bypass_promotion=true'`
+  succeeded in
+  `receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r3-live-apply-service-0.177.110.txt`
+  with final recap `docker-runtime-lv3 : ok=157 changed=4 failed=0`,
+  `nginx-lv3 : ok=47 changed=6 failed=0`, `postgres-lv3 : ok=51 changed=0 failed=0`,
+  `proxmox_florin : ok=277 changed=1 failed=0`, and `localhost : ok=4 changed=0 failed=0`.
+- Public and controller-local verification passed after the repaired exact-main
+  replay: `https://ci.lv3.org/healthz` returned `HTTP/2 200` with
+  `x-woodpecker-version: 3.13.0`, `http://100.64.0.1:8017/healthz` returned
+  `HTTP/1.1 200 OK`, the TLS certificate remained `CN=ci.lv3.org` from Let's
+  Encrypt `CN=E7`, `make woodpecker-manage ACTION=whoami` resolved to
+  `ops-gitea`, and `make woodpecker-manage ACTION=list-secrets
+  WOODPECKER_ARGS='--repo ops/proxmox_florin_server'` still exposed
+  `LV3_WOODPECKER_SECRET_SMOKE`.
 
-## Live Apply State
+## Mainline Closeout
 
-- Latest realistic upstream is `origin/main` commit `456984e2ebfed2f7d154c16dc1f49be79731520e`, which currently carries `VERSION` `0.177.109` and platform baseline `0.130.72`.
-- The successful branch-local replay is recorded in `receipts/live-applies/evidence/2026-03-30-ws-0287-live-apply-r14.txt`.
-- The public edge role now falls back to a dedicated site-local certificate for `ci.lv3.org` when the shared `lv3-edge` certificate does not yet cover the Woodpecker hostname, so unrelated SAN churn on the shared edge certificate no longer blocks the live apply.
-- The controller-local Woodpecker API bundle is verified live: `whoami` resolves to `ops-gitea` admin user `id=1`, and the seeded repository secret list contains `LV3_WOODPECKER_SECRET_SMOKE`.
-- Manual `trigger-pipeline --branch main --wait` is not yet a valid exact-main verification on this branch because `origin/main` still does not contain `.woodpecker.yml`; Woodpecker accepts the trigger request with `204 No Content`, but no pipeline becomes visible until the forge branch being triggered actually carries the workflow file.
-- `workstreams.yaml` stays non-terminal on this branch so branch-level ownership validation remains active until the final `main` closeout flips the workstream back to its terminal state.
-- Rebasing onto `456984e2ebfed2f7d154c16dc1f49be79731520e` required regenerating `config/subdomain-exposure-registry.json`; the rebased branch-side `workstream-surfaces` and `data-models` checks now pass again on top of that latest mainline snapshot.
-
-## Remaining For Merge-To-Main
-
-- Do not update `VERSION`, release sections in `changelog.md`, the top-level integrated `README.md` summary, or `versions/stack.yaml` on this branch.
-- The protected integration files still must wait for the final exact-main replay from the latest `origin/main`.
-- This branch is already rebased onto `origin/main` commit `456984e2ebfed2f7d154c16dc1f49be79731520e`; pull again before the final `main` push in case newer mainline work lands.
-- Update `VERSION`, the release notes in `changelog.md`, the top-level `README.md` integrated truth, and `versions/stack.yaml` only on the final mainline integration step.
-- After the mainline commit is pushed and the forge branch being tested contains `.woodpecker.yml`, rerun `make woodpecker-manage ACTION=trigger-pipeline WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main --wait'` and record the exact-main verification receipt.
+- The branch-local receipt remains the first-live audit trail for ADR 0287 on
+  platform version `0.130.72`.
+- The canonical mainline receipt
+  `receipts/live-applies/2026-03-30-adr-0287-woodpecker-mainline-live-apply.json`
+  carries the repaired exact-main replay onto repo version `0.177.110` and
+  platform version `0.130.73`.
+- The final post-push `main` pipeline trigger proof is attached to the
+  canonical mainline receipt so the workstream branch remains a stable audit
+  trail while the integrated `main` closeout records the forge-visible proof.

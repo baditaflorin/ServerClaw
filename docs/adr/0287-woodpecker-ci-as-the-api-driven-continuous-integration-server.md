@@ -1,9 +1,10 @@
 # ADR 0287: Woodpecker CI As The API-Driven Continuous Integration Server
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.110
+- Implemented In Platform Version: 0.130.73
+- Implemented On: 2026-03-30
 - Date: 2026-03-29
 
 ## Context

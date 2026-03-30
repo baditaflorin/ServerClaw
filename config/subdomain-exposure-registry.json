@@ -3041,12 +3041,12 @@
     }
   ],
   "summary": {
-    "catalog_total": 41,
-    "active_total": 37,
-    "active_public_total": 33,
+    "catalog_total": 42,
+    "active_total": 38,
+    "active_public_total": 34,
     "active_private_total": 4,
     "planned_total": 4,
-    "shared_edge_total": 32,
+    "shared_edge_total": 33,
     "platform_sso_total": 15
   }
 }
