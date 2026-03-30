@@ -16822,6 +16822,8 @@ workstreams:
       - config/ansible-execution-scopes.yaml
       - config/ansible-role-idempotency.yml
       - config/uptime-kuma/monitors.json
+      - config/prometheus/file_sd/https_tls_targets.yml
+      - config/prometheus/rules/https_tls_alerts.yml
       - playbooks/flagsmith.yml
       - playbooks/services/flagsmith.yml
       - collections/ansible_collections/lv3/platform/playbooks/flagsmith.yml
@@ -16986,6 +16988,9 @@ workstreams:
       - docs/release-notes/*.md
       - versions/stack.yaml
       - build/platform-manifest.json
+      - docs/site-generated/architecture/dependency-graph.md
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/diagrams/service-dependency-graph.excalidraw
       - receipts/image-scans/2026-03-30-flagsmith-runtime.json
       - receipts/image-scans/2026-03-30-flagsmith-runtime.trivy.json
       - receipts/live-applies/2026-03-30-adr-0288-flagsmith-live-apply.json
@@ -17031,6 +17036,8 @@ workstreams:
             - config/ansible-execution-scopes.yaml
             - config/ansible-role-idempotency.yml
             - config/uptime-kuma/monitors.json
+            - config/prometheus/file_sd/https_tls_targets.yml
+            - config/prometheus/rules/https_tls_alerts.yml
             - playbooks/flagsmith.yml
             - playbooks/services/flagsmith.yml
             - collections/ansible_collections/lv3/platform/playbooks/flagsmith.yml
@@ -17071,6 +17078,13 @@ workstreams:
             - build/platform-manifest.json
           mode: shared_contract
           contract: canonical-truth-v1
+        - id: latest_main_integration_generated_surfaces
+          paths:
+            - docs/site-generated/architecture/dependency-graph.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/diagrams/service-dependency-graph.excalidraw
+          mode: shared_contract
+          contract: latest-main-integration-v1
         - id: adr_0288_main_merge
           paths:
             - docs/workstreams/ws-0288-main-merge.md

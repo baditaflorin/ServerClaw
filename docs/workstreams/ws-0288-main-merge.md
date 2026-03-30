@@ -50,6 +50,8 @@ repository and platform version advances.
 - `config/ansible-execution-scopes.yaml`
 - `config/ansible-role-idempotency.yml`
 - `config/uptime-kuma/monitors.json`
+- `config/prometheus/file_sd/https_tls_targets.yml`
+- `config/prometheus/rules/https_tls_alerts.yml`
 - `playbooks/flagsmith.yml`
 - `playbooks/services/flagsmith.yml`
 - `collections/ansible_collections/lv3/platform/playbooks/flagsmith.yml`
@@ -72,6 +74,9 @@ repository and platform version advances.
 - `docs/release-notes/*.md`
 - `versions/stack.yaml`
 - `build/platform-manifest.json`
+- `docs/site-generated/architecture/dependency-graph.md`
+- `docs/diagrams/agent-coordination-map.excalidraw`
+- `docs/diagrams/service-dependency-graph.excalidraw`
 - `receipts/image-scans/2026-03-30-flagsmith-runtime.json`
 - `receipts/image-scans/2026-03-30-flagsmith-runtime.trivy.json`
 - `receipts/live-applies/2026-03-30-adr-0288-flagsmith-live-apply.json`
@@ -94,8 +99,37 @@ repository and platform version advances.
 - The release write then prepared `0.177.109` while preserving the pre-replay
   platform baseline at `0.130.71`, recorded in
   `receipts/live-applies/evidence/2026-03-30-ws-0288-mainline-r1-release-write.txt`.
-- The synchronized branch will next rerun the governed live replay, public
-  verification, and repository automation bundle from committed source before
+- The authoritative exact-main replay from committed source
+  `0b32e585bbf2f0445f9eddd153923f93c221dba2` passed via
+  `ALLOW_IN_PLACE_MUTATION=true HETZNER_DNS_API_TOKEN=... make live-apply-service service=flagsmith env=production`,
+  recorded in
+  `receipts/live-applies/evidence/2026-03-30-ws-0288-mainline-r2-live-apply-service-0.177.109.txt`,
+  with final recaps
+  `docker-runtime-lv3 : ok=171 changed=3 unreachable=0 failed=0 skipped=36 rescued=0 ignored=0`,
+  `localhost : ok=23 changed=0 unreachable=0 failed=0 skipped=3 rescued=0 ignored=0`,
+  `nginx-lv3 : ok=40 changed=5 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0`,
+  and `postgres-lv3 : ok=51 changed=0 unreachable=0 failed=0 skipped=21 rescued=0 ignored=0`;
+  the public health probe retried once before settling.
+- Public and guest-local runtime proofs were captured in
+  `receipts/live-applies/evidence/2026-03-30-ws-0288-mainline-r2-public-health-0.177.109.html`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0288-mainline-r2-public-ui-headers-0.177.109.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0288-mainline-r2-public-api-headers-0.177.109.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0288-mainline-r2-host-state-0.177.109.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0288-mainline-r2-guest-health-0.177.109.html`,
+  and
+  `receipts/live-applies/evidence/2026-03-30-ws-0288-mainline-r2-guest-runtime-state-0.177.109.txt`.
+- `git diff --check`, `scripts/live_apply_receipts.py --validate`,
+  `scripts/validate_repository_data_models.py --validate`, and
+  `./scripts/validate_repo.sh agent-standards workstream-surfaces health-probes`
+  passed on the exact-main branch and were recorded under the
+  `2026-03-30-ws-0288-mainline-r3-*` evidence set.
+- `make remote-validate` on the shared exact-main worktree correctly exposed
+  the remaining merge-candidate gaps: the generated
+  `config/prometheus/file_sd/https_tls_targets.yml` and
+  `docs/site-generated/architecture/dependency-graph.md` artifacts still need a
+  clean refresh, and the remote snapshot also inherited an unrelated dirty
+  `receipts/ops-portal-snapshot.html` from the shared worktree. The final gate
+  reruns therefore move to a clean exact-main candidate worktree before
   `main` is updated.
 - The final canonical receipt will be
   `receipts/live-applies/2026-03-30-adr-0288-flagsmith-mainline-live-apply.json`.
