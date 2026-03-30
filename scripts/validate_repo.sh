@@ -554,6 +554,7 @@ validate_health_probes() {
     docker_runtime
     dozzle_runtime
     excalidraw_runtime
+    jupyterhub_runtime
     postgres_vm
     monitoring_vm
     backup_vm

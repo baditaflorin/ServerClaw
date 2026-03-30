@@ -202,6 +202,17 @@
       "healthcheck_path": "/_health"
     },
     {
+      "id": "jupyterhub",
+      "name": "JupyterHub",
+      "upstream": "http://10.10.10.20:8097",
+      "gateway_prefix": "/v1/jupyterhub",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 60,
+      "healthcheck_path": "/hub/health"
+    },
+    {
       "id": "plane",
       "name": "Plane",
       "upstream": "http://10.10.10.20:8093",

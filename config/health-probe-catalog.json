@@ -2110,6 +2110,76 @@
         }
       }
     },
+    "jupyterhub": {
+      "service_name": "jupyterhub",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "jupyterhub_runtime",
+      "verify_file": "roles/jupyterhub_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "JupyterHub startup completes once the local hub health endpoint returns 200 on the runtime listener.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8097/hub/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The local JupyterHub health endpoint responds on docker-runtime-lv3.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8097/hub/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The public JupyterHub health endpoint renders through the shared edge after OIDC and runtime startup settle.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "https://notebooks.lv3.org/hub/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "docker_publication": {
+          "container_name": "jupyterhub",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 8097
+            }
+          ],
+          "required_networks": [
+            "jupyterhub_default"
+          ]
+        }
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "JupyterHub Public Health",
+          "type": "http",
+          "url": "https://notebooks.lv3.org/hub/health",
+          "description": "Public JupyterHub health endpoint published through the shared NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
     "platform_context_api": {
       "service_name": "platform-context-api",
       "owning_vm": "docker-runtime-lv3",

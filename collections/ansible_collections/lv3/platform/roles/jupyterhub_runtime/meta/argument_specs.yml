@@ -1,0 +1,61 @@
+---
+# Purpose: Describe the required runtime variables for the JupyterHub stack.
+
+argument_specs:
+  main:
+    short_description: Converge the JupyterHub runtime, local image builds, and browser-authenticated publication contract.
+    options:
+      jupyterhub_site_dir:
+        type: path
+        required: true
+      jupyterhub_hub_build_dir:
+        type: path
+        required: true
+      jupyterhub_singleuser_build_dir:
+        type: path
+        required: true
+      jupyterhub_data_dir:
+        type: path
+        required: true
+      jupyterhub_secret_dir:
+        type: path
+        required: true
+      jupyterhub_compose_file:
+        type: path
+        required: true
+      jupyterhub_config_file:
+        type: path
+        required: true
+      jupyterhub_env_file:
+        type: path
+        required: true
+      jupyterhub_internal_port:
+        type: int
+        required: true
+      jupyterhub_public_base_url:
+        type: str
+        required: true
+      jupyterhub_keycloak_client_secret_local_file:
+        type: path
+        required: true
+      jupyterhub_service_api_token_local_file:
+        type: path
+        required: true
+      jupyterhub_minio_root_password_local_file:
+        type: path
+        required: true
+      jupyterhub_hub_image_name:
+        type: str
+        required: true
+      jupyterhub_singleuser_image_name:
+        type: str
+        required: true
+      jupyterhub_hub_base_image:
+        type: str
+        required: true
+      jupyterhub_singleuser_base_image:
+        type: str
+        required: true
+      jupyterhub_minio_image:
+        type: str
+        required: true

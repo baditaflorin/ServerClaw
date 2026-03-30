@@ -67,6 +67,7 @@ platform_port_assignments:
   browser_runner_port: 8096
   outline_port: 3006
   directus_port: 8055
+  jupyterhub_port: 8097
   plane_port: 8093
   plane_host_proxy_port: 8011
   woodpecker_http_port: 8102

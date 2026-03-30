@@ -243,6 +243,12 @@ playbooks:
     shared_surfaces:
       - service:outline
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/jupyterhub.yml:
+    playbook_id: jupyterhub
+    mutation_scope: platform
+    shared_surfaces:
+      - service:jupyterhub
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/openbao.yml:
     playbook_id: openbao
     mutation_scope: platform
@@ -415,6 +421,12 @@ playbooks:
     mutation_scope: platform
     shared_surfaces:
       - service:mailpit
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/jupyterhub.yml:
+    playbook_id: jupyterhub
+    mutation_scope: platform
+    shared_surfaces:
+      - service:jupyterhub
       - inventory/host_vars/proxmox_florin.yml
   playbooks/services/guest-log-shipping.yml:
     playbook_id: guest-log-shipping

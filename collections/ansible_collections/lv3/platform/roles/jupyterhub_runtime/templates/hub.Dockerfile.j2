@@ -1,0 +1,8 @@
+FROM {{ jupyterhub_hub_base_image }}
+
+WORKDIR /srv/jupyterhub
+
+COPY requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+EXPOSE 8000

@@ -33,6 +33,8 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_compose_network_name"] == "{{ keycloak_compose_project_name }}_default"
     assert defaults["keycloak_langfuse_client_id"] == "langfuse"
     assert defaults["keycloak_langfuse_client_secret_local_file"].endswith("/.local/keycloak/langfuse-client-secret.txt")
+    assert defaults["keycloak_jupyterhub_client_id"] == "jupyterhub"
+    assert defaults["keycloak_jupyterhub_client_secret_local_file"].endswith("/.local/keycloak/jupyterhub-client-secret.txt")
     assert defaults["keycloak_serverclaw_runtime_client_id"] == "serverclaw-runtime"
     assert defaults["keycloak_serverclaw_runtime_client_secret_local_file"].endswith(
         "/.local/keycloak/serverclaw-runtime-client-secret.txt"
@@ -51,6 +53,11 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_outline_post_logout_redirect_uris"] == [
         "{{ keycloak_outline_root_url }}",
         "{{ keycloak_outline_root_url }}/",
+        "{{ keycloak_session_authority.shared_proxy_cleanup_url }}",
+    ]
+    assert defaults["keycloak_jupyterhub_post_logout_redirect_uris"] == [
+        "{{ keycloak_jupyterhub_root_url }}",
+        "{{ keycloak_jupyterhub_root_url }}/",
         "{{ keycloak_session_authority.shared_proxy_cleanup_url }}",
     ]
     assert smtp_server["auth"] == "{{ keycloak_mail_platform_submission_auth_enabled }}"
@@ -409,6 +416,30 @@ def test_role_manages_outline_client_secret() -> None:
     )
     assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_outline_client_id }}"
     assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_outline_client_secret_local_file }}"
+
+
+def test_role_manages_jupyterhub_client_secret() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    tasks = load_tasks()
+    realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
+    jupyterhub_client_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Ensure the JupyterHub OAuth client exists"
+    )
+    read_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the JupyterHub client secret")
+    mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the JupyterHub client secret to the control machine")
+
+    assert defaults["keycloak_jupyterhub_client_id"] == "jupyterhub"
+    assert defaults["keycloak_jupyterhub_client_secret_local_file"].endswith("/.local/keycloak/jupyterhub-client-secret.txt")
+    assert defaults["keycloak_jupyterhub_root_url"] == "https://notebooks.lv3.org"
+    assert jupyterhub_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_jupyterhub_client_id }}"
+    assert jupyterhub_client_task["community.general.keycloak_client"]["redirect_uris"] == [
+        "{{ keycloak_jupyterhub_root_url }}/hub/oauth_callback"
+    ]
+    assert jupyterhub_client_task["community.general.keycloak_client"]["valid_post_logout_redirect_uris"] == (
+        "{{ keycloak_jupyterhub_post_logout_redirect_uris }}"
+    )
+    assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_jupyterhub_client_id }}"
+    assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_jupyterhub_client_secret_local_file }}"
 
 
 def test_role_manages_serverclaw_client_secret() -> None:

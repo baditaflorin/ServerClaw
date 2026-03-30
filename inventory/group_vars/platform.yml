@@ -191,6 +191,7 @@ platform_ports:
   browser_runner_port: 8096
   outline_port: 3006
   directus_port: 8055
+  jupyterhub_port: 8097
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
   excalidraw_port: 3095
@@ -271,6 +272,7 @@ platform_port_assignments:
   browser_runner_port: 8096
   outline_port: 3006
   directus_port: 8055
+  jupyterhub_port: 8097
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
   excalidraw_port: 3095
@@ -1766,6 +1768,37 @@ platform_service_topology:
     urls:
       public: https://wiki.lv3.org
       internal: http://10.10.10.20:3006
+  jupyterhub:
+    service_name: jupyterhub
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: notebooks.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: notebooks
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      client_max_body_size: 2g
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      upstream: http://10.10.10.20:8097
+    service_id: jupyterhub
+    ports:
+      internal: 8097
+    urls:
+      public: https://notebooks.lv3.org
+      internal: http://10.10.10.20:8097
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3
@@ -2486,6 +2519,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: wiki
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: notebooks
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -3369,6 +3406,37 @@ public_edge_service_topology:
     urls:
       public: https://wiki.lv3.org
       internal: http://10.10.10.20:3006
+  jupyterhub:
+    service_name: jupyterhub
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: notebooks.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: notebooks
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      client_max_body_size: 2g
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      upstream: http://10.10.10.20:8097
+    service_id: jupyterhub
+    ports:
+      internal: 8097
+    urls:
+      public: https://notebooks.lv3.org
+      internal: http://10.10.10.20:8097
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3
@@ -4144,6 +4212,7 @@ changedetection_port: 5000
 browser_runner_port: 8096
 outline_port: 3006
 directus_port: 8055
+jupyterhub_port: 8097
 dozzle_http_port: 8089
 dozzle_agent_port: 7007
 excalidraw_port: 3095

@@ -424,6 +424,18 @@
       "keycloak_client_generated": true,
       "suppressed_checks": {}
     },
+    "jupyterhub": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "keycloak_client_generated": true,
+      "suppressed_checks": {
+        "grafana_dashboard": "2026-09-30",
+        "alert_rules": "2026-09-30"
+      }
+    },
     "plane": {
       "service_type": "compose",
       "requires_subdomain": true,

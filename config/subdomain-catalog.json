@@ -448,6 +448,23 @@
       }
     },
     {
+      "fqdn": "notebooks.lv3.org",
+      "service_id": "jupyterhub",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0291",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge while JupyterHub itself delegates browser authentication to the repo-managed Keycloak OIDC client."
+    },
+    {
       "fqdn": "logs.lv3.org",
       "service_id": "dozzle",
       "environment": "production",

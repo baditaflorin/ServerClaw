@@ -562,6 +562,34 @@
       "notes": "Outline stores workspace, user, collection, and document metadata that may include operator identities and operational text."
     },
     {
+      "id": "jupyterhub-user-notebook-volumes",
+      "service": "jupyterhub",
+      "name": "JupyterHub per-user notebook volumes",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "Docker named volumes jupyterhub-user-* on docker-runtime-lv3 under /var/lib/docker/volumes"
+      ],
+      "notes": "Per-user notebook workspaces can contain exploratory code, exported data, ad hoc credentials, and copied operational artifacts that must be treated as confidential operator material."
+    },
+    {
+      "id": "jupyterhub-shared-notebook-bucket",
+      "service": "jupyterhub",
+      "name": "JupyterHub shared notebook bucket",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "/opt/jupyterhub/data/minio/jupyterhub-shared"
+      ],
+      "notes": "The service-local MinIO bucket stores shared notebook assets and collaborative exploratory artifacts exchanged between operators."
+    },
+    {
       "id": "plane-object-storage",
       "service": "plane",
       "name": "Plane attachment object storage",

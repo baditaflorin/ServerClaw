@@ -128,6 +128,14 @@ public_edge_security_headers_overrides:
       'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
       connect-src 'self' https://grafana.lv3.org wss://grafana.lv3.org;
       worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+  notebooks.lv3.org:
+    content_security_policy: >-
+      default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:;
+      style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:;
+      font-src 'self' data:; connect-src 'self' https://notebooks.lv3.org
+      wss://notebooks.lv3.org https://sso.lv3.org; worker-src 'self' blob:;
+      child-src 'self' blob:; manifest-src 'self'
   n8n.lv3.org:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';

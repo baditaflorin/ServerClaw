@@ -1521,6 +1521,42 @@
       }
     },
     {
+      "id": "jupyterhub",
+      "name": "JupyterHub",
+      "description": "Shared interactive notebook environment for exploratory platform analysis, prototype workflows, and governed operator experimentation.",
+      "category": "access",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8097",
+      "public_url": "https://notebooks.lv3.org",
+      "subdomain": "notebooks.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "JupyterHub Public Health",
+      "health_probe_id": "jupyterhub",
+      "secret_catalog_ids": [
+        "jupyterhub_service_api_token",
+        "jupyterhub_minio_root_password",
+        "keycloak_jupyterhub_client_secret"
+      ],
+      "adr": "0291",
+      "runbook": "docs/runbooks/configure-jupyterhub.md",
+      "tags": [
+        "jupyter",
+        "notebooks",
+        "exploration",
+        "oidc"
+      ],
+      "notes": "The current repo-managed notebook contract exposes Ollama, the private platform-context API, and the service-local jupyterhub-shared MinIO bucket inside spawned single-user servers; shared global MinIO, raw Qdrant, and LiteLLM remain future work.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://notebooks.lv3.org",
+          "subdomain": "notebooks.lv3.org"
+        }
+      }
+    },
+    {
       "id": "plane",
       "name": "Plane",
       "description": "Repo-managed Plane workspace for platform kanban tracking and ADR synchronization.",

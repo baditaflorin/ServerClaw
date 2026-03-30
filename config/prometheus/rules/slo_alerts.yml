@@ -873,6 +873,46 @@ groups:
           description: Outline remains reachable through the public LV3 edge for living
             knowledge browsing and sync automation.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_jupyterhub_availability
+        expr: (slo:jupyterhub_availability:error_rate_5m > (14 * 0.005000)) and (slo:jupyterhub_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: jupyterhub
+          slo_id: jupyterhub-availability
+          indicator: availability
+        annotations:
+          summary: jupyterhub-availability is burning its error budget at 14x
+          description: JupyterHub remains reachable through the public LV3 edge for
+            interactive exploratory notebook sessions.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_jupyterhub_availability
+        expr: slo:jupyterhub_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: jupyterhub
+          slo_id: jupyterhub-availability
+          indicator: availability
+        annotations:
+          summary: jupyterhub-availability is burning its error budget at 3x
+          description: JupyterHub remains reachable through the public LV3 edge for
+            interactive exploratory notebook sessions.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_jupyterhub_availability
+        expr: slo:jupyterhub_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: jupyterhub
+          slo_id: jupyterhub-availability
+          indicator: availability
+        annotations:
+          summary: jupyterhub-availability has less than 10% error budget remaining
+          description: JupyterHub remains reachable through the public LV3 edge for
+            interactive exploratory notebook sessions.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_plane_availability
         expr: (slo:plane_availability:error_rate_5m > (14 * 0.010000)) and (slo:plane_availability:error_rate_1h
           > (14 * 0.010000))
