@@ -10,6 +10,7 @@ ROLE_VERIFY = REPO_ROOT / "roles" / "tesseract_ocr_runtime" / "tasks" / "verify.
 ROLE_DEFAULTS = REPO_ROOT / "roles" / "tesseract_ocr_runtime" / "defaults" / "main.yml"
 COMPOSE_TEMPLATE = REPO_ROOT / "roles" / "tesseract_ocr_runtime" / "templates" / "docker-compose.yml.j2"
 DOCKERFILE_TEMPLATE = REPO_ROOT / "roles" / "tesseract_ocr_runtime" / "templates" / "Dockerfile.j2"
+ROLE_FILES = REPO_ROOT / "roles" / "tesseract_ocr_runtime" / "files"
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "tesseract-ocr.yml"
 COLLECTION_PLAYBOOK_PATH = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "tesseract-ocr.yml"
 SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "tesseract-ocr.yml"
@@ -35,6 +36,7 @@ def test_defaults_define_repo_built_tesseract_ocr_contract() -> None:
     assert defaults["tesseract_ocr_runtime_port"] == "{{ tesseract_ocr_runtime_service_topology.ports.internal }}"
     assert defaults["tesseract_ocr_runtime_local_base_url"] == "http://127.0.0.1:{{ tesseract_ocr_runtime_port }}"
     assert defaults["tesseract_ocr_runtime_default_language"] == "eng"
+    assert defaults["tesseract_ocr_runtime_verify_filename"] == "ocr-ok.png"
 
 
 def test_main_tasks_render_build_start_and_verify_tesseract_ocr() -> None:
@@ -61,8 +63,22 @@ def test_verify_tasks_cover_health_and_deterministic_ocr_probe() -> None:
     probe_task = next(
         task for task in tasks if task["name"] == "Verify Tesseract OCR extracts text from the deterministic image fixture"
     )
+    stage_task = next(task for task in tasks if task["name"] == "Stage the deterministic Tesseract OCR verification image")
+    cleanup_task = next(task for task in tasks if task["name"] == "Remove the staged Tesseract OCR verification image")
+    assert stage_task["ansible.builtin.copy"]["src"] == "ocr-ok.png"
+    assert stage_task["ansible.builtin.copy"]["dest"] == "{{ tesseract_ocr_runtime_verify_image_tempfile.path }}"
+    assert cleanup_task["ansible.builtin.file"]["path"] == "{{ tesseract_ocr_runtime_verify_image_tempfile.path }}"
     assert "{{ tesseract_ocr_runtime_local_base_url }}/ocr" in probe_task["ansible.builtin.shell"]
     assert 'payload.get("extraction_method") == "tesseract"' in probe_task["ansible.builtin.shell"]
+
+
+def test_verify_fixture_is_a_valid_png_file() -> None:
+    fixture = ROLE_FILES / "ocr-ok.png"
+
+    data = fixture.read_bytes()
+
+    assert data[:8] == b"\x89PNG\r\n\x1a\n"
+    assert len(data) > 1024
 
 
 def test_templates_define_repo_built_runtime_and_language_env() -> None:

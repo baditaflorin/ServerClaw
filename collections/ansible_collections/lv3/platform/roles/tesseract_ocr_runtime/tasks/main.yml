@@ -27,11 +27,10 @@
       - tesseract_ocr_runtime_max_pages | int > 0
       - tesseract_ocr_runtime_render_dpi | int > 0
       - tesseract_ocr_runtime_verify_filename | length > 0
-      - tesseract_ocr_runtime_verify_image_base64 | length > 0
       - tesseract_ocr_runtime_service_sources | length > 0
     fail_msg: >-
       tesseract_ocr_runtime requires service topology, local build inputs,
-      runtime URLs, and a deterministic OCR fixture for verification.
+      runtime URLs, and a deterministic OCR fixture file for verification.
 
 - name: Ensure Tesseract OCR runtime packages are present
   ansible.builtin.apt:

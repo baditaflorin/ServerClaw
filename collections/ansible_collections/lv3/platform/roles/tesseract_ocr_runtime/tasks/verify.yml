@@ -1,6 +1,6 @@
 ---
 # Purpose: Verify the local Tesseract OCR health endpoint and OCR extraction route with a deterministic image fixture.
-# Inputs: Running Tesseract OCR container plus the configured local runtime URL and base64-encoded verification image.
+# Inputs: Running Tesseract OCR container plus the configured local runtime URL and the repo-managed verification image.
 # Outputs: Read-only health and OCR probe results for the private OCR runtime.
 # Idempotency: Fully idempotent; these are read-only verification steps that only use temporary files.
 # Dependencies: ADR 0286 and ADR 0165; requires the Tesseract OCR compose stack to be running.
@@ -17,18 +17,28 @@
   until: tesseract_ocr_runtime_verify_health.status == 200
   changed_when: false
 
+- name: Create a temporary Tesseract OCR verification image path
+  ansible.builtin.tempfile:
+    state: file
+    suffix: -ocr-ok.png
+  register: tesseract_ocr_runtime_verify_image_tempfile
+  changed_when: false
+
+- name: Stage the deterministic Tesseract OCR verification image
+  ansible.builtin.copy:
+    src: ocr-ok.png
+    dest: "{{ tesseract_ocr_runtime_verify_image_tempfile.path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  changed_when: false
+
 - name: Verify Tesseract OCR extracts text from the deterministic image fixture
   ansible.builtin.shell: |
     set -euo pipefail
-    image_file="$(mktemp --suffix=.png)"
     response_file="$(mktemp)"
-    trap 'rm -f "$image_file" "$response_file"' EXIT
-    base64 --decode >"$image_file" <<'EOF'
-    {{ tesseract_ocr_runtime_verify_image_base64 }}
-    EOF
-    curl -fsS -o "$response_file" \
-      -F "file=@${image_file};filename={{ tesseract_ocr_runtime_verify_filename }};type=image/png" \
-      "{{ tesseract_ocr_runtime_local_base_url }}/ocr"
+    trap 'rm -f "$response_file"' EXIT
+    curl -fsS -o "$response_file"       -F "file=@{{ tesseract_ocr_runtime_verify_image_tempfile.path }};filename={{ tesseract_ocr_runtime_verify_filename }};type=image/png"       "{{ tesseract_ocr_runtime_local_base_url }}/ocr"
     python3 - "$response_file" <<'PY'
     import json
     import sys
@@ -46,4 +56,10 @@
   args:
     executable: /bin/bash
   register: tesseract_ocr_runtime_verify_extract
+  changed_when: false
+
+- name: Remove the staged Tesseract OCR verification image
+  ansible.builtin.file:
+    path: "{{ tesseract_ocr_runtime_verify_image_tempfile.path }}"
+    state: absent
   changed_when: false

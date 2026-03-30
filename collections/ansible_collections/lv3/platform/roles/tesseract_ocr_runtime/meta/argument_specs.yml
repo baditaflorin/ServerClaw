@@ -70,9 +70,6 @@ argument_specs:
       tesseract_ocr_runtime_verify_filename:
         type: str
         required: true
-      tesseract_ocr_runtime_verify_image_base64:
-        type: str
-        required: true
       tesseract_ocr_runtime_service_sources:
         type: list
         elements: dict
