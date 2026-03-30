@@ -267,7 +267,8 @@
     if docker image inspect "{{ jupyterhub_hub_base_image }}" >/dev/null 2>&1; then
       exit 0
     fi
-    docker pull "{{ jupyterhub_hub_base_image }}" || true
+    timeout "{{ jupyterhub_base_image_pull_timeout_seconds }}" \
+      docker pull "{{ jupyterhub_hub_base_image }}" || true
     docker image inspect "{{ jupyterhub_hub_base_image }}" >/dev/null 2>&1
   args:
     chdir: "{{ jupyterhub_site_dir }}"
@@ -287,7 +288,8 @@
     if docker image inspect "{{ jupyterhub_singleuser_base_image }}" >/dev/null 2>&1; then
       exit 0
     fi
-    docker pull "{{ jupyterhub_singleuser_base_image }}" || true
+    timeout "{{ jupyterhub_base_image_pull_timeout_seconds }}" \
+      docker pull "{{ jupyterhub_singleuser_base_image }}" || true
     docker image inspect "{{ jupyterhub_singleuser_base_image }}" >/dev/null 2>&1
   args:
     chdir: "{{ jupyterhub_site_dir }}"

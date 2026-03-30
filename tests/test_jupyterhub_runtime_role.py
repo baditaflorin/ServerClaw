@@ -33,6 +33,7 @@ def test_defaults_define_public_oidc_and_smoke_spawn_contract() -> None:
     assert defaults["jupyterhub_public_hostname_overrides"][1]["hostname"] == "{{ hostvars['proxmox_florin'].lv3_service_topology.keycloak.public_hostname }}"
     assert defaults["jupyterhub_hub_image_name"] == "lv3/jupyterhub-hub"
     assert defaults["jupyterhub_singleuser_image_name"] == "lv3/jupyterhub-singleuser"
+    assert defaults["jupyterhub_base_image_pull_timeout_seconds"] == 180
     assert defaults["jupyterhub_internal_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.jupyterhub_port }}"
     assert defaults["jupyterhub_keycloak_client_id"] == "jupyterhub"
     assert defaults["jupyterhub_verify_username"] == "jupyterhub-smoke"
@@ -53,6 +54,7 @@ def test_argument_spec_requires_runtime_paths_and_image_inputs() -> None:
     assert options["jupyterhub_keycloak_client_secret_local_file"]["type"] == "path"
     assert options["jupyterhub_hub_base_image"]["type"] == "str"
     assert options["jupyterhub_singleuser_base_image"]["type"] == "str"
+    assert options["jupyterhub_base_image_pull_timeout_seconds"]["type"] == "int"
 
 
 def test_main_tasks_render_build_force_recreate_and_verify_runtime() -> None:
@@ -105,12 +107,14 @@ def test_main_tasks_render_build_force_recreate_and_verify_runtime() -> None:
     singleuser_build = next(task for task in tasks if task["name"] == "Build the JupyterHub single-user image")
 
     assert "docker image inspect" in hub_cache["ansible.builtin.shell"]
+    assert 'timeout "{{ jupyterhub_base_image_pull_timeout_seconds }}"' in hub_cache["ansible.builtin.shell"]
     assert "docker pull" in hub_cache["ansible.builtin.shell"]
     assert hub_cache["until"] == "jupyterhub_hub_base_image_cache.rc == 0"
     assert hub_cache["retries"] == 5
     assert hub_cache["delay"] == 10
 
     assert "docker image inspect" in singleuser_cache["ansible.builtin.shell"]
+    assert 'timeout "{{ jupyterhub_base_image_pull_timeout_seconds }}"' in singleuser_cache["ansible.builtin.shell"]
     assert "docker pull" in singleuser_cache["ansible.builtin.shell"]
     assert singleuser_cache["until"] == "jupyterhub_singleuser_base_image_cache.rc == 0"
     assert singleuser_cache["retries"] == 5

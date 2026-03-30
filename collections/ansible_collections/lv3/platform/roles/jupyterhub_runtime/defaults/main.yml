@@ -36,6 +36,7 @@ jupyterhub_hub_image_name: lv3/jupyterhub-hub
 jupyterhub_singleuser_image_name: lv3/jupyterhub-singleuser
 jupyterhub_hub_base_image: quay.io/jupyterhub/jupyterhub:5.4.4@sha256:a4860afa5c3a99762006e42ec0c068e24b5a73a29c9145b3f8c19d49cd014f7d
 jupyterhub_singleuser_base_image: quay.io/jupyter/scipy-notebook:python-3.12@sha256:d0a76193887ed48cdc9adcc2cf042ae189901187226bf0466793acac1822ea78
+jupyterhub_base_image_pull_timeout_seconds: 180
 jupyterhub_minio_image: "{{ container_image_catalog.images.langfuse_minio_runtime.ref }}"
 jupyterhub_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/jupyterhub
 jupyterhub_service_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/jupyterhub/service-api-token.txt
