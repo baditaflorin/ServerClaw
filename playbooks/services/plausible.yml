@@ -1,0 +1,29 @@
+---
+# Playbook: services/plausible.yml
+# Purpose: Provide the stable live-apply service wrapper for Plausible Analytics.
+# Use case: Run `make live-apply-service service=plausible` so the generic service lane can invoke the Plausible converge playbook.
+#
+# Inputs (required):
+#   - env (str, required): Environment selector passed by the live-apply wrapper.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH connection strategy.
+#
+# Outputs:
+#   - Imports the canonical Plausible converge playbook.
+#
+# Idempotency: Fully idempotent
+#              The wrapper only imports the canonical playbook and adds no extra mutation.
+#
+# Dependencies:
+#   - ADR 0283: Plausible as the privacy-first analytics layer for public LV3 pages.
+#   - Requires: playbooks/plausible.yml
+#   - Role: imported playbook — owns all live mutations.
+#
+# Related ADRs: 0283
+# Related Runbooks: docs/runbooks/configure-plausible.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+
+- import_playbook: ../plausible.yml

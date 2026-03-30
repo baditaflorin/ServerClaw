@@ -58,6 +58,7 @@ platform_port_assignments:
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
+  plausible_port: 8016
   dify_port: 8094
   browser_runner_port: 8096
   outline_port: 3006
@@ -484,6 +485,11 @@ network_policy:
             - 9000
             - 9443
           description: Host-side private service proxies
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 8016
+          description: Reverse proxy access to Plausible Analytics and tracker endpoints
         - source: nginx-lv3
           protocol: tcp
           ports:
@@ -948,6 +954,29 @@ route_dns_assertion_retired_records:
     ttl: 60
     state: absent
 
+plausible_site_registrations:
+  - hostname: nginx.lv3.org
+    site_domain: nginx.lv3.org
+    timezone: Europe/Bucharest
+  - hostname: proxmox.lv3.org
+    site_domain: proxmox.lv3.org
+    timezone: Europe/Bucharest
+  - hostname: docker.lv3.org
+    site_domain: docker.lv3.org
+    timezone: Europe/Bucharest
+  - hostname: build.lv3.org
+    site_domain: build.lv3.org
+    timezone: Europe/Bucharest
+  - hostname: mail.lv3.org
+    site_domain: mail.lv3.org
+    timezone: Europe/Bucharest
+  - hostname: status.lv3.org
+    site_domain: status.lv3.org
+    timezone: Europe/Bucharest
+  - hostname: uptime.lv3.org
+    site_domain: uptime.lv3.org
+    timezone: Europe/Bucharest
+
 lv3_service_topology:
   nginx_edge:
     service_name: nginx-edge
@@ -1345,6 +1374,30 @@ lv3_service_topology:
       noindex: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.langfuse_port }}"
+  plausible:
+    service_name: plausible
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: analytics.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: analytics
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.plausible_port }}"
+      security_headers_enabled: false
+      preserve_upstream_security_headers: true
   dify:
     service_name: dify
     owning_vm: docker-runtime-lv3

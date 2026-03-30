@@ -187,6 +187,12 @@ playbooks:
     shared_surfaces:
       - service:open-webui
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/plausible.yml:
+    playbook_id: plausible
+    mutation_scope: platform
+    shared_surfaces:
+      - service:plausible
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/serverclaw.yml:
     playbook_id: serverclaw
     mutation_scope: platform

@@ -67,6 +67,20 @@ def test_build_platform_vars_includes_openfga_private_controller_topology() -> N
     assert openfga["urls"]["controller"] == "http://100.64.0.1:8014"
     assert platform_vars["openfga_controller_url"] == "http://100.64.0.1:8014"
 
+
+def test_build_platform_vars_includes_plausible_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    plausible = platform_vars["platform_service_topology"]["plausible"]
+
+    assert plausible["public_hostname"] == "analytics.lv3.org"
+    assert plausible["dns"]["name"] == "analytics"
+    assert plausible["ports"]["internal"] == 8016
+    assert plausible["urls"]["public"] == "https://analytics.lv3.org"
+    assert plausible["urls"]["internal"] == "http://10.10.10.20:8016"
+    assert plausible["edge"]["security_headers_enabled"] is False
+    assert plausible["edge"]["preserve_upstream_security_headers"] is True
+
+
 def test_build_platform_vars_includes_nextcloud_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     nextcloud = platform_vars["platform_service_topology"]["nextcloud"]

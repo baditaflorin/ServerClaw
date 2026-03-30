@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="{{ public_edge_robots_meta_content }}">
   <title>{{ item.title }}</title>
+{% set tracked_domain = public_edge_plausible_tracked_sites.get(item.hostname, '') if public_edge_plausible_tracked_sites is mapping else '' %}
+{% if tracked_domain | length > 0 and public_edge_plausible_base_url | default('') | length > 0 %}
+  <script defer data-domain="{{ tracked_domain }}" data-api="{{ public_edge_plausible_base_url }}/api/event" src="{{ public_edge_plausible_base_url }}/js/script.js"></script>
+{% endif %}
   <style>
     :root {
       color-scheme: light;

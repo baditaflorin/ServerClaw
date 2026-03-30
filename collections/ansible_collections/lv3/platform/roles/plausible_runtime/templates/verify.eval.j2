@@ -1,0 +1,53 @@
+alias Plausible.{Auth, Repo, Sites}
+
+email = "{{ plausible_bootstrap_user_email }}"
+password = "{{ plausible_bootstrap_user_password }}"
+
+site_specs = [
+{% for item in plausible_site_registrations %}
+  %{
+    domain: "{{ item.site_domain }}",
+    timezone: "{{ item.timezone | default(plausible_default_site_timezone) }}"
+  }{% if not loop.last %},{% endif %}
+{% endfor %}
+]
+
+user = Repo.get_by(Auth.User, email: email)
+
+registrations =
+  Enum.map(site_specs, fn spec ->
+    site = Sites.get_by_domain(spec.domain)
+
+    %{
+      domain: spec.domain,
+      exists: not is_nil(site),
+      owner_access: if(user, do: not is_nil(Sites.get_for_user(user, spec.domain, roles: [:owner])), else: false),
+      timezone: if(site, do: site.timezone, else: nil),
+      expected_timezone: spec.timezone
+    }
+  end)
+
+missing_sites =
+  registrations
+  |> Enum.filter(fn entry -> not entry.exists end)
+  |> Enum.map(& &1.domain)
+
+mismatched_timezones =
+  registrations
+  |> Enum.filter(fn entry -> entry.exists and entry.timezone != entry.expected_timezone end)
+  |> Enum.map(& &1.domain)
+
+owner_access_ok =
+  Enum.all?(registrations, fn entry ->
+    entry.exists and entry.owner_access
+  end)
+
+IO.puts(
+  Jason.encode!(%{
+    user_exists: not is_nil(user),
+    password_matches: if(user, do: Plausible.Auth.Password.match?(password, user.password_hash), else: false),
+    owner_access_ok: owner_access_ok,
+    missing_sites: missing_sites,
+    mismatched_timezones: mismatched_timezones
+  })
+)

@@ -125,6 +125,13 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - https://analytics.lv3.org/api/system/health/ready
+  labels:
+    service_id: plausible
+    slo_id: plausible-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - https://chat.lv3.org
   labels:
     service_id: serverclaw

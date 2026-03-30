@@ -15,6 +15,21 @@
 {% macro keycloak_logout_url(client_id, post_logout_redirect_uri, include_id_token_hint=false, id_token_hint='') -%}
 {{ public_edge_session_authority.keycloak_logout_url }}?client_id={{ client_id | urlencode }}{% if id_token_hint | length > 0 %}&id_token_hint={{ id_token_hint }}{% elif include_id_token_hint %}&id_token_hint={id_token}{% endif %}&post_logout_redirect_uri={{ post_logout_redirect_uri | urlencode }}
 {%- endmacro %}
+{% macro plausible_tracking_domain(hostname) -%}
+{{ public_edge_plausible_tracked_sites.get(hostname, '') if public_edge_plausible_tracked_sites is mapping else '' }}
+{%- endmacro %}
+{% macro plausible_tracking_snippet(hostname) -%}
+{% set tracked_domain = plausible_tracking_domain(hostname) %}
+{% if tracked_domain | length > 0 and public_edge_plausible_base_url | default('') | length > 0 %}<script defer data-domain="{{ tracked_domain }}" data-api="{{ public_edge_plausible_base_url }}/api/event" src="{{ public_edge_plausible_base_url }}/js/script.js"></script>{% endif %}
+{%- endmacro %}
+{% macro render_plausible_proxy_injection(site) -%}
+{% if plausible_tracking_domain(site.hostname) | length > 0 and public_edge_plausible_base_url | default('') | length > 0 %}
+        proxy_set_header Accept-Encoding "";
+        sub_filter_once on;
+        sub_filter_types text/html;
+        sub_filter '</head>' '{{ plausible_tracking_snippet(site.hostname) }}</head>';
+{% endif %}
+{%- endmacro %}
 map $http_upgrade $connection_upgrade {
     default upgrade;
     '' close;
@@ -47,7 +62,11 @@ map $lv3_logout_authorization $lv3_logout_id_token {
     add_header Permissions-Policy "{{ security_headers.permissions_policy }}" always;
 {% endif %}
 {% if security_headers.content_security_policy is defined and security_headers.content_security_policy is not none %}
-    add_header Content-Security-Policy "{{ security_headers.content_security_policy }}" always;
+{% set content_security_policy = security_headers.content_security_policy %}
+{% if plausible_tracking_domain(site.hostname) | length > 0 and public_edge_plausible_base_url | default('') | length > 0 and public_edge_plausible_base_url not in content_security_policy %}
+{% set content_security_policy = content_security_policy | replace('script-src ', 'script-src ' ~ public_edge_plausible_base_url ~ ' ') | replace('connect-src ', 'connect-src ' ~ public_edge_plausible_base_url ~ ' ') %}
+{% endif %}
+    add_header Content-Security-Policy "{{ content_security_policy }}" always;
 {% endif %}
 {% if security_headers.x_robots_tag is defined and security_headers.x_robots_tag is not none %}
     add_header X-Robots-Tag "{{ security_headers.x_robots_tag }}" always;
@@ -193,6 +212,7 @@ server {
         proxy_pass {{ site.upstream }}{{ site.root_proxy_path }};
         proxy_http_version 1.1;
 {{ hide_upstream_security_headers(site) }}
+{{ render_plausible_proxy_injection(site) }}
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -242,6 +262,7 @@ server {
         proxy_pass {{ site.upstream }};
         proxy_http_version 1.1;
 {{ hide_upstream_security_headers(site) }}
+{{ render_plausible_proxy_injection(site) }}
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -409,6 +430,7 @@ server {
         proxy_pass {{ site.upstream }}{{ site.root_proxy_path }};
         proxy_http_version 1.1;
 {{ hide_upstream_security_headers(site) }}
+{{ render_plausible_proxy_injection(site) }}
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -481,6 +503,7 @@ server {
         proxy_pass {{ site.upstream }};
         proxy_http_version 1.1;
 {{ hide_upstream_security_headers(site) }}
+{{ render_plausible_proxy_injection(site) }}
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

@@ -80,6 +80,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             sorted(protected_sites),
             [
                 "agents.lv3.org",
+                "analytics.lv3.org",
                 "changelog.lv3.org",
                 "coolify.lv3.org",
                 "docs.lv3.org",
@@ -92,6 +93,21 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
                 "realtime.lv3.org",
                 "tasks.lv3.org",
             ],
+        )
+        self.assertEqual(protected_sites["analytics.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
+        self.assertEqual(
+            protected_sites["analytics.lv3.org"]["unauthenticated_paths"],
+            [
+                "/api/error",
+                "/api/event",
+                "/api/health",
+                "/api/system/health/live",
+                "/api/system/health/ready",
+            ],
+        )
+        self.assertEqual(
+            protected_sites["analytics.lv3.org"]["unauthenticated_prefix_paths"],
+            ["/js/"],
         )
         self.assertEqual(protected_sites["agents.lv3.org"]["unauthenticated_paths"], ["/healthz"])
         self.assertEqual(protected_sites["agents.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
@@ -232,6 +248,20 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("location ^~ {{ path }} {", self.template)
         self.assertIn("location ^~ {{ route.path }} {", self.template)
         self.assertIn("proxy_buffering off;", self.template)
+
+    def test_template_supports_plausible_tracker_injection(self) -> None:
+        plausible_mapping_expr = self.defaults["public_edge_plausible_tracked_sites"]
+
+        self.assertIn("items2dict(key_name='hostname', value_name='site_domain')", plausible_mapping_expr)
+        self.assertIn("macro plausible_tracking_domain(hostname)", self.template)
+        self.assertIn("macro plausible_tracking_snippet(hostname)", self.template)
+        self.assertIn("macro render_plausible_proxy_injection(site)", self.template)
+        self.assertIn('proxy_set_header Accept-Encoding "";', self.template)
+        self.assertIn("sub_filter_once on;", self.template)
+        self.assertIn("sub_filter '</head>' '{{ plausible_tracking_snippet(site.hostname) }}</head>';", self.template)
+        self.assertIn("public_edge_plausible_base_url not in content_security_policy", self.template)
+        self.assertIn('data-api="{{ public_edge_plausible_base_url }}/api/event"', self.static_template)
+        self.assertIn('src="{{ public_edge_plausible_base_url }}/js/script.js"', self.static_template)
 
     def test_template_renders_security_headers_from_default_and_override_maps(self) -> None:
         self.assertIn("site.security_headers_enabled | default(true)", self.template)

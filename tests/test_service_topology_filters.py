@@ -93,6 +93,37 @@ def test_edge_sites_preserve_exact_redirects() -> None:
     ]
 
 
+def test_edge_sites_preserve_proxy_header_and_security_policy_controls() -> None:
+    filters = load_module()
+    sites = filters.service_topology_edge_sites(
+        {
+            "plausible": {
+                "public_hostname": "analytics.lv3.org",
+                "edge": {
+                    "enabled": True,
+                    "tls": True,
+                    "kind": "proxy",
+                    "upstream": "http://10.10.10.20:8016",
+                    "crawl_policy_enabled": False,
+                    "preserve_upstream_security_headers": True,
+                    "security_headers_enabled": False,
+                },
+            }
+        }
+    )
+
+    assert sites == [
+        {
+            "hostname": "analytics.lv3.org",
+            "kind": "proxy",
+            "upstream": "http://10.10.10.20:8016",
+            "crawl_policy_enabled": False,
+            "preserve_upstream_security_headers": True,
+            "security_headers_enabled": False,
+        }
+    ]
+
+
 def test_platform_inventory_points_headscale_edge_at_proxmox_internal_bridge() -> None:
     platform_vars = yaml.safe_load(PLATFORM_VARS_PATH.read_text())
     headscale = platform_vars["platform_service_topology"]["headscale"]

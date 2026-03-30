@@ -67,6 +67,16 @@ public_edge_robots_txt_content: |
   # There is no public content intended for indexing.
 public_edge_generated_build_root: "{{ inventory_dir | dirname }}/build"
 public_edge_static_sites: "{{ public_edge_service_topology | service_topology_edge_static_sites }}"
+public_edge_plausible_service_topology: "{{ public_edge_service_topology.get('plausible', {}) }}"
+public_edge_plausible_base_url: "{{ public_edge_plausible_service_topology.get('urls', {}).get('public', '') }}"
+public_edge_plausible_site_registrations: "{{ hostvars[public_edge_control_plane_host].plausible_site_registrations | default([]) }}"
+public_edge_plausible_tracked_sites: >-
+  {{
+    public_edge_plausible_site_registrations
+    | items2dict(key_name='hostname', value_name='site_domain')
+    if (public_edge_plausible_site_registrations | length > 0)
+    else {}
+  }}
 public_edge_security_headers_default:
   strict_transport_security: "max-age=63072000; includeSubDomains; preload"
   cross_origin_resource_policy: same-origin
@@ -202,6 +212,16 @@ public_edge_extra_sites:
     kind: static_dir
     source_dir: docs-portal
 public_edge_authenticated_sites:
+  analytics.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+    unauthenticated_paths:
+      - /api/error
+      - /api/event
+      - /api/health
+      - /api/system/health/live
+      - /api/system/health/ready
+    unauthenticated_prefix_paths:
+      - /js/
   changelog.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
   coolify.lv3.org:

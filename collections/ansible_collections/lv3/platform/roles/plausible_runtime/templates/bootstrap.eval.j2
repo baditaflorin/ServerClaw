@@ -1,0 +1,110 @@
+alias Plausible.{Auth, Repo, Site, Sites, Teams}
+
+email = "{{ plausible_bootstrap_user_email }}"
+name = "{{ plausible_bootstrap_user_name }}"
+password = "{{ plausible_bootstrap_user_password }}"
+
+site_specs = [
+{% for item in plausible_site_registrations %}
+  %{
+    domain: "{{ item.site_domain }}",
+    timezone: "{{ item.timezone | default(plausible_default_site_timezone) }}"
+  }{% if not loop.last %},{% endif %}
+{% endfor %}
+]
+
+{result, _changed?} =
+  Repo.transaction(fn ->
+    existing_user = Repo.get_by(Auth.User, email: email)
+
+    {user, user_created, profile_updated, password_updated} =
+      case existing_user do
+        nil ->
+          user =
+            %{
+              "email" => email,
+              "name" => name,
+              "password" => password,
+              "password_confirmation" => password
+            }
+            |> Auth.User.new()
+            |> Repo.insert!()
+
+          {user, true, false, false}
+
+        user ->
+          profile_needs_update = user.name != name or user.email_verified != true
+
+          user =
+            if profile_needs_update do
+              user
+              |> Auth.User.changeset(%{"email" => email, "name" => name, "email_verified" => true})
+              |> Repo.update!()
+            else
+              user
+            end
+
+          password_updated = not Plausible.Auth.Password.match?(password, user.password_hash)
+
+          user =
+            if password_updated do
+              user
+              |> Auth.User.set_password(password)
+              |> Repo.update!()
+            else
+              user
+            end
+
+          {user, false, profile_needs_update, password_updated}
+      end
+
+    {:ok, team} = Teams.get_or_create(user)
+    team = Teams.complete_setup(team)
+
+    {created_sites, updated_sites} =
+      Enum.reduce(site_specs, {[], []}, fn spec, {created, updated} ->
+        case Sites.get_by_domain(spec.domain) do
+          nil ->
+            case Sites.create(user, %{"domain" => spec.domain, "timezone" => spec.timezone}, team) do
+              {:ok, %{site: _site}} ->
+                {[spec.domain | created], updated}
+
+              {:error, :site, changeset, _context} ->
+                raise "unable to create site #{spec.domain}: #{inspect(changeset.errors)}"
+
+              {:error, reason} ->
+                raise "unable to create site #{spec.domain}: #{inspect(reason)}"
+            end
+
+          site ->
+            owner_access? = not is_nil(Sites.get_for_user(user, spec.domain, roles: [:owner]))
+
+            if not owner_access? do
+              raise "site #{spec.domain} exists without bootstrap-owner access"
+            end
+
+            if site.timezone != spec.timezone do
+              site
+              |> Site.update_changeset(%{"timezone" => spec.timezone})
+              |> Repo.update!()
+
+              {created, [spec.domain | updated]}
+            else
+              {created, updated}
+            end
+        end
+      end)
+
+    payload = %{
+      changed: user_created or profile_updated or password_updated or created_sites != [] or updated_sites != [],
+      user_created: user_created,
+      profile_updated: profile_updated,
+      password_updated: password_updated,
+      created_sites: Enum.reverse(created_sites),
+      updated_sites: Enum.reverse(updated_sites)
+    }
+
+    {Jason.encode!(payload), payload.changed}
+  end)
+
+IO.puts(result)

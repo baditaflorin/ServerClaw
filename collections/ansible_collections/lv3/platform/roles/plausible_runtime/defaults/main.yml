@@ -1,0 +1,72 @@
+---
+# Purpose: Default runtime inputs for the Plausible Analytics deployment.
+# Use case: Consumed whenever the Plausible runtime, bootstrap state, or verification path must match repo truth.
+#
+# Inputs (required):
+#   - platform_service_topology / hostvars (generated): Shared service topology and port assignments for `plausible`.
+#   - mail_platform_mailbox_password_local_file (controller secret): Existing managed mailbox password used for Plausible SMTP delivery.
+#
+# Inputs (optional):
+#   - plausible_site_registrations (list, optional): Explicit public sites to register and instrument.
+#
+# Outputs:
+#   - Stable defaults for the Plausible compose runtime, bootstrap account, mail relay configuration, and registered-site contract.
+#
+# Idempotency: Fully idempotent
+#              This file only declares role defaults.
+#
+# Dependencies:
+#   - ADR 0283: Declares Plausible as the privacy-first analytics layer.
+#   - ADR 0077: Runtime secrets are injected through OpenBao.
+#   - Requires: docker-runtime, OpenBao, and the mail-platform submission relay.
+#
+# Related ADRs: 0077, 0086, 0283
+# Related Runbooks: docs/runbooks/configure-plausible.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+plausible_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('plausible') }}"
+plausible_site_dir: /opt/plausible
+plausible_compose_file: "{{ plausible_site_dir }}/docker-compose.yml"
+plausible_clickhouse_config_dir: "{{ plausible_site_dir }}/clickhouse"
+plausible_env_file: "{{ compose_runtime_secret_root }}/plausible/runtime.env"
+plausible_legacy_env_file: "{{ plausible_site_dir }}/plausible.env"
+plausible_secret_dir: /etc/lv3/plausible
+plausible_openbao_agent_dir: "{{ plausible_site_dir }}/openbao"
+plausible_openbao_agent_image: "{{ openbao_agent_image }}"
+plausible_openbao_agent_container_name: plausible-openbao-agent
+plausible_openbao_secret_path: services/plausible/runtime-env
+plausible_openbao_policy_name: lv3-service-plausible-runtime
+plausible_openbao_approle_name: plausible-runtime
+plausible_internal_port: "{{ platform_service_topology | platform_service_port('plausible', 'internal') }}"
+plausible_internal_base_url: "{{ platform_service_topology | platform_service_url('plausible', 'internal') }}"
+plausible_public_base_url: "https://{{ plausible_service_topology.public_hostname }}"
+plausible_container_name: plausible
+plausible_db_container_name: plausible-db
+plausible_clickhouse_container_name: plausible-events-db
+plausible_runtime_image: "{{ container_image_catalog.images.plausible_runtime.ref }}"
+plausible_postgres_image: "{{ container_image_catalog.images.plausible_postgres_runtime.ref }}"
+plausible_clickhouse_image: "{{ container_image_catalog.images.plausible_clickhouse_runtime.ref }}"
+plausible_database_name: plausible
+plausible_database_user: plausible
+plausible_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plausible/database-password.txt
+plausible_secret_key_base_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plausible/secret-key-base.txt
+plausible_bootstrap_user_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plausible/bootstrap-user-password.txt
+plausible_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plausible
+plausible_database_password_remote_file: "{{ plausible_secret_dir }}/database-password.txt"
+plausible_secret_key_base_remote_file: "{{ plausible_secret_dir }}/secret-key-base.txt"
+plausible_bootstrap_user_password_remote_file: "{{ plausible_secret_dir }}/bootstrap-user-password.txt"
+plausible_mailbox_password_local_file: "{{ mail_platform_mailbox_password_local_file }}"
+plausible_smtp_host: 10.10.10.20
+plausible_smtp_port: 1587
+plausible_smtp_username: server
+plausible_mailer_email: server@lv3.org
+plausible_mailer_name: LV3 Plausible
+plausible_mailer_adapter: Bamboo.SMTPAdapter
+plausible_bootstrap_user_email: baditaflorin@gmail.com
+plausible_bootstrap_user_name: Florin Badita
+plausible_default_site_timezone: Europe/Bucharest
+plausible_disable_registration: true
+plausible_enable_email_verification: false
+plausible_verify_site_domain: "{{ (plausible_site_registrations | first).site_domain }}"
+plausible_site_registrations: "{{ hostvars['proxmox_florin'].plausible_site_registrations | default([]) }}"

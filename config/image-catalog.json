@@ -916,6 +916,90 @@
         "converge-plane"
       ]
     },
+    "plausible_clickhouse_runtime": {
+      "kind": "runtime",
+      "service_id": "plausible",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "plausible-events-db",
+      "registry_ref": "docker.io/clickhouse/clickhouse-server",
+      "tag": "24.12-alpine",
+      "digest": "sha256:58a8168a0a17a5694172cbe89b8d3f1f6c9a91182260c98e299e87da1b0d0d0b",
+      "ref": "docker.io/clickhouse/clickhouse-server:24.12-alpine@sha256:58a8168a0a17a5694172cbe89b8d3f1f6c9a91182260c98e299e87da1b0d0d0b",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-30-plausible-clickhouse-runtime.json",
+      "exception": {
+        "reason": "The pinned upstream ClickHouse runtime image reports critical and high Alpine package findings; keep it digest-pinned for the ADR 0283 rollout and review on the next image refresh window.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-30",
+        "review_by": "2026-04-13"
+      },
+      "consumers": [
+        "roles/plausible_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-plausible"
+      ]
+    },
+    "plausible_postgres_runtime": {
+      "kind": "runtime",
+      "service_id": "plausible",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "plausible-db",
+      "registry_ref": "docker.io/library/postgres",
+      "tag": "16-alpine",
+      "digest": "sha256:60b180625695e90b6e450405d5f0bcb74bc8c52c65d1cd11aeb3da46cac06dd8",
+      "ref": "docker.io/library/postgres:16-alpine@sha256:60b180625695e90b6e450405d5f0bcb74bc8c52c65d1cd11aeb3da46cac06dd8",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-30-plausible-postgres-runtime.json",
+      "exception": {
+        "reason": "The pinned upstream PostgreSQL runtime image reports critical and high findings in bundled gosu and Alpine packages; keep it digest-pinned for the ADR 0283 rollout and review on the next image refresh window.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-30",
+        "review_by": "2026-04-13"
+      },
+      "consumers": [
+        "roles/plausible_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-plausible"
+      ]
+    },
+    "plausible_runtime": {
+      "kind": "runtime",
+      "service_id": "plausible",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "plausible",
+      "registry_ref": "ghcr.io/plausible/community-edition",
+      "tag": "v3.2.0",
+      "digest": "sha256:7bd1b7e6e474c84e223c7fc5a9bac6411da340bf30dddbd46527f13551b79d59",
+      "ref": "ghcr.io/plausible/community-edition:v3.2.0@sha256:7bd1b7e6e474c84e223c7fc5a9bac6411da340bf30dddbd46527f13551b79d59",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-30-plausible-runtime.json",
+      "exception": {
+        "reason": "The pinned Plausible Community Edition runtime image reports critical and high Alpine package findings; keep it digest-pinned for the ADR 0283 rollout and review on the next image refresh window.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-30",
+        "review_by": "2026-04-13"
+      },
+      "consumers": [
+        "roles/plausible_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-plausible"
+      ]
+    },
     "portainer_runtime": {
       "kind": "runtime",
       "service_id": "portainer",

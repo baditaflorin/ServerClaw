@@ -424,6 +424,49 @@
       }
     },
     {
+      "id": "plausible",
+      "name": "Plausible Analytics",
+      "description": "Privacy-first cookie-free web analytics dashboard and tracker for selected public LV3 pages.",
+      "category": "observability",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8016",
+      "public_url": "https://analytics.lv3.org",
+      "subdomain": "analytics.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Plausible Public Health",
+      "health_probe_id": "plausible",
+      "image_catalog_ids": [
+        "plausible_runtime",
+        "plausible_postgres_runtime",
+        "plausible_clickhouse_runtime"
+      ],
+      "secret_catalog_ids": [
+        "plausible_database_password",
+        "plausible_secret_key_base",
+        "plausible_bootstrap_user_password",
+        "mail_platform_server_mailbox_password"
+      ],
+      "adr": "0283",
+      "runbook": "docs/runbooks/configure-plausible.md",
+      "tags": [
+        "analytics",
+        "privacy",
+        "observability",
+        "edge-authenticated"
+      ],
+      "notes": "The dashboard uses the shared edge OIDC boundary while the tracker, event ingestion path, and health endpoints remain intentionally public for instrumentation and probe traffic.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://analytics.lv3.org",
+          "subdomain": "analytics.lv3.org",
+          "notes": "Plausible Community Edition does not expose service-native OIDC in the verified upstream path, so browser access is gated at the shared edge and repo-managed site tracking is injected only on the declared public hostnames."
+        }
+      }
+    },
+    {
       "id": "realtime",
       "name": "Netdata Realtime Metrics",
       "description": "Authenticated Netdata parent dashboard for live host and guest metrics streamed into monitoring-lv3.",

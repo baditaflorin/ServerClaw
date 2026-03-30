@@ -177,6 +177,7 @@ platform_ports:
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
+  plausible_port: 8016
   dify_port: 8094
   browser_runner_port: 8096
   outline_port: 3006
@@ -247,6 +248,7 @@ platform_port_assignments:
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
+  plausible_port: 8016
   dify_port: 8094
   browser_runner_port: 8096
   outline_port: 3006
@@ -1449,6 +1451,36 @@ platform_service_topology:
     urls:
       public: https://langfuse.lv3.org
       internal: http://10.10.10.20:3002
+  plausible:
+    service_name: plausible
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: analytics.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: analytics
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8016
+      security_headers_enabled: false
+      preserve_upstream_security_headers: true
+    service_id: plausible
+    ports:
+      internal: 8016
+    urls:
+      public: https://analytics.lv3.org
+      internal: http://10.10.10.20:8016
   dify:
     service_name: dify
     owning_vm: docker-runtime-lv3
@@ -2182,6 +2214,10 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: analytics
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: agents
       type: A
       value: 65.108.75.123
@@ -2848,6 +2884,36 @@ public_edge_service_topology:
     urls:
       public: https://langfuse.lv3.org
       internal: http://10.10.10.20:3002
+  plausible:
+    service_name: plausible
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: analytics.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: analytics
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8016
+      security_headers_enabled: false
+      preserve_upstream_security_headers: true
+    service_id: plausible
+    ports:
+      internal: 8016
+    urls:
+      public: https://analytics.lv3.org
+      internal: http://10.10.10.20:8016
   dify:
     service_name: dify
     owning_vm: docker-runtime-lv3
@@ -3643,6 +3709,7 @@ gotenberg_port: 3007
 searxng_port: 8881
 searxng_host_proxy_port: 80
 langfuse_port: 3002
+plausible_port: 8016
 dify_port: 8094
 browser_runner_port: 8096
 outline_port: 3006

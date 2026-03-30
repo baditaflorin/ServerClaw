@@ -710,6 +710,46 @@ groups:
           summary: open-webui-availability has less than 10% error budget remaining
           description: Open WebUI remains reachable on the private runtime network.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_plausible_availability
+        expr: (slo:plausible_availability:error_rate_5m > (14 * 0.005000)) and (slo:plausible_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: plausible
+          slo_id: plausible-availability
+          indicator: availability
+        annotations:
+          summary: plausible-availability is burning its error budget at 14x
+          description: The public Plausible readiness endpoint remains reachable for
+            dashboard access, tracker delivery, and synthetic event verification.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_plausible_availability
+        expr: slo:plausible_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: plausible
+          slo_id: plausible-availability
+          indicator: availability
+        annotations:
+          summary: plausible-availability is burning its error budget at 3x
+          description: The public Plausible readiness endpoint remains reachable for
+            dashboard access, tracker delivery, and synthetic event verification.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_plausible_availability
+        expr: slo:plausible_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: plausible
+          slo_id: plausible-availability
+          indicator: availability
+        annotations:
+          summary: plausible-availability has less than 10% error budget remaining
+          description: The public Plausible readiness endpoint remains reachable for
+            dashboard access, tracker delivery, and synthetic event verification.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_serverclaw_availability
         expr: (slo:serverclaw_availability:error_rate_5m > (14 * 0.010000)) and (slo:serverclaw_availability:error_rate_1h
           > (14 * 0.010000))

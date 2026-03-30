@@ -300,6 +300,15 @@
       "adr": "0060"
     },
     {
+      "id": "plausible",
+      "service": "plausible",
+      "name": "Plausible Analytics",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "observability",
+      "adr": "0283"
+    },
+    {
       "id": "serverclaw",
       "service": "serverclaw",
       "name": "ServerClaw",
@@ -1050,6 +1059,30 @@
       "to": "postgres",
       "type": "hard",
       "description": "Windmill persists workflow metadata, run history, and state in Postgres."
+    },
+    {
+      "from": "plausible",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Plausible runtime, bundled PostgreSQL, and bundled ClickHouse analytics store run on docker-runtime-lv3."
+    },
+    {
+      "from": "plausible",
+      "to": "mail_platform",
+      "type": "soft",
+      "description": "SMTP delivery for notifications and password recovery uses the repo-managed server mailbox and internal submission relay on mail-platform."
+    },
+    {
+      "from": "plausible",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Dashboard publication at analytics.lv3.org and tracker injection on selected public hostnames depend on the shared NGINX edge publication path."
+    },
+    {
+      "from": "plausible",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Plausible starts from OpenBao-rendered runtime secrets mirrored into its compose environment before the main container launches."
     }
   ]
 }
