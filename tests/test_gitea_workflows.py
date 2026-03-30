@@ -36,9 +36,12 @@ def test_release_bundle_workflow_uses_pinned_python_runner_and_manual_checkout()
 def test_renovate_workflow_bootstraps_inside_pinned_python_runner() -> None:
     workflow = RENOVATE_WORKFLOW.read_text(encoding="utf-8")
 
-    assert PYTHON_RUNNER_IMAGE in workflow
+    assert workflow.count(PYTHON_RUNNER_IMAGE) == 2
     assert "uses: actions/checkout@v4" not in workflow
     assert MANUAL_CHECKOUT_FETCH in workflow
     assert 'git checkout --force "${WORKFLOW_SHA}"' in workflow
     assert "/var/run/docker.sock:/var/run/docker.sock" not in workflow
     assert "apt-get install -y --no-install-recommends docker.io" in workflow
+    assert 'bootstrap_host_dir="${runner_host_root}/credentials/renovate"' in workflow
+    assert '-v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro"' in workflow
+    assert 'docker run --rm \\' in workflow

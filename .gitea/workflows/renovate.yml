@@ -13,6 +13,7 @@ jobs:
       image: registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
     env:
       DOCKER_HOST: unix:///var/run/docker.sock
+      RENOVATE_HELPER_IMAGE: registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
       RENOVATE_IMAGE: registry.lv3.org/check-runner/renovate:42.76.4@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
       RENOVATE_BOOTSTRAP_ENV: /var/run/lv3/renovate/renovate.env
       RENOVATE_RUNTIME_ENV: .tmp/renovate.runtime.env
@@ -53,13 +54,30 @@ jobs:
       - name: Mint a short-lived Renovate token
         run: |
           set -euo pipefail
-          test -s "${RENOVATE_BOOTSTRAP_ENV}"
-          set -a
-          . "${RENOVATE_BOOTSTRAP_ENV}"
-          set +a
-          python3 scripts/renovate_runtime_token.py create \
-            --state-file "${RENOVATE_RUNTIME_STATE}" \
-            --env-file "${RENOVATE_RUNTIME_ENV}"
+          : "${GITEA_RUNNER_HOST_DATA_DIR:?GITEA_RUNNER_HOST_DATA_DIR must be set by the self-hosted runner}"
+          workspace_host_path="${PWD/#\/data/${GITEA_RUNNER_HOST_DATA_DIR}}"
+          runner_host_root="$(dirname "${GITEA_RUNNER_HOST_DATA_DIR}")"
+          bootstrap_host_dir="${runner_host_root}/credentials/renovate"
+          test -d "${workspace_host_path}"
+          test -s "${bootstrap_host_dir}/renovate.env"
+          docker run --rm \
+            --network host \
+            -e RENOVATE_BOOTSTRAP_ENV \
+            -e RENOVATE_RUNTIME_STATE \
+            -e RENOVATE_RUNTIME_ENV \
+            -v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro" \
+            -v "${workspace_host_path}:/workspace" \
+            -w /workspace \
+            "${RENOVATE_HELPER_IMAGE}" \
+            sh -lc '
+              set -euo pipefail
+              set -a
+              . "${RENOVATE_BOOTSTRAP_ENV}"
+              set +a
+              python3 scripts/renovate_runtime_token.py create \
+                --state-file "${RENOVATE_RUNTIME_STATE}" \
+                --env-file "${RENOVATE_RUNTIME_ENV}"
+            '
 
       - name: Run Renovate through the pinned Harbor image
         run: |
@@ -86,10 +104,26 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-          if [ -s "${RENOVATE_BOOTSTRAP_ENV}" ]; then
-            set -a
-            . "${RENOVATE_BOOTSTRAP_ENV}"
-            set +a
+          : "${GITEA_RUNNER_HOST_DATA_DIR:?GITEA_RUNNER_HOST_DATA_DIR must be set by the self-hosted runner}"
+          workspace_host_path="${PWD/#\/data/${GITEA_RUNNER_HOST_DATA_DIR}}"
+          runner_host_root="$(dirname "${GITEA_RUNNER_HOST_DATA_DIR}")"
+          bootstrap_host_dir="${runner_host_root}/credentials/renovate"
+          if [ -s "${bootstrap_host_dir}/renovate.env" ]; then
+            docker run --rm \
+              --network host \
+              -e RENOVATE_BOOTSTRAP_ENV \
+              -e RENOVATE_RUNTIME_STATE \
+              -e RENOVATE_RUNTIME_ENV \
+              -v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro" \
+              -v "${workspace_host_path}:/workspace" \
+              -w /workspace \
+              "${RENOVATE_HELPER_IMAGE}" \
+              sh -lc '
+                set -euo pipefail
+                set -a
+                . "${RENOVATE_BOOTSTRAP_ENV}"
+                set +a
+                python3 scripts/renovate_runtime_token.py cleanup \
+                  --state-file "${RENOVATE_RUNTIME_STATE}"
+              '
           fi
-          python3 scripts/renovate_runtime_token.py cleanup \
-            --state-file "${RENOVATE_RUNTIME_STATE}"
