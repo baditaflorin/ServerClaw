@@ -330,6 +330,33 @@
         import json
         import subprocess
         import sys
+        import time
+
+        TRANSIENT_DOCKER_NETWORK_ERRORS = (
+            "No chain/target/match by that name",
+            "driver failed programming external connectivity",
+        )
+
+
+        def run_with_retry(command, cwd=None, attempts=3, delay_seconds=3):
+            for attempt in range(1, attempts + 1):
+                result = subprocess.run(command, cwd=cwd, text=True, capture_output=True)
+                if result.returncode == 0:
+                    return
+
+                stderr = result.stderr or ""
+                if (
+                    attempt == attempts
+                    or not any(marker in stderr for marker in TRANSIENT_DOCKER_NETWORK_ERRORS)
+                ):
+                    raise subprocess.CalledProcessError(
+                        result.returncode,
+                        command,
+                        output=result.stdout,
+                        stderr=stderr,
+                    )
+
+                time.sleep(delay_seconds)
 
         containers = json.load(sys.stdin)
         stopped = [container for container in containers if not container.get("State", {}).get("Running")]
@@ -354,7 +381,7 @@
         actions = []
 
         if direct_start:
-            subprocess.run(["docker", "start", *direct_start], check=True)
+            run_with_retry(["docker", "start", *direct_start])
             actions.append({"type": "docker_start", "containers": direct_start})
 
         for (working_dir, config_files), services in sorted(compose_groups.items()):
@@ -363,7 +390,7 @@
             for config_file in config_file_list:
                 command.extend(["--file", config_file])
             command.extend(["up", "-d", *sorted(services)])
-            subprocess.run(command, cwd=working_dir or None, check=True)
+            run_with_retry(command, cwd=working_dir or None)
             actions.append(
                 {
                     "type": "docker_compose_up",

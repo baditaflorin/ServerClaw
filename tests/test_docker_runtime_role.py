@@ -119,6 +119,9 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
         "{{((docker_runtime_post_restart_container_inspect.stdout|default('[]'))|from_json)|to_json}}"
     )
     assert "docker_runtime_pre_restart_container_names" in confirm_recovery["ansible.builtin.command"]["argv"]
+    assert "TRANSIENT_DOCKER_NETWORK_ERRORS" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "No chain/target/match by that name" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "run_with_retry(command, cwd=working_dir or None)" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "com.docker.compose.project.working_dir" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "docker_compose_up" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'command.extend(["up", "-d", *sorted(services)])' in recover_containers["ansible.builtin.command"]["argv"][2]
