@@ -1,3 +1,9 @@
+# Purpose: Define default paths, image pins, secret locations, and realm settings for the repo-managed Keycloak runtime.
+# Use case: Loaded whenever the Keycloak runtime role converges or validates the delegated-auth control plane.
+# Inputs: Service topology, platform-wide authority settings, image catalog entries, and OpenBao runtime defaults.
+# Outputs: Supplies stable default variables consumed by Keycloak runtime tasks and templates.
+# Idempotency: Fully idempotent because this file only declares role defaults.
+# Dependencies: ADR 0165, ADR 0046, ADR 0197, and ADR 0262.
 ---
 keycloak_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') }}"
 keycloak_session_authority: "{{ platform_session_authority }}"
@@ -70,6 +76,8 @@ keycloak_agent_client_id: lv3-agent-hub
 keycloak_agent_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/lv3-agent-hub-client-secret.txt
 keycloak_api_gateway_client_id: api-gateway
 keycloak_api_gateway_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/api-gateway-client-secret.txt
+keycloak_serverclaw_runtime_client_id: serverclaw-runtime
+keycloak_serverclaw_runtime_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/serverclaw-runtime-client-secret.txt
 keycloak_langfuse_client_id: langfuse
 keycloak_langfuse_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/langfuse-client-secret.txt
 keycloak_outline_client_id: outline
@@ -112,10 +120,15 @@ keycloak_service_account_realm_role_mappings:
   - service_account_user_client_id: "{{ keycloak_agent_client_id }}"
     roles:
       - name: platform-read
+  - service_account_user_client_id: "{{ keycloak_serverclaw_runtime_client_id }}"
+    roles:
+      - name: platform-read
 keycloak_public_base_url: "https://{{ keycloak_service_topology.public_hostname }}"
 keycloak_local_admin_url: "http://{{ ansible_host }}:{{ keycloak_internal_http_port }}"
 keycloak_repo_user_admin_url: "{{ keycloak_local_admin_url }}"
-keycloak_admin_connection_timeout: 30
+keycloak_admin_connection_timeout: 60
+keycloak_admin_reconciliation_retries: 6
+keycloak_admin_reconciliation_delay: 5
 keycloak_startup_probe_retries: 60
 keycloak_startup_probe_delay: 5
 keycloak_repo_user_reconciliation_retries: 24

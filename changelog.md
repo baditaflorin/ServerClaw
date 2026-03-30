@@ -12,6 +12,9 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 
 ## Unreleased
 
+- implements ADR 0261 by publishing the private browser-runner runtime, the governed operator gateway route, and the Dify-compatible browser-run-session tool with packaged-runtime-safe config resolution and verified smoke artifacts
+- implements ADR 0262 by deploying the OpenFGA delegated authorization runtime, the ServerClaw bootstrap contracts, the repo-managed Keycloak runtime clients, and the API gateway registration for delegated authorization checks
+
 ## Latest Release
 
 - [0.177.94 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.94.md)

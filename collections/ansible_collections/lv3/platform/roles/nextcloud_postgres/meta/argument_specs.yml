@@ -1,3 +1,9 @@
+# Purpose: Declare the argument contract for the Nextcloud PostgreSQL bootstrap role.
+# Use case: Run during syntax and argument validation before converging the Nextcloud database prerequisites.
+# Inputs: nextcloud_* variables required to create the database secrets and credentials.
+# Outputs: Machine-readable argument specs for the nextcloud_postgres role.
+# Idempotency: Fully idempotent; metadata only validates role inputs.
+# Dependencies: ADR 0165 metadata standard, ADR 0260, and the nextcloud_postgres role tasks.
 ---
 argument_specs:
   main:

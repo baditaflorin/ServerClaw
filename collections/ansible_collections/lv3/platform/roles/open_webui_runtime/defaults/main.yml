@@ -1,3 +1,9 @@
+# Purpose: Define Open WebUI runtime defaults, secret paths, auth settings, and upstream integration knobs.
+# Use case: Loaded whenever the Open WebUI runtime converges or verifies.
+# Inputs: Platform topology, image catalog entries, OpenBao settings, and optional OIDC/search connectors.
+# Outputs: Supplies stable defaults for the Open WebUI runtime role.
+# Idempotency: Fully idempotent because this file only declares defaults.
+# Dependencies: ADR 0165, ADR 0060, ADR 0145, and ADR 0148.
 ---
 open_webui_site_dir: /opt/open-webui
 open_webui_data_dir: "{{ open_webui_site_dir }}/data"

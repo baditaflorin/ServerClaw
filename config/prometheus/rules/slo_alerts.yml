@@ -2,6 +2,46 @@ groups:
   - name: slo_alert_rules
     interval: 1m
     rules:
+      - alert: SLOFastBurn_browser_runner_availability
+        expr: (slo:browser_runner_availability:error_rate_5m > (14 * 0.010000)) and
+          (slo:browser_runner_availability:error_rate_1h > (14 * 0.010000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: browser_runner
+          slo_id: browser-runner-availability
+          indicator: availability
+        annotations:
+          summary: browser-runner-availability is burning its error budget at 14x
+          description: The private browser runner remains reachable on docker-runtime-lv3
+            for governed Playwright session execution.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_browser_runner_availability
+        expr: slo:browser_runner_availability:error_rate_1h > (3 * 0.010000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: browser_runner
+          slo_id: browser-runner-availability
+          indicator: availability
+        annotations:
+          summary: browser-runner-availability is burning its error budget at 3x
+          description: The private browser runner remains reachable on docker-runtime-lv3
+            for governed Playwright session execution.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_browser_runner_availability
+        expr: slo:browser_runner_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: browser_runner
+          slo_id: browser-runner-availability
+          indicator: availability
+        annotations:
+          summary: browser-runner-availability has less than 10% error budget remaining
+          description: The private browser runner remains reachable on docker-runtime-lv3
+            for governed Playwright session execution.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_dozzle_availability
         expr: (slo:dozzle_availability:error_rate_5m > (14 * 0.010000)) and (slo:dozzle_availability:error_rate_1h
           > (14 * 0.010000))
@@ -238,6 +278,86 @@ groups:
           summary: harbor-availability has less than 10% error budget remaining
           description: Harbor remains reachable through the shared LV3 edge for image
             pulls, pushes, and operator access.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_openfga_availability
+        expr: (slo:openfga_availability:error_rate_5m > (14 * 0.005000)) and (slo:openfga_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: openfga
+          slo_id: openfga-availability
+          indicator: availability
+        annotations:
+          summary: openfga-availability is burning its error budget at 14x
+          description: The private OpenFGA controller endpoint remains reachable for
+            delegated authorization queries and bootstrap replay.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_openfga_availability
+        expr: slo:openfga_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: openfga
+          slo_id: openfga-availability
+          indicator: availability
+        annotations:
+          summary: openfga-availability is burning its error budget at 3x
+          description: The private OpenFGA controller endpoint remains reachable for
+            delegated authorization queries and bootstrap replay.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_openfga_availability
+        expr: slo:openfga_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: openfga
+          slo_id: openfga-availability
+          indicator: availability
+        annotations:
+          summary: openfga-availability has less than 10% error budget remaining
+          description: The private OpenFGA controller endpoint remains reachable for
+            delegated authorization queries and bootstrap replay.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_openfga_latency
+        expr: (slo:openfga_latency:error_rate_5m > (14 * 0.050000)) and (slo:openfga_latency:error_rate_1h
+          > (14 * 0.050000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: openfga
+          slo_id: openfga-latency
+          indicator: latency
+        annotations:
+          summary: openfga-latency is burning its error budget at 14x
+          description: The private OpenFGA controller endpoint responds in under 500ms
+            for 95% of probes.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_openfga_latency
+        expr: slo:openfga_latency:error_rate_1h > (3 * 0.050000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: openfga
+          slo_id: openfga-latency
+          indicator: latency
+        annotations:
+          summary: openfga-latency is burning its error budget at 3x
+          description: The private OpenFGA controller endpoint responds in under 500ms
+            for 95% of probes.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_openfga_latency
+        expr: slo:openfga_latency:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: openfga
+          slo_id: openfga-latency
+          indicator: latency
+        annotations:
+          summary: openfga-latency has less than 10% error budget remaining
+          description: The private OpenFGA controller endpoint responds in under 500ms
+            for 95% of probes.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_homepage_availability
         expr: (slo:homepage_availability:error_rate_5m > (14 * 0.005000)) and (slo:homepage_availability:error_rate_1h

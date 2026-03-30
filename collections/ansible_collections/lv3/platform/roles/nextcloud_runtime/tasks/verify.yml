@@ -1,3 +1,9 @@
+# Purpose: Verify that the managed Nextcloud runtime is healthy, installed, and operator-accessible after converge.
+# Use case: Include at the end of Nextcloud convergence or replay verification to confirm local health and bootstrap state.
+# Inputs: nextcloud_* runtime URLs, container names, and OCC retry settings.
+# Outputs: Verified service health, admin presence, and expected runtime assertions.
+# Idempotency: Fully idempotent; verification reads state and fails if expectations are not met.
+# Dependencies: ADR 0165 metadata standard, ADR 0260, and a running nextcloud_runtime deployment.
 ---
 - name: Verify the Nextcloud local status endpoint
   ansible.builtin.uri:

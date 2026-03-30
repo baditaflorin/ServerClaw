@@ -1,4 +1,11 @@
 - targets:
+    - http://10.10.10.20:8096/healthz
+  labels:
+    service_id: browser_runner
+    slo_id: browser-runner-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - http://10.10.10.20:8089/healthcheck
   labels:
     service_id: dozzle
@@ -39,6 +46,20 @@
     service_id: harbor
     slo_id: harbor-availability
     indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - http://100.64.0.1:8014/healthz
+  labels:
+    service_id: openfga
+    slo_id: openfga-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - http://100.64.0.1:8014/healthz
+  labels:
+    service_id: openfga
+    slo_id: openfga-latency
+    indicator: latency
     probe_module: http_2xx_follow_redirects
 - targets:
     - https://home.lv3.org

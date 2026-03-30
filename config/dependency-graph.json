@@ -57,6 +57,15 @@
       "adr": "0194"
     },
     {
+      "id": "browser_runner",
+      "service": "browser_runner",
+      "name": "Browser Runner",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0261"
+    },
+    {
       "id": "dify",
       "service": "dify",
       "name": "Dify",
@@ -309,6 +318,15 @@
       "adr": "0043"
     },
     {
+      "id": "openfga",
+      "service": "openfga",
+      "name": "OpenFGA",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "access",
+      "adr": "0262"
+    },
+    {
       "id": "ops_portal",
       "service": "ops_portal",
       "name": "Ops Portal",
@@ -468,6 +486,18 @@
       "to": "nginx_edge",
       "type": "soft",
       "description": "Public access to api.lv3.org depends on the shared edge publication path, but the internal gateway remains reachable directly."
+    },
+    {
+      "from": "browser_runner",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The private Playwright browser runner is hosted on docker-runtime-lv3."
+    },
+    {
+      "from": "browser_runner",
+      "to": "api_gateway",
+      "type": "soft",
+      "description": "Authenticated operator access to the browser runner uses the governed API gateway route, while the private runtime can still be verified locally."
     },
     {
       "from": "changelog_portal",
@@ -834,6 +864,24 @@
       "to": "searxng",
       "type": "soft",
       "description": "Open WebUI delegates optional web-search requests to the private SearXNG runtime when the feature is enabled."
+    },
+    {
+      "from": "openfga",
+      "to": "postgres",
+      "type": "hard",
+      "description": "OpenFGA stores authorization stores, models, and relationship tuples in PostgreSQL."
+    },
+    {
+      "from": "openfga",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "OpenFGA reads its mirrored datastore password and preshared API key from the OpenBao-backed runtime secret path before startup."
+    },
+    {
+      "from": "openfga",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "The repo-managed bootstrap verification path checks Keycloak-issued operator and runtime identities alongside the delegated authorization graph."
     },
     {
       "from": "serverclaw",

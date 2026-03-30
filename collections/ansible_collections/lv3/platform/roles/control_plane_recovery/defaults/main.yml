@@ -1,3 +1,9 @@
+# Purpose: Define repo-managed control-plane recovery backup defaults, secret paths, and retention settings.
+# Use case: Loaded whenever the control-plane recovery backup runtime converges or validates.
+# Inputs: Runtime directory layout, OpenBao identities, backup schedule, and controller-local SSH key paths.
+# Outputs: Supplies stable defaults consumed by the control-plane recovery runtime role.
+# Idempotency: Fully idempotent because this file only declares defaults.
+# Dependencies: ADR 0165 and ADR 0231.
 ---
 control_plane_recovery_runtime_root: /opt/control-plane-recovery
 control_plane_recovery_runtime_config_dir: /etc/lv3/control-plane-recovery

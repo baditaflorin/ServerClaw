@@ -1,0 +1,58 @@
+---
+# Purpose: Declare the validated input contract for the browser_runner_runtime role.
+argument_specs:
+  main:
+    short_description: Converge the private Playwright browser runner service for governed browser action and extraction.
+    options:
+      browser_runner_runtime_site_dir:
+        type: path
+        required: true
+      browser_runner_runtime_service_dir:
+        type: path
+        required: true
+      browser_runner_runtime_data_dir:
+        type: path
+        required: true
+      browser_runner_runtime_artifact_dir:
+        type: path
+        required: true
+      browser_runner_runtime_compose_file:
+        type: path
+        required: true
+      browser_runner_runtime_dockerfile:
+        type: path
+        required: true
+      browser_runner_runtime_requirements_file:
+        type: path
+        required: true
+      browser_runner_runtime_service_script:
+        type: path
+        required: true
+      browser_runner_runtime_container_name:
+        type: str
+        required: true
+      browser_runner_runtime_image_name:
+        type: str
+        required: true
+      browser_runner_runtime_base_image:
+        type: str
+        required: true
+      browser_runner_runtime_internal_port:
+        type: int
+        required: true
+      browser_runner_runtime_bind_host:
+        type: str
+        required: true
+      browser_runner_runtime_network_mode:
+        type: str
+        required: true
+      browser_runner_runtime_default_timeout_seconds:
+        type: int
+        required: true
+      browser_runner_runtime_max_timeout_seconds:
+        type: int
+        required: true
+      browser_runner_runtime_service_sources:
+        type: list
+        required: true
+        elements: dict

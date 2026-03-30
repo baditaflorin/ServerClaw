@@ -77,6 +77,23 @@
         "failback_method": "Bring backup-lv3 back from the off-site copy, confirm the datastore, then resume scheduled Proxmox backups."
       }
     },
+    "browser_runner": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when the browser-runner runtime, its Playwright image build, or its artifact path cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the browser-runner converge and smoke verification from git."
+      }
+    },
     "changelog_portal": {
       "tier": "R1",
       "recovery_objective": {
@@ -620,6 +637,23 @@
         "location": "docker-runtime-lv3",
         "failover_trigger": "Restore docker-runtime-lv3 when OpenBao or its sealed runtime state cannot be recovered in place.",
         "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the OpenBao converge and unseal workflow from git."
+      }
+    },
+    "openfga": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when OpenFGA, its private host proxy contract, or its delegated authorization runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, rerun the OpenFGA converge and API gateway converge from git, and replay the repo-managed delegated authorization bootstrap verification."
       }
     },
     "ops_portal": {

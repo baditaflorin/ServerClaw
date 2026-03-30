@@ -1,3 +1,9 @@
+# Purpose: Set the default paths, image, ports, and verification settings for the private Gotenberg runtime.
+# Use case: Load when converging the Gotenberg service so the role can render compose state and health checks consistently.
+# Inputs: Platform topology, image catalog, and optional role overrides.
+# Outputs: Default variables consumed by the gotenberg_runtime tasks and templates.
+# Idempotency: Fully idempotent; defaults describe desired values only.
+# Dependencies: ADR 0165 metadata standard, ADR 0278, and the gotenberg_runtime role.
 ---
 gotenberg_runtime_site_dir: /opt/gotenberg
 gotenberg_runtime_compose_file: "{{ gotenberg_runtime_site_dir }}/docker-compose.yml"

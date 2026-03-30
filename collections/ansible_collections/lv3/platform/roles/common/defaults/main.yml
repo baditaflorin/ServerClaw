@@ -1,3 +1,9 @@
+# Purpose: Define shared default variables for reusable common-role task entrypoints.
+# Use case: Load when another role imports the common helper role for assertions, directory trees, waits, or Docker/OpenBao helpers.
+# Inputs: None; this file provides default values consumed by role callers and task includes.
+# Outputs: Stable default variables for the common role.
+# Idempotency: Fully idempotent; defaults declare desired values only.
+# Dependencies: ADR 0165 metadata standard and the common role task entrypoints.
 ---
 common_assert_vars_required: []
 common_assert_vars_expressions: []

@@ -5,6 +5,12 @@ playbooks:
     shared_surfaces:
       - service:api-gateway
       - config/api-gateway-catalog.json
+  playbooks/browser-runner.yml:
+    playbook_id: browser-runner
+    mutation_scope: host
+    shared_surfaces:
+      - service:browser-runner
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/backup-vm.yml:
     playbook_id: backup-vm
     mutation_scope: platform
@@ -198,6 +204,12 @@ playbooks:
     mutation_scope: platform
     shared_surfaces:
       - service:openbao
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/openfga.yml:
+    playbook_id: openfga
+    mutation_scope: platform
+    shared_surfaces:
+      - service:openfga
       - inventory/host_vars/proxmox_florin.yml
   playbooks/portainer.yml:
     playbook_id: portainer

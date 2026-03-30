@@ -18,7 +18,7 @@ Generated from `config/dependency-graph.json`.
 | Tier | Services |
 | --- | --- |
 | `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, Mail Platform, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Excalidraw, Gitea, Gotenberg, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, Outline, Plane, Public Status Page, Semaphore, ServerClaw, Vaultwarden, Windmill, n8n |
+| `2` | Browser Runner, Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Excalidraw, Gitea, Gotenberg, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Plane, Public Status Page, Semaphore, ServerClaw, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway |
 | `4` | Ops Portal |
 
@@ -50,6 +50,7 @@ graph TD
     searxng["SearXNG\nTier 1"]
     step_ca["step-ca\nTier 1"]
     uptime_kuma["Uptime Kuma\nTier 1"]
+    browser_runner["Browser Runner\nTier 2"]
     changelog_portal["Changelog Portal\nTier 2"]
     coolify_apps["Coolify Apps Ingress\nTier 2"]
     docs_portal["Developer Portal\nTier 2"]
@@ -65,6 +66,7 @@ graph TD
     netbox["NetBox\nTier 2"]
     nextcloud["Nextcloud\nTier 2"]
     open_webui["Open WebUI\nTier 2"]
+    openfga["OpenFGA\nTier 2"]
     outline["Outline\nTier 2"]
     plane["Plane\nTier 2"]
     status_page["Public Status Page\nTier 2"]
@@ -79,6 +81,8 @@ graph TD
     alertmanager -->|soft| ntfy
     api_gateway -->|hard| keycloak
     api_gateway -->|soft| nginx_edge
+    browser_runner -->|soft| api_gateway
+    browser_runner -->|hard| docker_runtime
     changelog_portal -->|hard| nginx_edge
     coolify -->|soft| keycloak
     coolify -->|soft| nginx_edge
@@ -140,6 +144,9 @@ graph TD
     open_webui -->|hard| ollama
     open_webui -->|startup_only| openbao
     open_webui -->|soft| searxng
+    openfga -->|soft| keycloak
+    openfga -->|startup_only| openbao
+    openfga -->|hard| postgres
     ops_portal -->|hard| api_gateway
     ops_portal -->|hard| keycloak
     ops_portal -->|hard| nginx_edge

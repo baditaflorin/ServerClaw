@@ -1,3 +1,9 @@
+# Purpose: Run a Nextcloud OCC command with guarded retries and controlled runtime recovery.
+# Use case: Include whenever Nextcloud administration needs an OCC command that can survive transient container interruptions.
+# Inputs: nextcloud_occ_command_* variables describing the command, retry policy, and failure messaging.
+# Outputs: A completed OCC command result or an explicit recovery/failure path.
+# Idempotency: Partially idempotent; the wrapper is repeatable, but the invoked OCC command determines end-state changes.
+# Dependencies: ADR 0165 metadata standard, ADR 0260, and a running nextcloud_runtime deployment.
 ---
 - name: "{{ nextcloud_occ_command_description }}"
   ansible.builtin.command:

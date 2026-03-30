@@ -357,6 +357,21 @@
       "notes": "Secret material is retained until explicit deletion or rotation removes the prior value."
     },
     {
+      "id": "openfga-authorization-graph",
+      "service": "openfga",
+      "name": "OpenFGA authorization graph",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "PostgreSQL openfga database on postgres-lv3",
+        "serverclaw-authz store, authorization models, and tuples"
+      ],
+      "notes": "The delegated authorization graph persists named operator and service-principal relationships until the repo-managed bootstrap contract removes or replaces them."
+    },
+    {
       "id": "outline-attachment-storage",
       "service": "outline",
       "name": "Outline attachment storage",
@@ -546,6 +561,21 @@
         "Windmill workspace logs"
       ],
       "notes": "Workflow logs can contain operator context and transient execution metadata but do not need indefinite retention."
+    },
+    {
+      "id": "browser-runner-artifacts",
+      "service": "browser_runner",
+      "name": "Browser runner bounded session artifacts",
+      "class": "confidential",
+      "retention_days": 30,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "/opt/browser-runner/data/artifacts",
+        "browser-run-session structured outputs"
+      ],
+      "notes": "Captured screenshots, PDFs, selector text, and downloaded files may contain third-party page content or delegated-session data, so retention stays intentionally short and private."
     }
   ]
 }

@@ -442,5 +442,18 @@
     "accepted_statuscodes": [
       "200-299"
     ]
+  },
+  {
+    "name": "Browser Runner Private",
+    "type": "http",
+    "url": "http://10.10.10.20:8096/healthz",
+    "description": "Private browser-runner health endpoint on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
   }
 ]

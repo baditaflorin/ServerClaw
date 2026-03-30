@@ -177,3 +177,25 @@ def test_receipt_environment_for_path_accepts_catalog_driven_subdirectories(
         )
         == "preview"
     )
+
+
+def test_iter_receipt_paths_skips_evidence_artifacts(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    (tmp_path / "2026-03-29-valid-live-apply.json").write_text("{}", encoding="utf-8")
+    (tmp_path / "staging").mkdir()
+    (tmp_path / "staging" / "2026-03-29-valid-staging-live-apply.json").write_text("{}", encoding="utf-8")
+    (tmp_path / "preview").mkdir()
+    (tmp_path / "preview" / "2026-03-29-valid-preview-live-apply.json").write_text("{}", encoding="utf-8")
+    (tmp_path / "evidence").mkdir()
+    (tmp_path / "evidence" / "2026-03-29-non-receipt-evidence.json").write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(live_apply_receipts, "RECEIPTS_DIR", tmp_path)
+
+    paths = [path.relative_to(tmp_path).as_posix() for path in live_apply_receipts.iter_receipt_paths(tmp_path)]
+
+    assert paths == [
+        "2026-03-29-valid-live-apply.json",
+        "preview/2026-03-29-valid-preview-live-apply.json",
+        "staging/2026-03-29-valid-staging-live-apply.json",
+    ]

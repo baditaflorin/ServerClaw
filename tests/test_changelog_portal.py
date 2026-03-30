@@ -64,6 +64,63 @@ class ChangelogPortalTests(unittest.TestCase):
         self.assertGreaterEqual(result["count"], 2)
         self.assertTrue(all("grafana" in entry["service_ids"] for entry in result["entries"]))
 
+    def test_query_deployment_history_ignores_live_apply_evidence_json(self) -> None:
+        temp_dir = Path(tempfile.mkdtemp(prefix="deployment-history-evidence-test-"))
+        receipts_dir = temp_dir / "live-applies"
+        promotions_dir = temp_dir / "promotions"
+        evidence_dir = receipts_dir / "evidence"
+        receipts_dir.mkdir(parents=True, exist_ok=True)
+        promotions_dir.mkdir(parents=True, exist_ok=True)
+        evidence_dir.mkdir(parents=True, exist_ok=True)
+        (receipts_dir / "2026-03-29-adr-9999-grafana-live-apply.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "1.0.0",
+                    "receipt_id": "2026-03-29-adr-9999-grafana-live-apply",
+                    "environment": "production",
+                    "applied_on": "2026-03-29",
+                    "recorded_on": "2026-03-29",
+                    "recorded_by": "codex",
+                    "source_commit": "8465168a90426723fad3083b78878575cff20534",
+                    "repo_version_context": "0.80.0",
+                    "workflow_id": "adr-9999-grafana-live-apply",
+                    "adr": "9999",
+                    "summary": "Grafana live apply.",
+                    "targets": [{"kind": "service", "name": "grafana"}],
+                    "verification": [{"check": "Smoke", "result": "pass", "observed": "Healthy."}],
+                    "evidence_refs": ["docs/adr/0261-playwright-browser-runners-for-serverclaw-web-action-and-extraction.md"],
+                    "notes": [],
+                }
+            ),
+            encoding="utf-8",
+        )
+        (evidence_dir / "2026-03-29-adr-9999-grafana-smoke.json").write_text(
+            json.dumps({"status": "ok", "service": "grafana"}),
+            encoding="utf-8",
+        )
+
+        try:
+            result = query_deployment_history(
+                service_id="grafana",
+                days=30,
+                receipts_dir=receipts_dir,
+                promotions_dir=promotions_dir,
+                service_catalog={
+                    "services": [
+                        {
+                            "id": "grafana",
+                            "name": "Grafana",
+                            "keywords": ["grafana"],
+                        }
+                    ]
+                },
+                mutation_audit_file=temp_dir / "missing-mutation-audit.jsonl",
+            )
+            self.assertEqual(result["count"], 1)
+            self.assertEqual(result["entries"][0]["id"], "2026-03-29-adr-9999-grafana-live-apply")
+        finally:
+            shutil.rmtree(temp_dir)
+
     def test_cli_check_succeeds_without_loki_when_file_fixture_is_provided(self) -> None:
         process = subprocess.run(
             [
