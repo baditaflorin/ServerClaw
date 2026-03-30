@@ -40,5 +40,5 @@ def test_renovate_workflow_bootstraps_inside_pinned_python_runner() -> None:
     assert "uses: actions/checkout@v4" not in workflow
     assert MANUAL_CHECKOUT_FETCH in workflow
     assert 'git checkout --force "${WORKFLOW_SHA}"' in workflow
-    assert "/var/run/docker.sock:/var/run/docker.sock" in workflow
+    assert "/var/run/docker.sock:/var/run/docker.sock" not in workflow
     assert "apt-get install -y --no-install-recommends docker.io" in workflow

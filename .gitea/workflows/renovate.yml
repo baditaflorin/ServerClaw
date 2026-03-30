@@ -11,8 +11,6 @@ jobs:
     timeout-minutes: 30
     container:
       image: registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
-      volumes:
-        - /var/run/docker.sock:/var/run/docker.sock
     env:
       DOCKER_HOST: unix:///var/run/docker.sock
       RENOVATE_IMAGE: registry.lv3.org/check-runner/renovate:42.76.4@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
