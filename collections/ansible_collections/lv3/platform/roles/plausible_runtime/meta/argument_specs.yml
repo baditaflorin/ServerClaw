@@ -1,0 +1,63 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the Plausible runtime and repo-managed analytics registrations.
+    options:
+      plausible_site_dir:
+        type: path
+        required: true
+      plausible_compose_file:
+        type: path
+        required: true
+      plausible_clickhouse_config_dir:
+        type: path
+        required: true
+      plausible_secret_dir:
+        type: path
+        required: true
+      plausible_env_file:
+        type: path
+        required: true
+      plausible_container_name:
+        type: str
+        required: true
+      plausible_db_container_name:
+        type: str
+        required: true
+      plausible_clickhouse_container_name:
+        type: str
+        required: true
+      plausible_internal_port:
+        type: int
+        required: true
+      plausible_runtime_image:
+        type: str
+        required: true
+      plausible_postgres_image:
+        type: str
+        required: true
+      plausible_clickhouse_image:
+        type: str
+        required: true
+      plausible_public_base_url:
+        type: str
+        required: true
+      plausible_internal_base_url:
+        type: str
+        required: true
+      plausible_database_password_local_file:
+        type: path
+        required: true
+      plausible_secret_key_base_local_file:
+        type: path
+        required: true
+      plausible_bootstrap_user_password_local_file:
+        type: path
+        required: true
+      plausible_mailbox_password_local_file:
+        type: path
+        required: true
+      plausible_site_registrations:
+        type: list
+        elements: dict
+        required: true

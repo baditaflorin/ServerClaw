@@ -58,6 +58,7 @@ PORT_KEYS = (
     "searxng_port",
     "searxng_host_proxy_port",
     "langfuse_port",
+    "plausible_port",
     "dify_port",
     "browser_runner_port",
     "outline_port",
@@ -489,6 +490,9 @@ def build_service_urls(
     elif service_id == "langfuse":
         urls["internal"] = service_url("http", private_ip, ports["langfuse_port"])
         port_map["internal"] = ports["langfuse_port"]
+    elif service_id == "plausible":
+        urls["internal"] = service_url("http", private_ip, ports["plausible_port"])
+        port_map["internal"] = ports["plausible_port"]
     elif service_id == "mailpit":
         urls["internal"] = service_url("http", private_ip, ports["mailpit_http_port"])
         urls["smtp"] = service_url("smtp", private_ip, ports["mailpit_smtp_port"])

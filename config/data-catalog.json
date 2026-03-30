@@ -470,6 +470,35 @@
       "notes": "Plane stores project boards, issue metadata, and operator-entered planning content that should remain recoverable across normal backup cycles."
     },
     {
+      "id": "plausible-analytics-events",
+      "service": "plausible",
+      "name": "Plausible analytics event store",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "low",
+      "locations": [
+        "Docker volume plausible-event-data"
+      ],
+      "notes": "ClickHouse stores privacy-preserving pageview and referral aggregates for the declared public LV3 sites without raw IP retention."
+    },
+    {
+      "id": "plausible-site-metadata",
+      "service": "plausible",
+      "name": "Plausible site, user, and configuration metadata",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Docker volume plausible-db-data",
+        "Docker volume plausible-data"
+      ],
+      "notes": "PostgreSQL-backed site configuration, dashboard state, and the bootstrap recovery user metadata remain restorable with the runtime volumes."
+    },
+    {
       "id": "serverclaw-workspace-store",
       "service": "serverclaw",
       "name": "ServerClaw workspace and chat state",

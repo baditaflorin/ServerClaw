@@ -1232,6 +1232,52 @@ groups:
           description: https://tasks.lv3.org:443/ has less than 14 days remaining
             before certificate expiry.
           runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_plausible_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="plausible-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: plausible
+          assurance_id: plausible-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: plausible-public HTTPS probe is failing.
+          description: https://analytics.lv3.org:443/api/system/health/ready is no
+            longer completing a healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_plausible_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="plausible-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: plausible
+          assurance_id: plausible-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: plausible-public TLS certificate is approaching expiry.
+          description: https://analytics.lv3.org:443/api/system/health/ready has less
+            than 21 days remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_plausible_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="plausible-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: plausible
+          assurance_id: plausible-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: plausible-public TLS certificate is within the critical expiry
+            window.
+          description: https://analytics.lv3.org:443/api/system/health/ready has less
+            than 14 days remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
       - alert: HTTPSProbeFailed_portainer_internal
         expr: probe_success{job="https-tls-blackbox",assurance_id="portainer-internal"}
           == 0

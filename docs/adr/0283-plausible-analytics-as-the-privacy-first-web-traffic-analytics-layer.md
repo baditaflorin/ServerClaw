@@ -1,9 +1,10 @@
 # ADR 0283: Plausible Analytics As The Privacy-First Web Traffic Analytics Layer
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.99
+- Implemented In Platform Version: 0.130.66
+- Implemented On: 2026-03-30
 - Date: 2026-03-29
 
 ## Context
@@ -44,24 +45,27 @@ analytics layer for public platform services.
 
 - Plausible runs as a Docker Compose service on the docker-runtime VM; it
   ships with an embedded ClickHouse instance in the official compose bundle
-- Authentication is delegated to Keycloak via OIDC (ADR 0063)
+- The dashboard is protected by the shared NGINX edge oauth2-proxy and
+  Keycloak sign-in boundary; the public tracker, event ingestion, and health
+  endpoints stay intentionally unauthenticated for instrumentation and probes
 - The service is published under the platform subdomain model (ADR 0021) at
   `analytics.<domain>`
 - ClickHouse data and Plausible PostgreSQL data are stored on named Docker
   volumes included in the backup scope (ADR 0086)
-- Secrets (secret key base, OIDC client credentials, SMTP credentials) are
-  injected from OpenBao following ADR 0077
+- Secrets (secret key base, database password, and SMTP credentials) are
+  injected from OpenBao following ADR 0077; the repo-managed bootstrap user
+  remains as the recovery and verification identity
 
 ### Site registration rules
 
 - each public-facing subdomain that serves user-facing pages registers as a
-  Plausible site; the registration is declared in the Ansible role's
-  `defaults/main.yml` site list and applied idempotently
+  Plausible site; the registration is declared in host inventory as the
+  explicit `plausible_site_registrations` list and applied idempotently
 - internal-only services (monitoring, Gitea, Portainer) are registered as
   sites only if operators explicitly decide to track internal traffic
-- the Plausible script snippet is added to the NGINX edge's standard include
-  block so all served responses automatically include the tracker without
-  per-service changes
+- the Plausible script snippet is injected only for the declared tracked sites
+  in the shared NGINX edge publication template; authenticated operator
+  surfaces and API-only traffic remain out of scope
 
 ### Data governance rules
 
@@ -101,8 +105,8 @@ analytics layer for public platform services.
   logs, or Langfuse for LLM interaction traces.
 - Plausible does not track authenticated internal user activity or API traffic;
   those remain in the API gateway request log and Loki.
-- Plausible event data is not correlated with Keycloak user sessions under
-  any circumstance.
+- Plausible event data is not correlated with Keycloak user sessions or any
+  other authenticated identity under any circumstance.
 - A/B testing and conversion funnel features of Plausible are not in scope
   for the initial deployment.
 

@@ -1,0 +1,60 @@
+BASH=/usr/bin/bash
+BASHOPTS=checkwinsize:cmdhist:complete_fullquote:extquote:force_fignore:globasciiranges:globskipdots:hostcomplete:interactive_comments:login_shell:patsub_replacement:progcomp:promptvars:sourcepath
+BASH_ALIASES=()
+BASH_ARGC=([0]="1")
+BASH_ARGV=([0]="pipefail")
+BASH_CMDS=()
+BASH_EXECUTION_STRING=set
+BASH_LINENO=()
+BASH_LOADABLES_PATH=/usr/local/lib/bash:/usr/lib/bash:/opt/local/lib/bash:/usr/pkg/lib/bash:/opt/pkg/lib/bash:.
+BASH_SOURCE=()
+BASH_VERSINFO=([0]="5" [1]="2" [2]="37" [3]="1" [4]="release" [5]="x86_64-pc-linux-gnu")
+BASH_VERSION='5.2.37(1)-release'
+DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+DIRSTACK=()
+EUID=1000
+GROUPS=()
+HOME=/home/ops
+HOSTNAME=docker-runtime-lv3
+HOSTTYPE=x86_64
+IFS=$' \t\n'
+LANG=C.UTF-8
+LC_ALL=C.UTF-8
+LC_CTYPE=C.UTF-8
+LOGNAME=ops
+MACHTYPE=x86_64-pc-linux-gnu
+MOTD_SHOWN=pam
+OPTERR=1
+OPTIND=1
+OSTYPE=linux-gnu
+PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+PIPESTATUS=([0]="1")
+PPID=3575225
+PS4='+ '
+PWD=/home/ops
+SHELL=/bin/bash
+SHELLOPTS=braceexpand:hashall:interactive-comments
+SHLVL=2
+SSH_CLIENT='10.10.10.1 47168 22'
+SSH_CONNECTION='10.10.10.1 47168 10.10.10.20 22'
+TERM=dumb
+UID=1000
+USER=ops
+XDG_RUNTIME_DIR=/run/user/1000
+XDG_SESSION_CLASS=user
+XDG_SESSION_ID=9799
+XDG_SESSION_TYPE=tty
+_=']'
+2026-03-30T08:50:00+00:00
+NAMES                               STATUS
+matrix-mautrix-discord              Up 5 minutes
+matrix-mautrix-whatsapp             Up 5 minutes
+matrix-synapse                      Up 5 minutes (healthy)
+matrix-synapse-openbao-agent        Up 5 minutes (healthy)
+lv3-openbao                         Up 7 minutes
+changedetection                     Up 14 minutes (healthy)
+plausible                           Up 19 minutes
+
+{"sessions":"ok","postgres":"ok","clickhouse":"ok","sites_cache":"ok"}
+LISTEN 0      4096     10.10.10.20:8016       0.0.0.0:*
+LISTEN 0      4096       127.0.0.1:8016       0.0.0.0:*
