@@ -9,6 +9,8 @@ PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "temporal.yml"
 SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "temporal.yml"
 SECRET_MANIFEST_PATH = REPO_ROOT / "config" / "controller-local-secrets.json"
 ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
+WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
+MAKEFILE_PATH = REPO_ROOT / "Makefile"
 
 
 def load_yaml(path: Path) -> list[dict] | dict:
@@ -88,3 +90,17 @@ def test_temporal_service_wrapper_secret_manifest_and_execution_scopes_register_
     entry = scopes["playbooks"]["playbooks/temporal.yml"]
     assert entry["playbook_id"] == "temporal"
     assert entry["canonical_service_id"] == "temporal"
+
+
+def test_temporal_workflow_catalog_and_make_targets_align() -> None:
+    workflow = json.loads(WORKFLOW_CATALOG_PATH.read_text(encoding="utf-8"))["workflows"]["converge-temporal"]
+    makefile = MAKEFILE_PATH.read_text(encoding="utf-8")
+
+    assert workflow["preferred_entrypoint"] == {
+        "kind": "make_target",
+        "target": "converge-temporal",
+        "command": "make converge-temporal",
+    }
+    assert "syntax-check-temporal" in workflow["validation_targets"]
+    assert "syntax-check-temporal:" in makefile
+    assert "converge-temporal:" in makefile

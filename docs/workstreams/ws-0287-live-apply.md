@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0287](../adr/0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md)
 - Title: deploy Woodpecker CI as the API-driven continuous integration server
-- Status: live_applied
+- Status: ready_for_merge
 - Branch: `codex/ws-0287-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0287-live-apply`
 - Owner: codex
@@ -52,17 +52,27 @@
 - `config/ansible-execution-scopes.yaml`
 - `config/ansible-role-idempotency.yml`
 - `config/correction-loops.json`
+- `config/subdomain-exposure-registry.json`
 - `config/uptime-kuma/monitors.json`
+- `config/prometheus/file_sd/https_tls_targets.yml`
 - `config/prometheus/file_sd/slo_targets.yml`
+- `config/prometheus/rules/https_tls_alerts.yml`
 - `config/prometheus/rules/slo_rules.yml`
 - `config/prometheus/rules/slo_alerts.yml`
 - `config/grafana/dashboards/slo-overview.json`
 - `Makefile`
+- `playbooks/tasks/post-verify.yml`
+- `collections/ansible_collections/lv3/platform/playbooks/tasks/post-verify.yml`
+- `collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/`
 - `tests/test_generate_platform_vars.py`
+- `tests/test_nginx_edge_publication_role.py`
+- `tests/test_post_verify_tasks.py`
 - `tests/test_postgres_vm_access_policy.py`
+- `tests/test_temporal_playbook.py`
 - `tests/test_woodpecker_client.py`
 - `tests/test_woodpecker_playbook.py`
 - `tests/test_woodpecker_runtime_role.py`
+- `tests/test_woodpecker_tool.py`
 - `receipts/image-scans/`
 - `receipts/live-applies/`
 - `docs/adr/.index.yaml`
@@ -88,6 +98,7 @@
 - The public edge role now falls back to a dedicated site-local certificate for `ci.lv3.org` when the shared `lv3-edge` certificate does not yet cover the Woodpecker hostname, so unrelated SAN churn on the shared edge certificate no longer blocks the live apply.
 - The controller-local Woodpecker API bundle is verified live: `whoami` resolves to `ops-gitea` admin user `id=1`, and the seeded repository secret list contains `LV3_WOODPECKER_SECRET_SMOKE`.
 - Manual `trigger-pipeline --branch main --wait` is not yet a valid exact-main verification on this branch because `origin/main` still does not contain `.woodpecker.yml`; Woodpecker accepts the trigger request with `204 No Content`, but no pipeline becomes visible until the forge branch being triggered actually carries the workflow file.
+- `workstreams.yaml` stays non-terminal on this branch so branch-level ownership validation remains active until the final `main` closeout flips the workstream back to its terminal state.
 
 ## Remaining For Merge-To-Main
 
