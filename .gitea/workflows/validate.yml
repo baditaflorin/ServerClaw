@@ -39,7 +39,7 @@ jobs:
           docker_bin="$(command -v docker || command -v docker.io || true)"
           if [ -n "${docker_bin}" ]; then
             printf '%s\n' "${docker_bin}" > .local/validation-gate/docker-bin.path
-            workspace_host_path="$("${docker_bin}" ps -q | while read -r container_id; do "${docker_bin}" inspect "${container_id}" --format "{{range .Mounts}}{{if eq .Destination \"${PWD}\"}}{{.Source}}{{end}}{{end}}"; done | sed -n "/./{p;q;}")"
+            workspace_host_path="$("${docker_bin}" ps -q | while read -r container_id; do "${docker_bin}" inspect "${container_id}" --format "{{range .Mounts}}{{if eq .Destination \"${PWD}\"}}{{.Source}}{{end}}{{end}}"; done | awk 'NF { value=$0 } END { if (value != \"\") print value }')"
             if [ -n "${workspace_host_path}" ]; then
               printf '%s\n' "${workspace_host_path}" > .local/validation-gate/workspace-host.path
             fi
@@ -55,7 +55,7 @@ jobs:
             exit 1
           fi
           printf '%s\n' "${docker_bin}" > .local/validation-gate/docker-bin.path
-          workspace_host_path="$("${docker_bin}" ps -q | while read -r container_id; do "${docker_bin}" inspect "${container_id}" --format "{{range .Mounts}}{{if eq .Destination \"${PWD}\"}}{{.Source}}{{end}}{{end}}"; done | sed -n "/./{p;q;}")"
+          workspace_host_path="$("${docker_bin}" ps -q | while read -r container_id; do "${docker_bin}" inspect "${container_id}" --format "{{range .Mounts}}{{if eq .Destination \"${PWD}\"}}{{.Source}}{{end}}{{end}}"; done | awk 'NF { value=$0 } END { if (value != \"\") print value }')"
           if [ -z "${workspace_host_path}" ]; then
             echo "Workspace host path remained unavailable after Docker CLI installation." >&2
             exit 1
