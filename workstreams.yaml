@@ -413,8 +413,9 @@ workstreams:
       changelog_entry: implemented ADR 0260 by re-verifying repo-managed
         Nextcloud on docker-runtime-lv3 with a dedicated postgres backend,
         shared-edge DAV publication, and synchronized recovery for stale
-        compose networks, Docker bridge chains, and detached local OpenBao
-        publication on the latest realistic origin/main baseline
+        compose networks, Docker bridge chains, detached local OpenBao
+        publication, and concurrent Docker interruptions during mutable OCC
+        convergence on the latest realistic origin/main baseline
       release_bump: patch
       included_in_repo_version: 0.177.92
       latest_receipts:
@@ -657,8 +658,9 @@ workstreams:
       changelog_entry: implemented ADR 0260 by re-verifying repo-managed
         Nextcloud on docker-runtime-lv3 with a dedicated postgres backend,
         shared-edge DAV publication, and synchronized recovery for stale
-        compose networks, Docker bridge chains, and detached local OpenBao
-        publication on the latest realistic origin/main baseline
+        compose networks, Docker bridge chains, detached local OpenBao
+        publication, and concurrent Docker interruptions during mutable OCC
+        convergence on the latest realistic origin/main baseline
       release_bump: patch
       included_in_repo_version: 0.177.92
       latest_receipts:

@@ -3,10 +3,10 @@
 - Date: 2026-03-30
 
 ## Summary
-- implements ADR 0260 by re-verifying repo-managed Nextcloud on docker-runtime-lv3 with a dedicated postgres backend, shared-edge DAV publication, and synchronized recovery for stale compose networks, Docker bridge chains, and detached local OpenBao publication on the latest realistic origin/main baseline
+- implements ADR 0260 by re-verifying repo-managed Nextcloud on docker-runtime-lv3 with a dedicated postgres backend, shared-edge DAV publication, and synchronized recovery for stale compose networks, Docker bridge chains, detached local OpenBao publication, and concurrent Docker interruptions during mutable OCC convergence on the latest realistic origin/main baseline
 
 ## Platform Impact
-- platform version advances to 0.130.61 after the synchronized main release 0.177.92 re-verifies the Nextcloud personal data plane, including stale compose-network, Docker bridge-chain, and detached local OpenBao publication recovery, on top of the 0.130.60 baseline
+- platform version advances to 0.130.61 after the synchronized main release 0.177.92 re-verifies the Nextcloud personal data plane, including stale compose-network, Docker bridge-chain, detached local OpenBao publication, and concurrent mutable OCC recovery on top of the 0.130.60 baseline
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

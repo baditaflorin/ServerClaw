@@ -4475,7 +4475,7 @@ adr_index:
       - serverclaw
     summary: We will use Nextcloud as the canonical personal data plane for ServerClaw.
     filename: 0260-nextcloud-as-the-canonical-personal-data-plane-for-serverclaw.md
-    implemented_version: 0.177.91
+    implemented_version: 0.177.92
   - adr: '0261'
     title: Playwright Browser Runners For ServerClaw Web Action And Extraction
     status: Accepted

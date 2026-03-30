@@ -55,16 +55,16 @@ branch-local proof authoritative on `main`.
 
 - `git fetch origin --prune` confirmed the newest available baseline before the
   final recut remained `origin/main` commit
-  `f965aa3101fa2cd2260a8e6fda165f366365ed80`, which already carried repository
-  version `0.177.90` and platform version `0.130.60`.
-- Release `0.177.91` was cut from synchronized source commit
-  `9db57048717121e6a0d933d44e87ac3835551baf` so ADR 0260 could be replayed from
-  an exact-main tree after `origin/main` had advanced beyond the earlier
-  2026-03-29 proof.
+  `86423688ceb22626a41204b5c83d0f90f0b79d71`, which already carried repository
+  version `0.177.91` and platform version `0.130.60`.
+- The final exact-main proof was replayed from committed source
+  `eab22d2560767573b15334ceaf073d929eb0e451`, which preserved repository
+  version `0.177.92` while hardening mutable Nextcloud OCC convergence against
+  concurrent Docker interruptions on the shared host.
 - `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=nextcloud env=production`
   succeeded from that synchronized tree with final recap
-  `docker-runtime-lv3 ok=156 changed=4 failed=0 skipped=32`,
-  `nginx-lv3 ok=38 changed=4 failed=0 skipped=7`,
+  `docker-runtime-lv3 ok=181 changed=7 failed=0 skipped=106`,
+  `nginx-lv3 ok=39 changed=2 failed=0 skipped=7`,
   `postgres-lv3 ok=52 changed=0 failed=0 skipped=14`, and
   `localhost ok=18 changed=0 failed=0 skipped=3`.
 - Public verification returned
@@ -81,13 +81,20 @@ branch-local proof authoritative on `main`.
 - The follow-up container health inspection confirmed both `nextcloud-redis`
   and `nextcloud-openbao-agent` reached `Status: healthy`, proving the replay
   preserved the post-apply runtime health and the shared OpenBao recovery path.
+- Repo validation also passed on the final branch tree:
+  `./scripts/validate_repo.sh agent-standards workstream-surfaces data-models generated-docs`,
+  `uv run --with pyyaml python3 scripts/canonical_truth.py --check`,
+  `uv run --with pyyaml --with jsonschema python3 scripts/live_apply_receipts.py --validate`,
+  `uv run --with pyyaml --with jsonschema python3 scripts/platform_manifest.py --check`,
+  `git diff --check`, and `make pre-push-gate`.
 
 ## Outcome
 
-- Release `0.177.91` carries ADR 0260's exact-main replay onto `main`.
+- Release `0.177.92` carries ADR 0260's exact-main replay onto `main`.
 - Platform version `0.130.61` becomes the current integrated platform baseline
-  because the synchronized release `0.177.91` was live-applied successfully
+  because the synchronized release `0.177.92` was live-applied successfully
   from the refreshed mainline tree.
 - `receipts/live-applies/2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply.json`
-  is the canonical exact-main proof for the Nextcloud personal data plane,
-  superseding the earlier 2026-03-29 mainline receipt.
+  is the canonical exact-main proof for the Nextcloud personal data plane from
+  committed source `eab22d2560767573b15334ceaf073d929eb0e451`, superseding the
+  earlier 2026-03-29 mainline receipt.

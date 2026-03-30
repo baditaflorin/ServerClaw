@@ -2741,12 +2741,12 @@
     }
   ],
   "summary": {
-    "catalog_total": 37,
-    "active_total": 33,
-    "active_public_total": 29,
+    "catalog_total": 38,
+    "active_total": 34,
+    "active_public_total": 30,
     "active_private_total": 4,
     "planned_total": 4,
-    "shared_edge_total": 28,
+    "shared_edge_total": 29,
     "platform_sso_total": 13
   }
 }
