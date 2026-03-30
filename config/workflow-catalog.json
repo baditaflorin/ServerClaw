@@ -3040,7 +3040,7 @@
       }
     },
     "converge-matrix-synapse": {
-      "description": "Converge Matrix Synapse on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish matrix.lv3.org through the shared edge, and expose the private controller proxy on the Proxmox host.",
+      "description": "Converge Matrix Synapse on docker-runtime-lv3, provision its PostgreSQL backend plus bridge databases on postgres-lv3, publish matrix.lv3.org through the shared edge, render Discord and WhatsApp application-service registrations, and expose the private controller proxy on the Proxmox host.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -3057,7 +3057,18 @@
           "matrix_synapse_database_password",
           "matrix_synapse_ops_password",
           "matrix_synapse_registration_shared_secret",
-          "matrix_synapse_signing_key"
+          "matrix_synapse_signing_key",
+          "matrix_synapse_mautrix_discord_database_password",
+          "matrix_synapse_mautrix_discord_as_token",
+          "matrix_synapse_mautrix_discord_hs_token",
+          "matrix_synapse_mautrix_discord_provisioning_shared_secret",
+          "matrix_synapse_mautrix_discord_avatar_proxy_key",
+          "matrix_synapse_mautrix_whatsapp_database_password",
+          "matrix_synapse_mautrix_whatsapp_as_token",
+          "matrix_synapse_mautrix_whatsapp_hs_token",
+          "matrix_synapse_mautrix_whatsapp_provisioning_shared_secret",
+          "matrix_synapse_mautrix_whatsapp_public_media_signing_key",
+          "matrix_synapse_mautrix_whatsapp_encryption_pickle_key"
         ]
       },
       "validation_targets": [
@@ -3075,19 +3086,22 @@
         "roles/proxmox_tailscale_proxy",
         "roles/proxmox_security",
         "roles/nginx_edge_publication",
+        "scripts/matrix_admin_register.py",
+        "scripts/matrix_bridge_smoke.py",
         "inventory/host_vars/proxmox_florin.yml",
         "config/uptime-kuma/monitors.json",
         "config/grafana/dashboards/matrix-synapse.json",
         "config/alertmanager/rules/matrix-synapse.yml"
       ],
       "outputs": [
-        "A repo-managed Matrix Synapse runtime on docker-runtime-lv3 with PostgreSQL persistence, a private controller proxy on the Proxmox host, and a public client API at matrix.lv3.org while federation remains disabled."
+        "A repo-managed Matrix Synapse runtime on docker-runtime-lv3 with PostgreSQL persistence, Discord and WhatsApp mautrix bridges, a private controller proxy on the Proxmox host, and a public client API at matrix.lv3.org while federation remains disabled."
       ],
       "verification_commands": [
         "make syntax-check-matrix-synapse",
         "curl -fsS https://matrix.lv3.org/_matrix/client/versions",
         "curl -fsS http://100.64.0.1:8015/_matrix/client/versions",
-        "python3 -c 'import json,pathlib,urllib.request; password=pathlib.Path(\"/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/ops-password.txt\").read_text().strip(); data=json.dumps({\"type\":\"m.login.password\",\"identifier\":{\"type\":\"m.id.user\",\"user\":\"ops\"},\"password\":password}).encode(); req=urllib.request.Request(\"http://100.64.0.1:8015/_matrix/client/v3/login\", data=data, headers={\"Content-Type\":\"application/json\"}); print(urllib.request.urlopen(req).read().decode())'"
+        "python3 scripts/matrix_admin_register.py --base-url https://matrix.lv3.org --shared-secret-file .local/matrix-synapse/registration-shared-secret.txt --username ops --password-file .local/matrix-synapse/ops-password.txt --admin",
+        "python3 scripts/matrix_bridge_smoke.py --base-url https://matrix.lv3.org --username ops --password-file .local/matrix-synapse/ops-password.txt --bot-user-id @discordbot:matrix.lv3.org --bot-user-id @whatsappbot:matrix.lv3.org"
       ],
       "execution_class": "mutation",
       "budget": {

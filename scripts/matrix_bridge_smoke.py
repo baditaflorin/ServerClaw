@@ -13,6 +13,15 @@ from pathlib import Path
 from typing import Any
 
 
+def decode_json_body(body: str) -> dict[str, Any]:
+    if not body:
+        return {}
+    try:
+        return json.loads(body)
+    except json.JSONDecodeError:
+        return {"raw_body": body}
+
+
 def request_json(
     method: str,
     url: str,
@@ -30,26 +39,67 @@ def request_json(
     try:
         with urllib.request.urlopen(request) as response:
             body = response.read().decode("utf-8")
-            return response.status, json.loads(body) if body else {}
+            return response.status, decode_json_body(body)
     except urllib.error.HTTPError as exc:
         body = exc.read().decode("utf-8")
-        response_payload = json.loads(body) if body else {}
+        response_payload = decode_json_body(body)
         return exc.code, response_payload
 
 
-def login(base_url: str, username: str, password: str) -> dict[str, Any]:
-    status, payload = request_json(
-        "POST",
-        f"{base_url}/_matrix/client/v3/login",
-        {
-            "type": "m.login.password",
-            "identifier": {"type": "m.id.user", "user": username},
-            "password": password,
-        },
+def persist_access_token(access_token_file: Path | None, access_token: str) -> None:
+    if access_token_file is None:
+        return
+    access_token_file.parent.mkdir(parents=True, exist_ok=True)
+    access_token_file.write_text(f"{access_token}\n", encoding="utf-8")
+    access_token_file.chmod(0o600)
+
+
+def whoami(base_url: str, access_token: str) -> tuple[int, dict[str, Any]]:
+    return request_json(
+        "GET",
+        f"{base_url}/_matrix/client/v3/account/whoami",
+        access_token=access_token,
     )
-    if status != 200 or "access_token" not in payload:
+
+
+def login(
+    base_url: str,
+    username: str,
+    password: str,
+    *,
+    access_token_file: Path | None = None,
+    max_rate_limit_wait_seconds: int = 300,
+) -> dict[str, Any]:
+    if access_token_file and access_token_file.exists():
+        cached_access_token = access_token_file.read_text(encoding="utf-8").strip()
+        if cached_access_token:
+            status, payload = whoami(base_url, cached_access_token)
+            if status == 200 and "user_id" in payload:
+                return {"access_token": cached_access_token, **payload}
+
+    waited_seconds = 0.0
+    while True:
+        status, payload = request_json(
+            "POST",
+            f"{base_url}/_matrix/client/v3/login",
+            {
+                "type": "m.login.password",
+                "identifier": {"type": "m.id.user", "user": username},
+                "password": password,
+            },
+        )
+        if status == 200 and "access_token" in payload:
+            persist_access_token(access_token_file, str(payload["access_token"]))
+            return payload
+        if status == 429 and payload.get("errcode") == "M_LIMIT_EXCEEDED":
+            retry_after_ms = int(payload.get("retry_after_ms") or 1000)
+            retry_after_seconds = max(retry_after_ms / 1000.0, 1.0)
+            if waited_seconds + retry_after_seconds > max_rate_limit_wait_seconds:
+                raise RuntimeError(f"Matrix login rate limit persisted for {username}: {payload}")
+            time.sleep(retry_after_seconds)
+            waited_seconds += retry_after_seconds
+            continue
         raise RuntimeError(f"Matrix login failed for {username}: {payload}")
-    return payload
 
 
 def sync(base_url: str, access_token: str, *, since: str | None = None, timeout_ms: int = 0) -> dict[str, Any]:
@@ -129,6 +179,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--base-url", required=True, help="Matrix base URL, for example https://matrix.lv3.org")
     parser.add_argument("--username", required=True)
     parser.add_argument("--password-file", required=True, type=Path)
+    parser.add_argument("--access-token-file", type=Path, help="Optional local file used to reuse or persist a verified Matrix access token")
     parser.add_argument("--bot-user-id", action="append", required=True, dest="bot_user_ids")
     parser.add_argument("--timeout-seconds", type=int, default=90)
     return parser.parse_args()
@@ -138,10 +189,15 @@ def main() -> int:
     args = parse_args()
     base_url = args.base_url.rstrip("/")
     password = args.password_file.read_text(encoding="utf-8").strip()
-    login_payload = login(base_url, args.username, password)
+    login_payload = login(
+        base_url,
+        args.username,
+        password,
+        access_token_file=args.access_token_file,
+    )
     access_token = login_payload["access_token"]
 
-    versions_status, versions_payload = request_json("GET", f"{base_url}/_matrix/client/v3/versions")
+    versions_status, versions_payload = request_json("GET", f"{base_url}/_matrix/client/versions")
     if versions_status != 200 or "versions" not in versions_payload:
         raise RuntimeError(f"Matrix versions endpoint did not return the expected payload: {versions_payload}")
 

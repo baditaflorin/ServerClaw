@@ -366,6 +366,7 @@
     owner: root
     group: root
     mode: "0600"
+  register: matrix_synapse_env_template
   no_log: true
 
 - name: Render the Matrix Synapse compose file
@@ -375,6 +376,7 @@
     owner: root
     group: root
     mode: "0644"
+  register: matrix_synapse_compose_template
 
 - name: Check whether the Matrix Synapse signing key already exists
   ansible.builtin.stat:
@@ -458,6 +460,7 @@
     owner: "{{ matrix_synapse_uid }}"
     group: "{{ matrix_synapse_gid }}"
     mode: "0600"
+  register: matrix_synapse_homeserver_template
   no_log: true
 
 - name: Render the mautrix Discord configuration
@@ -544,6 +547,29 @@
   register: matrix_synapse_mautrix_whatsapp_registration_generate
   changed_when: matrix_synapse_mautrix_whatsapp_registration_generate.rc == 0
 
+- name: Ensure the mautrix bridge registrations are readable by Synapse
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - "{{ matrix_synapse_mautrix_discord_registration_file }}"
+    - "{{ matrix_synapse_mautrix_whatsapp_registration_file }}"
+
+- name: Decide whether the Matrix Synapse stack must be force-recreated for config-backed changes
+  ansible.builtin.set_fact:
+    matrix_synapse_force_recreate_stack: >-
+      {{
+        (matrix_synapse_env_template.changed | default(false))
+        or (matrix_synapse_compose_template.changed | default(false))
+        or (matrix_synapse_homeserver_template.changed | default(false))
+        or (matrix_synapse_mautrix_discord_config_template.changed | default(false))
+        or (matrix_synapse_mautrix_whatsapp_config_template.changed | default(false))
+        or (matrix_synapse_mautrix_discord_registration_generate.changed | default(false))
+        or (matrix_synapse_mautrix_whatsapp_registration_generate.changed | default(false))
+      }}
+
 - name: Pull the Matrix Synapse image
   ansible.builtin.command:
     argv:
@@ -563,23 +589,152 @@
     or 'Downloaded newer image' in matrix_synapse_pull.stdout
     or 'Pull complete' in matrix_synapse_pull.stdout
 
-- name: Start the Matrix Synapse stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ matrix_synapse_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ matrix_synapse_site_dir }}"
-  register: matrix_synapse_up
-  changed_when: >-
-    'Creating' in matrix_synapse_up.stdout
-    or 'Recreating' in matrix_synapse_up.stdout
-    or 'Starting' in matrix_synapse_up.stdout
+- name: Start the Matrix Synapse stack and recover stale compose networks
+  block:
+    - name: Recreate the Matrix Synapse stack when config-backed files changed
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ matrix_synapse_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+          - --force-recreate
+      args:
+        chdir: "{{ matrix_synapse_site_dir }}"
+      register: matrix_synapse_up
+      changed_when: >-
+        'Creating' in matrix_synapse_up.stdout
+        or 'Recreating' in matrix_synapse_up.stdout
+        or 'Starting' in matrix_synapse_up.stdout
+        or 'Running' in matrix_synapse_up.stdout
+      when: matrix_synapse_force_recreate_stack
+
+    - name: Start the Matrix Synapse stack
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ matrix_synapse_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ matrix_synapse_site_dir }}"
+      register: matrix_synapse_up
+      changed_when: >-
+        'Creating' in matrix_synapse_up.stdout
+        or 'Recreating' in matrix_synapse_up.stdout
+        or 'Starting' in matrix_synapse_up.stdout
+      when: not matrix_synapse_force_recreate_stack
+  rescue:
+    - name: Flag Docker bridge-chain and stale Matrix Synapse compose network failures after startup failure
+      ansible.builtin.set_fact:
+        matrix_synapse_docker_bridge_chain_missing: >-
+          {{
+            'No chain/target/match by that name' in (matrix_synapse_up.stderr | default(''))
+            or 'Unable to enable ACCEPT OUTGOING rule' in (matrix_synapse_up.stderr | default(''))
+          }}
+        matrix_synapse_compose_network_missing: >-
+          {{
+            'failed to create endpoint' in (matrix_synapse_up.stderr | default(''))
+            and 'does not exist' in (matrix_synapse_up.stderr | default(''))
+          }}
+
+    - name: Surface unexpected Matrix Synapse startup failures
+      ansible.builtin.fail:
+        msg: >-
+          {{
+            matrix_synapse_up.stderr
+            | default(matrix_synapse_up.stdout)
+            | default('Unknown Matrix Synapse compose startup failure.')
+          }}
+      when: >-
+        not matrix_synapse_docker_bridge_chain_missing
+        and not matrix_synapse_compose_network_missing
+
+    - name: Reset stale Matrix Synapse compose resources after startup failure
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ matrix_synapse_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ matrix_synapse_site_dir }}"
+      register: matrix_synapse_compose_down_retry
+      changed_when: >-
+        'Stopping' in matrix_synapse_compose_down_retry.stdout
+        or 'Removing' in matrix_synapse_compose_down_retry.stdout
+      failed_when: false
+      when: matrix_synapse_compose_network_missing
+
+    - name: Restart Docker to restore bridge chains before retrying Matrix Synapse startup
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: matrix_synapse_docker_bridge_chain_missing or matrix_synapse_compose_network_missing
+
+    - name: Ensure Docker bridge networking chains are present before retrying Matrix Synapse startup
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_bridge_chains
+      vars:
+        common_docker_bridge_chains_service_name: docker
+        common_docker_bridge_chains_require_nat_chain: true
+      when: matrix_synapse_docker_bridge_chain_missing or matrix_synapse_compose_network_missing
+
+    - name: Wait for the Docker daemon to answer after Matrix Synapse network recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - info
+          - --format
+          - '{{ "{{.ServerVersion}}" }}'
+      register: matrix_synapse_docker_info
+      changed_when: false
+      retries: 10
+      delay: 2
+      until: matrix_synapse_docker_info.rc == 0
+      when: matrix_synapse_docker_bridge_chain_missing or matrix_synapse_compose_network_missing
+
+    - name: Remove the broken Matrix Synapse container before retrying startup
+      ansible.builtin.command:
+        argv:
+          - docker
+          - rm
+          - -f
+          - "{{ matrix_synapse_container_name }}"
+      register: matrix_synapse_remove_broken_container
+      changed_when: "'No such container' not in (matrix_synapse_remove_broken_container.stderr | default(''))"
+      failed_when: false
+      when: matrix_synapse_docker_bridge_chain_missing or matrix_synapse_compose_network_missing
+
+    - name: Retry Matrix Synapse startup after resetting stale compose resources
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ matrix_synapse_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+          - --force-recreate
+      args:
+        chdir: "{{ matrix_synapse_site_dir }}"
+      register: matrix_synapse_up_retry
+      changed_when: >-
+        'Creating' in matrix_synapse_up_retry.stdout
+        or 'Recreating' in matrix_synapse_up_retry.stdout
+        or 'Starting' in matrix_synapse_up_retry.stdout
+        or 'Running' in matrix_synapse_up_retry.stdout
+      when: matrix_synapse_docker_bridge_chain_missing or matrix_synapse_compose_network_missing
 
 - name: Wait for Matrix Synapse to listen locally
   ansible.builtin.wait_for:
@@ -599,7 +754,29 @@
   until: matrix_synapse_versions_ready.status == 200
   changed_when: false
 
-- name: Ensure the Matrix Synapse ops admin exists
+- name: Check whether the Matrix Synapse ops admin already accepts the bootstrap password
+  ansible.builtin.uri:
+    url: "{{ matrix_synapse_internal_base_url }}/_matrix/client/v3/login"
+    method: POST
+    body_format: json
+    body:
+      type: m.login.password
+      identifier:
+        type: m.id.user
+        user: "{{ matrix_synapse_admin_localpart }}"
+      password: "{{ matrix_synapse_ops_password }}"
+    status_code:
+      - 200
+      - 400
+      - 401
+      - 403
+      - 429
+  register: matrix_synapse_admin_login_probe
+  changed_when: false
+  failed_when: false
+  no_log: true
+
+- name: Ensure the Matrix Synapse ops admin exists when the bootstrap password does not work yet
   ansible.builtin.command:
     argv:
       - docker
@@ -617,9 +794,27 @@
       - http://127.0.0.1:8008
   register: matrix_synapse_admin_registration
   changed_when: false
+  failed_when: false
+  when: matrix_synapse_admin_login_probe.status != 200
+  no_log: true
+
+- name: Confirm the Matrix Synapse ops admin password login succeeds
+  ansible.builtin.uri:
+    url: "{{ matrix_synapse_internal_base_url }}/_matrix/client/v3/login"
+    method: POST
+    body_format: json
+    body:
+      type: m.login.password
+      identifier:
+        type: m.id.user
+        user: "{{ matrix_synapse_admin_localpart }}"
+      password: "{{ matrix_synapse_ops_password }}"
+    status_code: 200
+  register: matrix_synapse_admin_login_ready
   retries: 6
   delay: 10
-  until: matrix_synapse_admin_registration.rc == 0
+  until: matrix_synapse_admin_login_ready.status == 200
+  changed_when: false
   no_log: true
 
 - name: Read the Matrix Synapse signing key

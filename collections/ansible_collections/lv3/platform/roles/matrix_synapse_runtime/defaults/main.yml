@@ -75,6 +75,7 @@ matrix_synapse_mautrix_whatsapp_database_host: "{{ matrix_synapse_database_host 
 matrix_synapse_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse
 matrix_synapse_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/database-password.txt
 matrix_synapse_ops_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/ops-password.txt
+matrix_synapse_ops_access_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/ops-access-token.txt
 matrix_synapse_registration_shared_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/registration-shared-secret.txt
 matrix_synapse_signing_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/server-signing.key
 matrix_synapse_mautrix_discord_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-discord-database-password.txt

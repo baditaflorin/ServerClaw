@@ -1,7 +1,8 @@
-# Purpose: Verify the public Matrix Synapse endpoint by bootstrapping the admin account and exercising the first bridge bots through HTTPS.
+# Purpose: Verify the public Matrix Synapse endpoint by bootstrapping the admin token through the controller path and exercising the first bridge bots through HTTPS.
 # Use case: Imported after edge publication so live-apply runs prove Discord and WhatsApp bridge management rooms answer end to end.
 # Inputs (required):
 #   - matrix_synapse_public_base_url (str, required): Public Matrix base URL.
+#   - matrix_synapse_controller_url (str, required): Controller-local Matrix URL used to mint the reusable access token without consuming public login budget.
 #   - matrix_synapse_registration_shared_secret_local_file (path, required): Controller-local shared-secret registration artifact.
 #   - matrix_synapse_admin_localpart (str, required): Bootstrap admin localpart used for smoke login.
 #   - matrix_synapse_ops_password_local_file (path, required): Controller-local ops admin password artifact.
@@ -21,13 +22,15 @@
       - python3
       - "{{ inventory_dir }}/../scripts/matrix_admin_register.py"
       - --base-url
-      - "{{ matrix_synapse_public_base_url }}"
+      - "{{ matrix_synapse_controller_url }}"
       - --shared-secret-file
       - "{{ matrix_synapse_registration_shared_secret_local_file }}"
       - --username
       - "{{ matrix_synapse_admin_localpart }}"
       - --password-file
       - "{{ matrix_synapse_ops_password_local_file }}"
+      - --access-token-file
+      - "{{ matrix_synapse_ops_access_token_local_file }}"
       - --admin
   register: matrix_synapse_public_admin_register
   changed_when: "'registered' in matrix_synapse_public_admin_register.stdout"
@@ -44,6 +47,8 @@
       - "{{ matrix_synapse_admin_localpart }}"
       - --password-file
       - "{{ matrix_synapse_ops_password_local_file }}"
+      - --access-token-file
+      - "{{ matrix_synapse_ops_access_token_local_file }}"
       - --timeout-seconds
       - "{{ matrix_synapse_public_smoke_timeout_seconds | string }}"
       - --bot-user-id

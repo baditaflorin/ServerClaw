@@ -71,20 +71,17 @@
       - inspect
       - -f
       - '{{ "{{.State.Status}}" }}'
-      - "{{ item }}"
-  loop:
-    - "{{ matrix_synapse_mautrix_discord_container_name }}"
-    - "{{ matrix_synapse_mautrix_whatsapp_container_name }}"
+      - "{{ matrix_synapse_mautrix_discord_container_name }}"
+      - "{{ matrix_synapse_mautrix_whatsapp_container_name }}"
   register: matrix_synapse_bridge_container_status
   retries: 12
   delay: 5
-  until: >-
-    matrix_synapse_bridge_container_status.results | map(attribute='stdout') | list == ['running', 'running']
+  until: matrix_synapse_bridge_container_status.stdout_lines == ['running', 'running']
   changed_when: false
 
 - name: Assert the Matrix bridge containers are running
   ansible.builtin.assert:
     that:
-      - matrix_synapse_bridge_container_status.results | map(attribute='stdout') | list == ['running', 'running']
+      - matrix_synapse_bridge_container_status.stdout_lines == ['running', 'running']
     fail_msg: >-
       Matrix Synapse answered locally, but one or more repo-managed mautrix bridge containers were not running.

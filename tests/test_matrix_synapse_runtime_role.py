@@ -11,6 +11,7 @@ COMPOSE_TEMPLATE = REPO_ROOT / "roles" / "matrix_synapse_runtime" / "templates" 
 HOMESERVER_TEMPLATE = REPO_ROOT / "roles" / "matrix_synapse_runtime" / "templates" / "homeserver.yaml.j2"
 TASKS_FILE = REPO_ROOT / "roles" / "matrix_synapse_runtime" / "tasks" / "main.yml"
 PUBLIC_VERIFY_FILE = REPO_ROOT / "roles" / "matrix_synapse_runtime" / "tasks" / "public_verify.yml"
+VERIFY_FILE = REPO_ROOT / "roles" / "matrix_synapse_runtime" / "tasks" / "verify.yml"
 DISCORD_TEMPLATE = REPO_ROOT / "roles" / "matrix_synapse_runtime" / "templates" / "mautrix-discord-config.yaml.j2"
 WHATSAPP_TEMPLATE = REPO_ROOT / "roles" / "matrix_synapse_runtime" / "templates" / "mautrix-whatsapp-config.yaml.j2"
 
@@ -24,6 +25,7 @@ def test_matrix_synapse_runtime_defaults_expose_internal_controller_and_public_u
     assert defaults["matrix_synapse_controller_url"] == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('matrix_synapse', 'controller') }}"
     assert defaults["matrix_synapse_public_base_url"] == "{{ hostvars['proxmox_florin'].platform_service_topology.matrix_synapse.urls.public }}/"
     assert defaults["matrix_synapse_container_data_dir"] == "/data"
+    assert defaults["matrix_synapse_ops_access_token_local_file"] == "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/ops-access-token.txt"
     assert defaults["matrix_synapse_log_config_container_file"] == "{{ matrix_synapse_container_data_dir }}/{{ matrix_synapse_server_name }}.log.config"
     assert defaults["matrix_synapse_signing_key_container_file"] == "{{ matrix_synapse_container_data_dir }}/{{ matrix_synapse_server_name }}.signing.key"
     assert defaults["matrix_synapse_mautrix_discord_image"] == "{{ container_image_catalog.images.matrix_mautrix_discord_runtime.ref }}"
@@ -86,10 +88,56 @@ def test_matrix_synapse_runtime_generates_signing_material_and_bootstrap_user() 
         for task in tasks
         if task.get("name") == "Pull the Matrix Synapse image"
     )
+    startup_block = next(
+        task
+        for task in tasks
+        if task.get("name") == "Start the Matrix Synapse stack and recover stale compose networks"
+    )
+    retry_start_task = next(
+        task
+        for task in startup_block["rescue"]
+        if task.get("name") == "Retry Matrix Synapse startup after resetting stale compose resources"
+    )
+    recreate_start_task = next(
+        task
+        for task in startup_block["block"]
+        if task.get("name") == "Recreate the Matrix Synapse stack when config-backed files changed"
+    )
+    normal_start_task = next(
+        task
+        for task in startup_block["block"]
+        if task.get("name") == "Start the Matrix Synapse stack"
+    )
+    docker_info_task = next(
+        task
+        for task in startup_block["rescue"]
+        if task.get("name") == "Wait for the Docker daemon to answer after Matrix Synapse network recovery"
+    )
+    remove_broken_container_task = next(
+        task
+        for task in startup_block["rescue"]
+        if task.get("name") == "Remove the broken Matrix Synapse container before retrying startup"
+    )
+    admin_login_probe_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Check whether the Matrix Synapse ops admin already accepts the bootstrap password"
+    )
+    admin_registration_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Ensure the Matrix Synapse ops admin exists when the bootstrap password does not work yet"
+    )
+    admin_login_ready_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Confirm the Matrix Synapse ops admin password login succeeds"
+    )
 
     assert "Generate the initial Matrix Synapse signing material and log config" in task_file
     assert "register_new_matrix_user" in task_file
     assert "--exists-ok" in task_file
+    assert "/_matrix/client/v3/login" in task_file
     assert "Mirror the Matrix Synapse signing key to the control machine" in task_file
     assert bootstrap_pull_task["retries"] == 3
     assert bootstrap_pull_task["until"] == "matrix_synapse_initial_pull.rc == 0"
@@ -100,14 +148,32 @@ def test_matrix_synapse_runtime_generates_signing_material_and_bootstrap_user() 
     assert "matrix_synapse_generate.rc == 0" in task_file
     assert "Generate the mautrix Discord registration when needed" in task_file
     assert "Generate the mautrix WhatsApp registration when needed" in task_file
+    assert "Ensure the mautrix bridge registrations are readable by Synapse" in task_file
+    assert "Decide whether the Matrix Synapse stack must be force-recreated for config-backed changes" in task_file
+    assert "Flag Docker bridge-chain and stale Matrix Synapse compose network failures after startup failure" in task_file
+    assert "failed to create endpoint" in task_file
+    assert docker_info_task["until"] == "matrix_synapse_docker_info.rc == 0"
+    assert remove_broken_container_task["ansible.builtin.command"]["argv"][-1] == "{{ matrix_synapse_container_name }}"
+    assert recreate_start_task["when"] == "matrix_synapse_force_recreate_stack"
+    assert recreate_start_task["ansible.builtin.command"]["argv"][-4:] == ["up", "-d", "--remove-orphans", "--force-recreate"]
+    assert normal_start_task["when"] == "not matrix_synapse_force_recreate_stack"
+    assert retry_start_task["ansible.builtin.command"]["argv"][-4:] == ["up", "-d", "--remove-orphans", "--force-recreate"]
+    assert admin_login_probe_task["failed_when"] is False
+    assert admin_registration_task["when"] == "matrix_synapse_admin_login_probe.status != 200"
+    assert admin_registration_task["failed_when"] is False
+    assert admin_login_ready_task["until"] == "matrix_synapse_admin_login_ready.status == 200"
+    assert admin_login_ready_task["ansible.builtin.uri"]["status_code"] == 200
 
 
 def test_matrix_synapse_bridge_templates_and_public_verify_cover_discord_and_whatsapp() -> None:
     public_verify = PUBLIC_VERIFY_FILE.read_text()
+    verify = VERIFY_FILE.read_text()
     discord_template = DISCORD_TEMPLATE.read_text()
     whatsapp_template = WHATSAPP_TEMPLATE.read_text()
 
     assert "matrix_admin_register.py" in public_verify
     assert "matrix_bridge_smoke.py" in public_verify
+    assert "--access-token-file" in public_verify
+    assert "stdout_lines == ['running', 'running']" in verify
     assert "command_prefix: '!discord'" in discord_template
     assert "command_prefix: '!wa'" in whatsapp_template

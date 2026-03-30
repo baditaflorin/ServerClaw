@@ -7,10 +7,20 @@ import hashlib
 import hmac
 import json
 import sys
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
 from typing import Any
+
+
+def decode_json_body(body: str) -> dict[str, Any]:
+    if not body:
+        return {}
+    try:
+        return json.loads(body)
+    except json.JSONDecodeError:
+        return {"raw_body": body}
 
 
 def request_json(
@@ -30,24 +40,52 @@ def request_json(
     try:
         with urllib.request.urlopen(request) as response:
             body = response.read().decode("utf-8")
-            return response.status, json.loads(body) if body else {}
+            return response.status, decode_json_body(body)
     except urllib.error.HTTPError as exc:
         body = exc.read().decode("utf-8")
-        response_payload = json.loads(body) if body else {}
+        response_payload = decode_json_body(body)
         return exc.code, response_payload
 
 
-def login(base_url: str, username: str, password: str) -> tuple[bool, dict[str, Any]]:
-    status, payload = request_json(
-        "POST",
-        f"{base_url}/_matrix/client/v3/login",
-        {
-            "type": "m.login.password",
-            "identifier": {"type": "m.id.user", "user": username},
-            "password": password,
-        },
-    )
-    return status == 200 and "access_token" in payload, payload
+def persist_access_token(access_token_file: Path | None, access_token: str) -> None:
+    if access_token_file is None:
+        return
+    access_token_file.parent.mkdir(parents=True, exist_ok=True)
+    access_token_file.write_text(f"{access_token}\n", encoding="utf-8")
+    access_token_file.chmod(0o600)
+
+
+def login(
+    base_url: str,
+    username: str,
+    password: str,
+    *,
+    access_token_file: Path | None = None,
+    max_rate_limit_wait_seconds: int = 300,
+) -> tuple[bool, dict[str, Any]]:
+    waited_seconds = 0.0
+    while True:
+        status, payload = request_json(
+            "POST",
+            f"{base_url}/_matrix/client/v3/login",
+            {
+                "type": "m.login.password",
+                "identifier": {"type": "m.id.user", "user": username},
+                "password": password,
+            },
+        )
+        if status == 200 and "access_token" in payload:
+            persist_access_token(access_token_file, str(payload["access_token"]))
+            return True, payload
+        if status == 429 and payload.get("errcode") == "M_LIMIT_EXCEEDED":
+            retry_after_ms = int(payload.get("retry_after_ms") or 1000)
+            retry_after_seconds = max(retry_after_ms / 1000.0, 1.0)
+            if waited_seconds + retry_after_seconds > max_rate_limit_wait_seconds:
+                return False, payload
+            time.sleep(retry_after_seconds)
+            waited_seconds += retry_after_seconds
+            continue
+        return False, payload
 
 
 def compute_mac(nonce: str, username: str, password: str, shared_secret: str, *, admin: bool) -> str:
@@ -96,6 +134,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--shared-secret-file", required=True, type=Path)
     parser.add_argument("--username", required=True, help="Localpart or full MXID to register and verify")
     parser.add_argument("--password-file", required=True, type=Path)
+    parser.add_argument("--access-token-file", type=Path, help="Optional local file used to persist a verified Matrix access token")
     parser.add_argument("--admin", action="store_true", help="Register the user as a Synapse admin")
     return parser.parse_args()
 
@@ -106,7 +145,12 @@ def main() -> int:
     shared_secret = args.shared_secret_file.read_text(encoding="utf-8").strip()
     base_url = args.base_url.rstrip("/")
 
-    ok, login_payload = login(base_url, args.username, password)
+    ok, login_payload = login(
+        base_url,
+        args.username,
+        password,
+        access_token_file=args.access_token_file,
+    )
     if ok:
         print(json.dumps({"status": "existing", "user_id": login_payload.get("user_id")}, sort_keys=True))
         return 0
@@ -121,7 +165,12 @@ def main() -> int:
     if status not in {200, 201}:
         raise RuntimeError(f"Matrix shared-secret registration failed: {payload}")
 
-    ok, login_payload = login(base_url, args.username, password)
+    ok, login_payload = login(
+        base_url,
+        args.username,
+        password,
+        access_token_file=args.access_token_file,
+    )
     if not ok:
         raise RuntimeError("Matrix shared-secret registration succeeded, but password login verification failed")
 
