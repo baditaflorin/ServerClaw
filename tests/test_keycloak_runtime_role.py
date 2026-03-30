@@ -261,15 +261,22 @@ def test_realm_reconciliation_retries_repo_managed_keycloak_modules() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     tasks = load_tasks()
     realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
-    community_tasks = [
-        task
-        for task in realm_block["block"]
-        if any(key.startswith("community.general.keycloak_") for key in task)
-    ]
     assert defaults["keycloak_admin_connection_timeout"] == 60
     assert defaults["keycloak_admin_reconciliation_retries"] == 24
     assert defaults["keycloak_admin_reconciliation_delay"] == 5
-    for task in community_tasks:
+    assert realm_block["module_defaults"]["group/community.general.keycloak"]["connection_timeout"] == (
+        "{{ keycloak_admin_connection_timeout }}"
+    )
+    runtime_contract_tasks = [
+        next(
+            task
+            for task in realm_block["block"]
+            if task.get("name") == "Ensure the obsolete ServerClaw operator CLI direct-grant client is absent"
+        ),
+        next(task for task in realm_block["block"] if task.get("name") == "Ensure the ServerClaw runtime client exists"),
+        next(task for task in realm_block["block"] if task.get("name") == "Read the ServerClaw runtime client secret"),
+    ]
+    for task in runtime_contract_tasks:
         assert task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
         assert task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
         assert task["until"] == f"{task['register']} is succeeded"
@@ -480,49 +487,40 @@ def test_role_manages_the_outline_automation_identity() -> None:
     assert automation_password_task["ansible.builtin.uri"]["body"]["temporary"] is False
 
 
-def test_repo_managed_admin_token_is_refreshed_between_reconciliation_phases() -> None:
+def test_repo_managed_user_reconciliation_is_delegated_to_the_include_file() -> None:
     tasks = load_tasks()
+    repo_user_tasks = load_tasks(REPO_USER_TASKS_PATH)
+    repo_user_reconciliation = next(task for task in tasks if task.get("name") == "Reconcile repo-managed Keycloak users")
+    include_task = next(
+        task for task in repo_user_reconciliation["block"] if task.get("name") == "Run the repo-managed Keycloak user reconciliation tasks"
+    )
+    retry_task = next(
+        task
+        for task in repo_user_reconciliation["rescue"]
+        if task.get("name") == "Retry the repo-managed Keycloak user reconciliation tasks after recovery"
+    )
     group_token_task = next(
-        task for task in tasks if task.get("name") == "Request a Keycloak admin token for repo-managed user reconciliation"
-    )
-    operator_refresh_block = next(
         task
-        for task in tasks
-        if task.get("name") == "Refresh the repo-managed Keycloak admin headers before reconciling the named operator"
-    )
-    outline_refresh_block = next(
-        task
-        for task in tasks
-        if task.get("name") == "Refresh the repo-managed Keycloak admin headers before reconciling the Outline automation user"
+        for task in repo_user_tasks
+        if task.get("name") == "Request a Keycloak admin token for repo-managed user reconciliation"
     )
     platform_group_lookup_task = next(
-        task for task in tasks if task.get("name") == "Look up the lv3-platform-admins group in Keycloak"
+        task for task in repo_user_tasks if task.get("name") == "Look up the lv3-platform-admins group in Keycloak"
     )
-    operator_lookup_task = next(task for task in tasks if task.get("name") == "Look up the named operator in Keycloak")
-    outline_lookup_task = next(task for task in tasks if task.get("name") == "Look up the Outline automation user in Keycloak")
-
-    operator_token_task = next(
-        task
-        for task in operator_refresh_block["block"]
-        if task.get("name") == "Request a fresh Keycloak admin token for the named operator reconciliation"
-    )
-    outline_token_task = next(
-        task
-        for task in outline_refresh_block["block"]
-        if task.get("name") == "Request a fresh Keycloak admin token for the Outline automation reconciliation"
+    operator_lookup_task = next(task for task in repo_user_tasks if task.get("name") == "Look up the named operator in Keycloak")
+    outline_lookup_task = next(
+        task for task in repo_user_tasks if task.get("name") == "Look up the Outline automation user in Keycloak"
     )
 
-    for task in (group_token_task, operator_token_task, outline_token_task):
-        assert task["ansible.builtin.uri"]["timeout"] == "{{ keycloak_admin_connection_timeout }}"
-        assert task["retries"] == "{{ keycloak_repo_user_reconciliation_retries }}"
-        assert task["delay"] == "{{ keycloak_repo_user_reconciliation_delay }}"
-        assert "json.access_token" in task["until"]
-
-    assert tasks.index(group_token_task) < tasks.index(platform_group_lookup_task)
-    assert tasks.index(operator_refresh_block) < tasks.index(operator_lookup_task)
-    assert tasks.index(outline_refresh_block) < tasks.index(outline_lookup_task)
-    assert tasks.index(platform_group_lookup_task) < tasks.index(operator_refresh_block)
-    assert tasks.index(operator_lookup_task) < tasks.index(outline_refresh_block)
+    assert include_task["ansible.builtin.include_tasks"] == "reconcile_repo_managed_users.yml"
+    assert retry_task["ansible.builtin.include_tasks"] == "reconcile_repo_managed_users.yml"
+    assert group_token_task["ansible.builtin.uri"]["timeout"] == "{{ keycloak_admin_connection_timeout }}"
+    assert group_token_task["retries"] == "{{ keycloak_repo_user_reconciliation_retries }}"
+    assert group_token_task["delay"] == "{{ keycloak_repo_user_reconciliation_delay }}"
+    assert "json.access_token" in group_token_task["until"]
+    assert repo_user_tasks.index(group_token_task) < repo_user_tasks.index(platform_group_lookup_task)
+    assert repo_user_tasks.index(platform_group_lookup_task) < repo_user_tasks.index(operator_lookup_task)
+    assert repo_user_tasks.index(operator_lookup_task) < repo_user_tasks.index(outline_lookup_task)
 
 
 def test_role_manages_serverclaw_runtime_client_and_removes_the_stale_operator_direct_grant() -> None:
