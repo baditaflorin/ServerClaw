@@ -4,9 +4,12 @@
     daemon_reload: true
 
 - name: Restart Docker
-  ansible.builtin.systemd:
-    name: docker
-    state: restarted
+  ansible.builtin.shell: |
+    set -euo pipefail
+    systemctl reset-failed docker.service
+    systemctl restart docker.service
+  args:
+    executable: /bin/bash
 
 - name: Reload Nginx
   ansible.builtin.systemd:
