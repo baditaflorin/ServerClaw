@@ -98,11 +98,17 @@ def test_verify_tasks_cover_plaintext_and_metadata_extraction() -> None:
 
     text_task = next(task for task in tasks if task.get("name") == "Verify Apache Tika extracts plaintext from the HTML fixture")
     meta_task = next(task for task in tasks if task.get("name") == "Verify Apache Tika returns JSON metadata for the HTML fixture")
+    meta_assert_task = next(task for task in tasks if task.get("name") == "Assert Apache Tika returned metadata for the fixture")
 
     assert text_task["ansible.builtin.uri"]["url"] == "{{ tika_runtime_base_url }}/tika"
     assert text_task["ansible.builtin.uri"]["headers"]["Accept"] == "text/plain"
     assert meta_task["ansible.builtin.uri"]["url"] == "{{ tika_runtime_base_url }}/meta"
     assert meta_task["ansible.builtin.uri"]["headers"]["Accept"] == "application/json"
+    assert "tika_runtime_verify_meta_payload['Content-Type'] is defined" in meta_assert_task["ansible.builtin.assert"]["that"]
+    assert (
+        "tika_runtime_verify_meta_payload['Content-Type'] is match('^text/html(;.*)?$')"
+        in meta_assert_task["ansible.builtin.assert"]["that"]
+    )
 
 
 def test_compose_template_exposes_the_private_tika_port() -> None:

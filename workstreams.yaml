@@ -163,9 +163,9 @@ workstreams:
   - id: ws-0286-live-apply
     adr: "0286"
     title: Live apply Tesseract OCR from latest origin/main on top of the current Apache Tika baseline
-    ready_to_merge: false
-    live_applied: false
-    status: in_progress
+    ready_to_merge: true
+    live_applied: true
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0286-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0286-live-apply
@@ -181,6 +181,7 @@ workstreams:
       - README.md
       - docs/workstreams/ws-0286-live-apply.md
       - docs/adr/0286-tesseract-ocr-service-for-scanned-image-text-extraction.md
+      - docs/runbooks/configure-tika.md
       - docs/runbooks/configure-tesseract-ocr.md
       - docs/site-generated/architecture/dependency-graph.md
       - inventory/host_vars/proxmox_florin.yml
@@ -189,6 +190,7 @@ workstreams:
       - playbooks/services/tesseract-ocr.yml
       - collections/ansible_collections/lv3/platform/playbooks/tesseract-ocr.yml
       - collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/**
+      - collections/ansible_collections/lv3/platform/roles/tika_runtime/tasks/verify.yml
       - config/ansible-execution-scopes.yaml
       - config/ansible-role-idempotency.yml
       - config/command-catalog.json
@@ -216,10 +218,13 @@ workstreams:
       - tests/test_document_extraction.py
       - tests/test_generate_platform_vars.py
       - tests/test_service_id_resolver.py
+      - tests/test_tika_runtime_role.py
       - tests/test_tesseract_ocr_runtime_role.py
       - receipts/ops-portal-snapshot.html
       - receipts/live-applies/2026-03-30-adr-0286-tesseract-ocr-live-apply.json
       - receipts/live-applies/evidence/2026-03-30-adr-0286-tesseract-ocr-live-apply.txt
+      - receipts/live-applies/evidence/2026-03-30-adr-0286-live-apply-run.txt
+      - receipts/live-applies/evidence/2026-03-30-adr-0286-tika-prereq-replay.txt
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -241,6 +246,7 @@ workstreams:
           paths:
             - docs/workstreams/ws-0286-live-apply.md
             - docs/adr/0286-tesseract-ocr-service-for-scanned-image-text-extraction.md
+            - docs/runbooks/configure-tika.md
             - docs/runbooks/configure-tesseract-ocr.md
             - playbooks/tesseract-ocr.yml
             - playbooks/services/tesseract-ocr.yml
@@ -252,8 +258,14 @@ workstreams:
             - tests/test_document_extraction.py
             - tests/test_tesseract_ocr_runtime_role.py
             - receipts/live-applies/2026-03-30-adr-0286-tesseract-ocr-live-apply.json
-            - receipts/live-applies/evidence/2026-03-30-adr-0286-tesseract-ocr-live-apply.txt
+            - receipts/live-applies/evidence/2026-03-30-adr-0286-*
           mode: exclusive
+        - id: adr_0286_tika_prereq_verification_contract
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/tika_runtime/tasks/verify.yml
+            - tests/test_tika_runtime_role.py
+          mode: shared_contract
+          contract: tika-html-metadata-verification-v1
         - id: docs_portal_generation_contract
           paths:
             - docs/site-generated/architecture/dependency-graph.md
@@ -301,6 +313,11 @@ workstreams:
             - tests/test_service_id_resolver.py
           mode: shared_contract
           contract: service-id-alias-v1
+    canonical_truth:
+      changelog_entry: implements ADR 0286 by bringing the private Tesseract OCR runtime, the controller-local Tika-first fallback verification path, and the verified live receipt onto main while preserving the current 0.130.69 platform baseline
+      release_bump: patch
+      latest_receipts:
+        tesseract_ocr: 2026-03-30-adr-0286-tesseract-ocr-live-apply
   - id: ws-0282-live-apply
     adr: "0282"
     title: Live apply Mailpit as the SMTP development mail interceptor from latest origin/main

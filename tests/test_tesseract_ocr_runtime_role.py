@@ -1,5 +1,7 @@
 from pathlib import Path
+import base64
 import json
+import re
 
 import yaml
 
@@ -15,6 +17,7 @@ PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "tesseract-ocr.yml"
 COLLECTION_PLAYBOOK_PATH = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "tesseract-ocr.yml"
 SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "tesseract-ocr.yml"
 HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+HEALTH_PROBE_CATALOG_PATH = REPO_ROOT / "config" / "health-probe-catalog.json"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
@@ -81,6 +84,18 @@ def test_verify_fixture_is_a_valid_png_file() -> None:
     assert len(data) > 1024
 
 
+def test_health_probe_readiness_uses_the_tracked_fixture_bytes() -> None:
+    fixture = (ROLE_FILES / "ocr-ok.png").read_bytes()
+    health_catalog = json.loads(HEALTH_PROBE_CATALOG_PATH.read_text(encoding="utf-8"))
+
+    command = health_catalog["services"]["tesseract_ocr"]["readiness"]["argv"][2]
+    encoded_fixture = re.search(r'base64\.b64decode\([\'"]([^\'"]+)[\'"]\)', command)
+
+    assert encoded_fixture is not None
+    assert base64.b64decode(encoded_fixture.group(1)) == fixture
+    assert "payload.get('page_count') == 1" in command
+
+
 def test_templates_define_repo_built_runtime_and_language_env() -> None:
     compose_template = COMPOSE_TEMPLATE.read_text(encoding="utf-8")
     dockerfile_template = DOCKERFILE_TEMPLATE.read_text(encoding="utf-8")
@@ -126,6 +141,7 @@ def test_workflow_and_command_catalogs_declare_converge_tesseract_ocr_entrypoint
 
     workflow = workflow_catalog["workflows"]["converge-tesseract-ocr"]
     command = command_catalog["commands"]["converge-tesseract-ocr"]
+    verification_commands = workflow["verification_commands"]
 
     assert workflow["preferred_entrypoint"] == {
         "kind": "make_target",
@@ -134,6 +150,20 @@ def test_workflow_and_command_catalogs_declare_converge_tesseract_ocr_entrypoint
     }
     assert "syntax-check-tesseract-ocr" in workflow["validation_targets"]
     assert workflow["owner_runbook"] == "docs/runbooks/configure-tesseract-ocr.md"
+    assert verification_commands[0] == "make syntax-check-tesseract-ocr"
+    assert verification_commands[1] == "curl -fsS http://10.10.10.20:3008/healthz"
+    assert verification_commands[2] == (
+        "curl -fsS -F "
+        "'file=@collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png;"
+        "filename=ocr-ok.png;type=image/png' http://10.10.10.20:3008/ocr"
+    )
+    assert verification_commands[3] == (
+        "python3 scripts/document_extraction.py "
+        "collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png "
+        "--tika-url http://10.10.10.20:9998 --tesseract-url http://10.10.10.20:3008"
+    )
+    assert all("base64" not in item for item in verification_commands)
+    assert all("scp " not in item and "ssh " not in item for item in verification_commands[1:])
     assert command["workflow_id"] == "converge-tesseract-ocr"
     assert command["approval_policy"] == "sensitive_live_change"
     assert command["evidence"]["live_apply_receipt_required"] is True

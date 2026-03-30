@@ -64,6 +64,7 @@
 - name: Assert Apache Tika returned metadata for the fixture
   ansible.builtin.assert:
     that:
-      - tika_runtime_verify_meta_payload['Content-Type'] == 'text/html'
+      - tika_runtime_verify_meta_payload['Content-Type'] is defined
+      - tika_runtime_verify_meta_payload['Content-Type'] is match('^text/html(;.*)?$')
       - tika_runtime_verify_meta_payload['X-TIKA:Parsed-By'] is defined
     fail_msg: "Apache Tika did not return the expected metadata JSON payload."

@@ -25,13 +25,15 @@ make syntax-check-tesseract-ocr
 Converge the private runtime directly:
 
 ```bash
-cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png | ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519   -o IdentitiesOnly=yes   -J ops@100.64.0.1   ops@10.10.10.20   'image=$(mktemp --suffix=.png); trap '''rm -f "$image"''' EXIT; cat >"$image";   curl -fsS -F "file=@${image};filename=ocr-ok.png;type=image/png" http://127.0.0.1:3008/ocr'
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+make converge-tesseract-ocr env=production
 ```
 
 Run the governed live-apply wrapper:
 
 ```bash
-cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png | ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519   -o IdentitiesOnly=yes   -J ops@100.64.0.1   ops@10.10.10.20   'image=$(mktemp --suffix=.png); trap '''rm -f "$image"''' EXIT; cat >"$image";   python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/document_extraction.py "$image" --tika-url http://127.0.0.1:9998 --tesseract-url http://127.0.0.1:3008'
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=tesseract-ocr env=production
 ```
 
 ## Verification
@@ -39,25 +41,22 @@ cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansi
 Verify the private Tesseract OCR health endpoint on `docker-runtime-lv3`:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
-  -o IdentitiesOnly=yes \
-  -J ops@100.64.0.1 \
-  ops@10.10.10.20 \
-  'curl -fsS http://127.0.0.1:3008/healthz'
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+curl -fsS http://10.10.10.20:3008/healthz
 ```
 
 Verify direct OCR extraction through the `/ocr` endpoint:
 
 ```bash
-scp -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png ops@10.10.10.20:/tmp/ocr-ok.png
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS -F "file=@/tmp/ocr-ok.png;filename=ocr-ok.png;type=image/png" http://127.0.0.1:3008/ocr && rm -f /tmp/ocr-ok.png'
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+curl -fsS -F 'file=@collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png;filename=ocr-ok.png;type=image/png' http://10.10.10.20:3008/ocr
 ```
 
 Verify the Tika-first fallback helper chooses OCR when Tika returns no text:
 
 ```bash
-scp -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png ops@10.10.10.20:/tmp/ocr-ok.png
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/document_extraction.py /tmp/ocr-ok.png --tika-url http://127.0.0.1:9998 --tesseract-url http://127.0.0.1:3008 && rm -f /tmp/ocr-ok.png'
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+python3 scripts/document_extraction.py collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/files/ocr-ok.png --tika-url http://10.10.10.20:9998 --tesseract-url http://10.10.10.20:3008
 ```
 
 ## Operating Notes
