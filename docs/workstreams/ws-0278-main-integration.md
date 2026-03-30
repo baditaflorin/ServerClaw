@@ -5,6 +5,7 @@
 - Status: `in-progress`
 - Target Repo Version: `0.177.92`
 - Platform Version Before Exact-Main Replay: `0.130.60`
+- Live Applied In Platform Version: `0.130.61`
 - Branch: `codex/ws-0278-main-integration`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0278-main-integration`
 - Owner: codex
@@ -76,39 +77,39 @@ platform-version bump.
 
 - the branch-local latest-main proof for ADR 0278 completed successfully and is
   preserved in `receipts/live-applies/2026-03-30-adr-0278-gotenberg-live-apply.json`
-- the first exact-main candidate replay from release `0.177.92` succeeded, an
-  external Docker restart on `docker-runtime-lv3` later stopped the runtime,
-  and the governed recovery replay re-established the healthy state
-- fresh post-recovery checks succeeded for guest-local health, guest-local
+- the first merged-main replay from commit `8704a9798` failed in
+  `receipts/live-applies/evidence/2026-03-30-ws-0278-merged-main-live-apply.txt`
+  because reloading the full nftables ruleset flushed Docker-managed tables and
+  left Gotenberg without a usable `DOCKER` nat chain during startup
+- commit `e1b0ceb64` patched the Docker runtime role so the forward-compat
+  rules are applied live without reloading the full nftables ruleset, and the
+  focused Docker runtime plus Gotenberg pytest slice covers that behavior
+- the authoritative merged-main replay from commit `e1b0ceb64` succeeded with
+  recap `docker-runtime-lv3 : ok=259 changed=112 unreachable=0 failed=0 skipped=29 rescued=0 ignored=0`, captured in
+  `receipts/live-applies/evidence/2026-03-30-ws-0278-merged-main-live-apply-r2.txt`
+- fresh merged-main checks succeeded for guest-local health, guest-local
   Chromium and LibreOffice conversion, authenticated gateway health, and
   authenticated gateway Chromium conversion, with evidence in the
-  `2026-03-30-ws-0278-mainline-*` files
+  `2026-03-30-ws-0278-merged-main-*` files
 - the local validation slice passed: focused pytest, syntax check,
   ansible-scope validation, repository data-model validation, live-apply
   receipt validation, canonical truth, platform manifest, generated docs, and
   `git diff --check`
-- the first `git push origin HEAD:main` attempt ran the full remote pre-push
-  gate and every check passed except `workstream-surfaces`, which failed only
-  because this integration branch had not yet been registered in
-  `workstreams.yaml`
-- the first merged-main replay exposed a Docker-runtime recovery bug: reloading
-  the full nftables ruleset to persist the forward-compat patch flushed
-  Docker-managed tables, restarted the daemon, and left Gotenberg racing a
-  transient `iptables -t nat DOCKER` / bridge-network restore window
+- `git push origin HEAD:main` ran the full remote pre-push gate successfully
+  for both the initial `0.177.92` release integration and the follow-up Docker
+  runtime replay fix, with all documented validation lanes passing each time
 
 ## Current State
 
-- release `0.177.92` is ready to merge from this branch
-- exact-main replay evidence exists, but the authoritative merged-main receipt
-  and `platform_version` bump must wait until the push succeeds and the replay
-  is repeated from the resulting `main` commit
-- the remaining blocker is branch-ownership registration for this integration
-  branch, not service health or repo-validation drift
+- release `0.177.92` and the Docker runtime replay fix commit `e1b0ceb64` are
+  already on `origin/main`
+- the authoritative merged-main replay and fresh local plus gateway proofs are
+  complete, and this worktree now carries the canonical receipt plus
+  `platform_version` bump for the resulting mainline state
+- no service-health or repository-validation blocker remains for ADR 0278
 
 ## Remaining For Merge-To-Main
 
-- rerun `git push origin HEAD:main` after this workstream registration lands
-- replay `make live-apply-service service=gotenberg env=production` from the
-  merged `main` commit and capture the canonical mainline receipt
-- update `versions/stack.yaml`, the ADR metadata, the workstream docs, and the
-  generated canonical-truth surfaces after the merged-main replay is verified
+- none; this document remains as the integration audit trail for the merged
+  `origin/main` replay and the Docker runtime recovery fix that made it
+  reliable
