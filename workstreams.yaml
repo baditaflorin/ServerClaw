@@ -17,7 +17,7 @@ workstreams:
   - id: ws-0282-live-apply
     adr: "0282"
     title: Live apply Mailpit as the SMTP development mail interceptor from latest origin/main
-    status: ready_for_merge
+    status: live_applied
     owner: codex
     branch: codex/ws-0282-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-live-apply
@@ -163,6 +163,164 @@ workstreams:
     canonical_truth:
       latest_receipts:
         mailpit: 2026-03-30-adr-0282-mailpit-live-apply
+  - id: ws-0282-main-merge
+    adr: "0282"
+    title: Integrate ADR 0282 Mailpit live apply into current origin/main
+    status: ready_for_merge
+    owner: codex
+    branch: codex/ws-0282-main-merge
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-main-merge
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0282-main-merge.md
+    depends_on:
+      - ws-0282-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0282-main-merge.md
+      - docs/workstreams/ws-0282-live-apply.md
+      - docs/adr/0282-mailpit-as-the-smtp-development-mail-interceptor.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/configure-mailpit.md
+      - docs/runbooks/configure-mail-platform.md
+      - inventory/group_vars/all.yml
+      - inventory/group_vars/staging.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - collections/ansible_collections/lv3/platform/playbooks/mailpit.yml
+      - collections/ansible_collections/lv3/platform/roles/mailpit_runtime/
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/
+      - playbooks/mailpit.yml
+      - playbooks/services/mailpit.yml
+      - playbooks/mail-platform-verify.yml
+      - collections/ansible_collections/lv3/platform/playbooks/mail-platform-verify.yml
+      - config/ansible-execution-scopes.yaml
+      - config/command-catalog.json
+      - config/data-catalog.json
+      - config/dependency-graph.json
+      - config/health-probe-catalog.json
+      - config/image-catalog.json
+      - config/service-capability-catalog.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      - config/slo-catalog.json
+      - config/workflow-catalog.json
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/slo_rules.yml
+      - config/grafana/dashboards/slo-overview.json
+      - Makefile
+      - scripts/generate_platform_vars.py
+      - scripts/validate_repo.sh
+      - tests/test_keycloak_runtime_role.py
+      - tests/test_mailpit_playbook.py
+      - tests/test_mailpit_runtime_role.py
+      - tests/test_mail_platform_verify_playbook.py
+      - config/ansible-role-idempotency.yml
+      - scripts/remote_exec.sh
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/diagrams/service-dependency-graph.excalidraw
+      - docs/diagrams/trust-tier-model.excalidraw
+      - docs/site-generated/architecture/dependency-graph.md
+      - receipts/ops-portal-snapshot.html
+      - receipts/image-scans/2026-03-30-mailpit-runtime.json
+      - receipts/image-scans/2026-03-30-mailpit-runtime.trivy.json
+      - receipts/live-applies/2026-03-30-adr-0282-mailpit-live-apply.json
+      - receipts/live-applies/evidence/2026-03-30-adr-0282-mailpit-live-apply.txt
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0282_main_merge_carryover
+          paths:
+            - docs/workstreams/ws-0282-live-apply.md
+            - docs/adr/0282-mailpit-as-the-smtp-development-mail-interceptor.md
+            - docs/runbooks/configure-mailpit.md
+            - docs/runbooks/configure-mail-platform.md
+            - inventory/group_vars/all.yml
+            - inventory/group_vars/staging.yml
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - collections/ansible_collections/lv3/platform/playbooks/mailpit.yml
+            - collections/ansible_collections/lv3/platform/roles/mailpit_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/meta/argument_specs.yml
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/templates/docker-compose.yml.j2
+            - playbooks/mailpit.yml
+            - playbooks/services/mailpit.yml
+            - playbooks/mail-platform-verify.yml
+            - collections/ansible_collections/lv3/platform/playbooks/mail-platform-verify.yml
+            - config/ansible-execution-scopes.yaml
+            - config/command-catalog.json
+            - config/data-catalog.json
+            - config/dependency-graph.json
+            - config/health-probe-catalog.json
+            - config/image-catalog.json
+            - config/service-capability-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/slo-catalog.json
+            - config/workflow-catalog.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/grafana/dashboards/slo-overview.json
+            - Makefile
+            - scripts/generate_platform_vars.py
+            - scripts/validate_repo.sh
+            - tests/test_keycloak_runtime_role.py
+            - tests/test_mailpit_playbook.py
+            - tests/test_mailpit_runtime_role.py
+            - tests/test_mail_platform_verify_playbook.py
+            - config/ansible-role-idempotency.yml
+            - scripts/remote_exec.sh
+            - docs/site-generated/architecture/dependency-graph.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/diagrams/service-dependency-graph.excalidraw
+            - docs/diagrams/trust-tier-model.excalidraw
+            - receipts/ops-portal-snapshot.html
+            - receipts/image-scans/2026-03-30-mailpit-runtime.json
+            - receipts/image-scans/2026-03-30-mailpit-runtime.trivy.json
+            - receipts/live-applies/2026-03-30-adr-0282-mailpit-live-apply.json
+            - receipts/live-applies/evidence/2026-03-30-adr-0282-mailpit-live-apply.txt
+          mode: shared_contract
+          contract: mailpit-live-apply-v1
+        - id: adr_0282_main_merge_shared_integration
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+            - docs/adr/.index.yaml
+            - config/ansible-role-idempotency.yml
+            - scripts/remote_exec.sh
+          mode: shared_contract
+          contract: latest-main-integration-v1
+        - id: adr_0282_main_merge
+          paths:
+            - docs/workstreams/ws-0282-main-merge.md
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: integrates ADR 0282 into main by carrying Mailpit as the private development SMTP interceptor and the non-production SMTP contract onto the synchronized 0.177.91 / 0.130.60 baseline
+      release_bump: patch
+      included_in_repo_version: 0.177.92
   - id: ws-0266-validation-runner-capability-contracts
     adr: "0266"
     title: Validation runner capability contracts and environment attestation
@@ -2939,7 +3097,7 @@ workstreams:
   - id: ws-0254-live-apply
     adr: "0254"
     title: Live apply ADR 0254 ServerClaw
-    status: implemented
+    status: live_applied
     owner: codex
     branch: codex/ws-0254-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0254-live-apply
@@ -3086,7 +3244,7 @@ workstreams:
   - id: ws-0254-main-merge
     adr: "0254"
     title: Integrate ADR 0254 exact-main replay onto current origin/main
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/ws-0254-main-merge
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0254-main-merge
@@ -3161,6 +3319,8 @@ workstreams:
       - receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-live-apply.json
       - receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply.json
       - receipts/live-applies/evidence/2026-03-29-adr-0254-*.txt
+      - receipts/live-applies/2026-03-30-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-03-30-adr-0254-mainline-live-apply.txt
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -3245,15 +3405,17 @@ workstreams:
             - receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-live-apply.json
             - receipts/live-applies/2026-03-29-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply.json
             - receipts/live-applies/evidence/2026-03-29-adr-0254-*.txt
+            - receipts/live-applies/2026-03-30-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-03-30-adr-0254-mainline-live-apply.txt
           mode: exclusive
-    ready_to_merge: true
-    live_applied: false
+    ready_to_merge: false
+    live_applied: true
     canonical_truth:
-      changelog_entry: implements ADR 0254 by carrying the dedicated ServerClaw chat surface on chat.lv3.org onto current mainline truth, preserving the governed 8096 edge lane to coolify-lv3, and recording the first exact-main receipt once the merged replay is clean
+      changelog_entry: implements ADR 0254 by carrying the dedicated ServerClaw chat surface on chat.lv3.org onto current mainline truth, preserving the governed 8096 edge lane to coolify-lv3, and recording the first clean exact-main receipt from merged main
       release_bump: patch
       included_in_repo_version: 0.177.91
       latest_receipts:
-        serverclaw: 2026-03-29-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply
+        serverclaw: 2026-03-30-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply
   - id: ws-0244-runtime-assurance-adrs
     adr: "0244"
     title: Runtime assurance architecture bundle

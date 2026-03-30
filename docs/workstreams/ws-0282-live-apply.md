@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0282](../adr/0282-mailpit-as-the-smtp-development-mail-interceptor.md)
 - Title: Deploy Mailpit as the private SMTP development and staging mail interceptor
-- Status: ready_for_merge
+- Status: live_applied
 - Implemented In Repo Version: N/A
 - Live Applied In Platform Version: 0.130.60
 - Implemented On: 2026-03-30

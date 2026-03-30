@@ -572,16 +572,20 @@ sync_snapshot() {
 run_local_command() {
   [[ -n "$LOCAL_COMMAND" ]] || fail "no local fallback command configured for $COMMAND_LABEL"
   echo "remote_exec: running local fallback for $COMMAND_LABEL" >&2
+  local env_args=()
+  local validate_python_bin="${LV3_VALIDATE_PYTHON_BIN:-}"
+  if [[ -z "$validate_python_bin" ]]; then
+    validate_python_bin="$(command -v python3 2>/dev/null || true)"
+  fi
+  if [[ -n "$LOCAL_FALLBACK_RUNNER_ID" ]]; then
+    env_args+=("LV3_VALIDATION_RUNNER_ID=$LOCAL_FALLBACK_RUNNER_ID")
+  fi
+  if [[ -n "$validate_python_bin" ]]; then
+    env_args+=("LV3_VALIDATE_PYTHON_BIN=$validate_python_bin")
+  fi
   (
     cd "$REPO_ROOT"
-    if [[ -n "$LOCAL_FALLBACK_RUNNER_ID" ]]; then
-      export LV3_VALIDATION_RUNNER_ID="$LOCAL_FALLBACK_RUNNER_ID"
-    fi
-    if [[ -z "${LV3_VALIDATE_PYTHON_BIN:-}" ]]; then
-      export LV3_VALIDATE_PYTHON_BIN
-      LV3_VALIDATE_PYTHON_BIN="$(command -v python3 2>/dev/null || true)"
-    fi
-    bash -lc "$LOCAL_COMMAND"
+    env "${env_args[@]}" bash -lc "$LOCAL_COMMAND"
   )
 }
 
@@ -643,7 +647,7 @@ run_remote_command() {
   LV3_SESSION_LOCAL_ROOT="$RUN_WORKSPACE_ROOT/.local/session-workspaces/$LV3_SESSION_SLUG"
   export LV3_SNAPSHOT_MANIFEST="$REMOTE_RUN_ROOT/metadata/manifest.json"
   if [[ -n "$RUNNER_ID" ]]; then
-    export LV3_VALIDATION_RUNNER_ID="$RUNNER_ID"
+    LV3_VALIDATION_RUNNER_ID="$RUNNER_ID"
   fi
 
   remote_prefix="$(remote_env_exports)"

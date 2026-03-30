@@ -1,10 +1,10 @@
 # ADR 0254: ServerClaw As A Distinct Self-Hosted Agent Product On LV3
 
 - Status: Accepted
-- Implementation Status: Implemented on workstream branch
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: 2026-03-29
+- Implementation Status: Live on production from main
+- Implemented In Repo Version: 0.177.91
+- Implemented In Platform Version: 0.130.60
+- Implemented On: 2026-03-30
 - Date: 2026-03-28
 
 ## Context
