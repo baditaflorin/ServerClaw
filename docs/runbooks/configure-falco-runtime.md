@@ -10,6 +10,8 @@ It delivers:
 
 - a private Falco event bridge on `docker-runtime-lv3` listening on the
   managed internal port `18084`
+- the matching `ntfy` auth grant for `platform.security.critical` before the
+  bridge starts emitting CRITICAL findings
 - Falco `modern_ebpf` systemd services on `docker-runtime-lv3`,
   `docker-build-lv3`, `monitoring-lv3`, and `postgres-lv3`
 - Loki journal relabels so Falco events land under `job="falco"`
@@ -44,6 +46,7 @@ It delivers:
   guests only post Falco HTTP events over the internal guest network.
 - The rollout uses one repo-managed ntfy credential already shared with the
   private Alertmanager topic; ntfy grants that same identity publish rights to
-  `platform.security.critical`.
+  `platform.security.critical`, so `make converge-falco` also replays
+  `ntfy_runtime` on `docker-runtime-lv3`.
 - Falco rules and suppressions stay version controlled; do not hand-edit
   `/etc/falco` on the guests.

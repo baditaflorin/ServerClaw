@@ -105,6 +105,7 @@ def test_playbook_converges_bridge_then_falco_runtime_across_hosts() -> None:
     second_roles = [role["role"] for role in playbook[1]["roles"]]
     assert playbook[0]["hosts"] == "docker-runtime-lv3"
     assert playbook[1]["hosts"] == "docker-runtime-lv3:docker-build-lv3:monitoring-lv3:postgres-lv3"
+    assert "lv3.platform.ntfy_runtime" in first_roles
     assert first_roles[-1] == "lv3.platform.falco_event_bridge_runtime"
     assert second_roles[-1] == "lv3.platform.falco_runtime"
 

@@ -23,7 +23,7 @@
 #   - ADR 0124: ntfy push notifications.
 #   - ADR 0276: NATS JetStream event bus.
 #   - ADR 0300: Falco runtime syscall monitoring and anomaly routing.
-#   - Roles: lv3.platform.linux_guest_firewall, lv3.platform.loki_log_agent, lv3.platform.falco_event_bridge_runtime, lv3.platform.falco_runtime.
+#   - Roles: lv3.platform.linux_guest_firewall, lv3.platform.loki_log_agent, lv3.platform.ntfy_runtime, lv3.platform.falco_event_bridge_runtime, lv3.platform.falco_runtime.
 #
 # Related ADRs: 0052, 0066, 0115, 0124, 0276, 0300
 # Related Runbooks: docs/runbooks/configure-falco-runtime.md
@@ -62,6 +62,7 @@
         loki_log_agent_lane: control-plane
         loki_log_agent_nginx_logs_enabled: false
         loki_log_agent_docker_logs_enabled: true
+    - role: lv3.platform.ntfy_runtime
     - role: lv3.platform.falco_event_bridge_runtime
 
 - name: Converge Falco syscall monitoring across the governed guests
