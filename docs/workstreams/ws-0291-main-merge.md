@@ -92,15 +92,16 @@ branch-local state alone.
 ## Verification
 
 - `git fetch origin --prune` refreshed this workstream onto the newer
-  `origin/main` commit `32696e7e52d7bc05ed151139e8e221cb144acedb`, which already
-  carried repo version `0.177.109` and platform version `0.130.72` before the
-  JupyterHub integration work continued.
+  `origin/main` commit `456984e2e2d0c8e5ca32c8d652ecf154961f4f22`, which already
+  carried the Flagsmith exact-main closeout on top of repo version `0.177.109`
+  and platform version `0.130.72` before the JupyterHub integration work
+  continued.
 - The focused exact-main compatibility slice reran successfully on that rebased
-  tree with `72 passed in 4.09s`, plus `make syntax-check-jupyterhub`,
+  tree with `73 passed in 4.49s`, plus `make syntax-check-jupyterhub`,
   `make syntax-check-ollama`, and
   `python3 scripts/validate_service_completeness.py --service jupyterhub`;
   the full transcript is preserved in
-  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-targeted-checks-r1.txt`.
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-targeted-checks-r2.txt`.
 - The first exact-main wrapper attempt exposed a missing
   `keycloak_jupyterhub_client_secret` catalog entry after the rebase and the
   second stopped at the expected canonical-truth guard before the release tree
@@ -115,28 +116,29 @@ branch-local state alone.
   `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-release-dry-run-r1.txt`,
   and `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-release-write-r1.txt`.
 - `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=jupyterhub env=production`
-  succeeded from committed source `97e859427f8dbe2b3fad69b23c92e2b125684bff`
+  succeeded from committed source `2d53cf4eeaaa3da136eef6d44f79d7393f6329c3`
   with final recap `docker-runtime-lv3 : ok=278 changed=5 failed=0 skipped=82`,
   `localhost : ok=24 changed=0 failed=0 skipped=4`, and
   `nginx-lv3 : ok=40 changed=5 failed=0 skipped=6`, preserved in
-  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-r3.txt`.
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-r4.txt`.
 - Fresh controller verification after the exact-main replay confirmed the
   public health endpoint, the Keycloak OIDC redirect, the shared edge
-  certificate SAN set including `DNS:notebooks.lv3.org`, and the local
-  `docker-runtime-lv3` JupyterHub, Ollama, and platform-context probes,
+  certificate SAN set including `DNS:notebooks.lv3.org` and
+  `DNS:flags.lv3.org`, and the local `docker-runtime-lv3` JupyterHub, Ollama,
+  and platform-context probes,
   preserved in
-  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-direct-verification-r2.txt`.
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-direct-verification-r3.txt`.
 - Final repo automation and validation gates passed from the detached exact-main
   tree, including `make check-build-server`, `make validate`,
   `make remote-validate`, `make pre-push-gate`,
   `python scripts/live_apply_receipts.py --validate`, and `git diff --check`,
   preserved in
-  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-check-build-server-r1.txt`,
-  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-validate-r3.txt`,
-  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-remote-validate-r3.txt`,
-  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-pre-push-gate-r1.txt`,
-  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-receipts-validate-r2.txt`,
-  and `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-git-diff-check-r2.txt`.
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-check-build-server-r2.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-validate-r4.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-remote-validate-r4.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-pre-push-gate-r2.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-receipts-validate-r3.txt`,
+  and `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-git-diff-check-r3.txt`.
 
 ## Outcome
 

@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-03-30",
   "recorded_on": "2026-03-30",
-  "recorded_at": "2026-03-30T21:06:40Z",
+  "recorded_at": "2026-03-30T21:52:22Z",
   "recorded_by": "codex",
-  "source_commit": "97e859427f8dbe2b3fad69b23c92e2b125684bff",
+  "source_commit": "2d53cf4eeaaa3da136eef6d44f79d7393f6329c3",
   "repo_version_context": "0.177.110",
   "platform_version_context": "0.130.72",
   "workflow_id": "adr-0291-jupyterhub-mainline-live-apply",
   "adr": "0291",
-  "summary": "Replayed ADR 0291 from the committed 0.177.110 exact-main candidate on top of the current 0.130.72 mainline baseline, verified the public notebooks.lv3.org health and Keycloak OIDC handoff, revalidated the smoke-user notebook contract against Ollama and platform-context, and integrated JupyterHub into main without an additional platform-version bump because the notebook capability was already live before this synchronized replay.",
+  "summary": "Replayed ADR 0291 from the rebased 0.177.110 exact-main candidate on top of the newer Flagsmith-era 0.130.72 mainline baseline, verified the public notebooks.lv3.org health and Keycloak OIDC handoff, revalidated the smoke-user notebook contract against Ollama and platform-context, and integrated JupyterHub into main without an additional platform-version bump because the notebook capability was already live before this synchronized replay.",
   "targets": [
     {
       "kind": "host",
@@ -61,27 +61,17 @@
     {
       "check": "Focused exact-main compatibility slice",
       "result": "pass",
-      "observed": "The rebased latest-main tree reran `uv run --with pytest --with pyyaml python -m pytest -q tests/test_generate_platform_vars.py tests/test_ollama_runtime_role.py tests/test_openbao_compose_env_helper.py tests/test_keycloak_runtime_role.py tests/test_jupyterhub_runtime_role.py tests/test_jupyterhub_playbook.py tests/test_edge_publication_makefile.py tests/test_preflight_controller_local.py`, plus `make syntax-check-jupyterhub`, `make syntax-check-ollama`, and `python3 scripts/validate_service_completeness.py --service jupyterhub`; the pytest slice returned `72 passed in 4.09s` and the full transcript is preserved in `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-targeted-checks-r1.txt`."
-    },
-    {
-      "check": "Release automation status, dry run, and candidate cut",
-      "result": "pass",
-      "observed": "`uv run --with pyyaml python scripts/release_manager.py status --json` confirmed the `0.177.109 / 0.130.72` baseline, the dry run planned release `0.177.110`, and the write run prepared release `0.177.110` while preserving `platform_version: 0.130.72`; the transcripts are preserved in `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-release-status-r2.txt`, `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-release-dry-run-r1.txt`, and `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-release-write-r1.txt`."
+      "observed": "The rebased latest-main tree reran `uv run --with pytest --with pyyaml python -m pytest -q tests/test_generate_platform_vars.py tests/test_ollama_runtime_role.py tests/test_openbao_compose_env_helper.py tests/test_keycloak_runtime_role.py tests/test_jupyterhub_runtime_role.py tests/test_jupyterhub_playbook.py tests/test_edge_publication_makefile.py tests/test_preflight_controller_local.py`, plus `make syntax-check-jupyterhub`, `make syntax-check-ollama`, and `python3 scripts/validate_service_completeness.py --service jupyterhub`; the pytest slice returned `73 passed in 4.49s` and the full transcript is preserved in `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-targeted-checks-r2.txt`."
     },
     {
       "check": "Authoritative exact-main JupyterHub replay",
       "result": "pass",
-      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=jupyterhub env=production` succeeded from committed source `97e859427f8dbe2b3fad69b23c92e2b125684bff` with final recap `docker-runtime-lv3 : ok=278 changed=5 unreachable=0 failed=0 skipped=82 rescued=0 ignored=0`, `localhost : ok=24 changed=0 unreachable=0 failed=0 skipped=4 rescued=0 ignored=0`, and `nginx-lv3 : ok=40 changed=5 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0`, preserved in `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-r3.txt`."
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=jupyterhub env=production` succeeded from committed source `2d53cf4eeaaa3da136eef6d44f79d7393f6329c3` with final recap `docker-runtime-lv3 : ok=278 changed=5 unreachable=0 failed=0 skipped=82 rescued=0 ignored=0`, `localhost : ok=24 changed=0 unreachable=0 failed=0 skipped=4 rescued=0 ignored=0`, and `nginx-lv3 : ok=40 changed=5 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0`, preserved in `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-r4.txt`."
     },
     {
       "check": "Fresh public and runtime verification",
       "result": "pass",
-      "observed": "Fresh controller probes confirmed the public health endpoint, the Keycloak OIDC redirect with `client_id=jupyterhub`, the shared edge certificate SAN set including `DNS:notebooks.lv3.org`, and the local `docker-runtime-lv3` dependency probes for `http://127.0.0.1:11434/api/version`, `http://127.0.0.1:8010/healthz`, and `http://127.0.0.1:8097/hub/health`; the transcript is preserved in `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-direct-verification-r2.txt`."
-    },
-    {
-      "check": "Fresh-mainline bootstrap recovery repairs",
-      "result": "pass",
-      "observed": "The first exact-main wrapper attempt exposed a missing `keycloak_jupyterhub_client_secret` catalog entry after the rebase and the second stopped at the expected canonical-truth guard before release surfaces were cut; the repaired portal generator proof is preserved in `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-portal-generators-r1.txt`, while the two preliminary wrapper transcripts remain preserved in `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-r1.txt` and `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-r2.txt`."
+      "observed": "Fresh controller probes confirmed the public health endpoint, the Keycloak OIDC redirect with `client_id=jupyterhub`, the shared edge certificate SAN set including `DNS:notebooks.lv3.org` and `DNS:flags.lv3.org`, and the local `docker-runtime-lv3` dependency probes for `http://127.0.0.1:11434/api/version`, `http://127.0.0.1:8010/healthz`, and `http://127.0.0.1:8097/hub/health`; the transcript is preserved in `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-direct-verification-r3.txt`."
     }
   ],
   "evidence_refs": [
@@ -106,20 +96,13 @@
     "versions/stack.yaml",
     "workstreams.yaml",
     "receipts/live-applies/2026-03-30-adr-0291-jupyterhub-live-apply.json",
-    "receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-targeted-checks-r1.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-release-status-r1.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-release-status-r2.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-release-dry-run-r1.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-release-write-r1.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-r1.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-r2.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-r3.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-portal-generators-r1.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-direct-verification-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-targeted-checks-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-r4.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-direct-verification-r3.txt",
     "receipts/live-applies/2026-03-30-adr-0291-jupyterhub-mainline-live-apply.json"
   ],
   "notes": [
-    "This receipt is the canonical exact-main proof for ADR 0291 on top of repository release 0.177.110 and current mainline platform version 0.130.72.",
+    "This receipt is the canonical exact-main proof for ADR 0291 on top of repository release 0.177.110 and the newer Flagsmith-era mainline platform baseline 0.130.72.",
     "No additional platform-version bump is recorded here because JupyterHub first became true during the earlier branch-local proof on platform version 0.130.71; the synchronized mainline replay verifies that already-live capability on the newer 0.130.72 baseline.",
     "The earlier branch-local receipt remains part of the audit trail, while this exact-main receipt becomes the canonical `jupyterhub` entry for integrated repo truth."
   ]
