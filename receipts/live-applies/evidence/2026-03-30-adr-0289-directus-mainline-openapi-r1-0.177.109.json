@@ -1,0 +1,804 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Dynamic API Specification",
+    "description": "This is a dynamically generated API specification for all endpoints existing on the current project.",
+    "version": "8909aeafe876fa6791000de484a9dcc3eeeecff5"
+  },
+  "servers": [
+    {
+      "url": "https://data.lv3.org",
+      "description": "Your current Directus instance."
+    }
+  ],
+  "paths": {
+    "/assets/{id}": {
+      "get": {
+        "tags": [
+          "Assets"
+        ],
+        "operationId": "getAsset",
+        "summary": "Get an Asset",
+        "description": "Image typed files can be dynamically resized and transformed to fit any need.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The id of the file.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "key",
+            "in": "query",
+            "description": "The key of the asset size configured in settings.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "transforms",
+            "in": "query",
+            "description": "A JSON array of image transformations",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "description": "Download the asset to your computer",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Retrieve a Temporary Access Token",
+        "description": "Retrieve a Temporary Access Token",
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "admin@example.com",
+                    "description": "Email address of the user you're retrieving the access token for."
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Password of the user.",
+                    "format": "password",
+                    "example": "password"
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "json",
+                      "cookie",
+                      "session"
+                    ],
+                    "default": "json",
+                    "description": "Whether to retrieve the refresh token in the JSON response, or in a httpOnly cookie."
+                  },
+                  "otp": {
+                    "type": "string",
+                    "description": "The user's one-time-password (if MFA is enabled)."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful authentification",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "access_token": {
+                          "type": "string",
+                          "example": "eyJhbGciOiJI..."
+                        },
+                        "expires": {
+                          "type": "integer",
+                          "example": 900
+                        },
+                        "refresh_token": {
+                          "type": "string",
+                          "example": "yuOJkjdPXMd..."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "summary": "Refresh Token",
+        "description": "Refresh a Temporary Access Token.",
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "refresh",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refresh_token": {
+                    "type": "string",
+                    "example": "eyJ0eXAiOiJKV...",
+                    "description": "JWT access token you want to refresh. This token can't be expired."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "json",
+                      "cookie",
+                      "session"
+                    ],
+                    "default": "json",
+                    "description": "Whether to submit and retrieve the refresh token in the JSON response, or in a httpOnly cookie."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "access_token": {
+                          "type": "string",
+                          "example": "eyJhbGciOiJI..."
+                        },
+                        "expires": {
+                          "type": "integer",
+                          "example": 900
+                        },
+                        "refresh_token": {
+                          "type": "string",
+                          "example": "Gy-caJMpmGTA..."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "Log Out",
+        "description": "Log Out",
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "logout",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refresh_token": {
+                    "type": "string",
+                    "example": "eyJ0eXAiOiJKV...",
+                    "description": "The refresh token to invalidate. If you have the refresh token in a cookie through /auth/login, you don't have to submit it here."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "json",
+                      "cookie",
+                      "session"
+                    ],
+                    "description": "Whether the refresh token is submitted in the JSON response, or in a httpOnly cookie."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request successful"
+          }
+        }
+      }
+    },
+    "/auth/password/request": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "passwordRequest",
+        "summary": "Request a Password Reset",
+        "description": "Request that a password reset email be sent. This does not apply to users authenticated through external providers (OAuth, SAML, LDAP, etc.).",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "admin@example.com",
+                    "description": "Email address of the user you're requesting a reset for."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/auth/password/reset": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "passwordReset",
+        "summary": "Reset a Password",
+        "description": "The request a password reset endpoint sends an email with a link to the admin app which in turn uses this endpoint to allow the user to reset their password.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token",
+                  "password"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "example": "eyJ0eXAiOiJKV1Qi...",
+                    "description": "One-time use JWT token that is used to verify the user."
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password",
+                    "format": "password",
+                    "description": "New password for the user."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/auth/oauth": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "oauth",
+        "summary": "List OAuth Providers",
+        "description": "List configured OAuth providers.",
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "public": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "example": [
+                        "github",
+                        "facebook"
+                      ],
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/auth/oauth/{provider}": {
+      "get": {
+        "summary": "Authenticated using an OAuth provider",
+        "description": "Start OAuth flow using the specified provider",
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "oauthProvider",
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "description": "Key of the activated OAuth provider.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "redirect",
+            "in": "query",
+            "required": false,
+            "description": "Where to redirect on successful login.<br/>If set the authentication details are set inside cookies otherwise a JSON is returned.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "public": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "token": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/server/info": {
+      "get": {
+        "summary": "System Info",
+        "description": "Perform a system status check and return the options.",
+        "operationId": "serverInfo",
+        "parameters": [
+          {
+            "description": "The first time you create a project, the provided token will be saved and required for subsequent project installs. It can also be found and configured in `/config/__api.json` on your server.",
+            "in": "query",
+            "name": "super_admin_token",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "tags": [
+          "Server"
+        ]
+      }
+    },
+    "/server/ping": {
+      "get": {
+        "summary": "Ping",
+        "description": "Ping, pong. Ping.. pong.",
+        "operationId": "ping",
+        "responses": {
+          "200": {
+            "content": {
+              "application/text": {
+                "schema": {
+                  "type": "string",
+                  "pattern": "pong",
+                  "example": "pong"
+                }
+              }
+            },
+            "description": "Successful request"
+          }
+        },
+        "tags": [
+          "Server"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Assets",
+      "description": "Image typed files can be dynamically resized and transformed to fit any need."
+    },
+    {
+      "name": "Authentication",
+      "description": "All data within the platform is private by default. The public role can be configured to expose data without authentication, or you can pass an access token to the API to access private data."
+    },
+    {
+      "name": "Server",
+      "description": "Access to where Directus runs. Allows you to make sure your server has everything needed to run the platform, and check what kind of latency we're dealing with."
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Query": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Control what fields are being returned in the object.",
+            "example": [
+              "*",
+              "*.*"
+            ]
+          },
+          "filter": {
+            "type": "object",
+            "example": {
+              "<field>": {
+                "<operator>": "<value>"
+              }
+            }
+          },
+          "search": {
+            "description": "Filter by items that contain the given search query in one of their fields.",
+            "type": "string"
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "How to sort the returned items.",
+            "example": [
+              "-date_created"
+            ]
+          },
+          "limit": {
+            "type": "number",
+            "description": "Set the maximum number of items that will be returned"
+          },
+          "offset": {
+            "type": "number",
+            "description": "How many items to skip when fetching data."
+          },
+          "page": {
+            "type": "number",
+            "description": "Cursor for use in pagination. Often used in combination with limit."
+          },
+          "deep": {
+            "type": "object",
+            "description": "Deep allows you to set any of the other query parameters on a nested relational dataset.",
+            "example": {
+              "related_articles": {
+                "_limit": 3
+              }
+            }
+          }
+        }
+      },
+      "x-metadata": {
+        "type": "object",
+        "properties": {
+          "total_count": {
+            "description": "Returns the total item count of the collection you're querying.",
+            "type": "integer"
+          },
+          "filter_count": {
+            "description": "Returns the item count of the collection you're querying, taking the current filter/search parameters into account.",
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "parameters": {
+      "Id": {
+        "description": "Index",
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        }
+      },
+      "UUId": {
+        "description": "Unique identifier for the object.",
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "example": "8cbb43fe-4cdf-4991-8352-c461779cec02",
+          "type": "string"
+        }
+      },
+      "Collection": {
+        "description": "Collection of which you want to retrieve the items from.",
+        "name": "collection",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "Search": {
+        "description": "Filter by items that contain the given search query in one of their fields.",
+        "in": "query",
+        "name": "search",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "Page": {
+        "description": "Cursor for use in pagination. Often used in combination with limit.",
+        "in": "query",
+        "name": "page",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        }
+      },
+      "Offset": {
+        "description": "How many items to skip when fetching data.",
+        "in": "query",
+        "name": "offset",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        }
+      },
+      "Sort": {
+        "description": "How to sort the returned items. `sort` is a CSV of fields used to sort the fetched items. Sorting defaults to ascending (ASC) order but a minus sign (` - `) can be used to reverse this to descending (DESC) order. Fields are prioritized by their order in the CSV. You can also use a ` ? ` to sort randomly.\n",
+        "in": "query",
+        "name": "sort",
+        "required": false,
+        "explode": false,
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "Meta": {
+        "description": "What metadata to return in the response.",
+        "in": "query",
+        "name": "meta",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "Limit": {
+        "description": "A limit on the number of objects that are returned.",
+        "in": "query",
+        "name": "limit",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        }
+      },
+      "Filter": {
+        "description": "Select items in collection by given conditions.",
+        "in": "query",
+        "name": "filter",
+        "required": false,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "example": {
+                "<field>": {
+                  "<operator>": "<value>"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Fields": {
+        "description": "Control what fields are being returned in the object.",
+        "in": "query",
+        "name": "fields",
+        "required": false,
+        "explode": false,
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "Export": {
+        "name": "export",
+        "description": "Saves the API response to a file. Accepts one of \"csv\", \"csv_utf8\", \"json\", \"xml\", \"yaml\".",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "csv",
+            "csv_utf8",
+            "json",
+            "xml",
+            "yaml"
+          ]
+        }
+      },
+      "Version": {
+        "name": "version",
+        "description": "Retrieve an item's state from a specific Content Version. The value corresponds to the \"key\" of the Content Version.\n",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "responses": {
+      "NotFoundError": {
+        "description": "Error: Not found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "UnauthorizedError": {
+        "description": "Error: Unauthorized request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "KeyAuth": {
+        "type": "apiKey",
+        "in": "query",
+        "name": "access_token"
+      },
+      "Auth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization"
+      }
+    }
+  }
+}

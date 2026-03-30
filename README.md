@@ -196,8 +196,8 @@ ADR 0276 NATS JetStream is now live on production from `main`: `docker-runtime-l
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.108` |
-| Platform version | `0.130.71` |
+| Repository version | `0.177.109` |
+| Platform version | `0.130.72` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -283,6 +283,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `deadlock_detector` | `2026-03-26-adr-0162-deadlock-detector-live-apply` |
 | `dependency_graph_runtime` | `2026-03-26-adr-0117-dependency-graph-live-apply` |
 | `dify` | `2026-03-28-adr-0197-dify-mainline-live-apply` |
+| `directus` | `2026-03-30-adr-0289-directus-mainline-live-apply` |
 | `docker_publication` | `2026-03-30-adr-0270-docker-publication-self-healing-and-port-programming-assertions-mainline-live-apply` |
 | `docker_runtime` | `2026-03-22-adr-0023-docker-runtime-live-apply` |
 | `docs_portal` | `2026-03-29-adr-0239-browser-local-search-post-merge-replay` |
@@ -1432,8 +1433,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.108` |
-| Platform version | `0.130.71` |
+| Repository version | `0.177.109` |
+| Platform version | `0.130.72` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |

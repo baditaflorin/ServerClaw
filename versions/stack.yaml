@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.108
-platform_version: 0.130.71
+repo_version: 0.177.109
+platform_version: 0.130.72
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -135,6 +135,7 @@ live_apply_evidence:
     repo_deploy_base_image_cache: 2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply
     vulnerability_budget_gate: 2026-03-30-adr-0269-vulnerability-budget-gates-mainline-live-apply
     tesseract_ocr: 2026-03-30-adr-0286-tesseract-ocr-live-apply
+    directus: 2026-03-30-adr-0289-directus-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -1053,8 +1054,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.108
+    current: 0.177.109
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.71
+    current: 0.130.72
     meaning: intended platform release for the actual server configuration

@@ -16784,8 +16784,8 @@ workstreams:
     title: Live apply ADR 0289 Directus from latest origin/main
     status: live_applied
     owner: codex
-    branch: codex/ws-0289-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply
+    branch: codex/ws-0289-main-release
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-main-release
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0289-live-apply.md
     depends_on:
       - adr-0021-public-subdomain-publication
@@ -16842,7 +16842,16 @@ workstreams:
       - config/workflow-catalog.json
       - config/ansible-execution-scopes.yaml
       - Makefile
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
       - tests/
+      - receipts/ops-portal-snapshot.html
       - receipts/image-scans/
       - receipts/live-applies/
     ownership_manifest:
@@ -16857,6 +16866,11 @@ workstreams:
             - docs/adr/.index.yaml
           mode: shared_contract
           contract: adr-index-generator-v1
+        - id: integration_readme_surface
+          paths:
+            - README.md
+          mode: shared_contract
+          contract: main-integration-truth-v1
         - id: directus_docs_surface
           paths:
             - docs/workstreams/ws-0289-live-apply.md
@@ -16939,5 +16953,36 @@ workstreams:
             - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
           mode: shared_contract
           contract: keycloak-client-contract-v1
+        - id: release_management_surfaces
+          paths:
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+          mode: shared_contract
+          contract: release-management-v1
+        - id: platform_truth_generation
+          paths:
+            - versions/stack.yaml
+            - build/platform-manifest.json
+          mode: shared_contract
+          contract: canonical-truth-v1
+        - id: docs_portal_generation_contract
+          paths:
+            - docs/site-generated/architecture/dependency-graph.md
+            - receipts/ops-portal-snapshot.html
+          mode: shared_contract
+          contract: docs-portal-generation-v1
     ready_to_merge: true
     live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0289 by deploying Directus as the repo-managed
+        REST and GraphQL data API on docker-runtime-lv3, adds the dedicated
+        Postgres plus Keycloak/OIDC bootstrap path, publishes data.lv3.org on
+        the shared edge, and records the first verified mainline Directus live
+        apply that advances platform_version to 0.130.72
+      release_bump: patch
+      included_in_repo_version: 0.177.109
+      latest_receipts:
+        directus: 2026-03-30-adr-0289-directus-mainline-live-apply

@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.108",
-  "platform_version": "0.130.71",
-  "generated_at": "2026-03-30T19:13:08Z",
-  "next_refresh_at": "2026-03-30T20:13:08Z",
+  "repo_version": "0.177.109",
+  "platform_version": "0.130.72",
+  "generated_at": "2026-03-30T20:34:36Z",
+  "next_refresh_at": "2026-03-30T21:34:36Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -117,6 +117,18 @@
         "lifecycle_status": "active",
         "primary_url": "https://agents.lv3.org",
         "last_live_apply": "2026-03-30T00:00:00Z"
+      },
+      "directus": {
+        "service_name": "Directus",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://data.lv3.org",
+        "last_live_apply": "2026-03-30T00:00:00Z",
+        "slo_status": "unknown"
       },
       "docker_build": {
         "service_name": "Docker Build VM",
@@ -1230,6 +1242,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-dify.md"
+      },
+      {
+        "id": "converge-directus",
+        "description": "Deploy the Directus PostgreSQL backend, runtime, Keycloak client, and public edge publication, then verify REST, GraphQL, and OIDC access end to end.",
+        "tags": [
+          "converge-directus",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 280,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 2,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-directus.md"
       },
       {
         "id": "converge-docker-publication-assurance",
@@ -4028,6 +4066,16 @@
         ]
       },
       {
+        "id": "configure-directus",
+        "title": "Configure Directus",
+        "agent_trust_required": "T3",
+        "steps": 6,
+        "path": "docs/runbooks/configure-directus.md",
+        "workflow_ids": [
+          "converge-directus"
+        ]
+      },
+      {
         "id": "configure-docker-runtime",
         "title": "Configure Docker Runtime Runbook",
         "agent_trust_required": "T3",
@@ -5020,10 +5068,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.107",
+    "last_version": "0.177.108",
     "deployed_at": "2026-03-30",
-    "summary": "implements ADR 0301 by adding repo-managed Semgrep SAST and secret-pattern scanning to the shared validation gate, remote build-server replay, and hosted CI workflows through the Python check-runner contract",
-    "release_notes_url": "docs/release-notes/0.177.108.md"
+    "summary": "implements ADR 0289 by deploying Directus as the repo-managed REST and GraphQL data API on docker-runtime-lv3, adds the dedicated Postgres plus Keycloak/OIDC bootstrap path, publishes data.lv3.org on the shared edge, and records the first verified mainline Directus live apply that advances platform_version to 0.130.72",
+    "release_notes_url": "docs/release-notes/0.177.109.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -5045,7 +5045,7 @@ adr_index:
       - over
     summary: We will deploy Directus as the REST and GraphQL data API layer for
     filename: 0289-directus-as-the-rest-graphql-data-api-layer-over-postgres.md
-    implemented_version: 0.130.71
+    implemented_version: 0.177.109
   - adr: 0289
     title: Label Studio As The Human-In-The-Loop Data Annotation Platform
     status: Accepted

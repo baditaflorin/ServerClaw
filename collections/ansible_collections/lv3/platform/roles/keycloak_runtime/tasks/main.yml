@@ -261,6 +261,9 @@
     'Pulling' in keycloak_pull.stdout
     or 'Downloaded newer image' in keycloak_pull.stdout
     or 'Pull complete' in keycloak_pull.stdout
+  retries: 3
+  delay: 5
+  until: keycloak_pull.rc == 0
 
 - name: Check whether the Docker nat chain exists before recreating Keycloak published ports
   ansible.builtin.command:
