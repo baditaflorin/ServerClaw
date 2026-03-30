@@ -61,7 +61,7 @@
     {
       "check": "Exact-main repository automation and validation paths",
       "result": "pass",
-      "observed": "`uv run --with pyyaml python3 scripts/ansible_scope_runner.py validate --inventory inventory/hosts.yml`, the scoped `playbooks/services/build-artifact-cache.yml --syntax-check` replay, `uv run --with pyyaml --with jsonschema python3 scripts/validate_repository_data_models.py --validate`, `uv run --with pyyaml python3 scripts/canonical_truth.py --check`, `uv run --with pyyaml --with jsonschema python3 scripts/platform_manifest.py --check`, `./scripts/validate_repo.sh agent-standards`, and `git diff --check` all succeeded after the canonical receipt and truth surfaces were promoted."
+      "observed": "`uv run --with pyyaml python3 scripts/ansible_scope_runner.py validate --inventory inventory/hosts.yml`, the scoped `playbooks/services/build-artifact-cache.yml --syntax-check` replay, `uv run --with pyyaml --with jsonschema python3 scripts/validate_repository_data_models.py --validate`, `uv run --with pyyaml python3 scripts/canonical_truth.py --check`, `uv run --with pyyaml --with jsonschema python3 scripts/platform_manifest.py --check`, `./scripts/validate_repo.sh agent-standards`, and `git diff --check` all succeeded after the canonical receipt and truth surfaces were promoted; the remote pre-push gate then uncovered stale generated docs, which were cleared by rerunning `uv run --with jsonschema python3 scripts/generate_dependency_diagram.py --write`, `uv run --with pyyaml python3 scripts/generate_diagrams.py --write`, and `./scripts/validate_repo.sh generated-docs`."
     },
     {
       "check": "Exact-main dedicated cache VM replay",
@@ -113,6 +113,9 @@
     "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-canonical-truth-check-r1-0.177.103.txt",
     "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-platform-manifest-check-r1-0.177.103.txt",
     "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-validate-agent-standards-r1-0.177.103.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-generate-dependency-diagram-r2-0.177.103.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-generate-diagrams-r2-0.177.103.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-validate-generated-docs-r5-0.177.103.txt",
     "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-validate-workstream-surfaces-r1-0.177.103.txt",
     "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-git-diff-check-r2-0.177.103.txt",
     "receipts/live-applies/2026-03-30-adr-0296-dedicated-artifact-cache-vm-live-apply.json",
