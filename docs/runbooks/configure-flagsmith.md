@@ -30,6 +30,19 @@ The target validates the subdomain exposure contract and refreshes the shared
 generated edge static sites before publishing `flags.lv3.org`, so a fresh
 worktree does not need a separate docs or portal generation step first.
 
+To exercise the full repository wrapper path, run:
+
+```bash
+ALLOW_IN_PLACE_MUTATION=true HETZNER_DNS_API_TOKEN=... make live-apply-service service=flagsmith env=production
+```
+
+That wrapper runs `check-canonical-truth` before the service replay. On an
+isolated workstream branch it may stop on a stale shared `README.md` or other
+protected canonical-truth surface. Keep those shared writes for the exact-main
+integration step, and use `make converge-flagsmith` as the service-specific
+live replay path while protected release and README updates are intentionally
+out of scope on the workstream branch.
+
 ## Generated local artifacts
 
 The workflow maintains controller-local secrets under `.local/flagsmith/`:

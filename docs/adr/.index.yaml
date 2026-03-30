@@ -5015,7 +5015,7 @@ adr_index:
   - adr: 0288
     title: Flagsmith As The Feature Flag And Remote Configuration Service
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -5028,6 +5028,7 @@ adr_index:
       - service
     summary: We will deploy Flagsmith as the feature flag and remote configuration
     filename: 0288-flagsmith-as-the-feature-flag-and-remote-configuration-service.md
+    implemented_version: 0.177.108
   - adr: 0289
     title: Directus As The REST And GraphQL Data API Layer Over Postgres
     status: Accepted
