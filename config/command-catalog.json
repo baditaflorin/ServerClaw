@@ -1564,6 +1564,44 @@
         "timeout_seconds": 1500
       }
     },
+    "converge-tika": {
+      "description": "Converge the private Apache Tika extraction runtime on docker-runtime-lv3 for repo-managed document ingestion workflows.",
+      "workflow_id": "converge-tika",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-tika passes",
+        "make validate passes before the apply",
+        "The private-only extraction boundary and stateless document-handling contract are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, `/version` verification, plaintext extraction verification, metadata extraction verification, and the guest-local container status."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the Tika runtime fails to start, the `/version` endpoint does not come up, or either extraction contract fails verification.",
+          "Stop if the guest firewall or compose publication would expose the service beyond the intended private boundary."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Tika runtime and firewall configuration before retrying.",
+          "Do not compensate with manual container, compose, or nftables drift outside the repo-managed playbook path."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
+      }
+    },
     "converge-windmill": {
       "description": "Converge the private Windmill runtime, PostgreSQL backend, host-side proxy, and seeded workspace script.",
       "workflow_id": "converge-windmill",

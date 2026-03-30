@@ -195,6 +195,13 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - http://10.10.10.20:9998/version
+  labels:
+    service_id: tika
+    slo_id: tika-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - https://uptime.lv3.org
   labels:
     service_id: uptime_kuma

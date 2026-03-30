@@ -212,6 +212,7 @@ platform_ports:
   portainer_host_proxy_port: 9444
   step_ca_api_port: 9000
   step_ca_proxy_port: 9443
+  tika_port: 9998
   headscale_http_port: 8080
   vaultwarden_https_port: 8222
 platform_port_assignments:
@@ -286,6 +287,7 @@ platform_port_assignments:
   portainer_host_proxy_port: 9444
   step_ca_api_port: 9000
   step_ca_proxy_port: 9443
+  tika_port: 9998
   headscale_http_port: 8080
   vaultwarden_https_port: 8222
 platform_guest_catalog:
@@ -1267,6 +1269,19 @@ platform_service_topology:
     urls:
       internal: https://10.10.10.20:9000
       controller: https://100.64.0.1:9443
+  tika:
+    service_name: tika
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: tika
+    ports:
+      internal: 9998
+    urls:
+      internal: http://10.10.10.20:9998
   semaphore:
     service_name: semaphore
     owning_vm: docker-runtime-lv3
@@ -2728,6 +2743,19 @@ public_edge_service_topology:
     urls:
       internal: https://10.10.10.20:9000
       controller: https://100.64.0.1:9443
+  tika:
+    service_name: tika
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: tika
+    ports:
+      internal: 9998
+    urls:
+      internal: http://10.10.10.20:9998
   semaphore:
     service_name: semaphore
     owning_vm: docker-runtime-lv3
@@ -3796,3 +3824,4 @@ ops_portal_port: 8092
 harbor_port: 8095
 ntopng_http_port: 3000
 portainer_https_port: 9443
+tika_port: 9998

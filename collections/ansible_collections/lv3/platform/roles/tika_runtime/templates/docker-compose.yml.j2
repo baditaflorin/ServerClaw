@@ -1,0 +1,9 @@
+services:
+  tika:
+    image: {{ tika_runtime_image }}
+    container_name: {{ tika_runtime_container_name }}
+    restart: unless-stopped
+    environment:
+      JDK_JAVA_OPTIONS: {{ tika_runtime_java_opts | to_json }}
+    ports:
+      - "{{ tika_runtime_port }}:9998"

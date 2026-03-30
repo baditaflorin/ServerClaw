@@ -1116,6 +1116,49 @@ groups:
           description: The public status page remains externally reachable as the
             last-resort platform signal.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_tika_availability
+        expr: (slo:tika_availability:error_rate_5m > (14 * 0.010000)) and (slo:tika_availability:error_rate_1h
+          > (14 * 0.010000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: tika
+          slo_id: tika-availability
+          indicator: availability
+        annotations:
+          summary: tika-availability is burning its error budget at 14x
+          description: The private Apache Tika extraction API remains reachable on
+            docker-runtime-lv3 for synchronous document text and metadata extraction
+            workflows.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_tika_availability
+        expr: slo:tika_availability:error_rate_1h > (3 * 0.010000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: tika
+          slo_id: tika-availability
+          indicator: availability
+        annotations:
+          summary: tika-availability is burning its error budget at 3x
+          description: The private Apache Tika extraction API remains reachable on
+            docker-runtime-lv3 for synchronous document text and metadata extraction
+            workflows.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_tika_availability
+        expr: slo:tika_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: tika
+          slo_id: tika-availability
+          indicator: availability
+        annotations:
+          summary: tika-availability has less than 10% error budget remaining
+          description: The private Apache Tika extraction API remains reachable on
+            docker-runtime-lv3 for synchronous document text and metadata extraction
+            workflows.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_uptime_kuma_availability
         expr: (slo:uptime_kuma_availability:error_rate_5m > (14 * 0.001000)) and (slo:uptime_kuma_availability:error_rate_1h
           > (14 * 0.001000))

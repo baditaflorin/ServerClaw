@@ -14,6 +14,130 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0275-live-apply
+    adr: "0275"
+    title: ADR 0275 live apply from latest origin/main
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0275-live-apply-r2
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0275-live-apply-r2
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0275-live-apply.md
+    depends_on:
+      - adr-0023-docker-runtime-vm-baseline
+      - adr-0067-guest-network-policy-enforcement
+      - adr-0153-distributed-resource-lock-registry
+      - adr-0191-immutable-guest-replacement
+      - adr-0198-qdrant-vector-search-semantic-rag
+      - adr-0263-qdrant-postgresql-and-local-search-as-the-serverclaw-memory-substrate
+      - adr-0274-minio-as-the-s3-compatible-object-storage-layer
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0275-live-apply.md
+      - docs/adr/0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline.md
+      - docs/runbooks/configure-tika.md
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - scripts/generate_platform_vars.py
+      - Makefile
+      - config/service-capability-catalog.json
+      - config/health-probe-catalog.json
+      - config/image-catalog.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      - config/dependency-graph.json
+      - config/slo-catalog.json
+      - config/data-catalog.json
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/slo_rules.yml
+      - config/grafana/dashboards/slo-overview.json
+      - config/uptime-kuma/monitors.json
+      - config/command-catalog.json
+      - config/workflow-catalog.json
+      - config/ansible-execution-scopes.yaml
+      - config/grafana/dashboards/tika.json
+      - config/alertmanager/rules/tika.yml
+      - playbooks/tika.yml
+      - playbooks/services/tika.yml
+      - collections/ansible_collections/lv3/platform/playbooks/tika.yml
+      - collections/ansible_collections/lv3/platform/roles/tika_runtime/
+      - tests/test_tika_runtime_role.py
+      - tests/test_tika_playbook.py
+      - tests/test_generate_platform_vars.py
+      - receipts/image-scans/2026-03-30-tika-runtime.json
+      - receipts/image-scans/2026-03-30-tika-runtime.trivy.json
+      - receipts/live-applies/2026-03-30-adr-0275-apache-tika-live-apply.json
+      - receipts/live-applies/evidence/2026-03-30-ws-0275-*
+      - docs/adr/.index.yaml
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: tika_docs
+          paths:
+            - docs/workstreams/ws-0275-live-apply.md
+            - docs/adr/0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline.md
+            - docs/runbooks/configure-tika.md
+          mode: exclusive
+        - id: tika_platform_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - scripts/generate_platform_vars.py
+            - tests/test_generate_platform_vars.py
+          mode: shared_contract
+          contract: platform-topology-v1
+        - id: tika_shared_validation_contract
+          paths:
+            - Makefile
+            - config/command-catalog.json
+            - config/workflow-catalog.json
+            - config/ansible-execution-scopes.yaml
+          mode: shared_contract
+          contract: repository-automation-v1
+        - id: tika_service_catalog_contract
+          paths:
+            - config/service-capability-catalog.json
+            - config/health-probe-catalog.json
+            - config/image-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/dependency-graph.json
+            - config/slo-catalog.json
+            - config/data-catalog.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/grafana/dashboards/slo-overview.json
+            - config/uptime-kuma/monitors.json
+            - config/grafana/dashboards/tika.json
+            - config/alertmanager/rules/tika.yml
+          mode: shared_contract
+          contract: service-catalogs-v1
+        - id: tika_runtime_surfaces
+          paths:
+            - playbooks/tika.yml
+            - playbooks/services/tika.yml
+            - collections/ansible_collections/lv3/platform/playbooks/tika.yml
+            - collections/ansible_collections/lv3/platform/roles/tika_runtime/
+            - tests/test_tika_runtime_role.py
+            - tests/test_tika_playbook.py
+            - receipts/image-scans/2026-03-30-tika-runtime.json
+            - receipts/image-scans/2026-03-30-tika-runtime.trivy.json
+            - receipts/live-applies/2026-03-30-adr-0275-apache-tika-live-apply.json
+            - receipts/live-applies/evidence/2026-03-30-ws-0275-*
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false
   - id: ws-0282-live-apply
     adr: "0282"
     title: Live apply Mailpit as the SMTP development mail interceptor from latest origin/main

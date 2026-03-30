@@ -1,0 +1,28 @@
+# depends_on:
+#   - playbooks/docker-runtime.yml
+---
+# Playbook: services/tika.yml
+# Purpose: Provide the canonical service-scoped live-apply entrypoint for Apache Tika.
+# Use case: Run through `make live-apply-service service=tika env=production` and related guarded wrappers.
+#
+# Inputs (required):
+#   - env (str, required): Target environment passed through the shared execution wrapper.
+#
+# Inputs (optional):
+#   - EXTRA_ARGS (str, optional, default=""): Additional ansible arguments passed by the caller.
+#
+# Outputs:
+#   - Imports the root Apache Tika playbook used by the service-scoped wrappers.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - ADR 0079: shared playbook execution model
+#   - ADR 0275: Apache Tika extraction service decision
+#   - Requires: playbooks/tika.yml
+#
+# Related ADRs: 0079, 0275
+# Related Runbooks: docs/runbooks/configure-tika.md
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+- import_playbook: ../tika.yml

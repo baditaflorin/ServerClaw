@@ -1,0 +1,21 @@
+# Purpose: Set the default paths, image, ports, and verification settings for the private Apache Tika runtime.
+# Use case: Load when converging Tika so the role can render compose state and extraction verification consistently.
+# Inputs: Platform topology, image catalog, and optional role overrides.
+# Outputs: Default variables consumed by the tika_runtime tasks and templates.
+# Idempotency: Fully idempotent; defaults describe desired values only.
+# Dependencies: ADR 0165 metadata standard, ADR 0275, and the tika_runtime role.
+---
+tika_runtime_site_dir: /opt/tika
+tika_runtime_compose_file: "{{ tika_runtime_site_dir }}/docker-compose.yml"
+tika_runtime_container_name: tika
+tika_runtime_image: "{{ container_image_catalog.images.tika_runtime.ref }}"
+tika_runtime_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('tika', 'internal') }}"
+tika_runtime_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('tika', 'internal') }}"
+tika_runtime_java_opts: "-Xms256m -Xmx1024m"
+tika_runtime_verify_html_fixture: |
+  <html>
+    <body>
+      <h1>Hello Tika</h1>
+      <p>Example extraction fixture.</p>
+    </body>
+  </html>

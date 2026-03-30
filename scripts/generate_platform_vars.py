@@ -91,6 +91,7 @@ PORT_KEYS = (
     "portainer_host_proxy_port",
     "step_ca_api_port",
     "step_ca_proxy_port",
+    "tika_port",
     "headscale_http_port",
     "vaultwarden_https_port",
     "headscale_http_port",
@@ -439,6 +440,9 @@ def build_service_urls(
         urls["controller"] = service_url("https", tailscale_ipv4, ports["step_ca_proxy_port"])
         port_map["internal"] = ports["step_ca_api_port"]
         port_map["controller"] = ports["step_ca_proxy_port"]
+    elif service_id == "tika":
+        urls["internal"] = service_url("http", private_ip, ports["tika_port"])
+        port_map["internal"] = ports["tika_port"]
     elif service_id == "semaphore":
         urls["internal"] = service_url("http", private_ip, ports["semaphore_server_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["semaphore_host_proxy_port"])

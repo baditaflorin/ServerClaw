@@ -1234,6 +1234,28 @@
         "converge-step-ca"
       ]
     },
+    "tika_runtime": {
+      "kind": "runtime",
+      "service_id": "tika",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "tika",
+      "registry_ref": "docker.io/apache/tika",
+      "tag": "3.2.3.0",
+      "digest": "sha256:3fafa194474c5f3a8cff25a0eefd07e7c0513b7f552074ad455e1af58a06bbea",
+      "ref": "docker.io/apache/tika:3.2.3.0@sha256:3fafa194474c5f3a8cff25a0eefd07e7c0513b7f552074ad455e1af58a06bbea",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-30-tika-runtime.json",
+      "consumers": [
+        "roles/tika_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-tika"
+      ]
+    },
     "uptime_kuma_runtime": {
       "kind": "runtime",
       "service_id": "uptime_kuma",

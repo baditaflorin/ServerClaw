@@ -1819,6 +1819,38 @@
       }
     },
     {
+      "id": "tika",
+      "name": "Apache Tika",
+      "description": "Private stateless document text and metadata extraction service for the RAG and ServerClaw memory ingestion pipelines.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:9998",
+      "exposure": "private-only",
+      "uptime_monitor_name": "Tika Private",
+      "health_probe_id": "tika",
+      "image_catalog_ids": [
+        "tika_runtime"
+      ],
+      "adr": "0275",
+      "runbook": "docs/runbooks/configure-tika.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-tika/lv3-tika",
+      "tags": [
+        "documents",
+        "extraction",
+        "rag",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.20:9998",
+          "notes": "The runtime stays private to the guest network and is consumed directly by repo-managed ingestion workflows; no shared API gateway publication is issued."
+        }
+      }
+    },
+    {
       "id": "uptime_kuma",
       "name": "Uptime Kuma",
       "description": "Synthetic monitoring surface used to track public and internal service reachability.",

@@ -1,0 +1,79 @@
+# Purpose: Converge the private Apache Tika compose stack on docker-runtime-lv3.
+# Use case: Run during Tika deployment, recovery, or image refresh when the private extraction runtime must match repo truth.
+# Inputs: Pinned image catalog entry, private service URL, compose paths, and verification fixture settings.
+# Outputs: Rendered compose file plus a running Apache Tika container with version, text, and metadata endpoints verified.
+# Idempotency: Partially idempotent; reruns reconcile the same compose stack and host port binding.
+# Dependencies: ADR 0275 and ADR 0165; requires docker_runtime and linux_guest_firewall outputs.
+---
+- name: Validate Apache Tika runtime inputs
+  ansible.builtin.assert:
+    that:
+      - tika_runtime_site_dir | length > 0
+      - tika_runtime_compose_file | length > 0
+      - tika_runtime_container_name | length > 0
+      - tika_runtime_image | length > 0
+      - tika_runtime_port | int > 0
+      - tika_runtime_base_url | length > 0
+      - tika_runtime_java_opts | length > 0
+      - tika_runtime_verify_html_fixture | length > 0
+    fail_msg: "tika_runtime requires compose paths, the pinned image, listener metadata, and a verification fixture."
+
+- name: Ensure the Apache Tika runtime directory exists
+  ansible.builtin.file:
+    path: "{{ tika_runtime_site_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the Apache Tika compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ tika_runtime_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Apache Tika image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ tika_runtime_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ tika_runtime_site_dir }}"
+  register: tika_runtime_pull
+  changed_when: >-
+    'Pulling' in tika_runtime_pull.stdout
+    or 'Downloaded newer image' in tika_runtime_pull.stdout
+    or 'Pull complete' in tika_runtime_pull.stdout
+
+- name: Start the Apache Tika runtime
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ tika_runtime_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ tika_runtime_site_dir }}"
+  register: tika_runtime_up
+  changed_when: >-
+    'Creating' in tika_runtime_up.stdout
+    or 'Recreating' in tika_runtime_up.stdout
+    or 'Starting' in tika_runtime_up.stdout
+
+- name: Wait for Apache Tika to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ tika_runtime_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Verify the Apache Tika runtime
+  ansible.builtin.import_tasks: verify.yml

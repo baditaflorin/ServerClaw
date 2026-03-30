@@ -2369,6 +2369,65 @@
         }
       }
     },
+    "tika": {
+      "service_name": "tika",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "tika_runtime",
+      "verify_file": "roles/tika_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Apache Tika startup completes once the local version endpoint returns 200 on the runtime listener.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:9998/version",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "Apache Tika keeps serving the local version endpoint on docker-runtime-lv3.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:9998/version",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "A minimal HTML document is accepted on the local `/tika` endpoint and returns clean plaintext.",
+        "timeout_seconds": 120,
+        "retries": 3,
+        "delay_seconds": 5,
+        "argv": [
+          "/bin/bash",
+          "-lc",
+          "set -euo pipefail; body=$(mktemp); trap 'rm -f \"$body\"' EXIT; printf '<html><body><h1>LV3 Tika readiness</h1><p>Readiness probe.</p></body></html>' | curl -fsS -X PUT -H 'Content-Type: text/html' -H 'Accept: text/plain' --data-binary @- http://127.0.0.1:9998/tika >\"$body\"; grep -q 'LV3 Tika readiness' \"$body\""
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Tika Private",
+          "type": "http",
+          "url": "http://10.10.10.20:9998/version",
+          "description": "Private Apache Tika version endpoint on docker-runtime-lv3.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
     "uptime_kuma": {
       "service_name": "uptime-kuma",
       "owning_vm": "docker-runtime-lv3",

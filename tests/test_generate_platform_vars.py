@@ -91,6 +91,15 @@ def test_build_platform_vars_includes_plausible_publication_topology() -> None:
     assert plausible["edge"]["preserve_upstream_security_headers"] is True
 
 
+def test_build_platform_vars_includes_tika_private_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    tika = platform_vars["platform_service_topology"]["tika"]
+
+    assert tika["ports"]["internal"] == 9998
+    assert tika["urls"]["internal"] == "http://10.10.10.20:9998"
+    assert tika["exposure_model"] == "private-only"
+
+
 def test_build_platform_vars_includes_nextcloud_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     nextcloud = platform_vars["platform_service_topology"]["nextcloud"]
