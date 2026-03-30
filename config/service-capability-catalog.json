@@ -299,6 +299,7 @@
       "secret_catalog_ids": [
         "gitea_admin_password",
         "gitea_database_password",
+        "gitea_minio_secret_key",
         "gitea_runner_registration_token",
         "gitea_webhook_secret"
       ],
@@ -364,6 +365,7 @@
       "uptime_monitor_name": "Grafana Public",
       "health_probe_id": "grafana",
       "secret_catalog_ids": [
+        "loki_minio_secret_key",
         "monitoring_guest_writer_token",
         "monitoring_proxmox_writer_token"
       ],
@@ -617,12 +619,12 @@
         "langfuse_runtime",
         "langfuse_worker_runtime",
         "langfuse_clickhouse_runtime",
-        "langfuse_minio_runtime",
         "langfuse_redis_runtime"
       ],
       "secret_catalog_ids": [
         "langfuse_database_password",
         "langfuse_bootstrap_user_password",
+        "langfuse_minio_secret_key",
         "langfuse_project_secret_key",
         "keycloak_langfuse_client_secret"
       ],
@@ -710,6 +712,44 @@
           "status": "active",
           "url": "http://10.10.10.20:8025",
           "notes": "Mailpit runs privately on docker-runtime-lv3 for non-production SMTP interception and operator inspection; production services must continue to relay through Stalwart."
+        }
+      }
+    },
+    {
+      "id": "minio",
+      "name": "MinIO",
+      "description": "Shared S3-compatible object storage runtime for platform buckets, governed bucket policy reconciliation, and browser-based object inspection.",
+      "category": "data",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:9010",
+      "public_url": "https://minio.lv3.org",
+      "subdomain": "minio.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "MinIO Public Health",
+      "health_probe_id": "minio",
+      "image_catalog_ids": [
+        "minio_runtime"
+      ],
+      "secret_catalog_ids": [
+        "minio_root_password"
+      ],
+      "adr": "0274",
+      "adr_file": "docs/adr/0274-minio-as-the-s3-compatible-object-storage-layer.md",
+      "runbook": "docs/runbooks/minio-object-storage.md",
+      "tags": [
+        "s3",
+        "object-storage",
+        "minio",
+        "shared"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://minio.lv3.org",
+          "subdomain": "minio.lv3.org",
+          "notes": "The public S3 API remains machine-accessible while the browser console is separately published at minio-console.lv3.org behind the shared edge OIDC gate."
         }
       }
     },
@@ -1192,7 +1232,7 @@
         "plane_backend_runtime",
         "plane_proxy_runtime",
         "netbox_redis_runtime",
-        "langfuse_minio_runtime",
+        "minio_runtime",
         "plane_rabbitmq_runtime"
       ],
       "secret_catalog_ids": [
@@ -1413,7 +1453,7 @@
       "health_probe_id": "outline",
       "image_catalog_ids": [
         "outline_runtime",
-        "langfuse_minio_runtime",
+        "minio_runtime",
         "langfuse_redis_runtime"
       ],
       "secret_catalog_ids": [
@@ -1576,6 +1616,9 @@
       "exposure": "private-only",
       "uptime_monitor_name": "Platform Context Private",
       "health_probe_id": "platform_context_api",
+      "secret_catalog_ids": [
+        "platform_context_minio_secret_key"
+      ],
       "adr": "0070",
       "runbook": "docs/runbooks/rag-platform-context.md",
       "tags": [

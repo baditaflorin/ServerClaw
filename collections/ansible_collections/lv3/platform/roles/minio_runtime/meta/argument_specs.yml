@@ -1,0 +1,87 @@
+# Purpose: Declare the argument contract for the MinIO runtime role.
+# Use case: Run during syntax and argument validation before converging the shared MinIO runtime.
+# Inputs: minio_* variables required by the role.
+# Outputs: Machine-readable argument specs for the minio_runtime role.
+# Idempotency: Fully idempotent; metadata only validates role inputs.
+# Dependencies: ADR 0165 metadata standard, ADR 0274, and the minio_runtime role tasks.
+---
+argument_specs:
+  main:
+    short_description: Converge the shared MinIO object-storage runtime and launch buckets.
+    options:
+      minio_site_dir:
+        type: path
+        required: true
+      minio_data_dir:
+        type: path
+        required: true
+      minio_policy_dir:
+        type: path
+        required: true
+      minio_secret_dir:
+        type: path
+        required: true
+      minio_compose_file:
+        type: path
+        required: true
+      minio_env_file:
+        type: path
+        required: true
+      minio_openbao_agent_dir:
+        type: path
+        required: true
+      minio_openbao_secret_path:
+        type: str
+        required: true
+      minio_openbao_policy_name:
+        type: str
+        required: true
+      minio_openbao_approle_name:
+        type: str
+        required: true
+      minio_container_name:
+        type: str
+        required: true
+      minio_image:
+        type: str
+        required: true
+      minio_api_port:
+        type: int
+        required: true
+      minio_console_port:
+        type: int
+        required: true
+      minio_private_api_url:
+        type: str
+        required: true
+      minio_public_base_url:
+        type: str
+        required: true
+      minio_console_public_url:
+        type: str
+        required: true
+      minio_root_user:
+        type: str
+        required: true
+      minio_root_password_remote_file:
+        type: path
+        required: true
+      minio_root_password_local_file:
+        type: path
+        required: true
+      minio_mc_url:
+        type: str
+        required: true
+      minio_mc_checksum:
+        type: str
+        required: true
+      minio_mc_bin:
+        type: path
+        required: true
+      minio_mc_config_dir:
+        type: path
+        required: true
+      minio_managed_consumers:
+        type: list
+        elements: dict
+        required: true

@@ -4,6 +4,10 @@ portal_display: full
 tags:
   - architecture
   - dependency-graph
+pagefind_section: architecture
+pagefind_audience:
+  - contributors
+  - operators
 ---
 
 !!! note "Sensitivity: INTERNAL"
@@ -36,6 +40,7 @@ graph TD
     headscale["Headscale\nTier 1"]
     mail_platform["Mail Platform\nTier 1"]
     mailpit["Mailpit\nTier 1"]
+    minio["MinIO\nTier 1"]
     nats_jetstream["NATS JetStream\nTier 1"]
     realtime["Netdata Realtime Metrics\nTier 1"]
     nginx_edge["NGINX Edge\nTier 1"]
@@ -112,11 +117,13 @@ graph TD
     excalidraw -->|hard| nginx_edge
     gitea -->|soft| docker_build
     gitea -->|soft| keycloak
+    gitea -->|soft| minio
     gitea -->|startup_only| openbao
     gitea -->|hard| postgres
     gotenberg -->|soft| api_gateway
     gotenberg -->|hard| docker_runtime
     grafana -->|soft| keycloak
+    grafana -->|soft| minio
     grafana -->|soft| nginx_edge
     harbor -->|soft| keycloak
     harbor -->|soft| nginx_edge
@@ -129,6 +136,7 @@ graph TD
     keycloak -->|hard| postgres
     keycloak -->|startup_only| step_ca
     langfuse -->|soft| keycloak
+    langfuse -->|soft| minio
     langfuse -->|soft| nginx_edge
     langfuse -->|startup_only| openbao
     langfuse -->|hard| postgres
@@ -139,6 +147,8 @@ graph TD
     matrix_synapse -->|hard| postgres
     mattermost -->|startup_only| openbao
     mattermost -->|hard| postgres
+    minio -->|soft| nginx_edge
+    minio -->|startup_only| openbao
     n8n -->|soft| keycloak
     n8n -->|soft| nginx_edge
     n8n -->|startup_only| openbao
@@ -168,6 +178,7 @@ graph TD
     plane -->|soft| nginx_edge
     plane -->|startup_only| openbao
     plane -->|hard| postgres
+    platform_context_api -->|soft| minio
     platform_context_api -->|startup_only| openbao
     platform_context_api -->|reads_from| step_ca
     plausible -->|hard| docker_runtime

@@ -1,0 +1,445 @@
+---
+# Purpose: Converge the shared MinIO runtime, launch buckets, and per-consumer access keys on docker-runtime-lv3.
+# Inputs: Pinned image catalog entry, OpenBao env wiring, bucket policy inputs, and controller-local artifact paths.
+# Outputs: Rendered compose file plus a running MinIO runtime with repo-managed users, buckets, policies, default-CORS verification inputs, and lifecycle rules.
+# Idempotency: Partially idempotent; reruns reconcile the same compose stack, local secret mirrors, and bucket contracts.
+# Dependencies: ADR 0077, ADR 0165, ADR 0274, and the docker_runtime role outputs.
+- name: Validate MinIO runtime inputs
+  ansible.builtin.assert:
+    that:
+      - minio_site_dir | length > 0
+      - minio_data_dir | length > 0
+      - minio_policy_dir | length > 0
+      - minio_secret_dir | length > 0
+      - minio_compose_file | length > 0
+      - minio_env_file | length > 0
+      - minio_openbao_agent_dir | length > 0
+      - minio_openbao_secret_path | length > 0
+      - minio_openbao_policy_name | length > 0
+      - minio_openbao_approle_name | length > 0
+      - minio_container_name | length > 0
+      - minio_image | length > 0
+      - minio_api_port | int > 0
+      - minio_console_port | int > 0
+      - minio_private_api_url | length > 0
+      - minio_public_base_url | length > 0
+      - minio_console_public_url | length > 0
+      - minio_root_user | length > 0
+      - minio_root_password_remote_file | length > 0
+      - minio_root_password_local_file | length > 0
+      - minio_mc_url | length > 0
+      - minio_mc_checksum | length > 0
+      - minio_mc_bin | length > 0
+      - minio_mc_config_dir | length > 0
+      - minio_managed_consumers | length > 0
+    fail_msg: >-
+      minio_runtime requires compose paths, OpenBao env injection inputs, the pinned image ref,
+      runtime URLs, and at least one managed consumer bucket definition.
+
+- name: Ensure the MinIO runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - docker-compose-plugin
+      - python3
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Resolve the managed MinIO consumer contracts
+  ansible.builtin.set_fact:
+    minio_managed_consumers_resolved:
+      - name: langfuse
+        access_key_id: "{{ minio_langfuse_access_key_id }}"
+        secret_key_remote_file: "{{ minio_langfuse_secret_key_remote_file }}"
+        secret_key_local_file: "{{ minio_langfuse_secret_key_local_file }}"
+        bucket_name: "{{ minio_langfuse_bucket_name }}"
+        policy_name: "{{ minio_langfuse_policy_name }}"
+        policy_document: "{{ minio_langfuse_policy_document }}"
+      - name: gitea
+        access_key_id: "{{ minio_gitea_access_key_id }}"
+        secret_key_remote_file: "{{ minio_gitea_secret_key_remote_file }}"
+        secret_key_local_file: "{{ minio_gitea_secret_key_local_file }}"
+        bucket_name: "{{ minio_gitea_bucket_name }}"
+        policy_name: "{{ minio_gitea_policy_name }}"
+        policy_document: "{{ minio_gitea_policy_document }}"
+      - name: loki
+        access_key_id: "{{ minio_loki_access_key_id }}"
+        secret_key_remote_file: "{{ minio_loki_secret_key_remote_file }}"
+        secret_key_local_file: "{{ minio_loki_secret_key_local_file }}"
+        bucket_name: "{{ minio_loki_bucket_name }}"
+        policy_name: "{{ minio_loki_policy_name }}"
+        policy_document: "{{ minio_loki_policy_document }}"
+      - name: platform_context
+        access_key_id: "{{ minio_platform_context_access_key_id }}"
+        secret_key_remote_file: "{{ minio_platform_context_secret_key_remote_file }}"
+        secret_key_local_file: "{{ minio_platform_context_secret_key_local_file }}"
+        bucket_name: "{{ minio_platform_context_bucket_name }}"
+        policy_name: "{{ minio_platform_context_policy_name }}"
+        policy_document: "{{ minio_platform_context_policy_document }}"
+
+- name: Ensure the MinIO runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ minio_site_dir }}"
+      mode: "0755"
+    - path: "{{ minio_data_dir }}"
+      mode: "0755"
+    - path: "{{ minio_policy_dir }}"
+      mode: "0755"
+    - path: "{{ minio_secret_dir }}"
+      mode: "0700"
+    - path: "{{ minio_openbao_agent_dir }}"
+      mode: "0755"
+    - path: "{{ minio_mc_config_dir }}"
+      mode: "0700"
+
+- name: Install the pinned MinIO client
+  ansible.builtin.get_url:
+    url: "{{ minio_mc_url }}"
+    dest: "{{ minio_mc_bin }}"
+    mode: "0755"
+    checksum: "{{ minio_mc_checksum }}"
+
+- name: Generate the MinIO root password when missing
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ minio_root_password_remote_file }}" ]; then
+      umask 077
+      openssl rand -hex 20 > "{{ minio_root_password_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: minio_root_password_generation
+  changed_when: "'changed' in minio_root_password_generation.stdout"
+  no_log: true
+
+- name: Generate the MinIO consumer secret keys when missing
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item.secret_key_remote_file }}" ]; then
+      umask 077
+      openssl rand -hex 20 > "{{ item.secret_key_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop: "{{ minio_managed_consumers_resolved }}"
+  register: minio_consumer_secret_generation
+  changed_when: "'changed' in (minio_consumer_secret_generation.stdout | default(''))"
+  no_log: true
+
+- name: Read the MinIO root password
+  ansible.builtin.slurp:
+    src: "{{ minio_root_password_remote_file }}"
+  register: minio_root_password_raw
+  no_log: true
+
+- name: Read the MinIO consumer secret keys
+  ansible.builtin.slurp:
+    src: "{{ item.secret_key_remote_file }}"
+  loop: "{{ minio_managed_consumers_resolved }}"
+  register: minio_consumer_secret_reads
+  no_log: true
+
+- name: Record MinIO secret facts
+  ansible.builtin.set_fact:
+    minio_root_password: "{{ minio_root_password_raw.content | b64decode | trim }}"
+    minio_consumer_secret_keys: >-
+      {{
+        dict(
+          minio_managed_consumers_resolved
+          | map(attribute='access_key_id')
+          | zip(
+              minio_consumer_secret_reads.results
+              | map(attribute='content')
+              | map('b64decode')
+              | map('trim')
+            )
+        )
+      }}
+    minio_runtime_secret_payload:
+      MINIO_ROOT_PASSWORD: "{{ minio_root_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Ensure the local MinIO artifact directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0700"
+  loop: >-
+    {{
+      (
+        [minio_local_artifact_dir]
+        + [minio_root_password_local_file | dirname]
+        + (minio_managed_consumers_resolved | map(attribute='secret_key_local_file') | map('dirname') | list)
+      ) | unique
+    }}
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the MinIO root password to the control machine
+  ansible.builtin.copy:
+    dest: "{{ minio_root_password_local_file }}"
+    content: "{{ minio_root_password }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror the MinIO consumer secret keys to the control machine
+  ansible.builtin.copy:
+    dest: "{{ item.secret_key_local_file }}"
+    content: "{{ minio_consumer_secret_keys[item.access_key_id] }}\n"
+    mode: "0600"
+  loop: "{{ minio_managed_consumers_resolved }}"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for MinIO
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: minio
+    common_openbao_compose_env_agent_dir: "{{ minio_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ minio_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ minio_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ minio_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ minio_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ minio_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ minio_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ minio_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ minio_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ minio_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ minio_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: runtime.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ minio_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ minio_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ minio_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ minio_legacy_env_file }}"
+  no_log: true
+
+- name: Render the MinIO environment file
+  ansible.builtin.template:
+    src: runtime.env.j2
+    dest: "{{ minio_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the MinIO compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ minio_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the MinIO bucket policy documents
+  ansible.builtin.copy:
+    dest: "{{ minio_policy_dir }}/{{ item.policy_name }}.json"
+    content: "{{ item.policy_document | to_nice_json }}\n"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ minio_managed_consumers_resolved }}"
+
+- name: Pull the MinIO image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ minio_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ minio_site_dir }}"
+  register: minio_pull
+  changed_when: >-
+    'Pulling' in minio_pull.stdout
+    or 'Downloaded newer image' in minio_pull.stdout
+    or 'Pull complete' in minio_pull.stdout
+
+- name: Ensure the MinIO runtime is running
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ minio_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ minio_site_dir }}"
+  register: minio_up
+  changed_when: >-
+    'Creating' in minio_up.stdout
+    or 'Recreating' in minio_up.stdout
+    or 'Starting' in minio_up.stdout
+
+- name: Wait for MinIO to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ minio_api_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Wait for the MinIO live health endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ minio_api_port }}/minio/health/live"
+    method: GET
+    status_code: 200
+    return_content: false
+    timeout: 30
+  register: minio_healthcheck
+  retries: 24
+  delay: 5
+  until: minio_healthcheck.status == 200
+  changed_when: false
+
+- name: Configure the local MinIO client alias
+  ansible.builtin.command:
+    argv:
+      - "{{ minio_mc_bin }}"
+      - --config-dir
+      - "{{ minio_mc_config_dir }}"
+      - alias
+      - set
+      - local
+      - "http://127.0.0.1:{{ minio_api_port }}"
+      - "{{ minio_root_user }}"
+      - "{{ minio_root_password }}"
+  changed_when: false
+  no_log: true
+
+- name: Ensure the MinIO users exist
+  ansible.builtin.command:
+    argv:
+      - "{{ minio_mc_bin }}"
+      - --config-dir
+      - "{{ minio_mc_config_dir }}"
+      - admin
+      - user
+      - add
+      - local
+      - "{{ item.access_key_id }}"
+      - "{{ minio_consumer_secret_keys[item.access_key_id] }}"
+  loop: "{{ minio_managed_consumers_resolved }}"
+  changed_when: false
+  no_log: true
+
+- name: Ensure the MinIO bucket policies exist
+  ansible.builtin.command:
+    argv:
+      - "{{ minio_mc_bin }}"
+      - --config-dir
+      - "{{ minio_mc_config_dir }}"
+      - admin
+      - policy
+      - create
+      - local
+      - "{{ item.policy_name }}"
+      - "{{ minio_policy_dir }}/{{ item.policy_name }}.json"
+  loop: "{{ minio_managed_consumers_resolved }}"
+  changed_when: false
+
+- name: Ensure the MinIO bucket policies are attached to their users
+  ansible.builtin.command:
+    argv:
+      - "{{ minio_mc_bin }}"
+      - --config-dir
+      - "{{ minio_mc_config_dir }}"
+      - admin
+      - policy
+      - attach
+      - local
+      - "{{ item.policy_name }}"
+      - --user
+      - "{{ item.access_key_id }}"
+  loop: "{{ minio_managed_consumers_resolved }}"
+  changed_when: false
+
+- name: Ensure the managed MinIO buckets exist
+  ansible.builtin.command:
+    argv:
+      - "{{ minio_mc_bin }}"
+      - --config-dir
+      - "{{ minio_mc_config_dir }}"
+      - mb
+      - --ignore-existing
+      - "local/{{ item.bucket_name }}"
+  loop: "{{ minio_managed_consumers_resolved }}"
+  changed_when: false
+
+- name: Ensure the managed MinIO buckets stay private
+  ansible.builtin.command:
+    argv:
+      - "{{ minio_mc_bin }}"
+      - --config-dir
+      - "{{ minio_mc_config_dir }}"
+      - anonymous
+      - set
+      - private
+      - "local/{{ item.bucket_name }}"
+  loop: "{{ minio_managed_consumers_resolved }}"
+  changed_when: false
+
+- name: Read the RAG staging bucket lifecycle rules
+  ansible.builtin.command:
+    argv:
+      - "{{ minio_mc_bin }}"
+      - --config-dir
+      - "{{ minio_mc_config_dir }}"
+      - ilm
+      - rule
+      - list
+      - --json
+      - "local/{{ minio_platform_context_bucket_name }}"
+  register: minio_platform_context_lifecycle
+  changed_when: false
+  failed_when: false
+
+- name: Ensure the RAG staging bucket lifecycle rule exists
+  ansible.builtin.command:
+    argv:
+      - "{{ minio_mc_bin }}"
+      - --config-dir
+      - "{{ minio_mc_config_dir }}"
+      - ilm
+      - rule
+      - add
+      - --expire-days
+      - "{{ minio_platform_context_retention_days | string }}"
+      - "local/{{ minio_platform_context_bucket_name }}"
+  when: >-
+    minio_platform_context_lifecycle.rc != 0
+    or (
+      ('"Days":' ~ (minio_platform_context_retention_days | string))
+      not in (minio_platform_context_lifecycle.stdout | replace(' ', ''))
+    )
+  changed_when: true
+
+- name: Verify the MinIO runtime
+  ansible.builtin.import_tasks: verify.yml

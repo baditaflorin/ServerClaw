@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "minio_runtime",
+  "image_ref": "docker.io/minio/minio:RELEASE.2025-07-23T15-54-02Z@sha256:f6efb212cad3b62f78ca02339f16d8bc28d5bb2fbe792dfc21225c6037d2af8b",
+  "scanner": "trivy",
+  "scanner_image": "local-trivy-0.69.3",
+  "scanned_on": "2026-03-30",
+  "summary": {
+    "critical": 4,
+    "high": 15
+  },
+  "targets_with_findings": [
+    {
+      "target": "usr/bin/mc",
+      "critical": 2,
+      "high": 6
+    },
+    {
+      "target": "usr/bin/minio",
+      "critical": 2,
+      "high": 9
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-30-minio-runtime.trivy.json"
+}

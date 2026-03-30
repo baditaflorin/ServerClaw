@@ -440,19 +440,18 @@
   when: keycloak_force_recreate
 
 - name: Force-recreate the Keycloak service after Docker networking recovery
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ keycloak_compose_file }}"
-      - up
-      - -d
-      - --force-recreate
-      - --no-deps
-      - keycloak
+  ansible.builtin.shell: |
+    set -euo pipefail
+    stale_ids="$(docker ps -aq \
+      --filter label=com.docker.compose.project=keycloak \
+      --filter label=com.docker.compose.service=keycloak)"
+    if [ -n "$stale_ids" ]; then
+      docker rm -f $stale_ids >/dev/null 2>&1 || true
+    fi
+    docker compose --file "{{ keycloak_compose_file }}" up -d --force-recreate --no-deps keycloak
   args:
     chdir: "{{ keycloak_site_dir }}"
+    executable: /bin/bash
   register: keycloak_up
   changed_when: >-
     'Creating' in keycloak_up.stdout

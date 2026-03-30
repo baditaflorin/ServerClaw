@@ -43,6 +43,9 @@
       - monitoring_loki_config_file | length > 0
       - monitoring_loki_data_dir | length > 0
       - monitoring_loki_http_url | length > 0
+      - monitoring_loki_minio_secret_key_local_file | length > 0
+      - monitoring_loki_minio_bucket_name | length > 0
+      - monitoring_loki_minio_endpoint | length > 0
       - monitoring_prometheus_config_file | length > 0
       - monitoring_prometheus_rules_dir | length > 0
       - monitoring_prometheus_file_sd_dir | length > 0
@@ -128,6 +131,25 @@
     owner: root
     group: root
     mode: "0700"
+
+- name: Ensure the Loki MinIO secret key exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ monitoring_loki_minio_secret_key_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: monitoring_loki_minio_secret_key_local
+
+- name: Fail if the Loki MinIO secret key is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ monitoring_loki_minio_secret_key_local_file }} is missing on the control machine.
+      Converge MinIO before replaying the monitoring stack so Loki can write chunks to shared object storage.
+  when: not monitoring_loki_minio_secret_key_local.stat.exists
+
+- name: Record the Loki MinIO secret key
+  ansible.builtin.set_fact:
+    monitoring_loki_minio_secret_key: "{{ lookup('ansible.builtin.file', monitoring_loki_minio_secret_key_local_file) | trim }}"
+  no_log: true
 
 - name: Ensure Grafana datasource provisioning directory exists
   ansible.builtin.file:
