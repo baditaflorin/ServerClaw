@@ -196,7 +196,7 @@ ADR 0276 NATS JetStream is now live on production from `main`: `docker-runtime-l
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.99` |
-| Platform version | `0.130.65` |
+| Platform version | `0.130.66` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -339,7 +339,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `plane` | `2026-03-28-adr-0193-plane-mainline-live-apply` |
 | `platform_context` | `2026-03-28-adr-0198-semantic-rag-mainline-live-apply` |
 | `platform_event_taxonomy` | `2026-03-26-adr-0124-platform-event-taxonomy-live-apply` |
-| `plausible_analytics` | `2026-03-30-adr-0283-plausible-analytics-live-apply` |
+| `plausible_analytics` | `2026-03-30-adr-0283-plausible-analytics-mainline-live-apply` |
 | `policy_validation` | `2026-03-28-adr-0230-policy-decisions-live-apply` |
 | `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
@@ -1407,7 +1407,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.99` |
-| Platform version | `0.130.65` |
+| Platform version | `0.130.66` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |

@@ -1,6 +1,6 @@
 schema_version: 1.0.0
 repo_version: 0.177.99
-platform_version: 0.130.65
+platform_version: 0.130.66
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -128,7 +128,7 @@ live_apply_evidence:
     nextcloud: 2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply
     browser_runner: 2026-03-30-adr-0261-playwright-browser-runners-live-apply
     mailpit: 2026-03-30-adr-0282-mailpit-mainline-live-apply
-    plausible_analytics: 2026-03-30-adr-0283-plausible-analytics-live-apply
+    plausible_analytics: 2026-03-30-adr-0283-plausible-analytics-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -1050,5 +1050,5 @@ release_tracks:
     current: 0.177.99
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.65
+    current: 0.130.66
     meaning: intended platform release for the actual server configuration
