@@ -3112,7 +3112,7 @@ workstreams:
   - id: ws-0262-live-apply
     adr: "0262"
     title: OpenFGA and Keycloak delegated authorization live apply
-    status: in_progress
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0262-main-merge
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0262-main-merge
@@ -3246,7 +3246,7 @@ workstreams:
             - tests/test_openfga_runtime_role.py
             - tests/test_serverclaw_authz.py
           mode: exclusive
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
     canonical_truth:
       changelog_entry: implements ADR 0262 by deploying the OpenFGA delegated
@@ -3254,6 +3254,7 @@ workstreams:
         repo-managed Keycloak runtime clients, and the API gateway registration
         for delegated authorization checks
       release_bump: patch
+      included_in_repo_version: 0.177.93
       latest_receipts:
         openfga: 2026-03-29-adr-0262-openfga-keycloak-live-apply
   - id: ws-0244-runtime-assurance-adrs
@@ -13609,7 +13610,7 @@ workstreams:
   - id: ws-0278-main-integration
     adr: "0278"
     title: Integrate ADR 0278 exact-main replay onto current origin/main
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0278-main-integration
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0278-main-integration

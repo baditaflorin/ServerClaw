@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.92",
+  "repo_version": "0.177.93",
   "platform_version": "0.130.61",
-  "generated_at": "2026-03-30T00:35:02Z",
-  "next_refresh_at": "2026-03-30T01:35:02Z",
+  "generated_at": "2026-03-30T01:05:03Z",
+  "next_refresh_at": "2026-03-30T02:05:03Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -381,6 +381,18 @@
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:8200",
         "last_live_apply": "2026-03-30T00:00:00Z"
+      },
+      "openfga": {
+        "service_name": "OpenFGA",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://100.64.0.1:8014",
+        "last_live_apply": "2026-03-30T00:00:00Z",
+        "slo_status": "unknown"
       },
       "ops_portal": {
         "service_name": "Platform Operations Portal",
@@ -1643,6 +1655,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-openbao.md"
+      },
+      {
+        "id": "converge-openfga",
+        "description": "Converge OpenFGA on docker-runtime-lv3, publish the Proxmox host controller proxy, and seed the repo-managed ServerClaw delegated authorization graph.",
+        "tags": [
+          "converge-openfga",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-openfga.md"
       },
       {
         "id": "converge-ops-portal",
@@ -3744,7 +3782,7 @@
         "id": "configure-keycloak",
         "title": "Configure Keycloak",
         "agent_trust_required": "T3",
-        "steps": 10,
+        "steps": 11,
         "path": "docs/runbooks/configure-keycloak.md",
         "workflow_ids": [
           "converge-keycloak"
@@ -3878,6 +3916,16 @@
         "path": "docs/runbooks/configure-openbao.md",
         "workflow_ids": [
           "converge-openbao"
+        ]
+      },
+      {
+        "id": "configure-openfga",
+        "title": "Configure OpenFGA",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-openfga.md",
+        "workflow_ids": [
+          "converge-openfga"
         ]
       },
       {
@@ -4535,10 +4583,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.91",
+    "last_version": "0.177.92",
     "deployed_at": "2026-03-30",
-    "summary": "implemented ADR 0278 by adding the private Gotenberg document-to-PDF runtime on docker-runtime-lv3, publishing the authenticated `/v1/gotenberg` API gateway route, and verifying Chromium plus LibreOffice PDF conversion end to end",
-    "release_notes_url": "docs/release-notes/0.177.92.md"
+    "summary": "implements ADR 0262 by deploying the OpenFGA delegated authorization runtime, the ServerClaw bootstrap contracts, the repo-managed Keycloak runtime clients, and the API gateway registration for delegated authorization checks",
+    "release_notes_url": "docs/release-notes/0.177.93.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
