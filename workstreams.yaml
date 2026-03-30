@@ -3660,7 +3660,7 @@ workstreams:
         repo-managed Keycloak runtime clients, and the API gateway registration
         for delegated authorization checks
       release_bump: patch
-      included_in_repo_version: 0.177.93
+      included_in_repo_version: 0.177.94
       latest_receipts:
         openfga: 2026-03-29-adr-0262-openfga-keycloak-live-apply
   - id: ws-0244-runtime-assurance-adrs
