@@ -152,13 +152,18 @@
     method: POST
     headers:
       Auth-API-Token: "{{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
-    body_format: json
-    body:
-      zone_id: "{{ dns_provider_boundary_zone.provider_ref }}"
-      name: "{{ hetzner_dns_record_name }}"
-      type: "{{ hetzner_dns_record_type }}"
-      value: "{{ hetzner_dns_record_value }}"
-      ttl: "{{ hetzner_dns_record_ttl | int }}"
+      Content-Type: application/json
+    body: >-
+      {{
+        {
+          "zone_id": dns_provider_boundary_zone.provider_ref,
+          "name": hetzner_dns_record_name,
+          "type": hetzner_dns_record_type,
+          "value": hetzner_dns_record_value,
+          "ttl": (hetzner_dns_record_ttl | int)
+        } | to_json
+      }}
+    return_content: true
     status_code:
       - 200
       - 201
@@ -173,8 +178,14 @@
     - dns_provider_boundary_matching_records | length == 0
   retries: 5
   delay: 2
-  until: hetzner_dns_record_create_response.status in [200, 201]
-  failed_when: hetzner_dns_record_create_response.status not in [200, 201]
+  until:
+    - hetzner_dns_record_create_response.status in [200, 201]
+    - (hetzner_dns_record_create_response.json.error | default({})) == {}
+    - (hetzner_dns_record_create_response.json.record.id | default('') | length) > 0
+  failed_when:
+    - hetzner_dns_record_create_response.status not in [200, 201]
+      or (hetzner_dns_record_create_response.json.error | default({})) != {}
+      or (hetzner_dns_record_create_response.json.record.id | default('') | length) == 0
   changed_when: true
   no_log: true
 
@@ -184,13 +195,18 @@
     method: PUT
     headers:
       Auth-API-Token: "{{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
-    body_format: json
-    body:
-      zone_id: "{{ dns_provider_boundary_zone.provider_ref }}"
-      name: "{{ hetzner_dns_record_name }}"
-      type: "{{ hetzner_dns_record_type }}"
-      value: "{{ hetzner_dns_record_value }}"
-      ttl: "{{ hetzner_dns_record_ttl | int }}"
+      Content-Type: application/json
+    body: >-
+      {{
+        {
+          "zone_id": dns_provider_boundary_zone.provider_ref,
+          "name": hetzner_dns_record_name,
+          "type": hetzner_dns_record_type,
+          "value": hetzner_dns_record_value,
+          "ttl": (hetzner_dns_record_ttl | int)
+        } | to_json
+      }}
+    return_content: true
     status_code:
       - 200
       - 429
@@ -206,7 +222,13 @@
       or (dns_provider_boundary_matching_records[0].record_ttl | int) != (hetzner_dns_record_ttl | int)
   retries: 5
   delay: 2
-  until: hetzner_dns_record_update_response.status == 200
-  failed_when: hetzner_dns_record_update_response.status != 200
+  until:
+    - hetzner_dns_record_update_response.status == 200
+    - (hetzner_dns_record_update_response.json.error | default({})) == {}
+    - (hetzner_dns_record_update_response.json.record.id | default('') | length) > 0
+  failed_when:
+    - hetzner_dns_record_update_response.status != 200
+      or (hetzner_dns_record_update_response.json.error | default({})) != {}
+      or (hetzner_dns_record_update_response.json.record.id | default('') | length) == 0
   changed_when: true
   no_log: true
