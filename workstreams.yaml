@@ -61,7 +61,7 @@ workstreams:
       - playbooks/tika.yml
       - playbooks/services/tika.yml
       - collections/ansible_collections/lv3/platform/playbooks/tika.yml
-      - collections/ansible_collections/lv3/platform/roles/tika_runtime/
+      - collections/ansible_collections/lv3/platform/roles/tika_runtime/**
       - tests/test_tika_runtime_role.py
       - tests/test_tika_playbook.py
       - tests/test_generate_platform_vars.py
@@ -128,7 +128,7 @@ workstreams:
             - playbooks/tika.yml
             - playbooks/services/tika.yml
             - collections/ansible_collections/lv3/platform/playbooks/tika.yml
-            - collections/ansible_collections/lv3/platform/roles/tika_runtime/
+            - collections/ansible_collections/lv3/platform/roles/tika_runtime/**
             - tests/test_tika_runtime_role.py
             - tests/test_tika_playbook.py
             - receipts/image-scans/2026-03-30-tika-runtime.json

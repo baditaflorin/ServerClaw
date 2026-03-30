@@ -43,7 +43,9 @@ Verify the version endpoint on the guest:
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
-  -J ops@100.64.0.1 \
+  -o StrictHostKeyChecking=accept-new \
+  -o UserKnownHostsFile=/dev/null \
+  -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p" \
   ops@10.10.10.20 \
   'python3 - <<'"'"'PY'"'"'
 import urllib.request
@@ -56,7 +58,9 @@ Verify plaintext extraction:
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
-  -J ops@100.64.0.1 \
+  -o StrictHostKeyChecking=accept-new \
+  -o UserKnownHostsFile=/dev/null \
+  -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p" \
   ops@10.10.10.20 \
   'python3 - <<'"'"'PY'"'"'
 import urllib.request
@@ -76,7 +80,9 @@ Verify metadata extraction:
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
-  -J ops@100.64.0.1 \
+  -o StrictHostKeyChecking=accept-new \
+  -o UserKnownHostsFile=/dev/null \
+  -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p" \
   ops@10.10.10.20 \
   'python3 - <<'"'"'PY'"'"'
 import json
