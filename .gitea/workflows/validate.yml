@@ -36,10 +36,21 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p .local/validation-gate
+          discover_workspace_host_path() {
+            current_container_id="${HOSTNAME:-$(hostname)}"
+            workspace_host_path="$("${docker_bin}" inspect "${current_container_id}" --format "{{range .Mounts}}{{if eq .Destination \"${PWD}\"}}{{.Source}}{{end}}{{end}}" 2>/dev/null || true)"
+            if [ -n "${workspace_host_path}" ]; then
+              printf '%s\n' "${workspace_host_path}"
+              return 0
+            fi
+            "${docker_bin}" ps --filter "id=${current_container_id}" -q | while read -r container_id; do
+              "${docker_bin}" inspect "${container_id}" --format "{{range .Mounts}}{{if eq .Destination \"${PWD}\"}}{{.Source}}{{end}}{{end}}"
+            done | python3 -c 'import sys; lines=[line.strip() for line in sys.stdin if line.strip()]; print(lines[0] if lines else "", end="")'
+          }
           docker_bin="$(command -v docker || command -v docker.io || true)"
           if [ -n "${docker_bin}" ]; then
             printf '%s\n' "${docker_bin}" > .local/validation-gate/docker-bin.path
-            workspace_host_path="$("${docker_bin}" ps -q | while read -r container_id; do "${docker_bin}" inspect "${container_id}" --format "{{range .Mounts}}{{if eq .Destination \"${PWD}\"}}{{.Source}}{{end}}{{end}}"; done | python3 -c 'import sys; lines=[line.strip() for line in sys.stdin if line.strip()]; print(lines[-1] if lines else "", end="")')"
+            workspace_host_path="$(discover_workspace_host_path)"
             if [ -n "${workspace_host_path}" ]; then
               printf '%s\n' "${workspace_host_path}" > .local/validation-gate/workspace-host.path
             fi
@@ -55,7 +66,7 @@ jobs:
             exit 1
           fi
           printf '%s\n' "${docker_bin}" > .local/validation-gate/docker-bin.path
-          workspace_host_path="$("${docker_bin}" ps -q | while read -r container_id; do "${docker_bin}" inspect "${container_id}" --format "{{range .Mounts}}{{if eq .Destination \"${PWD}\"}}{{.Source}}{{end}}{{end}}"; done | python3 -c 'import sys; lines=[line.strip() for line in sys.stdin if line.strip()]; print(lines[-1] if lines else "", end="")')"
+          workspace_host_path="$(discover_workspace_host_path)"
           if [ -z "${workspace_host_path}" ]; then
             echo "Workspace host path remained unavailable after Docker CLI installation." >&2
             exit 1
