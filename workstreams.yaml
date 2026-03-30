@@ -13641,7 +13641,7 @@ workstreams:
       release_bump: patch
       included_in_repo_version: 0.177.92
       latest_receipts:
-        gotenberg: 2026-03-30-adr-0278-gotenberg-live-apply
+        gotenberg: 2026-03-30-adr-0278-gotenberg-mainline-live-apply
   - id: ws-0278-main-integration
     adr: "0278"
     title: Integrate ADR 0278 exact-main replay onto current origin/main
@@ -13777,11 +13777,11 @@ workstreams:
             - receipts/live-applies/evidence/2026-03-30-ws-0278-mainline-*
             - receipts/live-applies/evidence/2026-03-30-ws-0278-merged-main-*
           mode: exclusive
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: true
     canonical_truth:
       changelog_entry: implemented ADR 0278 by adding the private Gotenberg document-to-PDF runtime on docker-runtime-lv3, publishing the authenticated `/v1/gotenberg` API gateway route, and verifying Chromium plus LibreOffice PDF conversion end to end
       release_bump: patch
       included_in_repo_version: 0.177.92
       latest_receipts:
-        gotenberg: 2026-03-30-adr-0278-gotenberg-live-apply
+        gotenberg: 2026-03-30-adr-0278-gotenberg-mainline-live-apply
