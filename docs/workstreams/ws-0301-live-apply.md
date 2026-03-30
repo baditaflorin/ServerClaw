@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0301](../adr/0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md)
 - Title: Wire Semgrep SAST into the shared validation gate and verify the CI and build-server paths end to end from latest `origin/main`
-- Status: ready_for_merge
+- Status: merged
 - Branch: `codex/ws-0301-main-integration`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0301-main-integration`
 - Owner: codex
@@ -70,10 +70,16 @@
 
 ## Verification
 
-- Ready for merge. The exact command outputs and hosted workflow receipts will be recorded in the final live-apply receipts once the release and mainline promotion steps complete from this refreshed `origin/main` integration worktree.
+- `uv run --with pytest --with pyyaml --with jsonschema python -m pytest -q tests/test_semgrep_gate.py tests/test_parallel_check.py tests/test_validation_lanes.py tests/test_validation_gate_windmill.py tests/test_validation_runner_contracts.py tests/test_validation_gate.py` returned `38 passed in 4.69s`.
+- `./scripts/validate_repo.sh semgrep` passed from the exact-main `0.177.108` tree with `error=0 warning=2 note=0 total=2`.
+- The no-git snapshot replay in `registry.lv3.org/check-runner/python:3.12.10` passed and recorded `baseline comparison: skipped (checkout has no git metadata)` while still scanning real content.
+- `make remote-validate` passed after the release-surface ownership metadata was promoted into `workstreams.yaml`.
+- `make pre-push-gate` passed end to end from the exact-main `0.177.108` tree.
+- `origin/main` was fast-forwarded to commit `9b539fa6fb3e0f26531f461fc71573491da370ab` for the repository merge.
+- GitHub `Validate` on `main` for commit `9b539fa6fb3e0f26531f461fc71573491da370ab` failed before the job started because the GitHub account billing state blocked hosted runners.
+- The private Gitea branch-validation path could not be reverified because `http://100.64.0.1:3009` reset both git and HTTP/API connections during the validation window.
 
 ## Remaining For Merge-To-Main
 
-- Cut the exact-main repository release from the refreshed `origin/main` baseline.
-- Re-run local, remote, GitHub Actions, and private Gitea validation paths from the integrated branch.
-- Promote the canonical mainline live-apply receipt, platform-version metadata, and generated truth surfaces as the final step before pushing `origin/main`.
+- None for the repository merge. ADR 0301 is integrated on `main` in repo version `0.177.108`.
+- The remaining follow-up is hosted-platform revalidation only: once GitHub billing is restored and the private Gitea controller stops resetting connections on `100.64.0.1:3009`, rerun the mainline hosted CI checks and then promote the first verified platform version for ADR 0301.

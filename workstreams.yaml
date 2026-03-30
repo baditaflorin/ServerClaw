@@ -16652,7 +16652,7 @@ workstreams:
   - id: ws-0301-live-apply
     adr: "0301"
     title: Live apply ADR 0301 from latest origin/main
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/ws-0301-main-integration
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0301-main-integration
