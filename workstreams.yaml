@@ -694,10 +694,10 @@ workstreams:
   - id: ws-0295-live-apply
     adr: "0295"
     title: Live apply the shared artifact cache plane from latest origin/main
-    status: live_applied
+    status: in_progress
     owner: codex
-    branch: codex/ws-0295-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0295-live-apply
+    branch: codex/ws-0295-live-apply-r2
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0295-live-apply-r2
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md
     depends_on:
       - ws-0274-artifact-cache-plane
@@ -711,12 +711,32 @@ workstreams:
       - docs/adr/0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md
       - docs/runbooks/artifact-cache-runtime.md
       - docs/runbooks/configure-build-artifact-cache.md
-      - receipts/live-applies/2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply.json
-      - build/platform-manifest.json
-      - versions/stack.yaml
-      - README.md
+      - docs/adr/.index.yaml
+      - receipts/live-applies/2026-03-30-adr-0295-shared-artifact-cache-plane-mainline-replay-live-apply.json
+      - receipts/live-applies/evidence/2026-03-30-adr-0295-shared-artifact-cache-plane-mainline-replay-live-apply.txt
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: artifact_cache_adr_index_contract
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: artifact_cache_live_apply_replay
+          paths:
+            - docs/workstreams/ws-0295-live-apply.md
+            - docs/adr/0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md
+            - docs/runbooks/artifact-cache-runtime.md
+            - docs/runbooks/configure-build-artifact-cache.md
+            - receipts/live-applies/2026-03-30-adr-0295-shared-artifact-cache-plane-mainline-replay-live-apply.json
+            - receipts/live-applies/evidence/2026-03-30-adr-0295-shared-artifact-cache-plane-mainline-replay-live-apply.txt
+          mode: exclusive
     ready_to_merge: true
-    live_applied: true
+    live_applied: false
     canonical_truth:
       latest_receipts:
         artifact_cache_plane: 2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply
