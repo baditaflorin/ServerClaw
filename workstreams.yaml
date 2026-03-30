@@ -3599,11 +3599,11 @@ workstreams:
   - id: ws-0269-live-apply
     adr: "0269"
     title: Vulnerability budgets and image-host freshness promotion gates
-    status: live_applied
+    status: ready_for_merge
     owner: codex
-    branch: codex/ws-0269-origin-main-refresh-v4
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0269-origin-main-refresh-v4
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0269-origin-main-refresh-v4/docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+    branch: codex/ws-0269-origin-main-refresh-v5
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0269-origin-main-refresh-v5
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
     depends_on:
       - adr-0068-container-image-policy-and-supply-chain-integrity
       - adr-0102-security-posture-reporting
@@ -3639,23 +3639,35 @@ workstreams:
       - policy/decisions/release_promotion.rego
       - policy/tests/release_promotion_test.rego
       - Makefile
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/seeded_secrets_and_verification.yml
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
+      - config/windmill/scripts/stage-smoke-suites.py
       - docs/runbooks/configure-windmill.md
       - docs/runbooks/vulnerability-budget-gates.md
       - docs/runbooks/container-image-policy.md
       - docs/runbooks/security-posture-reporting.md
       - docs/runbooks/environment-promotion-pipeline.md
+      - docs/site-generated/architecture/dependency-graph.md
+      - scripts/matrix_admin_register.py
+      - scripts/matrix_bridge_smoke.py
       - tests/test_vulnerability_budget.py
       - tests/test_container_image_policy.py
       - tests/test_config_merge_repo_surfaces.py
       - tests/test_config_merge_windmill.py
       - tests/test_docker_runtime_role.py
+      - tests/test_openbao_runtime_role.py
       - tests/test_promotion_pipeline.py
       - tests/test_security_posture_report.py
       - tests/test_validation_gate.py
+      - tests/test_validation_gate_windmill.py
+      - tests/test_windmill_integration_wrappers.py
       - tests/test_windmill_operator_admin_app.py
       - tests/test_openbao_compose_env_helper.py
       - tests/test_compose_runtime_secret_injection.py
@@ -3667,6 +3679,8 @@ workstreams:
       - receipts/live-applies/2026-03-29-adr-0269-windmill-isolated-checkout-live-apply.json
       - receipts/live-applies/evidence/2026-03-29-adr-0269-*.txt
       - receipts/live-applies/evidence/2026-03-30-adr-0269-*.txt
+      - receipts/live-applies/evidence/2026-03-30-ws-0269-*.txt
+      - receipts/live-applies/evidence/2026-03-30-ws-0269-*.json
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -3685,7 +3699,6 @@ workstreams:
             - scripts/security_posture_report.py
             - scripts/container_image_policy.py
             - scripts/upgrade_container_image.py
-            - scripts/sync_windmill_seed_scripts.py
             - scripts/validate_repository_data_models.py
             - docs/runbooks/vulnerability-budget-gates.md
             - docs/runbooks/container-image-policy.md
@@ -3700,17 +3713,26 @@ workstreams:
           paths:
             - Makefile
             - config/ansible-role-idempotency.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+            - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
             - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/seeded_secrets_and_verification.yml
             - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
             - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
             - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
             - config/windmill/scripts/gate-status.py
+            - config/windmill/scripts/stage-smoke-suites.py
             - docs/runbooks/configure-windmill.md
             - docs/runbooks/environment-promotion-pipeline.md
+            - docs/site-generated/architecture/dependency-graph.md
             - policy/decisions/release_promotion.rego
             - policy/tests/release_promotion_test.rego
             - receipts/ops-portal-snapshot.html
             - scripts/gate_status.py
+            - scripts/matrix_admin_register.py
+            - scripts/matrix_bridge_smoke.py
             - scripts/promotion_pipeline.py
             - scripts/sync_windmill_seed_scripts.py
             - tests/test_compose_runtime_secret_injection.py
@@ -3719,10 +3741,13 @@ workstreams:
             - tests/test_container_image_policy.py
             - tests/test_docker_runtime_role.py
             - tests/test_openbao_compose_env_helper.py
+            - tests/test_openbao_runtime_role.py
             - tests/test_promotion_pipeline.py
             - tests/test_security_posture_report.py
             - tests/test_validation_gate.py
+            - tests/test_validation_gate_windmill.py
             - tests/test_vulnerability_budget.py
+            - tests/test_windmill_integration_wrappers.py
             - tests/test_windmill_operator_admin_app.py
           mode: shared_contract
           contract: adr-0269-shared-runtime-v1
@@ -3732,8 +3757,9 @@ workstreams:
             - receipts/live-applies/2026-03-29-adr-0269-vulnerability-budget-gates-live-apply.json
             - receipts/live-applies/2026-03-29-adr-0269-windmill-isolated-checkout-live-apply.json
             - receipts/live-applies/evidence/2026-03-29-adr-0269-*.txt
-            - receipts/live-applies/2026-03-30-adr-0269-vulnerability-budget-gates-mainline-live-apply.json
             - receipts/live-applies/evidence/2026-03-30-adr-0269-*.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0269-*.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0269-*.json
           mode: exclusive
         - id: adr_0269_mainline_integration
           paths:

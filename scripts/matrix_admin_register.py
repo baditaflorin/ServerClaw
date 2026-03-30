@@ -13,6 +13,8 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+from platform.retry import MaxRetriesExceeded, PlatformRetryError, RetryClass, RetryPolicy, with_retry
+
 
 def decode_json_body(body: str) -> dict[str, Any]:
     if not body:
@@ -55,16 +57,18 @@ def persist_access_token(access_token_file: Path | None, access_token: str) -> N
     access_token_file.chmod(0o600)
 
 
-def login(
+def request_login_with_rate_limit_retry(
     base_url: str,
     username: str,
     password: str,
     *,
-    access_token_file: Path | None = None,
-    max_rate_limit_wait_seconds: int = 300,
-) -> tuple[bool, dict[str, Any]]:
+    max_rate_limit_wait_seconds: int,
+) -> tuple[int, dict[str, Any]]:
     waited_seconds = 0.0
-    while True:
+    last_payload: dict[str, Any] = {}
+
+    def perform_login() -> tuple[int, dict[str, Any]]:
+        nonlocal last_payload
         status, payload = request_json(
             "POST",
             f"{base_url}/_matrix/client/v3/login",
@@ -74,18 +78,64 @@ def login(
                 "password": password,
             },
         )
-        if status == 200 and "access_token" in payload:
-            persist_access_token(access_token_file, str(payload["access_token"]))
-            return True, payload
+        last_payload = payload
         if status == 429 and payload.get("errcode") == "M_LIMIT_EXCEEDED":
             retry_after_ms = int(payload.get("retry_after_ms") or 1000)
-            retry_after_seconds = max(retry_after_ms / 1000.0, 1.0)
-            if waited_seconds + retry_after_seconds > max_rate_limit_wait_seconds:
-                return False, payload
-            time.sleep(retry_after_seconds)
-            waited_seconds += retry_after_seconds
-            continue
-        return False, payload
+            raise PlatformRetryError(
+                f"Matrix login rate limit persisted for {username}: {payload}",
+                code="http:429",
+                retry_class=RetryClass.BACKOFF,
+                retry_after=max(retry_after_ms / 1000.0, 1.0),
+            )
+        return status, payload
+
+    def sleep_with_budget(delay_seconds: float) -> None:
+        nonlocal waited_seconds
+        if waited_seconds + delay_seconds > max_rate_limit_wait_seconds:
+            raise PlatformRetryError(
+                f"Matrix login rate limit persisted for {username}: {last_payload}",
+                code="platform:budget_exceeded",
+                retry_class=RetryClass.PERMANENT,
+            )
+        time.sleep(delay_seconds)
+        waited_seconds += delay_seconds
+
+    try:
+        return with_retry(
+            perform_login,
+            policy=RetryPolicy(
+                max_attempts=max(int(max_rate_limit_wait_seconds), 2),
+                base_delay_s=1.0,
+                max_delay_s=max(float(max_rate_limit_wait_seconds), 1.0),
+                multiplier=1.0,
+                jitter=False,
+                transient_max=0,
+            ),
+            error_context=f"Matrix login for {username}",
+            sleep_fn=sleep_with_budget,
+        )
+    except (MaxRetriesExceeded, PlatformRetryError):
+        return 429, last_payload
+
+
+def login(
+    base_url: str,
+    username: str,
+    password: str,
+    *,
+    access_token_file: Path | None = None,
+    max_rate_limit_wait_seconds: int = 300,
+) -> tuple[bool, dict[str, Any]]:
+    status, payload = request_login_with_rate_limit_retry(
+        base_url,
+        username,
+        password,
+        max_rate_limit_wait_seconds=max_rate_limit_wait_seconds,
+    )
+    if status == 200 and "access_token" in payload:
+        persist_access_token(access_token_file, str(payload["access_token"]))
+        return True, payload
+    return False, payload
 
 
 def compute_mac(nonce: str, username: str, password: str, shared_secret: str, *, admin: bool) -> str:
