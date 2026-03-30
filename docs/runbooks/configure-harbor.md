@@ -64,6 +64,11 @@ Run these checks after converge:
 5. `jq -r '.username + \":\" + .secret' /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/harbor/check-runner-robot.json`
 6. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p' ops@10.10.10.30 'docker pull registry.lv3.org/check-runner/python:3.12.10 && docker image inspect registry.lv3.org/check-runner/python:3.12.10 --format '"'"'{{index .RepoDigests 0}}'"'"''`
 
+## Troubleshooting
+
+- If `make converge-harbor` exits cleanly but `https://registry.lv3.org/api/v2.0/ping` still returns `502 Bad Gateway`, `http://127.0.0.1:8095/api/v2.0/ping` is connection refused on `docker-runtime-lv3`, or `docker pull registry.lv3.org/check-runner/...` fails on `docker-build-lv3` with `received unexpected HTTP status: 502 Bad Gateway`, replay `make converge-docker-publication-assurance env=production` from the same checkout and rerun the full verification list above.
+- This failure mode indicates stale Docker publication drift on the Harbor edge path: the Harbor containers may still appear present, but the published registry port binding or compose network membership can be incomplete until the publication-assurance replay re-establishes the canonical bridge and port-forward state.
+
 ## Notes
 
 - Harbor currently uses the local filesystem backend. Migrating Harbor blob storage to the object-storage design from ADR 0203 remains a later mainline step.

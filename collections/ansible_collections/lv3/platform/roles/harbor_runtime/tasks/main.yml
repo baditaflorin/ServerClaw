@@ -721,6 +721,46 @@
         or 'Removing' in harbor_compose_oidc_recovery_down.stdout
         or 'Network' in harbor_compose_oidc_recovery_down.stdout
 
+    - name: Remove stale Harbor containers after the OIDC readiness recycle
+      ansible.builtin.shell: |
+        set -euo pipefail
+        ensure_docker_socket() {
+          if ! docker info >/dev/null 2>&1; then
+            systemctl restart docker
+            sleep 10
+            docker info >/dev/null 2>&1
+          fi
+        }
+        ensure_docker_socket
+        stale_containers="$(docker ps -aq --filter label=com.docker.compose.project=harbor)"
+        if [ -n "${stale_containers}" ]; then
+          if ! docker rm -f ${stale_containers}; then
+            ensure_docker_socket
+            stale_containers="$(docker ps -aq --filter label=com.docker.compose.project=harbor)"
+            if [ -n "${stale_containers}" ]; then
+              docker rm -f ${stale_containers}
+            fi
+          fi
+          echo changed
+        fi
+      args:
+        executable: /bin/bash
+      register: harbor_oidc_recovery_container_cleanup
+      changed_when: "'changed' in harbor_oidc_recovery_container_cleanup.stdout"
+
+    - name: Remove stale Harbor networks after the OIDC readiness recycle
+      ansible.builtin.shell: |
+        set -euo pipefail
+        stale_networks="$(docker network ls -q --filter label=com.docker.compose.project={{ harbor_compose_project_name }})"
+        if [ -n "${stale_networks}" ]; then
+          docker network rm ${stale_networks}
+          echo changed
+        fi
+      args:
+        executable: /bin/bash
+      register: harbor_oidc_recovery_network_cleanup
+      changed_when: "'changed' in harbor_oidc_recovery_network_cleanup.stdout"
+
     - name: Force one Harbor recreate when the published admin configuration API is unavailable
       ansible.builtin.command:
         argv:
@@ -741,6 +781,88 @@
         'Creating' in harbor_compose_oidc_recovery_up.stdout
         or 'Recreating' in harbor_compose_oidc_recovery_up.stdout
         or 'Starting' in harbor_compose_oidc_recovery_up.stdout
+
+    - name: Read the Harbor compose network state after the OIDC readiness recycle
+      ansible.builtin.command:
+        argv:
+          - docker
+          - network
+          - inspect
+          - "{{ harbor_compose_network_name }}"
+          - --format
+          - "{{ '{{ json .Containers }}' }}"
+      register: harbor_oidc_recovery_network_inspect
+      failed_when: false
+      changed_when: false
+
+    - name: Record the Harbor compose network container membership after the OIDC readiness recycle
+      ansible.builtin.set_fact:
+        harbor_oidc_recovery_network_container_members: >-
+          {{
+            harbor_oidc_recovery_network_inspect.stdout | default('{}') | from_json
+            if harbor_oidc_recovery_network_inspect.rc == 0
+            else {}
+          }}
+        harbor_oidc_recovery_network_container_names: >-
+          {{
+            (
+              (harbor_oidc_recovery_network_inspect.stdout | default('{}') | from_json
+              if harbor_oidc_recovery_network_inspect.rc == 0 else {})
+              | dict2items
+              | map(attribute='value.Name')
+              | list
+            )
+          }}
+
+    - name: Read the Harbor published port bindings after the OIDC readiness recycle
+      ansible.builtin.command:
+        argv:
+          - docker
+          - inspect
+          - nginx
+          - --format
+          - "{{ '{{ json .NetworkSettings.Ports }}' }}"
+      register: harbor_oidc_recovery_proxy_port_bindings_raw
+      failed_when: false
+      changed_when: false
+
+    - name: Record the Harbor published port binding state after the OIDC readiness recycle
+      ansible.builtin.set_fact:
+        harbor_oidc_recovery_proxy_port_bindings: >-
+          {{
+            harbor_oidc_recovery_proxy_port_bindings_raw.stdout | default('{}') | from_json
+            if harbor_oidc_recovery_proxy_port_bindings_raw.rc == 0
+            and (harbor_oidc_recovery_proxy_port_bindings_raw.stdout | default('') | trim | length > 0)
+            else {}
+          }}
+
+    - name: Record whether Harbor's published registry port binding is present after the OIDC readiness recycle
+      ansible.builtin.set_fact:
+        harbor_oidc_recovery_registry_port_binding_present: >-
+          {{
+            (
+              harbor_oidc_recovery_proxy_port_bindings.get('8080/tcp', [])
+              | selectattr('HostPort', 'equalto', harbor_http_port | string)
+              | list
+              | length
+            ) > 0
+          }}
+
+    - name: Assert the OIDC readiness recycle restored Harbor compose membership and published port bindings
+      ansible.builtin.assert:
+        that:
+          - harbor_oidc_recovery_network_inspect.rc == 0
+          - >
+            (
+              harbor_runtime_container_names
+              | difference(harbor_oidc_recovery_network_container_names | default([]))
+              | length
+            ) == 0
+          - harbor_oidc_recovery_registry_port_binding_present | bool
+        fail_msg: >-
+          Harbor recovered enough to answer the admin API probe, but the compose
+          network membership or published registry port binding is still missing
+          after the OIDC readiness recycle.
 
     - name: Wait for Harbor ping locally after the OIDC readiness recycle
       ansible.builtin.uri:

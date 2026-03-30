@@ -100,6 +100,13 @@ curl -sS \
 - The bootstrap env mounted into the runner contains the durable Gitea bot
   password and scope list only. The actual PAT used by Renovate is minted at
   workflow runtime and revoked at the end of the run.
+- If a Renovate, validate, or release-bundle workflow fails before repo checkout
+  while pulling its Harbor-pinned job image, verify `https://registry.lv3.org`
+  and a direct `docker-build-lv3` image pull before debugging the workflow
+  itself. The live 2026-03-30 replay showed that stale Harbor publication drift
+  can surface as `502 Bad Gateway` on the job container pull until
+  `make converge-docker-publication-assurance env=production` restores the
+  registry publication path.
 - The private Gitea repository `ops/proxmox_florin_server` is a managed
   internal snapshot, not a mirror of GitHub `origin`. If the workflow file is
   missing from the live repo, push the intended ref to Gitea first and then

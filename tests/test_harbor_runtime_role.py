@@ -53,7 +53,19 @@ def test_role_waits_for_keycloak_before_bootstrap_token_request() -> None:
     token_task = task_by_name["Request a Keycloak admin token for Harbor bootstrap"]
     oidc_readiness_block = task_by_name["Verify the Harbor admin configuration API is reachable before OIDC bootstrap"]
     config_probe_task = oidc_readiness_block["block"][0]
-    recovery_down_task, recovery_up_task, recovery_ping_task, re_probe_task = oidc_readiness_block["rescue"]
+    rescue_tasks = {task["name"]: task for task in oidc_readiness_block["rescue"]}
+    recovery_down_task = rescue_tasks["Force one Harbor recycle when the published admin configuration API is unavailable"]
+    recovery_container_cleanup_task = rescue_tasks["Remove stale Harbor containers after the OIDC readiness recycle"]
+    recovery_network_cleanup_task = rescue_tasks["Remove stale Harbor networks after the OIDC readiness recycle"]
+    recovery_up_task = rescue_tasks["Force one Harbor recreate when the published admin configuration API is unavailable"]
+    recovery_port_probe_task = rescue_tasks[
+        "Read the Harbor published port bindings after the OIDC readiness recycle"
+    ]
+    recovery_assert_task = rescue_tasks[
+        "Assert the OIDC readiness recycle restored Harbor compose membership and published port bindings"
+    ]
+    recovery_ping_task = rescue_tasks["Wait for Harbor ping locally after the OIDC readiness recycle"]
+    re_probe_task = rescue_tasks["Re-probe the Harbor admin configuration API after the OIDC readiness recycle"]
     oidc_task = task_by_name["Configure Harbor OIDC defaults"]
 
     assert readiness_task["retries"] == 24
@@ -66,9 +78,13 @@ def test_role_waits_for_keycloak_before_bootstrap_token_request() -> None:
     assert config_probe_task["delay"] == 5
     assert config_probe_task["until"] == "harbor_config_query_before_oidc.status == 200"
     assert "Removing" in recovery_down_task["changed_when"]
+    assert "ensure_docker_socket()" in recovery_container_cleanup_task["ansible.builtin.shell"]
+    assert "docker network ls -q" in recovery_network_cleanup_task["ansible.builtin.shell"]
     assert recovery_up_task["retries"] == 6
     assert recovery_up_task["delay"] == 10
     assert recovery_up_task["until"] == "harbor_compose_oidc_recovery_up.rc == 0"
+    assert ".NetworkSettings.Ports" in recovery_port_probe_task["ansible.builtin.command"]["argv"][-1]
+    assert "harbor_oidc_recovery_registry_port_binding_present | bool" in recovery_assert_task["ansible.builtin.assert"]["that"]
     assert recovery_ping_task["retries"] == 30
     assert recovery_ping_task["delay"] == 10
     assert recovery_ping_task["until"] == "harbor_ping_after_oidc_recovery.status == 200"
