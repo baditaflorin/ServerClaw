@@ -339,6 +339,9 @@ roles:
   step_ca_ssh_trust:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  tika_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   uptime_kuma_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
