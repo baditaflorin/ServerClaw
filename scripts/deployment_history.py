@@ -176,6 +176,27 @@ def receipt_outcome(receipt: dict[str, Any]) -> str:
     return "success"
 
 
+def history_receipt_id(path: Path, payload: Any) -> str | None:
+    if not isinstance(payload, dict):
+        return None
+    receipt_id = payload.get("receipt_id")
+    if not isinstance(receipt_id, str) or not receipt_id.strip():
+        return None
+    if path.stem != receipt_id:
+        return None
+    return receipt_id
+
+
+def history_receipt_timestamp(payload: Any) -> str | None:
+    if not isinstance(payload, dict):
+        return None
+    for field in ("recorded_on", "applied_on"):
+        value = payload.get(field)
+        if isinstance(value, str) and value.strip():
+            return value
+    return None
+
+
 def collect_live_apply_entries(
     *,
     receipts_dir: Path = LIVE_APPLY_DIR,
@@ -185,7 +206,11 @@ def collect_live_apply_entries(
     entries: list[dict[str, Any]] = []
     for path in iter_receipt_paths(receipts_dir):
         receipt = load_json(path)
-        timestamp = parse_timestamp(receipt.get("recorded_on") or receipt.get("applied_on"), default_to_start_of_day=True)
+        receipt_id = history_receipt_id(path, receipt)
+        receipt_timestamp = history_receipt_timestamp(receipt)
+        if receipt_id is None or receipt_timestamp is None:
+            continue
+        timestamp = parse_timestamp(receipt_timestamp, default_to_start_of_day=True)
         targets = receipt.get("targets", [])
         target_labels = [
             f"{target.get('kind', 'unknown')}:{target.get('name', 'unknown')}"
@@ -211,7 +236,7 @@ def collect_live_apply_entries(
         environment = receipt_environment(path, receipts_dir)
         entries.append(
             {
-                "id": receipt["receipt_id"],
+                "id": receipt_id,
                 "change_type": "live-apply",
                 "timestamp": timestamp_to_iso(timestamp),
                 "timestamp_precision": "date",

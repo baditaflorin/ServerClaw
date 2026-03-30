@@ -1,5 +1,7 @@
+import os
 from pathlib import Path
 import json
+import subprocess
 import sys
 
 
@@ -9,11 +11,25 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 import docker_publication_assurance as tool
 
 
-def test_helper_script_is_self_contained_for_remote_install() -> None:
-    script = (REPO_ROOT / "scripts" / "docker_publication_assurance.py").read_text()
+def test_standalone_helper_runs_without_repo_modules(tmp_path) -> None:
+    helper_path = tmp_path / "lv3-docker-publication-assurance"
+    helper_path.write_text((REPO_ROOT / "scripts" / "docker_publication_assurance.py").read_text(encoding="utf-8"))
+    helper_path.chmod(0o755)
 
-    assert "from script_bootstrap import" not in script
-    assert "from platform.retry import" not in script
+    env = dict(os.environ)
+    env.pop("PYTHONPATH", None)
+
+    result = subprocess.run(
+        [sys.executable, str(helper_path), "--help"],
+        cwd=tmp_path,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "--service-id" in result.stdout
 
 
 def test_derive_expected_bindings_collects_probe_and_contract_bindings() -> None:

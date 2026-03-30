@@ -287,6 +287,33 @@
     - step_ca_container_port_check.rc != 0
   changed_when: true
 
+- name: Inspect the managed step-ca default network before compose up
+  ansible.builtin.command:
+    argv:
+      - docker
+      - network
+      - inspect
+      - "{{ step_ca_default_network_name }}"
+  register: step_ca_default_network_inspect
+  changed_when: false
+  failed_when: step_ca_default_network_inspect.rc not in [0, 1]
+
+- name: Remove the detached managed step-ca default network before compose up
+  ansible.builtin.command:
+    argv:
+      - docker
+      - network
+      - rm
+      - "{{ step_ca_default_network_name }}"
+  register: step_ca_default_network_remove
+  changed_when: step_ca_default_network_remove.rc == 0
+  when:
+    - step_ca_default_network_inspect.rc == 0
+    - >-
+      (
+        (step_ca_default_network_inspect.stdout | from_json | first).Containers | default({})
+      ) | length == 0
+
 - name: Start the step-ca stack
   ansible.builtin.command:
     argv:

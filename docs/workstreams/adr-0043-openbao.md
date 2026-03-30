@@ -37,7 +37,7 @@
 
 - `docker-runtime-lv3` runs the managed OpenBao runtime with integrated Raft storage and controller-managed init and unseal
 - `postgres-lv3` serves the managed OpenBao database backend for dynamic read-only PostgreSQL credentials
-- controller-local `.local/openbao/` artifacts hold the init payload, named operator passwords, and refreshed short-lived AppRole credentials
+- controller-local `.local/openbao/` artifacts hold the init payload, named operator passwords, and refreshed short-TTL reusable AppRole credentials
 
 ## Verification
 

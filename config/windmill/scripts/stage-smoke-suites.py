@@ -7,6 +7,7 @@ import argparse
 import importlib.util
 import json
 import os
+import tempfile
 import shlex
 import subprocess
 from pathlib import Path
@@ -38,8 +39,14 @@ def main(
         "--environment",
         environment,
     ]
-    if report_file.strip():
-        command.extend(["--report-file", report_file.strip()])
+    resolved_report_file = report_file.strip()
+    if not resolved_report_file:
+        report_fd, resolved_report_file = tempfile.mkstemp(
+            prefix=f"stage-smoke-{service}-{environment}-",
+            suffix=".json",
+        )
+        os.close(report_fd)
+    command.extend(["--report-file", resolved_report_file])
     for suite_id in [item.strip() for item in suite_ids.split(",") if item.strip()]:
         command.extend(["--suite-id", suite_id])
 
@@ -58,6 +65,7 @@ def main(
         "service": service,
         "environment": environment,
         "command": " ".join(shlex.quote(part) for part in command),
+        "report_file": resolved_report_file,
         "returncode": completed.returncode,
         "stdout": completed.stdout.strip(),
         "stderr": completed.stderr.strip(),

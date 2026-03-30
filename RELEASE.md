@@ -1,12 +1,12 @@
-# Release 0.177.100
+# Release 0.177.101
 
 - Date: 2026-03-30
 
 ## Summary
-- implemented ADR 0280 by adding the private Changedetection.io runtime on docker-runtime-lv3, publishing the authenticated `/v1/changedetection` API gateway route, and verifying the repo-managed external watch catalogue end to end
+- replays ADR 0251 on the latest merged mainline by pinning the Windmill worker checkout to the active worktree during converge-windmill, replaying the Docker publication, step-ca, OpenBao, and stage-smoke verification paths on the live server, and refreshing the canonical smoke-suite and promotion-gate receipt
 
 ## Platform Impact
-- implements ADR 0280 by adding repo-managed Changedetection.io external content monitoring, the authenticated /v1/changedetection gateway route, and the refreshed exact-main replay that advances the platform version to 0.130.67
+- records ADR 0251 exact-main live-apply verification on top of current mainline, preserves the pinned Windmill worker checkout sync during converge-windmill, refreshes the canonical smoke-suite and promotion-gate receipt, and advances the verified platform baseline after the newest exact-main replay
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

@@ -2171,6 +2171,150 @@ workstreams:
       included_in_repo_version: 0.177.87
       latest_receipts:
         stage_smoke_promotion_gates: 2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
+  - id: ws-0251-main-integration-r2
+    adr: "0251"
+    title: Integrate ADR 0251 latest-server-state follow-up onto current origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0251-main-integration-r2
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0251-main-integration-r2.md
+    depends_on:
+      - ws-0251-live-apply
+      - ws-0251-main-integration
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - build/platform-manifest.json
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - docs/adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md
+      - docs/workstreams/ws-0251-live-apply.md
+      - docs/workstreams/ws-0251-main-integration-r2.md
+      - docs/workstreams/adr-0043-openbao.md
+      - docs/runbooks/configure-openbao.md
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+      - collections/ansible_collections/lv3/platform/roles/step_ca_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/step_ca_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
+      - config/windmill/scripts/gate-status.py
+      - config/windmill/scripts/stage-smoke-suites.py
+      - scripts/deployment_history.py
+      - scripts/gate_status.py
+      - scripts/live_apply_receipts.py
+      - scripts/stage_smoke_suites.py
+      - tests/test_changelog_portal.py
+      - tests/test_live_apply_receipts.py
+      - tests/test_openbao_compose_env_helper.py
+      - tests/test_openbao_runtime_role.py
+      - tests/test_compose_runtime_secret_injection.py
+      - tests/test_stage_smoke_suites.py
+      - tests/test_step_ca_runtime_role.py
+      - tests/test_validation_gate.py
+      - tests/test_validation_gate_windmill.py
+      - tests/test_windmill_integration_wrappers.py
+      - tests/test_windmill_operator_admin_app.py
+      - receipts/live-applies/2026-03-29-adr-0251-*.json
+      - receipts/live-applies/2026-03-30-adr-0251-*.json
+      - receipts/live-applies/evidence/2026-03-29-adr-0251-*
+      - receipts/live-applies/evidence/2026-03-30-adr-0251-*
+      - receipts/live-applies/evidence/2026-03-29-openbao-*
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: integration_truth
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - build/platform-manifest.json
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+            - versions/stack.yaml
+          mode: shared_contract
+          contract: main-integration-truth-v1
+        - id: adr_0251_latest_server_state_follow_up
+          paths:
+            - docs/adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md
+            - docs/workstreams/ws-0251-live-apply.md
+            - docs/workstreams/ws-0251-main-integration-r2.md
+            - docs/workstreams/adr-0043-openbao.md
+            - docs/runbooks/configure-openbao.md
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/step_ca_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/step_ca_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
+            - config/windmill/scripts/gate-status.py
+            - config/windmill/scripts/stage-smoke-suites.py
+            - scripts/deployment_history.py
+            - scripts/gate_status.py
+            - scripts/live_apply_receipts.py
+            - scripts/stage_smoke_suites.py
+            - tests/test_changelog_portal.py
+            - tests/test_live_apply_receipts.py
+            - tests/test_openbao_runtime_role.py
+            - tests/test_stage_smoke_suites.py
+            - tests/test_step_ca_runtime_role.py
+            - tests/test_validation_gate.py
+            - tests/test_validation_gate_windmill.py
+            - tests/test_windmill_integration_wrappers.py
+            - tests/test_windmill_operator_admin_app.py
+            - receipts/live-applies/2026-03-29-adr-0251-*.json
+            - receipts/live-applies/2026-03-30-adr-0251-*.json
+            - receipts/live-applies/evidence/2026-03-29-adr-0251-*
+            - receipts/live-applies/evidence/2026-03-30-adr-0251-*
+            - receipts/live-applies/evidence/2026-03-29-openbao-*
+          mode: exclusive
+        - id: openbao_compose_env_helper_contract
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+          mode: shared_contract
+          contract: openbao-compose-env-helper-v1
+        - id: ws_0251_openbao_compose_env_helper_tests
+          paths:
+            - tests/test_openbao_compose_env_helper.py
+          mode: shared_contract
+          contract: openbao-compose-env-helper-tests-v1
+        - id: ws_0251_openbao_systemd_credentials_helper
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+          mode: shared_contract
+          contract: openbao-systemd-credentials-helper-v1
+        - id: ws_0251_compose_runtime_secret_injection_tests
+          paths:
+            - tests/test_compose_runtime_secret_injection.py
+          mode: shared_contract
+          contract: compose-runtime-secret-injection-tests-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: replays ADR 0251 on the latest merged mainline by
+        pinning the Windmill worker checkout to the active worktree during
+        converge-windmill, replaying the Docker publication, step-ca,
+        OpenBao, and stage-smoke verification paths on the live server, and
+        refreshing the canonical smoke-suite and promotion-gate receipt after
+        the newest exact-main replay so the verified platform baseline
+        advances again
+      release_bump: patch
+      included_in_repo_version: 0.177.101
+      latest_receipts:
+        promotion_pipeline: 2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
+        stage_smoke_suites: 2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
+        openbao: 2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
   - id: ws-0255-live-apply
     adr: "0255"
     title: ADR 0255 live apply from latest origin/main
@@ -4169,8 +4313,9 @@ workstreams:
       release_bump: patch
       included_in_repo_version: 0.177.86
       latest_receipts:
-        promotion_pipeline: 2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
-        stage_smoke_suites: 2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
+        promotion_pipeline: 2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
+        stage_smoke_suites: 2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
+        openbao: 2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
   - id: ws-0259-live-apply
     adr: "0259"
     title: Live apply n8n as the external app connector fabric for ServerClaw

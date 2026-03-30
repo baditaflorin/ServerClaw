@@ -75,7 +75,8 @@ runner `docker-build-lv3`.
 - the mirrored Windmill worker checkout must include `README.md`, `VERSION`, `changelog.md`, `mkdocs.yml`, `roles/`, `versions/`, and `workstreams.yaml` because the worker-safe `generated-docs` and `generated-portals` checks read those canonical inputs even when the checkout has no `.git` metadata
 - repo-scoped `playbooks/windmill.yml` replays now mirror the active git worktree automatically because the worker-checkout archive dereferences the scoped-runner shard symlinks before upload
 - the build-server `remote-validate` and `remote-pre-push` paths now stage one immutable content-addressed repository snapshot per run and execute from a fresh `.lv3-runs/<run_id>/repo` namespace instead of a mutable remote mirror
-- if a Windmill replay starts from an out-of-tree or temporary playbook path, pass `-e windmill_worker_checkout_repo_root_local_dir=/absolute/worktree/path` to pin `/srv/proxmox_florin_server` to the intended checkout explicitly
+- `make converge-windmill` now pins `/srv/proxmox_florin_server` to the active repo worktree automatically via `windmill_worker_checkout_repo_root_local_dir=$(REPO_ROOT)`
+- if a Windmill replay starts from an out-of-tree or temporary playbook path instead of the Makefile wrapper, pass `-e windmill_worker_checkout_repo_root_local_dir=/absolute/worktree/path` explicitly
 - validation resolves tracked JSON files against the repo root, falls back to `python3` when `jq` is unavailable, and skips rsync-excluded generated JSON artifacts that are intentionally absent from mirrored remote workspaces
 - required Ansible collections are installed from [collections/requirements.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/requirements.yml)
 - validation collections are cached under `.ansible/validation/collections`

@@ -175,6 +175,16 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert quarterly_schedule["args"]["schedule_guard"] == "first_monday_of_quarter"
 
 
+def test_make_converge_windmill_pins_worker_checkout_to_active_repo_root() -> None:
+    makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
+
+    assert (
+        "converge-windmill:\n"
+        "\t$(MAKE) preflight WORKFLOW=converge-windmill\n"
+        "\tANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/windmill.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e windmill_worker_checkout_repo_root_local_dir=$(REPO_ROOT)\n"
+    ) in makefile
+
+
 def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> None:
     app_dir = REPO_ROOT / "config/windmill/apps/f/lv3/operator_access_admin.raw_app"
     lock_path = REPO_ROOT / "config/windmill/apps/wmill-lock.yaml"
@@ -710,11 +720,18 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "--path {{ windmill_validation_gate_status_script_path | quote }}" in verify_tasks
     assert "Run the Windmill validation gate status script" in verify_tasks
     assert "Assert the Windmill validation gate status result" in verify_tasks
+    assert "Parse the Windmill validation gate status result" in verify_tasks
     assert "Verify the Windmill default operations scripts are seeded" in verify_tasks
     assert 'WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"' in verify_tasks
     assert 'Authorization: "Bearer {{ windmill_runtime_api_token }}"' in verify_tasks
     assert "until: windmill_verify_healthcheck.rc == 0" in verify_tasks
-    assert "until: windmill_verify_validation_gate_status.rc == 0" in verify_tasks
+    assert "windmill_verify_healthcheck.stdout | trim | length > 0" in verify_tasks
+    assert "windmill_verify_healthcheck_payload" in verify_tasks
+    assert "windmill_verify_validation_gate_status.rc == 0" in verify_tasks
+    assert "windmill_verify_validation_gate_status.stdout | trim | length > 0" in verify_tasks
+    assert "windmill_verify_validation_gate_status_payload" in verify_tasks
+    assert "windmill_verify_stage_smoke_suites.stdout | trim | length > 0" in verify_tasks
+    assert "windmill_verify_stage_smoke_suites_payload" in verify_tasks
     assert "failed_when: false" in verify_tasks
     assert "retries: 6" in verify_tasks
     assert "windmill_verify_default_operations_scripts.status == 200" in verify_tasks

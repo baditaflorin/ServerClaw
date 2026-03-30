@@ -140,3 +140,15 @@ def test_run_stage_smoke_suites_writes_aggregate_and_receipt_payload(monkeypatch
     assert payload["status"] == "passed"
     assert payload["receipt_smoke_suites"][0]["suite_id"] == "production-windmill-primary-path"
     assert report_file.exists()
+
+
+def test_write_report_replaces_read_only_file(tmp_path: Path) -> None:
+    report_file = tmp_path / ".local" / "stage-smoke-suites" / "production-windmill.json"
+    report_file.parent.mkdir(parents=True, exist_ok=True)
+    report_file.write_text("stale\n", encoding="utf-8")
+    report_file.chmod(0o444)
+
+    stage_smoke_suites.write_report(report_file, {"status": "passed"})
+
+    assert json.loads(report_file.read_text(encoding="utf-8")) == {"status": "passed"}
+    assert report_file.stat().st_mode & 0o666 == 0o666

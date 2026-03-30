@@ -49,9 +49,9 @@ def test_openbao_runtime_defaults_use_postgres_primary_address() -> None:
     assert "postgres_ha.initial_primary" in defaults
     assert "ansible_host" in defaults
     assert "@{{ openbao_postgres_host }}:5432/postgres?sslmode=disable" in defaults
-    assert 'CREATE ROLE "{{ name }}" WITH LOGIN PASSWORD \'{{ password }}\' VALID UNTIL \'{{ expiration }}\';' in defaults
-    assert 'GRANT pg_read_all_data TO "{{ name }}";' in defaults
-    assert 'DROP ROLE IF EXISTS "{{ name }}";' in defaults
+    assert 'CREATE ROLE "{{name}}" WITH LOGIN PASSWORD \'{{password}}\' VALID UNTIL \'{{expiration}}\';' in defaults
+    assert 'GRANT pg_read_all_data TO "{{name}}";' in defaults
+    assert 'DROP ROLE IF EXISTS "{{name}}";' in defaults
 
 
 def test_generated_platform_vars_pin_openbao_to_postgres_primary_ip() -> None:
@@ -112,6 +112,61 @@ def test_openbao_runtime_checks_certificate_freshness_before_renewal() -> None:
     assert "when: openbao_tls_certificate_freshness.rc != 0" in tasks
 
 
+def test_openbao_runtime_recovers_detached_empty_default_network_before_compose_up() -> None:
+    defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
+    tasks = TASKS_PATH.read_text(encoding="utf-8")
+
+    assert 'openbao_default_network_name: "{{ openbao_site_dir | basename }}_default"' in defaults
+    assert "Inspect the managed OpenBao default network before compose up" in tasks
+    assert "Remove the detached managed OpenBao default network before compose up" in tasks
+    assert "openbao_default_network_inspect.stdout | from_json | first" in tasks
+    assert ".Containers | default({})" in tasks
+    assert '      - network\n      - rm' in tasks
+
+
+def test_openbao_runtime_retries_seal_status_during_restart_window() -> None:
+    tasks = TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "- name: Read OpenBao seal status" in tasks
+    assert "register: openbao_seal_status" in tasks
+    assert "until: openbao_seal_status.status == 200" in tasks
+    assert "register: openbao_unsealed_status" in tasks
+    assert "until: openbao_unsealed_status.status == 200" in tasks
+    assert "changed_when: false" in tasks
+
+
+def test_openbao_runtime_continues_after_docker_chain_recheck_when_compose_health_checks_guard_recovery() -> None:
+    tasks = TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "Recheck Docker nat chain before OpenBao startup" in tasks
+    assert "failed_when: openbao_docker_nat_chain_recheck.rc not in [0, 1]" in tasks
+    assert "failed_when: openbao_docker_forward_chain_recheck.rc not in [0, 1]" in tasks
+    assert "Record Docker chain readiness before OpenBao startup" in tasks
+    assert "Warn when Docker chains are still missing before OpenBao startup" in tasks
+    assert "continuing to docker compose up" in tasks
+    assert "Assert Docker nat chain is present before OpenBao startup" not in tasks
+    assert "Assert Docker forward chain is present before OpenBao startup" not in tasks
+
+
+def test_openbao_runtime_recovers_dnat_chain_failures_during_compose_startup() -> None:
+    tasks = TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "- name: Start the OpenBao stack and recover Docker bridge-chain failures" in tasks
+    assert "- name: Flag Docker bridge-chain failures during OpenBao startup" in tasks
+    assert "Unable to enable DNAT rule" in tasks
+    assert "- name: Restart Docker to restore bridge chains before retrying OpenBao startup" in tasks
+    assert "- name: Recheck Docker nat chain after Docker recovery for OpenBao startup" in tasks
+    assert "- name: Remove the failed OpenBao container before retrying startup" in tasks
+    assert "- name: Remove the detached managed OpenBao default network before retrying startup" in tasks
+    assert "- name: Retry OpenBao startup after Docker bridge-chain recovery" in tasks
+
+
+def test_openbao_runtime_persisted_approles_use_reusable_secret_ids() -> None:
+    defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
+
+    assert defaults.count("secret_id_num_uses: 0") >= 3
+
+
 def test_openbao_runtime_rechecks_seal_state_before_auth_verification() -> None:
     tasks = TASKS_PATH.read_text(encoding="utf-8")
     ensure_unsealed_tasks = ENSURE_UNSEALED_TASKS_PATH.read_text(encoding="utf-8")
@@ -123,13 +178,31 @@ def test_openbao_runtime_rechecks_seal_state_before_auth_verification() -> None:
     assert "Wait for OpenBao to become active before" in ensure_unsealed_tasks
 
 
-def test_openbao_runtime_retries_policy_reads_during_startup_recovery() -> None:
+def test_openbao_runtime_retries_policy_reads_during_post_restart_recovery() -> None:
     tasks = TASKS_PATH.read_text(encoding="utf-8")
 
     assert "- name: Read current OpenBao policies" in tasks
-    assert "retries: 6" in tasks
+    assert "register: openbao_current_policies" in tasks
+    assert "      - 500" in tasks
+    assert "      - 502" in tasks
+    assert "      - 503" in tasks
+    assert "retries: 12" in tasks
     assert "delay: 2" in tasks
     assert "until: openbao_current_policies.status in [200, 404]" in tasks
+    assert "changed_when: false" in tasks
+
+
+def test_openbao_runtime_waits_out_background_apt_maintenance() -> None:
+    tasks = yaml.safe_load(TASKS_PATH.read_text(encoding="utf-8"))
+    apt_task = next(task for task in tasks if task["name"] == "Ensure OpenBao runtime prerequisite packages are present")
+    apt_module = apt_task["ansible.builtin.apt"]
+
+    assert apt_module["name"] == ["curl"]
+    assert apt_module["state"] == "present"
+    assert apt_module["update_cache"] is True
+    assert apt_module["cache_valid_time"] == 3600
+    assert apt_module["lock_timeout"] == 300
+    assert apt_module["force_apt_get"] is True
 
 
 def test_openbao_runtime_renders_rotatable_secret_keys_dynamically() -> None:
@@ -144,16 +217,25 @@ def test_openbao_runtime_renders_rotatable_secret_keys_dynamically() -> None:
     assert "(openbao_rotation_metadata.rotated_by_metadata_key): 'openbao-seed'" in tasks
 
 
-def test_openbao_runtime_retries_seed_state_reads_during_recovery() -> None:
+def test_openbao_runtime_retries_other_read_side_api_checks_after_restart() -> None:
     tasks = TASKS_PATH.read_text(encoding="utf-8")
 
+    assert "- name: Discover enabled auth methods" in tasks
+    assert "register: openbao_auth_methods" in tasks
+    assert "until: openbao_auth_methods.status == 200" in tasks
+    assert "- name: Discover enabled secret engines" in tasks
+    assert "register: openbao_secret_engines" in tasks
+    assert "until: openbao_secret_engines.status == 200" in tasks
+    assert "- name: Read current OpenBao transit keys" in tasks
+    assert "register: openbao_transit_key_statuses" in tasks
+    assert "until: openbao_transit_key_statuses.status in [200, 404]" in tasks
     assert "- name: Read current controller Proxmox API secret" in tasks
-    assert "- name: Read current controller monitoring secret" in tasks
-    assert "- name: Read current mail platform runtime secret" in tasks
-    assert "- name: Read current dedicated rotatable secrets from OpenBao" in tasks
     assert "until: openbao_controller_proxmox_api_current.status in [200, 404]" in tasks
+    assert "- name: Read current controller monitoring secret" in tasks
     assert "until: openbao_controller_monitoring_current.status in [200, 404]" in tasks
+    assert "- name: Read current mail platform runtime secret" in tasks
     assert "until: openbao_mail_platform_runtime_current.status in [200, 404]" in tasks
+    assert "- name: Read current dedicated rotatable secrets from OpenBao" in tasks
     assert "until: openbao_rotatable_secret_current.status in [200, 404]" in tasks
 
 

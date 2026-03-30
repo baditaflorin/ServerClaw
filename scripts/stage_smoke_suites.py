@@ -73,7 +73,18 @@ def load_service_catalog(path: Path = SERVICE_CATALOG_PATH) -> dict[str, Any]:
 
 def write_report(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    contents = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    try:
+        path.write_text(contents, encoding="utf-8")
+    except PermissionError:
+        if not path.exists():
+            raise
+        path.unlink()
+        path.write_text(contents, encoding="utf-8")
+    try:
+        path.chmod(0o666)
+    except OSError:
+        pass
 
 
 def maybe_relative_to_repo(path: Path, repo_root: Path) -> str:

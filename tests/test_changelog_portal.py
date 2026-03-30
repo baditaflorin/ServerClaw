@@ -64,6 +64,70 @@ class ChangelogPortalTests(unittest.TestCase):
         self.assertGreaterEqual(result["count"], 2)
         self.assertTrue(all("grafana" in entry["service_ids"] for entry in result["entries"]))
 
+    def test_render_portal_skips_nested_evidence_json_that_is_not_a_receipt(self) -> None:
+        temp_dir = Path(tempfile.mkdtemp(prefix="changelog-portal-evidence-test-"))
+        receipts_dir = temp_dir / "receipts" / "live-applies"
+        promotions_dir = temp_dir / "promotions"
+        receipts_dir.mkdir(parents=True, exist_ok=True)
+        promotions_dir.mkdir(parents=True, exist_ok=True)
+
+        (receipts_dir / "2026-03-29-adr-0251-stage-smoke-live-apply.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "1.0.0",
+                    "receipt_id": "2026-03-29-adr-0251-stage-smoke-live-apply",
+                    "applied_on": "2026-03-29",
+                    "recorded_on": "2026-03-29",
+                    "recorded_by": "codex",
+                    "source_commit": "abc1234",
+                    "repo_version_context": "0.177.87",
+                    "workflow_id": "converge-windmill",
+                    "adr": "0251",
+                    "summary": "Applied Windmill promotion gates on docker-runtime-lv3.",
+                    "targets": [{"kind": "vm", "name": "docker-runtime-lv3"}],
+                    "verification": [{"check": "gate-status", "result": "pass", "observed": "healthy"}],
+                    "evidence_refs": ["docs/adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md"],
+                    "notes": [],
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        (receipts_dir / "evidence" / "2026-03-29-adr-0251-gate-status-live.json").parent.mkdir(parents=True, exist_ok=True)
+        (receipts_dir / "evidence" / "2026-03-29-adr-0251-gate-status-live.json").write_text(
+            json.dumps(
+                {
+                    "status": "ok",
+                    "result": {"status": "ok", "checks": [{"id": "post_merge_run", "status": "failed"}]},
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        try:
+            render_portal(
+                temp_dir / "site",
+                receipts_dir=receipts_dir,
+                promotions_dir=promotions_dir,
+                mutation_audit_file=REPO_ROOT / "tests" / "fixtures" / "mutation_audit_history.jsonl",
+            )
+            result = query_deployment_history(
+                days=30,
+                receipts_dir=receipts_dir,
+                promotions_dir=promotions_dir,
+                mutation_audit_file=REPO_ROOT / "tests" / "fixtures" / "mutation_audit_history.jsonl",
+            )
+            index_html = (temp_dir / "site" / "index.html").read_text(encoding="utf-8")
+            live_entries = [entry for entry in result["entries"] if entry["change_type"] == "live-apply"]
+
+            self.assertEqual(len(live_entries), 1)
+            self.assertEqual(live_entries[0]["id"], "2026-03-29-adr-0251-stage-smoke-live-apply")
+            self.assertIn("2026-03-29-adr-0251-stage-smoke-live-apply", index_html)
+            self.assertNotIn("2026-03-29-adr-0251-gate-status-live", index_html)
+        finally:
+            shutil.rmtree(temp_dir)
+
     def test_query_deployment_history_ignores_live_apply_evidence_json(self) -> None:
         temp_dir = Path(tempfile.mkdtemp(prefix="deployment-history-evidence-test-"))
         receipts_dir = temp_dir / "live-applies"

@@ -100,6 +100,8 @@
       - curl
     state: present
     update_cache: true
+    cache_valid_time: 3600
+    lock_timeout: 300
     force_apt_get: true
 
 - name: Ensure OpenBao runtime directories exist
@@ -301,17 +303,18 @@
   delay: "{{ openbao_runtime_chain_recheck_delay_seconds }}"
   until: openbao_docker_forward_chain_recheck.rc == 0
 
-- name: Assert Docker nat chain is present before OpenBao startup
-  ansible.builtin.assert:
-    that:
-      - openbao_docker_nat_chain_recheck.rc == 0
-    fail_msg: "Docker is running but the nat DOCKER chain is missing; OpenBao published ports will fail."
+- name: Record Docker chain readiness before OpenBao startup
+  ansible.builtin.set_fact:
+    openbao_docker_chains_ready_before_startup: >-
+      {{ openbao_docker_nat_chain_recheck.rc == 0 and openbao_docker_forward_chain_recheck.rc == 0 }}
 
-- name: Assert Docker forward chain is present before OpenBao startup
-  ansible.builtin.assert:
-    that:
-      - openbao_docker_forward_chain_recheck.rc == 0
-    fail_msg: "Docker is running but the filter DOCKER-FORWARD chain is missing; OpenBao bridge networking will fail."
+- name: Warn when Docker chains are still missing before OpenBao startup
+  ansible.builtin.debug:
+    msg: >-
+      Docker DOCKER or DOCKER-FORWARD chains are still missing after restart;
+      continuing to docker compose up and relying on the published-port, loopback,
+      and seal-status checks to catch any remaining Docker startup failure.
+  when: not openbao_docker_chains_ready_before_startup
 
 - name: Check whether the named OpenBao container already exists
   ansible.builtin.command:
@@ -335,28 +338,153 @@
   changed_when: openbao_container_remove.rc == 0
   when: openbao_container_inspect.rc == 0
 
-- name: Start the OpenBao stack
+- name: Inspect the managed OpenBao default network before compose up
+  ansible.builtin.command:
+    argv:
+      - docker
+      - network
+      - inspect
+      - "{{ openbao_default_network_name }}"
+  register: openbao_default_network_inspect
+  changed_when: false
+  failed_when: openbao_default_network_inspect.rc not in [0, 1]
+
+- name: Remove the detached managed OpenBao default network before compose up
   vars:
-    mutation_audit_action: start.openbao_stack
+    mutation_audit_action: remove.openbao_default_network
     mutation_audit_target: openbao-runtime
   ansible.builtin.command:
     argv:
       - docker
-      - compose
-      - --file
-      - "{{ openbao_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ openbao_site_dir }}"
-  register: openbao_up
-  changed_when: >-
-    'Creating' in openbao_up.stdout
-    or 'Recreating' in openbao_up.stdout
-    or 'Starting' in openbao_up.stdout
+      - network
+      - rm
+      - "{{ openbao_default_network_name }}"
+  register: openbao_default_network_remove
+  changed_when: openbao_default_network_remove.rc == 0
+  when:
+    - openbao_default_network_inspect.rc == 0
+    - >-
+      (
+        (openbao_default_network_inspect.stdout | from_json | first).Containers | default({})
+      ) | length == 0
   tags:
     - mutation
+
+- name: Start the OpenBao stack and recover Docker bridge-chain failures
+  block:
+    - name: Start the OpenBao stack
+      vars:
+        mutation_audit_action: start.openbao_stack
+        mutation_audit_target: openbao-runtime
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ openbao_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ openbao_site_dir }}"
+      register: openbao_up
+      changed_when: >-
+        'Creating' in openbao_up.stdout
+        or 'Recreating' in openbao_up.stdout
+        or 'Starting' in openbao_up.stdout
+      tags:
+        - mutation
+  rescue:
+    - name: Flag Docker bridge-chain failures during OpenBao startup
+      ansible.builtin.set_fact:
+        openbao_docker_bridge_chain_missing: >-
+          {{
+            'No chain/target/match by that name' in (ansible_failed_result.stderr | default(''))
+            or 'Unable to enable DNAT rule' in (ansible_failed_result.stderr | default(''))
+          }}
+
+    - name: Surface unexpected OpenBao startup failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('OpenBao compose up failed')) }}"
+      when: not openbao_docker_bridge_chain_missing
+
+    - name: Restart Docker to restore bridge chains before retrying OpenBao startup
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: openbao_docker_bridge_chain_missing
+
+    - name: Reset SSH connection before retrying OpenBao startup after Docker recovery
+      ansible.builtin.meta: reset_connection
+      when: openbao_docker_bridge_chain_missing
+
+    - name: Recheck Docker nat chain after Docker recovery for OpenBao startup
+      ansible.builtin.command: iptables -t nat -S DOCKER
+      register: openbao_docker_nat_chain_retry
+      changed_when: false
+      failed_when: openbao_docker_nat_chain_retry.rc not in [0, 1]
+      retries: "{{ openbao_runtime_chain_recheck_retries }}"
+      delay: "{{ openbao_runtime_chain_recheck_delay_seconds }}"
+      until: openbao_docker_nat_chain_retry.rc == 0
+      when: openbao_docker_bridge_chain_missing
+
+    - name: Recheck Docker forward chain after Docker recovery for OpenBao startup
+      ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
+      register: openbao_docker_forward_chain_retry
+      changed_when: false
+      failed_when: openbao_docker_forward_chain_retry.rc not in [0, 1]
+      retries: "{{ openbao_runtime_chain_recheck_retries }}"
+      delay: "{{ openbao_runtime_chain_recheck_delay_seconds }}"
+      until: openbao_docker_forward_chain_retry.rc == 0
+      when: openbao_docker_bridge_chain_missing
+
+    - name: Remove the failed OpenBao container before retrying startup
+      ansible.builtin.command:
+        argv:
+          - docker
+          - rm
+          - -f
+          - "{{ openbao_container_name }}"
+      register: openbao_container_remove_retry
+      changed_when: openbao_container_remove_retry.rc == 0
+      failed_when: false
+      when: openbao_docker_bridge_chain_missing
+
+    - name: Remove the detached managed OpenBao default network before retrying startup
+      ansible.builtin.command:
+        argv:
+          - docker
+          - network
+          - rm
+          - "{{ openbao_default_network_name }}"
+      register: openbao_default_network_remove_retry
+      changed_when: openbao_default_network_remove_retry.rc == 0
+      failed_when: false
+      when: openbao_docker_bridge_chain_missing
+
+    - name: Retry OpenBao startup after Docker bridge-chain recovery
+      vars:
+        mutation_audit_action: start.openbao_stack
+        mutation_audit_target: openbao-runtime
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ openbao_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ openbao_site_dir }}"
+      register: openbao_up
+      changed_when: >-
+        'Creating' in openbao_up.stdout
+        or 'Recreating' in openbao_up.stdout
+        or 'Starting' in openbao_up.stdout
+      when: openbao_docker_bridge_chain_missing
+      tags:
+        - mutation
 
 - name: Install the OpenBao TLS renewal timer
   ansible.builtin.include_role:
@@ -479,7 +607,12 @@
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
     method: GET
     return_content: true
+    status_code: 200
   register: openbao_seal_status
+  retries: 12
+  delay: 2
+  until: openbao_seal_status.status == 200
+  changed_when: false
 
 - name: Unseal OpenBao with the first threshold of recovery keys
   ansible.builtin.uri:
@@ -502,7 +635,12 @@
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
     method: GET
     return_content: true
+    status_code: 200
   register: openbao_unsealed_status
+  retries: 12
+  delay: 2
+  until: openbao_unsealed_status.status == 200
+  changed_when: false
 
 - name: Assert that OpenBao is unsealed
   ansible.builtin.assert:
@@ -528,7 +666,16 @@
     headers:
       X-Vault-Token: "{{ openbao_init_payload.root_token }}"
     return_content: true
+    status_code:
+      - 200
+      - 500
+      - 502
+      - 503
   register: openbao_auth_methods
+  retries: 12
+  delay: 2
+  until: openbao_auth_methods.status == 200
+  changed_when: false
   no_log: true
 
 - name: Enable userpass auth
@@ -586,7 +733,16 @@
     headers:
       X-Vault-Token: "{{ openbao_init_payload.root_token }}"
     return_content: true
+    status_code:
+      - 200
+      - 500
+      - 502
+      - 503
   register: openbao_secret_engines
+  retries: 12
+  delay: 2
+  until: openbao_secret_engines.status == 200
+  changed_when: false
   no_log: true
 
 - name: Enable kv-v2 secrets engine
@@ -679,11 +835,15 @@
     status_code:
       - 200
       - 404
+      - 500
+      - 502
+      - 503
   loop: "{{ openbao_policy_contents.results }}"
   register: openbao_current_policies
-  retries: 6
+  retries: 12
   delay: 2
   until: openbao_current_policies.status in [200, 404]
+  changed_when: false
   no_log: true
 
 - name: Upsert OpenBao policies
@@ -772,8 +932,15 @@
     status_code:
       - 200
       - 404
+      - 500
+      - 502
+      - 503
   loop: "{{ openbao_transit_keys }}"
   register: openbao_transit_key_statuses
+  retries: 12
+  delay: 2
+  until: openbao_transit_key_statuses.status in [200, 404]
+  changed_when: false
   no_log: true
 
 - name: Create missing OpenBao transit keys
@@ -863,10 +1030,14 @@
     status_code:
       - 200
       - 404
+      - 500
+      - 502
+      - 503
   register: openbao_controller_proxmox_api_current
-  retries: 6
+  retries: 12
   delay: 2
   until: openbao_controller_proxmox_api_current.status in [200, 404]
+  changed_when: false
   no_log: true
 
 - name: Read current controller monitoring secret
@@ -879,10 +1050,14 @@
     status_code:
       - 200
       - 404
+      - 500
+      - 502
+      - 503
   register: openbao_controller_monitoring_current
-  retries: 6
+  retries: 12
   delay: 2
   until: openbao_controller_monitoring_current.status in [200, 404]
+  changed_when: false
   no_log: true
 
 - name: Read current mail platform runtime secret
@@ -895,10 +1070,14 @@
     status_code:
       - 200
       - 404
+      - 500
+      - 502
+      - 503
   register: openbao_mail_platform_runtime_current
-  retries: 6
+  retries: 12
   delay: 2
   until: openbao_mail_platform_runtime_current.status in [200, 404]
+  changed_when: false
   no_log: true
 
 - name: Read the controller-local Proxmox API payload

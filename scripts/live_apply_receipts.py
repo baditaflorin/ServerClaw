@@ -76,7 +76,7 @@ def iter_receipt_paths(receipts_dir: Path = RECEIPTS_DIR) -> list[Path]:
         if not path.is_file():
             continue
         relative = path.relative_to(receipts_dir)
-        if relative.parts and relative.parts[0] in NON_RECEIPT_TOP_LEVEL_DIRS:
+        if "evidence" in relative.parts:
             continue
         receipt_paths.append(path)
     return receipt_paths

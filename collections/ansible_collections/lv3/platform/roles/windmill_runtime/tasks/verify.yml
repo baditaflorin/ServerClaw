@@ -39,9 +39,21 @@
 - name: Assert the Windmill seeded healthcheck result
   ansible.builtin.assert:
     that:
-      - (windmill_verify_healthcheck.stdout | from_json).probe == "live-verify"
-      - (windmill_verify_healthcheck.stdout | from_json).job_id_present | bool
-      - (windmill_verify_healthcheck.stdout | from_json).workspace == windmill_workspace_id
+      - windmill_verify_healthcheck.rc == 0
+      - windmill_verify_healthcheck.stdout | trim | length > 0
+    fail_msg: "Windmill API responded, but the seeded healthcheck script did not return JSON output."
+
+- name: Parse the Windmill seeded healthcheck result
+  ansible.builtin.set_fact:
+    windmill_verify_healthcheck_payload: "{{ windmill_verify_healthcheck.stdout | trim | from_json }}"
+  changed_when: false
+
+- name: Assert the Windmill seeded healthcheck result
+  ansible.builtin.assert:
+    that:
+      - windmill_verify_healthcheck_payload.probe == "live-verify"
+      - windmill_verify_healthcheck_payload.job_id_present | bool
+      - windmill_verify_healthcheck_payload.workspace == windmill_workspace_id
     fail_msg: "Windmill API responded, but the seeded healthcheck script did not return the expected result."
 
 - name: Run the Windmill validation gate status script
@@ -62,7 +74,9 @@
   register: windmill_verify_validation_gate_status
   retries: 3
   delay: 10
-  until: windmill_verify_validation_gate_status.rc == 0
+  until:
+    - windmill_verify_validation_gate_status.rc == 0
+    - windmill_verify_validation_gate_status.stdout | trim | length > 0
   changed_when: false
   failed_when: false
   no_log: true
@@ -70,9 +84,23 @@
 - name: Assert the Windmill validation gate status result
   ansible.builtin.assert:
     that:
-      - (windmill_verify_validation_gate_status.stdout | from_json).status == "ok"
-      - (windmill_verify_validation_gate_status.stdout | from_json).gate_status.manifest_path | length > 0
-      - ((windmill_verify_validation_gate_status.stdout | from_json).gate_status.enabled_checks | length) >= 1
+      - windmill_verify_validation_gate_status.rc == 0
+      - windmill_verify_validation_gate_status.stdout | trim | length > 0
+    fail_msg: >-
+      Windmill API responded, but the seeded validation gate status script did not return JSON output.
+
+- name: Parse the Windmill validation gate status result
+  ansible.builtin.set_fact:
+    windmill_verify_validation_gate_status_payload: >-
+      {{ windmill_verify_validation_gate_status.stdout | trim | from_json }}
+  changed_when: false
+
+- name: Assert the Windmill validation gate status result
+  ansible.builtin.assert:
+    that:
+      - windmill_verify_validation_gate_status_payload.status == "ok"
+      - windmill_verify_validation_gate_status_payload.gate_status.manifest_path | length > 0
+      - (windmill_verify_validation_gate_status_payload.gate_status.enabled_checks | length) >= 1
     fail_msg: >-
       Windmill API responded, but the seeded validation gate status script did not return the expected structured result.
 
@@ -98,9 +126,22 @@
 - name: Assert the Windmill stage smoke suites result
   ansible.builtin.assert:
     that:
-      - (windmill_verify_stage_smoke_suites.stdout | from_json).status == "ok"
-      - (windmill_verify_stage_smoke_suites.stdout | from_json).result.status == "passed"
-      - ((windmill_verify_stage_smoke_suites.stdout | from_json).result.receipt_smoke_suites | length) >= 1
+      - windmill_verify_stage_smoke_suites.rc == 0
+      - windmill_verify_stage_smoke_suites.stdout | trim | length > 0
+    fail_msg: >-
+      Windmill API responded, but the seeded stage smoke suites script did not return JSON output.
+
+- name: Parse the Windmill stage smoke suites result
+  ansible.builtin.set_fact:
+    windmill_verify_stage_smoke_suites_payload: "{{ windmill_verify_stage_smoke_suites.stdout | trim | from_json }}"
+  changed_when: false
+
+- name: Assert the Windmill stage smoke suites result
+  ansible.builtin.assert:
+    that:
+      - windmill_verify_stage_smoke_suites_payload.status == "ok"
+      - windmill_verify_stage_smoke_suites_payload.result.status == "passed"
+      - (windmill_verify_stage_smoke_suites_payload.result.receipt_smoke_suites | length) >= 1
     fail_msg: >-
       Windmill API responded, but the seeded stage smoke suites script did not return a passing structured result.
 

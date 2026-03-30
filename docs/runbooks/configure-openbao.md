@@ -54,6 +54,10 @@ The converge creates these controller-local files:
 
 Treat the entire `.local/openbao/` subtree as recovery material and keep it out of git.
 
+The persisted AppRole JSON artifacts now carry reusable secret IDs within their
+existing `15m` TTL so concurrent controller-side automation and parallel agent
+worktrees do not invalidate each other by consuming a shared single-use file.
+
 ## Verification
 
 Basic runtime checks:
@@ -78,6 +82,10 @@ secret_id="$(jq -r '.secret_id' /Users/live/Documents/GITHUB_PROJECTS/proxmox_fl
 token="$(curl -fsS --request POST --data "{\"role_id\":\"$role_id\",\"secret_id\":\"$secret_id\"}" http://127.0.0.1:8201/v1/auth/approle/login | jq -r '.auth.client_token')"
 curl -fsS --header "X-Vault-Token: $token" http://127.0.0.1:8201/v1/database/creds/postgres-readonly
 ```
+
+If the AppRole login starts returning `invalid role or secret ID`, the artifact
+has usually expired rather than being permanently broken. Refresh it with
+`make converge-openbao` and retry.
 
 Controller-side mTLS verification for the private OpenBao API:
 
@@ -116,6 +124,19 @@ As of the `2026-03-29` replay, `make converge-openbao` automatically recovers th
 
 The same replay also hardened the post-unseal verification path: after a restart-and-unseal cycle, the role now retries the controller AppRole PostgreSQL dynamic credential request for a short bounded window because OpenBao can briefly close loopback HTTP requests while the database backend resumes.
 
+That recovery path now also removes an empty detached `openbao_default` network
+when Docker has lost the endpoint attachment. If Docker still has not recreated
+those chains after the bounded recheck window, the role logs that degraded
+preflight state and still continues into `docker compose up`; the decisive guard
+is whether the runtime can actually rebind `:8200`, answer on `127.0.0.1:8201`,
+and pass the subsequent seal-status plus AppRole verification steps.
+
+As of the `2026-03-30` exact-main replay, the role also treats a first-pass
+`docker compose up` DNAT failure as recoverable automation drift: it restarts
+Docker again, removes the half-created `lv3-openbao` container plus detached
+`openbao_default` network, rechecks `DOCKER` and `DOCKER-FORWARD`, and retries
+the stack start once before surfacing a hard failure.
+
 As of the `2026-03-29` ADR 0270 replay, the shared OpenBao helpers used by
 runtime secret injection and host-native systemd credential delivery also
 recover a missing loopback `127.0.0.1:8201` publication automatically. When the
@@ -127,7 +148,7 @@ publication drifted while the container itself still existed.
 
 If a future rerun still leaves the guest runtime broken, the failure usually presents as `docker compose up` failing to bind `:8200` with an iptables DNAT error and `docker inspect lv3-openbao` showing an empty `NetworkSettings.Networks` object.
 
-Recover the guest runtime in this order:
+If the automated cleanup still cannot recover the guest runtime, repair it in this order:
 
 1. Restart Docker on `docker-runtime-lv3`.
 2. Remove the broken `lv3-openbao` container.

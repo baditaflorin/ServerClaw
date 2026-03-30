@@ -176,13 +176,14 @@ now serves internal pull-through mirrors on `10.10.10.30:5001-5004`, the
 path were both re-verified afterward.
 The repository now also ships ADR 0251 stage-scoped smoke suites fully live on
 production: the promotion gate and runtime-assurance scoreboard now require
-declared or inherited smoke suites for active environments, the current
-exact-main verification on `docker-runtime-lv3` keeps the Windmill worker
-checkout aligned with those imports, `config/windmill/scripts/gate-status.py`
-returns `status: ok`, the live promotion gate still rejects the stale staged
-`grafana` receipt while reporting no required or observed stage-smoke suites
-for that receipt, and the authenticated runtime-assurance gateway plus local
-ops-portal partials verify cleanly on platform version `0.130.59`.
+declared or inherited smoke suites for active environments, the latest
+exact-main replay on release `0.177.100` pins the Windmill worker checkout to
+the active worktree during `make converge-windmill`, re-verifies the live
+`f/lv3/gate-status` and `f/lv3/stage-smoke-suites` wrappers together with the
+worker-local `post_merge_run: passed` surface, confirms runtime-assurance
+summary `55 total / 36 pass / 19 degraded / 0 failed`, and keeps the promotion
+gate blocking the stale staged `grafana` receipt for the expected SLO,
+capacity, and receipt-age reasons on platform version `0.130.67`.
 The repository now also ships ADR 0197 Dify visual workflow canvas fully live on production: `https://agents.lv3.org/healthz` now returns `200`, governed Dify tool calls through `https://api.lv3.org/v1/dify-tools/get-platform-status` re-verified from the latest-main replay, and the linked-worktree smoke export plus Langfuse trace path completed successfully on 2026-03-28.
 The repository now also ships ADR 0231 local secret delivery live on production: `docker-runtime-lv3` now serves the control-plane backup path through a repo-managed OpenBao Agent plus systemd credentials, the legacy `/etc/lv3/control-plane-recovery/openbao-backup-token.json` artifact is gone, and the 2026-03-28 replay re-verified a fresh backup generation plus restore drill on `backup-lv3`.
 The repository now also ships ADR 0137 crawl policy automation live on production: the shared public edge serves a universal `robots.txt`, emits `X-Robots-Tag: noindex, nofollow` across published hostnames, adds robots meta tags to repository-generated HTML surfaces, and includes `lv3.org` in the shared edge certificate definition.
@@ -195,8 +196,8 @@ ADR 0276 NATS JetStream is now live on production from `main`: `docker-runtime-l
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.100` |
-| Platform version | `0.130.67` |
+| Repository version | `0.177.101` |
+| Platform version | `0.130.68` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -320,7 +321,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `observation_to_action_closure_loop` | `2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply` |
 | `ollama` | `2026-03-27-adr-0176-inventory-sharding-mainline-live-apply` |
 | `open_webui` | `2026-03-25-adr-0145-open-webui-ollama-connector-live-apply` |
-| `openbao` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
+| `openbao` | `2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply` |
 | `openbao_operator_entity` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `openbao_operator_policy` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `openfga` | `2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply` |
@@ -345,7 +346,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
 | `preview_environment` | `2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z` |
-| `promotion_pipeline` | `2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply` |
+| `promotion_pipeline` | `2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply` |
 | `provider_boundaries` | `2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply` |
 | `public_edge_publication` | `2026-03-29-adr-0255-matrix-synapse-mainline-live-apply` |
 | `public_endpoint_admission_control` | `2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply` |
@@ -370,7 +371,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `shared_policy_packs` | `2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply` |
 | `short_lived_credentials_and_mtls` | `2026-03-22-adr-0047-short-lived-credentials-live-apply` |
 | `signed_release_bundles` | `2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply` |
-| `stage_smoke_suites` | `2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply` |
+| `stage_smoke_suites` | `2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply` |
 | `staging_environment` | `2026-03-27-adr-0183-staging-live-apply` |
 | `step_ca` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
@@ -1359,6 +1360,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0250-live-apply: Live Apply ADR 0250 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0250-live-apply.md)
 - [Workstream ws-0251-live-apply-r2: Stage-Scoped Smoke Suites And Promotion Gates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0251-live-apply-r2.md)
 - [Workstream WS-0251: Stage-Scoped Smoke Suites Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0251-live-apply.md)
+- [Workstream ws-0251-main-integration-r2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0251-main-integration-r2.md)
 - [Workstream ws-0251-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0251-main-integration.md)
 - [Workstream WS-0252: Route And DNS Publication Assertion Ledger Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0252-live-apply.md)
 - [Workstream ws-0252-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0252-main-merge.md)
@@ -1410,8 +1412,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.100` |
-| Platform version | `0.130.67` |
+| Repository version | `0.177.101` |
+| Platform version | `0.130.68` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1678,6 +1680,7 @@ This repository is intentionally opinionated:
 | `0251` | Live apply stage-scoped smoke suites and promotion gates | `live_applied` | [ws-0251-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0251-live-apply.md) |
 | `0251` | Stage-scoped smoke suites and promotion-gate live apply | `live_applied` | [ws-0251-live-apply-r2.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0251-live-apply-r2.md) |
 | `0251` | Integrate ADR 0251 exact-main durable verification onto current origin/main | `merged` | [ws-0251-main-integration.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0251-main-integration.md) |
+| `0251` | Integrate ADR 0251 latest-server-state follow-up onto current origin/main | `merged` | [ws-0251-main-integration-r2.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0251-main-integration-r2.md) |
 | `0252` | Live apply ADR 0252 route and DNS publication assertion ledger | `live_applied` | [ws-0252-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0252-live-apply.md) |
 | `0252` | Integrate ADR 0252 exact-main replay onto current origin/main | `merged` | [ws-0252-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0252-main-merge.md) |
 | `0252` | Re-verify ADR 0252 from the latest origin/main and prepare final merge surfaces | `live_applied` | [ws-0252-mainline-replay.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0252-mainline-replay.md) |
