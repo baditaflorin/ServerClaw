@@ -70,10 +70,22 @@
   register: jupyterhub_smoke_user_api
   changed_when: false
 
+- name: Record the spawned Jupyter single-user container name from the admin API payload
+  ansible.builtin.set_fact:
+    jupyterhub_smoke_container_name: >-
+      {{
+        (
+          (jupyterhub_smoke_user_api.stdout | from_json)
+          .servers[""]
+          .state
+          .object_name
+        )
+      }}
+
 - name: Verify the spawned Jupyter single-user container exposes the expected platform contract
   ansible.builtin.shell: |
     set -euo pipefail
-    container_name="jupyter-{{ jupyterhub_verify_username }}"
+    container_name="{{ jupyterhub_smoke_container_name }}"
     docker inspect "$container_name" >/dev/null
     docker exec "$container_name" /bin/bash -lc 'env | grep -Fqx "OPENAI_BASE_URL={{ jupyterhub_openai_base_url }}"'
     docker exec "$container_name" /bin/bash -lc 'env | grep -Fqx "OLLAMA_BASE_URL={{ jupyterhub_ollama_base_url }}"'

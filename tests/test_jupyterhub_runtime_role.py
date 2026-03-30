@@ -168,6 +168,7 @@ def test_verify_tasks_cover_local_health_admin_api_and_smoke_spawn() -> None:
 
     assert "Verify the JupyterHub local health endpoint" in names
     assert "Exercise JupyterHub smoke-user provisioning through the local admin API" in names
+    assert "Record the spawned Jupyter single-user container name from the admin API payload" in names
     assert "Verify the spawned Jupyter single-user container exposes the expected platform contract" in names
     assert "Stop the JupyterHub smoke user server" in names
 
@@ -180,7 +181,12 @@ def test_verify_tasks_cover_local_health_admin_api_and_smoke_spawn() -> None:
     container_task = next(
         task for task in verify if task["name"] == "Verify the spawned Jupyter single-user container exposes the expected platform contract"
     )
-    assert 'container_name="jupyter-{{ jupyterhub_verify_username }}"' in container_task["ansible.builtin.shell"]
+    smoke_name_task = next(
+        task for task in verify if task["name"] == "Record the spawned Jupyter single-user container name from the admin API payload"
+    )
+    assert "jupyterhub_smoke_user_api.stdout | from_json" in smoke_name_task["ansible.builtin.set_fact"]["jupyterhub_smoke_container_name"]
+    assert ".object_name" in smoke_name_task["ansible.builtin.set_fact"]["jupyterhub_smoke_container_name"]
+    assert 'container_name="{{ jupyterhub_smoke_container_name }}"' in container_task["ansible.builtin.shell"]
     assert "http://minio:9000/minio/health/live" in container_task["ansible.builtin.shell"]
     assert 'assert client.bucket_exists(os.environ["JUPYTERHUB_SHARED_BUCKET"])' in container_task["ansible.builtin.shell"]
     assert "{{ jupyterhub_ollama_base_url }}/api/version" in container_task["ansible.builtin.shell"]
