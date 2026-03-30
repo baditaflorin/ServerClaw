@@ -2,8 +2,8 @@
 
 - Status: Accepted
 - Implementation Status: Live applied
-- Implemented In Repo Version: Pending main integration from latest origin/main
-- Implemented In Platform Version: Pending exact-main replay from main
+- Implemented In Repo Version: 0.177.109
+- Implemented In Platform Version: 0.130.72
 - Implemented On: 2026-03-30
 - Date: 2026-03-29
 

@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-30'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 265
+  Implemented: 266
   Partial: 6
-  Not Implemented: 52
+  Not Implemented: 51
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5187,6 +5187,7 @@ adr_index:
       - engine
     summary: We will deploy Temporal as the durable workflow engine for long-running,
     filename: 0293-temporal-as-the-durable-workflow-and-task-queue-engine.md
+    implemented_version: 0.177.109
   - adr: 0294
     title: One-API As The Unified LLM API Proxy And Router
     status: Accepted

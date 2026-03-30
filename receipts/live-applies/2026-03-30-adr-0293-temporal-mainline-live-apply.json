@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0293-temporal-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_at": "2026-03-30T19:57:22Z",
+  "recorded_by": "codex",
+  "source_commit": "bc43866bf1ea26fb36455da9f63e1966826e7520",
+  "repo_version_context": "0.177.109",
+  "platform_version_context": "0.130.72",
+  "workflow_id": "adr-0293-temporal-mainline-live-apply",
+  "adr": "0293",
+  "summary": "Replayed ADR 0293 from the exact `0.177.109` mainline candidate by converging the private Temporal durable workflow engine on docker-runtime-lv3, provisioning its PostgreSQL history and visibility stores on postgres-lv3, wiring OpenBao-managed runtime secrets, and re-verifying the repo-managed `lv3` namespace and smoke workflow so the platform baseline advances to `0.130.72` on repository release `0.177.109`.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Temporal frontend loopback",
+      "address": "127.0.0.1:7233 on docker-runtime-lv3"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Temporal UI loopback",
+      "address": "http://127.0.0.1:8099 on docker-runtime-lv3"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused Temporal regression coverage",
+      "result": "pass",
+      "observed": "The integrated tree passed `39 passed in 2.29s` across `tests/test_temporal_runtime_role.py`, `tests/test_temporal_playbook.py`, `tests/test_temporal_postgres_role.py`, `tests/test_generate_platform_vars.py`, and `tests/test_dependency_graph.py`, and `make syntax-check-temporal` also passed after the namespace-retention retry and drift-detection fix."
+    },
+    {
+      "check": "Protected release write and tracked versions",
+      "result": "pass",
+      "observed": "The integrated main candidate records repository version `0.177.109` and platform version `0.130.72`, with `RELEASE.md`, `changelog.md`, `README.md`, `versions/stack.yaml`, and `build/platform-manifest.json` all regenerated around ADR 0293."
+    },
+    {
+      "check": "Authoritative exact-main Temporal replay",
+      "result": "pass",
+      "observed": "`make converge-temporal env=production` succeeded from the exact-main `0.177.109` tree recorded in `receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-converge-temporal-0.177.109.txt`, with final recap `docker-runtime-lv3 : ok=174 changed=2 unreachable=0 failed=0 skipped=49 rescued=0 ignored=0` and `postgres-lv3 : ok=59 changed=2 unreachable=0 failed=0 skipped=25 rescued=0 ignored=0`."
+    },
+    {
+      "check": "Temporal runtime health and namespace state",
+      "result": "pass",
+      "observed": "Fresh runtime probes recorded in `receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-runtime-health.txt` confirm `temporal-frontend`, `temporal-history`, `temporal-matching`, `temporal-worker`, `temporal-openbao-agent`, and `temporal-ui` are running, cluster health reports `SERVING`, and namespace `lv3` remains registered with `Config.WorkflowExecutionRetentionTtl  168h0m0s`."
+    },
+    {
+      "check": "PostgreSQL headroom and smoke workflow",
+      "result": "pass",
+      "observed": "Fresh headroom and smoke evidence in `receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-postgres-headroom.txt` and `receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-temporal-smoke-remote.json` show `100|71` active PostgreSQL sessions with `temporal|9`, and an on-guest workflow against `127.0.0.1:7233` completed in `371 ms` with result message `temporal-smoke:lv3`."
+    },
+    {
+      "check": "Merged-tree repository automation wrappers",
+      "result": "pass",
+      "observed": "The integrated tree passed `release_manager.py status`, `canonical_truth.py --check`, `platform_manifest.py --check`, `validate_repository_data_models.py --validate`, `live_apply_receipts.py --validate`, `git diff --check`, and `./scripts/validate_repo.sh agent-standards data-models generated-docs`. Both `make remote-validate` and `make pre-push-gate` also passed every substantive lane and failed only the expected terminal `workstream-surfaces` guard because branch `codex/ws-0293-mainline-replay` is the temporary exact-main integration branch and not a registered terminal workstream branch in `workstreams.yaml`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0293-temporal-as-the-durable-workflow-and-task-queue-engine.md",
+    "docs/workstreams/ws-0293-live-apply.md",
+    "docs/runbooks/configure-temporal.md",
+    "workstreams.yaml",
+    "VERSION",
+    "README.md",
+    "changelog.md",
+    "RELEASE.md",
+    "docs/release-notes/0.177.109.md",
+    "docs/release-notes/README.md",
+    "build/platform-manifest.json",
+    "versions/stack.yaml",
+    "playbooks/temporal.yml",
+    "playbooks/services/temporal.yml",
+    "collections/ansible_collections/lv3/platform/roles/temporal_postgres/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/temporal_runtime/tasks/main.yml",
+    "scripts/temporal_smoke.py",
+    "tests/test_temporal_playbook.py",
+    "tests/test_temporal_postgres_role.py",
+    "tests/test_temporal_runtime_role.py",
+    "tests/test_generate_platform_vars.py",
+    "tests/test_dependency_graph.py",
+    "receipts/image-scans/2026-03-30-temporal-server-runtime.json",
+    "receipts/image-scans/2026-03-30-temporal-server-runtime.trivy.json",
+    "receipts/image-scans/2026-03-30-temporal-admin-tools-runtime.json",
+    "receipts/image-scans/2026-03-30-temporal-admin-tools-runtime.trivy.json",
+    "receipts/image-scans/2026-03-30-temporal-ui-runtime.json",
+    "receipts/image-scans/2026-03-30-temporal-ui-runtime.trivy.json",
+    "receipts/live-applies/2026-03-30-adr-0293-temporal-live-apply.json",
+    "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-converge-temporal-0.177.109.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-runtime-health.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-postgres-headroom.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-temporal-smoke-remote.raw.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-temporal-smoke-remote.json",
+    "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-release-status-0.177.109.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-canonical-truth-check-0.177.109.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-platform-manifest-check-0.177.109.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-container-image-policy-validate-0.177.109.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-validate-repository-data-models-r2-0.177.109.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-validate-repo-r2-0.177.109.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-remote-validate-0.177.109.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-pre-push-gate-0.177.109.txt",
+    "receipts/live-applies/2026-03-30-adr-0293-temporal-mainline-live-apply.json"
+  ],
+  "notes": [
+    "This receipt supersedes the branch-local ADR 0293 receipt as the canonical mainline proof for Temporal on release `0.177.109`.",
+    "The exact-main replay surfaced and fixed the namespace retention reconciliation edge case: repeated mainline replays now retry admin-tools namespace calls while Temporal settles and skip no-op retention updates when `168h` is already present.",
+    "The source commit will be updated to the final integration commit once the exact-main branch state is committed and pushed to `origin/main`.",
+    "The wrapper-gate evidence also records the only remaining branch-local non-pass before the `main` push: `workstream-surfaces` intentionally fails for the temporary integration branch `codex/ws-0293-mainline-replay` because it is not the terminal workstream branch registered in `workstreams.yaml`."
+  ]
+}

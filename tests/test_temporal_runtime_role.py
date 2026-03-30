@@ -113,6 +113,12 @@ def test_temporal_runtime_bootstraps_openbao_env_and_namespace() -> None:
         task for task in tasks if task.get("name") == "Wait for the Temporal cluster to become ready for namespace administration"
     )
     namespace_check_task = next(task for task in tasks if task.get("name") == "Check whether the Temporal namespace already exists")
+    namespace_retention_task = next(
+        task for task in tasks if task.get("name") == "Record the current Temporal namespace retention window"
+    )
+    namespace_retention_decision_task = next(
+        task for task in tasks if task.get("name") == "Decide whether the Temporal namespace retention window needs reconciliation"
+    )
     namespace_create_task = next(task for task in tasks if task.get("name") == "Create the repo-managed Temporal namespace when missing")
     namespace_update_task = next(task for task in tasks if task.get("name") == "Reconcile the Temporal namespace retention window")
     namespace_report_task = next(task for task in tasks if task.get("name") == "Mirror the Temporal namespace report to the control machine")
@@ -135,8 +141,17 @@ def test_temporal_runtime_bootstraps_openbao_env_and_namespace() -> None:
         "--namespace",
         "{{ temporal_default_namespace }}",
     ]
+    assert namespace_check_task["retries"] == 12
+    assert "not found" in namespace_check_task["until"]
+    assert "WorkflowExecutionRetentionTtl" in namespace_retention_task["ansible.builtin.set_fact"]["temporal_namespace_retention_observed"]
+    assert "temporal_namespace_retention_observed" in namespace_retention_decision_task["ansible.builtin.set_fact"][
+        "temporal_namespace_needs_retention_update"
+    ]
     assert "--retention" in namespace_create_task["ansible.builtin.command"]["argv"]
+    assert namespace_create_task["retries"] == 6
     assert namespace_update_task["changed_when"] is False
+    assert namespace_update_task["retries"] == 6
+    assert namespace_update_task["when"] == "temporal_namespace_needs_retention_update | default(false)"
     assert namespace_report_task["delegate_to"] == "localhost"
 
 

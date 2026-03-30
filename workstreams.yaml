@@ -16782,7 +16782,7 @@ workstreams:
   - id: ws-0293-live-apply
     adr: "0293"
     title: Live apply Temporal as the durable workflow and task queue engine from latest origin/main
-    status: ready_for_merge
+    status: live_applied
     owner: codex
     branch: codex/ws-0293-temporal-main
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-temporal-main
@@ -16831,7 +16831,9 @@ workstreams:
       - receipts/image-scans/2026-03-30-temporal-ui-runtime.json
       - receipts/image-scans/2026-03-30-temporal-ui-runtime.trivy.json
       - receipts/live-applies/2026-03-30-adr-0293-temporal-live-apply.json
+      - receipts/live-applies/2026-03-30-adr-0293-temporal-mainline-live-apply.json
       - receipts/live-applies/evidence/2026-03-30-ws-0293-*
+      - receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-*
     ownership_manifest:
       owned_surfaces:
         - id: workstream_registry
@@ -16867,7 +16869,9 @@ workstreams:
             - receipts/image-scans/2026-03-30-temporal-ui-runtime.json
             - receipts/image-scans/2026-03-30-temporal-ui-runtime.trivy.json
             - receipts/live-applies/2026-03-30-adr-0293-temporal-live-apply.json
+            - receipts/live-applies/2026-03-30-adr-0293-temporal-mainline-live-apply.json
             - receipts/live-applies/evidence/2026-03-30-ws-0293-*
+            - receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-*
           mode: exclusive
         - id: temporal_topology_contract
           paths:
@@ -16899,5 +16903,11 @@ workstreams:
             - tests/test_dependency_graph.py
           mode: shared_contract
           contract: repository-automation-v1
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0293 by adding the private Temporal durable workflow engine, PostgreSQL-backed history and visibility stores, OpenBao-managed runtime secrets, and the repo-managed `lv3` namespace with exact-main verification on docker-runtime-lv3 and postgres-lv3
+      release_bump: patch
+      included_in_repo_version: 0.177.109
+      latest_receipts:
+        temporal: 2026-03-30-adr-0293-temporal-mainline-live-apply

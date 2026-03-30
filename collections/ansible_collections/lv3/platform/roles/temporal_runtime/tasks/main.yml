@@ -284,8 +284,41 @@
   args:
     chdir: "{{ temporal_site_dir }}"
   register: temporal_namespace_describe
+  retries: 12
+  delay: 5
+  until: >-
+    temporal_namespace_describe.rc == 0
+    or (
+      'namespace' in (((temporal_namespace_describe.stdout | default('')) ~ ' ' ~ (temporal_namespace_describe.stderr | default(''))) | lower)
+      and 'not found' in (((temporal_namespace_describe.stdout | default('')) ~ ' ' ~ (temporal_namespace_describe.stderr | default(''))) | lower)
+    )
   changed_when: false
   failed_when: temporal_namespace_describe.rc not in [0, 1]
+
+- name: Record the current Temporal namespace retention window
+  ansible.builtin.set_fact:
+    temporal_namespace_retention_observed: >-
+      {{
+        (
+          temporal_namespace_describe.stdout
+          | regex_findall('Config\\.WorkflowExecutionRetentionTtl\\s+([^\\n]+)')
+          | first
+          | default('')
+        ) | trim
+      }}
+  when: temporal_namespace_describe.rc == 0
+
+- name: Decide whether the Temporal namespace retention window needs reconciliation
+  ansible.builtin.set_fact:
+    temporal_namespace_needs_retention_update: >-
+      {{
+        temporal_namespace_describe.rc == 0
+        and (
+          temporal_namespace_retention_observed
+          | regex_replace('0s$', '')
+          | regex_replace('0m$', '')
+        ) != temporal_default_namespace_retention
+      }}
 
 - name: Create the repo-managed Temporal namespace when missing
   ansible.builtin.command:
@@ -312,6 +345,9 @@
   args:
     chdir: "{{ temporal_site_dir }}"
   register: temporal_namespace_create
+  retries: 6
+  delay: 5
+  until: temporal_namespace_create.rc == 0
   changed_when: temporal_namespace_create.rc == 0
   when: temporal_namespace_describe.rc != 0
 
@@ -340,7 +376,11 @@
   args:
     chdir: "{{ temporal_site_dir }}"
   register: temporal_namespace_update
+  retries: 6
+  delay: 5
+  until: temporal_namespace_update.rc == 0
   changed_when: false
+  when: temporal_namespace_needs_retention_update | default(false)
 
 - name: Capture the Temporal namespace description as JSON
   ansible.builtin.command:
@@ -365,6 +405,9 @@
   args:
     chdir: "{{ temporal_site_dir }}"
   register: temporal_namespace_describe_json
+  retries: 12
+  delay: 5
+  until: temporal_namespace_describe_json.rc == 0
   changed_when: false
 
 - name: Mirror the Temporal namespace report to the control machine

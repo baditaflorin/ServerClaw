@@ -2,10 +2,10 @@
 
 - ADR: [ADR 0293](../adr/0293-temporal-as-the-durable-workflow-and-task-queue-engine.md)
 - Title: Live apply Temporal as the durable workflow and task queue engine from latest `origin/main`
-- Status: ready_for_merge
-- Ready To Merge: true
-- Implemented In Repo Version: Pending main integration from latest `origin/main`
-- Live Applied In Platform Version: Pending exact-main replay from `main`
+- Status: live_applied
+- Included In Repo Version: 0.177.109
+- Canonical Mainline Receipt: `receipts/live-applies/2026-03-30-adr-0293-temporal-mainline-live-apply.json`
+- Live Applied In Platform Version: 0.130.72
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0293-temporal-main`
@@ -105,24 +105,33 @@
 - update the ADR, workstream registry, and live-apply receipts only after the
   on-platform verification is complete
 
-## Branch Outcome
+## Outcome
 
-- `make converge-temporal env=production` succeeded on the final replay
-  recorded in `receipts/live-applies/evidence/2026-03-30-ws-0293-converge-temporal-r14.txt`
-  with recap `docker-runtime-lv3 ok=168 changed=1 failed=0` and
-  `postgres-lv3 ok=59 changed=3 failed=0`
-- the live PostgreSQL footprint dropped from the pre-fix saturation state
-  (`100|103` total sessions with `temporal|30`) to `100|60` total sessions
-  with `temporal|4` after the final converge
-- the runtime is healthy on `docker-runtime-lv3`, the repo-managed `lv3`
-  namespace remains present with `168h` retention, and the final smoke receipt
-  is recorded in
-  `receipts/live-applies/evidence/2026-03-30-ws-0293-temporal-smoke-r14-remote.json`
-
-## Remaining Main-Only Follow-Through
-
-- merge this workstream onto the latest `origin/main`
-- update the protected integration surfaces on `main` only:
-  `VERSION`, `changelog.md`, top-level `README.md`, and `versions/stack.yaml`
-- replay the Temporal converge from merged `main` before setting the final
-  repo/platform version fields in the ADR and workstream metadata
+- The exact-main replay from the integrated `0.177.109` tree succeeded in
+  `receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-converge-temporal-0.177.109.txt`
+  with final recap `docker-runtime-lv3 ok=174 changed=2 failed=0` and
+  `postgres-lv3 ok=59 changed=2 failed=0`.
+- Runtime verification is recorded in
+  `receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-runtime-health.txt`
+  and reconfirms the loopback-only Temporal gRPC, HTTP, and UI listeners,
+  `SERVING` cluster health, and the repo-managed `lv3` namespace with
+  `168h0m0s` retention.
+- PostgreSQL headroom is recorded in
+  `receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-postgres-headroom.txt`
+  with `100|71` active sessions at observation time and `temporal|9`,
+  confirming the ADR 0293 guardrails avoided the earlier saturation state.
+- The remote smoke workflow is recorded in
+  `receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-temporal-smoke-remote.json`
+  with `elapsed_ms: 371` and result message `temporal-smoke:lv3`.
+- The merged-tree repository automation path is recorded in
+  `receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-remote-validate-0.177.109.txt`
+  and
+  `receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-pre-push-gate-0.177.109.txt`;
+  every substantive lane passed, and the only non-pass was the expected
+  `workstream-surfaces` guard because `codex/ws-0293-mainline-replay` is the
+  temporary exact-main replay branch rather than a terminal workstream branch
+  registered in `workstreams.yaml`.
+- The final mainline replay also hardened the Temporal namespace retention
+  reconciliation path so repeated exact-main runs now retry cleanly during
+  admin-tools startup and skip unnecessary namespace updates when the declared
+  `168h` retention is already present.

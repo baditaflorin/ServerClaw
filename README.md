@@ -196,8 +196,8 @@ ADR 0276 NATS JetStream is now live on production from `main`: `docker-runtime-l
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.108` |
-| Platform version | `0.130.71` |
+| Repository version | `0.177.109` |
+| Platform version | `0.130.72` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -377,6 +377,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `staging_environment` | `2026-03-27-adr-0183-staging-live-apply` |
 | `step_ca` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
+| `temporal` | `2026-03-30-adr-0293-temporal-mainline-live-apply` |
 | `tesseract_ocr` | `2026-03-30-adr-0286-tesseract-ocr-live-apply` |
 | `tika` | `2026-03-30-adr-0275-apache-tika-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
@@ -656,6 +657,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure step-ca](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-step-ca.md)
 - [Configure Storage And Backups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-storage-and-backups.md)
 - [Configure Tailscale Private Access](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-tailscale-access.md)
+- [Configure Temporal](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-temporal.md)
 - [Configure Tesseract OCR](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-tesseract-ocr.md)
 - [Configure Apache Tika](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-tika.md)
 - [Configure Vaultwarden](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-vaultwarden.md)
@@ -1408,6 +1410,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0282-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0282-main-merge.md)
 - [Workstream ws-0283-live-apply: Live Apply ADR 0283 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0283-live-apply.md)
 - [Workstream ws-0286-live-apply: Live Apply ADR 0286 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0286-live-apply.md)
+- [Workstream WS-0293: Temporal Durable Workflow Engine Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-live-apply.md)
 - [Workstream ws-0295-live-apply: Live Apply ADR 0295 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md)
 - [Workstream WS-0296: Education Repo Refresh And Named Deploy Profiles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-education-refresh.md)
 - [Workstream WS-0296: Dedicated Artifact Cache VM Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-live-apply.md)
@@ -1429,8 +1432,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.108` |
-| Platform version | `0.130.71` |
+| Repository version | `0.177.109` |
+| Platform version | `0.130.72` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1739,6 +1742,7 @@ This repository is intentionally opinionated:
 | `0282` | Integrate ADR 0282 Mailpit exact-main replay into current origin/main | `live_applied` | [ws-0282-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0282-main-merge.md) |
 | `0283` | Live apply Plausible Analytics from latest origin/main | `live_applied` | [ws-0283-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0283-live-apply.md) |
 | `0286` | Live apply Tesseract OCR from latest origin/main on top of the current Apache Tika baseline | `live_applied` | [ws-0286-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0286-live-apply.md) |
+| `0293` | Live apply Temporal as the durable workflow and task queue engine from latest origin/main | `live_applied` | [ws-0293-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-live-apply.md) |
 | `0295` | Shared artifact cache plane and dedicated cache VM roadmap | `live_applied` | [adr-0295-artifact-cache-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `merged` | [ws-0295-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md) |
 | `0296` | Live apply the dedicated artifact cache VM from latest origin/main | `live_applied` | [ws-0296-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-live-apply.md) |
