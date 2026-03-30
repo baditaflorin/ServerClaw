@@ -33,8 +33,8 @@
   connection: local
   gather_facts: false
   vars:
-    subdomain_catalog_path: "{{ inventory_dir | dirname }}/config/subdomain-catalog.json"
-    inventory_defaults_path: "{{ inventory_dir }}/group_vars/all.yml"
+    subdomain_catalog_path: "{{ playbook_dir }}/../config/subdomain-catalog.json"
+    inventory_defaults_path: "{{ playbook_dir }}/../inventory/group_vars/all.yml"
     subdomain_fqdn: flags.lv3.org
 
   tasks:
@@ -132,7 +132,7 @@
   become: true
   gather_facts: true
   vars_files:
-    - "{{ inventory_dir }}/group_vars/platform.yml"
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
 
   pre_tasks:
     - name: Run shared preflight checks

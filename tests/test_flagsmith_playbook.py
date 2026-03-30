@@ -31,6 +31,8 @@ def test_flagsmith_dns_stage_converges_only_the_flags_subdomain_record() -> None
     assert dns_play["hosts"] == "localhost"
     assert dns_play["connection"] == "local"
     assert dns_play["vars"]["subdomain_fqdn"] == "flags.lv3.org"
+    assert dns_play["vars"]["subdomain_catalog_path"] == "{{ playbook_dir }}/../config/subdomain-catalog.json"
+    assert dns_play["vars"]["inventory_defaults_path"] == "{{ playbook_dir }}/../inventory/group_vars/all.yml"
 
     select_task = next(task for task in tasks if task["name"] == "Select the Flagsmith subdomain entry")
     assert "selectattr('fqdn', 'equalto', subdomain_fqdn)" in select_task["ansible.builtin.set_fact"]["selected_subdomain"]
@@ -54,6 +56,7 @@ def test_flagsmith_playbook_converges_postgres_runtime_edge_and_public_verify() 
         "lv3.platform.flagsmith_runtime",
     ]
     assert [role["role"] for role in plays[3]["roles"]] == ["lv3.platform.nginx_edge_publication"]
+    assert plays[3]["vars_files"] == ["{{ playbook_dir }}/../inventory/group_vars/platform.yml"]
     verify_task = plays[4]["tasks"][0]
     assert verify_task["ansible.builtin.include_role"]["name"] == "lv3.platform.flagsmith_runtime"
     assert verify_task["ansible.builtin.include_role"]["tasks_from"] == "verify_public.yml"
