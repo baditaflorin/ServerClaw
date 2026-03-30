@@ -41,6 +41,20 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - http://100.64.0.1:8014/healthz
+  labels:
+    service_id: openfga
+    slo_id: openfga-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - http://100.64.0.1:8014/healthz
+  labels:
+    service_id: openfga
+    slo_id: openfga-latency
+    indicator: latency
+    probe_module: http_2xx_follow_redirects
+- targets:
     - https://home.lv3.org
   labels:
     service_id: homepage

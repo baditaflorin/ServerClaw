@@ -1657,6 +1657,52 @@
         "reason": "The operator-facing TLS surface requires client-certificate authentication, so Uptime Kuma only tracks this contract indirectly through role verification."
       }
     },
+    "openfga": {
+      "service_name": "openfga",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "openfga_runtime",
+      "verify_file": "roles/openfga_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "OpenFGA startup completes once the local health endpoint returns 200 on the runtime listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8098/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "OpenFGA keeps serving the local health endpoint on docker-runtime-lv3.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8098/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "OpenFGA accepts requests on the local runtime health endpoint after the datastore and bootstrap contract are ready.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8098/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "The private authenticated OpenFGA contract is verified directly by the repo-managed bootstrap and bearer-auth checks instead of an unauthenticated Uptime Kuma monitor."
+      }
+    },
     "ops_portal": {
       "service_name": "ops-portal",
       "owning_vm": "docker-runtime-lv3",

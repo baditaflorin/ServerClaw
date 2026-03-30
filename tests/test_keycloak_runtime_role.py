@@ -33,6 +33,10 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_compose_network_name"] == "{{ keycloak_compose_project_name }}_default"
     assert defaults["keycloak_langfuse_client_id"] == "langfuse"
     assert defaults["keycloak_langfuse_client_secret_local_file"].endswith("/.local/keycloak/langfuse-client-secret.txt")
+    assert defaults["keycloak_serverclaw_runtime_client_id"] == "serverclaw-runtime"
+    assert defaults["keycloak_serverclaw_runtime_client_secret_local_file"].endswith(
+        "/.local/keycloak/serverclaw-runtime-client-secret.txt"
+    )
     assert defaults["keycloak_outline_automation_username"] == "outline.automation"
     assert defaults["keycloak_outline_automation_password_local_file"].endswith("/.local/keycloak/outline.automation-password.txt")
     assert defaults["keycloak_ops_portal_post_logout_redirect_uris"] == [
@@ -112,10 +116,30 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
         for task in tasks
         if task.get("name") == "Wait for the Docker daemon to answer after networking recovery"
     )
+    replace_cleanup = next(
+        task
+        for task in tasks
+        if task.get("name") == "Remove stale Keycloak compose replacement containers before recovery"
+    )
+    openbao_agent_recreate = next(
+        task
+        for task in tasks
+        if task.get("name") == "Force-recreate the Keycloak OpenBao agent after Docker networking recovery"
+    )
+    runtime_env_wait = next(
+        task
+        for task in tasks
+        if task.get("name") == "Wait for the Keycloak runtime env file after OpenBao agent recovery"
+    )
     force_recreate = next(
         task
         for task in tasks
-        if task.get("name") == "Force-recreate the Keycloak stack after Docker networking recovery"
+        if task.get("name") == "Force-recreate the Keycloak service after Docker networking recovery"
+    )
+    force_recreate_fact = next(
+        task
+        for task in tasks
+        if task.get("name") == "Record whether the Keycloak startup needs a force recreate"
     )
     force_recreate_fact = next(
         task for task in tasks if task.get("name") == "Record whether the Keycloak startup needs a force recreate"
@@ -137,6 +161,14 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     assert docker_info["ansible.builtin.command"]["argv"] == ["docker", "info", "--format", '{{ "{{.ServerVersion}}" }}']
     assert env_render["register"] == "keycloak_env_template"
     assert compose_render["register"] == "keycloak_compose_template"
+    assert "com.docker.compose.project=keycloak" in replace_cleanup["ansible.builtin.shell"]
+    assert "com.docker.compose.replace" in replace_cleanup["ansible.builtin.shell"]
+    assert openbao_agent_recreate["ansible.builtin.command"]["argv"][-4:] == ["up", "-d", "--force-recreate", "openbao-agent"]
+    assert 'grep -Fqx "KC_DB_URL_HOST={{ keycloak_database_host }}" "{{ keycloak_env_file }}"' in runtime_env_wait["ansible.builtin.shell"]
+    assert (
+        'grep -Fqx "KC_BOOTSTRAP_ADMIN_USERNAME={{ keycloak_bootstrap_admin_username }}" "{{ keycloak_env_file }}"'
+        in runtime_env_wait["ansible.builtin.shell"]
+    )
     assert readiness_probe["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
     assert force_recreate_down["ansible.builtin.command"]["argv"] == [
         "docker",
@@ -150,6 +182,8 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     assert "{{ keycloak_compose_network_name }}" in network_cleanup["ansible.builtin.shell"]
     assert network_cleanup["when"] == "keycloak_force_recreate"
     assert "--force-recreate" in force_recreate["ansible.builtin.command"]["argv"]
+    assert "--no-deps" in force_recreate["ansible.builtin.command"]["argv"]
+    assert force_recreate["ansible.builtin.command"]["argv"][-1] == "keycloak"
     assert force_recreate["until"] == "keycloak_up.rc == 0"
     force_recreate_expression = force_recreate_fact["ansible.builtin.set_fact"]["keycloak_force_recreate"]
     assert "keycloak_docker_nat_chain.rc != 0" in force_recreate_expression
@@ -176,8 +210,14 @@ def test_role_verifies_internal_mail_network_connectivity() -> None:
         "ahostsv4",
         "{{ keycloak_mail_platform_submission_host }}",
     ]
+    assert resolve_task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
+    assert resolve_task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
+    assert resolve_task["until"] == "keycloak_mail_submission_host_lookup.rc == 0"
     assert "{{ keycloak_mail_platform_submission_host }}" in connect_task["ansible.builtin.shell"]
     assert "{{ keycloak_mail_platform_submission_port }}" in connect_task["ansible.builtin.shell"]
+    assert connect_task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
+    assert connect_task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
+    assert connect_task["until"] == "keycloak_mail_submission_probe.rc == 0"
 
 
 def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile() -> None:
@@ -191,6 +231,21 @@ def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile(
     admin_probe_task = next(
         task for task in tasks if task.get("name") == "Wait for an authenticated Keycloak admin realm query to answer"
     )
+    settle_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Allow the Keycloak admin API to settle after the first authenticated probe"
+    )
+    token_probe_confirmed_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Reconfirm the Keycloak bootstrap admin token endpoint after the settle window"
+    )
+    admin_probe_confirmed_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Reconfirm an authenticated Keycloak admin realm query after the settle window"
+    )
     assert defaults["keycloak_startup_probe_retries"] == 60
     assert defaults["keycloak_startup_probe_delay"] == 5
     assert readiness_task["retries"] == "{{ keycloak_startup_probe_retries }}"
@@ -201,11 +256,60 @@ def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile(
     assert token_probe_task["delay"] == "{{ keycloak_startup_probe_delay }}"
     assert admin_probe_task["retries"] == "{{ keycloak_startup_probe_retries }}"
     assert admin_probe_task["delay"] == "{{ keycloak_startup_probe_delay }}"
+    assert settle_task["ansible.builtin.pause"]["seconds"] == "{{ keycloak_startup_probe_delay }}"
+    assert token_probe_confirmed_task["retries"] == "{{ keycloak_startup_probe_retries }}"
+    assert token_probe_confirmed_task["delay"] == "{{ keycloak_startup_probe_delay }}"
+    assert admin_probe_confirmed_task["retries"] == "{{ keycloak_startup_probe_retries }}"
+    assert admin_probe_confirmed_task["delay"] == "{{ keycloak_startup_probe_delay }}"
     assert token_probe_task["ansible.builtin.uri"]["return_content"] is True
     assert admin_probe_task["ansible.builtin.uri"]["url"] == "{{ keycloak_local_admin_url }}/admin/realms/{{ keycloak_realm_name }}"
     assert admin_probe_task["ansible.builtin.uri"]["headers"]["Authorization"] == (
         "Bearer {{ keycloak_bootstrap_admin_token_probe.json.access_token }}"
     )
+    assert token_probe_confirmed_task["ansible.builtin.uri"]["return_content"] is True
+    assert admin_probe_confirmed_task["ansible.builtin.uri"]["headers"]["Authorization"] == (
+        "Bearer {{ keycloak_bootstrap_admin_token_probe_confirmed.json.access_token }}"
+    )
+
+
+def test_realm_reconciliation_retries_repo_managed_keycloak_modules() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    tasks = load_tasks()
+    realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
+    assert defaults["keycloak_admin_connection_timeout"] == 60
+    assert defaults["keycloak_admin_reconciliation_retries"] == 24
+    assert defaults["keycloak_admin_reconciliation_delay"] == 5
+    assert realm_block["module_defaults"]["group/community.general.keycloak"]["connection_timeout"] == (
+        "{{ keycloak_admin_connection_timeout }}"
+    )
+    runtime_contract_tasks = [
+        next(
+            task
+            for task in realm_block["block"]
+            if task.get("name") == "Ensure the obsolete ServerClaw operator CLI direct-grant client is absent"
+        ),
+        next(task for task in realm_block["block"] if task.get("name") == "Ensure the ServerClaw runtime client exists"),
+        next(task for task in realm_block["block"] if task.get("name") == "Read the ServerClaw runtime client secret"),
+    ]
+    for task in runtime_contract_tasks:
+        assert task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
+        assert task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
+        assert task["until"] == f"{task['register']} is succeeded"
+
+
+def test_runtime_token_verification_retries_confidential_clients() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    tasks = load_tasks()
+    agent_token_task = next(task for task in tasks if task.get("name") == "Request an agent client-credentials token")
+    serverclaw_runtime_token_task = next(
+        task for task in tasks if task.get("name") == "Request the ServerClaw runtime client-credentials token"
+    )
+    assert defaults["keycloak_admin_connection_timeout"] == 60
+    for task in (agent_token_task, serverclaw_runtime_token_task):
+        assert task["ansible.builtin.uri"]["timeout"] == "{{ keycloak_admin_connection_timeout }}"
+        assert task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
+        assert task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
+        assert task["until"] == f"{task['register']}.status == 200"
 
 
 def test_compose_template_joins_the_mail_platform_network() -> None:
@@ -360,8 +464,8 @@ def test_role_manages_the_outline_automation_identity() -> None:
     assert password_mirror_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_outline_automation_password_local_file }}"
     assert defaults["keycloak_repo_user_reconciliation_retries"] == 24
     assert defaults["keycloak_repo_user_reconciliation_delay"] == 5
-    assert defaults["keycloak_admin_connection_timeout"] == 30
-    assert defaults["keycloak_local_admin_url"] == "http://{{ ansible_host }}:{{ keycloak_internal_http_port }}"
+    assert defaults["keycloak_admin_connection_timeout"] == 60
+    assert defaults["keycloak_local_admin_url"] == "http://127.0.0.1:{{ keycloak_local_http_port }}"
     assert defaults["keycloak_repo_user_admin_url"] == "{{ keycloak_local_admin_url }}"
     assert include_task["ansible.builtin.include_tasks"] == "reconcile_repo_managed_users.yml"
     assert recovery_restart_task["ansible.builtin.command"]["argv"] == [
@@ -396,3 +500,80 @@ def test_role_manages_the_outline_automation_identity() -> None:
     assert automation_user_task["ansible.builtin.uri"]["body"]["username"] == "{{ keycloak_outline_automation_username }}"
     assert automation_user_task["ansible.builtin.uri"]["body"]["requiredActions"] == []
     assert automation_password_task["ansible.builtin.uri"]["body"]["temporary"] is False
+
+
+def test_repo_managed_user_reconciliation_is_delegated_to_the_include_file() -> None:
+    tasks = load_tasks()
+    repo_user_tasks = load_tasks(REPO_USER_TASKS_PATH)
+    repo_user_reconciliation = next(task for task in tasks if task.get("name") == "Reconcile repo-managed Keycloak users")
+    include_task = next(
+        task for task in repo_user_reconciliation["block"] if task.get("name") == "Run the repo-managed Keycloak user reconciliation tasks"
+    )
+    retry_task = next(
+        task
+        for task in repo_user_reconciliation["rescue"]
+        if task.get("name") == "Retry the repo-managed Keycloak user reconciliation tasks after recovery"
+    )
+    group_token_task = next(
+        task
+        for task in repo_user_tasks
+        if task.get("name") == "Request a Keycloak admin token for repo-managed user reconciliation"
+    )
+    platform_group_lookup_task = next(
+        task for task in repo_user_tasks if task.get("name") == "Look up the lv3-platform-admins group in Keycloak"
+    )
+    operator_lookup_task = next(task for task in repo_user_tasks if task.get("name") == "Look up the named operator in Keycloak")
+    outline_lookup_task = next(
+        task for task in repo_user_tasks if task.get("name") == "Look up the Outline automation user in Keycloak"
+    )
+
+    assert include_task["ansible.builtin.include_tasks"] == "reconcile_repo_managed_users.yml"
+    assert retry_task["ansible.builtin.include_tasks"] == "reconcile_repo_managed_users.yml"
+    assert group_token_task["ansible.builtin.uri"]["timeout"] == "{{ keycloak_admin_connection_timeout }}"
+    assert group_token_task["retries"] == "{{ keycloak_repo_user_reconciliation_retries }}"
+    assert group_token_task["delay"] == "{{ keycloak_repo_user_reconciliation_delay }}"
+    assert "json.access_token" in group_token_task["until"]
+    assert repo_user_tasks.index(group_token_task) < repo_user_tasks.index(platform_group_lookup_task)
+    assert repo_user_tasks.index(platform_group_lookup_task) < repo_user_tasks.index(operator_lookup_task)
+    assert repo_user_tasks.index(operator_lookup_task) < repo_user_tasks.index(outline_lookup_task)
+
+
+def test_role_manages_serverclaw_runtime_client_and_removes_the_stale_operator_direct_grant() -> None:
+    tasks = load_tasks()
+    realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
+    remove_operator_client_task = next(
+        task
+        for task in realm_block["block"]
+        if task.get("name") == "Ensure the obsolete ServerClaw operator CLI direct-grant client is absent"
+    )
+    runtime_client_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Ensure the ServerClaw runtime client exists"
+    )
+    read_runtime_secret_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Read the ServerClaw runtime client secret"
+    )
+    remove_operator_secret_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Remove the stale ServerClaw operator CLI client secret from the control machine"
+    )
+    mirror_runtime_secret_task = next(
+        task for task in tasks if task.get("name") == "Mirror the ServerClaw runtime client secret to the control machine"
+    )
+    runtime_token_task = next(
+        task for task in tasks if task.get("name") == "Request the ServerClaw runtime client-credentials token"
+    )
+    assert_task = next(task for task in tasks if task.get("name") == "Assert Keycloak endpoints and automation credentials are working")
+
+    assert remove_operator_client_task["community.general.keycloak_client"]["client_id"] == "serverclaw-operator-cli"
+    assert remove_operator_client_task["community.general.keycloak_client"]["state"] == "absent"
+    assert runtime_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_serverclaw_runtime_client_id }}"
+    assert runtime_client_task["community.general.keycloak_client"]["service_accounts_enabled"] is True
+    assert read_runtime_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == (
+        "{{ keycloak_serverclaw_runtime_client_id }}"
+    )
+    assert remove_operator_secret_task["ansible.builtin.file"]["state"] == "absent"
+    assert mirror_runtime_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_serverclaw_runtime_client_secret_local_file }}"
+    assert runtime_token_task["ansible.builtin.uri"]["body"]["grant_type"] == "client_credentials"
+    assert runtime_token_task["ansible.builtin.uri"]["body"]["client_id"] == "{{ keycloak_serverclaw_runtime_client_id }}"
+    assert "keycloak_serverclaw_runtime_token.json.access_token" in str(assert_task["ansible.builtin.assert"]["that"])

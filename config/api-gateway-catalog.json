@@ -157,6 +157,17 @@
       "healthcheck_path": "/v1/sys/health"
     },
     {
+      "id": "openfga",
+      "name": "OpenFGA",
+      "upstream": "http://10.10.10.20:8098",
+      "gateway_prefix": "/v1/openfga",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/healthz"
+    },
+    {
       "id": "ops_portal",
       "name": "Ops Portal",
       "upstream": "http://10.10.10.20:8092",

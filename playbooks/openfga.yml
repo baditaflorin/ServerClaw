@@ -1,0 +1,142 @@
+---
+# Playbook: openfga.yml
+# Purpose: Converge the private OpenFGA runtime, its PostgreSQL backend, the Proxmox host proxy, and the repo-managed ServerClaw delegated authorization bootstrap.
+# Use case: Run during ADR 0262 rollout, recovery, or replay when OpenFGA and its Keycloak-backed ServerClaw authz seed must match repo truth.
+#
+# Inputs (required):
+#   - env (string, required): Target environment selector used to choose the postgres and docker-runtime guests.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH path to managed guests.
+#
+# Outputs:
+#   - OpenFGA runtime state, PostgreSQL access, Proxmox host proxying, and the initial ServerClaw delegated authz tuples are reconciled to the declared platform state.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - ADR 0262: OpenFGA and Keycloak for delegated ServerClaw capability authorization.
+#   - Requires: OpenBao, Keycloak, PostgreSQL, docker-runtime, and the Proxmox host Tailscale proxy lane to already exist.
+#
+# Related ADRs: 0056, 0254, 0262
+# Related Runbooks: docs/runbooks/configure-openfga.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-29
+
+- name: Converge private OpenFGA access on the Proxmox host
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: lv3.platform.proxmox_tailscale_proxy
+    - role: lv3.platform.proxmox_security
+
+- name: Prepare PostgreSQL for OpenFGA
+  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.postgres_vm
+    - role: lv3.platform.openfga_postgres
+
+- name: Converge OpenFGA and its Keycloak bootstrap on docker-runtime-lv3
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.openfga
+        playbook_execution_audit_target: openfga
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.keycloak_runtime
+    - role: lv3.platform.openfga_runtime
+
+  post_tasks:
+    - name: Run shared post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: openfga
+        playbook_execution_post_verify_audit_action: playbook.verify.openfga
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: openfga
+
+- name: Bootstrap the ServerClaw delegated authorization graph from the controller
+  hosts: localhost
+  become: false
+  gather_facts: false
+  vars:
+    openfga_bootstrap_config_file: "{{ playbook_dir }}/../config/serverclaw-authz/bootstrap.json"
+    openfga_bootstrap_script: "{{ playbook_dir }}/../scripts/serverclaw_authz.py"
+    openfga_bootstrap_report_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/serverclaw-authz-bootstrap-report.json
+    openfga_bootstrap_keycloak_host: >-
+      {{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}
+    openfga_bootstrap_url: >-
+      http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{
+        hostvars['proxmox_florin'].platform_port_assignments.openfga_host_proxy_port
+      }}
+    openfga_bootstrap_preshared_key_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/preshared-key.txt
+    openfga_bootstrap_keycloak_url: >-
+      http://{{ hostvars[openfga_bootstrap_keycloak_host].ansible_host }}:8091
+
+  tasks:
+    - name: Bootstrap the ServerClaw authorization store, model, and tuples
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ openfga_bootstrap_script }}"
+          - apply
+          - --config
+          - "{{ openfga_bootstrap_config_file }}"
+          - --openfga-url
+          - "{{ openfga_bootstrap_url }}"
+          - --openfga-preshared-key-file
+          - "{{ openfga_bootstrap_preshared_key_file }}"
+          - --keycloak-url
+          - "{{ openfga_bootstrap_keycloak_url }}"
+          - --write-report
+          - "{{ openfga_bootstrap_report_file }}"
+      register: openfga_bootstrap
+      retries: 5
+      delay: 3
+      until: >-
+        openfga_bootstrap.rc == 0 and
+        (openfga_bootstrap.stdout | length > 0) and
+        ((openfga_bootstrap.stdout | from_json).verification_passed)
+      changed_when: >-
+        openfga_bootstrap.rc == 0 and
+        (openfga_bootstrap.stdout | length > 0) and
+        ((openfga_bootstrap.stdout | from_json).changed)
+      failed_when: >-
+        openfga_bootstrap.rc != 0 or
+        (openfga_bootstrap.stdout | length == 0) or
+        (not (openfga_bootstrap.stdout | from_json).verification_passed)
+
+    - name: Assert the delegated authorization bootstrap passed verification
+      ansible.builtin.assert:
+        that:
+          - (openfga_bootstrap.stdout | from_json).verification_passed
+        fail_msg: "The ServerClaw delegated authorization bootstrap did not pass verification."

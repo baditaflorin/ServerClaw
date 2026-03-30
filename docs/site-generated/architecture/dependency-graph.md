@@ -17,8 +17,8 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, Mail Platform, Mailpit, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Excalidraw, Gitea, Gotenberg, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, Outline, Plane, Public Status Page, Semaphore, ServerClaw, Vaultwarden, Windmill, n8n |
+| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, Mail Platform, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
+| `2` | Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Excalidraw, Gitea, Gotenberg, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Plane, Public Status Page, Semaphore, ServerClaw, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway |
 | `4` | Ops Portal |
 
@@ -35,7 +35,6 @@ graph TD
     harbor["Harbor\nTier 1"]
     headscale["Headscale\nTier 1"]
     mail_platform["Mail Platform\nTier 1"]
-    mailpit["Mailpit\nTier 1"]
     realtime["Netdata Realtime Metrics\nTier 1"]
     nginx_edge["NGINX Edge\nTier 1"]
     nomad["Nomad\nTier 1"]
@@ -66,6 +65,7 @@ graph TD
     netbox["NetBox\nTier 2"]
     nextcloud["Nextcloud\nTier 2"]
     open_webui["Open WebUI\nTier 2"]
+    openfga["OpenFGA\nTier 2"]
     outline["Outline\nTier 2"]
     plane["Plane\nTier 2"]
     status_page["Public Status Page\nTier 2"]
@@ -111,7 +111,6 @@ graph TD
     headscale -->|soft| nginx_edge
     homepage -->|hard| keycloak
     homepage -->|hard| nginx_edge
-    keycloak -->|soft| mailpit
     keycloak -->|soft| nginx_edge
     keycloak -->|startup_only| openbao
     keycloak -->|hard| postgres
@@ -142,6 +141,9 @@ graph TD
     open_webui -->|hard| ollama
     open_webui -->|startup_only| openbao
     open_webui -->|soft| searxng
+    openfga -->|soft| keycloak
+    openfga -->|startup_only| openbao
+    openfga -->|hard| postgres
     ops_portal -->|hard| api_gateway
     ops_portal -->|hard| keycloak
     ops_portal -->|hard| nginx_edge

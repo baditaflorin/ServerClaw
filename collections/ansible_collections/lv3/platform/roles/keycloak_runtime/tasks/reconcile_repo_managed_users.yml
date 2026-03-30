@@ -2,6 +2,7 @@
   ansible.builtin.uri:
     url: "{{ keycloak_repo_user_admin_url }}/realms/master/protocol/openid-connect/token"
     method: POST
+    timeout: "{{ keycloak_admin_connection_timeout }}"
     body_format: form-urlencoded
     body:
       grant_type: password

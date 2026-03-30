@@ -57,6 +57,17 @@ COMPOSE_TEMPLATE_PATH = (
     / "templates"
     / "docker-compose.yml.j2"
 )
+SYNC_TREE_TASKS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "api_gateway_runtime"
+    / "tasks"
+    / "sync_tree.yml"
+)
 ENV_TEMPLATE_PATH = (
     REPO_ROOT
     / "collections"
@@ -67,6 +78,17 @@ ENV_TEMPLATE_PATH = (
     / "api_gateway_runtime"
     / "templates"
     / "api-gateway.env.j2"
+)
+VERIFY_TASKS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "api_gateway_runtime"
+    / "tasks"
+    / "verify.yml"
 )
 REQUIREMENTS_PATH = REPO_ROOT / "requirements" / "api-gateway.txt"
 MAKEFILE_PATH = REPO_ROOT / "Makefile"
@@ -119,6 +141,7 @@ def test_api_gateway_compose_mounts_config_into_app_root() -> None:
     assert "http://127.0.0.1:{{ api_gateway_internal_port }}/healthz" in compose_template
     assert "{{ api_gateway_config_dir }}:/config:ro" in compose_template
     assert "{{ api_gateway_config_dir }}:/app/config:ro" in compose_template
+    assert "{{ api_gateway_service_dir }}/receipts:/app/receipts:ro" in compose_template
     assert "LV3_GATEWAY_GRAPH_DSN={{ api_gateway_graph_dsn }}" in env_template
     assert "LV3_GATEWAY_WORLD_STATE_DSN={{ api_gateway_world_state_dsn }}" in env_template
     assert "LV3_DIFY_TOOLS_API_KEY={{ api_gateway_dify_tools_api_key }}" in env_template
@@ -174,8 +197,8 @@ def test_windmill_runtime_templates_export_graph_world_state_and_ledger_dsns() -
 def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
     tasks = TASKS_PATH.read_text(encoding="utf-8")
-    verify_tasks = VERIFY_TASKS_PATH.read_text(encoding="utf-8")
     sync_tree_tasks = SYNC_TREE_TASKS_PATH.read_text(encoding="utf-8")
+    verify_tasks = VERIFY_TASKS_PATH.read_text(encoding="utf-8")
     requirements = REQUIREMENTS_PATH.read_text(encoding="utf-8")
 
     assert "scripts/maintenance_window_tool.py" in defaults
@@ -212,7 +235,7 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "api_gateway_tree_remote_archive_path" in sync_tree_tasks
     assert "(api_gateway_tree_archive_local.path | basename)" in sync_tree_tasks
     assert 'dest: "{{ api_gateway_tree_remote_archive_path }}"' in sync_tree_tasks
-    assert 'tar -xzf "{{ api_gateway_tree_remote_archive_path }}"' in sync_tree_tasks
+    assert '-xzf "{{ api_gateway_tree_remote_archive_path }}"' in sync_tree_tasks
     assert "Remove stale API gateway build-context ignore files" in tasks
     assert "{{ api_gateway_service_dir }}/.dockerignore" in tasks
     assert "Ensure the API gateway receipts build-context tree exists" not in tasks
@@ -224,7 +247,10 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "Check whether the API gateway container sees the runtime config bundle" in tasks
     assert "database not open" in tasks
     assert "api_gateway_docker_builder_database_missing" in tasks
+    assert "failed to receive status" in tasks
+    assert "api_gateway_docker_builder_status_stream_unavailable" in tasks
     assert "api_gateway_docker_recoverable_start_failure" in tasks
+    assert "Record whether the API gateway startup failure is recoverable" in tasks
     assert "Restart Docker to restore the container engine before retrying the API gateway start" in tasks
     assert "Retry the API gateway stack start after Docker engine recovery" in tasks
     assert "/v1/platform/runtime-assurance" in verify_tasks
@@ -236,6 +262,11 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "Mark the Keycloak verification token request as unavailable" in verify_tasks
     assert "Record the API gateway verification bearer token from the legacy platform context" in verify_tasks
     assert "API gateway verification requires either the Keycloak client secret or the" in verify_tasks
+    assert "tar --no-same-owner --no-same-permissions" in sync_tree_tasks
+    assert "api_gateway_keycloak_retry_after_seconds: 30" in defaults
+    assert "Request a Keycloak bearer token for API gateway verification" in verify_tasks
+    assert "delay: \"{{ api_gateway_keycloak_retry_after_seconds }}\"" in verify_tasks
+    assert "until: api_gateway_verify_token_response.status == 200" in verify_tasks
     assert "{{ api_gateway_service_dir }}/.githooks" in tasks
     assert "COPY Makefile ./Makefile" in tasks
     assert "COPY .githooks ./.githooks" in tasks
@@ -253,7 +284,6 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "COPY molecule ./molecule" in tasks
     assert "COPY packer ./packer" in tasks
     assert "COPY playbooks ./playbooks" in tasks
-    assert "COPY receipts ./receipts" in tasks
     assert "COPY requirements ./requirements" in tasks
     assert "COPY roles ./roles" in tasks
     assert "COPY scripts ./scripts" in tasks

@@ -336,6 +336,16 @@
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
     },
+    "openfga": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "dashboard_file": "config/grafana/dashboards/openfga.json",
+      "alert_rule_file": "config/alertmanager/rules/openfga.yml",
+      "suppressed_checks": {}
+    },
     "ops_portal": {
       "service_type": "nginx-plugin",
       "requires_subdomain": true,

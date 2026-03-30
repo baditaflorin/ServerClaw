@@ -34,6 +34,8 @@ PORT_KEYS = (
     "mailpit_smtp_port",
     "mail_platform_gateway_port",
     "ntfy_port",
+    "openfga_http_port",
+    "openfga_host_proxy_port",
     "openbao_http_port",
     "openbao_proxy_port",
     "semaphore_server_port",
@@ -551,6 +553,11 @@ def build_service_urls(
         urls["controller"] = service_url("https", tailscale_ipv4, ports["openbao_proxy_port"])
         port_map["internal"] = ports["openbao_proxy_port"]
         port_map["controller"] = ports["openbao_proxy_port"]
+    elif service_id == "openfga":
+        urls["internal"] = service_url("http", private_ip, ports["openfga_http_port"])
+        urls["controller"] = service_url("http", tailscale_ipv4, ports["openfga_host_proxy_port"])
+        port_map["internal"] = ports["openfga_http_port"]
+        port_map["controller"] = ports["openfga_host_proxy_port"]
     elif service_id == "platform_context_api":
         urls["internal"] = service_url("http", private_ip, ports["platform_context_internal_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["platform_context_host_proxy_port"])
@@ -782,6 +789,7 @@ def build_platform_vars(
     api_gateway_service = service_topology["api_gateway"]
     headscale_service = service_topology["headscale"]
     openbao_service = service_topology["openbao"]
+    openfga_service = service_topology["openfga"]
     platform_context_service = service_topology["platform_context_api"]
     portainer_service = service_topology["portainer"]
     vaultwarden_service = service_topology["vaultwarden"]
@@ -879,6 +887,7 @@ def build_platform_vars(
             resolved_ports["netbox_host_proxy_port"],
             resolved_ports["step_ca_proxy_port"],
             resolved_ports["openbao_proxy_port"],
+            resolved_ports["openfga_host_proxy_port"],
             resolved_ports["semaphore_host_proxy_port"],
             resolved_ports["headscale_http_port"],
             resolved_ports["windmill_host_proxy_port"],
@@ -897,6 +906,9 @@ def build_platform_vars(
         "platform_postgres_host": postgres_service["public_hostname"],
         "openbao_postgres_host": postgres_primary_ip,
         "openbao_controller_url": openbao_service["urls"]["controller"],
+        "openfga_http_port": resolved_ports["openfga_http_port"],
+        "openfga_host_proxy_port": resolved_ports["openfga_host_proxy_port"],
+        "openfga_controller_url": openfga_service["urls"]["controller"],
         "semaphore_server_port": resolved_ports["semaphore_server_port"],
         "semaphore_host_proxy_port": resolved_ports["semaphore_host_proxy_port"],
         "semaphore_private_base_url": semaphore_service["urls"]["internal"],
@@ -954,6 +966,7 @@ def build_platform_vars(
             resolved_ports["netbox_host_proxy_port"],
             resolved_ports["step_ca_proxy_port"],
             resolved_ports["openbao_proxy_port"],
+            resolved_ports["openfga_host_proxy_port"],
             resolved_ports["semaphore_host_proxy_port"],
             resolved_ports["headscale_http_port"],
             resolved_ports["windmill_host_proxy_port"],

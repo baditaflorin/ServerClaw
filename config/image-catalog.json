@@ -698,6 +698,28 @@
         "converge-openbao"
       ]
     },
+    "openfga_runtime": {
+      "kind": "runtime",
+      "service_id": "openfga",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "lv3-openfga",
+      "registry_ref": "docker.io/openfga/openfga",
+      "tag": "v1.13.1",
+      "digest": "sha256:d099cc8ab01f5411434cbb8f005a4a89ea72222a5301277b7b079b8a6258b1c8",
+      "ref": "docker.io/openfga/openfga:v1.13.1@sha256:d099cc8ab01f5411434cbb8f005a4a89ea72222a5301277b7b079b8a6258b1c8",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-29",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-29-openfga-runtime.json",
+      "consumers": [
+        "collections/ansible_collections/lv3/platform/roles/openfga_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-openfga"
+      ]
+    },
     "outline_runtime": {
       "kind": "runtime",
       "service_id": "outline",
