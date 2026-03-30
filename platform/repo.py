@@ -10,10 +10,9 @@ from typing import Any, Final
 
 
 REPO_ROOT: Final[Path] = Path(__file__).resolve().parents[1]
+PACKAGED_SIBLING_DIRS: Final[set[str]] = {"config"}
 MAKEFILE_PATH: Final[Path] = REPO_ROOT / "Makefile"
 README_PATH: Final[Path] = REPO_ROOT / "README.md"
-WORKFLOW_CATALOG_PATH: Final[Path] = REPO_ROOT / "config" / "workflow-catalog.json"
-SECRET_MANIFEST_PATH: Final[Path] = REPO_ROOT / "config" / "controller-local-secrets.json"
 RECEIPTS_DIR: Final[Path] = REPO_ROOT / "receipts" / "live-applies"
 MAKE_TARGET_PATTERN: Final[re.Pattern[str]] = re.compile(r"^([A-Za-z0-9_-]+):")
 PYYAML_INSTALL_HINT: Final[str] = (
@@ -24,7 +23,24 @@ _MISSING = object()
 
 
 def repo_path(*parts: str) -> Path:
-    return REPO_ROOT.joinpath(*parts)
+    if not parts:
+        return REPO_ROOT
+
+    candidate = REPO_ROOT.joinpath(*parts)
+    if candidate.exists():
+        return candidate
+
+    head = parts[0]
+    if head in PACKAGED_SIBLING_DIRS:
+        sibling_root = REPO_ROOT.parent / head
+        if sibling_root.exists():
+            return sibling_root.joinpath(*parts[1:])
+
+    return candidate
+
+
+WORKFLOW_CATALOG_PATH: Final[Path] = repo_path("config", "workflow-catalog.json")
+SECRET_MANIFEST_PATH: Final[Path] = repo_path("config", "controller-local-secrets.json")
 
 
 def load_json(path: Path, default: Any = _MISSING) -> Any:

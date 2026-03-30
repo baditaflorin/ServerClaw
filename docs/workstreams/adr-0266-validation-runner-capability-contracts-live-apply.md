@@ -3,10 +3,10 @@
 - ADR: [ADR 0266](../adr/0266-validation-runner-capability-contracts-and-environment-attestation.md)
 - Title: Make validation runners declare capability contracts and emit per-run environment attestations
 - Status: ready_for_merge
-- Implemented In Repo Version: pending main release
-- Live Applied In Platform Version: branch-local verification on platform 0.130.54; exact-main replay pending
-- Implemented On: 2026-03-29
-- Live Applied On: 2026-03-29
+- Implemented In Repo Version: 0.177.88
+- Live Applied In Platform Version: 0.130.60
+- Implemented On: 2026-03-30
+- Live Applied On: 2026-03-30
 - Branch: `codex/ws-0266-main-integration-r3`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0266-main-integration-r2`
 - Owner: codex
@@ -100,13 +100,11 @@
 - `make pre-push-gate` passed on 2026-03-29 from commit `d9a17397` with runner `build-server-validation`; the recorded gate payload shows 15/15 checks passing in `receipts/live-applies/evidence/2026-03-29-adr-0266-pre-push-summary.txt`
 - `make gate-status` now reports both the remote-validate and pre-push payloads with the attested runner id; see `receipts/live-applies/evidence/2026-03-29-adr-0266-gate-status.txt`
 
-## Mainline Integration Notes
+## Mainline Verification
 
-- do not touch `VERSION`, `changelog.md`, `README.md`, or `versions/stack.yaml` on this workstream branch
-- once the branch proof is complete, merge to the latest `origin/main`, then update protected release truth and record the exact-main replay receipt
-- remaining exact-main work:
-  - merge this workstream to `main`
-  - cut the next patch release from `main`
-  - replay `make remote-validate` and `make pre-push-gate` on the exact merged main commit
-  - sync the Windmill worker checkout and run `config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox_florin_server`
-  - update ADR metadata, `versions/stack.yaml`, and `receipts/live-applies/2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply.json`
+- `git fetch origin main` now shows the latest mainline release cut at `f965aa3101fa2cd2260a8e6fda165f366365ed80` (`2026-03-30T01:45:22+03:00`, repository version `0.177.90`); ADR 0266 itself first became true from the earlier exact-main replay source `020c5f5ad`, whose code-carrying tree was `42fcf4c04` before the evidence-only branch-head refresh
+- `./scripts/validate_repo.sh generated-docs data-models policy workstream-surfaces agent-standards` passed on the synchronized mainline tree, the targeted pytest sweep returned `88 passed in 129.31s`, and `make syntax-check-openbao` passed before the final metadata closeout
+- `make check-build-server` passed for the exact-main snapshot upload, `make remote-validate` passed at `2026-03-29T22:07:09.413886+00:00`, `make pre-push-gate` passed at `2026-03-29T22:10:48.423912+00:00`, and `make gate-status` recorded both build-server proofs from the same mainline tree
+- the durable runtime replay for the supporting OpenBao changes completed in `receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-converge-openbao-rerun-2.txt` with `docker-runtime-lv3 : ok=140 changed=9 failed=0` and `postgres-lv3 : ok=43 changed=0 failed=0`
+- `/srv/proxmox_florin_server` on `docker-runtime-lv3` is a mirrored runtime checkout, not a git clone, so the final worker proof synced the exact-main `config/windmill/scripts/gate-status.py` wrapper directly, refreshed the mirrored generated artifacts, reran `python3 /srv/proxmox_florin_server/config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server`, and then reran `python3 /srv/proxmox_florin_server/config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox_florin_server`; the worker now reports `post_merge_run.executed_at=2026-03-29T22:24:37.498783+00:00` and a passing bounded local fallback in `receipts/live-applies/evidence/2026-03-29-adr-0266-mainline-post-merge-last-run.txt`
+- remaining merge-to-main work: none; `origin/main` already carries the validated ADR 0266 changeset and this closeout only updates shared metadata, receipts, and platform truth to match that verified state

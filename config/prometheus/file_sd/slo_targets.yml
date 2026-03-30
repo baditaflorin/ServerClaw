@@ -111,6 +111,13 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - https://chat.lv3.org
+  labels:
+    service_id: serverclaw
+    slo_id: serverclaw-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - https://wiki.lv3.org/_health
   labels:
     service_id: outline

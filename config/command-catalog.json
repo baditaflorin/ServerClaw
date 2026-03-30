@@ -2256,6 +2256,44 @@
         "timeout_seconds": 1500
       }
     },
+    "converge-serverclaw": {
+      "description": "Converge the public ServerClaw runtime, its dedicated Keycloak OIDC client, and the chat.lv3.org edge publication.",
+      "workflow_id": "converge-serverclaw",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-serverclaw passes",
+        "make validate passes before the apply",
+        "HETZNER_DNS_API_TOKEN is available before adding chat.lv3.org to the shared edge certificate"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record Keycloak client secret mirroring, runtime health, public edge reachability, and bootstrap admin sign-in verification."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the Keycloak client, runtime deployment, or edge publication fails verification.",
+          "Stop if chat.lv3.org serves traffic without the intended in-app authentication and repo-managed model-search settings."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good ServerClaw runtime, Keycloak client contract, and edge publication before retrying.",
+          "Do not compensate for a failed rollout with manual Coolify or nginx changes outside the repo."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
     "converge-searxng": {
       "description": "Converge the private SearXNG runtime, host-side tailnet proxy, DNS publication, and Open WebUI search integration state.",
       "workflow_id": "converge-searxng",

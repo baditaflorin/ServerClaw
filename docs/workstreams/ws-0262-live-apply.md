@@ -3,10 +3,10 @@
 - ADR: [ADR 0262](../adr/0262-openfga-and-keycloak-for-delegated-serverclaw-capability-authorization.md)
 - Title: OpenFGA and Keycloak delegated authorization live apply
 - Status: live_applied
-- Implemented In Repo Version: N/A
-- Live Applied In Platform Version: live workstream replay pending exact-main merge
+- Implemented In Repo Version: pending merge-to-main version bump (latest replay baseline 0.177.92)
+- Live Applied In Platform Version: 0.130.61
 - Implemented On: 2026-03-29
-- Live Applied On: 2026-03-29
+- Live Applied On: 2026-03-30
 - Branch: `codex/ws-0261-main-finish`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish`
 - Owner: codex
@@ -20,6 +20,9 @@ The original ADR-local replay completed on
 `codex/ws-0262-openfga-keycloak-live-apply`. The exact-main continuation now
 runs on `codex/ws-0261-main-finish` so ADR 0261 and ADR 0262 can be replayed,
 verified, and merged together from the latest realistic `origin/main`.
+The successful exact-main replay baseline was `origin/main` commit
+`bbb0f66b8ec995dfa3ecdd7bac9156ed664157cc` with `VERSION` `0.177.92` and
+`platform_version` `0.130.61`.
 
 - converge the private OpenFGA runtime, PostgreSQL backend, and Proxmox-host
   Tailscale controller proxy
@@ -134,6 +137,11 @@ verified, and merged together from the latest realistic `origin/main`.
   token request gained the same retry pattern already used by the Keycloak
   runtime role; the final replay completed with
   `docker-runtime-lv3 ok=242 changed=113 failed=0 skipped=35`
+- the exact-main continuation on `codex/ws-0261-main-finish` re-ran
+  `make converge-keycloak env=production`, `make converge-openfga
+  env=production`, and the direct delegated-authz verification flow from the
+  `0.177.92` replay baseline before the shared API gateway replays for ADR 0261
+  finished green
 
 ## Live Evidence
 
@@ -150,17 +158,26 @@ verified, and merged together from the latest realistic `origin/main`.
 - `https://api.lv3.org/v1/openfga/healthz` now returns the canonical
   `AUTH_INSUFFICIENT_ROLE` envelope for the `lv3-agent-hub` bearer token,
   which proves the gateway route is live and protected instead of missing
-- canonical branch-local live-apply receipt:
+- canonical branch-local live-apply receipts:
   `receipts/live-applies/2026-03-29-adr-0262-openfga-keycloak-live-apply.json`
+  and
+  `receipts/live-applies/2026-03-30-adr-0262-openfga-keycloak-exact-main-live-apply.json`
 - branch-local evidence files:
   `receipts/live-applies/evidence/2026-03-29-adr-0262-converge-openfga-live-apply.txt`
   and
   `receipts/live-applies/evidence/2026-03-29-adr-0262-converge-api-gateway-for-openfga.txt`
+  plus
+  `receipts/live-applies/evidence/2026-03-30-adr-0261-0262-merged-origin-main-converge-keycloak.txt`,
+  `receipts/live-applies/evidence/2026-03-30-adr-0261-0262-merged-origin-main-converge-openfga.txt`,
+  and
+  `receipts/live-applies/evidence/2026-03-30-adr-0262-merged-origin-main-openfga-keycloak-verify.txt`
 
 ## Remaining For Mainline Integration
 
-- rebase this workstream onto the latest `origin/main` tip and rerun the
-  focused validation and live-apply path from that exact synchronized tree
+- `origin/main` advanced during closeout to commit
+  `46df65e7f2227ca79a38035d2d24f53b6c02b5f8` with `VERSION` `0.177.93` and
+  `platform_version` `0.130.62`; the final merge path must reconcile this newer
+  upstream before landing on `main`
 - update the protected integration files only on the exact-main branch that
   lands on `main`: `VERSION`, `changelog.md`, `README.md`, and
   `versions/stack.yaml`

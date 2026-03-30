@@ -58,7 +58,10 @@ def request_json(
     base_url = base_url.rstrip("/")
     target = f"{base_url}{path}"
     body = None if payload is None else json.dumps(payload).encode("utf-8")
-    request = urllib.request.Request(target, method=method.upper(), data=body, headers=headers or {})
+    request_headers = dict(headers or {})
+    if body is not None:
+        request_headers.setdefault("Content-Type", "application/json")
+    request = urllib.request.Request(target, method=method.upper(), data=body, headers=request_headers)
     try:
         with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
             return json.loads(response.read().decode("utf-8"))

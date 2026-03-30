@@ -121,13 +121,40 @@ def test_run_decodes_non_utf8_subprocess_output(monkeypatch) -> None:
     assert "stderr byte" in message
 
 
-def test_ensure_policy_toolchain_replaces_stale_cross_platform_binaries(
+def test_managed_tool_path_is_platform_scoped() -> None:
+    module = load_module("policy_toolchain_module_paths", "platform/policy/toolchain.py")
+
+    install_root = REPO_ROOT / ".local" / "policy-toolchain"
+    path = module._managed_tool_path(
+        install_root,
+        "opa",
+        module.OPA_VERSION,
+        system="linux",
+        machine="amd64",
+    )
+
+    assert path == install_root / "opa" / module.OPA_VERSION / "linux-amd64" / "opa"
+
+
+def test_ensure_policy_toolchain_replaces_unusable_platform_binaries(
     tmp_path: Path, monkeypatch
 ) -> None:
     toolchain_module = load_module("policy_toolchain_module_refresh", "platform/policy/toolchain.py")
     install_root = tmp_path / "toolchain"
-    stale_opa = install_root / "opa" / toolchain_module.OPA_VERSION / "opa"
-    stale_conftest = install_root / "conftest" / toolchain_module.CONFTEST_VERSION / "conftest"
+    stale_opa = toolchain_module._managed_tool_path(
+        install_root,
+        "opa",
+        toolchain_module.OPA_VERSION,
+        system="darwin",
+        machine="arm64",
+    )
+    stale_conftest = toolchain_module._managed_tool_path(
+        install_root,
+        "conftest",
+        toolchain_module.CONFTEST_VERSION,
+        system="darwin",
+        machine="arm64",
+    )
 
     stale_opa.parent.mkdir(parents=True, exist_ok=True)
     stale_conftest.parent.mkdir(parents=True, exist_ok=True)

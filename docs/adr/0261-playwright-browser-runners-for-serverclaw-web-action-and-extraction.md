@@ -1,9 +1,10 @@
 # ADR 0261: Playwright Browser Runners For ServerClaw Web Action And Extraction
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Live applied on exact-main workstream branch pending merge-to-main
+- Implemented In Repo Version: pending merge-to-main version bump (latest replay baseline 0.177.92)
+- Implemented In Platform Version: 0.130.61
+- Implemented On: 2026-03-30
 - Date: 2026-03-28
 
 ## Context

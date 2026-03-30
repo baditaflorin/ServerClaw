@@ -1,12 +1,12 @@
-# Release 0.177.90
+# Release 0.177.91
 
-- Date: 2026-03-29
+- Date: 2026-03-30
 
 ## Summary
-- implements ADR 0263 by making the governed ServerClaw memory substrate live on the private platform-context runtime with PostgreSQL canonical memory records, Qdrant semantic recall, local keyword search, CLI memory operations, and exact-main replay evidence on `docker-runtime-lv3`
+- implements ADR 0254 by carrying the dedicated ServerClaw chat surface on chat.lv3.org onto current mainline truth, preserving the governed 8096 edge lane to coolify-lv3, and recording the first clean exact-main receipt from merged main
 
 ## Platform Impact
-- advances the verified platform baseline to 0.130.60 by promoting the ADR 0263 exact-main live-apply receipt for the private ServerClaw memory substrate on docker-runtime-lv3, verified through the private :8010 health and CLI memory smoke path
+- no platform version bump was required; platform version 0.130.60 remains current after the merged-main replay and end-to-end live verification on 2026-03-30
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

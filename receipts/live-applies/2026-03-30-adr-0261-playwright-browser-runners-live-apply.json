@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0261-playwright-browser-runners-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_by": "codex",
+  "source_commit": "a2bd68fad7d9b1ac6c0217b92fd8e3e4b80464b9",
+  "repo_version_context": "0.177.92",
+  "platform_version_context": "0.130.61",
+  "workflow_id": "adr-0261-playwright-browser-runners-live-apply",
+  "adr": "0261",
+  "summary": "Live-applied ADR 0261 from the latest realistic origin/main baseline `bbb0f66b8ec995dfa3ecdd7bac9156ed664157cc` (VERSION 0.177.92, platform_version 0.130.61) on `codex/ws-0261-main-finish`, converged the private browser-runner runtime plus governed API gateway publication, fixed the packaged API gateway config lookup and governed Dify JSON content-type regression, and verified the private, operator, and Dify browser-runner paths end to end with artifacts.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "browser-runner-private",
+      "address": "http://10.10.10.20:8096"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "browser-runner-gateway",
+      "address": "https://api.lv3.org/v1/browser-runner"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "dify-browser-run-session",
+      "address": "https://api.lv3.org/v1/dify-tools/browser-run-session"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused browser-runner and gateway regressions",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml python -m pytest tests/test_browser_runner_client.py tests/test_packaged_repo_paths.py tests/test_agent_tool_registry.py -q` passed with `18 passed`; `uv run --with pytest --with pyyaml --with fastapi --with httpx python -m pytest tests/test_browser_runner_service.py -q` passed with `3 passed`; and `uv run --with pytest --with pyyaml --with httpx --with cryptography --with fastapi python -m pytest tests/test_api_gateway.py -k dify_tools_route -q` passed with `2 passed`."
+    },
+    {
+      "check": "Governed tool registry and packaged repo-path validation",
+      "result": "pass",
+      "observed": "`python3 scripts/agent_tool_registry.py --validate` completed successfully after the packaged sibling `config/` fallback landed in `platform/repo.py`, `platform/ledger/_common.py`, and `scripts/workflow_catalog.py`."
+    },
+    {
+      "check": "Browser-runner converge replay",
+      "result": "pass",
+      "observed": "`make converge-browser-runner env=production` completed successfully from the exact-main replay baseline and republished the private browser-runner runtime plus the governed `/v1/browser-runner/*` route."
+    },
+    {
+      "check": "API gateway replay with Dify browser-runner fix",
+      "result": "pass",
+      "observed": "After the packaged config lookup fix and automatic JSON `Content-Type` header fix in `scripts/browser_runner_client.py`, `make converge-api-gateway env=production` completed successfully with final recap `docker-runtime-lv3 ok=278 changed=116 failed=0 skipped=38`."
+    },
+    {
+      "check": "Private, operator, and Dify browser-runner proofs",
+      "result": "pass",
+      "observed": "The private browser-runner `/healthz` and smoke flow succeeded through a local tunnel, the operator route at `https://api.lv3.org/v1/browser-runner` returned `{\"status\":\"ok\",\"artifact_root\":\"/data/artifacts\"}` and a successful smoke session for the platform-context bearer token, and the governed Dify route `https://api.lv3.org/v1/dify-tools/browser-run-session` returned HTTP 200 with heading `LV3 Browser Runner Smoke`, result `BROWSER RUNNER`, plus screenshot and PDF artifacts."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0261-playwright-browser-runners-for-serverclaw-web-action-and-extraction.md",
+    "docs/workstreams/ws-0261-live-apply.md",
+    "docs/runbooks/configure-browser-runner.md",
+    "docs/runbooks/agent-tool-registry.md",
+    "platform/repo.py",
+    "platform/ledger/_common.py",
+    "scripts/workflow_catalog.py",
+    "scripts/browser_runner_client.py",
+    "tests/test_browser_runner_client.py",
+    "tests/test_packaged_repo_paths.py",
+    "receipts/live-applies/evidence/2026-03-30-adr-0261-0262-merged-origin-main-converge-browser-runner.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0261-merged-origin-main-browser-runner-private-verify.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0261-merged-origin-main-browser-runner-gateway-verify.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0261-merged-origin-main-converge-api-gateway-dify-header-fix.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0261-merged-origin-main-browser-runner-dify-verify.txt",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "The exact-main replay baseline at verification time was origin/main commit `bbb0f66b8ec995dfa3ecdd7bac9156ed664157cc` with `VERSION` `0.177.92` and `platform_version` `0.130.61`.",
+    "The operator route requires a `platform-operator` bearer token; the legacy platform-context token remained the correct proof identity because `lv3-agent-hub` is `platform-read` only.",
+    "origin/main advanced during closeout to commit `46df65e7f2227ca79a38035d2d24f53b6c02b5f8` with `VERSION` `0.177.93` and `platform_version` `0.130.62`, so the final merge path must reconcile that newer upstream before landing on main.",
+    "Protected integration files (`VERSION`, `changelog.md`, `README.md`, and `versions/stack.yaml`) intentionally remain pending until the final mainline merge and replay."
+  ]
+}

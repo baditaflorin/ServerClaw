@@ -69,6 +69,7 @@ def test_run_session_posts_json_payload() -> None:
     assert captured["method"] == "POST"
     assert captured["body"] == {"url": "https://example.com"}
     assert captured["timeout"] == 33
+    assert ("Content-type", "application/json") in captured["headers"].items()
     assert ("Authorization", "Bearer test") in captured["headers"].items()
 
 
@@ -87,6 +88,25 @@ def test_run_session_accepts_stringified_json_payload() -> None:
 
     assert payload == {"status": "ok", "run_id": "abc123"}
     assert captured["body"] == {"url": "https://example.com", "timeout_seconds": 12}
+
+
+def test_run_session_adds_json_content_type_without_explicit_headers() -> None:
+    captured: dict[str, object] = {}
+
+    def fake_urlopen(request, timeout=0):  # noqa: ANN001, ARG001
+        captured["headers"] = dict(request.header_items())
+        captured["body"] = json.loads(request.data.decode("utf-8"))
+        return FakeResponse({"status": "ok", "run_id": "abc123"})
+
+    with patch("urllib.request.urlopen", side_effect=fake_urlopen):
+        payload = browser_runner_client.run_session(
+            "http://browser-runner.test",
+            {"url": "https://example.com"},
+        )
+
+    assert payload == {"status": "ok", "run_id": "abc123"}
+    assert captured["body"] == {"url": "https://example.com"}
+    assert ("Content-type", "application/json") in captured["headers"].items()
 
 
 def test_get_health_requests_healthz_endpoint() -> None:

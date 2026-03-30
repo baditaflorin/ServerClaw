@@ -1,3 +1,9 @@
+# Purpose: Declare the supported Open WebUI runtime role inputs for validation and editor tooling.
+# Use case: Loaded by Ansible role argument validation before the Open WebUI runtime role executes.
+# Inputs: Required Open WebUI runtime paths, feature flags, and secret variables.
+# Outputs: Constrains the accepted role inputs and documents them for operators.
+# Idempotency: Fully idempotent because this file only declares argument metadata.
+# Dependencies: ADR 0165 and the Open WebUI runtime role defaults/tasks.
 ---
 argument_specs:
   main:
@@ -103,6 +109,11 @@ argument_specs:
         required: true
         description:
           - Guest-local file that stores the application secret key.
+      open_webui_enable_openbao_agent:
+        type: bool
+        required: false
+        description:
+          - Whether the managed OpenBao Agent sidecar is enabled for runtime secret refresh.
       open_webui_enable_oidc:
         type: bool
         required: false
@@ -123,3 +134,138 @@ argument_specs:
         required: false
         description:
           - Base URL used by Open WebUI for the local Ollama connector.
+      open_webui_webui_url:
+        type: str
+        required: false
+        description:
+          - Browser-facing base URL used for the managed Open WebUI surface.
+      open_webui_webui_name:
+        type: str
+        required: false
+        description:
+          - Display name shown by the managed Open WebUI deployment.
+      open_webui_enable_login_form:
+        type: bool
+        required: false
+        description:
+          - Whether the login form remains available in addition to any configured OAuth providers.
+      open_webui_enable_password_auth:
+        type: bool
+        required: false
+        description:
+          - Whether password authentication remains available for the bootstrap admin.
+      open_webui_default_user_role:
+        type: str
+        required: false
+        description:
+          - Default role assigned to newly created users.
+      open_webui_oidc_client_id:
+        type: str
+        required: false
+        description:
+          - OIDC client id used when browser SSO is enabled.
+      open_webui_oidc_provider_url:
+        type: str
+        required: false
+        description:
+          - OpenID discovery document URL used when browser SSO is enabled.
+      open_webui_oidc_provider_name:
+        type: str
+        required: false
+        description:
+          - Display name shown for the configured OIDC provider.
+      open_webui_oidc_scopes:
+        type: str
+        required: false
+        description:
+          - Requested OIDC scopes.
+      open_webui_oidc_redirect_uri:
+        type: str
+        required: false
+        description:
+          - Redirect URI registered for the managed OIDC client.
+      open_webui_enable_web_search:
+        type: bool
+        required: false
+        description:
+          - Whether the web-search capability is enabled.
+      open_webui_web_search_engine:
+        type: str
+        required: false
+        description:
+          - Search backend name rendered into the runtime env.
+      open_webui_searxng_query_url:
+        type: str
+        required: false
+        description:
+          - Query URL used when SearXNG-backed web search is enabled.
+      open_webui_web_search_result_count:
+        type: int
+        required: false
+        description:
+          - Maximum number of search results returned per query.
+      open_webui_web_search_concurrent_requests:
+        type: int
+        required: false
+        description:
+          - Maximum number of concurrent search requests issued per query.
+      open_webui_bypass_web_search_web_loader:
+        type: bool
+        required: false
+        description:
+          - Whether the built-in web loader is bypassed when search is enabled.
+      open_webui_default_models:
+        type: str
+        required: false
+        description:
+          - Default model list rendered into the runtime env.
+      open_webui_default_pinned_models:
+        type: str
+        required: false
+        description:
+          - Default pinned model list rendered into the runtime env.
+      open_webui_user_permissions_workspace_knowledge_access:
+        type: bool
+        required: false
+        description:
+          - Whether workspace knowledge access is enabled for routine users.
+      open_webui_user_permissions_workspace_prompts_access:
+        type: bool
+        required: false
+        description:
+          - Whether workspace prompt access is enabled for routine users.
+      open_webui_user_permissions_workspace_tools_access:
+        type: bool
+        required: false
+        description:
+          - Whether workspace tool access is enabled for routine users.
+      open_webui_user_permissions_workspace_skills_access:
+        type: bool
+        required: false
+        description:
+          - Whether workspace skill access is enabled for routine users.
+      open_webui_cors_allow_origin:
+        type: str
+        required: false
+        description:
+          - Semicolon-separated CORS origin list for reverse-proxied browser access.
+      open_webui_session_cookie_same_site:
+        type: str
+        required: false
+        description:
+          - SameSite setting applied to session cookies.
+      open_webui_auth_cookie_same_site:
+        type: str
+        required: false
+        description:
+          - SameSite setting applied to auth cookies.
+      open_webui_session_cookie_secure:
+        type: bool
+        required: false
+        description:
+          - Whether session cookies are marked Secure.
+      open_webui_auth_cookie_secure:
+        type: bool
+        required: false
+        description:
+          - Whether auth cookies are marked Secure.

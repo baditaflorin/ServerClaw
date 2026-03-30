@@ -1,3 +1,9 @@
+# Purpose: Converge the Open WebUI runtime, mirrored secrets, bootstrap admin state, and runtime verification.
+# Use case: Run during Open WebUI deploys, updates, and exact-main live replays.
+# Inputs: Runtime paths, feature flags, OpenBao secret material, and optional OIDC/search settings.
+# Outputs: Brings the Open WebUI container stack and admin bootstrap state to the repo-managed target state.
+# Idempotency: Partially idempotent because bootstrap state and runtime restarts may intentionally refresh live state.
+# Dependencies: ADR 0165, ADR 0060, ADR 0145, and ADR 0148.
 ---
 - name: Validate Open WebUI runtime inputs
   ansible.builtin.assert:
@@ -69,6 +75,12 @@
       mode: "0755"
     - path: "{{ open_webui_secret_dir }}"
       mode: "0700"
+    - path: "{{ open_webui_env_file | dirname }}"
+      mode: "0700"
+    - path: "{{ open_webui_openbao_agent_dir }}"
+      mode: "0700"
+      enabled: "{{ open_webui_enable_openbao_agent | bool }}"
+  when: item.enabled | default(true) | bool
 
 - name: Generate the Open WebUI admin password
   ansible.builtin.shell: |
@@ -186,6 +198,7 @@
     common_openbao_compose_env_image: "{{ open_webui_openbao_agent_image }}"
     common_openbao_compose_env_legacy_env_files:
       - "{{ open_webui_legacy_env_file }}"
+  when: open_webui_enable_openbao_agent | bool
   no_log: true
 
 - name: Render the Open WebUI environment file

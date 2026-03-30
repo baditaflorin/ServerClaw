@@ -914,6 +914,45 @@
       }
     },
     {
+      "id": "serverclaw",
+      "name": "ServerClaw",
+      "description": "Public chat-first ServerClaw assistant surface backed by repo-governed local model and search integrations.",
+      "category": "access",
+      "lifecycle_status": "active",
+      "vm": "coolify-lv3",
+      "vmid": 170,
+      "internal_url": "http://10.10.10.70:8096",
+      "public_url": "https://chat.lv3.org",
+      "subdomain": "chat.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "ServerClaw",
+      "health_probe_id": "serverclaw",
+      "image_catalog_ids": [
+        "open_webui_runtime"
+      ],
+      "secret_catalog_ids": [
+        "serverclaw_admin_password",
+        "serverclaw_secret_key",
+        "serverclaw_oidc_client_secret"
+      ],
+      "adr": "0254",
+      "runbook": "docs/runbooks/configure-serverclaw.md",
+      "tags": [
+        "agents",
+        "chat",
+        "assistant",
+        "public"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://chat.lv3.org",
+          "subdomain": "chat.lv3.org",
+          "notes": "ServerClaw uses in-app Keycloak OIDC for routine browser login while retaining a repo-managed bootstrap admin as break-glass access."
+        }
+      }
+    },
+    {
       "id": "plane",
       "name": "Plane",
       "description": "Repo-managed Plane workspace for platform kanban tracking and ADR synchronization.",

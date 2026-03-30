@@ -1,0 +1,36 @@
+Commands:
+- ansible -i inventory/hosts.yml coolify-lv3 -b -m shell -a 'grep -E "^(WEBUI_URL|CORS_ALLOW_ORIGIN|ENABLE_OAUTH_SIGNUP|OAUTH_CLIENT_ID|OPENID_PROVIDER_URL|OLLAMA_BASE_URL|SEARXNG_QUERY_URL)=" /run/lv3-secrets/serverclaw/runtime.env'
+- ansible -i inventory/hosts.yml coolify-lv3 -b -m shell -a 'nft list ruleset | grep -n "10.10.10.10.*dport" || true; nft list ruleset | grep -n "8096" || true'
+- ansible -i inventory/hosts.yml coolify-lv3 -b -m shell -a 'docker compose --file /opt/serverclaw/docker-compose.yml ps'
+- ansible -i inventory/hosts.yml coolify-lv3 -b -m shell -a 'curl -sv --max-time 5 http://127.0.0.1:8096/ -o /dev/null 2>&1 | egrep "Connected to|< HTTP|< server"'
+- ansible -i inventory/hosts.yml coolify-lv3 -b -m shell -a 'pw=$(cat /etc/lv3/serverclaw/admin-password.txt); curl -s -X POST http://127.0.0.1:8096/api/v1/auths/signin -H "Content-Type: application/json" -d "{\"email\":\"ops@lv3.org\",\"password\":\"$pw\"}" | python3 -c "import json,sys; data=json.load(sys.stdin); print({k:data.get(k) for k in (\"id\",\"name\",\"email\",\"role\")}); print(\"token_present=\", bool(data.get(\"token\")))"'
+
+Observed on 2026-03-29:
+
+WEBUI_URL=https://chat.lv3.org
+CORS_ALLOW_ORIGIN=https://chat.lv3.org
+OLLAMA_BASE_URL=http://10.10.10.20:11434
+SEARXNG_QUERY_URL=http://10.10.10.20:8881/search?q=<query>&format=json
+ENABLE_OAUTH_SIGNUP=True
+OAUTH_CLIENT_ID=serverclaw
+OPENID_PROVIDER_URL=https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
+
+10:		ip saddr 10.10.10.10 tcp dport { 80, 443, 8000 } accept
+22:		ip saddr 10.10.10.10 tcp dport { 80, 443, 8000 } accept
+35:		iifname != "br-174a6b30ac58" tcp dport 8096 counter packets 5 bytes 300 dnat to 172.20.0.2:8080
+
+NAME         IMAGE                                                                                                          COMMAND           SERVICE      CREATED       STATUS                 PORTS
+serverclaw   ghcr.io/open-webui/open-webui:v0.8.9@sha256:c5058cf3491ee7eade6ae050ffb78701d3195fe0600215aedd92bb4ec588bfb1   "bash start.sh"   open-webui   7 hours ago   Up 7 hours (healthy)   0.0.0.0:8096->8080/tcp, [::]:8096->8080/tcp
+
+* Connected to 127.0.0.1 (127.0.0.1) port 8096
+< HTTP/1.1 200 OK
+< server: uvicorn
+
+{'id': 'b2569c91-2d0a-43d7-ba5c-cc56b3c9a98d', 'name': 'Florin Badita', 'email': 'ops@lv3.org', 'role': 'admin'}
+token_present= True
+
+Interpretation:
+- the dedicated ServerClaw runtime on coolify-lv3 is healthy
+- guest-local auth and OIDC wiring are healthy
+- the coolify guest firewall no longer allows tcp/8096 from nginx-lv3, so the
+  edge proxy path is currently broken even though the app itself is healthy

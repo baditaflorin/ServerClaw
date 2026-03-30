@@ -1,4 +1,29 @@
+# Purpose: Converge the public NGINX edge publication runtime, site catalog, and certificate wiring.
+# Use case: Run during edge publication deploys, updates, and exact-main validation replays.
+# Inputs: Public edge topology, certificate inputs, site definitions, and shared publication paths.
+# Outputs: Renders edge configuration, certificates, and related publication state on the edge host.
+# Idempotency: Partially idempotent because certificate issuance and runtime restarts may refresh live state.
+# Dependencies: ADR 0165 and the public-edge publication catalogs.
 ---
+- name: Resolve public edge site and certificate catalogs
+  ansible.builtin.set_fact:
+    public_edge_certificate_domains: >-
+      {{
+        (
+          (public_edge_service_topology | service_topology_edge_certificate_domains)
+          + (public_edge_extra_sites | map(attribute='hostname') | list)
+          + public_edge_additional_certificate_domains
+        ) | unique
+      }}
+    public_edge_sites: >-
+      {{
+        (
+          public_edge_extra_sites
+          + (public_edge_service_topology | service_topology_edge_sites)
+        )
+        | unique(attribute='hostname')
+      }}
+
 - name: Validate public edge publication inputs
   ansible.builtin.assert:
     that:

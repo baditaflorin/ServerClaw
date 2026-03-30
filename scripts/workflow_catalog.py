@@ -13,6 +13,7 @@ from controller_automation_toolkit import (
     load_json,
     load_yaml,
     parse_make_targets,
+    repo_path,
 )
 from correction_loops import (
     CORRECTION_LOOP_CATALOG_PATH,
@@ -39,7 +40,7 @@ ALLOWED_EXECUTION_CLASSES = {"mutation", "diagnostic"}
 ALLOWED_ESCALATION_ACTIONS = {"notify_and_abort", "abort_silently", "escalate_to_operator"}
 ALLOWED_RESOURCE_CLAIM_ACCESS = {"read", "write", "exclusive"}
 WORKFLOW_SECRET_FIELDS = ("required_secret_ids", "generated_secret_ids", "blocked_secret_ids")
-EXECUTION_LANES_PATH = REPO_ROOT / "config" / "execution-lanes.yaml"
+EXECUTION_LANES_PATH = repo_path("config", "execution-lanes.yaml")
 
 
 def load_json(path: Path) -> dict:
@@ -55,7 +56,7 @@ def load_workflow_catalog() -> dict:
 
 
 def load_workflow_defaults() -> dict:
-    return load_yaml(REPO_ROOT / "config" / "workflow-defaults.yaml")
+    return load_yaml(repo_path("config", "workflow-defaults.yaml"))
 
 
 def load_execution_lane_ids() -> set[str]:

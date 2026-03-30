@@ -3480,6 +3480,59 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-serverclaw": {
+      "description": "Deploy the first public ServerClaw surface on coolify-lv3, reconcile its dedicated Keycloak client, and publish chat.lv3.org through the shared edge.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-serverclaw",
+        "command": "make converge-serverclaw"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "serverclaw_admin_password",
+          "serverclaw_secret_key",
+          "serverclaw_oidc_client_secret"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-serverclaw"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-serverclaw.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/serverclaw.yml",
+        "collections/ansible_collections/lv3/platform/roles/open_webui_runtime",
+        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime",
+        "inventory/group_vars/all.yml",
+        "inventory/group_vars/platform.yml",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "A public ServerClaw runtime deployed on coolify-lv3 with a dedicated Keycloak client, repo-managed bootstrap auth, and chat.lv3.org published through the shared edge."
+      ],
+      "verification_commands": [
+        "make syntax-check-serverclaw",
+        "curl -I https://chat.lv3.org/",
+        "ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml coolify-lv3 -m shell -a \"curl -s -X POST http://127.0.0.1:8096/api/v1/auths/signin -H 'Content-Type: application/json' -d '{\\\"email\\\":\\\"ops@lv3.org\\\",\\\"password\\\":\\\"'\\\"$(sudo cat /etc/lv3/serverclaw/admin-password.txt)\\\"'\\\"}'\" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-searxng": {
       "description": "Deploy the private SearXNG runtime on docker-runtime-lv3, publish its tailnet-only hostname through the Proxmox host proxy, and re-render Open WebUI to use the local search endpoint.",
       "lifecycle_status": "active",

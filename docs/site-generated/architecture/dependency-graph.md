@@ -4,10 +4,6 @@ portal_display: full
 tags:
   - architecture
   - dependency-graph
-pagefind_section: architecture
-pagefind_audience:
-  - contributors
-  - operators
 ---
 
 !!! note "Sensitivity: INTERNAL"
@@ -22,7 +18,7 @@ Generated from `config/dependency-graph.json`.
 | Tier | Services |
 | --- | --- |
 | `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, Mail Platform, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Browser Runner, Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Excalidraw, Gitea, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Open WebUI, OpenFGA, Outline, Plane, Public Status Page, Semaphore, Vaultwarden, Windmill, n8n |
+| `2` | Browser Runner, Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Excalidraw, Gitea, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Open WebUI, OpenFGA, Outline, Plane, Public Status Page, Semaphore, ServerClaw, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway |
 | `4` | Ops Portal |
 
@@ -73,6 +69,7 @@ graph TD
     plane["Plane\nTier 2"]
     status_page["Public Status Page\nTier 2"]
     semaphore["Semaphore\nTier 2"]
+    serverclaw["ServerClaw\nTier 2"]
     vaultwarden["Vaultwarden\nTier 2"]
     windmill["Windmill\nTier 2"]
     homepage["Homepage\nTier 3"]
@@ -160,6 +157,11 @@ graph TD
     realtime -->|soft| nginx_edge
     semaphore -->|startup_only| openbao
     semaphore -->|hard| postgres
+    serverclaw -->|soft| keycloak
+    serverclaw -->|soft| nginx_edge
+    serverclaw -->|hard| ollama
+    serverclaw -->|startup_only| openbao
+    serverclaw -->|soft| searxng
     status_page -->|hard| nginx_edge
     status_page -->|hard| uptime_kuma
     vaultwarden -->|hard| postgres

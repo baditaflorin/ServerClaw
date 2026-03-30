@@ -2,7 +2,11 @@
 
 - ADR: [ADR 0261](../adr/0261-playwright-browser-runners-for-serverclaw-web-action-and-extraction.md)
 - Title: Live apply private Playwright browser runners for governed ServerClaw web action and extraction
-- Status: in_progress
+- Status: live_applied
+- Implemented In Repo Version: pending merge-to-main version bump (latest replay baseline 0.177.92)
+- Live Applied In Platform Version: 0.130.61
+- Implemented On: 2026-03-30
+- Live Applied On: 2026-03-30
 - Branch: `codex/ws-0261-main-finish`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish`
 - Owner: codex
@@ -15,6 +19,9 @@
 The original ADR-local implementation branch was rebased forward into
 `codex/ws-0261-main-finish` so the exact-main live replay can continue from the
 latest realistic `origin/main` while preserving the ADR 0261 workstream state.
+The successful replay baseline was `origin/main` commit
+`bbb0f66b8ec995dfa3ecdd7bac9156ed664157cc` with `VERSION` `0.177.92` and
+`platform_version` `0.130.61`.
 
 - add a private `browser_runner` service on `docker-runtime-lv3` for bounded Playwright session execution
 - expose the runtime through the governed operator API gateway route `/v1/browser-runner/*`
@@ -70,3 +77,37 @@ latest realistic `origin/main` while preserving the ADR 0261 workstream state.
 ## Merge-To-Main Notes
 
 - protected integration files (`VERSION`, `changelog.md`, `README.md`, `versions/stack.yaml`, and release-note surfaces) intentionally remain untouched until the exact-main integration replay
+
+## Live Apply Outcome
+
+- `make converge-browser-runner env=production` completed successfully from the
+  exact-main replay baseline and re-published the private browser-runner
+  runtime plus the governed operator route
+- the follow-up `make converge-api-gateway env=production` replays landed two
+  branch-local fixes required by the packaged runtime: sibling `config/`
+  resolution inside `/opt/api-gateway/service`, and automatic JSON
+  `Content-Type` headers for governed Dify browser-runner calls
+- the final browser-runner Dify replay completed with HTTP 200 and returned the
+  expected heading, result text, screenshot artifact, and PDF artifact
+
+## Live Evidence
+
+- `receipts/live-applies/evidence/2026-03-30-adr-0261-0262-merged-origin-main-converge-browser-runner.txt`
+- `receipts/live-applies/evidence/2026-03-30-adr-0261-merged-origin-main-browser-runner-private-verify.txt`
+- `receipts/live-applies/evidence/2026-03-30-adr-0261-merged-origin-main-browser-runner-gateway-verify.txt`
+- `receipts/live-applies/evidence/2026-03-30-adr-0261-merged-origin-main-converge-api-gateway-dify-header-fix.txt`
+- `receipts/live-applies/evidence/2026-03-30-adr-0261-merged-origin-main-browser-runner-dify-verify.txt`
+- branch-local canonical receipt:
+  `receipts/live-applies/2026-03-30-adr-0261-playwright-browser-runners-live-apply.json`
+
+## Remaining For Mainline Integration
+
+- `origin/main` advanced during closeout to commit
+  `46df65e7f2227ca79a38035d2d24f53b6c02b5f8` with `VERSION` `0.177.93` and
+  `platform_version` `0.130.62`; the final merge path must reconcile this newer
+  upstream before landing on `main`
+- update the protected integration files only on the exact branch that lands on
+  `main`: `VERSION`, `changelog.md`, `README.md`, and `versions/stack.yaml`
+- replace the branch-local replay baseline metadata with the final merged repo
+  version and canonical mainline live-apply receipt after the merge-to-main
+  replay completes

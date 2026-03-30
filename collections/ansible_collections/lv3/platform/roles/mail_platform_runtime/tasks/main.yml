@@ -540,6 +540,41 @@
     state: restarted
   when: mail_platform_docker_nat_chain.rc != 0
 
+- name: Recheck the Docker nat chain before mail-platform startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: mail_platform_docker_nat_chain_recheck
+  changed_when: false
+  retries: 10
+  delay: 2
+  until: mail_platform_docker_nat_chain_recheck.rc == 0
+  when: mail_platform_docker_nat_chain.rc != 0
+
+- name: Wait for the Docker daemon to answer after networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - info
+      - --format
+      - '{{ "{{.ServerVersion}}" }}'
+  register: mail_platform_docker_info
+  changed_when: false
+  retries: 10
+  delay: 2
+  until: mail_platform_docker_info.rc == 0
+  when: mail_platform_docker_nat_chain.rc != 0
+
+- name: Assert Docker nat chain is present before mail-platform startup
+  ansible.builtin.assert:
+    that:
+      - mail_platform_docker_nat_chain.rc == 0 or mail_platform_docker_nat_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; mail-platform published ports will fail."
+
 - name: Check whether the Stalwart management port is already published locally
   ansible.builtin.wait_for:
     host: 127.0.0.1
@@ -550,12 +585,22 @@
   changed_when: false
   failed_when: false
 
+- name: Check whether the current mail gateway health endpoint is healthy before startup
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ mail_platform_gateway_port }}/healthz"
+    method: GET
+    status_code: 200
+  register: mail_platform_gateway_health_probe
+  changed_when: false
+  failed_when: false
+
 - name: Record whether the mail platform startup needs a force recreate
   ansible.builtin.set_fact:
     mail_platform_force_recreate: >-
       {{
         mail_platform_docker_nat_chain.rc != 0
         or (mail_platform_stalwart_port_probe.failed | default(false))
+        or (mail_platform_gateway_health_probe.status | default(0)) != 200
         or (mail_platform_stalwart_config.changed | default(false))
         or (mail_platform_gateway_env.changed | default(false))
         or (mail_platform_gateway_profiles.changed | default(false))
@@ -563,24 +608,160 @@
         or (mail_platform_gateway_build.changed | default(false))
       }}
 
-- name: Force-recreate the mail platform stack after Docker networking recovery
+- name: Remove stale mail-platform compose resources before force recreate
   ansible.builtin.command:
     argv:
       - docker
       - compose
       - --file
       - "{{ mail_platform_compose_file }}"
-      - up
-      - -d
-      - --force-recreate
-      - --remove-orphans
+      - rm
+      - --stop
+      - --force
+      - openbao-agent
+      - stalwart
+      - mail-gateway
+  args:
+    chdir: "{{ mail_platform_site_dir }}"
+  register: mail_platform_down
+  changed_when: >-
+    'Stopping' in mail_platform_down.stdout
+    or 'Removing' in mail_platform_down.stdout
+    or 'Removed' in mail_platform_down.stdout
+  failed_when: false
+  when: mail_platform_force_recreate
+
+- name: Force-recreate the mail platform stack after Docker networking recovery
+  ansible.builtin.shell: |
+    docker compose --file "{{ mail_platform_compose_file }}" rm --stop --force openbao-agent stalwart mail-gateway || true
+    docker compose --file "{{ mail_platform_compose_file }}" up -d --force-recreate --remove-orphans
   args:
     chdir: "{{ mail_platform_site_dir }}"
   register: mail_platform_up
   changed_when: >-
-    'Creating' in mail_platform_up.stdout
+    'Stopping' in mail_platform_up.stdout
+    or 'Removing' in mail_platform_up.stdout
+    or 'Removed' in mail_platform_up.stdout
+    or 'Creating' in mail_platform_up.stdout
     or 'Recreating' in mail_platform_up.stdout
     or 'Starting' in mail_platform_up.stdout
+  failed_when: false
+  retries: 3
+  delay: 5
+  until: mail_platform_up.rc == 0
+  when: mail_platform_force_recreate
+
+- name: Read external mail-platform network consumers before forced network reset
+  ansible.builtin.command:
+    argv:
+      - docker
+      - network
+      - inspect
+      - "{{ mail_platform_docker_network_name }}"
+      - --format
+      - '{{ "{{range $id, $cfg := .Containers}}{{println $cfg.Name}}{{end}}" }}'
+  register: mail_platform_network_consumers
+  changed_when: false
+  failed_when: false
+  when:
+    - mail_platform_force_recreate
+    - mail_platform_up.rc != 0
+
+- name: Record external mail-platform network consumers that need reattachment
+  ansible.builtin.set_fact:
+    mail_platform_network_external_consumers: >-
+      {{
+        mail_platform_network_consumers.stdout_lines
+        | default([])
+        | reject('equalto', '')
+        | reject('equalto', mail_platform_stalwart_container_name)
+        | reject('equalto', mail_platform_gateway_container_name)
+        | reject('equalto', mail_platform_openbao_agent_container_name)
+        | list
+      }}
+  when:
+    - mail_platform_force_recreate
+    - mail_platform_up.rc != 0
+
+- name: Detach external mail-platform network consumers before forced network reset
+  ansible.builtin.command:
+    argv:
+      - docker
+      - network
+      - disconnect
+      - -f
+      - "{{ mail_platform_docker_network_name }}"
+      - "{{ item }}"
+  loop: "{{ mail_platform_network_external_consumers | default([]) }}"
+  register: mail_platform_network_disconnect
+  changed_when: mail_platform_network_disconnect.rc == 0
+  failed_when: false
+  when:
+    - mail_platform_force_recreate
+    - mail_platform_up.rc != 0
+
+- name: Remove the shared mail-platform network before retrying the force recreate
+  ansible.builtin.command:
+    argv:
+      - docker
+      - network
+      - rm
+      - "{{ mail_platform_docker_network_name }}"
+  register: mail_platform_network_remove
+  changed_when: mail_platform_network_remove.rc == 0
+  failed_when: false
+  when:
+    - mail_platform_force_recreate
+    - mail_platform_up.rc != 0
+
+- name: Re-run the mail platform force recreate after rebuilding the shared network
+  ansible.builtin.shell: |
+    docker compose --file "{{ mail_platform_compose_file }}" rm --stop --force openbao-agent stalwart mail-gateway || true
+    docker compose --file "{{ mail_platform_compose_file }}" up -d --force-recreate --remove-orphans
+  args:
+    chdir: "{{ mail_platform_site_dir }}"
+  register: mail_platform_up_network_reset
+  changed_when: >-
+    'Stopping' in mail_platform_up_network_reset.stdout
+    or 'Removing' in mail_platform_up_network_reset.stdout
+    or 'Removed' in mail_platform_up_network_reset.stdout
+    or 'Creating' in mail_platform_up_network_reset.stdout
+    or 'Recreating' in mail_platform_up_network_reset.stdout
+    or 'Starting' in mail_platform_up_network_reset.stdout
+  failed_when: false
+  retries: 3
+  delay: 5
+  until: mail_platform_up_network_reset.rc == 0
+  when:
+    - mail_platform_force_recreate
+    - mail_platform_up.rc != 0
+
+- name: Reconnect external mail-platform network consumers after rebuilding the shared network
+  ansible.builtin.command:
+    argv:
+      - docker
+      - network
+      - connect
+      - "{{ mail_platform_docker_network_name }}"
+      - "{{ item }}"
+  loop: "{{ mail_platform_network_external_consumers | default([]) }}"
+  register: mail_platform_network_reconnect
+  changed_when: mail_platform_network_reconnect.rc == 0
+  failed_when: false
+  when:
+    - mail_platform_force_recreate
+    - mail_platform_up.rc != 0
+    - (mail_platform_up_network_reset.rc | default(1)) == 0
+
+- name: Assert the mail platform force-recreate succeeded
+  ansible.builtin.assert:
+    that:
+      - mail_platform_up.rc == 0 or (mail_platform_up_network_reset.rc | default(1)) == 0
+    fail_msg: >-
+      {{
+        mail_platform_up_network_reset.stderr
+        | default(mail_platform_up.stderr | default(mail_platform_up.msg | default('mail-platform compose force-recreate failed')))
+      }}
   when: mail_platform_force_recreate
 
 - name: Start the mail platform stack
@@ -600,6 +781,17 @@
     'Creating' in mail_platform_up.stdout
     or 'Recreating' in mail_platform_up.stdout
     or 'Starting' in mail_platform_up.stdout
+  failed_when: false
+  retries: 3
+  delay: 5
+  until: mail_platform_up.rc == 0
+  when: not mail_platform_force_recreate
+
+- name: Assert the mail platform startup succeeded
+  ansible.builtin.assert:
+    that:
+      - mail_platform_up.rc == 0
+    fail_msg: "{{ mail_platform_up.stderr | default(mail_platform_up.msg | default('mail-platform compose up failed')) }}"
   when: not mail_platform_force_recreate
 
 - name: Wait for the Stalwart management API to listen locally
