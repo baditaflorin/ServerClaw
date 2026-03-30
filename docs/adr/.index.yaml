@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-30'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 262
+  Implemented: 264
   Partial: 6
-  Not Implemented: 55
+  Not Implemented: 53
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4935,7 +4935,7 @@ adr_index:
   - adr: 0286
     title: Tesseract OCR Service For Scanned Image Text Extraction
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -4948,6 +4948,7 @@ adr_index:
       - extraction
     summary: We will deploy Tesseract OCR as a REST service to fill the image-OCR gap
     filename: 0286-tesseract-ocr-service-for-scanned-image-text-extraction.md
+    implemented_version: 0.177.107
   - adr: 0286
     title: Vikunja As The Task And Project Management REST API
     status: Accepted

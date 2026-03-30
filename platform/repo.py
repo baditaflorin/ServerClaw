@@ -228,7 +228,7 @@ def _load_yaml_without_pyyaml(path: Path) -> Any:
 
 def load_yaml(path: Path) -> Any:
     try:
-        import yaml
+        import yaml  # type: ignore[import-untyped]
     except ModuleNotFoundError as exc:  # pragma: no cover - direct runtime guard
         try:
             return _load_yaml_without_pyyaml(path)

@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.106",
+  "repo_version": "0.177.107",
   "platform_version": "0.130.71",
-  "generated_at": "2026-03-30T16:33:20Z",
-  "next_refresh_at": "2026-03-30T17:33:20Z",
+  "generated_at": "2026-03-30T17:02:58Z",
+  "next_refresh_at": "2026-03-30T18:02:58Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -614,6 +614,18 @@
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9443",
         "last_live_apply": "2026-03-30T00:00:00Z"
+      },
+      "tesseract_ocr": {
+        "service_name": "Tesseract OCR",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://10.10.10.20:3008",
+        "last_live_apply": "2026-03-30T00:00:00Z",
+        "slo_status": "unknown"
       },
       "tika": {
         "service_name": "Apache Tika",
@@ -2206,6 +2218,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-step-ca.md"
+      },
+      {
+        "id": "converge-tesseract-ocr",
+        "description": "Build and deploy the private Tesseract OCR fallback runtime on docker-runtime-lv3 and verify direct OCR plus the Tika-first helper path.",
+        "tags": [
+          "converge-tesseract-ocr",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 260,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-tesseract-ocr.md"
       },
       {
         "id": "converge-tika",
@@ -4384,6 +4422,16 @@
         ]
       },
       {
+        "id": "configure-tesseract-ocr",
+        "title": "Configure Tesseract OCR",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-tesseract-ocr.md",
+        "workflow_ids": [
+          "converge-tesseract-ocr"
+        ]
+      },
+      {
         "id": "configure-tika",
         "title": "Configure Apache Tika",
         "agent_trust_required": "T3",
@@ -4972,10 +5020,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.105",
+    "last_version": "0.177.106",
     "deployed_at": "2026-03-30",
-    "summary": "replays ADR 0269 from the exact 0.177.105 main tree, preserves the worktree-safe Windmill checkout and OpenBao secret delivery fixes, records the merged-tree gate-status plus healthcheck and default-operations proof, cuts release 0.177.106, and advances platform_version to 0.130.71",
-    "release_notes_url": "docs/release-notes/0.177.106.md"
+    "summary": "implements ADR 0286 by bringing the private Tesseract OCR runtime, the controller-local Tika-first fallback verification path, and the verified live receipt onto main while preserving the current 0.130.71 platform baseline",
+    "release_notes_url": "docs/release-notes/0.177.107.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

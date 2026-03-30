@@ -165,10 +165,10 @@ workstreams:
     title: Live apply Tesseract OCR from latest origin/main on top of the current Apache Tika baseline
     ready_to_merge: true
     live_applied: true
-    status: ready_for_merge
+    status: live_applied
     owner: codex
-    branch: codex/ws-0286-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0286-live-apply
+    branch: codex/ws-0286-live-apply-r3
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0286-live-apply-r3
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0286-live-apply.md
     depends_on:
       - adr-0107-platform-extension-model
@@ -314,8 +314,9 @@ workstreams:
           mode: shared_contract
           contract: service-id-alias-v1
     canonical_truth:
-      changelog_entry: implements ADR 0286 by bringing the private Tesseract OCR runtime, the controller-local Tika-first fallback verification path, and the verified live receipt onto main while preserving the current 0.130.69 platform baseline
+      changelog_entry: implements ADR 0286 by bringing the private Tesseract OCR runtime, the controller-local Tika-first fallback verification path, and the verified live receipt onto main while preserving the current 0.130.71 platform baseline
       release_bump: patch
+      included_in_repo_version: 0.177.107
       latest_receipts:
         tesseract_ocr: 2026-03-30-adr-0286-tesseract-ocr-live-apply
   - id: ws-0282-live-apply

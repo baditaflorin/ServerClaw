@@ -194,6 +194,7 @@
   failed_when: false
 
 - name: Force-recreate Tika when the host port binding is missing and recover stale compose-network drift
+  when: tika_runtime_port_binding_check.stdout | trim == ''
   block:
     - name: Force-recreate Tika when the host port binding is missing
       ansible.builtin.command:
@@ -259,8 +260,6 @@
       register: tika_runtime_force_recreate
       changed_when: true
       when: tika_runtime_force_recreate_compose_network_missing
-  when: tika_runtime_port_binding_check.stdout | trim == ''
-
 - name: Recheck Tika host port binding
   ansible.builtin.command:
     argv:
