@@ -3,9 +3,9 @@
 - ADR: [ADR 0291](../adr/0291-jupyterhub-as-the-interactive-notebook-environment.md)
 - Title: Deploy JupyterHub on `docker-runtime-lv3`, publish `notebooks.lv3.org`, and verify the interactive notebook environment end to end
 - Status: live_applied
-- Included In Repo Version: pending
+- Included In Repo Version: 0.177.110
 - Branch-Local Receipt: `receipts/live-applies/2026-03-30-adr-0291-jupyterhub-live-apply.json`
-- Canonical Mainline Receipt: pending
+- Canonical Mainline Receipt: `receipts/live-applies/2026-03-30-adr-0291-jupyterhub-mainline-live-apply.json`
 - Live Applied In Platform Version: 0.130.71
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
@@ -117,6 +117,10 @@ a complete audit trail for the later exact-main replay.
 ## Outcome
 
 - ADR 0291 is live on the current platform from the branch-local replay.
-- The remaining exact-main step is to refresh the protected release and
-  canonical-truth surfaces on the newest `origin/main` baseline and cut the
-  canonical mainline receipt.
+- Release `0.177.110` integrates the notebook environment onto `main`.
+- `receipts/live-applies/2026-03-30-adr-0291-jupyterhub-mainline-live-apply.json`
+  supersedes the branch-local receipt as the canonical exact-main proof while
+  preserving the earlier branch-local audit trail.
+- The current integrated mainline baseline remains `0.130.72` with no
+  additional platform-version bump beyond the earlier `0.130.71` live-apply
+  milestone for ADR 0291.

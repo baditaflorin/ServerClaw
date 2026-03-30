@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0291](../adr/0291-jupyterhub-as-the-interactive-notebook-environment.md)
 - Title: Integrate ADR 0291 JupyterHub exact-main replay onto `origin/main`
-- Status: in_progress
-- Included In Repo Version: pending
-- Platform Version Observed During Integration: pending
-- Release Date: pending
-- Live Applied On: pending
+- Status: live_applied
+- Included In Repo Version: 0.177.110
+- Platform Version Observed During Integration: 0.130.72
+- Release Date: 2026-03-30
+- Live Applied On: 2026-03-30
 - Branch: `codex/ws-0291-main-merge`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge`
 - Owner: codex
@@ -81,6 +81,8 @@ branch-local state alone.
 - `docs/release-notes/*.md`
 - `versions/stack.yaml`
 - `build/platform-manifest.json`
+- `docs/diagrams/agent-coordination-map.excalidraw`
+- `docs/diagrams/service-dependency-graph.excalidraw`
 - `docs/site-generated/architecture/dependency-graph.md`
 - `receipts/ops-portal-snapshot.html`
 - `receipts/live-applies/2026-03-30-adr-0291-jupyterhub-live-apply.json`
@@ -89,8 +91,59 @@ branch-local state alone.
 
 ## Verification
 
-- pending
+- `git fetch origin --prune` refreshed this workstream onto the newer
+  `origin/main` commit `32696e7e52d7bc05ed151139e8e221cb144acedb`, which already
+  carried repo version `0.177.109` and platform version `0.130.72` before the
+  JupyterHub integration work continued.
+- The focused exact-main compatibility slice reran successfully on that rebased
+  tree with `72 passed in 4.09s`, plus `make syntax-check-jupyterhub`,
+  `make syntax-check-ollama`, and
+  `python3 scripts/validate_service_completeness.py --service jupyterhub`;
+  the full transcript is preserved in
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-targeted-checks-r1.txt`.
+- The first exact-main wrapper attempt exposed a missing
+  `keycloak_jupyterhub_client_secret` catalog entry after the rebase and the
+  second stopped at the expected canonical-truth guard before the release tree
+  was written; those repair steps are preserved in
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-r1.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-portal-generators-r1.txt`,
+  and `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-r2.txt`.
+- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py ...`
+  prepared release `0.177.110` while preserving `platform_version: 0.130.72`,
+  preserved in
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-release-status-r2.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-release-dry-run-r1.txt`,
+  and `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-release-write-r1.txt`.
+- `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=jupyterhub env=production`
+  succeeded from committed source `97e859427f8dbe2b3fad69b23c92e2b125684bff`
+  with final recap `docker-runtime-lv3 : ok=278 changed=5 failed=0 skipped=82`,
+  `localhost : ok=24 changed=0 failed=0 skipped=4`, and
+  `nginx-lv3 : ok=40 changed=5 failed=0 skipped=6`, preserved in
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-r3.txt`.
+- Fresh controller verification after the exact-main replay confirmed the
+  public health endpoint, the Keycloak OIDC redirect, the shared edge
+  certificate SAN set including `DNS:notebooks.lv3.org`, and the local
+  `docker-runtime-lv3` JupyterHub, Ollama, and platform-context probes,
+  preserved in
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-direct-verification-r2.txt`.
+- Final repo automation and validation gates passed from the detached exact-main
+  tree, including `make check-build-server`, `make validate`,
+  `make remote-validate`, `make pre-push-gate`,
+  `python scripts/live_apply_receipts.py --validate`, and `git diff --check`,
+  preserved in
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-check-build-server-r1.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-validate-r3.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-remote-validate-r3.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-pre-push-gate-r1.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-receipts-validate-r2.txt`,
+  and `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-git-diff-check-r2.txt`.
 
 ## Outcome
 
-- pending
+- Release `0.177.110` is the integrated repo version for ADR 0291.
+- Platform version remains `0.130.72` because the notebook environment first
+  became true on `0.130.71`; the exact-main replay verifies that already-live
+  capability on the newer synchronized baseline instead of advancing the
+  platform version again.
+- `receipts/live-applies/2026-03-30-adr-0291-jupyterhub-mainline-live-apply.json`
+  is the canonical exact-main proof for JupyterHub on `main`.

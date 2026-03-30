@@ -1,0 +1,92 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/scripts/remote_exec.sh remote-validate --local-fallback
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Validation lane selection
+  mode: explicit_checks
+  branch: HEAD
+  selected lanes: repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit
+  blocking checks: workstream-surfaces, agent-standards, ansible-syntax, schema-validation, policy-validation, alert-rule-validation, type-check, dependency-graph
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 0.83
+alert-rule-validation passed 1.46
+ansible-syntax        passed 109.21
+dependency-graph      failed 1.31
+policy-validation     passed 1.09
+schema-validation     passed 13.35
+type-check            passed 3.25
+workstream-surfaces   passed 3.07
+
+[dependency-graph] docker command
+docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0291-main-merge-19eb226299/repo/.lv3-runs/20260330T212305Z-1b25d61be4a1/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=1b25d61be4a12bcaa34d5ba0173b830b088bf9bbc523b7f753bd75424625d525 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T21:22:59.175746+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=97e859427f8dbe2b3fad69b23c92e2b125684bff -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/validate_dependency_graph.py >/dev/null && python scripts/generate_dependency_diagram.py --check >/dev/null && python scripts/generate_diagrams.py --check >/dev/null
+[dependency-graph] stderr
+dependency diagram error: /workspace/docs/site-generated/architecture/dependency-graph.md is stale. Run 'python3 scripts/generate_dependency_diagram.py --write'.
+remote_exec: remote command failed, falling back locally for remote-validate
+remote_exec: running local fallback for remote-validate
+Validation lane selection
+  mode: explicit_checks
+  branch: HEAD
+  selected lanes: repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit
+  blocking checks: workstream-surfaces, agent-standards, ansible-syntax, schema-validation, policy-validation, alert-rule-validation, type-check, dependency-graph
+  changed files: Makefile, README.md, RELEASE.md, VERSION, build/platform-manifest.json, changelog.md, ...
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 9.43
+alert-rule-validation passed 8.77
+ansible-syntax        failed 130.99
+dependency-graph      failed 6.62
+policy-validation     passed 12.65
+schema-validation     failed 130.99
+type-check            passed 15.90
+workstream-surfaces   passed 13.42
+
+[ansible-syntax] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0291-main-merge:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0291-main-merge:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/.ansible/validation/collections:/opt/lv3/ansible-collections -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=1b25d61be4a12bcaa34d5ba0173b830b088bf9bbc523b7f753bd75424625d525 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T21:22:59.175746+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=97e859427f8dbe2b3fad69b23c92e2b125684bff -e LV3_SNAPSHOT_BRANCH=HEAD -e LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections -w /workspace registry.lv3.org/check-runner/ansible:2.17.10 sh -c mkdir -p .ansible/validation/syntax-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/syntax-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/syntax-requirements.sha ./scripts/validate_repo.sh ansible-syntax
+[ansible-syntax] stdout
+Syntax check: playbooks/api-gateway.yml
+Syntax check: playbooks/artifact-cache-vm.yml
+Syntax check: playbooks/backup-vm.yml
+Syntax check: playbooks/browser-runner.yml
+Syntax check: playbooks/build-artifact-cache.yml
+Syntax check: playbooks/changedetection.yml
+Syntax check: playbooks/control-plane-recovery.yml
+Syntax check: playbooks/coolify.yml
+Syntax check: playbooks/data-retention.yml
+Syntax check: playbooks/database-dns.yml
+Syntax check: playbooks/dify.yml
+Syntax check: playbooks/docker-publication-assurance.yml
+Syntax check: playbooks/docker-runtime.yml
+Syntax check: playbooks/dozzle.yml
+Syntax check: playbooks/excalidraw.yml
+Syntax check: playbooks/gitea.yml
+Syntax check: playbooks/gotenberg.yml
+Syntax check: playbooks/groups/access.yml
+Syntax check: playbooks/groups/automation.yml
+Syntax check: playbooks/groups/communication.yml
+Syntax check: playbooks/groups/data.yml
+Syntax check: playbooks/groups/observability.yml
+Syntax check: playbooks/groups/platform-apps.yml
+Syntax check: playbooks/groups/security.yml
+Syntax check: playbooks/guest-access.yml
+Syntax check: playbooks/guest-network-policy.yml
+Syntax check: playbooks/harbor.yml
+Syntax check: playbooks/headscale.yml
+Syntax check: playbooks/homepage.yml
+Syntax check: playbooks/jupyterhub.yml
+Syntax check: playbooks/keycloak.yml
+[ansible-syntax] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+
+[dependency-graph] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0291-main-merge:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0291-main-merge:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=1b25d61be4a12bcaa34d5ba0173b830b088bf9bbc523b7f753bd75424625d525 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T21:22:59.175746+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=97e859427f8dbe2b3fad69b23c92e2b125684bff -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/validate_dependency_graph.py >/dev/null && python scripts/generate_dependency_diagram.py --check >/dev/null && python scripts/generate_diagrams.py --check >/dev/null
+[dependency-graph] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+dependency diagram error: /workspace/docs/site-generated/architecture/dependency-graph.md is stale. Run 'python3 scripts/generate_dependency_diagram.py --write'.
+
+[schema-validation] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0291-main-merge:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0291-main-merge:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=1b25d61be4a12bcaa34d5ba0173b830b088bf9bbc523b7f753bd75424625d525 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T21:22:59.175746+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=97e859427f8dbe2b3fad69b23c92e2b125684bff -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/provider_boundary_catalog.py --validate >/dev/null && python scripts/validate_repository_data_models.py --validate >/dev/null && python scripts/capability_contracts.py --validate >/dev/null && python scripts/platform_manifest.py --check >/dev/null && python scripts/data_catalog.py --validate >/dev/null && python scripts/operator_manager.py validate >/dev/null && python scripts/service_catalog.py --validate >/dev/null && python scripts/stage_smoke_suites.py --validate >/dev/null && python scripts/environment_topology.py --validate >/dev/null && python scripts/subdomain_catalog.py --validate >/dev/null && python scripts/subdomain_exposure_audit.py --validate >/dev/null && ./scripts/agent_tool_registry.py --export-mcp >/dev/null && python scripts/mutation_audit.py --validate-schema >/dev/null
+[schema-validation] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+make: *** [remote-validate] Error 1
