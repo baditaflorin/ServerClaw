@@ -369,6 +369,11 @@
   rescue:
     - name: Flag stale Gitea compose-network failures during startup
       ansible.builtin.set_fact:
+        gitea_docker_nat_chain_missing: >-
+          {{
+            'No chain/target/match by that name' in (ansible_failed_result.stderr | default(''))
+            or 'Unable to enable DNAT rule' in (ansible_failed_result.stderr | default(''))
+          }}
         gitea_compose_network_missing: >-
           {{
             'failed to create endpoint' in (ansible_failed_result.stderr | default(''))
@@ -382,7 +387,9 @@
             ansible_failed_result.stderr
             | default(ansible_failed_result.msg | default('gitea compose up failed'))
           }}
-      when: not gitea_compose_network_missing
+      when: >-
+        not gitea_docker_nat_chain_missing
+        and not gitea_compose_network_missing
 
     - name: Reset stale Gitea compose resources before retrying startup
       ansible.builtin.command:
@@ -403,6 +410,17 @@
       failed_when: false
       when: gitea_compose_network_missing
 
+    - name: Reset Docker failed state before nat-chain recovery retry
+      ansible.builtin.command: systemctl reset-failed docker.service
+      changed_when: false
+      when: gitea_docker_nat_chain_missing
+
+    - name: Restart Docker to restore nat chain before retrying Gitea startup
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: gitea_docker_nat_chain_missing
+
     - name: Retry Gitea stack startup after compose-network recovery
       ansible.builtin.command:
         argv:
@@ -421,7 +439,7 @@
         'Creating' in gitea_up.stdout
         or 'Recreating' in gitea_up.stdout
         or 'Starting' in gitea_up.stdout
-      when: gitea_compose_network_missing
+      when: gitea_docker_nat_chain_missing or gitea_compose_network_missing
 
 - name: Wait for Gitea to listen locally
   ansible.builtin.wait_for:
@@ -439,6 +457,17 @@
   retries: 24
   delay: 5
   until: gitea_login_page.status == 200
+  changed_when: false
+
+- name: Wait for the Keycloak OIDC discovery endpoint used by Gitea bootstrap
+  ansible.builtin.uri:
+    url: "{{ gitea_oidc_internal_discovery_url }}"
+    method: GET
+    status_code: 200
+  register: gitea_oidc_discovery_ready
+  retries: 60
+  delay: 5
+  until: gitea_oidc_discovery_ready.status == 200
   changed_when: false
 
 - name: Run the Gitea bootstrap script

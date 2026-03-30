@@ -104,10 +104,19 @@ def test_runtime_tasks_recover_stale_compose_network_during_gitea_startup() -> N
         if task.get("name") == "Start the Gitea stack and recover stale compose-network failures"
     )
     rescue_names = [task["name"] for task in start_block["rescue"]]
+    recovery_fact = next(
+        task
+        for task in start_block["rescue"]
+        if task.get("name") == "Flag stale Gitea compose-network failures during startup"
+    )
 
     assert "Flag stale Gitea compose-network failures during startup" in rescue_names
+    assert "Reset Docker failed state before nat-chain recovery retry" in rescue_names
+    assert "Restart Docker to restore nat chain before retrying Gitea startup" in rescue_names
     assert "Reset stale Gitea compose resources before retrying startup" in rescue_names
     assert "Retry Gitea stack startup after compose-network recovery" in rescue_names
+    assert "Unable to enable DNAT rule" in recovery_fact["ansible.builtin.set_fact"]["gitea_docker_nat_chain_missing"]
+    assert "No chain/target/match by that name" in recovery_fact["ansible.builtin.set_fact"]["gitea_docker_nat_chain_missing"]
 
 
 def test_runner_tasks_recover_stale_compose_network_during_startup() -> None:
@@ -127,7 +136,13 @@ def test_runner_tasks_recover_stale_compose_network_during_startup() -> None:
 def test_gitea_waits_on_the_published_service_address() -> None:
     tasks = load_tasks()
     wait_task = next(task for task in tasks if task["name"] == "Wait for Gitea to listen locally")
+    oidc_wait_task = next(
+        task
+        for task in tasks
+        if task["name"] == "Wait for the Keycloak OIDC discovery endpoint used by Gitea bootstrap"
+    )
     assert wait_task["ansible.builtin.wait_for"]["host"] == "{{ ansible_host }}"
+    assert oidc_wait_task["ansible.builtin.uri"]["url"] == "{{ gitea_oidc_internal_discovery_url }}"
 
 
 def test_gitea_defaults_include_release_bundle_signing_paths() -> None:
