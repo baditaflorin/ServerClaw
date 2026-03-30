@@ -17,7 +17,14 @@
 
 - name: Stage the repo-managed Docker publication assurance helper for verification
   ansible.builtin.copy:
-    content: "{{ lookup('ansible.builtin.file', inventory_dir ~ '/../scripts/docker_publication_assurance.py') }}"
+    content: >-
+      {{
+        lookup(
+          'ansible.builtin.file',
+          lookup('ansible.builtin.pipe', 'git -C ' ~ (playbook_dir | quote) ~ ' rev-parse --show-toplevel')
+          ~ '/scripts/docker_publication_assurance.py'
+        )
+      }}
     dest: "{{ playbook_execution_docker_publication_helper_tempfile.path }}"
     owner: root
     group: root

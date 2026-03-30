@@ -596,6 +596,42 @@ def test_sync_helper_retries_remote_disconnect(monkeypatch: pytest.MonkeyPatch, 
     assert payload == {"path": "f/lv3/sync_operators", "attempts": 2, "status": "synced"}
 
 
+def test_sync_helper_retries_wait_for_content_timeout(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    module = load_module("sync_helper_retry_wait_for_content", SYNC_HELPER_PATH)
+    spec = {
+        "path": "f/lv3/deploy_and_promote",
+        "local_file": str(tmp_path / "deploy-and-promote.py"),
+        "language": "python3",
+        "summary": "deploy and promote",
+        "description": "repo-managed deploy and promote wrapper",
+    }
+    Path(spec["local_file"]).write_text("print('ok')\n", encoding="utf-8")
+    attempts = {"count": 0}
+
+    monkeypatch.setattr(module, "delete_script", lambda **kwargs: None)
+    monkeypatch.setattr(module, "wait_for_absent", lambda **kwargs: None)
+    monkeypatch.setattr(module, "create_script", lambda **kwargs: (201, ""))
+    monkeypatch.setattr(module.time, "sleep", lambda *_args, **_kwargs: None)
+
+    def fake_wait_for_content(**kwargs):
+        attempts["count"] += 1
+        if attempts["count"] == 1:
+            raise module.SyncError("timed out waiting for f/lv3/deploy_and_promote to match expected content")
+
+    monkeypatch.setattr(module, "wait_for_content", fake_wait_for_content)
+
+    payload = module.sync_script(
+        base_url="http://windmill.internal",
+        workspace="lv3",
+        token="token",
+        spec=spec,
+        max_attempts=3,
+        settle_interval_s=0.01,
+    )
+
+    assert payload == {"path": "f/lv3/deploy_and_promote", "attempts": 2, "status": "synced"}
+
+
 def test_sync_helper_marks_remote_disconnect_as_transport_error(monkeypatch: pytest.MonkeyPatch) -> None:
     module = load_module("sync_helper_transport_error", SYNC_HELPER_PATH)
 

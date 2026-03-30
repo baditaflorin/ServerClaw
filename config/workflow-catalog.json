@@ -195,7 +195,7 @@
       }
     },
     "gate-status": {
-      "description": "Show the configured validation gate checks plus the last local, bypass, and post-merge results.",
+      "description": "Show the configured validation gate checks plus the last local, waiver, and post-merge results.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -210,16 +210,18 @@
       "owner_runbook": "docs/runbooks/validation-gate.md",
       "implementation_refs": [
         "Makefile",
+        "config/gate-bypass-waiver-catalog.json",
         "config/validation-gate.json",
         "config/validation-lanes.yaml",
         "config/windmill/scripts/gate-status.py",
+        "scripts/gate_bypass_waivers.py",
         "scripts/gate_status.py",
         "scripts/validation_lanes.py",
         "scripts/log_gate_bypass.py",
         "receipts/gate-bypasses/.gitkeep"
       ],
       "outputs": [
-        "A human-readable or machine-readable summary of enabled validation checks and lanes, the last local gate run, the last post-merge gate run, and the latest explicit bypass receipt."
+        "A human-readable or machine-readable summary of enabled validation checks and lanes, the last local gate run, the last post-merge gate run, the latest explicit bypass receipt, any open waivers, and repeated reason-code escalation state."
       ],
       "verification_commands": [
         "make gate-status",

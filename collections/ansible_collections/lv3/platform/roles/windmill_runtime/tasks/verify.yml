@@ -1,4 +1,11 @@
 ---
+# Purpose: Verify the converged Windmill runtime, seeded workflows, and worker-side gate wrappers.
+# Inputs: Windmill runtime defaults, bootstrap session credentials, and mirrored worker checkout content.
+# Outputs: Verified Windmill API reachability, workflow execution receipts, and seeded-script availability checks.
+# Idempotency: Fully idempotent; this task file only reads runtime state and asserts expected verification results.
+# Dependencies: ADR 0165, ADR 0228, ADR 0230, ADR 0251, ADR 0267; requires windmill_runtime convergence and seeded scripts.
+# Related Runbooks: docs/runbooks/configure-windmill.md, docs/runbooks/validation-gate.md
+
 - name: Verify the Windmill API version endpoint
   ansible.builtin.uri:
     url: "{{ windmill_runtime_api_base_url }}/api/version"
@@ -39,22 +46,28 @@
 - name: Assert the Windmill seeded healthcheck result
   ansible.builtin.assert:
     that:
-      - windmill_verify_healthcheck.rc == 0
-      - windmill_verify_healthcheck.stdout | trim | length > 0
-    fail_msg: "Windmill API responded, but the seeded healthcheck script did not return JSON output."
-
-- name: Parse the Windmill seeded healthcheck result
-  ansible.builtin.set_fact:
-    windmill_verify_healthcheck_payload: "{{ windmill_verify_healthcheck.stdout | trim | from_json }}"
-  changed_when: false
-
-- name: Assert the Windmill seeded healthcheck result
-  ansible.builtin.assert:
-    that:
-      - windmill_verify_healthcheck_payload.probe == "live-verify"
-      - windmill_verify_healthcheck_payload.job_id_present | bool
-      - windmill_verify_healthcheck_payload.workspace == windmill_workspace_id
+      - (windmill_verify_healthcheck.stdout | from_json).probe == "live-verify"
+      - (windmill_verify_healthcheck.stdout | from_json).job_id_present | bool
+      - (windmill_verify_healthcheck.stdout | from_json).workspace == windmill_workspace_id
     fail_msg: "Windmill API responded, but the seeded healthcheck script did not return the expected result."
+
+- name: Ensure Windmill validation gate integrity file parent directories exist on the guest
+  ansible.builtin.file:
+    path: "{{ (windmill_worker_repo_checkout_host_path ~ '/' ~ item) | dirname }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ windmill_worker_checkout_integrity_files }}"
+  loop_control:
+    label: "{{ item }}"
+
+- name: Mirror Windmill validation gate integrity files to the guest before verification
+  ansible.builtin.copy:
+    src: "{{ windmill_worker_checkout_repo_root_local_dir }}/{{ item }}"
+    dest: "{{ windmill_worker_repo_checkout_host_path }}/{{ item }}"
+    mode: preserve
+  loop: "{{ windmill_worker_checkout_integrity_files }}"
+  loop_control:
+    label: "{{ item }}"
 
 - name: Run the Windmill validation gate status script
   ansible.builtin.shell: >
@@ -74,9 +87,7 @@
   register: windmill_verify_validation_gate_status
   retries: 3
   delay: 10
-  until:
-    - windmill_verify_validation_gate_status.rc == 0
-    - windmill_verify_validation_gate_status.stdout | trim | length > 0
+  until: windmill_verify_validation_gate_status.rc == 0
   changed_when: false
   failed_when: false
   no_log: true
@@ -84,23 +95,11 @@
 - name: Assert the Windmill validation gate status result
   ansible.builtin.assert:
     that:
-      - windmill_verify_validation_gate_status.rc == 0
-      - windmill_verify_validation_gate_status.stdout | trim | length > 0
-    fail_msg: >-
-      Windmill API responded, but the seeded validation gate status script did not return JSON output.
-
-- name: Parse the Windmill validation gate status result
-  ansible.builtin.set_fact:
-    windmill_verify_validation_gate_status_payload: >-
-      {{ windmill_verify_validation_gate_status.stdout | trim | from_json }}
-  changed_when: false
-
-- name: Assert the Windmill validation gate status result
-  ansible.builtin.assert:
-    that:
-      - windmill_verify_validation_gate_status_payload.status == "ok"
-      - windmill_verify_validation_gate_status_payload.gate_status.manifest_path | length > 0
-      - (windmill_verify_validation_gate_status_payload.gate_status.enabled_checks | length) >= 1
+      - (windmill_verify_validation_gate_status.stdout | from_json).status == "ok"
+      - (windmill_verify_validation_gate_status.stdout | from_json).gate_status.manifest_path | length > 0
+      - ((windmill_verify_validation_gate_status.stdout | from_json).gate_status.enabled_checks | length) >= 1
+      - ((windmill_verify_validation_gate_status.stdout | from_json).gate_status.waiver_summary.totals.compliant_receipts | int) >= 0
+      - ((windmill_verify_validation_gate_status.stdout | from_json).gate_status.waiver_summary.release_blockers | type_debug) == "list"
     fail_msg: >-
       Windmill API responded, but the seeded validation gate status script did not return the expected structured result.
 
@@ -126,24 +125,182 @@
 - name: Assert the Windmill stage smoke suites result
   ansible.builtin.assert:
     that:
-      - windmill_verify_stage_smoke_suites.rc == 0
-      - windmill_verify_stage_smoke_suites.stdout | trim | length > 0
-    fail_msg: >-
-      Windmill API responded, but the seeded stage smoke suites script did not return JSON output.
-
-- name: Parse the Windmill stage smoke suites result
-  ansible.builtin.set_fact:
-    windmill_verify_stage_smoke_suites_payload: "{{ windmill_verify_stage_smoke_suites.stdout | trim | from_json }}"
-  changed_when: false
-
-- name: Assert the Windmill stage smoke suites result
-  ansible.builtin.assert:
-    that:
-      - windmill_verify_stage_smoke_suites_payload.status == "ok"
-      - windmill_verify_stage_smoke_suites_payload.result.status == "passed"
-      - (windmill_verify_stage_smoke_suites_payload.result.receipt_smoke_suites | length) >= 1
+      - (windmill_verify_stage_smoke_suites.stdout | from_json).status == "ok"
+      - (windmill_verify_stage_smoke_suites.stdout | from_json).result.status == "passed"
+      - ((windmill_verify_stage_smoke_suites.stdout | from_json).result.receipt_smoke_suites | length) >= 1
     fail_msg: >-
       Windmill API responded, but the seeded stage smoke suites script did not return a passing structured result.
+
+- name: Define the critical Windmill verification script expectations
+  ansible.builtin.set_fact:
+    windmill_verify_critical_seed_script_expectations:
+      "{{ {
+        windmill_healthcheck_script_path: {
+          'local_file': windmill_seed_script_root_local_dir ~ '/lv3-healthcheck.py',
+          'content': lookup('ansible.builtin.file', windmill_seed_script_root_local_dir ~ '/lv3-healthcheck.py', rstrip=False),
+        },
+        windmill_validation_gate_status_script_path: {
+          'local_file': windmill_seed_script_root_local_dir ~ '/gate-status.py',
+          'content': lookup('ansible.builtin.file', windmill_seed_script_root_local_dir ~ '/gate-status.py', rstrip=False),
+        },
+        windmill_stage_smoke_suites_script_path: {
+          'local_file': inventory_dir ~ '/../config/windmill/scripts/stage-smoke-suites.py',
+          'content': lookup('ansible.builtin.file', inventory_dir ~ '/../config/windmill/scripts/stage-smoke-suites.py', rstrip=False),
+        },
+      } }}"
+  no_log: true
+
+- name: Verify the critical Windmill verification scripts are seeded with current controller content
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/{{ item.path | urlencode }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ windmill_bootstrap_session_token }}"
+    status_code:
+      - 200
+  loop:
+    - path: "{{ windmill_healthcheck_script_path }}"
+    - path: "{{ windmill_validation_gate_status_script_path }}"
+    - path: "{{ windmill_stage_smoke_suites_script_path }}"
+  loop_control:
+    label: "{{ item.path }}"
+  delegate_to: localhost
+  become: false
+  register: windmill_verify_critical_seed_scripts
+  changed_when: false
+  failed_when: false
+  retries: 6
+  delay: 5
+  until:
+    - windmill_verify_critical_seed_scripts.status == 200
+    - ((windmill_verify_critical_seed_scripts.json | default({})).path | default('')) == item.path
+  no_log: true
+
+- name: Initialize the critical Windmill verification script drift tracker
+  ansible.builtin.set_fact:
+    windmill_verify_critical_seed_script_drift_paths: []
+  no_log: true
+
+- name: Record critical Windmill verification scripts that drifted after sync
+  ansible.builtin.set_fact:
+    windmill_verify_critical_seed_script_drift_paths: >-
+      {{
+        (
+          windmill_verify_critical_seed_script_drift_paths
+          + [item.item.path]
+        ) | unique
+      }}
+  loop: "{{ windmill_verify_critical_seed_scripts.results }}"
+  loop_control:
+    label: "{{ item.item.path }}"
+  when:
+    - item.status != 200
+      or (((item.json | default({})).path | default('')) != item.item.path)
+      or (((item.json | default({})).content | default(''))
+         != windmill_verify_critical_seed_script_expectations[item.item.path].content)
+  no_log: true
+
+- name: Create a local manifest path for drifted critical Windmill verification scripts
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .json
+  when: (windmill_verify_critical_seed_script_drift_paths | length) > 0
+  delegate_to: localhost
+  become: false
+  register: windmill_verify_critical_seed_script_manifest_local
+
+- name: Render the drifted critical Windmill verification script manifest locally
+  ansible.builtin.copy:
+    dest: "{{ windmill_verify_critical_seed_script_manifest_local.path }}"
+    content: >-
+      {{
+        (
+          windmill_seed_scripts
+          | selectattr('path', 'in', windmill_verify_critical_seed_script_drift_paths)
+          | list
+        ) | to_nice_json
+      }}
+    mode: "0600"
+  when: (windmill_verify_critical_seed_script_drift_paths | length) > 0
+  delegate_to: localhost
+  become: false
+
+- name: Re-sync drifted critical Windmill verification scripts after concurrent drift
+  ansible.builtin.command:
+    argv:
+      - uv
+      - run
+      - --no-project
+      - --with
+      - pyyaml
+      - python3
+      - "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_scripts.py"
+      - --base-url
+      - "{{ windmill_private_base_url }}"
+      - --workspace
+      - "{{ windmill_workspace_id }}"
+      - --manifest
+      - "{{ windmill_verify_critical_seed_script_manifest_local.path }}"
+      - --max-attempts
+      - "20"
+      - --settle-interval
+      - "2.0"
+  when: (windmill_verify_critical_seed_script_drift_paths | length) > 0
+  delegate_to: localhost
+  become: false
+  environment:
+    WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
+  register: windmill_verify_critical_seed_script_resync
+  changed_when: false
+  no_log: true
+
+- name: Remove the local drifted critical Windmill verification script manifest
+  ansible.builtin.file:
+    path: "{{ windmill_verify_critical_seed_script_manifest_local.path }}"
+    state: absent
+  when: (windmill_verify_critical_seed_script_drift_paths | length) > 0
+  delegate_to: localhost
+  become: false
+
+- name: Verify the critical Windmill verification scripts are seeded with current controller content after any repair attempt
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/{{ item.path | urlencode }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ windmill_bootstrap_session_token }}"
+    status_code:
+      - 200
+  loop:
+    - path: "{{ windmill_healthcheck_script_path }}"
+    - path: "{{ windmill_validation_gate_status_script_path }}"
+    - path: "{{ windmill_stage_smoke_suites_script_path }}"
+  loop_control:
+    label: "{{ item.path }}"
+  delegate_to: localhost
+  become: false
+  register: windmill_verify_critical_seed_scripts_final
+  changed_when: false
+  failed_when: false
+  retries: 6
+  delay: 5
+  until:
+    - windmill_verify_critical_seed_scripts_final.status == 200
+    - ((windmill_verify_critical_seed_scripts_final.json | default({})).path | default('')) == item.path
+  no_log: true
+
+- name: Assert the critical Windmill verification scripts match controller content
+  ansible.builtin.assert:
+    that:
+      - item.status == 200
+      - item.json.path == item.item.path
+      - item.json.content == windmill_verify_critical_seed_script_expectations[item.json.path].content
+    fail_msg: >-
+      Windmill seeded script {{ item.item.path }} does not match controller content from
+      {{ windmill_verify_critical_seed_script_expectations[item.json.path].local_file }} after converge and repair.
+  loop: "{{ windmill_verify_critical_seed_scripts_final.results }}"
+  loop_control:
+    label: "{{ item.item.path }}"
+  no_log: true
 
 - name: Verify the Windmill default operations scripts are seeded
   ansible.builtin.uri:

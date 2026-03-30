@@ -7,6 +7,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -73,18 +74,21 @@ def load_service_catalog(path: Path = SERVICE_CATALOG_PATH) -> dict[str, Any]:
 
 def write_report(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    contents = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    file_descriptor, temp_name = tempfile.mkstemp(
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        text=True,
+    )
+    temp_path = Path(temp_name)
     try:
-        path.write_text(contents, encoding="utf-8")
-    except PermissionError:
-        if not path.exists():
-            raise
-        path.unlink()
-        path.write_text(contents, encoding="utf-8")
-    try:
-        path.chmod(0o666)
-    except OSError:
-        pass
+        with os.fdopen(file_descriptor, "w", encoding="utf-8") as handle:
+            handle.write(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+        os.chmod(temp_path, 0o666)
+        temp_path.replace(path)
+    finally:
+        if temp_path.exists():
+            temp_path.unlink()
 
 
 def maybe_relative_to_repo(path: Path, repo_root: Path) -> str:

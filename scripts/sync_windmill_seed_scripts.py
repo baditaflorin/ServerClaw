@@ -321,15 +321,22 @@ def sync_script(
                 code="platform:windmill_seed_sync_pending",
                 retry_class=RetryClass.BACKOFF,
             )
-        wait_for_content(
-            base_url=base_url,
-            workspace=workspace,
-            token=token,
-            script_path=spec["path"],
-            expected_content=content,
-            timeout_s=content_timeout_s,
-            interval_s=settle_interval_s,
-        )
+        try:
+            wait_for_content(
+                base_url=base_url,
+                workspace=workspace,
+                token=token,
+                script_path=spec["path"],
+                expected_content=content,
+                timeout_s=content_timeout_s,
+                interval_s=settle_interval_s,
+            )
+        except (RetryableSyncError, SyncError, OSError) as exc:
+            raise PlatformRetryError(
+                str(exc),
+                code="platform:windmill_seed_sync_pending",
+                retry_class=RetryClass.BACKOFF,
+            ) from exc
         return {"path": spec["path"], "attempts": attempts, "status": "synced"}
 
     try:

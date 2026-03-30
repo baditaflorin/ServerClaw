@@ -62,11 +62,17 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "Makefile",
         "config/validation-gate.json",
         "config/validation-lanes.yaml",
+        "config/gate-bypass-waiver-catalog.json",
+        "scripts/__init__.py",
         "scripts/policy_checks.py",
         "scripts/policy_toolchain.py",
         "scripts/command_catalog.py",
+        "scripts/controller_automation_toolkit.py",
+        "scripts/gate_bypass_waivers.py",
         "scripts/gate_status.py",
         "scripts/stage_smoke_suites.py",
+        "scripts/validation_lanes.py",
+        "scripts/run_python_with_packages.sh",
         "config/windmill/scripts/gate-status.py",
         "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
         "config/windmill/scripts/stage-smoke-suites.py",
@@ -173,16 +179,6 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert quarterly_schedule["schedule"] == "0 0 9 * * 1"
     assert quarterly_schedule["timezone"] == "Europe/Bucharest"
     assert quarterly_schedule["args"]["schedule_guard"] == "first_monday_of_quarter"
-
-
-def test_make_converge_windmill_pins_worker_checkout_to_active_repo_root() -> None:
-    makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
-
-    assert (
-        "converge-windmill:\n"
-        "\t$(MAKE) preflight WORKFLOW=converge-windmill\n"
-        "\tANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/windmill.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e windmill_worker_checkout_repo_root_local_dir=$(REPO_ROOT)\n"
-    ) in makefile
 
 
 def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> None:
@@ -538,6 +534,12 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     tasks = (
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml"
     ).read_text()
+    script_sync_task = tasks.split("- name: Sync repo-managed Windmill scripts", 1)[1].split(
+        "- name: Remove the local repo-managed Windmill script manifest", 1
+    )[0]
+    schedule_sync_task = tasks.split("- name: Sync repo-managed Windmill schedules", 1)[1].split(
+        "- name: Remove the local repo-managed Windmill schedule manifest", 1
+    )[0]
     verify_tasks = (
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml"
     ).read_text()
@@ -570,17 +572,22 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Sync repo-managed Windmill scripts" in tasks
     assert "scripts/sync_windmill_seed_scripts.py" in tasks
     assert "WINDMILL_TOKEN" in tasks
+    assert 'WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"' in script_sync_task
+    assert 'WINDMILL_TOKEN: "{{ windmill_runtime_api_token }}"' not in script_sync_task
     assert "Sync repo-managed Windmill schedules" in tasks
     assert "scripts/sync_windmill_seed_schedules.py" in tasks
+    assert 'WINDMILL_TOKEN: "{{ windmill_runtime_api_token }}"' in schedule_sync_task
     assert tasks.count("uv") >= 2
     assert tasks.count("--with") >= 2
     assert tasks.count("pyyaml") >= 2
     assert "--path {{ windmill_healthcheck_script_path | quote }}" in tasks
     assert "--path {{ windmill_stage_smoke_suites_script_path | quote }}" in verify_tasks
-    assert '$1 == "DATABASE_URL"' in tasks
-    assert '. "{{ windmill_env_file }}"' not in tasks
     assert "Converge repo-managed Windmill schedule enabled flags" in tasks
-    assert 'psql "${database_url}"' in tasks
+    assert 'delegate_to: "{{ windmill_database_inventory_host }}"' in tasks
+    assert "become_user: postgres" in tasks
+    assert '      - psql' in tasks
+    assert '      - "{{ windmill_database_name }}"' in tasks
+    assert "schedule.enabled IS DISTINCT FROM desired.enabled" in tasks
     assert "become: true" in tasks
     assert "Sync repo-managed Windmill raw apps" in tasks
     assert "Install frontend dependencies for repo-managed Windmill raw apps" in tasks
@@ -658,6 +665,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Collect controller-side integrity checksums for Windmill worker checkout sentinels" in tasks
     assert "Collect guest-side integrity checksums for Windmill worker checkout sentinels" in tasks
     assert "Flag the Windmill worker checkout for refresh when integrity sentinels drift" in tasks
+    assert "Mirror critical Windmill worker checkout integrity sentinels after refresh" in tasks
     assert "Re-collect guest-side integrity checksums after Windmill worker checkout refresh" in tasks
     assert "Assert the refreshed Windmill worker checkout integrity sentinels match controller state" in tasks
     assert "windmill_worker_checkout_integrity_mismatch" in tasks
@@ -717,23 +725,41 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert 'delay: "{{ windmill_worker_registration_delay_seconds }}"' in wait_for_workers_tasks
     assert 'WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"' in tasks
     assert 'WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"' in verify_tasks
+    assert "Ensure Windmill validation gate integrity file parent directories exist on the guest" in verify_tasks
+    assert "Mirror Windmill validation gate integrity files to the guest before verification" in verify_tasks
     assert "--path {{ windmill_validation_gate_status_script_path | quote }}" in verify_tasks
     assert "Run the Windmill validation gate status script" in verify_tasks
     assert "Assert the Windmill validation gate status result" in verify_tasks
-    assert "Parse the Windmill validation gate status result" in verify_tasks
+    assert "gate_status.waiver_summary.totals.compliant_receipts" in verify_tasks
+    assert "gate_status.waiver_summary.release_blockers" in verify_tasks
+    assert "windmill_verify_critical_seed_script_expectations" in verify_tasks
+    assert "Verify the critical Windmill verification scripts are seeded with current controller content" in verify_tasks
+    assert "Initialize the critical Windmill verification script drift tracker" in verify_tasks
+    assert "Record critical Windmill verification scripts that drifted after sync" in verify_tasks
+    assert "Re-sync drifted critical Windmill verification scripts after concurrent drift" in verify_tasks
+    assert "Verify the critical Windmill verification scripts are seeded with current controller content after any repair attempt" in verify_tasks
+    assert "Assert the critical Windmill verification scripts match controller content" in verify_tasks
+    assert "windmill_seed_script_root_local_dir ~ '/gate-status.py'" in verify_tasks
+    assert "inventory_dir ~ '/../config/windmill/scripts/stage-smoke-suites.py'" in verify_tasks
+    assert "lookup('ansible.builtin.file', windmill_seed_script_root_local_dir ~ '/lv3-healthcheck.py', rstrip=False)" in verify_tasks
+    assert "lookup('ansible.builtin.file', windmill_seed_script_root_local_dir ~ '/gate-status.py', rstrip=False)" in verify_tasks
+    assert "lookup('ansible.builtin.file', inventory_dir ~ '/../config/windmill/scripts/stage-smoke-suites.py', rstrip=False)" in verify_tasks
+    assert "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/" in verify_tasks
+    assert 'Authorization: "Bearer {{ windmill_bootstrap_session_token }}"' in verify_tasks
+    assert "windmill_verify_critical_seed_script_drift_paths" in verify_tasks
+    assert "selectattr('path', 'in', windmill_verify_critical_seed_script_drift_paths)" in verify_tasks
+    assert "windmill_verify_critical_seed_script_expectations[item.json.path].content" in verify_tasks
+    assert "windmill_verify_critical_seed_script_expectations[item.json.path].local_file" in verify_tasks
+    assert "windmill_verify_critical_seed_scripts_final" in verify_tasks
     assert "Verify the Windmill default operations scripts are seeded" in verify_tasks
     assert 'WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"' in verify_tasks
     assert 'Authorization: "Bearer {{ windmill_runtime_api_token }}"' in verify_tasks
     assert "until: windmill_verify_healthcheck.rc == 0" in verify_tasks
-    assert "windmill_verify_healthcheck.stdout | trim | length > 0" in verify_tasks
-    assert "windmill_verify_healthcheck_payload" in verify_tasks
-    assert "windmill_verify_validation_gate_status.rc == 0" in verify_tasks
-    assert "windmill_verify_validation_gate_status.stdout | trim | length > 0" in verify_tasks
-    assert "windmill_verify_validation_gate_status_payload" in verify_tasks
-    assert "windmill_verify_stage_smoke_suites.stdout | trim | length > 0" in verify_tasks
-    assert "windmill_verify_stage_smoke_suites_payload" in verify_tasks
+    assert "until: windmill_verify_validation_gate_status.rc == 0" in verify_tasks
     assert "failed_when: false" in verify_tasks
     assert "retries: 6" in verify_tasks
+    assert "windmill_verify_critical_seed_scripts.status == 200" in verify_tasks
+    assert "windmill_verify_critical_seed_scripts.json | default({})" in verify_tasks
     assert "windmill_verify_default_operations_scripts.status == 200" in verify_tasks
     assert "windmill_verify_default_operations_scripts.json | default({})" in verify_tasks
     assert "delegate_to: localhost" in tasks

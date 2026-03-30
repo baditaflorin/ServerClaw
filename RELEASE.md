@@ -1,12 +1,12 @@
-# Release 0.177.104
+# Release 0.177.105
 
 - Date: 2026-03-30
 
 ## Summary
-- completed the ADR 0274 mainline live apply by hardening the Coolify bootstrap and publication path, then re-verifying governed repo-deploy base-image warming on coolify-lv3
+- replays ADR 0267 from the exact 0.177.104 main tree, keeps governed validation-gate waivers live on the Windmill worker checkout, preserves the repo-root Docker publication helper repair plus apt-lock tolerance, and fixes the latest-main nftables forward-compat insertion regression before advancing platform_version to 0.130.70
 
 ## Platform Impact
-- Implements ADR 0274 exact-main live apply on top of the ADR 0296 mainline baseline, preserving the verified 0.130.69 platform state
+- platform version advances to 0.130.70 after the exact-main ADR 0267 replay re-verifies governed validation-gate waivers on the 0.177.104 baseline and fixes the latest-main Docker runtime nftables forward-compat insertion regression
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

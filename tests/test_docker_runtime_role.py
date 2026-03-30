@@ -95,14 +95,19 @@ def test_docker_runtime_patches_nftables_rule_block_once() -> None:
     tasks = load_tasks()
     build_rules = next(task for task in tasks if task["name"] == "Build the Docker bridge forward-compat rule block")
     patch_rules = next(task for task in tasks if task["name"] == "Patch nftables forward policy for Docker bridge egress")
+    assert_rules = next(task for task in tasks if task["name"] == "Assert the Docker bridge forward-compat rule is present")
     live_rules = next(
         task for task in tasks if task["name"] == "Apply Docker bridge forward-compat rules live without reloading nftables"
     )
 
     assert "docker_runtime_container_forward_rule_lines" in build_rules["ansible.builtin.set_fact"]
     assert "docker_runtime_container_forward_rule_block" in build_rules["ansible.builtin.set_fact"]
-    assert patch_rules["ansible.builtin.lineinfile"]["line"] == "    {{ docker_runtime_container_forward_rule_block }}"
-    assert "loop" not in patch_rules
+    assert patch_rules["ansible.builtin.lineinfile"]["line"] == "    ip saddr {{ item }} accept"
+    assert patch_rules["ansible.builtin.lineinfile"]["insertafter"] == (
+        r"^\s*ct state (established,related|related,established) accept$"
+    )
+    assert patch_rules["loop"] == "{{ docker_runtime_container_forward_source_cidrs | reverse | list }}"
+    assert assert_rules["loop"] == "{{ docker_runtime_container_forward_source_cidrs }}"
     assert live_rules["loop"] == "{{ docker_runtime_container_forward_source_cidrs }}"
     assert live_rules["ansible.builtin.command"]["argv"][:6] == ["nft", "add", "rule", "inet", "filter", "forward"]
 
@@ -147,11 +152,38 @@ def test_docker_runtime_installs_publication_assurance_helper_before_chain_check
     nftables_check_task = next(task for task in tasks if task["name"] == "Check whether nftables config exists")
 
     assert install_task["ansible.builtin.copy"]["dest"] == "{{ docker_runtime_publication_assurance_script_path }}"
-    assert (
-        install_task["ansible.builtin.copy"]["content"]
-        == "{{ lookup('ansible.builtin.file', docker_runtime_publication_assurance_helper_source) }}"
-    )
+    helper_content = install_task["ansible.builtin.copy"]["content"]
+    assert "rev-parse --show-toplevel" in helper_content
+    assert "/scripts/docker_publication_assurance.py" in helper_content
+    assert "playbook_dir ~ '/../../scripts/docker_publication_assurance.py'" not in helper_content
     assert tasks.index(install_task) < tasks.index(nftables_check_task)
+
+
+def test_docker_runtime_waits_out_background_apt_maintenance() -> None:
+    tasks = load_tasks()
+    prereq_task = next(task for task in tasks if task["name"] == "Install Docker repository prerequisites")
+    remove_conflicts_task = next(task for task in tasks if task["name"] == "Remove conflicting Docker packages")
+    install_runtime_task = next(task for task in tasks if task["name"] == "Install Docker runtime packages")
+
+    prereq_apt = prereq_task["ansible.builtin.apt"]
+    remove_conflicts_apt = remove_conflicts_task["ansible.builtin.apt"]
+    install_runtime_apt = install_runtime_task["ansible.builtin.apt"]
+
+    assert prereq_apt["name"] == "{{ docker_runtime_prereq_packages }}"
+    assert prereq_apt["state"] == "present"
+    assert prereq_apt["update_cache"] is True
+    assert prereq_apt["lock_timeout"] == 300
+    assert prereq_apt["force_apt_get"] is True
+
+    assert remove_conflicts_apt["name"] == "{{ docker_runtime_conflicting_packages }}"
+    assert remove_conflicts_apt["state"] == "absent"
+    assert remove_conflicts_apt["lock_timeout"] == 300
+
+    assert install_runtime_apt["name"] == "{{ docker_runtime_engine_packages }}"
+    assert install_runtime_apt["state"] == "present"
+    assert install_runtime_apt["update_cache"] is True
+    assert install_runtime_apt["lock_timeout"] == 300
+    assert install_runtime_apt["force_apt_get"] is True
 
 
 def test_docker_runtime_verify_checks_publication_assurance_helper_is_executable() -> None:

@@ -1,0 +1,10 @@
+Debian-trixie-latest-amd64-base
+6.17.13-2-pve
+active
+active
+LISTEN 0      128                  0.0.0.0:2222       0.0.0.0:*
+LISTEN 0      4096   100.64.0.1%tailscale0:8005       0.0.0.0:*
+LISTEN 0      128                     [::]:2222          [::]:*
+LISTEN 0      4096                       *:8006             *:*
+status: running
+CE v1.662.0
