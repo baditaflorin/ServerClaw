@@ -51,7 +51,9 @@ platform-version bump.
 - `config/alertmanager/rules/gotenberg.yml`
 - `playbooks/gotenberg.yml`
 - `playbooks/services/gotenberg.yml`
+- `collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml`
 - `collections/ansible_collections/lv3/platform/roles/gotenberg_runtime/**`
+- `tests/test_docker_runtime_role.py`
 - `tests/test_gotenberg_runtime_role.py`
 - `README.md`
 - `RELEASE.md`
@@ -89,6 +91,10 @@ platform-version bump.
   gate and every check passed except `workstream-surfaces`, which failed only
   because this integration branch had not yet been registered in
   `workstreams.yaml`
+- the first merged-main replay exposed a Docker-runtime recovery bug: reloading
+  the full nftables ruleset to persist the forward-compat patch flushed
+  Docker-managed tables, restarted the daemon, and left Gotenberg racing a
+  transient `iptables -t nat DOCKER` / bridge-network restore window
 
 ## Current State
 
