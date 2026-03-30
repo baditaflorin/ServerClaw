@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.92",
   "platform_version": "0.130.60",
-  "generated_at": "2026-03-30T00:07:15Z",
-  "next_refresh_at": "2026-03-30T01:07:15Z",
+  "generated_at": "2026-03-30T00:09:28Z",
+  "next_refresh_at": "2026-03-30T01:09:28Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -26,7 +26,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.40:9093",
-        "last_live_apply": "2026-03-30T00:00:00Z"
+        "last_live_apply": "2026-03-29T00:00:00Z"
       },
       "api_gateway": {
         "service_name": "Platform API Gateway",
@@ -163,6 +163,18 @@
         "last_live_apply": "2026-03-30T00:00:00Z",
         "slo_status": "unknown"
       },
+      "gotenberg": {
+        "service_name": "Gotenberg",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://10.10.10.20:3007",
+        "last_live_apply": "2026-03-30T00:00:00Z",
+        "slo_status": "unknown"
+      },
       "grafana": {
         "service_name": "Grafana",
         "status": "healthy",
@@ -172,7 +184,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://grafana.lv3.org",
-        "last_live_apply": "2026-03-30T00:00:00Z",
+        "last_live_apply": "2026-03-29T00:00:00Z",
         "slo_status": "unknown"
       },
       "harbor": {
@@ -245,18 +257,6 @@
         "primary_url": "https://mail.lv3.org",
         "last_live_apply": "2026-03-30T00:00:00Z"
       },
-      "mailpit": {
-        "service_name": "Mailpit",
-        "status": "healthy",
-        "score": 0.95,
-        "safe_to_act": true,
-        "source": "repo_evidence",
-        "reason": "Repository evidence is complete enough for normal automation.",
-        "lifecycle_status": "active",
-        "primary_url": "http://10.10.10.20:8025",
-        "last_live_apply": "2026-03-30T00:00:00Z",
-        "slo_status": "unknown"
-      },
       "matrix_synapse": {
         "service_name": "Matrix Synapse",
         "status": "healthy",
@@ -324,7 +324,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:8013",
-        "last_live_apply": "2026-03-30T00:00:00Z"
+        "last_live_apply": "2026-03-29T00:00:00Z"
       },
       "ntfy": {
         "service_name": "ntfy",
@@ -471,7 +471,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://realtime.lv3.org",
-        "last_live_apply": "2026-03-30T00:00:00Z",
+        "last_live_apply": "2026-03-29T00:00:00Z",
         "slo_status": "unknown"
       },
       "searxng": {
@@ -1151,6 +1151,32 @@
         "runbook": "docs/runbooks/configure-gitea.md"
       },
       {
+        "id": "converge-gotenberg",
+        "description": "Deploy the private Gotenberg runtime on docker-runtime-lv3 and refresh the shared API gateway route used for authenticated PDF rendering requests.",
+        "tags": [
+          "converge-gotenberg",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 280,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-gotenberg.md"
+      },
+      {
         "id": "converge-guest-network-policy",
         "description": "Converge the default-deny guest network policy on the Proxmox host and all managed guests.",
         "tags": [
@@ -1331,32 +1357,6 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-mail-platform.md"
-      },
-      {
-        "id": "converge-mailpit",
-        "description": "Deploy the private Mailpit SMTP interceptor on docker-runtime-lv3 for staging and development mail capture plus REST-API assertions.",
-        "tags": [
-          "converge-mailpit",
-          "guest-live",
-          "mutation",
-          "preflight",
-          "validated"
-        ],
-        "risk_class": "HIGH",
-        "automation_eligible": true,
-        "agent_trust_required": "T3",
-        "execution_class": "mutation",
-        "live_impact": "guest_live",
-        "budget": {
-          "max_duration_seconds": 900,
-          "max_steps": 250,
-          "max_concurrent_instances": 1,
-          "max_touched_hosts": 2,
-          "max_restarts": 1,
-          "max_rollback_depth": 1,
-          "escalation_action": "notify_and_abort"
-        },
-        "runbook": "docs/runbooks/configure-mailpit.md"
       },
       {
         "id": "converge-matrix-synapse",
@@ -3681,6 +3681,16 @@
         ]
       },
       {
+        "id": "configure-gotenberg",
+        "title": "Configure Gotenberg",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-gotenberg.md",
+        "workflow_ids": [
+          "converge-gotenberg"
+        ]
+      },
+      {
         "id": "configure-guest-network-policy",
         "title": "Configure Guest Network Policy",
         "agent_trust_required": "T3",
@@ -3758,16 +3768,6 @@
         "path": "docs/runbooks/configure-mail-platform.md",
         "workflow_ids": [
           "converge-mail-platform"
-        ]
-      },
-      {
-        "id": "configure-mailpit",
-        "title": "Configure Mailpit",
-        "agent_trust_required": "T3",
-        "steps": 0,
-        "path": "docs/runbooks/configure-mailpit.md",
-        "workflow_ids": [
-          "converge-mailpit"
         ]
       },
       {
@@ -4537,7 +4537,7 @@
   "recent_changes": {
     "last_version": "0.177.91",
     "deployed_at": "2026-03-30",
-    "summary": "integrates ADR 0282 into main by carrying Mailpit as the private development SMTP interceptor and the non-production SMTP contract onto the synchronized 0.177.91 / 0.130.60 baseline",
+    "summary": "implemented ADR 0278 by adding the private Gotenberg document-to-PDF runtime on docker-runtime-lv3, publishing the authenticated `/v1/gotenberg` API gateway route, and verifying Chromium plus LibreOffice PDF conversion end to end",
     "release_notes_url": "docs/release-notes/0.177.92.md"
   },
   "agentic_architecture": {

@@ -141,6 +141,16 @@
       "requires_compose_secrets": true,
       "keycloak_client_generated": true
     },
+    "gotenberg": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "dashboard_file": "config/grafana/dashboards/gotenberg.json",
+      "alert_rule_file": "config/alertmanager/rules/gotenberg.yml",
+      "suppressed_checks": {}
+    },
     "grafana": {
       "service_type": "vm-service",
       "requires_subdomain": true,

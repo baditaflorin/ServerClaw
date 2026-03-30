@@ -1,0 +1,13 @@
+services:
+  gotenberg:
+    image: {{ gotenberg_runtime_image }}
+    container_name: {{ gotenberg_runtime_container_name }}
+    restart: unless-stopped
+    network_mode: bridge
+    ports:
+      - "{{ gotenberg_runtime_port }}:{{ gotenberg_runtime_container_port }}"
+    environment:
+      CHROMIUM_AUTO_START: "{{ 'true' if gotenberg_runtime_chromium_auto_start | bool else 'false' }}"
+      LIBREOFFICE_AUTO_START: "{{ 'true' if gotenberg_runtime_libreoffice_auto_start | bool else 'false' }}"
+    mem_limit: {{ gotenberg_runtime_memory_limit }}
+    cpus: "{{ gotenberg_runtime_cpu_limit }}"

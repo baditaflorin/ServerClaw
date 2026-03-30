@@ -1,9 +1,10 @@
 # ADR 0278: Gotenberg As The Document-To-PDF Rendering Service
 
 - Status: Accepted
-- Implementation Status: Not Implemented
+- Implementation Status: Live applied
 - Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implemented In Platform Version: 0.130.59
+- Implemented On: 2026-03-30
 - Date: 2026-03-29
 
 ## Context

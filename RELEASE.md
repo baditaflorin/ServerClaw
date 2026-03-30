@@ -3,10 +3,10 @@
 - Date: 2026-03-30
 
 ## Summary
-- integrates ADR 0282 into main by carrying Mailpit as the private development SMTP interceptor and the non-production SMTP contract onto the synchronized 0.177.91 / 0.130.60 baseline
+- implemented ADR 0278 by adding the private Gotenberg document-to-PDF runtime on docker-runtime-lv3, publishing the authenticated `/v1/gotenberg` API gateway route, and verifying Chromium plus LibreOffice PDF conversion end to end
 
 ## Platform Impact
-- platform_version remains 0.130.60; this release integrates ADR 0282 Mailpit as the private development SMTP interceptor and carries the staging SMTP contract already verified from the rebased latest-main live apply
+- platform version advances to 0.130.61 after the exact-main ADR 0278 replay; this release integrates the private Gotenberg runtime, authenticated /v1/gotenberg route, pinned image contract, and verified Chromium plus LibreOffice rendering on top of the current 0.177.91 / 0.130.60 baseline.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

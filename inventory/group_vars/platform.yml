@@ -168,6 +168,7 @@ platform_ports:
   gitea_host_proxy_port: 3009
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
+  gotenberg_port: 3007
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
@@ -235,6 +236,7 @@ platform_port_assignments:
   gitea_host_proxy_port: 3009
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
+  gotenberg_port: 3007
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
@@ -1619,6 +1621,19 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8088
       controller: http://100.64.0.1:8008
+  gotenberg:
+    service_name: gotenberg
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: gotenberg
+    ports:
+      internal: 3007
+    urls:
+      internal: http://10.10.10.20:3007
   serverclaw:
     service_name: serverclaw
     owning_vm: coolify-lv3
@@ -2944,6 +2959,19 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8088
       controller: http://100.64.0.1:8008
+  gotenberg:
+    service_name: gotenberg
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: gotenberg
+    ports:
+      internal: 3007
+    urls:
+      internal: http://10.10.10.20:3007
   serverclaw:
     service_name: serverclaw
     owning_vm: coolify-lv3
@@ -3483,6 +3511,7 @@ nomad_server_port: 4646
 nomad_rpc_port: 4647
 nomad_serf_port: 4648
 netbox_server_port: 8082
+gotenberg_port: 3007
 searxng_port: 8881
 searxng_host_proxy_port: 80
 langfuse_port: 3002

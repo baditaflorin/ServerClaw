@@ -120,6 +120,15 @@
       "adr": "0143"
     },
     {
+      "id": "gotenberg",
+      "service": "gotenberg",
+      "name": "Gotenberg",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0278"
+    },
+    {
       "id": "grafana",
       "service": "grafana",
       "name": "Grafana",
@@ -591,6 +600,18 @@
       "to": "postgres",
       "type": "hard",
       "description": "Gitea persists repositories, metadata, and issue state in Postgres."
+    },
+    {
+      "from": "gotenberg",
+      "to": "api_gateway",
+      "type": "soft",
+      "description": "Authenticated operator and cross-service access can be brokered through the shared API gateway route, while private guest-network callers can still use the internal listener directly."
+    },
+    {
+      "from": "gotenberg",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Gotenberg Chromium and LibreOffice renderers are hosted on docker-runtime-lv3."
     },
     {
       "from": "grafana",
