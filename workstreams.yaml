@@ -16986,3 +16986,135 @@ workstreams:
       included_in_repo_version: 0.177.109
       latest_receipts:
         directus: 2026-03-30-adr-0289-directus-mainline-live-apply
+  - id: ws-0293-live-apply
+    adr: "0293"
+    title: Live apply Temporal as the durable workflow and task queue engine from latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0293-temporal-main
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-temporal-main
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-live-apply.md
+    depends_on:
+      - adr-0042-postgresql-as-the-shared-relational-database
+      - adr-0077-compose-secrets-injection-pattern
+      - adr-0086-backup-and-recovery-for-stateful-services
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0293-live-apply.md
+      - docs/adr/0293-temporal-as-the-durable-workflow-and-task-queue-engine.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/configure-temporal.md
+      - playbooks/temporal.yml
+      - playbooks/services/temporal.yml
+      - collections/ansible_collections/lv3/platform/roles/temporal_postgres/
+      - collections/ansible_collections/lv3/platform/roles/temporal_runtime/
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - config/controller-local-secrets.json
+      - config/secret-catalog.json
+      - config/image-catalog.json
+      - config/service-capability-catalog.json
+      - config/health-probe-catalog.json
+      - config/service-completeness.json
+      - config/data-catalog.json
+      - config/service-redundancy-catalog.json
+      - config/dependency-graph.json
+      - config/command-catalog.json
+      - config/workflow-catalog.json
+      - config/ansible-execution-scopes.yaml
+      - config/ansible-role-idempotency.yml
+      - Makefile
+      - scripts/temporal_smoke.py
+      - tests/test_temporal_playbook.py
+      - tests/test_temporal_postgres_role.py
+      - tests/test_temporal_runtime_role.py
+      - tests/test_generate_platform_vars.py
+      - tests/test_dependency_graph.py
+      - receipts/image-scans/2026-03-30-temporal-server-runtime.json
+      - receipts/image-scans/2026-03-30-temporal-server-runtime.trivy.json
+      - receipts/image-scans/2026-03-30-temporal-admin-tools-runtime.json
+      - receipts/image-scans/2026-03-30-temporal-admin-tools-runtime.trivy.json
+      - receipts/image-scans/2026-03-30-temporal-ui-runtime.json
+      - receipts/image-scans/2026-03-30-temporal-ui-runtime.trivy.json
+      - receipts/live-applies/2026-03-30-adr-0293-temporal-live-apply.json
+      - receipts/live-applies/2026-03-30-adr-0293-temporal-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-03-30-ws-0293-*
+      - receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-*
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: temporal_docs
+          paths:
+            - docs/workstreams/ws-0293-live-apply.md
+            - docs/adr/0293-temporal-as-the-durable-workflow-and-task-queue-engine.md
+            - docs/runbooks/configure-temporal.md
+          mode: exclusive
+        - id: temporal_runtime_bundle
+          paths:
+            - playbooks/temporal.yml
+            - playbooks/services/temporal.yml
+            - collections/ansible_collections/lv3/platform/roles/temporal_postgres/*
+            - collections/ansible_collections/lv3/platform/roles/temporal_runtime/*
+            - scripts/temporal_smoke.py
+            - tests/test_temporal_playbook.py
+            - tests/test_temporal_postgres_role.py
+            - tests/test_temporal_runtime_role.py
+            - receipts/image-scans/2026-03-30-temporal-server-runtime.json
+            - receipts/image-scans/2026-03-30-temporal-server-runtime.trivy.json
+            - receipts/image-scans/2026-03-30-temporal-admin-tools-runtime.json
+            - receipts/image-scans/2026-03-30-temporal-admin-tools-runtime.trivy.json
+            - receipts/image-scans/2026-03-30-temporal-ui-runtime.json
+            - receipts/image-scans/2026-03-30-temporal-ui-runtime.trivy.json
+            - receipts/live-applies/2026-03-30-adr-0293-temporal-live-apply.json
+            - receipts/live-applies/2026-03-30-adr-0293-temporal-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-03-30-ws-0293-*
+            - receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-*
+          mode: exclusive
+        - id: temporal_topology_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - tests/test_generate_platform_vars.py
+          mode: shared_contract
+          contract: platform-topology-v1
+        - id: temporal_catalog_contract
+          paths:
+            - config/controller-local-secrets.json
+            - config/secret-catalog.json
+            - config/image-catalog.json
+            - config/service-capability-catalog.json
+            - config/health-probe-catalog.json
+            - config/service-completeness.json
+            - config/data-catalog.json
+            - config/service-redundancy-catalog.json
+            - config/dependency-graph.json
+          mode: shared_contract
+          contract: service-catalog-and-image-policy-v1
+        - id: temporal_validation_contract
+          paths:
+            - config/command-catalog.json
+            - config/workflow-catalog.json
+            - config/ansible-execution-scopes.yaml
+            - config/ansible-role-idempotency.yml
+            - Makefile
+            - tests/test_dependency_graph.py
+          mode: shared_contract
+          contract: repository-automation-v1
+    ready_to_merge: false
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0293 by adding the private Temporal durable workflow engine, PostgreSQL-backed history and visibility stores, OpenBao-managed runtime secrets, and the repo-managed `lv3` namespace with exact-main verification on docker-runtime-lv3 and postgres-lv3
+      release_bump: patch
+      included_in_repo_version: 0.177.109
+      latest_receipts:
+        temporal: 2026-03-30-adr-0293-temporal-mainline-live-apply

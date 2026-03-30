@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.109",
   "platform_version": "0.130.72",
-  "generated_at": "2026-03-30T20:34:36Z",
-  "next_refresh_at": "2026-03-30T21:34:36Z",
+  "generated_at": "2026-03-30T21:03:49Z",
+  "next_refresh_at": "2026-03-30T22:03:49Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -625,6 +625,17 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9443",
+        "last_live_apply": "2026-03-30T00:00:00Z"
+      },
+      "temporal": {
+        "service_name": "Temporal",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "grpc://127.0.0.1:7233",
         "last_live_apply": "2026-03-30T00:00:00Z"
       },
       "tesseract_ocr": {
@@ -2256,6 +2267,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-step-ca.md"
+      },
+      {
+        "id": "converge-temporal",
+        "description": "Converge Temporal on docker-runtime-lv3, provision its PostgreSQL history and visibility stores on postgres-lv3, and bootstrap the private `lv3` namespace plus loopback-only diagnostics.",
+        "tags": [
+          "converge-temporal",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-temporal.md"
       },
       {
         "id": "converge-tesseract-ocr",
@@ -4470,6 +4507,16 @@
         ]
       },
       {
+        "id": "configure-temporal",
+        "title": "Configure Temporal",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-temporal.md",
+        "workflow_ids": [
+          "converge-temporal"
+        ]
+      },
+      {
         "id": "configure-tesseract-ocr",
         "title": "Configure Tesseract OCR",
         "agent_trust_required": "T3",
@@ -5070,7 +5117,7 @@
   "recent_changes": {
     "last_version": "0.177.108",
     "deployed_at": "2026-03-30",
-    "summary": "implements ADR 0289 by deploying Directus as the repo-managed REST and GraphQL data API on docker-runtime-lv3, adds the dedicated Postgres plus Keycloak/OIDC bootstrap path, publishes data.lv3.org on the shared edge, and records the first verified mainline Directus live apply that advances platform_version to 0.130.72",
+    "summary": "implements ADR 0289 by deploying Directus as the repo-managed REST and GraphQL data API on docker-runtime-lv3, adding the dedicated Postgres plus Keycloak/OIDC bootstrap path, publishing `data.lv3.org` on the shared edge, and recording the canonical mainline Directus live-apply receipt bundle implements ADR 0293 by adding the private Temporal durable workflow engine, PostgreSQL-backed history and visibility stores, OpenBao-managed runtime secrets, and the repo-managed `lv3` namespace with exact-main verification on docker-runtime-lv3 and postgres-lv3",
     "release_notes_url": "docs/release-notes/0.177.109.md"
   },
   "agentic_architecture": {

@@ -1,9 +1,10 @@
 # ADR 0293: Temporal As The Durable Workflow And Task Queue Engine
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.177.109
+- Implemented In Platform Version: 0.130.72
+- Implemented On: 2026-03-30
 - Date: 2026-03-29
 
 ## Context
@@ -47,10 +48,15 @@ recovery are required.
 
 - Temporal server runs as a Docker Compose stack (frontend, history, matching,
   and worker services, plus the `temporal-ui-server` for diagnostic access)
-  on the docker-runtime VM using the official `temporalio/temporal` image
+  on the docker-runtime VM using the official `temporalio/server` and
+  `temporalio/ui` images
 - The Temporal server is internal-only; no public subdomain is issued
-- The gRPC API endpoint is `temporal:7233` (internal Compose network);
-  the HTTP frontend API is `temporal:7234`
+- The gRPC API endpoint is `temporal-frontend:7233` on the internal Compose
+  network; the HTTP frontend API is `temporal-frontend:7243`
+- Operator diagnostics stay loopback-only on `docker-runtime-lv3`
+  (`127.0.0.1:7233`, `127.0.0.1:7243`, and `127.0.0.1:8099`) and are consumed
+  through the documented Proxmox jump-path tunnel instead of public edge
+  publication
 - Temporal uses the shared PostgreSQL cluster (ADR 0042) with a dedicated
   `temporal` database and a `temporal_visibility` database for the
   visibility store
@@ -75,7 +81,7 @@ recovery are required.
   nightly document ingestion still running?") without reading PostgreSQL
   directly
 - Namespace management (creating namespaces for different domains) is
-  performed via the Temporal `tctl` CLI or the namespaces REST API during
+  performed via the Temporal `temporal` CLI or the namespaces REST API during
   Ansible provisioning; namespaces are declared in `defaults/main.yml` and
   applied idempotently
 

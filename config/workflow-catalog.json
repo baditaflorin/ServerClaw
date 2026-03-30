@@ -1974,6 +1974,60 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-temporal": {
+      "description": "Converge Temporal on docker-runtime-lv3, provision its PostgreSQL history and visibility stores on postgres-lv3, and bootstrap the private `lv3` namespace plus loopback-only diagnostics.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-temporal",
+        "command": "make converge-temporal"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "temporal_database_password"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-temporal"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-temporal.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/temporal.yml",
+        "playbooks/services/temporal.yml",
+        "collections/ansible_collections/lv3/platform/roles/temporal_postgres",
+        "collections/ansible_collections/lv3/platform/roles/temporal_runtime",
+        "scripts/temporal_smoke.py",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/service-completeness.json",
+        "config/data-catalog.json",
+        "config/dependency-graph.json"
+      ],
+      "outputs": [
+        "A repo-managed Temporal runtime on docker-runtime-lv3 with PostgreSQL-backed history plus visibility stores on postgres-lv3, loopback-only gRPC/HTTP plus UI endpoints, and an automatically reconciled `lv3` namespace."
+      ],
+      "verification_commands": [
+        "make syntax-check-temporal",
+        "ANSIBLE_HOST_KEY_CHECKING=False ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a \"docker compose --profile tools --file /opt/temporal/docker-compose.yml run --rm temporal-admin-tools temporal operator cluster health && docker compose --profile tools --file /opt/temporal/docker-compose.yml run --rm temporal-admin-tools temporal operator namespace describe --namespace lv3 && curl -fsS http://127.0.0.1:8099 >/dev/null\" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-windmill": {
       "description": "Converge Windmill on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and expose the operator-only Tailscale proxy on the Proxmox host.",
       "lifecycle_status": "active",

@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "temporal_admin_tools_runtime",
+  "image_ref": "docker.io/temporalio/admin-tools:1.30.2@sha256:024c6473df113e4b220b3caf6056d30964582ffcae6f6e46a1074aa6c67968d3",
+  "scanner": "trivy",
+  "scanner_image": "docker.io/aquasec/trivy:0.63.0",
+  "scanned_on": "2026-03-30",
+  "summary": {
+    "critical": 1,
+    "high": 3
+  },
+  "targets_with_findings": [
+    "usr/local/bin/temporal"
+  ],
+  "raw_report": "receipts/image-scans/2026-03-30-temporal-admin-tools-runtime.trivy.json"
+}

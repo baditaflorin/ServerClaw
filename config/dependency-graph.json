@@ -354,6 +354,15 @@
       "adr": "0262"
     },
     {
+      "id": "temporal",
+      "service": "temporal",
+      "name": "Temporal",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0293"
+    },
+    {
       "id": "ops_portal",
       "service": "ops_portal",
       "name": "Ops Portal",
@@ -975,6 +984,18 @@
       "to": "postgres",
       "type": "hard",
       "description": "OpenFGA stores authorization stores, models, and relationship tuples in PostgreSQL."
+    },
+    {
+      "from": "temporal",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Temporal stores workflow history, task queues, and visibility records in PostgreSQL."
+    },
+    {
+      "from": "temporal",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Temporal reads its mirrored PostgreSQL password from the OpenBao-backed runtime secret path before startup."
     },
     {
       "from": "ops_portal",

@@ -136,6 +136,7 @@ live_apply_evidence:
     vulnerability_budget_gate: 2026-03-30-adr-0269-vulnerability-budget-gates-mainline-live-apply
     tesseract_ocr: 2026-03-30-adr-0286-tesseract-ocr-live-apply
     directus: 2026-03-30-adr-0289-directus-mainline-live-apply
+    temporal: 2026-03-30-adr-0293-temporal-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated

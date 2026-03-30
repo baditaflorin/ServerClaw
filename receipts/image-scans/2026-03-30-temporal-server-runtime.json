@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "temporal_server_runtime",
+  "image_ref": "docker.io/temporalio/server:1.30.2@sha256:d5334ee3ddce1617efbe280a10afc85916cf8d81798415c98988dbda2b46773e",
+  "scanner": "trivy",
+  "scanner_image": "docker.io/aquasec/trivy:0.63.0",
+  "scanned_on": "2026-03-30",
+  "summary": {
+    "critical": 0,
+    "high": 0
+  },
+  "targets_with_findings": [],
+  "raw_report": "receipts/image-scans/2026-03-30-temporal-server-runtime.trivy.json"
+}

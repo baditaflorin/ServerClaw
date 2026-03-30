@@ -339,6 +339,12 @@ roles:
   step_ca_ssh_trust:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  temporal_postgres:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  temporal_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   tesseract_ocr_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.

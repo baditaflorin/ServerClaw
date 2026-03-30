@@ -97,6 +97,17 @@ def test_build_platform_vars_includes_openfga_private_controller_topology() -> N
     assert platform_vars["openfga_controller_url"] == "http://100.64.0.1:8014"
 
 
+def test_build_platform_vars_includes_temporal_private_loopback_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    temporal = platform_vars["platform_service_topology"]["temporal"]
+
+    assert temporal["exposure_model"] == "private-only"
+    assert temporal["private_ip"] == "10.10.10.20"
+    assert temporal["access"]["kind"] == "ssh-tunnel"
+    assert temporal["access"]["url"] == "grpc://127.0.0.1:7233"
+    assert "urls" not in temporal or temporal["urls"] == {}
+
+
 def test_build_platform_vars_includes_plausible_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     plausible = platform_vars["platform_service_topology"]["plausible"]

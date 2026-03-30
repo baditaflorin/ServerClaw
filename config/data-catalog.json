@@ -490,6 +490,21 @@
       "notes": "The delegated authorization graph persists named operator and service-principal relationships until the repo-managed bootstrap contract removes or replaces them."
     },
     {
+      "id": "temporal-workflow-history",
+      "service": "temporal",
+      "name": "Temporal workflow history and visibility",
+      "class": "confidential",
+      "retention_days": 7,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "PostgreSQL temporal database on postgres-lv3",
+        "PostgreSQL temporal_visibility database on postgres-lv3"
+      ],
+      "notes": "Temporal persists workflow event history, timers, and visibility records for the repo-managed `lv3` namespace using the declared retention window."
+    },
+    {
       "id": "outline-attachment-storage",
       "service": "outline",
       "name": "Outline attachment storage",

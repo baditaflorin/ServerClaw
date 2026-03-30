@@ -1,0 +1,71 @@
+# Purpose: Define default runtime paths, secret locations, and controller settings for the private Temporal service.
+# Use case: Loaded whenever the Temporal runtime role converges or validates the durable workflow engine.
+# Inputs: Image catalog entries, compose secret roots, OpenBao defaults, and Temporal service settings.
+# Outputs: Supplies stable defaults consumed by the Temporal runtime tasks and templates.
+# Idempotency: Fully idempotent because this file only declares role defaults.
+# Dependencies: ADR 0165 and ADR 0293.
+---
+temporal_server_image: "{{ container_image_catalog.images.temporal_server_runtime.ref }}"
+temporal_admin_tools_image: "{{ container_image_catalog.images.temporal_admin_tools_runtime.ref }}"
+temporal_ui_image: "{{ container_image_catalog.images.temporal_ui_runtime.ref }}"
+temporal_site_dir: /opt/temporal
+temporal_config_dir: "{{ temporal_site_dir }}/config"
+temporal_compose_file: "{{ temporal_site_dir }}/docker-compose.yml"
+temporal_dynamic_config_file: "{{ temporal_config_dir }}/dynamicconfig.yml"
+temporal_env_file: "{{ compose_runtime_secret_root }}/temporal/runtime.env"
+temporal_legacy_env_file: "{{ temporal_site_dir }}/temporal.env"
+temporal_openbao_agent_dir: "{{ temporal_site_dir }}/openbao"
+temporal_openbao_agent_image: "{{ openbao_agent_image }}"
+temporal_openbao_agent_container_name: temporal-openbao-agent
+temporal_openbao_secret_path: services/temporal/runtime-env
+temporal_openbao_policy_name: lv3-service-temporal-runtime
+temporal_openbao_approle_name: temporal-runtime
+temporal_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/temporal
+temporal_database_name: temporal
+temporal_visibility_database_name: temporal_visibility
+temporal_database_user: temporal
+temporal_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+temporal_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/temporal/database-password.txt
+temporal_schema_bootstrap_report_local_file: "{{ temporal_local_artifact_dir }}/schema-bootstrap-report.json"
+temporal_namespace_report_local_file: "{{ temporal_local_artifact_dir }}/namespace-report.json"
+temporal_default_store_max_conns: 5
+temporal_default_store_max_idle_conns: 5
+temporal_visibility_store_max_conns: 3
+temporal_visibility_store_max_idle_conns: 3
+temporal_frontend_bind_host: 127.0.0.1
+temporal_frontend_grpc_port: 7233
+temporal_frontend_http_port: 7243
+temporal_frontend_membership_port: 6933
+temporal_history_grpc_port: 7234
+temporal_history_membership_port: 6934
+temporal_matching_grpc_port: 7235
+temporal_matching_membership_port: 6935
+temporal_worker_grpc_port: 7239
+temporal_worker_membership_port: 6939
+temporal_ui_bind_host: 127.0.0.1
+temporal_ui_port: 8099
+temporal_ui_container_port: 8080
+temporal_num_history_shards: 4
+temporal_cluster_name: active
+temporal_default_namespace: lv3
+temporal_default_namespace_retention: 168h
+temporal_namespace_owner_email: ops@lv3.org
+temporal_public_frontend_address: temporal-frontend:7233
+temporal_public_frontend_http_address: temporal-frontend:7243
+temporal_server_components:
+  - role: frontend
+    service_name: temporal-frontend
+    membership_port: "{{ temporal_frontend_membership_port }}"
+    config_template_file: "{{ temporal_config_dir }}/frontend.yml.tpl"
+  - role: history
+    service_name: temporal-history
+    membership_port: "{{ temporal_history_membership_port }}"
+    config_template_file: "{{ temporal_config_dir }}/history.yml.tpl"
+  - role: matching
+    service_name: temporal-matching
+    membership_port: "{{ temporal_matching_membership_port }}"
+    config_template_file: "{{ temporal_config_dir }}/matching.yml.tpl"
+  - role: worker
+    service_name: temporal-worker
+    membership_port: "{{ temporal_worker_membership_port }}"
+    config_template_file: "{{ temporal_config_dir }}/worker.yml.tpl"

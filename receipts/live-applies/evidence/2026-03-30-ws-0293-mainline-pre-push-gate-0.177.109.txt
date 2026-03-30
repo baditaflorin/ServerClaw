@@ -1,0 +1,75 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-mainline-replay/scripts/remote_exec.sh pre-push-gate --local-fallback
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+  changed files: Makefile, README.md, RELEASE.md, VERSION, build/platform-manifest.json, changelog.md, ...
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 1.71
+alert-rule-validation passed 2.93
+ansible-lint          passed 179.29
+ansible-syntax        passed 111.00
+artifact-secret-scan  passed 3.94
+dependency-direction  passed 2.61
+dependency-graph      passed 3.83
+documentation-index   passed 3.32
+generated-docs        passed 8.68
+generated-portals     passed 30.76
+integration-tests     passed 0.96
+packer-validate       passed 6.56
+policy-validation     passed 3.27
+schema-validation     passed 16.31
+security-scan         passed 15.10
+semgrep-sast          passed 58.08
+service-completeness  passed 2.84
+tofu-validate         passed 0.93
+type-check            passed 5.09
+workstream-surfaces   failed 4.48
+yaml-lint             passed 15.78
+
+[workstream-surfaces] docker command
+docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0293-mainline-replay-b00c00a65c/repo/.lv3-runs/20260330T200500Z-99a1120d665e/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=99a1120d665e088c02303251a49c03f3a540e6d095cfa82da74502af21de9541 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T20:04:57.024805+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=bc43866bf1ea26fb36455da9f63e1966826e7520 -e LV3_SNAPSHOT_BRANCH=codex/ws-0293-mainline-replay -e LV3_VALIDATION_BASE_REF=origin/main -e LV3_VALIDATION_CHANGED_FILES_JSON=["Makefile", "README.md", "RELEASE.md", "VERSION", "build/platform-manifest.json", "changelog.md", "collections/ansible_collections/lv3/platform/roles/temporal_postgres/README.md", "collections/ansible_collections/lv3/platform/roles/temporal_postgres/defaults/main.yml", "collections/ansible_collections/lv3/platform/roles/temporal_postgres/meta/argument_specs.yml", "collections/ansible_collections/lv3/platform/roles/temporal_postgres/tasks/main.yml", "collections/ansible_collections/lv3/platform/roles/temporal_runtime/README.md", "collections/ansible_collections/lv3/platform/roles/temporal_runtime/defaults/main.yml", "collections/ansible_collections/lv3/platform/roles/temporal_runtime/meta/argument_specs.yml", "collections/ansible_collections/lv3/platform/roles/temporal_runtime/tasks/main.yml", "collections/ansible_collections/lv3/platform/roles/temporal_runtime/tasks/verify.yml", "collections/ansible_collections/lv3/platform/roles/temporal_runtime/templates/docker-compose.yml.j2", "collections/ansible_collections/lv3/platform/roles/temporal_runtime/templates/dynamicconfig.yml.j2", "collections/ansible_collections/lv3/platform/roles/temporal_runtime/templates/server-config.yml.j2", "collections/ansible_collections/lv3/platform/roles/temporal_runtime/templates/temporal.env.ctmpl.j2", "config/ansible-execution-scopes.yaml", "config/ansible-role-idempotency.yml", "config/command-catalog.json", "config/controller-local-secrets.json", "config/data-catalog.json", "config/dependency-graph.json", "config/health-probe-catalog.json", "config/image-catalog.json", "config/secret-catalog.json", "config/service-capability-catalog.json", "config/service-completeness.json", "config/service-redundancy-catalog.json", "config/workflow-catalog.json", "docs/adr/.index.yaml", "docs/adr/0293-temporal-as-the-durable-workflow-and-task-queue-engine.md", "docs/diagrams/agent-coordination-map.excalidraw", "docs/diagrams/service-dependency-graph.excalidraw", "docs/release-notes/0.177.109.md", "docs/release-notes/README.md", "docs/runbooks/configure-temporal.md", "docs/site-generated/architecture/dependency-graph.md", "docs/workstreams/ws-0293-live-apply.md", "inventory/group_vars/platform.yml", "inventory/host_vars/proxmox_florin.yml", "playbooks/services/temporal.yml", "playbooks/temporal.yml", "receipts/image-scans/2026-03-30-temporal-admin-tools-runtime.json", "receipts/image-scans/2026-03-30-temporal-admin-tools-runtime.trivy.json", "receipts/image-scans/2026-03-30-temporal-server-runtime.json", "receipts/image-scans/2026-03-30-temporal-server-runtime.trivy.json", "receipts/image-scans/2026-03-30-temporal-ui-runtime.json", "receipts/image-scans/2026-03-30-temporal-ui-runtime.trivy.json", "receipts/live-applies/2026-03-30-adr-0293-temporal-live-apply.json", "receipts/live-applies/2026-03-30-adr-0293-temporal-mainline-live-apply.json", "receipts/live-applies/evidence/2026-03-30-ws-0293-converge-temporal-r1.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-converge-temporal-r10.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-converge-temporal-r11.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-converge-temporal-r12.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-converge-temporal-r13.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-converge-temporal-r14.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-converge-temporal-r2.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-converge-temporal-r3.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-converge-temporal-r4.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-converge-temporal-r5.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-converge-temporal-r6.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-converge-temporal-r7.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-converge-temporal-r8.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-converge-temporal-r9.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-canonical-truth-check-0.177.109.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-container-image-policy-validate-0.177.109.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-converge-temporal-0.177.109.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-converge-temporal.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-generate-adr-index-0.177.109.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-generate-dependency-diagram-0.177.109.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-generate-dependency-diagram-r2-0.177.109.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-git-diff-check-0.177.109.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-live-apply-receipts-validate-0.177.109.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-platform-manifest-check-0.177.109.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-postgres-headroom.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-pre-push-gate-0.177.109.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-release-status-0.177.109.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-remote-validate-0.177.109.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-runtime-health.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-temporal-smoke-remote.json", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-temporal-smoke-remote.raw.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-validate-repo-0.177.109.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-validate-repo-r2-0.177.109.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-validate-repository-data-models-0.177.109.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-mainline-validate-repository-data-models-r2-0.177.109.txt", "receipts/live-applies/evidence/2026-03-30-ws-0293-temporal-smoke-r14-remote.json", "receipts/live-applies/evidence/2026-03-30-ws-0293-temporal-smoke.json", "scripts/temporal_smoke.py", "tests/test_dependency_graph.py", "tests/test_generate_platform_vars.py", "tests/test_temporal_playbook.py", "tests/test_temporal_postgres_role.py", "tests/test_temporal_runtime_role.py", "versions/stack.yaml", "workstreams.yaml"] -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh workstream-surfaces
+[workstream-surfaces] stdout
+Workstream surface ownership validation
+[workstream-surfaces] stderr
+Workstream surface ownership validation failed: branch 'codex/ws-0293-mainline-replay' is not registered in workstreams.yaml
+Validation lane selection
+  mode: auto
+  branch: codex/ws-0293-mainline-replay
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+  changed files: Makefile, README.md, RELEASE.md, VERSION, build/platform-manifest.json, changelog.md, ...
+  widened to all lanes because of unknown surfaces: Makefile, docs/site-generated/architecture/dependency-graph.md, receipts/image-scans/2026-03-30-temporal-admin-tools-runtime.json, receipts/image-scans/2026-03-30-temporal-admin-tools-runtime.trivy.json, receipts/image-scans/2026-03-30-temporal-server-runtime.json, receipts/image-scans/2026-03-30-temporal-server-runtime.trivy.json, receipts/image-scans/2026-03-30-temporal-ui-runtime.json, receipts/image-scans/2026-03-30-temporal-ui-runtime.trivy.json
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 12.43
+alert-rule-validation passed 10.10
+ansible-lint          passed 323.47
+ansible-syntax        passed 187.82
+artifact-secret-scan  passed 20.74
+dependency-direction  passed 16.20
+dependency-graph      passed 16.93
+documentation-index   passed 14.65
+generated-docs        passed 31.77
+generated-portals     passed 86.36
+integration-tests     passed 4.83
+packer-validate       passed 51.18
+policy-validation     passed 19.09
+schema-validation     passed 110.17
+security-scan         passed 66.27
+semgrep-sast          passed 90.90
+service-completeness  passed 9.53
+tofu-validate         passed 6.70
+type-check            passed 21.64
+workstream-surfaces   failed 16.74
+yaml-lint             passed 47.84
+
+[workstream-surfaces] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0293-mainline-replay:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0293-mainline-replay:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0293-mainline-replay:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=99a1120d665e088c02303251a49c03f3a540e6d095cfa82da74502af21de9541 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T20:04:57.024805+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=bc43866bf1ea26fb36455da9f63e1966826e7520 -e LV3_SNAPSHOT_BRANCH=codex/ws-0293-mainline-replay -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh workstream-surfaces
+[workstream-surfaces] stdout
+Workstream surface ownership validation
+[workstream-surfaces] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+Workstream surface ownership validation failed: branch 'codex/ws-0293-mainline-replay' is not registered in workstreams.yaml

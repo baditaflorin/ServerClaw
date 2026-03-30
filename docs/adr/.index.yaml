@@ -5175,7 +5175,7 @@ adr_index:
   - adr: 0293
     title: Temporal As The Durable Workflow And Task Queue Engine
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: monitoring
     keywords:
@@ -5188,6 +5188,7 @@ adr_index:
       - engine
     summary: We will deploy Temporal as the durable workflow engine for long-running,
     filename: 0293-temporal-as-the-durable-workflow-and-task-queue-engine.md
+    implemented_version: 0.177.109
   - adr: 0294
     title: One-API As The Unified LLM API Proxy And Router
     status: Accepted

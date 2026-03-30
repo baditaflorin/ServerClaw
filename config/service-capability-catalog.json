@@ -1363,6 +1363,42 @@
       }
     },
     {
+      "id": "temporal",
+      "name": "Temporal",
+      "description": "Private durable workflow and task queue engine for long-running platform automation that must survive worker crashes and retries.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "grpc://127.0.0.1:7233",
+      "exposure": "private-only",
+      "health_probe_id": "temporal",
+      "image_catalog_ids": [
+        "temporal_server_runtime",
+        "temporal_admin_tools_runtime",
+        "temporal_ui_runtime"
+      ],
+      "secret_catalog_ids": [
+        "temporal_database_password"
+      ],
+      "adr": "0293",
+      "runbook": "docs/runbooks/configure-temporal.md",
+      "tags": [
+        "workflow",
+        "durable",
+        "temporal",
+        "private"
+      ],
+      "notes": "The frontend gRPC port, HTTP port, and UI are intentionally loopback-only on docker-runtime-lv3; operators reach them through SSH tunneling or repo-managed admin-tools commands.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "grpc://127.0.0.1:7233",
+          "notes": "The repo-managed `lv3` namespace is bootstrapped automatically, while UI diagnostics are exposed only through a loopback tunnel to preserve the current guest firewall boundary."
+        }
+      }
+    },
+    {
       "id": "ops_portal",
       "name": "Platform Operations Portal",
       "description": "Interactive operator portal with live service actions, drift visibility, runbook launchers, and deployment streaming.",

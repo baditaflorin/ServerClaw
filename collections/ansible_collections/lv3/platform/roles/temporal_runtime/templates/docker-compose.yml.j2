@@ -1,0 +1,160 @@
+services:
+  openbao-agent:
+    image: {{ temporal_openbao_agent_image }}
+    container_name: {{ temporal_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ temporal_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ temporal_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ temporal_env_file | dirname }}:{{ temporal_env_file | dirname }}
+
+  temporal-history:
+    image: {{ temporal_server_image }}
+    container_name: temporal-history
+    restart: unless-stopped
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+    env_file:
+      - {{ temporal_env_file }}
+    command:
+      - /bin/sh
+      - -lc
+      - >
+        TEMPORAL_BROADCAST_ADDRESS=$$(hostname -i | awk '{print $$1}') &&
+        sed
+        -e "s/__TEMPORAL_DB_PASSWORD__/$${TEMPORAL_DB_PASSWORD}/g"
+        -e "s/__TEMPORAL_BROADCAST_ADDRESS__/$${TEMPORAL_BROADCAST_ADDRESS}/g"
+        /etc/temporal/config/history.yml.tpl > /tmp/temporal-history.yml &&
+        exec temporal-server --config-file /tmp/temporal-history.yml start --service=history
+    volumes:
+      - {{ temporal_config_dir }}:/etc/temporal/config:ro
+    networks:
+      - temporal
+
+  temporal-matching:
+    image: {{ temporal_server_image }}
+    container_name: temporal-matching
+    restart: unless-stopped
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+    env_file:
+      - {{ temporal_env_file }}
+    command:
+      - /bin/sh
+      - -lc
+      - >
+        TEMPORAL_BROADCAST_ADDRESS=$$(hostname -i | awk '{print $$1}') &&
+        sed
+        -e "s/__TEMPORAL_DB_PASSWORD__/$${TEMPORAL_DB_PASSWORD}/g"
+        -e "s/__TEMPORAL_BROADCAST_ADDRESS__/$${TEMPORAL_BROADCAST_ADDRESS}/g"
+        /etc/temporal/config/matching.yml.tpl > /tmp/temporal-matching.yml &&
+        exec temporal-server --config-file /tmp/temporal-matching.yml start --service=matching
+    volumes:
+      - {{ temporal_config_dir }}:/etc/temporal/config:ro
+    networks:
+      - temporal
+
+  temporal-frontend:
+    image: {{ temporal_server_image }}
+    container_name: temporal-frontend
+    restart: unless-stopped
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+      temporal-history:
+        condition: service_started
+      temporal-matching:
+        condition: service_started
+    env_file:
+      - {{ temporal_env_file }}
+    command:
+      - /bin/sh
+      - -lc
+      - >
+        TEMPORAL_BROADCAST_ADDRESS=$$(hostname -i | awk '{print $$1}') &&
+        sed
+        -e "s/__TEMPORAL_DB_PASSWORD__/$${TEMPORAL_DB_PASSWORD}/g"
+        -e "s/__TEMPORAL_BROADCAST_ADDRESS__/$${TEMPORAL_BROADCAST_ADDRESS}/g"
+        /etc/temporal/config/frontend.yml.tpl > /tmp/temporal-frontend.yml &&
+        exec temporal-server --config-file /tmp/temporal-frontend.yml start --service=frontend
+    ports:
+      - "{{ temporal_frontend_bind_host }}:{{ temporal_frontend_grpc_port }}:{{ temporal_frontend_grpc_port }}"
+      - "{{ temporal_frontend_bind_host }}:{{ temporal_frontend_http_port }}:{{ temporal_frontend_http_port }}"
+    volumes:
+      - {{ temporal_config_dir }}:/etc/temporal/config:ro
+    networks:
+      - temporal
+
+  temporal-worker:
+    image: {{ temporal_server_image }}
+    container_name: temporal-worker
+    restart: unless-stopped
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+      temporal-frontend:
+        condition: service_started
+    env_file:
+      - {{ temporal_env_file }}
+    command:
+      - /bin/sh
+      - -lc
+      - >
+        TEMPORAL_BROADCAST_ADDRESS=$$(hostname -i | awk '{print $$1}') &&
+        sed
+        -e "s/__TEMPORAL_DB_PASSWORD__/$${TEMPORAL_DB_PASSWORD}/g"
+        -e "s/__TEMPORAL_BROADCAST_ADDRESS__/$${TEMPORAL_BROADCAST_ADDRESS}/g"
+        /etc/temporal/config/worker.yml.tpl > /tmp/temporal-worker.yml &&
+        exec temporal-server --config-file /tmp/temporal-worker.yml start --service=worker
+    volumes:
+      - {{ temporal_config_dir }}:/etc/temporal/config:ro
+    networks:
+      - temporal
+
+  temporal-ui:
+    image: {{ temporal_ui_image }}
+    container_name: temporal-ui
+    restart: unless-stopped
+    depends_on:
+      temporal-frontend:
+        condition: service_started
+    environment:
+      TEMPORAL_ADDRESS: temporal-frontend:{{ temporal_frontend_grpc_port }}
+      TEMPORAL_UI_PORT: "{{ temporal_ui_container_port }}"
+      TEMPORAL_DEFAULT_NAMESPACE: "{{ temporal_default_namespace }}"
+    ports:
+      - "{{ temporal_ui_bind_host }}:{{ temporal_ui_port }}:{{ temporal_ui_container_port }}"
+    networks:
+      - temporal
+
+  temporal-admin-tools:
+    image: {{ temporal_admin_tools_image }}
+    profiles:
+      - tools
+    depends_on:
+      temporal-frontend:
+        condition: service_started
+    environment:
+      TEMPORAL_ADDRESS: temporal-frontend:{{ temporal_frontend_grpc_port }}
+      TEMPORAL_CLI_ADDRESS: temporal-frontend:{{ temporal_frontend_grpc_port }}
+    networks:
+      - temporal
+
+networks:
+  temporal:
+    driver: bridge

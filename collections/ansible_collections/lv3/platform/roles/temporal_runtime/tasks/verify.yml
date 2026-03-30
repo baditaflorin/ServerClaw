@@ -1,0 +1,78 @@
+# Purpose: Verify the deployed Temporal runtime health, UI reachability, and repo-managed namespace bootstrap.
+# Use case: Run after Temporal converges or during validation to prove the durable workflow engine is live.
+# Inputs: Loopback URLs, compose project paths, and expected namespace/bootstrap values exposed by the runtime role.
+# Outputs: Confirms the Temporal cluster, UI, and namespace contract without mutating service state.
+# Idempotency: Fully idempotent because these tasks only read state and assert expected behavior.
+# Dependencies: ADR 0165 and ADR 0293.
+---
+- name: Verify the Temporal gRPC frontend is listening on loopback
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ temporal_frontend_grpc_port }}"
+    timeout: 120
+    state: started
+  changed_when: false
+
+- name: Verify the Temporal UI responds on the loopback diagnostic endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ temporal_ui_port }}"
+    method: GET
+    status_code: 200
+  register: temporal_verify_ui
+  changed_when: false
+
+- name: Verify Temporal cluster health through the repo-managed admin-tools profile
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --profile
+      - tools
+      - --file
+      - "{{ temporal_compose_file }}"
+      - run
+      - --rm
+      - temporal-admin-tools
+      - temporal
+      - operator
+      - cluster
+      - health
+  args:
+    chdir: "{{ temporal_site_dir }}"
+  register: temporal_verify_cluster_health
+  retries: 24
+  delay: 5
+  until: temporal_verify_cluster_health.rc == 0
+  changed_when: false
+
+- name: Verify the repo-managed Temporal namespace exists
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --profile
+      - tools
+      - --file
+      - "{{ temporal_compose_file }}"
+      - run
+      - --rm
+      - temporal-admin-tools
+      - temporal
+      - operator
+      - namespace
+      - describe
+      - --namespace
+      - "{{ temporal_default_namespace }}"
+  args:
+    chdir: "{{ temporal_site_dir }}"
+  register: temporal_verify_namespace
+  changed_when: false
+
+- name: Assert Temporal UI, cluster health, and namespace verification are working
+  ansible.builtin.assert:
+    that:
+      - temporal_verify_ui.status == 200
+      - temporal_verify_cluster_health.rc == 0
+      - temporal_verify_namespace.rc == 0
+      - temporal_default_namespace in temporal_verify_namespace.stdout
+    fail_msg: "Temporal answered locally, but the cluster or namespace verification contract did not validate."

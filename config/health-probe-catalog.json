@@ -1808,6 +1808,76 @@
         "reason": "The private authenticated OpenFGA contract is verified directly by the repo-managed bootstrap and bearer-auth checks instead of an unauthenticated Uptime Kuma monitor."
       }
     },
+    "temporal": {
+      "service_name": "temporal",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "temporal_runtime",
+      "verify_file": "roles/temporal_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "command",
+        "description": "Temporal startup completes once the cluster health command succeeds through the repo-managed admin-tools profile.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "argv": [
+          "docker",
+          "compose",
+          "--profile",
+          "tools",
+          "--file",
+          "/opt/temporal/docker-compose.yml",
+          "run",
+          "--rm",
+          "temporal-admin-tools",
+          "temporal",
+          "operator",
+          "cluster",
+          "health"
+        ],
+        "success_rc": 0
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The Temporal UI renders on the loopback diagnostic endpoint after the runtime settles.",
+        "timeout_seconds": 60,
+        "retries": 12,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8099",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "Temporal is ready once the repo-managed `lv3` namespace can be described through the admin-tools profile.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "argv": [
+          "docker",
+          "compose",
+          "--profile",
+          "tools",
+          "--file",
+          "/opt/temporal/docker-compose.yml",
+          "run",
+          "--rm",
+          "temporal-admin-tools",
+          "temporal",
+          "operator",
+          "namespace",
+          "describe",
+          "--namespace",
+          "lv3"
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Temporal is intentionally private-only and loopback-bound; the repo-managed admin-tools and smoke workflow verification path provides the authoritative health signal."
+      }
+    },
     "ops_portal": {
       "service_name": "ops-portal",
       "owning_vm": "docker-runtime-lv3",
