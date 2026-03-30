@@ -71,13 +71,16 @@ def service_topology_edge_sites(catalog):
                 "blocked_exact_paths",
                 "chunked_transfer_encoding",
                 "client_max_body_size",
+                "crawl_policy_enabled",
                 "exact_redirects",
                 "prefix_proxy_routes",
+                "preserve_upstream_security_headers",
                 "proxy_hide_headers",
                 "proxy_read_timeout_seconds",
                 "proxy_request_buffering",
                 "proxy_send_timeout_seconds",
                 "root_proxy_path",
+                "security_headers_enabled",
                 "server_sent_events",
             ):
                 if optional_field in edge:

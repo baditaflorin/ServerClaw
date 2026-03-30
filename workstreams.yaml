@@ -563,6 +563,134 @@ workstreams:
       included_in_repo_version: 0.177.88
       latest_receipts:
         validation_runner_contracts: 2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply
+  - id: ws-0283-live-apply
+    adr: "0283"
+    title: Live apply Plausible Analytics from latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0283-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0283-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0283-live-apply.md
+    depends_on:
+      - adr-0021-public-subdomain-publication
+      - adr-0077-compose-secret-injection
+      - adr-0086-backup-and-recovery
+      - adr-0191-immutable-guest-replacement
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0283-live-apply.md
+      - docs/adr/0283-plausible-analytics-as-the-privacy-first-web-traffic-analytics-layer.md
+      - docs/runbooks/configure-plausible.md
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - playbooks/plausible.yml
+      - playbooks/services/plausible.yml
+      - roles/plausible_runtime/
+      - roles/nginx_edge_publication/
+      - collections/ansible_collections/lv3/platform/plugins/filter/service_topology.py
+      - config/service-capability-catalog.json
+      - config/subdomain-catalog.json
+      - config/health-probe-catalog.json
+      - config/secret-catalog.json
+      - config/controller-local-secrets.json
+      - config/image-catalog.json
+      - config/data-catalog.json
+      - config/dependency-graph.json
+      - config/slo-catalog.json
+      - config/service-completeness.json
+      - config/command-catalog.json
+      - config/workflow-catalog.json
+      - config/ansible-execution-scopes.yaml
+      - receipts/image-scans/
+      - receipts/live-applies/
+      - tests/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_contract
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-v1
+        - id: plausible_repo_surface
+          paths:
+            - docs/workstreams/ws-0283-live-apply.md
+            - docs/adr/0283-plausible-analytics-as-the-privacy-first-web-traffic-analytics-layer.md
+            - docs/runbooks/configure-plausible.md
+            - playbooks/plausible.yml
+            - playbooks/services/plausible.yml
+            - collections/ansible_collections/lv3/platform/playbooks/plausible.yml
+            - collections/ansible_collections/lv3/platform/playbooks/services/plausible.yml
+            - collections/ansible_collections/lv3/platform/roles/plausible_runtime/**
+            - tests/test_plausible_playbook.py
+            - tests/test_plausible_runtime_role.py
+            - receipts/image-scans/2026-03-30-plausible-runtime.json
+            - receipts/image-scans/2026-03-30-plausible-runtime.trivy.json
+            - receipts/image-scans/2026-03-30-plausible-postgres-runtime.json
+            - receipts/image-scans/2026-03-30-plausible-postgres-runtime.trivy.json
+            - receipts/image-scans/2026-03-30-plausible-clickhouse-runtime.json
+            - receipts/image-scans/2026-03-30-plausible-clickhouse-runtime.trivy.json
+          mode: exclusive
+        - id: plausible_platform_catalog_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - scripts/generate_platform_vars.py
+            - Makefile
+            - config/ansible-execution-scopes.yaml
+            - config/ansible-role-idempotency.yml
+            - config/command-catalog.json
+            - config/controller-local-secrets.json
+            - config/data-catalog.json
+            - config/dependency-graph.json
+            - config/health-probe-catalog.json
+            - config/image-catalog.json
+            - config/prometheus/file_sd/https_tls_targets.yml
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/https_tls_alerts.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/secret-catalog.json
+            - config/service-capability-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/slo-catalog.json
+            - config/subdomain-catalog.json
+            - config/subdomain-exposure-registry.json
+            - config/uptime-kuma/monitors.json
+            - config/workflow-catalog.json
+            - collections/ansible_collections/lv3/platform/plugins/filter/service_topology.py
+            - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2
+            - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/static-page.html.j2
+            - tests/test_ansible_execution_scopes.py
+            - tests/test_generate_platform_vars.py
+            - tests/test_nginx_edge_publication_role.py
+            - tests/test_service_topology_filters.py
+          mode: shared_contract
+          contract: plausible-platform-catalogs-v1
+        - id: plausible_live_apply_receipts
+          paths:
+            - receipts/live-applies/*plausible*
+          mode: shared_contract
+          contract: live-apply-receipts-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0283 by deploying Plausible Analytics on
+        docker-runtime-lv3, publishing analytics.lv3.org through the shared
+        edge, injecting the tracker into declared public pages, and recording
+        synchronized branch-local live-apply proof before exact-main
+        integration
+      release_bump: patch
+      included_in_repo_version: 0.177.99
+      latest_receipts:
+        plausible_analytics: 2026-03-30-adr-0283-plausible-analytics-live-apply
   - id: ws-0295-live-apply
     adr: "0295"
     title: Live apply the shared artifact cache plane from latest origin/main

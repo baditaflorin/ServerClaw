@@ -196,6 +196,16 @@
       "description": "Open WebUI remains reachable on the private runtime network."
     },
     {
+      "id": "plausible-availability",
+      "service_id": "plausible",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://analytics.lv3.org/api/system/health/ready",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The public Plausible readiness endpoint remains reachable for dashboard access, tracker delivery, and synthetic event verification."
+    },
+    {
       "id": "serverclaw-availability",
       "service_id": "serverclaw",
       "indicator": "availability",

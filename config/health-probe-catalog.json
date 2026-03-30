@@ -1538,6 +1538,76 @@
         }
       }
     },
+    "plausible": {
+      "service_name": "plausible",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "plausible_runtime",
+      "verify_file": "roles/plausible_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Plausible startup completes once the local /api/health endpoint returns 200 on docker-runtime-lv3.",
+        "timeout_seconds": 300,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8016/api/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The local Plausible liveness endpoint continues to answer on docker-runtime-lv3.",
+        "timeout_seconds": 300,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8016/api/system/health/live",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The public Plausible readiness endpoint answers through the shared NGINX edge with public tracker paths and authenticated dashboard publication in place.",
+        "timeout_seconds": 300,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "https://analytics.lv3.org/api/system/health/ready",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "docker_publication": {
+          "container_name": "plausible",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 8016
+            }
+          ],
+          "required_networks": [
+            "plausible_default"
+          ]
+        }
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Plausible Public Health",
+          "type": "http",
+          "url": "https://analytics.lv3.org/api/system/health/ready",
+          "description": "Public Plausible readiness endpoint published through the shared NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
     "serverclaw": {
       "service_name": "serverclaw",
       "owning_vm": "coolify-lv3",

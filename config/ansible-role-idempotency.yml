@@ -199,6 +199,9 @@ roles:
   open_webui_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  plausible_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   openbao_postgres_backend:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.

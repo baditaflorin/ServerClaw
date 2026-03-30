@@ -1,0 +1,110 @@
+---
+# Purpose: Verify the Plausible runtime, bootstrap contract, and one synthetic event ingestion path.
+# Use case: Run after Plausible converges or during validation to prove the dashboard, tracker, and registered sites are working.
+# Inputs: Running Plausible container plus the configured local runtime URL, bootstrap credentials, and one declared tracked site.
+# Outputs: Read-only health checks, bootstrap assertions, and a synthetic pageview probe recorded in the ClickHouse event store.
+# Idempotency: Partially idempotent because the synthetic verification step intentionally appends one pageview event to the analytics store.
+# Dependencies: ADR 0165 and ADR 0283.
+- name: Verify the Plausible basic health endpoint responds locally
+  ansible.builtin.uri:
+    url: "{{ plausible_internal_base_url }}/api/health"
+    method: GET
+    status_code:
+      - 200
+    return_content: true
+    timeout: 30
+  register: plausible_verify_health
+  retries: 24
+  delay: 5
+  until: plausible_verify_health.status == 200
+  changed_when: false
+
+- name: Verify the Plausible readiness endpoint responds locally
+  ansible.builtin.uri:
+    url: "{{ plausible_internal_base_url }}/api/system/health/ready"
+    method: GET
+    status_code:
+      - 200
+    return_content: false
+    timeout: 30
+  register: plausible_verify_readiness
+  retries: 24
+  delay: 5
+  until: plausible_verify_readiness.status == 200
+  changed_when: false
+
+- name: Verify the Plausible tracker script responds locally
+  ansible.builtin.uri:
+    url: "{{ plausible_internal_base_url }}/js/script.js"
+    method: GET
+    status_code:
+      - 200
+    return_content: true
+    timeout: 30
+  register: plausible_verify_tracker
+  changed_when: false
+
+- name: Verify the Plausible bootstrap contract
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ plausible_container_name }}"
+      - bin/plausible
+      - rpc
+      - "{{ lookup('ansible.builtin.template', 'verify.eval.j2') | trim }}"
+  register: plausible_verify_bootstrap
+  changed_when: false
+  no_log: true
+
+- name: Assert the Plausible bootstrap contract and tracker are healthy
+  ansible.builtin.assert:
+    that:
+      - plausible_verify_health.status == 200
+      - plausible_verify_readiness.status == 200
+      - plausible_verify_tracker.status == 200
+      - (plausible_verify_bootstrap.stdout | trim | from_json).user_exists
+      - (plausible_verify_bootstrap.stdout | trim | from_json).password_matches
+      - (plausible_verify_bootstrap.stdout | trim | from_json).owner_access_ok
+      - ((plausible_verify_bootstrap.stdout | trim | from_json).missing_sites | length) == 0
+      - ((plausible_verify_bootstrap.stdout | trim | from_json).mismatched_timezones | length) == 0
+    fail_msg: "Plausible answered locally, but the bootstrap user, tracker, or repo-managed site registrations did not verify."
+  no_log: true
+
+- name: Derive the Plausible synthetic verification path
+  ansible.builtin.set_fact:
+    plausible_verify_path: "/plausible-smoke-{{ ansible_date_time.epoch }}"
+
+- name: Post a synthetic Plausible pageview event locally
+  ansible.builtin.uri:
+    url: "{{ plausible_internal_base_url }}/api/event"
+    method: POST
+    headers:
+      Content-Type: application/json
+      User-Agent: Mozilla/5.0 (LV3 Plausible Smoke)
+    body_format: json
+    body:
+      name: pageview
+      url: "https://{{ plausible_verify_site_domain }}{{ plausible_verify_path }}"
+      domain: "{{ plausible_verify_site_domain }}"
+    status_code:
+      - 200
+      - 202
+    timeout: 30
+  register: plausible_synthetic_event
+  changed_when: false
+
+- name: Wait for the synthetic Plausible event to reach ClickHouse
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ plausible_container_name }}"
+      - bin/plausible
+      - rpc
+      - "{{ lookup('ansible.builtin.template', 'event-check.eval.j2') | trim }}"
+  register: plausible_event_check
+  retries: 24
+  delay: 5
+  until: (plausible_event_check.stdout | trim | from_json).seen
+  changed_when: false

@@ -349,6 +349,23 @@
         "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Homepage converge from git."
       }
     },
+    "plausible": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Plausible, its bundled databases, or its analytics publication state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, rerun the Plausible converge from git, and replay the synthetic tracker verification before resuming operator use."
+      }
+    },
     "realtime": {
       "tier": "R1",
       "recovery_objective": {

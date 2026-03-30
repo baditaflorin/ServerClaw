@@ -1,12 +1,12 @@
-# Release 0.177.98
+# Release 0.177.99
 
 - Date: 2026-03-30
 
 ## Summary
-- Live-applied ADR 0256 so Matrix Synapse now provisions repo-managed mautrix Discord and WhatsApp bridges, bridge databases, bridge smoke verification, and controller-safe admin bootstrap handling.
+- implements ADR 0283 by deploying Plausible Analytics on docker-runtime-lv3, publishing analytics.lv3.org through the shared edge, injecting the tracker into declared public pages, and recording synchronized branch-local live-apply proof before exact-main integration
 
 ## Platform Impact
-- adds repo-managed Matrix Synapse mautrix bridge automation, receipts, and operator verification surfaces for ADR 0256, and the exact-main replay advanced the platform version to 0.130.65
+- adds repo-managed Plausible Analytics automation, receipts, and tracker injection surfaces for ADR 0283; the exact-main replay will advance the platform version once verified
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

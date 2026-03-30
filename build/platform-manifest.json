@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.98",
+  "repo_version": "0.177.99",
   "platform_version": "0.130.65",
-  "generated_at": "2026-03-30T09:08:43Z",
-  "next_refresh_at": "2026-03-30T10:08:43Z",
+  "generated_at": "2026-03-30T09:35:23Z",
+  "next_refresh_at": "2026-03-30T10:35:23Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -485,6 +485,18 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8010",
+        "last_live_apply": "2026-03-30T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "plausible": {
+        "service_name": "Plausible Analytics",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://analytics.lv3.org",
         "last_live_apply": "2026-03-30T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -1884,6 +1896,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-plane.md"
+      },
+      {
+        "id": "converge-plausible",
+        "description": "Converge Plausible on docker-runtime-lv3, publish analytics.lv3.org through the shared edge, and verify public tracker injection plus synthetic event ingestion.",
+        "tags": [
+          "converge-plausible",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-plausible.md"
       },
       {
         "id": "converge-portainer",
@@ -4121,6 +4159,16 @@
         ]
       },
       {
+        "id": "configure-plausible",
+        "title": "Configure Plausible",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-plausible.md",
+        "workflow_ids": [
+          "converge-plausible"
+        ]
+      },
+      {
         "id": "configure-portainer",
         "title": "Configure Portainer",
         "agent_trust_required": "T3",
@@ -4792,10 +4840,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.97",
+    "last_version": "0.177.98",
     "deployed_at": "2026-03-30",
-    "summary": "Live-applied ADR 0256 so Matrix Synapse now provisions repo-managed mautrix Discord and WhatsApp bridges, bridge databases, bridge smoke verification, and controller-safe admin bootstrap handling.",
-    "release_notes_url": "docs/release-notes/0.177.98.md"
+    "summary": "implements ADR 0283 by deploying Plausible Analytics on docker-runtime-lv3, publishing analytics.lv3.org through the shared edge, injecting the tracker into declared public pages, and recording synchronized branch-local live-apply proof before exact-main integration",
+    "release_notes_url": "docs/release-notes/0.177.99.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

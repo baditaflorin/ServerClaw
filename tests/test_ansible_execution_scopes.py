@@ -293,6 +293,11 @@ def test_real_repo_scope_resolution_for_live_apply_paths() -> None:
         repo_root=REPO_ROOT,
         catalog_path=REPO_ROOT / "config" / "ansible-execution-scopes.yaml",
     )
+    plausible_scope = scopes.resolve_playbook_scope(
+        "playbooks/services/plausible.yml",
+        repo_root=REPO_ROOT,
+        catalog_path=REPO_ROOT / "config" / "ansible-execution-scopes.yaml",
+    )
     monitoring_scope = scopes.resolve_playbook_scope(
         "playbooks/monitoring-stack.yml",
         repo_root=REPO_ROOT,
@@ -301,5 +306,7 @@ def test_real_repo_scope_resolution_for_live_apply_paths() -> None:
 
     assert api_scope.mutation_scope == "host"
     assert api_scope.source_leaf_playbooks == ("playbooks/api-gateway.yml",)
+    assert plausible_scope.mutation_scope == "platform"
+    assert plausible_scope.source_leaf_playbooks == ("playbooks/plausible.yml",)
     assert monitoring_scope.mutation_scope == "platform"
     assert "playbooks/services/grafana.yml" in monitoring_scope.source_leaf_playbooks
