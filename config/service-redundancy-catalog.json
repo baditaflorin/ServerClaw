@@ -264,6 +264,23 @@
         "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Gitea converge and runner reconnect workflow."
       }
     },
+    "gotenberg": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Gotenberg or the shared runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Gotenberg converge and gateway verification workflow."
+      }
+    },
     "grafana": {
       "tier": "R1",
       "recovery_objective": {
@@ -449,6 +466,24 @@
         "location": "docker-runtime-lv3",
         "failover_trigger": "Restore docker-runtime-lv3 when n8n or its runtime state cannot be recovered in place.",
         "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the n8n converge from git."
+      }
+    },
+    "nextcloud": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120",
+        "pbs_vm_150"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Nextcloud or its runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Nextcloud converge from git."
       }
     },
     "netbox": {

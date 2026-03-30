@@ -169,7 +169,19 @@
         "method": "GET",
         "expected_status": [
           200
-        ]
+        ],
+        "docker_publication": {
+          "container_name": "coolify",
+          "bindings": [
+            {
+              "host": "10.10.10.70",
+              "port": 8000
+            }
+          ],
+          "required_networks": [
+            "coolify"
+          ]
+        }
       },
       "uptime_kuma": {
         "enabled": false,
@@ -255,7 +267,13 @@
         "method": "GET",
         "expected_status": [
           200
-        ]
+        ],
+        "docker_publication": {
+          "container_name": "dify-nginx",
+          "required_networks": [
+            "dify_default"
+          ]
+        }
       },
       "uptime_kuma": {
         "enabled": true,
@@ -473,7 +491,13 @@
           "-x",
           "/opt/gitea/data/git/repositories/ops/proxmox_florin_server.git/custom_hooks/pre-receive"
         ],
-        "success_rc": 0
+        "success_rc": 0,
+        "docker_publication": {
+          "container_name": "gitea",
+          "required_networks": [
+            "gitea_runtime_default"
+          ]
+        }
       },
       "uptime_kuma": {
         "enabled": true,
@@ -490,6 +514,53 @@
             "200-299"
           ]
         }
+      }
+    },
+    "gotenberg": {
+      "service_name": "gotenberg",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "gotenberg_runtime",
+      "verify_file": "roles/gotenberg_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "The Gotenberg health endpoint responds on the local listener after Chromium and LibreOffice are ready.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:3007/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The Gotenberg health endpoint responds on the local listener.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:3007/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "A minimal HTML document renders to a PDF through the Chromium conversion route.",
+        "timeout_seconds": 120,
+        "retries": 3,
+        "delay_seconds": 5,
+        "argv": [
+          "/bin/bash",
+          "-lc",
+          "set -euo pipefail; html=$(mktemp --suffix=.html); pdf=$(mktemp); trap 'rm -f \"$html\" \"$pdf\"' EXIT; printf '<html><body><h1>LV3 Gotenberg readiness</h1></body></html>' >\"$html\"; curl -fsS -o \"$pdf\" -F \"files=@${html};filename=index.html;type=text/html\" http://127.0.0.1:3007/forms/chromium/convert/html; head -c 4 \"$pdf\" | grep -q '%PDF'"
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "The Gotenberg runtime stays private to docker-runtime-lv3 and is verified through repo-managed readiness probes plus authenticated API gateway checks."
       }
     },
     "grafana": {
@@ -568,7 +639,19 @@
         "method": "GET",
         "expected_status": [
           200
-        ]
+        ],
+        "docker_publication": {
+          "container_name": "nginx",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 8095
+            }
+          ],
+          "required_networks": [
+            "harbor_harbor"
+          ]
+        }
       },
       "uptime_kuma": {
         "enabled": true,
@@ -665,7 +748,13 @@
         "method": "GET",
         "expected_status": [
           200
-        ]
+        ],
+        "docker_publication": {
+          "container_name": "homepage",
+          "required_networks": [
+            "homepage_default"
+          ]
+        }
       },
       "uptime_kuma": {
         "enabled": true,
@@ -723,7 +812,20 @@
         "method": "GET",
         "expected_status": [
           200
-        ]
+        ],
+        "docker_publication": {
+          "container_name": "keycloak-keycloak-1",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 8091
+            }
+          ],
+          "required_networks": [
+            "keycloak_default",
+            "mail-platform_default"
+          ]
+        }
       },
       "tls_certificate_ids": [
         "keycloak-edge"
@@ -784,7 +886,19 @@
         "method": "GET",
         "expected_status": [
           200
-        ]
+        ],
+        "docker_publication": {
+          "container_name": "langfuse-web",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 3002
+            }
+          ],
+          "required_networks": [
+            "langfuse_default"
+          ]
+        }
       },
       "uptime_kuma": {
         "enabled": true,
@@ -1006,6 +1120,76 @@
           "type": "http",
           "url": "https://n8n.lv3.org/healthz",
           "description": "n8n edge-published health endpoint behind the shared NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "nextcloud": {
+      "service_name": "nextcloud",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "nextcloud_runtime",
+      "verify_file": "roles/nextcloud_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Nextcloud startup completes once the local status endpoint reports an installed runtime on the private listener.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8084/status.php",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The local Nextcloud status endpoint responds on docker-runtime-lv3.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8084/status.php",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The public Nextcloud status endpoint renders through the shared NGINX edge with DAV publication in place.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "https://cloud.lv3.org/status.php",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "docker_publication": {
+          "container_name": "nextcloud-app",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 8084
+            }
+          ],
+          "required_networks": [
+            "nextcloud_default"
+          ]
+        }
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Nextcloud Public Status",
+          "type": "http",
+          "url": "https://cloud.lv3.org/status.php",
+          "description": "Public Nextcloud status endpoint published through the shared NGINX edge VM.",
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,
@@ -1416,7 +1600,19 @@
         "method": "GET",
         "expected_status": [
           200
-        ]
+        ],
+        "docker_publication": {
+          "container_name": "lv3-openbao",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 8200
+            }
+          ],
+          "required_networks": [
+            "openbao_default"
+          ]
+        }
       },
       "tls_certificate_ids": [
         "openbao-proxy"
@@ -1557,7 +1753,19 @@
         "method": "GET",
         "expected_status": [
           200
-        ]
+        ],
+        "docker_publication": {
+          "container_name": "outline",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 3006
+            }
+          ],
+          "required_networks": [
+            "outline_default"
+          ]
+        }
       },
       "uptime_kuma": {
         "enabled": true,
@@ -2027,7 +2235,13 @@
           "--not-after",
           "1h"
         ],
-        "success_rc": 0
+        "success_rc": 0,
+        "docker_publication": {
+          "container_name": "step-ca",
+          "required_networks": [
+            "step-ca_default"
+          ]
+        }
       },
       "tls_certificate_ids": [
         "step-ca-proxy"
@@ -2130,7 +2344,20 @@
         "expected_status": [
           200
         ],
-        "validate_tls": false
+        "validate_tls": false,
+        "docker_publication": {
+          "container_name": "vaultwarden",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 8222
+            }
+          ],
+          "derive_bindings_from_probes": false,
+          "required_networks": [
+            "vaultwarden_default"
+          ]
+        }
       },
       "tls_certificate_ids": [
         "vaultwarden-private"

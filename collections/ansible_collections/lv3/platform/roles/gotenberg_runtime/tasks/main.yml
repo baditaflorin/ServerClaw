@@ -1,0 +1,125 @@
+---
+# Purpose: Converge the private Gotenberg runtime on docker-runtime-lv3.
+# Inputs: Pinned image catalog entry, private service URL, compose paths, and runtime resource limits.
+# Outputs: Rendered compose file plus a running Gotenberg container with Chromium and LibreOffice renderers available.
+# Idempotency: Partially idempotent; reruns reconcile the same compose stack and host port binding.
+# Dependencies: ADR 0278 and ADR 0165; requires docker_runtime and linux_guest_firewall outputs.
+- name: Validate Gotenberg runtime inputs
+  ansible.builtin.assert:
+    that:
+      - gotenberg_runtime_site_dir | length > 0
+      - gotenberg_runtime_compose_file | length > 0
+      - gotenberg_runtime_container_name | length > 0
+      - gotenberg_runtime_container_port | int > 0
+      - gotenberg_runtime_image | length > 0
+      - gotenberg_runtime_port | int > 0
+      - gotenberg_runtime_internal_base_url | length > 0
+      - gotenberg_runtime_local_base_url | length > 0
+      - gotenberg_runtime_healthcheck_path | length > 0
+      - gotenberg_runtime_memory_limit | length > 0
+      - gotenberg_runtime_cpu_limit | length > 0
+    fail_msg: >-
+      gotenberg_runtime requires compose paths, the pinned image reference, a private runtime port,
+      and local/internal base URLs for verification.
+
+- name: Ensure the Gotenberg runtime directory exists
+  ansible.builtin.file:
+    path: "{{ gotenberg_runtime_site_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the Gotenberg compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ gotenberg_runtime_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Gotenberg image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ gotenberg_runtime_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ gotenberg_runtime_site_dir }}"
+  register: gotenberg_runtime_pull
+  changed_when: >-
+    'Pulling' in gotenberg_runtime_pull.stdout
+    or 'Downloaded newer image' in gotenberg_runtime_pull.stdout
+    or 'Pull complete' in gotenberg_runtime_pull.stdout
+
+- name: Ensure the Gotenberg runtime is running
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ gotenberg_runtime_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ gotenberg_runtime_site_dir }}"
+  register: gotenberg_runtime_up
+  changed_when: >-
+    'Creating' in gotenberg_runtime_up.stdout
+    or 'Recreating' in gotenberg_runtime_up.stdout
+    or 'Starting' in gotenberg_runtime_up.stdout
+
+- name: Check whether Gotenberg publishes the expected host port
+  ansible.builtin.command:
+    argv:
+      - docker
+      - port
+      - "{{ gotenberg_runtime_container_name }}"
+      - "{{ gotenberg_runtime_container_port }}/tcp"
+  register: gotenberg_runtime_port_binding_check
+  changed_when: false
+  failed_when: false
+
+- name: Force-recreate Gotenberg when the host port binding is missing
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ gotenberg_runtime_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - --remove-orphans
+  args:
+    chdir: "{{ gotenberg_runtime_site_dir }}"
+  register: gotenberg_runtime_force_recreate
+  changed_when: true
+  when: gotenberg_runtime_port_binding_check.stdout | trim == ""
+
+- name: Wait for Gotenberg to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ gotenberg_runtime_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Wait for the Gotenberg health endpoint
+  ansible.builtin.uri:
+    url: "{{ gotenberg_runtime_local_base_url }}{{ gotenberg_runtime_healthcheck_path }}"
+    method: GET
+    status_code:
+      - 200
+    return_content: false
+    timeout: 30
+  register: gotenberg_runtime_healthcheck
+  retries: 24
+  delay: 5
+  until: gotenberg_runtime_healthcheck.status == 200
+  changed_when: false
+
+- name: Verify the Gotenberg runtime
+  ansible.builtin.import_tasks: verify.yml

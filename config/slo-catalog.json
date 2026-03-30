@@ -44,6 +44,16 @@
       "description": "The private Gitea runtime remains reachable for repository hosting, webhooks, and self-hosted CI orchestration."
     },
     {
+      "id": "gotenberg-availability",
+      "service_id": "gotenberg",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.20:3007/health",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The private Gotenberg document rendering API remains reachable on docker-runtime-lv3 for synchronous PDF conversion workflows."
+    },
+    {
       "id": "grafana-availability",
       "service_id": "grafana",
       "indicator": "availability",
@@ -154,6 +164,16 @@
       "target_url": "https://nginx.lv3.org",
       "probe_module": "http_2xx_follow_redirects",
       "description": "The edge reverse proxy remains reachable for published services."
+    },
+    {
+      "id": "nextcloud-availability",
+      "service_id": "nextcloud",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://cloud.lv3.org/status.php",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The public Nextcloud status endpoint remains reachable for the canonical personal file and DAV data plane."
     },
     {
       "id": "open-webui-availability",

@@ -173,6 +173,7 @@ platform_ports:
   gitea_host_proxy_port: 3009
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
+  gotenberg_port: 3007
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
@@ -185,6 +186,7 @@ platform_ports:
   excalidraw_room_port: 3096
   ollama_api_port: 11434
   n8n_port: 5678
+  nextcloud_port: 8084
   coolify_dashboard_port: 8000
   coolify_proxy_port: 80
   coolify_proxy_tls_port: 443
@@ -241,6 +243,7 @@ platform_port_assignments:
   gitea_host_proxy_port: 3009
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
+  gotenberg_port: 3007
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
@@ -253,6 +256,7 @@ platform_port_assignments:
   excalidraw_room_port: 3096
   ollama_api_port: 11434
   n8n_port: 5678
+  nextcloud_port: 8084
   coolify_dashboard_port: 8000
   coolify_proxy_port: 80
   coolify_proxy_tls_port: 443
@@ -1005,7 +1009,7 @@ platform_service_topology:
   headscale:
     service_name: headscale
     owning_vm: proxmox_florin
-    private_ip: '{{ hostvars[''proxmox_florin''].proxmox_internal_ipv4 }}'
+    private_ip: 10.10.10.1
     public_hostname: headscale.lv3.org
     exposure_model: edge-published
     observability:
@@ -1527,13 +1531,13 @@ platform_service_topology:
       tls: true
       noindex: true
       kind: proxy
-      upstream: http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3')
-        | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port
-        }}
+      upstream: http://10.10.10.20:3006
     service_id: outline
-    ports: {}
+    ports:
+      internal: 3006
     urls:
       public: https://wiki.lv3.org
+      internal: http://10.10.10.20:3006
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3
@@ -1585,8 +1589,7 @@ platform_service_topology:
       upstream: http://10.10.10.20:3095
       prefix_proxy_routes:
         - path: /socket.io/
-          upstream: http://10.10.10.20:{{ platform_port_assignments.excalidraw_room_port
-            }}
+          upstream: http://10.10.10.20:3096
     service_id: excalidraw
     ports:
       internal: 3095
@@ -1611,6 +1614,19 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8088
       controller: http://100.64.0.1:8008
+  gotenberg:
+    service_name: gotenberg
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: gotenberg
+    ports:
+      internal: 3007
+    urls:
+      internal: http://10.10.10.20:3007
   serverclaw:
     service_name: serverclaw
     owning_vm: coolify-lv3
@@ -1679,6 +1695,47 @@ platform_service_topology:
     urls:
       public: https://n8n.lv3.org
       internal: http://10.10.10.20:5678
+  nextcloud:
+    service_name: nextcloud
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: cloud.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: cloud
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8084
+      client_max_body_size: 16g
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      security_headers_enabled: false
+      preserve_upstream_security_headers: true
+      exact_redirects:
+        - path: /.well-known/carddav
+          location: /remote.php/dav/
+          status: 301
+        - path: /.well-known/caldav
+          location: /remote.php/dav/
+          status: 301
+    service_id: nextcloud
+    ports:
+      internal: 8084
+    urls:
+      public: https://cloud.lv3.org
+      internal: http://10.10.10.20:8084
   coolify:
     service_name: coolify
     owning_vm: coolify-lv3
@@ -2153,6 +2210,10 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: cloud
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: coolify
       type: A
       value: 65.108.75.123
@@ -2347,7 +2408,7 @@ public_edge_service_topology:
   headscale:
     service_name: headscale
     owning_vm: proxmox_florin
-    private_ip: '{{ hostvars[''proxmox_florin''].proxmox_internal_ipv4 }}'
+    private_ip: 10.10.10.1
     public_hostname: headscale.lv3.org
     exposure_model: edge-published
     observability:
@@ -2869,13 +2930,13 @@ public_edge_service_topology:
       tls: true
       noindex: true
       kind: proxy
-      upstream: http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3')
-        | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port
-        }}
+      upstream: http://10.10.10.20:3006
     service_id: outline
-    ports: {}
+    ports:
+      internal: 3006
     urls:
       public: https://wiki.lv3.org
+      internal: http://10.10.10.20:3006
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3
@@ -2927,8 +2988,7 @@ public_edge_service_topology:
       upstream: http://10.10.10.20:3095
       prefix_proxy_routes:
         - path: /socket.io/
-          upstream: http://10.10.10.20:{{ platform_port_assignments.excalidraw_room_port
-            }}
+          upstream: http://10.10.10.20:3096
     service_id: excalidraw
     ports:
       internal: 3095
@@ -2953,6 +3013,19 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8088
       controller: http://100.64.0.1:8008
+  gotenberg:
+    service_name: gotenberg
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: gotenberg
+    ports:
+      internal: 3007
+    urls:
+      internal: http://10.10.10.20:3007
   serverclaw:
     service_name: serverclaw
     owning_vm: coolify-lv3
@@ -3021,6 +3094,47 @@ public_edge_service_topology:
     urls:
       public: https://n8n.lv3.org
       internal: http://10.10.10.20:5678
+  nextcloud:
+    service_name: nextcloud
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: cloud.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: cloud
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8084
+      client_max_body_size: 16g
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      security_headers_enabled: false
+      preserve_upstream_security_headers: true
+      exact_redirects:
+        - path: /.well-known/carddav
+          location: /remote.php/dav/
+          status: 301
+        - path: /.well-known/caldav
+          location: /remote.php/dav/
+          status: 301
+    service_id: nextcloud
+    ports:
+      internal: 8084
+    urls:
+      public: https://cloud.lv3.org
+      internal: http://10.10.10.20:8084
   coolify:
     service_name: coolify
     owning_vm: coolify-lv3
@@ -3525,6 +3639,7 @@ nomad_server_port: 4646
 nomad_rpc_port: 4647
 nomad_serf_port: 4648
 netbox_server_port: 8082
+gotenberg_port: 3007
 searxng_port: 8881
 searxng_host_proxy_port: 80
 langfuse_port: 3002
@@ -3537,6 +3652,7 @@ excalidraw_port: 3095
 excalidraw_room_port: 3096
 ollama_api_port: 11434
 n8n_port: 5678
+nextcloud_port: 8084
 coolify_dashboard_port: 8000
 coolify_proxy_port: 80
 coolify_proxy_tls_port: 443

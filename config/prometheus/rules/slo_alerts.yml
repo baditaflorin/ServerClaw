@@ -162,6 +162,46 @@ groups:
           description: The private Gitea runtime remains reachable for repository
             hosting, webhooks, and self-hosted CI orchestration.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_gotenberg_availability
+        expr: (slo:gotenberg_availability:error_rate_5m > (14 * 0.010000)) and (slo:gotenberg_availability:error_rate_1h
+          > (14 * 0.010000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: gotenberg
+          slo_id: gotenberg-availability
+          indicator: availability
+        annotations:
+          summary: gotenberg-availability is burning its error budget at 14x
+          description: The private Gotenberg document rendering API remains reachable
+            on docker-runtime-lv3 for synchronous PDF conversion workflows.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_gotenberg_availability
+        expr: slo:gotenberg_availability:error_rate_1h > (3 * 0.010000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: gotenberg
+          slo_id: gotenberg-availability
+          indicator: availability
+        annotations:
+          summary: gotenberg-availability is burning its error budget at 3x
+          description: The private Gotenberg document rendering API remains reachable
+            on docker-runtime-lv3 for synchronous PDF conversion workflows.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_gotenberg_availability
+        expr: slo:gotenberg_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: gotenberg
+          slo_id: gotenberg-availability
+          indicator: availability
+        annotations:
+          summary: gotenberg-availability has less than 10% error budget remaining
+          description: The private Gotenberg document rendering API remains reachable
+            on docker-runtime-lv3 for synchronous PDF conversion workflows.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_grafana_availability
         expr: (slo:grafana_availability:error_rate_5m > (14 * 0.005000)) and (slo:grafana_availability:error_rate_1h
           > (14 * 0.005000))
@@ -592,6 +632,46 @@ groups:
         annotations:
           summary: nginx-edge-availability has less than 10% error budget remaining
           description: The edge reverse proxy remains reachable for published services.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_nextcloud_availability
+        expr: (slo:nextcloud_availability:error_rate_5m > (14 * 0.005000)) and (slo:nextcloud_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: nextcloud
+          slo_id: nextcloud-availability
+          indicator: availability
+        annotations:
+          summary: nextcloud-availability is burning its error budget at 14x
+          description: The public Nextcloud status endpoint remains reachable for
+            the canonical personal file and DAV data plane.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_nextcloud_availability
+        expr: slo:nextcloud_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: nextcloud
+          slo_id: nextcloud-availability
+          indicator: availability
+        annotations:
+          summary: nextcloud-availability is burning its error budget at 3x
+          description: The public Nextcloud status endpoint remains reachable for
+            the canonical personal file and DAV data plane.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_nextcloud_availability
+        expr: slo:nextcloud_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: nextcloud
+          slo_id: nextcloud-availability
+          indicator: availability
+        annotations:
+          summary: nextcloud-availability has less than 10% error budget remaining
+          description: The public Nextcloud status endpoint remains reachable for
+            the canonical personal file and DAV data plane.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_open_webui_availability
         expr: (slo:open_webui_availability:error_rate_5m > (14 * 0.010000)) and (slo:open_webui_availability:error_rate_1h

@@ -1,0 +1,52 @@
+---
+# Playbook: gotenberg.yml
+# Purpose: Converge the private Gotenberg document-to-PDF runtime on docker-runtime-lv3 and refresh its governed API gateway route.
+# Use case: Run when changing ADR 0278 runtime automation, image pins, firewall exposure, or the authenticated gateway route.
+#
+# Inputs (required):
+#   - proxmox_guest_ssh_connection_mode (str, required via make target defaults): SSH transport mode for guest access.
+#
+# Inputs (optional):
+#   - preflight_wait_for_connection (bool, optional, default=false): Skip redundant connection checks when the shared make preflight already passed.
+#
+# Outputs:
+#   - Gotenberg container running on docker-runtime-lv3 with Chromium and LibreOffice renderers pre-started
+#   - API gateway config bundle refreshed so /v1/gotenberg proxies to the private runtime
+#
+# Idempotency: Partially idempotent
+#              Reruns reconcile the same compose stack, guest firewall, and API gateway bundle without mutating shared release truth on this branch.
+#
+# Dependencies:
+#   - ADR 0278: Defines Gotenberg as the shared document-to-PDF rendering service.
+#   - ADR 0092: Governs the authenticated API gateway route used for operator and service access.
+#   - Role: lv3.platform.gotenberg_runtime — converges the renderer runtime.
+#   - Role: lv3.platform.api_gateway_runtime — refreshes the governed gateway route bundle.
+#
+# Related ADRs: 0165
+# Related Runbooks: docs/runbooks/configure-gotenberg.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+- name: Converge Gotenberg and refresh API gateway routing on the Docker runtime VM
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+  vars:
+    preflight_wait_for_connection: false
+  tags:
+    - tier-2
+    - automation
+    - service-gotenberg
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.gotenberg_runtime
+    - role: lv3.platform.api_gateway_runtime

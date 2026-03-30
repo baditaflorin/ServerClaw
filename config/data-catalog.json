@@ -101,6 +101,21 @@
       "notes": "Repositories, issues, webhook configuration, and audit metadata are operational records that should remain restorable for multi-year incident and change reconstruction."
     },
     {
+      "id": "gotenberg-transient-render-buffers",
+      "service": "gotenberg",
+      "name": "Gotenberg transient render buffers",
+      "class": "internal",
+      "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Transient request and response buffers inside the gotenberg container on docker-runtime-lv3",
+        "Ephemeral temporary files created during Chromium and LibreOffice conversions on docker-runtime-lv3"
+      ],
+      "notes": "Gotenberg is stateless and does not persist source documents or rendered PDFs after each synchronous conversion finishes."
+    },
+    {
       "id": "grafana-annotations",
       "service": "grafana",
       "name": "Grafana annotations",
@@ -383,6 +398,34 @@
         "Outline PostgreSQL database"
       ],
       "notes": "Outline stores workspace, user, collection, and document metadata that may include operator identities and operational text."
+    },
+    {
+      "id": "nextcloud-personal-files",
+      "service": "nextcloud",
+      "name": "Nextcloud personal files and DAV payloads",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "break_glass",
+      "pii_risk": "high",
+      "locations": [
+        "/opt/nextcloud/data/html/data"
+      ],
+      "notes": "User-owned files, attachments, calendar bodies, contacts, and task payloads remain under user-directed retention and must stay recoverable."
+    },
+    {
+      "id": "nextcloud-account-metadata",
+      "service": "nextcloud",
+      "name": "Nextcloud account and sharing metadata",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "break_glass",
+      "pii_risk": "high",
+      "locations": [
+        "Nextcloud PostgreSQL database"
+      ],
+      "notes": "Account records, shares, app state, and file metadata define the canonical personal data plane and must remain restorable with the runtime filesystem."
     },
     {
       "id": "plane-object-storage",

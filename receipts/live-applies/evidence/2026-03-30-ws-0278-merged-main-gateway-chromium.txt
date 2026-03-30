@@ -1,0 +1,2 @@
+pdf_magic=%PDF
+pdf_bytes=32038

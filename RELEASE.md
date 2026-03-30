@@ -1,12 +1,12 @@
-# Release 0.177.91
+# Release 0.177.93
 
 - Date: 2026-03-30
 
 ## Summary
-- implements ADR 0254 by carrying the dedicated ServerClaw chat surface on chat.lv3.org onto current mainline truth, preserving the governed 8096 edge lane to coolify-lv3, and recording the first clean exact-main receipt from merged main
+- implemented ADR 0260 by re-verifying repo-managed Nextcloud on docker-runtime-lv3 with a dedicated postgres backend, shared-edge DAV publication, and synchronized recovery for stale compose networks, Docker bridge chains, detached local OpenBao publication, and concurrent Docker interruptions during mutable OCC convergence on the latest realistic origin/main baseline
 
 ## Platform Impact
-- no platform version bump was required; platform version 0.130.60 remains current after the merged-main replay and end-to-end live verification on 2026-03-30
+- platform version advances to 0.130.62 after the exact-main ADR 0260 replay; this release integrates the synchronized Nextcloud recovery hardening on top of the current 0.177.92 / 0.130.61 baseline.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

@@ -129,6 +129,15 @@
       "adr": "0143"
     },
     {
+      "id": "gotenberg",
+      "service": "gotenberg",
+      "name": "Gotenberg",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0278"
+    },
+    {
       "id": "grafana",
       "service": "grafana",
       "name": "Grafana",
@@ -217,6 +226,15 @@
       "tier": 2,
       "category": "automation",
       "adr": "0151"
+    },
+    {
+      "id": "nextcloud",
+      "service": "nextcloud",
+      "name": "Nextcloud",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "data",
+      "adr": "0260"
     },
     {
       "id": "netbox",
@@ -614,6 +632,18 @@
       "description": "Gitea persists repositories, metadata, and issue state in Postgres."
     },
     {
+      "from": "gotenberg",
+      "to": "api_gateway",
+      "type": "soft",
+      "description": "Authenticated operator and cross-service access can be brokered through the shared API gateway route, while private guest-network callers can still use the internal listener directly."
+    },
+    {
+      "from": "gotenberg",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Gotenberg Chromium and LibreOffice renderers are hosted on docker-runtime-lv3."
+    },
+    {
       "from": "grafana",
       "to": "keycloak",
       "type": "soft",
@@ -768,6 +798,24 @@
       "to": "postgres",
       "type": "hard",
       "description": "n8n stores workflow, credential, and execution state in Postgres."
+    },
+    {
+      "from": "nextcloud",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Nextcloud stores account, sharing, file, and app metadata in Postgres."
+    },
+    {
+      "from": "nextcloud",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Nextcloud receives its mirrored database, Redis, and admin bootstrap secrets through the OpenBao agent before startup."
+    },
+    {
+      "from": "nextcloud",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public reachability for cloud.lv3.org and DAV discovery redirects depends on the shared NGINX edge publication path."
     },
     {
       "from": "netbox",

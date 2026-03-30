@@ -229,6 +229,28 @@
         "converge-dozzle"
       ]
     },
+    "gotenberg_runtime": {
+      "kind": "runtime",
+      "service_id": "gotenberg",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "gotenberg",
+      "registry_ref": "docker.io/gotenberg/gotenberg",
+      "tag": "8.29.0",
+      "digest": "sha256:1c04b80fa1e1f42123258a3fe28e2260d52e267dec77c0da5eab4143540172d5",
+      "ref": "docker.io/gotenberg/gotenberg:8.29.0@sha256:1c04b80fa1e1f42123258a3fe28e2260d52e267dec77c0da5eab4143540172d5",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-30-gotenberg-runtime.json",
+      "consumers": [
+        "roles/gotenberg_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-gotenberg"
+      ]
+    },
     "homepage_runtime": {
       "kind": "runtime",
       "service_id": "homepage",
@@ -480,6 +502,56 @@
       ],
       "apply_targets": [
         "converge-n8n"
+      ]
+    },
+    "nextcloud_runtime": {
+      "kind": "runtime",
+      "service_id": "nextcloud",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "nextcloud-app",
+      "registry_ref": "docker.io/library/nextcloud",
+      "tag": "33.0.1-apache",
+      "digest": "sha256:59da99ff25d5085f3525251c88f8cda312d1ac01379f347cf499c61abb74a2a0",
+      "ref": "docker.io/library/nextcloud:33.0.1-apache@sha256:59da99ff25d5085f3525251c88f8cda312d1ac01379f347cf499c61abb74a2a0",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-29",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-29-nextcloud-runtime.json",
+      "consumers": [
+        "roles/nextcloud_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "live-apply-service service=nextcloud env=production"
+      ]
+    },
+    "nextcloud_redis_runtime": {
+      "kind": "runtime",
+      "service_id": "nextcloud",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "nextcloud-redis",
+      "registry_ref": "docker.io/library/redis",
+      "tag": "7.4-alpine",
+      "digest": "sha256:4bfd9eca23339865dc14fe75f6d9ae643f714924623978dd2798f1a673b08f43",
+      "ref": "docker.io/library/redis:7.4-alpine@sha256:4bfd9eca23339865dc14fe75f6d9ae643f714924623978dd2798f1a673b08f43",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-29",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-29-nextcloud-redis-runtime.json",
+      "exception": {
+        "reason": "The newest realistic Redis 7.4 alpine digest still reports critical and high Trivy findings in bundled Alpine and gosu-linked components; keep it digest-pinned and review at the next image refresh.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-29",
+        "review_by": "2026-04-12"
+      },
+      "consumers": [
+        "roles/nextcloud_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "live-apply-service service=nextcloud env=production"
       ]
     },
     "netbox_redis_runtime": {

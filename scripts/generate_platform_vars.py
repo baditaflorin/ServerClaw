@@ -52,6 +52,7 @@ PORT_KEYS = (
     "gitea_host_proxy_port",
     "netbox_server_port",
     "netbox_host_proxy_port",
+    "gotenberg_port",
     "searxng_port",
     "searxng_host_proxy_port",
     "langfuse_port",
@@ -64,6 +65,7 @@ PORT_KEYS = (
     "excalidraw_room_port",
     "ollama_api_port",
     "n8n_port",
+    "nextcloud_port",
     "coolify_dashboard_port",
     "coolify_proxy_port",
     "coolify_proxy_tls_port",
@@ -95,6 +97,16 @@ MANAGEMENT_TAILSCALE_IPV4_TOKEN = "{{ management_tailscale_ipv4 }}"
 SESSION_AUTHORITY_SHARED_LOGOUT_PATH = "/.well-known/lv3/session/logout"
 SESSION_AUTHORITY_SHARED_PROXY_CLEANUP_PATH = "/.well-known/lv3/session/proxy-logout"
 SESSION_AUTHORITY_SHARED_LOGGED_OUT_PATH = "/.well-known/lv3/session/logged-out"
+HOST_VAR_TEMPLATE_RE = re.compile(r"{{\s*([a-z0-9_]+(?:\.[a-z0-9_]+)*)\s*}}")
+HOST_SELF_TEMPLATE_RE = re.compile(
+    r"""{{\s*hostvars\[(?:'|")proxmox_florin(?:'|")\]\.([a-z0-9_]+(?:\.[a-z0-9_]+)*)\s*}}"""
+)
+PORT_ASSIGNMENT_TEMPLATE_RE = re.compile(
+    r"""{{\s*(?:hostvars\[(?:'|")proxmox_florin(?:'|")\]\.)?platform_port_assignments\.([a-z0-9_]+)\s*}}"""
+)
+GUEST_IPV4_TEMPLATE_RE = re.compile(
+    r"""{{\s*\(proxmox_guests\s+\|\s+selectattr\('name',\s+'equalto',\s+'([^']+)'\)\s+\|\s+map\(attribute='ipv4'\)\s+\|\s+first\)\s*}}"""
+)
 
 
 def yaml_dump(payload: Any) -> str:
@@ -156,10 +168,14 @@ def resolve_dns_target(target: str, host_vars: dict[str, Any]) -> str:
 def resolve_host_var_template(value: Any, host_vars: dict[str, Any], path: str) -> Any:
     if not isinstance(value, str):
         return value
-    match = re.fullmatch(r"{{\s*([a-z0-9_]+(?:\.[a-z0-9_]+)*)\s*}}", value)
+    match = HOST_VAR_TEMPLATE_RE.fullmatch(value)
     if match is None:
         return value
-    keys = match.group(1).split(".")
+    return lookup_host_var_path(host_vars, match.group(1), path)
+
+
+def lookup_host_var_path(host_vars: dict[str, Any], dotted_path: str, path: str) -> Any:
+    keys = dotted_path.split(".")
     current: Any = host_vars
     traversed = []
     for key in keys:
@@ -168,6 +184,72 @@ def resolve_host_var_template(value: Any, host_vars: dict[str, Any], path: str) 
             raise ValueError(f"{path} references unknown host var {'.'.join(traversed)!r}")
         current = current[key]
     return current
+
+
+def render_known_templates_in_string(
+    value: str,
+    host_vars: dict[str, Any],
+    guest_ipv4_by_name: dict[str, str],
+    ports: dict[str, int],
+    path: str,
+) -> str:
+    def replace_host_self(match: re.Match[str]) -> str:
+        resolved = lookup_host_var_path(host_vars, match.group(1), path)
+        return str(resolved)
+
+    def replace_port_assignment(match: re.Match[str]) -> str:
+        port_key = match.group(1)
+        if port_key not in ports:
+            raise ValueError(f"{path} references unknown port assignment {port_key!r}")
+        return str(ports[port_key])
+
+    def replace_guest_ipv4(match: re.Match[str]) -> str:
+        guest_name = match.group(1)
+        if guest_name not in guest_ipv4_by_name:
+            raise ValueError(f"{path} references unknown proxmox guest {guest_name!r}")
+        return guest_ipv4_by_name[guest_name]
+
+    def replace_host_var(match: re.Match[str]) -> str:
+        resolved = lookup_host_var_path(host_vars, match.group(1), path)
+        return str(resolved)
+
+    rendered = value
+    previous = None
+    while rendered != previous:
+        previous = rendered
+        rendered = PORT_ASSIGNMENT_TEMPLATE_RE.sub(replace_port_assignment, rendered)
+        rendered = HOST_SELF_TEMPLATE_RE.sub(replace_host_self, rendered)
+        rendered = GUEST_IPV4_TEMPLATE_RE.sub(replace_guest_ipv4, rendered)
+        rendered = HOST_VAR_TEMPLATE_RE.sub(replace_host_var, rendered)
+    return rendered
+
+
+def render_known_templates(
+    value: Any,
+    host_vars: dict[str, Any],
+    guest_ipv4_by_name: dict[str, str],
+    ports: dict[str, int],
+    path: str,
+) -> Any:
+    if isinstance(value, dict):
+        return {
+            key: render_known_templates(
+                item,
+                host_vars,
+                guest_ipv4_by_name,
+                ports,
+                f"{path}.{key}",
+            )
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [
+            render_known_templates(item, host_vars, guest_ipv4_by_name, ports, f"{path}[{index}]")
+            for index, item in enumerate(value)
+        ]
+    if isinstance(value, str):
+        return render_known_templates_in_string(value, host_vars, guest_ipv4_by_name, ports, path)
+    return value
 
 
 def extract_port(raw_url: str, path: str) -> int:
@@ -388,6 +470,9 @@ def build_service_urls(
         urls["controller"] = service_url("http", tailscale_ipv4, ports["netbox_host_proxy_port"])
         port_map["internal"] = ports["netbox_server_port"]
         port_map["controller"] = ports["netbox_host_proxy_port"]
+    elif service_id == "gotenberg":
+        urls["internal"] = service_url("http", private_ip, ports["gotenberg_port"])
+        port_map["internal"] = ports["gotenberg_port"]
     elif service_id == "searxng":
         public_hostname = service.get("public_hostname")
         urls["internal"] = service_url("http", private_ip, ports["searxng_port"])
@@ -408,6 +493,9 @@ def build_service_urls(
     elif service_id == "browser_runner":
         urls["internal"] = service_url("http", private_ip, ports["browser_runner_port"])
         port_map["internal"] = ports["browser_runner_port"]
+    elif service_id == "outline":
+        urls["internal"] = service_url("http", private_ip, ports["outline_port"])
+        port_map["internal"] = ports["outline_port"]
     elif service_id == "harbor":
         urls["internal"] = service_url("http", private_ip, ports["harbor_port"])
         port_map["internal"] = ports["harbor_port"]
@@ -428,6 +516,9 @@ def build_service_urls(
     elif service_id == "n8n":
         urls["internal"] = service_url("http", private_ip, ports["n8n_port"])
         port_map["internal"] = ports["n8n_port"]
+    elif service_id == "nextcloud":
+        urls["internal"] = service_url("http", private_ip, ports["nextcloud_port"])
+        port_map["internal"] = ports["nextcloud_port"]
     elif service_id == "coolify":
         urls["internal"] = service_url("http", private_ip, ports["coolify_dashboard_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["coolify_host_proxy_port"])
@@ -578,6 +669,13 @@ def build_service_topology(
             service["edge"]["action_url"] = urls["controller"]
         if "access" in service and "controller" in urls:
             service["access"]["url"] = urls["controller"]
+        service = render_known_templates(
+            service,
+            host_vars,
+            guest_ipv4_by_name,
+            ports,
+            f"host_vars.lv3_service_topology.{service_id}",
+        )
 
         resolved[service_id] = service
     return resolved
