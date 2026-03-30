@@ -10,6 +10,9 @@ CTMPL_TEMPLATE = REPO_ROOT / "roles" / "matrix_synapse_runtime" / "templates" / 
 COMPOSE_TEMPLATE = REPO_ROOT / "roles" / "matrix_synapse_runtime" / "templates" / "docker-compose.yml.j2"
 HOMESERVER_TEMPLATE = REPO_ROOT / "roles" / "matrix_synapse_runtime" / "templates" / "homeserver.yaml.j2"
 TASKS_FILE = REPO_ROOT / "roles" / "matrix_synapse_runtime" / "tasks" / "main.yml"
+PUBLIC_VERIFY_FILE = REPO_ROOT / "roles" / "matrix_synapse_runtime" / "tasks" / "public_verify.yml"
+DISCORD_TEMPLATE = REPO_ROOT / "roles" / "matrix_synapse_runtime" / "templates" / "mautrix-discord-config.yaml.j2"
+WHATSAPP_TEMPLATE = REPO_ROOT / "roles" / "matrix_synapse_runtime" / "templates" / "mautrix-whatsapp-config.yaml.j2"
 
 
 def test_matrix_synapse_runtime_defaults_expose_internal_controller_and_public_urls() -> None:
@@ -23,6 +26,12 @@ def test_matrix_synapse_runtime_defaults_expose_internal_controller_and_public_u
     assert defaults["matrix_synapse_container_data_dir"] == "/data"
     assert defaults["matrix_synapse_log_config_container_file"] == "{{ matrix_synapse_container_data_dir }}/{{ matrix_synapse_server_name }}.log.config"
     assert defaults["matrix_synapse_signing_key_container_file"] == "{{ matrix_synapse_container_data_dir }}/{{ matrix_synapse_server_name }}.signing.key"
+    assert defaults["matrix_synapse_mautrix_discord_image"] == "{{ container_image_catalog.images.matrix_mautrix_discord_runtime.ref }}"
+    assert defaults["matrix_synapse_mautrix_whatsapp_image"] == "{{ container_image_catalog.images.matrix_mautrix_whatsapp_runtime.ref }}"
+    assert defaults["matrix_synapse_public_smoke_bot_user_ids"] == [
+        "{{ matrix_synapse_mautrix_discord_bot_user_id }}",
+        "{{ matrix_synapse_mautrix_whatsapp_bot_user_id }}",
+    ]
 
 
 def test_matrix_synapse_env_templates_pin_the_homeserver_config_path() -> None:
@@ -41,6 +50,10 @@ def test_matrix_synapse_compose_template_only_exposes_the_client_listener() -> N
     assert 'ports:\n      - "{{ matrix_synapse_port }}:8008"' in compose_template
     assert "8448" not in compose_template
     assert "openbao-agent:" in compose_template
+    assert "{{ matrix_synapse_mautrix_discord_registration_file }}:/appservices/mautrix-discord-registration.yaml:ro" in compose_template
+    assert "{{ matrix_synapse_mautrix_whatsapp_registration_file }}:/appservices/mautrix-whatsapp-registration.yaml:ro" in compose_template
+    assert "mautrix-discord:" in compose_template
+    assert "mautrix-whatsapp:" in compose_template
 
 
 def test_matrix_synapse_homeserver_template_is_client_only_and_x_forwarded() -> None:
@@ -52,6 +65,7 @@ def test_matrix_synapse_homeserver_template_is_client_only_and_x_forwarded() -> 
     assert "public_baseurl: \"{{ matrix_synapse_public_base_url }}\"" in homeserver_template
     assert 'log_config: "{{ matrix_synapse_log_config_container_file }}"' in homeserver_template
     assert 'signing_key_path: "{{ matrix_synapse_signing_key_container_file }}"' in homeserver_template
+    assert "app_service_config_files:" in homeserver_template
 
 
 def test_matrix_synapse_runtime_generates_signing_material_and_bootstrap_user() -> None:
@@ -84,3 +98,16 @@ def test_matrix_synapse_runtime_generates_signing_material_and_bootstrap_user() 
     assert compose_pull_task["until"] == "matrix_synapse_pull.rc == 0"
     assert "Assert Matrix Synapse bootstrap generation produced the required artifacts" in task_file
     assert "matrix_synapse_generate.rc == 0" in task_file
+    assert "Generate the mautrix Discord registration when needed" in task_file
+    assert "Generate the mautrix WhatsApp registration when needed" in task_file
+
+
+def test_matrix_synapse_bridge_templates_and_public_verify_cover_discord_and_whatsapp() -> None:
+    public_verify = PUBLIC_VERIFY_FILE.read_text()
+    discord_template = DISCORD_TEMPLATE.read_text()
+    whatsapp_template = WHATSAPP_TEMPLATE.read_text()
+
+    assert "matrix_admin_register.py" in public_verify
+    assert "matrix_bridge_smoke.py" in public_verify
+    assert "command_prefix: '!discord'" in discord_template
+    assert "command_prefix: '!wa'" in whatsapp_template

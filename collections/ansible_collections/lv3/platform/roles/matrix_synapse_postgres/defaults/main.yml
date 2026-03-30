@@ -17,9 +17,10 @@
 #
 # Dependencies:
 #   - ADR 0255: Matrix Synapse As The Canonical ServerClaw Conversation Hub
+#   - ADR 0256: Mautrix Bridges For External Chat Channel Adapters
 #   - Role: matrix_synapse_postgres — provisions the database and mirrored password.
 #
-# Related ADRs: 0165, 0255
+# Related ADRs: 0165, 0255, 0256
 # Related Runbooks: docs/runbooks/configure-matrix-synapse.md
 #
 # Author: LV3 Platform
@@ -33,3 +34,20 @@ matrix_synapse_postgres_secret_dir: /etc/lv3/matrix-synapse
 matrix_synapse_postgres_password_file: "{{ matrix_synapse_postgres_secret_dir }}/database-password.txt"
 matrix_synapse_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse
 matrix_synapse_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/database-password.txt
+matrix_synapse_bridge_databases:
+  - id: mautrix_discord
+    database_name: mautrix_discord
+    database_user: mautrix_discord
+    database_collation: C
+    database_ctype: C
+    database_template: template0
+    password_local_file: "{{ matrix_synapse_local_artifact_dir }}/mautrix-discord-database-password.txt"
+    password_remote_file: "{{ matrix_synapse_postgres_secret_dir }}/mautrix-discord-database-password.txt"
+  - id: mautrix_whatsapp
+    database_name: mautrix_whatsapp
+    database_user: mautrix_whatsapp
+    database_collation: C
+    database_ctype: C
+    database_template: template0
+    password_local_file: "{{ matrix_synapse_local_artifact_dir }}/mautrix-whatsapp-database-password.txt"
+    password_remote_file: "{{ matrix_synapse_postgres_secret_dir }}/mautrix-whatsapp-database-password.txt"

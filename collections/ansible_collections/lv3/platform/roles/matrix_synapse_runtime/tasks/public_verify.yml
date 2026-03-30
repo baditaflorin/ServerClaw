@@ -1,0 +1,55 @@
+# Purpose: Verify the public Matrix Synapse endpoint by bootstrapping the admin account and exercising the first bridge bots through HTTPS.
+# Use case: Imported after edge publication so live-apply runs prove Discord and WhatsApp bridge management rooms answer end to end.
+# Inputs (required):
+#   - matrix_synapse_public_base_url (str, required): Public Matrix base URL.
+#   - matrix_synapse_registration_shared_secret_local_file (path, required): Controller-local shared-secret registration artifact.
+#   - matrix_synapse_admin_localpart (str, required): Bootstrap admin localpart used for smoke login.
+#   - matrix_synapse_ops_password_local_file (path, required): Controller-local ops admin password artifact.
+#   - matrix_synapse_public_smoke_bot_user_ids (list, required): Expected bridge bot MXIDs.
+# Outputs:
+#   - Public bootstrap and bridge-smoke evidence for the Matrix Synapse live surface.
+# Idempotency: Fully idempotent
+#              The bootstrap helper is exists-ok and the smoke flow exercises reversible management-room messages.
+# Dependencies:
+#   - ADR 0165: Playbook / Role Metadata Standard
+#   - ADR 0256: Mautrix Bridges For External Chat Channel Adapters
+#   - Scripts: scripts/matrix_admin_register.py and scripts/matrix_bridge_smoke.py
+---
+- name: Ensure the Matrix Synapse admin account exists through the shared-secret bootstrap path
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ inventory_dir }}/../scripts/matrix_admin_register.py"
+      - --base-url
+      - "{{ matrix_synapse_public_base_url }}"
+      - --shared-secret-file
+      - "{{ matrix_synapse_registration_shared_secret_local_file }}"
+      - --username
+      - "{{ matrix_synapse_admin_localpart }}"
+      - --password-file
+      - "{{ matrix_synapse_ops_password_local_file }}"
+      - --admin
+  register: matrix_synapse_public_admin_register
+  changed_when: "'registered' in matrix_synapse_public_admin_register.stdout"
+  no_log: true
+
+- name: Verify the Matrix Synapse bridge management bots answer on the public endpoint
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ inventory_dir }}/../scripts/matrix_bridge_smoke.py"
+      - --base-url
+      - "{{ matrix_synapse_public_base_url }}"
+      - --username
+      - "{{ matrix_synapse_admin_localpart }}"
+      - --password-file
+      - "{{ matrix_synapse_ops_password_local_file }}"
+      - --timeout-seconds
+      - "{{ matrix_synapse_public_smoke_timeout_seconds | string }}"
+      - --bot-user-id
+      - "{{ matrix_synapse_public_smoke_bot_user_ids[0] }}"
+      - --bot-user-id
+      - "{{ matrix_synapse_public_smoke_bot_user_ids[1] }}"
+  register: matrix_synapse_public_bridge_smoke
+  changed_when: false
+  no_log: true

@@ -1,0 +1,176 @@
+#!/usr/bin/env python3
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+from pathlib import Path
+from typing import Any
+
+
+def request_json(
+    method: str,
+    url: str,
+    payload: dict[str, Any] | None = None,
+    *,
+    access_token: str | None = None,
+) -> tuple[int, dict[str, Any]]:
+    data = None if payload is None else json.dumps(payload).encode("utf-8")
+    headers = {"Accept": "application/json"}
+    if data is not None:
+        headers["Content-Type"] = "application/json"
+    if access_token:
+        headers["Authorization"] = f"Bearer {access_token}"
+    request = urllib.request.Request(url, data=data, headers=headers, method=method)
+    try:
+        with urllib.request.urlopen(request) as response:
+            body = response.read().decode("utf-8")
+            return response.status, json.loads(body) if body else {}
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8")
+        response_payload = json.loads(body) if body else {}
+        return exc.code, response_payload
+
+
+def login(base_url: str, username: str, password: str) -> dict[str, Any]:
+    status, payload = request_json(
+        "POST",
+        f"{base_url}/_matrix/client/v3/login",
+        {
+            "type": "m.login.password",
+            "identifier": {"type": "m.id.user", "user": username},
+            "password": password,
+        },
+    )
+    if status != 200 or "access_token" not in payload:
+        raise RuntimeError(f"Matrix login failed for {username}: {payload}")
+    return payload
+
+
+def sync(base_url: str, access_token: str, *, since: str | None = None, timeout_ms: int = 0) -> dict[str, Any]:
+    query = {"timeout": str(timeout_ms)}
+    if since:
+        query["since"] = since
+    status, payload = request_json(
+        "GET",
+        f"{base_url}/_matrix/client/v3/sync?{urllib.parse.urlencode(query)}",
+        access_token=access_token,
+    )
+    if status != 200:
+        raise RuntimeError(f"Matrix sync failed: {payload}")
+    return payload
+
+
+def create_direct_room(base_url: str, access_token: str, bot_user_id: str) -> str:
+    status, payload = request_json(
+        "POST",
+        f"{base_url}/_matrix/client/v3/createRoom",
+        {
+            "is_direct": True,
+            "preset": "trusted_private_chat",
+            "invite": [bot_user_id],
+            "topic": f"Repo-managed bridge smoke for {bot_user_id}",
+        },
+        access_token=access_token,
+    )
+    if status != 200 or "room_id" not in payload:
+        raise RuntimeError(f"Failed to create Matrix DM with {bot_user_id}: {payload}")
+    return payload["room_id"]
+
+
+def send_message(base_url: str, access_token: str, room_id: str, body: str) -> None:
+    transaction_id = str(int(time.time() * 1000))
+    status, payload = request_json(
+        "PUT",
+        f"{base_url}/_matrix/client/v3/rooms/{urllib.parse.quote(room_id, safe='')}/send/m.room.message/{transaction_id}",
+        {"msgtype": "m.text", "body": body},
+        access_token=access_token,
+    )
+    if status != 200:
+        raise RuntimeError(f"Failed to send Matrix message into {room_id}: {payload}")
+
+
+def wait_for_bot_reply(
+    base_url: str,
+    access_token: str,
+    *,
+    room_id: str,
+    bot_user_id: str,
+    since: str,
+    timeout_seconds: int,
+) -> tuple[str, str]:
+    deadline = time.monotonic() + timeout_seconds
+    next_batch = since
+    while time.monotonic() < deadline:
+        payload = sync(base_url, access_token, since=next_batch, timeout_ms=5000)
+        next_batch = payload.get("next_batch", next_batch)
+        room = payload.get("rooms", {}).get("join", {}).get(room_id, {})
+        events = room.get("timeline", {}).get("events", [])
+        for event in events:
+            if event.get("sender") != bot_user_id:
+                continue
+            if event.get("type") != "m.room.message":
+                continue
+            body = event.get("content", {}).get("body", "").strip()
+            if body:
+                return body, next_batch
+    raise RuntimeError(f"No Matrix bridge response arrived from {bot_user_id} within {timeout_seconds} seconds")
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Exercise Matrix bridge management rooms by DMing the repo-managed bridge bots and waiting for a reply.",
+    )
+    parser.add_argument("--base-url", required=True, help="Matrix base URL, for example https://matrix.lv3.org")
+    parser.add_argument("--username", required=True)
+    parser.add_argument("--password-file", required=True, type=Path)
+    parser.add_argument("--bot-user-id", action="append", required=True, dest="bot_user_ids")
+    parser.add_argument("--timeout-seconds", type=int, default=90)
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    base_url = args.base_url.rstrip("/")
+    password = args.password_file.read_text(encoding="utf-8").strip()
+    login_payload = login(base_url, args.username, password)
+    access_token = login_payload["access_token"]
+
+    versions_status, versions_payload = request_json("GET", f"{base_url}/_matrix/client/v3/versions")
+    if versions_status != 200 or "versions" not in versions_payload:
+        raise RuntimeError(f"Matrix versions endpoint did not return the expected payload: {versions_payload}")
+
+    next_batch = sync(base_url, access_token, timeout_ms=0).get("next_batch")
+    if not next_batch:
+        raise RuntimeError("Matrix sync did not return next_batch")
+
+    results: list[dict[str, str]] = []
+    for bot_user_id in args.bot_user_ids:
+        room_id = create_direct_room(base_url, access_token, bot_user_id)
+        next_batch = sync(base_url, access_token, timeout_ms=0).get("next_batch", next_batch)
+        send_message(base_url, access_token, room_id, "help")
+        reply, next_batch = wait_for_bot_reply(
+            base_url,
+            access_token,
+            room_id=room_id,
+            bot_user_id=bot_user_id,
+            since=next_batch,
+            timeout_seconds=args.timeout_seconds,
+        )
+        results.append({"bot_user_id": bot_user_id, "room_id": room_id, "reply": reply})
+
+    print(json.dumps({"status": "ok", "bridges": results}, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except Exception as exc:  # pragma: no cover
+        print(str(exc), file=sys.stderr)
+        raise SystemExit(1)

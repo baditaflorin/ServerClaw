@@ -12,16 +12,17 @@
 #   - none
 #
 # Outputs:
-#   - Local HTTP readiness and password login verification for Matrix Synapse.
+#   - Local HTTP readiness, password login verification, and bridge container health for Matrix Synapse.
 #
 # Idempotency: Fully idempotent
 #              Verification-only tasks do not mutate runtime state.
 #
 # Dependencies:
 #   - ADR 0255: Matrix Synapse As The Canonical ServerClaw Conversation Hub
+#   - ADR 0256: Mautrix Bridges For External Chat Channel Adapters
 #   - Role: matrix_synapse_runtime — sets the facts consumed here.
 #
-# Related ADRs: 0165, 0255
+# Related ADRs: 0165, 0255, 0256
 # Related Runbooks: docs/runbooks/configure-matrix-synapse.md
 #
 # Author: LV3 Platform
@@ -62,3 +63,28 @@
     fail_msg: >-
       Matrix Synapse answered locally, but the repo-managed ops admin account could not authenticate.
   no_log: true
+
+- name: Verify the Matrix bridge containers are running
+  ansible.builtin.command:
+    argv:
+      - docker
+      - inspect
+      - -f
+      - '{{ "{{.State.Status}}" }}'
+      - "{{ item }}"
+  loop:
+    - "{{ matrix_synapse_mautrix_discord_container_name }}"
+    - "{{ matrix_synapse_mautrix_whatsapp_container_name }}"
+  register: matrix_synapse_bridge_container_status
+  retries: 12
+  delay: 5
+  until: >-
+    matrix_synapse_bridge_container_status.results | map(attribute='stdout') | list == ['running', 'running']
+  changed_when: false
+
+- name: Assert the Matrix bridge containers are running
+  ansible.builtin.assert:
+    that:
+      - matrix_synapse_bridge_container_status.results | map(attribute='stdout') | list == ['running', 'running']
+    fail_msg: >-
+      Matrix Synapse answered locally, but one or more repo-managed mautrix bridge containers were not running.

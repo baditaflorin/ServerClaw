@@ -27,10 +27,11 @@
 #
 # Dependencies:
 #   - ADR 0255: Matrix Synapse As The Canonical ServerClaw Conversation Hub
+#   - ADR 0256: Mautrix Bridges For External Chat Channel Adapters
 #   - Requires: docker_runtime and the Matrix Synapse PostgreSQL converge to have completed first.
 #   - Uses: the shared OpenBao compose env helper for runtime secret delivery.
 #
-# Related ADRs: 0165, 0255
+# Related ADRs: 0165, 0255, 0256
 # Related Runbooks: docs/runbooks/configure-matrix-synapse.md
 #
 # Author: LV3 Platform
@@ -45,15 +46,21 @@
       - matrix_synapse_env_file | length > 0
       - matrix_synapse_homeserver_config_file | length > 0
       - matrix_synapse_image | length > 0
+      - matrix_synapse_mautrix_discord_image | length > 0
+      - matrix_synapse_mautrix_whatsapp_image | length > 0
       - matrix_synapse_container_name | length > 0
       - matrix_synapse_server_name | length > 0
       - matrix_synapse_port | int > 0
       - matrix_synapse_internal_base_url | length > 0
       - matrix_synapse_public_base_url | length > 0
+      - matrix_synapse_mautrix_discord_dir | length > 0
+      - matrix_synapse_mautrix_whatsapp_dir | length > 0
       - matrix_synapse_database_host | length > 0
       - matrix_synapse_database_name | length > 0
       - matrix_synapse_database_user | length > 0
       - matrix_synapse_database_password_local_file | length > 0
+      - matrix_synapse_mautrix_discord_database_password_local_file | length > 0
+      - matrix_synapse_mautrix_whatsapp_database_password_local_file | length > 0
       - matrix_synapse_admin_localpart | length > 0
       - matrix_synapse_admin_user_id | length > 0
       - matrix_synapse_ops_password_local_file | length > 0
@@ -76,6 +83,24 @@
       {{ matrix_synapse_database_password_local_file }} is missing on the control machine.
       Run the Matrix Synapse PostgreSQL converge first so the runtime can connect to postgres-lv3.
   when: not matrix_synapse_database_password_local.stat.exists
+
+- name: Check whether the Matrix bridge database passwords exist on the control machine
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  delegate_to: localhost
+  become: false
+  loop:
+    - "{{ matrix_synapse_mautrix_discord_database_password_local_file }}"
+    - "{{ matrix_synapse_mautrix_whatsapp_database_password_local_file }}"
+  register: matrix_synapse_bridge_database_password_stats
+
+- name: Fail if the Matrix bridge database passwords are missing locally
+  ansible.builtin.fail:
+    msg: >-
+      One or more Matrix bridge database password files are missing on the control machine.
+      Run the Matrix Synapse PostgreSQL converge first so the bridge configs can connect to postgres-lv3.
+  when: >-
+    (matrix_synapse_bridge_database_password_stats.results | selectattr('stat.exists', 'equalto', false) | list | length) > 0
 
 - name: Ensure the Matrix Synapse runtime packages are present
   ansible.builtin.apt:
@@ -105,6 +130,22 @@
       owner: root
       group: root
       mode: "0700"
+    - path: "{{ matrix_synapse_mautrix_discord_dir }}"
+      owner: root
+      group: root
+      mode: "0755"
+    - path: "{{ matrix_synapse_mautrix_discord_dir }}/logs"
+      owner: root
+      group: root
+      mode: "0755"
+    - path: "{{ matrix_synapse_mautrix_whatsapp_dir }}"
+      owner: root
+      group: root
+      mode: "0755"
+    - path: "{{ matrix_synapse_mautrix_whatsapp_dir }}/logs"
+      owner: root
+      group: root
+      mode: "0755"
 
 - name: Generate the Matrix Synapse ops password
   ansible.builtin.shell: |
@@ -207,6 +248,67 @@
     mode: "0700"
   delegate_to: localhost
   become: false
+
+- name: Generate the Matrix bridge secret artifacts
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item.path }}" ]; then
+      umask 077
+      {{ item.command }} > "{{ item.path }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  loop:
+    - path: "{{ matrix_synapse_mautrix_discord_as_token_local_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ matrix_synapse_mautrix_discord_hs_token_local_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ matrix_synapse_mautrix_discord_provisioning_shared_secret_local_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ matrix_synapse_mautrix_discord_avatar_proxy_key_local_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ matrix_synapse_mautrix_whatsapp_as_token_local_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ matrix_synapse_mautrix_whatsapp_hs_token_local_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ matrix_synapse_mautrix_whatsapp_provisioning_shared_secret_local_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ matrix_synapse_mautrix_whatsapp_public_media_signing_key_local_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ matrix_synapse_mautrix_whatsapp_encryption_pickle_key_local_file }}"
+      command: "openssl rand -hex 32"
+  register: matrix_synapse_bridge_secret_generation
+  changed_when: "'changed' in matrix_synapse_bridge_secret_generation.stdout"
+  no_log: true
+
+- name: Record the Matrix bridge runtime secrets
+  ansible.builtin.set_fact:
+    matrix_synapse_mautrix_discord_database_password: >-
+      {{ lookup('ansible.builtin.file', matrix_synapse_mautrix_discord_database_password_local_file) | trim }}
+    matrix_synapse_mautrix_discord_as_token: >-
+      {{ lookup('ansible.builtin.file', matrix_synapse_mautrix_discord_as_token_local_file) | trim }}
+    matrix_synapse_mautrix_discord_hs_token: >-
+      {{ lookup('ansible.builtin.file', matrix_synapse_mautrix_discord_hs_token_local_file) | trim }}
+    matrix_synapse_mautrix_discord_provisioning_shared_secret: >-
+      {{ lookup('ansible.builtin.file', matrix_synapse_mautrix_discord_provisioning_shared_secret_local_file) | trim }}
+    matrix_synapse_mautrix_discord_avatar_proxy_key: >-
+      {{ lookup('ansible.builtin.file', matrix_synapse_mautrix_discord_avatar_proxy_key_local_file) | trim }}
+    matrix_synapse_mautrix_whatsapp_database_password: >-
+      {{ lookup('ansible.builtin.file', matrix_synapse_mautrix_whatsapp_database_password_local_file) | trim }}
+    matrix_synapse_mautrix_whatsapp_as_token: >-
+      {{ lookup('ansible.builtin.file', matrix_synapse_mautrix_whatsapp_as_token_local_file) | trim }}
+    matrix_synapse_mautrix_whatsapp_hs_token: >-
+      {{ lookup('ansible.builtin.file', matrix_synapse_mautrix_whatsapp_hs_token_local_file) | trim }}
+    matrix_synapse_mautrix_whatsapp_provisioning_shared_secret: >-
+      {{ lookup('ansible.builtin.file', matrix_synapse_mautrix_whatsapp_provisioning_shared_secret_local_file) | trim }}
+    matrix_synapse_mautrix_whatsapp_public_media_signing_key: >-
+      {{ lookup('ansible.builtin.file', matrix_synapse_mautrix_whatsapp_public_media_signing_key_local_file) | trim }}
+    matrix_synapse_mautrix_whatsapp_encryption_pickle_key: >-
+      {{ lookup('ansible.builtin.file', matrix_synapse_mautrix_whatsapp_encryption_pickle_key_local_file) | trim }}
+  no_log: true
 
 - name: Mirror the Matrix Synapse bootstrap secrets to the control machine
   ansible.builtin.copy:
@@ -357,6 +459,90 @@
     group: "{{ matrix_synapse_gid }}"
     mode: "0600"
   no_log: true
+
+- name: Render the mautrix Discord configuration
+  ansible.builtin.template:
+    src: mautrix-discord-config.yaml.j2
+    dest: "{{ matrix_synapse_mautrix_discord_config_file }}"
+    owner: root
+    group: root
+    mode: "0640"
+  register: matrix_synapse_mautrix_discord_config_template
+  no_log: true
+
+- name: Render the mautrix WhatsApp configuration
+  ansible.builtin.template:
+    src: mautrix-whatsapp-config.yaml.j2
+    dest: "{{ matrix_synapse_mautrix_whatsapp_config_file }}"
+    owner: root
+    group: root
+    mode: "0640"
+  register: matrix_synapse_mautrix_whatsapp_config_template
+  no_log: true
+
+- name: Check whether the mautrix bridge registration files already exist
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - "{{ matrix_synapse_mautrix_discord_registration_file }}"
+    - "{{ matrix_synapse_mautrix_whatsapp_registration_file }}"
+  register: matrix_synapse_bridge_registration_stats
+
+- name: Remove the mautrix Discord registration when the config changed
+  ansible.builtin.file:
+    path: "{{ matrix_synapse_mautrix_discord_registration_file }}"
+    state: absent
+  when: matrix_synapse_mautrix_discord_config_template.changed
+
+- name: Remove the mautrix WhatsApp registration when the config changed
+  ansible.builtin.file:
+    path: "{{ matrix_synapse_mautrix_whatsapp_registration_file }}"
+    state: absent
+  when: matrix_synapse_mautrix_whatsapp_config_template.changed
+
+- name: Generate the mautrix Discord registration when needed
+  ansible.builtin.command:
+    argv:
+      - docker
+      - run
+      - --rm
+      - -v
+      - "{{ matrix_synapse_mautrix_discord_dir }}:/data"
+      - --entrypoint
+      - mautrix-discord
+      - "{{ matrix_synapse_mautrix_discord_image }}"
+      - -g
+      - -c
+      - /data/config.yaml
+      - -r
+      - /data/registration.yaml
+  when: >-
+    matrix_synapse_mautrix_discord_config_template.changed
+    or not matrix_synapse_bridge_registration_stats.results[0].stat.exists
+  register: matrix_synapse_mautrix_discord_registration_generate
+  changed_when: matrix_synapse_mautrix_discord_registration_generate.rc == 0
+
+- name: Generate the mautrix WhatsApp registration when needed
+  ansible.builtin.command:
+    argv:
+      - docker
+      - run
+      - --rm
+      - -v
+      - "{{ matrix_synapse_mautrix_whatsapp_dir }}:/data"
+      - --entrypoint
+      - mautrix-whatsapp
+      - "{{ matrix_synapse_mautrix_whatsapp_image }}"
+      - -g
+      - -c
+      - /data/config.yaml
+      - -r
+      - /data/registration.yaml
+  when: >-
+    matrix_synapse_mautrix_whatsapp_config_template.changed
+    or not matrix_synapse_bridge_registration_stats.results[1].stat.exists
+  register: matrix_synapse_mautrix_whatsapp_registration_generate
+  changed_when: matrix_synapse_mautrix_whatsapp_registration_generate.rc == 0
 
 - name: Pull the Matrix Synapse image
   ansible.builtin.command:
