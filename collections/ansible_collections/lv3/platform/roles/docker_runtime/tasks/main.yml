@@ -271,16 +271,13 @@
   changed_when: false
   when: docker_runtime_pre_restart_container_ids.stdout_lines | length > 0
 
-- name: Record restart-managed containers that were running before Docker restarts
+- name: Record containers that were running before Docker restarts
   ansible.builtin.set_fact:
-    docker_runtime_pre_restart_managed_container_names: >-
+    docker_runtime_pre_restart_container_names: >-
       {{
         (
           (docker_runtime_pre_restart_container_inspect.stdout | default('[]')) | from_json
         )
-        | selectattr('HostConfig.RestartPolicy.Name', 'defined')
-        | rejectattr('HostConfig.RestartPolicy.Name', 'equalto', '')
-        | rejectattr('HostConfig.RestartPolicy.Name', 'equalto', 'no')
         | map(attribute='Name')
         | map('regex_replace', '^/', '')
         | list
@@ -304,16 +301,16 @@
     common_docker_bridge_chains_retries: "{{ docker_runtime_chain_recheck_retries }}"
     common_docker_bridge_chains_delay: "{{ docker_runtime_chain_recheck_delay_seconds }}"
 
-- name: Re-inspect restart-managed containers after Docker restarts
+- name: Re-inspect pre-restart containers after Docker restarts
   ansible.builtin.command:
-    argv: "{{ ['docker', 'inspect'] + docker_runtime_pre_restart_managed_container_names }}"
+    argv: "{{ ['docker', 'inspect'] + docker_runtime_pre_restart_container_names }}"
   register: docker_runtime_post_restart_container_inspect
   changed_when: false
-  when: docker_runtime_pre_restart_managed_container_names | default([]) | length > 0
+  when: docker_runtime_pre_restart_container_names | default([]) | length > 0
 
-- name: Record restart-managed containers that remained stopped after Docker restarts
+- name: Record pre-restart containers that remained stopped after Docker restarts
   ansible.builtin.set_fact:
-    docker_runtime_stopped_pre_restart_managed_container_names: >-
+    docker_runtime_stopped_pre_restart_container_names: >-
       {{
         (
           (docker_runtime_post_restart_container_inspect.stdout | default('[]')) | from_json
@@ -324,7 +321,7 @@
         | list
       }}
 
-- name: Recover restart-managed containers that remained stopped after Docker restarts
+- name: Recover pre-restart containers that remained stopped after Docker restarts
   ansible.builtin.command:
     argv:
       - python3
@@ -384,12 +381,12 @@
         ) | to_json
       }}
   register: docker_runtime_recover_stopped_containers
-  changed_when: docker_runtime_stopped_pre_restart_managed_container_names | length > 0
-  when: docker_runtime_stopped_pre_restart_managed_container_names | default([]) | length > 0
+  changed_when: docker_runtime_stopped_pre_restart_container_names | length > 0
+  when: docker_runtime_stopped_pre_restart_container_names | default([]) | length > 0
 
-- name: Confirm restart-managed containers recovered after Docker restarts
+- name: Confirm pre-restart containers recovered after Docker restarts
   ansible.builtin.command:
-    argv: "{{ ['docker', 'inspect'] + docker_runtime_pre_restart_managed_container_names }}"
+    argv: "{{ ['docker', 'inspect'] + docker_runtime_pre_restart_container_names }}"
   register: docker_runtime_recovered_container_inspect
   changed_when: false
   retries: "{{ docker_runtime_container_recovery_retries }}"
@@ -403,7 +400,7 @@
       | list
       | length
     ) == 0
-  when: docker_runtime_pre_restart_managed_container_names | default([]) | length > 0
+  when: docker_runtime_pre_restart_container_names | default([]) | length > 0
 
 - name: Verify Docker runtime health probes
   ansible.builtin.import_tasks: verify.yml
