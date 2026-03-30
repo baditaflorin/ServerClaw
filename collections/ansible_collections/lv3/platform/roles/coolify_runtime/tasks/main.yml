@@ -205,6 +205,19 @@
     delay: 0
     timeout: 240
 
+- name: Clear stale Laravel bootstrap cache files before repo-managed Coolify bootstrap
+  ansible.builtin.shell: |
+    set -euo pipefail
+    docker exec -u 0 "{{ coolify_service_name }}" sh -lc '
+      find /var/www/html/bootstrap/cache -maxdepth 1 -type f \
+        \( -name "config.php" -o -name "events.php" -o -name "routes*.php" \) \
+        -print -delete
+    '
+  args:
+    executable: /bin/bash
+  register: coolify_bootstrap_cache_cleanup
+  changed_when: (coolify_bootstrap_cache_cleanup.stdout | default('') | trim) | length > 0
+
 - name: Ensure the Coolify root account and API settings are enforced
   ansible.builtin.shell: |
     set -euo pipefail
