@@ -51,10 +51,28 @@ def test_main_tasks_render_build_start_and_verify_tesseract_ocr() -> None:
     assert "Sync the Tesseract OCR service sources" in names
     assert "Build the Tesseract OCR image" in names
     assert "Start the Tesseract OCR runtime and recover Docker nat-chain or stale compose-network failures" in names
+    start_block = next(
+        task
+        for task in tasks
+        if task["name"] == "Start the Tesseract OCR runtime and recover Docker nat-chain or stale compose-network failures"
+    )
+    rescue_names = [task["name"] for task in start_block["rescue"]]
+    assert "Restart Docker to restore bridge networking before retrying Tesseract OCR startup" in rescue_names
+    assert "Ensure Docker bridge networking chains are present before retrying Tesseract OCR startup" in rescue_names
     assert "Verify the Tesseract OCR runtime" in names
 
     build_task = next(task for task in tasks if task["name"] == "Build the Tesseract OCR image")
     assert build_task["ansible.builtin.shell"].startswith("set -euo pipefail")
+
+    force_recreate_block = next(
+        task
+        for task in tasks
+        if task["name"] == "Force-recreate Tesseract OCR when the host port binding is missing and recover stale Docker networking drift"
+    )
+    force_recreate_rescue_names = [task["name"] for task in force_recreate_block["rescue"]]
+    assert "Restart Docker to restore bridge networking before retrying Tesseract OCR force-recreate" in force_recreate_rescue_names
+    assert "Ensure Docker bridge networking chains are present before retrying Tesseract OCR force-recreate" in force_recreate_rescue_names
+    assert "Retry Tesseract OCR force-recreate after Docker networking recovery" in force_recreate_rescue_names
 
 
 def test_verify_tasks_cover_health_and_deterministic_ocr_probe() -> None:
@@ -102,6 +120,7 @@ def test_templates_define_repo_built_runtime_and_language_env() -> None:
 
     assert "image: {{ tesseract_ocr_runtime_image_name }}:latest" in compose_template
     assert '"{{ tesseract_ocr_runtime_port }}:{{ tesseract_ocr_runtime_container_port }}"' in compose_template
+    assert "network_mode: bridge" not in compose_template
     assert "TESSERACT_OCR_DEFAULT_LANGUAGE" in compose_template
     assert "FROM {{ tesseract_ocr_runtime_base_image }}" in dockerfile_template
     assert "tesseract-ocr" in dockerfile_template

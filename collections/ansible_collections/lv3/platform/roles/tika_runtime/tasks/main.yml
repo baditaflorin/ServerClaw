@@ -193,21 +193,72 @@
   changed_when: false
   failed_when: false
 
-- name: Force-recreate Tika when the host port binding is missing
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ tika_runtime_compose_file }}"
-      - up
-      - -d
-      - --force-recreate
-      - --remove-orphans
-  args:
-    chdir: "{{ tika_runtime_site_dir }}"
-  register: tika_runtime_force_recreate
-  changed_when: true
+- name: Force-recreate Tika when the host port binding is missing and recover stale compose-network drift
+  block:
+    - name: Force-recreate Tika when the host port binding is missing
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ tika_runtime_compose_file }}"
+          - up
+          - -d
+          - --force-recreate
+          - --remove-orphans
+      args:
+        chdir: "{{ tika_runtime_site_dir }}"
+      register: tika_runtime_force_recreate
+      changed_when: true
+  rescue:
+    - name: Flag stale compose-network drift during Tika force-recreate
+      ansible.builtin.set_fact:
+        tika_runtime_force_recreate_compose_network_missing: >-
+          {{
+            'failed to create endpoint' in (ansible_failed_result.stderr | default(''))
+            and 'does not exist' in (ansible_failed_result.stderr | default(''))
+          }}
+
+    - name: Surface unexpected Tika force-recreate failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('tika force-recreate failed')) }}"
+      when: not tika_runtime_force_recreate_compose_network_missing
+
+    - name: Reset stale Tika compose resources after force-recreate failure
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ tika_runtime_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ tika_runtime_site_dir }}"
+      register: tika_runtime_force_recreate_down_retry
+      changed_when: >-
+        'Stopping' in (tika_runtime_force_recreate_down_retry.stdout | default(''))
+        or 'Removing' in (tika_runtime_force_recreate_down_retry.stdout | default(''))
+        or 'Removing' in (tika_runtime_force_recreate_down_retry.stderr | default(''))
+      failed_when: false
+      when: tika_runtime_force_recreate_compose_network_missing
+
+    - name: Retry Tika force-recreate after compose-network recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ tika_runtime_compose_file }}"
+          - up
+          - -d
+          - --force-recreate
+          - --remove-orphans
+      args:
+        chdir: "{{ tika_runtime_site_dir }}"
+      register: tika_runtime_force_recreate
+      changed_when: true
+      when: tika_runtime_force_recreate_compose_network_missing
   when: tika_runtime_port_binding_check.stdout | trim == ''
 
 - name: Recheck Tika host port binding

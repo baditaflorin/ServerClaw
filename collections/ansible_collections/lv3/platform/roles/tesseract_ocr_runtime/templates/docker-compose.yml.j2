@@ -3,7 +3,6 @@ services:
     image: {{ tesseract_ocr_runtime_image_name }}:latest
     container_name: {{ tesseract_ocr_runtime_container_name }}
     restart: unless-stopped
-    network_mode: bridge
     command:
       - uvicorn
       - tesseract_ocr_service:app

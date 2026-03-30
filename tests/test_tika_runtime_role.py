@@ -82,10 +82,18 @@ def test_role_force_recreates_tika_when_port_binding_is_missing() -> None:
         "{{ tika_runtime_container_port }}",
     ]
 
-    recreate_task = next(
-        task for task in tasks if task.get("name") == "Force-recreate Tika when the host port binding is missing"
+    recreate_block = next(
+        task
+        for task in tasks
+        if task.get("name") == "Force-recreate Tika when the host port binding is missing and recover stale compose-network drift"
     )
+    recreate_task = next(
+        task for task in recreate_block["block"] if task.get("name") == "Force-recreate Tika when the host port binding is missing"
+    )
+    rescue_names = [task["name"] for task in recreate_block["rescue"]]
     assert "--force-recreate" in recreate_task["ansible.builtin.command"]["argv"]
+    assert "Reset stale Tika compose resources after force-recreate failure" in rescue_names
+    assert "Retry Tika force-recreate after compose-network recovery" in rescue_names
 
 
 def test_verify_tasks_cover_plaintext_and_metadata_extraction() -> None:

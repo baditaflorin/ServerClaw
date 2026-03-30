@@ -218,11 +218,20 @@
       changed_when: false
       when: tesseract_ocr_runtime_docker_nat_chain_missing
 
-    - name: Restart Docker to restore nat chain before retrying Tesseract OCR startup
+    - name: Restart Docker to restore bridge networking before retrying Tesseract OCR startup
       ansible.builtin.service:
         name: docker
         state: restarted
-      when: tesseract_ocr_runtime_docker_nat_chain_missing
+      when: tesseract_ocr_runtime_docker_nat_chain_missing or tesseract_ocr_runtime_compose_network_missing
+
+    - name: Ensure Docker bridge networking chains are present before retrying Tesseract OCR startup
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_bridge_chains
+      vars:
+        common_docker_bridge_chains_service_name: docker
+        common_docker_bridge_chains_require_nat_chain: true
+      when: tesseract_ocr_runtime_docker_nat_chain_missing or tesseract_ocr_runtime_compose_network_missing
 
     - name: Retry Tesseract OCR startup after Docker nat-chain or compose-network recovery
       ansible.builtin.command:
@@ -252,21 +261,87 @@
   changed_when: false
   failed_when: false
 
-- name: Force-recreate Tesseract OCR when the host port binding is missing
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ tesseract_ocr_runtime_compose_file }}"
-      - up
-      - -d
-      - --force-recreate
-      - --remove-orphans
-  args:
-    chdir: "{{ tesseract_ocr_runtime_site_dir }}"
-  register: tesseract_ocr_runtime_force_recreate
-  changed_when: true
+- name: Force-recreate Tesseract OCR when the host port binding is missing and recover stale Docker networking drift
+  block:
+    - name: Force-recreate Tesseract OCR when the host port binding is missing
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ tesseract_ocr_runtime_compose_file }}"
+          - up
+          - -d
+          - --force-recreate
+          - --remove-orphans
+      args:
+        chdir: "{{ tesseract_ocr_runtime_site_dir }}"
+      register: tesseract_ocr_runtime_force_recreate
+      changed_when: true
+  rescue:
+    - name: Detect stale Docker networking drift during Tesseract OCR force-recreate
+      ansible.builtin.set_fact:
+        tesseract_ocr_runtime_force_recreate_network_missing: >-
+          {{
+            'failed to create endpoint' in ((ansible_failed_result.stderr | default('')) ~ ' ' ~ (ansible_failed_result.stdout | default('')))
+            and 'does not exist' in ((ansible_failed_result.stderr | default('')) ~ ' ' ~ (ansible_failed_result.stdout | default('')))
+          }}
+
+    - name: Surface unexpected Tesseract OCR force-recreate failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('tesseract-ocr force-recreate failed')) }}"
+      when: not tesseract_ocr_runtime_force_recreate_network_missing
+
+    - name: Reset stale Tesseract OCR compose resources after force-recreate failure
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ tesseract_ocr_runtime_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ tesseract_ocr_runtime_site_dir }}"
+      register: tesseract_ocr_runtime_force_recreate_down_retry
+      changed_when: >-
+        'Stopping' in (tesseract_ocr_runtime_force_recreate_down_retry.stdout | default(''))
+        or 'Removing' in (tesseract_ocr_runtime_force_recreate_down_retry.stdout | default(''))
+        or 'Removing' in (tesseract_ocr_runtime_force_recreate_down_retry.stderr | default(''))
+      failed_when: false
+      when: tesseract_ocr_runtime_force_recreate_network_missing
+
+    - name: Restart Docker to restore bridge networking before retrying Tesseract OCR force-recreate
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: tesseract_ocr_runtime_force_recreate_network_missing
+
+    - name: Ensure Docker bridge networking chains are present before retrying Tesseract OCR force-recreate
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_bridge_chains
+      vars:
+        common_docker_bridge_chains_service_name: docker
+        common_docker_bridge_chains_require_nat_chain: true
+      when: tesseract_ocr_runtime_force_recreate_network_missing
+
+    - name: Retry Tesseract OCR force-recreate after Docker networking recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ tesseract_ocr_runtime_compose_file }}"
+          - up
+          - -d
+          - --force-recreate
+          - --remove-orphans
+      args:
+        chdir: "{{ tesseract_ocr_runtime_site_dir }}"
+      register: tesseract_ocr_runtime_force_recreate
+      changed_when: true
+      when: tesseract_ocr_runtime_force_recreate_network_missing
   when: tesseract_ocr_runtime_port_binding_check.stdout | trim == ""
 
 - name: Recheck Tesseract OCR host port binding
