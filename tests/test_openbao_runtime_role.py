@@ -162,6 +162,19 @@ def test_openbao_runtime_retries_policy_reads_during_post_restart_recovery() -> 
     assert "changed_when: false" in tasks
 
 
+def test_openbao_runtime_waits_out_background_apt_maintenance() -> None:
+    tasks = yaml.safe_load(TASKS_PATH.read_text(encoding="utf-8"))
+    apt_task = next(task for task in tasks if task["name"] == "Ensure OpenBao runtime prerequisite packages are present")
+    apt_module = apt_task["ansible.builtin.apt"]
+
+    assert apt_module["name"] == ["curl"]
+    assert apt_module["state"] == "present"
+    assert apt_module["update_cache"] is True
+    assert apt_module["cache_valid_time"] == 3600
+    assert apt_module["lock_timeout"] == 300
+    assert apt_module["force_apt_get"] is True
+
+
 def test_openbao_runtime_renders_rotatable_secret_keys_dynamically() -> None:
     tasks = TASKS_PATH.read_text(encoding="utf-8")
 
