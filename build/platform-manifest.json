@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.92",
   "platform_version": "0.130.60",
-  "generated_at": "2026-03-29T23:26:39Z",
-  "next_refresh_at": "2026-03-30T00:26:39Z",
+  "generated_at": "2026-03-30T00:09:28Z",
+  "next_refresh_at": "2026-03-30T01:09:28Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -59,7 +59,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://changelog.lv3.org",
-        "last_live_apply": "2026-03-29T00:00:00Z"
+        "last_live_apply": "2026-03-30T00:00:00Z"
       },
       "coolify": {
         "service_name": "Coolify",
@@ -125,7 +125,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://docs.lv3.org",
-        "last_live_apply": "2026-03-29T00:00:00Z"
+        "last_live_apply": "2026-03-30T00:00:00Z"
       },
       "dozzle": {
         "service_name": "Dozzle",
@@ -160,6 +160,18 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:3009",
+        "last_live_apply": "2026-03-30T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "gotenberg": {
+        "service_name": "Gotenberg",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://10.10.10.20:3007",
         "last_live_apply": "2026-03-30T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -300,7 +312,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://nginx.lv3.org",
-        "last_live_apply": "2026-03-29T00:00:00Z",
+        "last_live_apply": "2026-03-30T00:00:00Z",
         "slo_status": "unknown"
       },
       "nomad": {
@@ -1035,32 +1047,6 @@
         "runbook": "docs/runbooks/configure-dify.md"
       },
       {
-        "id": "converge-docker-publication-assurance",
-        "description": "Converge the shared ADR 0270 Docker publication assurance helper on managed Docker guests and verify every declared publication contract before readiness is trusted.",
-        "tags": [
-          "converge-docker-publication-assurance",
-          "guest-live",
-          "mutation",
-          "preflight",
-          "validated"
-        ],
-        "risk_class": "HIGH",
-        "automation_eligible": true,
-        "agent_trust_required": "T3",
-        "execution_class": "mutation",
-        "live_impact": "guest_live",
-        "budget": {
-          "max_duration_seconds": 1200,
-          "max_steps": 250,
-          "max_concurrent_instances": 1,
-          "max_touched_hosts": 2,
-          "max_restarts": 1,
-          "max_rollback_depth": 1,
-          "escalation_action": "notify_and_abort"
-        },
-        "runbook": "docs/runbooks/docker-publication-assurance.md"
-      },
-      {
         "id": "converge-docker-runtime",
         "description": "Converge the Docker runtime baseline on docker-runtime-lv3.",
         "tags": [
@@ -1163,6 +1149,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-gitea.md"
+      },
+      {
+        "id": "converge-gotenberg",
+        "description": "Deploy the private Gotenberg runtime on docker-runtime-lv3 and refresh the shared API gateway route used for authenticated PDF rendering requests.",
+        "tags": [
+          "converge-gotenberg",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 280,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-gotenberg.md"
       },
       {
         "id": "converge-guest-network-policy",
@@ -3669,6 +3681,16 @@
         ]
       },
       {
+        "id": "configure-gotenberg",
+        "title": "Configure Gotenberg",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-gotenberg.md",
+        "workflow_ids": [
+          "converge-gotenberg"
+        ]
+      },
+      {
         "id": "configure-guest-network-policy",
         "title": "Configure Guest Network Policy",
         "agent_trust_required": "T3",
@@ -4011,16 +4033,6 @@
         "path": "docs/runbooks/disaster-recovery.md",
         "workflow_ids": [
           "disaster-recovery-runbook"
-        ]
-      },
-      {
-        "id": "docker-publication-assurance",
-        "title": "Docker Publication Assurance Runbook",
-        "agent_trust_required": "T3",
-        "steps": 0,
-        "path": "docs/runbooks/docker-publication-assurance.md",
-        "workflow_ids": [
-          "converge-docker-publication-assurance"
         ]
       },
       {
@@ -4524,8 +4536,8 @@
   },
   "recent_changes": {
     "last_version": "0.177.91",
-    "deployed_at": "2026-03-29",
-    "summary": "implemented ADR 0270 by adding a shared Docker publication assurance helper, catalog-declared host publication contracts, post-verify repair hooks, read-only observation checks, and live-apply recovery hardening for Harbor, Keycloak, and OpenBao when Docker publication drift surfaced during replay",
+    "deployed_at": "2026-03-30",
+    "summary": "implemented ADR 0278 by adding the private Gotenberg document-to-PDF runtime on docker-runtime-lv3, publishing the authenticated `/v1/gotenberg` API gateway route, and verifying Chromium plus LibreOffice PDF conversion end to end",
     "release_notes_url": "docs/release-notes/0.177.92.md"
   },
   "agentic_architecture": {

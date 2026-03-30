@@ -53,7 +53,7 @@ def load_verify() -> list[dict]:
 
 def test_docker_runtime_patches_nftables_before_starting_docker() -> None:
     task_names = [task["name"] for task in load_tasks()]
-    assert task_names.index("Reload nftables after forward compatibility patch") < task_names.index(
+    assert task_names.index("Apply Docker bridge forward-compat rules live without reloading nftables") < task_names.index(
         "Ensure Docker service is enabled and running"
     )
 
@@ -111,12 +111,16 @@ def test_docker_runtime_patches_nftables_rule_block_once() -> None:
     tasks = load_tasks()
     build_rules = next(task for task in tasks if task["name"] == "Build the Docker bridge forward-compat rule block")
     patch_rules = next(task for task in tasks if task["name"] == "Patch nftables forward policy for Docker bridge egress")
-    reload_rules = next(task for task in tasks if task["name"] == "Reload nftables after forward compatibility patch")
+    live_rules = next(
+        task for task in tasks if task["name"] == "Apply Docker bridge forward-compat rules live without reloading nftables"
+    )
 
+    assert "docker_runtime_container_forward_rule_lines" in build_rules["ansible.builtin.set_fact"]
     assert "docker_runtime_container_forward_rule_block" in build_rules["ansible.builtin.set_fact"]
     assert patch_rules["ansible.builtin.lineinfile"]["line"] == "    {{ docker_runtime_container_forward_rule_block }}"
     assert "loop" not in patch_rules
-    assert reload_rules["changed_when"] == "docker_runtime_nftables_forward_patch.changed"
+    assert live_rules["loop"] == "{{ docker_runtime_container_forward_source_cidrs }}"
+    assert live_rules["ansible.builtin.command"]["argv"][:6] == ["nft", "add", "rule", "inet", "filter", "forward"]
 
 
 def test_docker_runtime_pins_public_edge_hostnames_and_address_pools() -> None:

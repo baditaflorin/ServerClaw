@@ -261,6 +261,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `fixture_pools` | `2026-03-28-adr-0186-prewarmed-fixture-pools-live-apply` |
 | `gitea` | `2026-03-26-adr-0143-gitea-live-apply` |
 | `gitea_actions_runners` | `2026-03-28-adr-0229-gitea-actions-runners-live-apply` |
+| `gotenberg` | `2026-03-30-adr-0278-gotenberg-live-apply` |
 | `guest_network_policy` | `2026-03-22-adr-0067-guest-network-policy-live-apply` |
 | `harbor` | `2026-03-29-adr-0201-harbor-mainline-live-apply` |
 | `homepage` | `2026-03-26-adr-0152-homepage-live-apply` |
@@ -329,6 +330,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `semaphore` | `2026-03-25-adr-0149-semaphore-live-apply` |
 | `server_resident_operations` | `2026-03-28-adr-0224-server-resident-operations-default-control-live-apply` |
 | `server_resident_reconciliation` | `2026-03-28-adr-0225-server-resident-reconciliation-via-ansible-pull-live-apply` |
+| `serverclaw` | `2026-03-30-adr-0254-serverclaw-distinct-product-surface-mainline-live-apply` |
 | `serverclaw_memory` | `2026-03-29-adr-0263-serverclaw-memory-substrate-mainline-live-apply` |
 | `service_redundancy` | `2026-03-27-adr-0188-failover-rehearsal-gate-live-apply` |
 | `session_logout_authority` | `2026-03-29-adr-0248-session-logout-authority-mainline-live-apply` |
@@ -576,6 +578,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Edge Publication](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-edge-publication.md)
 - [Configure Excalidraw](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-excalidraw.md)
 - [Configure Gitea](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-gitea.md)
+- [Configure Gotenberg](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-gotenberg.md)
 - [Configure Guest Network Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-guest-network-policy.md)
 - [Configure Harbor](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-harbor.md)
 - [Configure Headscale](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-headscale.md)
@@ -1334,6 +1337,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0268-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0268-main-integration.md)
 - [Workstream WS-0271: Backup Coverage Assertion Ledger Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0271-live-apply.md)
 - [Workstream ws-0272-live-apply: ADR 0272 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0272-live-apply.md)
+- [Workstream ws-0278-live-apply: ADR 0278 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0278-live-apply.md)
+- [Workstream ws-0278-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0278-main-integration.md)
 - [Workstream ws-0295-live-apply: Live Apply ADR 0295 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md)
 - [Workstream WS-0296: Education Repo Refresh And Named Deploy Profiles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-education-refresh.md)
 <!-- END GENERATED: document-index -->
@@ -1625,6 +1630,8 @@ This repository is intentionally opinionated:
 | `0252` | Integrate ADR 0252 exact-main replay onto current origin/main | `merged` | [ws-0252-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0252-main-merge.md) |
 | `0252` | Re-verify ADR 0252 from the latest origin/main and prepare final merge surfaces | `live_applied` | [ws-0252-mainline-replay.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0252-mainline-replay.md) |
 | `0253` | Unified runtime assurance scoreboard live apply | `live_applied` | [ws-0253-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0253-live-apply.md) |
+| `0254` | Live apply ADR 0254 ServerClaw | `live_applied` | [ws-0254-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0254-live-apply.md) |
+| `0254` | Integrate ADR 0254 exact-main replay onto current origin/main | `merged` | [ws-0254-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0254-main-merge.md) |
 | `0254` | ServerClaw architecture bundle | `merged` | [adr-0254-serverclaw-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0254-serverclaw-architecture-bundle.md) |
 | `0255` | ADR 0255 live apply from latest origin/main | `live_applied` | [ws-0255-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0255-live-apply.md) |
 | `0255` | Integrate ADR 0255 exact-main replay onto current origin/main | `merged` | [ws-0255-main-integration.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0255-main-integration.md) |
@@ -1641,6 +1648,7 @@ This repository is intentionally opinionated:
 | `0271` | Backup coverage assertion ledger live apply | `live_applied` | [ws-0271-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0271-live-apply.md) |
 | `0272` | Restore readiness ladders and stateful warm-up verification profiles | `live_applied` | [ws-0272-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0272-live-apply.md) |
 | `0273` | Live apply ADR 0273 public endpoint admission control | `live_applied` | [adr-0273-public-endpoint-admission-control.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0273-public-endpoint-admission-control.md) |
+| `0278` | ADR 0278 live apply from latest origin/main | `live_applied` | [ws-0278-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0278-live-apply.md) |
 | `0295` | Shared artifact cache plane and dedicated cache VM roadmap | `live_applied` | [adr-0295-artifact-cache-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md) |
 <!-- END GENERATED: merged-workstreams -->

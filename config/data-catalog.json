@@ -101,6 +101,21 @@
       "notes": "Repositories, issues, webhook configuration, and audit metadata are operational records that should remain restorable for multi-year incident and change reconstruction."
     },
     {
+      "id": "gotenberg-transient-render-buffers",
+      "service": "gotenberg",
+      "name": "Gotenberg transient render buffers",
+      "class": "internal",
+      "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Transient request and response buffers inside the gotenberg container on docker-runtime-lv3",
+        "Ephemeral temporary files created during Chromium and LibreOffice conversions on docker-runtime-lv3"
+      ],
+      "notes": "Gotenberg is stateless and does not persist source documents or rendered PDFs after each synchronous conversion finishes."
+    },
+    {
       "id": "grafana-annotations",
       "service": "grafana",
       "name": "Grafana annotations",

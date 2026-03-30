@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-30'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 247
+  Implemented: 248
   Partial: 7
-  Not Implemented: 69
+  Not Implemented: 68
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4378,6 +4378,7 @@ adr_index:
       - lv3
     summary: We will define ServerClaw as a distinct product surface on top of the LV3
     filename: 0254-serverclaw-as-a-distinct-self-hosted-agent-product-on-lv3.md
+    implemented_version: 0.177.91
   - adr: '0255'
     title: Matrix Synapse As The Canonical ServerClaw Conversation Hub
     status: Accepted
@@ -4767,7 +4768,7 @@ adr_index:
   - adr: 0278
     title: Gotenberg As The Document-To-PDF Rendering Service
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -4778,6 +4779,7 @@ adr_index:
       - service
     summary: We will deploy Gotenberg as the shared document-to-PDF rendering service.
     filename: 0278-gotenberg-as-the-document-to-pdf-rendering-service.md
+    implemented_version: 0.130.59
   - adr: 0279
     title: Grist As The No-Code Operational Spreadsheet Database
     status: Accepted

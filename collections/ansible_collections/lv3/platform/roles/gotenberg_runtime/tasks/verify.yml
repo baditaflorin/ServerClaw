@@ -1,0 +1,58 @@
+---
+# Purpose: Verify the local Gotenberg health contract and both PDF conversion routes.
+# Inputs: Running Gotenberg container plus the configured local runtime URL and verification fixtures.
+# Outputs: Read-only health and conversion probe results for the Chromium and LibreOffice renderers.
+# Idempotency: Fully idempotent; these are read-only verification steps that only use temporary files.
+# Dependencies: ADR 0278 and ADR 0165; requires the gotenberg_runtime compose stack to be running.
+- name: Verify the Gotenberg health endpoint responds locally
+  ansible.builtin.uri:
+    url: "{{ gotenberg_runtime_local_base_url }}{{ gotenberg_runtime_healthcheck_path }}"
+    method: GET
+    status_code:
+      - 200
+    return_content: false
+    timeout: 30
+  register: gotenberg_runtime_verify_health
+  retries: 12
+  delay: 2
+  until: gotenberg_runtime_verify_health.status == 200
+  changed_when: false
+
+- name: Verify the Gotenberg Chromium HTML conversion route renders a PDF
+  ansible.builtin.shell: |
+    set -euo pipefail
+    html="$(mktemp --suffix=.html)"
+    pdf="$(mktemp)"
+    trap 'rm -f "$html" "$pdf"' EXIT
+    cat >"$html" <<'EOF'
+    <html>
+      <body>
+        <h1>{{ gotenberg_runtime_verify_html_title }}</h1>
+        <p>Chromium route verification.</p>
+      </body>
+    </html>
+    EOF
+    curl -fsS -o "$pdf" \
+      -F "files=@${html};filename=index.html;type=text/html" \
+      "{{ gotenberg_runtime_local_base_url }}/forms/chromium/convert/html"
+    head -c 4 "$pdf" | grep -q '%PDF'
+  args:
+    executable: /bin/bash
+  register: gotenberg_runtime_verify_html
+  changed_when: false
+
+- name: Verify the Gotenberg LibreOffice conversion route renders a PDF
+  ansible.builtin.shell: |
+    set -euo pipefail
+    text_file="$(mktemp --suffix=.txt)"
+    pdf="$(mktemp)"
+    trap 'rm -f "$text_file" "$pdf"' EXIT
+    printf 'LV3 Gotenberg LibreOffice verification\n' >"$text_file"
+    curl -fsS -o "$pdf" \
+      -F "files=@${text_file};filename={{ gotenberg_runtime_verify_text_filename }};type=text/plain" \
+      "{{ gotenberg_runtime_local_base_url }}/forms/libreoffice/convert"
+    head -c 4 "$pdf" | grep -q '%PDF'
+  args:
+    executable: /bin/bash
+  register: gotenberg_runtime_verify_libreoffice
+  changed_when: false
