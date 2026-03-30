@@ -138,6 +138,8 @@
   `receipts/live-applies/2026-03-30-adr-0287-woodpecker-mainline-live-apply.json`
   carries the repaired exact-main replay onto repo version `0.177.110` and
   platform version `0.130.73`.
-- The final post-push `main` pipeline trigger proof is attached to the
-  canonical mainline receipt so the workstream branch remains a stable audit
-  trail while the integrated `main` closeout records the forge-visible proof.
+- The canonical mainline receipt now also records the published `origin/main`
+  proof at commit `f9bc208e7930a3b93abda8206c48fb718232e2a4`: the managed
+  `main` trigger request is accepted by Woodpecker, but repeated
+  `list-pipelines` calls still return `[]` and a bounded `--wait --timeout 30`
+  replay reports that no pipeline became visible for branch `main`.

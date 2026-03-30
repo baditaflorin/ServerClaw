@@ -85,6 +85,23 @@ accepts the manual trigger request with `204 No Content` but no pipeline run
 appears. Push or merge the branch carrying `.woodpecker.yml` first, then rerun
 the managed trigger command.
 
+If `origin/main` already contains `.woodpecker.yml` and the managed trigger
+still returns an accepted response while `make woodpecker-manage
+ACTION=list-pipelines WOODPECKER_ARGS='--repo ops/proxmox_florin_server
+--branch main'` keeps returning `[]`, treat that as a Woodpecker
+post-acceptance visibility issue. Capture:
+
+```bash
+make woodpecker-manage ACTION=trigger-pipeline WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main'
+make woodpecker-manage ACTION=list-pipelines WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main'
+make woodpecker-manage ACTION=trigger-pipeline WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main --wait --timeout 30'
+```
+
+Then inspect the live runtime on `docker-runtime-lv3` with the jump-path check
+already documented below to review `docker compose --file
+/opt/woodpecker/docker-compose.yml ps` and the Woodpecker container logs before
+claiming end-to-end pipeline visibility is healthy again.
+
 ## Verification
 
 After a converge:

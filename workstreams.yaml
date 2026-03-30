@@ -324,7 +324,7 @@ workstreams:
     title: Live apply Woodpecker CI as the API-driven continuous integration server from latest origin/main
     ready_to_merge: true
     live_applied: true
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/ws-0287-mainline-final
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0287-mainline-final
@@ -535,7 +535,8 @@ workstreams:
       included_in_repo_version: 0.177.110
       latest_receipts:
         woodpecker: 2026-03-30-adr-0287-woodpecker-mainline-live-apply
-    blockers: []
+    blockers:
+      - Post-push Woodpecker manual `main` triggers are accepted but still do not materialize a visible pipeline through the API as of 2026-03-30; see the canonical mainline receipt and r7 evidence bundle.
   - id: ws-0282-live-apply
     adr: "0282"
     title: Live apply Mailpit as the SMTP development mail interceptor from latest origin/main

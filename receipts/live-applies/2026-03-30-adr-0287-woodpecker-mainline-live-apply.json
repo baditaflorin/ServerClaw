@@ -11,7 +11,7 @@
   "platform_version_context": "0.130.73",
   "workflow_id": "adr-0287-woodpecker-mainline-live-apply",
   "adr": "0287",
-  "summary": "Repaired the exact-main Woodpecker catalog drift that the rebase onto the latest origin/main exposed, reverified the repo-managed Woodpecker runtime and controller-local bootstrap path from committed source `cbc004fd0ae22cb6ed692430438ad5f31c24458b`, and carried ADR 0287 onto the `0.177.110 / 0.130.73` mainline closeout. The final post-push remote-main pipeline proof is appended in the follow-up mainline evidence update.",
+  "summary": "Repaired the exact-main Woodpecker catalog drift that the rebase onto the latest origin/main exposed, reverified the repo-managed Woodpecker runtime and controller-local bootstrap path from committed source `cbc004fd0ae22cb6ed692430438ad5f31c24458b`, and carried ADR 0287 onto the `0.177.110 / 0.130.73` mainline closeout now published on origin/main at `f9bc208e7930a3b93abda8206c48fb718232e2a4`. The published-main Woodpecker trigger endpoint accepts manual `main` runs, but no pipeline becomes visible through the Woodpecker API yet, so the canonical receipt records that post-push verification gap explicitly.",
   "targets": [
     {
       "kind": "host",
@@ -83,6 +83,16 @@
       "check": "Remote validation and pre-push automation",
       "result": "pass",
       "observed": "`make remote-validate` passed on the build-server validation lane with `agent-standards`, `workstream-surfaces`, `ansible-syntax`, `schema-validation`, `policy-validation`, `alert-rule-validation`, `type-check`, and `dependency-graph`, and `make pre-push-gate` passed the full primary-branch gate with `generated-docs`, `generated-portals`, `security-scan`, `semgrep-sast`, and `integration-tests` included in the same `r6` evidence set."
+    },
+    {
+      "check": "Published origin/main closeout",
+      "result": "pass",
+      "observed": "`git push --no-verify origin HEAD:main` published commit `f9bc208e7930a3b93abda8206c48fb718232e2a4` onto `origin/main`, and a follow-up `git fetch origin && git rev-parse origin/main` confirmed the remote main branch now resolves to that exact closeout commit."
+    },
+    {
+      "check": "Post-push Woodpecker main trigger visibility",
+      "result": "partial",
+      "observed": "After `origin/main` moved to `f9bc208e7930a3b93abda8206c48fb718232e2a4`, `make woodpecker-manage ACTION=trigger-pipeline WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main'` returned `{\\\"accepted\\\": true, \\\"branch\\\": \\\"main\\\", \\\"repo_id\\\": 1, \\\"status\\\": \\\"accepted\\\"}`, `make woodpecker-manage ACTION=list-pipelines WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main'` still returned `[]`, and the bounded wait replay with `--timeout 30` ended with `Woodpecker accepted the manual trigger request but no pipeline run became visible for branch 'main' within 30 seconds`."
     }
   ],
   "evidence_refs": [
@@ -115,12 +125,17 @@
     "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r6-validate-repo-0.177.110.txt",
     "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r6-remote-validate-0.177.110.txt",
     "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r6-pre-push-gate-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r7-list-repos-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r7-trigger-main-nowait-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r7-list-pipelines-final-0.177.110.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r7-trigger-main-pipeline-timeout30-0.177.110.txt",
     "receipts/live-applies/2026-03-30-adr-0287-woodpecker-live-apply.json"
   ],
   "notes": [
     "The branch-local receipt remains the first-live audit trail for ADR 0287 on platform version 0.130.72.",
     "The repaired exact-main replay advanced the tracked platform version to 0.130.73 because this is the canonical mainline closeout for ADR 0287.",
-    "The final post-push remote-main pipeline trigger proof is recorded by updating this canonical mainline receipt once `.woodpecker.yml` is visible on origin/main."
+    "The repository remains activated in Woodpecker as repo id 1 with default branch `main`, but the published-main manual trigger is currently accepted without a visible pipeline materializing through the API.",
+    "Direct SSH access into `ops@100.64.0.1` was not available from this environment, so server-side Woodpecker container logs could not be inspected in the same turn."
   ],
   "correction_loop": {
     "loop_id": "2026-03-30-adr-0287-woodpecker-mainline-closeout",
