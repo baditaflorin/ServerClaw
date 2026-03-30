@@ -69,6 +69,8 @@ PORT_KEYS = (
     "dozzle_agent_port",
     "excalidraw_port",
     "excalidraw_room_port",
+    "woodpecker_http_port",
+    "woodpecker_host_proxy_port",
     "ollama_api_port",
     "n8n_port",
     "nextcloud_port",
@@ -535,6 +537,11 @@ def build_service_urls(
         urls["controller"] = service_url("http", tailscale_ipv4, ports["plane_host_proxy_port"])
         port_map["internal"] = ports["plane_port"]
         port_map["controller"] = ports["plane_host_proxy_port"]
+    elif service_id == "woodpecker":
+        urls["internal"] = service_url("http", private_ip, ports["woodpecker_http_port"])
+        urls["controller"] = service_url("http", tailscale_ipv4, ports["woodpecker_host_proxy_port"])
+        port_map["internal"] = ports["woodpecker_http_port"]
+        port_map["controller"] = ports["woodpecker_host_proxy_port"]
     elif service_id == "dozzle":
         urls["internal"] = service_url("http", private_ip, ports["dozzle_http_port"])
         port_map["internal"] = ports["dozzle_http_port"]
@@ -814,6 +821,7 @@ def build_platform_vars(
     netbox_service = service_topology["netbox"]
     open_webui_service = service_topology["open_webui"]
     plane_service = service_topology["plane"]
+    woodpecker_service = service_topology["woodpecker"]
     api_gateway_service = service_topology["api_gateway"]
     headscale_service = service_topology["headscale"]
     openbao_service = service_topology["openbao"]
@@ -922,6 +930,7 @@ def build_platform_vars(
             resolved_ports["nomad_host_proxy_port"],
             resolved_ports["open_webui_host_proxy_port"],
             resolved_ports["plane_host_proxy_port"],
+            resolved_ports["woodpecker_host_proxy_port"],
             resolved_ports["mattermost_host_proxy_port"],
             resolved_ports["matrix_synapse_host_proxy_port"],
             resolved_ports["platform_context_host_proxy_port"],
@@ -949,6 +958,10 @@ def build_platform_vars(
         "plane_host_proxy_port": resolved_ports["plane_host_proxy_port"],
         "plane_private_base_url": plane_service["urls"]["internal"],
         "plane_controller_url": plane_service["urls"]["controller"],
+        "woodpecker_http_port": resolved_ports["woodpecker_http_port"],
+        "woodpecker_host_proxy_port": resolved_ports["woodpecker_host_proxy_port"],
+        "woodpecker_private_base_url": woodpecker_service["urls"]["internal"],
+        "woodpecker_controller_url": woodpecker_service["urls"]["controller"],
         "api_gateway_internal_port": resolved_ports["api_gateway_internal_port"],
         "api_gateway_public_url": api_gateway_service["urls"]["public"],
         "api_gateway_internal_url": api_gateway_service["urls"]["internal"],
@@ -1001,6 +1014,7 @@ def build_platform_vars(
             resolved_ports["nomad_host_proxy_port"],
             resolved_ports["open_webui_host_proxy_port"],
             resolved_ports["plane_host_proxy_port"],
+            resolved_ports["woodpecker_host_proxy_port"],
             resolved_ports["mattermost_host_proxy_port"],
             resolved_ports["matrix_synapse_host_proxy_port"],
             resolved_ports["platform_context_host_proxy_port"],

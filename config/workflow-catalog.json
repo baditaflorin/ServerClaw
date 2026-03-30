@@ -2156,6 +2156,78 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-woodpecker": {
+      "description": "Converge Woodpecker on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish ci.lv3.org through the shared edge, and bootstrap the governed seed repository plus controller-local auth bundle.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-woodpecker",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-woodpecker"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "woodpecker_database_password",
+          "woodpecker_gitea_client_id",
+          "woodpecker_gitea_client_secret",
+          "woodpecker_agent_secret",
+          "woodpecker_api_token",
+          "woodpecker_admin_auth",
+          "woodpecker_bootstrap_spec",
+          "woodpecker_secret_smoke"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-woodpecker"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-woodpecker.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/woodpecker.yml",
+        "playbooks/services/woodpecker.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/woodpecker.yml",
+        "roles/woodpecker_postgres/tasks/main.yml",
+        "roles/woodpecker_runtime/tasks/main.yml",
+        "platform/ansible/woodpecker.py",
+        "scripts/woodpecker_bootstrap.py",
+        "scripts/woodpecker_tool.py",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "Woodpecker CI deployed on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, a public ci.lv3.org publication, a private controller URL on the Proxmox host, controller-local auth artifacts under .local/woodpecker, and the ops/proxmox_florin_server seed repository activated with the smoke secret."
+      ],
+      "verification_commands": [
+        "make syntax-check-woodpecker",
+        "curl -fsS http://100.64.0.1:8017/healthz",
+        "curl -fsS https://ci.lv3.org/healthz",
+        "make woodpecker-manage ACTION=whoami",
+        "make woodpecker-manage ACTION=list-secrets WOODPECKER_ARGS='--repo ops/proxmox_florin_server'",
+        "make woodpecker-manage ACTION=trigger-pipeline WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main --wait'"
+      ],
+      "execution_class": "mutation",
+      "target_lane": "lane:docker-runtime",
+      "resource_reservation": {
+        "cpu_milli": 2000,
+        "memory_mb": 1024,
+        "disk_iops": 120,
+        "estimated_duration_seconds": 900
+      },
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 350,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-coolify": {
       "description": "Converge Coolify on coolify-lv3, publish the authenticated dashboard plus public applications ingress, and verify repo-backed smoke deployment through the governed API wrapper.",
       "lifecycle_status": "active",
@@ -6191,6 +6263,49 @@
       "execution_class": "mutation",
       "budget": {
         "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "woodpecker-manage": {
+      "description": "Run governed Woodpecker API actions such as checking identity, activating the seed repository, listing repository secrets, or triggering the repo validation pipeline.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "woodpecker-manage",
+        "command": "make woodpecker-manage ACTION=whoami"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "woodpecker_admin_auth"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/configure-woodpecker.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/woodpecker_tool.py",
+        "platform/ansible/woodpecker.py"
+      ],
+      "outputs": [
+        "Governed Woodpecker repository inspection, secret management, and pipeline execution through the repo-managed wrapper instead of ad hoc API calls."
+      ],
+      "verification_commands": [
+        "make woodpecker-manage ACTION=whoami",
+        "make woodpecker-manage ACTION=list-secrets WOODPECKER_ARGS='--repo ops/proxmox_florin_server'",
+        "make woodpecker-manage ACTION=trigger-pipeline WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main --wait'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
         "max_steps": 250,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 1,

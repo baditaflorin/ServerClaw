@@ -300,6 +300,17 @@
       "strip_prefix": true,
       "timeout_seconds": 30,
       "healthcheck_path": "/api/version"
+    },
+    {
+      "id": "woodpecker",
+      "name": "Woodpecker",
+      "upstream": "http://10.10.10.20:8099",
+      "gateway_prefix": "/v1/woodpecker",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/healthz"
     }
   ]
 }

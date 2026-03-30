@@ -236,3 +236,10 @@
     slo_id: windmill-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
+- targets:
+    - https://ci.lv3.org/healthz
+  labels:
+    service_id: woodpecker
+    slo_id: woodpecker-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects

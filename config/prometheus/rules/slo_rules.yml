@@ -1904,3 +1904,59 @@ groups:
           slo_id: windmill-availability
           service_id: windmill
           indicator: availability
+      - record: slo:woodpecker_availability:success_ratio_5m
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="woodpecker-availability"}[5m])
+        labels:
+          slo_id: woodpecker-availability
+          service_id: woodpecker
+          indicator: availability
+      - record: slo:woodpecker_availability:success_ratio_1h
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="woodpecker-availability"}[1h])
+        labels:
+          slo_id: woodpecker-availability
+          service_id: woodpecker
+          indicator: availability
+      - record: slo:woodpecker_availability:success_ratio_30d
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="woodpecker-availability"}[30d])
+        labels:
+          slo_id: woodpecker-availability
+          service_id: woodpecker
+          indicator: availability
+      - record: slo:woodpecker_availability:error_rate_5m
+        expr: 1 - slo:woodpecker_availability:success_ratio_5m
+        labels:
+          slo_id: woodpecker-availability
+          service_id: woodpecker
+          indicator: availability
+      - record: slo:woodpecker_availability:error_rate_1h
+        expr: 1 - slo:woodpecker_availability:success_ratio_1h
+        labels:
+          slo_id: woodpecker-availability
+          service_id: woodpecker
+          indicator: availability
+      - record: slo:woodpecker_availability:error_rate_30d
+        expr: 1 - slo:woodpecker_availability:success_ratio_30d
+        labels:
+          slo_id: woodpecker-availability
+          service_id: woodpecker
+          indicator: availability
+      - record: slo:woodpecker_availability:budget_remaining
+        expr: clamp_min(1 - (slo:woodpecker_availability:error_rate_30d / 0.005000),
+          0)
+        labels:
+          slo_id: woodpecker-availability
+          service_id: woodpecker
+          indicator: availability
+      - record: slo:woodpecker_availability:burn_rate_1h
+        expr: slo:woodpecker_availability:error_rate_1h / 0.005000
+        labels:
+          slo_id: woodpecker-availability
+          service_id: woodpecker
+          indicator: availability
+      - record: slo:woodpecker_availability:time_to_budget_exhaustion_days
+        expr: (slo:woodpecker_availability:budget_remaining * 30) / clamp_min(slo:woodpecker_availability:burn_rate_1h,
+          0.001)
+        labels:
+          slo_id: woodpecker-availability
+          service_id: woodpecker
+          indicator: availability

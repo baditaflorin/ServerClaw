@@ -1353,3 +1353,43 @@ groups:
           summary: windmill-availability has less than 10% error budget remaining
           description: Windmill API stays reachable for scheduled automation.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_woodpecker_availability
+        expr: (slo:woodpecker_availability:error_rate_5m > (14 * 0.005000)) and (slo:woodpecker_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: woodpecker
+          slo_id: woodpecker-availability
+          indicator: availability
+        annotations:
+          summary: woodpecker-availability is burning its error budget at 14x
+          description: Woodpecker stays reachable for repo-managed CI bootstrap, API
+            inspection, and manual validation pipeline triggers.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_woodpecker_availability
+        expr: slo:woodpecker_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: woodpecker
+          slo_id: woodpecker-availability
+          indicator: availability
+        annotations:
+          summary: woodpecker-availability is burning its error budget at 3x
+          description: Woodpecker stays reachable for repo-managed CI bootstrap, API
+            inspection, and manual validation pipeline triggers.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_woodpecker_availability
+        expr: slo:woodpecker_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: woodpecker
+          slo_id: woodpecker-availability
+          indicator: availability
+        annotations:
+          summary: woodpecker-availability has less than 10% error budget remaining
+          description: Woodpecker stays reachable for repo-managed CI bootstrap, API
+            inspection, and manual validation pipeline triggers.
+          runbook: docs/runbooks/slo-tracking.md

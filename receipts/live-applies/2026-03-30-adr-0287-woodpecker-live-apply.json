@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0287-woodpecker-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_at": "2026-03-30T17:59:00Z",
+  "recorded_by": "codex",
+  "source_commit": "4db2d1f4dc788fa391f3cf1bf39facfcac00c218",
+  "repo_version_context": "0.177.106",
+  "platform_version_context": "0.130.71",
+  "workflow_id": "converge-woodpecker",
+  "adr": "0287",
+  "summary": "Validated the repo-managed Woodpecker implementation from the dedicated latest-main worktree and attempted the first production live replay from origin/main commit 4db2d1f4dc788fa391f3cf1bf39facfcac00c218. The replay reached the Hetzner DNS mutation for ci.lv3.org and then stopped because the legacy dns.hetzner.com write API returned the published brownout/shutdown response with provider error code 503. Because the playbook performs DNS reconciliation before the PostgreSQL, runtime, edge, and bootstrap stages, the Woodpecker runtime itself is not yet live from this workstream.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Woodpecker public hostname",
+      "address": "https://ci.lv3.org/healthz"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Woodpecker controller path",
+      "address": "http://100.64.0.1:8017/healthz"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Woodpecker-focused validation bundle",
+      "result": "pass",
+      "observed": "`make validate-generated-vars`, `make syntax-check-woodpecker`, `uv tool run --from ansible-lint ansible-lint playbooks/woodpecker.yml playbooks/services/woodpecker.yml collections/ansible_collections/lv3/platform/roles/woodpecker_postgres collections/ansible_collections/lv3/platform/roles/woodpecker_runtime collections/ansible_collections/lv3/platform/playbooks/woodpecker.yml`, `./scripts/validate_repo.sh json health-probes data-models agent-standards`, and the targeted pytest bundle all passed from the isolated worktree, captured in the `receipts/live-applies/evidence/2026-03-30-ws-0287-*` artifacts."
+    },
+    {
+      "check": "First production Woodpecker replay",
+      "result": "partial",
+      "observed": "`HETZNER_DNS_API_TOKEN=... make converge-woodpecker env=production` passed preflight, updated the Proxmox-host Tailscale proxy definitions to include the Woodpecker listener on `100.64.0.1:8017`, and then failed while creating the `ci.lv3.org` A record through the legacy Hetzner DNS API. The live replay evidence is captured in `receipts/live-applies/evidence/2026-03-30-ws-0287-live-apply-r1.txt`."
+    },
+    {
+      "check": "Direct provider brownout reproduction",
+      "result": "fail",
+      "observed": "Direct `POST https://dns.hetzner.com/api/v1/records` probes for `ci A 65.108.75.123` reproduced the provider response outside Ansible: the HTTP body returned the planned shutdown message and provider error code `503`, so the DNS create failure is external to the Woodpecker runtime implementation."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md",
+    "docs/runbooks/configure-woodpecker.md",
+    "docs/workstreams/ws-0287-live-apply.md",
+    "playbooks/woodpecker.yml",
+    "playbooks/services/woodpecker.yml",
+    "collections/ansible_collections/lv3/platform/playbooks/woodpecker.yml",
+    "collections/ansible_collections/lv3/platform/roles/woodpecker_postgres/",
+    "collections/ansible_collections/lv3/platform/roles/woodpecker_runtime/",
+    "platform/ansible/woodpecker.py",
+    "scripts/woodpecker_bootstrap.py",
+    "scripts/woodpecker_tool.py",
+    ".woodpecker.yml",
+    "workstreams.yaml",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-validate-generated-vars-r1.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-syntax-check-woodpecker-r1.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-targeted-ansible-lint-r1.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-targeted-pytest-r1.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-validate-repo-r1.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-live-apply-r1.txt"
+  ],
+  "notes": [
+    "The latest realistic upstream checked during this workstream remained origin/main commit 4db2d1f4dc788fa391f3cf1bf39facfcac00c218.",
+    "The branch intentionally still leaves protected integration files unchanged: VERSION, release sections in changelog.md, versions/stack.yaml, and the top-level README mainline summary.",
+    "Finishing ADR 0287 now requires a successful DNS mutation for ci.lv3.org, which in turn requires either the end of the legacy Hetzner DNS brownout or a Hetzner Console API token after the broader DNS API migration."
+  ]
+}

@@ -249,6 +249,23 @@
       "notes": "Coolify dashboard published through the shared authenticated NGINX edge with the private controller API proxied on the management tailnet."
     },
     {
+      "fqdn": "ci.lv3.org",
+      "service_id": "woodpecker",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0287",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge and authenticated through Woodpecker's delegated Gitea OAuth flow."
+    },
+    {
       "fqdn": "database.lv3.org",
       "service_id": "postgres",
       "environment": "production",

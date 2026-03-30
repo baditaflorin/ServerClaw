@@ -19,6 +19,7 @@ POSTGRES_CLIENT_PLAYBOOKS = [
     REPO_ROOT / "playbooks" / "plane.yml",
     REPO_ROOT / "playbooks" / "postgres-vm.yml",
     REPO_ROOT / "playbooks" / "semaphore.yml",
+    REPO_ROOT / "playbooks" / "woodpecker.yml",
     REPO_ROOT / "playbooks" / "vaultwarden.yml",
     REPO_ROOT / "playbooks" / "windmill.yml",
 ]

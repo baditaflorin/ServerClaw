@@ -519,6 +519,78 @@
       "notes": "ServerClaw is published through the shared NGINX edge and delegates browser authentication to its in-app Keycloak OIDC flow."
     },
     {
+      "fqdn": "ci.lv3.org",
+      "service_id": "woodpecker",
+      "environment": "production",
+      "status": "active",
+      "owner_adr": "0287",
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "upstream-auth",
+        "audience": "operator"
+      },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "upstream_auth",
+        "route_target": {
+          "service_id": "woodpecker",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.woodpecker_http_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "woodpecker",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "noindex": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.woodpecker_http_port }}"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": true,
+      "notes": "Published through the shared NGINX edge and authenticated through Woodpecker's delegated Gitea OAuth flow."
+    },
+    {
       "fqdn": "cloud.lv3.org",
       "service_id": "nextcloud",
       "environment": "production",

@@ -115,6 +115,11 @@ platform_host:
         listen_port: 8011
         upstream_host: 10.10.10.20
         upstream_port: 8093
+      - name: woodpecker
+        listen_address: 100.64.0.1
+        listen_port: 8017
+        upstream_host: 10.10.10.20
+        upstream_port: 8099
       - name: open-webui
         listen_address: 100.64.0.1
         listen_port: 8008
@@ -190,6 +195,8 @@ platform_ports:
   dozzle_agent_port: 7007
   excalidraw_port: 3095
   excalidraw_room_port: 3096
+  woodpecker_http_port: 8099
+  woodpecker_host_proxy_port: 8017
   ollama_api_port: 11434
   n8n_port: 5678
   nextcloud_port: 8084
@@ -268,6 +275,8 @@ platform_port_assignments:
   dozzle_agent_port: 7007
   excalidraw_port: 3095
   excalidraw_room_port: 3096
+  woodpecker_http_port: 8099
+  woodpecker_host_proxy_port: 8017
   ollama_api_port: 11434
   n8n_port: 5678
   nextcloud_port: 8084
@@ -1696,6 +1705,39 @@ platform_service_topology:
       public: https://tasks.lv3.org
       internal: http://10.10.10.20:8093
       controller: http://100.64.0.1:8011
+  woodpecker:
+    service_name: woodpecker
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: ci.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: ci
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8099
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8017
+    service_id: woodpecker
+    ports:
+      internal: 8099
+      controller: 8017
+    urls:
+      public: https://ci.lv3.org
+      internal: http://10.10.10.20:8099
+      controller: http://100.64.0.1:8017
   outline:
     service_name: outline
     owning_vm: docker-runtime-lv3
@@ -2439,6 +2481,10 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: ci
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: wiki
       type: A
       value: 65.108.75.123
@@ -2553,6 +2599,7 @@ platform_management_allowed_tcp_ports:
   - 8013
   - 8008
   - 8011
+  - 8017
   - 8066
   - 8015
   - 8010
@@ -3261,6 +3308,39 @@ public_edge_service_topology:
       public: https://tasks.lv3.org
       internal: http://10.10.10.20:8093
       controller: http://100.64.0.1:8011
+  woodpecker:
+    service_name: woodpecker
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: ci.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: ci
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8099
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8017
+    service_id: woodpecker
+    ports:
+      internal: 8099
+      controller: 8017
+    urls:
+      public: https://ci.lv3.org
+      internal: http://10.10.10.20:8099
+      controller: http://100.64.0.1:8017
   outline:
     service_name: outline
     owning_vm: docker-runtime-lv3
@@ -3969,6 +4049,10 @@ plane_port: 8093
 plane_host_proxy_port: 8011
 plane_private_base_url: http://10.10.10.20:8093
 plane_controller_url: http://100.64.0.1:8011
+woodpecker_http_port: 8099
+woodpecker_host_proxy_port: 8017
+woodpecker_private_base_url: http://10.10.10.20:8099
+woodpecker_controller_url: http://100.64.0.1:8017
 api_gateway_internal_port: 8083
 api_gateway_public_url: https://api.lv3.org
 api_gateway_internal_url: http://10.10.10.20:8083
@@ -4021,6 +4105,7 @@ proxmox_management_allowed_tcp_ports:
   - 8013
   - 8008
   - 8011
+  - 8017
   - 8066
   - 8015
   - 8010

@@ -361,6 +361,12 @@ playbooks:
     shared_surfaces:
       - service:windmill
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/woodpecker.yml:
+    playbook_id: woodpecker
+    mutation_scope: platform
+    shared_surfaces:
+      - service:woodpecker
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/services/build-artifact-cache.yml:
     playbook_id: build-artifact-cache
     canonical_service_id: docker_build

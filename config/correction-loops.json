@@ -90,7 +90,8 @@
           "route-dns-assertion-ledger",
           "semaphore-manage",
           "uptime-kuma-manage",
-          "uptime-robot-manage"
+          "uptime-robot-manage",
+          "woodpecker-manage"
         ]
       },
       "invariant": "The targeted external control surface reflects the declared repo state or approved operator request, and the affected service still matches its published contract.",

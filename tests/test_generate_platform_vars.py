@@ -330,6 +330,26 @@ def test_build_platform_vars_includes_plane_publication_topology() -> None:
     assert plane["urls"]["controller"] == "http://100.64.0.1:8011"
 
 
+def test_build_platform_vars_includes_woodpecker_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    woodpecker = platform_vars["platform_service_topology"]["woodpecker"]
+
+    assert woodpecker["public_hostname"] == "ci.lv3.org"
+    assert woodpecker["dns"]["name"] == "ci"
+    assert woodpecker["ports"]["internal"] == 8099
+    assert woodpecker["ports"]["controller"] == 8017
+    assert woodpecker["urls"]["public"] == "https://ci.lv3.org"
+    assert woodpecker["urls"]["controller"] == "http://100.64.0.1:8017"
+
+
+def test_woodpecker_network_policy_allows_host_and_edge_access() -> None:
+    host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text(encoding="utf-8"))
+    allowed_inbound = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
+
+    assert any(rule["source"] == "host" and 8099 in rule["ports"] for rule in allowed_inbound)
+    assert any(rule["source"] == "nginx-lv3" and 8099 in rule["ports"] for rule in allowed_inbound)
+
+
 def test_build_platform_vars_uses_loopback_for_guest_local_platform_context_verification() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
 

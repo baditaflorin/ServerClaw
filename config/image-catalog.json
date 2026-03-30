@@ -1584,6 +1584,72 @@
       "apply_targets": [
         "converge-windmill"
       ]
+    },
+    "woodpecker_server_runtime": {
+      "kind": "runtime",
+      "service_id": "woodpecker",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "woodpecker-server",
+      "registry_ref": "docker.io/woodpeckerci/woodpecker-server",
+      "tag": "v3.13.0",
+      "digest": "sha256:268f891dd63f2e86f912fc3fbdff0b26552a79c4290b4be66b7c04acbe81fbb9",
+      "ref": "docker.io/woodpeckerci/woodpecker-server:v3.13.0@sha256:268f891dd63f2e86f912fc3fbdff0b26552a79c4290b4be66b7c04acbe81fbb9",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-30-woodpecker-server-runtime.json",
+      "exception": {
+        "owner": "Platform operations",
+        "justification": "The initial Woodpecker server image rollout keeps the reviewed digest pinned until the vulnerability scan result is re-evaluated during the next image refresh window.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed Woodpecker server fixed to the reviewed upstream artifact while the exception is open.",
+          "The service is published through the shared managed edge and its controller automation remains repo-governed."
+        ],
+        "approved_on": "2026-03-30",
+        "expires_on": "2026-04-13",
+        "remediation_plan": "Re-scan and refresh woodpecker_server_runtime with make upgrade-container-image IMAGE_ID=woodpecker_server_runtime WRITE=true APPLY=true before the exception expires."
+      },
+      "consumers": [
+        "collections/ansible_collections/lv3/platform/roles/woodpecker_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-woodpecker"
+      ]
+    },
+    "woodpecker_agent_runtime": {
+      "kind": "runtime",
+      "service_id": "woodpecker",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "woodpecker-agent",
+      "registry_ref": "docker.io/woodpeckerci/woodpecker-agent",
+      "tag": "v3.13.0",
+      "digest": "sha256:92e1729d00334828ea6d0dc1762e55a0b93b72e01e8e2d4435fe2d91e4a30783",
+      "ref": "docker.io/woodpeckerci/woodpecker-agent:v3.13.0@sha256:92e1729d00334828ea6d0dc1762e55a0b93b72e01e8e2d4435fe2d91e4a30783",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-30-woodpecker-agent-runtime.json",
+      "exception": {
+        "owner": "Platform operations",
+        "justification": "The initial Woodpecker agent image rollout keeps the reviewed digest pinned until the vulnerability scan result is re-evaluated during the next image refresh window.",
+        "compensating_controls": [
+          "Digest pin keeps the deployed Woodpecker agent fixed to the reviewed upstream artifact while the exception is open.",
+          "The agent remains attached only to the repo-managed docker socket and Woodpecker runtime networks on docker-runtime-lv3."
+        ],
+        "approved_on": "2026-03-30",
+        "expires_on": "2026-04-13",
+        "remediation_plan": "Re-scan and refresh woodpecker_agent_runtime with make upgrade-container-image IMAGE_ID=woodpecker_agent_runtime WRITE=true APPLY=true before the exception expires."
+      },
+      "consumers": [
+        "collections/ansible_collections/lv3/platform/roles/woodpecker_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-woodpecker"
+      ]
     }
   }
 }

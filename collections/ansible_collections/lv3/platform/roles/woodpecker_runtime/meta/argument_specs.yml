@@ -1,0 +1,71 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the Woodpecker runtime, bootstrap Gitea OAuth, and refresh controller-local auth artifacts.
+    options:
+      woodpecker_site_dir:
+        type: path
+        required: true
+      woodpecker_data_dir:
+        type: path
+        required: true
+      woodpecker_secret_dir:
+        type: path
+        required: true
+      woodpecker_compose_file:
+        type: path
+        required: true
+      woodpecker_env_file:
+        type: path
+        required: true
+      woodpecker_http_port:
+        type: int
+        required: true
+      woodpecker_controller_url:
+        type: str
+        required: true
+      woodpecker_public_url:
+        type: str
+        required: true
+      woodpecker_gitea_api_url:
+        type: str
+        required: true
+      woodpecker_gitea_oauth_url:
+        type: str
+        required: true
+      woodpecker_database_name:
+        type: str
+        required: true
+      woodpecker_database_user:
+        type: str
+        required: true
+      woodpecker_database_host:
+        type: str
+        required: true
+      woodpecker_database_password_local_file:
+        type: path
+        required: true
+      woodpecker_gitea_admin_token_local_file:
+        type: path
+        required: true
+      woodpecker_gitea_admin_password_local_file:
+        type: path
+        required: true
+      woodpecker_gitea_client_id_local_file:
+        type: path
+        required: true
+      woodpecker_gitea_client_secret_local_file:
+        type: path
+        required: true
+      woodpecker_agent_secret_local_file:
+        type: path
+        required: true
+      woodpecker_api_token_local_file:
+        type: path
+        required: true
+      woodpecker_admin_auth_local_file:
+        type: path
+        required: true
+      woodpecker_bootstrap_spec_local_file:
+        type: path
+        required: true

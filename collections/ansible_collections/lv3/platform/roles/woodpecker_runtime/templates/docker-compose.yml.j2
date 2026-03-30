@@ -1,0 +1,64 @@
+services:
+  openbao-agent:
+    image: {{ woodpecker_openbao_agent_image }}
+    container_name: {{ woodpecker_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ woodpecker_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ woodpecker_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ woodpecker_env_file | dirname }}:{{ woodpecker_env_file | dirname }}
+
+  woodpecker-server:
+    image: {{ woodpecker_server_image }}
+    container_name: {{ woodpecker_server_container_name }}
+    restart: unless-stopped
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+    env_file:
+      - {{ woodpecker_env_file }}
+    ports:
+      - "{{ woodpecker_http_port }}:{{ woodpecker_http_port }}"
+    volumes:
+      - {{ woodpecker_server_data_dir }}:/var/lib/woodpecker
+    networks:
+      - default
+      - gitea
+
+  woodpecker-agent:
+    image: {{ woodpecker_agent_image }}
+    container_name: {{ woodpecker_agent_container_name }}
+    restart: unless-stopped
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+      woodpecker-server:
+        condition: service_started
+    env_file:
+      - {{ woodpecker_env_file }}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - {{ woodpecker_agent_data_dir }}:/etc/woodpecker
+    networks:
+      - default
+      - gitea
+
+networks:
+  default:
+    name: woodpecker_default
+  gitea:
+    external: true
+    name: {{ woodpecker_backend_network }}

@@ -1,0 +1,31 @@
+---
+# Purpose: Declare the shared defaults for the Woodpecker PostgreSQL role and controller-local password artifact paths.
+# Use case: Used whenever the woodpecker_postgres role provisions or repairs the dedicated database used by the Woodpecker server.
+#
+# Inputs (required):
+#   - platform host facts (generated, required): Supplies the current PostgreSQL inventory host and service topology.
+#
+# Inputs (optional):
+#   - none
+#
+# Outputs:
+#   - Default variable values consumed by the woodpecker_postgres role tasks.
+#
+# Idempotency: Fully idempotent
+#              This file only declares role defaults.
+#
+# Dependencies:
+#   - ADR 0287: Defines Woodpecker as the repo-managed CI server.
+#   - Requires: postgres-lv3 to be reachable and writable.
+#
+# Related ADRs: 0165, 0287
+# Related Runbooks: docs/runbooks/configure-woodpecker.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+woodpecker_database_name: woodpecker
+woodpecker_database_user: woodpecker
+woodpecker_postgres_secret_dir: /etc/lv3/woodpecker
+woodpecker_postgres_password_file: "{{ woodpecker_postgres_secret_dir }}/database-password"
+woodpecker_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/woodpecker
+woodpecker_database_password_local_file: "{{ woodpecker_local_artifact_dir }}/database-password.txt"
