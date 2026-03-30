@@ -30,6 +30,24 @@
       "adr": "0029"
     },
     {
+      "id": "browser_runner",
+      "service": "browser_runner",
+      "name": "Browser Runner",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0261"
+    },
+    {
+      "id": "changedetection",
+      "service": "changedetection",
+      "name": "Changedetection.io",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "observability",
+      "adr": "0280"
+    },
+    {
       "id": "changelog_portal",
       "service": "changelog_portal",
       "name": "Changelog Portal",
@@ -57,24 +75,6 @@
       "adr": "0194"
     },
     {
-      "id": "browser_runner",
-      "service": "browser_runner",
-      "name": "Browser Runner",
-      "vm": "docker-runtime-lv3",
-      "tier": 2,
-      "category": "automation",
-      "adr": "0261"
-    },
-    {
-      "id": "changedetection",
-      "service": "changedetection",
-      "name": "Changedetection.io",
-      "vm": "docker-runtime-lv3",
-      "tier": 2,
-      "category": "observability",
-      "adr": "0280"
-    },
-    {
       "id": "dify",
       "service": "dify",
       "name": "Dify",
@@ -82,6 +82,15 @@
       "tier": 2,
       "category": "automation",
       "adr": "0197"
+    },
+    {
+      "id": "directus",
+      "service": "directus",
+      "name": "Directus",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "access",
+      "adr": "0289"
     },
     {
       "id": "docker_build",
@@ -246,13 +255,13 @@
       "adr": "0151"
     },
     {
-      "id": "nextcloud",
-      "service": "nextcloud",
-      "name": "Nextcloud",
+      "id": "nats_jetstream",
+      "service": "nats_jetstream",
+      "name": "NATS JetStream",
       "vm": "docker-runtime-lv3",
-      "tier": 2,
-      "category": "data",
-      "adr": "0260"
+      "tier": 1,
+      "category": "automation",
+      "adr": "0276"
     },
     {
       "id": "netbox",
@@ -262,6 +271,15 @@
       "tier": 2,
       "category": "data",
       "adr": "0054"
+    },
+    {
+      "id": "nextcloud",
+      "service": "nextcloud",
+      "name": "Nextcloud",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "data",
+      "adr": "0260"
     },
     {
       "id": "nginx_edge",
@@ -280,15 +298,6 @@
       "tier": 1,
       "category": "automation",
       "adr": "0232"
-    },
-    {
-      "id": "nats_jetstream",
-      "service": "nats_jetstream",
-      "name": "NATS JetStream",
-      "vm": "docker-runtime-lv3",
-      "tier": 1,
-      "category": "automation",
-      "adr": "0276"
     },
     {
       "id": "ntfy",
@@ -325,24 +334,6 @@
       "tier": 2,
       "category": "automation",
       "adr": "0060"
-    },
-    {
-      "id": "plausible",
-      "service": "plausible",
-      "name": "Plausible Analytics",
-      "vm": "docker-runtime-lv3",
-      "tier": 2,
-      "category": "observability",
-      "adr": "0283"
-    },
-    {
-      "id": "serverclaw",
-      "service": "serverclaw",
-      "name": "ServerClaw",
-      "vm": "coolify-lv3",
-      "tier": 2,
-      "category": "access",
-      "adr": "0254"
     },
     {
       "id": "openbao",
@@ -399,6 +390,15 @@
       "adr": "0070"
     },
     {
+      "id": "plausible",
+      "service": "plausible",
+      "name": "Plausible Analytics",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "observability",
+      "adr": "0283"
+    },
+    {
       "id": "portainer",
       "service": "portainer",
       "name": "Portainer",
@@ -451,6 +451,15 @@
       "tier": 2,
       "category": "automation",
       "adr": "0149"
+    },
+    {
+      "id": "serverclaw",
+      "service": "serverclaw",
+      "name": "ServerClaw",
+      "vm": "coolify-lv3",
+      "tier": 2,
+      "category": "access",
+      "adr": "0254"
     },
     {
       "id": "status_page",
@@ -543,15 +552,15 @@
     },
     {
       "from": "browser_runner",
-      "to": "docker_runtime",
-      "type": "hard",
-      "description": "The private Playwright browser runner is hosted on docker-runtime-lv3."
-    },
-    {
-      "from": "browser_runner",
       "to": "api_gateway",
       "type": "soft",
       "description": "Authenticated operator access to the browser runner uses the governed API gateway route, while the private runtime can still be verified locally."
+    },
+    {
+      "from": "browser_runner",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The private Playwright browser runner is hosted on docker-runtime-lv3."
     },
     {
       "from": "changedetection",
@@ -884,24 +893,6 @@
       "description": "n8n stores workflow, credential, and execution state in Postgres."
     },
     {
-      "from": "nextcloud",
-      "to": "postgres",
-      "type": "hard",
-      "description": "Nextcloud stores account, sharing, file, and app metadata in Postgres."
-    },
-    {
-      "from": "nextcloud",
-      "to": "openbao",
-      "type": "startup_only",
-      "description": "Nextcloud receives its mirrored database, Redis, and admin bootstrap secrets through the OpenBao agent before startup."
-    },
-    {
-      "from": "nextcloud",
-      "to": "nginx_edge",
-      "type": "soft",
-      "description": "Public reachability for cloud.lv3.org and DAV discovery redirects depends on the shared NGINX edge publication path."
-    },
-    {
       "from": "netbox",
       "to": "openbao",
       "type": "startup_only",
@@ -912,6 +903,24 @@
       "to": "postgres",
       "type": "hard",
       "description": "NetBox stores all inventory, topology, and IPAM data in Postgres."
+    },
+    {
+      "from": "nextcloud",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public reachability for cloud.lv3.org and DAV discovery redirects depends on the shared NGINX edge publication path."
+    },
+    {
+      "from": "nextcloud",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Nextcloud receives its mirrored database, Redis, and admin bootstrap secrets through the OpenBao agent before startup."
+    },
+    {
+      "from": "nextcloud",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Nextcloud stores account, sharing, file, and app metadata in Postgres."
     },
     {
       "from": "nomad",
@@ -951,9 +960,9 @@
     },
     {
       "from": "openfga",
-      "to": "postgres",
-      "type": "hard",
-      "description": "OpenFGA stores authorization stores, models, and relationship tuples in PostgreSQL."
+      "to": "keycloak",
+      "type": "soft",
+      "description": "The repo-managed bootstrap verification path checks Keycloak-issued operator and runtime identities alongside the delegated authorization graph."
     },
     {
       "from": "openfga",
@@ -963,39 +972,9 @@
     },
     {
       "from": "openfga",
-      "to": "keycloak",
-      "type": "soft",
-      "description": "The repo-managed bootstrap verification path checks Keycloak-issued operator and runtime identities alongside the delegated authorization graph."
-    },
-    {
-      "from": "serverclaw",
-      "to": "keycloak",
-      "type": "soft",
-      "description": "ServerClaw prefers Keycloak-backed browser sign-in while retaining a repo-managed bootstrap admin as the break-glass fallback."
-    },
-    {
-      "from": "serverclaw",
-      "to": "ollama",
+      "to": "postgres",
       "type": "hard",
-      "description": "ServerClaw routes its default local model connector to the private Ollama runtime on docker-runtime-lv3."
-    },
-    {
-      "from": "serverclaw",
-      "to": "openbao",
-      "type": "startup_only",
-      "description": "ServerClaw consumes mirrored runtime secrets and the dedicated OIDC client secret from the OpenBao sidecar."
-    },
-    {
-      "from": "serverclaw",
-      "to": "searxng",
-      "type": "soft",
-      "description": "ServerClaw delegates optional web-search requests to the private SearXNG runtime when the feature is enabled."
-    },
-    {
-      "from": "serverclaw",
-      "to": "nginx_edge",
-      "type": "soft",
-      "description": "Public access to chat.lv3.org depends on the shared NGINX edge publication path."
+      "description": "OpenFGA stores authorization stores, models, and relationship tuples in PostgreSQL."
     },
     {
       "from": "ops_portal",
@@ -1076,6 +1055,30 @@
       "description": "The indexed corpus includes step-ca ADR and runbook content for operator query grounding."
     },
     {
+      "from": "plausible",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Plausible runtime, bundled PostgreSQL, and bundled ClickHouse analytics store run on docker-runtime-lv3."
+    },
+    {
+      "from": "plausible",
+      "to": "mail_platform",
+      "type": "soft",
+      "description": "SMTP delivery for notifications and password recovery uses the repo-managed server mailbox and internal submission relay on mail-platform."
+    },
+    {
+      "from": "plausible",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Dashboard publication at analytics.lv3.org and tracker injection on selected public hostnames depend on the shared NGINX edge publication path."
+    },
+    {
+      "from": "plausible",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Plausible starts from OpenBao-rendered runtime secrets mirrored into its compose environment before the main container launches."
+    },
+    {
       "from": "realtime",
       "to": "keycloak",
       "type": "soft",
@@ -1098,6 +1101,36 @@
       "to": "postgres",
       "type": "hard",
       "description": "Semaphore persists project metadata, inventories, templates, and task history in Postgres."
+    },
+    {
+      "from": "serverclaw",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "ServerClaw prefers Keycloak-backed browser sign-in while retaining a repo-managed bootstrap admin as the break-glass fallback."
+    },
+    {
+      "from": "serverclaw",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public access to chat.lv3.org depends on the shared NGINX edge publication path."
+    },
+    {
+      "from": "serverclaw",
+      "to": "ollama",
+      "type": "hard",
+      "description": "ServerClaw routes its default local model connector to the private Ollama runtime on docker-runtime-lv3."
+    },
+    {
+      "from": "serverclaw",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "ServerClaw consumes mirrored runtime secrets and the dedicated OIDC client secret from the OpenBao sidecar."
+    },
+    {
+      "from": "serverclaw",
+      "to": "searxng",
+      "type": "soft",
+      "description": "ServerClaw delegates optional web-search requests to the private SearXNG runtime when the feature is enabled."
     },
     {
       "from": "status_page",
@@ -1142,28 +1175,34 @@
       "description": "Windmill persists workflow metadata, run history, and state in Postgres."
     },
     {
-      "from": "plausible",
+      "from": "directus",
       "to": "docker_runtime",
       "type": "hard",
-      "description": "The Plausible runtime, bundled PostgreSQL, and bundled ClickHouse analytics store run on docker-runtime-lv3."
+      "description": "The Directus runtime container and guest-local listener are hosted on docker-runtime-lv3."
     },
     {
-      "from": "plausible",
-      "to": "mail_platform",
-      "type": "soft",
-      "description": "SMTP delivery for notifications and password recovery uses the repo-managed server mailbox and internal submission relay on mail-platform."
+      "from": "directus",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Directus persists its system state and governed collections in the dedicated PostgreSQL database directus on postgres-lv3."
     },
     {
-      "from": "plausible",
+      "from": "directus",
       "to": "nginx_edge",
       "type": "soft",
-      "description": "Dashboard publication at analytics.lv3.org and tracker injection on selected public hostnames depend on the shared NGINX edge publication path."
+      "description": "The shared NGINX edge publishes data.lv3.org directly to Directus on docker-runtime-lv3."
     },
     {
-      "from": "plausible",
+      "from": "directus",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Routine browser sign-in delegates to Keycloak via OIDC while the local Directus admin remains break-glass only."
+    },
+    {
+      "from": "directus",
       "to": "openbao",
       "type": "startup_only",
-      "description": "Plausible starts from OpenBao-rendered runtime secrets mirrored into its compose environment before the main container launches."
+      "description": "Directus consumes OpenBao-delivered runtime secrets during converge and container startup."
     },
     {
       "from": "tesseract_ocr",

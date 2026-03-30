@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-30'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 265
+  Implemented: 266
   Partial: 6
-  Not Implemented: 52
+  Not Implemented: 51
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5031,7 +5031,7 @@ adr_index:
   - adr: 0289
     title: Directus As The REST And GraphQL Data API Layer Over Postgres
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: api
     keywords:
@@ -5045,6 +5045,7 @@ adr_index:
       - over
     summary: We will deploy Directus as the REST and GraphQL data API layer for
     filename: 0289-directus-as-the-rest-graphql-data-api-layer-over-postgres.md
+    implemented_version: 0.130.71
   - adr: 0289
     title: Label Studio As The Human-In-The-Loop Data Annotation Platform
     status: Accepted

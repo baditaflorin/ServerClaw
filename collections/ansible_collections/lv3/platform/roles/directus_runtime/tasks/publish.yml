@@ -1,0 +1,58 @@
+# Purpose: Verify the public Directus publication, REST token flow, GraphQL query path, and OIDC redirect contract.
+# Use case: Run from localhost after the Directus runtime, PostgreSQL access model, and shared edge publication are converged.
+# Inputs: Public URL, controller-local service token, and the Directus verification script.
+# Outputs: Confirms the public data API surface is reachable and the repo-managed service token works end to end.
+# Idempotency: Fully idempotent because these are read-only public verification calls.
+# Dependencies: ADR 0165, ADR 0021, ADR 0063, and ADR 0289.
+---
+- name: Validate Directus publication inputs
+  ansible.builtin.assert:
+    that:
+      - directus_public_base_url | length > 0
+      - directus_service_registry_token_local_file | length > 0
+    fail_msg: >-
+      directus_runtime publication requires the public URL and the
+      controller-local service token path.
+
+- name: Check whether the Directus service token exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ directus_service_registry_token_local_file }}"
+  register: directus_service_registry_token_publish_local
+
+- name: Fail if the Directus service token is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ directus_service_registry_token_local_file }} is missing on the control machine.
+      Converge directus_postgres first so the public REST and GraphQL checks can authenticate.
+  when: not directus_service_registry_token_publish_local.stat.exists
+
+- name: Wait for the Directus public health endpoint
+  ansible.builtin.uri:
+    url: "{{ directus_public_base_url }}{{ directus_health_path }}"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: directus_publish_public_health
+  retries: 36
+  delay: 5
+  until: directus_publish_public_health.status == 200
+  changed_when: false
+
+- name: Verify the public Directus publication and token-based API paths
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ playbook_dir }}/../scripts/directus_bootstrap.py"
+      - verify-public
+      - --base-url
+      - "{{ directus_public_base_url }}"
+      - --api-token-file
+      - "{{ directus_service_registry_token_local_file }}"
+      - --collection
+      - "{{ directus_bootstrap_collection_name }}"
+      - --expected-service-name
+      - directus
+      - --expected-sso-host
+      - sso.lv3.org
+  register: directus_public_verify
+  changed_when: false

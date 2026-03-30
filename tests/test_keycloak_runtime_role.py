@@ -90,6 +90,9 @@ def test_realm_task_applies_repo_managed_smtp_settings() -> None:
     )
     realm_task = next(task for task in realm_block["block"] if task.get("name") == "Ensure the LV3 realm exists")
     assert realm_task["community.general.keycloak_realm"]["smtp_server"] == "{{ keycloak_realm_smtp_server }}"
+    assert realm_task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
+    assert realm_task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
+    assert realm_task["until"] == "keycloak_realm_reconcile is succeeded"
 
 
 def test_role_restores_docker_nat_chain_before_startup() -> None:
@@ -297,6 +300,22 @@ def test_realm_reconciliation_retries_repo_managed_keycloak_modules() -> None:
         assert task["until"] == f"{task['register']} is succeeded"
 
 
+def test_all_keycloak_client_secret_reads_retry_reconciliation_until_success() -> None:
+    tasks = load_tasks()
+    realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
+    read_secret_tasks = [
+        task
+        for task in realm_block["block"]
+        if task.get("name", "").startswith("Read the ") and task.get("name", "").endswith(" client secret")
+    ]
+
+    assert len(read_secret_tasks) == 10
+    for task in read_secret_tasks:
+        assert task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
+        assert task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
+        assert task["until"] == f"{task['register']} is succeeded"
+
+
 def test_runtime_token_verification_retries_confidential_clients() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     tasks = load_tasks()
@@ -332,6 +351,33 @@ def test_role_manages_langfuse_client_secret() -> None:
     ]
     assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_langfuse_client_id }}"
     assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_langfuse_client_secret_local_file }}"
+
+
+def test_role_manages_directus_client_secret() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    tasks = load_tasks()
+    realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
+    directus_client_task = next(task for task in realm_block["block"] if task.get("name") == "Ensure the Directus OAuth client exists")
+    read_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the Directus client secret")
+    mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the Directus client secret to the control machine")
+
+    assert defaults["keycloak_directus_client_id"] == "directus"
+    assert defaults["keycloak_directus_client_secret_local_file"].endswith("/.local/keycloak/directus-client-secret.txt")
+    assert defaults["keycloak_directus_root_url"] == "https://data.lv3.org"
+    assert directus_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_directus_client_id }}"
+    assert directus_client_task["community.general.keycloak_client"]["redirect_uris"] == [
+        "{{ keycloak_directus_root_url }}/auth/login/keycloak/callback"
+    ]
+    assert directus_client_task["community.general.keycloak_client"]["web_origins"] == ["{{ keycloak_directus_root_url }}"]
+    directus_mapper = directus_client_task["community.general.keycloak_client"]["protocol_mappers"][0]
+    assert directus_mapper["name"] == "groups"
+    assert directus_mapper["config"]["claim.name"] == "groups"
+    assert directus_mapper["config"]["full.path"] == "true"
+    assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_directus_client_id }}"
+    assert read_secret_task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
+    assert read_secret_task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
+    assert read_secret_task["until"] == "keycloak_directus_client_secret_info is succeeded"
+    assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_directus_client_secret_local_file }}"
 
 
 def test_role_manages_outline_client_secret() -> None:

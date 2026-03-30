@@ -39,3 +39,13 @@ def test_single_record_role_retries_transient_provider_errors() -> None:
     assert "delay: 2" in tasks
     assert "429" in tasks
     assert "504" in tasks
+    assert "json.error.code" in tasks
+    assert "DNS Console brownout during migration" in tasks
+
+
+def test_single_record_role_reports_provider_error_details_after_retries() -> None:
+    tasks = ROLE_TASKS.read_text(encoding="utf-8")
+
+    assert "Fail with provider details when DNS record creation did not complete" in tasks
+    assert "Fail with provider details when DNS record update did not complete" in tasks
+    assert "Fail with provider details when DNS record deletion did not complete" in tasks

@@ -4537,6 +4537,51 @@
         "profile": "docker_runtime_systemd_make",
         "timeout_seconds": 1800
       }
+    },
+    "converge-directus": {
+      "description": "Converge the Directus PostgreSQL backend, runtime, Keycloak client, and shared-edge publication, then verify REST, GraphQL, and OIDC access on data.lv3.org.",
+      "workflow_id": "converge-directus",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to publish data.lv3.org and keep the shared edge certificate current."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-directus passes",
+        "make validate passes before the apply",
+        "The Directus publication, dedicated database boundary, and Keycloak login blast radius are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, one local Directus health response, the public /server/health result, one Keycloak redirect response, and successful scoped REST plus GraphQL reads against the governed service_registry collection."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the Directus runtime fails to start, the access model cannot be seeded cleanly, or the governed collection bootstrap drifts from repo truth.",
+          "Stop if data.lv3.org does not serve the expected health contract or if the Keycloak redirect, REST token path, or GraphQL token path fails after converge."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Directus runtime and publication config from version control before retrying.",
+          "Do not compensate for a failed rollout by leaving behind manual Directus schema, role, policy, or token changes outside the repo-managed converge path."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
     }
   },
   "execution_profiles": {

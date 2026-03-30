@@ -1,0 +1,67 @@
+# Purpose: Verify the local Directus runtime endpoints after converge or recovery.
+# Use case: Imported by the Directus runtime role before and after schema bootstrap.
+# Inputs: directus_internal_base_url, directus_health_path, directus_ping_path, and directus_openapi_path.
+# Outputs: Confirms the local runtime listener, health, ping, and OpenAPI paths respond as expected.
+# Idempotency: Fully idempotent because these are read-only verification probes.
+# Dependencies: ADR 0165 and ADR 0289.
+---
+- name: Wait for the Directus runtime to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ directus_internal_port }}"
+    delay: 0
+    timeout: 300
+
+- name: Verify the Directus health endpoint
+  ansible.builtin.uri:
+    url: "{{ directus_internal_base_url }}{{ directus_health_path }}"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: directus_verify_health
+  retries: 36
+  delay: 5
+  until: directus_verify_health.status == 200
+  changed_when: false
+
+- name: Assert the Directus health payload reports ok
+  ansible.builtin.assert:
+    that:
+      - directus_verify_health.json.status == "ok"
+    fail_msg: "Directus answered locally, but /server/health did not report status=ok."
+
+- name: Verify the Directus ping endpoint
+  ansible.builtin.uri:
+    url: "{{ directus_internal_base_url }}{{ directus_ping_path }}"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: directus_verify_ping
+  retries: 18
+  delay: 5
+  until: directus_verify_ping.status == 200
+  changed_when: false
+
+- name: Assert the Directus ping payload matches pong
+  ansible.builtin.assert:
+    that:
+      - directus_verify_ping.content | trim == "pong"
+    fail_msg: "Directus answered locally, but /server/ping did not return pong."
+
+- name: Verify the Directus OpenAPI document is served locally
+  ansible.builtin.uri:
+    url: "{{ directus_internal_base_url }}{{ directus_openapi_path }}"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: directus_verify_openapi
+  retries: 18
+  delay: 5
+  until: directus_verify_openapi.status == 200
+  changed_when: false
+
+- name: Assert the local Directus OpenAPI document looks valid
+  ansible.builtin.assert:
+    that:
+      - "'paths' in directus_verify_openapi.json"
+    fail_msg: "Directus served /server/specs/oas locally, but it did not parse as an OpenAPI document."

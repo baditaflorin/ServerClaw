@@ -13,6 +13,13 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - https://data.lv3.org/server/health
+  labels:
+    service_id: directus
+    slo_id: directus-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - http://10.10.10.20:8089/healthcheck
   labels:
     service_id: dozzle
@@ -53,20 +60,6 @@
     service_id: harbor
     slo_id: harbor-availability
     indicator: availability
-    probe_module: http_2xx_follow_redirects
-- targets:
-    - http://100.64.0.1:8014/healthz
-  labels:
-    service_id: openfga
-    slo_id: openfga-availability
-    indicator: availability
-    probe_module: http_2xx_follow_redirects
-- targets:
-    - http://100.64.0.1:8014/healthz
-  labels:
-    service_id: openfga
-    slo_id: openfga-latency
-    indicator: latency
     probe_module: http_2xx_follow_redirects
 - targets:
     - https://home.lv3.org
@@ -118,17 +111,17 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://nginx.lv3.org
-  labels:
-    service_id: nginx_edge
-    slo_id: nginx-edge-availability
-    indicator: availability
-    probe_module: http_2xx_follow_redirects
-- targets:
     - https://cloud.lv3.org/status.php
   labels:
     service_id: nextcloud
     slo_id: nextcloud-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - https://nginx.lv3.org
+  labels:
+    service_id: nginx_edge
+    slo_id: nginx-edge-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
@@ -139,18 +132,18 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://analytics.lv3.org/api/system/health/ready
+    - http://100.64.0.1:8014/healthz
   labels:
-    service_id: plausible
-    slo_id: plausible-availability
+    service_id: openfga
+    slo_id: openfga-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://chat.lv3.org
+    - http://100.64.0.1:8014/healthz
   labels:
-    service_id: serverclaw
-    slo_id: serverclaw-availability
-    indicator: availability
+    service_id: openfga
+    slo_id: openfga-latency
+    indicator: latency
     probe_module: http_2xx_follow_redirects
 - targets:
     - https://wiki.lv3.org/_health
@@ -174,6 +167,13 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - https://analytics.lv3.org/api/system/health/ready
+  labels:
+    service_id: plausible
+    slo_id: plausible-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - http://10.10.10.40:19999/api/v1/info
   labels:
     service_id: realtime
@@ -185,6 +185,13 @@
   labels:
     service_id: semaphore
     slo_id: semaphore-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - https://chat.lv3.org
+  labels:
+    service_id: serverclaw
+    slo_id: serverclaw-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:

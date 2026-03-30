@@ -45,6 +45,26 @@
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
+    "browser_runner": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "dashboard_file": "config/grafana/dashboards/browser-runner.json",
+      "alert_rule_file": "config/alertmanager/rules/browser-runner.yml",
+      "suppressed_checks": {}
+    },
+    "changedetection": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "dashboard_file": "config/grafana/dashboards/slo-overview.json",
+      "alert_rule_file": "config/prometheus/rules/slo_alerts.yml",
+      "suppressed_checks": {}
+    },
     "changelog_portal": {
       "service_type": "nginx-plugin",
       "requires_subdomain": true,
@@ -89,6 +109,18 @@
       "requires_secrets": true,
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
+    },
+    "directus": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "keycloak_client_generated": true,
+      "suppressed_checks": {
+        "alert_rules": "2026-09-30",
+        "grafana_dashboard": "2026-09-30"
+      }
     },
     "docker_build": {
       "service_type": "vm-service",
@@ -260,6 +292,14 @@
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
+    "netbox": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "suppression_preset": "legacy-service"
+    },
     "nextcloud": {
       "service_type": "compose",
       "requires_subdomain": true,
@@ -271,14 +311,6 @@
       "suppressed_checks": {
         "api_gateway": "2026-09-23"
       }
-    },
-    "netbox": {
-      "service_type": "compose",
-      "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "suppression_preset": "legacy-service"
     },
     "nginx_edge": {
       "service_type": "nginx-plugin",
@@ -327,26 +359,6 @@
       "requires_secrets": true,
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
-    },
-    "plausible": {
-      "service_type": "compose",
-      "requires_subdomain": true,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "suppressed_checks": {
-        "alert_rules": "2026-09-30",
-        "api_gateway": "2026-09-30",
-        "grafana_dashboard": "2026-09-30"
-      }
-    },
-    "serverclaw": {
-      "service_type": "compose",
-      "requires_subdomain": true,
-      "requires_oidc": true,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "keycloak_client_generated": true
     },
     "openbao": {
       "service_type": "compose",
@@ -400,6 +412,18 @@
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
     },
+    "plausible": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "suppressed_checks": {
+        "alert_rules": "2026-09-30",
+        "api_gateway": "2026-09-30",
+        "grafana_dashboard": "2026-09-30"
+      }
+    },
     "portainer": {
       "service_type": "compose",
       "requires_subdomain": false,
@@ -447,6 +471,14 @@
       "requires_oidc": false,
       "requires_secrets": true,
       "requires_compose_secrets": true
+    },
+    "serverclaw": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "keycloak_client_generated": true
     },
     "status_page": {
       "service_type": "compose",
@@ -513,26 +545,6 @@
       "requires_secrets": true,
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
-    },
-    "browser_runner": {
-      "service_type": "compose",
-      "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": false,
-      "requires_compose_secrets": false,
-      "dashboard_file": "config/grafana/dashboards/browser-runner.json",
-      "alert_rule_file": "config/alertmanager/rules/browser-runner.yml",
-      "suppressed_checks": {}
-    },
-    "changedetection": {
-      "service_type": "compose",
-      "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": false,
-      "requires_compose_secrets": false,
-      "dashboard_file": "config/grafana/dashboards/slo-overview.json",
-      "alert_rule_file": "config/prometheus/rules/slo_alerts.yml",
-      "suppressed_checks": {}
     }
   }
 }

@@ -8,6 +8,7 @@ HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 POSTGRES_GROUP_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "postgres_guests.yml"
 POSTGRES_CLIENT_PLAYBOOKS = [
     REPO_ROOT / "playbooks" / "dify.yml",
+    REPO_ROOT / "playbooks" / "directus.yml",
     REPO_ROOT / "playbooks" / "keycloak.yml",
     REPO_ROOT / "playbooks" / "langfuse.yml",
     REPO_ROOT / "playbooks" / "mattermost.yml",

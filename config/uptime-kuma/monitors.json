@@ -26,6 +26,19 @@
     ]
   },
   {
+    "name": "Browser Runner Private",
+    "type": "http",
+    "url": "http://10.10.10.20:8096/healthz",
+    "description": "Private browser-runner health endpoint on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
     "name": "Dify Public",
     "type": "http",
     "url": "https://agents.lv3.org/healthz",
@@ -34,6 +47,19 @@
     "retryInterval": 60,
     "maxretries": 0,
     "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Directus Public Health",
+    "type": "http",
+    "url": "https://data.lv3.org/server/health",
+    "description": "Public Directus health endpoint published through the shared NGINX edge.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
     "accepted_statuscodes": [
       "200-299"
     ]
@@ -221,19 +247,6 @@
     ]
   },
   {
-    "name": "Nextcloud Public Status",
-    "type": "http",
-    "url": "https://cloud.lv3.org/status.php",
-    "description": "Public Nextcloud status endpoint published through the shared NGINX edge VM.",
-    "interval": 60,
-    "retryInterval": 60,
-    "maxretries": 0,
-    "maxredirects": 5,
-    "accepted_statuscodes": [
-      "200-299"
-    ]
-  },
-  {
     "name": "NetBox Private",
     "type": "http",
     "url": "http://10.10.10.20:8082/login/",
@@ -242,6 +255,19 @@
     "retryInterval": 60,
     "maxretries": 0,
     "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Nextcloud Public Status",
+    "type": "http",
+    "url": "https://cloud.lv3.org/status.php",
+    "description": "Public Nextcloud status endpoint published through the shared NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
     "accepted_statuscodes": [
       "200-299"
     ]
@@ -264,32 +290,6 @@
     "type": "http",
     "url": "http://10.10.10.20:8088",
     "description": "Private Open WebUI surface on docker-runtime-lv3.",
-    "interval": 60,
-    "retryInterval": 60,
-    "maxretries": 0,
-    "maxredirects": 10,
-    "accepted_statuscodes": [
-      "200-299"
-    ]
-  },
-  {
-    "name": "Plausible Public Health",
-    "type": "http",
-    "url": "https://analytics.lv3.org/api/system/health/ready",
-    "description": "Public Plausible readiness endpoint published through the shared NGINX edge VM.",
-    "interval": 60,
-    "retryInterval": 60,
-    "maxretries": 0,
-    "maxredirects": 5,
-    "accepted_statuscodes": [
-      "200-299"
-    ]
-  },
-  {
-    "name": "ServerClaw",
-    "type": "http",
-    "url": "https://chat.lv3.org",
-    "description": "Public ServerClaw assistant surface published through the shared NGINX edge.",
     "interval": 60,
     "retryInterval": 60,
     "maxretries": 0,
@@ -346,6 +346,19 @@
     "retryInterval": 60,
     "maxretries": 0,
     "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Plausible Public Health",
+    "type": "http",
+    "url": "https://analytics.lv3.org/api/system/health/ready",
+    "description": "Public Plausible readiness endpoint published through the shared NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
     "accepted_statuscodes": [
       "200-299"
     ]
@@ -417,6 +430,19 @@
     ]
   },
   {
+    "name": "ServerClaw",
+    "type": "http",
+    "url": "https://chat.lv3.org",
+    "description": "Public ServerClaw assistant surface published through the shared NGINX edge.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
     "name": "Step CA Private",
     "type": "http",
     "url": "https://10.10.10.20:9000/health",
@@ -461,19 +487,6 @@
     "type": "http",
     "url": "http://10.10.10.20:8000/api/version",
     "description": "Private Windmill API version endpoint on docker-runtime-lv3.",
-    "interval": 60,
-    "retryInterval": 60,
-    "maxretries": 0,
-    "maxredirects": 10,
-    "accepted_statuscodes": [
-      "200-299"
-    ]
-  },
-  {
-    "name": "Browser Runner Private",
-    "type": "http",
-    "url": "http://10.10.10.20:8096/healthz",
-    "description": "Private browser-runner health endpoint on docker-runtime-lv3.",
     "interval": 60,
     "retryInterval": 60,
     "maxretries": 0,

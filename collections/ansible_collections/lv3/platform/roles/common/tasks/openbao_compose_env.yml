@@ -236,6 +236,10 @@
       secret_id_ttl: 0
       secret_id_num_uses: 0
     status_code: 204
+  register: common_openbao_compose_env_approle_upsert
+  retries: 12
+  delay: 2
+  until: common_openbao_compose_env_approle_upsert.status == 204
   no_log: true
 
 - name: Read the OpenBao AppRole role ID

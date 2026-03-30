@@ -21,6 +21,8 @@ def test_common_openbao_agent_helper_exists() -> None:
     assert "kv/data/" in helper
     assert 'static_secret_render_interval = "5m"' in template
     assert 'destination          = "{{ common_openbao_compose_env_env_file }}"' in template
+    assert "register: common_openbao_compose_env_approle_upsert" in helper
+    assert "until: common_openbao_compose_env_approle_upsert.status == 204" in helper
 
 
 def test_validate_repo_checks_for_unexpected_env_files() -> None:

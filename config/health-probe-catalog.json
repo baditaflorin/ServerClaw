@@ -142,6 +142,99 @@
         }
       }
     },
+    "browser_runner": {
+      "service_name": "browser-runner",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "browser_runner_runtime",
+      "verify_file": "roles/browser_runner_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The browser runner health endpoint responds on the private runtime listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8096/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The browser runner sessions endpoint accepts the bounded local smoke payload through the role verification path.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8096/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Browser Runner Private",
+          "type": "http",
+          "url": "http://10.10.10.20:8096/healthz",
+          "description": "Private browser-runner health endpoint on docker-runtime-lv3.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "changedetection": {
+      "service_name": "changedetection",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "changedetection_runtime",
+      "verify_file": "roles/changedetection_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Changedetection startup completes once the private root page responds on the local listener.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:5000/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "Changedetection keeps serving the private root page on docker-runtime-lv3.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:5000/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "Changedetection accepts the repo-managed API token and reports the loaded watch catalogue counts through systeminfo.",
+        "timeout_seconds": 120,
+        "retries": 3,
+        "delay_seconds": 5,
+        "argv": [
+          "/bin/bash",
+          "-lc",
+          "set -euo pipefail; token=$(cat /etc/lv3/changedetection/api-token); systeminfo=$(mktemp); tags=$(mktemp); trap 'rm -f \"${systeminfo}\" \"${tags}\"' EXIT; curl -fsS http://127.0.0.1:5000/api/v1/systeminfo -H \"x-api-key: ${token}\" > \"${systeminfo}\"; curl -fsS http://127.0.0.1:5000/api/v1/tags -H \"x-api-key: ${token}\" > \"${tags}\"; python3 -c 'import json, pathlib, sys; payload=json.loads(pathlib.Path(sys.argv[1]).read_text()); tags=json.loads(pathlib.Path(sys.argv[2]).read_text()); assert payload[\"watch_count\"] >= 1 and len(tags) >= 1' \"${systeminfo}\" \"${tags}\""
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Changedetection stays private and uses an authenticated API contract; repo-managed runtime verification plus the governed API gateway check are the supported health path."
+      }
+    },
     "coolify": {
       "service_name": "coolify",
       "owning_vm": "coolify-lv3",
@@ -286,6 +379,76 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "directus": {
+      "service_name": "directus",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "directus_runtime",
+      "verify_file": "roles/directus_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Directus startup completes once the loopback /server/health endpoint responds on docker-runtime-lv3.",
+        "timeout_seconds": 180,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8055/server/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "Directus keeps serving the loopback /server/health contract on docker-runtime-lv3.",
+        "timeout_seconds": 180,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8055/server/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "Directus serves the managed health contract locally and keeps the published container port bound for edge publication.",
+        "timeout_seconds": 180,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8055/server/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "docker_publication": {
+          "container_name": "directus",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 8055
+            }
+          ],
+          "required_networks": [
+            "directus_default"
+          ]
+        }
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Directus Public Health",
+          "type": "http",
+          "url": "https://data.lv3.org/server/health",
+          "description": "Public Directus health endpoint published through the shared NGINX edge.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
           "accepted_statuscodes": [
             "200-299"
           ]
@@ -1165,6 +1328,64 @@
         }
       }
     },
+    "netbox": {
+      "service_name": "netbox",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "netbox_runtime",
+      "verify_file": "roles/netbox_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "NetBox startup completes once the repo-managed API token can read the users API.",
+        "timeout_seconds": 300,
+        "retries": 30,
+        "delay_seconds": 10,
+        "url": "http://127.0.0.1:8082/api/users/users/?limit=1",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The NetBox login page responds on the local runtime listener.",
+        "timeout_seconds": 300,
+        "retries": 30,
+        "delay_seconds": 10,
+        "url": "http://127.0.0.1:8082/login/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The repo-managed NetBox API token can read the users API.",
+        "timeout_seconds": 60,
+        "retries": 12,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8082/api/users/users/?limit=1",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "NetBox Private",
+          "type": "http",
+          "url": "http://10.10.10.20:8082/login/",
+          "description": "Private NetBox login surface on docker-runtime-lv3.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
     "nextcloud": {
       "service_name": "nextcloud",
       "owning_vm": "docker-runtime-lv3",
@@ -1229,64 +1450,6 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 5,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "netbox": {
-      "service_name": "netbox",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "netbox_runtime",
-      "verify_file": "roles/netbox_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "NetBox startup completes once the repo-managed API token can read the users API.",
-        "timeout_seconds": 300,
-        "retries": 30,
-        "delay_seconds": 10,
-        "url": "http://127.0.0.1:8082/api/users/users/?limit=1",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The NetBox login page responds on the local runtime listener.",
-        "timeout_seconds": 300,
-        "retries": 30,
-        "delay_seconds": 10,
-        "url": "http://127.0.0.1:8082/login/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The repo-managed NetBox API token can read the users API.",
-        "timeout_seconds": 60,
-        "retries": 12,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8082/api/users/users/?limit=1",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "NetBox Private",
-          "type": "http",
-          "url": "http://10.10.10.20:8082/login/",
-          "description": "Private NetBox login surface on docker-runtime-lv3.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 10,
           "accepted_statuscodes": [
             "200-299"
           ]
@@ -1528,134 +1691,6 @@
           "type": "http",
           "url": "http://10.10.10.20:8088",
           "description": "Private Open WebUI surface on docker-runtime-lv3.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 10,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "plausible": {
-      "service_name": "plausible",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "plausible_runtime",
-      "verify_file": "roles/plausible_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "Plausible startup completes once the local /api/health endpoint returns 200 on docker-runtime-lv3.",
-        "timeout_seconds": 300,
-        "retries": 36,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8016/api/health",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The local Plausible liveness endpoint continues to answer on docker-runtime-lv3.",
-        "timeout_seconds": 300,
-        "retries": 36,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8016/api/system/health/live",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The public Plausible readiness endpoint answers through the shared NGINX edge with public tracker paths and authenticated dashboard publication in place.",
-        "timeout_seconds": 300,
-        "retries": 36,
-        "delay_seconds": 5,
-        "url": "https://analytics.lv3.org/api/system/health/ready",
-        "method": "GET",
-        "expected_status": [
-          200
-        ],
-        "docker_publication": {
-          "container_name": "plausible",
-          "bindings": [
-            {
-              "host": "10.10.10.20",
-              "port": 8016
-            }
-          ],
-          "required_networks": [
-            "plausible_default"
-          ]
-        }
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Plausible Public Health",
-          "type": "http",
-          "url": "https://analytics.lv3.org/api/system/health/ready",
-          "description": "Public Plausible readiness endpoint published through the shared NGINX edge VM.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 5,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "serverclaw": {
-      "service_name": "serverclaw",
-      "owning_vm": "coolify-lv3",
-      "role": "open_webui_runtime",
-      "verify_file": "roles/open_webui_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "ServerClaw startup completes once the local HTTP surface answers on the runtime VM.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8096",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "The ServerClaw root page responds on the local listener.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8096",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The ServerClaw local listener still answers after the role-level admin sign-in verification completes.",
-        "timeout_seconds": 120,
-        "retries": 1,
-        "delay_seconds": 0,
-        "url": "http://127.0.0.1:8096",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "ServerClaw",
-          "type": "http",
-          "url": "https://chat.lv3.org",
-          "description": "Public ServerClaw assistant surface published through the shared NGINX edge.",
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,
@@ -1993,6 +2028,76 @@
         }
       }
     },
+    "plausible": {
+      "service_name": "plausible",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "plausible_runtime",
+      "verify_file": "roles/plausible_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Plausible startup completes once the local /api/health endpoint returns 200 on docker-runtime-lv3.",
+        "timeout_seconds": 300,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8016/api/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The local Plausible liveness endpoint continues to answer on docker-runtime-lv3.",
+        "timeout_seconds": 300,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8016/api/system/health/live",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The public Plausible readiness endpoint answers through the shared NGINX edge with public tracker paths and authenticated dashboard publication in place.",
+        "timeout_seconds": 300,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "https://analytics.lv3.org/api/system/health/ready",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "docker_publication": {
+          "container_name": "plausible",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 8016
+            }
+          ],
+          "required_networks": [
+            "plausible_default"
+          ]
+        }
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Plausible Public Health",
+          "type": "http",
+          "url": "https://analytics.lv3.org/api/system/health/ready",
+          "description": "Public Plausible readiness endpoint published through the shared NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
     "portainer": {
       "service_name": "portainer",
       "owning_vm": "docker-runtime-lv3",
@@ -2249,6 +2354,64 @@
           "type": "http",
           "url": "http://10.10.10.20:3004/api/ping",
           "description": "Private Semaphore ping endpoint on docker-runtime-lv3.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "serverclaw": {
+      "service_name": "serverclaw",
+      "owning_vm": "coolify-lv3",
+      "role": "open_webui_runtime",
+      "verify_file": "roles/open_webui_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "ServerClaw startup completes once the local HTTP surface answers on the runtime VM.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8096",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The ServerClaw root page responds on the local listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8096",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The ServerClaw local listener still answers after the role-level admin sign-in verification completes.",
+        "timeout_seconds": 120,
+        "retries": 1,
+        "delay_seconds": 0,
+        "url": "http://127.0.0.1:8096",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "ServerClaw",
+          "type": "http",
+          "url": "https://chat.lv3.org",
+          "description": "Public ServerClaw assistant surface published through the shared NGINX edge.",
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,
@@ -2622,99 +2785,6 @@
             "200-299"
           ]
         }
-      }
-    },
-    "browser_runner": {
-      "service_name": "browser-runner",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "browser_runner_runtime",
-      "verify_file": "roles/browser_runner_runtime/tasks/verify.yml",
-      "liveness": {
-        "kind": "http",
-        "description": "The browser runner health endpoint responds on the private runtime listener.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8096/healthz",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "http",
-        "description": "The browser runner sessions endpoint accepts the bounded local smoke payload through the role verification path.",
-        "timeout_seconds": 120,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:8096/healthz",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "uptime_kuma": {
-        "enabled": true,
-        "monitor": {
-          "name": "Browser Runner Private",
-          "type": "http",
-          "url": "http://10.10.10.20:8096/healthz",
-          "description": "Private browser-runner health endpoint on docker-runtime-lv3.",
-          "interval": 60,
-          "retryInterval": 60,
-          "maxretries": 0,
-          "maxredirects": 10,
-          "accepted_statuscodes": [
-            "200-299"
-          ]
-        }
-      }
-    },
-    "changedetection": {
-      "service_name": "changedetection",
-      "owning_vm": "docker-runtime-lv3",
-      "role": "changedetection_runtime",
-      "verify_file": "roles/changedetection_runtime/tasks/verify.yml",
-      "startup": {
-        "kind": "http",
-        "description": "Changedetection startup completes once the private root page responds on the local listener.",
-        "timeout_seconds": 180,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:5000/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "liveness": {
-        "kind": "http",
-        "description": "Changedetection keeps serving the private root page on docker-runtime-lv3.",
-        "timeout_seconds": 180,
-        "retries": 24,
-        "delay_seconds": 5,
-        "url": "http://127.0.0.1:5000/",
-        "method": "GET",
-        "expected_status": [
-          200
-        ]
-      },
-      "readiness": {
-        "kind": "command",
-        "description": "Changedetection accepts the repo-managed API token and reports the loaded watch catalogue counts through systeminfo.",
-        "timeout_seconds": 120,
-        "retries": 3,
-        "delay_seconds": 5,
-        "argv": [
-          "/bin/bash",
-          "-lc",
-          "set -euo pipefail; token=$(cat /etc/lv3/changedetection/api-token); systeminfo=$(mktemp); tags=$(mktemp); trap 'rm -f \"${systeminfo}\" \"${tags}\"' EXIT; curl -fsS http://127.0.0.1:5000/api/v1/systeminfo -H \"x-api-key: ${token}\" > \"${systeminfo}\"; curl -fsS http://127.0.0.1:5000/api/v1/tags -H \"x-api-key: ${token}\" > \"${tags}\"; python3 -c 'import json, pathlib, sys; payload=json.loads(pathlib.Path(sys.argv[1]).read_text()); tags=json.loads(pathlib.Path(sys.argv[2]).read_text()); assert payload[\"watch_count\"] >= 1 and len(tags) >= 1' \"${systeminfo}\" \"${tags}\""
-        ],
-        "success_rc": 0
-      },
-      "uptime_kuma": {
-        "enabled": false,
-        "reason": "Changedetection stays private and uses an authenticated API contract; repo-managed runtime verification plus the governed API gateway check are the supported health path."
       }
     }
   }

@@ -3,6 +3,21 @@
   "schema_version": "1.0.0",
   "data_stores": [
     {
+      "id": "browser-runner-artifacts",
+      "service": "browser_runner",
+      "name": "Browser runner bounded session artifacts",
+      "class": "confidential",
+      "retention_days": 30,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "/opt/browser-runner/data/artifacts",
+        "browser-run-session structured outputs"
+      ],
+      "notes": "Captured screenshots, PDFs, selector text, and downloaded files may contain third-party page content or delegated-session data, so retention stays intentionally short and private."
+    },
+    {
       "id": "changedetection-watch-history",
       "service": "changedetection",
       "name": "Changedetection watch history and diff datastore",
@@ -17,6 +32,21 @@
         "/opt/changedetection/watch-sync-report.json"
       ],
       "notes": "Changedetection stores repo-managed watch metadata, snapshots, diff history, and the most recent drift-free sync report for upstream content monitoring."
+    },
+    {
+      "id": "directus_primary_data",
+      "service": "directus",
+      "name": "Directus operational metadata database",
+      "class": "internal",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "low",
+      "locations": [
+        "PostgreSQL database directus on postgres-lv3",
+        "Directus system tables plus governed collections in the public schema of the dedicated directus database"
+      ],
+      "notes": "Directus persists repo-governed operational metadata in a dedicated PostgreSQL database. Upstream Directus 11.17.0 keeps both system tables and managed collections in the public schema of that dedicated database, so schema isolation is enforced at the database boundary rather than by a separate PostgreSQL schema."
     },
     {
       "id": "dozzle-live-log-stream",
@@ -237,20 +267,6 @@
       "notes": "Security scan evidence should remain available across one full patching and review cycle."
     },
     {
-      "id": "mailpit-captured-messages",
-      "service": "mailpit",
-      "name": "Mailpit captured message cache",
-      "class": "internal",
-      "retention_days": null,
-      "backup_included": false,
-      "access_role": "platform-operator",
-      "pii_risk": "medium",
-      "locations": [
-        "Mailpit in-memory message store on docker-runtime-lv3"
-      ],
-      "notes": "Mailpit intentionally keeps intercepted staging and development messages in ephemeral in-memory storage so assertion traffic is inspectable but lost on restart."
-    },
-    {
       "id": "langfuse-object-storage",
       "service": "langfuse",
       "name": "Langfuse event and media object storage",
@@ -312,6 +328,20 @@
         "Grafana Loki datasource"
       ],
       "notes": "Operational logs may contain internal IP addresses, usernames, and error details."
+    },
+    {
+      "id": "mailpit-captured-messages",
+      "service": "mailpit",
+      "name": "Mailpit captured message cache",
+      "class": "internal",
+      "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Mailpit in-memory message store on docker-runtime-lv3"
+      ],
+      "notes": "Mailpit intentionally keeps intercepted staging and development messages in ephemeral in-memory storage so assertion traffic is inspectable but lost on restart."
     },
     {
       "id": "matrix-synapse-event-store",
@@ -402,6 +432,34 @@
       "notes": "Netdata stores short-lived host and guest metrics for live operator troubleshooting and anomaly triage; long-term retention remains outside the scope of this service."
     },
     {
+      "id": "nextcloud-account-metadata",
+      "service": "nextcloud",
+      "name": "Nextcloud account and sharing metadata",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "break_glass",
+      "pii_risk": "high",
+      "locations": [
+        "Nextcloud PostgreSQL database"
+      ],
+      "notes": "Account records, shares, app state, and file metadata define the canonical personal data plane and must remain restorable with the runtime filesystem."
+    },
+    {
+      "id": "nextcloud-personal-files",
+      "service": "nextcloud",
+      "name": "Nextcloud personal files and DAV payloads",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "break_glass",
+      "pii_risk": "high",
+      "locations": [
+        "/opt/nextcloud/data/html/data"
+      ],
+      "notes": "User-owned files, attachments, calendar bodies, contacts, and task payloads remain under user-directed retention and must stay recoverable."
+    },
+    {
       "id": "openbao-secrets",
       "service": "openbao",
       "name": "OpenBao KV secrets",
@@ -458,34 +516,6 @@
         "Outline PostgreSQL database"
       ],
       "notes": "Outline stores workspace, user, collection, and document metadata that may include operator identities and operational text."
-    },
-    {
-      "id": "nextcloud-personal-files",
-      "service": "nextcloud",
-      "name": "Nextcloud personal files and DAV payloads",
-      "class": "confidential",
-      "retention_days": null,
-      "backup_included": true,
-      "access_role": "break_glass",
-      "pii_risk": "high",
-      "locations": [
-        "/opt/nextcloud/data/html/data"
-      ],
-      "notes": "User-owned files, attachments, calendar bodies, contacts, and task payloads remain under user-directed retention and must stay recoverable."
-    },
-    {
-      "id": "nextcloud-account-metadata",
-      "service": "nextcloud",
-      "name": "Nextcloud account and sharing metadata",
-      "class": "confidential",
-      "retention_days": null,
-      "backup_included": true,
-      "access_role": "break_glass",
-      "pii_risk": "high",
-      "locations": [
-        "Nextcloud PostgreSQL database"
-      ],
-      "notes": "Account records, shares, app state, and file metadata define the canonical personal data plane and must remain restorable with the runtime filesystem."
     },
     {
       "id": "plane-object-storage",
@@ -545,21 +575,6 @@
       "notes": "PostgreSQL-backed site configuration, dashboard state, and the bootstrap recovery user metadata remain restorable with the runtime volumes."
     },
     {
-      "id": "serverclaw-workspace-store",
-      "service": "serverclaw",
-      "name": "ServerClaw workspace and chat state",
-      "class": "confidential",
-      "retention_days": 90,
-      "backup_included": false,
-      "access_role": "platform-operator",
-      "pii_risk": "high",
-      "locations": [
-        "/opt/serverclaw/data",
-        "https://chat.lv3.org"
-      ],
-      "notes": "ServerClaw persists chat history, workspace metadata, uploaded knowledge artifacts, and user-facing assistant settings in its Open WebUI data volume on coolify-lv3."
-    },
-    {
       "id": "promotion-receipts",
       "service": "platform_control_plane",
       "name": "Promotion receipts",
@@ -590,6 +605,21 @@
         "/opt/semaphore/data"
       ],
       "notes": "Task output can contain operator context, playbook names, and limited execution logs, so it should stay private and be retained long enough for incident review."
+    },
+    {
+      "id": "serverclaw-workspace-store",
+      "service": "serverclaw",
+      "name": "ServerClaw workspace and chat state",
+      "class": "confidential",
+      "retention_days": 90,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "/opt/serverclaw/data",
+        "https://chat.lv3.org"
+      ],
+      "notes": "ServerClaw persists chat history, workspace metadata, uploaded knowledge artifacts, and user-facing assistant settings in its Open WebUI data volume on coolify-lv3."
     },
     {
       "id": "tempo-traces",
@@ -650,21 +680,6 @@
         "Windmill workspace logs"
       ],
       "notes": "Workflow logs can contain operator context and transient execution metadata but do not need indefinite retention."
-    },
-    {
-      "id": "browser-runner-artifacts",
-      "service": "browser_runner",
-      "name": "Browser runner bounded session artifacts",
-      "class": "confidential",
-      "retention_days": 30,
-      "backup_included": false,
-      "access_role": "platform-operator",
-      "pii_risk": "high",
-      "locations": [
-        "/opt/browser-runner/data/artifacts",
-        "browser-run-session structured outputs"
-      ],
-      "notes": "Captured screenshots, PDFs, selector text, and downloaded files may contain third-party page content or delegated-session data, so retention stays intentionally short and private."
     }
   ]
 }

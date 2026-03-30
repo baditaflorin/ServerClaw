@@ -141,10 +141,35 @@
     - dns_provider_boundary_matching_records | length == 1
   retries: 5
   delay: 2
-  until: hetzner_dns_record_delete_response.status in [200, 204]
-  failed_when: hetzner_dns_record_delete_response.status not in [200, 204]
-  changed_when: true
+  until:
+    - hetzner_dns_record_delete_response.status in [200, 204]
+    - (hetzner_dns_record_delete_response.json.error.code | default(0) | int) == 0
+  failed_when: false
+  changed_when: >-
+    hetzner_dns_record_delete_response.status in [200, 204]
+    and (hetzner_dns_record_delete_response.json.error.code | default(0) | int) == 0
   no_log: true
+
+- name: Fail with provider details when DNS record deletion did not complete
+  ansible.builtin.fail:
+    msg: >-
+      Hetzner DNS did not delete {{ hetzner_dns_record_name }} {{ hetzner_dns_record_type }}
+      in zone {{ hetzner_dns_record_zone_name }}. HTTP
+      {{ hetzner_dns_record_delete_response.status | default('unknown') }}, provider
+      error {{ hetzner_dns_record_delete_response.json.error.code | default('none') }}:
+      {{
+        hetzner_dns_record_delete_response.json.error.message
+        | default('no provider message returned')
+      }}.
+      If this is the documented DNS Console brownout during migration, retry after
+      the brownout window or migrate the zone to Hetzner Console first.
+  when:
+    - hetzner_dns_record_state == 'absent'
+    - dns_provider_boundary_matching_records | length == 1
+    - not (
+        hetzner_dns_record_delete_response.status in [200, 204]
+        and (hetzner_dns_record_delete_response.json.error.code | default(0) | int) == 0
+      )
 
 - name: Create the canonical DNS record when absent
   ansible.builtin.uri:
@@ -173,10 +198,38 @@
     - dns_provider_boundary_matching_records | length == 0
   retries: 5
   delay: 2
-  until: hetzner_dns_record_create_response.status in [200, 201]
-  failed_when: hetzner_dns_record_create_response.status not in [200, 201]
-  changed_when: true
+  until:
+    - hetzner_dns_record_create_response.status in [200, 201]
+    - (hetzner_dns_record_create_response.json.error.code | default(0) | int) == 0
+    - (hetzner_dns_record_create_response.json.record.id | default('') | length) > 0
+  failed_when: false
+  changed_when: >-
+    hetzner_dns_record_create_response.status in [200, 201]
+    and (hetzner_dns_record_create_response.json.error.code | default(0) | int) == 0
+    and (hetzner_dns_record_create_response.json.record.id | default('') | length) > 0
   no_log: true
+
+- name: Fail with provider details when DNS record creation did not complete
+  ansible.builtin.fail:
+    msg: >-
+      Hetzner DNS did not create {{ hetzner_dns_record_name }} {{ hetzner_dns_record_type }}
+      in zone {{ hetzner_dns_record_zone_name }} with value {{ hetzner_dns_record_value }}.
+      HTTP {{ hetzner_dns_record_create_response.status | default('unknown') }},
+      provider error {{ hetzner_dns_record_create_response.json.error.code | default('none') }}:
+      {{
+        hetzner_dns_record_create_response.json.error.message
+        | default('no provider message returned')
+      }}.
+      If this is the documented DNS Console brownout during migration, retry after
+      the brownout window or migrate the zone to Hetzner Console first.
+  when:
+    - hetzner_dns_record_state == 'present'
+    - dns_provider_boundary_matching_records | length == 0
+    - not (
+        hetzner_dns_record_create_response.status in [200, 201]
+        and (hetzner_dns_record_create_response.json.error.code | default(0) | int) == 0
+        and (hetzner_dns_record_create_response.json.record.id | default('') | length) > 0
+      )
 
 - name: Update the canonical DNS record when drift is detected
   ansible.builtin.uri:
@@ -206,7 +259,34 @@
       or (dns_provider_boundary_matching_records[0].record_ttl | int) != (hetzner_dns_record_ttl | int)
   retries: 5
   delay: 2
-  until: hetzner_dns_record_update_response.status == 200
-  failed_when: hetzner_dns_record_update_response.status != 200
-  changed_when: true
+  until:
+    - hetzner_dns_record_update_response.status == 200
+    - (hetzner_dns_record_update_response.json.error.code | default(0) | int) == 0
+  failed_when: false
+  changed_when: >-
+    hetzner_dns_record_update_response.status == 200
+    and (hetzner_dns_record_update_response.json.error.code | default(0) | int) == 0
   no_log: true
+
+- name: Fail with provider details when DNS record update did not complete
+  ansible.builtin.fail:
+    msg: >-
+      Hetzner DNS did not update {{ hetzner_dns_record_name }} {{ hetzner_dns_record_type }}
+      in zone {{ hetzner_dns_record_zone_name }} to value {{ hetzner_dns_record_value }}.
+      HTTP {{ hetzner_dns_record_update_response.status | default('unknown') }},
+      provider error {{ hetzner_dns_record_update_response.json.error.code | default('none') }}:
+      {{
+        hetzner_dns_record_update_response.json.error.message
+        | default('no provider message returned')
+      }}.
+      If this is the documented DNS Console brownout during migration, retry after
+      the brownout window or migrate the zone to Hetzner Console first.
+  when:
+    - hetzner_dns_record_state == 'present'
+    - dns_provider_boundary_matching_records | length == 1
+    - dns_provider_boundary_matching_records[0].record_value != hetzner_dns_record_value
+      or (dns_provider_boundary_matching_records[0].record_ttl | int) != (hetzner_dns_record_ttl | int)
+    - not (
+        hetzner_dns_record_update_response.status == 200
+        and (hetzner_dns_record_update_response.json.error.code | default(0) | int) == 0
+      )

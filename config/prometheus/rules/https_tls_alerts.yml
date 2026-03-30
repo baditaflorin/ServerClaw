@@ -276,6 +276,51 @@ groups:
           description: https://agents.lv3.org:443/healthz has less than 14 days remaining
             before certificate expiry.
           runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_directus_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="directus-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: directus
+          assurance_id: directus-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: directus-public HTTPS probe is failing.
+          description: https://data.lv3.org:443/server/health is no longer completing
+            a healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_directus_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="directus-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: directus
+          assurance_id: directus-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: directus-public TLS certificate is approaching expiry.
+          description: https://data.lv3.org:443/server/health has less than 21 days
+            remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_directus_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="directus-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: directus
+          assurance_id: directus-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: directus-public TLS certificate is within the critical expiry window.
+          description: https://data.lv3.org:443/server/health has less than 14 days
+            remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
       - alert: HTTPSProbeFailed_docker_build_public
         expr: probe_success{job="https-tls-blackbox",assurance_id="docker-build-public"}
           == 0

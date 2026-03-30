@@ -107,6 +107,24 @@
     policy_critical: '14'
     display_url: https://agents.lv3.org:443/healthz
 - targets:
+    - https://10.10.10.10:443/server/health
+  labels:
+    assurance_id: directus-public
+    service_id: directus
+    service_name: Directus
+    environment: production
+    scope: public
+    exposure: edge-published
+    auth_requirement: upstream_auth
+    probe_module: http_2xx_follow_redirects
+    probe_hostname: data.lv3.org
+    certificate_id: data-edge
+    expected_issuer: letsencrypt
+    policy_unit: days
+    policy_warn: '21'
+    policy_critical: '14'
+    display_url: https://data.lv3.org:443/server/health
+- targets:
     - https://10.10.10.10:443/
   labels:
     assurance_id: docker-build-public

@@ -1,0 +1,1 @@
+{"status": "ok", "collection": "service_registry", "service_name": "directus", "rest_items": 1, "graphql_items": 1}

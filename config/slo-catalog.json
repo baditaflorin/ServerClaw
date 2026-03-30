@@ -24,6 +24,16 @@
       "description": "The private Changedetection.io runtime remains reachable on docker-runtime-lv3 for governed upstream release, advisory, and API change monitoring."
     },
     {
+      "id": "directus-availability",
+      "service_id": "directus",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://data.lv3.org/server/health",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Directus should keep the public health contract on data.lv3.org reachable through the shared edge."
+    },
+    {
       "id": "dozzle-availability",
       "service_id": "dozzle",
       "indicator": "availability",
@@ -82,27 +92,6 @@
       "target_url": "https://registry.lv3.org/api/v2.0/ping",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Harbor remains reachable through the shared LV3 edge for image pulls, pushes, and operator access."
-    },
-    {
-      "id": "openfga-availability",
-      "service_id": "openfga",
-      "indicator": "availability",
-      "objective_percent": 99.5,
-      "window_days": 30,
-      "target_url": "http://100.64.0.1:8014/healthz",
-      "probe_module": "http_2xx_follow_redirects",
-      "description": "The private OpenFGA controller endpoint remains reachable for delegated authorization queries and bootstrap replay."
-    },
-    {
-      "id": "openfga-latency",
-      "service_id": "openfga",
-      "indicator": "latency",
-      "objective_percent": 95.0,
-      "window_days": 30,
-      "target_url": "http://100.64.0.1:8014/healthz",
-      "probe_module": "http_2xx_follow_redirects",
-      "latency_threshold_ms": 500,
-      "description": "The private OpenFGA controller endpoint responds in under 500ms for 95% of probes."
     },
     {
       "id": "homepage-availability",
@@ -176,16 +165,6 @@
       "description": "NetBox remains reachable for inventory, IPAM, and topology workflows."
     },
     {
-      "id": "nginx-edge-availability",
-      "service_id": "nginx_edge",
-      "indicator": "availability",
-      "objective_percent": 99.95,
-      "window_days": 30,
-      "target_url": "https://nginx.lv3.org",
-      "probe_module": "http_2xx_follow_redirects",
-      "description": "The edge reverse proxy remains reachable for published services."
-    },
-    {
       "id": "nextcloud-availability",
       "service_id": "nextcloud",
       "indicator": "availability",
@@ -194,6 +173,16 @@
       "target_url": "https://cloud.lv3.org/status.php",
       "probe_module": "http_2xx_follow_redirects",
       "description": "The public Nextcloud status endpoint remains reachable for the canonical personal file and DAV data plane."
+    },
+    {
+      "id": "nginx-edge-availability",
+      "service_id": "nginx_edge",
+      "indicator": "availability",
+      "objective_percent": 99.95,
+      "window_days": 30,
+      "target_url": "https://nginx.lv3.org",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The edge reverse proxy remains reachable for published services."
     },
     {
       "id": "open-webui-availability",
@@ -206,24 +195,25 @@
       "description": "Open WebUI remains reachable on the private runtime network."
     },
     {
-      "id": "plausible-availability",
-      "service_id": "plausible",
+      "id": "openfga-availability",
+      "service_id": "openfga",
       "indicator": "availability",
       "objective_percent": 99.5,
       "window_days": 30,
-      "target_url": "https://analytics.lv3.org/api/system/health/ready",
+      "target_url": "http://100.64.0.1:8014/healthz",
       "probe_module": "http_2xx_follow_redirects",
-      "description": "The public Plausible readiness endpoint remains reachable for dashboard access, tracker delivery, and synthetic event verification."
+      "description": "The private OpenFGA controller endpoint remains reachable for delegated authorization queries and bootstrap replay."
     },
     {
-      "id": "serverclaw-availability",
-      "service_id": "serverclaw",
-      "indicator": "availability",
-      "objective_percent": 99.0,
+      "id": "openfga-latency",
+      "service_id": "openfga",
+      "indicator": "latency",
+      "objective_percent": 95.0,
       "window_days": 30,
-      "target_url": "https://chat.lv3.org",
+      "target_url": "http://100.64.0.1:8014/healthz",
       "probe_module": "http_2xx_follow_redirects",
-      "description": "ServerClaw remains reachable through the public LV3 edge for chat-first assistant access."
+      "latency_threshold_ms": 500,
+      "description": "The private OpenFGA controller endpoint responds in under 500ms for 95% of probes."
     },
     {
       "id": "outline-availability",
@@ -256,6 +246,16 @@
       "description": "The platform context API remains reachable for agent-assisted operator workflows."
     },
     {
+      "id": "plausible-availability",
+      "service_id": "plausible",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://analytics.lv3.org/api/system/health/ready",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The public Plausible readiness endpoint remains reachable for dashboard access, tracker delivery, and synthetic event verification."
+    },
+    {
       "id": "realtime-availability",
       "service_id": "realtime",
       "indicator": "availability",
@@ -274,6 +274,16 @@
       "target_url": "http://10.10.10.20:3004/api/ping",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Semaphore stays reachable for private Ansible job launches and API-based task inspection."
+    },
+    {
+      "id": "serverclaw-availability",
+      "service_id": "serverclaw",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "https://chat.lv3.org",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "ServerClaw remains reachable through the public LV3 edge for chat-first assistant access."
     },
     {
       "id": "status-page-availability",

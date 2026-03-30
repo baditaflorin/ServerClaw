@@ -62,6 +62,19 @@ def test_build_platform_vars_includes_changedetection_private_topology() -> None
     assert platform_vars["changedetection_port"] == 5000
 
 
+def test_build_platform_vars_includes_directus_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    directus = platform_vars["platform_service_topology"]["directus"]
+
+    assert directus["public_hostname"] == "data.lv3.org"
+    assert directus["dns"]["name"] == "data"
+    assert directus["ports"]["internal"] == 8055
+    assert directus["urls"]["public"] == "https://data.lv3.org"
+    assert directus["urls"]["internal"] == "http://10.10.10.20:8055"
+    assert directus["edge"]["upstream"] == directus["urls"]["internal"]
+    assert platform_vars["directus_port"] == 8055
+
+
 def test_build_platform_vars_includes_harbor_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     harbor = platform_vars["platform_service_topology"]["harbor"]

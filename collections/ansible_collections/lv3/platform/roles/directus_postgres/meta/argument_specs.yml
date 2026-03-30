@@ -1,0 +1,29 @@
+# Purpose: Describe the required PostgreSQL variables for Directus.
+# Use case: Run during syntax and role-argument validation before converging the Directus PostgreSQL backend.
+# Inputs: directus_* variables consumed by the PostgreSQL role and access-model tasks.
+# Outputs: Machine-readable argument specs for the directus_postgres role.
+# Idempotency: Fully idempotent because this file only validates role inputs.
+# Dependencies: ADR 0165, ADR 0042, and ADR 0289.
+---
+argument_specs:
+  main:
+    short_description: Converge the PostgreSQL backend and durable service token for Directus.
+    options:
+      directus_database_name:
+        type: str
+        required: true
+      directus_database_user:
+        type: str
+        required: true
+      directus_postgres_secret_dir:
+        type: path
+        required: true
+      directus_postgres_password_file:
+        type: path
+        required: true
+      directus_database_password_local_file:
+        type: path
+        required: true
+      directus_service_registry_token_local_file:
+        type: path
+        required: true

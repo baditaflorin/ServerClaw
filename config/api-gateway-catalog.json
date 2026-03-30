@@ -3,17 +3,6 @@
   "schema_version": "1.0.0",
   "services": [
     {
-      "id": "dozzle",
-      "name": "Dozzle",
-      "upstream": "http://10.10.10.20:8089",
-      "gateway_prefix": "/v1/dozzle",
-      "auth": "keycloak_jwt",
-      "required_role": "platform-operator",
-      "strip_prefix": true,
-      "timeout_seconds": 60,
-      "healthcheck_path": "/healthcheck"
-    },
-    {
       "id": "browser_runner",
       "name": "Browser Runner",
       "upstream": "http://10.10.10.20:8096",
@@ -35,6 +24,17 @@
       "strip_prefix": true,
       "timeout_seconds": 60,
       "healthcheck_path": "/"
+    },
+    {
+      "id": "dozzle",
+      "name": "Dozzle",
+      "upstream": "http://10.10.10.20:8089",
+      "gateway_prefix": "/v1/dozzle",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 60,
+      "healthcheck_path": "/healthcheck"
     },
     {
       "id": "gitea",
@@ -158,17 +158,6 @@
       "healthcheck_path": "/health"
     },
     {
-      "id": "serverclaw",
-      "name": "ServerClaw",
-      "upstream": "http://10.10.10.70:8096",
-      "gateway_prefix": "/v1/serverclaw",
-      "auth": "keycloak_jwt",
-      "required_role": "platform-read",
-      "strip_prefix": true,
-      "timeout_seconds": 30,
-      "healthcheck_path": "/"
-    },
-    {
       "id": "openbao",
       "name": "OpenBao",
       "upstream": "https://10.10.10.20:8200",
@@ -267,6 +256,17 @@
       "strip_prefix": true,
       "timeout_seconds": 30,
       "healthcheck_path": "/api/ping"
+    },
+    {
+      "id": "serverclaw",
+      "name": "ServerClaw",
+      "upstream": "http://10.10.10.70:8096",
+      "gateway_prefix": "/v1/serverclaw",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-read",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/"
     },
     {
       "id": "uptime_kuma",

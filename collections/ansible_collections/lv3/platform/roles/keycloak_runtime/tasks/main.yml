@@ -661,6 +661,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_realm_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_realm_reconcile is succeeded
 
     - name: Ensure the Keycloak realm groups exist
       community.general.keycloak_group:
@@ -893,6 +897,46 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
 
+    - name: Ensure the Directus OAuth client exists
+      community.general.keycloak_client:
+        realm: "{{ keycloak_realm_name }}"
+        client_id: "{{ keycloak_directus_client_id }}"
+        name: Directus
+        description: Repo-managed OIDC client for the Directus data API and operator studio.
+        enabled: true
+        protocol: openid-connect
+        public_client: false
+        client_authenticator_type: client-secret
+        standard_flow_enabled: true
+        implicit_flow_enabled: false
+        direct_access_grants_enabled: false
+        service_accounts_enabled: false
+        full_scope_allowed: false
+        root_url: "{{ keycloak_directus_root_url }}"
+        base_url: "{{ keycloak_directus_root_url }}"
+        admin_url: "{{ keycloak_directus_root_url }}"
+        redirect_uris:
+          - "{{ keycloak_directus_root_url }}/auth/login/keycloak/callback"
+        web_origins:
+          - "{{ keycloak_directus_root_url }}"
+        protocol_mappers:
+          - name: groups
+            protocol: openid-connect
+            protocolMapper: oidc-group-membership-mapper
+            config:
+              claim.name: groups
+              full.path: "true"
+              id.token.claim: "true"
+              access.token.claim: "true"
+              userinfo.token.claim: "true"
+        state: present
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+
     - name: Ensure the Outline OAuth client exists
       community.general.keycloak_client:
         realm: "{{ keycloak_realm_name }}"
@@ -1079,6 +1123,9 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
       register: keycloak_grafana_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_grafana_client_secret_info is succeeded
       no_log: true
 
     - name: Read the operations portal client secret
@@ -1092,6 +1139,9 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
       register: keycloak_ops_portal_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_ops_portal_client_secret_info is succeeded
       no_log: true
 
     - name: Read the Gitea client secret
@@ -1105,6 +1155,9 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
       register: keycloak_gitea_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_gitea_client_secret_info is succeeded
       no_log: true
 
     - name: Read the agent client secret
@@ -1118,6 +1171,9 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
       register: keycloak_agent_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_agent_client_secret_info is succeeded
       no_log: true
 
     - name: Read the Langfuse client secret
@@ -1131,6 +1187,25 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
       register: keycloak_langfuse_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_langfuse_client_secret_info is succeeded
+      no_log: true
+
+    - name: Read the Directus client secret
+      community.general.keycloak_clientsecret_info:
+        realm: "{{ keycloak_realm_name }}"
+        client_id: "{{ keycloak_directus_client_id }}"
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+      register: keycloak_directus_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_directus_client_secret_info is succeeded
       no_log: true
 
     - name: Read the Outline client secret
@@ -1144,6 +1219,9 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
       register: keycloak_outline_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_outline_client_secret_info is succeeded
       no_log: true
 
     - name: Read the ServerClaw client secret
@@ -1157,6 +1235,9 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
       register: keycloak_serverclaw_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_serverclaw_client_secret_info is succeeded
       no_log: true
 
     - name: Read the API gateway client secret
@@ -1170,6 +1251,9 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
       register: keycloak_api_gateway_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_api_gateway_client_secret_info is succeeded
       no_log: true
 
     - name: Read the ServerClaw runtime client secret
@@ -1195,6 +1279,7 @@
     keycloak_gitea_client_secret: "{{ keycloak_gitea_client_secret_info.clientsecret_info.value }}"
     keycloak_agent_client_secret: "{{ keycloak_agent_client_secret_info.clientsecret_info.value }}"
     keycloak_langfuse_client_secret: "{{ keycloak_langfuse_client_secret_info.clientsecret_info.value }}"
+    keycloak_directus_client_secret: "{{ keycloak_directus_client_secret_info.clientsecret_info.value }}"
     keycloak_outline_client_secret: "{{ keycloak_outline_client_secret_info.clientsecret_info.value }}"
     keycloak_serverclaw_client_secret: "{{ keycloak_serverclaw_client_secret_info.clientsecret_info.value }}"
     keycloak_api_gateway_client_secret: "{{ keycloak_api_gateway_client_secret_info.clientsecret_info.value }}"
@@ -1241,6 +1326,15 @@
   ansible.builtin.copy:
     dest: "{{ keycloak_langfuse_client_secret_local_file }}"
     content: "{{ keycloak_langfuse_client_secret }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror the Directus client secret to the control machine
+  ansible.builtin.copy:
+    dest: "{{ keycloak_directus_client_secret_local_file }}"
+    content: "{{ keycloak_directus_client_secret }}\n"
     mode: "0600"
   delegate_to: localhost
   become: false

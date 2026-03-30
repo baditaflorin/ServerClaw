@@ -165,23 +165,6 @@
       "notes": "Shared public applications ingress published through the NGINX edge with wildcard alias coverage for Coolify-managed applications."
     },
     {
-      "fqdn": "chat.lv3.org",
-      "service_id": "serverclaw",
-      "environment": "production",
-      "status": "active",
-      "exposure": "edge-published",
-      "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
-      "target_port": 443,
-      "owner_adr": "0254",
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
-      },
-      "notes": "ServerClaw is published through the shared NGINX edge and delegates browser authentication to its in-app Keycloak OIDC flow."
-    },
-    {
       "fqdn": "build.lv3.org",
       "service_id": "docker_build",
       "environment": "production",
@@ -213,6 +196,40 @@
         "auto_renew": true
       },
       "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+    },
+    {
+      "fqdn": "chat.lv3.org",
+      "service_id": "serverclaw",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0254",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "ServerClaw is published through the shared NGINX edge and delegates browser authentication to its in-app Keycloak OIDC flow."
+    },
+    {
+      "fqdn": "cloud.lv3.org",
+      "service_id": "nextcloud",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0260",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge while Nextcloud itself enforces browser and DAV authentication plus .well-known DAV discovery redirects."
     },
     {
       "fqdn": "coolify.lv3.org",
@@ -452,23 +469,6 @@
         "auto_renew": true
       },
       "notes": "Published as an informational HTTPS surface on the shared edge while the live mail service itself is reached over SMTP submission and IMAPS."
-    },
-    {
-      "fqdn": "cloud.lv3.org",
-      "service_id": "nextcloud",
-      "environment": "production",
-      "status": "active",
-      "exposure": "edge-published",
-      "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
-      "target_port": 443,
-      "owner_adr": "0260",
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
-      },
-      "notes": "Published through the shared NGINX edge while Nextcloud itself enforces browser and DAV authentication plus .well-known DAV discovery redirects."
     },
     {
       "fqdn": "matrix.lv3.org",
@@ -752,6 +752,23 @@
         "auto_renew": true
       },
       "notes": "Published through the shared NGINX edge while Outline itself delegates browser authentication to the repo-managed Keycloak OIDC client."
+    },
+    {
+      "fqdn": "data.lv3.org",
+      "service_id": "directus",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0289",
+      "tls": {
+        "provider": "letsencrypt",
+        "auto_renew": true,
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/"
+      },
+      "notes": "The shared NGINX edge publishes data.lv3.org directly to Directus. Browser users authenticate upstream through Keycloak and API consumers authenticate with Directus-issued bearer tokens."
     }
   ]
 }

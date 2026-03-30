@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "directus_runtime",
+  "image_ref": "docker.io/directus/directus:11.17.0@sha256:072dcba19d51b588b9e9495450d9f9789f2a5a1fefdc5729870954f28ec1c500",
+  "scanner": "trivy",
+  "scanner_image": "local/trivy:0.69.3",
+  "scanned_on": "2026-03-30",
+  "summary": {
+    "critical": 2,
+    "high": 42
+  },
+  "targets_with_findings": [
+    {
+      "target": "docker.io/directus/directus:11.17.0@sha256:072dcba19d51b588b9e9495450d9f9789f2a5a1fefdc5729870954f28ec1c500 (alpine 3.23.3)",
+      "class": "os-pkgs",
+      "type": "alpine",
+      "critical": 0,
+      "high": 1
+    },
+    {
+      "target": "Node.js",
+      "class": "lang-pkgs",
+      "type": "node-pkg",
+      "critical": 0,
+      "high": 31
+    },
+    {
+      "target": "directus/node_modules/.pnpm/@esbuild+linux-x64@0.25.12/node_modules/@esbuild/linux-x64/bin/esbuild",
+      "class": "lang-pkgs",
+      "type": "gobinary",
+      "critical": 1,
+      "high": 5
+    },
+    {
+      "target": "directus/node_modules/.pnpm/@esbuild+linux-x64@0.26.0/node_modules/@esbuild/linux-x64/bin/esbuild",
+      "class": "lang-pkgs",
+      "type": "gobinary",
+      "critical": 1,
+      "high": 5
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-30-directus-runtime.trivy.json"
+}

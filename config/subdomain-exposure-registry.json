@@ -681,6 +681,78 @@
       "notes": "Coolify dashboard published through the shared authenticated NGINX edge with the private controller API proxied on the management tailnet."
     },
     {
+      "fqdn": "data.lv3.org",
+      "service_id": "directus",
+      "environment": "production",
+      "status": "active",
+      "owner_adr": "0289",
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "upstream-auth",
+        "audience": "operator"
+      },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "upstream_auth",
+        "route_target": {
+          "service_id": "directus",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.directus_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "directus",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "noindex": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.directus_port }}"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "auto_renew": true,
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/"
+        }
+      },
+      "live_tracking_expected": true,
+      "notes": "The shared NGINX edge publishes data.lv3.org directly to Directus. Browser users authenticate upstream through Keycloak and API consumers authenticate with Directus-issued bearer tokens."
+    },
+    {
       "fqdn": "database.lv3.org",
       "service_id": "postgres",
       "environment": "production",
@@ -2823,12 +2895,12 @@
     }
   ],
   "summary": {
-    "catalog_total": 39,
-    "active_total": 35,
-    "active_public_total": 31,
+    "catalog_total": 40,
+    "active_total": 36,
+    "active_public_total": 32,
     "active_private_total": 4,
     "planned_total": 4,
-    "shared_edge_total": 30,
+    "shared_edge_total": 31,
     "platform_sso_total": 14
   }
 }

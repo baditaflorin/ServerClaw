@@ -1,0 +1,56 @@
+# Purpose: Describe the required runtime variables for the Directus stack.
+# Use case: Run during syntax and role-argument validation before converging Directus.
+# Inputs: directus_* variables consumed by the runtime tasks and templates.
+# Outputs: Machine-readable argument specs for the directus_runtime role.
+# Idempotency: Fully idempotent because this file only validates role inputs.
+# Dependencies: ADR 0165, ADR 0063, ADR 0077, and ADR 0289.
+---
+argument_specs:
+  main:
+    short_description: Converge the Directus runtime, schema bootstrap, and public verification path.
+    options:
+      directus_site_dir:
+        type: path
+        required: true
+      directus_secret_dir:
+        type: path
+        required: true
+      directus_compose_file:
+        type: path
+        required: true
+      directus_env_file:
+        type: path
+        required: true
+      directus_image:
+        type: str
+        required: true
+      directus_internal_port:
+        type: int
+        required: true
+      directus_internal_base_url:
+        type: str
+        required: true
+      directus_public_base_url:
+        type: str
+        required: true
+      directus_database_host:
+        type: str
+        required: true
+      directus_database_name:
+        type: str
+        required: true
+      directus_database_user:
+        type: str
+        required: true
+      directus_database_password_local_file:
+        type: path
+        required: true
+      directus_keycloak_client_secret_local_file:
+        type: path
+        required: true
+      directus_admin_password_local_file:
+        type: path
+        required: true
+      directus_service_registry_token_local_file:
+        type: path
+        required: true

@@ -6353,6 +6353,74 @@
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
       }
+    },
+    "converge-directus": {
+      "description": "Deploy the Directus PostgreSQL backend, runtime, Keycloak client, and public edge publication, then verify REST, GraphQL, and OIDC access end to end.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-directus",
+        "command": "make converge-directus"
+      },
+      "preflight": {
+        "required": true,
+        "bootstrap_manifest_ids": [
+          "shared-edge-generated-portals"
+        ],
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "directus_database_password",
+          "directus_key",
+          "directus_secret",
+          "directus_admin_password",
+          "directus_service_registry_token",
+          "keycloak_directus_client_secret"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-directus"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-directus.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/directus.yml",
+        "playbooks/services/directus.yml",
+        "roles/directus_postgres",
+        "roles/directus_runtime",
+        "roles/keycloak_runtime",
+        "scripts/directus_bootstrap.py",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/image-catalog.json",
+        "config/subdomain-catalog.json",
+        "config/command-catalog.json",
+        "config/workflow-catalog.json"
+      ],
+      "outputs": [
+        "A published Directus runtime on data.lv3.org backed by the dedicated directus PostgreSQL database, a repo-managed Keycloak client, a governed service_registry collection, and durable REST plus GraphQL verification credentials."
+      ],
+      "verification_commands": [
+        "make syntax-check-directus",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/directus/docker-compose.yml ps && curl -fsS http://127.0.0.1:8055/server/health'",
+        "curl -fsS https://data.lv3.org/server/health",
+        "python3 scripts/directus_bootstrap.py verify-public --base-url https://data.lv3.org --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/directus/service-registry-token.txt --collection service_registry --expected-service-name directus --expected-sso-host sso.lv3.org"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 280,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 2,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     }
   }
 }

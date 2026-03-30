@@ -1,9 +1,10 @@
 # ADR 0289: Directus As The REST And GraphQL Data API Layer Over Postgres
 
 - Status: Accepted
-- Implementation Status: Not Implemented
+- Implementation Status: Live applied
 - Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implemented In Platform Version: 0.130.71
+- Implemented On: 2026-03-30
 - Date: 2026-03-29
 
 ## Context
@@ -40,30 +41,32 @@ service-specific application.
 
 - Directus runs as a Docker Compose service on the docker-runtime VM using
   the official `directus/directus` image
-- Authentication is delegated to Keycloak via OIDC (ADR 0063); local
-  Directus accounts are disabled except for the break-glass admin account
-  whose password is stored in OpenBao (ADR 0077)
+- Authentication is delegated to Keycloak via OIDC (ADR 0063) for routine
+  browser use; a local Directus admin account remains available strictly as
+  a break-glass recovery path and its password is stored through the
+  controller-local/OpenBao-backed secret flow (ADR 0077)
 - The service is published under the platform subdomain model (ADR 0021) at
   `data.<domain>`; the REST API is at `data.<domain>/items/` and the GraphQL
   endpoint at `data.<domain>/graphql`
 - Directus connects to the shared PostgreSQL cluster (ADR 0042) using a
-  dedicated read-write role scoped to the `directus` schema; it does not
-  have DDL permissions outside that schema
-- All Directus configuration (roles, permissions, webhooks, flows) is
-  exported to a JSON snapshot via the Schema/Snapshot API and committed to
-  the Ansible role; the snapshot is applied idempotently on converge
+  dedicated read-write role and a dedicated `directus` database; Directus
+  does not receive DDL access outside that database boundary
+- The repo-managed converge path bootstraps governed collections through the
+  Directus REST API and seeds the access model with deterministic SQL. The
+  upstream Schema/Snapshot API is used only for data-model introspection and
+  not as the sole source of truth for roles or permissions
 - Secrets (database credentials, OIDC client credentials, secret key) are
   injected from OpenBao following ADR 0077
 
 ### API-first operation rules
 
-- New operational data sets are added by creating a PostgreSQL table in the
-  `directus` schema and running a Directus schema sync; Directus
-  auto-generates the REST and GraphQL endpoints without additional code
-- Collection permissions (who can read, create, update, delete which fields)
-  are managed via the Directus permissions REST API
-  (`PATCH /permissions/{id}`); permissions are declared in the Ansible role
-  defaults and applied by the seed task
+- New operational data sets are added through repo-managed Directus
+  collection bootstrap and, when required, explicit PostgreSQL changes inside
+  the dedicated `directus` database; Directus auto-generates the REST and
+  GraphQL endpoints without additional application code
+- Collection permissions, browser roles, and the durable service token are
+  declared in repo automation and applied by the seed task so the access
+  model stays reproducible without GUI-only steps
 - Windmill and n8n workflows interact with operational data exclusively
   through the Directus REST or GraphQL API using scoped API tokens stored
   in OpenBao; direct PostgreSQL connections from automation scripts are
@@ -75,9 +78,10 @@ service-specific application.
 
 ### Data governance rules
 
-- the `directus` PostgreSQL schema is the exclusive home of operational
-  data sets managed by Directus; application-specific tables live in their
-  service's own schema
+- the dedicated `directus` PostgreSQL database is the exclusive home of
+  operational data sets managed by Directus; with the current upstream
+  Directus release, both system tables and governed collections live in that
+  database's `public` schema
 - all Directus-managed tables include `created_at`, `updated_at`, and
   `created_by` audit columns managed by Directus automatically
 - the OpenAPI specification at `/server/specs/oas` is fetched during CI and
@@ -88,12 +92,14 @@ service-specific application.
 
 **Positive**
 
-- Any PostgreSQL table in the `directus` schema becomes an authenticated,
-  rate-limited HTTP endpoint in minutes with no application code written.
+- Any governed collection in the dedicated `directus` database becomes an
+  authenticated, rate-limited HTTP endpoint in minutes with no application
+  code written.
 - Windmill and n8n workflows have a consistent, predictable REST API for
   operational data regardless of which table they query.
-- The schema snapshot in the Ansible role means Directus configuration is
-  fully reproducible after a fresh deploy; no manual GUI steps are required.
+- The bootstrap-and-seed converge path keeps the governed collection schema
+  and access model reproducible after a fresh deploy; no manual GUI steps are
+  required for the supported collection contract.
 - Directus field-level permissions allow read-only API tokens to be issued
   for specific collections without exposing unrelated data sets.
 
@@ -102,6 +108,10 @@ service-specific application.
 - Directus adds a layer of indirection over PostgreSQL; complex joins and
   aggregations that are natural in SQL require either a PostgreSQL view or
   a GraphQL query with nested relations, which may be less intuitive.
+- Upstream Directus does not currently isolate its system state in a separate
+  PostgreSQL schema, so the repo must enforce isolation at the dedicated
+  database boundary instead of at the schema boundary imagined in the first
+  draft of this ADR.
 - The auto-generated OpenAPI spec is verbose; consumers should import it
   into a client generator rather than reading it manually.
 

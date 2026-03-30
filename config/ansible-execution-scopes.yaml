@@ -92,6 +92,12 @@ playbooks:
     shared_surfaces:
       - service:changedetection
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/directus.yml:
+    playbook_id: directus
+    mutation_scope: platform
+    shared_surfaces:
+      - service:directus
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/gotenberg.yml:
     playbook_id: gotenberg
     mutation_scope: host

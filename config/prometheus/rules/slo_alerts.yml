@@ -85,6 +85,46 @@ groups:
             docker-runtime-lv3 for governed upstream release, advisory, and API change
             monitoring.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_directus_availability
+        expr: (slo:directus_availability:error_rate_5m > (14 * 0.005000)) and (slo:directus_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: directus
+          slo_id: directus-availability
+          indicator: availability
+        annotations:
+          summary: directus-availability is burning its error budget at 14x
+          description: Directus should keep the public health contract on data.lv3.org
+            reachable through the shared edge.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_directus_availability
+        expr: slo:directus_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: directus
+          slo_id: directus-availability
+          indicator: availability
+        annotations:
+          summary: directus-availability is burning its error budget at 3x
+          description: Directus should keep the public health contract on data.lv3.org
+            reachable through the shared edge.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_directus_availability
+        expr: slo:directus_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: directus
+          slo_id: directus-availability
+          indicator: availability
+        annotations:
+          summary: directus-availability has less than 10% error budget remaining
+          description: Directus should keep the public health contract on data.lv3.org
+            reachable through the shared edge.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_dozzle_availability
         expr: (slo:dozzle_availability:error_rate_5m > (14 * 0.010000)) and (slo:dozzle_availability:error_rate_1h
           > (14 * 0.010000))
@@ -321,86 +361,6 @@ groups:
           summary: harbor-availability has less than 10% error budget remaining
           description: Harbor remains reachable through the shared LV3 edge for image
             pulls, pushes, and operator access.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOFastBurn_openfga_availability
-        expr: (slo:openfga_availability:error_rate_5m > (14 * 0.005000)) and (slo:openfga_availability:error_rate_1h
-          > (14 * 0.005000))
-        for: 2m
-        labels:
-          severity: critical
-          service_id: openfga
-          slo_id: openfga-availability
-          indicator: availability
-        annotations:
-          summary: openfga-availability is burning its error budget at 14x
-          description: The private OpenFGA controller endpoint remains reachable for
-            delegated authorization queries and bootstrap replay.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOSlowBurn_openfga_availability
-        expr: slo:openfga_availability:error_rate_1h > (3 * 0.005000)
-        for: 60m
-        labels:
-          severity: warning
-          service_id: openfga
-          slo_id: openfga-availability
-          indicator: availability
-        annotations:
-          summary: openfga-availability is burning its error budget at 3x
-          description: The private OpenFGA controller endpoint remains reachable for
-            delegated authorization queries and bootstrap replay.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOBudgetCritical_openfga_availability
-        expr: slo:openfga_availability:budget_remaining < 0.10
-        for: 10m
-        labels:
-          severity: critical
-          service_id: openfga
-          slo_id: openfga-availability
-          indicator: availability
-        annotations:
-          summary: openfga-availability has less than 10% error budget remaining
-          description: The private OpenFGA controller endpoint remains reachable for
-            delegated authorization queries and bootstrap replay.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOFastBurn_openfga_latency
-        expr: (slo:openfga_latency:error_rate_5m > (14 * 0.050000)) and (slo:openfga_latency:error_rate_1h
-          > (14 * 0.050000))
-        for: 2m
-        labels:
-          severity: critical
-          service_id: openfga
-          slo_id: openfga-latency
-          indicator: latency
-        annotations:
-          summary: openfga-latency is burning its error budget at 14x
-          description: The private OpenFGA controller endpoint responds in under 500ms
-            for 95% of probes.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOSlowBurn_openfga_latency
-        expr: slo:openfga_latency:error_rate_1h > (3 * 0.050000)
-        for: 60m
-        labels:
-          severity: warning
-          service_id: openfga
-          slo_id: openfga-latency
-          indicator: latency
-        annotations:
-          summary: openfga-latency is burning its error budget at 3x
-          description: The private OpenFGA controller endpoint responds in under 500ms
-            for 95% of probes.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOBudgetCritical_openfga_latency
-        expr: slo:openfga_latency:budget_remaining < 0.10
-        for: 10m
-        labels:
-          severity: critical
-          service_id: openfga
-          slo_id: openfga-latency
-          indicator: latency
-        annotations:
-          summary: openfga-latency has less than 10% error budget remaining
-          description: The private OpenFGA controller endpoint responds in under 500ms
-            for 95% of probes.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_homepage_availability
         expr: (slo:homepage_availability:error_rate_5m > (14 * 0.005000)) and (slo:homepage_availability:error_rate_1h
@@ -679,43 +639,6 @@ groups:
           description: NetBox remains reachable for inventory, IPAM, and topology
             workflows.
           runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOFastBurn_nginx_edge_availability
-        expr: (slo:nginx_edge_availability:error_rate_5m > (14 * 0.000500)) and (slo:nginx_edge_availability:error_rate_1h
-          > (14 * 0.000500))
-        for: 2m
-        labels:
-          severity: critical
-          service_id: nginx_edge
-          slo_id: nginx-edge-availability
-          indicator: availability
-        annotations:
-          summary: nginx-edge-availability is burning its error budget at 14x
-          description: The edge reverse proxy remains reachable for published services.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOSlowBurn_nginx_edge_availability
-        expr: slo:nginx_edge_availability:error_rate_1h > (3 * 0.000500)
-        for: 60m
-        labels:
-          severity: warning
-          service_id: nginx_edge
-          slo_id: nginx-edge-availability
-          indicator: availability
-        annotations:
-          summary: nginx-edge-availability is burning its error budget at 3x
-          description: The edge reverse proxy remains reachable for published services.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOBudgetCritical_nginx_edge_availability
-        expr: slo:nginx_edge_availability:budget_remaining < 0.10
-        for: 10m
-        labels:
-          severity: critical
-          service_id: nginx_edge
-          slo_id: nginx-edge-availability
-          indicator: availability
-        annotations:
-          summary: nginx-edge-availability has less than 10% error budget remaining
-          description: The edge reverse proxy remains reachable for published services.
-          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_nextcloud_availability
         expr: (slo:nextcloud_availability:error_rate_5m > (14 * 0.005000)) and (slo:nextcloud_availability:error_rate_1h
           > (14 * 0.005000))
@@ -756,6 +679,43 @@ groups:
           description: The public Nextcloud status endpoint remains reachable for
             the canonical personal file and DAV data plane.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_nginx_edge_availability
+        expr: (slo:nginx_edge_availability:error_rate_5m > (14 * 0.000500)) and (slo:nginx_edge_availability:error_rate_1h
+          > (14 * 0.000500))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: nginx_edge
+          slo_id: nginx-edge-availability
+          indicator: availability
+        annotations:
+          summary: nginx-edge-availability is burning its error budget at 14x
+          description: The edge reverse proxy remains reachable for published services.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_nginx_edge_availability
+        expr: slo:nginx_edge_availability:error_rate_1h > (3 * 0.000500)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: nginx_edge
+          slo_id: nginx-edge-availability
+          indicator: availability
+        annotations:
+          summary: nginx-edge-availability is burning its error budget at 3x
+          description: The edge reverse proxy remains reachable for published services.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_nginx_edge_availability
+        expr: slo:nginx_edge_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: nginx_edge
+          slo_id: nginx-edge-availability
+          indicator: availability
+        annotations:
+          summary: nginx-edge-availability has less than 10% error budget remaining
+          description: The edge reverse proxy remains reachable for published services.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_open_webui_availability
         expr: (slo:open_webui_availability:error_rate_5m > (14 * 0.010000)) and (slo:open_webui_availability:error_rate_1h
           > (14 * 0.010000))
@@ -793,85 +753,85 @@ groups:
           summary: open-webui-availability has less than 10% error budget remaining
           description: Open WebUI remains reachable on the private runtime network.
           runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOFastBurn_plausible_availability
-        expr: (slo:plausible_availability:error_rate_5m > (14 * 0.005000)) and (slo:plausible_availability:error_rate_1h
+      - alert: SLOFastBurn_openfga_availability
+        expr: (slo:openfga_availability:error_rate_5m > (14 * 0.005000)) and (slo:openfga_availability:error_rate_1h
           > (14 * 0.005000))
         for: 2m
         labels:
           severity: critical
-          service_id: plausible
-          slo_id: plausible-availability
+          service_id: openfga
+          slo_id: openfga-availability
           indicator: availability
         annotations:
-          summary: plausible-availability is burning its error budget at 14x
-          description: The public Plausible readiness endpoint remains reachable for
-            dashboard access, tracker delivery, and synthetic event verification.
+          summary: openfga-availability is burning its error budget at 14x
+          description: The private OpenFGA controller endpoint remains reachable for
+            delegated authorization queries and bootstrap replay.
           runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOSlowBurn_plausible_availability
-        expr: slo:plausible_availability:error_rate_1h > (3 * 0.005000)
+      - alert: SLOSlowBurn_openfga_availability
+        expr: slo:openfga_availability:error_rate_1h > (3 * 0.005000)
         for: 60m
         labels:
           severity: warning
-          service_id: plausible
-          slo_id: plausible-availability
+          service_id: openfga
+          slo_id: openfga-availability
           indicator: availability
         annotations:
-          summary: plausible-availability is burning its error budget at 3x
-          description: The public Plausible readiness endpoint remains reachable for
-            dashboard access, tracker delivery, and synthetic event verification.
+          summary: openfga-availability is burning its error budget at 3x
+          description: The private OpenFGA controller endpoint remains reachable for
+            delegated authorization queries and bootstrap replay.
           runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOBudgetCritical_plausible_availability
-        expr: slo:plausible_availability:budget_remaining < 0.10
+      - alert: SLOBudgetCritical_openfga_availability
+        expr: slo:openfga_availability:budget_remaining < 0.10
         for: 10m
         labels:
           severity: critical
-          service_id: plausible
-          slo_id: plausible-availability
+          service_id: openfga
+          slo_id: openfga-availability
           indicator: availability
         annotations:
-          summary: plausible-availability has less than 10% error budget remaining
-          description: The public Plausible readiness endpoint remains reachable for
-            dashboard access, tracker delivery, and synthetic event verification.
+          summary: openfga-availability has less than 10% error budget remaining
+          description: The private OpenFGA controller endpoint remains reachable for
+            delegated authorization queries and bootstrap replay.
           runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOFastBurn_serverclaw_availability
-        expr: (slo:serverclaw_availability:error_rate_5m > (14 * 0.010000)) and (slo:serverclaw_availability:error_rate_1h
-          > (14 * 0.010000))
+      - alert: SLOFastBurn_openfga_latency
+        expr: (slo:openfga_latency:error_rate_5m > (14 * 0.050000)) and (slo:openfga_latency:error_rate_1h
+          > (14 * 0.050000))
         for: 2m
         labels:
           severity: critical
-          service_id: serverclaw
-          slo_id: serverclaw-availability
-          indicator: availability
+          service_id: openfga
+          slo_id: openfga-latency
+          indicator: latency
         annotations:
-          summary: serverclaw-availability is burning its error budget at 14x
-          description: ServerClaw remains reachable through the public LV3 edge for
-            chat-first assistant access.
+          summary: openfga-latency is burning its error budget at 14x
+          description: The private OpenFGA controller endpoint responds in under 500ms
+            for 95% of probes.
           runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOSlowBurn_serverclaw_availability
-        expr: slo:serverclaw_availability:error_rate_1h > (3 * 0.010000)
+      - alert: SLOSlowBurn_openfga_latency
+        expr: slo:openfga_latency:error_rate_1h > (3 * 0.050000)
         for: 60m
         labels:
           severity: warning
-          service_id: serverclaw
-          slo_id: serverclaw-availability
-          indicator: availability
+          service_id: openfga
+          slo_id: openfga-latency
+          indicator: latency
         annotations:
-          summary: serverclaw-availability is burning its error budget at 3x
-          description: ServerClaw remains reachable through the public LV3 edge for
-            chat-first assistant access.
+          summary: openfga-latency is burning its error budget at 3x
+          description: The private OpenFGA controller endpoint responds in under 500ms
+            for 95% of probes.
           runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOBudgetCritical_serverclaw_availability
-        expr: slo:serverclaw_availability:budget_remaining < 0.10
+      - alert: SLOBudgetCritical_openfga_latency
+        expr: slo:openfga_latency:budget_remaining < 0.10
         for: 10m
         labels:
           severity: critical
-          service_id: serverclaw
-          slo_id: serverclaw-availability
-          indicator: availability
+          service_id: openfga
+          slo_id: openfga-latency
+          indicator: latency
         annotations:
-          summary: serverclaw-availability has less than 10% error budget remaining
-          description: ServerClaw remains reachable through the public LV3 edge for
-            chat-first assistant access.
+          summary: openfga-latency has less than 10% error budget remaining
+          description: The private OpenFGA controller endpoint responds in under 500ms
+            for 95% of probes.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_outline_availability
         expr: (slo:outline_availability:error_rate_5m > (14 * 0.005000)) and (slo:outline_availability:error_rate_1h
@@ -996,6 +956,46 @@ groups:
           description: The platform context API remains reachable for agent-assisted
             operator workflows.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_plausible_availability
+        expr: (slo:plausible_availability:error_rate_5m > (14 * 0.005000)) and (slo:plausible_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: plausible
+          slo_id: plausible-availability
+          indicator: availability
+        annotations:
+          summary: plausible-availability is burning its error budget at 14x
+          description: The public Plausible readiness endpoint remains reachable for
+            dashboard access, tracker delivery, and synthetic event verification.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_plausible_availability
+        expr: slo:plausible_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: plausible
+          slo_id: plausible-availability
+          indicator: availability
+        annotations:
+          summary: plausible-availability is burning its error budget at 3x
+          description: The public Plausible readiness endpoint remains reachable for
+            dashboard access, tracker delivery, and synthetic event verification.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_plausible_availability
+        expr: slo:plausible_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: plausible
+          slo_id: plausible-availability
+          indicator: availability
+        annotations:
+          summary: plausible-availability has less than 10% error budget remaining
+          description: The public Plausible readiness endpoint remains reachable for
+            dashboard access, tracker delivery, and synthetic event verification.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_realtime_availability
         expr: (slo:realtime_availability:error_rate_5m > (14 * 0.010000)) and (slo:realtime_availability:error_rate_1h
           > (14 * 0.010000))
@@ -1075,6 +1075,46 @@ groups:
           summary: semaphore-availability has less than 10% error budget remaining
           description: Semaphore stays reachable for private Ansible job launches
             and API-based task inspection.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_serverclaw_availability
+        expr: (slo:serverclaw_availability:error_rate_5m > (14 * 0.010000)) and (slo:serverclaw_availability:error_rate_1h
+          > (14 * 0.010000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: serverclaw
+          slo_id: serverclaw-availability
+          indicator: availability
+        annotations:
+          summary: serverclaw-availability is burning its error budget at 14x
+          description: ServerClaw remains reachable through the public LV3 edge for
+            chat-first assistant access.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_serverclaw_availability
+        expr: slo:serverclaw_availability:error_rate_1h > (3 * 0.010000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: serverclaw
+          slo_id: serverclaw-availability
+          indicator: availability
+        annotations:
+          summary: serverclaw-availability is burning its error budget at 3x
+          description: ServerClaw remains reachable through the public LV3 edge for
+            chat-first assistant access.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_serverclaw_availability
+        expr: slo:serverclaw_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: serverclaw
+          slo_id: serverclaw-availability
+          indicator: availability
+        annotations:
+          summary: serverclaw-availability has less than 10% error budget remaining
+          description: ServerClaw remains reachable through the public LV3 edge for
+            chat-first assistant access.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_status_page_availability
         expr: (slo:status_page_availability:error_rate_5m > (14 * 0.001000)) and (slo:status_page_availability:error_rate_1h

@@ -65,6 +65,7 @@ platform_port_assignments:
   changedetection_port: 5000
   browser_runner_port: 8096
   outline_port: 3006
+  directus_port: 8055
   plane_port: 8093
   plane_host_proxy_port: 8011
   dozzle_http_port: 8089
@@ -574,10 +575,11 @@ network_policy:
           ports:
             - 3007
             - 3008
+            - 8055
             - 8881
             - 9998
             - 11434
-          description: Private guest-to-guest document rendering, extraction, OCR, and agent API traffic
+          description: Private guest-to-guest document rendering, extraction, OCR, agent API, and governed data API traffic
         - source: host
           protocol: tcp
           ports:
@@ -590,20 +592,22 @@ network_policy:
             - 3007
             - 3008
             - 5000
+            - 8055
             - 8881
             - 9998
             - 11434
-          description: Local Docker workloads that use the private Gotenberg, Tika, Tesseract OCR, Changedetection, Ollama, and SearXNG APIs
+          description: Local Docker workloads that use the private Gotenberg, Tika, Tesseract OCR, Changedetection, Directus, Ollama, and SearXNG APIs
         - source: 192.168.0.0/16
           protocol: tcp
           ports:
             - 3007
             - 3008
             - 5000
+            - 8055
             - 8881
             - 9998
             - 11434
-          description: Local Docker workloads that use the private Gotenberg, Tika, Tesseract OCR, Changedetection, Ollama, and SearXNG APIs
+          description: Local Docker workloads that use the private Gotenberg, Tika, Tesseract OCR, Changedetection, Directus, Ollama, and SearXNG APIs
         - source: docker-build-lv3
           protocol: tcp
           ports:
@@ -2016,3 +2020,25 @@ lv3_service_topology:
     observability:
       guest_dashboard: false
       service_telemetry: false
+  directus:
+    service_name: directus
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: data.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: data
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.directus_port }}"
