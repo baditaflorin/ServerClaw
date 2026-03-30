@@ -49,9 +49,9 @@ def test_openbao_runtime_defaults_use_postgres_primary_address() -> None:
     assert "postgres_ha.initial_primary" in defaults
     assert "ansible_host" in defaults
     assert "@{{ openbao_postgres_host }}:5432/postgres?sslmode=disable" in defaults
-    assert 'CREATE ROLE "{{name}}" WITH LOGIN PASSWORD \'{{password}}\' VALID UNTIL \'{{expiration}}\';' in defaults
-    assert 'GRANT pg_read_all_data TO "{{name}}";' in defaults
-    assert 'DROP ROLE IF EXISTS "{{name}}";' in defaults
+    assert 'CREATE ROLE "{{ name }}" WITH LOGIN PASSWORD \'{{ password }}\' VALID UNTIL \'{{ expiration }}\';' in defaults
+    assert 'GRANT pg_read_all_data TO "{{ name }}";' in defaults
+    assert 'DROP ROLE IF EXISTS "{{ name }}";' in defaults
 
 
 def test_generated_platform_vars_pin_openbao_to_postgres_primary_ip() -> None:
