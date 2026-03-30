@@ -2647,7 +2647,7 @@ workstreams:
   - id: ws-0261-live-apply
     adr: "0261"
     title: Live apply private Playwright browser runners for governed web action and extraction
-    status: ready_for_merge
+    status: live_applied
     owner: codex
     branch: codex/ws-0261-main-finish
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish
@@ -2809,6 +2809,80 @@ workstreams:
       included_in_repo_version: 0.177.95
       latest_receipts:
         browser_runner: 2026-03-30-adr-0261-playwright-browser-runners-live-apply
+  - id: ws-0261-main-integration
+    adr: "0261"
+    title: Integrate ADR 0261 and ADR 0262 exact-main replay onto current origin/main
+    status: ready_for_merge
+    owner: codex
+    branch: codex/ws-0261-main-promote
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-promote
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0261-main-integration.md
+    depends_on:
+      - ws-0261-live-apply
+      - ws-0262-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0261-main-integration.md
+      - docs/workstreams/ws-0261-live-apply.md
+      - docs/workstreams/ws-0262-live-apply.md
+      - docs/adr/0261-playwright-browser-runners-for-serverclaw-web-action-and-extraction.md
+      - docs/adr/0262-openfga-and-keycloak-for-delegated-serverclaw-capability-authorization.md
+      - docs/adr/.index.yaml
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.95.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - Makefile
+      - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/**
+      - config/*
+      - docs/*
+      - inventory/*
+      - platform/*
+      - playbooks/*
+      - receipts/*
+      - requirements/*
+      - scripts/*
+      - tests/*
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: adr_0261_main_integration
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - Makefile
+            - build/*
+            - collections/ansible_collections/lv3/platform/*
+            - config/*
+            - docs/*
+            - inventory/*
+            - platform/*
+            - playbooks/*
+            - receipts/*
+            - requirements/*
+            - scripts/*
+            - tests/*
+            - versions/*
+          mode: shared_contract
+          contract: latest-main-integration-v1
+    ready_to_merge: true
+    live_applied: false
   - id: ws-0252-live-apply
     adr: "0252"
     title: Live apply ADR 0252 route and DNS publication assertion ledger

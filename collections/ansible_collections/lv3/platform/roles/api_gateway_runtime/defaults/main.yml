@@ -222,6 +222,9 @@ api_gateway_keycloak_verify_token_retries: 18
 api_gateway_keycloak_verify_token_delay: 5
 api_gateway_keycloak_docker_network: keycloak_default
 api_gateway_runtime_config_probe_path: /app/config/ledger-event-types.yaml
+api_gateway_runtime_packaged_probe_paths:
+  - /app/.gitea/workflows/release-bundle.yml
+  - /app/.github/workflows/validate.yml
 api_gateway_database_name: windmill
 api_gateway_database_user: windmill_admin
 api_gateway_database_inventory_host: >-

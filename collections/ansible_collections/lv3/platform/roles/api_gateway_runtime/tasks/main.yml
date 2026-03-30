@@ -220,6 +220,7 @@
       COPY packer ./packer
       COPY platform ./platform
       COPY playbooks ./playbooks
+      COPY receipts ./receipts
       COPY requirements ./requirements
       COPY roles ./roles
       COPY scripts ./scripts
@@ -401,6 +402,38 @@
   failed_when: false
   when: api_gateway_network_mode != 'host'
 
+- name: Inspect the built API gateway image id
+  ansible.builtin.command:
+    argv:
+      - docker
+      - image
+      - inspect
+      - "{{ api_gateway_image_name }}:latest"
+      - --format
+      - "{{ '{{.Id}}' }}"
+  register: api_gateway_built_image_id
+  changed_when: false
+
+- name: Inspect the running API gateway container image id
+  ansible.builtin.command:
+    argv:
+      - docker
+      - inspect
+      - "{{ api_gateway_container_name }}"
+      - --format
+      - "{{ '{{.Image}}' }}"
+  register: api_gateway_running_container_image_id
+  changed_when: false
+  failed_when: false
+
+- name: Record whether the API gateway container image drifted from the freshly built image
+  ansible.builtin.set_fact:
+    api_gateway_container_image_drifted: >-
+      {{
+        api_gateway_running_container_image_id.rc != 0
+        or (api_gateway_running_container_image_id.stdout | trim) != (api_gateway_built_image_id.stdout | trim)
+      }}
+
 - name: Check whether the API gateway container sees the runtime config bundle
   ansible.builtin.command:
     argv:
@@ -414,7 +447,21 @@
   changed_when: false
   failed_when: false
 
-- name: Force recreate the API gateway when the published host port is missing or the config bind is stale
+- name: Check whether the API gateway container sees the packaged runtime probes
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ api_gateway_container_name }}"
+      - test
+      - -f
+      - "{{ item }}"
+  loop: "{{ api_gateway_runtime_packaged_probe_paths }}"
+  register: api_gateway_runtime_packaged_probes
+  changed_when: false
+  failed_when: false
+
+- name: Force recreate the API gateway when the built image drifted or runtime probes are stale
   ansible.builtin.command:
     argv:
       - docker
@@ -436,6 +483,64 @@
         and api_gateway_published_port.stdout | trim == ""
       )
       or api_gateway_runtime_config_probe.rc != 0
+      or api_gateway_container_image_drifted
+      or (
+        api_gateway_runtime_packaged_probes.results
+        | selectattr('rc', 'ne', 0)
+        | list
+        | length
+      ) > 0
+
+- name: Re-check whether the API gateway container sees the runtime config bundle after startup recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ api_gateway_container_name }}"
+      - test
+      - -f
+      - "{{ api_gateway_runtime_config_probe_path }}"
+  register: api_gateway_runtime_config_probe_after_recovery
+  changed_when: false
+  failed_when: false
+
+- name: Re-check whether the API gateway container sees the packaged runtime probes after startup recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ api_gateway_container_name }}"
+      - test
+      - -f
+      - "{{ item }}"
+  loop: "{{ api_gateway_runtime_packaged_probe_paths }}"
+  register: api_gateway_runtime_packaged_probes_after_recovery
+  changed_when: false
+  failed_when: false
+
+- name: Fail when the API gateway runtime still misses required packaged content after recovery
+  ansible.builtin.fail:
+    msg: >-
+      API gateway runtime recovery left required files unavailable:
+      config={{ api_gateway_runtime_config_probe_path if api_gateway_runtime_config_probe_after_recovery.rc != 0 else 'ok' }};
+      packaged={{
+        (
+          api_gateway_runtime_packaged_probes_after_recovery.results
+          | selectattr('rc', 'ne', 0)
+          | map(attribute='item')
+          | list
+          | join(', ')
+        )
+        or 'ok'
+      }}
+  when:
+    - api_gateway_runtime_config_probe_after_recovery.rc != 0
+      or (
+        api_gateway_runtime_packaged_probes_after_recovery.results
+        | selectattr('rc', 'ne', 0)
+        | list
+        | length
+      ) > 0
 
 - name: Verify the API gateway runtime
   ansible.builtin.meta: reset_connection

@@ -100,6 +100,9 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "dest: runtime-assurance-matrix.json" in defaults
     assert "api_gateway_environment_topology_src" in defaults
     assert "dest: environment-topology.json" in defaults
+    assert "api_gateway_runtime_packaged_probe_paths" in defaults
+    assert "/app/.gitea/workflows/release-bundle.yml" in defaults
+    assert "/app/.github/workflows/validate.yml" in defaults
     assert "api_gateway_database_name: windmill" in defaults
     assert "api_gateway_database_user: windmill_admin" in defaults
     assert "api_gateway_windmill_service_topology" in defaults
@@ -216,10 +219,17 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "Sync the staged repo trees required by the API gateway runtime" in tasks
     assert "Ensure nested parent directories for managed API gateway source files exist" in tasks
     assert "ansible.builtin.include_tasks: sync_tree.yml" in tasks
+    assert "Inspect the built API gateway image id" in tasks
+    assert "Inspect the running API gateway container image id" in tasks
+    assert "api_gateway_container_image_drifted" in tasks
     assert "Derive a per-run guest archive path for {{ api_gateway_tree_sync_spec.name }}" in sync_tree_tasks
     assert "api_gateway_tree_remote_archive_path" in sync_tree_tasks
     assert "(api_gateway_tree_archive_local.path | basename)" in sync_tree_tasks
     assert 'dest: "{{ api_gateway_tree_remote_archive_path }}"' in sync_tree_tasks
+    assert "COPYFILE_DISABLE=1" in sync_tree_tasks
+    assert "COPY_EXTENDED_ATTRIBUTES_DISABLE=1" in sync_tree_tasks
+    assert 'apple_double="{{ api_gateway_tree_sync_spec.dest_parent }}/._{{ api_gateway_tree_sync_spec.source | basename }}"' in sync_tree_tasks
+    assert "api_gateway_tree_remove_destination" in sync_tree_tasks
     assert 'tar --no-same-owner --no-same-permissions \\' in sync_tree_tasks
     assert "Remove stale API gateway build-context ignore files" in tasks
     assert "{{ api_gateway_service_dir }}/.dockerignore" in tasks
@@ -233,6 +243,9 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "mktemp -d /tmp/api-gateway-build." in tasks
     assert 'DOCKER_BUILDKIT=0 docker build --pull=false -t "{{ api_gateway_image_name }}:latest"' in tasks
     assert "Check whether the API gateway container sees the runtime config bundle" in tasks
+    assert "Check whether the API gateway container sees the packaged runtime probes" in tasks
+    assert "Re-check whether the API gateway container sees the packaged runtime probes after startup recovery" in tasks
+    assert "Fail when the API gateway runtime still misses required packaged content after recovery" in tasks
     assert "database not open" in tasks
     assert "api_gateway_docker_builder_database_missing" in tasks
     assert "api_gateway_docker_recoverable_start_failure" in tasks
@@ -276,6 +289,7 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "COPY molecule ./molecule" in tasks
     assert "COPY packer ./packer" in tasks
     assert "COPY playbooks ./playbooks" in tasks
+    assert "COPY receipts ./receipts" in tasks
     assert "COPY requirements ./requirements" in tasks
     assert "COPY roles ./roles" in tasks
     assert "COPY scripts ./scripts" in tasks
