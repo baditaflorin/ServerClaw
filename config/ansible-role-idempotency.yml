@@ -19,6 +19,9 @@ roles:
   build_server:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  browser_runner_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   cert_renewal_timer:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.

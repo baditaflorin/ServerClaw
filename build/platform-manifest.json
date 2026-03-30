@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.95",
+  "repo_version": "0.177.96",
   "platform_version": "0.130.63",
-  "generated_at": "2026-03-30T04:32:17Z",
-  "next_refresh_at": "2026-03-30T05:32:17Z",
+  "generated_at": "2026-03-30T04:39:39Z",
+  "next_refresh_at": "2026-03-30T05:39:39Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4781,10 +4781,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.94",
+    "last_version": "0.177.95",
     "deployed_at": "2026-03-30",
-    "summary": "implements ADR 0261 by publishing the private browser-runner runtime, the governed operator gateway route, and the Dify-compatible browser-run-session tool with packaged-runtime-safe config resolution and verified smoke artifacts implements ADR 0262 by deploying the OpenFGA delegated authorization runtime, the ServerClaw bootstrap contracts, the repo-managed Keycloak runtime clients, and the API gateway registration for delegated authorization checks",
-    "release_notes_url": "docs/release-notes/0.177.95.md"
+    "summary": "integrates ADR 0282 into main by replaying Mailpit as the private development SMTP interceptor and the non-production SMTP contract onto the merged 0.177.95 / 0.130.63 baseline, preserving the exact-main Mailpit verification from docker-runtime-lv3 and monitoring-lv3 without advancing platform_version again",
+    "release_notes_url": "docs/release-notes/0.177.96.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
