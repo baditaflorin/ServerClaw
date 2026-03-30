@@ -49,11 +49,27 @@
   changed_when: false
   no_log: true
 
+- name: Verify the Changedetection tags endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ changedetection_runtime_port }}/api/v1/tags"
+    method: GET
+    headers:
+      x-api-key: "{{ changedetection_runtime_api_token }}"
+    status_code: 200
+    return_content: true
+    timeout: 30
+  register: changedetection_runtime_tags
+  retries: 12
+  delay: 2
+  until: changedetection_runtime_tags.status == 200
+  changed_when: false
+  no_log: true
+
 - name: Assert the Changedetection watch catalogue is loaded
   ansible.builtin.assert:
     that:
       - changedetection_runtime_systeminfo.json.watch_count == (changedetection_runtime_watches | length)
-      - changedetection_runtime_systeminfo.json.tag_count == (changedetection_runtime_watch_groups | length)
+      - changedetection_runtime_tags.json | length == (changedetection_runtime_watch_groups | length)
     fail_msg: "Changedetection did not load the repo-managed watch catalogue as expected."
   no_log: true
 

@@ -43,4 +43,5 @@ def test_service_catalogs_capture_changedetection_runtime_contract() -> None:
     assert service["health_probe_id"] == "changedetection"
     assert service["image_catalog_ids"] == ["changedetection_runtime"]
     assert probe["verify_file"] == "roles/changedetection_runtime/tasks/verify.yml"
+    assert "/api/v1/tags" in probe["readiness"]["argv"][2]
     assert probe["uptime_kuma"]["enabled"] is False

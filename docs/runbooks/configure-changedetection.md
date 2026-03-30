@@ -64,14 +64,25 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   'docker compose --file /opt/changedetection/docker-compose.yml ps && docker volume inspect changedetection-datastore >/dev/null'
 ```
 
-Verify the local system info endpoint with the mirrored API token:
+Verify the local system info and tag catalogue endpoints with the mirrored API token:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -J ops@100.64.0.1 \
   ops@10.10.10.20 \
-  'curl -fsS http://127.0.0.1:5000/api/v1/systeminfo -H "x-api-key: $(sudo cat /etc/lv3/changedetection/api-token)"'
+  'python3 - <<'\''PY'\''
+import json, urllib.request
+key = open("/etc/lv3/changedetection/api-token", encoding="utf-8").read().strip()
+for path in ("/api/v1/systeminfo", "/api/v1/tags"):
+    req = urllib.request.Request(f"http://127.0.0.1:5000{path}", headers={"x-api-key": key})
+    with urllib.request.urlopen(req, timeout=30) as response:
+        payload = json.load(response)
+    if path.endswith("systeminfo"):
+        print(json.dumps({"watch_count": payload["watch_count"], "version": payload["version"]}, sort_keys=True))
+    else:
+        print(json.dumps({"tag_count": len(payload), "tag_titles": sorted(item["title"] for item in payload.values())}, sort_keys=True))
+PY'
 ```
 
 Verify the drift-free sync report written by the post-converge check:

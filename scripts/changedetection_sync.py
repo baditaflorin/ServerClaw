@@ -138,7 +138,7 @@ def normalize_scalar(value: Any) -> Any:
     return value
 
 
-def normalize_subset(payload: dict[str, Any], fields: tuple[str, ...]) -> dict[str, Any]:
+def normalize_subset(payload: dict[str, Any], fields: tuple[str, ...] | list[str]) -> dict[str, Any]:
     normalized: dict[str, Any] = {}
     for field in fields:
         if field not in payload:
@@ -294,7 +294,8 @@ def sync_changedetection(
             uuid = client.create_tag(payload)
         else:
             current = client.get_tag(uuid)
-            if normalize_subset(current, TAG_FIELDS) != normalize_subset(payload, TAG_FIELDS):
+            comparison_fields = tuple(payload.keys())
+            if normalize_subset(current, comparison_fields) != normalize_subset(payload, comparison_fields):
                 actions.append(Action("tag", "update", tag_id, title))
                 if not check_only:
                     client.update_tag(uuid, payload)
@@ -319,7 +320,8 @@ def sync_changedetection(
                 client.create_watch(payload)
             continue
         current = client.get_watch(uuid)
-        if normalize_subset(current, WATCH_FIELDS) != normalize_subset(payload, WATCH_FIELDS):
+        comparison_fields = tuple(payload.keys())
+        if normalize_subset(current, comparison_fields) != normalize_subset(payload, comparison_fields):
             actions.append(Action("watch", "update", watch_id, url))
             if not check_only:
                 client.update_watch(uuid, payload)

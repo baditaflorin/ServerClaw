@@ -10,6 +10,7 @@ ROLE_VERIFY = REPO_ROOT / "roles" / "changedetection_runtime" / "tasks" / "verif
 ROLE_DEFAULTS = REPO_ROOT / "roles" / "changedetection_runtime" / "defaults" / "main.yml"
 ROLE_META = REPO_ROOT / "roles" / "changedetection_runtime" / "meta" / "argument_specs.yml"
 COMPOSE_TEMPLATE = REPO_ROOT / "roles" / "changedetection_runtime" / "templates" / "docker-compose.yml.j2"
+WATCH_CATALOG_TEMPLATE = REPO_ROOT / "roles" / "changedetection_runtime" / "templates" / "watch-catalog.json.j2"
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "changedetection.yml"
 SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "changedetection.yml"
 HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
@@ -53,15 +54,19 @@ def test_argument_spec_requires_watch_catalogue_and_notification_inputs() -> Non
 def test_main_tasks_deploy_sync_and_verify_changedetection() -> None:
     tasks = load_yaml(ROLE_TASKS)
     names = [task["name"] for task in tasks]
+    task_text = ROLE_TASKS.read_text(encoding="utf-8")
 
     assert "Build the desired Changedetection watch catalogue" in names
     assert "Consolidate the desired Changedetection watch catalogue" in names
+    assert "Decode Changedetection notification route inputs" in names
     assert "Build Changedetection notification URLs" in names
     assert "Persist the Changedetection watch catalogue" in names
     assert "Read the Changedetection API token from the datastore" in names
     assert "Mirror the Changedetection API token to the control machine" in names
     assert "Reconcile the Changedetection watch catalogue over the live API" in names
     assert "Verify Changedetection health probes" in names
+    assert "watch-catalog.json.j2" in task_text
+    assert "changedetection_runtime_desired_tags_json" not in task_text
 
 
 def test_verify_tasks_assert_watch_count_and_sync_idempotency() -> None:
@@ -69,6 +74,7 @@ def test_verify_tasks_assert_watch_count_and_sync_idempotency() -> None:
     names = [task["name"] for task in tasks]
 
     assert "Verify the Changedetection system info endpoint" in names
+    assert "Verify the Changedetection tags endpoint" in names
     assert "Assert the Changedetection watch catalogue is loaded" in names
     assert "Verify the Changedetection watch sync is idempotent" in names
     assert "Assert the Changedetection watch sync is drift-free" in names
@@ -82,6 +88,15 @@ def test_compose_template_uses_host_network_and_named_volume() -> None:
     assert "PORT:" in template
     assert "{{ changedetection_runtime_volume_name }}:/datastore" in template
     assert "volumes:" in template
+
+
+def test_watch_catalog_template_renders_notification_urls_into_json() -> None:
+    template = WATCH_CATALOG_TEMPLATE.read_text(encoding="utf-8")
+
+    assert '"schema_version": "1.0.0"' in template
+    assert "notification_urls" in template
+    assert "notification_muted" in template
+    assert "changedetection_runtime_notification_urls[group.notification_channel]" in template
 
 
 def test_playbook_converges_runtime_and_api_gateway_route() -> None:

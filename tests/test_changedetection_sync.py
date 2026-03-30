@@ -227,6 +227,55 @@ def test_sync_check_only_reports_drift_without_mutating() -> None:
     assert client.calls == []
 
 
+def test_sync_ignores_live_watch_defaults_not_declared_in_desired_state() -> None:
+    client = FakeClient(
+        tags={
+            "tag-1": {
+                "uuid": "tag-1",
+                "title": "upstream-releases",
+                "notification_urls": ["mmost://10.10.10.20:8065/token"],
+                "notification_muted": False,
+                "overrides_watch": True,
+            },
+            "tag-2": {
+                "uuid": "tag-2",
+                "title": "security-advisories",
+                "notification_urls": ["ntfy://alertmanager:secret@10.10.10.20:2586/platform-alerts?priority=high"],
+                "notification_muted": False,
+                "overrides_watch": True,
+            },
+        },
+        watches={
+            "watch-1": {
+                "uuid": "watch-1",
+                "url": "https://github.com/coollabsio/coolify/releases.atom",
+                "title": "Coolify Releases",
+                "tags": ["tag-1"],
+                "paused": False,
+                "time_between_check_use_default": False,
+                "time_between_check": {"hours": 6, "days": 0, "weeks": 0, "minutes": 0, "seconds": 0},
+                "method": "GET",
+                "fetch_backend": "system",
+                "headers": {},
+                "body": None,
+                "notification_urls": [],
+                "notification_title": None,
+                "notification_body": None,
+            }
+        },
+    )
+
+    report = changedetection_sync.sync_changedetection(
+        client=client,
+        desired_state=desired_state(),
+        check_only=True,
+    )
+
+    assert report["changed"] is False
+    assert report["summary"]["watches_updated"] == 0
+    assert client.calls == []
+
+
 def test_main_reads_api_key_file_and_writes_report(tmp_path: Path) -> None:
     desired_file = tmp_path / "desired.json"
     api_key_file = tmp_path / "api-key.txt"

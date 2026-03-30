@@ -2602,7 +2602,7 @@
         "argv": [
           "/bin/bash",
           "-lc",
-          "set -euo pipefail; token=$(cat /etc/lv3/changedetection/api-token); curl -fsS http://127.0.0.1:5000/api/v1/systeminfo -H \"x-api-key: ${token}\" | python3 -c 'import json,sys; payload=json.load(sys.stdin); assert payload[\"watch_count\"] >= 1 and payload[\"tag_count\"] >= 1'"
+        "set -euo pipefail; token=$(cat /etc/lv3/changedetection/api-token); systeminfo=$(mktemp); tags=$(mktemp); trap 'rm -f \"${systeminfo}\" \"${tags}\"' EXIT; curl -fsS http://127.0.0.1:5000/api/v1/systeminfo -H \"x-api-key: ${token}\" > \"${systeminfo}\"; curl -fsS http://127.0.0.1:5000/api/v1/tags -H \"x-api-key: ${token}\" > \"${tags}\"; python3 -c 'import json, pathlib, sys; payload=json.loads(pathlib.Path(sys.argv[1]).read_text()); tags=json.loads(pathlib.Path(sys.argv[2]).read_text()); assert payload[\"watch_count\"] >= 1 and len(tags) >= 1' \"${systeminfo}\" \"${tags}\""
         ],
         "success_rc": 0
       },

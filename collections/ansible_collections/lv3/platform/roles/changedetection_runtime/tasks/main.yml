@@ -66,10 +66,14 @@
   register: changedetection_runtime_mattermost_manifest_raw
   no_log: true
 
-- name: Build Changedetection notification URLs
+- name: Decode Changedetection notification route inputs
   ansible.builtin.set_fact:
     changedetection_runtime_ntfy_password: "{{ changedetection_runtime_ntfy_password_raw.content | b64decode | trim }}"
     changedetection_runtime_mattermost_manifest: "{{ changedetection_runtime_mattermost_manifest_raw.content | b64decode | from_json }}"
+  no_log: true
+
+- name: Build Changedetection notification URLs
+  ansible.builtin.set_fact:
     changedetection_runtime_notification_urls:
       platform-ops: >-
         {{
@@ -101,23 +105,12 @@
 
 - name: Build the desired Changedetection watch catalogue
   ansible.builtin.set_fact:
-    changedetection_runtime_desired_tags_json: |-
-      [
-      {% for group in changedetection_runtime_watch_groups %}
-      {{ (group | combine({
-        'notification_urls': [changedetection_runtime_notification_urls[group.notification_channel]],
-        'notification_muted': false
-      })) | to_json }}{% if not loop.last %},{% endif %}
-      {% endfor %}
-      ]
+    changedetection_runtime_desired_state_json_rendered: "{{ lookup('ansible.builtin.template', 'watch-catalog.json.j2') }}"
   no_log: true
 
 - name: Consolidate the desired Changedetection watch catalogue
   ansible.builtin.set_fact:
-    changedetection_runtime_desired_state:
-      schema_version: "1.0.0"
-      tags: "{{ changedetection_runtime_desired_tags_json | from_json }}"
-      watches: "{{ changedetection_runtime_watches }}"
+    changedetection_runtime_desired_state_json: "{{ changedetection_runtime_desired_state_json_rendered | trim }}"
   no_log: true
 
 - name: Ensure Changedetection directories exist
@@ -136,7 +129,7 @@
 - name: Persist the Changedetection watch catalogue
   ansible.builtin.copy:
     dest: "{{ changedetection_runtime_watch_catalog_file }}"
-    content: "{{ changedetection_runtime_desired_state | to_nice_json }}\n"
+    content: "{{ changedetection_runtime_desired_state_json }}\n"
     owner: root
     group: root
     mode: "0600"
