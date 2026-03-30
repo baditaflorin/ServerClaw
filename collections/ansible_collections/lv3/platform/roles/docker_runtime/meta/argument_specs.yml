@@ -1,4 +1,25 @@
 ---
+# Purpose: Declare supported docker_runtime role inputs and validation metadata for managed Docker guests.
+# Use case: Evaluated by Ansible and repo validation when the docker_runtime role is invoked.
+#
+# Inputs (required):
+#   - docker_runtime_prereq_packages, docker_runtime_conflicting_packages, docker_runtime_engine_packages
+#   - docker_runtime_admin_users, docker_runtime_apt_key_url, docker_runtime_apt_keyring_path
+#   - docker_runtime_apt_repo_file, docker_runtime_apt_repo_uri
+#
+# Inputs (optional):
+#   - docker_runtime_* overrides for daemon config, bridge-chain timing, and publication assurance behavior.
+#
+# Outputs:
+#   - Argument validation rules for the docker_runtime role.
+#
+# Idempotency: Fully idempotent
+#              Argument specs define schema only and do not mutate host state.
+#
+# Dependencies:
+#   - ADR 0023: Docker runtime VM baseline.
+#   - ADR 0270: Docker publication self-healing and port-programming assertions.
+#   - Role: lv3.platform.docker_runtime - validated by this schema.
 argument_specs:
   main:
     short_description: Install and configure the Docker runtime on Debian guests.

@@ -90,6 +90,13 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - https://cloud.lv3.org/status.php
+  labels:
+    service_id: nextcloud
+    slo_id: nextcloud-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - http://10.10.10.20:8088
   labels:
     service_id: open_webui

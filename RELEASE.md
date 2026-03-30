@@ -3,10 +3,10 @@
 - Date: 2026-03-30
 
 ## Summary
-- implemented ADR 0270 by adding a shared Docker publication assurance helper, catalog-declared host publication contracts, post-verify repair hooks, read-only observation checks, and live-apply recovery hardening for Harbor, Keycloak, OpenBao, Outline, and Langfuse when Docker publication drift surfaced during replay
+- implemented ADR 0260 by re-verifying repo-managed Nextcloud on docker-runtime-lv3 with a dedicated postgres backend, shared-edge DAV publication, and synchronized recovery for stale compose networks, Docker bridge chains, detached local OpenBao publication, and concurrent Docker interruptions during mutable OCC convergence on the latest realistic origin/main baseline
 
 ## Platform Impact
-- after the exact-main ADR 0270 replay this release advances the live platform from 0.130.61 to 0.130.62 with Docker publication self-healing plus Harbor, Keycloak, OpenBao, Outline, and Langfuse recovery hardening verified on the merged mainline
+- platform version advances to 0.130.62 after the exact-main ADR 0260 replay; this release integrates the synchronized Nextcloud recovery hardening on top of the current 0.177.92 / 0.130.61 baseline.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

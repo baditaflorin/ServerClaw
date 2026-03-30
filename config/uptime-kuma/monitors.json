@@ -234,6 +234,19 @@
     ]
   },
   {
+    "name": "Nextcloud Public Status",
+    "type": "http",
+    "url": "https://cloud.lv3.org/status.php",
+    "description": "Public Nextcloud status endpoint published through the shared NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
     "name": "NetBox Private",
     "type": "http",
     "url": "http://10.10.10.20:8082/login/",

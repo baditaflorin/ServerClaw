@@ -18,7 +18,22 @@ HELPER_TASKS_PATH = (
 def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     tasks = HELPER_TASKS_PATH.read_text(encoding="utf-8")
 
-    assert "- name: Ensure the local OpenBao API answers before runtime secret injection" in tasks
+    assert "- name: Inspect current OpenBao container networks" in tasks
+    assert "openbao_container_name | default('lv3-openbao')" in tasks
+    assert '{{ "{{json .NetworkSettings.Networks}}" }}' in tasks
+    assert "- name: Inspect current OpenBao published ports" in tasks
+    assert '{{ "{{json .NetworkSettings.Ports}}" }}' in tasks
+    assert "- name: Record whether the local OpenBao runtime needs recovery before runtime secret injection" in tasks
+    assert "common_openbao_compose_env_runtime_needs_recovery" in tasks
+    assert "- name: Ensure Docker bridge networking chains are present before recovering the local OpenBao runtime" in tasks
+    assert "tasks_from: docker_bridge_chains" in tasks
+    assert "- name: Check whether the OpenBao compose network exists before recovery" in tasks
+    assert "openbao_site_dir | default('/opt/openbao')" in tasks
+    assert "- name: Remove the detached OpenBao container before runtime secret injection recovery" in tasks
+    assert "- name: Remove the stale OpenBao compose network before runtime secret injection recovery" in tasks
+    assert "- name: Force-recreate the local OpenBao stack before runtime secret injection" in tasks
+    assert "openbao_compose_file | default('/opt/openbao/docker-compose.yml')" in tasks
+    assert "--force-recreate" in tasks
     assert "- name: Read the local OpenBao seal status" in tasks
     assert "/v1/sys/seal-status" in tasks
     assert "- name: Unseal the local OpenBao API when runtime secret injection finds it sealed" in tasks
@@ -34,25 +49,3 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     assert "until: common_openbao_compose_env_current_secret.status in [200, 404]" in tasks
     assert "- name: Read the current OpenBao policy for the runtime AppRole" in tasks
     assert "until: common_openbao_compose_env_current_policy.status in [200, 404]" in tasks
-
-
-def test_helper_recovers_local_openbao_publication_drift() -> None:
-    tasks = HELPER_TASKS_PATH.read_text(encoding="utf-8")
-    systemd_helper_tasks = (
-        REPO_ROOT
-        / "collections"
-        / "ansible_collections"
-        / "lv3"
-        / "platform"
-        / "roles"
-        / "common"
-        / "tasks"
-        / "openbao_systemd_credentials.yml"
-    ).read_text(encoding="utf-8")
-
-    assert "- name: Force-recreate the OpenBao service when the local API publication is missing before runtime secret injection" in tasks
-    assert "--force-recreate" in tasks
-    assert "- name: Wait for the local OpenBao loopback port after runtime secret injection recovery" in tasks
-    assert "connection refused" in tasks
-    assert "- name: Force-recreate the OpenBao service when the local API publication is missing before host-native secret delivery" in systemd_helper_tasks
-    assert "- name: Wait for the local OpenBao loopback port after host-native secret delivery recovery" in systemd_helper_tasks

@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.93",
   "platform_version": "0.130.62",
-  "generated_at": "2026-03-30T00:59:51Z",
-  "next_refresh_at": "2026-03-30T01:59:51Z",
+  "generated_at": "2026-03-30T00:57:13Z",
+  "next_refresh_at": "2026-03-30T01:57:13Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -303,6 +303,18 @@
         "last_live_apply": "2026-03-30T00:00:00Z",
         "slo_status": "unknown"
       },
+      "nextcloud": {
+        "service_name": "Nextcloud",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://cloud.lv3.org",
+        "last_live_apply": "2026-03-30T00:00:00Z",
+        "slo_status": "unknown"
+      },
       "nginx_edge": {
         "service_name": "NGINX Edge",
         "status": "healthy",
@@ -324,7 +336,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:8013",
-        "last_live_apply": "2026-03-29T00:00:00Z"
+        "last_live_apply": "2026-03-30T00:00:00Z"
       },
       "ntfy": {
         "service_name": "ntfy",
@@ -1513,6 +1525,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-netbox.md"
+      },
+      {
+        "id": "converge-nextcloud",
+        "description": "Converge Nextcloud on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish cloud.lv3.org with DAV redirects and large-upload support.",
+        "tags": [
+          "converge-nextcloud",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 350,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-nextcloud.md"
       },
       {
         "id": "converge-nomad",
@@ -3847,6 +3885,16 @@
         ]
       },
       {
+        "id": "configure-nextcloud",
+        "title": "Configure Nextcloud",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-nextcloud.md",
+        "workflow_ids": [
+          "converge-nextcloud"
+        ]
+      },
+      {
         "id": "configure-nomad",
         "title": "Configure Nomad",
         "agent_trust_required": "T3",
@@ -4422,10 +4470,10 @@
     ],
     "capability_contracts": {
       "summary": {
-        "total": 6,
-        "selected": 6,
+        "total": 7,
+        "selected": 7,
         "contract_only": 0,
-        "export_ready": 6
+        "export_ready": 7
       },
       "items": [
         {
@@ -4480,6 +4528,24 @@
           "selection_notes": "Selected for self-hosted mesh coordination and controlled subnet routing into the private guest network.",
           "export_format_count": 3,
           "fallback_behaviour": "Existing private sessions may continue temporarily, but new enrollments or route changes pause until the replacement mesh control plane is ready.",
+          "failure_mode_count": 1
+        },
+        {
+          "id": "personal_data_plane",
+          "name": "Personal Data Plane",
+          "summary": "Provide durable user-owned personal files and DAV-backed calendar, contact, and task data through a replaceable standards-based contract rather than one SaaS provider API.",
+          "scope": "critical_shared_surface",
+          "owner": "platform-operations",
+          "review_cadence": "quarterly",
+          "selected_product": "Nextcloud",
+          "service_id": "nextcloud",
+          "service_name": "Nextcloud",
+          "service_url": "https://cloud.lv3.org",
+          "selection_adr": "0260",
+          "runbook": "docs/runbooks/configure-nextcloud.md",
+          "selection_notes": "Selected for self-hosted standards-based personal file and DAV data management with repo-managed runtime automation.",
+          "export_format_count": 3,
+          "fallback_behaviour": "Read-only maintenance is acceptable during migration if user data remains intact and exportable from the managed runtime.",
           "failure_mode_count": 1
         },
         {
@@ -4573,7 +4639,7 @@
   "recent_changes": {
     "last_version": "0.177.92",
     "deployed_at": "2026-03-30",
-    "summary": "implemented ADR 0270 by adding a shared Docker publication assurance helper, catalog-declared host publication contracts, post-verify repair hooks, read-only observation checks, and live-apply recovery hardening for Harbor, Keycloak, OpenBao, Outline, and Langfuse when Docker publication drift surfaced during replay",
+    "summary": "implemented ADR 0260 by re-verifying repo-managed Nextcloud on docker-runtime-lv3 with a dedicated postgres backend, shared-edge DAV publication, and synchronized recovery for stale compose networks, Docker bridge chains, detached local OpenBao publication, and concurrent Docker interruptions during mutable OCC convergence on the latest realistic origin/main baseline",
     "release_notes_url": "docs/release-notes/0.177.93.md"
   },
   "agentic_architecture": {

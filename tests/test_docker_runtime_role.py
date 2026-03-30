@@ -63,48 +63,17 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     defaults = load_defaults()
     task_names = {task["name"] for task in tasks}
     assert "Flush Docker handlers before chain health checks" in task_names
-    assert "Warm the Docker control socket before chain health checks" in task_names
-    assert "Check whether Docker nat chain exists" in task_names
-    assert "Check whether Docker forward chain exists" in task_names
-    assert "Wait briefly for Docker chains to recover after daemon activation" in task_names
-    assert "Restart Docker when required chains are missing" in task_names
-    info_ready = next(task for task in tasks if task["name"] == "Warm the Docker control socket before chain health checks")
-    chain_warmup = next(task for task in tasks if task["name"] == "Wait briefly for Docker chains to recover after daemon activation")
-    nat_recheck = next(task for task in tasks if task["name"] == "Recheck Docker nat chain after restart")
-    forward_recheck = next(task for task in tasks if task["name"] == "Recheck Docker forward chain after restart")
-    restart_task = next(task for task in tasks if task["name"] == "Restart Docker when required chains are missing")
+    assert "Ensure Docker bridge networking chains are present" in task_names
+    ensure_task = next(task for task in tasks if task["name"] == "Ensure Docker bridge networking chains are present")
+    include_role = ensure_task["ansible.builtin.include_role"]
+    assert include_role["name"] == "lv3.platform.common"
+    assert include_role["tasks_from"] == "docker_bridge_chains"
+    assert ensure_task["vars"]["common_docker_bridge_chains_service_name"] == "docker"
+    assert ensure_task["vars"]["common_docker_bridge_chains_require_nat_chain"] == "{{ docker_runtime_require_nat_chain }}"
     assert defaults["docker_runtime_chain_recheck_retries"] == 30
     assert defaults["docker_runtime_chain_recheck_delay_seconds"] == 2
-    assert info_ready["ansible.builtin.command"]["argv"] == [
-        "docker",
-        "info",
-        "--format",
-        "{{ '{{.ServerVersion}}' }}",
-    ]
-    assert info_ready["retries"] == "{{ docker_runtime_chain_recheck_retries }}"
-    assert info_ready["delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
-    assert info_ready["until"] == "docker_runtime_info_ready.rc == 0"
-    assert "iptables -t nat -S DOCKER" in chain_warmup["ansible.builtin.shell"]
-    assert "iptables -t filter -S DOCKER-FORWARD" in chain_warmup["ansible.builtin.shell"]
-    assert "sleep {{ docker_runtime_chain_recheck_delay_seconds }}" in chain_warmup["ansible.builtin.shell"]
-    assert chain_warmup["failed_when"] is False
-    assert any("docker_runtime_chain_warmup.rc != 0" in condition for condition in restart_task["when"])
-    assert nat_recheck["retries"] == "{{ docker_runtime_chain_recheck_retries }}"
-    assert nat_recheck["delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
-    assert nat_recheck["until"] == "docker_runtime_nat_chain_recheck.rc == 0"
-    assert forward_recheck["retries"] == "{{ docker_runtime_chain_recheck_retries }}"
-    assert forward_recheck["delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
-    assert forward_recheck["until"] == "docker_runtime_forward_chain_recheck.rc == 0"
-    nat_assert = next(task for task in tasks if task["name"] == "Assert Docker nat chain is present")
-    forward_assert = next(task for task in tasks if task["name"] == "Assert Docker filter forward chain is present")
-    assert nat_assert["ansible.builtin.command"] == "iptables -t nat -S DOCKER"
-    assert nat_assert["retries"] == 3
-    assert nat_assert["delay"] == 1
-    assert nat_assert["until"] == "docker_runtime_nat_chain_assert.rc == 0"
-    assert forward_assert["ansible.builtin.command"] == "iptables -t filter -S DOCKER-FORWARD"
-    assert forward_assert["retries"] == 3
-    assert forward_assert["delay"] == 1
-    assert forward_assert["until"] == "docker_runtime_forward_chain_assert.rc == 0"
+    assert ensure_task["vars"]["common_docker_bridge_chains_retries"] == "{{ docker_runtime_chain_recheck_retries }}"
+    assert ensure_task["vars"]["common_docker_bridge_chains_delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
 
 
 def test_docker_runtime_patches_nftables_rule_block_once() -> None:

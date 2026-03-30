@@ -135,6 +135,16 @@
       "description": "The edge reverse proxy remains reachable for published services."
     },
     {
+      "id": "nextcloud-availability",
+      "service_id": "nextcloud",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://cloud.lv3.org/status.php",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The public Nextcloud status endpoint remains reachable for the canonical personal file and DAV data plane."
+    },
+    {
       "id": "open-webui-availability",
       "service_id": "open_webui",
       "indicator": "availability",

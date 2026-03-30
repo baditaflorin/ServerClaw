@@ -53,89 +53,124 @@
     common_openbao_compose_env_init_payload: "{{ lookup('ansible.builtin.file', openbao_init_local_file) | from_json }}"
   no_log: true
 
-- name: Ensure the local OpenBao API answers before runtime secret injection
-  block:
-    - name: Wait for the local OpenBao API to answer
-      ansible.builtin.uri:
-        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"
-        method: GET
-        status_code:
-          - 200
-          - 429
-          - 472
-          - 473
-          - 501
-          - 503
-      register: common_openbao_compose_env_api_health
-      retries: 24
-      delay: 5
-      until: common_openbao_compose_env_api_health.status in [200, 429, 472, 473, 501, 503]
-      changed_when: false
-  rescue:
-    - name: Classify the local OpenBao API failure before runtime secret injection recovery
-      ansible.builtin.set_fact:
-        common_openbao_compose_env_api_retryable: >-
-          {{
-            (ansible_failed_result.status | default(0) | int) == -1
-            or 'connection refused' in (ansible_failed_result.msg | default('') | lower)
-            or 'failed to connect' in (ansible_failed_result.msg | default('') | lower)
-          }}
-      no_log: true
+- name: Inspect current OpenBao container networks
+  ansible.builtin.command:
+    argv:
+      - docker
+      - inspect
+      - "{{ openbao_container_name | default('lv3-openbao') }}"
+      - --format
+      - '{{ "{{json .NetworkSettings.Networks}}" }}'
+  register: common_openbao_compose_env_container_networks
+  changed_when: false
+  failed_when: common_openbao_compose_env_container_networks.rc not in [0, 1]
 
-    - name: Surface unexpected local OpenBao API failures before runtime secret injection
-      ansible.builtin.fail:
-        msg: >-
-          The local OpenBao API failed during runtime secret injection for
-          {{ common_openbao_compose_env_service_name }} and did not match a recoverable
-          local publication outage signature.
-      when: not common_openbao_compose_env_api_retryable | bool
+- name: Inspect current OpenBao published ports
+  ansible.builtin.command:
+    argv:
+      - docker
+      - inspect
+      - "{{ openbao_container_name | default('lv3-openbao') }}"
+      - --format
+      - '{{ "{{json .NetworkSettings.Ports}}" }}'
+  register: common_openbao_compose_env_container_ports
+  changed_when: false
+  failed_when: common_openbao_compose_env_container_ports.rc not in [0, 1]
 
-    - name: Force-recreate the OpenBao service when the local API publication is missing before runtime secret injection
-      ansible.builtin.command:
-        argv:
-          - docker
-          - compose
-          - --file
-          - "{{ openbao_site_dir }}/docker-compose.yml"
-          - up
-          - -d
-          - --force-recreate
-          - --remove-orphans
-          - openbao
-      args:
-        chdir: "{{ openbao_site_dir }}"
-      register: common_openbao_compose_env_openbao_recovery_up
-      changed_when: >-
-        'Creating' in common_openbao_compose_env_openbao_recovery_up.stdout
-        or 'Recreating' in common_openbao_compose_env_openbao_recovery_up.stdout
-        or 'Starting' in common_openbao_compose_env_openbao_recovery_up.stdout
-      when: common_openbao_compose_env_api_retryable | bool
+- name: Record whether the local OpenBao runtime needs recovery before runtime secret injection
+  ansible.builtin.set_fact:
+    common_openbao_compose_env_runtime_needs_recovery: >-
+      {{
+        common_openbao_compose_env_container_networks.rc != 0
+        or common_openbao_compose_env_container_ports.rc != 0
+        or (common_openbao_compose_env_container_networks.stdout | trim) in ['', '{}', 'null']
+        or (common_openbao_compose_env_container_ports.stdout | trim) in ['', '{}', 'null']
+        or ('"' ~ (openbao_http_port | string) ~ '/tcp"' not in common_openbao_compose_env_container_ports.stdout)
+      }}
 
-    - name: Wait for the local OpenBao loopback port after runtime secret injection recovery
-      ansible.builtin.wait_for:
-        host: 127.0.0.1
-        port: "{{ openbao_http_port }}"
-        delay: 0
-        timeout: 120
-      when: common_openbao_compose_env_api_retryable | bool
+- name: Ensure Docker bridge networking chains are present before recovering the local OpenBao runtime
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_bridge_chains
+  vars:
+    common_docker_bridge_chains_service_name: docker
+    common_docker_bridge_chains_require_nat_chain: true
+  when: common_openbao_compose_env_runtime_needs_recovery | bool
 
-    - name: Wait for the local OpenBao API to answer after runtime secret injection recovery
-      ansible.builtin.uri:
-        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"
-        method: GET
-        status_code:
-          - 200
-          - 429
-          - 472
-          - 473
-          - 501
-          - 503
-      register: common_openbao_compose_env_api_health
-      retries: 24
-      delay: 5
-      until: common_openbao_compose_env_api_health.status in [200, 429, 472, 473, 501, 503]
-      changed_when: false
-      when: common_openbao_compose_env_api_retryable | bool
+- name: Check whether the OpenBao compose network exists before recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - network
+      - inspect
+      - "{{ (openbao_site_dir | default('/opt/openbao')) | basename }}_default"
+  register: common_openbao_compose_env_network
+  changed_when: false
+  failed_when: common_openbao_compose_env_network.rc not in [0, 1]
+  when: common_openbao_compose_env_runtime_needs_recovery | bool
+
+- name: Remove the detached OpenBao container before runtime secret injection recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - rm
+      - -f
+      - "{{ openbao_container_name | default('lv3-openbao') }}"
+  register: common_openbao_compose_env_container_remove
+  changed_when: common_openbao_compose_env_container_remove.rc == 0
+  failed_when: common_openbao_compose_env_container_remove.rc not in [0, 1]
+  when: common_openbao_compose_env_runtime_needs_recovery | bool
+
+- name: Remove the stale OpenBao compose network before runtime secret injection recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - network
+      - rm
+      - "{{ (openbao_site_dir | default('/opt/openbao')) | basename }}_default"
+  register: common_openbao_compose_env_network_remove
+  changed_when: common_openbao_compose_env_network_remove.rc == 0
+  failed_when: common_openbao_compose_env_network_remove.rc not in [0, 1]
+  when:
+    - common_openbao_compose_env_runtime_needs_recovery | bool
+    - common_openbao_compose_env_network.rc == 0
+
+- name: Force-recreate the local OpenBao stack before runtime secret injection
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ openbao_compose_file | default('/opt/openbao/docker-compose.yml') }}"
+      - up
+      - -d
+      - --remove-orphans
+      - --force-recreate
+  args:
+    chdir: "{{ openbao_site_dir | default('/opt/openbao') }}"
+  register: common_openbao_compose_env_recovery_up
+  changed_when: >-
+    'Creating' in common_openbao_compose_env_recovery_up.stdout
+    or 'Recreating' in common_openbao_compose_env_recovery_up.stdout
+    or 'Starting' in common_openbao_compose_env_recovery_up.stdout
+  when: common_openbao_compose_env_runtime_needs_recovery | bool
+
+- name: Wait for the local OpenBao API to answer
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"
+    method: GET
+    status_code:
+      - 200
+      - 429
+      - 472
+      - 473
+      - 501
+      - 503
+  register: common_openbao_compose_env_api_health
+  retries: 24
+  delay: 5
+  until: common_openbao_compose_env_api_health.status in [200, 429, 472, 473, 501, 503]
+  changed_when: false
 
 - name: Read the local OpenBao seal status
   ansible.builtin.uri:

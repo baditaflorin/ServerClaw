@@ -1,4 +1,25 @@
 ---
+# Purpose: Execute the shared Docker publication assurance helper for a service-specific readiness contract.
+# Use case: Included by post-verify when a service declares readiness.docker_publication and must repair host publication before readiness is trusted.
+#
+# Inputs (required):
+#   - service_health_probe_id
+#   - playbook_execution_service_probe
+#   - playbook_execution_docker_publication_contract
+#
+# Inputs (optional):
+#   - playbook_execution_docker_publication_command (string, optional, default=/usr/local/bin/lv3-docker-publication-assurance)
+#
+# Outputs:
+#   - The publication assurance helper runs and records a structured result for downstream verification tasks.
+#
+# Idempotency: Fully idempotent
+#              Repairs only occur when the declared Docker publication contract is broken.
+#
+# Dependencies:
+#   - ADR 0246: Startup, readiness, and liveness semantics.
+#   - ADR 0270: Docker publication self-healing and port-programming assertions.
+#   - Script: scripts/docker_publication_assurance.py - remote publication recovery helper.
 - name: Assert the Docker publication contract is defined
   ansible.builtin.assert:
     that:

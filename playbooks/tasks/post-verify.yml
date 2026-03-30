@@ -1,4 +1,28 @@
 ---
+# Purpose: Run the shared startup, liveness, Docker publication repair, and readiness verification flow after a service converge.
+# Use case: Included by service playbooks after mutation tasks finish and the apply needs standardized health evidence.
+#
+# Inputs (required):
+#   - service_health_probe_id
+#   - playbook_execution_health_probe_catalog_path
+#   - playbook_execution_mutation_audit_script
+#   - playbook_execution_correlation_id
+#
+# Inputs (optional):
+#   - playbook_execution_emit_audit (bool, optional, default=true)
+#   - playbook_execution_post_verify_audit_action (string, optional, default=playbook.verify)
+#   - playbook_execution_audit_evidence_ref (string, optional)
+#
+# Outputs:
+#   - Service health probes executed in order, optional Docker publication recovery applied, and a best-effort completion audit emitted.
+#
+# Idempotency: Fully idempotent
+#              Verification is read-only except for delegated Docker publication recovery when the declared contract is broken.
+#
+# Dependencies:
+#   - ADR 0246: Startup, readiness, and liveness semantics.
+#   - ADR 0270: Docker publication self-healing and port-programming assertions.
+#   - Task file: playbooks/tasks/docker-publication-assert.yml - repairs Docker publication before readiness when required.
 - name: Load the health probe catalog
   ansible.builtin.set_fact:
     playbook_execution_health_probe_catalog: >-
