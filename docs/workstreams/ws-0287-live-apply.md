@@ -93,17 +93,18 @@
 
 ## Live Apply State
 
-- Latest realistic upstream is `origin/main` commit `32696e7e523f0f1cd0fd3168d9701790b54f66e`, which currently carries `VERSION` `0.177.109` and platform baseline `0.130.72`.
+- Latest realistic upstream is `origin/main` commit `456984e2ebfed2f7d154c16dc1f49be79731520e`, which currently carries `VERSION` `0.177.109` and platform baseline `0.130.72`.
 - The successful branch-local replay is recorded in `receipts/live-applies/evidence/2026-03-30-ws-0287-live-apply-r14.txt`.
 - The public edge role now falls back to a dedicated site-local certificate for `ci.lv3.org` when the shared `lv3-edge` certificate does not yet cover the Woodpecker hostname, so unrelated SAN churn on the shared edge certificate no longer blocks the live apply.
 - The controller-local Woodpecker API bundle is verified live: `whoami` resolves to `ops-gitea` admin user `id=1`, and the seeded repository secret list contains `LV3_WOODPECKER_SECRET_SMOKE`.
 - Manual `trigger-pipeline --branch main --wait` is not yet a valid exact-main verification on this branch because `origin/main` still does not contain `.woodpecker.yml`; Woodpecker accepts the trigger request with `204 No Content`, but no pipeline becomes visible until the forge branch being triggered actually carries the workflow file.
 - `workstreams.yaml` stays non-terminal on this branch so branch-level ownership validation remains active until the final `main` closeout flips the workstream back to its terminal state.
+- Rebasing onto `456984e2ebfed2f7d154c16dc1f49be79731520e` required regenerating `config/subdomain-exposure-registry.json`; the rebased branch-side `workstream-surfaces` and `data-models` checks now pass again on top of that latest mainline snapshot.
 
 ## Remaining For Merge-To-Main
 
 - Do not update `VERSION`, release sections in `changelog.md`, the top-level integrated `README.md` summary, or `versions/stack.yaml` on this branch.
 - The protected integration files still must wait for the final exact-main replay from the latest `origin/main`.
-- Rebase or merge this branch onto `origin/main` commit `32696e7e523f0f1cd0fd3168d9701790b54f66e` before cutting the mainline integration commit.
+- This branch is already rebased onto `origin/main` commit `456984e2ebfed2f7d154c16dc1f49be79731520e`; pull again before the final `main` push in case newer mainline work lands.
 - Update `VERSION`, the release notes in `changelog.md`, the top-level `README.md` integrated truth, and `versions/stack.yaml` only on the final mainline integration step.
 - After the mainline commit is pushed and the forge branch being tested contains `.woodpecker.yml`, rerun `make woodpecker-manage ACTION=trigger-pipeline WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main --wait'` and record the exact-main verification receipt.
