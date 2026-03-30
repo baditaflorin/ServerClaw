@@ -6,20 +6,15 @@ import argparse
 import base64
 import ipaddress
 import json
+import random
 import socket
 import subprocess
 import sys
+import time
 from dataclasses import dataclass
-from pathlib import Path
+from enum import Enum
 from typing import Any, Callable, Iterable
 from urllib.parse import urlsplit
-
-from script_bootstrap import ensure_repo_root_on_path
-
-ensure_repo_root_on_path(__file__)
-
-from platform.retry import MaxRetriesExceeded, PlatformRetryError, RetryClass, RetryPolicy, with_retry
-
 
 LOOPBACK_HOSTS = {"127.0.0.1", "localhost"}
 DOCKER_ASSURANCE_DEFAULT_PATH = "/usr/local/bin/lv3-docker-publication-assurance"
@@ -40,6 +35,105 @@ class CommandResult:
 
 CommandRunner = Callable[[list[str], str | None], CommandResult]
 ListenerChecker = Callable[[str, int, float], bool]
+
+
+class RetryClass(str, Enum):
+    TRANSIENT = "TRANSIENT"
+    BACKOFF = "BACKOFF"
+    PERMANENT = "PERMANENT"
+    FATAL = "FATAL"
+
+
+@dataclass(frozen=True)
+class RetryPolicy:
+    max_attempts: int = 5
+    base_delay_s: float = 1.0
+    max_delay_s: float = 60.0
+    multiplier: float = 2.0
+    jitter: bool = True
+    transient_max: int = 2
+
+
+class MaxRetriesExceeded(RuntimeError):
+    def __init__(self, message: str, *, attempts: int, last_error: BaseException | None) -> None:
+        super().__init__(message)
+        self.attempts = attempts
+        self.last_error = last_error
+
+
+class PlatformRetryError(RuntimeError):
+    def __init__(
+        self,
+        message: str,
+        *,
+        code: str | None = None,
+        retry_class: RetryClass | None = None,
+        retry_after: float | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.code = code
+        self.retry_class = retry_class
+        self.retry_after = retry_after
+
+
+def _delay_seconds(
+    policy: RetryPolicy,
+    *,
+    retry_after: float | None,
+    backoff_attempt: int,
+    random_fn: Callable[[float, float], float],
+) -> float:
+    raw_delay = min(policy.base_delay_s * (policy.multiplier ** max(backoff_attempt - 1, 0)), policy.max_delay_s)
+    delay = random_fn(0.0, raw_delay) if policy.jitter else raw_delay
+    if retry_after is not None:
+        delay = max(delay, retry_after)
+    return delay
+
+
+def with_retry(
+    fn: Callable[[], Any],
+    *,
+    policy: RetryPolicy,
+    error_context: str = "",
+    sleep_fn: Callable[[float], None] = time.sleep,
+    random_fn: Callable[[float, float], float] = random.uniform,
+) -> Any:
+    last_error: BaseException | None = None
+    transient_failures = 0
+    backoff_attempts = 0
+
+    for attempt in range(1, policy.max_attempts + 1):
+        try:
+            return fn()
+        except PlatformRetryError as exc:
+            last_error = exc
+            retry_class = exc.retry_class or RetryClass.PERMANENT
+
+            if retry_class in {RetryClass.PERMANENT, RetryClass.FATAL}:
+                raise
+            if attempt >= policy.max_attempts:
+                break
+            if retry_class == RetryClass.TRANSIENT and transient_failures < policy.transient_max:
+                transient_failures += 1
+                continue
+
+            backoff_attempts += 1
+            sleep_fn(
+                _delay_seconds(
+                    policy,
+                    retry_after=exc.retry_after,
+                    backoff_attempt=backoff_attempts,
+                    random_fn=random_fn,
+                )
+            )
+        except Exception:
+            raise
+
+    raise MaxRetriesExceeded(
+        f"exhausted {policy.max_attempts} attempts for {error_context or 'retry operation'}",
+        attempts=policy.max_attempts,
+        last_error=last_error,
+    ) from last_error
 
 
 def run_command(argv: list[str], cwd: str | None = None) -> CommandResult:

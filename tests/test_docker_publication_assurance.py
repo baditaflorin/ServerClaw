@@ -9,6 +9,13 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 import docker_publication_assurance as tool
 
 
+def test_helper_script_is_self_contained_for_remote_install() -> None:
+    script = (REPO_ROOT / "scripts" / "docker_publication_assurance.py").read_text()
+
+    assert "from script_bootstrap import" not in script
+    assert "from platform.retry import" not in script
+
+
 def test_derive_expected_bindings_collects_probe_and_contract_bindings() -> None:
     service_probe = {
         "startup": {
