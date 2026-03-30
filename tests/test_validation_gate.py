@@ -576,6 +576,18 @@ def test_gate_status_workflow_catalog_and_windmill_seed_align() -> None:
     assert "f/lv3/stage-smoke-suites" in script_paths
 
 
+def test_validation_gate_manifest_declares_atlas_lint() -> None:
+    manifest = json.loads((REPO_ROOT / "config" / "validation-gate.json").read_text(encoding="utf-8"))
+
+    atlas_lint = manifest["atlas-lint"]
+
+    assert atlas_lint["severity"] == "error"
+    assert atlas_lint["image"] == "registry.lv3.org/check-runner/python:3.12.10"
+    assert "scripts/atlas_schema.py lint" in atlas_lint["command"]
+    assert "run_python_with_packages.sh docker pyyaml" in atlas_lint["command"]
+    assert atlas_lint["cache_mounts"] == ["docker_socket"]
+
+
 def test_gate_status_reexecs_via_python_package_runner_when_yaml_is_missing() -> None:
     script = (REPO_ROOT / "scripts" / "gate_status.py").read_text(encoding="utf-8")
 

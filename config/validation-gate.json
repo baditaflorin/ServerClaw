@@ -83,12 +83,23 @@
     "cache_mounts": ["packer_plugins"]
   },
   "schema-validation": {
-    "description": "Validate canonical repository data models, provider-boundary anti-corruption guards, capability-contract catalogs, the committed platform manifest artifact, operator roster schema, cross references, and receipt schemas.",
+    "description": "Validate canonical repository data models, provider-boundary anti-corruption guards, capability-contract catalogs, Atlas schema catalog contracts, the committed platform manifest artifact, operator roster schema, cross references, and receipt schemas.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/python:3.12.10",
-    "command": "python scripts/provider_boundary_catalog.py --validate >/dev/null && python scripts/validate_repository_data_models.py --validate >/dev/null && python scripts/capability_contracts.py --validate >/dev/null && python scripts/platform_manifest.py --check >/dev/null && python scripts/data_catalog.py --validate >/dev/null && python scripts/operator_manager.py validate >/dev/null && python scripts/service_catalog.py --validate >/dev/null && python scripts/stage_smoke_suites.py --validate >/dev/null && python scripts/environment_topology.py --validate >/dev/null && python scripts/subdomain_catalog.py --validate >/dev/null && python scripts/subdomain_exposure_audit.py --validate >/dev/null && ./scripts/agent_tool_registry.py --export-mcp >/dev/null && python scripts/mutation_audit.py --validate-schema >/dev/null",
+    "command": "python scripts/provider_boundary_catalog.py --validate >/dev/null && python scripts/validate_repository_data_models.py --validate >/dev/null && python scripts/capability_contracts.py --validate >/dev/null && python scripts/platform_manifest.py --check >/dev/null && python scripts/data_catalog.py --validate >/dev/null && python scripts/operator_manager.py validate >/dev/null && python scripts/service_catalog.py --validate >/dev/null && python scripts/stage_smoke_suites.py --validate >/dev/null && python scripts/environment_topology.py --validate >/dev/null && python scripts/subdomain_catalog.py --validate >/dev/null && python scripts/subdomain_exposure_audit.py --validate >/dev/null && ./scripts/agent_tool_registry.py --export-mcp >/dev/null && python scripts/mutation_audit.py --validate-schema >/dev/null && ./scripts/run_python_with_packages.sh pyyaml -- scripts/atlas_schema.py validate >/dev/null",
     "working_dir": "/workspace",
     "timeout_seconds": 360
+  },
+  "atlas-lint": {
+    "description": "Run Atlas pre-migration lint for the repo-managed SQL migration directories using the pinned Atlas image and an ephemeral PostgreSQL dev database.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "command": "./scripts/run_python_with_packages.sh docker pyyaml -- scripts/atlas_schema.py lint --repo-root ${LV3_HOST_WORKSPACE:-/workspace} >/dev/null",
+    "working_dir": "/workspace",
+    "timeout_seconds": 600,
+    "cache_mounts": [
+      "docker_socket"
+    ]
   },
   "policy-validation": {
     "description": "Run the ADR 0230 shared OPA and Conftest policy checks against command approval, promotion eligibility, runner admission, and service-boundary invariants.",
@@ -160,10 +171,10 @@
     "timeout_seconds": 120
   },
   "type-check": {
-    "description": "Type check the gate orchestration code and the manifest-backed Docker runner surfaces.",
+    "description": "Type check the gate orchestration code, Atlas schema helpers, and the manifest-backed Docker runner surfaces.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/python:3.12.10",
-    "command": "mypy --cache-dir /tmp/mypy-cache scripts/gate_bypass_waivers.py scripts/parallel_check.py scripts/run_gate.py scripts/gate_status.py scripts/iac_policy_scan.py scripts/log_gate_bypass.py scripts/policy_checks.py scripts/policy_toolchain.py scripts/semgrep_gate.py scripts/validation_lanes.py scripts/validation_runner_contracts.py config/windmill/scripts/post-merge-gate.py tests/test_iac_policy_scan.py tests/test_parallel_check.py tests/test_semgrep_gate.py tests/test_validation_gate.py tests/test_validation_lanes.py tests/test_policy_checks.py tests/test_command_catalog.py tests/test_validation_runner_contracts.py",
+    "command": "mypy --cache-dir /tmp/mypy-cache scripts/atlas_schema.py scripts/gate_bypass_waivers.py scripts/parallel_check.py scripts/run_gate.py scripts/gate_status.py scripts/iac_policy_scan.py scripts/log_gate_bypass.py scripts/policy_checks.py scripts/policy_toolchain.py scripts/semgrep_gate.py scripts/validation_lanes.py scripts/validation_runner_contracts.py config/windmill/scripts/atlas-drift-check.py config/windmill/scripts/post-merge-gate.py tests/test_atlas_schema.py tests/test_atlas_drift_check_windmill.py tests/test_iac_policy_scan.py tests/test_parallel_check.py tests/test_semgrep_gate.py tests/test_validation_gate.py tests/test_validation_lanes.py tests/test_policy_checks.py tests/test_command_catalog.py tests/test_validation_runner_contracts.py",
     "working_dir": "/workspace",
     "timeout_seconds": 180
   },

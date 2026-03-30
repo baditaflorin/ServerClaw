@@ -16,6 +16,7 @@ lanes:
     checks:
       - yaml-lint
       - schema-validation
+      - atlas-lint
       - policy-validation
       - alert-rule-validation
       - dependency-direction

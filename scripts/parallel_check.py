@@ -208,6 +208,14 @@ def build_docker_command(
                         "PACKER_PLUGIN_PATH=/root/.packer.d/plugins",
                     ]
                 )
+        elif cache_mount == "docker_socket":
+            socket_path = Path(os.environ.get("LV3_DOCKER_SOCKET_PATH", "/var/run/docker.sock")).resolve()
+            if socket_path.exists():
+                mount_args.extend(["-v", f"{socket_path}:{socket_path}"])
+                env_args.extend(["-e", f"DOCKER_HOST=unix://{socket_path}"])
+            host_workspace = workspace.resolve()
+            mount_args.extend(["-v", f"{host_workspace}:{host_workspace}"])
+            env_args.extend(["-e", f"LV3_HOST_WORKSPACE={host_workspace}"])
 
     return [
         docker_binary,

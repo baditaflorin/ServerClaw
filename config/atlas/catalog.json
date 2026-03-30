@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0.0",
+  "atlas_image_ref": "docker.io/arigaio/atlas:1.1.6-community@sha256:e2aa1cdefb6f48fbe619d4b504777e26b140f4d358344d320ed26c374068ef01",
+  "dev_postgres_image": "docker.io/library/postgres:16",
+  "runtime": {
+    "openbao_guest": "docker-runtime-lv3",
+    "openbao_url": "http://127.0.0.1:8201",
+    "postgres_guest": "postgres-lv3",
+    "postgres_port": 5432
+  },
+  "openbao": {
+    "approle_secret_id": "openbao_atlas_approle",
+    "database_role": "postgres-atlas-readonly"
+  },
+  "notifications": {
+    "nats_subject": "platform.db.schema_drift",
+    "ntfy": {
+      "url": "http://10.10.10.20:2586/platform.db.warn",
+      "username": "alertmanager",
+      "password_secret_id": "ntfy_alertmanager_password"
+    }
+  },
+  "receipts": {
+    "drift_dir": "receipts/atlas-drift"
+  },
+  "lint_targets": [
+    {
+      "id": "platform-control-plane",
+      "path": "migrations",
+      "triggers": [
+        "migrations/",
+        "config/atlas/",
+        "scripts/atlas_schema.py",
+        "config/validation-gate.json",
+        "config/validation-lanes.yaml"
+      ],
+      "dev_database": "atlas_lint"
+    }
+  ],
+  "databases": [
+    {
+      "id": "dify",
+      "database": "dify",
+      "snapshot_path": "config/atlas/dify.hcl"
+    },
+    {
+      "id": "gitea",
+      "database": "gitea",
+      "snapshot_path": "config/atlas/gitea.hcl"
+    },
+    {
+      "id": "glitchtip",
+      "database": "glitchtip",
+      "snapshot_path": "config/atlas/glitchtip.hcl"
+    },
+    {
+      "id": "keycloak",
+      "database": "keycloak",
+      "snapshot_path": "config/atlas/keycloak.hcl"
+    },
+    {
+      "id": "langfuse",
+      "database": "langfuse",
+      "snapshot_path": "config/atlas/langfuse.hcl"
+    },
+    {
+      "id": "matrix_synapse",
+      "database": "matrix_synapse",
+      "snapshot_path": "config/atlas/matrix_synapse.hcl"
+    },
+    {
+      "id": "mattermost",
+      "database": "mattermost",
+      "snapshot_path": "config/atlas/mattermost.hcl"
+    },
+    {
+      "id": "mautrix_discord",
+      "database": "mautrix_discord",
+      "snapshot_path": "config/atlas/mautrix_discord.hcl"
+    },
+    {
+      "id": "mautrix_whatsapp",
+      "database": "mautrix_whatsapp",
+      "snapshot_path": "config/atlas/mautrix_whatsapp.hcl"
+    },
+    {
+      "id": "n8n",
+      "database": "n8n",
+      "snapshot_path": "config/atlas/n8n.hcl"
+    },
+    {
+      "id": "netbox",
+      "database": "netbox",
+      "snapshot_path": "config/atlas/netbox.hcl"
+    },
+    {
+      "id": "nextcloud",
+      "database": "nextcloud",
+      "snapshot_path": "config/atlas/nextcloud.hcl"
+    },
+    {
+      "id": "openfga",
+      "database": "openfga",
+      "snapshot_path": "config/atlas/openfga.hcl"
+    },
+    {
+      "id": "outline",
+      "database": "outline",
+      "snapshot_path": "config/atlas/outline.hcl"
+    },
+    {
+      "id": "outline_production",
+      "database": "outline_production",
+      "snapshot_path": "config/atlas/outline_production.hcl"
+    },
+    {
+      "id": "outline_staging",
+      "database": "outline_staging",
+      "snapshot_path": "config/atlas/outline_staging.hcl"
+    },
+    {
+      "id": "plane",
+      "database": "plane",
+      "snapshot_path": "config/atlas/plane.hcl"
+    },
+    {
+      "id": "semaphore",
+      "database": "semaphore",
+      "snapshot_path": "config/atlas/semaphore.hcl"
+    },
+    {
+      "id": "vaultwarden",
+      "database": "vaultwarden",
+      "snapshot_path": "config/atlas/vaultwarden.hcl"
+    },
+    {
+      "id": "windmill",
+      "database": "windmill",
+      "snapshot_path": "config/atlas/windmill.hcl"
+    }
+  ]
+}

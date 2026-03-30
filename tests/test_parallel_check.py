@@ -179,6 +179,32 @@ def test_build_docker_command_forwards_validation_context(tmp_path: Path, monkey
     )
 
 
+def test_build_docker_command_mounts_docker_socket_and_host_workspace(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    parallel_check = load_parallel_check_module()
+    socket_path = tmp_path / "docker.sock"
+    socket_path.write_text("", encoding="utf-8")
+    monkeypatch.setenv("LV3_DOCKER_SOCKET_PATH", str(socket_path))
+
+    check = parallel_check.CheckDefinition(
+        label="atlas-lint",
+        image="registry.lv3.org/check-runner/python:3.12.10",
+        command="python scripts/atlas_schema.py lint",
+        working_dir="/workspace",
+        timeout_seconds=30,
+        cache_mounts=("docker_socket",),
+    )
+
+    command = parallel_check.build_docker_command(check, tmp_path, "docker")
+
+    assert f"{socket_path.resolve()}:{socket_path.resolve()}" in command
+    assert f"DOCKER_HOST=unix://{socket_path.resolve()}" in command
+    assert f"{tmp_path.resolve()}:{tmp_path.resolve()}" in command
+    assert f"LV3_HOST_WORKSPACE={tmp_path.resolve()}" in command
+
+
 def test_run_checks_returns_non_zero_when_any_check_fails(tmp_path: Path) -> None:
     parallel_check = load_parallel_check_module()
     fake_docker = tmp_path / "fake-docker"

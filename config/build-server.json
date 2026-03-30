@@ -41,14 +41,15 @@
       "validation_lanes": [
         "ansible-syntax",
         "schema-validation",
+        "atlas-lint",
         "policy-validation",
         "iac-policy-scan",
         "alert-rule-validation",
         "type-check",
         "dependency-graph"
       ],
-      "command": "mkdir -p .local/validation-gate /opt/builds/.policy-toolchain && LV3_ANSIBLE_COLLECTIONS_DIR=/opt/builds/.ansible/collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha LV3_PACKER_PLUGIN_CACHE_DIR=/opt/builds/.packer.d LV3_POLICY_TOOLCHAIN_ROOT=/opt/builds/.policy-toolchain python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/remote-validate-last-run.json --source build-server-validate ansible-syntax schema-validation policy-validation iac-policy-scan alert-rule-validation type-check dependency-graph",
-      "local_fallback_command": "mkdir -p .local/validation-gate .local/packer-plugin-cache .ansible/validation/collections .local/policy-toolchain && LV3_ANSIBLE_COLLECTIONS_DIR=.ansible/validation/collections LV3_PACKER_PLUGIN_CACHE_DIR=.local/packer-plugin-cache LV3_POLICY_TOOLCHAIN_ROOT=.local/policy-toolchain python3 scripts/run_gate_fallback.py --workspace . --status-file .local/validation-gate/remote-validate-last-run.json --source local-validate ansible-syntax schema-validation policy-validation iac-policy-scan alert-rule-validation type-check dependency-graph"
+      "command": "mkdir -p .local/validation-gate /opt/builds/.policy-toolchain && LV3_ANSIBLE_COLLECTIONS_DIR=/opt/builds/.ansible/collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha LV3_PACKER_PLUGIN_CACHE_DIR=/opt/builds/.packer.d LV3_POLICY_TOOLCHAIN_ROOT=/opt/builds/.policy-toolchain python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/remote-validate-last-run.json --source build-server-validate ansible-syntax schema-validation atlas-lint policy-validation iac-policy-scan alert-rule-validation type-check dependency-graph",
+      "local_fallback_command": "mkdir -p .local/validation-gate .local/packer-plugin-cache .ansible/validation/collections .local/policy-toolchain && LV3_ANSIBLE_COLLECTIONS_DIR=.ansible/validation/collections LV3_PACKER_PLUGIN_CACHE_DIR=.local/packer-plugin-cache LV3_POLICY_TOOLCHAIN_ROOT=.local/policy-toolchain python3 scripts/run_gate_fallback.py --workspace . --status-file .local/validation-gate/remote-validate-last-run.json --source local-validate ansible-syntax schema-validation atlas-lint policy-validation iac-policy-scan alert-rule-validation type-check dependency-graph"
     },
     "pre-push-gate": {
       "runner_id": "build-server-validation",
