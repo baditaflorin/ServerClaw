@@ -73,6 +73,11 @@
       "check": "Final public and private publication verification after Harbor repair",
       "result": "pass",
       "observed": "Post-repair verification returned `harbor_public=Pong`, `harbor_local=Pong`, `keycloak_public_issuer=https://sso.lv3.org/realms/lv3`, `keycloak_local_issuer=https://sso.lv3.org/realms/lv3`, `openbao_local` with `sealed:false`, `outline_public=OK`, `outline_local=OK`, `langfuse_local_health={\"status\":\"OK\"...}`, and `langfuse_local_signin_status=200`."
+    },
+    {
+      "check": "Merged-main repository validation",
+      "result": "pass",
+      "observed": "`LV3_SNAPSHOT_BRANCH=main ./scripts/validate_repo.sh workstream-surfaces agent-standards yaml json data-models ansible-syntax role-argument-specs health-probes generated-docs` completed successfully from the merged-main snapshot after fast-forwarding `origin/main` commit `bbb0f66b8ec995dfa3ecdd7bac9156ed664157cc` to the ADR 0270 integration head."
     }
   ],
   "evidence_refs": [
@@ -95,7 +100,8 @@
     "receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-harbor-diagnostics-post-rerun-7.txt",
     "receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-converge-harbor-r2.txt",
     "receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-direct-and-public-verification-r2.txt",
-    "receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-targeted-pytests-r2.txt"
+    "receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-targeted-pytests-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-validate-repo-r8.txt"
   ],
   "notes": [
     "This receipt is the canonical exact-main proof for ADR 0270 and justifies the platform version bump from the latest realistic pre-replay baseline `0.130.61` to `0.130.62` on repository version `0.177.93`.",

@@ -116,6 +116,11 @@
   the Harbor, Keycloak, OpenBao, Docker publication, Docker runtime,
   observation, post-verify, and Gotenberg coverage set, captured in
   `receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-targeted-pytests-r2.txt`.
+- The merged-main repository validation path also passed from the final
+  synchronized snapshot with
+  `LV3_SNAPSHOT_BRANCH=main ./scripts/validate_repo.sh workstream-surfaces agent-standards yaml json data-models ansible-syntax role-argument-specs health-probes generated-docs`,
+  captured in
+  `receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-validate-repo-r8.txt`.
 - Final steady-state verification after the Harbor repair is captured in
   `receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-direct-and-public-verification-r2.txt`,
   which shows `harbor_public=Pong`, `harbor_local=Pong`,
@@ -126,9 +131,7 @@
 
 ## Merge Follow-Through
 
-- exact-main replay and receipt capture are complete on the synchronized
-  integration worktree
-- ADR metadata, runbook updates, release surfaces, and workstream state are all
-  updated for safe merge
-- final remaining steps are repository validation, merge to `main`, and push to
-  `origin/main`
+- exact-main replay, receipt capture, merged-main validation, and protected
+  integration surface updates are complete
+- this workstream has been fast-forwarded onto `main` in the final integration
+  checkout and is ready for the `origin/main` push represented by this closeout
