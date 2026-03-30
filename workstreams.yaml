@@ -16167,3 +16167,134 @@ workstreams:
       included_in_repo_version: 0.177.100
       latest_receipts:
         changedetection: 2026-03-30-adr-0280-changedetection-mainline-live-apply
+  - id: ws-0267-live-apply
+    adr: "0267"
+    title: Live apply ADR 0267 from the latest realistic origin/main
+    status: ready_for_merge
+    owner: codex
+    branch: codex/ws-0267-main-refresh-v5
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0267-main-refresh-v5
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0267-live-apply.md
+    depends_on:
+      - adr-0087-validation-gate
+      - adr-0168-automated-validation
+      - adr-0228-windmill-default-operations-surface
+      - adr-0230-policy-decisions-via-open-policy-agent-and-conftest
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0267-live-apply.md
+      - docs/adr/0267-expiring-gate-bypass-waivers-with-structured-reason-codes.md
+      - docs/adr/.index.yaml
+      - .config-locations.yaml
+      - .githooks/pre-push
+      - Makefile
+      - collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
+      - config/gate-bypass-waiver-catalog.json
+      - config/validation-gate.json
+      - config/windmill/scripts/gate-status.py
+      - config/workflow-catalog.json
+      - docs/runbooks/configure-windmill.md
+      - docs/runbooks/platform-release-management.md
+      - docs/runbooks/validation-gate.md
+      - docs/schema/gate-bypass-waiver-catalog.schema.json
+      - docs/schema/gate-bypass-waiver-receipt.schema.json
+      - playbooks/tasks/docker-publication-assert.yml
+      - scripts/gate_bypass_waivers.py
+      - scripts/gate_status.py
+      - scripts/log_gate_bypass.py
+      - scripts/release_manager.py
+      - scripts/stage_smoke_suites.py
+      - scripts/sync_windmill_seed_scripts.py
+      - scripts/validate_repository_data_models.py
+      - tests/test_config_merge_repo_surfaces.py
+      - tests/test_config_merge_windmill.py
+      - tests/test_docker_runtime_role.py
+      - tests/test_gate_bypass_waivers.py
+      - tests/test_openbao_compose_env_helper.py
+      - tests/test_post_verify_tasks.py
+      - tests/test_release_manager.py
+      - tests/test_stage_smoke_suites.py
+      - tests/test_validation_gate.py
+      - tests/test_validation_gate_windmill.py
+      - tests/test_windmill_operator_admin_app.py
+      - receipts/live-applies/2026-03-30-adr-0267-gate-bypass-waivers-live-apply.json
+      - receipts/live-applies/2026-03-30-adr-0267-gate-bypass-waivers-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-03-30-adr-0267-main-refresh-v5-converge-windmill-after-verify-parent-dir-fix.txt
+      - receipts/live-applies/evidence/2026-03-30-ws-0267-mainline-*
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: adr_0267_live_apply_bundle
+          paths:
+            - docs/workstreams/ws-0267-live-apply.md
+            - docs/adr/0267-expiring-gate-bypass-waivers-with-structured-reason-codes.md
+            - .config-locations.yaml
+            - .githooks/pre-push
+            - Makefile
+            - collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml
+            - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml
+            - config/gate-bypass-waiver-catalog.json
+            - config/validation-gate.json
+            - config/windmill/scripts/gate-status.py
+            - config/workflow-catalog.json
+            - docs/runbooks/configure-windmill.md
+            - docs/runbooks/platform-release-management.md
+            - docs/runbooks/validation-gate.md
+            - docs/schema/gate-bypass-waiver-catalog.schema.json
+            - docs/schema/gate-bypass-waiver-receipt.schema.json
+            - playbooks/tasks/docker-publication-assert.yml
+            - scripts/gate_bypass_waivers.py
+            - scripts/gate_status.py
+            - scripts/log_gate_bypass.py
+            - scripts/release_manager.py
+            - scripts/stage_smoke_suites.py
+            - scripts/sync_windmill_seed_scripts.py
+            - scripts/validate_repository_data_models.py
+            - tests/test_config_merge_repo_surfaces.py
+            - tests/test_config_merge_windmill.py
+            - tests/test_docker_runtime_role.py
+            - tests/test_gate_bypass_waivers.py
+            - tests/test_openbao_compose_env_helper.py
+            - tests/test_post_verify_tasks.py
+            - tests/test_release_manager.py
+            - tests/test_stage_smoke_suites.py
+            - tests/test_validation_gate.py
+            - tests/test_validation_gate_windmill.py
+            - tests/test_windmill_operator_admin_app.py
+            - receipts/live-applies/2026-03-30-adr-0267-gate-bypass-waivers-live-apply.json
+            - receipts/live-applies/2026-03-30-adr-0267-gate-bypass-waivers-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-03-30-adr-0267-main-refresh-v5-converge-windmill-after-verify-parent-dir-fix.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0267-mainline-*
+          mode: shared_contract
+          contract: adr-0267-live-apply-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: replays ADR 0267 from the exact 0.177.103 main tree, keeps governed validation-gate waivers live on the Windmill worker checkout, preserves the repo-root Docker publication helper repair plus apt-lock tolerance surfaced during latest-main verification, and advances platform_version to 0.130.70 after the refreshed exact-main replay succeeded end to end
+      release_bump: patch
+      included_in_repo_version: 0.177.104
+      latest_receipts:
+        validation_gate: 2026-03-30-adr-0267-gate-bypass-waivers-mainline-live-apply
