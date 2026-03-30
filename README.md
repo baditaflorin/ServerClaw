@@ -195,8 +195,8 @@ ADR 0276 NATS JetStream is now live on production from `main`: `docker-runtime-l
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.98` |
-| Platform version | `0.130.65` |
+| Repository version | `0.177.99` |
+| Platform version | `0.130.66` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -318,7 +318,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `observation_to_action_closure_loop` | `2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply` |
 | `ollama` | `2026-03-27-adr-0176-inventory-sharding-mainline-live-apply` |
 | `open_webui` | `2026-03-25-adr-0145-open-webui-ollama-connector-live-apply` |
-| `openbao` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
+| `openbao` | `2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply` |
 | `openbao_operator_entity` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `openbao_operator_policy` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `openfga` | `2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply` |
@@ -342,7 +342,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
 | `preview_environment` | `2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z` |
-| `promotion_pipeline` | `2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply` |
+| `promotion_pipeline` | `2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply` |
 | `provider_boundaries` | `2026-03-28-adr-0207-anti-corruption-layers-at-provider-boundaries-live-apply` |
 | `public_edge_publication` | `2026-03-29-adr-0255-matrix-synapse-mainline-live-apply` |
 | `public_endpoint_admission_control` | `2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply` |
@@ -367,7 +367,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `shared_policy_packs` | `2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply` |
 | `short_lived_credentials_and_mtls` | `2026-03-22-adr-0047-short-lived-credentials-live-apply` |
 | `signed_release_bundles` | `2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply` |
-| `stage_smoke_suites` | `2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply` |
+| `stage_smoke_suites` | `2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply` |
 | `staging_environment` | `2026-03-27-adr-0183-staging-live-apply` |
 | `step_ca` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
@@ -1403,8 +1403,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.98` |
-| Platform version | `0.130.65` |
+| Repository version | `0.177.99` |
+| Platform version | `0.130.66` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |

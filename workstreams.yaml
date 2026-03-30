@@ -1969,7 +1969,7 @@ workstreams:
   - id: ws-0251-main-integration-r2
     adr: "0251"
     title: Integrate ADR 0251 latest-server-state follow-up onto current origin/main
-    status: in_progress
+    status: merged
     owner: codex
     branch: codex/ws-0251-main-integration-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply
@@ -2018,7 +2018,9 @@ workstreams:
       - tests/test_windmill_integration_wrappers.py
       - tests/test_windmill_operator_admin_app.py
       - receipts/live-applies/2026-03-29-adr-0251-*.json
+      - receipts/live-applies/2026-03-30-adr-0251-*.json
       - receipts/live-applies/evidence/2026-03-29-adr-0251-*
+      - receipts/live-applies/evidence/2026-03-30-adr-0251-*
       - receipts/live-applies/evidence/2026-03-29-openbao-*
     ownership_manifest:
       owned_surfaces:
@@ -2067,7 +2069,9 @@ workstreams:
             - tests/test_windmill_integration_wrappers.py
             - tests/test_windmill_operator_admin_app.py
             - receipts/live-applies/2026-03-29-adr-0251-*.json
+            - receipts/live-applies/2026-03-30-adr-0251-*.json
             - receipts/live-applies/evidence/2026-03-29-adr-0251-*
+            - receipts/live-applies/evidence/2026-03-30-adr-0251-*
             - receipts/live-applies/evidence/2026-03-29-openbao-*
           mode: exclusive
         - id: openbao_compose_env_helper_contract
@@ -2090,20 +2094,20 @@ workstreams:
             - tests/test_compose_runtime_secret_injection.py
           mode: shared_contract
           contract: compose-runtime-secret-injection-tests-v1
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
     canonical_truth:
-      changelog_entry: records ADR 0251 latest-server-state follow-up verification
-        on the newest origin/main by preserving the stage-smoke and
-        promotion-gate live checks, fixing deployment-history portal receipt
-        enumeration for nested evidence JSON, and hardening OpenBao recovery
-        against transient Docker chain loss before the exact-main replay
+      changelog_entry: records ADR 0251 latest-main verification on release
+        0.177.99 by replaying the hardened Docker publication helper through
+        the step-ca durability path, re-verifying OpenBao and Windmill on the
+        current server state, and refreshing the canonical smoke-suite and
+        promotion-gate receipt on platform version 0.130.66
       release_bump: patch
-      included_in_repo_version: 0.177.92
+      included_in_repo_version: 0.177.99
       latest_receipts:
-        promotion_pipeline: 2026-03-29-adr-0251-latest-server-state-follow-up-mainline-live-apply
-        stage_smoke_suites: 2026-03-29-adr-0251-latest-server-state-follow-up-mainline-live-apply
-        openbao: 2026-03-29-adr-0251-latest-server-state-follow-up-mainline-live-apply
+        promotion_pipeline: 2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
+        stage_smoke_suites: 2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
+        openbao: 2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
   - id: ws-0255-live-apply
     adr: "0255"
     title: ADR 0255 live apply from latest origin/main
@@ -4102,8 +4106,9 @@ workstreams:
       release_bump: patch
       included_in_repo_version: 0.177.86
       latest_receipts:
-        promotion_pipeline: 2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
-        stage_smoke_suites: 2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
+        promotion_pipeline: 2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
+        stage_smoke_suites: 2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
+        openbao: 2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
   - id: ws-0259-live-apply
     adr: "0259"
     title: Live apply n8n as the external app connector fabric for ServerClaw

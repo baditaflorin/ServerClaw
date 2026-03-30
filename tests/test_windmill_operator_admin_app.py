@@ -175,6 +175,16 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert quarterly_schedule["args"]["schedule_guard"] == "first_monday_of_quarter"
 
 
+def test_make_converge_windmill_pins_worker_checkout_to_active_repo_root() -> None:
+    makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
+
+    assert (
+        "converge-windmill:\n"
+        "\t$(MAKE) preflight WORKFLOW=converge-windmill\n"
+        "\tANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/windmill.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e windmill_worker_checkout_repo_root_local_dir=$(REPO_ROOT)\n"
+    ) in makefile
+
+
 def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> None:
     app_dir = REPO_ROOT / "config/windmill/apps/f/lv3/operator_access_admin.raw_app"
     lock_path = REPO_ROOT / "config/windmill/apps/wmill-lock.yaml"

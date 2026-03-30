@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.98",
-  "platform_version": "0.130.65",
-  "generated_at": "2026-03-30T09:08:43Z",
-  "next_refresh_at": "2026-03-30T10:08:43Z",
+  "repo_version": "0.177.99",
+  "platform_version": "0.130.66",
+  "generated_at": "2026-03-30T09:59:16Z",
+  "next_refresh_at": "2026-03-30T10:59:16Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4792,10 +4792,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.97",
+    "last_version": "0.177.98",
     "deployed_at": "2026-03-30",
-    "summary": "Live-applied ADR 0256 so Matrix Synapse now provisions repo-managed mautrix Discord and WhatsApp bridges, bridge databases, bridge smoke verification, and controller-safe admin bootstrap handling.",
-    "release_notes_url": "docs/release-notes/0.177.98.md"
+    "summary": "records ADR 0251 latest-main verification on release 0.177.99 by replaying the hardened Docker publication helper through the step-ca durability path, re-verifying OpenBao and Windmill on the current server state, and refreshing the canonical smoke-suite and promotion-gate receipt on platform version 0.130.66",
+    "release_notes_url": "docs/release-notes/0.177.99.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
