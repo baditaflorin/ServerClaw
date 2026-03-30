@@ -49,6 +49,13 @@ def test_control_plane_lane_points_at_private_submission_relay() -> None:
     assert submission["endpoint"] == "10.10.10.20:1587"
 
 
+def test_defaults_resolve_mail_gateway_otlp_endpoint_from_canonical_host_topology() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    assert defaults["mail_platform_gateway_trace_otlp_endpoint"] == (
+        "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('grafana', 'otlp_http') }}"
+    )
+
+
 def test_mail_platform_runtime_verifies_plaintext_private_submission_auth() -> None:
     tasks = yaml.safe_load(TASKS_PATH.read_text())
     verify_task = next(
@@ -130,12 +137,15 @@ def test_mail_platform_runtime_force_recreates_when_runtime_inputs_change() -> N
     assert "mail_platform_gateway_build.changed" in expression
 
 
-def test_mail_platform_runtime_renders_openbao_env_template_from_role_path() -> None:
+def test_mail_platform_runtime_stages_openbao_env_template_locally_before_helper_include() -> None:
     tasks_text = TASKS_PATH.read_text()
-    assert "mail_platform_openbao_agent_template_content" in tasks_text
-    assert "Render the OpenBao mail gateway env template content in the caller role context" in tasks_text
-    assert "lookup('ansible.builtin.template', 'mail-gateway.env.ctmpl.j2')" in tasks_text
-    assert "common_openbao_compose_env_agent_template_content" in tasks_text
-    assert 'common_openbao_compose_env_agent_template_content: "{{ mail_platform_openbao_agent_template_content }}"' in tasks_text
-    assert "role_path ~ '/templates/mail-gateway.env.ctmpl.j2'" not in tasks_text
+    assert "Create a controller-local staging path for the mail platform OpenBao agent runtime env template" in tasks_text
+    assert "mail_platform_openbao_agent_template_local" in tasks_text
+    assert "Resolve the mail gateway OTLP endpoint before delegating the OpenBao env template render" in tasks_text
+    assert "mail_platform_gateway_trace_otlp_endpoint_resolved" in tasks_text
+    assert "mail-gateway.env.ctmpl.j2" in tasks_text
+    assert "common_openbao_compose_env_agent_template_local_file" in tasks_text
+    assert 'common_openbao_compose_env_agent_template_local_file: "{{ mail_platform_openbao_agent_template_local.path }}"' in tasks_text
+    assert "Remove the controller-local mail platform OpenBao agent runtime env template staging file" in tasks_text
+    assert "common_openbao_compose_env_agent_template_content" not in tasks_text
     assert "common_openbao_compose_env_agent_template_src: mail-gateway.env.ctmpl.j2" not in tasks_text

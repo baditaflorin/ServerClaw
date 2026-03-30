@@ -400,10 +400,27 @@
     group: root
     mode: "0644"
 
-- name: Render the OpenBao mail gateway env template content in the caller role context
+- name: Create a controller-local staging path for the mail platform OpenBao agent runtime env template
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .ctmpl
+  delegate_to: localhost
+  become: false
+  register: mail_platform_openbao_agent_template_local
+
+- name: Resolve the mail gateway OTLP endpoint before delegating the OpenBao env template render
   ansible.builtin.set_fact:
-    mail_platform_openbao_agent_template_content: "{{ lookup('ansible.builtin.template', 'mail-gateway.env.ctmpl.j2') }}"
-  no_log: true
+    mail_platform_gateway_trace_otlp_endpoint_resolved: "{{ mail_platform_gateway_trace_otlp_endpoint }}"
+
+- name: Render the mail platform OpenBao agent runtime env template to a controller-local file
+  vars:
+    mail_platform_gateway_trace_otlp_endpoint: "{{ mail_platform_gateway_trace_otlp_endpoint_resolved }}"
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/templates/mail-gateway.env.ctmpl.j2"
+    dest: "{{ mail_platform_openbao_agent_template_local.path }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
 
 - name: Prepare OpenBao agent runtime secret injection for the mail platform gateway
   ansible.builtin.include_role:
@@ -432,13 +449,20 @@
     common_openbao_compose_env_approle_name: "{{ mail_platform_openbao_approle_name }}"
     common_openbao_compose_env_agent_config_file: "{{ mail_platform_openbao_agent_dir }}/agent.hcl"
     common_openbao_compose_env_agent_template_file: "{{ mail_platform_openbao_agent_dir }}/runtime.env.ctmpl"
-    common_openbao_compose_env_agent_template_content: "{{ mail_platform_openbao_agent_template_content }}"
+    common_openbao_compose_env_agent_template_local_file: "{{ mail_platform_openbao_agent_template_local.path }}"
     common_openbao_compose_env_role_id_file: "{{ mail_platform_openbao_agent_dir }}/role_id"
     common_openbao_compose_env_secret_id_file: "{{ mail_platform_openbao_agent_dir }}/secret_id"
     common_openbao_compose_env_image: "{{ mail_platform_openbao_agent_image }}"
     common_openbao_compose_env_legacy_env_files:
       - "{{ mail_platform_gateway_legacy_env_file }}"
   no_log: true
+
+- name: Remove the controller-local mail platform OpenBao agent runtime env template staging file
+  ansible.builtin.file:
+    path: "{{ mail_platform_openbao_agent_template_local.path }}"
+    state: absent
+  delegate_to: localhost
+  become: false
 
 - name: Render the mail gateway environment file
   ansible.builtin.template:
