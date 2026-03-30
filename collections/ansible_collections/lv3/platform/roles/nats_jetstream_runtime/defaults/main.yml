@@ -22,5 +22,40 @@ nats_jetstream_publish_allow:
   - secret.rotation.>
 nats_jetstream_subscribe_allow:
   - _INBOX.>
+nats_jetstream_additional_users:
+  - user: control-plane-publisher
+    password_local_file: "{{ nats_jetstream_local_artifact_dir }}/control-plane-publisher-password.txt"
+    publish_allow:
+      - lv3.>
+    subscribe_allow:
+      - _INBOX.>
+  - user: workflow-consumer
+    password_local_file: "{{ nats_jetstream_local_artifact_dir }}/workflow-consumer-password.txt"
+    publish_allow:
+      - $JS.API.>
+    subscribe_allow:
+      - _INBOX.>
+    allow_responses: true
+  - user: alert-consumer
+    password_local_file: "{{ nats_jetstream_local_artifact_dir }}/alert-consumer-password.txt"
+    publish_allow:
+      - $JS.API.>
+    subscribe_allow:
+      - _INBOX.>
+    allow_responses: true
+  - user: receipt-consumer
+    password_local_file: "{{ nats_jetstream_local_artifact_dir }}/receipt-consumer-password.txt"
+    publish_allow:
+      - $JS.API.>
+    subscribe_allow:
+      - _INBOX.>
+    allow_responses: true
+  - user: agent-consumer
+    password_local_file: "{{ nats_jetstream_local_artifact_dir }}/agent-consumer-password.txt"
+    publish_allow:
+      - $JS.API.>
+    subscribe_allow:
+      - _INBOX.>
+    allow_responses: true
 nats_jetstream_max_memory_store: 256MB
 nats_jetstream_max_file_store: 2GB

@@ -10,17 +10,22 @@ jetstream {
 
 authorization {
   users = [
+{% for principal in nats_jetstream_users_resolved %}
     {
-      user: "{{ nats_jetstream_admin_user }}"
-      password: "{{ nats_jetstream_admin_password }}"
+      user: "{{ principal.user }}"
+      password: "{{ principal.password }}"
       permissions: {
         publish: {
-          allow: [{% for subject in nats_jetstream_publish_allow %}"{{ subject }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+          allow: [{% for subject in principal.publish_allow %}"{{ subject }}"{% if not loop.last %}, {% endif %}{% endfor %}]
         }
         subscribe: {
-          allow: [{% for subject in nats_jetstream_subscribe_allow %}"{{ subject }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+          allow: [{% for subject in principal.subscribe_allow %}"{{ subject }}"{% if not loop.last %}, {% endif %}{% endfor %}]
         }
+{% if principal.allow_responses | default(false) %}
+        allow_responses: true
+{% endif %}
       }
-    }
+    }{% if not loop.last %},{% endif %}
+{% endfor %}
   ]
 }

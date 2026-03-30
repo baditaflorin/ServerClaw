@@ -29,11 +29,16 @@ It is the operational reference for:
 - client listener: `127.0.0.1` or `10.10.10.20` on TCP `4222`
 - monitoring endpoint: `http://127.0.0.1:8222/healthz`
 
-The repo-managed runtime currently keeps one controller-known admin principal:
+The repo-managed runtime keeps the existing live principal set intact:
 
-- `jetstream-admin` with the password mirrored at `.local/nats/jetstream-admin-password.txt`
+- `jetstream-admin` with `.local/nats/jetstream-admin-password.txt`
+- `control-plane-publisher` with `.local/nats/control-plane-publisher-password.txt`
+- `workflow-consumer` with `.local/nats/workflow-consumer-password.txt`
+- `alert-consumer` with `.local/nats/alert-consumer-password.txt`
+- `receipt-consumer` with `.local/nats/receipt-consumer-password.txt`
+- `agent-consumer` with `.local/nats/agent-consumer-password.txt`
 
-That principal can manage JetStream and publish the current platform subject
+`jetstream-admin` manages JetStream and publishes the current platform subject
 families:
 
 - `platform.>`
@@ -54,11 +59,16 @@ ansible-playbook -i inventory/hosts.yml playbooks/nats-jetstream.yml \
 The playbook:
 
 1. ensures the controller-local admin password exists
-2. renders `/opt/nats-jetstream/config/nats-server.conf`
-3. renders `/opt/nats-jetstream/docker-compose.yml`
-4. runs `docker compose pull`
-5. runs `docker compose up -d --remove-orphans`
-6. verifies `127.0.0.1:4222` and `http://127.0.0.1:8222/healthz`
+2. reads the preserved controller-local service-principal password files
+3. renders `/opt/nats-jetstream/config/nats-server.conf`
+4. renders `/opt/nats-jetstream/docker-compose.yml`
+5. runs `docker compose pull`
+6. runs `docker compose up -d --remove-orphans`
+7. verifies `127.0.0.1:4222` and `http://127.0.0.1:8222/healthz`
+
+If the additional service-principal password files do not already exist on the
+controller, mirror them from the live runtime before the first managed replay so
+the converge preserves the current auth contract instead of rotating it.
 
 ## Reconcile Streams
 

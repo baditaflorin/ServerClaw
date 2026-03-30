@@ -21,6 +21,7 @@
       - nats_jetstream_monitor_port | int > 0
       - nats_jetstream_publish_allow | length > 0
       - nats_jetstream_subscribe_allow | length > 0
+      - nats_jetstream_additional_users is iterable
     fail_msg: "nats_jetstream_runtime requires image, compose, port, and admin-password inputs."
 
 - name: Ensure the controller-local NATS artifact directory exists
@@ -58,6 +59,49 @@
 - name: Record the NATS admin password fact
   ansible.builtin.set_fact:
     nats_jetstream_admin_password: "{{ nats_jetstream_admin_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Read the controller-local NATS additional user passwords
+  ansible.builtin.slurp:
+    src: "{{ item.password_local_file }}"
+  loop: "{{ nats_jetstream_additional_users }}"
+  loop_control:
+    label: "{{ item.user }}"
+  delegate_to: localhost
+  become: false
+  register: nats_jetstream_additional_user_passwords
+  when: nats_jetstream_additional_users | length > 0
+  no_log: true
+
+- name: Seed the resolved NATS principal list with the admin principal
+  ansible.builtin.set_fact:
+    nats_jetstream_users_resolved:
+      - user: "{{ nats_jetstream_admin_user }}"
+        password: "{{ nats_jetstream_admin_password }}"
+        publish_allow: "{{ nats_jetstream_publish_allow }}"
+        subscribe_allow: "{{ nats_jetstream_subscribe_allow }}"
+        allow_responses: false
+  no_log: true
+
+- name: Append the additional NATS principals
+  ansible.builtin.set_fact:
+    nats_jetstream_users_resolved: >-
+      {{
+        nats_jetstream_users_resolved
+        + [
+            {
+              "user": item.item.user,
+              "password": item.content | b64decode | trim,
+              "publish_allow": item.item.publish_allow,
+              "subscribe_allow": item.item.subscribe_allow,
+              "allow_responses": item.item.allow_responses | default(false),
+            }
+          ]
+      }}
+  loop: "{{ nats_jetstream_additional_user_passwords.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item.user }}"
+  when: nats_jetstream_additional_users | length > 0
   no_log: true
 
 - name: Ensure the NATS JetStream runtime directories exist
