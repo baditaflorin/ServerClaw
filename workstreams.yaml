@@ -3601,9 +3601,9 @@ workstreams:
     title: Vulnerability budgets and image-host freshness promotion gates
     status: live_applied
     owner: codex
-    branch: codex/ws-0269-origin-main-refresh-v2
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0269-origin-main-refresh-v2
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0269-origin-main-refresh-v2/docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
+    branch: codex/ws-0269-origin-main-refresh-v4
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0269-origin-main-refresh-v4
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0269-origin-main-refresh-v4/docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md
     depends_on:
       - adr-0068-container-image-policy-and-supply-chain-integrity
       - adr-0102-security-posture-reporting
