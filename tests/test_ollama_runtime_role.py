@@ -59,10 +59,18 @@ def test_role_force_recreates_ollama_when_port_binding_is_missing() -> None:
         "{{ ollama_runtime_port }}",
     ]
 
-    recreate_task = next(
-        task for task in tasks if task.get("name") == "Force-recreate Ollama when the host port binding is missing"
+    recreate_block = next(
+        task for task in tasks if task.get("name") == "Force-recreate Ollama when the host port binding is missing and recover stale Docker networking drift"
     )
+    recreate_task = next(
+        task for task in recreate_block["block"] if task.get("name") == "Force-recreate Ollama when the host port binding is missing"
+    )
+    rescue_names = [task["name"] for task in recreate_block["rescue"]]
+
     assert "--force-recreate" in recreate_task["ansible.builtin.command"]["argv"]
+    assert "Detect stale Docker networking drift during Ollama force-recreate" in rescue_names
+    assert "Remove the stale Ollama compose network before retrying force-recreate" in rescue_names
+    assert "Retry Ollama force-recreate after Docker networking recovery" in rescue_names
 
 
 def test_compose_template_exposes_private_runtime_port_and_model_volume() -> None:
