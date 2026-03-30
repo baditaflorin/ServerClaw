@@ -1,0 +1,67 @@
+services:
+  openbao-agent:
+    image: {{ flagsmith_openbao_agent_image }}
+    container_name: {{ flagsmith_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    restart: unless-stopped
+    network_mode: host
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ flagsmith_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    cap_add:
+      - IPC_LOCK
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - {{ flagsmith_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ flagsmith_env_file | dirname }}:{{ flagsmith_env_file | dirname }}
+
+  flagsmith:
+    image: {{ flagsmith_runtime_image }}
+    container_name: {{ flagsmith_container_name }}
+    restart: unless-stopped
+    env_file:
+      - {{ flagsmith_env_file }}
+    environment:
+      ACCESS_LOG_LOCATION: {{ flagsmith_access_log_file | to_json }}
+      ACCESS_LOG_FORMAT: {{ flagsmith_access_log_format | to_json }}
+      GUNICORN_TIMEOUT: "{{ flagsmith_api_timeout_seconds }}"
+      GUNICORN_WORKERS: "{{ flagsmith_api_workers }}"
+      GUNICORN_THREADS: "{{ flagsmith_api_threads }}"
+      GUNICORN_KEEP_ALIVE: "{{ flagsmith_api_keepalive_seconds }}"
+    ports:
+      - "{{ ansible_host }}:{{ flagsmith_internal_port }}:8000"
+      - "127.0.0.1:{{ flagsmith_internal_port }}:8000"
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+
+  flagsmith-task-processor:
+    image: {{ flagsmith_runtime_image }}
+    container_name: {{ flagsmith_task_processor_container_name }}
+    restart: unless-stopped
+    env_file:
+      - {{ flagsmith_env_file }}
+    environment:
+      ACCESS_LOG_LOCATION: {{ flagsmith_access_log_file | to_json }}
+      ACCESS_LOG_FORMAT: {{ flagsmith_access_log_format | to_json }}
+      TASK_PROCESSOR_SLEEP_INTERVAL_MS: "{{ flagsmith_task_processor_sleep_interval_ms }}"
+      TASK_PROCESSOR_GRACE_PERIOD_MS: "{{ flagsmith_task_processor_grace_period_ms }}"
+      TASK_PROCESSOR_NUM_THREADS: "{{ flagsmith_task_processor_threads }}"
+      TASK_PROCESSOR_QUEUE_POP_SIZE: "{{ flagsmith_task_processor_queue_pop_size }}"
+    command:
+      - run-task-processor
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+      flagsmith:
+        condition: service_started

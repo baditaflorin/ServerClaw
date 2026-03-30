@@ -1,0 +1,29 @@
+---
+# Playbook: services/flagsmith.yml
+# Purpose: Provide the stable live-apply service wrapper for Flagsmith.
+# Use case: Run `make live-apply-service service=flagsmith` so the generic service lane can invoke the Flagsmith converge playbook.
+#
+# Inputs (required):
+#   - env (str, required): Environment selector passed by the live-apply wrapper.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH connection strategy.
+#
+# Outputs:
+#   - Imports the canonical Flagsmith converge playbook.
+#
+# Idempotency: Fully idempotent
+#              The wrapper only imports the canonical playbook and adds no extra mutation.
+#
+# Dependencies:
+#   - ADR 0288: Flagsmith as the feature flag and remote configuration service.
+#   - Requires: playbooks/flagsmith.yml
+#   - Role: imported playbook — owns all live mutations.
+#
+# Related ADRs: 0288
+# Related Runbooks: docs/runbooks/configure-flagsmith.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+
+- import_playbook: ../flagsmith.yml

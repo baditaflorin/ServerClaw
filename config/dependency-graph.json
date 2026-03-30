@@ -138,6 +138,15 @@
       "adr": "0202"
     },
     {
+      "id": "flagsmith",
+      "service": "flagsmith",
+      "name": "Flagsmith",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0288"
+    },
+    {
       "id": "gitea",
       "service": "gitea",
       "name": "Gitea",
@@ -702,6 +711,36 @@
       "to": "nginx_edge",
       "type": "hard",
       "description": "The private diagram surface is published at draw.lv3.org through the shared NGINX edge, including the routed /socket.io/ collaboration path."
+    },
+    {
+      "from": "flagsmith",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Flagsmith Community Edition runtime and task processor are hosted on docker-runtime-lv3."
+    },
+    {
+      "from": "flagsmith",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Browser access to flags.lv3.org is gated by the shared oauth2-proxy and Keycloak edge-auth path, while private environment-key consumers continue to use the internal runtime directly."
+    },
+    {
+      "from": "flagsmith",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public reachability for flags.lv3.org depends on the shared NGINX edge publication path."
+    },
+    {
+      "from": "flagsmith",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Flagsmith consumes mirrored runtime secrets and publishes seeded environment API keys through the OpenBao-backed compose environment path."
+    },
+    {
+      "from": "flagsmith",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Flagsmith stores organisations, projects, environments, feature state, and audit metadata in the shared PostgreSQL cluster."
     },
     {
       "from": "gitea",

@@ -1,9 +1,10 @@
 # ADR 0288: Flagsmith As The Feature Flag And Remote Configuration Service
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.109
+- Implemented In Platform Version: 0.130.71
+- Implemented On: 2026-03-30
 - Date: 2026-03-29
 
 ## Context
@@ -42,15 +43,18 @@ service for platform applications.
 
 - Flagsmith runs as a Docker Compose service on the docker-runtime VM using
   the official `flagsmith/flagsmith` image
-- Authentication to the Flagsmith management UI and API is delegated to
-  Keycloak via OIDC (ADR 0063)
+- Authentication to the Flagsmith management UI and browser-reachable
+  management API is enforced at the shared NGINX edge via oauth2-proxy
+  and Keycloak (ADR 0063); the verified upstream path does not require a
+  service-local OIDC client inside Flagsmith itself
 - The service is published under the platform subdomain model (ADR 0021) at
   `flags.<domain>`; the management API is at `flags.<domain>/api/v1/`
 - Flagsmith uses the shared PostgreSQL cluster (ADR 0042) with a dedicated
   `flagsmith` database
 - Persistent state is included in the backup scope (ADR 0086)
-- Secrets (database password, OIDC client credentials, Django secret key)
-  are injected from OpenBao following ADR 0077
+- Secrets (database password, Django secret key, bootstrap admin password,
+  and mirrored environment API keys) are injected or mirrored through
+  OpenBao following ADR 0077
 
 ### API-first operation rules
 

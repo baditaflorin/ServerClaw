@@ -1,0 +1,78 @@
+---
+# Purpose: Verify the local Flagsmith runtime, task processor, seeded state, and environment-key evaluation path.
+
+- name: Verify the Flagsmith local health endpoint
+  ansible.builtin.uri:
+    url: "{{ flagsmith_internal_base_url }}/health"
+    method: GET
+    status_code:
+      - 200
+    return_content: false
+    timeout: 30
+  register: flagsmith_verify_health
+  retries: 24
+  delay: 5
+  until: flagsmith_verify_health.status == 200
+  changed_when: false
+
+- name: Verify the Flagsmith task processor readiness endpoint
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ flagsmith_task_processor_container_name }}"
+      - python
+      - -c
+      - >-
+        import sys, urllib.request;
+        sys.exit(
+            0
+            if urllib.request.urlopen("http://127.0.0.1:8000/health/readiness", timeout=30).getcode() == 200
+            else 1
+        )
+  register: flagsmith_task_processor_health
+  retries: 24
+  delay: 5
+  until: flagsmith_task_processor_health.rc == 0
+  changed_when: false
+
+- name: Verify the Flagsmith seeded state and environment-key evaluation path
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ flagsmith_seed_script_remote_file }}"
+      - verify
+      - --base-url
+      - "{{ flagsmith_internal_base_url }}"
+      - --admin-email
+      - "{{ flagsmith_admin_email }}"
+      - --admin-password-file
+      - "{{ flagsmith_admin_password_remote_file }}"
+      - --organisation-name
+      - "{{ flagsmith_organisation_name }}"
+      - --project-name
+      - "{{ flagsmith_project_name }}"
+      - --environment-spec-json
+      - "{{ flagsmith_environment_definitions | to_json }}"
+      - --feature-spec-json
+      - "{{ flagsmith_seed_features | to_json }}"
+      - --verify-boolean-feature
+      - "{{ flagsmith_verify_boolean_feature }}"
+      - --expected-boolean-json
+      - "{{ flagsmith_verify_boolean_expectations | to_json }}"
+      - --verify-config-feature
+      - "{{ flagsmith_verify_config_feature }}"
+      - --expected-config-json
+      - "{{ flagsmith_verify_config_expectations | to_json }}"
+  register: flagsmith_verify_seed
+  changed_when: false
+  no_log: true
+
+- name: Assert the local Flagsmith verification results are healthy
+  ansible.builtin.assert:
+    that:
+      - flagsmith_verify_health.status == 200
+      - flagsmith_task_processor_health.rc == 0
+      - (flagsmith_verify_seed.stdout | trim | from_json).healthy
+    fail_msg: "Flagsmith answered locally, but the task processor, seeded environments, or environment-key verification did not pass."
+  no_log: true

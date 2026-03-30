@@ -49,6 +49,14 @@ class SubdomainCatalogTests(unittest.TestCase):
             "edge_oidc",
         )
         self.assertEqual(
+            subdomain_catalog.get_subdomain_entry(self.catalog, "flags.lv3.org")["auth_requirement"],
+            "edge_oidc",
+        )
+        self.assertEqual(
+            subdomain_catalog.get_subdomain_entry(self.catalog, "flags.lv3.org")["service_id"],
+            "flagsmith",
+        )
+        self.assertEqual(
             subdomain_catalog.get_subdomain_entry(self.catalog, "lv3.org")["service_id"],
             "nginx_edge",
         )

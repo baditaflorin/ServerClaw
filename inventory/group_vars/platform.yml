@@ -180,6 +180,7 @@ platform_ports:
   searxng_host_proxy_port: 80
   langfuse_port: 3002
   plausible_port: 8016
+  flagsmith_port: 8017
   dify_port: 8094
   changedetection_port: 5000
   browser_runner_port: 8096
@@ -257,6 +258,7 @@ platform_port_assignments:
   searxng_host_proxy_port: 80
   langfuse_port: 3002
   plausible_port: 8016
+  flagsmith_port: 8017
   dify_port: 8094
   changedetection_port: 5000
   browser_runner_port: 8096
@@ -1575,6 +1577,34 @@ platform_service_topology:
     urls:
       public: https://langfuse.lv3.org
       internal: http://10.10.10.20:3002
+  flagsmith:
+    service_name: flagsmith
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: flags.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: flags
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8017
+    service_id: flagsmith
+    ports:
+      internal: 8017
+    urls:
+      public: https://flags.lv3.org
+      internal: http://10.10.10.20:8017
   plausible:
     service_name: plausible
     owning_vm: docker-runtime-lv3
@@ -2393,6 +2423,10 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: flags
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: analytics
       type: A
       value: 65.108.75.123
@@ -3108,6 +3142,34 @@ public_edge_service_topology:
     urls:
       public: https://langfuse.lv3.org
       internal: http://10.10.10.20:3002
+  flagsmith:
+    service_name: flagsmith
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: flags.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: flags
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8017
+    service_id: flagsmith
+    ports:
+      internal: 8017
+    urls:
+      public: https://flags.lv3.org
+      internal: http://10.10.10.20:8017
   plausible:
     service_name: plausible
     owning_vm: docker-runtime-lv3
@@ -3991,6 +4053,7 @@ searxng_port: 8881
 searxng_host_proxy_port: 80
 langfuse_port: 3002
 plausible_port: 8016
+flagsmith_port: 8017
 dify_port: 8094
 changedetection_port: 5000
 browser_runner_port: 8096

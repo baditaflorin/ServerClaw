@@ -230,6 +230,10 @@ public_edge_authenticated_sites:
     auth_proxy_upstream: http://127.0.0.1:4180
   draw.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
+  flags.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+    unauthenticated_paths:
+      - /health
   agents.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
     unauthenticated_paths:

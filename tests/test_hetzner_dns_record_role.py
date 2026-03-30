@@ -43,6 +43,15 @@ def test_single_record_role_retries_transient_provider_errors() -> None:
     assert "DNS Console brownout during migration" in tasks
 
 
+def test_single_record_role_sends_json_scalars_and_rejects_embedded_provider_errors() -> None:
+    tasks = ROLE_TASKS.read_text(encoding="utf-8")
+
+    assert "Content-Type: application/json" in tasks
+    assert "| to_json" in tasks
+    assert "json.error" in tasks
+    assert "json.record.id" in tasks
+
+
 def test_single_record_role_reports_provider_error_details_after_retries() -> None:
     tasks = ROLE_TASKS.read_text(encoding="utf-8")
 

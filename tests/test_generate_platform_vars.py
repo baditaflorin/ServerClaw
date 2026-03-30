@@ -121,6 +121,18 @@ def test_build_platform_vars_includes_plausible_publication_topology() -> None:
     assert plausible["edge"]["preserve_upstream_security_headers"] is True
 
 
+def test_build_platform_vars_includes_flagsmith_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    flagsmith = platform_vars["platform_service_topology"]["flagsmith"]
+
+    assert flagsmith["public_hostname"] == "flags.lv3.org"
+    assert flagsmith["dns"]["name"] == "flags"
+    assert flagsmith["ports"]["internal"] == 8017
+    assert flagsmith["urls"]["public"] == "https://flags.lv3.org"
+    assert flagsmith["urls"]["internal"] == "http://10.10.10.20:8017"
+    assert platform_vars["flagsmith_port"] == 8017
+
+
 def test_build_platform_vars_includes_tika_private_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     tika = platform_vars["platform_service_topology"]["tika"]

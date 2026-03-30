@@ -85,6 +85,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
                 "coolify.lv3.org",
                 "docs.lv3.org",
                 "draw.lv3.org",
+                "flags.lv3.org",
                 "home.lv3.org",
                 "langfuse.lv3.org",
                 "logs.lv3.org",
@@ -109,6 +110,8 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             protected_sites["analytics.lv3.org"]["unauthenticated_prefix_paths"],
             ["/js/"],
         )
+        self.assertEqual(protected_sites["flags.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
+        self.assertEqual(protected_sites["flags.lv3.org"]["unauthenticated_paths"], ["/health"])
         self.assertEqual(protected_sites["agents.lv3.org"]["unauthenticated_paths"], ["/healthz"])
         self.assertEqual(protected_sites["agents.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
         self.assertNotIn("unauthenticated_paths", protected_sites["coolify.lv3.org"])

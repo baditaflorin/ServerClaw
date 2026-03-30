@@ -626,6 +626,76 @@
         }
       }
     },
+    "flagsmith": {
+      "service_name": "flagsmith",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "flagsmith_runtime",
+      "verify_file": "roles/flagsmith_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Flagsmith startup completes once the local health endpoint responds on the private runtime listener.",
+        "timeout_seconds": 300,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8017/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The local Flagsmith health endpoint continues to answer on docker-runtime-lv3.",
+        "timeout_seconds": 300,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8017/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The public Flagsmith health endpoint answers through the shared NGINX edge while the browser UI and management API remain protected by the shared auth boundary.",
+        "timeout_seconds": 300,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "https://flags.lv3.org/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "docker_publication": {
+          "container_name": "flagsmith",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 8017
+            }
+          ],
+          "required_networks": [
+            "flagsmith_default"
+          ]
+        }
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Flagsmith Public Health",
+          "type": "http",
+          "url": "https://flags.lv3.org/health",
+          "description": "Public Flagsmith health endpoint published through the shared NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
     "gitea": {
       "service_name": "gitea",
       "owning_vm": "docker-runtime-lv3",

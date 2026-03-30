@@ -177,13 +177,18 @@
     method: POST
     headers:
       Auth-API-Token: "{{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
-    body_format: json
-    body:
-      zone_id: "{{ dns_provider_boundary_zone.provider_ref }}"
-      name: "{{ hetzner_dns_record_name }}"
-      type: "{{ hetzner_dns_record_type }}"
-      value: "{{ hetzner_dns_record_value }}"
-      ttl: "{{ hetzner_dns_record_ttl | int }}"
+      Content-Type: application/json
+    body: >-
+      {{
+        {
+          "zone_id": dns_provider_boundary_zone.provider_ref,
+          "name": hetzner_dns_record_name,
+          "type": hetzner_dns_record_type,
+          "value": hetzner_dns_record_value,
+          "ttl": (hetzner_dns_record_ttl | int)
+        } | to_json
+      }}
+    return_content: true
     status_code:
       - 200
       - 201
@@ -237,13 +242,18 @@
     method: PUT
     headers:
       Auth-API-Token: "{{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
-    body_format: json
-    body:
-      zone_id: "{{ dns_provider_boundary_zone.provider_ref }}"
-      name: "{{ hetzner_dns_record_name }}"
-      type: "{{ hetzner_dns_record_type }}"
-      value: "{{ hetzner_dns_record_value }}"
-      ttl: "{{ hetzner_dns_record_ttl | int }}"
+      Content-Type: application/json
+    body: >-
+      {{
+        {
+          "zone_id": dns_provider_boundary_zone.provider_ref,
+          "name": hetzner_dns_record_name,
+          "type": hetzner_dns_record_type,
+          "value": hetzner_dns_record_value,
+          "ttl": (hetzner_dns_record_ttl | int)
+        } | to_json
+      }}
+    return_content: true
     status_code:
       - 200
       - 429

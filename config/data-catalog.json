@@ -97,6 +97,20 @@
       "notes": "The committed architecture scene sources are regenerated from repo truth and remain part of normal repository backup scope."
     },
     {
+      "id": "flagsmith-control-plane-state",
+      "service": "flagsmith",
+      "name": "Flagsmith project, environment, and feature state",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Flagsmith PostgreSQL database on postgres-lv3"
+      ],
+      "notes": "Flagsmith persists organisations, projects, environments, feature definitions, segment metadata, and environment-specific flag state in the shared PostgreSQL cluster."
+    },
+    {
       "id": "fixture-receipts",
       "service": "platform_control_plane",
       "name": "Ephemeral fixture receipts",
