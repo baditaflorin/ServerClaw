@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-03-30",
   "recorded_on": "2026-03-30",
-  "recorded_at": "2026-03-30T20:22:13Z",
+  "recorded_at": "2026-03-30T21:00:25Z",
   "recorded_by": "codex",
   "source_commit": "0b32e585bbf2f0445f9eddd153923f93c221dba2",
   "repo_version_context": "0.177.109",
   "platform_version_context": "0.130.72",
   "workflow_id": "adr-0288-flagsmith-mainline-live-apply",
   "adr": "0288",
-  "summary": "Replayed ADR 0288 from the merged `0.177.108 / 0.130.71` baseline using committed source `0b32e585bbf2f0445f9eddd153923f93c221dba2`, published the repo-managed Flagsmith runtime at `flags.lv3.org` behind the shared oauth2-proxy and Keycloak boundary, verified public and guest-local health from the exact-main `0.177.109` tree, and advanced the tracked platform baseline to `0.130.72`.",
+  "summary": "Replayed ADR 0288 from committed source `0b32e585bbf2f0445f9eddd153923f93c221dba2`, published the repo-managed Flagsmith runtime at `flags.lv3.org` behind the shared oauth2-proxy and Keycloak boundary, verified public and guest-local health from the exact-main `0.177.109` tree, and attached the canonical Flagsmith receipt to the already-merged `0.177.109 / 0.130.72` mainline baseline without advancing the tracked platform version again.",
   "targets": [
     {
       "kind": "host",
@@ -62,7 +62,7 @@
     {
       "check": "Exact-main release preparation",
       "result": "pass",
-      "observed": "`scripts/release_manager.py --dry-run` confirmed current version `0.177.108`, next version `0.177.109`, and one unreleased note, and the release write prepared `0.177.109` while preserving the pre-replay platform baseline at `0.130.71`."
+      "observed": "The earlier exact-main candidate preserved release-preparation provenance in `receipts/live-applies/evidence/2026-03-30-ws-0288-mainline-r2-release-dry-run.txt` and `receipts/live-applies/evidence/2026-03-30-ws-0288-mainline-r1-release-write.txt`; after `origin/main` later absorbed ADR 0293, the rebased integration retained those receipts as history while preserving the already-merged `0.177.109 / 0.130.72` baseline."
     },
     {
       "check": "Authoritative committed-source live replay",
@@ -125,7 +125,7 @@
     "receipts/live-applies/2026-03-30-adr-0288-flagsmith-live-apply.json"
   ],
   "notes": [
-    "This canonical exact-main receipt advances the tracked platform baseline from 0.130.71 to 0.130.72 on release 0.177.109.",
+    "This canonical exact-main receipt carries ADR 0288 onto the already-merged 0.177.109 / 0.130.72 baseline without advancing platform_version again.",
     "The earlier branch-local receipt remains the first-live audit trail for ADR 0288 on platform version 0.130.71.",
     "The first exact-main remote-validate attempt on the shared worktree exposed two real generated-surface drifts (`config/prometheus/file_sd/https_tls_targets.yml` and `docs/site-generated/architecture/dependency-graph.md`) and also inherited an unrelated dirty `receipts/ops-portal-snapshot.html`; the final automation replay moved to a clean candidate worktree after those surfaces were refreshed.",
     "An earlier direct guest-local curl attempt briefly failed before the service fully settled, but the final guest-local health probe and runtime-state capture confirmed a healthy Flagsmith container plus health page on `docker-runtime-lv3`."
@@ -133,7 +133,7 @@
   "correction_loop": {
     "loop_id": "2026-03-30-adr-0288-flagsmith-mainline-closeout",
     "surface": "receipts/live-applies/2026-03-30-adr-0288-flagsmith-mainline-live-apply.json",
-    "repair_action": "Moved the exact-main integration onto a clean candidate worktree, refreshed the HTTPS TLS assurance targets and dependency-graph page from the merged catalog state, and reran the full automation gates before recording the canonical mainline receipt and platform-version advance.",
+    "repair_action": "Moved the exact-main integration onto a clean candidate worktree, refreshed the HTTPS TLS assurance targets and dependency-graph page from the merged catalog state, reran the full automation gates, and then rebased the canonical closeout onto the already-merged 0.177.109 / 0.130.72 mainline baseline before recording the Flagsmith mainline receipt.",
     "verification": "Replayed the committed source on the live server, verified public and guest-local Flagsmith health, reran the repository validation bundle, passed remote-validate, and passed the full pre-push gate from the clean exact-main candidate.",
     "diagnosis": "stale_input"
   }

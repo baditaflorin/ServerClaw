@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.109",
   "platform_version": "0.130.72",
-  "generated_at": "2026-03-30T20:35:31Z",
-  "next_refresh_at": "2026-03-30T21:35:31Z",
+  "generated_at": "2026-03-30T21:07:53Z",
+  "next_refresh_at": "2026-03-30T22:07:53Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -5116,7 +5116,7 @@
   "recent_changes": {
     "last_version": "0.177.108",
     "deployed_at": "2026-03-30",
-    "summary": "implements ADR 0293 by adding the private Temporal durable workflow engine, PostgreSQL-backed history and visibility stores, OpenBao-managed runtime secrets, and the repo-managed `lv3` namespace, and ADR 0288 by adding the repo-managed Flagsmith runtime, OpenBao-backed seed and environment key publication, and public flags.lv3.org edge routing",
+    "summary": "implements ADR 0293 by adding the private Temporal durable workflow engine, PostgreSQL-backed history and visibility stores, OpenBao-managed runtime secrets, and the repo-managed `lv3` namespace, and ADR 0288 by adding the repo-managed Flagsmith runtime, OpenBao-backed seed and environment key publication, public `flags.lv3.org` edge routing, and live verification hardening for sparse feature-state API responses plus Docker bridge-chain recovery",
     "release_notes_url": "docs/release-notes/0.177.109.md"
   },
   "agentic_architecture": {

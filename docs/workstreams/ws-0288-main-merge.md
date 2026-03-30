@@ -4,7 +4,7 @@
 - Title: Integrate ADR 0288 Flagsmith exact-main replay onto `origin/main`
 - Status: merged
 - Included In Repo Version: 0.177.109
-- Platform Version Observed During Integration: 0.130.71
+- Platform Version Observed During Integration: 0.130.72
 - Release Date: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0288-main-merge`
@@ -17,8 +17,8 @@
 Carry the verified ADR 0288 Flagsmith workstream onto the newest available
 `origin/main`, refresh the protected release and canonical-truth surfaces from
 that synchronized baseline, rerun the exact-main live replay from committed
-source, and publish the canonical mainline receipt that justifies the
-repository and platform version advances.
+source, and publish the canonical mainline receipt that preserves the settled
+`0.177.109 / 0.130.72` release and platform baseline.
 
 ## Shared Surfaces
 
@@ -94,12 +94,12 @@ repository and platform version advances.
   `receipts/live-applies/evidence/2026-03-30-ws-0288-mainline-r1-targeted-checks.txt`.
 - `make syntax-check-flagsmith` passed on the synchronized tree, recorded in
   `receipts/live-applies/evidence/2026-03-30-ws-0288-mainline-r1-syntax-checks.txt`.
-- The release dry run first confirmed current version `0.177.108`, next version
-  `0.177.109`, and one unreleased changelog note in
-  `receipts/live-applies/evidence/2026-03-30-ws-0288-mainline-r2-release-dry-run.txt`.
-- The release write then prepared `0.177.109` while preserving the pre-replay
-  platform baseline at `0.130.71`, recorded in
-  `receipts/live-applies/evidence/2026-03-30-ws-0288-mainline-r1-release-write.txt`.
+- The earlier exact-main candidate preserved release-preparation provenance in
+  `receipts/live-applies/evidence/2026-03-30-ws-0288-mainline-r2-release-dry-run.txt`
+  and `receipts/live-applies/evidence/2026-03-30-ws-0288-mainline-r1-release-write.txt`;
+  after `origin/main` later absorbed ADR 0293, the rebased merge retained
+  those receipts as history while preserving the already-published
+  `0.177.109 / 0.130.72` baseline.
 - The authoritative exact-main replay from committed source
   `0b32e585bbf2f0445f9eddd153923f93c221dba2` passed via
   `ALLOW_IN_PLACE_MUTATION=true HETZNER_DNS_API_TOKEN=... make live-apply-service service=flagsmith env=production`,
@@ -150,13 +150,14 @@ repository and platform version advances.
 
 ## Outcome
 
-- Release `0.177.109` now carries ADR 0288 onto the latest shared mainline
-  baseline of `0.177.108 / 0.130.71`.
+- Release `0.177.109` now carries ADR 0288 on top of the settled shared
+  mainline baseline of `0.177.109 / 0.130.72`.
 - The authoritative committed replay from
   `0b32e585bbf2f0445f9eddd153923f93c221dba2` refreshed the repo-managed
   Flagsmith runtime plus the authenticated public `flags.lv3.org` edge route
-  on the live server, and the integrated canonical truth advances the tracked
-  platform baseline to `0.130.72`.
+  on the live server, and the integrated canonical truth preserves that
+  verified release and platform baseline while adding the Flagsmith mainline
+  receipt.
 - `receipts/live-applies/2026-03-30-adr-0288-flagsmith-mainline-live-apply.json`
   is the canonical mainline receipt for ADR 0288; the earlier branch-local
   receipt on `0.130.71` remains part of the audit trail.

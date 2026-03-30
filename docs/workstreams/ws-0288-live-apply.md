@@ -120,17 +120,19 @@
   the canonical record as managed and drift-free, with both DNS tasks skipped
   because no change is required.
 - The exact-main integration lane then carried ADR 0288 onto the shared
-  `0.177.108 / 0.130.71` baseline, replayed the committed `0.177.109` source,
-  and published the canonical receipt
+  `origin/main` baseline after it had already settled at
+  `0.177.109 / 0.130.72`, replayed the committed `0.177.109` source, and
+  published the canonical receipt
   `receipts/live-applies/2026-03-30-adr-0288-flagsmith-mainline-live-apply.json`.
 
-## Remaining For Merge-To-Main
+## Mainline Closeout
 
 - The branch-local receipt remains the first-live audit trail for ADR 0288 on
   platform version `0.130.71`.
 - The protected release and canonical-truth surfaces are now carried by
   `ws-0288-main-merge`, whose canonical receipt is
   `receipts/live-applies/2026-03-30-adr-0288-flagsmith-mainline-live-apply.json`.
-- The exact-main integration lane advances the tracked platform baseline from
-  `0.130.71` to `0.130.72` on release `0.177.109` while preserving this
-  workstream's branch-local evidence as audit history.
+- The exact-main integration lane preserves the already-merged
+  `0.177.109 / 0.130.72` baseline while carrying ADR 0288's canonical
+  mainline receipt and preserving this workstream's branch-local evidence as
+  audit history.
