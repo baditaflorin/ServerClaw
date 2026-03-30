@@ -3,7 +3,7 @@
 - ADR: [ADR 0274](../adr/0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments.md)
 - Title: Make the governed repo-deploy base-image warm-cache contract fully true on `coolify-lv3`
 - Status: live_applied
-- Implemented In Repo Version: 0.177.103
+- Implemented In Repo Version: 0.177.104
 - Live Applied In Platform Version: 0.130.69
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0274-main-merge-r4`
@@ -67,7 +67,8 @@
 - Before this workstream, `coolify-lv3` only had the first ADR 0274 slice: Docker used `https://mirror.gcr.io` and explicit public resolvers, but there was no governed repo-deploy warm plan, no warm receipt, and no refresh timer on the deployment lane.
 - This mainline candidate adds the approved deployment profile catalog, the `repo_deploy_image_cache` role, the guest-local warm-plan and receipt contract, the scheduled timer-driven refresh surface, and the Coolify bootstrap/publication hardening required to keep the replay self-healing from a separate worktree and on guests that rely on `nftables`.
 - The live platform now holds the approved refs `docker.io/library/postgres:17.4-alpine3.21`, `mirror.gcr.io/library/alpine:3.21.3`, `mirror.gcr.io/library/golang:1.25.0-alpine3.21`, `mirror.gcr.io/library/node:22.14.0-bookworm-slim`, and `mirror.gcr.io/nginxinc/nginx-unprivileged:1.27.5-alpine3.21` under the governed warm-cache contract.
+- While this branch was clearing the remote push gate, concurrent ADR 0296 work advanced `origin/main` to `0.177.103` on the same verified platform version `0.130.69`; ADR 0274 is therefore being recut on top as `0.177.104` without changing the already-verified live host baseline.
 
 ## Merge-To-Main Remaining
 
-- none after the `0.177.103` exact-main integration and canonical receipt refresh
+- none after the `0.177.104` post-ADR-0296 integration and canonical receipt refresh

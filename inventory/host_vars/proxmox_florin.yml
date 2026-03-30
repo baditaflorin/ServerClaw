@@ -428,6 +428,29 @@ proxmox_guests:
     packages:
       - docker.io
       - git
+  - vmid: 180
+    name: artifact-cache-lv3
+    role: artifact-cache
+    template_key: lv3-debian-base
+    ipv4: 10.10.10.80
+    cidr: 24
+    gateway4: 10.10.10.1
+    macaddr: BC:24:11:18:AC:80
+    cores: 4
+    memory_mb: 8192
+    disk_gb: 160
+    tags:
+      - artifact-cache
+      - cache
+      - docker
+      - lv3
+    placement:
+      failure_domain: host:proxmox_florin
+      placement_class: primary
+      anti_affinity_group: artifact-cache-plane
+      co_location_exceptions: []
+    packages:
+      - docker.io
 
 network_policy:
   guest_management_sources:
@@ -800,6 +823,29 @@ network_policy:
             - 8000
             - 8096
           description: Shared edge publication for the Coolify dashboard and wildcard app ingress
+    artifact-cache-lv3:
+      allowed_inbound:
+        - source: management
+          protocol: tcp
+          ports:
+            - 22
+          description: Operator and Ansible SSH access
+        - source: host
+          protocol: tcp
+          ports:
+            - 5001
+            - 5002
+            - 5003
+            - 5004
+          description: Host-side verification and private cache-plane checks
+        - source: docker-build-lv3
+          protocol: tcp
+          ports:
+            - 5001
+            - 5002
+            - 5003
+            - 5004
+          description: Build-host and CI consumers use the dedicated cache plane
     postgres-lv3:
       allowed_inbound:
         - source: management

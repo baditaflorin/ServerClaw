@@ -17,6 +17,13 @@ playbooks:
     shared_surfaces:
       - service:backup-vm
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/artifact-cache-vm.yml:
+    playbook_id: artifact-cache-vm
+    mutation_scope: platform
+    shared_surfaces:
+      - service:artifact-cache-vm
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/control-plane-recovery.yml:
     playbook_id: control-plane-recovery
     mutation_scope: platform

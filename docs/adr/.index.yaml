@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-30'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 260
+  Implemented: 261
   Partial: 6
-  Not Implemented: 57
+  Not Implemented: 56
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4705,7 +4705,7 @@ adr_index:
       - deployments
     summary: We will add a cache-first base-image policy for governed repo deployments.
     filename: 0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments.md
-    implemented_version: 0.177.103
+    implemented_version: 0.177.104
   - adr: '0274'
     title: MinIO As The S3-Compatible Object Storage Layer
     status: Accepted
@@ -5220,7 +5220,7 @@ adr_index:
   - adr: 0296
     title: Dedicated Artifact-Cache VM With Phased Consumer Adoption
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: vm-topology
     keywords:
@@ -5232,6 +5232,7 @@ adr_index:
       - adoption
     summary: We will adopt artifact caching in two phases.
     filename: 0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md
+    implemented_version: 0.177.103
   - adr: 0297
     title: Renovate Bot As The Automated Stack Version Upgrade Proposer
     status: Accepted

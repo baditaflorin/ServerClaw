@@ -3,7 +3,7 @@
   "receipt_id": "2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply",
   "applied_on": "2026-03-30",
   "recorded_on": "2026-03-30",
-  "recorded_at": "2026-03-30T13:47:58Z",
+  "recorded_at": "2026-03-30T14:14:21Z",
   "recorded_by": "codex",
   "workflow_id": "adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply",
   "adr": "0274",
@@ -14,7 +14,7 @@
   "source_commit": "4ee7c5c596d6a9013c825576a45c9a4134512c9d",
   "repo_version_context": "0.177.102",
   "platform_version_context": "0.130.68",
-  "integrated_repo_version": "0.177.103",
+  "integrated_repo_version": "0.177.104",
   "integrated_platform_version": "0.130.69",
   "result": "pass",
   "summary": "Replayed ADR 0274 from the latest merged origin/main candidate, fixed the exact-main helper path and nftables-only publication verification edge cases, and confirmed the governed repo-deploy image warm-cache contract end to end.",
@@ -149,6 +149,6 @@
   "notes": [
     "The exact-main live apply was executed from the refreshed latest-main candidate rooted at source commit 4ee7c5c596d6a9013c825576a45c9a4134512c9d.",
     "The preserved `r6` evidence captures the initial failed replay caused by a helper installation path that assumed the primary worktree layout, and the follow-up verification run before the nftables-only fallback was added.",
-    "The integrated metadata updates that move the repo to 0.177.103 and preserve platform version 0.130.69 do not change the converged runtime behavior already verified by this replay."
+    "A concurrent ADR 0296 mainline release advanced origin/main to 0.177.103 while this branch was clearing remote validation, so ADR 0274 is integrated on top as 0.177.104 while preserving the same verified platform version 0.130.69 and the already-converged coolify-lv3 runtime state."
   ]
 }

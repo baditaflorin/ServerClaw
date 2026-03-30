@@ -21,6 +21,7 @@ Anything not listed here is denied by default between guests.
 | management sources | `monitoring-lv3` | `22` | operator and Ansible SSH |
 | management sources | `postgres-lv3` | `22` | operator and Ansible SSH |
 | management sources | `backup-lv3` | `22` | operator and Ansible SSH |
+| management sources | `artifact-cache-lv3` | `22` | operator and Ansible SSH |
 | public internet | `nginx-lv3` | `80`, `443` | public edge ingress |
 | public internet | `docker-runtime-lv3` | `25`, `587`, `993` | public mail ingress |
 | `nginx-lv3` | `docker-runtime-lv3` | `3001` | reverse proxy to Uptime Kuma |
@@ -32,6 +33,8 @@ Anything not listed here is denied by default between guests.
 | Proxmox host | `postgres-lv3` | `5432` | private PostgreSQL TCP proxy |
 | `docker-runtime-lv3` | `postgres-lv3` | `5432` | application databases and OpenBao rotation |
 | Proxmox host | `backup-lv3` | `8007` | Proxmox Backup Server access |
+| Proxmox host | `artifact-cache-lv3` | `5001`, `5002`, `5003`, `5004` | private cache-plane verification and host-side checks |
+| `docker-build-lv3` | `artifact-cache-lv3` | `5001`, `5002`, `5003`, `5004` | private artifact-cache mirrors for build and CI consumers |
 
 ## Related Surfaces
 

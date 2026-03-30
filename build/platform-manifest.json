@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.103",
+  "repo_version": "0.177.104",
   "platform_version": "0.130.69",
-  "generated_at": "2026-03-30T13:52:03Z",
-  "next_refresh_at": "2026-03-30T14:52:03Z",
+  "generated_at": "2026-03-30T14:15:16Z",
+  "next_refresh_at": "2026-03-30T15:15:16Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -854,6 +854,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/ansible-collection-development.md"
+      },
+      {
+        "id": "configure-artifact-cache-vm",
+        "description": "Provision the dedicated artifact-cache VM, converge the private cache-plane runtime on it, and leave build-host consumer adoption to the governed service replay.",
+        "tags": [
+          "configure-artifact-cache-vm",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 260,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-artifact-cache-vm.md"
       },
       {
         "id": "configure-backup-vm",
@@ -3892,6 +3918,16 @@
         ]
       },
       {
+        "id": "configure-artifact-cache-vm",
+        "title": "Configure Artifact Cache VM",
+        "agent_trust_required": "T3",
+        "steps": 8,
+        "path": "docs/runbooks/configure-artifact-cache-vm.md",
+        "workflow_ids": [
+          "configure-artifact-cache-vm"
+        ]
+      },
+      {
         "id": "configure-backup-vm",
         "title": "Configure Backup VM",
         "agent_trust_required": "T3",
@@ -4936,10 +4972,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.102",
+    "last_version": "0.177.103",
     "deployed_at": "2026-03-30",
     "summary": "completed the ADR 0274 mainline live apply by hardening the Coolify bootstrap and publication path, then re-verifying governed repo-deploy base-image warming on coolify-lv3",
-    "release_notes_url": "docs/release-notes/0.177.103.md"
+    "release_notes_url": "docs/release-notes/0.177.104.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

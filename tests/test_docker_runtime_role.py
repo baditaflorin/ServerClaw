@@ -127,6 +127,9 @@ def test_docker_runtime_defaults_pin_governed_resolvers_and_registry_mirror() ->
 
     assert defaults["docker_runtime_registry_mirrors"] == ["https://mirror.gcr.io"]
     assert defaults["docker_runtime_publication_assurance_script_path"] == "/usr/local/bin/lv3-docker-publication-assurance"
+    assert defaults["docker_runtime_publication_assurance_helper_source"] == (
+        "{{ inventory_dir ~ '/../scripts/docker_publication_assurance.py' }}"
+    )
     assert defaults["docker_runtime_insecure_registries"] == []
     assert daemon_config["dns"] == ["1.1.1.1", "8.8.8.8"]
     assert daemon_config["registry-mirrors"] == "{{ docker_runtime_registry_mirrors }}"
@@ -146,7 +149,7 @@ def test_docker_runtime_installs_publication_assurance_helper_before_chain_check
     assert install_task["ansible.builtin.copy"]["dest"] == "{{ docker_runtime_publication_assurance_script_path }}"
     assert (
         install_task["ansible.builtin.copy"]["content"]
-        == "{{ lookup('ansible.builtin.file', playbook_dir ~ '/../scripts/docker_publication_assurance.py') }}"
+        == "{{ lookup('ansible.builtin.file', docker_runtime_publication_assurance_helper_source) }}"
     )
     assert tasks.index(install_task) < tasks.index(nftables_check_task)
 

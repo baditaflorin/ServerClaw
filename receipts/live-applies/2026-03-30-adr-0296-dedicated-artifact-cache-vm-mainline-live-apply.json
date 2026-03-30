@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0296-dedicated-artifact-cache-vm-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_at": "2026-03-30T13:40:20Z",
+  "recorded_by": "codex",
+  "source_commit": "e95d5d9a0d92892b48ca66400a9935f25e4e492d",
+  "repo_version_context": "0.177.103",
+  "platform_version_context": "0.130.69",
+  "workflow_id": "adr-0296-dedicated-artifact-cache-vm-mainline-live-apply",
+  "adr": "0296",
+  "summary": "Live-applied ADR 0296 from the exact-main release tree by replaying `artifact-cache-lv3` as VM 180 on 10.10.10.80, converging the dedicated private cache plane with the current repo-derived 51-image warm set, moving `docker-build-lv3` onto those dedicated cache endpoints through the governed wrapper path, and promoting the canonical receipt and truth surfaces that now match repo version 0.177.103 and platform version 0.130.69.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "artifact-cache-lv3",
+      "vmid": 180,
+      "address": "10.10.10.80"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-build-lv3",
+      "vmid": 130,
+      "address": "10.10.10.30"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "artifact-cache-docker-hub",
+      "address": "http://10.10.10.80:5001/v2/"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "artifact-cache-ghcr",
+      "address": "http://10.10.10.80:5002/v2/"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "artifact-cache-plane",
+      "address": "http://10.10.10.80:5003/v2/"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "artifact-cache-n8n",
+      "address": "http://10.10.10.80:5004/v2/"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Exact-main focused artifact-cache regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest python -m pytest -q tests/test_artifact_cache_runtime_role.py tests/test_artifact_cache_playbook.py tests/test_common_docker_bridge_chains_helper.py tests/test_docker_runtime_role.py tests/test_post_verify_tasks.py` returned `19 passed in 0.22s`, and `make syntax-check-artifact-cache-vm` also succeeded from the exact-main release tree."
+    },
+    {
+      "check": "Exact-main repository automation and validation paths",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml python3 scripts/ansible_scope_runner.py validate --inventory inventory/hosts.yml`, the scoped `playbooks/services/build-artifact-cache.yml --syntax-check` replay, `uv run --with pyyaml --with jsonschema python3 scripts/validate_repository_data_models.py --validate`, `uv run --with pyyaml python3 scripts/canonical_truth.py --check`, `uv run --with pyyaml --with jsonschema python3 scripts/platform_manifest.py --check`, `./scripts/validate_repo.sh agent-standards`, and `git diff --check` all succeeded after the canonical receipt and truth surfaces were promoted; the remote pre-push gate then uncovered stale generated docs, which were cleared by rerunning `uv run --with jsonschema python3 scripts/generate_dependency_diagram.py --write`, `uv run --with pyyaml python3 scripts/generate_diagrams.py --write`, and `./scripts/validate_repo.sh generated-docs`."
+    },
+    {
+      "check": "Exact-main dedicated cache VM replay",
+      "result": "pass",
+      "observed": "`make configure-artifact-cache-vm env=production` succeeded from repo version `0.177.103`, finishing with final recap `artifact-cache-lv3 : ok=118 changed=8 unreachable=0 failed=0 skipped=7 rescued=0 ignored=0` and `proxmox_florin : ok=14 changed=4 unreachable=0 failed=0 skipped=3 rescued=0 ignored=0`."
+    },
+    {
+      "check": "Exact-main governed build-host cutover",
+      "result": "pass",
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=build-artifact-cache env=production EXTRA_ARGS='-e bypass_promotion=true'` completed end to end from the exact-main release tree, including the canonical-truth gate, with final recap `docker-build-lv3 : ok=127 changed=11 unreachable=0 failed=0 skipped=18 rescued=0 ignored=0`."
+    },
+    {
+      "check": "Exact-main end-to-end live state",
+      "result": "pass",
+      "observed": "Fresh post-replay verification confirmed VM `180` is running with the declared IP and MAC, `artifact-cache-lv3` serves all four cache ports locally, `/opt/artifact-cache/seed-plan.json` now contains the current repo-derived `51` warmable images, Docker on the cache guest trusts `10.10.10.80:5001-5004`, `docker-build-lv3` points its Docker mirrors and insecure registries at those dedicated endpoints, `docker buildx inspect lv3-cache --bootstrap` succeeds, and the old local `artifact-cache-*` containers remain absent from the build guest."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md",
+    "docs/workstreams/ws-0296-live-apply.md",
+    "docs/runbooks/artifact-cache-runtime.md",
+    "docs/runbooks/configure-artifact-cache-vm.md",
+    "docs/runbooks/configure-build-artifact-cache.md",
+    "docs/runbooks/network-policy-reference.md",
+    "playbooks/artifact-cache-vm.yml",
+    "playbooks/services/build-artifact-cache.yml",
+    "playbooks/tasks/docker-publication-assert.yml",
+    "roles/artifact_cache_runtime/tasks/main.yml",
+    "roles/docker_runtime/tasks/main.yml",
+    "roles/common/tasks/docker_bridge_chains.yml",
+    "config/capacity-model.json",
+    "config/ansible-execution-scopes.yaml",
+    "config/workflow-catalog.json",
+    "config/command-catalog.json",
+    "tests/test_artifact_cache_runtime_role.py",
+    "tests/test_artifact_cache_playbook.py",
+    "tests/test_common_docker_bridge_chains_helper.py",
+    "tests/test_docker_runtime_role.py",
+    "tests/test_post_verify_tasks.py",
+    "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-release-write-r1.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-targeted-checks-r2-0.177.103.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-syntax-check-r2-0.177.103.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-configure-artifact-cache-vm-r1-0.177.103.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-build-artifact-cache-r1-0.177.103.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-end-to-end-r1-0.177.103.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-ansible-scope-validate-r1-0.177.103.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-build-artifact-cache-scope-syntax-r1-0.177.103.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-validate-repository-data-models-r2-0.177.103.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-canonical-truth-check-r1-0.177.103.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-platform-manifest-check-r1-0.177.103.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-validate-agent-standards-r1-0.177.103.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-generate-dependency-diagram-r2-0.177.103.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-generate-diagrams-r2-0.177.103.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-validate-generated-docs-r5-0.177.103.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-validate-workstream-surfaces-r1-0.177.103.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0296-mainline-git-diff-check-r2-0.177.103.txt",
+    "receipts/live-applies/2026-03-30-adr-0296-dedicated-artifact-cache-vm-live-apply.json",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This canonical mainline receipt supersedes the earlier branch-local receipt for latest-receipt promotion, while preserving the branch-local receipt as pre-integration audit history.",
+    "The exact-main replay surfaced a repo-derived warm-set increase from the earlier branch-local 50 images to 51 images because the synchronized catalog set now includes the Apache Tika image introduced by ADR 0275.",
+    "The exact live apply was executed from source commit e95d5d9a0d92892b48ca66400a9935f25e4e492d; the final integration commit only promotes the canonical receipt, ADR metadata, and generated truth surfaces without changing the live automation logic that was replayed.",
+    "`./scripts/validate_repo.sh workstream-surfaces` now fails by design on this branch because the validator rejects branch mappings to terminal workstream states such as `live_applied`; the earlier non-terminal branch-local pass remains in the audit trail, and the promoted truth is intended for `main` rather than further branch-local mutation."
+  ],
+  "correction_loop": {
+    "loop_id": "2026-03-30-adr-0296-dedicated-artifact-cache-vm-live-repair",
+    "surface": "roles/docker_runtime/tasks/main.yml",
+    "repair_action": "Switched the Docker publication-assurance helper source from a playbook-dir-relative path to an inventory-dir-relative path in both the shared Docker role and the shared post-verify task so nested service playbooks under playbooks/services can install the helper correctly.",
+    "verification": "The exact-main focused pytest slice, syntax check, dedicated cache guest replay, governed build-artifact-cache wrapper path, and end-to-end verification all succeeded after the helper-path repair.",
+    "diagnosis": "contract_drift"
+  }
+}

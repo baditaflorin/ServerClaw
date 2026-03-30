@@ -106,3 +106,8 @@ argument_specs:
         required: false
         description:
           - Destination path for the repo-managed Docker publication assurance helper installed on managed Docker guests.
+      docker_runtime_publication_assurance_helper_source:
+        type: path
+        required: false
+        description:
+          - Controller-local source path for the repo-managed Docker publication assurance helper content.

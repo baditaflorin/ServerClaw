@@ -92,7 +92,7 @@ def test_docker_publication_assert_retries_empty_helper_output() -> None:
     assert helper_path_task["when"] == "playbook_execution_docker_publication_command is not defined"
     assert helper_path_task["changed_when"] is False
     assert stage_task["ansible.builtin.copy"]["content"] == (
-        "{{ lookup('ansible.builtin.file', playbook_dir ~ '/../scripts/docker_publication_assurance.py') }}"
+        "{{ lookup('ansible.builtin.file', inventory_dir ~ '/../scripts/docker_publication_assurance.py') }}"
     )
     assert stage_task["ansible.builtin.copy"]["dest"] == "{{ playbook_execution_docker_publication_helper_tempfile.path }}"
     assert stage_task["when"] == "playbook_execution_docker_publication_command is not defined"

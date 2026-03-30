@@ -18,6 +18,7 @@ ROLE_ROOT = (
 def test_artifact_cache_defaults_define_four_upstream_mirrors() -> None:
     defaults = yaml.safe_load((ROLE_ROOT / "defaults" / "main.yml").read_text())
     mirrors = defaults["artifact_cache_registry_mirrors"]
+    assert defaults["artifact_cache_state"] == "present"
     assert defaults["artifact_cache_network_mode"] == "host"
     assert list(mirrors.keys()) == ["docker_io", "ghcr_io", "artifacts_plane_so", "docker_n8n_io"]
     assert mirrors["docker_io"]["upstream_registry"] == "https://registry-1.docker.io"
@@ -28,6 +29,8 @@ def test_artifact_cache_defaults_define_four_upstream_mirrors() -> None:
 def test_artifact_cache_tasks_render_seed_plan_then_warm_images() -> None:
     tasks = yaml.safe_load((ROLE_ROOT / "tasks" / "main.yml").read_text())
     task_names = [task["name"] for task in tasks]
+    assert "Stop the artifact cache stack when state=absent" in task_names
+    assert "Wait for artifact cache listeners to stop when state=absent" in task_names
     assert "Generate the artifact cache seed plan from repo catalogs" in task_names
     assert "Persist the artifact cache seed plan on the guest" in task_names
     assert "Warm the mirrored image set through the cache endpoints" in task_names

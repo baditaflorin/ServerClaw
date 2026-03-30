@@ -4,6 +4,11 @@ argument_specs:
   main:
     short_description: Converge internal pull-through mirrors and a repo-derived warm set for repeated container-image pulls.
     options:
+      artifact_cache_state:
+        type: str
+        required: false
+        description:
+          - Whether the role should converge the cache runtime or remove it from a previous host.
       artifact_cache_site_dir:
         type: path
         required: true
