@@ -1955,7 +1955,7 @@
       - python3
       - "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_scripts.py"
       - --base-url
-      - "{{ windmill_private_base_url }}"
+      - "{{ windmill_base_url }}"
       - --workspace
       - "{{ windmill_workspace_id }}"
       - --manifest
@@ -2158,7 +2158,7 @@
       - python3
       - "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_schedules.py"
       - --base-url
-      - "{{ windmill_private_base_url }}"
+      - "{{ windmill_base_url }}"
       - --workspace
       - "{{ windmill_workspace_id }}"
       - --manifest

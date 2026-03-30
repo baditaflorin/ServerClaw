@@ -738,6 +738,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "windmill_verify_validation_gate_status_payload" in verify_tasks
     assert "windmill_verify_stage_smoke_suites.stdout | trim | length > 0" in verify_tasks
     assert "windmill_verify_stage_smoke_suites_payload" in verify_tasks
+    assert "until:\n    - windmill_verify_healthcheck.rc == 0" in verify_tasks
+    assert "until:\n    - windmill_verify_validation_gate_status.rc == 0" in verify_tasks
     assert "failed_when: false" in verify_tasks
     assert "retries: 6" in verify_tasks
     assert "windmill_verify_default_operations_scripts.status == 200" in verify_tasks

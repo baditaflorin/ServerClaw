@@ -133,6 +133,7 @@ live_apply_evidence:
     tika: 2026-03-30-adr-0275-apache-tika-live-apply
     artifact_cache_vm: 2026-03-30-adr-0296-dedicated-artifact-cache-vm-mainline-live-apply
     repo_deploy_base_image_cache: 2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply
+    vulnerability_budget_gate: 2026-03-30-adr-0269-vulnerability-budget-gates-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
