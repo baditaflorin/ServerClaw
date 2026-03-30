@@ -27,8 +27,11 @@ def test_validate_workflow_uses_pinned_python_runner_and_manual_checkout() -> No
     assert "Bootstrap validation toolchain" in workflow
     assert "apt-get install -y --no-install-recommends docker-cli" in workflow
     assert "docker-bin.path" in workflow
+    assert 'inspect "$(hostname)" --format' in workflow
+    assert "workspace-host.path" in workflow
     assert "Bundle validation artifacts" in workflow
     assert '--docker-binary "${DOCKER_BIN}"' in workflow
+    assert 'LV3_DOCKER_WORKSPACE_PATH="$(cat .local/validation-gate/workspace-host.path)"' in workflow
     assert "gitea-validation-receipts.tar.gz" in workflow
 
 

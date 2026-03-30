@@ -22,6 +22,7 @@ PASSTHROUGH_ENV_VARS = (
     "LV3_SNAPSHOT_GENERATED_AT",
     "LV3_SNAPSHOT_SOURCE_COMMIT",
     "LV3_SNAPSHOT_BRANCH",
+    "LV3_DOCKER_WORKSPACE_PATH",
     "LV3_VALIDATION_BASE_REF",
     "LV3_VALIDATION_CHANGED_FILES_JSON",
 )
@@ -145,7 +146,10 @@ def build_docker_command(
     workspace: Path,
     docker_binary: str,
 ) -> list[str]:
-    mount_args = ["-v", f"{workspace.resolve()}:/workspace"]
+    workspace_mount_source = os.environ.get("LV3_DOCKER_WORKSPACE_PATH", "").strip()
+    if not workspace_mount_source:
+        workspace_mount_source = str(workspace.resolve())
+    mount_args = ["-v", f"{workspace_mount_source}:/workspace"]
     env_args: list[str] = []
     safe_directories = sorted({"/workspace", check.working_dir})
     env_args.extend(["-e", f"GIT_CONFIG_COUNT={len(safe_directories)}"])

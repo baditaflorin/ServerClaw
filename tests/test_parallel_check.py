@@ -152,6 +152,7 @@ def test_build_docker_command_mounts_declared_caches(
 def test_build_docker_command_forwards_validation_context(tmp_path: Path, monkeypatch) -> None:
     parallel_check = load_parallel_check_module()
     monkeypatch.setenv("LV3_SNAPSHOT_BRANCH", "codex/adr-0264-live-apply")
+    monkeypatch.setenv("LV3_DOCKER_WORKSPACE_PATH", "/host/gitea-runner/workspace")
     monkeypatch.setenv("LV3_VALIDATION_BASE_REF", "origin/main")
     monkeypatch.setenv(
         "LV3_VALIDATION_CHANGED_FILES_JSON",
@@ -168,6 +169,8 @@ def test_build_docker_command_forwards_validation_context(tmp_path: Path, monkey
 
     command = parallel_check.build_docker_command(check, tmp_path, "docker")
 
+    assert "/host/gitea-runner/workspace:/workspace" in command
+    assert "LV3_DOCKER_WORKSPACE_PATH=/host/gitea-runner/workspace" in command
     assert "LV3_SNAPSHOT_BRANCH=codex/adr-0264-live-apply" in command
     assert "LV3_VALIDATION_BASE_REF=origin/main" in command
     assert (
