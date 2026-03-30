@@ -41,6 +41,7 @@
     name: "{{ docker_runtime_prereq_packages }}"
     state: present
     update_cache: true
+    lock_timeout: 300
     force_apt_get: true
 
 - name: Ensure Docker-managed directories exist
@@ -68,12 +69,14 @@
   ansible.builtin.apt:
     name: "{{ docker_runtime_conflicting_packages }}"
     state: absent
+    lock_timeout: 300
 
 - name: Install Docker runtime packages
   ansible.builtin.apt:
     name: "{{ docker_runtime_engine_packages }}"
     state: present
     update_cache: true
+    lock_timeout: 300
     force_apt_get: true
 
 - name: Ensure docker admin group exists
