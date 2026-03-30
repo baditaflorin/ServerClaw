@@ -1,1 +1,1 @@
-architecture diagrams error: Missing dependency: PyYAML. Run via 'uvx --from pyyaml python ...' or 'uv run --with pyyaml ...'.
+Updated diagrams in /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/docs/diagrams

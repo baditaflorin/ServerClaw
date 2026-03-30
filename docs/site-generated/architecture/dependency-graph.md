@@ -17,7 +17,7 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, Mail Platform, Mailpit, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
+| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, JupyterHub, Mail Platform, Mailpit, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
 | `2` | Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, Gotenberg, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Temporal, Tesseract OCR, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway, Woodpecker CI |
 | `4` | Ops Portal |
@@ -34,6 +34,7 @@ graph TD
     grafana["Grafana\nTier 1"]
     harbor["Harbor\nTier 1"]
     headscale["Headscale\nTier 1"]
+    jupyterhub["JupyterHub\nTier 1"]
     mail_platform["Mail Platform\nTier 1"]
     mailpit["Mailpit\nTier 1"]
     nats_jetstream["NATS JetStream\nTier 1"]
@@ -138,6 +139,11 @@ graph TD
     headscale -->|soft| nginx_edge
     homepage -->|hard| keycloak
     homepage -->|hard| nginx_edge
+    jupyterhub -->|soft| keycloak
+    jupyterhub -->|soft| nginx_edge
+    jupyterhub -->|soft| ollama
+    jupyterhub -->|startup_only| openbao
+    jupyterhub -->|soft| platform_context_api
     keycloak -->|soft| mailpit
     keycloak -->|soft| nginx_edge
     keycloak -->|startup_only| openbao

@@ -43,6 +43,8 @@ public_edge_session_authority: "{{ platform_session_authority }}"
 public_edge_certbot_email: baditaflorin@gmail.com
 public_edge_cert_name: lv3-edge
 public_edge_acme_challenge_method: webroot
+public_edge_certbot_retries: 6
+public_edge_certbot_delay_seconds: 15
 public_edge_update_apt_cache: false
 public_edge_sync_generated_static_dirs: true
 public_edge_static_root: /var/www/lv3-edge

@@ -55,6 +55,12 @@ roles:
   data_retention:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  directus_postgres:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  directus_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   docker_build_observability:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.

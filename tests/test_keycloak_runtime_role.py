@@ -322,6 +322,7 @@ def test_realm_reconciliation_retries_repo_managed_keycloak_modules() -> None:
         "Read the Gitea client secret",
         "Read the agent client secret",
         "Read the Langfuse client secret",
+        "Read the Directus client secret",
         "Read the Outline client secret",
         "Read the JupyterHub client secret",
         "Read the ServerClaw client secret",
@@ -344,7 +345,7 @@ def test_all_keycloak_client_secret_reads_retry_reconciliation_until_success() -
         if task.get("name", "").startswith("Read the ") and task.get("name", "").endswith(" client secret")
     ]
 
-    assert len(read_secret_tasks) == 10
+    assert len(read_secret_tasks) == 11
     for task in read_secret_tasks:
         assert task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
         assert task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"

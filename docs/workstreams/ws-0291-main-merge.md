@@ -33,6 +33,7 @@ branch-local state alone.
 - `inventory/group_vars/platform.yml`
 - `scripts/generate_platform_vars.py`
 - `Makefile`
+- `scripts/tofu_exec.sh`
 - `scripts/validate_repo.sh`
 - `config/service-capability-catalog.json`
 - `config/health-probe-catalog.json`
@@ -63,6 +64,7 @@ branch-local state alone.
 - `collections/ansible_collections/lv3/platform/roles/jupyterhub_runtime/`
 - `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/`
 - `collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml`
+- `collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml`
 - `collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml`
 - `collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_systemd_credentials.yml`
 - `collections/ansible_collections/lv3/platform/roles/ollama_runtime/`
@@ -70,6 +72,7 @@ branch-local state alone.
 - `tests/test_jupyterhub_runtime_role.py`
 - `tests/test_jupyterhub_playbook.py`
 - `tests/test_keycloak_runtime_role.py`
+- `tests/test_nginx_edge_publication_role.py`
 - `tests/test_ollama_runtime_role.py`
 - `tests/test_openbao_compose_env_helper.py`
 - `tests/test_edge_publication_makefile.py`

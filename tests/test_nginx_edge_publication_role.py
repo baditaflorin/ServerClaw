@@ -63,6 +63,8 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         )
         self.assertEqual(self.defaults["public_edge_apex_hostname"], "lv3.org")
         self.assertEqual(self.defaults["public_edge_additional_certificate_domains"], ["{{ public_edge_apex_hostname }}"])
+        self.assertEqual(self.defaults["public_edge_certbot_retries"], 6)
+        self.assertEqual(self.defaults["public_edge_certbot_delay_seconds"], 15)
         self.assertEqual(self.defaults["public_edge_robots_meta_content"], "noindex, nofollow")
         self.assertEqual(
             self.defaults["public_edge_generated_build_root"],
@@ -163,6 +165,22 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         )
         package_expr = ensure_packages_task["ansible.builtin.apt"]["name"]
         self.assertIn("rsync", package_expr)
+        obtain_task = next(
+            task for task in self.tasks if task["name"] == "Obtain the public edge Let's Encrypt certificate"
+        )
+        expand_task = next(
+            task
+            for task in self.tasks
+            if task["name"] == "Expand the public edge Let's Encrypt certificate when domains were added"
+        )
+        self.assertEqual(obtain_task["register"], "public_edge_certbot_issue")
+        self.assertEqual(obtain_task["retries"], "{{ public_edge_certbot_retries }}")
+        self.assertEqual(obtain_task["delay"], "{{ public_edge_certbot_delay_seconds }}")
+        self.assertEqual(obtain_task["until"], "public_edge_certbot_issue.rc == 0")
+        self.assertEqual(expand_task["register"], "public_edge_certbot_expand")
+        self.assertEqual(expand_task["retries"], "{{ public_edge_certbot_retries }}")
+        self.assertEqual(expand_task["delay"], "{{ public_edge_certbot_delay_seconds }}")
+        self.assertEqual(expand_task["until"], "public_edge_certbot_expand.rc == 0")
 
     def test_tasks_resolve_edge_catalogs_before_validation(self) -> None:
         task_names = [task["name"] for task in self.tasks]

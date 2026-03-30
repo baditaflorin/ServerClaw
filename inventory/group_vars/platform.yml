@@ -1768,37 +1768,6 @@ platform_service_topology:
     urls:
       public: https://wiki.lv3.org
       internal: http://10.10.10.20:3006
-  jupyterhub:
-    service_name: jupyterhub
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
-    public_hostname: notebooks.lv3.org
-    exposure_model: edge-published
-    observability:
-      guest_dashboard: false
-      service_telemetry: false
-    dns:
-      managed: true
-      visibility: public
-      name: notebooks
-      type: A
-      target: 65.108.75.123
-      ttl: 60
-    edge:
-      enabled: true
-      tls: true
-      noindex: true
-      kind: proxy
-      client_max_body_size: 2g
-      proxy_read_timeout_seconds: 3600
-      proxy_send_timeout_seconds: 3600
-      upstream: http://10.10.10.20:8097
-    service_id: jupyterhub
-    ports:
-      internal: 8097
-    urls:
-      public: https://notebooks.lv3.org
-      internal: http://10.10.10.20:8097
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3
@@ -2433,6 +2402,37 @@ platform_service_topology:
     urls:
       public: https://data.lv3.org
       internal: http://10.10.10.20:8055
+  jupyterhub:
+    service_name: jupyterhub
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: notebooks.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: notebooks
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      client_max_body_size: 2g
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      upstream: http://10.10.10.20:8097
+    service_id: jupyterhub
+    ports:
+      internal: 8097
+    urls:
+      public: https://notebooks.lv3.org
+      internal: http://10.10.10.20:8097
 platform_session_authority:
   authority_hostname: ops.lv3.org
   ops_portal_client_id: ops-portal-oauth
@@ -2522,10 +2522,6 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
-    - name: notebooks
-      type: A
-      value: 65.108.75.123
-      ttl: 60
     - name: logs
       type: A
       value: 65.108.75.123
@@ -2579,6 +2575,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: data
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: notebooks
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -3406,37 +3406,6 @@ public_edge_service_topology:
     urls:
       public: https://wiki.lv3.org
       internal: http://10.10.10.20:3006
-  jupyterhub:
-    service_name: jupyterhub
-    owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
-    public_hostname: notebooks.lv3.org
-    exposure_model: edge-published
-    observability:
-      guest_dashboard: false
-      service_telemetry: false
-    dns:
-      managed: true
-      visibility: public
-      name: notebooks
-      type: A
-      target: 65.108.75.123
-      ttl: 60
-    edge:
-      enabled: true
-      tls: true
-      noindex: true
-      kind: proxy
-      client_max_body_size: 2g
-      proxy_read_timeout_seconds: 3600
-      proxy_send_timeout_seconds: 3600
-      upstream: http://10.10.10.20:8097
-    service_id: jupyterhub
-    ports:
-      internal: 8097
-    urls:
-      public: https://notebooks.lv3.org
-      internal: http://10.10.10.20:8097
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3
@@ -4071,6 +4040,37 @@ public_edge_service_topology:
     urls:
       public: https://data.lv3.org
       internal: http://10.10.10.20:8055
+  jupyterhub:
+    service_name: jupyterhub
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: notebooks.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: notebooks
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      client_max_body_size: 2g
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      upstream: http://10.10.10.20:8097
+    service_id: jupyterhub
+    ports:
+      internal: 8097
+    urls:
+      public: https://notebooks.lv3.org
+      internal: http://10.10.10.20:8097
 uptime_kuma_service_topology:
   service_name: uptime-kuma
   owning_vm: docker-runtime-lv3
