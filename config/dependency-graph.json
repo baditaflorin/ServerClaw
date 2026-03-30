@@ -541,6 +541,15 @@
       "tier": 2,
       "category": "automation",
       "adr": "0044"
+    },
+    {
+      "id": "woodpecker",
+      "service": "woodpecker",
+      "name": "Woodpecker CI",
+      "vm": "docker-runtime-lv3",
+      "tier": 3,
+      "category": "automation",
+      "adr": "0287"
     }
   ],
   "edges": [
@@ -1275,6 +1284,30 @@
       "to": "tika",
       "type": "soft",
       "description": "Document-extraction callers invoke Tika first and only fall back to Tesseract OCR when Tika returns no embedded text."
+    },
+    {
+      "from": "woodpecker",
+      "to": "gitea",
+      "type": "hard",
+      "description": "Woodpecker delegates authentication and repository activation to Gitea through the governed OAuth and API bootstrap path."
+    },
+    {
+      "from": "woodpecker",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public operator access to ci.lv3.org depends on the shared NGINX edge, while the controller path remains reachable on the Proxmox host tailnet."
+    },
+    {
+      "from": "woodpecker",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Woodpecker loads mirrored database, OAuth, and agent secrets from the OpenBao agent before the runtime starts."
+    },
+    {
+      "from": "woodpecker",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Woodpecker persists repository metadata, secrets, and pipeline history in Postgres."
     }
   ]
 }

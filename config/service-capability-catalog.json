@@ -1836,6 +1836,57 @@
       }
     },
     {
+      "id": "woodpecker",
+      "name": "Woodpecker CI",
+      "description": "Repo-managed event-driven CI server with Gitea OAuth, a public edge URL, and a private controller path on the Proxmox host.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://100.64.0.1:8017",
+      "public_url": "https://ci.lv3.org",
+      "subdomain": "ci.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Woodpecker Public",
+      "health_probe_id": "woodpecker",
+      "image_catalog_ids": [
+        "woodpecker_server_runtime",
+        "woodpecker_agent_runtime"
+      ],
+      "secret_catalog_ids": [
+        "woodpecker_database_password",
+        "woodpecker_gitea_client_secret",
+        "woodpecker_agent_secret",
+        "woodpecker_api_token",
+        "woodpecker_secret_smoke"
+      ],
+      "adr": "0287",
+      "runbook": "docs/runbooks/configure-woodpecker.md",
+      "degradation_modes": [
+        {
+          "dependency": "postgres",
+          "dependency_type": "hard",
+          "degraded_behaviour": "Woodpecker cannot persist repositories, secrets, pipeline history, or queued state without PostgreSQL.",
+          "degraded_for_seconds_max": 0,
+          "recovery_signal": "Woodpecker database connectivity succeeds again",
+          "tested_by": "fault:postgres-unavailable"
+        }
+      ],
+      "tags": [
+        "ci",
+        "pipelines",
+        "git",
+        "automation"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://ci.lv3.org",
+          "subdomain": "ci.lv3.org"
+        }
+      }
+    },
+    {
       "id": "semaphore",
       "name": "Semaphore",
       "description": "Private Semaphore UI and API for bounded Ansible job execution.",

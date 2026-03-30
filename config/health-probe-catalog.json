@@ -2926,6 +2926,54 @@
           ]
         }
       }
+    },
+    "woodpecker": {
+      "service_name": "woodpecker",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "woodpecker_runtime",
+      "verify_file": "roles/woodpecker_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Woodpecker health endpoint responds on the local runtime listener.",
+        "timeout_seconds": 90,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8102/healthz",
+        "method": "GET",
+        "expected_status": [
+          200,
+          204
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The public Woodpecker health endpoint remains reachable through the shared NGINX edge publication after bootstrap completes.",
+        "timeout_seconds": 90,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "https://ci.lv3.org/healthz",
+        "method": "GET",
+        "expected_status": [
+          200,
+          204
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Woodpecker Public",
+          "type": "http",
+          "url": "https://ci.lv3.org/healthz",
+          "description": "Woodpecker health endpoint published through the shared NGINX edge.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
     }
   }
 }

@@ -507,5 +507,18 @@
     "accepted_statuscodes": [
       "200-299"
     ]
+  },
+  {
+    "name": "Woodpecker Public",
+    "type": "http",
+    "url": "https://ci.lv3.org/healthz",
+    "description": "Woodpecker health endpoint published through the shared NGINX edge.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
   }
 ]

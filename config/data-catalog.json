@@ -3,6 +3,21 @@
   "schema_version": "1.0.0",
   "data_stores": [
     {
+      "id": "woodpecker-pipeline-history",
+      "service": "woodpecker",
+      "name": "Woodpecker pipeline history",
+      "class": "internal",
+      "retention_days": 90,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Woodpecker PostgreSQL data",
+        "/opt/woodpecker/data/server"
+      ],
+      "notes": "Pipeline logs and repository activation metadata can contain branch names, repository details, and operator-trigger context, so they remain private and restorable with the Woodpecker control plane."
+    },
+    {
       "id": "browser-runner-artifacts",
       "service": "browser_runner",
       "name": "Browser runner bounded session artifacts",
