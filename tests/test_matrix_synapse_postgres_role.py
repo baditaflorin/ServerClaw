@@ -14,6 +14,8 @@ def test_matrix_synapse_postgres_defaults_require_synapse_safe_locale() -> None:
     assert defaults["matrix_synapse_database_collation"] == "C"
     assert defaults["matrix_synapse_database_ctype"] == "C"
     assert defaults["matrix_synapse_database_template"] == "template0"
+    assert defaults["matrix_synapse_bridge_databases"][0]["database_name"] == "mautrix_discord"
+    assert defaults["matrix_synapse_bridge_databases"][1]["database_name"] == "mautrix_whatsapp"
 
 
 def test_matrix_synapse_postgres_role_recreates_empty_mis_collated_database() -> None:
@@ -25,3 +27,6 @@ def test_matrix_synapse_postgres_role_recreates_empty_mis_collated_database() ->
     assert "LC_COLLATE '{{ matrix_synapse_database_collation }}'" in task_file
     assert "LC_CTYPE '{{ matrix_synapse_database_ctype }}'" in task_file
     assert "Assert the Matrix Synapse database locale matches the required setting" in task_file
+    assert "Create the missing Matrix bridge database roles" in task_file
+    assert "Create the missing Matrix bridge PostgreSQL databases" in task_file
+    assert "Assert the Matrix bridge database locales match the managed settings" in task_file

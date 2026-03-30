@@ -4399,7 +4399,7 @@ adr_index:
   - adr: '0256'
     title: Mautrix Bridges For External Chat Channel Adapters
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: networking
     keywords:
@@ -4411,6 +4411,7 @@ adr_index:
       - adapters
     summary: We will use mautrix bridges as the default external chat-channel adapters
     filename: 0256-mautrix-bridges-for-external-chat-channel-adapters.md
+    implemented_version: 0.177.98
   - adr: '0257'
     title: OpenClaw-Compatible SKILL.md Packs And Workspace Precedence For ServerClaw
     status: Accepted

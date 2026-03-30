@@ -1347,7 +1347,7 @@
       }
     },
     "converge-matrix-synapse": {
-      "description": "Converge Matrix Synapse, its PostgreSQL backend, the host-side controller proxy, and the shared-edge publication for matrix.lv3.org.",
+      "description": "Converge Matrix Synapse, its PostgreSQL backend, the Discord and WhatsApp mautrix bridges, the host-side controller proxy, and the shared-edge publication for matrix.lv3.org.",
       "workflow_id": "converge-matrix-synapse",
       "scope": "host_and_guest",
       "approval_policy": "sensitive_live_change",
@@ -1370,16 +1370,16 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-matrix-synapse passes",
         "make validate passes before the apply",
-        "The public/auth boundary and intentional no-federation scope are reviewed before live rollout"
+        "The public/auth boundary, intentional no-federation scope, and bridge-specific auth models are reviewed before live rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the source commit, public and controller client-version checks, bootstrap-admin login verification, mirrored secret artifacts, and confirmation that federation was intentionally left disabled."
+        "notes": "Record the source commit, public and controller client-version checks, bootstrap-admin registration or login verification, mirrored bridge secret artifacts, bridge container health, bridge-management-room smoke evidence, and confirmation that federation was intentionally left disabled."
       },
       "failure_guidance": {
         "stop_conditions": [
-          "Stop if PostgreSQL, Matrix Synapse runtime, the host-side proxy, or the shared-edge publication fails verification.",
-          "Stop if the rollout exposes an unintended federation listener or drifts from the documented upstream-auth publication model."
+          "Stop if PostgreSQL, Matrix Synapse runtime, either bridge runtime, the host-side proxy, or the shared-edge publication fails verification.",
+          "Stop if the rollout exposes an unintended federation listener, skips bridge registration regeneration when configs changed, or drifts from the documented upstream-auth publication model."
         ],
         "rollback_guidance": [
           "Restore the last known-good Matrix Synapse runtime and edge configuration from version control before retrying.",

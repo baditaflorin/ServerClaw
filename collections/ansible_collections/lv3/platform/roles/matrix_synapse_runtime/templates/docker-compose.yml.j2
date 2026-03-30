@@ -34,3 +34,23 @@ services:
         condition: service_healthy
     volumes:
       - {{ matrix_synapse_data_dir }}:/data
+      - {{ matrix_synapse_mautrix_discord_registration_file }}:/appservices/mautrix-discord-registration.yaml:ro
+      - {{ matrix_synapse_mautrix_whatsapp_registration_file }}:/appservices/mautrix-whatsapp-registration.yaml:ro
+
+  mautrix-discord:
+    image: {{ matrix_synapse_mautrix_discord_image }}
+    container_name: {{ matrix_synapse_mautrix_discord_container_name }}
+    restart: unless-stopped
+    depends_on:
+      - matrix-synapse
+    volumes:
+      - {{ matrix_synapse_mautrix_discord_dir }}:/data
+
+  mautrix-whatsapp:
+    image: {{ matrix_synapse_mautrix_whatsapp_image }}
+    container_name: {{ matrix_synapse_mautrix_whatsapp_container_name }}
+    restart: unless-stopped
+    depends_on:
+      - matrix-synapse
+    volumes:
+      - {{ matrix_synapse_mautrix_whatsapp_dir }}:/data

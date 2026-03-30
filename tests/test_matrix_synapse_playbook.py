@@ -32,3 +32,7 @@ def test_matrix_synapse_playbook_includes_proxy_postgres_runtime_and_edge_roles(
     assert {"role": "lv3.platform.matrix_synapse_postgres"} in plays[2]["roles"]
     assert {"role": "lv3.platform.matrix_synapse_runtime"} in plays[3]["roles"]
     assert {"role": "lv3.platform.nginx_edge_publication"} in plays[4]["roles"]
+    public_verify_task = plays[5]["tasks"][0]
+    assert plays[5]["hosts"] == "localhost"
+    assert public_verify_task["ansible.builtin.include_role"]["name"] == "lv3.platform.matrix_synapse_runtime"
+    assert public_verify_task["ansible.builtin.include_role"]["tasks_from"] == "public_verify.yml"

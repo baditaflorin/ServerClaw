@@ -1,9 +1,10 @@
 # ADR 0256: Mautrix Bridges For External Chat Channel Adapters
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Live on production from main
+- Implemented In Repo Version: 0.177.98
+- Implemented In Platform Version: 0.130.65
+- Implemented On: 2026-03-30
 - Date: 2026-03-28
 
 ## Context

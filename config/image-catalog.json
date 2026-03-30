@@ -498,6 +498,62 @@
         "converge-matrix-synapse"
       ]
     },
+    "matrix_mautrix_discord_runtime": {
+      "kind": "runtime",
+      "service_id": "matrix_synapse",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "matrix-mautrix-discord",
+      "registry_ref": "dock.mau.dev/mautrix/discord",
+      "tag": "v0.7.6",
+      "digest": "sha256:e4946b0df6a2786c88ed490e0d2692e352f1b79b9ff0e821a33764bd8bd1fffd",
+      "ref": "dock.mau.dev/mautrix/discord:v0.7.6@sha256:e4946b0df6a2786c88ed490e0d2692e352f1b79b9ff0e821a33764bd8bd1fffd",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-30-matrix-mautrix-discord-runtime.json",
+      "exception": {
+        "reason": "The approved upstream mautrix-discord digest still reports one critical and multiple high Trivy findings; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-30",
+        "review_by": "2026-04-13"
+      },
+      "consumers": [
+        "roles/matrix_synapse_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-matrix-synapse"
+      ]
+    },
+    "matrix_mautrix_whatsapp_runtime": {
+      "kind": "runtime",
+      "service_id": "matrix_synapse",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "matrix-mautrix-whatsapp",
+      "registry_ref": "dock.mau.dev/mautrix/whatsapp",
+      "tag": "v0.2603.0",
+      "digest": "sha256:b49009312361d9ea0d7090716fd09f2323f477b32bd119648c6ca2d558a3e236",
+      "ref": "dock.mau.dev/mautrix/whatsapp:v0.2603.0@sha256:b49009312361d9ea0d7090716fd09f2323f477b32bd119648c6ca2d558a3e236",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-30-matrix-mautrix-whatsapp-runtime.json",
+      "exception": {
+        "reason": "The approved upstream mautrix-whatsapp digest still reports one critical and multiple high Trivy findings; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-30",
+        "review_by": "2026-04-13"
+      },
+      "consumers": [
+        "roles/matrix_synapse_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-matrix-synapse"
+      ]
+    },
     "n8n_runtime": {
       "kind": "runtime",
       "service_id": "n8n",

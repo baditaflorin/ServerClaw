@@ -11,6 +11,7 @@
 #
 # Inputs (optional):
 #   - matrix_synapse_local_artifact_dir (path, optional): Controller-local artifact directory.
+#   - matrix_synapse_bridge_databases (list, optional): Additional bridge databases and password artifacts.
 #
 # Outputs:
 #   - Argument-spec validation metadata for the matrix_synapse_postgres role.
@@ -20,9 +21,10 @@
 #
 # Dependencies:
 #   - ADR 0255: Matrix Synapse As The Canonical ServerClaw Conversation Hub
+#   - ADR 0256: Mautrix Bridges For External Chat Channel Adapters
 #   - Role: matrix_synapse_postgres — validates inputs before database convergence.
 #
-# Related ADRs: 0165, 0255
+# Related ADRs: 0165, 0255, 0256
 # Related Runbooks: docs/runbooks/configure-matrix-synapse.md
 #
 # Author: LV3 Platform
@@ -45,6 +47,9 @@ argument_specs:
         required: true
       matrix_synapse_local_artifact_dir:
         type: path
+        required: false
+      matrix_synapse_bridge_databases:
+        type: list
         required: false
       matrix_synapse_database_password_local_file:
         type: path

@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.97",
-  "platform_version": "0.130.64",
-  "generated_at": "2026-03-30T08:23:16Z",
-  "next_refresh_at": "2026-03-30T09:23:16Z",
+  "repo_version": "0.177.98",
+  "platform_version": "0.130.65",
+  "generated_at": "2026-03-30T09:08:43Z",
+  "next_refresh_at": "2026-03-30T10:08:43Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -1497,7 +1497,7 @@
       },
       {
         "id": "converge-matrix-synapse",
-        "description": "Converge Matrix Synapse on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish matrix.lv3.org through the shared edge, and expose the private controller proxy on the Proxmox host.",
+        "description": "Converge Matrix Synapse on docker-runtime-lv3, provision its PostgreSQL backend plus bridge databases on postgres-lv3, publish matrix.lv3.org through the shared edge, render Discord and WhatsApp application-service registrations, and expose the private controller proxy on the Proxmox host.",
         "tags": [
           "converge-matrix-synapse",
           "host-and-guest-live",
@@ -3983,7 +3983,7 @@
         "id": "configure-matrix-synapse",
         "title": "Configure Matrix Synapse",
         "agent_trust_required": "T3",
-        "steps": 9,
+        "steps": 10,
         "path": "docs/runbooks/configure-matrix-synapse.md",
         "workflow_ids": [
           "converge-matrix-synapse"
@@ -4792,10 +4792,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.96",
+    "last_version": "0.177.97",
     "deployed_at": "2026-03-30",
-    "summary": "implements ADR 0276 by bringing the private NATS JetStream runtime under repo-managed automation, preserving the live multi-principal auth contract, aligning mutation-ledger, secret-rotation, and RAG subjects with the platform event-bus stream catalog, and recording rebased live-apply proof before exact-main integration",
-    "release_notes_url": "docs/release-notes/0.177.97.md"
+    "summary": "Live-applied ADR 0256 so Matrix Synapse now provisions repo-managed mautrix Discord and WhatsApp bridges, bridge databases, bridge smoke verification, and controller-safe admin bootstrap handling.",
+    "release_notes_url": "docs/release-notes/0.177.98.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

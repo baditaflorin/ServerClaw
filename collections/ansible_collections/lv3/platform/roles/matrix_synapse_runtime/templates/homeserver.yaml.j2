@@ -38,3 +38,6 @@ trusted_key_servers:
 {% for server_name in matrix_synapse_trusted_key_servers %}
   - server_name: "{{ server_name }}"
 {% endfor %}
+app_service_config_files:
+  - /appservices/mautrix-discord-registration.yaml
+  - /appservices/mautrix-whatsapp-registration.yaml
