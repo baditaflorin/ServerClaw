@@ -17,7 +17,7 @@ workstreams:
   - id: ws-0266-validation-runner-capability-contracts
     adr: "0266"
     title: Validation runner capability contracts and environment attestation
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/ws-0266-main-integration-r3
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0266-main-integration-r2
