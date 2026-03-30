@@ -176,13 +176,14 @@ now serves internal pull-through mirrors on `10.10.10.30:5001-5004`, the
 path were both re-verified afterward.
 The repository now also ships ADR 0251 stage-scoped smoke suites fully live on
 production: the promotion gate and runtime-assurance scoreboard now require
-declared or inherited smoke suites for active environments, the current
-exact-main verification on `docker-runtime-lv3` keeps the Windmill worker
-checkout aligned with those imports, `config/windmill/scripts/gate-status.py`
-returns `status: ok`, the live promotion gate still rejects the stale staged
-`grafana` receipt while reporting no required or observed stage-smoke suites
-for that receipt, and the authenticated runtime-assurance gateway plus local
-ops-portal partials verify cleanly on platform version `0.130.59`.
+declared or inherited smoke suites for active environments, the latest
+exact-main replay on release `0.177.100` pins the Windmill worker checkout to
+the active worktree during `make converge-windmill`, re-verifies the live
+`f/lv3/gate-status` and `f/lv3/stage-smoke-suites` wrappers together with the
+worker-local `post_merge_run: passed` surface, confirms runtime-assurance
+summary `55 total / 36 pass / 19 degraded / 0 failed`, and keeps the promotion
+gate blocking the stale staged `grafana` receipt for the expected SLO,
+capacity, and receipt-age reasons on platform version `0.130.67`.
 The repository now also ships ADR 0197 Dify visual workflow canvas fully live on production: `https://agents.lv3.org/healthz` now returns `200`, governed Dify tool calls through `https://api.lv3.org/v1/dify-tools/get-platform-status` re-verified from the latest-main replay, and the linked-worktree smoke export plus Langfuse trace path completed successfully on 2026-03-28.
 The repository now also ships ADR 0231 local secret delivery live on production: `docker-runtime-lv3` now serves the control-plane backup path through a repo-managed OpenBao Agent plus systemd credentials, the legacy `/etc/lv3/control-plane-recovery/openbao-backup-token.json` artifact is gone, and the 2026-03-28 replay re-verified a fresh backup generation plus restore drill on `backup-lv3`.
 The repository now also ships ADR 0137 crawl policy automation live on production: the shared public edge serves a universal `robots.txt`, emits `X-Robots-Tag: noindex, nofollow` across published hostnames, adds robots meta tags to repository-generated HTML surfaces, and includes `lv3.org` in the shared edge certificate definition.
@@ -196,7 +197,7 @@ ADR 0276 NATS JetStream is now live on production from `main`: `docker-runtime-l
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.100` |
-| Platform version | `0.130.66` |
+| Platform version | `0.130.67` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -1408,7 +1409,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.100` |
-| Platform version | `0.130.66` |
+| Platform version | `0.130.67` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |

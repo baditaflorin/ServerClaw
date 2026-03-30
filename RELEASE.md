@@ -3,10 +3,10 @@
 - Date: 2026-03-30
 
 ## Summary
-- replays ADR 0251 on the latest merged mainline by pinning the Windmill worker checkout to the active worktree during converge-windmill, replaying the Docker publication, step-ca, OpenBao, and stage-smoke verification paths on the live server, and refreshing the canonical smoke-suite and promotion-gate receipt
+- replays ADR 0251 on exact-main release 0.177.100 by pinning the Windmill worker checkout to the active worktree during converge-windmill, rerunning the Docker publication, step-ca, OpenBao, and stage-smoke verification paths, and refreshing the canonical smoke-suite and promotion-gate receipt on platform version 0.130.67
 
 ## Platform Impact
-- replays ADR 0251 on the latest mainline, pins Windmill worker checkout sync to the active worktree during converge-windmill, refreshes the canonical smoke-suite and promotion-gate receipt, and advances the verified platform baseline after the exact-main server-state replay
+- keeps ADR 0251 live on the latest mainline and advances the verified platform baseline from 0.130.66 to 0.130.67 after the exact-main replay
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

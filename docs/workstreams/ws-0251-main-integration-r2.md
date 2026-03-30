@@ -2,10 +2,10 @@
 
 - ADR: [ADR 0251](../adr/0251-stage-scoped-smoke-suites-and-promotion-gates.md)
 - Title: Integrate ADR 0251 latest-server-state follow-up onto `origin/main`
-- Status: `in_progress`
-- Target Repo Version: 0.177.92
-- Target Platform Version: 0.130.61
-- Release Date: 2026-03-29
+- Status: `merged`
+- Target Repo Version: 0.177.100
+- Target Platform Version: 0.130.67
+- Release Date: 2026-03-30
 - Branch: `codex/ws-0251-main-integration-r2`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0251-live-apply`
 - Owner: codex
@@ -64,32 +64,17 @@ step-ca durability paths.
 - `receipts/live-applies/evidence/2026-03-29-adr-0251-*`
 - `receipts/live-applies/evidence/2026-03-29-openbao-*`
 
-## Prepared Verification
+## Verification
 
-- The integration branch inherits the validated follow-up commit
-  `b6c70600b97997a1faf048d2e61014280fbdc9b4`, which already passed focused
-  pytest coverage for the deployment-history portal fix and OpenBao recovery
-  hardening, `./scripts/validate_repo.sh generated-vars role-argument-specs
-  json alert-rules generated-docs generated-portals agent-standards`,
-  `uv run --with pyyaml python3 scripts/canonical_truth.py --check`, and the
-  Windmill playbook syntax check.
-- Branch-local live evidence already confirms `make converge-windmill`, the
-  live worker `make post-merge-gate`, post-gate `gate-status`, post-gate
-  `stage-smoke-suites`, post-gate `windmill_healthcheck`, OpenBao recovery,
-  and fresh host-plus-guest server-state snapshots on the latest realistic
-  pre-merge baseline.
-- The current integration branch is now merged onto `origin/main` release
-  `0.177.91`, preserves the worker-side gate-status retry hardening, the
-  latest-server-state step-ca topology recovery, and the OpenBao recovery plus
-  nested-evidence receipt-enumeration fixes, and is being revalidated from
-  that exact latest-main baseline before the final merge.
+- `uv run --with pytest --with pyyaml pytest -q tests/test_windmill_operator_admin_app.py` returned `14 passed in 0.24s` after pinning `make converge-windmill` to the active worktree checkout.
+- Release `0.177.100` was cut on the merged branch, producing committed source `fad05e6af1cd920191051deaeac5d1d79116604e`.
+- `make converge-docker-runtime env=production`, `make converge-step-ca env=production`, `make converge-openbao env=production`, and `make converge-windmill env=production` all succeeded from that committed source, with evidence in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r31-converge-docker-runtime-0.177.100.txt` through `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r34-converge-windmill-0.177.100.txt`.
+- Worker-side `make post-merge-gate` passed through the intended local fallback, `f/lv3/gate-status` returned wrapper `status: ok` with `post_merge_run.status: passed`, and `f/lv3/stage-smoke-suites` passed `production-windmill-primary-path`, with evidence in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r35-post-merge-gate-worker-0.177.100.txt` through `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r37-stage-smoke-suites-live-post-release-0.177.100.json`.
+- The authenticated runtime-assurance API returned summary `55 total / 36 pass / 19 degraded / 0 failed / 0 unknown`, fresh host and guest probes reconfirmed `pve-manager/9.1.6`, kernel `6.17.13-2-pve`, Windmill `CE v1.662.0`, and healthy unsealed OpenBao `2.5.1`, and worker checkout hashes matched the active worktree across the six pinning-sensitive files, with evidence in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r38-runtime-assurance-api-post-release-0.177.100.json` through `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r42-worker-checkout-hash-verify-0.177.100.txt`.
+- The governed promotion gate still rejected the stale staged Grafana receipt for the expected reasons: Prometheus SLO query timeouts, projected vCPU commitment `36.0` above target `22.5`, and receipt age, while `approval.approved`, `stage_smoke_gate.passed`, and `staging_health_check.passed` remained true.
 
-## Pending Exact-Main Replay
+## Outcome
 
-- Cut release `0.177.92` on this branch once the protected surfaces are ready,
-  unless `origin/main` advances again first.
-- Re-run the exact commit that will become `main` through the OpenBao and
-  Windmill live paths, including a refreshed worker-local post-merge gate and
-  a latest-server-state step-ca replay from the merged tip.
-- Record the resulting structured receipt and then advance
-  `versions/stack.yaml` to platform version `0.130.61`.
+- Release `0.177.100` records this follow-up on `main`.
+- Platform version `0.130.67` is the verified mainline baseline after the exact-main replay.
+- The canonical receipt is `receipts/live-applies/2026-03-30-adr-0251-stage-smoke-promotion-gates-mainline-live-apply.json`.
