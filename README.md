@@ -154,6 +154,15 @@ and the 2026-03-30 exact-main replay on release `0.177.93` re-verified the
 guest-local `10.10.10.20:8084` runtime together with the shared OpenBao
 publication-recovery path and the new mutable OCC recovery path for
 concurrent Docker interruptions on the shared host.
+ADR 0262 delegated authorization is now live on production from `main`: the
+private OpenFGA service answers on `http://100.64.0.1:8014`, the
+repo-managed `serverclaw-authz` store and verification set pass through
+`scripts/serverclaw_authz.py verify` against the guest-local Keycloak listener
+at `http://10.10.10.20:8091`, `https://api.lv3.org/v1/platform/services` now
+lists `openfga` with `gateway_prefix: /v1/openfga`, and
+`https://api.lv3.org/v1/openfga/healthz` returns the canonical
+`AUTH_INSUFFICIENT_ROLE` envelope for `lv3-agent-hub`, proving the route is
+live and correctly role-gated.
 ADR 0295 shared artifact cache plane is now live on production: `docker-build-lv3`
 now serves internal pull-through mirrors on `10.10.10.30:5001-5004`, the
 2026-03-29 exact-main replay re-warmed a repo-derived `41`-image seed set, and
@@ -180,7 +189,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.95` |
-| Platform version | `0.130.62` |
+| Platform version | `0.130.63` |
 | Observed check date | `2026-03-29` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -278,7 +287,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `https_tls_assurance` | `2026-03-29-adr-0255-matrix-synapse-mainline-live-apply` |
 | `identity_taxonomy` | `2026-03-22-adr-0046-identity-classes-live-apply` |
 | `immutable_guest_replacement` | `2026-03-27-adr-0191-immutable-guest-replacement-live-apply` |
-| `keycloak` | `2026-03-26-adr-0171-fault-injection-live-apply` |
+| `keycloak` | `2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply` |
 | `keycloak_operator_access` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `langfuse` | `2026-03-26-adr-0146-langfuse-live-apply` |
 | `local_search_and_indexing_fabric` | `2026-03-29-adr-0239-browser-local-search-post-merge-replay` |
@@ -302,6 +311,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `openbao` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
 | `openbao_operator_entity` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `openbao_operator_policy` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
+| `openfga` | `2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply` |
 | `operator_access` | `2026-03-28-adr-0238-operator-grid-live-apply` |
 | `operator_access_composition_root` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_guided_onboarding` | `2026-03-28-adr-0242-guided-human-onboarding-live-apply` |
@@ -1344,7 +1354,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0259-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0259-main-merge.md)
 - [Workstream ws-0260-live-apply: ADR 0260 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0260-live-apply.md)
 - [Workstream ws-0260-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0260-main-integration.md)
-- [Workstream WS-0262: OpenFGA And Keycloak Delegated Authorization Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0262-live-apply.md)
+- [Workstream ws-0262-live-apply: ADR 0262 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0262-live-apply.md)
 - [Workstream ws-0263-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0263-main-merge.md)
 - [Workstream ws-0264-live-apply: Live Apply ADR 0264 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0264-live-apply.md)
 - [Workstream ws-0264-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0264-main-merge.md)
@@ -1374,7 +1384,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.95` |
-| Platform version | `0.130.62` |
+| Platform version | `0.130.63` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |

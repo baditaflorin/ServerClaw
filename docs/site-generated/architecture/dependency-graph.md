@@ -18,7 +18,7 @@ Generated from `config/dependency-graph.json`.
 | Tier | Services |
 | --- | --- |
 | `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, Mail Platform, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Excalidraw, Gitea, Gotenberg, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, Outline, Plane, Public Status Page, Semaphore, ServerClaw, Vaultwarden, Windmill, n8n |
+| `2` | Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Excalidraw, Gitea, Gotenberg, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Plane, Public Status Page, Semaphore, ServerClaw, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway |
 | `4` | Ops Portal |
 
@@ -65,6 +65,7 @@ graph TD
     netbox["NetBox\nTier 2"]
     nextcloud["Nextcloud\nTier 2"]
     open_webui["Open WebUI\nTier 2"]
+    openfga["OpenFGA\nTier 2"]
     outline["Outline\nTier 2"]
     plane["Plane\nTier 2"]
     status_page["Public Status Page\nTier 2"]
@@ -140,6 +141,9 @@ graph TD
     open_webui -->|hard| ollama
     open_webui -->|startup_only| openbao
     open_webui -->|soft| searxng
+    openfga -->|soft| keycloak
+    openfga -->|startup_only| openbao
+    openfga -->|hard| postgres
     ops_portal -->|hard| api_gateway
     ops_portal -->|hard| keycloak
     ops_portal -->|hard| nginx_edge
