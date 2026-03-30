@@ -118,6 +118,7 @@
       "requires_compose_secrets": true,
       "keycloak_client_generated": true,
       "suppressed_checks": {
+        "api_gateway": "2026-09-30",
         "alert_rules": "2026-09-30",
         "grafana_dashboard": "2026-09-30"
       }
