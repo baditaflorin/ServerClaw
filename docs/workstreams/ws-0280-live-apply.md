@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0280](../adr/0280-changedetection-io-for-external-content-and-api-change-monitoring.md)
 - Title: private Changedetection.io external content and API change monitoring live apply
-- Status: in_progress
+- Status: ready_for_merge
 - Branch: `codex/ws-0280-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0280-live-apply`
 - Owner: codex
@@ -44,6 +44,8 @@
 - `docs/site-generated/architecture/dependency-graph.md`
 - `docs/diagrams/service-dependency-graph.excalidraw`
 - `docs/diagrams/trust-tier-model.excalidraw`
+- `collections/ansible_collections/lv3/platform/roles/mattermost_runtime/templates/mattermost.env.j2`
+- `collections/ansible_collections/lv3/platform/roles/mattermost_runtime/templates/mattermost.env.ctmpl.j2`
 - `playbooks/changedetection.yml`
 - `playbooks/services/changedetection.yml`
 - `collections/ansible_collections/lv3/platform/roles/changedetection_runtime/`
@@ -52,6 +54,7 @@
 - `tests/test_changedetection_metadata.py`
 - `tests/test_changedetection_sync.py`
 - `tests/test_generate_platform_vars.py`
+- `tests/test_data_retention_role.py`
 - `receipts/image-scans/2026-03-30-changedetection-runtime.json`
 - `receipts/image-scans/2026-03-30-changedetection-runtime.trivy.json`
 - `receipts/live-applies/`
@@ -59,20 +62,29 @@
 
 ## Verification
 
-- repository validation completed on the branch before the live apply pause:
-  - `uv run --with pytest --with pyyaml pytest tests/test_changedetection_runtime_role.py tests/test_changedetection_metadata.py tests/test_changedetection_sync.py tests/test_generate_platform_vars.py -q`
+- targeted validation on the repaired workstream branch passed before the final replay:
+  - `uv run --with pytest --with pyyaml pytest tests/test_changedetection_sync.py tests/test_changedetection_runtime_role.py tests/test_changedetection_metadata.py tests/test_generate_platform_vars.py -q` returned `41 passed in 1.59s`
   - `make syntax-check-changedetection`
-  - `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
-  - `uvx --from pyyaml python scripts/interface_contracts.py --check-live-apply service:changedetection`
-  - `./scripts/validate_repo.sh agent-standards`
+  - `make syntax-check-mattermost`
+  - `make syntax-check-netbox`
 - direct guest checks confirmed `docker-runtime-lv3` did not have Changedetection live before this workstream:
   - `/opt/changedetection/docker-compose.yml` absent
   - TCP `5000` absent
   - `/etc/lv3/changedetection/api-token` absent
-- first live apply evidence was recorded in `receipts/live-applies/evidence/2026-03-30-ws-0280-converge-changedetection.txt`
-- the initial converge stopped while resolving Mattermost notification routing because the live Mattermost webhook manifest on `docker-runtime-lv3` does not currently include the repo-declared `platform-ops` / `ops` webhook key required by ADR 0280
+- the first live converge exposed a Mattermost dependency gap instead of a Changedetection runtime bug:
+  - `receipts/live-applies/evidence/2026-03-30-ws-0280-converge-mattermost-unblock-r1.txt` captured the invalid retention configuration that kept Mattermost crash-looping
+  - `receipts/live-applies/evidence/2026-03-30-ws-0280-converge-mattermost-unblock-r3.txt` captured the repaired Mattermost replay after fixing retention defaults and guest-side PostgreSQL host resolution
+- the Changedetection correction loop is preserved in the sequential branch evidence:
+  - `receipts/live-applies/evidence/2026-03-30-ws-0280-converge-changedetection-r2.txt` through `receipts/live-applies/evidence/2026-03-30-ws-0280-converge-changedetection-r8.txt`
+  - the final authoritative replay is `receipts/live-applies/evidence/2026-03-30-ws-0280-converge-changedetection-r8.txt`, which completed with `docker-runtime-lv3 : ok=311 changed=118 unreachable=0 failed=0 skipped=33 rescued=0 ignored=0`
+- direct settled-state proofs after the successful replay are recorded in:
+  - `receipts/live-applies/evidence/2026-03-30-ws-0280-host-state-r2.txt`
+  - `receipts/live-applies/evidence/2026-03-30-ws-0280-changedetection-runtime-state-r1.txt`
+  - `receipts/live-applies/evidence/2026-03-30-ws-0280-changedetection-health-r1.txt`
+  - `receipts/live-applies/evidence/2026-03-30-ws-0280-changedetection-gateway-route-r1.txt`
 
 ## Remaining For Merge-To-Main
 
-- exact-main integration still needs the protected release and canonical-truth surfaces once branch-local live apply is verified
-- if the live apply succeeds on this branch, the final merge-to-main step still needs to refresh `VERSION`, `changelog.md`, `versions/stack.yaml`, and generated canonical-truth surfaces from exact `origin/main`
+- `origin/main` advanced during the branch-local replay, so the exact-main integration still needs a fresh rebase before merge
+- the exact-main step still needs to refresh the protected release and canonical-truth surfaces from the latest `origin/main`
+- the final integration step on `main` must update `VERSION`, `changelog.md`, `versions/stack.yaml`, the integrated `README.md` status summary, and ADR 0280's final repo/platform implementation metadata after the exact-main replay succeeds
