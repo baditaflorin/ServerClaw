@@ -64,6 +64,7 @@ def test_role_recovers_missing_docker_nat_chain_before_startup() -> None:
         for task in start_block["rescue"]
         if task.get("name") == "Flag Docker nat-chain and stale compose-network failures during Tika startup"
     )
+    assert "Reset Docker failed state before nat-chain recovery restart" in [task["name"] for task in tasks]
     assert "Reset Docker failed state before nat-chain recovery retry" in rescue_names
     assert "Restart Docker to restore nat chain before retrying Tika startup" in rescue_names
     assert "Reset stale Tika compose resources after startup failure" in rescue_names
