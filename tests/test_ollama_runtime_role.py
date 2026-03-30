@@ -46,6 +46,8 @@ def test_role_recovers_missing_docker_nat_chain_before_startup() -> None:
     )
     rescue_names = [task["name"] for task in start_block["rescue"]]
     assert "Restart Docker to restore nat chain before retrying Ollama startup" in rescue_names
+    assert "Detect stale Docker networking drift during Ollama startup" in rescue_names
+    assert "Remove the stale Ollama compose network before retrying startup" in rescue_names
     assert "Retry Ollama startup after Docker nat-chain recovery" in rescue_names
 
 
