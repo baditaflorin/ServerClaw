@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.96",
+  "repo_version": "0.177.97",
   "platform_version": "0.130.63",
-  "generated_at": "2026-03-30T04:39:39Z",
-  "next_refresh_at": "2026-03-30T05:39:39Z",
+  "generated_at": "2026-03-30T08:04:07Z",
+  "next_refresh_at": "2026-03-30T09:04:07Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -313,6 +313,17 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://n8n.lv3.org",
+        "last_live_apply": "2026-03-30T00:00:00Z"
+      },
+      "nats_jetstream": {
+        "service_name": "NATS JetStream",
+        "status": "degraded",
+        "score": 0.75,
+        "safe_to_act": false,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "nats://10.10.10.20:4222",
         "last_live_apply": "2026-03-30T00:00:00Z"
       },
       "netbox": {
@@ -4781,10 +4792,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.95",
+    "last_version": "0.177.96",
     "deployed_at": "2026-03-30",
-    "summary": "integrates ADR 0282 into main by replaying Mailpit as the private development SMTP interceptor and the non-production SMTP contract onto the merged 0.177.95 / 0.130.63 baseline, preserving the exact-main Mailpit verification from docker-runtime-lv3 and monitoring-lv3 without advancing platform_version again",
-    "release_notes_url": "docs/release-notes/0.177.96.md"
+    "summary": "implements ADR 0276 by bringing the private NATS JetStream runtime under repo-managed automation, preserving the live multi-principal auth contract, aligning mutation-ledger, secret-rotation, and RAG subjects with the platform event-bus stream catalog, and recording rebased live-apply proof before exact-main integration",
+    "release_notes_url": "docs/release-notes/0.177.97.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

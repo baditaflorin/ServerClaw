@@ -661,7 +661,7 @@ workstreams:
         catalog, and recording rebased live-apply proof before exact-main
         integration
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.97
       latest_receipts:
         nats_jetstream: 2026-03-30-adr-0276-nats-jetstream-event-bus-mainline-live-apply
   - id: ws-0260-live-apply
