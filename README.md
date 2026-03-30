@@ -180,7 +180,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.93` |
-| Platform version | `0.130.60` |
+| Platform version | `0.130.61` |
 | Observed check date | `2026-03-29` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -269,7 +269,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `fixture_pools` | `2026-03-28-adr-0186-prewarmed-fixture-pools-live-apply` |
 | `gitea` | `2026-03-26-adr-0143-gitea-live-apply` |
 | `gitea_actions_runners` | `2026-03-28-adr-0229-gitea-actions-runners-live-apply` |
-| `gotenberg` | `2026-03-30-adr-0278-gotenberg-live-apply` |
+| `gotenberg` | `2026-03-30-adr-0278-gotenberg-mainline-live-apply` |
 | `guest_network_policy` | `2026-03-22-adr-0067-guest-network-policy-live-apply` |
 | `harbor` | `2026-03-29-adr-0201-harbor-mainline-live-apply` |
 | `homepage` | `2026-03-26-adr-0152-homepage-live-apply` |
@@ -1370,7 +1370,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.93` |
-| Platform version | `0.130.60` |
+| Platform version | `0.130.61` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
