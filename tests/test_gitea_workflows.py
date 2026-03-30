@@ -9,9 +9,17 @@ PYTHON_RUNNER_IMAGE = (
     "registry.lv3.org/check-runner/python:3.12.10"
     "@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff"
 )
-MANUAL_CHECKOUT_FETCH = (
+SHALLOW_MANUAL_CHECKOUT_FETCH = (
     'git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" '
     'fetch --depth=1 origin "${WORKFLOW_REF}"'
+)
+VALIDATE_CHECKOUT_FETCH = (
+    'git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" '
+    'fetch origin "${WORKFLOW_REF}"'
+)
+VALIDATE_MAIN_FETCH = (
+    'git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" '
+    'fetch origin main'
 )
 
 
@@ -22,7 +30,9 @@ def test_validate_workflow_uses_pinned_python_runner_and_manual_checkout() -> No
     assert "uses: actions/checkout@v4" not in workflow
     assert "uses: actions/setup-python@v5" not in workflow
     assert "uses: actions/upload-artifact@v4" not in workflow
-    assert MANUAL_CHECKOUT_FETCH in workflow
+    assert VALIDATE_CHECKOUT_FETCH in workflow
+    assert VALIDATE_MAIN_FETCH in workflow
+    assert "--depth=1" not in workflow
     assert 'git checkout --force "${WORKFLOW_SHA}"' in workflow
     assert "Bootstrap validation toolchain" in workflow
     assert "apt-get install -y --no-install-recommends docker-cli" in workflow
@@ -43,7 +53,7 @@ def test_release_bundle_workflow_uses_pinned_python_runner_and_manual_checkout()
 
     assert workflow.count(PYTHON_RUNNER_IMAGE) == 2
     assert "uses: actions/checkout@v4" not in workflow
-    assert workflow.count(MANUAL_CHECKOUT_FETCH) == 2
+    assert workflow.count(SHALLOW_MANUAL_CHECKOUT_FETCH) == 2
     assert workflow.count('git checkout --force "${WORKFLOW_SHA}"') == 2
 
 
@@ -52,7 +62,7 @@ def test_renovate_workflow_bootstraps_inside_pinned_python_runner() -> None:
 
     assert workflow.count(PYTHON_RUNNER_IMAGE) == 2
     assert "uses: actions/checkout@v4" not in workflow
-    assert MANUAL_CHECKOUT_FETCH in workflow
+    assert SHALLOW_MANUAL_CHECKOUT_FETCH in workflow
     assert 'git checkout --force "${WORKFLOW_SHA}"' in workflow
     assert "/var/run/docker.sock:/var/run/docker.sock" not in workflow
     assert "apt-get install -y --no-install-recommends docker.io" in workflow

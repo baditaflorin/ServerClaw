@@ -29,7 +29,8 @@ jobs:
           else
             git remote add origin "${WORKFLOW_SERVER_URL}/${WORKFLOW_REPOSITORY}.git"
           fi
-          git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch --depth=1 origin "${WORKFLOW_REF}"
+          git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch origin "${WORKFLOW_REF}"
+          git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch origin main
           git checkout --force "${WORKFLOW_SHA}"
 
       - name: Bootstrap validation toolchain
