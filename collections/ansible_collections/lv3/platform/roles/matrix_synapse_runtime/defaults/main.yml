@@ -18,9 +18,10 @@
 #
 # Dependencies:
 #   - ADR 0255: Matrix Synapse As The Canonical ServerClaw Conversation Hub
+#   - ADR 0256: Mautrix Bridges For External Chat Channel Adapters
 #   - Role: matrix_synapse_runtime — deploys the Matrix Synapse runtime on docker-runtime-lv3.
 #
-# Related ADRs: 0165, 0255
+# Related ADRs: 0165, 0255, 0256
 # Related Runbooks: docs/runbooks/configure-matrix-synapse.md
 #
 # Author: LV3 Platform
@@ -38,11 +39,21 @@ matrix_synapse_legacy_env_file: "{{ matrix_synapse_site_dir }}/matrix-synapse.en
 matrix_synapse_openbao_agent_dir: "{{ matrix_synapse_site_dir }}/openbao"
 matrix_synapse_openbao_agent_image: "{{ openbao_agent_image }}"
 matrix_synapse_openbao_agent_container_name: matrix-synapse-openbao-agent
+matrix_synapse_mautrix_discord_dir: "{{ matrix_synapse_site_dir }}/mautrix-discord"
+matrix_synapse_mautrix_discord_config_file: "{{ matrix_synapse_mautrix_discord_dir }}/config.yaml"
+matrix_synapse_mautrix_discord_registration_file: "{{ matrix_synapse_mautrix_discord_dir }}/registration.yaml"
+matrix_synapse_mautrix_discord_container_name: matrix-mautrix-discord
+matrix_synapse_mautrix_whatsapp_dir: "{{ matrix_synapse_site_dir }}/mautrix-whatsapp"
+matrix_synapse_mautrix_whatsapp_config_file: "{{ matrix_synapse_mautrix_whatsapp_dir }}/config.yaml"
+matrix_synapse_mautrix_whatsapp_registration_file: "{{ matrix_synapse_mautrix_whatsapp_dir }}/registration.yaml"
+matrix_synapse_mautrix_whatsapp_container_name: matrix-mautrix-whatsapp
 matrix_synapse_openbao_secret_path: services/matrix-synapse/runtime-env
 matrix_synapse_openbao_policy_name: lv3-service-matrix-synapse-runtime
 matrix_synapse_openbao_approle_name: matrix-synapse-runtime
 matrix_synapse_container_name: matrix-synapse
 matrix_synapse_image: "{{ container_image_catalog.images.matrix_synapse_runtime.ref }}"
+matrix_synapse_mautrix_discord_image: "{{ container_image_catalog.images.matrix_mautrix_discord_runtime.ref }}"
+matrix_synapse_mautrix_whatsapp_image: "{{ container_image_catalog.images.matrix_mautrix_whatsapp_runtime.ref }}"
 matrix_synapse_server_name: matrix.lv3.org
 matrix_synapse_public_hostname: "{{ hostvars['proxmox_florin'].platform_service_topology.matrix_synapse.public_hostname }}"
 matrix_synapse_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('matrix_synapse', 'internal') }}"
@@ -55,11 +66,29 @@ matrix_synapse_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_h
 matrix_synapse_database_port: 5432
 matrix_synapse_database_name: matrix_synapse
 matrix_synapse_database_user: matrix_synapse
+matrix_synapse_mautrix_discord_database_name: mautrix_discord
+matrix_synapse_mautrix_discord_database_user: mautrix_discord
+matrix_synapse_mautrix_discord_database_host: "{{ matrix_synapse_database_host }}"
+matrix_synapse_mautrix_whatsapp_database_name: mautrix_whatsapp
+matrix_synapse_mautrix_whatsapp_database_user: mautrix_whatsapp
+matrix_synapse_mautrix_whatsapp_database_host: "{{ matrix_synapse_database_host }}"
 matrix_synapse_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse
 matrix_synapse_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/database-password.txt
 matrix_synapse_ops_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/ops-password.txt
+matrix_synapse_ops_access_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/ops-access-token.txt
 matrix_synapse_registration_shared_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/registration-shared-secret.txt
 matrix_synapse_signing_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/server-signing.key
+matrix_synapse_mautrix_discord_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-discord-database-password.txt
+matrix_synapse_mautrix_discord_as_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-discord-as-token.txt
+matrix_synapse_mautrix_discord_hs_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-discord-hs-token.txt
+matrix_synapse_mautrix_discord_provisioning_shared_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-discord-provisioning-shared-secret.txt
+matrix_synapse_mautrix_discord_avatar_proxy_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-discord-avatar-proxy-key.txt
+matrix_synapse_mautrix_whatsapp_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-whatsapp-database-password.txt
+matrix_synapse_mautrix_whatsapp_as_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-whatsapp-as-token.txt
+matrix_synapse_mautrix_whatsapp_hs_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-whatsapp-hs-token.txt
+matrix_synapse_mautrix_whatsapp_provisioning_shared_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-whatsapp-provisioning-shared-secret.txt
+matrix_synapse_mautrix_whatsapp_public_media_signing_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-whatsapp-public-media-signing-key.txt
+matrix_synapse_mautrix_whatsapp_encryption_pickle_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/matrix-synapse/mautrix-whatsapp-encryption-pickle-key.txt
 matrix_synapse_ops_password_remote_file: "{{ matrix_synapse_secret_dir }}/ops-password.txt"
 matrix_synapse_registration_shared_secret_remote_file: "{{ matrix_synapse_secret_dir }}/registration-shared-secret.txt"
 matrix_synapse_form_secret_remote_file: "{{ matrix_synapse_secret_dir }}/form-secret.txt"
@@ -68,6 +97,12 @@ matrix_synapse_signing_key_remote_file: "{{ matrix_synapse_data_dir }}/{{ matrix
 matrix_synapse_signing_key_container_file: "{{ matrix_synapse_container_data_dir }}/{{ matrix_synapse_server_name }}.signing.key"
 matrix_synapse_admin_localpart: ops
 matrix_synapse_admin_user_id: "@{{ matrix_synapse_admin_localpart }}:{{ matrix_synapse_server_name }}"
+matrix_synapse_mautrix_discord_bot_user_id: "@discordbot:{{ matrix_synapse_server_name }}"
+matrix_synapse_mautrix_whatsapp_bot_user_id: "@whatsappbot:{{ matrix_synapse_server_name }}"
+matrix_synapse_public_smoke_bot_user_ids:
+  - "{{ matrix_synapse_mautrix_discord_bot_user_id }}"
+  - "{{ matrix_synapse_mautrix_whatsapp_bot_user_id }}"
+matrix_synapse_public_smoke_timeout_seconds: 90
 matrix_synapse_report_stats: false
 matrix_synapse_disable_federation: true
 matrix_synapse_trusted_key_servers:

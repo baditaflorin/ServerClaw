@@ -17,11 +17,12 @@
 #
 # Dependencies:
 #   - ADR 0255: Matrix Synapse As The Canonical ServerClaw Conversation Hub
+#   - ADR 0256: Mautrix Bridges For External Chat Channel Adapters
 #   - Requires: OpenBao, docker-runtime-lv3, postgres-lv3, the shared NGINX edge, and Hetzner DNS publication to be reachable
 #   - Role: matrix_synapse_postgres — provisions the Matrix Synapse database and role
 #   - Role: matrix_synapse_runtime — deploys Matrix Synapse, seeds bootstrap secrets, and verifies local login
 #
-# Related ADRs: 0149, 0152, 0255
+# Related ADRs: 0149, 0152, 0255, 0256
 # Related Runbooks: docs/runbooks/configure-matrix-synapse.md
 #
 # Author: LV3 Platform
@@ -184,3 +185,18 @@
 
   roles:
     - role: lv3.platform.nginx_edge_publication
+
+- name: Verify the public Matrix Synapse bridge surfaces
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tags:
+    - tier-2
+    - automation
+    - service-matrix-synapse
+
+  tasks:
+    - name: Run shared Matrix Synapse public verification
+      ansible.builtin.include_role:
+        name: lv3.platform.matrix_synapse_runtime
+        tasks_from: public_verify.yml

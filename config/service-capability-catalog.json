@@ -642,7 +642,7 @@
     {
       "id": "matrix_synapse",
       "name": "Matrix Synapse",
-      "description": "Repo-managed Matrix Synapse runtime that serves as the canonical ServerClaw conversation hub.",
+      "description": "Repo-managed Matrix Synapse runtime with Discord and WhatsApp mautrix bridges that serves as the canonical ServerClaw conversation hub.",
       "category": "communication",
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
@@ -654,13 +654,26 @@
       "uptime_monitor_name": "Matrix Synapse Public",
       "health_probe_id": "matrix_synapse",
       "image_catalog_ids": [
-        "matrix_synapse_runtime"
+        "matrix_synapse_runtime",
+        "matrix_mautrix_discord_runtime",
+        "matrix_mautrix_whatsapp_runtime"
       ],
       "secret_catalog_ids": [
         "matrix_synapse_database_password",
         "matrix_synapse_ops_password",
         "matrix_synapse_registration_shared_secret",
-        "matrix_synapse_signing_key"
+        "matrix_synapse_signing_key",
+        "matrix_synapse_mautrix_discord_database_password",
+        "matrix_synapse_mautrix_discord_as_token",
+        "matrix_synapse_mautrix_discord_hs_token",
+        "matrix_synapse_mautrix_discord_provisioning_shared_secret",
+        "matrix_synapse_mautrix_discord_avatar_proxy_key",
+        "matrix_synapse_mautrix_whatsapp_database_password",
+        "matrix_synapse_mautrix_whatsapp_as_token",
+        "matrix_synapse_mautrix_whatsapp_hs_token",
+        "matrix_synapse_mautrix_whatsapp_provisioning_shared_secret",
+        "matrix_synapse_mautrix_whatsapp_public_media_signing_key",
+        "matrix_synapse_mautrix_whatsapp_encryption_pickle_key"
       ],
       "adr": "0255",
       "runbook": "docs/runbooks/configure-matrix-synapse.md",
@@ -669,14 +682,17 @@
         "matrix",
         "synapse",
         "serverclaw",
-        "conversation"
+        "conversation",
+        "bridge",
+        "discord",
+        "whatsapp"
       ],
       "environments": {
         "production": {
           "status": "active",
           "url": "https://matrix.lv3.org",
           "subdomain": "matrix.lv3.org",
-          "notes": "The public Matrix client API is edge-published while authentication stays inside Synapse and federation remains disabled for ADR 0255."
+          "notes": "The public Matrix client API is edge-published while authentication stays inside Synapse, federation remains disabled for ADR 0255, and ADR 0256 manages Discord plus WhatsApp bridge bots through application-service registrations and bridge-management-room smoke verification."
         }
       }
     },
