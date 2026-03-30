@@ -64,6 +64,8 @@ was already live on `0.130.60`.
 - `tests/test_mailpit_runtime_role.py`
 - `tests/test_mail_platform_verify_playbook.py`
 - `config/ansible-role-idempotency.yml`
+- `scripts/serverclaw_authz.py`
+- `tests/test_serverclaw_authz.py`
 - `scripts/remote_exec.sh`
 - `README.md`
 - `RELEASE.md`
@@ -111,10 +113,11 @@ was already live on `0.130.60`.
 - Final automation checks also passed on the release tree:
   `make validate`, `make remote-validate`, `make pre-push-gate`, and
   `make check-build-server`, with the validation follow-up migrating the
-  refreshed mainline's remaining raw retry loop in
-  `scripts/docker_publication_assurance.py` onto `platform.retry.with_retry`,
-  rerunning the focused Docker publication pytest slice, and keeping the
-  branch-local workstream state non-terminal until the final mainline commit so
+  refreshed mainline's remaining raw retry loops in
+  `scripts/docker_publication_assurance.py` and `scripts/serverclaw_authz.py`
+  onto `platform.retry.with_retry`, rerunning the focused Docker publication
+  and ServerClaw authorization pytest slices, and keeping the branch-local
+  workstream state non-terminal until the final mainline commit so
   `workstream-surfaces` could pass on the branch.
 - After the final registry flip back to `status: merged`,
   `./scripts/validate_repo.sh workstream-surfaces` predictably reported

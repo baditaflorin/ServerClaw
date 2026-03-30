@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.95",
   "platform_version": "0.130.63",
-  "generated_at": "2026-03-30T02:55:43Z",
-  "next_refresh_at": "2026-03-30T03:55:43Z",
+  "generated_at": "2026-03-30T04:21:07Z",
+  "next_refresh_at": "2026-03-30T05:21:07Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -256,6 +256,18 @@
         "lifecycle_status": "active",
         "primary_url": "https://mail.lv3.org",
         "last_live_apply": "2026-03-30T00:00:00Z"
+      },
+      "mailpit": {
+        "service_name": "Mailpit",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://10.10.10.20:8025",
+        "last_live_apply": "2026-03-30T00:00:00Z",
+        "slo_status": "unknown"
       },
       "matrix_synapse": {
         "service_name": "Matrix Synapse",
@@ -1407,6 +1419,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-mail-platform.md"
+      },
+      {
+        "id": "converge-mailpit",
+        "description": "Deploy the private Mailpit SMTP interceptor on docker-runtime-lv3 for staging and development mail capture plus REST-API assertions.",
+        "tags": [
+          "converge-mailpit",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-mailpit.md"
       },
       {
         "id": "converge-matrix-synapse",
@@ -3870,6 +3908,16 @@
         "path": "docs/runbooks/configure-mail-platform.md",
         "workflow_ids": [
           "converge-mail-platform"
+        ]
+      },
+      {
+        "id": "configure-mailpit",
+        "title": "Configure Mailpit",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-mailpit.md",
+        "workflow_ids": [
+          "converge-mailpit"
         ]
       },
       {

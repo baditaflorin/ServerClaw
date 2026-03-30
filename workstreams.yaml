@@ -167,7 +167,7 @@ workstreams:
   - id: ws-0282-main-merge
     adr: "0282"
     title: Integrate ADR 0282 Mailpit exact-main replay into current origin/main
-    status: merged
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0282-main-merge
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-main-merge
@@ -220,7 +220,9 @@ workstreams:
       - .ansible-lint-ignore
       - collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml
       - scripts/docker_publication_assurance.py
+      - scripts/serverclaw_authz.py
       - scripts/remote_exec.sh
+      - tests/test_serverclaw_authz.py
       - README.md
       - RELEASE.md
       - VERSION
@@ -323,6 +325,12 @@ workstreams:
             - scripts/remote_exec.sh
           mode: shared_contract
           contract: latest-main-integration-v1
+        - id: adr_0282_main_merge_retry_guard_repair
+          paths:
+            - scripts/serverclaw_authz.py
+            - tests/test_serverclaw_authz.py
+          mode: shared_contract
+          contract: retry-guard-modernization-v1
         - id: adr_0282_main_merge
           paths:
             - docs/workstreams/ws-0282-main-merge.md
