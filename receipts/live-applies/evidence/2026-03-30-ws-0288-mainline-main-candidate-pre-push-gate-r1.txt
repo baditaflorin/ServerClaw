@@ -1,0 +1,95 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0288-main-candidate/scripts/remote_exec.sh pre-push-gate --local-fallback
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 0.96
+alert-rule-validation passed 1.97
+ansible-lint          passed 183.43
+ansible-syntax        passed 107.19
+artifact-secret-scan  passed 3.25
+dependency-direction  passed 2.79
+dependency-graph      failed 2.97
+documentation-index   passed 2.38
+generated-docs        failed 9.09
+generated-portals     passed 30.21
+integration-tests     passed 0.98
+packer-validate       passed 6.19
+policy-validation     passed 2.64
+schema-validation     failed 13.87
+security-scan         passed 13.85
+semgrep-sast          passed 56.65
+service-completeness  passed 1.85
+tofu-validate         passed 2.03
+type-check            passed 5.17
+workstream-surfaces   passed 4.17
+yaml-lint             passed 14.68
+
+[dependency-graph] docker command
+docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0288-main-candidate-3e9cc32c94/repo/.lv3-runs/20260330T202918Z-037cde2b7ec8/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=037cde2b7ec8e2df11fce7ef4921137d452e6452ef262b52f9b9b543f0912c60 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T20:29:15.047436+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=1113958d73b71d25c8154fad609a7821592dea39 -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/validate_dependency_graph.py >/dev/null && python scripts/generate_dependency_diagram.py --check >/dev/null && python scripts/generate_diagrams.py --check >/dev/null
+[dependency-graph] stderr
+architecture diagrams error: /workspace/docs/diagrams is stale for agent-coordination-map.excalidraw. Run 'python3 scripts/generate_diagrams.py --write'.
+
+[generated-docs] docker command
+docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0288-main-candidate-3e9cc32c94/repo/.lv3-runs/20260330T202918Z-037cde2b7ec8/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=037cde2b7ec8e2df11fce7ef4921137d452e6452ef262b52f9b9b543f0912c60 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T20:29:15.047436+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=1113958d73b71d25c8154fad609a7821592dea39 -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh generated-docs
+[generated-docs] stdout
+Generated status document validation
+[generated-docs] stderr
+architecture diagrams error: /workspace/docs/diagrams is stale for agent-coordination-map.excalidraw. Run 'python3 scripts/generate_diagrams.py --write'.
+
+[schema-validation] docker command
+docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0288-main-candidate-3e9cc32c94/repo/.lv3-runs/20260330T202918Z-037cde2b7ec8/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=037cde2b7ec8e2df11fce7ef4921137d452e6452ef262b52f9b9b543f0912c60 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T20:29:15.047436+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=1113958d73b71d25c8154fad609a7821592dea39 -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/provider_boundary_catalog.py --validate >/dev/null && python scripts/validate_repository_data_models.py --validate >/dev/null && python scripts/capability_contracts.py --validate >/dev/null && python scripts/platform_manifest.py --check >/dev/null && python scripts/data_catalog.py --validate >/dev/null && python scripts/operator_manager.py validate >/dev/null && python scripts/service_catalog.py --validate >/dev/null && python scripts/stage_smoke_suites.py --validate >/dev/null && python scripts/environment_topology.py --validate >/dev/null && python scripts/subdomain_catalog.py --validate >/dev/null && python scripts/subdomain_exposure_audit.py --validate >/dev/null && ./scripts/agent_tool_registry.py --export-mcp >/dev/null && python scripts/mutation_audit.py --validate-schema >/dev/null
+[schema-validation] stderr
+platform manifest error: /workspace/build/platform-manifest.json is out of date; rerun scripts/platform_manifest.py --write
+Validation lane selection
+  mode: primary_branch
+  branch: HEAD
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, type-check, service-completeness, packer-validate, tofu-validate, security-scan, semgrep-sast, integration-tests
+  changed files: Makefile, README.md, RELEASE.md, VERSION, build/platform-manifest.json, changelog.md, ...
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 9.36
+alert-rule-validation passed 11.19
+ansible-lint          passed 304.18
+ansible-syntax        passed 191.75
+artifact-secret-scan  passed 18.25
+dependency-direction  passed 12.75
+dependency-graph      failed 15.49
+documentation-index   passed 12.98
+generated-docs        failed 29.77
+generated-portals     passed 68.83
+integration-tests     passed 5.99
+packer-validate       passed 40.36
+policy-validation     passed 21.78
+schema-validation     failed 86.64
+security-scan         passed 53.73
+semgrep-sast          passed 74.43
+service-completeness  passed 8.25
+tofu-validate         passed 5.46
+type-check            passed 21.23
+workstream-surfaces   passed 16.68
+yaml-lint             passed 40.26
+
+[dependency-graph] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0288-main-candidate:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0288-main-candidate:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0288-main-candidate:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=037cde2b7ec8e2df11fce7ef4921137d452e6452ef262b52f9b9b543f0912c60 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T20:29:15.047436+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=1113958d73b71d25c8154fad609a7821592dea39 -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/validate_dependency_graph.py >/dev/null && python scripts/generate_dependency_diagram.py --check >/dev/null && python scripts/generate_diagrams.py --check >/dev/null
+[dependency-graph] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+architecture diagrams error: /workspace/docs/diagrams is stale for agent-coordination-map.excalidraw. Run 'python3 scripts/generate_diagrams.py --write'.
+
+[generated-docs] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0288-main-candidate:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0288-main-candidate:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0288-main-candidate:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=037cde2b7ec8e2df11fce7ef4921137d452e6452ef262b52f9b9b543f0912c60 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T20:29:15.047436+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=1113958d73b71d25c8154fad609a7821592dea39 -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh generated-docs
+[generated-docs] stdout
+Generated status document validation
+[generated-docs] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+architecture diagrams error: /workspace/docs/diagrams is stale for agent-coordination-map.excalidraw. Run 'python3 scripts/generate_diagrams.py --write'.
+
+[schema-validation] docker command
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0288-main-candidate:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0288-main-candidate:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0288-main-candidate:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=037cde2b7ec8e2df11fce7ef4921137d452e6452ef262b52f9b9b543f0912c60 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T20:29:15.047436+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=1113958d73b71d25c8154fad609a7821592dea39 -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c python scripts/provider_boundary_catalog.py --validate >/dev/null && python scripts/validate_repository_data_models.py --validate >/dev/null && python scripts/capability_contracts.py --validate >/dev/null && python scripts/platform_manifest.py --check >/dev/null && python scripts/data_catalog.py --validate >/dev/null && python scripts/operator_manager.py validate >/dev/null && python scripts/service_catalog.py --validate >/dev/null && python scripts/stage_smoke_suites.py --validate >/dev/null && python scripts/environment_topology.py --validate >/dev/null && python scripts/subdomain_catalog.py --validate >/dev/null && python scripts/subdomain_exposure_audit.py --validate >/dev/null && ./scripts/agent_tool_registry.py --export-mcp >/dev/null && python scripts/mutation_audit.py --validate-schema >/dev/null
+[schema-validation] stderr
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+platform manifest error: /workspace/build/platform-manifest.json is out of date; rerun scripts/platform_manifest.py --write
