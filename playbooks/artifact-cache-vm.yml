@@ -1,0 +1,128 @@
+# Playbook: artifact-cache-vm.yml
+# Purpose: Provision the dedicated artifact-cache VM on Proxmox and converge the private cache-plane runtime on that guest.
+# Use case: Run when ADR 0296 needs the steady-state artifact cache surface or when replaying it from main.
+#
+# Inputs (required):
+#   - bootstrap_ssh_private_key (path, required via make targets): SSH private key used for the Proxmox host and guest jump path.
+#
+# Inputs (optional):
+#   - env (string, optional, default=production): Deployment environment selector. This playbook currently converges only the production guest.
+#   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH routing mode for the guest baseline converge.
+#   - platform_trace_id (string, optional): Mutation-audit trace identifier propagated by the make wrapper.
+#
+# Outputs:
+#   - Dedicated VM `artifact-cache-lv3` provisioned on Proxmox with Docker, guest firewall policy, named `ops` access, and the managed cache-plane runtime on ports 5001-5004.
+#
+# Idempotency: Partially idempotent
+#              The guest roles are idempotent, but the Proxmox-side replay intentionally stop/starts VM 180 after `qm set` changes so cloud-init-backed network and hardware changes become effective.
+#
+# Dependencies:
+#   - ADR 0084: Managed guests clone from the declared template catalog.
+#   - ADR 0295: The cache-plane runtime and warm-set policy land on the dedicated guest.
+#   - ADR 0296: Defines VM 180 on 10.10.10.80 as the steady-state artifact cache target.
+#   - Role: lv3.platform.proxmox_guests — provisions the dedicated guest from the managed template catalog.
+#   - Role: lv3.platform.docker_runtime — converges Docker CE on the cache guest.
+#   - Role: lv3.platform.artifact_cache_runtime — manages the pull-through cache runtime and seed plan on the guest.
+#
+# Related ADRs: 0084, 0295, 0296
+# Related Runbooks: docs/runbooks/configure-artifact-cache-vm.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+---
+- name: Ensure the artifact cache VM is provisioned on the Proxmox host
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - automation
+    - service-artifact-cache-vm
+  vars:
+    artifact_cache_vm_vmid: 180
+    proxmox_guests_active: >-
+      {{
+        proxmox_guests
+        | selectattr('vmid', 'equalto', artifact_cache_vm_vmid)
+        | list
+      }}
+
+  roles:
+    - role: lv3.platform.proxmox_guests
+      tags:
+        - guests
+        - artifact-cache-vm
+
+  post_tasks:
+    - name: Stop the artifact cache VM from Proxmox after qm set changes
+      ansible.builtin.command: "qm stop {{ artifact_cache_vm_vmid }} --skiplock 1"
+      register: artifact_cache_vm_stop
+      failed_when: artifact_cache_vm_stop.rc not in [0, 255]
+      changed_when: true
+      tags:
+        - guests
+        - artifact-cache-vm
+
+    - name: Start the artifact cache VM from Proxmox after the forced stop
+      ansible.builtin.command: "qm start {{ artifact_cache_vm_vmid }}"
+      register: artifact_cache_vm_start_after_stop
+      failed_when: artifact_cache_vm_start_after_stop.rc not in [0, 255]
+      changed_when: artifact_cache_vm_start_after_stop.rc == 0
+      tags:
+        - guests
+        - artifact-cache-vm
+
+- name: Converge the dedicated artifact cache guest
+  hosts: artifact-cache-lv3
+  become: true
+  gather_facts: false
+  tags:
+    - tier-2
+    - automation
+    - service-artifact-cache-vm
+  vars:
+    proxmox_guest_ssh_connection_mode: proxmox_host_jump
+    docker_runtime_insecure_registries:
+      - "{{ ansible_host }}:5001"
+      - "{{ ansible_host }}:5002"
+      - "{{ ansible_host }}:5003"
+      - "{{ ansible_host }}:5004"
+
+  pre_tasks:
+    - name: Wait for the artifact cache VM SSH service to be reachable
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Gather facts after SSH is ready
+      ansible.builtin.setup:
+
+    - name: Wait for cloud-init first boot work to finish when present
+      ansible.builtin.shell: |
+        if command -v cloud-init >/dev/null 2>&1; then
+          cloud-init status --wait
+        fi
+      args:
+        executable: /bin/bash
+      changed_when: false
+
+    - name: Wait for Debian package manager activity to settle after cloud-init
+      ansible.builtin.shell: |
+        for _ in $(seq 1 120); do
+          if ! pgrep -x apt-get >/dev/null \
+            && ! pgrep -x dpkg >/dev/null; then
+            exit 0
+          fi
+          sleep 5
+        done
+        exit 1
+      args:
+        executable: /bin/bash
+      changed_when: false
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.linux_access
+      vars:
+        linux_access_admin_user: "{{ proxmox_guest_ci_user }}"
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.artifact_cache_runtime

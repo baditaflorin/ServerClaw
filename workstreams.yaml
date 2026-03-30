@@ -163,7 +163,7 @@ workstreams:
   - id: ws-0282-live-apply
     adr: "0282"
     title: Live apply Mailpit as the SMTP development mail interceptor from latest origin/main
-    status: live_applied
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0282-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-live-apply
@@ -896,6 +896,139 @@ workstreams:
     canonical_truth:
       latest_receipts:
         artifact_cache_plane: 2026-03-30-adr-0295-shared-artifact-cache-plane-mainline-replay-live-apply
+  - id: ws-0296-live-apply
+    adr: "0296"
+    title: Live apply the dedicated artifact cache VM from latest origin/main
+    status: ready_for_merge
+    owner: codex
+    branch: codex/ws-0296-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-live-apply.md
+    depends_on:
+      - ws-0274-artifact-cache-plane
+      - ws-0295-live-apply
+      - adr-0084-packer-pipeline
+      - adr-0191-immutable-guest-replacement
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0296-live-apply.md
+      - docs/adr/0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/artifact-cache-runtime.md
+      - docs/runbooks/configure-artifact-cache-vm.md
+      - docs/runbooks/configure-build-artifact-cache.md
+      - docs/runbooks/network-policy-reference.md
+      - docs/site-generated/architecture/dependency-graph.md
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - config/capacity-model.json
+      - Makefile
+      - playbooks/artifact-cache-vm.yml
+      - playbooks/services/build-artifact-cache.yml
+      - playbooks/tasks/docker-publication-assert.yml
+      - roles/artifact_cache_runtime/
+      - roles/docker_runtime/
+      - roles/common/tasks/docker_bridge_chains.yml
+      - collections/ansible_collections/lv3/platform/playbooks/artifact-cache-vm.yml
+      - collections/ansible_collections/lv3/platform/playbooks/services/build-artifact-cache.yml
+      - collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml
+      - collections/ansible_collections/lv3/platform/roles/artifact_cache_runtime/
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+      - config/ansible-execution-scopes.yaml
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - tests/test_artifact_cache_runtime_role.py
+      - tests/test_artifact_cache_playbook.py
+      - tests/test_common_docker_bridge_chains_helper.py
+      - tests/test_docker_runtime_role.py
+      - tests/test_post_verify_tasks.py
+      - receipts/live-applies/
+      - receipts/ops-portal-snapshot.html
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: artifact_cache_adr_index_contract
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: artifact_cache_live_apply_surfaces
+          paths:
+            - docs/workstreams/ws-0296-live-apply.md
+            - docs/adr/0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md
+            - docs/runbooks/artifact-cache-runtime.md
+            - docs/runbooks/configure-artifact-cache-vm.md
+            - docs/runbooks/configure-build-artifact-cache.md
+            - docs/runbooks/network-policy-reference.md
+            - inventory/hosts.yml
+            - playbooks/artifact-cache-vm.yml
+            - playbooks/services/build-artifact-cache.yml
+            - playbooks/tasks/docker-publication-assert.yml
+            - roles/artifact_cache_runtime/*
+            - roles/docker_runtime/*
+            - roles/common/tasks/docker_bridge_chains.yml
+            - collections/ansible_collections/lv3/platform/playbooks/artifact-cache-vm.yml
+            - collections/ansible_collections/lv3/platform/playbooks/services/build-artifact-cache.yml
+            - collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml
+            - collections/ansible_collections/lv3/platform/roles/artifact_cache_runtime/*
+            - collections/ansible_collections/lv3/platform/roles/docker_runtime/*
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+            - tests/test_artifact_cache_runtime_role.py
+            - tests/test_artifact_cache_playbook.py
+            - tests/test_common_docker_bridge_chains_helper.py
+            - tests/test_docker_runtime_role.py
+            - tests/test_post_verify_tasks.py
+            - receipts/live-applies/*0296*
+          mode: exclusive
+        - id: artifact_cache_topology_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+          mode: shared_contract
+          contract: platform-topology-v1
+        - id: artifact_cache_capacity_model_contract
+          paths:
+            - config/capacity-model.json
+          mode: shared_contract
+          contract: capacity-model-v1
+        - id: artifact_cache_ansible_scope_contract
+          paths:
+            - config/ansible-execution-scopes.yaml
+          mode: shared_contract
+          contract: ansible-execution-scope-catalog-v1
+        - id: artifact_cache_workflow_catalog_contract
+          paths:
+            - config/workflow-catalog.json
+          mode: shared_contract
+          contract: workflow-catalog-v1
+        - id: artifact_cache_command_catalog_contract
+          paths:
+            - config/command-catalog.json
+          mode: shared_contract
+          contract: command-catalog-v1
+        - id: artifact_cache_repository_automation_contract
+          paths:
+            - Makefile
+          mode: shared_contract
+          contract: repository-automation-v1
+        - id: artifact_cache_docs_portal_contract
+          paths:
+            - docs/site-generated/architecture/dependency-graph.md
+            - receipts/ops-portal-snapshot.html
+          mode: shared_contract
+          contract: docs-portal-generation-v1
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      latest_receipts:
+        artifact_cache_vm: 2026-03-30-adr-0296-dedicated-artifact-cache-vm-live-apply
   - id: ws-0276-live-apply
     adr: "0276"
     title: Live apply the NATS JetStream platform event bus from latest origin/main

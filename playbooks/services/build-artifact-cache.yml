@@ -1,69 +1,37 @@
 ---
-- name: Converge build artifact cache on the docker build guest
+- name: Converge build artifact cache consumers on the docker build guest
   hosts: "{{ 'docker-build-staging-lv3' if (env | default('production')) == 'staging' else 'docker-build-lv3' }}"
   become: true
   gather_facts: true
   vars:
-    artifact_cache_registry_mirrors:
-      docker_io:
-        registry_host: docker.io
-        service_name: docker-hub
-        container_name: artifact-cache-docker-hub
-        bind_port: 5001
-        upstream_registry: https://registry-1.docker.io
-        mirror_registry: "{{ ansible_host }}:5001"
-        storage_path: /opt/artifact-cache/data/docker-hub
-      ghcr_io:
-        registry_host: ghcr.io
-        service_name: ghcr
-        container_name: artifact-cache-ghcr
-        bind_port: 5002
-        upstream_registry: https://ghcr.io
-        mirror_registry: "{{ ansible_host }}:5002"
-        storage_path: /opt/artifact-cache/data/ghcr
-      artifacts_plane_so:
-        registry_host: artifacts.plane.so
-        service_name: plane-artifacts
-        container_name: artifact-cache-plane
-        bind_port: 5003
-        upstream_registry: https://artifacts.plane.so
-        mirror_registry: "{{ ansible_host }}:5003"
-        storage_path: /opt/artifact-cache/data/plane
-      docker_n8n_io:
-        registry_host: docker.n8n.io
-        service_name: n8n
-        container_name: artifact-cache-n8n
-        bind_port: 5004
-        upstream_registry: https://docker.n8n.io
-        mirror_registry: "{{ ansible_host }}:5004"
-        storage_path: /opt/artifact-cache/data/n8n
+    artifact_cache_remote_host: "{{ hostvars['artifact-cache-lv3'].ansible_host }}"
     docker_runtime_registry_mirrors:
-      - "http://{{ ansible_host }}:5001"
+      - "http://{{ artifact_cache_remote_host }}:5001"
       - https://mirror.gcr.io
     docker_runtime_insecure_registries:
-      - "{{ ansible_host }}:5001"
-      - "{{ ansible_host }}:5002"
-      - "{{ ansible_host }}:5003"
-      - "{{ ansible_host }}:5004"
+      - "{{ artifact_cache_remote_host }}:5001"
+      - "{{ artifact_cache_remote_host }}:5002"
+      - "{{ artifact_cache_remote_host }}:5003"
+      - "{{ artifact_cache_remote_host }}:5004"
     build_server_buildkit_registry_mirrors:
       docker.io:
         mirrors:
-          - "{{ ansible_host }}:5001"
+          - "{{ artifact_cache_remote_host }}:5001"
         http: true
         insecure: true
       ghcr.io:
         mirrors:
-          - "{{ ansible_host }}:5002"
+          - "{{ artifact_cache_remote_host }}:5002"
         http: true
         insecure: true
       artifacts.plane.so:
         mirrors:
-          - "{{ ansible_host }}:5003"
+          - "{{ artifact_cache_remote_host }}:5003"
         http: true
         insecure: true
       docker.n8n.io:
         mirrors:
-          - "{{ ansible_host }}:5004"
+          - "{{ artifact_cache_remote_host }}:5004"
         http: true
         insecure: true
   tags:
@@ -84,4 +52,6 @@
     - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.docker_runtime
     - role: lv3.platform.artifact_cache_runtime
+      vars:
+        artifact_cache_state: absent
     - role: lv3.platform.build_server

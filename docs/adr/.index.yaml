@@ -5220,7 +5220,7 @@ adr_index:
   - adr: 0296
     title: Dedicated Artifact-Cache VM With Phased Consumer Adoption
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: vm-topology
     keywords:
@@ -5232,6 +5232,7 @@ adr_index:
       - adoption
     summary: We will adopt artifact caching in two phases.
     filename: 0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md
+    implemented_version: 0.177.101
   - adr: 0297
     title: Renovate Bot As The Automated Stack Version Upgrade Proposer
     status: Accepted

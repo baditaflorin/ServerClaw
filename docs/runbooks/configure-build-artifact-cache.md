@@ -5,7 +5,7 @@
 ADR 0089 moves the expensive build-time downloads for the private build VM onto persistent cache surfaces:
 
 - Docker layers via a dedicated BuildKit daemon
-- Docker upstream pulls via repo-managed pull-through mirror endpoints
+- Docker upstream pulls via repo-managed pull-through mirror endpoints on `artifact-cache-lv3`
 - Python downloads via the `pip-cache` Docker volume
 - Packer plugins under `/opt/builds/.packer.d`
 - Ansible collections under `/opt/builds/.ansible/collections`
@@ -31,7 +31,7 @@ ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=build-artifact-cach
 The direct playbook entrypoint remains useful for role iteration and targeted
 non-production convergence:
 
-Run the dedicated playbook against the build guest:
+Run the direct playbook against the build guest:
 
 ```bash
 ansible-playbook -i inventory/hosts.yml playbooks/build-artifact-cache.yml \
@@ -41,11 +41,12 @@ ansible-playbook -i inventory/hosts.yml playbooks/build-artifact-cache.yml \
 Expected host-side outcomes:
 
 - `apt-cacher-ng` is active on `docker-build-lv3:3142`
-- the artifact-cache registry listeners respond on `docker-build-lv3:5001-5004`
+- the Docker daemon now points at `artifact-cache-lv3:5001-5004`
 - `lv3-buildkitd.service` is active and exposes `/run/buildkit/buildkitd.sock`
 - `docker buildx inspect lv3-cache --bootstrap` succeeds
 - Docker volume `pip-cache` exists
 - the cache directories under `/opt/builds/` exist and are stable across reruns
+- the old local `artifact-cache-*` containers are absent on `docker-build-lv3`
 
 ## Validate The Host
 
@@ -65,11 +66,11 @@ ansible -i inventory/hosts.yml docker-build-lv3 -m shell \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
-Check the registry mirrors:
+Check the build host mirror wiring:
 
 ```bash
 ansible -i inventory/hosts.yml docker-build-lv3 -m shell \
-  -a 'for port in 5001 5002 5003 5004; do curl -fsS "http://10.10.10.30:${port}/v2/" >/dev/null; done' \
+  -a 'docker buildx inspect lv3-cache --bootstrap >/dev/null && sudo cat /etc/docker/daemon.json && ! docker ps --format "{{.Names}}" | grep -q "^artifact-cache-"' \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
@@ -104,11 +105,13 @@ python3 config/windmill/scripts/build-cache-maintenance.py
 ## Operational Notes
 
 - Keep the BuildKit cache root on the build VM's fast local storage.
-- The new mirror endpoints are an internal phase-1 landing point; ADR 0296 keeps
-  the long-term target as a dedicated `artifact-cache-lv3` VM.
+- The build guest is now a consumer of the dedicated cache plane, not the cache
+  runtime host itself.
+- The dedicated cache guest must be healthy before replaying this build-host
+  path, otherwise the build daemon falls back to direct upstream access.
 - The governed production wrapper currently requires
-  `ALLOW_IN_PLACE_MUTATION=true` because this phase still applies in place on
-  `docker-build-lv3` under the documented ADR 0191 exception.
+  `ALLOW_IN_PLACE_MUTATION=true` because this replay still mutates
+  `docker-build-lv3` in place under the documented ADR 0191 exception.
 - Verify the managed BuildKit daemon through `lv3-buildkitd.service`; the guest
   does not ship a separate `buildkit.service`.
 - Do not commit runtime cache contents; only the manifest belongs in git.

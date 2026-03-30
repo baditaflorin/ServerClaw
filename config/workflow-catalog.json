@@ -4714,6 +4714,51 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "configure-artifact-cache-vm": {
+      "description": "Provision the dedicated artifact-cache VM, converge the private cache-plane runtime on it, and leave build-host consumer adoption to the governed service replay.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "configure-artifact-cache-vm",
+        "command": "make configure-artifact-cache-vm"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-artifact-cache-vm"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-artifact-cache-vm.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/artifact-cache-vm.yml",
+        "playbooks/services/build-artifact-cache.yml",
+        "roles/artifact_cache_runtime/tasks/main.yml",
+        "roles/proxmox_guests/tasks/main.yml"
+      ],
+      "outputs": [
+        "artifact-cache-lv3 provisioned as VM 180 on 10.10.10.80 with Docker, guest firewall policy, named ops access, and the managed cache-plane runtime listening privately on ports 5001-5004."
+      ],
+      "verification_commands": [
+        "make syntax-check-artifact-cache-vm",
+        "make live-apply-service service=build-artifact-cache env=production EXTRA_ARGS='-e bypass_promotion=true'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 260,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "disaster-recovery-runbook": {
       "description": "Render the ADR 0100 ordered recovery plan, current DR evidence summary, and table-top review state.",
       "lifecycle_status": "active",
