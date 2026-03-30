@@ -22,6 +22,15 @@ ADR 0089 moves the expensive build-time downloads for the private build VM onto 
 
 ## Converge The Build Host
 
+For a governed production replay from the repository root, use:
+
+```bash
+ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=build-artifact-cache env=production EXTRA_ARGS='-e bypass_promotion=true'
+```
+
+The direct playbook entrypoint remains useful for role iteration and targeted
+non-production convergence:
+
 Run the dedicated playbook against the build guest:
 
 ```bash
@@ -97,5 +106,8 @@ python3 config/windmill/scripts/build-cache-maintenance.py
 - Keep the BuildKit cache root on the build VM's fast local storage.
 - The new mirror endpoints are an internal phase-1 landing point; ADR 0296 keeps
   the long-term target as a dedicated `artifact-cache-lv3` VM.
+- The governed production wrapper currently requires
+  `ALLOW_IN_PLACE_MUTATION=true` because this phase still applies in place on
+  `docker-build-lv3` under the documented ADR 0191 exception.
 - Do not commit runtime cache contents; only the manifest belongs in git.
 - The first full warm run is expected to be slow. The value is in subsequent reuse.
