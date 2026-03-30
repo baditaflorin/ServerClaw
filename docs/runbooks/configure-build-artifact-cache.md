@@ -109,5 +109,7 @@ python3 config/windmill/scripts/build-cache-maintenance.py
 - The governed production wrapper currently requires
   `ALLOW_IN_PLACE_MUTATION=true` because this phase still applies in place on
   `docker-build-lv3` under the documented ADR 0191 exception.
+- Verify the managed BuildKit daemon through `lv3-buildkitd.service`; the guest
+  does not ship a separate `buildkit.service`.
 - Do not commit runtime cache contents; only the manifest belongs in git.
 - The first full warm run is expected to be slow. The value is in subsequent reuse.

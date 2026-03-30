@@ -79,6 +79,14 @@ ansible -i inventory/hosts.yml docker-build-lv3 -m shell \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
+Check the managed BuildKit daemon and builder:
+
+```bash
+ansible -i inventory/hosts.yml docker-build-lv3 -m shell \
+  -a 'systemctl is-active lv3-buildkitd && docker buildx inspect lv3-cache --bootstrap >/dev/null' \
+  -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+```
+
 ## Operational Notes
 
 - This phase intentionally lands on `docker-build-lv3` first so repeated image
@@ -89,4 +97,7 @@ ansible -i inventory/hosts.yml docker-build-lv3 -m shell \
   `ALLOW_IN_PLACE_MUTATION=true` because `docker-build-lv3` is still a
   documented ADR 0191 narrow exception until ADR 0296 moves the cache plane
   onto a dedicated guest.
+- The guest-side seed file lives at `/opt/artifact-cache/seed-plan.json`.
+- The managed BuildKit unit on `docker-build-lv3` is `lv3-buildkitd.service`;
+  there is no generic `buildkit.service` on that guest.
 - Do not publish the mirror ports on the public edge.

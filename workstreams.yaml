@@ -167,7 +167,7 @@ workstreams:
   - id: ws-0282-main-merge
     adr: "0282"
     title: Integrate ADR 0282 Mailpit exact-main replay into current origin/main
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/ws-0282-main-merge
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-main-merge
@@ -694,7 +694,7 @@ workstreams:
   - id: ws-0295-live-apply
     adr: "0295"
     title: Live apply the shared artifact cache plane from latest origin/main
-    status: live_applied
+    status: merged
     owner: codex
     branch: codex/ws-0295-live-apply-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0295-live-apply-r2
@@ -712,6 +712,9 @@ workstreams:
       - docs/runbooks/artifact-cache-runtime.md
       - docs/runbooks/configure-build-artifact-cache.md
       - docs/adr/.index.yaml
+      - README.md
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+      - tests/test_docker_runtime_role.py
       - receipts/live-applies/2026-03-30-adr-0295-shared-artifact-cache-plane-mainline-replay-live-apply.json
       - receipts/live-applies/evidence/2026-03-30-adr-0295-shared-artifact-cache-plane-mainline-replay-live-apply.txt
     ownership_manifest:
@@ -726,12 +729,19 @@ workstreams:
             - docs/adr/.index.yaml
           mode: shared_contract
           contract: adr-index-generator-v1
+        - id: integration_readme_surface
+          paths:
+            - README.md
+          mode: shared_contract
+          contract: main-integration-truth-v1
         - id: artifact_cache_live_apply_replay
           paths:
             - docs/workstreams/ws-0295-live-apply.md
             - docs/adr/0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md
             - docs/runbooks/artifact-cache-runtime.md
             - docs/runbooks/configure-build-artifact-cache.md
+            - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+            - tests/test_docker_runtime_role.py
             - receipts/live-applies/2026-03-30-adr-0295-shared-artifact-cache-plane-mainline-replay-live-apply.json
             - receipts/live-applies/evidence/2026-03-30-adr-0295-shared-artifact-cache-plane-mainline-replay-live-apply.txt
           mode: exclusive

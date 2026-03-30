@@ -3,20 +3,33 @@
 Branch and base:
 - branch: codex/ws-0295-live-apply-r2
 - worktree: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0295-live-apply-r2
-- branch head during replay: 4eec3fd69bd424b489ecb6bde8919ff32bdc9bb5
-- origin/main base during replay: aaab0fef79957f2c8b045b791fb117244d8873ec
+- branch head before the latest-main repair commit: 489094065a94db6fdb8b3f040dd237b8d1900cc9
+- origin/main base during the exact-main replay: 9ce18e9c35cd4c8e97411c92e6dada5c3a2c3dd7
+- latest-main regression introduced by: dc3387ad0 [docker] Harden publication helper staging for live apply
 
 Validation:
 - ./scripts/validate_repo.sh workstream-surfaces data-models
   result: pass
 - ./scripts/validate_repo.sh generated-docs
   result: initially failed because canonical truth needed a README.md refresh while the workstream was marked in progress; `uvx --from pyyaml python scripts/canonical_truth.py --write` updated README.md and unblocked the governed wrapper
-- ./scripts/validate_repo.sh agent-standards
-  result: pass with the existing non-blocking ADR index warning because `.index.yaml` content did not change after adding `Implemented On` metadata to ADR 0295
 - uv run --with pytest python -m pytest -q tests/test_artifact_cache_seed.py tests/test_artifact_cache_runtime_role.py tests/test_docker_runtime_role.py tests/test_service_id_resolver.py
-  result: 18 passed in 1.10s
+  result: 18 passed in 1.10s before the first March 30 replay
+- uv run --with pytest python -m pytest -q tests/test_artifact_cache_seed.py tests/test_artifact_cache_runtime_role.py tests/test_docker_runtime_role.py tests/test_service_id_resolver.py tests/test_docker_publication_assurance_playbook.py
+  result: 24 passed in 0.58s after the latest-main helper-path repair
 - uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --run-id ws0295syntax-r2 --playbook playbooks/services/build-artifact-cache.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check
+  result: pass before the first replay
+- uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --run-id ws0295syntax-r4 --playbook playbooks/services/build-artifact-cache.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check
+  result: pass from the rebased latest-main worktree
+- ./scripts/validate_repo.sh generated-docs
+  result: pass after `uvx --from pyyaml python scripts/canonical_truth.py --write` regenerated README.md
+- ./scripts/validate_repo.sh agent-standards
   result: pass
+- ./scripts/validate_repo.sh data-models
+  result: pass
+- uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --run-id ws0295syntax-r5 --playbook playbooks/services/build-artifact-cache.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check
+  result: pass after the receipt/workstream updates
+- ./scripts/validate_repo.sh workstream-surfaces data-models
+  result: expected terminal-state failure once `ws-0295-live-apply` returned to `live_applied`; the validator rejects terminal workstreams on their owning branch by design, so the earlier pre-terminal pass remains the relevant branch-side proof
 
 Pre-apply guest snapshot via SSH over the Proxmox jump path:
 ports
@@ -37,7 +50,7 @@ buildx=ok
 apt
 apt=ok
 
-Governed live apply:
+Initial March 30 replay before the latest-main rebase:
 - command:
   ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=build-artifact-cache env=production EXTRA_ARGS='-e bypass_promotion=true'
 - guard highlights:
@@ -47,24 +60,43 @@ Governed live apply:
 - final recap:
   docker-build-lv3 : ok=122 changed=10 unreachable=0 failed=0 skipped=8 rescued=0 ignored=0
 
-Post-apply guest snapshot via SSH over the Proxmox jump path:
+Latest-main regression and repair:
+- the first exact-main rerun after rebasing to `9ce18e9c35cd4c8e97411c92e6dada5c3a2c3dd7` failed in `lv3.platform.docker_runtime : Install the Docker publication assurance helper`
+- root cause: `playbook_dir ~ '/../scripts/docker_publication_assurance.py'` resolved to a nonexistent `playbooks/scripts/` path during `playbooks/services/build-artifact-cache.yml`
+- repair: change the lookup path to `playbook_dir ~ '/../../scripts/docker_publication_assurance.py'` in `collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml`
+- regression test update: `tests/test_docker_runtime_role.py`
+
+Governed exact-main replay after the helper-path fix:
+- command:
+  ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=build-artifact-cache env=production EXTRA_ARGS='-e bypass_promotion=true'
+- guard highlights:
+  - standby_capacity.py -> Decision: approved
+  - service_redundancy.py -> docker_build: declared R1 -> platform R1 -> implemented R0 [gate=unproven]
+  - immutable_guest_replacement.py -> override accepted for docker-build-lv3
+- final recap:
+  docker-build-lv3 : ok=119 changed=4 unreachable=0 failed=0 skipped=11 rescued=0 ignored=0
+
+Final post-apply guest snapshot via SSH over the Proxmox jump path:
 ports
 PORT:5001=ok
 PORT:5002=ok
 PORT:5003=ok
 PORT:5004=ok
 containers
-artifact-cache-plane                        Up 16 hours
-artifact-cache-ghcr                         Up 16 hours
-artifact-cache-n8n                          Up 16 hours
-artifact-cache-docker-hub                   Up 16 hours
+artifact-cache-docker-hub Up 17 hours
+artifact-cache-ghcr Up 17 hours
+artifact-cache-n8n Up 17 hours
+artifact-cache-plane Up 17 hours
+http-93faacf5-69a7-3165-c393-cfbc92a70b32 Up 7 minutes
+lv3-buildkitd Up 8 minutes
 seed_count
 50
-buildkit
+buildkit_service
 active
+buildx
 buildx=ok
 apt
-apt=ok
+http_status=200
 nft_forward
 		ip saddr 172.16.0.0/12 accept
 		ip saddr 192.168.0.0/16 accept
@@ -75,5 +107,6 @@ Local repo seed planner:
 
 Observed replay outcome:
 - The cache plane was already up before mutation, but the guest-side seed plan had drifted behind current mainline catalogs at 41 images.
-- The March 30 replay refreshed the guest seed plan to 50 images and warmed the newly added mirrorable refs.
-- The shared wrapper also reasserted Docker bridge forward compatibility on docker-build-lv3 while keeping the cache mirrors healthy.
+- The initial March 30 replay refreshed the guest seed plan to 50 images and warmed the newly added mirrorable refs.
+- Rebasing onto latest main exposed a real helper-staging regression from `dc3387ad0`, and the final exact-main replay only succeeded after repairing that path.
+- The shared wrapper reasserted Docker bridge forward compatibility on `docker-build-lv3` while keeping the cache mirrors healthy.

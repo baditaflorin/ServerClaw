@@ -124,7 +124,7 @@ def test_docker_runtime_installs_publication_assurance_helper_before_chain_check
     assert install_task["ansible.builtin.copy"]["dest"] == "{{ docker_runtime_publication_assurance_script_path }}"
     assert (
         install_task["ansible.builtin.copy"]["content"]
-        == "{{ lookup('ansible.builtin.file', playbook_dir ~ '/../scripts/docker_publication_assurance.py') }}"
+        == "{{ lookup('ansible.builtin.file', playbook_dir ~ '/../../scripts/docker_publication_assurance.py') }}"
     )
     assert tasks.index(install_task) < tasks.index(nftables_check_task)
 

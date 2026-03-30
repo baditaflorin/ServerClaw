@@ -108,7 +108,7 @@
 
 - name: Install the Docker publication assurance helper
   ansible.builtin.copy:
-    content: "{{ lookup('ansible.builtin.file', playbook_dir ~ '/../scripts/docker_publication_assurance.py') }}"
+    content: "{{ lookup('ansible.builtin.file', playbook_dir ~ '/../../scripts/docker_publication_assurance.py') }}"
     dest: "{{ docker_runtime_publication_assurance_script_path }}"
     owner: root
     group: root
