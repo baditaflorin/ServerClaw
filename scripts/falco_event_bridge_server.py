@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import traceback
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
@@ -35,7 +36,8 @@ def load_config() -> tuple[str, int, BridgeConfig]:
         nats_username=os.environ.get("FALCO_EVENT_BRIDGE_NATS_USERNAME", "").strip(),
         nats_password=os.environ.get("FALCO_EVENT_BRIDGE_NATS_PASSWORD", "").strip(),
         ntfy_base_url=os.environ.get("FALCO_EVENT_BRIDGE_NTFY_BASE_URL", "http://127.0.0.1:2586").strip() or "http://127.0.0.1:2586",
-        ntfy_topic=os.environ.get("FALCO_EVENT_BRIDGE_NTFY_TOPIC", "platform.security.critical").strip() or "platform.security.critical",
+        ntfy_topic=os.environ.get("FALCO_EVENT_BRIDGE_NTFY_TOPIC", "platform-security-critical").strip()
+        or "platform-security-critical",
         ntfy_username=os.environ.get("FALCO_EVENT_BRIDGE_NTFY_USERNAME", "").strip(),
         ntfy_password=os.environ.get("FALCO_EVENT_BRIDGE_NTFY_PASSWORD", "").strip(),
         mutation_audit_file=os.environ.get(
@@ -82,6 +84,11 @@ class FalcoBridgeHandler(BaseHTTPRequestHandler):
         try:
             action_report = [bridge_event(event, config=self.bridge_config) for event in events]
         except Exception as exc:  # pragma: no cover - exercised through live bridge path
+            print(
+                f"falco-event-bridge error while handling {len(events)} event(s): {exc}",
+                flush=True,
+            )
+            traceback.print_exc()
             self._write_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"error": str(exc)})
             return
 

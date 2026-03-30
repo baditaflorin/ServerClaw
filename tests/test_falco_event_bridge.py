@@ -79,11 +79,11 @@ def test_bridge_config_requires_explicit_private_outputs() -> None:
         nats_username="jetstream-admin",
         nats_password="secret",
         ntfy_base_url="http://127.0.0.1:2586",
-        ntfy_topic="platform.security.critical",
+        ntfy_topic="platform-security-critical",
         ntfy_username="alertmanager",
         ntfy_password="secret",
         mutation_audit_file="/var/log/platform/mutation-audit.jsonl",
     )
 
     assert config.nats_subject == "platform.security.falco"
-    assert config.ntfy_topic == "platform.security.critical"
+    assert config.ntfy_topic == "platform-security-critical"

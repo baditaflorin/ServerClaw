@@ -23,6 +23,10 @@ COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
 EVENT_TAXONOMY_PATH = REPO_ROOT / "config" / "event-taxonomy.yaml"
 NTFY_CONFIG_PATH = REPO_ROOT / "config" / "ntfy" / "server.yml"
+NTFY_ROLE_DEFAULTS = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "ntfy_runtime" / "defaults" / "main.yml"
+NTFY_ROLE_TASKS = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "ntfy_runtime" / "tasks" / "main.yml"
+NTFY_ROLE_HANDLERS = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "ntfy_runtime" / "handlers" / "main.yml"
+NTFY_ROLE_VERIFY = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "ntfy_runtime" / "tasks" / "verify.yml"
 
 
 def load_yaml(path: Path) -> list[dict] | dict:
@@ -79,7 +83,7 @@ def test_bridge_defaults_reuse_private_nats_and_ntfy_contracts() -> None:
     assert defaults["falco_event_bridge_service_name"] == "lv3-falco-event-bridge"
     assert defaults["falco_event_bridge_listen_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.falco_event_bridge_port }}"
     assert defaults["falco_event_bridge_nats_subject"] == "platform.security.falco"
-    assert defaults["falco_event_bridge_ntfy_topic"] == "platform.security.critical"
+    assert defaults["falco_event_bridge_ntfy_topic"] == "platform-security-critical"
 
 
 def test_bridge_role_reads_controller_local_credentials_and_starts_systemd_service() -> None:
@@ -164,4 +168,33 @@ def test_ansible_scopes_taxonomy_ntfy_and_mutation_audit_cover_falco() -> None:
     ]
 
     ntfy_config = NTFY_CONFIG_PATH.read_text(encoding="utf-8")
-    assert "{{ ntfy_runtime_username }}:platform.security.critical:rw" in ntfy_config
+    assert "{{ ntfy_runtime_username }}:platform-security-critical:rw" in ntfy_config
+
+
+def test_ntfy_runtime_restarts_container_when_auth_config_changes() -> None:
+    defaults = load_yaml(NTFY_ROLE_DEFAULTS)
+    tasks = load_yaml(NTFY_ROLE_TASKS)
+    handlers = load_yaml(NTFY_ROLE_HANDLERS)
+    verify_tasks = load_yaml(NTFY_ROLE_VERIFY)
+
+    render_config = next(task for task in tasks if task["name"] == "Render ntfy server config")
+    render_compose = next(task for task in tasks if task["name"] == "Render ntfy compose file")
+    snapshot_acl = next(task for task in tasks if task["name"] == "Snapshot provisioned ntfy ACL state")
+    repair_acl = next(task for task in tasks if task["name"] == "Force-recreate the ntfy stack when provisioned ACL entries are stale")
+    restart_handler = next(task for task in handlers if task["name"] == "Restart ntfy stack")
+    verify_acl = next(
+        task
+        for task in verify_tasks
+        if task["name"] == "Verify provisioned ntfy ACL topics are writable for the managed publisher"
+    )
+
+    assert defaults["ntfy_runtime_expected_write_topics"] == [
+        "platform-alerts",
+        "platform-security-critical",
+    ]
+    assert render_config["notify"] == "Restart ntfy stack"
+    assert render_compose["notify"] == "Restart ntfy stack"
+    assert snapshot_acl["environment"]["NTFY_RUNTIME_EXPECTED_TOPICS"] == "{{ ntfy_runtime_expected_write_topics | to_json }}"
+    assert repair_acl["when"] == "ntfy_runtime_acl_state.rc != 0"
+    assert "--force-recreate" in restart_handler["ansible.builtin.command"]["argv"]
+    assert verify_acl["environment"]["NTFY_RUNTIME_EXPECTED_TOPICS"] == "{{ ntfy_runtime_expected_write_topics | to_json }}"

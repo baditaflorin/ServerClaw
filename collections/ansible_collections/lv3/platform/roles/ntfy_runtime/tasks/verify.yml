@@ -29,3 +29,37 @@
     that:
       - ntfy_runtime_running.stdout_lines | select('equalto', ntfy_runtime_container_name) | list | length == 1
     fail_msg: "ntfy container is not running."
+
+- name: Verify provisioned ntfy ACL topics are writable for the managed publisher
+  ansible.builtin.command:
+    argv:
+      - python3
+      - -c
+      - |
+        import json, os, sqlite3, sys
+        username = os.environ["NTFY_RUNTIME_USERNAME"]
+        expected_topics = json.loads(os.environ["NTFY_RUNTIME_EXPECTED_TOPICS"])
+        conn = sqlite3.connect("{{ ntfy_runtime_data_dir }}/user.db")
+        cur = conn.cursor()
+        user_row = cur.execute("select id from user where user = ?", (username,)).fetchone()
+        if user_row is None:
+            raise SystemExit(f"managed ntfy user {username!r} is missing")
+        rows = cur.execute(
+            "select topic, read, write from user_access where user_id = ? order by topic",
+            (user_row[0],),
+        ).fetchall()
+        grants = {topic: {"read": bool(can_read), "write": bool(can_write)} for topic, can_read, can_write in rows}
+        missing_topics = [
+            topic for topic in expected_topics
+            if grants.get(topic) != {"read": True, "write": True}
+        ]
+        if missing_topics:
+            raise SystemExit(
+                "missing provisioned ntfy ACL topics: "
+                + ", ".join(missing_topics)
+                + f"; observed grants={json.dumps(grants, sort_keys=True)}"
+            )
+  environment:
+    NTFY_RUNTIME_USERNAME: "{{ ntfy_runtime_username }}"
+    NTFY_RUNTIME_EXPECTED_TOPICS: "{{ ntfy_runtime_expected_write_topics | to_json }}"
+  changed_when: false

@@ -10,13 +10,13 @@ It delivers:
 
 - a private Falco event bridge on `docker-runtime-lv3` listening on the
   managed internal port `18084`
-- the matching `ntfy` auth grant for `platform.security.critical` before the
+- the matching `ntfy` auth grant for `platform-security-critical` before the
   bridge starts emitting CRITICAL findings
 - Falco `modern_ebpf` systemd services on `docker-runtime-lv3`,
   `docker-build-lv3`, `monitoring-lv3`, and `postgres-lv3`
 - Loki journal relabels so Falco events land under `job="falco"`
 - WARNING+ event fan-out to NATS subject `platform.security.falco`
-- CRITICAL push notifications on ntfy topic `platform.security.critical`
+- CRITICAL push notifications on ntfy topic `platform-security-critical`
 - legacy mutation-audit JSONL entries with `surface="falco"`
 
 ## Entrypoints
@@ -36,9 +36,9 @@ It delivers:
 ## Verification
 
 1. `make syntax-check-falco`
-2. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'systemctl is-active lv3-falco-event-bridge falco-modern-bpf && curl -fsS http://127.0.0.1:18084/healthz'`
-3. `for host in 10.10.10.20 10.10.10.30 10.10.10.40 10.10.10.50; do ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@$host 'systemctl is-active falco-modern-bpf && falco --version'; done`
-4. Trigger the repo-managed smoke marker on each host and confirm one `platform.security.falco` envelope plus one `surface="falco"` audit entry per host.
+2. `ANSIBLE_HOST_KEY_CHECKING=False ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a 'systemctl is-active lv3-falco-event-bridge falco-modern-bpf && curl -fsS http://127.0.0.1:18084/healthz' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+3. `ANSIBLE_HOST_KEY_CHECKING=False ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3:docker-build-lv3:monitoring-lv3:postgres-lv3 -m shell -a 'systemctl is-active falco-modern-bpf && falco --version' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+4. Trigger the repo-managed smoke marker on each host and confirm one `platform.security.falco` envelope plus one `surface="falco"` audit entry per host, plus CRITICAL delivery into ntfy topic `platform-security-critical`.
 
 ## Notes
 
@@ -46,7 +46,10 @@ It delivers:
   guests only post Falco HTTP events over the internal guest network.
 - The rollout uses one repo-managed ntfy credential already shared with the
   private Alertmanager topic; ntfy grants that same identity publish rights to
-  `platform.security.critical`, so `make converge-falco` also replays
+  `platform-security-critical`, so `make converge-falco` also replays
   `ntfy_runtime` on `docker-runtime-lv3`.
+- The ntfy topic uses a hyphenated slug rather than a dotted subject name
+  because the live ntfy publish endpoint rejects dotted topic paths with
+  `404 page not found`.
 - Falco rules and suppressions stay version controlled; do not hand-edit
   `/etc/falco` on the guests.

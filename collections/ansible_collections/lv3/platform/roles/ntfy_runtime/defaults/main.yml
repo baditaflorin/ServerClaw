@@ -21,3 +21,9 @@ ntfy_runtime_base_url: "{{ ntfy_runtime_public_base_url }}"
 ntfy_runtime_visitor_request_limit_burst: 60
 ntfy_runtime_visitor_request_limit_replenish: 10s
 ntfy_runtime_visitor_message_daily_limit: 1000
+ntfy_runtime_password_local_file: "{{ ntfy_runtime_local_artifact_dir }}/alertmanager-password.txt"
+ntfy_runtime_password_hash_remote_file: "{{ ntfy_runtime_site_dir }}/password.hash"
+ntfy_runtime_username: alertmanager
+ntfy_runtime_expected_write_topics:
+  - platform-alerts
+  - platform-security-critical

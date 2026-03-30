@@ -12,7 +12,7 @@
 - Owner: codex
 - Depends On: `adr-0052`, `adr-0066`, `adr-0124`, `adr-0276`, `adr-0300`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0300`, `docs/workstreams/ws-0300-live-apply.md`, `docs/runbooks/configure-falco-runtime.md`, `docs/runbooks/configure-ntfy.md`, `.ansible-lint-ignore`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `scripts/matrix_admin_register.py`, `scripts/matrix_bridge_smoke.py`, `config/falco/`, `config/ntfy/server.yml`, `config/event-taxonomy.yaml`, `config/workflow-catalog.json`, `config/command-catalog.json`, `config/ansible-execution-scopes.yaml`, `playbooks/falco.yml`, `playbooks/services/falco.yml`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml`, `roles/falco_runtime`, `roles/falco_event_bridge_runtime`, `scripts/falco_event_bridge.py`, `scripts/falco_event_bridge_server.py`, `receipts/live-applies/`
+- Shared Surfaces: `docs/adr/0299`, `docs/adr/0300`, `docs/workstreams/ws-0300-live-apply.md`, `docs/runbooks/configure-falco-runtime.md`, `docs/runbooks/configure-ntfy.md`, `.ansible-lint-ignore`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `scripts/generate_platform_vars.py`, `scripts/matrix_admin_register.py`, `scripts/matrix_bridge_smoke.py`, `config/falco/`, `config/ntfy/server.yml`, `config/event-taxonomy.yaml`, `config/workflow-catalog.json`, `config/command-catalog.json`, `config/ansible-execution-scopes.yaml`, `playbooks/falco.yml`, `playbooks/services/falco.yml`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml`, `collections/ansible_collections/lv3/platform/roles/ntfy_runtime/`, `roles/falco_runtime`, `roles/falco_event_bridge_runtime`, `scripts/falco_event_bridge.py`, `scripts/falco_event_bridge_server.py`, `receipts/live-applies/`
 
 ## Scope
 
@@ -31,6 +31,7 @@
 
 - `workstreams.yaml`
 - `docs/workstreams/ws-0300-live-apply.md`
+- `docs/adr/0299-ntfy-as-the-self-hosted-push-notification-channel-for-programmatic-alert-delivery.md`
 - `docs/adr/0300-falco-for-container-runtime-syscall-security-monitoring-and-autonomous-anomaly-detection.md`
 - `docs/runbooks/configure-falco-runtime.md`
 - `docs/runbooks/configure-ntfy.md`
@@ -50,6 +51,7 @@
 - `playbooks/falco.yml`
 - `playbooks/services/falco.yml`
 - `collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml`
+- `collections/ansible_collections/lv3/platform/roles/ntfy_runtime/`
 - `collections/ansible_collections/lv3/platform/roles/falco_runtime/`
 - `collections/ansible_collections/lv3/platform/roles/falco_event_bridge_runtime/`
 - `scripts/falco_event_bridge.py`
@@ -62,7 +64,7 @@
 - `falco-modern-bpf.service` active on `docker-runtime-lv3`, `docker-build-lv3`, `monitoring-lv3`, and `postgres-lv3`
 - Falco bridge listener reachable on `10.10.10.20:18084` from the other governed guests
 - WARNING+ smoke events published to NATS subject `platform.security.falco`
-- CRITICAL smoke events published to ntfy topic `platform.security.critical`
+- CRITICAL smoke events published to ntfy topic `platform-security-critical`
 - WARNING+ smoke events appended to `/var/log/platform/mutation-audit.jsonl` with `surface="falco"`
 
 ## Ownership Notes

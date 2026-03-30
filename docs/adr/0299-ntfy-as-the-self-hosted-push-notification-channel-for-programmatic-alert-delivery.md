@@ -55,8 +55,10 @@ to it.
 
 ### Topic naming convention
 
-- every ntfy topic follows the pattern `platform.<component>.<severity>` where
-  `severity` is one of `info`, `warn`, `critical`
+- every ntfy topic uses a lowercase hyphenated slug such as
+  `platform-alerts` or `platform-security-critical`; dotted NATS subject names
+  are not reused directly as ntfy topic paths because the live ntfy HTTP
+  publish endpoint rejects dotted topic names with `404 page not found`
 - the topic registry is declared in `config/ntfy/topics.yaml` alongside
   `server.yml`; topics not in the registry are not published to by governed
   automation
@@ -70,7 +72,8 @@ to it.
 - **Ansible playbooks**: Ansible roles that perform irreversible mutations publish
   a `platform-ansible-warn` notification at the start and a
   `platform-ansible-info` notification on successful completion; failures publish
-  to `platform-ansible-critical`
+  to `platform-ansible-critical`; these ntfy paths remain hyphenated and are
+  distinct from the dotted canonical NATS subject names
 - **Gitea Actions**: the CI validation gate (ADR 0087) publishes a
   `platform-ci-critical` notification when a gate failure blocks a merge; this
   reaches the operator without requiring them to poll the Gitea UI
