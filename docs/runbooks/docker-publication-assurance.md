@@ -20,6 +20,10 @@ replays every service contract in
 [config/health-probe-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/health-probe-catalog.json)
 that declares `readiness.docker_publication`.
 
+Service-specific converges also stage a transient copy of the current
+repo-managed helper before readiness verification so a stale installed helper
+cannot block an otherwise valid live apply.
+
 ## What The Helper Verifies
 
 - the declared container still exists

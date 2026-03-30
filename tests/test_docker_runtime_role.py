@@ -122,7 +122,10 @@ def test_docker_runtime_installs_publication_assurance_helper_before_chain_check
     nftables_check_task = next(task for task in tasks if task["name"] == "Check whether nftables config exists")
 
     assert install_task["ansible.builtin.copy"]["dest"] == "{{ docker_runtime_publication_assurance_script_path }}"
-    assert "scripts/docker_publication_assurance.py" in install_task["ansible.builtin.copy"]["content"]
+    assert (
+        install_task["ansible.builtin.copy"]["content"]
+        == "{{ lookup('ansible.builtin.file', playbook_dir ~ '/../scripts/docker_publication_assurance.py') }}"
+    )
     assert tasks.index(install_task) < tasks.index(nftables_check_task)
 
 
