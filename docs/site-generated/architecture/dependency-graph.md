@@ -18,7 +18,7 @@ Generated from `config/dependency-graph.json`.
 | Tier | Services |
 | --- | --- |
 | `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, Mail Platform, Mailpit, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Excalidraw, Gitea, Gotenberg, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Vaultwarden, Windmill, n8n |
+| `2` | Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Excalidraw, Gitea, Gotenberg, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway |
 | `4` | Ops Portal |
 
@@ -52,6 +52,7 @@ graph TD
     searxng["SearXNG\nTier 1"]
     step_ca["step-ca\nTier 1"]
     uptime_kuma["Uptime Kuma\nTier 1"]
+    tika["Apache Tika\nTier 2"]
     browser_runner["Browser Runner\nTier 2"]
     changedetection["Changedetection.io\nTier 2"]
     changelog_portal["Changelog Portal\nTier 2"]
@@ -184,6 +185,7 @@ graph TD
     serverclaw -->|soft| searxng
     status_page -->|hard| nginx_edge
     status_page -->|hard| uptime_kuma
+    tika -->|hard| docker_runtime
     vaultwarden -->|hard| postgres
     vaultwarden -->|startup_only| step_ca
     windmill -->|startup_only| openbao

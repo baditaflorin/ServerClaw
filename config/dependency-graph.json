@@ -471,6 +471,15 @@
       "adr": "0042"
     },
     {
+      "id": "tika",
+      "service": "tika",
+      "name": "Apache Tika",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0275"
+    },
+    {
       "id": "uptime_kuma",
       "service": "uptime_kuma",
       "name": "Uptime Kuma",
@@ -1092,6 +1101,12 @@
       "to": "uptime_kuma",
       "type": "hard",
       "description": "The public status page is rendered by the Uptime Kuma runtime and cannot function if that service is unavailable."
+    },
+    {
+      "from": "tika",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Apache Tika extraction runtime is hosted on docker-runtime-lv3."
     },
     {
       "from": "vaultwarden",

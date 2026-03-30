@@ -93,6 +93,7 @@ platform_port_assignments:
   portainer_host_proxy_port: 9444
   step_ca_api_port: 9000
   step_ca_proxy_port: 9443
+  tika_port: 9998
   headscale_http_port: 8080
   vaultwarden_https_port: 8222
 proxmox_tailscale_hostname: proxmox-florin-subnet-router
@@ -549,24 +550,32 @@ network_policy:
           ports:
             - 3007
             - 8881
+            - 9998
             - 11434
-          description: Private guest-to-guest document rendering and agent API traffic
+          description: Private guest-to-guest document rendering, extraction, and agent API traffic
+        - source: host
+          protocol: tcp
+          ports:
+            - 9998
+          description: Proxmox host verification and controller-side access to the private Tika extraction API
         - source: 172.16.0.0/12
           protocol: tcp
           ports:
             - 3007
             - 5000
             - 8881
+            - 9998
             - 11434
-          description: Local Docker workloads that use the private Gotenberg, Changedetection, Ollama, and SearXNG APIs
+          description: Local Docker workloads that use the private Gotenberg, Changedetection, Tika, Ollama, and SearXNG APIs
         - source: 192.168.0.0/16
           protocol: tcp
           ports:
             - 3007
             - 5000
             - 8881
+            - 9998
             - 11434
-          description: Local Docker workloads that use the private Gotenberg, Changedetection, Ollama, and SearXNG APIs
+          description: Local Docker workloads that use the private Gotenberg, Changedetection, Tika, Ollama, and SearXNG APIs
         - source: docker-build-lv3
           protocol: tcp
           ports:
@@ -1273,6 +1282,14 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ step_ca_controller_url }}"
+  tika:
+    service_name: tika
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
   semaphore:
     service_name: semaphore
     owning_vm: docker-runtime-lv3

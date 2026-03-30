@@ -10,8 +10,8 @@ generated: '2026-03-30'
 total_adrs: 324
 implementation_status_summary:
   Implemented: 259
-  Partial: 6
-  Not Implemented: 58
+  Partial: 7
+  Not Implemented: 57
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4691,7 +4691,7 @@ adr_index:
   - adr: '0274'
     title: Governed Base Image Mirrors And Warm Caches For Repo Deployments
     status: Accepted
-    implementation_status: Implemented
+    implementation_status: Partial
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -4705,7 +4705,7 @@ adr_index:
       - deployments
     summary: We will add a cache-first base-image policy for governed repo deployments.
     filename: 0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments.md
-    implemented_version: 0.177.102
+    implemented_version: 0.177.31
   - adr: '0274'
     title: MinIO As The S3-Compatible Object Storage Layer
     status: Accepted
@@ -4724,7 +4724,7 @@ adr_index:
   - adr: '0275'
     title: Apache Tika Server For Document Text Extraction In The RAG Pipeline
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: ci-cd
     keywords:
@@ -4738,6 +4738,7 @@ adr_index:
       - pipeline
     summary: We will deploy Apache Tika Server as the canonical document extraction
     filename: 0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline.md
+    implemented_version: 0.177.102
   - adr: '0276'
     title: NATS JetStream As The Platform Event Bus
     status: Accepted

@@ -1,4 +1,10 @@
+from pathlib import Path
+
 import generate_platform_vars
+import yaml
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def iter_strings(value):
@@ -89,6 +95,15 @@ def test_build_platform_vars_includes_plausible_publication_topology() -> None:
     assert plausible["urls"]["internal"] == "http://10.10.10.20:8016"
     assert plausible["edge"]["security_headers_enabled"] is False
     assert plausible["edge"]["preserve_upstream_security_headers"] is True
+
+
+def test_build_platform_vars_includes_tika_private_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    tika = platform_vars["platform_service_topology"]["tika"]
+
+    assert tika["ports"]["internal"] == 9998
+    assert tika["urls"]["internal"] == "http://10.10.10.20:9998"
+    assert tika["exposure_model"] == "private-only"
 
 
 def test_build_platform_vars_includes_nextcloud_publication_topology() -> None:
@@ -248,6 +263,13 @@ def test_build_platform_vars_renders_service_topology_without_unresolved_templat
     assert service_topology["headscale"]["private_ip"] == platform_vars["platform_host"]["network"]["internal_ipv4"]
     assert service_topology["outline"]["edge"]["upstream"] == service_topology["outline"]["urls"]["internal"]
     assert service_topology["excalidraw"]["edge"]["prefix_proxy_routes"][0]["upstream"] == "http://10.10.10.20:3096"
+
+
+def test_tika_network_policy_allows_proxmox_host_private_probe() -> None:
+    host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text(encoding="utf-8"))
+    allowed_inbound = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
+
+    assert any(rule["source"] == "host" and 9998 in rule["ports"] for rule in allowed_inbound)
 
 
 def test_build_platform_vars_includes_plane_publication_topology() -> None:

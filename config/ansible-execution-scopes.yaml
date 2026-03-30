@@ -304,6 +304,12 @@ playbooks:
     shared_surfaces:
       - service:step-ca
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/tika.yml:
+    playbook_id: tika
+    mutation_scope: host
+    shared_surfaces:
+      - service:tika
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/uptime-kuma.yml:
     playbook_id: uptime-kuma
     mutation_scope: platform

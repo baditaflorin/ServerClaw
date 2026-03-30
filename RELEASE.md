@@ -3,10 +3,10 @@
 - Date: 2026-03-30
 
 ## Summary
-- completed the ADR 0274 mainline live apply by hardening the Coolify bootstrap and publication path, then re-verifying governed repo-deploy base-image warming on coolify-lv3
+- implements ADR 0275 by bringing the private Apache Tika extraction service, host-reachability policy, and Docker compose-network recovery hardening onto main while preserving the latest verified live state from docker-runtime-lv3 because a concurrent vm:120 lock blocked a new exact-main replay
 
 ## Platform Impact
-- implements ADR 0274 with the refreshed exact-main Coolify replay that verifies governed repo-deploy base-image warming on coolify-lv3 and advances the platform version to 0.130.69
+- records ADR 0275 on main with the private Apache Tika extraction service verified live on docker-runtime-lv3 while platform version remains 0.130.68 because a concurrent vm:120 lock prevented a new exact-main replay
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

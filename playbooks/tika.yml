@@ -1,0 +1,26 @@
+---
+# Playbook: tika.yml
+# Purpose: Expose the collection Apache Tika converge path from the repository root entrypoint.
+# Use case: Run through make targets, live-apply wrappers, and syntax checks that expect root playbook entrypoints.
+#
+# Inputs (required):
+#   - env (str, required): Target environment passed through the shared execution wrapper.
+#
+# Inputs (optional):
+#   - EXTRA_ARGS (str, optional, default=""): Additional ansible arguments passed by the caller.
+#
+# Outputs:
+#   - Imports the canonical collection playbook for the Tika runtime.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - ADR 0079: shared playbook execution model
+#   - ADR 0275: Apache Tika extraction service decision
+#   - Requires: collections/ansible_collections/lv3/platform/playbooks/tika.yml
+#
+# Related ADRs: 0079, 0275
+# Related Runbooks: docs/runbooks/configure-tika.md
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+- import_playbook: ../collections/ansible_collections/lv3/platform/playbooks/tika.yml

@@ -1,0 +1,247 @@
+# Purpose: Converge the private Apache Tika compose stack on docker-runtime-lv3.
+# Use case: Run during Tika deployment, recovery, or image refresh when the private extraction runtime must match repo truth.
+# Inputs: Pinned image catalog entry, private service URL, compose paths, recovery metadata, and verification fixtures.
+# Outputs: Rendered compose file plus a running Apache Tika container with version, text, and metadata endpoints verified.
+# Idempotency: Partially idempotent; reruns reconcile the same compose stack and recover stale Docker state when possible.
+# Dependencies: ADR 0275 and ADR 0165; requires docker_runtime and linux_guest_firewall outputs.
+---
+- name: Validate Apache Tika runtime inputs
+  ansible.builtin.assert:
+    that:
+      - tika_runtime_site_dir | length > 0
+      - tika_runtime_compose_file | length > 0
+      - tika_runtime_container_name | length > 0
+      - tika_runtime_image | length > 0
+      - tika_runtime_port | int > 0
+      - tika_runtime_base_url | length > 0
+      - tika_runtime_container_port | int > 0
+      - tika_runtime_sample_text | length > 0
+    fail_msg: "tika_runtime requires compose paths, the pinned image, service URLs, and a sample payload."
+
+- name: Ensure the Apache Tika runtime directory exists
+  ansible.builtin.file:
+    path: "{{ tika_runtime_site_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the Apache Tika compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ tika_runtime_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Apache Tika image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ tika_runtime_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ tika_runtime_site_dir }}"
+  register: tika_runtime_pull
+  changed_when: >-
+    'Pulling' in tika_runtime_pull.stdout
+    or 'Downloaded newer image' in tika_runtime_pull.stdout
+    or 'Pull complete' in tika_runtime_pull.stdout
+
+- name: Check whether Docker nat chain exists before Tika startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: tika_runtime_docker_nat_chain_check
+  changed_when: false
+  failed_when: tika_runtime_docker_nat_chain_check.rc not in [0, 1]
+
+- name: Reset Docker failed state before nat-chain recovery restart
+  ansible.builtin.command: systemctl reset-failed docker.service
+  changed_when: false
+  when: tika_runtime_docker_nat_chain_check.rc == 1
+
+- name: Restart Docker when the nat chain is missing before Tika startup
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: tika_runtime_docker_nat_chain_check.rc == 1
+
+- name: Recheck Docker nat chain before Tika startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: tika_runtime_docker_nat_chain_recheck
+  changed_when: false
+  failed_when: tika_runtime_docker_nat_chain_recheck.rc not in [0, 1]
+  retries: 5
+  delay: 2
+  until: tika_runtime_docker_nat_chain_recheck.rc == 0
+
+- name: Assert Docker nat chain is present before Tika startup
+  ansible.builtin.assert:
+    that:
+      - tika_runtime_docker_nat_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; Tika published ports will fail."
+
+- name: Start the Apache Tika runtime and recover Docker nat-chain and compose-network failures
+  # Recover Docker nat-chain and stale compose-network drift before giving up on the Tika rollout.
+  block:
+    - name: Start the Apache Tika runtime
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ tika_runtime_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ tika_runtime_site_dir }}"
+      register: tika_runtime_up
+      changed_when: >-
+        'Creating' in tika_runtime_up.stdout
+        or 'Recreating' in tika_runtime_up.stdout
+        or 'Starting' in tika_runtime_up.stdout
+  rescue:
+    - name: Flag Docker nat-chain and stale compose-network failures during Tika startup
+      ansible.builtin.set_fact:
+        tika_runtime_docker_nat_chain_missing: >-
+          {{
+            'No chain/target/match by that name' in (ansible_failed_result.stderr | default(''))
+            or 'Unable to enable DNAT rule' in (ansible_failed_result.stderr | default(''))
+          }}
+        tika_runtime_compose_network_missing: >-
+          {{
+            'failed to create endpoint' in (ansible_failed_result.stderr | default(''))
+            and 'does not exist' in (ansible_failed_result.stderr | default(''))
+          }}
+
+    - name: Surface unexpected Tika startup failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('tika compose up failed')) }}"
+      when: >-
+        not tika_runtime_docker_nat_chain_missing
+        and not tika_runtime_compose_network_missing
+
+    - name: Reset stale Tika compose resources after startup failure
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ tika_runtime_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ tika_runtime_site_dir }}"
+      register: tika_runtime_down_retry
+      changed_when: >-
+        'Stopping' in (tika_runtime_down_retry.stdout | default(''))
+        or 'Removing' in (tika_runtime_down_retry.stdout | default(''))
+        or 'Removing' in (tika_runtime_down_retry.stderr | default(''))
+      failed_when: false
+      when: tika_runtime_compose_network_missing
+
+    - name: Reset Docker failed state before nat-chain recovery retry
+      ansible.builtin.command: systemctl reset-failed docker.service
+      changed_when: false
+      when: tika_runtime_docker_nat_chain_missing
+
+    - name: Restart Docker to restore nat chain before retrying Tika startup
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: tika_runtime_docker_nat_chain_missing
+
+    - name: Retry Tika startup after Docker nat-chain or compose-network recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ tika_runtime_compose_file }}"
+          - up
+          - -d
+          - --force-recreate
+          - --remove-orphans
+      args:
+        chdir: "{{ tika_runtime_site_dir }}"
+      register: tika_runtime_up
+      changed_when: true
+      when: tika_runtime_docker_nat_chain_missing or tika_runtime_compose_network_missing
+
+- name: Check whether Tika publishes the expected host port
+  ansible.builtin.command:
+    argv:
+      - docker
+      - port
+      - "{{ tika_runtime_container_name }}"
+      - "{{ tika_runtime_container_port }}"
+  register: tika_runtime_port_binding_check
+  changed_when: false
+  failed_when: false
+
+- name: Force-recreate Tika when the host port binding is missing
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ tika_runtime_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - --remove-orphans
+  args:
+    chdir: "{{ tika_runtime_site_dir }}"
+  register: tika_runtime_force_recreate
+  changed_when: true
+  when: tika_runtime_port_binding_check.stdout | trim == ''
+
+- name: Recheck Tika host port binding
+  ansible.builtin.command:
+    argv:
+      - docker
+      - port
+      - "{{ tika_runtime_container_name }}"
+      - "{{ tika_runtime_container_port }}"
+  register: tika_runtime_port_binding_recheck
+  changed_when: false
+  retries: 5
+  delay: 2
+  until: tika_runtime_port_binding_recheck.stdout | trim != ''
+
+- name: Wait for Tika to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ tika_runtime_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Wait for the Tika version endpoint
+  ansible.builtin.uri:
+    url: "{{ tika_runtime_base_url }}/version"
+    method: GET
+    status_code: 200
+    return_content: true
+    timeout: 30
+  register: tika_runtime_version
+  retries: 24
+  delay: 5
+  until: tika_runtime_version.status == 200
+  changed_when: false
+
+- name: Verify the Apache Tika runtime
+  ansible.builtin.import_tasks: verify.yml

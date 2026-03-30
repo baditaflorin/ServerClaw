@@ -37,6 +37,17 @@ ROLE_VERIFY = (
     / "tasks"
     / "verify.yml"
 )
+FIREWALL_TEMPLATE = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "linux_guest_firewall"
+    / "templates"
+    / "nftables.conf.j2"
+)
 
 
 def load_tasks() -> list[dict]:
@@ -63,6 +74,7 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     defaults = load_defaults()
     task_names = {task["name"] for task in tasks}
     assert "Flush Docker handlers before chain health checks" in task_names
+    assert "Reset Docker failed state before nat-chain recovery restart" in task_names
     assert "Ensure Docker bridge networking chains are present" in task_names
     ensure_task = next(task for task in tasks if task["name"] == "Ensure Docker bridge networking chains are present")
     include_role = ensure_task["ansible.builtin.include_role"]
@@ -74,6 +86,9 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert defaults["docker_runtime_chain_recheck_delay_seconds"] == 2
     assert ensure_task["vars"]["common_docker_bridge_chains_retries"] == "{{ docker_runtime_chain_recheck_retries }}"
     assert ensure_task["vars"]["common_docker_bridge_chains_delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
+    reset_task = next(task for task in tasks if task["name"] == "Reset Docker failed state before nat-chain recovery restart")
+    assert reset_task["ansible.builtin.command"] == "systemctl reset-failed docker.service"
+    assert reset_task["changed_when"] is False
 
 
 def test_docker_runtime_patches_nftables_rule_block_once() -> None:
@@ -90,6 +105,13 @@ def test_docker_runtime_patches_nftables_rule_block_once() -> None:
     assert "loop" not in patch_rules
     assert live_rules["loop"] == "{{ docker_runtime_container_forward_source_cidrs }}"
     assert live_rules["ansible.builtin.command"]["argv"][:6] == ["nft", "add", "rule", "inet", "filter", "forward"]
+
+
+def test_linux_guest_firewall_template_includes_all_docker_forward_compat_cidrs() -> None:
+    template = FIREWALL_TEMPLATE.read_text()
+    assert "docker_runtime_container_forward_source_cidrs" in template
+    assert "172.16.0.0/12" in template
+    assert "192.168.0.0/16" in template
 
 
 def test_docker_runtime_pins_public_edge_hostnames_and_address_pools() -> None:
@@ -124,7 +146,7 @@ def test_docker_runtime_installs_publication_assurance_helper_before_chain_check
     assert install_task["ansible.builtin.copy"]["dest"] == "{{ docker_runtime_publication_assurance_script_path }}"
     assert (
         install_task["ansible.builtin.copy"]["content"]
-        == "{{ lookup('ansible.builtin.file', playbook_dir ~ '/../scripts/docker_publication_assurance.py') }}"
+        == "{{ lookup('ansible.builtin.file', playbook_dir ~ '/../../scripts/docker_publication_assurance.py') }}"
     )
     assert tasks.index(install_task) < tasks.index(nftables_check_task)
 
