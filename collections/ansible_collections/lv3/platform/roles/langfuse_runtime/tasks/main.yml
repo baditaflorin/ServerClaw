@@ -296,23 +296,81 @@
     or 'Downloaded newer image' in langfuse_pull.stdout
     or 'Pull complete' in langfuse_pull.stdout
 
-- name: Start the Langfuse stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ langfuse_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ langfuse_site_dir }}"
-  register: langfuse_up
-  changed_when: >-
-    'Creating' in langfuse_up.stdout
-    or 'Recreating' in langfuse_up.stdout
-    or 'Starting' in langfuse_up.stdout
+- name: Start the Langfuse stack and recover stale compose-network failures
+  block:
+    - name: Start the Langfuse stack
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ langfuse_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ langfuse_site_dir }}"
+      register: langfuse_up
+      changed_when: >-
+        'Creating' in langfuse_up.stdout
+        or 'Recreating' in langfuse_up.stdout
+        or 'Starting' in langfuse_up.stdout
+  rescue:
+    - name: Flag stale Langfuse compose-network failures during startup
+      ansible.builtin.set_fact:
+        langfuse_compose_network_missing: >-
+          {{
+            'failed to create endpoint' in (ansible_failed_result.stderr | default(''))
+            and 'does not exist' in (ansible_failed_result.stderr | default(''))
+          }}
+
+    - name: Surface unexpected Langfuse startup failures
+      ansible.builtin.fail:
+        msg: >-
+          {{
+            ansible_failed_result.stderr
+            | default(ansible_failed_result.msg | default('langfuse compose up failed'))
+          }}
+      when: not langfuse_compose_network_missing
+
+    - name: Reset stale Langfuse compose resources before retrying startup
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ langfuse_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ langfuse_site_dir }}"
+      register: langfuse_down
+      changed_when: >-
+        'Stopping' in (langfuse_down.stdout | default(''))
+        or 'Removing' in (langfuse_down.stdout | default(''))
+        or 'Removing' in (langfuse_down.stderr | default(''))
+      failed_when: false
+      when: langfuse_compose_network_missing
+
+    - name: Retry Langfuse stack startup after compose-network recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ langfuse_compose_file }}"
+          - up
+          - -d
+          - --force-recreate
+          - --remove-orphans
+      args:
+        chdir: "{{ langfuse_site_dir }}"
+      register: langfuse_up
+      changed_when: >-
+        'Creating' in langfuse_up.stdout
+        or 'Recreating' in langfuse_up.stdout
+        or 'Starting' in langfuse_up.stdout
+      when: langfuse_compose_network_missing
 
 - name: Wait for Langfuse to listen locally
   ansible.builtin.wait_for:

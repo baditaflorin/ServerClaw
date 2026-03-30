@@ -347,23 +347,81 @@
     or 'Downloaded newer image' in gitea_pull.stdout
     or 'Pull complete' in gitea_pull.stdout
 
-- name: Start the Gitea stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ gitea_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ gitea_site_dir }}"
-  register: gitea_up
-  changed_when: >-
-    'Creating' in gitea_up.stdout
-    or 'Recreating' in gitea_up.stdout
-    or 'Starting' in gitea_up.stdout
+- name: Start the Gitea stack and recover stale compose-network failures
+  block:
+    - name: Start the Gitea stack
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ gitea_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ gitea_site_dir }}"
+      register: gitea_up
+      changed_when: >-
+        'Creating' in gitea_up.stdout
+        or 'Recreating' in gitea_up.stdout
+        or 'Starting' in gitea_up.stdout
+  rescue:
+    - name: Flag stale Gitea compose-network failures during startup
+      ansible.builtin.set_fact:
+        gitea_compose_network_missing: >-
+          {{
+            'failed to create endpoint' in (ansible_failed_result.stderr | default(''))
+            and 'does not exist' in (ansible_failed_result.stderr | default(''))
+          }}
+
+    - name: Surface unexpected Gitea startup failures
+      ansible.builtin.fail:
+        msg: >-
+          {{
+            ansible_failed_result.stderr
+            | default(ansible_failed_result.msg | default('gitea compose up failed'))
+          }}
+      when: not gitea_compose_network_missing
+
+    - name: Reset stale Gitea compose resources before retrying startup
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ gitea_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ gitea_site_dir }}"
+      register: gitea_down
+      changed_when: >-
+        'Stopping' in (gitea_down.stdout | default(''))
+        or 'Removing' in (gitea_down.stdout | default(''))
+        or 'Removing' in (gitea_down.stderr | default(''))
+      failed_when: false
+      when: gitea_compose_network_missing
+
+    - name: Retry Gitea stack startup after compose-network recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ gitea_compose_file }}"
+          - up
+          - -d
+          - --force-recreate
+          - --remove-orphans
+      args:
+        chdir: "{{ gitea_site_dir }}"
+      register: gitea_up
+      changed_when: >-
+        'Creating' in gitea_up.stdout
+        or 'Recreating' in gitea_up.stdout
+        or 'Starting' in gitea_up.stdout
+      when: gitea_compose_network_missing
 
 - name: Wait for Gitea to listen locally
   ansible.builtin.wait_for:

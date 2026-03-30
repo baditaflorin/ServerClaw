@@ -57,3 +57,17 @@ def test_compose_template_no_longer_embeds_local_minio_sidecar() -> None:
     template = COMPOSE_TEMPLATE.read_text()
     assert "\n  minio:\n" not in template
     assert "langfuse-minio" not in template
+
+
+def test_tasks_recover_stale_compose_network_during_langfuse_startup() -> None:
+    tasks = load_tasks()
+    start_block = next(
+        task
+        for task in tasks
+        if task.get("name") == "Start the Langfuse stack and recover stale compose-network failures"
+    )
+    rescue_names = [task["name"] for task in start_block["rescue"]]
+
+    assert "Flag stale Langfuse compose-network failures during startup" in rescue_names
+    assert "Reset stale Langfuse compose resources before retrying startup" in rescue_names
+    assert "Retry Langfuse stack startup after compose-network recovery" in rescue_names
