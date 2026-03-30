@@ -18,7 +18,7 @@ Generated from `config/dependency-graph.json`.
 | Tier | Services |
 | --- | --- |
 | `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, Mail Platform, Mailpit, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Excalidraw, Gitea, Gotenberg, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Temporal, Tesseract OCR, Vaultwarden, Windmill, n8n |
+| `2` | Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Excalidraw, Flagsmith, Gitea, Gotenberg, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Temporal, Tesseract OCR, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway |
 | `4` | Ops Portal |
 
@@ -60,6 +60,7 @@ graph TD
     docs_portal["Developer Portal\nTier 2"]
     dify["Dify\nTier 2"]
     excalidraw["Excalidraw\nTier 2"]
+    flagsmith["Flagsmith\nTier 2"]
     gitea["Gitea\nTier 2"]
     gotenberg["Gotenberg\nTier 2"]
     keycloak["Keycloak\nTier 2"]
@@ -112,6 +113,11 @@ graph TD
     excalidraw -->|hard| docker_runtime
     excalidraw -->|soft| keycloak
     excalidraw -->|hard| nginx_edge
+    flagsmith -->|hard| docker_runtime
+    flagsmith -->|soft| keycloak
+    flagsmith -->|soft| nginx_edge
+    flagsmith -->|startup_only| openbao
+    flagsmith -->|hard| postgres
     gitea -->|soft| docker_build
     gitea -->|soft| keycloak
     gitea -->|startup_only| openbao

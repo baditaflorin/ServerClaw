@@ -505,6 +505,52 @@ groups:
           description: https://draw.lv3.org:443/ has less than 14 days remaining before
             certificate expiry.
           runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_flagsmith_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="flagsmith-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: flagsmith
+          assurance_id: flagsmith-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: flagsmith-public HTTPS probe is failing.
+          description: https://flags.lv3.org:443/health is no longer completing a
+            healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_flagsmith_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="flagsmith-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: flagsmith
+          assurance_id: flagsmith-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: flagsmith-public TLS certificate is approaching expiry.
+          description: https://flags.lv3.org:443/health has less than 21 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_flagsmith_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="flagsmith-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: flagsmith
+          assurance_id: flagsmith-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: flagsmith-public TLS certificate is within the critical expiry
+            window.
+          description: https://flags.lv3.org:443/health has less than 14 days remaining
+            before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
       - alert: HTTPSProbeFailed_grafana_public
         expr: probe_success{job="https-tls-blackbox",assurance_id="grafana-public"}
           == 0

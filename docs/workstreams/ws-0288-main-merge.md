@@ -2,12 +2,13 @@
 
 - ADR: [ADR 0288](../adr/0288-flagsmith-as-the-feature-flag-and-remote-configuration-service.md)
 - Title: Integrate ADR 0288 Flagsmith exact-main replay onto `origin/main`
-- Status: ready_for_merge
+- Status: merged
 - Included In Repo Version: 0.177.109
 - Platform Version Observed During Integration: 0.130.71
 - Release Date: 2026-03-30
+- Live Applied On: 2026-03-30
 - Branch: `codex/ws-0288-main-merge`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0288-main-merge`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0288-main-candidate`
 - Owner: codex
 - Depends On: `ws-0288-live-apply`
 
@@ -131,5 +132,31 @@ repository and platform version advances.
   `receipts/ops-portal-snapshot.html` from the shared worktree. The final gate
   reruns therefore move to a clean exact-main candidate worktree before
   `main` is updated.
-- The final canonical receipt will be
-  `receipts/live-applies/2026-03-30-adr-0288-flagsmith-mainline-live-apply.json`.
+- After moving the active workstream to the clean candidate worktree and
+  refreshing `config/prometheus/file_sd/https_tls_targets.yml`,
+  `config/prometheus/rules/https_tls_alerts.yml`, and
+  `docs/site-generated/architecture/dependency-graph.md`, the exact-main
+  automation bundle all passed: `git diff --check`,
+  `uv run --with pyyaml --with jsonschema python scripts/live_apply_receipts.py --validate`,
+  `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`,
+  `./scripts/validate_repo.sh agent-standards workstream-surfaces health-probes`,
+  `make remote-validate`, and `make pre-push-gate`, preserved in the
+  `2026-03-30-ws-0288-mainline-r4-*` evidence set.
+- `receipts/live-applies/2026-03-30-adr-0288-flagsmith-mainline-live-apply.json`
+  records the canonical exact-main receipt from committed source
+  `0b32e585bbf2f0445f9eddd153923f93c221dba2`, while the earlier branch-local
+  receipt remains preserved as first-live audit history on platform version
+  `0.130.71`.
+
+## Outcome
+
+- Release `0.177.109` now carries ADR 0288 onto the latest shared mainline
+  baseline of `0.177.108 / 0.130.71`.
+- The authoritative committed replay from
+  `0b32e585bbf2f0445f9eddd153923f93c221dba2` refreshed the repo-managed
+  Flagsmith runtime plus the authenticated public `flags.lv3.org` edge route
+  on the live server, and the integrated canonical truth advances the tracked
+  platform baseline to `0.130.72`.
+- `receipts/live-applies/2026-03-30-adr-0288-flagsmith-mainline-live-apply.json`
+  is the canonical mainline receipt for ADR 0288; the earlier branch-local
+  receipt on `0.130.71` remains part of the audit trail.

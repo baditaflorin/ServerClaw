@@ -290,6 +290,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `excalidraw` | `2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply` |
 | `failure_domain_policy` | `2026-03-27-adr-0184-failure-domain-labels-live-apply` |
 | `fixture_pools` | `2026-03-28-adr-0186-prewarmed-fixture-pools-live-apply` |
+| `flagsmith` | `2026-03-30-adr-0288-flagsmith-mainline-live-apply` |
 | `gitea` | `2026-03-26-adr-0143-gitea-live-apply` |
 | `gitea_actions_runners` | `2026-03-28-adr-0229-gitea-actions-runners-live-apply` |
 | `gotenberg` | `2026-03-30-adr-0278-gotenberg-mainline-live-apply` |
@@ -1746,6 +1747,8 @@ This repository is intentionally opinionated:
 | `0282` | Integrate ADR 0282 Mailpit exact-main replay into current origin/main | `live_applied` | [ws-0282-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0282-main-merge.md) |
 | `0283` | Live apply Plausible Analytics from latest origin/main | `live_applied` | [ws-0283-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0283-live-apply.md) |
 | `0286` | Live apply Tesseract OCR from latest origin/main on top of the current Apache Tika baseline | `live_applied` | [ws-0286-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0286-live-apply.md) |
+| `0288` | ADR 0288 live apply from latest origin/main | `live_applied` | [ws-0288-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0288-live-apply.md) |
+| `0288` | Integrate ADR 0288 Flagsmith exact-main replay onto current origin/main | `merged` | [ws-0288-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0288-main-merge.md) |
 | `0293` | Live apply Temporal as the durable workflow and task queue engine from latest origin/main | `live_applied` | [ws-0293-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-live-apply.md) |
 | `0295` | Shared artifact cache plane and dedicated cache VM roadmap | `live_applied` | [adr-0295-artifact-cache-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0295-artifact-cache-architecture-bundle.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `merged` | [ws-0295-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md) |

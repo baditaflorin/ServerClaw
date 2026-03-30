@@ -2,9 +2,10 @@
 
 - ADR: [ADR 0288](../adr/0288-flagsmith-as-the-feature-flag-and-remote-configuration-service.md)
 - Title: deploy Flagsmith as the repo-managed feature flag and remote configuration control plane
-- Status: ready_for_merge
+- Status: live_applied
 - Included In Repo Version: 0.177.109
 - Branch-Local Receipt: `receipts/live-applies/2026-03-30-adr-0288-flagsmith-live-apply.json`
+- Canonical Mainline Receipt: `receipts/live-applies/2026-03-30-adr-0288-flagsmith-mainline-live-apply.json`
 - Live Applied In Platform Version: 0.130.71
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
@@ -45,6 +46,8 @@
 - `config/command-catalog.json`
 - `config/ansible-execution-scopes.yaml`
 - `config/ansible-role-idempotency.yml`
+- `config/prometheus/file_sd/https_tls_targets.yml`
+- `config/prometheus/rules/https_tls_alerts.yml`
 - `playbooks/flagsmith.yml`
 - `playbooks/services/flagsmith.yml`
 - `collections/ansible_collections/lv3/platform/playbooks/flagsmith.yml`
@@ -116,16 +119,18 @@
   the `flags.lv3.org` A record, but the settled repository converge now treats
   the canonical record as managed and drift-free, with both DNS tasks skipped
   because no change is required.
+- The exact-main integration lane then carried ADR 0288 onto the shared
+  `0.177.108 / 0.130.71` baseline, replayed the committed `0.177.109` source,
+  and published the canonical receipt
+  `receipts/live-applies/2026-03-30-adr-0288-flagsmith-mainline-live-apply.json`.
 
 ## Remaining For Merge-To-Main
 
-- Refresh the protected exact-main surfaces only after rebasing onto the newest
-  shared `origin/main`: `README.md`, `VERSION`, release sections in
-  `changelog.md`, `versions/stack.yaml`, and the final ADR 0288 repo-version
-  metadata.
-- Create the canonical exact-main Flagsmith receipt after replaying the merged
-  committed source from that synchronized baseline.
-- Rerun the generic `make live-apply-service service=flagsmith env=production`
-  wrapper after the exact-main canonical-truth surfaces are refreshed, or treat
-  the current `README.md` gate as the expected branch-local stop that preserved
-  the protected shared files on this workstream branch.
+- The branch-local receipt remains the first-live audit trail for ADR 0288 on
+  platform version `0.130.71`.
+- The protected release and canonical-truth surfaces are now carried by
+  `ws-0288-main-merge`, whose canonical receipt is
+  `receipts/live-applies/2026-03-30-adr-0288-flagsmith-mainline-live-apply.json`.
+- The exact-main integration lane advances the tracked platform baseline from
+  `0.130.71` to `0.130.72` on release `0.177.109` while preserving this
+  workstream's branch-local evidence as audit history.

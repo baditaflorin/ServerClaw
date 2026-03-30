@@ -16782,7 +16782,7 @@ workstreams:
   - id: ws-0288-live-apply
     adr: "0288"
     title: ADR 0288 live apply from latest origin/main
-    status: ready_for_merge
+    status: live_applied
     owner: codex
     branch: codex/ws-0288-live-apply-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0288-live-apply-r2
@@ -16924,14 +16924,14 @@ workstreams:
       release_bump: patch
       included_in_repo_version: 0.177.109
       latest_receipts:
-        flagsmith: 2026-03-30-adr-0288-flagsmith-live-apply
+        flagsmith: 2026-03-30-adr-0288-flagsmith-mainline-live-apply
   - id: ws-0288-main-merge
     adr: "0288"
     title: Integrate ADR 0288 Flagsmith exact-main replay onto current origin/main
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/ws-0288-main-merge
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0288-main-merge
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0288-main-candidate
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0288-main-merge.md
     depends_on:
       - ws-0288-live-apply
@@ -16966,6 +16966,8 @@ workstreams:
       - config/ansible-execution-scopes.yaml
       - config/ansible-role-idempotency.yml
       - config/uptime-kuma/monitors.json
+      - config/prometheus/file_sd/https_tls_targets.yml
+      - config/prometheus/rules/https_tls_alerts.yml
       - playbooks/flagsmith.yml
       - playbooks/services/flagsmith.yml
       - collections/ansible_collections/lv3/platform/playbooks/flagsmith.yml
@@ -17092,7 +17094,13 @@ workstreams:
             - receipts/live-applies/evidence/2026-03-30-ws-0288-mainline-*
           mode: exclusive
     ready_to_merge: true
-    live_applied: false
+    live_applied: true
+    canonical_truth:
+      changelog_entry: integrates ADR 0288 into main by replaying the repo-managed Flagsmith runtime and public `flags.lv3.org` edge publication onto the already-merged 0.177.109 / 0.130.72 baseline, preserving the verified release and platform version while adding the canonical Flagsmith mainline receipt
+      release_bump: patch
+      included_in_repo_version: 0.177.109
+      latest_receipts:
+        flagsmith: 2026-03-30-adr-0288-flagsmith-mainline-live-apply
   - id: ws-0293-live-apply
     adr: "0293"
     title: Live apply Temporal as the durable workflow and task queue engine from latest origin/main
