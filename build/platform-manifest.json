@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.104",
-  "platform_version": "0.130.69",
-  "generated_at": "2026-03-30T14:15:16Z",
-  "next_refresh_at": "2026-03-30T15:15:16Z",
+  "repo_version": "0.177.105",
+  "platform_version": "0.130.70",
+  "generated_at": "2026-03-30T15:14:08Z",
+  "next_refresh_at": "2026-03-30T16:14:08Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -2542,7 +2542,7 @@
       },
       {
         "id": "gate-status",
-        "description": "Show the configured validation gate checks plus the last local, bypass, and post-merge results.",
+        "description": "Show the configured validation gate checks plus the last local, waiver, and post-merge results.",
         "tags": [
           "diagnostic",
           "gate-status",
@@ -4972,10 +4972,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.103",
+    "last_version": "0.177.104",
     "deployed_at": "2026-03-30",
-    "summary": "completed the ADR 0274 mainline live apply by hardening the Coolify bootstrap and publication path, then re-verifying governed repo-deploy base-image warming on coolify-lv3",
-    "release_notes_url": "docs/release-notes/0.177.104.md"
+    "summary": "replays ADR 0267 from the exact 0.177.104 main tree, keeps governed validation-gate waivers live on the Windmill worker checkout, preserves the repo-root Docker publication helper repair plus apt-lock tolerance, and fixes the latest-main nftables forward-compat insertion regression before advancing platform_version to 0.130.70",
+    "release_notes_url": "docs/release-notes/0.177.105.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
