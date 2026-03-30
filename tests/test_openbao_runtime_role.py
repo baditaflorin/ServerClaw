@@ -273,6 +273,15 @@ def test_openbao_compose_template_supports_private_extra_http_bindings() -> None
     assert "{% for bind_address in openbao_http_extra_bind_addresses %}" in template
 
 
+def test_openbao_runtime_renders_the_compose_file_from_the_active_role_path() -> None:
+    tasks = yaml.safe_load(TASKS_PATH.read_text(encoding="utf-8"))
+    render_task = next(task for task in tasks if task["name"] == "Render the OpenBao Compose file")
+    copy_module = render_task["ansible.builtin.copy"]
+
+    assert copy_module["dest"] == "{{ openbao_compose_file }}"
+    assert "role_path ~ '/templates/docker-compose.yml.j2'" in copy_module["content"]
+
+
 def test_openbao_playbook_refreshes_secret_ids_from_local_artifacts() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text(encoding="utf-8"))
     refresh_play = next(

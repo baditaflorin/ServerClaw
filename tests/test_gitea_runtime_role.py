@@ -111,6 +111,18 @@ def test_gitea_waits_on_the_published_service_address() -> None:
     assert wait_task["ansible.builtin.wait_for"]["host"] == "{{ ansible_host }}"
 
 
+def test_gitea_waits_for_internal_keycloak_oidc_before_bootstrap() -> None:
+    tasks = load_tasks()
+    wait_task = next(
+        task
+        for task in tasks
+        if task["name"] == "Wait for the internal Keycloak OIDC discovery document before bootstrapping Gitea"
+    )
+    assert wait_task["ansible.builtin.uri"]["url"] == "{{ gitea_oidc_internal_discovery_url }}"
+    assert wait_task["retries"] == 48
+    assert wait_task["delay"] == 5
+
+
 def test_gitea_runtime_recovers_stale_docker_networking() -> None:
     tasks = load_tasks()
     names = {task["name"] for task in tasks}
@@ -123,6 +135,11 @@ def test_gitea_runtime_recovers_stale_docker_networking() -> None:
     assert "Remove stale Gitea compose networks after the reset" in names
     assert "Remove stale Gitea containers before recovery" in names
     assert "Force-recreate the Gitea stack after Docker networking recovery" in names
+
+    network_cleanup_task = next(task for task in tasks if task["name"] == "Remove stale Gitea compose networks after the reset")
+    network_cleanup_script = network_cleanup_task["ansible.builtin.shell"]
+    assert 'docker network inspect "${network_id}"' in network_cleanup_script
+    assert 'payload[0].get("Containers")' in network_cleanup_script
 
     force_recreate_task = next(
         task for task in tasks if task["name"] == "Record whether the Gitea startup needs a force recreate"

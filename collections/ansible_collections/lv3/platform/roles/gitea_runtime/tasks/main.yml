@@ -454,8 +454,20 @@
   ansible.builtin.shell: |
     set -euo pipefail
     stale_networks="$(docker network ls -q --filter name={{ gitea_network_name }})"
+    changed=false
     if [ -n "${stale_networks}" ]; then
-      docker network rm ${stale_networks}
+      for network_id in ${stale_networks}; do
+        container_count="$(
+          docker network inspect "${network_id}" | python3 -c 'import json, sys; payload = json.load(sys.stdin); print(len((payload[0].get("Containers") or {})))'
+        )"
+        if [ "${container_count}" -gt 0 ]; then
+          continue
+        fi
+        docker network rm "${network_id}"
+        changed=true
+      done
+    fi
+    if [ "${changed}" = true ]; then
       echo changed
     fi
   args:
@@ -548,6 +560,17 @@
   retries: 24
   delay: 5
   until: gitea_login_page.status == 200
+  changed_when: false
+
+- name: Wait for the internal Keycloak OIDC discovery document before bootstrapping Gitea
+  ansible.builtin.uri:
+    url: "{{ gitea_oidc_internal_discovery_url }}"
+    method: GET
+    status_code: 200
+  register: gitea_oidc_discovery
+  retries: 48
+  delay: 5
+  until: gitea_oidc_discovery.status == 200
   changed_when: false
 
 - name: Run the Gitea bootstrap script

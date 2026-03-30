@@ -35,6 +35,12 @@ def test_postgres_vm_validation_guards_reserved_connection_budget() -> None:
     assert "postgres_vm_superuser_reserved_connections | int) + (postgres_vm_reserved_connections | int) < (postgres_vm_max_connections | int)" in task_file
 
 
+def test_postgres_vm_renders_the_managed_conf_from_the_active_role_path() -> None:
+    task_file = TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "lookup('ansible.builtin.template', role_path ~ '/templates/postgresql-lv3.conf.j2')" in task_file
+
+
 def test_postgres_vm_template_renders_reserved_connection_settings() -> None:
     template = TEMPLATE_PATH.read_text(encoding="utf-8")
 

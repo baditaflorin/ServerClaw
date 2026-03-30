@@ -234,8 +234,8 @@
   vars:
     mutation_audit_action: render.openbao_compose
     mutation_audit_target: openbao-runtime
-  ansible.builtin.template:
-    src: docker-compose.yml.j2
+  ansible.builtin.copy:
+    content: "{{ lookup('ansible.builtin.template', role_path ~ '/templates/docker-compose.yml.j2') }}"
     dest: "{{ openbao_compose_file }}"
     owner: root
     group: root

@@ -54,9 +54,9 @@
     mode: "0755"
 
 - name: Render managed PostgreSQL settings
-  ansible.builtin.template:
-    src: postgresql-lv3.conf.j2
+  ansible.builtin.copy:
     dest: "{{ postgres_vm_managed_conf_path }}"
+    content: "{{ lookup('ansible.builtin.template', role_path ~ '/templates/postgresql-lv3.conf.j2') }}"
     mode: "0644"
   notify: Restart PostgreSQL
 
