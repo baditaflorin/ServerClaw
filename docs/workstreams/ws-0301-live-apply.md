@@ -2,13 +2,13 @@
 
 - ADR: [ADR 0301](../adr/0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md)
 - Title: Wire Semgrep SAST into the shared validation gate and verify the CI and build-server paths end to end from latest `origin/main`
-- Status: in_progress
-- Branch: `codex/ws-0301-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0301-live-apply`
+- Status: ready_for_merge
+- Branch: `codex/ws-0301-main-integration`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0301-main-integration`
 - Owner: codex
 - Depends On: `adr-0083-docker-based-check-runners`, `adr-0087-repository-validation-gate`, `adr-0229-gitea-actions-runners`, `adr-0264-failure-domain-isolated-validation-lanes`, `adr-0266-validation-runner-capability-contracts`, `adr-0267-expiring-gate-bypass-waivers-with-structured-reason-codes`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0301-live-apply.md`, `docs/adr/0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md`, `docs/runbooks/validation-gate.md`, `docs/runbooks/validate-repository-automation.md`, `docs/runbooks/docker-check-runners.md`, `docs/adr/.index.yaml`, `Makefile`, `.config-locations.yaml`, `.gitea/workflows/validate.yml`, `.github/workflows/validate.yml`, `config/semgrep/`, `config/validation-gate.json`, `config/check-runner-manifest.json`, `config/validation-lanes.yaml`, `config/validation-runner-contracts.json`, `config/workflow-catalog.json`, `docker/check-runners/security/`, `docs/diagrams/agent-coordination-map.excalidraw`, `platform/repo.py`, `scripts/run_gate.py`, `scripts/semgrep_gate.py`, `scripts/validate_repo.sh`, `scripts/validation_runner_contracts.py`, `tests/test_parallel_check.py`, `tests/test_semgrep_gate.py`, `tests/test_validation_gate.py`, `tests/test_validation_lanes.py`, `tests/test_validation_runner_contracts.py`, `receipts/live-applies/`
+- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0301-live-apply.md`, `docs/adr/0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md`, `docs/runbooks/validation-gate.md`, `docs/runbooks/validate-repository-automation.md`, `docs/runbooks/docker-check-runners.md`, `docs/adr/.index.yaml`, `Makefile`, `.config-locations.yaml`, `.gitea/workflows/validate.yml`, `.github/workflows/validate.yml`, `config/semgrep/`, `config/validation-gate.json`, `config/check-runner-manifest.json`, `config/validation-lanes.yaml`, `config/validation-runner-contracts.json`, `config/workflow-catalog.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `platform/repo.py`, `scripts/run_gate.py`, `scripts/semgrep_gate.py`, `scripts/validate_repo.sh`, `scripts/validation_runner_contracts.py`, `tests/test_parallel_check.py`, `tests/test_semgrep_gate.py`, `tests/test_validation_gate.py`, `tests/test_validation_lanes.py`, `tests/test_validation_runner_contracts.py`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/release-notes/`, `versions/stack.yaml`, `build/platform-manifest.json`, `receipts/live-applies/`
 
 ## Scope
 
@@ -42,7 +42,6 @@
 - `config/validation-lanes.yaml`
 - `config/validation-runner-contracts.json`
 - `config/workflow-catalog.json`
-- `docker/check-runners/security/`
 - `docs/diagrams/agent-coordination-map.excalidraw`
 - `platform/repo.py`
 - `scripts/run_gate.py`
@@ -54,6 +53,13 @@
 - `tests/test_validation_gate.py`
 - `tests/test_validation_lanes.py`
 - `tests/test_validation_runner_contracts.py`
+- `README.md`
+- `RELEASE.md`
+- `VERSION`
+- `changelog.md`
+- `docs/release-notes/`
+- `versions/stack.yaml`
+- `build/platform-manifest.json`
 - `receipts/live-applies/`
 
 ## Expected Live Surfaces
@@ -64,8 +70,10 @@
 
 ## Verification
 
-- In progress. This section will be replaced with the exact local, remote, and CI verification results captured during the live apply.
+- Ready for merge. The exact command outputs and hosted workflow receipts will be recorded in the final live-apply receipts once the release and mainline promotion steps complete from this refreshed `origin/main` integration worktree.
 
 ## Remaining For Merge-To-Main
 
-- In progress. This workstream is expected to perform the final exact-main integration step itself once the branch-local and live gate proofs are complete.
+- Cut the exact-main repository release from the refreshed `origin/main` baseline.
+- Re-run local, remote, GitHub Actions, and private Gitea validation paths from the integrated branch.
+- Promote the canonical mainline live-apply receipt, platform-version metadata, and generated truth surfaces as the final step before pushing `origin/main`.

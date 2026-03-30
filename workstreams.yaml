@@ -16652,10 +16652,10 @@ workstreams:
   - id: ws-0301-live-apply
     adr: "0301"
     title: Live apply ADR 0301 from latest origin/main
-    status: in_progress
+    status: ready_for_merge
     owner: codex
-    branch: codex/ws-0301-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0301-live-apply
+    branch: codex/ws-0301-main-integration
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0301-main-integration
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0301-live-apply.md
     depends_on:
       - adr-0083-docker-based-check-runners
@@ -16683,8 +16683,6 @@ workstreams:
       - config/validation-lanes.yaml
       - config/validation-runner-contracts.json
       - config/workflow-catalog.json
-      - config/windmill/scripts/check-runner-rebuild.py
-      - docker/check-runners/security/**
       - docs/diagrams/agent-coordination-map.excalidraw
       - platform/repo.py
       - receipts/sast/.gitignore
@@ -16697,6 +16695,14 @@ workstreams:
       - tests/test_validation_gate.py
       - tests/test_validation_lanes.py
       - tests/test_validation_runner_contracts.py
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
       - receipts/live-applies/2026-03-30-adr-0301-semgrep-sast-live-apply.json
       - receipts/live-applies/2026-03-30-adr-0301-semgrep-sast-mainline-live-apply.json
       - receipts/live-applies/evidence/2026-03-30-ws-0301-*
@@ -16729,8 +16735,6 @@ workstreams:
             - config/validation-lanes.yaml
             - config/validation-runner-contracts.json
             - config/workflow-catalog.json
-            - config/windmill/scripts/check-runner-rebuild.py
-            - docker/check-runners/security/**
             - docs/diagrams/agent-coordination-map.excalidraw
             - platform/repo.py
             - receipts/sast/.gitignore
@@ -16748,10 +16752,30 @@ workstreams:
             - receipts/live-applies/evidence/2026-03-30-ws-0301-*
           mode: shared_contract
           contract: adr-0301-semgrep-live-apply-v1
+        - id: integration_readme_surface
+          paths:
+            - README.md
+          mode: shared_contract
+          contract: main-integration-truth-v1
+        - id: release_management_surfaces
+          paths:
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+          mode: shared_contract
+          contract: release-management-v1
+        - id: platform_truth_generation
+          paths:
+            - versions/stack.yaml
+            - build/platform-manifest.json
+          mode: shared_contract
+          contract: canonical-truth-v1
     ready_to_merge: false
     live_applied: false
     canonical_truth:
-      changelog_entry: implements ADR 0301 by adding the repo-managed Semgrep SAST and secret-pattern gate, publishing the updated security runner image, and recording the first mainline live apply that proves the new CI path end to end
+      changelog_entry: implements ADR 0301 by adding repo-managed Semgrep SAST and secret-pattern scanning to the shared validation gate, remote build-server replay, and hosted CI workflows through the Python check-runner contract
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.108
       latest_receipts: {}

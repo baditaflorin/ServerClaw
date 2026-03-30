@@ -196,7 +196,7 @@ ADR 0276 NATS JetStream is now live on production from `main`: `docker-runtime-l
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.107` |
+| Repository version | `0.177.108` |
 | Platform version | `0.130.71` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
@@ -1411,6 +1411,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0295-live-apply: Live Apply ADR 0295 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md)
 - [Workstream WS-0296: Education Repo Refresh And Named Deploy Profiles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-education-refresh.md)
 - [Workstream WS-0296: Dedicated Artifact Cache VM Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-live-apply.md)
+- [Workstream ws-0301-live-apply: Live Apply ADR 0301 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0301-live-apply.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -1428,7 +1429,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.107` |
+| Repository version | `0.177.108` |
 | Platform version | `0.130.71` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |

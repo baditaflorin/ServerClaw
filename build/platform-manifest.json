@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.107",
+  "repo_version": "0.177.108",
   "platform_version": "0.130.71",
-  "generated_at": "2026-03-30T17:02:58Z",
-  "next_refresh_at": "2026-03-30T18:02:58Z",
+  "generated_at": "2026-03-30T18:34:57Z",
+  "next_refresh_at": "2026-03-30T19:34:57Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -5020,10 +5020,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.106",
+    "last_version": "0.177.107",
     "deployed_at": "2026-03-30",
-    "summary": "implements ADR 0286 by bringing the private Tesseract OCR runtime, the controller-local Tika-first fallback verification path, and the verified live receipt onto main while preserving the current 0.130.71 platform baseline",
-    "release_notes_url": "docs/release-notes/0.177.107.md"
+    "summary": "implements ADR 0301 by adding repo-managed Semgrep SAST and secret-pattern scanning to the shared validation gate, remote build-server replay, and hosted CI workflows through the Python check-runner contract",
+    "release_notes_url": "docs/release-notes/0.177.108.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
