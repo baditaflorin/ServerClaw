@@ -2969,12 +2969,12 @@
     }
   ],
   "summary": {
-    "catalog_total": 40,
-    "active_total": 36,
-    "active_public_total": 32,
+    "catalog_total": 41,
+    "active_total": 37,
+    "active_public_total": 33,
     "active_private_total": 4,
     "planned_total": 4,
-    "shared_edge_total": 31,
+    "shared_edge_total": 32,
     "platform_sso_total": 15
   }
 }
