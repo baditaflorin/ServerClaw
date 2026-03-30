@@ -3,7 +3,7 @@
 - ADR: [ADR 0288](../adr/0288-flagsmith-as-the-feature-flag-and-remote-configuration-service.md)
 - Title: deploy Flagsmith as the repo-managed feature flag and remote configuration control plane
 - Status: ready_for_merge
-- Included In Repo Version: 0.177.108
+- Included In Repo Version: 0.177.109
 - Branch-Local Receipt: `receipts/live-applies/2026-03-30-adr-0288-flagsmith-live-apply.json`
 - Live Applied In Platform Version: 0.130.71
 - Implemented On: 2026-03-30

@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.109",
   "platform_version": "0.130.72",
-  "generated_at": "2026-03-30T19:33:15Z",
-  "next_refresh_at": "2026-03-30T20:33:15Z",
+  "generated_at": "2026-03-30T19:48:09Z",
+  "next_refresh_at": "2026-03-30T20:48:09Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -174,6 +174,17 @@
         "primary_url": "https://draw.lv3.org",
         "last_live_apply": "2026-03-30T00:00:00Z",
         "slo_status": "unknown"
+      },
+      "flagsmith": {
+        "service_name": "Flagsmith",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://flags.lv3.org",
+        "last_live_apply": "2026-03-30T00:00:00Z"
       },
       "gitea": {
         "service_name": "Gitea",
@@ -1345,6 +1356,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-excalidraw.md"
+      },
+      {
+        "id": "converge-flagsmith",
+        "description": "Converge Flagsmith on docker-runtime-lv3, prepare the shared PostgreSQL backing database, publish flags.lv3.org through the shared edge, and verify seeded feature state plus environment keys.",
+        "tags": [
+          "converge-flagsmith",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-flagsmith.md"
       },
       {
         "id": "converge-gitea",
@@ -4105,6 +4142,16 @@
         ]
       },
       {
+        "id": "configure-flagsmith",
+        "title": "Configure Flagsmith",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-flagsmith.md",
+        "workflow_ids": [
+          "converge-flagsmith"
+        ]
+      },
+      {
         "id": "configure-gitea",
         "title": "Configure Gitea",
         "agent_trust_required": "T3",
@@ -5069,7 +5116,7 @@
   "recent_changes": {
     "last_version": "0.177.108",
     "deployed_at": "2026-03-30",
-    "summary": "implements ADR 0293 by adding the private Temporal durable workflow engine, PostgreSQL-backed history and visibility stores, OpenBao-managed runtime secrets, and the repo-managed `lv3` namespace with exact-main verification on docker-runtime-lv3 and postgres-lv3",
+    "summary": "implements ADR 0293 by adding the private Temporal durable workflow engine, PostgreSQL-backed history and visibility stores, OpenBao-managed runtime secrets, and the repo-managed `lv3` namespace, and ADR 0288 by adding the repo-managed Flagsmith runtime, OpenBao-backed seed and environment key publication, and public flags.lv3.org edge routing",
     "release_notes_url": "docs/release-notes/0.177.109.md"
   },
   "agentic_architecture": {
