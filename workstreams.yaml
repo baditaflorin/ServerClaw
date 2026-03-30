@@ -439,9 +439,9 @@ workstreams:
     ready_to_merge: true
     live_applied: true
     canonical_truth:
-      changelog_entry: implemented ADR 0270 by adding a shared Docker publication assurance helper, catalog-declared host publication contracts, post-verify repair hooks, read-only observation checks, and live-apply recovery hardening for Harbor, Keycloak, and OpenBao when Docker publication drift surfaced during replay
+      changelog_entry: implemented ADR 0270 by adding a shared Docker publication assurance helper, catalog-declared host publication contracts, post-verify repair hooks, read-only observation checks, and live-apply recovery hardening for Harbor, Keycloak, OpenBao, Outline, and Langfuse when Docker publication drift surfaced during replay
       release_bump: patch
-      included_in_repo_version: 0.177.92
+      included_in_repo_version: 0.177.93
       latest_receipts:
         docker_publication: 2026-03-29-adr-0270-docker-publication-self-healing-and-port-programming-assertions-mainline-live-apply
   - id: ws-0274-artifact-cache-plane
@@ -13645,7 +13645,7 @@ workstreams:
   - id: ws-0278-main-integration
     adr: "0278"
     title: Integrate ADR 0278 exact-main replay onto current origin/main
-    status: in_progress
+    status: merged
     owner: codex
     branch: codex/ws-0278-main-integration
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0278-main-integration

@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0278](../adr/0278-gotenberg-as-the-document-to-pdf-rendering-service.md)
 - Title: Integrate ADR 0278 exact-main replay onto `origin/main`
-- Status: `in-progress`
+- Status: `merged`
 - Target Repo Version: `0.177.92`
 - Platform Version Before Exact-Main Replay: `0.130.60`
 - Branch: `codex/ws-0278-main-integration`
@@ -98,12 +98,11 @@ platform-version bump.
 
 ## Current State
 
-- release `0.177.92` is ready to merge from this branch
-- exact-main replay evidence exists, but the authoritative merged-main receipt
-  and `platform_version` bump must wait until the push succeeds and the replay
-  is repeated from the resulting `main` commit
-- the remaining blocker is branch-ownership registration for this integration
-  branch, not service health or repo-validation drift
+- release `0.177.92` is already published on `origin/main`
+- the exact-main replay evidence exists and the remaining gap is historical
+  canonical-truth cleanup, not pending Gotenberg implementation work
+- this workstream now remains in the registry as merged historical context, not
+  as an active release blocker
 
 ## Remaining For Merge-To-Main
 

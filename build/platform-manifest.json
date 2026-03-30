@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.92",
+  "repo_version": "0.177.93",
   "platform_version": "0.130.60",
-  "generated_at": "2026-03-30T00:09:28Z",
-  "next_refresh_at": "2026-03-30T01:09:28Z",
+  "generated_at": "2026-03-30T00:43:39Z",
+  "next_refresh_at": "2026-03-30T01:43:39Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -1045,6 +1045,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-dify.md"
+      },
+      {
+        "id": "converge-docker-publication-assurance",
+        "description": "Converge the shared ADR 0270 Docker publication assurance helper on managed Docker guests and verify every declared publication contract before readiness is trusted.",
+        "tags": [
+          "converge-docker-publication-assurance",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/docker-publication-assurance.md"
       },
       {
         "id": "converge-docker-runtime",
@@ -4036,6 +4062,16 @@
         ]
       },
       {
+        "id": "docker-publication-assurance",
+        "title": "Docker Publication Assurance Runbook",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/docker-publication-assurance.md",
+        "workflow_ids": [
+          "converge-docker-publication-assurance"
+        ]
+      },
+      {
         "id": "drift-detection",
         "title": "Drift Detection",
         "agent_trust_required": "T2",
@@ -4535,10 +4571,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.91",
+    "last_version": "0.177.92",
     "deployed_at": "2026-03-30",
-    "summary": "implemented ADR 0278 by adding the private Gotenberg document-to-PDF runtime on docker-runtime-lv3, publishing the authenticated `/v1/gotenberg` API gateway route, and verifying Chromium plus LibreOffice PDF conversion end to end",
-    "release_notes_url": "docs/release-notes/0.177.92.md"
+    "summary": "implemented ADR 0270 by adding a shared Docker publication assurance helper, catalog-declared host publication contracts, post-verify repair hooks, read-only observation checks, and live-apply recovery hardening for Harbor, Keycloak, OpenBao, Outline, and Langfuse when Docker publication drift surfaced during replay",
+    "release_notes_url": "docs/release-notes/0.177.93.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
