@@ -516,6 +516,46 @@ groups:
           description: Langfuse remains reachable through the public LV3 edge for
             trace ingestion and operator access.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_mailpit_availability
+        expr: (slo:mailpit_availability:error_rate_5m > (14 * 0.010000)) and (slo:mailpit_availability:error_rate_1h
+          > (14 * 0.010000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: mailpit
+          slo_id: mailpit-availability
+          indicator: availability
+        annotations:
+          summary: mailpit-availability is burning its error budget at 14x
+          description: Mailpit remains reachable on the private guest-network listener
+            for staging and development SMTP capture flows.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_mailpit_availability
+        expr: slo:mailpit_availability:error_rate_1h > (3 * 0.010000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: mailpit
+          slo_id: mailpit-availability
+          indicator: availability
+        annotations:
+          summary: mailpit-availability is burning its error budget at 3x
+          description: Mailpit remains reachable on the private guest-network listener
+            for staging and development SMTP capture flows.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_mailpit_availability
+        expr: slo:mailpit_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: mailpit
+          slo_id: mailpit-availability
+          indicator: availability
+        annotations:
+          summary: mailpit-availability has less than 10% error budget remaining
+          description: Mailpit remains reachable on the private guest-network listener
+            for staging and development SMTP capture flows.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_matrix_synapse_availability
         expr: (slo:matrix_synapse_availability:error_rate_5m > (14 * 0.005000)) and
           (slo:matrix_synapse_availability:error_rate_1h > (14 * 0.005000))

@@ -405,6 +405,7 @@ validate_json() {
   local json_files=()
 
   echo "JSON validation"
+  resolve_python_bin
   load_lines_into_array json_files < <(tracked_files '*.json')
   for json_file in "${json_files[@]}"; do
     if [[ "$json_file" = /* ]]; then
@@ -452,6 +453,7 @@ validate_compose_runtime_envs() {
 
 validate_retry_guard() {
   echo "Retry guard"
+  resolve_python_bin
   "$PYTHON_BIN" "$REPO_ROOT/scripts/check_ad_hoc_retry.py" >/dev/null
 }
 
@@ -489,6 +491,7 @@ validate_policy() {
 
 validate_architecture_fitness() {
   echo "Architecture fitness validation"
+  resolve_python_bin
   "$PYTHON_BIN" "$REPO_ROOT/scripts/replaceability_scorecards.py" --validate >/dev/null
 }
 
@@ -539,6 +542,7 @@ validate_health_probes() {
     mattermost_runtime
     matrix_synapse_runtime
     mail_platform_runtime
+    mailpit_runtime
     nginx_edge_publication
     ntfy_runtime
     uptime_kuma_runtime

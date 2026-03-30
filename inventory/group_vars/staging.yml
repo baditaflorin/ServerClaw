@@ -1,0 +1,9 @@
+smtp_host: mailpit
+smtp_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.mailpit_smtp_port | default(1025) }}"
+smtp_starttls: false
+smtp_auth_enabled: false
+smtp_username: ""
+smtp_password_local_file: ""
+smtp_docker_network_name: dev-tools_default
+smtp_from_address: "{{ mail_platform_mailbox_address }}"
+smtp_reply_to_address: "{{ mail_platform_reply_to_email }}"

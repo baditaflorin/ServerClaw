@@ -127,6 +127,12 @@ playbooks:
     shared_surfaces:
       - service:mail-platform
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/mailpit.yml:
+    playbook_id: mailpit
+    mutation_scope: platform
+    shared_surfaces:
+      - service:mailpit
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/nomad.yml:
     playbook_id: nomad
     mutation_scope: platform
@@ -339,6 +345,12 @@ playbooks:
     mutation_scope: host
     shared_surfaces:
       - service:grafana
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/mailpit.yml:
+    playbook_id: mailpit
+    mutation_scope: platform
+    shared_surfaces:
+      - service:mailpit
       - inventory/host_vars/proxmox_florin.yml
   playbooks/services/guest-log-shipping.yml:
     playbook_id: guest-log-shipping

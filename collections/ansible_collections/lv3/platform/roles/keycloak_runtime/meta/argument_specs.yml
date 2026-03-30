@@ -148,7 +148,7 @@ argument_specs:
         type: path
         required: true
         description:
-          - Controller-local file containing the managed mailbox password used for Keycloak mail submission.
+          - Controller-local file containing the managed mailbox password used for Keycloak mail submission when SMTP auth is enabled.
       keycloak_mail_platform_submission_host:
         type: str
         required: true
@@ -164,11 +164,16 @@ argument_specs:
         required: true
         description:
           - Whether Keycloak should negotiate STARTTLS on the configured submission listener.
+      keycloak_mail_platform_submission_auth_enabled:
+        type: bool
+        required: true
+        description:
+          - Whether Keycloak should authenticate to the configured SMTP relay.
       keycloak_mail_platform_docker_network_name:
         type: str
         required: true
         description:
-          - External Docker network name Keycloak joins so it can reach the Stalwart relay directly.
+          - External Docker network name Keycloak joins so it can reach the configured SMTP relay directly.
       keycloak_mail_platform_from_address:
         type: str
         required: true

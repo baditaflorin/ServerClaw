@@ -653,6 +653,36 @@
       }
     },
     {
+      "id": "mailpit",
+      "name": "Mailpit",
+      "description": "Private SMTP interception surface for staging, development, and assertion-level email verification.",
+      "category": "communication",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8025",
+      "exposure": "private-only",
+      "health_probe_id": "mailpit",
+      "image_catalog_ids": [
+        "mailpit_runtime"
+      ],
+      "adr": "0282",
+      "runbook": "docs/runbooks/configure-mailpit.md",
+      "tags": [
+        "mail",
+        "smtp",
+        "development",
+        "testing"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.20:8025",
+          "notes": "Mailpit runs privately on docker-runtime-lv3 for non-production SMTP interception and operator inspection; production services must continue to relay through Stalwart."
+        }
+      }
+    },
+    {
       "id": "matrix_synapse",
       "name": "Matrix Synapse",
       "description": "Repo-managed Matrix Synapse runtime that serves as the canonical ServerClaw conversation hub.",

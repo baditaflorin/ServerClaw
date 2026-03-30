@@ -16,6 +16,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from platform.retry import MaxRetriesExceeded, RetryPolicy, with_retry
+
 try:
     from datetime import UTC
 except ImportError:  # pragma: no cover - exercised on older controller Python runtimes
@@ -119,8 +121,8 @@ def http_json(
         body = urllib.parse.urlencode(form_body).encode("utf-8")
         request_headers["content-type"] = "application/x-www-form-urlencoded"
     request = urllib.request.Request(url, data=body, headers=request_headers, method=method)
-    last_error: Exception | None = None
-    for attempt in range(max(retries, 1)):
+
+    def perform_request() -> Any:
         try:
             with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
                 payload = response.read().decode("utf-8")
@@ -133,14 +135,23 @@ def http_json(
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="replace")
             raise AuthzError(f"{method} {url} failed with status {exc.code}: {detail}") from exc
-        except (TimeoutError, urllib.error.URLError, OSError) as exc:
-            last_error = exc
-            if attempt == max(retries, 1) - 1:
-                break
-            if retry_delay_seconds > 0:
-                time.sleep(retry_delay_seconds)
-    assert last_error is not None
-    raise AuthzError(f"{method} {url} failed after {max(retries, 1)} attempts: {last_error}") from last_error
+    try:
+        return with_retry(
+            perform_request,
+            policy=RetryPolicy(
+                max_attempts=max(retries, 1),
+                base_delay_s=max(float(retry_delay_seconds), 0.0),
+                max_delay_s=max(float(retry_delay_seconds), 0.0),
+                multiplier=1.0,
+                jitter=False,
+                transient_max=0,
+            ),
+            error_context=f"{method} {url}",
+            sleep_fn=time.sleep,
+        )
+    except MaxRetriesExceeded as exc:
+        assert exc.last_error is not None
+        raise AuthzError(f"{method} {url} failed after {max(retries, 1)} attempts: {exc.last_error}") from exc.last_error
 
 
 def bearer_headers(preshared_key: str) -> dict[str, str]:

@@ -967,6 +967,41 @@
         }
       }
     },
+    "mailpit": {
+      "service_name": "mailpit",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "mailpit_runtime",
+      "verify_file": "roles/mailpit_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Mailpit info endpoint responds on the private HTTP listener.",
+        "timeout_seconds": 60,
+        "retries": 1,
+        "delay_seconds": 0,
+        "url": "http://127.0.0.1:8025/api/v1/info",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "Mailpit accepts a local SMTP probe and exposes the captured message through the REST API.",
+        "timeout_seconds": 120,
+        "retries": 1,
+        "delay_seconds": 0,
+        "argv": [
+          "python3",
+          "-c",
+          "import json, smtplib, urllib.request; from email.message import EmailMessage; subject = 'LV3 health-probe Mailpit'; delete_request = urllib.request.Request('http://127.0.0.1:8025/api/v1/messages', method='DELETE'); urllib.request.urlopen(delete_request, timeout=30).read(); message = EmailMessage(); message['From'] = 'healthcheck@lv3.org'; message['To'] = 'mailpit-health@lv3.org'; message['Subject'] = subject; message.set_content('Mailpit readiness probe'); client = smtplib.SMTP('127.0.0.1', 1025, timeout=30); client.send_message(message); client.quit(); response = urllib.request.urlopen('http://127.0.0.1:8025/api/v1/messages', timeout=30); payload = json.loads(response.read().decode('utf-8')); messages = payload.get('messages', []); raise SystemExit(0 if any(item.get('Subject') == subject for item in messages) else 1)"
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Mailpit is intentionally private-only and is verified through role-level HTTP and SMTP probes instead of an always-on public monitor."
+      }
+    },
     "matrix_synapse": {
       "service_name": "matrix-synapse",
       "owning_vm": "docker-runtime-lv3",

@@ -1,0 +1,71 @@
+---
+- name: Record the Mailpit SMTP probe subject
+  ansible.builtin.set_fact:
+    mailpit_verify_subject: "{{ mailpit_test_subject_prefix }} {{ ansible_date_time.epoch }}"
+
+- name: Verify the Mailpit info endpoint responds locally
+  ansible.builtin.uri:
+    url: "{{ mailpit_api_url }}/info"
+    method: GET
+    status_code: 200
+  register: mailpit_verify_info
+  retries: 24
+  delay: 5
+  until: mailpit_verify_info.status == 200
+  changed_when: false
+
+- name: Clear any previous Mailpit messages
+  ansible.builtin.uri:
+    url: "{{ mailpit_api_url }}/messages"
+    method: DELETE
+    status_code: 200
+    return_content: true
+  register: mailpit_clear_messages
+  changed_when: false
+
+- name: Send a repo-managed Mailpit SMTP probe
+  ansible.builtin.shell: |
+    python3 - <<'PY'
+    import smtplib
+    from email.message import EmailMessage
+
+    message = EmailMessage()
+    message['From'] = '{{ mailpit_test_from_address }}'
+    message['To'] = '{{ mailpit_test_to_address }}'
+    message['Subject'] = '{{ mailpit_verify_subject }}'
+    message.set_content('{{ mailpit_test_body }}')
+
+    with smtplib.SMTP('127.0.0.1', {{ mailpit_smtp_port }}, timeout=15) as client:
+        client.send_message(message)
+
+    print('sent')
+    PY
+  args:
+    executable: /bin/bash
+  register: mailpit_smtp_probe
+  changed_when: false
+
+- name: Read the captured Mailpit messages
+  ansible.builtin.uri:
+    url: "{{ mailpit_api_url }}/messages"
+    method: GET
+    status_code: 200
+  register: mailpit_verify_messages
+  retries: 20
+  delay: 2
+  until: (mailpit_verify_messages.json.messages | default([]) | length) > 0
+  changed_when: false
+
+- name: Record the matching Mailpit probe messages
+  ansible.builtin.set_fact:
+    mailpit_matching_messages: "{{ mailpit_verify_messages.json.messages | selectattr('Subject', 'equalto', mailpit_verify_subject) | list }}"
+
+- name: Assert Mailpit captured the expected probe message
+  ansible.builtin.assert:
+    that:
+      - mailpit_clear_messages.content == 'ok'
+      - mailpit_smtp_probe.stdout == 'sent'
+      - mailpit_matching_messages | length == 1
+      - mailpit_matching_messages[0].To[0].Address == mailpit_test_to_address
+      - mailpit_matching_messages[0].Snippet == mailpit_test_body
+    fail_msg: "Mailpit started, but the expected SMTP probe was not captured through the REST API."
