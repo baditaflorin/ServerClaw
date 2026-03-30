@@ -489,6 +489,12 @@ workstreams:
             - receipts/live-applies/2026-03-30-adr-0287-*
             - receipts/live-applies/evidence/2026-03-30-ws-0287-*
           mode: exclusive
+    canonical_truth:
+      changelog_entry: implements ADR 0287 by bringing the repo-managed Woodpecker CI control plane, API bootstrap and trigger recovery paths, dedicated `ci.lv3.org` publication, and verified live-apply evidence onto main from the latest exact-main baseline
+      release_bump: patch
+      included_in_repo_version: 0.177.110
+      latest_receipts:
+        woodpecker: 2026-03-30-adr-0287-woodpecker-mainline-live-apply
     blockers: []
   - id: ws-0282-live-apply
     adr: "0282"
