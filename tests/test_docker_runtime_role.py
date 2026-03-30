@@ -93,10 +93,10 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert "Flush Docker handlers before chain health checks" in task_names
     assert "Reset Docker failed state before nat-chain recovery restart" in task_names
     assert "Ensure Docker bridge networking chains are present" in task_names
-    assert "Start restart-managed containers that remained stopped after Docker restarts" in task_names
+    assert "Recover restart-managed containers that remained stopped after Docker restarts" in task_names
     assert "Confirm restart-managed containers recovered after Docker restarts" in task_names
     ensure_task = next(task for task in tasks if task["name"] == "Ensure Docker bridge networking chains are present")
-    recover_containers = next(task for task in tasks if task["name"] == "Start restart-managed containers that remained stopped after Docker restarts")
+    recover_containers = next(task for task in tasks if task["name"] == "Recover restart-managed containers that remained stopped after Docker restarts")
     confirm_recovery = next(task for task in tasks if task["name"] == "Confirm restart-managed containers recovered after Docker restarts")
     include_role = ensure_task["ansible.builtin.include_role"]
     assert include_role["name"] == "lv3.platform.common"
@@ -112,7 +112,11 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     reset_task = next(task for task in tasks if task["name"] == "Reset Docker failed state before nat-chain recovery restart")
     assert reset_task["ansible.builtin.command"] == "systemctl reset-failed docker.service"
     assert reset_task["changed_when"] is False
-    assert recover_containers["ansible.builtin.command"]["argv"] == "{{ ['docker', 'start'] + docker_runtime_stopped_pre_restart_managed_container_names }}"
+    assert recover_containers["ansible.builtin.command"]["argv"][:2] == ["python3", "-c"]
+    assert recover_containers["ansible.builtin.command"]["stdin"] == "{{ docker_runtime_post_restart_container_inspect.stdout | default('[]') }}"
+    assert "com.docker.compose.project.working_dir" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "docker_compose_up" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'command.extend(["up", "-d", *sorted(services)])' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert confirm_recovery["retries"] == "{{ docker_runtime_container_recovery_retries }}"
     assert confirm_recovery["delay"] == "{{ docker_runtime_container_recovery_delay_seconds }}"
 

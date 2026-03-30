@@ -324,9 +324,60 @@
         | list
       }}
 
-- name: Start restart-managed containers that remained stopped after Docker restarts
+- name: Recover restart-managed containers that remained stopped after Docker restarts
   ansible.builtin.command:
-    argv: "{{ ['docker', 'start'] + docker_runtime_stopped_pre_restart_managed_container_names }}"
+    argv:
+      - python3
+      - -c
+      - |
+        import json
+        import subprocess
+        import sys
+
+        containers = json.load(sys.stdin)
+        stopped = [container for container in containers if not container.get("State", {}).get("Running")]
+
+        direct_start = []
+        compose_groups = {}
+
+        for container in stopped:
+            name = (container.get("Name") or "").lstrip("/")
+            labels = container.get("Config", {}).get("Labels") or {}
+            working_dir = labels.get("com.docker.compose.project.working_dir") or ""
+            config_files = labels.get("com.docker.compose.project.config_files") or ""
+            service = labels.get("com.docker.compose.service") or ""
+
+            if working_dir and service:
+                compose_groups.setdefault((working_dir, config_files), set()).add(service)
+                continue
+
+            if name:
+                direct_start.append(name)
+
+        actions = []
+
+        if direct_start:
+            subprocess.run(["docker", "start", *direct_start], check=True)
+            actions.append({"type": "docker_start", "containers": direct_start})
+
+        for (working_dir, config_files), services in sorted(compose_groups.items()):
+            command = ["docker", "compose"]
+            config_file_list = [value for value in config_files.split(",") if value]
+            for config_file in config_file_list:
+                command.extend(["--file", config_file])
+            command.extend(["up", "-d", *sorted(services)])
+            subprocess.run(command, cwd=working_dir or None, check=True)
+            actions.append(
+                {
+                    "type": "docker_compose_up",
+                    "working_dir": working_dir,
+                    "config_files": config_file_list,
+                    "services": sorted(services),
+                }
+            )
+
+        json.dump({"actions": actions}, sys.stdout)
+    stdin: "{{ docker_runtime_post_restart_container_inspect.stdout | default('[]') }}"
   register: docker_runtime_recover_stopped_containers
   changed_when: docker_runtime_stopped_pre_restart_managed_container_names | length > 0
   when: docker_runtime_stopped_pre_restart_managed_container_names | default([]) | length > 0
