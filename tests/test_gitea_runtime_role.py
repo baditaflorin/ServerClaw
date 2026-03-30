@@ -9,6 +9,8 @@ ROLE_DEFAULTS = ROLE_ROOT / "gitea_runtime" / "defaults" / "main.yml"
 ROLE_TASKS = ROLE_ROOT / "gitea_runtime" / "tasks" / "main.yml"
 RUNNER_DEFAULTS = ROLE_ROOT / "gitea_runner" / "defaults" / "main.yml"
 COMPOSE_TEMPLATE = ROLE_ROOT / "gitea_runtime" / "templates" / "docker-compose.yml.j2"
+ENV_TEMPLATE = ROLE_ROOT / "gitea_runtime" / "templates" / "runtime.env.j2"
+ENV_CTEMPLATE = ROLE_ROOT / "gitea_runtime" / "templates" / "runtime.env.ctmpl.j2"
 RUNNER_COMPOSE_TEMPLATE = ROLE_ROOT / "gitea_runner" / "templates" / "docker-compose.yml.j2"
 BOOTSTRAP_TEMPLATE = ROLE_ROOT / "gitea_runtime" / "templates" / "bootstrap-gitea.sh.j2"
 
@@ -21,8 +23,11 @@ def test_gitea_defaults_reference_private_service_topology() -> None:
     defaults = ROLE_DEFAULTS.read_text()
     assert "service_topology_get('gitea')" in defaults
     assert "service_topology_get('keycloak')" in defaults
+    assert "service_topology_get('minio')" in defaults
     assert "gitea-oauth" in defaults
     assert "playbook_execution_host_patterns.postgres[playbook_execution_env]" in defaults
+    assert ".local/gitea/minio-secret-key.txt" in defaults
+    assert "gitea_minio_bucket_name: gitea-lfs" in defaults
     assert 'gitea_oidc_internal_discovery_url: "http://{{ gitea_keycloak_service_topology.private_ip }}:8091/realms/lv3/.well-known/openid-configuration"' in defaults
 
 
@@ -79,6 +84,7 @@ def test_runtime_tasks_require_oidc_secret_and_database_password() -> None:
     names = {task["name"] for task in tasks}
     assert "Ensure the Gitea database password exists on the control machine" in names
     assert "Ensure the Gitea OIDC client secret exists on the control machine" in names
+    assert "Ensure the Gitea MinIO secret key exists on the control machine" in names
     assert "Ensure the release-bundle Cosign private key exists on the control machine" in names
     assert "Ensure the release-bundle Cosign password exists on the control machine" in names
     assert "Mirror the Gitea admin token to the control machine" in names
@@ -97,3 +103,20 @@ def test_gitea_defaults_include_release_bundle_signing_paths() -> None:
     assert ".local/gitea/release-bundle-cosign.password.txt" in defaults
     assert "keys/gitea-release-bundle-cosign.pub" in defaults
     assert "RELEASE_BUNDLE_REPO_TOKEN" in defaults
+
+
+def test_runtime_env_templates_enable_lfs_on_shared_minio() -> None:
+    template = ENV_TEMPLATE.read_text()
+    ctemplate = ENV_CTEMPLATE.read_text()
+
+    assert "GITEA__server__LFS_START_SERVER=true" in template
+    assert "GITEA__lfs__STORAGE_TYPE=minio" in template
+    assert "GITEA__lfs__MINIO_ENDPOINT={{ gitea_minio_endpoint }}" in template
+    assert "GITEA__lfs__MINIO_ACCESS_KEY_ID={{ gitea_minio_access_key_id }}" in template
+    assert "GITEA__lfs__MINIO_SECRET_ACCESS_KEY={{ gitea_minio_secret_key }}" in template
+    assert "GITEA__lfs__MINIO_BUCKET={{ gitea_minio_bucket_name }}" in template
+    assert "GITEA__lfs__MINIO_BUCKET_LOOKUP_TYPE=path" in template
+
+    assert "GITEA__lfs__STORAGE_TYPE=minio" in ctemplate
+    assert "GITEA__lfs__MINIO_ENDPOINT={{ gitea_minio_endpoint }}" in ctemplate
+    assert "GITEA__lfs__MINIO_SECRET_ACCESS_KEY=[[ with secret " in ctemplate

@@ -8,6 +8,7 @@ The Langfuse workflow converges:
 
 - the PostgreSQL backend on `postgres-lv3`
 - the Langfuse runtime on `docker-runtime-lv3`
+- the shared MinIO object-storage contract used for exports and media uploads
 - the public hostname `langfuse.lv3.org` on the shared NGINX edge
 - the Keycloak OIDC client used by the Langfuse sign-in flow
 - the repo-managed bootstrap org, project, API keys, and bootstrap user
@@ -16,6 +17,7 @@ The Langfuse workflow converges:
 
 - `bootstrap_ssh_private_key` is present under `.local/ssh/`
 - the OpenBao init payload is already available under `.local/openbao/init.json`
+- MinIO is already deployed and healthy on `minio.lv3.org`
 - Keycloak is already deployed and healthy on `sso.lv3.org`
 - Hetzner DNS API credentials are available when the edge certificate needs expansion
 
@@ -37,7 +39,7 @@ The workflow maintains controller-local secrets under `.local/langfuse/`:
 - `encryption-key.txt`
 - `clickhouse-password.txt`
 - `redis-password.txt`
-- `minio-root-password.txt`
+- `minio-secret-key.txt`
 - `bootstrap-user-password.txt`
 - `project-public-key.txt`
 - `project-secret-key.txt`
@@ -64,3 +66,9 @@ uv run --with langfuse --with requests python scripts/langfuse_trace_smoke.py \
 ```
 
 The smoke script emits one synthetic trace, polls the Langfuse public API until the trace is readable, and prints the direct UI URL for that trace. When bootstrap credentials are provided, it also verifies that the trace page resolves through the Langfuse HTML UI.
+
+Verify the shared MinIO secret exists locally before replaying Langfuse:
+
+```bash
+test -s /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/langfuse/minio-secret-key.txt
+```

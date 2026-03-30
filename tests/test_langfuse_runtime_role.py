@@ -1,0 +1,59 @@
+from pathlib import Path
+
+import yaml
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+ROLE_ROOT = REPO_ROOT / "roles" / "langfuse_runtime"
+DEFAULTS_PATH = ROLE_ROOT / "defaults" / "main.yml"
+TASKS_PATH = ROLE_ROOT / "tasks" / "main.yml"
+COMPOSE_TEMPLATE = ROLE_ROOT / "templates" / "docker-compose.yml.j2"
+ENV_TEMPLATE = ROLE_ROOT / "templates" / "langfuse.env.j2"
+ENV_CTEMPLATE = ROLE_ROOT / "templates" / "langfuse.env.ctmpl.j2"
+
+
+def load_tasks() -> list[dict]:
+    return yaml.safe_load(TASKS_PATH.read_text())
+
+
+def test_defaults_use_shared_minio_contract() -> None:
+    defaults = DEFAULTS_PATH.read_text()
+    assert "langfuse_minio_secret_key_local_file" in defaults
+    assert "langfuse_minio_access_key_id: langfuseapp" in defaults
+    assert "langfuse_minio_bucket_name: langfuse-exports" in defaults
+    assert "platform_service_url('minio', 'internal')" in defaults
+    assert "platform_service_url('minio', 'public')" in defaults
+    assert "langfuse_minio_root_password" not in defaults
+    assert "langfuse_minio_image" not in defaults
+
+
+def test_tasks_require_minio_secret_and_record_shared_s3_secret() -> None:
+    tasks = load_tasks()
+    names = {task["name"] for task in tasks}
+
+    assert "Check whether the Langfuse MinIO secret key exists on the control machine" in names
+    assert "Fail if the Langfuse MinIO secret key is missing locally" in names
+
+    record_task = next(task for task in tasks if task.get("name") == "Record the Langfuse runtime secrets")
+    assert "LANGFUSE_S3_SECRET_ACCESS_KEY" in record_task["ansible.builtin.set_fact"]["langfuse_runtime_secret_payload"]
+
+
+def test_env_templates_use_shared_minio_for_event_and_media_uploads() -> None:
+    template = ENV_TEMPLATE.read_text()
+    ctemplate = ENV_CTEMPLATE.read_text()
+
+    assert "LANGFUSE_S3_EVENT_UPLOAD_BUCKET={{ langfuse_minio_bucket_name }}" in template
+    assert "LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT={{ langfuse_minio_private_endpoint }}" in template
+    assert "LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT={{ langfuse_minio_public_endpoint }}" in template
+    assert "LANGFUSE_S3_SECRET_ACCESS_KEY" not in template
+    assert "MINIO_ROOT_USER" not in template
+
+    assert "LANGFUSE_S3_SECRET_ACCESS_KEY" in ctemplate
+    assert "LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT={{ langfuse_minio_public_endpoint }}" in ctemplate
+    assert "MINIO_ROOT_PASSWORD" not in ctemplate
+
+
+def test_compose_template_no_longer_embeds_local_minio_sidecar() -> None:
+    template = COMPOSE_TEMPLATE.read_text()
+    assert "\n  minio:\n" not in template
+    assert "langfuse-minio" not in template

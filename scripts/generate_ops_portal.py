@@ -17,6 +17,7 @@ from typing import Any
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
+from adr_catalog import resolve_service_adr_path
 from dependency_graph import dependency_summary, load_dependency_graph
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from environment_topology import (
@@ -561,10 +562,9 @@ def render_service_cards(
                 links.append(render_external_link(repo_view_link(repo_path(service["runbook"])), "Runbook"))
             if service.get("dashboard_url"):
                 links.append(render_external_link(service["dashboard_url"], "Dashboard"))
-            if service.get("adr"):
-                matches = sorted(ADR_DIR.glob(f"{service['adr']}-*.md"))
-                if matches:
-                    links.append(render_external_link(repo_view_link(matches[0]), f"ADR {service['adr']}"))
+            adr_path = resolve_service_adr_path(service)
+            if adr_path is not None:
+                links.append(render_external_link(repo_view_link(adr_path), f"ADR {service['adr']}"))
 
             summary = dependency_summaries[service["id"]]
 

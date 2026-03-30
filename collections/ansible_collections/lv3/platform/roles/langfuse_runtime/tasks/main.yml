@@ -1,4 +1,21 @@
 ---
+# Purpose: Converge the Langfuse runtime stack, bootstrap secrets, and shared MinIO upload contract on docker-runtime-lv3.
+# Use case: Run during Langfuse deploys, upgrades, and recovery replays when the observability runtime must match repo truth.
+#
+# Inputs (required):
+#   - langfuse_* role defaults, image catalog refs, controller-local secrets, and topology-derived URLs.
+#
+# Inputs (optional):
+#   - Langfuse bootstrap and OpenBao overrides declared through the langfuse_* role variables.
+#
+# Outputs:
+#   - Rendered Langfuse runtime env and compose files, mirrored bootstrap artifacts, and a running Langfuse stack.
+#
+# Idempotency: Partially idempotent
+#              Reruns reconcile the same runtime stack, bootstrap secrets, and MinIO upload settings.
+#
+# Dependencies:
+#   - ADR 0146, ADR 0165, and ADR 0274.
 - name: Validate Langfuse runtime inputs
   ansible.builtin.assert:
     that:
@@ -11,10 +28,10 @@
       - langfuse_public_base_url | length > 0
       - langfuse_database_password_local_file | length > 0
       - langfuse_keycloak_client_secret_local_file | length > 0
+      - langfuse_minio_secret_key_local_file | length > 0
       - langfuse_web_image | length > 0
       - langfuse_worker_image | length > 0
       - langfuse_clickhouse_image | length > 0
-      - langfuse_minio_image | length > 0
       - langfuse_redis_image | length > 0
     fail_msg: >-
       langfuse_runtime requires runtime paths, pinned image refs, database auth,
@@ -34,6 +51,13 @@
   become: false
   register: langfuse_keycloak_client_secret_local
 
+- name: Check whether the Langfuse MinIO secret key exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ langfuse_minio_secret_key_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: langfuse_minio_secret_key_local
+
 - name: Fail if the Langfuse database password is missing locally
   ansible.builtin.fail:
     msg: >-
@@ -47,6 +71,13 @@
       {{ langfuse_keycloak_client_secret_local_file }} is missing on the control machine.
       Converge the Keycloak runtime before deploying Langfuse.
   when: not langfuse_keycloak_client_secret_local.stat.exists
+
+- name: Fail if the Langfuse MinIO secret key is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ langfuse_minio_secret_key_local_file }} is missing on the control machine.
+      Converge MinIO before deploying Langfuse so shared object storage is available.
+  when: not langfuse_minio_secret_key_local.stat.exists
 
 - name: Ensure the Langfuse runtime packages are present
   ansible.builtin.apt:
@@ -77,10 +108,6 @@
       owner: "101"
       group: "101"
       mode: "0750"
-    - path: "{{ langfuse_minio_data_dir }}"
-      mode: "0755"
-    - path: "{{ langfuse_minio_data_dir }}/{{ langfuse_bucket_name }}"
-      mode: "0755"
     - path: "{{ langfuse_redis_data_dir }}"
       owner: "{{ langfuse_redis_uid }}"
       group: "{{ langfuse_redis_gid }}"
@@ -109,8 +136,6 @@
       command: "openssl rand -base64 24 | tr -d '\n'"
     - path: "{{ langfuse_redis_password_remote_file }}"
       command: "openssl rand -base64 24 | tr -d '\n'"
-    - path: "{{ langfuse_minio_root_password_remote_file }}"
-      command: "openssl rand -base64 24 | tr -d '\n'"
     - path: "{{ langfuse_bootstrap_user_password_remote_file }}"
       command: "openssl rand -base64 24 | tr -d '\n'"
     - path: "{{ langfuse_project_public_key_remote_file }}"
@@ -131,7 +156,6 @@
     - "{{ langfuse_encryption_key_remote_file }}"
     - "{{ langfuse_clickhouse_password_remote_file }}"
     - "{{ langfuse_redis_password_remote_file }}"
-    - "{{ langfuse_minio_root_password_remote_file }}"
     - "{{ langfuse_bootstrap_user_password_remote_file }}"
     - "{{ langfuse_project_public_key_remote_file }}"
     - "{{ langfuse_project_secret_key_remote_file }}"
@@ -144,12 +168,12 @@
     langfuse_encryption_key: "{{ langfuse_secret_reads.results[2].content | b64decode | trim }}"
     langfuse_clickhouse_password: "{{ langfuse_secret_reads.results[3].content | b64decode | trim }}"
     langfuse_redis_password: "{{ langfuse_secret_reads.results[4].content | b64decode | trim }}"
-    langfuse_minio_root_password: "{{ langfuse_secret_reads.results[5].content | b64decode | trim }}"
-    langfuse_bootstrap_user_password: "{{ langfuse_secret_reads.results[6].content | b64decode | trim }}"
-    langfuse_project_public_key: "{{ langfuse_secret_reads.results[7].content | b64decode | trim }}"
-    langfuse_project_secret_key: "{{ langfuse_secret_reads.results[8].content | b64decode | trim }}"
+    langfuse_bootstrap_user_password: "{{ langfuse_secret_reads.results[5].content | b64decode | trim }}"
+    langfuse_project_public_key: "{{ langfuse_secret_reads.results[6].content | b64decode | trim }}"
+    langfuse_project_secret_key: "{{ langfuse_secret_reads.results[7].content | b64decode | trim }}"
     langfuse_database_password: "{{ lookup('ansible.builtin.file', langfuse_database_password_local_file) | trim }}"
     langfuse_keycloak_client_secret: "{{ lookup('ansible.builtin.file', langfuse_keycloak_client_secret_local_file) | trim }}"
+    langfuse_minio_secret_key: "{{ lookup('ansible.builtin.file', langfuse_minio_secret_key_local_file) | trim }}"
     langfuse_database_url: >-
       postgresql://{{ langfuse_database_user }}:{{ (lookup('ansible.builtin.file', langfuse_database_password_local_file) | trim) | urlencode }}@{{ langfuse_database_host }}:5432/{{ langfuse_database_name }}
     langfuse_runtime_secret_payload:
@@ -158,10 +182,10 @@
       ENCRYPTION_KEY: "{{ langfuse_secret_reads.results[2].content | b64decode | trim }}"
       CLICKHOUSE_PASSWORD: "{{ langfuse_secret_reads.results[3].content | b64decode | trim }}"
       REDIS_AUTH: "{{ langfuse_secret_reads.results[4].content | b64decode | trim }}"
-      MINIO_ROOT_PASSWORD: "{{ langfuse_secret_reads.results[5].content | b64decode | trim }}"
-      LANGFUSE_INIT_USER_PASSWORD: "{{ langfuse_secret_reads.results[6].content | b64decode | trim }}"
-      LANGFUSE_INIT_PROJECT_PUBLIC_KEY: "{{ langfuse_secret_reads.results[7].content | b64decode | trim }}"
-      LANGFUSE_INIT_PROJECT_SECRET_KEY: "{{ langfuse_secret_reads.results[8].content | b64decode | trim }}"
+      LANGFUSE_S3_SECRET_ACCESS_KEY: "{{ lookup('ansible.builtin.file', langfuse_minio_secret_key_local_file) | trim }}"
+      LANGFUSE_INIT_USER_PASSWORD: "{{ langfuse_secret_reads.results[5].content | b64decode | trim }}"
+      LANGFUSE_INIT_PROJECT_PUBLIC_KEY: "{{ langfuse_secret_reads.results[6].content | b64decode | trim }}"
+      LANGFUSE_INIT_PROJECT_SECRET_KEY: "{{ langfuse_secret_reads.results[7].content | b64decode | trim }}"
       DATABASE_PASSWORD: "{{ lookup('ansible.builtin.file', langfuse_database_password_local_file) | trim }}"
       DATABASE_URL: >-
         postgresql://{{ langfuse_database_user }}:{{ (lookup('ansible.builtin.file', langfuse_database_password_local_file) | trim) | urlencode }}@{{ langfuse_database_host }}:5432/{{ langfuse_database_name }}
@@ -194,8 +218,6 @@
       content: "{{ langfuse_clickhouse_password }}"
     - dest: "{{ langfuse_redis_password_local_file }}"
       content: "{{ langfuse_redis_password }}"
-    - dest: "{{ langfuse_minio_root_password_local_file }}"
-      content: "{{ langfuse_minio_root_password }}"
     - dest: "{{ langfuse_bootstrap_user_password_local_file }}"
       content: "{{ langfuse_bootstrap_user_password }}"
     - dest: "{{ langfuse_project_public_key_local_file }}"

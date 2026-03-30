@@ -65,3 +65,11 @@ def test_multi_record_role_marks_provider_mutations_as_changed() -> None:
     record_tasks = ROLE_TASKS.read_text(encoding="utf-8")
 
     assert record_tasks.count("changed_when: true") == 3
+
+
+def test_multi_record_role_builds_native_json_payload_for_create_and_update() -> None:
+    record_tasks = ROLE_TASKS.read_text(encoding="utf-8")
+
+    assert "Build the canonical DNS record provider payload" in record_tasks
+    assert "'ttl': (hetzner_dns_record.ttl | default(60) | int)" in record_tasks
+    assert record_tasks.count('body: "{{ dns_provider_boundary_desired_record_payload }}"') == 2

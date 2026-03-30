@@ -1,4 +1,10 @@
 ---
+# Purpose: Converge the private Ollama runtime and its required local model set on the Docker runtime VM.
+# Use case: Included by the `ollama_runtime` role when the platform needs local LLM inference or embeddings.
+# Inputs: `ollama_runtime_*` variables, the repo-managed model catalog, and Docker availability on the target host.
+# Outputs: A running Ollama container, healthy local API, and the declared startup models present on disk.
+# Idempotency: Fully idempotent; reruns only recreate the stack or pull models when runtime state drifts.
+# Dependencies: ADR 0165 metadata standard and the `ollama_runtime` role defaults, templates, and verify tasks.
 - name: Validate Ollama runtime inputs
   ansible.builtin.assert:
     that:
@@ -111,7 +117,7 @@
       - ollama_runtime_docker_nat_chain_recheck.rc == 0
     fail_msg: "Docker is running but the nat DOCKER chain is missing; Ollama published ports will fail."
 
-- name: Start the Ollama runtime and recover Docker nat-chain failures
+- name: Start the Ollama runtime and recover Docker nat-chain and compose-network failures
   block:
     - name: Start the Ollama runtime
       ansible.builtin.command:
@@ -131,18 +137,44 @@
         or 'Recreating' in ollama_runtime_up.stdout
         or 'Starting' in ollama_runtime_up.stdout
   rescue:
-    - name: Flag Docker nat-chain failures during Ollama startup
+    - name: Flag Docker nat-chain and stale compose-network failures during Ollama startup
       ansible.builtin.set_fact:
         ollama_runtime_docker_nat_chain_missing: >-
           {{
             'No chain/target/match by that name' in (ansible_failed_result.stderr | default(''))
             or 'Unable to enable DNAT rule' in (ansible_failed_result.stderr | default(''))
           }}
+        ollama_runtime_compose_network_missing: >-
+          {{
+            'failed to create endpoint' in (ansible_failed_result.stderr | default(''))
+            and 'does not exist' in (ansible_failed_result.stderr | default(''))
+          }}
 
     - name: Surface unexpected Ollama startup failures
       ansible.builtin.fail:
         msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('ollama compose up failed')) }}"
-      when: not ollama_runtime_docker_nat_chain_missing
+      when: >-
+        not ollama_runtime_docker_nat_chain_missing
+        and not ollama_runtime_compose_network_missing
+
+    - name: Reset stale Ollama compose resources after startup failure
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ ollama_runtime_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ ollama_runtime_site_dir }}"
+      register: ollama_runtime_down_retry
+      changed_when: >-
+        'Stopping' in (ollama_runtime_down_retry.stdout | default(''))
+        or 'Removing' in (ollama_runtime_down_retry.stdout | default(''))
+        or 'Removing' in (ollama_runtime_down_retry.stderr | default(''))
+      failed_when: false
+      when: ollama_runtime_compose_network_missing
 
     - name: Restart Docker to restore nat chain before retrying Ollama startup
       ansible.builtin.service:
@@ -150,7 +182,7 @@
         state: restarted
       when: ollama_runtime_docker_nat_chain_missing
 
-    - name: Retry Ollama startup after Docker nat-chain recovery
+    - name: Retry Ollama startup after Docker nat-chain or compose-network recovery
       ansible.builtin.command:
         argv:
           - docker
@@ -159,12 +191,13 @@
           - "{{ ollama_runtime_compose_file }}"
           - up
           - -d
+          - --force-recreate
           - --remove-orphans
       args:
         chdir: "{{ ollama_runtime_site_dir }}"
       register: ollama_runtime_up
       changed_when: true
-      when: ollama_runtime_docker_nat_chain_missing
+      when: ollama_runtime_docker_nat_chain_missing or ollama_runtime_compose_network_missing
 
 - name: Check whether Ollama publishes the expected host port
   ansible.builtin.command:

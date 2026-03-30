@@ -30,7 +30,7 @@ outline_redis_container_name: outline-redis
 outline_minio_container_name: outline-minio
 outline_image: "{{ container_image_catalog.images.outline_runtime.ref }}"
 outline_redis_image: "{{ container_image_catalog.images.langfuse_redis_runtime.ref }}"
-outline_minio_image: "{{ container_image_catalog.images.langfuse_minio_runtime.ref }}"
+outline_minio_image: "{{ container_image_catalog.images.minio_runtime.ref }}"
 outline_database_name: outline
 outline_database_user: outline
 outline_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"

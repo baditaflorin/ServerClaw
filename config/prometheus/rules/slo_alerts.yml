@@ -599,6 +599,46 @@ groups:
           description: Mailpit remains reachable on the private guest-network listener
             for staging and development SMTP capture flows.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_minio_availability
+        expr: (slo:minio_availability:error_rate_5m > (14 * 0.005000)) and (slo:minio_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: minio
+          slo_id: minio-availability
+          indicator: availability
+        annotations:
+          summary: minio-availability is burning its error budget at 14x
+          description: The shared MinIO S3-compatible object-storage API remains reachable
+            through the public LV3 edge.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_minio_availability
+        expr: slo:minio_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: minio
+          slo_id: minio-availability
+          indicator: availability
+        annotations:
+          summary: minio-availability is burning its error budget at 3x
+          description: The shared MinIO S3-compatible object-storage API remains reachable
+            through the public LV3 edge.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_minio_availability
+        expr: slo:minio_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: minio
+          slo_id: minio-availability
+          indicator: availability
+        annotations:
+          summary: minio-availability has less than 10% error budget remaining
+          description: The shared MinIO S3-compatible object-storage API remains reachable
+            through the public LV3 edge.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_matrix_synapse_availability
         expr: (slo:matrix_synapse_availability:error_rate_5m > (14 * 0.005000)) and
           (slo:matrix_synapse_availability:error_rate_1h > (14 * 0.005000))

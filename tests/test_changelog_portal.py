@@ -45,6 +45,7 @@ class ChangelogPortalTests(unittest.TestCase):
             index_html = (temp_dir / "site" / "index.html").read_text()
             promotions_html = (temp_dir / "site" / "promotions" / "index.html").read_text()
             grafana_html = (temp_dir / "site" / "service" / "grafana" / "index.html").read_text()
+            minio_html = (temp_dir / "site" / "service" / "minio" / "index.html").read_text()
 
             self.assertIn("Deployment History Portal", index_html)
             self.assertIn("2026-03-22-adr-0011-monitoring-live-apply", index_html)
@@ -52,6 +53,11 @@ class ChangelogPortalTests(unittest.TestCase):
             self.assertIn("promotion-1", promotions_html)
             self.assertIn("Grafana", grafana_html)
             self.assertIn("mutation-audit-log.md", grafana_html)
+            self.assertIn("0274-minio-as-the-s3-compatible-object-storage-layer.md", minio_html)
+            self.assertNotIn(
+                "0274-governed-base-image-mirrors-and-warm-caches-for-repo-deployments.md",
+                minio_html,
+            )
         finally:
             shutil.rmtree(temp_dir)
 

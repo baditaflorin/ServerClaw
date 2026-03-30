@@ -1,4 +1,21 @@
 ---
+# Purpose: Converge the monitoring VM tracing, Loki, Prometheus, Tempo, and OTLP runtime components, including the shared MinIO chunk backend.
+# Use case: Included from monitoring_vm/tasks/main.yml when the observability stack and its tracing/logging surfaces need reconciliation.
+#
+# Inputs (required):
+#   - monitoring_* defaults, health probe catalog inputs, and controller-local Loki MinIO secret material.
+#
+# Inputs (optional):
+#   - Retention, canary, and Tempo/OpenTelemetry overrides declared through the monitoring_* role variables.
+#
+# Outputs:
+#   - Rendered Loki, Prometheus, blackbox, Tempo, and OTLP config plus started systemd services on monitoring-lv3.
+#
+# Idempotency: Partially idempotent
+#              Reruns reconcile the same config, services, and Loki storage backend contract.
+#
+# Dependencies:
+#   - ADR 0041, ADR 0165, ADR 0250, and ADR 0274.
 - name: Download Tempo Debian package
   ansible.builtin.get_url:
     url: "{{ monitoring_tempo_deb_url }}"
@@ -21,6 +38,19 @@
   ansible.builtin.apt:
     deb: "{{ monitoring_otelcol_deb_file }}"
 
+- name: Discover the installed Loki primary group
+  ansible.builtin.command:
+    argv:
+      - id
+      - -gn
+      - loki
+  register: monitoring_loki_primary_group
+  changed_when: false
+
+- name: Record the installed Loki primary group
+  ansible.builtin.set_fact:
+    monitoring_loki_group_name: "{{ monitoring_loki_primary_group.stdout | trim }}"
+
 - name: Ensure Tempo storage directories exist
   ansible.builtin.file:
     path: "{{ item.path }}"
@@ -40,6 +70,25 @@
     - path: "{{ monitoring_tempo_data_dir }}/generator/wal"
       mode: "0750"
     - path: "{{ monitoring_tempo_data_dir }}/generator/traces"
+      mode: "0750"
+
+- name: Ensure Loki storage directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: loki
+    group: "{{ monitoring_loki_group_name }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ monitoring_loki_data_dir }}"
+      mode: "0755"
+    - path: "{{ monitoring_loki_data_dir }}/index"
+      mode: "0750"
+    - path: "{{ monitoring_loki_data_dir }}/index_cache"
+      mode: "0750"
+    - path: "{{ monitoring_loki_data_dir }}/chunks"
+      mode: "0750"
+    - path: "{{ monitoring_loki_data_dir }}/retention"
       mode: "0750"
 
 - name: Ensure Prometheus data directory exists
@@ -70,6 +119,15 @@
     group: prometheus
     mode: "0640"
   notify: Restart Blackbox Exporter
+
+- name: Render Loki configuration
+  ansible.builtin.template:
+    src: loki-config.yml.j2
+    dest: "{{ monitoring_loki_config_file }}"
+    owner: root
+    group: "{{ monitoring_loki_group_name }}"
+    mode: "0640"
+  notify: Restart Loki
 
 - name: Render Prometheus configuration
   ansible.builtin.template:
@@ -126,6 +184,12 @@
     enabled: true
     state: started
 
+- name: Enable and start Loki
+  ansible.builtin.systemd:
+    name: loki
+    enabled: true
+    state: started
+
 - name: Enable and start Tempo
   ansible.builtin.systemd:
     name: tempo
@@ -160,6 +224,16 @@
   retries: 20
   delay: 3
   until: monitoring_blackbox_exporter_ready.status == 200
+
+- name: Wait for Loki readiness
+  ansible.builtin.uri:
+    url: "{{ monitoring_loki_http_url }}/ready"
+    method: GET
+    status_code: 200
+  register: monitoring_loki_ready
+  retries: 20
+  delay: 3
+  until: monitoring_loki_ready.status == 200
 
 - name: Wait for Tempo readiness
   ansible.builtin.uri:
