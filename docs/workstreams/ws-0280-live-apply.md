@@ -2,7 +2,13 @@
 
 - ADR: [ADR 0280](../adr/0280-changedetection-io-for-external-content-and-api-change-monitoring.md)
 - Title: private Changedetection.io external content and API change monitoring live apply
-- Status: ready_for_merge
+- Status: live_applied
+- Included In Repo Version: 0.177.100
+- Branch-Local Receipt: `receipts/live-applies/2026-03-30-adr-0280-changedetection-live-apply.json`
+- Canonical Mainline Receipt: `receipts/live-applies/2026-03-30-adr-0280-changedetection-mainline-live-apply.json`
+- Live Applied In Platform Version: 0.130.63
+- Implemented On: 2026-03-30
+- Live Applied On: 2026-03-30
 - Branch: `codex/ws-0280-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0280-live-apply`
 - Owner: codex
@@ -62,29 +68,53 @@
 
 ## Verification
 
-- targeted validation on the repaired workstream branch passed before the final replay:
-  - `uv run --with pytest --with pyyaml pytest tests/test_changedetection_sync.py tests/test_changedetection_runtime_role.py tests/test_changedetection_metadata.py tests/test_generate_platform_vars.py -q` returned `41 passed in 1.59s`
-  - `make syntax-check-changedetection`
-  - `make syntax-check-mattermost`
-  - `make syntax-check-netbox`
-- direct guest checks confirmed `docker-runtime-lv3` did not have Changedetection live before this workstream:
-  - `/opt/changedetection/docker-compose.yml` absent
-  - TCP `5000` absent
-  - `/etc/lv3/changedetection/api-token` absent
-- the first live converge exposed a Mattermost dependency gap instead of a Changedetection runtime bug:
-  - `receipts/live-applies/evidence/2026-03-30-ws-0280-converge-mattermost-unblock-r1.txt` captured the invalid retention configuration that kept Mattermost crash-looping
-  - `receipts/live-applies/evidence/2026-03-30-ws-0280-converge-mattermost-unblock-r3.txt` captured the repaired Mattermost replay after fixing retention defaults and guest-side PostgreSQL host resolution
-- the Changedetection correction loop is preserved in the sequential branch evidence:
-  - `receipts/live-applies/evidence/2026-03-30-ws-0280-converge-changedetection-r2.txt` through `receipts/live-applies/evidence/2026-03-30-ws-0280-converge-changedetection-r8.txt`
-  - the final authoritative replay is `receipts/live-applies/evidence/2026-03-30-ws-0280-converge-changedetection-r8.txt`, which completed with `docker-runtime-lv3 : ok=311 changed=118 unreachable=0 failed=0 skipped=33 rescued=0 ignored=0`
-- direct settled-state proofs after the successful replay are recorded in:
-  - `receipts/live-applies/evidence/2026-03-30-ws-0280-host-state-r2.txt`
-  - `receipts/live-applies/evidence/2026-03-30-ws-0280-changedetection-runtime-state-r1.txt`
-  - `receipts/live-applies/evidence/2026-03-30-ws-0280-changedetection-health-r1.txt`
-  - `receipts/live-applies/evidence/2026-03-30-ws-0280-changedetection-gateway-route-r1.txt`
+- The branch-local live apply first made ADR 0280 true on platform version
+  `0.130.63`, recorded in
+  `receipts/live-applies/2026-03-30-adr-0280-changedetection-live-apply.json`.
+- The first live converge exposed shared dependency gaps rather than a
+  Changedetection runtime design bug:
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-converge-mattermost-unblock-r1.txt`
+  captured the invalid Mattermost retention combination, and
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-converge-mattermost-unblock-r3.txt`
+  captured the repaired replay after the retention and guest-side PostgreSQL
+  fixes landed.
+- The Changedetection correction loop is preserved in the sequential branch
+  evidence from
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-converge-changedetection-r2.txt`
+  through
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-converge-changedetection-r8.txt`;
+  the settled branch-local replay completed with
+  `docker-runtime-lv3 : ok=311 changed=118 unreachable=0 failed=0 skipped=33 rescued=0 ignored=0`.
+- The exact-main retry branch then rebased ADR 0280 onto the shared
+  `0.177.99 / 0.130.66` baseline, where the focused compatibility slice passed
+  with `64 passed in 2.57s` in
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r2-targeted-checks-r1.txt`,
+  the syntax sweep passed in
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r2-syntax-checks-r1.txt`,
+  and the protected release write prepared `0.177.100` in
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r2-release-write-r1.txt`.
+- The canonical committed-source replay from
+  `65305c70c7049bcb177f59b5a44ab0d031a8a10c` succeeded in
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-live-apply-0.177.100.txt`
+  with final recap
+  `docker-runtime-lv3 : ok=312 changed=115 unreachable=0 failed=0 skipped=32 rescued=0 ignored=0`.
+- Fresh current-server proofs from that committed replay are preserved in
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-host-state-r1-0.177.100.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-changedetection-runtime-state-r1-0.177.100.txt`,
+  and
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-gateway-route-r1-0.177.100.html`,
+  confirming Debian 13 / Proxmox VE 9.1.6 on the host, a healthy
+  Changedetection `0.54.7` runtime with `9` watches and `4` tags on
+  `docker-runtime-lv3`, a drift-free sync report, and a live authenticated
+  `/v1/changedetection` gateway route.
 
 ## Remaining For Merge-To-Main
 
-- `origin/main` advanced during the branch-local replay, so the exact-main integration still needs a fresh rebase before merge
-- the exact-main step still needs to refresh the protected release and canonical-truth surfaces from the latest `origin/main`
-- the final integration step on `main` must update `VERSION`, `changelog.md`, `versions/stack.yaml`, the integrated `README.md` status summary, and ADR 0280's final repo/platform implementation metadata after the exact-main replay succeeds
+- The branch-local receipt remains the first-live audit trail for ADR 0280 on
+  platform version `0.130.63`.
+- The protected release and canonical-truth surfaces are now carried by
+  `ws-0280-main-merge`, whose canonical receipt is
+  `receipts/live-applies/2026-03-30-adr-0280-changedetection-mainline-live-apply.json`.
+- The exact-main integration lane advances the tracked platform baseline from
+  `0.130.66` to `0.130.67` on release `0.177.100` while preserving this
+  workstream's branch-local evidence as audit history.

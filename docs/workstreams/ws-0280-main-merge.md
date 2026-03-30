@@ -3,10 +3,10 @@
 - ADR: [ADR 0280](../adr/0280-changedetection-io-for-external-content-and-api-change-monitoring.md)
 - Title: Integrate ADR 0280 Changedetection exact-main replay onto `origin/main`
 - Status: ready_for_merge
-- Included In Repo Version: pending
-- Platform Version Observed During Integration: 0.130.64
-- Release Date: pending
-- Live Applied On: pending
+- Included In Repo Version: 0.177.100
+- Platform Version Observed During Integration: 0.130.66
+- Release Date: 2026-03-30
+- Live Applied On: 2026-03-30
 - Branch: `codex/ws-0280-main-merge-r2`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0280-main-merge`
 - Owner: codex
@@ -83,10 +83,78 @@ runtime plus its authenticated `/v1/changedetection` gateway contract on
 
 ## Verification
 
-- exact-main replay pending from the current `origin/main` baseline
-- protected release and canonical-truth surfaces pending until the replay,
-  current-server probes, and repository automation all succeed on this branch
+- `git fetch origin --prune` confirmed the latest shared `origin/main` baseline
+  is commit `ba70f6936291dfa44f42e1ff694b1d6cb6cd0d4f`, which already carries the
+  ADR 0283 integration release `0.177.99` and platform version `0.130.66`.
+- ADR 0280 was replayed onto that newer baseline by cherry-picking the four
+  functional Changedetection commits onto `codex/ws-0280-main-merge-r2`; the
+  one generated-file conflict in
+  `config/grafana/dashboards/slo-overview.json` was resolved by preserving the
+  newer mainline source-of-truth inputs and regenerating the dashboard from the
+  merged catalog state.
+- The focused exact-main compatibility slice passed with `64 passed in 2.57s`
+  across the Changedetection, platform-vars, Mattermost, NetBox, OpenBao,
+  data-retention, and Plausible regressions, preserved in
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r2-targeted-checks-r1.txt`.
+- The syntax sweep passed for the Changedetection, Plausible, Mattermost, and
+  NetBox lanes, preserved in
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r2-syntax-checks-r1.txt`.
+- The exact-main release manager dry run confirmed the merged baseline at
+  `0.177.99` and the next release at `0.177.100`, and the write run prepared
+  release `0.177.100` while preserving the pre-replay platform baseline at
+  `0.130.66`, preserved in
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r2-release-dry-run-r1.txt`
+  and
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r2-release-write-r1.txt`.
+- The authoritative exact-main replay from committed source
+  `65305c70c7049bcb177f59b5a44ab0d031a8a10c` succeeded in
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-live-apply-0.177.100.txt`
+  with final recap
+  `docker-runtime-lv3 : ok=312 changed=115 unreachable=0 failed=0 skipped=32 rescued=0 ignored=0`.
+- Fresh post-commit proofs from that replay confirmed the current server still
+  reports `Debian-trixie-latest-amd64-base`,
+  `pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)`, and
+  `sudo qm status 120 => status: running`, while `docker-runtime-lv3` serves a
+  healthy Changedetection `0.54.7` runtime with `watch_count == 9`,
+  `tag_count == 4`, and a drift-free sync report, preserved in
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-host-state-r1-0.177.100.txt`
+  and
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-changedetection-runtime-state-r1-0.177.100.txt`.
+- A fresh authenticated controller-side probe of
+  `https://api.lv3.org/v1/changedetection/` returned the live Changedetection
+  UI HTML for version `0.54.7`, preserved in
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-gateway-route-r1-0.177.100.html`.
+- `receipts/live-applies/2026-03-30-adr-0280-changedetection-mainline-live-apply.json`
+  records the canonical exact-main receipt from committed source
+  `65305c70c7049bcb177f59b5a44ab0d031a8a10c`, while the earlier branch-local
+  receipt remains preserved as first-live audit history on platform version
+  `0.130.63`.
+- Final branch-side automation checks all passed while this workstream remains
+  `ready_for_merge`: `git diff --check`,
+  `uv run --with pyyaml --with jsonschema python scripts/live_apply_receipts.py --validate`,
+  `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`,
+  `./scripts/validate_repo.sh agent-standards workstream-surfaces health-probes`,
+  `make remote-validate`, and `make pre-push-gate`, preserved in
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-git-diff-check-r1-0.177.100.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-live-apply-receipts-validate-r1-0.177.100.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-data-model-validate-r1-0.177.100.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-branch-validate-r1-0.177.100.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-remote-validate-r1-0.177.100.txt`,
+  and
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-pre-push-gate-r1-0.177.100.txt`.
+- The only remaining closeout is the terminal `status: merged` flip on the
+  final main candidate immediately before push, followed by a last minimal
+  validation sweep on that terminal tree.
 
 ## Outcome
 
-- pending exact-main replay, final release bump, and `origin/main` push
+- Release `0.177.100` now carries ADR 0280 onto the latest shared mainline
+  baseline of `0.177.99 / 0.130.66`.
+- The authoritative committed replay from
+  `65305c70c7049bcb177f59b5a44ab0d031a8a10c` refreshed the private
+  Changedetection runtime and authenticated `/v1/changedetection` gateway route
+  on the live server, and the integrated canonical truth advances the tracked
+  platform baseline to `0.130.67`.
+- `receipts/live-applies/2026-03-30-adr-0280-changedetection-mainline-live-apply.json`
+  is the canonical mainline receipt for ADR 0280; the earlier branch-local
+  receipt on `0.130.63` remains part of the audit trail.

@@ -15265,7 +15265,7 @@ workstreams:
   - id: ws-0280-live-apply
     adr: "0280"
     title: ADR 0280 live apply from latest origin/main
-    status: ready_for_merge
+    status: live_applied
     owner: codex
     branch: codex/ws-0280-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0280-live-apply
@@ -15418,7 +15418,7 @@ workstreams:
       release_bump: patch
       included_in_repo_version: 0.177.100
       latest_receipts:
-        changedetection: 2026-03-30-adr-0280-changedetection-live-apply
+        changedetection: 2026-03-30-adr-0280-changedetection-mainline-live-apply
   - id: ws-0280-main-merge
     adr: "0280"
     title: Integrate ADR 0280 exact-main replay onto current origin/main
@@ -15592,3 +15592,11 @@ workstreams:
             - receipts/live-applies/2026-03-30-adr-0280-changedetection-mainline-live-apply.json
             - receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-*
           mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: integrates ADR 0280 into main by replaying the private Changedetection.io runtime and authenticated `/v1/changedetection` gateway route onto the merged 0.177.99 / 0.130.66 baseline, cutting release 0.177.100, and advancing platform_version to 0.130.67
+      release_bump: patch
+      included_in_repo_version: 0.177.100
+      latest_receipts:
+        changedetection: 2026-03-30-adr-0280-changedetection-mainline-live-apply

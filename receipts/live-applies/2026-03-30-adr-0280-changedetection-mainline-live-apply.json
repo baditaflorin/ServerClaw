@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0280-changedetection-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_at": "2026-03-30T10:37:32Z",
+  "recorded_by": "codex",
+  "source_commit": "65305c70c7049bcb177f59b5a44ab0d031a8a10c",
+  "repo_version_context": "0.177.100",
+  "platform_version_context": "0.130.67",
+  "workflow_id": "adr-0280-changedetection-mainline-live-apply",
+  "adr": "0280",
+  "summary": "Replayed ADR 0280 from the merged `0.177.99` mainline baseline using committed source `65305c70c7049bcb177f59b5a44ab0d031a8a10c`, carried the private Changedetection.io runtime and authenticated `/v1/changedetection/` gateway contract onto the live `0.130.66` platform, and recorded the canonical exact-main proof that advances the tracked platform baseline to `0.130.67` on release `0.177.100`.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Changedetection private runtime",
+      "address": "http://10.10.10.20:5000"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Changedetection authenticated gateway route",
+      "address": "https://api.lv3.org/v1/changedetection/"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused rebased compatibility slice",
+      "result": "pass",
+      "observed": "The latest-main retry branch passed `64 passed in 2.57s` across the Changedetection, platform-vars, Mattermost, NetBox, OpenBao, data-retention, and Plausible regressions, captured in `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r2-targeted-checks-r1.txt`."
+    },
+    {
+      "check": "Syntax coverage on the merged baseline",
+      "result": "pass",
+      "observed": "`make syntax-check-changedetection`, `make syntax-check-plausible`, `make syntax-check-mattermost`, and `make syntax-check-netbox` all passed on the retry branch, captured in `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r2-syntax-checks-r1.txt`."
+    },
+    {
+      "check": "Release planning and protected release write",
+      "result": "pass",
+      "observed": "The release dry run confirmed current version `0.177.99` and next version `0.177.100`, and the write run prepared release `0.177.100` while the shared baseline still reported `platform_version: 0.130.66`, captured in `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r2-release-dry-run-r1.txt` and `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r2-release-write-r1.txt`."
+    },
+    {
+      "check": "Authoritative committed-source replay",
+      "result": "pass",
+      "observed": "`make converge-changedetection` succeeded from source commit `65305c70c7049bcb177f59b5a44ab0d031a8a10c` with final recap `docker-runtime-lv3 : ok=312 changed=115 unreachable=0 failed=0 skipped=32 rescued=0 ignored=0`, captured in `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-live-apply-0.177.100.txt`."
+    },
+    {
+      "check": "Current host and private runtime state",
+      "result": "pass",
+      "observed": "Fresh post-commit probes confirmed `Debian-trixie-latest-amd64-base`, `pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)`, and `sudo qm status 120 => status: running`; the settled guest probe confirmed the `changedetection` container is healthy on `0.54.7`, `watch_count == 9`, `tag_count == 4`, and `/opt/changedetection/watch-sync-report.json` reports `changed=false` with zero pending actions."
+    },
+    {
+      "check": "Authenticated gateway route",
+      "result": "pass",
+      "observed": "A fresh authenticated `curl -fsS -H \"Authorization: Bearer $LV3_TOKEN\" https://api.lv3.org/v1/changedetection/` returned the live Changedetection UI HTML for version `0.54.7`, confirming the gateway route is serving the refreshed private runtime."
+    },
+    {
+      "check": "Branch-side repository automation and validation bundle",
+      "result": "pass",
+      "observed": "While `ws-0280-main-merge` remained `ready_for_merge`, `git diff --check`, `uv run --with pyyaml --with jsonschema python scripts/live_apply_receipts.py --validate`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `./scripts/validate_repo.sh agent-standards workstream-surfaces health-probes`, `make remote-validate`, and `make pre-push-gate` all passed on the exact-main candidate."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0280-changedetection-io-for-external-content-and-api-change-monitoring.md",
+    "docs/workstreams/ws-0280-live-apply.md",
+    "docs/workstreams/ws-0280-main-merge.md",
+    "docs/runbooks/configure-changedetection.md",
+    "playbooks/changedetection.yml",
+    "playbooks/services/changedetection.yml",
+    "collections/ansible_collections/lv3/platform/roles/changedetection_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/changedetection_runtime/tasks/verify.yml",
+    "collections/ansible_collections/lv3/platform/roles/changedetection_runtime/templates/watch-catalog.json.j2",
+    "scripts/changedetection_sync.py",
+    "tests/test_changedetection_runtime_role.py",
+    "tests/test_changedetection_metadata.py",
+    "tests/test_changedetection_sync.py",
+    "tests/test_data_retention_role.py",
+    "tests/test_openbao_runtime_role.py",
+    "tests/test_plausible_playbook.py",
+    "tests/test_plausible_runtime_role.py",
+    "workstreams.yaml",
+    "versions/stack.yaml",
+    "receipts/live-applies/2026-03-30-adr-0280-changedetection-live-apply.json",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r2-targeted-checks-r1.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r2-syntax-checks-r1.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r2-release-dry-run-r1.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r2-release-write-r1.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r2-live-apply-0.177.100.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r2-host-state-r1-0.177.100.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r2-changedetection-runtime-state-r1-0.177.100.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r2-gateway-route-r1-0.177.100.html",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-live-apply-0.177.100.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-host-state-r1-0.177.100.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-changedetection-runtime-state-r1-0.177.100.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-gateway-route-r1-0.177.100.html",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-git-diff-check-r1-0.177.100.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-live-apply-receipts-validate-r1-0.177.100.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-data-model-validate-r1-0.177.100.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-branch-validate-r1-0.177.100.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-remote-validate-r1-0.177.100.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-pre-push-gate-r1-0.177.100.txt",
+    "receipts/live-applies/2026-03-30-adr-0280-changedetection-mainline-live-apply.json"
+  ],
+  "notes": [
+    "This receipt is the canonical exact-main replay that justifies advancing `platform_version` from `0.130.66` to `0.130.67` for ADR 0280 on release `0.177.100`.",
+    "The earlier branch-local receipt remains the audit trail for the first time ADR 0280 became true on platform version `0.130.63`.",
+    "The earlier exploratory `r2` replay and proof bundle from the uncommitted `0.177.100` candidate remain preserved as audit history, but the committed-source `r3` replay recorded here supersedes them as canonical evidence."
+  ]
+}

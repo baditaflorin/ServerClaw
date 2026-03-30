@@ -1,9 +1,10 @@
 # ADR 0280: Changedetection.io For External Content And API Change Monitoring
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.100
+- Implemented In Platform Version: 0.130.63
+- Implemented On: 2026-03-30
 - Date: 2026-03-29
 
 ## Context
