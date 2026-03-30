@@ -11,7 +11,7 @@ jobs:
   validate:
     runs-on: self-hosted
     container:
-      image: registry.lv3.org/check-runner/python:3.12.10@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb
+      image: registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
     steps:
       - name: Checkout
         env:

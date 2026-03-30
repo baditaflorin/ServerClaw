@@ -7,7 +7,7 @@ RENOVATE_WORKFLOW = REPO_ROOT / ".gitea" / "workflows" / "renovate.yml"
 RELEASE_BUNDLE_WORKFLOW = REPO_ROOT / ".gitea" / "workflows" / "release-bundle.yml"
 PYTHON_RUNNER_IMAGE = (
     "registry.lv3.org/check-runner/python:3.12.10"
-    "@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb"
+    "@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff"
 )
 MANUAL_CHECKOUT_FETCH = (
     'git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" '
