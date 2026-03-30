@@ -369,6 +369,8 @@
       - --file
       - "{{ jupyterhub_compose_file }}"
       - pull
+      - openbao-agent
+      - minio
   args:
     chdir: "{{ jupyterhub_site_dir }}"
   register: jupyterhub_pull

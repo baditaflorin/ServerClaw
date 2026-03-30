@@ -150,6 +150,17 @@ def test_main_tasks_render_build_force_recreate_and_verify_runtime() -> None:
     assert singleuser_build["retries"] == 3
     assert singleuser_build["delay"] == 10
 
+    compose_pull = next(task for task in tasks if task["name"] == "Pull the JupyterHub compose-managed images")
+    assert compose_pull["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "compose",
+        "--file",
+        "{{ jupyterhub_compose_file }}",
+        "pull",
+        "openbao-agent",
+        "minio",
+    ]
+
 
 def test_verify_tasks_cover_local_health_admin_api_and_smoke_spawn() -> None:
     verify = load_yaml(ROLE_VERIFY)
