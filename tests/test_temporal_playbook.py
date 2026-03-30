@@ -53,8 +53,10 @@ def test_temporal_playbook_bootstraps_schema_from_localhost_and_deploys_runtime(
         == "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
     )
     assert schema_probe_task["ansible.builtin.command"]["argv"][1:4] == ["-d", "{{ temporal_database_name }}", "-Atqc"]
+    assert schema_probe_task["become"] is True
     assert schema_probe_task["become_user"] == "postgres"
     assert connection_headroom_task["ansible.builtin.command"]["argv"][1:4] == ["-d", "postgres", "-Atqc"]
+    assert connection_headroom_task["become"] is True
     assert connection_headroom_task["become_user"] == "postgres"
     assert drain_task["delegate_to"] == "{{ temporal_schema_tool_delegate_host }}"
     assert drain_task["ansible.builtin.command"]["argv"] == [

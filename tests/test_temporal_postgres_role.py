@@ -52,6 +52,12 @@ def test_temporal_postgres_role_generates_and_mirrors_password_and_databases() -
         task for task in tasks if task.get("name") == "Check whether the Temporal PostgreSQL databases already exist"
     )
     database_create_task = next(task for task in tasks if task.get("name") == "Create the Temporal PostgreSQL databases")
+    database_owner_check_task = next(
+        task for task in tasks if task.get("name") == "Check whether the Temporal PostgreSQL database owners already match"
+    )
+    database_owner_task = next(
+        task for task in tasks if task.get("name") == "Ensure the Temporal PostgreSQL database owners are correct"
+    )
 
     assert generate_task["delegate_to"] == "localhost"
     assert mirror_task["ansible.builtin.copy"]["dest"] == "{{ temporal_database_password_local_file }}"
@@ -60,4 +66,11 @@ def test_temporal_postgres_role_generates_and_mirrors_password_and_databases() -
         "{{ temporal_database_name }}",
         "{{ temporal_visibility_database_name }}",
     ]
+    assert database_create_task["changed_when"] is True
     assert "CREATE DATABASE {{ item.item }} OWNER {{ temporal_database_user }}" in database_create_task["ansible.builtin.command"]["argv"][-1]
+    assert database_owner_check_task["loop"] == [
+        "{{ temporal_database_name }}",
+        "{{ temporal_visibility_database_name }}",
+    ]
+    assert database_owner_task["loop"] == "{{ temporal_postgres_database_owner_checks.results | default([]) }}"
+    assert database_owner_task["changed_when"] is True

@@ -120,6 +120,7 @@
       - -c
       - "CREATE ROLE {{ temporal_database_user }} LOGIN PASSWORD '{{ temporal_database_password }}'"
   no_log: true
+  changed_when: true
   when:
     - temporal_postgres_writable_check.stdout | trim == "1"
     - temporal_postgres_role_check.stdout != "1"
@@ -158,9 +159,30 @@
   loop: "{{ temporal_postgres_database_checks.results | default([]) }}"
   loop_control:
     label: "{{ item.item }}"
+  changed_when: true
   when:
     - temporal_postgres_writable_check.stdout | trim == "1"
     - item.stdout != "1"
+
+- name: Check whether the Temporal PostgreSQL database owners already match
+  ansible.builtin.command:
+    argv:
+      - sudo
+      - -u
+      - postgres
+      - psql
+      - -d
+      - postgres
+      - -Atqc
+      - "SELECT pg_catalog.pg_get_userbyid(datdba) FROM pg_database WHERE datname = '{{ item }}'"
+  loop:
+    - "{{ temporal_database_name }}"
+    - "{{ temporal_visibility_database_name }}"
+  loop_control:
+    label: "{{ item }}"
+  register: temporal_postgres_database_owner_checks
+  changed_when: false
+  when: temporal_postgres_writable_check.stdout | trim == "1"
 
 - name: Ensure the Temporal PostgreSQL database owners are correct
   ansible.builtin.command:
@@ -173,9 +195,10 @@
       - postgres
       - -c
       - "ALTER DATABASE {{ item }} OWNER TO {{ temporal_database_user }}"
-  loop:
-    - "{{ temporal_database_name }}"
-    - "{{ temporal_visibility_database_name }}"
+  loop: "{{ temporal_postgres_database_owner_checks.results | default([]) }}"
   loop_control:
-    label: "{{ item }}"
-  when: temporal_postgres_writable_check.stdout | trim == "1"
+    label: "{{ item.item }}"
+  changed_when: true
+  when:
+    - temporal_postgres_writable_check.stdout | trim == "1"
+    - item.stdout != temporal_database_user
