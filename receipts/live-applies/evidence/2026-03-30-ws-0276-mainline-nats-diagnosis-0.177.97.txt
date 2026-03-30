@@ -1,0 +1,130 @@
+HOST=docker-runtime-lv3
+--- docker-ps-a ---
+NAMES                STATUS                          CREATED
+lv3-nats-jetstream   Exited (0) About a minute ago   33 minutes ago
+--- compose-ps ---
+NAME      IMAGE     COMMAND   SERVICE   CREATED   STATUS    PORTS
+--- inspect ---
+status=exited exit=0 error= started=2026-03-30T07:55:28.085510801Z finished=2026-03-30T08:08:36.734272606Z
+--- logs ---
+[1] 2026/03/30 07:40:27.107256 [ERR] 127.0.0.1:48260 - cid:81 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.109292 [ERR] 127.0.0.1:48266 - cid:82 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.109601 [ERR] 127.0.0.1:48268 - cid:83 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.110214 [ERR] 127.0.0.1:48276 - cid:85 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.110625 [ERR] 127.0.0.1:48286 - cid:84 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.110910 [ERR] 127.0.0.1:48306 - cid:87 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.111088 [ERR] 127.0.0.1:48302 - cid:86 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.112962 [ERR] 127.0.0.1:48314 - cid:88 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.113146 [ERR] 127.0.0.1:48326 - cid:89 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.113305 [ERR] 127.0.0.1:48338 - cid:90 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.113475 [ERR] 127.0.0.1:48348 - cid:91 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.114028 [ERR] 127.0.0.1:48358 - cid:92 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.115119 [ERR] 127.0.0.1:48362 - cid:93 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.115395 [ERR] 127.0.0.1:48378 - cid:94 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.115577 [ERR] 127.0.0.1:48380 - cid:95 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.115783 [ERR] 127.0.0.1:48384 - cid:96 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.115973 [ERR] 127.0.0.1:48398 - cid:97 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.116698 [ERR] 127.0.0.1:48406 - cid:99 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.116951 [ERR] 127.0.0.1:48416 - cid:98 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.117290 [ERR] 127.0.0.1:48422 - cid:101 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.117532 [ERR] 127.0.0.1:48436 - cid:100 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.117576 [ERR] 127.0.0.1:48440 - cid:102 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.118031 [ERR] 127.0.0.1:48454 - cid:104 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.118248 [ERR] 127.0.0.1:48466 - cid:105 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.118610 [ERR] 127.0.0.1:48470 - cid:106 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.119017 [ERR] 127.0.0.1:48446 - cid:103 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.119345 [ERR] 127.0.0.1:48500 - cid:109 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.120000 [ERR] 127.0.0.1:48524 - cid:111 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.120038 [ERR] 127.0.0.1:48522 - cid:112 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.120100 [ERR] 127.0.0.1:48472 - cid:108 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.119195 [ERR] 127.0.0.1:48484 - cid:107 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.121345 [ERR] 127.0.0.1:48566 - cid:113 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.119451 [ERR] 127.0.0.1:48516 - cid:110 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.121701 [ERR] 127.0.0.1:48586 - cid:116 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.121718 [ERR] 127.0.0.1:48572 - cid:117 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.121748 [ERR] 127.0.0.1:48540 - cid:114 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.121765 [ERR] 127.0.0.1:48554 - cid:115 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.121875 [ERR] 127.0.0.1:48588 - cid:118 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.122381 [ERR] 127.0.0.1:48598 - cid:119 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.125941 [ERR] 127.0.0.1:48636 - cid:120 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.125970 [ERR] 127.0.0.1:48606 - cid:121 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.125987 [ERR] 127.0.0.1:48618 - cid:122 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.126004 [ERR] 127.0.0.1:48626 - cid:123 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.126617 [ERR] 127.0.0.1:48642 - cid:124 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.130709 [ERR] 127.0.0.1:48694 - cid:126 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.130749 [ERR] 127.0.0.1:48678 - cid:127 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.130775 [ERR] 127.0.0.1:48686 - cid:128 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.130874 [ERR] 127.0.0.1:48648 - cid:129 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.130909 [ERR] 127.0.0.1:48650 - cid:130 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.131181 [ERR] 127.0.0.1:48724 - cid:132 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.131209 [ERR] 127.0.0.1:48696 - cid:133 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.131236 [ERR] 127.0.0.1:48708 - cid:134 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.131266 [ERR] 127.0.0.1:48710 - cid:135 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.131864 [ERR] 127.0.0.1:48782 - cid:131 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.131887 [ERR] 127.0.0.1:48740 - cid:136 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.131920 [ERR] 127.0.0.1:48754 - cid:137 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.131939 [ERR] 127.0.0.1:48766 - cid:138 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.132109 [ERR] 127.0.0.1:48792 - cid:139 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:27.132363 [ERR] 127.0.0.1:48666 - cid:125 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:40:28.959741 [ERR] 127.0.0.1:48798 - cid:140 - authentication error - User "jetstream-admin"
+[1] 2026/03/30 07:44:11.181131 [INF] Trapped "terminated" signal
+[1] 2026/03/30 07:44:11.181257 [INF] Initiating Shutdown...
+[1] 2026/03/30 07:44:11.181267 [INF] Initiating JetStream Shutdown...
+[1] 2026/03/30 07:44:11.181454 [INF] JetStream Shutdown
+[1] 2026/03/30 07:44:11.181914 [INF] Server Exiting..
+[1] 2026/03/30 07:55:28.211280 [INF] Starting nats-server
+[1] 2026/03/30 07:55:28.211313 [INF]   Version:  2.11.15
+[1] 2026/03/30 07:55:28.211364 [INF]   Git:      [bef17e1]
+[1] 2026/03/30 07:55:28.211366 [INF]   Name:     lv3-nats-jetstream
+[1] 2026/03/30 07:55:28.211369 [INF]   Node:     48lMitZd
+[1] 2026/03/30 07:55:28.211370 [INF]   ID:       NBZ77F7FEKYV7AX6DWFYFFOFLGKAMQJSJJP42NVO3LFFY6ZCVNALMCNM
+[1] 2026/03/30 07:55:28.211375 [WRN] Plaintext passwords detected, use nkeys or bcrypt
+[1] 2026/03/30 07:55:28.211393 [INF] Using configuration file: /etc/nats/nats-server.conf (sha256:a66b2b153533ad71db757c0a257ca48360f16d0db51d86ac511ffc43031b2bc0)
+[1] 2026/03/30 07:55:28.212150 [INF] Starting http monitor on 127.0.0.1:8222
+[1] 2026/03/30 07:55:28.212224 [INF] Starting JetStream
+[1] 2026/03/30 07:55:28.212315 [INF]     _ ___ _____ ___ _____ ___ ___   _   __  __
+[1] 2026/03/30 07:55:28.212316 [INF]  _ | | __|_   _/ __|_   _| _ \ __| /_\ |  \/  |
+[1] 2026/03/30 07:55:28.212317 [INF] | || | _|  | | \__ \ | | |   / _| / _ \| |\/| |
+[1] 2026/03/30 07:55:28.212318 [INF]  \__/|___| |_| |___/ |_| |_|_\___/_/ \_\_|  |_|
+[1] 2026/03/30 07:55:28.212319 [INF]
+[1] 2026/03/30 07:55:28.212320 [INF]          https://docs.nats.io/jetstream
+[1] 2026/03/30 07:55:28.212321 [INF]
+[1] 2026/03/30 07:55:28.212322 [INF] ---------------- JETSTREAM ----------------
+[1] 2026/03/30 07:55:28.212326 [INF]   Max Memory:      256.00 MB
+[1] 2026/03/30 07:55:28.212328 [INF]   Max Storage:     2.00 GB
+[1] 2026/03/30 07:55:28.212329 [INF]   Store Directory: "/data/jetstream/jetstream"
+[1] 2026/03/30 07:55:28.212330 [INF]   API Level:       1
+[1] 2026/03/30 07:55:28.212331 [INF] -------------------------------------------
+[1] 2026/03/30 07:55:28.212854 [INF]   Starting restore for stream '$G > KV_maintenance-windows'
+[1] 2026/03/30 07:55:28.213206 [INF]   Restored 0 messages for stream '$G > KV_maintenance-windows' in 0s
+[1] 2026/03/30 07:55:28.213271 [INF]   Starting restore for stream '$G > PLATFORM_EVENTS'
+[1] 2026/03/30 07:55:28.213388 [INF]   Restored 168 messages for stream '$G > PLATFORM_EVENTS' in 0s
+[1] 2026/03/30 07:55:28.213449 [INF]   Starting restore for stream '$G > RAG_DOCUMENT'
+[1] 2026/03/30 07:55:28.213562 [INF]   Restored 1 messages for stream '$G > RAG_DOCUMENT' in 0s
+[1] 2026/03/30 07:55:28.213611 [INF]   Starting restore for stream '$G > SECRET_ROTATION'
+[1] 2026/03/30 07:55:28.213714 [INF]   Restored 1 messages for stream '$G > SECRET_ROTATION' in 0s
+[1] 2026/03/30 07:55:28.213759 [INF]   Starting restore for stream '$G > lv3_agent_events'
+[1] 2026/03/30 07:55:28.213866 [INF]   Restored 0 messages for stream '$G > lv3_agent_events' in 0s
+[1] 2026/03/30 07:55:28.213877 [INF]   Recovering 1 consumers for stream - '$G > lv3_agent_events'
+[1] 2026/03/30 07:55:28.214113 [INF]   Starting restore for stream '$G > lv3_alert_events'
+[1] 2026/03/30 07:55:28.214225 [INF]   Restored 0 messages for stream '$G > lv3_alert_events' in 0s
+[1] 2026/03/30 07:55:28.214235 [INF]   Recovering 1 consumers for stream - '$G > lv3_alert_events'
+[1] 2026/03/30 07:55:28.214607 [INF]   Starting restore for stream '$G > lv3_workflow_events'
+[1] 2026/03/30 07:55:28.214682 [INF]   Starting restore for stream '$G > KV_platform-circuits'
+[1] 2026/03/30 07:55:28.215118 [INF]   Starting restore for stream '$G > lv3_receipt_events'
+[1] 2026/03/30 07:55:28.215320 [INF]   Restored 0 messages for stream '$G > lv3_receipt_events' in 0s
+[1] 2026/03/30 07:55:28.215332 [INF]   Recovering 1 consumers for stream - '$G > lv3_receipt_events'
+[1] 2026/03/30 07:55:28.215365 [INF]   Restored 0 messages for stream '$G > KV_platform-circuits' in 1ms
+[1] 2026/03/30 07:55:28.215420 [INF]   Restored 0 messages for stream '$G > lv3_workflow_events' in 1ms
+[1] 2026/03/30 07:55:28.215445 [INF]   Recovering 1 consumers for stream - '$G > lv3_workflow_events'
+[1] 2026/03/30 07:55:28.215805 [INF]   Starting restore for stream '$G > KV_platform-locks'
+[1] 2026/03/30 07:55:28.216034 [INF]   Restored 0 messages for stream '$G > KV_platform-locks' in 0s
+[1] 2026/03/30 07:55:28.216075 [INF] Took 3.849026ms to start JetStream
+[1] 2026/03/30 07:55:28.216151 [INF] Listening for client connections on 0.0.0.0:4222
+[1] 2026/03/30 07:55:28.224943 [INF] Server is ready
+[1] 2026/03/30 08:08:36.726485 [INF] Trapped "terminated" signal
+[1] 2026/03/30 08:08:36.726578 [INF] Initiating Shutdown...
+[1] 2026/03/30 08:08:36.726588 [INF] Initiating JetStream Shutdown...
+[1] 2026/03/30 08:08:36.726727 [INF] JetStream Shutdown
+[1] 2026/03/30 08:08:36.726916 [INF] Server Exiting..
+--- ports ---

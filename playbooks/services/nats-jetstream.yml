@@ -1,0 +1,8 @@
+---
+# Purpose: Service-scoped wrapper for the NATS JetStream runtime playbook.
+# Use case: Used by the generic live-apply and syntax-check entrypoints with service=nats-jetstream.
+# Inputs: env (optional) plus any nats_jetstream_* overrides accepted by playbooks/nats-jetstream.yml.
+# Outputs: Delegates service-scoped execution to the canonical NATS JetStream playbook.
+# Idempotency: Yes; inherits the idempotent runtime converge behaviour from playbooks/nats-jetstream.yml.
+# Dependencies: playbooks/nats-jetstream.yml and ADR 0276.
+- import_playbook: ../nats-jetstream.yml

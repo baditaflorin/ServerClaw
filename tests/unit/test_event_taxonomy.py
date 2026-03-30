@@ -19,6 +19,7 @@ def test_topic_index_contains_active_canonical_subjects() -> None:
     topics = load_topic_index()
     assert topics["platform.findings.observation"]["status"] == "active"
     assert topics["platform.maintenance.opened"]["status"] == "active"
+    assert topics["platform.mutation.recorded"]["status"] == "active"
     assert topics["platform.config.merged"]["status"] == "active"
     assert topics["platform.intent.compiled"]["status"] == "reserved"
 

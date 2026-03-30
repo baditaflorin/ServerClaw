@@ -193,7 +193,7 @@ def test_writer_inserts_event_and_publishes_asynchronously() -> None:
     publisher_release = threading.Event()
 
     def publisher(subject: str, payload: dict[str, Any]) -> None:
-        assert subject == "platform.ledger.event_written"
+        assert subject == "platform.mutation.recorded"
         assert payload["event_type"] == "service.deployed"
         publisher_started.set()
         publisher_release.wait(timeout=1)

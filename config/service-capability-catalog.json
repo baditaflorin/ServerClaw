@@ -735,6 +735,32 @@
       }
     },
     {
+      "id": "nats_jetstream",
+      "name": "NATS JetStream",
+      "description": "Private internal event bus for platform control-plane, secret-rotation, and RAG lifecycle events.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "nats://10.10.10.20:4222",
+      "exposure": "private-only",
+      "adr": "0276",
+      "runbook": "docs/runbooks/nats-jetstream-event-bus.md",
+      "tags": [
+        "events",
+        "nats",
+        "jetstream",
+        "private"
+      ],
+      "notes": "The monitoring endpoint stays loopback-only on docker-runtime-lv3 at http://127.0.0.1:8222/healthz.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "nats://10.10.10.20:4222"
+        }
+      }
+    },
+    {
       "id": "netbox",
       "name": "NetBox",
       "description": "Private topology, IPAM, and inventory system for the platform.",

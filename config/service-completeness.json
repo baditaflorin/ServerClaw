@@ -252,6 +252,14 @@
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
     },
+    "nats_jetstream": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
     "nextcloud": {
       "service_type": "compose",
       "requires_subdomain": true,
