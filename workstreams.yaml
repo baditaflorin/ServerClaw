@@ -2806,6 +2806,7 @@ workstreams:
         browser-run-session tool with packaged-runtime-safe config resolution
         and verified smoke artifacts
       release_bump: patch
+      included_in_repo_version: 0.177.95
       latest_receipts:
         browser_runner: 2026-03-30-adr-0261-playwright-browser-runners-live-apply
   - id: ws-0252-live-apply
@@ -4014,6 +4015,7 @@ workstreams:
         repo-managed Keycloak runtime clients, and the API gateway registration
         for delegated authorization checks
       release_bump: patch
+      included_in_repo_version: 0.177.95
       latest_receipts:
         openfga: 2026-03-30-adr-0262-openfga-keycloak-exact-main-live-apply
   - id: ws-0244-runtime-assurance-adrs
