@@ -44,6 +44,18 @@ def test_tasks_install_mc_and_manage_buckets_policies_and_lifecycle() -> None:
     assert "minio_consumer_secret_generation.stdout" in tasks_text
 
 
+def test_tasks_recover_stale_compose_network_during_startup() -> None:
+    tasks = load_yaml(TASKS_PATH)
+    start_block = next(
+        task for task in tasks if task.get("name") == "Start the MinIO runtime and recover stale compose-network failures"
+    )
+    rescue_names = [task["name"] for task in start_block["rescue"]]
+
+    assert "Flag stale MinIO compose-network failures during startup" in rescue_names
+    assert "Reset stale MinIO compose resources after startup failure" in rescue_names
+    assert "Retry MinIO startup after compose-network recovery" in rescue_names
+
+
 def test_templates_publish_public_server_and_console_urls() -> None:
     compose = COMPOSE_TEMPLATE.read_text()
     env_template = ENV_TEMPLATE.read_text()

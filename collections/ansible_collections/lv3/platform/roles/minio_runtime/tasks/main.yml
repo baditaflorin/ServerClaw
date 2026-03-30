@@ -281,23 +281,72 @@
     or 'Downloaded newer image' in minio_pull.stdout
     or 'Pull complete' in minio_pull.stdout
 
-- name: Ensure the MinIO runtime is running
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ minio_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ minio_site_dir }}"
-  register: minio_up
-  changed_when: >-
-    'Creating' in minio_up.stdout
-    or 'Recreating' in minio_up.stdout
-    or 'Starting' in minio_up.stdout
+- name: Start the MinIO runtime and recover stale compose-network failures
+  block:
+    - name: Ensure the MinIO runtime is running
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ minio_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ minio_site_dir }}"
+      register: minio_up
+      changed_when: >-
+        'Creating' in minio_up.stdout
+        or 'Recreating' in minio_up.stdout
+        or 'Starting' in minio_up.stdout
+  rescue:
+    - name: Flag stale MinIO compose-network failures during startup
+      ansible.builtin.set_fact:
+        minio_compose_network_missing: >-
+          {{
+            'failed to create endpoint' in (ansible_failed_result.stderr | default(''))
+            and 'does not exist' in (ansible_failed_result.stderr | default(''))
+          }}
+
+    - name: Surface unexpected MinIO startup failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('minio compose up failed')) }}"
+      when: not minio_compose_network_missing
+
+    - name: Reset stale MinIO compose resources after startup failure
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ minio_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ minio_site_dir }}"
+      register: minio_down_retry
+      changed_when: >-
+        'Stopping' in (minio_down_retry.stdout | default(''))
+        or 'Removing' in (minio_down_retry.stdout | default(''))
+        or 'Removing' in (minio_down_retry.stderr | default(''))
+      failed_when: false
+
+    - name: Retry MinIO startup after compose-network recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ minio_compose_file }}"
+          - up
+          - -d
+          - --force-recreate
+          - --remove-orphans
+      args:
+        chdir: "{{ minio_site_dir }}"
+      register: minio_up
+      changed_when: true
 
 - name: Wait for MinIO to listen locally
   ansible.builtin.wait_for:
