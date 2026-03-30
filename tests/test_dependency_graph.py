@@ -17,6 +17,7 @@ def test_compute_impact_for_postgres_includes_direct_and_transitive_failures() -
 
     assert set(impact.direct_hard) == {
         "dify",
+        "directus",
         "gitea",
         "keycloak",
         "langfuse",
