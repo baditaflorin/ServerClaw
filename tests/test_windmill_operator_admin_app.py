@@ -730,14 +730,23 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "gate_status.waiver_summary.release_blockers" in verify_tasks
     assert "windmill_verify_critical_seed_script_expectations" in verify_tasks
     assert "Verify the critical Windmill verification scripts are seeded with current controller content" in verify_tasks
+    assert "Initialize the critical Windmill verification script drift tracker" in verify_tasks
+    assert "Record critical Windmill verification scripts that drifted after sync" in verify_tasks
+    assert "Re-sync drifted critical Windmill verification scripts after concurrent drift" in verify_tasks
+    assert "Verify the critical Windmill verification scripts are seeded with current controller content after any repair attempt" in verify_tasks
     assert "Assert the critical Windmill verification scripts match controller content" in verify_tasks
     assert "windmill_seed_script_root_local_dir ~ '/gate-status.py'" in verify_tasks
     assert "inventory_dir ~ '/../config/windmill/scripts/stage-smoke-suites.py'" in verify_tasks
     assert "lookup('ansible.builtin.file', windmill_seed_script_root_local_dir ~ '/lv3-healthcheck.py', rstrip=False)" in verify_tasks
     assert "lookup('ansible.builtin.file', windmill_seed_script_root_local_dir ~ '/gate-status.py', rstrip=False)" in verify_tasks
     assert "lookup('ansible.builtin.file', inventory_dir ~ '/../config/windmill/scripts/stage-smoke-suites.py', rstrip=False)" in verify_tasks
+    assert "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/" in verify_tasks
+    assert 'Authorization: "Bearer {{ windmill_bootstrap_session_token }}"' in verify_tasks
+    assert "windmill_verify_critical_seed_script_drift_paths" in verify_tasks
+    assert "selectattr('path', 'in', windmill_verify_critical_seed_script_drift_paths)" in verify_tasks
     assert "windmill_verify_critical_seed_script_expectations[item.json.path].content" in verify_tasks
     assert "windmill_verify_critical_seed_script_expectations[item.json.path].local_file" in verify_tasks
+    assert "windmill_verify_critical_seed_scripts_final" in verify_tasks
     assert "Verify the Windmill default operations scripts are seeded" in verify_tasks
     assert 'WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"' in verify_tasks
     assert 'Authorization: "Bearer {{ windmill_runtime_api_token }}"' in verify_tasks
