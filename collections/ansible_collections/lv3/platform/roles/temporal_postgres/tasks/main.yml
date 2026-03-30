@@ -1,0 +1,181 @@
+# Purpose: Provision the PostgreSQL role, databases, and password material used by the Temporal runtime.
+# Use case: Run during Temporal bootstrap or recovery when the durable workflow engine needs its backing stores.
+# Inputs: Database names, secret directories, and controller-local password sources for the Temporal service account.
+# Outputs: Ensures the Temporal PostgreSQL databases, role grants, and password files exist in the expected locations.
+# Idempotency: Partially idempotent because the generated password is preserved once created while repeated role/database checks converge cleanly.
+# Dependencies: ADR 0165 and ADR 0293.
+---
+- name: Validate Temporal PostgreSQL inputs
+  ansible.builtin.assert:
+    that:
+      - temporal_database_name | length > 0
+      - temporal_visibility_database_name | length > 0
+      - temporal_database_user | length > 0
+      - temporal_postgres_secret_dir | length > 0
+      - temporal_postgres_password_file | length > 0
+      - temporal_database_password_local_file | length > 0
+    fail_msg: "temporal_postgres requires database names and local or remote password paths."
+
+- name: Ensure the Temporal PostgreSQL secret directory exists
+  ansible.builtin.file:
+    path: "{{ temporal_postgres_secret_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Ensure the local Temporal artifact directory exists
+  ansible.builtin.file:
+    path: "{{ temporal_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the Temporal database password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ temporal_database_password_local_file }}" ]; then
+      umask 077
+      openssl rand -hex 24 | tr -d '\n' > "{{ temporal_database_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: temporal_postgres_password_generation
+  changed_when: "'changed' in temporal_postgres_password_generation.stdout"
+  no_log: true
+
+- name: Read the Temporal database password
+  ansible.builtin.slurp:
+    src: "{{ temporal_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: temporal_postgres_password_raw
+  no_log: true
+
+- name: Record the Temporal database password
+  ansible.builtin.set_fact:
+    temporal_database_password: "{{ temporal_postgres_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Mirror the Temporal database password to the control machine
+  ansible.builtin.copy:
+    dest: "{{ temporal_database_password_local_file }}"
+    content: "{{ temporal_database_password }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Persist the Temporal database password on the current guest
+  ansible.builtin.copy:
+    dest: "{{ temporal_postgres_password_file }}"
+    content: "{{ temporal_database_password }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Check whether the PostgreSQL host is writable
+  ansible.builtin.command:
+    argv:
+      - sudo
+      - -u
+      - postgres
+      - psql
+      - -d
+      - postgres
+      - -Atqc
+      - SELECT (NOT pg_is_in_recovery())::int
+  register: temporal_postgres_writable_check
+  changed_when: false
+
+- name: Check whether the Temporal database role already exists
+  ansible.builtin.command:
+    argv:
+      - sudo
+      - -u
+      - postgres
+      - psql
+      - -d
+      - postgres
+      - -Atqc
+      - "SELECT 1 FROM pg_roles WHERE rolname = '{{ temporal_database_user }}'"
+  register: temporal_postgres_role_check
+  changed_when: false
+  when: temporal_postgres_writable_check.stdout | trim == "1"
+
+- name: Create the Temporal database role
+  ansible.builtin.command:
+    argv:
+      - sudo
+      - -u
+      - postgres
+      - psql
+      - -d
+      - postgres
+      - -c
+      - "CREATE ROLE {{ temporal_database_user }} LOGIN PASSWORD '{{ temporal_database_password }}'"
+  no_log: true
+  when:
+    - temporal_postgres_writable_check.stdout | trim == "1"
+    - temporal_postgres_role_check.stdout != "1"
+
+- name: Check whether the Temporal PostgreSQL databases already exist
+  ansible.builtin.command:
+    argv:
+      - sudo
+      - -u
+      - postgres
+      - psql
+      - -d
+      - postgres
+      - -Atqc
+      - "SELECT 1 FROM pg_database WHERE datname = '{{ item }}'"
+  loop:
+    - "{{ temporal_database_name }}"
+    - "{{ temporal_visibility_database_name }}"
+  loop_control:
+    label: "{{ item }}"
+  register: temporal_postgres_database_checks
+  changed_when: false
+  when: temporal_postgres_writable_check.stdout | trim == "1"
+
+- name: Create the Temporal PostgreSQL databases
+  ansible.builtin.command:
+    argv:
+      - sudo
+      - -u
+      - postgres
+      - psql
+      - -d
+      - postgres
+      - -c
+      - "CREATE DATABASE {{ item.item }} OWNER {{ temporal_database_user }}"
+  loop: "{{ temporal_postgres_database_checks.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - temporal_postgres_writable_check.stdout | trim == "1"
+    - item.stdout != "1"
+
+- name: Ensure the Temporal PostgreSQL database owners are correct
+  ansible.builtin.command:
+    argv:
+      - sudo
+      - -u
+      - postgres
+      - psql
+      - -d
+      - postgres
+      - -c
+      - "ALTER DATABASE {{ item }} OWNER TO {{ temporal_database_user }}"
+  loop:
+    - "{{ temporal_database_name }}"
+    - "{{ temporal_visibility_database_name }}"
+  loop_control:
+    label: "{{ item }}"
+  when: temporal_postgres_writable_check.stdout | trim == "1"

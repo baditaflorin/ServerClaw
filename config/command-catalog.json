@@ -1481,6 +1481,44 @@
         "timeout_seconds": 1500
       }
     },
+    "converge-temporal": {
+      "description": "Converge the private Temporal runtime with PostgreSQL-backed history stores, controller-side schema bootstrap, and the repo-managed `lv3` namespace.",
+      "workflow_id": "converge-temporal",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-temporal passes",
+        "make validate passes before the apply",
+        "OpenBao, PostgreSQL, and docker-runtime-lv3 are already converged before the Temporal rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record source commit, schema bootstrap evidence, Temporal cluster health, namespace bootstrap verification, UI loopback verification, and the smoke workflow result together."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if PostgreSQL access, schema bootstrap, Temporal runtime startup, namespace reconciliation, or smoke workflow verification fails.",
+          "Stop if the rollout would require ad hoc firewall, inventory, or compose edits outside the repo-managed loopback-only publication model."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good repo-managed Temporal and PostgreSQL state before retrying.",
+          "Do not compensate for a failed rollout by hand-editing live Docker compose files, Temporal namespaces, or PostgreSQL schema state outside the documented bootstrap path."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1500
+      }
+    },
     "deploy-uptime-kuma": {
       "description": "Converge the Uptime Kuma runtime, DNS, and edge-publication path.",
       "workflow_id": "deploy-uptime-kuma",

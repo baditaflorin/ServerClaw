@@ -2173,6 +2173,20 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8098
       controller: http://100.64.0.1:8014
+  temporal:
+    service_name: temporal
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: ssh-tunnel
+      url: grpc://127.0.0.1:7233
+    service_id: temporal
+    ports: {}
+    urls: {}
   ntfy:
     service_name: ntfy
     owning_vm: docker-runtime-lv3
@@ -3660,6 +3674,20 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8098
       controller: http://100.64.0.1:8014
+  temporal:
+    service_name: temporal
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: ssh-tunnel
+      url: grpc://127.0.0.1:7233
+    service_id: temporal
+    ports: {}
+    urls: {}
   ntfy:
     service_name: ntfy
     owning_vm: docker-runtime-lv3

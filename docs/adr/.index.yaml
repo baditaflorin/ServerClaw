@@ -5174,7 +5174,7 @@ adr_index:
   - adr: 0293
     title: Temporal As The Durable Workflow And Task Queue Engine
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: monitoring
     keywords:

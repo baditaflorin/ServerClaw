@@ -243,6 +243,13 @@ playbooks:
     shared_surfaces:
       - service:openfga
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/temporal.yml:
+    playbook_id: temporal
+    canonical_service_id: temporal
+    mutation_scope: platform
+    shared_surfaces:
+      - service:temporal
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/portainer.yml:
     playbook_id: portainer
     mutation_scope: platform

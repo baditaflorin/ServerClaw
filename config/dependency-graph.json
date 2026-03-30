@@ -363,6 +363,15 @@
       "adr": "0262"
     },
     {
+      "id": "temporal",
+      "service": "temporal",
+      "name": "Temporal",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0293"
+    },
+    {
       "id": "ops_portal",
       "service": "ops_portal",
       "name": "Ops Portal",
@@ -966,6 +975,18 @@
       "to": "keycloak",
       "type": "soft",
       "description": "The repo-managed bootstrap verification path checks Keycloak-issued operator and runtime identities alongside the delegated authorization graph."
+    },
+    {
+      "from": "temporal",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Temporal stores workflow history, task queues, and visibility records in PostgreSQL."
+    },
+    {
+      "from": "temporal",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Temporal reads its mirrored PostgreSQL password from the OpenBao-backed runtime secret path before startup."
     },
     {
       "from": "serverclaw",

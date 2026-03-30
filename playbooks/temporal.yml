@@ -1,0 +1,306 @@
+---
+# Playbook: temporal.yml
+# Purpose: Converge the private Temporal runtime, its PostgreSQL backing stores, and the repo-managed namespace bootstrap on docker-runtime-lv3.
+# Use case: Run during ADR 0293 rollout, recovery, or later drift reconciliation when the durable workflow engine must match repo truth.
+#
+# Inputs (required):
+#   - env (string, required): Target environment selector used to choose the postgres and docker-runtime guests.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH path to managed guests.
+#
+# Outputs:
+#   - The Temporal PostgreSQL stores, controller-local schema bootstrap evidence, private docker-runtime stack, and default namespace are reconciled to the declared platform state.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - ADR 0293: Temporal as the durable workflow and task queue engine.
+#   - Requires: OpenBao, PostgreSQL, and docker-runtime-lv3 to already exist.
+#
+# Related ADRs: 0042, 0077, 0086, 0165, 0293
+# Related Runbooks: docs/runbooks/configure-temporal.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+
+- name: Prepare PostgreSQL for Temporal
+  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+  become: true
+  gather_facts: true
+  vars:
+    temporal_admin_tools_image: "{{ container_image_catalog.images.temporal_admin_tools_runtime.ref }}"
+    temporal_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/temporal
+    temporal_database_password_local_file: "{{ temporal_local_artifact_dir }}/database-password.txt"
+    temporal_database_name: temporal
+    temporal_visibility_database_name: temporal_visibility
+    temporal_database_user: temporal
+    temporal_database_host: "{{ ansible_host }}"
+    temporal_controller_database_url: "{{ hostvars['proxmox_florin'].platform_service_topology.postgres.urls.controller }}"
+    temporal_controller_database_host: "{{ temporal_controller_database_url | urlsplit('hostname') }}"
+    temporal_controller_database_port: "{{ temporal_controller_database_url | urlsplit('port') | default('5432', true) }}"
+    temporal_schema_tool_delegate_host: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+    temporal_runtime_compose_file: /opt/temporal/docker-compose.yml
+    temporal_schema_bootstrap_report_local_file: "{{ temporal_local_artifact_dir }}/schema-bootstrap-report.json"
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
+          - "{{ temporal_schema_tool_delegate_host }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.postgres_vm
+    - role: lv3.platform.temporal_postgres
+
+  post_tasks:
+    - name: Ensure Temporal schema bootstrap tools are available on the schema tool host
+      ansible.builtin.command:
+        argv:
+          - /bin/sh
+          - -lc
+          - command -v docker >/dev/null
+      delegate_to: "{{ temporal_schema_tool_delegate_host }}"
+      run_once: true
+      changed_when: false
+
+    - name: Check whether the Temporal default schema version table exists
+      ansible.builtin.command:
+        argv:
+          - psql
+          - -d
+          - "{{ temporal_database_name }}"
+          - -Atqc
+          - SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'schema_version'
+      become_user: postgres
+      run_once: true
+      register: temporal_default_schema_version_table
+      changed_when: false
+      no_log: true
+
+    - name: Check whether the Temporal visibility schema version table exists
+      ansible.builtin.command:
+        argv:
+          - psql
+          - -d
+          - "{{ temporal_visibility_database_name }}"
+          - -Atqc
+          - SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'schema_version'
+      become_user: postgres
+      run_once: true
+      register: temporal_visibility_schema_version_table
+      changed_when: false
+      no_log: true
+
+    - name: Check PostgreSQL connection headroom before Temporal schema migrations
+      ansible.builtin.command:
+        argv:
+          - psql
+          - -d
+          - postgres
+          - -Atqc
+          - "SELECT current_setting('max_connections')::int, current_setting('superuser_reserved_connections')::int, count(*), count(*) FILTER (WHERE usename = '{{ temporal_database_user }}') FROM pg_stat_activity"
+      become_user: postgres
+      run_once: true
+      register: temporal_postgres_connection_headroom
+      changed_when: false
+
+    - name: Record PostgreSQL connection headroom facts for Temporal schema migrations
+      ansible.builtin.set_fact:
+        temporal_postgres_max_connections: "{{ (temporal_postgres_connection_headroom.stdout.split('|'))[0] | int }}"
+        temporal_postgres_superuser_reserved_connections: "{{ (temporal_postgres_connection_headroom.stdout.split('|'))[1] | int }}"
+        temporal_postgres_active_connections: "{{ (temporal_postgres_connection_headroom.stdout.split('|'))[2] | int }}"
+        temporal_postgres_temporal_connections: "{{ (temporal_postgres_connection_headroom.stdout.split('|'))[3] | int }}"
+      run_once: true
+
+    - name: Stop the Temporal runtime before schema migrations when PostgreSQL has no regular connection slots left
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - -f
+          - "{{ temporal_runtime_compose_file }}"
+          - stop
+      delegate_to: "{{ temporal_schema_tool_delegate_host }}"
+      run_once: true
+      when:
+        - (temporal_postgres_active_connections | int) >= ((temporal_postgres_max_connections | int) - (temporal_postgres_superuser_reserved_connections | int))
+        - (temporal_postgres_temporal_connections | int) > 0
+      changed_when: true
+
+    - name: Initialize the Temporal default schema version tables when missing
+      ansible.builtin.command:
+        argv:
+          - docker
+          - run
+          - --rm
+          - --network
+          - host
+          - "{{ temporal_admin_tools_image }}"
+          - temporal-sql-tool
+          - --plugin
+          - postgres12
+          - --ep
+          - "{{ temporal_database_host }}"
+          - --port
+          - "5432"
+          - --user
+          - "{{ temporal_database_user }}"
+          - --password
+          - "{{ lookup('ansible.builtin.file', temporal_database_password_local_file) | trim }}"
+          - --database
+          - "{{ temporal_database_name }}"
+          - setup-schema
+          - -v
+          - "0.0"
+      delegate_to: "{{ temporal_schema_tool_delegate_host }}"
+      run_once: true
+      when: temporal_default_schema_version_table.stdout | trim != "1"
+      changed_when: true
+      no_log: true
+
+    - name: Apply the Temporal default schema migrations
+      ansible.builtin.command:
+        argv:
+          - docker
+          - run
+          - --rm
+          - --network
+          - host
+          - "{{ temporal_admin_tools_image }}"
+          - temporal-sql-tool
+          - --plugin
+          - postgres12
+          - --ep
+          - "{{ temporal_database_host }}"
+          - --port
+          - "5432"
+          - --user
+          - "{{ temporal_database_user }}"
+          - --password
+          - "{{ lookup('ansible.builtin.file', temporal_database_password_local_file) | trim }}"
+          - --database
+          - "{{ temporal_database_name }}"
+          - update-schema
+          - --schema-dir
+          - /etc/temporal/schema/postgresql/v12/temporal/versioned
+      delegate_to: "{{ temporal_schema_tool_delegate_host }}"
+      run_once: true
+      changed_when: true
+      no_log: true
+
+    - name: Initialize the Temporal visibility schema version tables when missing
+      ansible.builtin.command:
+        argv:
+          - docker
+          - run
+          - --rm
+          - --network
+          - host
+          - "{{ temporal_admin_tools_image }}"
+          - temporal-sql-tool
+          - --plugin
+          - postgres12
+          - --ep
+          - "{{ temporal_database_host }}"
+          - --port
+          - "5432"
+          - --user
+          - "{{ temporal_database_user }}"
+          - --password
+          - "{{ lookup('ansible.builtin.file', temporal_database_password_local_file) | trim }}"
+          - --database
+          - "{{ temporal_visibility_database_name }}"
+          - setup-schema
+          - -v
+          - "0.0"
+      delegate_to: "{{ temporal_schema_tool_delegate_host }}"
+      run_once: true
+      when: temporal_visibility_schema_version_table.stdout | trim != "1"
+      changed_when: true
+      no_log: true
+
+    - name: Apply the Temporal visibility schema migrations
+      ansible.builtin.command:
+        argv:
+          - docker
+          - run
+          - --rm
+          - --network
+          - host
+          - "{{ temporal_admin_tools_image }}"
+          - temporal-sql-tool
+          - --plugin
+          - postgres12
+          - --ep
+          - "{{ temporal_database_host }}"
+          - --port
+          - "5432"
+          - --user
+          - "{{ temporal_database_user }}"
+          - --password
+          - "{{ lookup('ansible.builtin.file', temporal_database_password_local_file) | trim }}"
+          - --database
+          - "{{ temporal_visibility_database_name }}"
+          - update-schema
+          - --schema-dir
+          - /etc/temporal/schema/postgresql/v12/visibility/versioned
+      delegate_to: "{{ temporal_schema_tool_delegate_host }}"
+      run_once: true
+      changed_when: true
+      no_log: true
+
+    - name: Record the Temporal schema bootstrap report on the control machine
+      ansible.builtin.copy:
+        dest: "{{ temporal_schema_bootstrap_report_local_file }}"
+        mode: "0600"
+        content: |
+          {
+            "default_schema_version_table_present_before": {{ (temporal_default_schema_version_table.stdout | trim == "1") | to_json }},
+            "visibility_schema_version_table_present_before": {{ (temporal_visibility_schema_version_table.stdout | trim == "1") | to_json }},
+            "runtime_database_host": {{ temporal_database_host | to_json }},
+            "controller_database_host": {{ temporal_controller_database_host | to_json }},
+            "controller_database_port": {{ temporal_controller_database_port | to_json }},
+            "schema_tool_delegate_host": {{ temporal_schema_tool_delegate_host | to_json }},
+            "database_name": {{ temporal_database_name | to_json }},
+            "visibility_database_name": {{ temporal_visibility_database_name | to_json }}
+          }
+      delegate_to: localhost
+      become: false
+      run_once: true
+
+- name: Converge Temporal on docker-runtime-lv3
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.temporal
+        playbook_execution_audit_target: temporal
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.temporal_runtime
+
+  post_tasks:
+    - name: Run shared post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: temporal
+        playbook_execution_post_verify_audit_action: playbook.verify.temporal
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: temporal

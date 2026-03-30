@@ -864,6 +864,84 @@
         "converge-openfga"
       ]
     },
+    "temporal_server_runtime": {
+      "kind": "runtime",
+      "service_id": "temporal",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "temporal-frontend",
+      "registry_ref": "docker.io/temporalio/server",
+      "tag": "1.30.2",
+      "digest": "sha256:d5334ee3ddce1617efbe280a10afc85916cf8d81798415c98988dbda2b46773e",
+      "ref": "docker.io/temporalio/server:1.30.2@sha256:d5334ee3ddce1617efbe280a10afc85916cf8d81798415c98988dbda2b46773e",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-30-temporal-server-runtime.json",
+      "consumers": [
+        "collections/ansible_collections/lv3/platform/roles/temporal_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-temporal"
+      ]
+    },
+    "temporal_admin_tools_runtime": {
+      "kind": "runtime",
+      "service_id": "temporal",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "temporal-admin-tools",
+      "registry_ref": "docker.io/temporalio/admin-tools",
+      "tag": "1.30.2",
+      "digest": "sha256:024c6473df113e4b220b3caf6056d30964582ffcae6f6e46a1074aa6c67968d3",
+      "ref": "docker.io/temporalio/admin-tools:1.30.2@sha256:024c6473df113e4b220b3caf6056d30964582ffcae6f6e46a1074aa6c67968d3",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-30-temporal-admin-tools-runtime.json",
+      "exception": {
+        "reason": "The admin-tools image is profile-only, not long-running, and must stay version-aligned with the pinned Temporal server for namespace and schema administration; accept the current upstream gRPC/authz finding temporarily while tracking the next compatible rebuild or image refresh.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-30",
+        "review_by": "2026-04-13"
+      },
+      "consumers": [
+        "playbooks/temporal.yml",
+        "collections/ansible_collections/lv3/platform/roles/temporal_runtime/templates/docker-compose.yml.j2",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-temporal"
+      ]
+    },
+    "temporal_ui_runtime": {
+      "kind": "runtime",
+      "service_id": "temporal",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "temporal-ui",
+      "registry_ref": "docker.io/temporalio/ui",
+      "tag": "2.43.3",
+      "digest": "sha256:31f0d8c1ed0bfc49c9c20ea9613ee9dd5c52f5f989bacb8a30210f847028e9cd",
+      "ref": "docker.io/temporalio/ui:2.43.3@sha256:31f0d8c1ed0bfc49c9c20ea9613ee9dd5c52f5f989bacb8a30210f847028e9cd",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-30-temporal-ui-runtime.json",
+      "exception": {
+        "reason": "The Temporal UI is loopback-only, diagnostic, and reachable only through operator SSH tunneling, but the pinned upstream image still carries critical OpenSSL and Go runtime findings; accept it temporarily until a rebuilt UI image or newer validated digest is available.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-30",
+        "review_by": "2026-04-13"
+      },
+      "consumers": [
+        "collections/ansible_collections/lv3/platform/roles/temporal_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-temporal"
+      ]
+    },
     "outline_runtime": {
       "kind": "runtime",
       "service_id": "outline",
