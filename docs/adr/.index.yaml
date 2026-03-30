@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-30'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 253
+  Implemented: 255
   Partial: 7
-  Not Implemented: 63
+  Not Implemented: 61
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4740,7 +4740,7 @@ adr_index:
   - adr: '0276'
     title: NATS JetStream As The Platform Event Bus
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: networking
     keywords:
@@ -4752,6 +4752,7 @@ adr_index:
       - bus
     summary: We will deploy NATS with JetStream enabled as the platform event bus.
     filename: 0276-nats-jetstream-as-the-platform-event-bus.md
+    implemented_version: 0.177.97
   - adr: '0277'
     title: Typesense As The Full-Text Search Engine For Internal Structured Data
     status: Accepted
@@ -4845,7 +4846,7 @@ adr_index:
       - interceptor
     summary: We will deploy Mailpit as the SMTP development mail interceptor, available
     filename: 0282-mailpit-as-the-smtp-development-mail-interceptor.md
-    implemented_version: 0.177.95
+    implemented_version: 0.177.96
   - adr: 0283
     title: Plausible Analytics As The Privacy-First Web Traffic Analytics Layer
     status: Accepted

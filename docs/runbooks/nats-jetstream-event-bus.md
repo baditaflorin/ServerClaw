@@ -101,3 +101,18 @@ history during ADR 0276 rollout.
 3. Publish one `platform.findings.observation` smoke record with `scripts/nats_streams.py --smoke-publish`
 4. Publish one `secret.rotation.completed` and one `rag.document.staged` smoke record through a controller-side `nats-py` snippet when those domain streams are first reconciled
 5. Record the live-apply receipt under `receipts/live-applies/`
+
+## Troubleshooting
+
+If `curl -fsS http://127.0.0.1:8222/healthz` starts refusing connections right
+after a shared Docker-runtime replay, inspect `lv3-nats-jetstream` before
+assuming the NATS config is broken:
+
+1. check `docker ps -a --filter name=lv3-nats-jetstream`
+2. inspect `docker logs lv3-nats-jetstream`
+3. if the container exited with code `0` after a `terminated` signal, rerun
+   [playbooks/nats-jetstream.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/nats-jetstream.yml)
+   from a synchronized worktree to restore the repo-managed runtime
+4. only use `docker compose --file /opt/nats-jetstream/docker-compose.yml up -d`
+   as a temporary bridge while the authoritative playbook replay is still in
+   progress or recovering from shared Docker daemon churn

@@ -595,7 +595,7 @@ workstreams:
   - id: ws-0276-live-apply
     adr: "0276"
     title: Live apply the NATS JetStream platform event bus from latest origin/main
-    status: ready_for_merge
+    status: live_applied
     owner: codex
     branch: codex/ws-0276-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0276-live-apply
