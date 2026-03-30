@@ -2,11 +2,13 @@
 
 - ADR: [ADR 0276](../adr/0276-nats-jetstream-as-the-platform-event-bus.md)
 - Title: Recover and repo-manage the private NATS JetStream runtime, then verify the ADR 0276 event-bus contract live
-- Status: in_progress
-- Implemented In Repo Version: not yet
+- Status: ready_for_merge
+- Included In Repo Version: not yet
+- Branch-Local Receipt: `receipts/live-applies/2026-03-30-adr-0276-nats-jetstream-event-bus-live-apply.json`
+- Canonical Mainline Receipt: not yet
 - Live Applied In Platform Version: not yet
-- Implemented On: not yet
-- Live Applied On: not yet
+- Implemented On: 2026-03-30
+- Live Applied On: 2026-03-30
 - Branch: `codex/ws-0276-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0276-live-apply`
 - Owner: codex
@@ -64,3 +66,58 @@
 - this workstream owns the repo-managed recovery of the currently stopped NATS runtime plus the ADR 0276 stream and subject contract
 - `platform.mutation.recorded` remains inside `PLATFORM_EVENTS` by design so the live rollout does not destroy the existing `platform.>` stream history
 - if the branch-local live apply completes before safe main integration, the handoff must state exactly which release and integrated-truth files still wait for the merge step
+
+## Purpose
+
+Implement ADR 0276 by making the private NATS JetStream runtime repo-managed,
+preserving the live multi-principal auth contract already used by other
+consumers, and leaving a clean branch-local audit trail that an exact-main
+replay can promote onto the protected `main` surfaces safely.
+
+## Branch-Local Delivery
+
+- `27c676e46` added the repo-managed NATS JetStream playbooks and role,
+  aligned the mutation-ledger and secret-rotation subjects with the ADR 0276
+  contract, updated the NATS stream catalog, and recorded the initial
+  workstream surfaces.
+- `959b10f38` preserved the live additional principal catalog
+  (`control-plane-publisher`, `workflow-consumer`, `alert-consumer`,
+  `receipt-consumer`, and `agent-consumer`) so the repo-managed runtime matches
+  the live multi-principal NATS contract instead of collapsing it back to a
+  single admin account.
+
+## Verification
+
+- The rebased branch-local proof is recorded in
+  `receipts/live-applies/2026-03-30-adr-0276-nats-jetstream-event-bus-live-apply.json`
+  from commit `959b10f382ff96e7a16db56a1283e83cca9fb8ea` on top of repository
+  version `0.177.96` and platform version `0.130.63`.
+- `uv run --with pytest -m pytest -q tests/test_nats_jetstream_runtime_role.py tests/test_secret_rotation.py tests/test_service_id_resolver.py tests/unit/test_event_taxonomy.py tests/unit/test_ledger_writer.py tests/test_ansible_execution_scopes.py`
+  returned `38 passed in 0.68s` on the rebased head.
+- `uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --run-id ws0276syntax-postrebase --playbook playbooks/nats-jetstream.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check`
+  passed on the rebased tree, and `make preflight WORKFLOW=live-apply-service`
+  also passed.
+- `ANSIBLE_HOST_KEY_CHECKING=False uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --run-id ws0276recover-r1 --playbook playbooks/nats-jetstream.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+  succeeded with final recap
+  `docker-runtime-lv3 : ok=79 changed=1 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0`
+  after the latest server inspection found `lv3-nats-jetstream` had exited.
+- `make check-nats-streams` and `make apply-nats-streams` both returned
+  `PLATFORM_EVENTS: none`, `RAG_DOCUMENT: none`, and
+  `SECRET_ROTATION: none` after the recovery replay.
+- `uv run --with pyyaml --with nats-py python scripts/nats_streams.py --smoke-publish`
+  published `platform.findings.observation` into `PLATFORM_EVENTS` at
+  sequence `169`, and follow-up raw JSON publishes to
+  `secret.rotation.completed` and `rag.document.staged` landed in
+  `SECRET_ROTATION` and `RAG_DOCUMENT` with stream-local sequence `2`.
+
+## Outcome
+
+- Branch-local proof is complete on the current `origin/main` lineage, and the
+  live platform once again has a healthy repo-managed NATS runtime with clean
+  stream reconciliation and smoke evidence.
+- The remaining exact-main integration step still needs to bump `VERSION` from
+  `0.177.96`, update `RELEASE.md`, `changelog.md`,
+  `docs/release-notes/`, `README.md`, `versions/stack.yaml`,
+  `build/platform-manifest.json`, `docs/adr/0276-nats-jetstream-as-the-platform-event-bus.md`,
+  and `docs/adr/.index.yaml`, then rerun the governed replay from that exact
+  release commit and record the canonical mainline receipt.

@@ -595,7 +595,7 @@ workstreams:
   - id: ws-0276-live-apply
     adr: "0276"
     title: Live apply the NATS JetStream platform event bus from latest origin/main
-    status: in_progress
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0276-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0276-live-apply
@@ -651,8 +651,19 @@ workstreams:
             - collections/ansible_collections/lv3/platform/roles/nats_jetstream_runtime/
             - receipts/live-applies/
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0276 by bringing the private NATS
+        JetStream runtime under repo-managed automation, preserving the live
+        multi-principal auth contract, aligning mutation-ledger,
+        secret-rotation, and RAG subjects with the platform event-bus stream
+        catalog, and recording rebased live-apply proof before exact-main
+        integration
+      release_bump: patch
+      included_in_repo_version: null
+      latest_receipts:
+        nats_jetstream: 2026-03-30-adr-0276-nats-jetstream-event-bus-mainline-live-apply
   - id: ws-0260-live-apply
     adr: "0260"
     title: Live-apply ADR 0260 Nextcloud personal data plane from latest origin/main
