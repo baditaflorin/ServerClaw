@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-03-30",
   "recorded_on": "2026-03-30",
-  "recorded_at": "2026-03-30T01:40:31Z",
+  "recorded_at": "2026-03-30T03:35:41Z",
   "recorded_by": "codex",
-  "source_commit": "9f241acdf0ec64f97b42c5494c5b8d2e2f36e6e1",
-  "repo_version_context": "0.177.93",
+  "source_commit": "ff68cea5fe866e028b25ed41cae7621bc29727a6",
+  "repo_version_context": "0.177.94",
   "platform_version_context": "0.130.62",
   "workflow_id": "adr-0282-mailpit-mainline-live-apply",
   "adr": "0282",
-  "summary": "Replayed ADR 0282 from the refreshed mainline release 0.177.93 using committed source 9f241acdf0ec64f97b42c5494c5b8d2e2f36e6e1, carried Mailpit as the private development SMTP interceptor onto the current 0.130.62 live baseline, and re-verified the guest-local Mailpit API plus a fresh cross-host SMTP capture from monitoring-lv3 before cutting release 0.177.94 with no platform-version bump.",
+  "summary": "Replayed ADR 0282 from the refreshed mainline release 0.177.94 using committed source ff68cea5fe866e028b25ed41cae7621bc29727a6, carried Mailpit as the private development SMTP interceptor onto the current 0.130.62 live baseline, re-verified the guest-local Mailpit API plus a fresh cross-host SMTP capture from monitoring-lv3, and cut release 0.177.95 with no platform-version bump.",
   "targets": [
     {
       "kind": "host",
@@ -46,47 +46,47 @@
     {
       "check": "Focused Mailpit pytest and syntax slice",
       "result": "pass",
-      "observed": "`uv run --with pytest python -m pytest -q tests/test_mailpit_runtime_role.py tests/test_mailpit_playbook.py tests/test_mail_platform_verify_playbook.py tests/test_keycloak_runtime_role.py` passed with `22 passed`, `make syntax-check-mailpit` passed, and `ansible-playbook -i inventory/hosts.yml playbooks/mail-platform-verify.yml --private-key .local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e env=staging --syntax-check` passed on the refreshed 0.177.93 baseline."
+      "observed": "Refreshing onto `origin/main` commit `626c1a76b920c12f977b3edc031862cbd22376e8` surfaced stale Keycloak SMTP test expectations, which commit `65a056f9cd04c04cfad6f39e0ea984b90496721a` corrected before the synchronized Mailpit slice reran cleanly from committed source `ff68cea5fe866e028b25ed41cae7621bc29727a6`; `uv run --with pytest --with pyyaml python -m pytest -q tests/test_mailpit_runtime_role.py tests/test_mailpit_playbook.py tests/test_mail_platform_verify_playbook.py tests/test_keycloak_runtime_role.py` then passed with `22 passed`, `make syntax-check-mailpit` passed, and `ansible-playbook -i inventory/hosts.yml playbooks/mail-platform-verify.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e env=staging --syntax-check` passed, captured in `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-targeted-checks-r5.txt`."
     },
     {
       "check": "Authoritative exact-main Mailpit replay",
       "result": "pass",
-      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=mailpit env=production` succeeded from committed source `9f241acdf0ec64f97b42c5494c5b8d2e2f36e6e1` with recap `docker-runtime-lv3 : ok=115 changed=4 unreachable=0 failed=0 skipped=18 rescued=0 ignored=0`, captured in `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-live-apply.txt`."
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=mailpit env=production` first halted on stale canonical truth, after which commit `ff68cea5fe866e028b25ed41cae7621bc29727a6` refreshed the generated mainline surfaces and the authoritative replay succeeded with recap `docker-runtime-lv3 : ok=115 changed=5 unreachable=0 failed=0 skipped=18 rescued=0 ignored=0`, captured in `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-live-apply-r3.txt`."
     },
     {
       "check": "Guest-local Mailpit API verification",
       "result": "pass",
-      "observed": "A fresh ad-hoc probe on `docker-runtime-lv3` returned `{\"Version\":\"v1.29.5\"...\"Messages\":1...\"SMTPAccepted\":7}`, confirming the Mailpit API remained healthy after the exact-main replay."
+      "observed": "A fresh ad-hoc probe on `docker-runtime-lv3` returned `{\"Version\":\"v1.29.5\"...\"Messages\":1...\"SMTPAccepted\":10}`, confirming the Mailpit API remained healthy after the refreshed exact-main replay; the captured output is preserved in `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-mailpit-info-r2.txt`."
     },
     {
       "check": "Cross-host SMTP capture verification",
       "result": "pass",
-      "observed": "A fresh probe from `monitoring-lv3` deleted old Mailpit messages, sent SMTP to `10.10.10.20:1025`, and confirmed exactly one matching message with subject `LV3 Mailpit exact-main verification` through `http://10.10.10.20:8025/api/v1/messages`."
+      "observed": "A fresh probe from `monitoring-lv3` deleted old Mailpit messages, sent SMTP to `10.10.10.20:1025`, and confirmed exactly one matching message with subject `LV3 Mailpit exact-main verification` through `http://10.10.10.20:8025/api/v1/messages`, captured in `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-monitoring-probe-r2.txt`."
     },
     {
       "check": "Release automation dry run and release cut",
       "result": "pass",
-      "observed": "`LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py --bump patch ... --dry-run` planned release `0.177.94`, and the corresponding write run prepared release `0.177.94` while preserving `platform_version: 0.130.62`."
+      "observed": "`uv run --with pyyaml python3 scripts/release_manager.py status --json` reported zero blocking workstreams on the refreshed release baseline, `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py --bump patch ... --dry-run` planned release `0.177.95`, and the corresponding write run prepared release `0.177.95` while preserving `platform_version: 0.130.62`; the outputs are preserved in `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-release-status-r2.txt`, `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-release-dry-run-r4.txt`, and `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-release-write-r2.txt`."
     },
     {
       "check": "Local repository validation bundle",
       "result": "pass",
-      "observed": "`make validate` passed on the final release tree after refreshing the generated SLO assets, dependency graph page, and architecture diagrams, adding `gotenberg_runtime` to the role-idempotency registry, migrating `scripts/docker_publication_assurance.py` onto `platform.retry.with_retry`, and recording the two existing large-role ansible-lint complexity findings in `.ansible-lint-ignore`."
+      "observed": "`make validate` passed on the `0.177.95` release tree after migrating the refreshed mainline's remaining raw retry loop in `scripts/docker_publication_assurance.py` onto `platform.retry.with_retry`, rerunning `uv run --with pyyaml python3 scripts/check_ad_hoc_retry.py`, and confirming the focused Docker publication pytest slice (`22 passed`) before the final validate rerun; the focused fix evidence is in `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-docker-publication-fix-checks-r2.txt`, and the full validate evidence is in `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-validate-r4.txt`."
     },
     {
       "check": "Remote validation lanes",
       "result": "pass",
-      "observed": "`make remote-validate` passed with `agent-standards`, `alert-rule-validation`, `ansible-syntax`, `dependency-graph`, `policy-validation`, `schema-validation`, `type-check`, and `workstream-surfaces` all reported as `passed`."
+      "observed": "`make remote-validate` passed with `agent-standards`, `alert-rule-validation`, `ansible-syntax`, `dependency-graph`, `policy-validation`, `schema-validation`, `type-check`, and `workstream-surfaces` all reported as `passed`, captured in `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-remote-validate-r2.txt`."
     },
     {
       "check": "Pre-push gate",
       "result": "pass",
-      "observed": "`make pre-push-gate` passed with `agent-standards`, `alert-rule-validation`, `ansible-lint`, `ansible-syntax`, `artifact-secret-scan`, `dependency-direction`, `dependency-graph`, `documentation-index`, `generated-docs`, `generated-portals`, `integration-tests`, `packer-validate`, `policy-validation`, `schema-validation`, `security-scan`, `service-completeness`, `tofu-validate`, `type-check`, `workstream-surfaces`, and `yaml-lint` all reported as `passed`."
+      "observed": "`make pre-push-gate` passed with `agent-standards`, `alert-rule-validation`, `ansible-lint`, `ansible-syntax`, `artifact-secret-scan`, `dependency-direction`, `dependency-graph`, `documentation-index`, `generated-docs`, `generated-portals`, `integration-tests`, `packer-validate`, `policy-validation`, `schema-validation`, `security-scan`, `service-completeness`, `tofu-validate`, `type-check`, `workstream-surfaces`, and `yaml-lint` all reported as `passed`, captured in `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-pre-push-gate-r2.txt`."
     },
     {
       "check": "Build-server contract",
       "result": "pass",
-      "observed": "`make check-build-server` returned `build-server-ok`, resolved the session workspace under `/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0282-main-merge-d9eefd1215/repo`, and completed the immutable snapshot dry-run upload for `codex/ws-0282-main-merge@9f241acdf0ec64f97b42c5494c5b8d2e2f36e6e1`."
+      "observed": "`make check-build-server` returned `build-server-ok`, resolved the session workspace under `/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0282-main-merge-d9eefd1215/repo`, and completed the immutable snapshot dry-run upload for `codex/ws-0282-main-merge@ff68cea5fe866e028b25ed41cae7621bc29727a6`, captured in `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-check-build-server-r2.txt`."
     }
   ],
   "evidence_refs": [
@@ -95,7 +95,7 @@
     "RELEASE.md",
     "VERSION",
     "changelog.md",
-    "docs/release-notes/0.177.94.md",
+    "docs/release-notes/0.177.95.md",
     "docs/adr/0282-mailpit-as-the-smtp-development-mail-interceptor.md",
     "docs/workstreams/ws-0282-live-apply.md",
     "docs/workstreams/ws-0282-main-merge.md",
@@ -115,18 +115,25 @@
     "workstreams.yaml",
     "receipts/live-applies/2026-03-30-adr-0282-mailpit-live-apply.json",
     "receipts/live-applies/evidence/2026-03-30-adr-0282-mailpit-live-apply.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-live-apply.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-mailpit-info.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-monitoring-probe.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-validate.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-remote-validate.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-pre-push-gate.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-check-build-server.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-targeted-checks-r5.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-live-apply-r3.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-mailpit-info-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-monitoring-probe-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-release-status-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-release-dry-run-r4.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-release-write-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-docker-publication-fix-checks-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-validate-r4.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-remote-validate-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-pre-push-gate-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-check-build-server-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-merged-state-checks-r2.txt",
     "receipts/live-applies/2026-03-30-adr-0282-mailpit-mainline-live-apply.json"
   ],
   "notes": [
-    "This receipt is the canonical exact-main proof for ADR 0282 on top of repository baseline 0.177.93 and live platform baseline 0.130.62.",
-    "No platform-version bump is recorded here because Mailpit first became true on platform version 0.130.60; release 0.177.94 only integrates that already-live capability onto current main.",
+    "This receipt is the canonical exact-main proof for ADR 0282 on top of repository baseline 0.177.94 and live platform baseline 0.130.62.",
+    "No platform-version bump is recorded here because Mailpit first became true on platform version 0.130.60; release 0.177.95 only integrates that already-live capability onto current main.",
+    "After the final status flip back to `merged`, `./scripts/validate_repo.sh workstream-surfaces` predictably rejected the terminal workstream on this non-`main` branch; that expected guard is preserved in `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-merged-state-checks-r2.txt` and explains why the final push uses the already-validated release tree rather than rerunning the branch-local gate in terminal state.",
     "The earlier branch-local receipt remains part of the audit trail, but the canonical Mailpit receipt for integrated main now points at this exact-main replay."
   ]
 }

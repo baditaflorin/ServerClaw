@@ -18,7 +18,7 @@ from script_bootstrap import ensure_repo_root_on_path
 
 ensure_repo_root_on_path(__file__)
 
-from platform.retry import PlatformRetryError, RetryClass, RetryPolicy, with_retry
+from platform.retry import MaxRetriesExceeded, PlatformRetryError, RetryClass, RetryPolicy, with_retry
 
 
 LOOPBACK_HOSTS = {"127.0.0.1", "localhost"}
@@ -701,21 +701,13 @@ def _wait_for_publication_recovery(
     attempts: int = 12,
     delay_seconds: float = 2.0,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    latest = _run_checks(
-        service_id=service_id,
-        service_probe=service_probe,
-        contract=contract,
-        local_ipv4s=local_ipv4s,
-        command_runner=command_runner,
-        listener_checker=listener_checker,
-        listener_timeout=listener_timeout,
-    )
-    for attempt in range(1, attempts + 1):
-        if not _has_blocking_issues(latest, strict_listeners=strict_listeners):
-            return latest, {"settled": True, "attempts": attempt, "report": latest}
-        if attempt == attempts:
-            break
-        time.sleep(delay_seconds)
+    latest: dict[str, Any] = {}
+    attempts_used = 0
+
+    def _probe_publication_recovery() -> dict[str, Any]:
+        nonlocal latest, attempts_used
+
+        attempts_used += 1
         latest = _run_checks(
             service_id=service_id,
             service_probe=service_probe,
@@ -725,7 +717,30 @@ def _wait_for_publication_recovery(
             listener_checker=listener_checker,
             listener_timeout=listener_timeout,
         )
-    return latest, {"settled": False, "attempts": attempts, "report": latest}
+        if _has_blocking_issues(latest, strict_listeners=strict_listeners):
+            raise PlatformRetryError(
+                "docker publication has not settled yet",
+                retry_class=RetryClass.BACKOFF,
+                retry_after=delay_seconds,
+            )
+        return latest
+
+    try:
+        settled = with_retry(
+            _probe_publication_recovery,
+            policy=RetryPolicy(
+                max_attempts=attempts,
+                base_delay_s=delay_seconds,
+                max_delay_s=delay_seconds,
+                multiplier=1.0,
+                jitter=False,
+                transient_max=0,
+            ),
+            error_context="docker publication recovery",
+        )
+        return settled, {"settled": True, "attempts": attempts_used, "report": settled}
+    except MaxRetriesExceeded:
+        return latest, {"settled": False, "attempts": attempts_used, "report": latest}
 
 
 def assure_docker_publication(

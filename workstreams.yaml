@@ -161,13 +161,13 @@ workstreams:
     ready_to_merge: true
     live_applied: true
     canonical_truth:
-      included_in_repo_version: 0.177.94
+      included_in_repo_version: 0.177.95
       latest_receipts:
         mailpit: 2026-03-30-adr-0282-mailpit-mainline-live-apply
   - id: ws-0282-main-merge
     adr: "0282"
     title: Integrate ADR 0282 Mailpit exact-main replay into current origin/main
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/ws-0282-main-merge
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-main-merge
@@ -332,9 +332,9 @@ workstreams:
     ready_to_merge: true
     live_applied: true
     canonical_truth:
-      changelog_entry: integrates ADR 0282 into main by replaying Mailpit as the private development SMTP interceptor and the non-production SMTP contract onto the current 0.177.93 / 0.130.62 baseline
+      changelog_entry: integrates ADR 0282 into main by replaying Mailpit as the private development SMTP interceptor and the non-production SMTP contract onto the current 0.177.94 / 0.130.62 baseline
       release_bump: patch
-      included_in_repo_version: 0.177.94
+      included_in_repo_version: 0.177.95
       latest_receipts:
         mailpit: 2026-03-30-adr-0282-mailpit-mainline-live-apply
   - id: ws-0266-validation-runner-capability-contracts
