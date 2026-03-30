@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.177.97
+repo_version: 0.177.98
 platform_version: 0.130.64
 
 live_apply_evidence:
@@ -122,7 +122,7 @@ live_apply_evidence:
     https_tls_assurance: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
     validation_gate: 2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply
     validation_runner_contracts: 2026-03-29-adr-0266-validation-runner-capability-contracts-mainline-live-apply
-    matrix_synapse: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
+    matrix_synapse: 2026-03-30-adr-0256-mautrix-bridges-live-apply
     stage_smoke_suites: 2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
     gotenberg: 2026-03-30-adr-0278-gotenberg-mainline-live-apply
     nextcloud: 2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply
@@ -1046,7 +1046,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.97
+    current: 0.177.98
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.64
