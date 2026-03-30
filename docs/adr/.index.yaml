@@ -4768,7 +4768,7 @@ adr_index:
   - adr: 0278
     title: Gotenberg As The Document-To-PDF Rendering Service
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -4779,6 +4779,7 @@ adr_index:
       - service
     summary: We will deploy Gotenberg as the shared document-to-PDF rendering service.
     filename: 0278-gotenberg-as-the-document-to-pdf-rendering-service.md
+    implemented_version: 0.130.59
   - adr: 0279
     title: Grist As The No-Code Operational Spreadsheet Database
     status: Accepted

@@ -1,12 +1,12 @@
-# Release 0.177.91
+# Release 0.177.92
 
 - Date: 2026-03-30
 
 ## Summary
-- implements ADR 0254 by carrying the dedicated ServerClaw chat surface on chat.lv3.org onto current mainline truth, preserving the governed 8096 edge lane to coolify-lv3, and recording the first clean exact-main receipt from merged main
+- implemented ADR 0278 by adding the private Gotenberg document-to-PDF runtime on docker-runtime-lv3, publishing the authenticated `/v1/gotenberg` API gateway route, and verifying Chromium plus LibreOffice PDF conversion end to end
 
 ## Platform Impact
-- no platform version bump was required; platform version 0.130.60 remains current after the merged-main replay and end-to-end live verification on 2026-03-30
+- platform version advances to 0.130.61 after the exact-main ADR 0278 replay; this release integrates the private Gotenberg runtime, authenticated /v1/gotenberg route, pinned image contract, and verified Chromium plus LibreOffice rendering on top of the current 0.177.91 / 0.130.60 baseline.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

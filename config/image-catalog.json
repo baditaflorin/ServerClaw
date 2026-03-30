@@ -229,6 +229,28 @@
         "converge-dozzle"
       ]
     },
+    "gotenberg_runtime": {
+      "kind": "runtime",
+      "service_id": "gotenberg",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "gotenberg",
+      "registry_ref": "docker.io/gotenberg/gotenberg",
+      "tag": "8.29.0",
+      "digest": "sha256:1c04b80fa1e1f42123258a3fe28e2260d52e267dec77c0da5eab4143540172d5",
+      "ref": "docker.io/gotenberg/gotenberg:8.29.0@sha256:1c04b80fa1e1f42123258a3fe28e2260d52e267dec77c0da5eab4143540172d5",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-30-gotenberg-runtime.json",
+      "consumers": [
+        "roles/gotenberg_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-gotenberg"
+      ]
+    },
     "homepage_runtime": {
       "kind": "runtime",
       "service_id": "homepage",

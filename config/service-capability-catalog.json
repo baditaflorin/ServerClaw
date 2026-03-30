@@ -259,6 +259,37 @@
       }
     },
     {
+      "id": "gotenberg",
+      "name": "Gotenberg",
+      "description": "Private stateless document rendering service for HTML, Markdown, text, and Office-to-PDF conversion workflows.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:3007",
+      "exposure": "private-only",
+      "health_probe_id": "gotenberg",
+      "image_catalog_ids": [
+        "gotenberg_runtime"
+      ],
+      "adr": "0278",
+      "runbook": "docs/runbooks/configure-gotenberg.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-gotenberg/lv3-gotenberg",
+      "tags": [
+        "documents",
+        "pdf",
+        "rendering",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.20:3007",
+          "notes": "The runtime stays private to the guest network; authenticated operator and automation access may be brokered through the shared API gateway route at https://api.lv3.org/v1/gotenberg."
+        }
+      }
+    },
+    {
       "id": "grafana",
       "name": "Grafana",
       "description": "Metrics dashboards, platform overview, and service detail dashboards.",

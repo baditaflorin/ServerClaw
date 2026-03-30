@@ -54,6 +54,7 @@ platform_port_assignments:
   gitea_host_proxy_port: 3009
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
+  gotenberg_port: 3007
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
@@ -510,21 +511,24 @@ network_policy:
         - source: all_guests
           protocol: tcp
           ports:
+            - 3007
             - 8881
             - 11434
-          description: Private guest-to-guest agent API traffic
+          description: Private guest-to-guest document rendering and agent API traffic
         - source: 172.16.0.0/12
           protocol: tcp
           ports:
+            - 3007
             - 8881
             - 11434
-          description: Local Docker workloads that use the private Ollama and SearXNG APIs
+          description: Local Docker workloads that use the private Gotenberg, Ollama, and SearXNG APIs
         - source: 192.168.0.0/16
           protocol: tcp
           ports:
+            - 3007
             - 8881
             - 11434
-          description: Local Docker workloads that use the private Ollama and SearXNG APIs
+          description: Local Docker workloads that use the private Gotenberg, Ollama, and SearXNG APIs
         - source: docker-build-lv3
           protocol: tcp
           ports:
@@ -1445,6 +1449,14 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ open_webui_controller_url }}"
+  gotenberg:
+    service_name: gotenberg
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
   serverclaw:
     service_name: serverclaw
     owning_vm: coolify-lv3
