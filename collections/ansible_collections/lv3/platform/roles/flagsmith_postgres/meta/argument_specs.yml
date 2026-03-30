@@ -1,0 +1,22 @@
+---
+# Purpose: Describe the required PostgreSQL variables for the Flagsmith database role.
+
+argument_specs:
+  main:
+    short_description: Converge the PostgreSQL role and database used by Flagsmith.
+    options:
+      flagsmith_database_name:
+        type: str
+        required: true
+      flagsmith_database_user:
+        type: str
+        required: true
+      flagsmith_postgres_secret_dir:
+        type: path
+        required: true
+      flagsmith_postgres_password_file:
+        type: path
+        required: true
+      flagsmith_database_password_local_file:
+        type: path
+        required: true

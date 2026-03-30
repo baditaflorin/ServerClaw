@@ -61,6 +61,7 @@ platform_port_assignments:
   searxng_host_proxy_port: 80
   langfuse_port: 3002
   plausible_port: 8016
+  flagsmith_port: 8017
   dify_port: 8094
   changedetection_port: 5000
   browser_runner_port: 8096
@@ -546,6 +547,11 @@ network_policy:
         - source: nginx-lv3
           protocol: tcp
           ports:
+            - 8017
+          description: Reverse proxy access to Flagsmith edge publication and public health checks
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
             - 3090
           description: Reverse proxy access to the Homepage dashboard
         - source: nginx-lv3
@@ -578,12 +584,27 @@ network_policy:
             - 9998
             - 11434
           description: Private guest-to-guest document rendering, extraction, OCR, and agent API traffic
+        - source: all_guests
+          protocol: tcp
+          ports:
+            - 8017
+          description: Private guest-to-guest access to Flagsmith environment evaluation and management APIs
+        - source: host
+          protocol: tcp
+          ports:
+            - 8017
+          description: Proxmox host verification and controller-side access to the private Flagsmith runtime
         - source: host
           protocol: tcp
           ports:
             - 3008
             - 9998
           description: Proxmox host verification and controller-side access to the private Tika and Tesseract OCR APIs
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 8017
+          description: Local Docker workloads that evaluate flags or fetch remote configuration from the private Flagsmith API
         - source: 172.16.0.0/12
           protocol: tcp
           ports:
@@ -594,6 +615,11 @@ network_policy:
             - 9998
             - 11434
           description: Local Docker workloads that use the private Gotenberg, Tika, Tesseract OCR, Changedetection, Ollama, and SearXNG APIs
+        - source: 192.168.0.0/16
+          protocol: tcp
+          ports:
+            - 8017
+          description: Local Docker workloads that evaluate flags or fetch remote configuration from the private Flagsmith API
         - source: 192.168.0.0/16
           protocol: tcp
           ports:
@@ -692,6 +718,11 @@ network_policy:
             - 8089
             - 9998
           description: Private monitoring probes for the Tesseract OCR, Changedetection, Tika, and Dozzle runtimes
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
+            - 8017
+          description: Private monitoring probes for the Flagsmith runtime
         - source: monitoring-lv3
           protocol: tcp
           ports:
@@ -1491,6 +1522,28 @@ lv3_service_topology:
       noindex: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.langfuse_port }}"
+  flagsmith:
+    service_name: flagsmith
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: flags.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: flags
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.flagsmith_port }}"
   plausible:
     service_name: plausible
     owning_vm: docker-runtime-lv3

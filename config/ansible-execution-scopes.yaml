@@ -80,6 +80,12 @@ playbooks:
     shared_surfaces:
       - service:excalidraw
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/flagsmith.yml:
+    playbook_id: flagsmith
+    mutation_scope: platform
+    shared_surfaces:
+      - service:flagsmith
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/gitea.yml:
     playbook_id: gitea
     mutation_scope: platform
@@ -379,6 +385,12 @@ playbooks:
     mutation_scope: host
     shared_surfaces:
       - service:docker-runtime-observability
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/flagsmith.yml:
+    playbook_id: flagsmith
+    mutation_scope: platform
+    shared_surfaces:
+      - service:flagsmith
       - inventory/host_vars/proxmox_florin.yml
   playbooks/services/grafana.yml:
     playbook_id: grafana

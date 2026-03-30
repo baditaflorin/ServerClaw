@@ -1,0 +1,50 @@
+---
+# Purpose: Verify the public Flagsmith health publication and the shared edge auth gate.
+
+- name: Verify the public Flagsmith health endpoint
+  ansible.builtin.uri:
+    url: "{{ flagsmith_public_base_url }}/health"
+    method: GET
+    status_code:
+      - 200
+    return_content: false
+    timeout: 30
+  register: flagsmith_public_health
+  retries: 24
+  delay: 5
+  until: flagsmith_public_health.status == 200
+  changed_when: false
+
+- name: Verify the public Flagsmith UI is protected by the shared edge auth boundary
+  ansible.builtin.uri:
+    url: "{{ flagsmith_public_base_url }}/"
+    method: GET
+    follow_redirects: none
+    status_code:
+      - 302
+      - 303
+    return_content: false
+    timeout: 30
+  register: flagsmith_public_root
+  changed_when: false
+
+- name: Verify the public Flagsmith management API is protected by the shared edge auth boundary
+  ansible.builtin.uri:
+    url: "{{ flagsmith_public_base_url }}/api/v1/projects/"
+    method: GET
+    follow_redirects: none
+    status_code:
+      - 302
+      - 303
+    return_content: false
+    timeout: 30
+  register: flagsmith_public_api
+  changed_when: false
+
+- name: Assert the Flagsmith edge publication behaves as expected
+  ansible.builtin.assert:
+    that:
+      - flagsmith_public_health.status == 200
+      - (flagsmith_public_root.location | default('')) is search('/oauth2/')
+      - (flagsmith_public_api.location | default('')) is search('/oauth2/')
+    fail_msg: "Flagsmith is published publicly, but the shared edge health or auth-gate behaviour did not verify."

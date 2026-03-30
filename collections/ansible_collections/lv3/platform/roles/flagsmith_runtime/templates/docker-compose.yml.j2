@@ -1,0 +1,42 @@
+services:
+  openbao-agent:
+    image: {{ flagsmith_openbao_agent_image }}
+    container_name: {{ flagsmith_openbao_agent_container_name }}
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    restart: unless-stopped
+    network_mode: host
+    cap_add:
+      - IPC_LOCK
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - {{ flagsmith_openbao_agent_dir }}:/openbao-agent:ro
+
+  flagsmith:
+    image: {{ flagsmith_runtime_image }}
+    container_name: {{ flagsmith_container_name }}
+    restart: unless-stopped
+    env_file:
+      - {{ flagsmith_env_file }}
+    ports:
+      - "{{ ansible_host }}:{{ flagsmith_internal_port }}:8000"
+      - "127.0.0.1:{{ flagsmith_internal_port }}:8000"
+    depends_on:
+      openbao-agent:
+        condition: service_started
+
+  flagsmith-task-processor:
+    image: {{ flagsmith_runtime_image }}
+    container_name: {{ flagsmith_task_processor_container_name }}
+    restart: unless-stopped
+    env_file:
+      - {{ flagsmith_env_file }}
+    command:
+      - run-task-processor
+    depends_on:
+      openbao-agent:
+        condition: service_started
+      flagsmith:
+        condition: service_started

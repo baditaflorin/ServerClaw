@@ -1,0 +1,389 @@
+---
+# Purpose: Converge the Flagsmith CE runtime, bootstrap identity, environment keys, and repo-managed feature seed state.
+
+- name: Validate Flagsmith runtime inputs
+  ansible.builtin.assert:
+    that:
+      - flagsmith_site_dir | length > 0
+      - flagsmith_compose_file | length > 0
+      - flagsmith_secret_dir | length > 0
+      - flagsmith_env_file | length > 0
+      - flagsmith_runtime_image | length > 0
+      - flagsmith_internal_port | int > 0
+      - flagsmith_internal_base_url | length > 0
+      - flagsmith_public_base_url | length > 0
+      - flagsmith_database_host | length > 0
+      - flagsmith_database_name | length > 0
+      - flagsmith_database_user | length > 0
+      - flagsmith_database_password_local_file | length > 0
+      - flagsmith_django_secret_key_local_file | length > 0
+      - flagsmith_admin_password_local_file | length > 0
+      - flagsmith_environment_keys_local_file | length > 0
+      - flagsmith_environment_definitions | length > 0
+      - flagsmith_seed_features | length > 0
+    fail_msg: >-
+      flagsmith_runtime requires runtime paths, image refs, database auth,
+      controller-local mirrored secrets, and at least one declared environment and feature.
+
+- name: Check whether the Flagsmith database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ flagsmith_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: flagsmith_database_password_local
+
+- name: Fail if the Flagsmith database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ flagsmith_database_password_local_file }} is missing on the control machine.
+      Converge flagsmith_postgres before deploying Flagsmith.
+  when: not flagsmith_database_password_local.stat.exists
+
+- name: Ensure the Flagsmith runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+      - python3
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the local Flagsmith artifact directory exists
+  ansible.builtin.file:
+    path: "{{ flagsmith_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Ensure the Flagsmith runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ flagsmith_site_dir }}"
+      mode: "0755"
+    - path: "{{ flagsmith_secret_dir }}"
+      mode: "0700"
+
+- name: Generate the Flagsmith runtime secrets
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item.path }}" ]; then
+      umask 077
+      {{ item.command }} > "{{ item.path }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop:
+    - path: "{{ flagsmith_django_secret_key_remote_file }}"
+      command: "openssl rand -hex 64"
+    - path: "{{ flagsmith_admin_password_remote_file }}"
+      command: "openssl rand -base64 24 | tr -d '\\n'"
+  register: flagsmith_secret_generation
+  changed_when: >-
+    (
+      flagsmith_secret_generation.results | default([])
+      | selectattr('stdout', 'search', 'changed')
+      | list
+      | length
+    ) > 0
+  no_log: true
+
+- name: Read the Flagsmith runtime secrets
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  register: flagsmith_secret_reads
+  loop:
+    - "{{ flagsmith_django_secret_key_remote_file }}"
+    - "{{ flagsmith_admin_password_remote_file }}"
+  no_log: true
+
+- name: Record the Flagsmith runtime secrets
+  ansible.builtin.set_fact:
+    flagsmith_django_secret_key: "{{ flagsmith_secret_reads.results[0].content | b64decode | trim }}"
+    flagsmith_admin_password: "{{ flagsmith_secret_reads.results[1].content | b64decode | trim }}"
+    flagsmith_database_password: "{{ lookup('ansible.builtin.file', flagsmith_database_password_local_file) | trim }}"
+    flagsmith_runtime_secret_payload:
+      DATABASE_URL: >-
+        postgresql://{{ flagsmith_database_user }}:{{
+          (lookup('ansible.builtin.file', flagsmith_database_password_local_file) | trim) | urlencode
+        }}@{{ flagsmith_database_host }}:5432/{{ flagsmith_database_name }}
+      DJANGO_SECRET_KEY: "{{ flagsmith_secret_reads.results[0].content | b64decode | trim }}"
+  no_log: true
+
+- name: Mirror the Flagsmith runtime secrets to the control machine
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.content }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  loop:
+    - dest: "{{ flagsmith_django_secret_key_local_file }}"
+      content: "{{ flagsmith_django_secret_key }}"
+    - dest: "{{ flagsmith_admin_password_local_file }}"
+      content: "{{ flagsmith_admin_password }}"
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for Flagsmith
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: flagsmith
+    common_openbao_compose_env_agent_dir: "{{ flagsmith_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ flagsmith_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ flagsmith_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ flagsmith_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ flagsmith_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ flagsmith_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ flagsmith_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ flagsmith_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ flagsmith_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ flagsmith_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ flagsmith_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: flagsmith.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ flagsmith_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ flagsmith_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ flagsmith_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ flagsmith_legacy_env_file }}"
+  no_log: true
+
+- name: Render the Flagsmith environment file
+  ansible.builtin.template:
+    src: flagsmith.env.j2
+    dest: "{{ flagsmith_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  register: flagsmith_env_template
+  no_log: true
+
+- name: Render the Flagsmith compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ flagsmith_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: flagsmith_compose_template
+
+- name: Copy the Flagsmith seed helper to the runtime host
+  ansible.builtin.copy:
+    src: "{{ inventory_dir }}/../scripts/flagsmith_seed.py"
+    dest: "{{ flagsmith_seed_script_remote_file }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Ensure Docker bridge networking chains are ready before Flagsmith startup
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_bridge_chains
+  vars:
+    common_docker_bridge_chains_service_name: docker
+    common_docker_bridge_chains_require_nat_chain: true
+
+- name: Pull the Flagsmith images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ flagsmith_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ flagsmith_site_dir }}"
+  register: flagsmith_pull
+  changed_when: >-
+    'Pulling' in flagsmith_pull.stdout
+    or 'Downloaded newer image' in flagsmith_pull.stdout
+    or 'Pull complete' in flagsmith_pull.stdout
+
+- name: Start the Flagsmith stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ flagsmith_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ flagsmith_site_dir }}"
+  register: flagsmith_up
+  changed_when: >-
+    'Creating' in flagsmith_up.stdout
+    or 'Recreating' in flagsmith_up.stdout
+    or 'Starting' in flagsmith_up.stdout
+
+- name: Check whether Flagsmith publishes the expected host port
+  ansible.builtin.command:
+    argv:
+      - docker
+      - port
+      - "{{ flagsmith_container_name }}"
+      - 8000/tcp
+  register: flagsmith_port_binding_check
+  changed_when: false
+  failed_when: false
+
+- name: Force-recreate Flagsmith when the host port binding is missing
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ flagsmith_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - --remove-orphans
+  args:
+    chdir: "{{ flagsmith_site_dir }}"
+  register: flagsmith_force_recreate
+  changed_when: true
+  when: flagsmith_port_binding_check.stdout | trim == ""
+
+- name: Wait for Flagsmith to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ flagsmith_internal_port }}"
+    delay: 0
+    timeout: 300
+
+- name: Wait for the Flagsmith health endpoint
+  ansible.builtin.uri:
+    url: "{{ flagsmith_internal_base_url }}/health"
+    method: GET
+    status_code:
+      - 200
+    return_content: false
+    timeout: 30
+  register: flagsmith_health_ready
+  retries: 36
+  delay: 5
+  until: flagsmith_health_ready.status == 200
+  changed_when: false
+
+- name: Ensure the Flagsmith bootstrap admin password matches the managed secret
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ flagsmith_container_name }}"
+      - python
+      - manage.py
+      - shell
+      - -c
+      - >-
+        import json;
+        from users.models import FFAdminUser;
+        email = {{ flagsmith_admin_email | to_json }};
+        password = {{ flagsmith_admin_password | to_json }};
+        user = FFAdminUser.objects.filter(email=email).first();
+        assert user is not None, f"Flagsmith bootstrap user {email} was not created";
+        changed = not user.check_password(password);
+        if changed:
+            user.set_password(password);
+            user.save(update_fields=["password"]);
+        print(json.dumps({"changed": changed, "is_superuser": bool(user.is_superuser)}))
+  register: flagsmith_admin_password_sync
+  retries: 24
+  delay: 5
+  until: flagsmith_admin_password_sync.rc == 0
+  changed_when: >-
+    (
+      (flagsmith_admin_password_sync.stdout | trim | from_json).changed
+      | default(false)
+    )
+  no_log: true
+
+- name: Assert the Flagsmith bootstrap identity remained a superuser
+  ansible.builtin.assert:
+    that:
+      - (flagsmith_admin_password_sync.stdout | trim | from_json).is_superuser
+    fail_msg: "The managed Flagsmith bootstrap identity exists, but it no longer has superuser access."
+  no_log: true
+
+- name: Reconcile the Flagsmith org, project, environments, features, and environment keys
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ flagsmith_seed_script_remote_file }}"
+      - reconcile
+      - --base-url
+      - "{{ flagsmith_internal_base_url }}"
+      - --admin-email
+      - "{{ flagsmith_admin_email }}"
+      - --admin-password-file
+      - "{{ flagsmith_admin_password_remote_file }}"
+      - --organisation-name
+      - "{{ flagsmith_organisation_name }}"
+      - --project-name
+      - "{{ flagsmith_project_name }}"
+      - --environment-spec-json
+      - "{{ flagsmith_environment_definitions | to_json }}"
+      - --feature-spec-json
+      - "{{ flagsmith_seed_features | to_json }}"
+  register: flagsmith_seed
+  changed_when: >-
+    (
+      (flagsmith_seed.stdout | trim | from_json).changed
+      | default(false)
+    )
+  no_log: true
+
+- name: Record the Flagsmith seed summary
+  ansible.builtin.set_fact:
+    flagsmith_seed_summary: "{{ flagsmith_seed.stdout | trim | from_json }}"
+  no_log: true
+
+- name: Mirror the Flagsmith environment keys to the control machine
+  ansible.builtin.copy:
+    dest: "{{ flagsmith_environment_keys_local_file }}"
+    content: "{{ flagsmith_seed_summary.environment_keys_bundle | to_nice_json }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Record the controller-local OpenBao init payload for Flagsmith environment key publication
+  ansible.builtin.set_fact:
+    flagsmith_openbao_init_payload: "{{ lookup('ansible.builtin.file', openbao_init_local_file) | from_json }}"
+  no_log: true
+
+- name: Store the managed Flagsmith environment keys in OpenBao
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ flagsmith_openbao_environment_keys_path }}"
+    method: POST
+    headers:
+      X-Vault-Token: "{{ flagsmith_openbao_init_payload.root_token }}"
+    body_format: json
+    body:
+      data: "{{ flagsmith_seed_summary.openbao_payload }}"
+    status_code:
+      - 200
+      - 204
+  changed_when: false
+  no_log: true
+
+- name: Verify the Flagsmith runtime
+  ansible.builtin.import_tasks: verify.yml

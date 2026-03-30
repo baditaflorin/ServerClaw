@@ -59,6 +59,7 @@ PORT_KEYS = (
     "searxng_host_proxy_port",
     "langfuse_port",
     "plausible_port",
+    "flagsmith_port",
     "dify_port",
     "changedetection_port",
     "browser_runner_port",
@@ -499,6 +500,9 @@ def build_service_urls(
     elif service_id == "langfuse":
         urls["internal"] = service_url("http", private_ip, ports["langfuse_port"])
         port_map["internal"] = ports["langfuse_port"]
+    elif service_id == "flagsmith":
+        urls["internal"] = service_url("http", private_ip, ports["flagsmith_port"])
+        port_map["internal"] = ports["flagsmith_port"]
     elif service_id == "plausible":
         urls["internal"] = service_url("http", private_ip, ports["plausible_port"])
         port_map["internal"] = ports["plausible_port"]

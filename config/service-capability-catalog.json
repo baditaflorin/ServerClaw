@@ -422,6 +422,47 @@
       }
     },
     {
+      "id": "flagsmith",
+      "name": "Flagsmith",
+      "description": "Feature flag and remote configuration control plane with repo-managed environment and baseline feature seeding.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8017",
+      "public_url": "https://flags.lv3.org",
+      "subdomain": "flags.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Flagsmith Public Health",
+      "health_probe_id": "flagsmith",
+      "secret_catalog_ids": [
+        "flagsmith_database_password",
+        "flagsmith_django_secret_key",
+        "flagsmith_admin_password",
+        "flagsmith_environment_keys"
+      ],
+      "image_catalog_ids": [
+        "flagsmith_runtime"
+      ],
+      "adr": "0288",
+      "runbook": "docs/runbooks/configure-flagsmith.md",
+      "tags": [
+        "feature-flags",
+        "remote-config",
+        "control-plane",
+        "edge-authenticated"
+      ],
+      "notes": "The public UI and browser management API are protected by the shared edge oauth2-proxy and Keycloak flow while server-side environment keys remain private and repo-managed through OpenBao.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://flags.lv3.org",
+          "subdomain": "flags.lv3.org",
+          "notes": "The bootstrap org, project, environments, feature definitions, and environment API keys are seeded from the repo-managed Flagsmith runtime role."
+        }
+      }
+    },
+    {
       "id": "homepage",
       "name": "Homepage",
       "description": "Unified operator-facing dashboard for the current LV3 service inventory, quick links, and live service reachability.",

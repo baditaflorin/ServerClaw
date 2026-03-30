@@ -282,6 +282,28 @@
         "converge-dozzle"
       ]
     },
+    "flagsmith_runtime": {
+      "kind": "runtime",
+      "service_id": "flagsmith",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "flagsmith",
+      "registry_ref": "docker.io/flagsmith/flagsmith",
+      "tag": "2.224.0",
+      "digest": "sha256:488e4ed58aefdda768c0f3613bb45bd3e5d441462e230040d8f1164b0526225c",
+      "ref": "docker.io/flagsmith/flagsmith:2.224.0@sha256:488e4ed58aefdda768c0f3613bb45bd3e5d441462e230040d8f1164b0526225c",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-30-flagsmith-runtime.json",
+      "consumers": [
+        "roles/flagsmith_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-flagsmith"
+      ]
+    },
     "gotenberg_runtime": {
       "kind": "runtime",
       "service_id": "gotenberg",
