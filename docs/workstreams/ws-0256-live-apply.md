@@ -60,6 +60,7 @@ merged onto the protected mainline surfaces safely.
 
 ## Live Evidence
 
+- receipt: `receipts/live-applies/2026-03-30-adr-0256-mautrix-bridges-live-apply.json`
 - successful branch-local converge log: `receipts/live-applies/evidence/2026-03-30-ws-0256-converge-matrix-synapse-r7.txt`
 - intermediate failure logs retained for auditability:
   `receipts/live-applies/evidence/2026-03-30-ws-0256-converge-matrix-synapse-r1.txt`,

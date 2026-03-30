@@ -2204,7 +2204,8 @@ workstreams:
     canonical_truth:
       changelog_entry: Live-applied ADR 0256 so Matrix Synapse now provisions repo-managed mautrix Discord and WhatsApp bridges, bridge databases, bridge smoke verification, and controller-safe admin bootstrap handling.
       release_bump: patch
-      latest_receipts: {}
+      latest_receipts:
+        matrix_synapse: 2026-03-30-adr-0256-mautrix-bridges-live-apply
   - id: ws-0255-main-integration
     adr: "0255"
     title: Integrate ADR 0255 exact-main replay onto current origin/main
