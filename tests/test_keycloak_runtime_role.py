@@ -249,6 +249,21 @@ def test_role_verifies_internal_mail_network_connectivity() -> None:
     assert connect_task["until"] == "keycloak_mail_submission_probe.rc == 0"
 
 
+def test_role_retries_api_gateway_client_reconcile_and_secret_read() -> None:
+    tasks = load_tasks()
+    realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
+    api_gateway_client_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Ensure the API gateway client exists"
+    )
+    api_gateway_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the API gateway client secret")
+    assert api_gateway_client_task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
+    assert api_gateway_client_task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
+    assert api_gateway_client_task["until"] == "keycloak_api_gateway_client_reconcile is succeeded"
+    assert api_gateway_secret_task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
+    assert api_gateway_secret_task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
+    assert api_gateway_secret_task["until"] == "keycloak_api_gateway_client_secret_info is succeeded"
+
+
 def test_role_warms_authenticated_keycloak_admin_queries_before_realm_reconcile() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     tasks = load_tasks()
