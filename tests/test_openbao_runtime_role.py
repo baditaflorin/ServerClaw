@@ -49,9 +49,9 @@ def test_openbao_runtime_defaults_use_postgres_primary_address() -> None:
     assert "postgres_ha.initial_primary" in defaults
     assert "ansible_host" in defaults
     assert "@{{ openbao_postgres_host }}:5432/postgres?sslmode=disable" in defaults
-    assert 'CREATE ROLE "{{name}}" WITH LOGIN PASSWORD \'{{password}}\' VALID UNTIL \'{{expiration}}\';' in defaults
-    assert 'GRANT pg_read_all_data TO "{{name}}";' in defaults
-    assert 'DROP ROLE IF EXISTS "{{name}}";' in defaults
+    assert 'CREATE ROLE "{{ name }}" WITH LOGIN PASSWORD \'{{ password }}\' VALID UNTIL \'{{ expiration }}\';' in defaults
+    assert 'GRANT pg_read_all_data TO "{{ name }}";' in defaults
+    assert 'DROP ROLE IF EXISTS "{{ name }}";' in defaults
 
 
 def test_generated_platform_vars_pin_openbao_to_postgres_primary_ip() -> None:
@@ -62,6 +62,36 @@ def test_generated_platform_vars_pin_openbao_to_postgres_primary_ip() -> None:
 
     assert platform_vars["openbao_postgres_host"] == primary_guest["ipv4"]
     assert platform_vars["platform_postgres_host"] == "database.lv3.org"
+
+
+def test_guest_side_postgres_clients_use_the_primary_guest_address() -> None:
+    mattermost_defaults = (
+        REPO_ROOT
+        / "collections"
+        / "ansible_collections"
+        / "lv3"
+        / "platform"
+        / "roles"
+        / "mattermost_runtime"
+        / "defaults"
+        / "main.yml"
+    ).read_text(encoding="utf-8")
+    netbox_defaults = (
+        REPO_ROOT
+        / "collections"
+        / "ansible_collections"
+        / "lv3"
+        / "platform"
+        / "roles"
+        / "netbox_runtime"
+        / "defaults"
+        / "main.yml"
+    ).read_text(encoding="utf-8")
+
+    expected = "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+
+    assert f"mattermost_database_host: \"{expected}\"" in mattermost_defaults
+    assert f"netbox_database_host: \"{expected}\"" in netbox_defaults
 
 
 def test_openbao_rotation_catalog_is_loaded_before_derived_facts() -> None:

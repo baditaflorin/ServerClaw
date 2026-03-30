@@ -138,7 +138,7 @@
       "lineHeight": 1.25
     },
     {
-      "id": "c2d6060fae5b442f",
+      "id": "7cbb4eeab97a0965",
       "type": "rectangle",
       "x": 760,
       "y": 60,
@@ -167,7 +167,7 @@
       "locked": false
     },
     {
-      "id": "be6a6f2dd143e160",
+      "id": "d0f58ca16f795831",
       "type": "text",
       "x": 780,
       "y": 82,
@@ -194,14 +194,14 @@
       "updated": 0,
       "link": null,
       "locked": false,
-      "text": "Private Runtime\nalertmanager\nbackup-pbs\nbrowser-runner\ngitea",
+      "text": "Private Runtime\nalertmanager\nbackup-pbs\nbrowser-runner\nchangedetection",
       "fontSize": 20,
       "fontFamily": 1,
       "textAlign": "center",
       "verticalAlign": "middle",
       "baseline": 18,
       "containerId": null,
-      "originalText": "Private Runtime\nalertmanager\nbackup-pbs\nbrowser-runner\ngitea",
+      "originalText": "Private Runtime\nalertmanager\nbackup-pbs\nbrowser-runner\nchangedetection",
       "lineHeight": 1.25
     },
     {

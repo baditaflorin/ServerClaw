@@ -60,6 +60,7 @@ PORT_KEYS = (
     "langfuse_port",
     "plausible_port",
     "dify_port",
+    "changedetection_port",
     "browser_runner_port",
     "outline_port",
     "dozzle_http_port",
@@ -501,6 +502,9 @@ def build_service_urls(
     elif service_id == "dify":
         urls["internal"] = service_url("http", private_ip, ports["dify_port"])
         port_map["internal"] = ports["dify_port"]
+    elif service_id == "changedetection":
+        urls["internal"] = service_url("http", private_ip, ports["changedetection_port"])
+        port_map["internal"] = ports["changedetection_port"]
     elif service_id == "browser_runner":
         urls["internal"] = service_url("http", private_ip, ports["browser_runner_port"])
         port_map["internal"] = ports["browser_runner_port"]

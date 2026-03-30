@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-30'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 257
+  Implemented: 258
   Partial: 7
-  Not Implemented: 59
+  Not Implemented: 58
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4804,7 +4804,7 @@ adr_index:
   - adr: 0280
     title: Changedetection.io For External Content And API Change Monitoring
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: monitoring
     keywords:
@@ -4817,6 +4817,7 @@ adr_index:
       - monitoring
     summary: We will deploy Changedetection.io as the external content and API change
     filename: 0280-changedetection-io-for-external-content-and-api-change-monitoring.md
+    implemented_version: 0.177.100
   - adr: 0281
     title: GlitchTip As The Sentry-Compatible Application Error Tracker
     status: Accepted

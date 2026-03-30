@@ -129,6 +129,7 @@ live_apply_evidence:
     browser_runner: 2026-03-30-adr-0261-playwright-browser-runners-live-apply
     mailpit: 2026-03-30-adr-0282-mailpit-mainline-live-apply
     plausible_analytics: 2026-03-30-adr-0283-plausible-analytics-mainline-live-apply
+    changedetection: 2026-03-30-adr-0280-changedetection-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated

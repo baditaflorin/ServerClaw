@@ -15405,3 +15405,341 @@ workstreams:
       included_in_repo_version: 0.177.92
       latest_receipts:
         gotenberg: 2026-03-30-adr-0278-gotenberg-mainline-live-apply
+  - id: ws-0280-live-apply
+    adr: "0280"
+    title: ADR 0280 live apply from latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0280-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0280-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0280-live-apply.md
+    depends_on:
+      - adr-0086-backup-and-recovery-for-stateful-services
+      - adr-0092-unified-platform-api-gateway
+      - adr-0124-ntfy-for-lightweight-push-notifications
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0280-live-apply.md
+      - docs/adr/0280-changedetection-io-for-external-content-and-api-change-monitoring.md
+      - docs/runbooks/configure-changedetection.md
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - scripts/generate_platform_vars.py
+      - Makefile
+      - config/service-capability-catalog.json
+      - config/health-probe-catalog.json
+      - config/image-catalog.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      - config/api-gateway-catalog.json
+      - config/dependency-graph.json
+      - config/slo-catalog.json
+      - config/data-catalog.json
+      - config/command-catalog.json
+      - config/workflow-catalog.json
+      - config/ansible-execution-scopes.yaml
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/slo_rules.yml
+      - config/grafana/dashboards/slo-overview.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/site-generated/architecture/dependency-graph.md
+      - docs/diagrams/service-dependency-graph.excalidraw
+      - docs/diagrams/trust-tier-model.excalidraw
+      - collections/ansible_collections/lv3/platform/roles/mattermost_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/mattermost_runtime/templates/mattermost.env.j2
+      - collections/ansible_collections/lv3/platform/roles/mattermost_runtime/templates/mattermost.env.ctmpl.j2
+      - collections/ansible_collections/lv3/platform/roles/netbox_runtime/defaults/main.yml
+      - playbooks/changedetection.yml
+      - playbooks/services/changedetection.yml
+      - collections/ansible_collections/lv3/platform/roles/changedetection_runtime/
+      - scripts/changedetection_sync.py
+      - tests/test_changedetection_runtime_role.py
+      - tests/test_changedetection_metadata.py
+      - tests/test_changedetection_sync.py
+      - tests/test_generate_platform_vars.py
+      - tests/test_data_retention_role.py
+      - tests/test_openbao_runtime_role.py
+      - receipts/image-scans/2026-03-30-changedetection-runtime.json
+      - receipts/image-scans/2026-03-30-changedetection-runtime.trivy.json
+      - receipts/live-applies/
+      - docs/adr/.index.yaml
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: changedetection_docs
+          paths:
+            - docs/workstreams/ws-0280-live-apply.md
+            - docs/adr/0280-changedetection-io-for-external-content-and-api-change-monitoring.md
+            - docs/runbooks/configure-changedetection.md
+          mode: exclusive
+        - id: changedetection_platform_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - scripts/generate_platform_vars.py
+            - tests/test_generate_platform_vars.py
+          mode: shared_contract
+          contract: platform-topology-v1
+        - id: changedetection_shared_validation_contract
+          paths:
+            - Makefile
+          mode: shared_contract
+          contract: repository-automation-v1
+        - id: changedetection_service_catalog_contract
+          paths:
+            - config/service-capability-catalog.json
+            - config/health-probe-catalog.json
+            - config/image-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/api-gateway-catalog.json
+            - config/dependency-graph.json
+            - config/slo-catalog.json
+            - config/data-catalog.json
+            - config/command-catalog.json
+            - config/workflow-catalog.json
+            - config/ansible-execution-scopes.yaml
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/grafana/dashboards/slo-overview.json
+            - docs/site-generated/architecture/dependency-graph.md
+            - docs/diagrams/service-dependency-graph.excalidraw
+            - docs/diagrams/trust-tier-model.excalidraw
+          mode: shared_contract
+          contract: service-catalogs-v1
+        - id: changedetection_generated_diagrams
+          paths:
+            - docs/diagrams/agent-coordination-map.excalidraw
+          mode: shared_contract
+          contract: generated-diagrams-v1
+        - id: changedetection_dependency_runtime_fix
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/mattermost_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/mattermost_runtime/templates/mattermost.env.j2
+            - collections/ansible_collections/lv3/platform/roles/mattermost_runtime/templates/mattermost.env.ctmpl.j2
+            - tests/test_data_retention_role.py
+          mode: shared_contract
+          contract: compose-runtime-retention-v1
+        - id: changedetection_guest_database_host_fix
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/netbox_runtime/defaults/main.yml
+            - tests/test_openbao_runtime_role.py
+          mode: shared_contract
+          contract: guest-side-postgres-endpoint-v1
+        - id: changedetection_runtime_surfaces
+          paths:
+            - playbooks/changedetection.yml
+            - playbooks/services/changedetection.yml
+            - collections/ansible_collections/lv3/platform/roles/changedetection_runtime/**
+            - scripts/changedetection_sync.py
+            - tests/test_changedetection_runtime_role.py
+            - tests/test_changedetection_metadata.py
+            - tests/test_changedetection_sync.py
+            - receipts/image-scans/2026-03-30-changedetection-runtime.json
+            - receipts/image-scans/2026-03-30-changedetection-runtime.trivy.json
+          mode: exclusive
+        - id: changedetection_live_receipts
+          paths:
+            - receipts/live-applies/**
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0280 by adding the private Changedetection.io runtime on docker-runtime-lv3, publishing the authenticated `/v1/changedetection` API gateway route, and verifying the repo-managed external watch catalogue end to end
+      release_bump: patch
+      included_in_repo_version: 0.177.100
+      latest_receipts:
+        changedetection: 2026-03-30-adr-0280-changedetection-mainline-live-apply
+  - id: ws-0280-main-merge
+    adr: "0280"
+    title: Integrate ADR 0280 exact-main replay onto current origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0280-main-merge-r2
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0280-main-merge
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0280-main-merge.md
+    depends_on:
+      - ws-0280-live-apply
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0280-main-merge.md
+      - docs/workstreams/ws-0280-live-apply.md
+      - docs/adr/0280-changedetection-io-for-external-content-and-api-change-monitoring.md
+      - docs/adr/.index.yaml
+      - docs/runbooks/configure-changedetection.md
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - scripts/generate_platform_vars.py
+      - Makefile
+      - config/service-capability-catalog.json
+      - config/health-probe-catalog.json
+      - config/image-catalog.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      - config/api-gateway-catalog.json
+      - config/dependency-graph.json
+      - config/slo-catalog.json
+      - config/data-catalog.json
+      - config/command-catalog.json
+      - config/workflow-catalog.json
+      - config/ansible-execution-scopes.yaml
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/slo_rules.yml
+      - config/grafana/dashboards/slo-overview.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/site-generated/architecture/dependency-graph.md
+      - docs/diagrams/service-dependency-graph.excalidraw
+      - docs/diagrams/trust-tier-model.excalidraw
+      - collections/ansible_collections/lv3/platform/roles/mattermost_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/mattermost_runtime/templates/mattermost.env.j2
+      - collections/ansible_collections/lv3/platform/roles/mattermost_runtime/templates/mattermost.env.ctmpl.j2
+      - collections/ansible_collections/lv3/platform/roles/netbox_runtime/defaults/main.yml
+      - playbooks/changedetection.yml
+      - playbooks/services/changedetection.yml
+      - collections/ansible_collections/lv3/platform/roles/changedetection_runtime/
+      - scripts/changedetection_sync.py
+      - tests/test_changedetection_runtime_role.py
+      - tests/test_changedetection_metadata.py
+      - tests/test_changedetection_sync.py
+      - tests/test_generate_platform_vars.py
+      - tests/test_data_retention_role.py
+      - tests/test_openbao_runtime_role.py
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - receipts/image-scans/2026-03-30-changedetection-runtime.json
+      - receipts/image-scans/2026-03-30-changedetection-runtime.trivy.json
+      - receipts/live-applies/2026-03-30-adr-0280-changedetection-live-apply.json
+      - receipts/live-applies/2026-03-30-adr-0280-changedetection-mainline-live-apply.json
+      - receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-*
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: adr_0280_main_merge_carryover
+          paths:
+            - docs/workstreams/ws-0280-live-apply.md
+            - docs/adr/0280-changedetection-io-for-external-content-and-api-change-monitoring.md
+            - docs/runbooks/configure-changedetection.md
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - scripts/generate_platform_vars.py
+            - Makefile
+            - config/service-capability-catalog.json
+            - config/health-probe-catalog.json
+            - config/image-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/api-gateway-catalog.json
+            - config/dependency-graph.json
+            - config/slo-catalog.json
+            - config/data-catalog.json
+            - config/command-catalog.json
+            - config/workflow-catalog.json
+            - config/ansible-execution-scopes.yaml
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/grafana/dashboards/slo-overview.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/site-generated/architecture/dependency-graph.md
+            - docs/diagrams/service-dependency-graph.excalidraw
+            - docs/diagrams/trust-tier-model.excalidraw
+            - collections/ansible_collections/lv3/platform/roles/mattermost_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/mattermost_runtime/templates/mattermost.env.j2
+            - collections/ansible_collections/lv3/platform/roles/mattermost_runtime/templates/mattermost.env.ctmpl.j2
+            - collections/ansible_collections/lv3/platform/roles/netbox_runtime/defaults/main.yml
+            - playbooks/changedetection.yml
+            - playbooks/services/changedetection.yml
+            - collections/ansible_collections/lv3/platform/roles/changedetection_runtime/**
+            - scripts/changedetection_sync.py
+            - tests/test_changedetection_runtime_role.py
+            - tests/test_changedetection_metadata.py
+            - tests/test_changedetection_sync.py
+            - tests/test_generate_platform_vars.py
+            - tests/test_data_retention_role.py
+            - tests/test_openbao_runtime_role.py
+            - receipts/image-scans/2026-03-30-changedetection-runtime.json
+            - receipts/image-scans/2026-03-30-changedetection-runtime.trivy.json
+            - receipts/live-applies/2026-03-30-adr-0280-changedetection-live-apply.json
+            - receipts/live-applies/evidence/2026-03-30-ws-0280-branch-*
+            - receipts/live-applies/evidence/2026-03-30-ws-0280-changedetection-gateway-route-r1.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0280-changedetection-health-r1.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0280-changedetection-runtime-state-r1.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0280-converge-changedetection.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0280-converge-changedetection-r2.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0280-converge-changedetection-r3.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0280-converge-changedetection-r4.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0280-converge-changedetection-r5.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0280-converge-changedetection-r6.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0280-converge-changedetection-r7.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0280-converge-changedetection-r8.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0280-converge-mattermost-unblock-r1.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0280-converge-mattermost-unblock-r2.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0280-converge-mattermost-unblock-r3.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0280-host-state-r1.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0280-host-state-r2.txt
+            - receipts/live-applies/evidence/2026-03-30-ws-0280-live-apply-receipts-validate-r1.txt
+          mode: shared_contract
+          contract: changedetection-live-apply-v1
+        - id: integration_readme_surface
+          paths:
+            - README.md
+          mode: shared_contract
+          contract: main-integration-truth-v1
+        - id: release_management_surfaces
+          paths:
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+          mode: shared_contract
+          contract: release-management-v1
+        - id: platform_truth_generation
+          paths:
+            - versions/stack.yaml
+            - build/platform-manifest.json
+          mode: shared_contract
+          contract: canonical-truth-v1
+        - id: adr_0280_main_merge
+          paths:
+            - docs/workstreams/ws-0280-main-merge.md
+            - receipts/live-applies/2026-03-30-adr-0280-changedetection-mainline-live-apply.json
+            - receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-*
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: integrates ADR 0280 into main by replaying the private Changedetection.io runtime and authenticated `/v1/changedetection` gateway route onto the merged 0.177.99 / 0.130.66 baseline, cutting release 0.177.100, and advancing platform_version to 0.130.67
+      release_bump: patch
+      included_in_repo_version: 0.177.100
+      latest_receipts:
+        changedetection: 2026-03-30-adr-0280-changedetection-mainline-live-apply

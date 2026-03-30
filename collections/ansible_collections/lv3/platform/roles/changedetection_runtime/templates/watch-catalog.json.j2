@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "tags": [
+{% for group in changedetection_runtime_watch_groups %}
+    {{ (group | combine({
+      'notification_urls': [changedetection_runtime_notification_urls[group.notification_channel]],
+      'notification_muted': false
+    })) | to_json }}{% if not loop.last %},{% endif %}
+{% endfor %}
+  ],
+  "watches": {{ changedetection_runtime_watches | to_json }}
+}

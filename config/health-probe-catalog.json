@@ -2563,6 +2563,53 @@
           ]
         }
       }
+    },
+    "changedetection": {
+      "service_name": "changedetection",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "changedetection_runtime",
+      "verify_file": "roles/changedetection_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Changedetection startup completes once the private root page responds on the local listener.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:5000/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "Changedetection keeps serving the private root page on docker-runtime-lv3.",
+        "timeout_seconds": 180,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:5000/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "Changedetection accepts the repo-managed API token and reports the loaded watch catalogue counts through systeminfo.",
+        "timeout_seconds": 120,
+        "retries": 3,
+        "delay_seconds": 5,
+        "argv": [
+          "/bin/bash",
+          "-lc",
+        "set -euo pipefail; token=$(cat /etc/lv3/changedetection/api-token); systeminfo=$(mktemp); tags=$(mktemp); trap 'rm -f \"${systeminfo}\" \"${tags}\"' EXIT; curl -fsS http://127.0.0.1:5000/api/v1/systeminfo -H \"x-api-key: ${token}\" > \"${systeminfo}\"; curl -fsS http://127.0.0.1:5000/api/v1/tags -H \"x-api-key: ${token}\" > \"${tags}\"; python3 -c 'import json, pathlib, sys; payload=json.loads(pathlib.Path(sys.argv[1]).read_text()); tags=json.loads(pathlib.Path(sys.argv[2]).read_text()); assert payload[\"watch_count\"] >= 1 and len(tags) >= 1' \"${systeminfo}\" \"${tags}\""
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Changedetection stays private and uses an authenticated API contract; repo-managed runtime verification plus the governed API gateway check are the supported health path."
+      }
     }
   }
 }

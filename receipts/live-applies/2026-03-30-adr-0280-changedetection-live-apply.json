@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0280-changedetection-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_at": "2026-03-30T08:57:30Z",
+  "recorded_by": "codex",
+  "source_commit": "5e24045399bb6a65ba9b142c51579d88915d3290",
+  "repo_version_context": "0.177.96",
+  "platform_version_context": "0.130.63",
+  "workflow_id": "adr-0280-changedetection-live-apply",
+  "adr": "0280",
+  "summary": "Live-applied ADR 0280 from the latest rebased origin/main lineage by converging the private Changedetection.io runtime on docker-runtime-lv3, refreshing the authenticated /v1/changedetection API gateway route, repairing the Mattermost and guest-side PostgreSQL dependencies uncovered during replay, and verifying that the repo-managed watch catalogue is now drift-free on the live server.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Changedetection private runtime",
+      "address": "http://10.10.10.20:5000"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Changedetection authenticated gateway route",
+      "address": "https://api.lv3.org/v1/changedetection/"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused Changedetection regression slice",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml pytest tests/test_changedetection_sync.py tests/test_changedetection_runtime_role.py tests/test_changedetection_metadata.py tests/test_generate_platform_vars.py -q` returned `41 passed in 1.59s` after the live replay fixes were folded back into the worktree."
+    },
+    {
+      "check": "Changedetection and dependency syntax coverage",
+      "result": "pass",
+      "observed": "`make syntax-check-changedetection`, `make syntax-check-mattermost`, and `make syntax-check-netbox` all passed on the repaired worktree."
+    },
+    {
+      "check": "Branch validation paths",
+      "result": "pass",
+      "observed": "`./scripts/validate_repo.sh agent-standards workstream-surfaces health-probes`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, and `git diff --check` all passed after the workstream ownership manifest was updated to cover the real live-debug surfaces."
+    },
+    {
+      "check": "Governed production replay",
+      "result": "pass",
+      "observed": "`make converge-changedetection` succeeded with final recap `docker-runtime-lv3 : ok=311 changed=118 unreachable=0 failed=0 skipped=33 rescued=0 ignored=0`, captured in `receipts/live-applies/evidence/2026-03-30-ws-0280-converge-changedetection-r8.txt`."
+    },
+    {
+      "check": "Current host and Changedetection runtime state",
+      "result": "pass",
+      "observed": "The current host probe confirmed `Debian-trixie-latest-amd64-base`, `pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)`, and `sudo qm status 120 => status: running`; the settled guest probe confirmed the `changedetection` container is `healthy`, the root page responds, `systeminfo.watch_count == 9`, `tag_count == 4`, and `/opt/changedetection/watch-sync-report.json` reports `changed=false` with zero pending actions."
+    },
+    {
+      "check": "Authenticated gateway route",
+      "result": "pass",
+      "observed": "An authenticated `curl -fsS -H \"Authorization: Bearer $LV3_TOKEN\" https://api.lv3.org/v1/changedetection/` returned the private Changedetection UI HTML for version `0.54.7`, confirming the API gateway route is refreshing the live runtime."
+    }
+  ],
+  "evidence_refs": [
+    "docs/workstreams/ws-0280-live-apply.md",
+    "docs/runbooks/configure-changedetection.md",
+    "playbooks/changedetection.yml",
+    "playbooks/services/changedetection.yml",
+    "collections/ansible_collections/lv3/platform/roles/changedetection_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/changedetection_runtime/tasks/verify.yml",
+    "collections/ansible_collections/lv3/platform/roles/changedetection_runtime/templates/watch-catalog.json.j2",
+    "collections/ansible_collections/lv3/platform/roles/mattermost_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/mattermost_runtime/templates/mattermost.env.j2",
+    "collections/ansible_collections/lv3/platform/roles/mattermost_runtime/templates/mattermost.env.ctmpl.j2",
+    "collections/ansible_collections/lv3/platform/roles/netbox_runtime/defaults/main.yml",
+    "config/health-probe-catalog.json",
+    "scripts/changedetection_sync.py",
+    "tests/test_changedetection_runtime_role.py",
+    "tests/test_changedetection_metadata.py",
+    "tests/test_changedetection_sync.py",
+    "tests/test_data_retention_role.py",
+    "tests/test_openbao_runtime_role.py",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-branch-validate-r5.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-branch-data-model-validate-r1.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-branch-git-diff-check-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-converge-mattermost-unblock-r3.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-converge-changedetection-r8.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-host-state-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-changedetection-runtime-state-r1.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-changedetection-health-r1.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-changedetection-gateway-route-r1.txt",
+    "receipts/live-applies/2026-03-30-adr-0280-changedetection-live-apply.json",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "This receipt records branch-local live-apply proof on top of repo version 0.177.96 and platform version 0.130.63 before the exact-main integration step.",
+    "The initial replay failed because Mattermost was crash-looping on an invalid retention combination and because guest-side PostgreSQL clients were still pointing at a host-only address; those dependency fixes are now part of the committed worktree.",
+    "The initial Changedetection reconcile also left false-positive watch drift because the sync script compared live API-defaulted fields against sparse desired payloads; the repaired normalization now verifies only declared fields and the live sync report is clean.",
+    "Protected release surfaces and ADR 0280's final repo/platform implementation metadata remain to be updated only during the exact-main merge and live replay on the newest origin/main."
+  ],
+  "correction_loop": {
+    "loop_id": "2026-03-30-adr-0280-changedetection-live-repair",
+    "surface": "scripts/changedetection_sync.py",
+    "repair_action": "Reworked Changedetection watch reconciliation to compare only declared payload fields, split notification route decoding from URL assembly, rendered the watch catalogue through a dedicated template, and repaired Mattermost plus guest-side PostgreSQL defaults that blocked the live notification path.",
+    "verification": "Reran the focused pytest slice and syntax checks, replayed Mattermost successfully, reran the governed Changedetection converge successfully, and confirmed the settled sync report now returns changed=false with zero actions.",
+    "diagnosis": "contract_drift"
+  }
+}

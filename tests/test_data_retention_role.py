@@ -34,6 +34,9 @@ def test_monitoring_and_runtime_roles_expose_retention_settings() -> None:
     mattermost_env = (REPO_ROOT / "roles" / "mattermost_runtime" / "templates" / "mattermost.env.j2").read_text(
         encoding="utf-8"
     )
+    mattermost_env_ctmpl = (
+        REPO_ROOT / "roles" / "mattermost_runtime" / "templates" / "mattermost.env.ctmpl.j2"
+    ).read_text(encoding="utf-8")
     netbox_env = (REPO_ROOT / "roles" / "netbox_runtime" / "templates" / "netbox.env.j2").read_text(
         encoding="utf-8"
     )
@@ -44,6 +47,14 @@ def test_monitoring_and_runtime_roles_expose_retention_settings() -> None:
     assert "monitoring_tempo_trace_retention: 336h" in monitoring_defaults
     assert "option: max_age" in monitoring_tasks
     assert "MM_DATARETENTIONSETTINGS_ENABLEMESSAGEDELETION=true" in mattermost_env
+    assert "MM_DATARETENTIONSETTINGS_MESSAGERETENTIONDAYS=0" in mattermost_env
+    assert "MM_DATARETENTIONSETTINGS_FILERETENTIONDAYS=0" in mattermost_env
+    assert "MM_DATARETENTIONSETTINGS_MESSAGERETENTIONHOURS={{ mattermost_message_retention_hours }}" in mattermost_env
+    assert "MM_DATARETENTIONSETTINGS_FILERETENTIONHOURS={{ mattermost_file_retention_hours }}" in mattermost_env
+    assert "MM_DATARETENTIONSETTINGS_MESSAGERETENTIONDAYS=0" in mattermost_env_ctmpl
+    assert "MM_DATARETENTIONSETTINGS_FILERETENTIONDAYS=0" in mattermost_env_ctmpl
+    assert "MM_DATARETENTIONSETTINGS_MESSAGERETENTIONHOURS={{ mattermost_message_retention_hours }}" in mattermost_env_ctmpl
+    assert "MM_DATARETENTIONSETTINGS_FILERETENTIONHOURS={{ mattermost_file_retention_hours }}" in mattermost_env_ctmpl
     assert "CHANGELOG_RETENTION={{ netbox_changelog_retention_days }}" in netbox_env
     assert "Enable the NetBox housekeeping timer" in netbox_tasks
     assert "Find controller-side .env files in the repository workspace" in preflight_tasks
