@@ -99,5 +99,9 @@ ansible-playbook -i inventory/hosts.yml playbooks/mail-platform-verify.yml \
 
 - Mailpit is intentionally private-only. Do not publish it on the public NGINX edge.
 - Mailpit is intentionally stateless. Restarting or re-creating the container clears captured messages.
+- The governed Mailpit converge now retries automatically if Docker reports a
+  stale compose-network error such as `failed to create endpoint mailpit ...
+  network ... does not exist`; prefer rerunning the repo-managed workflow over
+  manual Docker network cleanup.
 - Production mail delivery must continue to point at Stalwart; Mailpit is only for staging,
   development, and assertion-level verification traffic.

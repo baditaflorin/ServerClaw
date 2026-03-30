@@ -3,7 +3,8 @@
 - ADR: [ADR 0282](../adr/0282-mailpit-as-the-smtp-development-mail-interceptor.md)
 - Title: Deploy Mailpit as the private SMTP development and staging mail interceptor
 - Status: live_applied
-- Implemented In Repo Version: N/A
+- Included In Repo Version: 0.177.94
+- Canonical Mainline Receipt: `receipts/live-applies/2026-03-30-adr-0282-mailpit-mainline-live-apply.json`
 - Live Applied In Platform Version: 0.130.60
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
@@ -14,95 +15,51 @@
 - Conflicts With: none
 - Shared Surfaces: `docs/adr/0282`, `docs/workstreams/ws-0282-live-apply.md`, `docs/runbooks/configure-mailpit.md`, `docs/runbooks/configure-mail-platform.md`, `inventory/group_vars/all.yml`, `inventory/group_vars/staging.yml`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `playbooks/mailpit.yml`, `playbooks/services/mailpit.yml`, `collections/ansible_collections/lv3/platform/roles/mailpit_runtime/`, `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/`, `playbooks/mail-platform-verify.yml`, `collections/ansible_collections/lv3/platform/playbooks/mail-platform-verify.yml`, `config/*catalog*.json`, `Makefile`, `scripts/generate_platform_vars.py`, `scripts/validate_repo.sh`, `receipts/image-scans/`, `receipts/live-applies/`
 
-## Scope
+## Purpose
 
-- deploy Mailpit on the Docker runtime VM as a private guest-network SMTP and HTTP capture service
-- add a non-production SMTP override contract so staging automation can target Mailpit instead of Stalwart
-- verify the private Mailpit API and SMTP capture path end to end on the live platform
-- record branch-local evidence and any exact remaining main-only truth updates clearly
+Implement ADR 0282 by making Mailpit the repo-managed private SMTP
+interceptor on `docker-runtime-lv3`, wiring the non-production SMTP contract to
+that service, and preserving enough branch-local state that a later exact-main
+replay can promote the service onto the protected `main` surfaces safely.
 
-## Non-Goals
+## Branch-Local Delivery
 
-- exposing Mailpit on the public NGINX edge or publishing a public subdomain
-- replacing Stalwart for production transactional or operator mail delivery
-- rewriting protected integration files on this workstream branch before the final verified merge-to-main step
-
-## Expected Repo Surfaces
-
-- `workstreams.yaml`
-- `docs/workstreams/ws-0282-live-apply.md`
-- `docs/adr/0282-mailpit-as-the-smtp-development-mail-interceptor.md`
-- `docs/runbooks/configure-mailpit.md`
-- `docs/runbooks/configure-mail-platform.md`
-- `inventory/group_vars/all.yml`
-- `inventory/group_vars/staging.yml`
-- `inventory/host_vars/proxmox_florin.yml`
-- `inventory/group_vars/platform.yml`
-- `playbooks/mailpit.yml`
-- `playbooks/services/mailpit.yml`
-- `collections/ansible_collections/lv3/platform/playbooks/mailpit.yml`
-- `collections/ansible_collections/lv3/platform/roles/mailpit_runtime/`
-- `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/`
-- `playbooks/mail-platform-verify.yml`
-- `collections/ansible_collections/lv3/platform/playbooks/mail-platform-verify.yml`
-- `config/ansible-execution-scopes.yaml`
-- `config/command-catalog.json`
-- `config/data-catalog.json`
-- `config/dependency-graph.json`
-- `config/health-probe-catalog.json`
-- `config/image-catalog.json`
-- `config/service-capability-catalog.json`
-- `config/service-completeness.json`
-- `config/service-redundancy-catalog.json`
-- `config/slo-catalog.json`
-- `config/workflow-catalog.json`
-- `config/prometheus/file_sd/slo_targets.yml`
-- `config/prometheus/rules/slo_alerts.yml`
-- `config/prometheus/rules/slo_rules.yml`
-- `config/grafana/dashboards/slo-overview.json`
-- `Makefile`
-- `scripts/generate_platform_vars.py`
-- `scripts/validate_repo.sh`
-- `tests/test_keycloak_runtime_role.py`
-- `tests/test_mailpit_playbook.py`
-- `tests/test_mailpit_runtime_role.py`
-- `tests/test_mail_platform_verify_playbook.py`
-- `receipts/image-scans/`
-- `receipts/live-applies/`
-
-## Expected Live Surfaces
-
-- `docker-runtime-lv3` listens privately on TCP `1025` for Mailpit SMTP capture
-- `docker-runtime-lv3` listens privately on TCP `8025` for the Mailpit UI and REST API
-- the Docker runtime guest firewall allows guest-network and management-plane access to those private listeners only
-- staging SMTP-aware automation can target `smtp_host: mailpit` on the `dev-tools_default` Docker network instead of Stalwart
+- `ba64cd226` added the repo-managed Mailpit runtime, the staging SMTP
+  override contract, the Mailpit verification playbook path, and the supporting
+  catalog, workflow, and image-scan surfaces.
+- `52517d2c2` fixed the Mailpit mail-platform verification syntax-check path so
+  the staging probe contract could be validated through repo automation.
+- `fb1ebb6b9` repaired the topology lookup so the first governed replay could
+  traverse the canonical host variables cleanly after rebases.
+- `c70973105` refreshed the rebased branch-local proof and preserved the
+  branch-local live-apply receipt after the earlier origin/main history
+  changed underneath the workstream.
 
 ## Verification
 
-- `uv run --with pytest python -m pytest -q tests/test_mailpit_runtime_role.py tests/test_mailpit_playbook.py tests/test_keycloak_runtime_role.py tests/test_mail_platform_verify_playbook.py`
-- `make syntax-check-mailpit`
-- `uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py validate`
-- `uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --run-id ws0282syntax --playbook playbooks/services/mailpit.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check`
+- The first synchronized mainline proof on 2026-03-30 is preserved in
+  `receipts/live-applies/2026-03-30-adr-0282-mailpit-live-apply.json`, and it
+  records the first live platform version where Mailpit became true:
+  `0.130.60`.
+- The authoritative exact-main replay now uses repository version `0.177.93`
+  from committed source `9f241acdf0ec64f97b42c5494c5b8d2e2f36e6e1` after
+  refreshing this work onto `origin/main` commit
+  `46df65e7f2227ca79a38035d2d24f53b6c02b5f8`.
 - `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=mailpit env=production`
-- `ansible-playbook -i inventory/hosts.yml playbooks/mail-platform-verify.yml --private-key .local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e env=staging --syntax-check`
-- `./scripts/validate_repo.sh workstream-surfaces agent-standards health-probes`
-- `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
-- `make check-canonical-truth`
-- `make validate-generated-slo`
-- `make validate-generated-docs`
-- `make validate-generated-portals`
+  completed successfully on that synchronized tree with final recap
+  `docker-runtime-lv3 : ok=115 changed=4 unreachable=0 failed=0 skipped=18 rescued=0 ignored=0`.
+- Fresh guest-local verification returned Mailpit info with
+  `Version=v1.29.5`, `Messages=1`, and `SMTPAccepted=7`.
+- A fresh probe from `monitoring-lv3` deleted previous Mailpit messages, sent
+  SMTP to `10.10.10.20:1025`, and confirmed exactly one matching captured
+  message through `http://10.10.10.20:8025/api/v1/messages`.
 
-## Results
+## Outcome
 
-- Branch-local live apply succeeded from rebased commit `bd15ecd2965e4e6213f0608f5bf8d9dae9ee1594`.
-- Receipt: `receipts/live-applies/2026-03-30-adr-0282-mailpit-live-apply.json`
-- The first governed replay exposed a real role-contract bug (`platform service catalog must be a mapping`); commit `ae60394c67d15486f7d64a90b327bac4ad0e7174` repaired the topology lookup and the second replay completed cleanly.
-- `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=mailpit env=production` finished with `docker-runtime-lv3 : ok=96 changed=5 unreachable=0 failed=0 skipped=16 rescued=0 ignored=0`.
-- The full validation sweep now passes on the rebased worktree, including the scoped runner, canonical-truth check, generated SLO rules, generated docs, and generated portals.
-- Independent post-apply Ansible verification on `docker-runtime-lv3` returned Mailpit info with `Version=v1.29.5`, and a second probe from `monitoring-lv3` sent SMTP to `10.10.10.20:1025` and confirmed one captured message through `http://10.10.10.20:8025/api/v1/messages`.
-- Generated architecture surfaces were reconciled on the branch by regenerating `docs/diagrams/*.excalidraw` and removing a stray conflict marker from `docs/site-generated/architecture/dependency-graph.md`, allowing `make validate-generated-docs` to pass.
-
-## Merge-To-Main Notes
-
-- remaining for merge to `main`: update `VERSION`, `changelog.md`, `README.md`, `versions/stack.yaml`, `build/platform-manifest.json`, and any generated status surfaces only after the exact synchronized mainline integration step is prepared
-- the branch-local receipt proves live state and keeps the protected release surfaces deferred until that final mainline closeout
+- ADR 0282 is now implemented on integrated repo version `0.177.94`.
+- Mailpit first became true on platform version `0.130.60`, while the current
+  integrated mainline baseline remains `0.130.62` with no additional
+  platform-version bump.
+- `receipts/live-applies/2026-03-30-adr-0282-mailpit-mainline-live-apply.json`
+  supersedes the branch-local receipt as the canonical proof for `mailpit`
+  while preserving the earlier branch-local receipt in the audit trail.

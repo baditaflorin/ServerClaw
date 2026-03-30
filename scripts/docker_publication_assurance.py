@@ -9,11 +9,16 @@ import json
 import socket
 import subprocess
 import sys
-import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Iterable
 from urllib.parse import urlsplit
+
+from script_bootstrap import ensure_repo_root_on_path
+
+ensure_repo_root_on_path(__file__)
+
+from platform.retry import PlatformRetryError, RetryClass, RetryPolicy, with_retry
 
 
 LOOPBACK_HOSTS = {"127.0.0.1", "localhost"}
@@ -260,7 +265,18 @@ def _wait_for_docker_chain_state(
         "docker_info_ready": False,
         "commands": [],
     }
-    for _ in range(attempts):
+
+    attempts_used = 0
+
+    def _probe_chain_state() -> dict[str, Any]:
+        nonlocal latest, attempts_used
+        attempts_used += 1
+        latest = {
+            "missing_nat_chain": False,
+            "missing_forward_chain": False,
+            "docker_info_ready": False,
+            "commands": [],
+        }
         info_result = command_runner(["docker", "info", "--format", "{{.ServerVersion}}"], None)
         latest["commands"].append(_command_record(info_result))
         latest["docker_info_ready"] = info_result.returncode == 0 and bool(info_result.stdout.strip())
@@ -286,8 +302,26 @@ def _wait_for_docker_chain_state(
             latest["missing_forward_chain"] = False
         if latest["docker_info_ready"] and not latest["missing_nat_chain"] and not latest["missing_forward_chain"]:
             return latest
-        time.sleep(delay_seconds)
-    return latest
+        if attempts_used >= attempts:
+            return latest
+        raise PlatformRetryError(
+            "docker chain state not ready yet",
+            retry_class=RetryClass.BACKOFF,
+            retry_after=delay_seconds,
+        )
+
+    return with_retry(
+        _probe_chain_state,
+        policy=RetryPolicy(
+            max_attempts=attempts,
+            base_delay_s=delay_seconds,
+            max_delay_s=delay_seconds,
+            multiplier=1.0,
+            jitter=False,
+            transient_max=0,
+        ),
+        error_context="docker chain state readiness",
+    )
 
 
 def _extract_compose_context(container_inspect: dict[str, Any], contract: dict[str, Any]) -> tuple[str | None, list[str]]:

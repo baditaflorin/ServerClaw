@@ -1,11 +1,12 @@
 # Workstream ws-0282-main-merge
 
 - ADR: [ADR 0282](../adr/0282-mailpit-as-the-smtp-development-mail-interceptor.md)
-- Title: Integrate ADR 0282 Mailpit live apply into `origin/main`
-- Status: ready_for_merge
-- Included In Repo Version: not yet
-- Platform Version Observed During Merge: 0.130.60
-- Release Date: not yet
+- Title: Integrate ADR 0282 Mailpit exact-main replay onto `origin/main`
+- Status: merged
+- Included In Repo Version: 0.177.94
+- Platform Version Observed During Integration: 0.130.62
+- Release Date: 2026-03-30
+- Live Applied On: 2026-03-30
 - Branch: `codex/ws-0282-main-merge`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-main-merge`
 - Owner: codex
@@ -13,11 +14,12 @@
 
 ## Purpose
 
-Carry the verified ADR 0282 Mailpit live-apply branch onto the latest
-`origin/main`, cut the protected release and canonical-truth surfaces from that
-merged baseline, rerun the integrated validation bundle, and publish the
-Mailpit rollout on `main` without inventing a second live event when the
-latest-main replay has already been verified on platform version `0.130.60`.
+Carry the verified ADR 0282 Mailpit live-apply branch onto the newest
+available `origin/main`, rerun the exact-main Mailpit replay from committed
+source on that synchronized baseline, cut the protected release and
+canonical-truth surfaces from the resulting tree, and publish the Mailpit
+rollout on `main` without inventing a new platform-version bump after Mailpit
+was already live on `0.130.60`.
 
 ## Shared Surfaces
 
@@ -77,24 +79,45 @@ latest-main replay has already been verified on platform version `0.130.60`.
 - `docs/site-generated/architecture/dependency-graph.md`
 - `receipts/live-applies/2026-03-30-adr-0282-mailpit-live-apply.json`
 
-## Plan
-
-- carry the finished Mailpit live-apply branch onto the latest `origin/main`
-- cut the next patch release from that merged candidate
-- refresh canonical truth so `versions/stack.yaml` records the Mailpit receipt
-  while keeping `platform_version` at `0.130.60`, because the rebased latest-main
-  live replay already proved the platform change before this release cut
-- rerun the integrated validation and release automation paths before pushing
-  `origin/main`
-
 ## Verification
 
-- `git fetch origin --prune` refreshed this integration worktree from the latest published `origin/main`
-- `git merge --ff-only codex/ws-0282-live-apply` carried the finished Mailpit branch onto the exact-main integration worktree without reopening branch-local conflicts
-- `receipts/live-applies/2026-03-30-adr-0282-mailpit-live-apply.json` remains the canonical live proof for the rebased latest-main replay and the independent SMTP capture from `monitoring-lv3`
+- `git fetch origin --prune` refreshed this integration worktree and confirmed
+  the newest baseline was `origin/main` commit
+  `46df65e7f2227ca79a38035d2d24f53b6c02b5f8`, which already carried
+  repository version `0.177.93` and platform version `0.130.62`.
+- The exact-main Mailpit replay used committed source
+  `9f241acdf0ec64f97b42c5494c5b8d2e2f36e6e1`, which preserved repository
+  version `0.177.93` while adding the Mailpit stale-network startup recovery
+  path to the synchronized tree.
+- `uv run --with pytest python -m pytest -q tests/test_mailpit_runtime_role.py tests/test_mailpit_playbook.py tests/test_mail_platform_verify_playbook.py tests/test_keycloak_runtime_role.py`
+  passed with `22 passed`, `make syntax-check-mailpit` passed, and
+  `ansible-playbook -i inventory/hosts.yml playbooks/mail-platform-verify.yml --private-key .local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e env=staging --syntax-check`
+  passed on the synchronized tree before the authoritative replay.
+- `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=mailpit env=production`
+  succeeded from committed source `9f241acdf0ec64f97b42c5494c5b8d2e2f36e6e1`
+  with final recap
+  `docker-runtime-lv3 : ok=115 changed=4 unreachable=0 failed=0 skipped=18 rescued=0 ignored=0`.
+- A fresh guest-local Mailpit probe returned `Version=v1.29.5`,
+  `Messages=1`, and `SMTPAccepted=7`, and a fresh probe from `monitoring-lv3`
+  sent SMTP to `10.10.10.20:1025` and confirmed the captured message through
+  `http://10.10.10.20:8025/api/v1/messages`.
+- `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python3 scripts/release_manager.py --bump patch ... --dry-run`
+  planned release `0.177.94`, and the matching write run prepared release
+  `0.177.94` while preserving `platform_version: 0.130.62`.
+- Final automation checks also passed on the release tree:
+  `make validate`, `make remote-validate`, `make pre-push-gate`, and
+  `make check-build-server`, with the validation follow-up refreshing the
+  generated SLO assets, dependency-graph page, and architecture diagrams plus
+  the small repo-automation fixes needed to satisfy `ansible-lint`,
+  `check_ad_hoc_retry.py`, and workstream ownership validation.
 
-## Current State
+## Outcome
 
-- The ADR 0282 Mailpit implementation and live verification are complete on the carried workstream branch.
-- This integration branch now owns the protected release surfaces needed to publish that already-verified Mailpit rollout on `main`.
-- The remaining work is the release cut, canonical-truth refresh, integration-side validation pass, and final push to `origin/main`.
+- Release `0.177.94` carries ADR 0282's exact-main replay onto `main`.
+- Platform version remains `0.130.62` because Mailpit first became true on
+  `0.130.60`; this release integrates that already-live capability onto the
+  synchronized repo truth instead of advancing the platform baseline again.
+- `receipts/live-applies/2026-03-30-adr-0282-mailpit-mainline-live-apply.json`
+  is the canonical exact-main proof for Mailpit from committed source
+  `9f241acdf0ec64f97b42c5494c5b8d2e2f36e6e1`, superseding the earlier
+  branch-local receipt while preserving it in the audit trail.

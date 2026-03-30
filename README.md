@@ -179,7 +179,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.93` |
+| Repository version | `0.177.94` |
 | Platform version | `0.130.62` |
 | Observed check date | `2026-03-29` |
 | Observed OS | `Debian 13` |
@@ -283,7 +283,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `local_search_and_indexing_fabric` | `2026-03-29-adr-0239-browser-local-search-post-merge-replay` |
 | `log_queryability_canary` | `2026-03-28-adr-0250-log-queryability-canary-live-apply` |
 | `mail_platform` | `2026-03-24-keycloak-password-reset-mail-live-apply` |
-| `mailpit` | `2026-03-30-adr-0282-mailpit-live-apply` |
+| `mailpit` | `2026-03-30-adr-0282-mailpit-mainline-live-apply` |
 | `matrix_synapse` | `2026-03-29-adr-0255-matrix-synapse-mainline-live-apply` |
 | `mattermost` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `monitoring` | `2026-03-28-adr-0250-log-queryability-canary-live-apply` |
@@ -1374,7 +1374,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.93` |
+| Repository version | `0.177.94` |
 | Platform version | `0.130.62` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
