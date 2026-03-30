@@ -6,7 +6,7 @@
 - Branch: `codex/ws-0260-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0260-live-apply`
 - Owner: codex
-- Included In Repo Version: 0.177.92
+- Included In Repo Version: 0.177.93
 - Canonical Mainline Receipt: `receipts/live-applies/2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply.json`
 - Depends On: `adr-0206-ports-and-adapters-for-external-integrations`, `adr-0259-n8n-as-the-external-app-connector-fabric-for-serverclaw`
 - Conflicts With: none
@@ -37,14 +37,14 @@ promote the service onto the protected `main` surfaces safely.
 - The first synchronized mainline proof on 2026-03-29 is preserved in
   `receipts/live-applies/2026-03-29-adr-0260-nextcloud-personal-data-plane-mainline-live-apply.json`,
   but it became non-canonical once `origin/main` advanced to release `0.177.90`.
-- The authoritative exact-main replay now uses repository version `0.177.92`
-  from committed source `eab22d2560767573b15334ceaf073d929eb0e451` after
+- The authoritative exact-main replay now uses repository version `0.177.93`
+  from committed source `2b0787aeac03f143ef50cf3e4f2c17f1a81aa3b0` after
   refreshing this work onto `origin/main` commit
-  `86423688ceb22626a41204b5c83d0f90f0b79d71`.
+  `bbb0f66b8ec995dfa3ecdd7bac9156ed664157cc`.
 - `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=nextcloud env=production`
   completed successfully on that synchronized tree with final recap
-  `docker-runtime-lv3 ok=181 changed=7 failed=0 skipped=106`,
-  `nginx-lv3 ok=39 changed=2 failed=0 skipped=7`,
+  `docker-runtime-lv3 ok=181 changed=4 failed=0 skipped=109`,
+  `nginx-lv3 ok=39 changed=4 failed=0 skipped=7`,
   `postgres-lv3 ok=52 changed=0 failed=0 skipped=14`, and
   `localhost ok=18 changed=0 failed=0 skipped=3`.
 - Public verification after the replay returned `installed=true` from
@@ -60,8 +60,8 @@ promote the service onto the protected `main` surfaces safely.
 
 ## Outcome
 
-- ADR 0260 is now implemented on integrated repo version `0.177.92` and live
-  platform version `0.130.61`.
+- ADR 0260 is now implemented on integrated repo version `0.177.93` and live
+  platform version `0.130.62`.
 - `receipts/live-applies/2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply.json`
   supersedes the earlier 2026-03-29 mainline receipt as the canonical proof
   for `nextcloud`.

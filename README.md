@@ -150,7 +150,7 @@ assurance path from `monitoring-lv3`.
 ADR 0260 Nextcloud is now live on production from `main`: `https://cloud.lv3.org/status.php`
 returns `installed=true`, the published `/.well-known/caldav` and
 `/.well-known/carddav` routes redirect to `https://cloud.lv3.org/remote.php/dav/`,
-and the 2026-03-30 exact-main replay on release `0.177.92` re-verified the
+and the 2026-03-30 exact-main replay on release `0.177.93` re-verified the
 guest-local `10.10.10.20:8084` runtime together with the shared OpenBao
 publication-recovery path and the new mutable OCC recovery path for
 concurrent Docker interruptions on the shared host.
@@ -180,7 +180,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.93` |
-| Platform version | `0.130.61` |
+| Platform version | `0.130.62` |
 | Observed check date | `2026-03-29` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -1371,7 +1371,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.93` |
-| Platform version | `0.130.61` |
+| Platform version | `0.130.62` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |

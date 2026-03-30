@@ -3,8 +3,8 @@
 - ADR: [ADR 0260](../adr/0260-nextcloud-as-the-canonical-personal-data-plane-for-serverclaw.md)
 - Title: Integrate ADR 0260 exact-main replay onto `origin/main`
 - Status: `ready_for_merge`
-- Included In Repo Version: 0.177.92
-- Platform Version Observed During Integration: 0.130.61
+- Included In Repo Version: 0.177.93
+- Platform Version Observed During Integration: 0.130.62
 - Release Date: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0260-final-main`
@@ -27,7 +27,7 @@ branch-local proof authoritative on `main`.
 - `RELEASE.md`
 - `VERSION`
 - `changelog.md`
-- `docs/release-notes/0.177.92.md`
+- `docs/release-notes/0.177.93.md`
 - `docs/release-notes/README.md`
 - `versions/stack.yaml`
 - `build/platform-manifest.json`
@@ -50,21 +50,22 @@ branch-local proof authoritative on `main`.
 - `tests/test_nextcloud_runtime_role.py`
 - `tests/test_openbao_compose_env_helper.py`
 - `receipts/live-applies/2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply.json`
+- `receipts/live-applies/evidence/2026-03-30-ws-0260-mainline-*.txt`
 
 ## Verification
 
 - `git fetch origin --prune` confirmed the newest available baseline before the
   final recut remained `origin/main` commit
-  `86423688ceb22626a41204b5c83d0f90f0b79d71`, which already carried repository
-  version `0.177.91` and platform version `0.130.60`.
+  `bbb0f66b8ec995dfa3ecdd7bac9156ed664157cc`, which already carried repository
+  version `0.177.92` and platform version `0.130.61`.
 - The final exact-main proof was replayed from committed source
-  `eab22d2560767573b15334ceaf073d929eb0e451`, which preserved repository
-  version `0.177.92` while hardening mutable Nextcloud OCC convergence against
+  `2b0787aeac03f143ef50cf3e4f2c17f1a81aa3b0`, which preserved repository
+  version `0.177.93` while hardening mutable Nextcloud OCC convergence against
   concurrent Docker interruptions on the shared host.
 - `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=nextcloud env=production`
   succeeded from that synchronized tree with final recap
-  `docker-runtime-lv3 ok=181 changed=7 failed=0 skipped=106`,
-  `nginx-lv3 ok=39 changed=2 failed=0 skipped=7`,
+  `docker-runtime-lv3 ok=181 changed=4 failed=0 skipped=109`,
+  `nginx-lv3 ok=39 changed=4 failed=0 skipped=7`,
   `postgres-lv3 ok=52 changed=0 failed=0 skipped=14`, and
   `localhost ok=18 changed=0 failed=0 skipped=3`.
 - Public verification returned
@@ -90,11 +91,11 @@ branch-local proof authoritative on `main`.
 
 ## Outcome
 
-- Release `0.177.92` carries ADR 0260's exact-main replay onto `main`.
-- Platform version `0.130.61` becomes the current integrated platform baseline
-  because the synchronized release `0.177.92` was live-applied successfully
+- Release `0.177.93` carries ADR 0260's exact-main replay onto `main`.
+- Platform version `0.130.62` becomes the current integrated platform baseline
+  because the synchronized release `0.177.93` was live-applied successfully
   from the refreshed mainline tree.
 - `receipts/live-applies/2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply.json`
   is the canonical exact-main proof for the Nextcloud personal data plane from
-  committed source `eab22d2560767573b15334ceaf073d929eb0e451`, superseding the
+  committed source `2b0787aeac03f143ef50cf3e4f2c17f1a81aa3b0`, superseding the
   earlier 2026-03-29 mainline receipt.
