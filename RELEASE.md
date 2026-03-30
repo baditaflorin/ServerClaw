@@ -1,12 +1,12 @@
-# Release 0.177.105
+# Release 0.177.106
 
 - Date: 2026-03-30
 
 ## Summary
-- replays ADR 0267 from the exact 0.177.104 main tree, keeps governed validation-gate waivers live on the Windmill worker checkout, preserves the repo-root Docker publication helper repair plus apt-lock tolerance, and fixes the latest-main nftables forward-compat insertion regression before advancing platform_version to 0.130.70
+- replays ADR 0269 from the exact 0.177.105 main tree, preserves the worktree-safe Windmill checkout and OpenBao secret delivery fixes, records the merged-tree gate-status plus healthcheck and default-operations proof, cuts release 0.177.106, and advances platform_version to 0.130.71
 
 ## Platform Impact
-- platform version advances to 0.130.70 after the exact-main ADR 0267 replay re-verifies governed validation-gate waivers on the 0.177.104 baseline and fixes the latest-main Docker runtime nftables forward-compat insertion regression
+- Replayed ADR 0269 on the exact 0.177.105 main tree, preserved the refreshed Windmill vulnerability-budget and freshness gates plus worker-checkout and OpenBao secret-delivery fixes, and advanced the live platform baseline to 0.130.71.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

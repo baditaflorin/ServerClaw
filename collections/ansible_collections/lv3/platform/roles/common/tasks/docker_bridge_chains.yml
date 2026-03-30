@@ -24,6 +24,20 @@
   changed_when: false
   failed_when: common_docker_bridge_chains_active_state.rc not in [0, 3, 4]
 
+- name: Warm the Docker control socket before chain health checks
+  ansible.builtin.command:
+    argv:
+      - docker
+      - info
+      - --format
+      - "{{ '{{.ServerVersion}}' }}"
+  register: common_docker_bridge_chains_info_ready
+  changed_when: false
+  retries: "{{ common_docker_bridge_chains_retries }}"
+  delay: "{{ common_docker_bridge_chains_delay }}"
+  until: common_docker_bridge_chains_info_ready.rc == 0
+  when: common_docker_bridge_chains_active_state.rc == 0
+
 - name: Check whether Docker nat chain exists
   ansible.builtin.command:
     argv:
@@ -88,12 +102,40 @@
       }}
   when: common_docker_bridge_chains_active_state.rc == 0
 
+- name: Wait briefly for Docker bridge chains to recover after daemon activation
+  ansible.builtin.shell: |
+    set -euo pipefail
+    for _ in $(seq 1 {{ common_docker_bridge_chains_retries }}); do
+      if {% if common_docker_bridge_chains_require_nat_chain | bool %}iptables -t nat -S DOCKER >/dev/null 2>&1 && {% endif %}{% if common_docker_bridge_chains_expect_forward_chain | default(false) %}iptables -t filter -S DOCKER-FORWARD >/dev/null 2>&1{% else %}true{% endif %}; then
+        exit 0
+      fi
+      sleep {{ common_docker_bridge_chains_delay }}
+    done
+    exit 1
+  args:
+    executable: /bin/bash
+  register: common_docker_bridge_chains_wait
+  changed_when: false
+  failed_when: false
+  when:
+    - common_docker_bridge_chains_active_state.rc == 0
+    - >
+      (
+        common_docker_bridge_chains_expect_forward_chain | default(false)
+        and common_docker_bridge_chains_forward_check.rc == 1
+      )
+      or (
+        (common_docker_bridge_chains_require_nat_chain | bool)
+        and common_docker_bridge_chains_nat_check.rc == 1
+      )
+
 - name: Restart Docker when required bridge chains are missing
   ansible.builtin.systemd_service:
     name: "{{ common_docker_bridge_chains_service_name }}"
     state: restarted
   when:
     - common_docker_bridge_chains_active_state.rc == 0
+    - ((common_docker_bridge_chains_wait | default({})).get('rc', 1)) != 0
     - >
       (
         common_docker_bridge_chains_expect_forward_chain | default(false)

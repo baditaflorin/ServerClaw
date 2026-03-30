@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-29-adr-0269-windmill-isolated-checkout-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-29",
+  "recorded_on": "2026-03-29",
+  "recorded_at": "2026-03-29T20:00:38Z",
+  "recorded_by": "codex",
+  "source_commit": "7bcc8a18b0cad2c2ff716d83d06c87e77231455b",
+  "repo_version_context": "0.177.81",
+  "platform_version_context": "0.130.55",
+  "workflow_id": "adr-0269-windmill-isolated-checkout-live-apply",
+  "adr": "0269",
+  "summary": "Replayed the Windmill production live apply from a branch-scoped controller worktree and alternate guest checkout path so concurrent agents could verify ADR 0269 without clobbering the shared /srv/proxmox_florin_server checkout, then recorded the checkout-hardening changes that made the isolated replay succeed end to end.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service",
+      "name": "windmill",
+      "address": "http://100.64.0.1:8005"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused Windmill checkout regression tests",
+      "result": "pass",
+      "observed": "uv run --with pytest --with pyyaml pytest -q tests/test_windmill_operator_admin_app.py passed with 13 passed after adding the branch-scoped checkout checksum key, symlink-safe archive traversal, and mutable-file bootstrap coverage."
+    },
+    {
+      "check": "Isolated-checkout governed Windmill live apply",
+      "result": "pass",
+      "observed": "make live-apply-service service=windmill env=production ALLOW_IN_PLACE_MUTATION=true EXTRA_ARGS='-e bypass_promotion=true -e windmill_worker_checkout_repo_root_local_dir=/Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0269-live-apply -e windmill_worker_repo_checkout_host_path=/srv/proxmox_florin_server-adr-0269-live-apply -e windmill_worker_repo_checkout_container_path=/srv/proxmox_florin_server -e windmill_worker_repo_checkout_compat_root=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-adr-0269-live-apply' passed with docker-runtime-lv3 ok=253 changed=59 failed=0, postgres-lv3 ok=65 changed=1 failed=0, and proxmox_florin ok=37 changed=4 failed=0."
+    },
+    {
+      "check": "Seeded Windmill healthcheck and gate-status scripts after isolated replay",
+      "result": "pass",
+      "observed": "The successful isolated replay passed Wait for Windmill workers to register, Assert Windmill workers are registered, Run the Windmill seeded healthcheck script, Assert the Windmill seeded healthcheck result, Run the Windmill validation gate status script, Assert the Windmill validation gate status result, and Assert the Windmill default operations scripts exist."
+    },
+    {
+      "check": "Direct post-apply script execution",
+      "result": "pass",
+      "observed": "scripts/windmill_run_wait_result.py returned a healthy JSON payload for f/lv3/windmill_healthcheck and a structured gate-status document with status ok for f/lv3/gate-status, proving the earlier empty-result failure no longer reproduced after the isolated checkout replay."
+    },
+    {
+      "check": "Steady-state mount-source inspection",
+      "result": "partial",
+      "observed": "docker inspect windmill-windmill_worker-1 still showed /srv/proxmox_florin_server -> /srv/proxmox_florin_server after the successful replay, so the branch-scoped converge path is verified but the long-lived worker bind mount may still be reclaimed by later concurrent compose renders."
+    }
+  ],
+  "evidence_refs": [
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml",
+    "docs/runbooks/configure-windmill.md",
+    "docs/workstreams/adr-0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md",
+    "tests/test_windmill_operator_admin_app.py",
+    "receipts/live-applies/evidence/2026-03-29-adr-0269-windmill-mainline-live-apply-isolated-checkout.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0269-windmill-mainline-live-apply-isolated-checkout-retry.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0269-windmill-mainline-live-apply-isolated-checkout-retry-2.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0269-windmill-mainline-live-apply-healthcheck-race.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0269-windmill-mainline-live-apply-healthcheck-race-retry-parse.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0269-windmill-mainline-live-apply-gate-status-race.txt",
+    "receipts/live-applies/evidence/2026-03-29-adr-0269-windmill-mainline-live-apply-gate-status-empty-stdout.txt",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "The first isolated-checkout attempts failed for two branch-specific reasons: the worker checkout archive and prune steps recursed into symlinked sync roots as if they were normal directories, and fresh alternate guest checkout paths did not contain the mutable files that the worker runtime expects to stay writable.",
+    "The final hardening changed the worker checkout checksum marker to key off the alternate guest checkout basename, treated sync-root symlinks as symlink entries instead of directory trees, and bootstrapped missing mutable files from the controller worktree or placeholder files before the worker jobs ran.",
+    "Use this receipt together with the exact-main receipt when another agent needs to replay ADR 0269 from a separate worktree without mutating the canonical /srv/proxmox_florin_server checkout."
+  ]
+}

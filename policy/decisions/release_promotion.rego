@@ -29,6 +29,11 @@ deny[msg] if {
 }
 
 deny[msg] if {
+  some reason in input.vulnerability_gate.reasons
+  msg := reason
+}
+
+deny[msg] if {
   some reason in input.capacity_gate.reasons
   msg := reason
 }

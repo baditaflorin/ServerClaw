@@ -1,0 +1,42 @@
+=== docker-runtime-lv3 ===
+docker-runtime-lv3
+2026-03-30T16:31:15Z
+Linux 6.12.74+deb13+1-cloud-amd64 x86_64 GNU/Linux
+
+--- disk ---
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1        95G   89G  2.4G  98% /
+
+--- windmill compose ---
+NAME                                IMAGE                                                                                                                  COMMAND                  SERVICE                  CREATED       STATUS                 PORTS
+windmill-openbao-agent              docker.io/openbao/openbao:2.5.1@sha256:8843249c9bc051b0c547e53888565ee5a23a40a49079a8cd63578ef1517ba56b                "docker-entrypoint.s…"   openbao-agent            3 hours ago   Up 3 hours (healthy)
+windmill-windmill_extra-1           ghcr.io/windmill-labs/windmill-extra:1.662.0@sha256:a87f28faa82efca84485752583f07798f863f917893cbbf91ec86d3a254b0b4c   "/entrypoint.sh"         windmill_extra           3 hours ago   Up 3 hours             3000-3003/tcp, 8000/tcp
+windmill-windmill_server-1          ghcr.io/windmill-labs/windmill:1.662.0@sha256:13d5456a80500822446ce0154f68d5fd5089628df82e77e2bd9cb24ff898d58d         "windmill"               windmill_server          3 hours ago   Up 3 hours
+windmill-windmill_worker-1          ghcr.io/windmill-labs/windmill:1.662.0@sha256:13d5456a80500822446ce0154f68d5fd5089628df82e77e2bd9cb24ff898d58d         "windmill"               windmill_worker          3 hours ago   Up 3 hours
+windmill-windmill_worker_native-1   ghcr.io/windmill-labs/windmill:1.662.0@sha256:13d5456a80500822446ce0154f68d5fd5089628df82e77e2bd9cb24ff898d58d         "windmill"               windmill_worker_native   3 hours ago   Up 3 hours
+
+--- api version ---
+CE v1.662.0
+
+=== proxmox_florin ===
+Debian-trixie-latest-amd64-base
+2026-03-30T16:31:17Z
+Linux 6.17.13-2-pve x86_64 GNU/Linux
+
+--- pveversion ---
+pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)
+
+--- qm list ---
+      VMID NAME                 STATUS     MEM(MB)    BOOTDISK(GB) PID
+       110 nginx-lv3            running    4096              32.00 2296230
+       120 docker-runtime-lv3   running    24576             96.00 2296294
+       130 docker-build-lv3     running    24576            160.00 2296362
+       140 monitoring-lv3       running    8192              64.00 2296520
+       150 postgres-lv3         running    8192              96.00 2296625
+       160 backup-lv3           running    8192              32.00 863611
+       170 coolify-lv3          running    8192              96.00 2860211
+       180 artifact-cache-lv3   running    8192             160.00 3053948
+       220 docker-runtime-staging-lv3 running    8192              64.00 2233879
+       240 monitoring-staging-lv3 running    4096              48.00 2234109
+       912 ops-base-912         stopped    2048              24.00 0
+      9000 debian13-cloud-template stopped    2048               0.00 0

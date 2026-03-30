@@ -210,7 +210,13 @@ windmill_worker_repo_secret_files:
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/openbao/init.json"
     src: "{{ windmill_controller_local_root }}/openbao/init.json"
     mode: "0600"
-windmill_worker_checkout_checksum_file: "{{ windmill_site_dir }}/worker-checkout.sha256"
+windmill_worker_checkout_checksum_file: >-
+  {{
+    windmill_site_dir
+    ~ '/worker-checkout-'
+    ~ (windmill_worker_repo_checkout_host_path | basename)
+    ~ '.sha256'
+  }}
 windmill_worker_checkout_integrity_files:
   - Makefile
   - config/validation-gate.json

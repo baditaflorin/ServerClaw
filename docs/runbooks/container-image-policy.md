@@ -27,6 +27,8 @@ Current scan receipts live under [receipts/image-scans](/Users/live/Documents/GI
 4. A new digest must have a Trivy receipt before it is committed.
 5. Zero critical findings is the default gate. If the current official upstream image still reports critical CVEs, the catalog entry must carry a time-bounded exception with an owner and review date.
 6. Managed converges read image refs from the catalog instead of hand-maintained per-role strings.
+7. ADR 0269 exceptions must also record a justification, compensating controls,
+   an expiry date, and an explicit remediation plan.
 
 ## Verification
 
@@ -79,7 +81,14 @@ make upgrade-container-image IMAGE_ID=netbox_runtime WRITE=true APPLY=true
 Allow a time-bounded exception when the official upstream image still reports critical CVEs:
 
 ```bash
-make upgrade-container-image IMAGE_ID=portainer_runtime WRITE=true EXCEPTION_OWNER="Platform operations" EXCEPTION_REVIEW_BY=2026-04-05 EXCEPTION_REASON="Current upstream Portainer image still ships critical CVEs; keep digest pinned and review on the next image cycle."
+make upgrade-container-image \
+  IMAGE_ID=portainer_runtime \
+  WRITE=true \
+  EXCEPTION_OWNER="Platform operations" \
+  EXCEPTION_EXPIRES_ON=2026-04-05 \
+  EXCEPTION_JUSTIFICATION="Current upstream Portainer image still ships critical CVEs; keep the reviewed digest pinned until the next image cycle." \
+  EXCEPTION_CONTROLS_JSON='["Digest pin prevents surprise upstream drift.","Service remains private-only while the upstream image is being remediated."]' \
+  EXCEPTION_REMEDIATION_PLAN="Re-scan and refresh portainer_runtime before the exception expires."
 ```
 
 ## Windmill Surface
@@ -102,7 +111,9 @@ Catalog exceptions record:
 
 - why the image is still temporarily approved
 - who owns the risk review
-- when the exception must be revisited
+- which compensating controls bound the risk while the exception is open
+- when the exception expires
+- what remediation plan clears the exception before expiry
 
 ## Failure Rules
 

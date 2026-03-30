@@ -107,7 +107,9 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "workstreams.yaml",
         "roles",
     }.issubset(set(defaults["windmill_worker_checkout_sync_paths"]))
-    assert defaults["windmill_worker_checkout_checksum_file"] == "{{ windmill_site_dir }}/worker-checkout.sha256"
+    assert "worker-checkout-" in defaults["windmill_worker_checkout_checksum_file"]
+    assert "(windmill_worker_repo_checkout_host_path | basename)" in defaults["windmill_worker_checkout_checksum_file"]
+    assert ".sha256" in defaults["windmill_worker_checkout_checksum_file"]
     assert "windmill_worker_checkout_prune_preserve_paths" in defaults_text
     assert "windmill_worker_repo_mutable_files" in defaults_text
     assert "windmill_worker_runtime_writable_directories" in defaults_text
@@ -754,8 +756,12 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Verify the Windmill default operations scripts are seeded" in verify_tasks
     assert 'WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"' in verify_tasks
     assert 'Authorization: "Bearer {{ windmill_runtime_api_token }}"' in verify_tasks
-    assert "until: windmill_verify_healthcheck.rc == 0" in verify_tasks
-    assert "until: windmill_verify_validation_gate_status.rc == 0" in verify_tasks
+    assert "until:\n    - windmill_verify_healthcheck.rc == 0" in verify_tasks
+    assert "(windmill_verify_healthcheck.stdout | default('') | trim | length) > 0" in verify_tasks
+    assert "until:\n    - windmill_verify_validation_gate_status.rc == 0" in verify_tasks
+    assert "(windmill_verify_validation_gate_status.stdout | default('') | trim | length) > 0" in verify_tasks
+    assert '(windmill_verify_stage_smoke_suites.stdout | from_json).status == "ok"' in verify_tasks
+    assert '(windmill_verify_stage_smoke_suites.stdout | from_json).result.status == "passed"' in verify_tasks
     assert "failed_when: false" in verify_tasks
     assert "retries: 6" in verify_tasks
     assert "windmill_verify_critical_seed_scripts.status == 200" in verify_tasks

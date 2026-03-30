@@ -80,6 +80,8 @@ def test_windmill_script_sync_uses_manifest_helper() -> None:
     assert "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_seed_schedules.py" in tasks
     assert tasks.count("pyyaml") >= 2
     assert "{{ windmill_seed_schedule_manifest_local.path }}" in tasks
+    assert tasks.count('{{ windmill_base_url }}') == 2
+    assert tasks.count('{{ windmill_private_base_url }}') == 5
 
 
 def test_make_converge_windmill_forwards_extra_args() -> None:

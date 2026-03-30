@@ -39,7 +39,7 @@ if str(REPO_ROOT) not in sys.path:
 if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
     del sys.modules["platform"]
 
-from platform.retry import PlatformRetryError, RetryClass, RetryPolicy, with_retry
+from platform.retry import MaxRetriesExceeded, PlatformRetryError, RetryClass, RetryPolicy, with_retry
 
 
 class SyncError(RuntimeError):
@@ -275,6 +275,7 @@ def sync_script(
     def sync_attempt() -> dict:
         nonlocal attempts
         attempts += 1
+        script_absent_after_delete = False
         try:
             delete_script(
                 base_url=base_url,
@@ -283,23 +284,52 @@ def sync_script(
                 script_path=spec["path"],
                 timeout_s=request_timeout_s,
             )
-            time.sleep(settle_interval_s)
-            wait_for_absent(
-                base_url=base_url,
-                workspace=workspace,
-                token=token,
-                script_path=spec["path"],
-                timeout_s=absent_timeout_s,
-                interval_s=settle_interval_s,
-            )
+        except SyncTransportError as exc:
+            try:
+                status, _ = get_script(
+                    base_url=base_url,
+                    workspace=workspace,
+                    token=token,
+                    script_path=spec["path"],
+                    timeout_s=request_timeout_s,
+                )
+            except (RetryableSyncError, SyncError, OSError):
+                raise PlatformRetryError(
+                    str(exc),
+                    code="platform:windmill_seed_sync_pending",
+                    retry_class=RetryClass.BACKOFF,
+                ) from exc
+            if status == 404:
+                script_absent_after_delete = True
+            else:
+                raise PlatformRetryError(
+                    str(exc),
+                    code="platform:windmill_seed_sync_pending",
+                    retry_class=RetryClass.BACKOFF,
+                ) from exc
         except (RetryableSyncError, OSError) as exc:
             raise PlatformRetryError(
                 str(exc),
                 code="platform:windmill_seed_sync_pending",
                 retry_class=RetryClass.BACKOFF,
             ) from exc
-        except SyncError:
-            pass
+        try:
+            if not script_absent_after_delete:
+                time.sleep(settle_interval_s)
+                wait_for_absent(
+                    base_url=base_url,
+                    workspace=workspace,
+                    token=token,
+                    script_path=spec["path"],
+                    timeout_s=absent_timeout_s,
+                    interval_s=settle_interval_s,
+                )
+        except (RetryableSyncError, SyncError, OSError) as exc:
+            raise PlatformRetryError(
+                str(exc),
+                code="platform:windmill_seed_sync_pending",
+                retry_class=RetryClass.BACKOFF,
+            ) from exc
         try:
             status, body = create_script(
                 base_url=base_url,
@@ -353,7 +383,10 @@ def sync_script(
             error_context=f"windmill seed sync for {spec['path']}",
         )
     except Exception as exc:
-        raise SyncError(f"failed to sync {spec['path']} after {max_attempts} attempts: {exc}") from exc
+        detail = str(exc)
+        if isinstance(exc, MaxRetriesExceeded) and exc.last_error is not None:
+            detail = f"{detail}; last error: {exc.last_error}"
+        raise SyncError(f"failed to sync {spec['path']} after {max_attempts} attempts: {detail}") from exc
 
 
 def main() -> int:

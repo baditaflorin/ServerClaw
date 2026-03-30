@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.105",
-  "platform_version": "0.130.70",
-  "generated_at": "2026-03-30T15:14:08Z",
-  "next_refresh_at": "2026-03-30T16:14:08Z",
+  "repo_version": "0.177.106",
+  "platform_version": "0.130.71",
+  "generated_at": "2026-03-30T16:33:20Z",
+  "next_refresh_at": "2026-03-30T17:33:20Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4468,7 +4468,7 @@
         "id": "environment-promotion-pipeline",
         "title": "Environment Promotion Pipeline",
         "agent_trust_required": "T3",
-        "steps": 23,
+        "steps": 25,
         "path": "docs/runbooks/environment-promotion-pipeline.md",
         "workflow_ids": [
           "deploy-and-promote"
@@ -4972,10 +4972,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.104",
+    "last_version": "0.177.105",
     "deployed_at": "2026-03-30",
-    "summary": "replays ADR 0267 from the exact 0.177.104 main tree, keeps governed validation-gate waivers live on the Windmill worker checkout, preserves the repo-root Docker publication helper repair plus apt-lock tolerance, and fixes the latest-main nftables forward-compat insertion regression before advancing platform_version to 0.130.70",
-    "release_notes_url": "docs/release-notes/0.177.105.md"
+    "summary": "replays ADR 0269 from the exact 0.177.105 main tree, preserves the worktree-safe Windmill checkout and OpenBao secret delivery fixes, records the merged-tree gate-status plus healthcheck and default-operations proof, cuts release 0.177.106, and advances platform_version to 0.130.71",
+    "release_notes_url": "docs/release-notes/0.177.106.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -27,6 +27,17 @@ TASKS_PATH = (
     / "tasks"
     / "main.yml"
 )
+SEEDED_SECRET_TASKS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "openbao_runtime"
+    / "tasks"
+    / "seeded_secrets_and_verification.yml"
+)
 ENSURE_UNSEALED_TASKS_PATH = (
     REPO_ROOT
     / "collections"
@@ -41,6 +52,10 @@ ENSURE_UNSEALED_TASKS_PATH = (
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "openbao.yml"
 
 
+def read_openbao_runtime_tasks_text() -> str:
+    return TASKS_PATH.read_text(encoding="utf-8") + "\n" + SEEDED_SECRET_TASKS_PATH.read_text(encoding="utf-8")
+
+
 def test_openbao_runtime_defaults_use_postgres_primary_address() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
 
@@ -49,9 +64,9 @@ def test_openbao_runtime_defaults_use_postgres_primary_address() -> None:
     assert "postgres_ha.initial_primary" in defaults
     assert "ansible_host" in defaults
     assert "@{{ openbao_postgres_host }}:5432/postgres?sslmode=disable" in defaults
-    assert 'CREATE ROLE "{{name}}" WITH LOGIN PASSWORD \'{{password}}\' VALID UNTIL \'{{expiration}}\';' in defaults
-    assert 'GRANT pg_read_all_data TO "{{name}}";' in defaults
-    assert 'DROP ROLE IF EXISTS "{{name}}";' in defaults
+    assert 'CREATE ROLE "{{ name }}" WITH LOGIN PASSWORD \'{{ password }}\' VALID UNTIL \'{{ expiration }}\';' in defaults
+    assert 'GRANT pg_read_all_data TO "{{ name }}";' in defaults
+    assert 'DROP ROLE IF EXISTS "{{ name }}";' in defaults
 
 
 def test_generated_platform_vars_pin_openbao_to_postgres_primary_ip() -> None:
@@ -95,7 +110,7 @@ def test_guest_side_postgres_clients_use_the_primary_guest_address() -> None:
 
 
 def test_openbao_rotation_catalog_is_loaded_before_derived_facts() -> None:
-    tasks = TASKS_PATH.read_text(encoding="utf-8")
+    tasks = read_openbao_runtime_tasks_text()
 
     assert "- name: Load the rotatable secret catalog and controller secret manifest" in tasks
     assert "- name: Derive OpenBao secret rotation facts from the loaded catalog" in tasks
@@ -104,7 +119,7 @@ def test_openbao_rotation_catalog_is_loaded_before_derived_facts() -> None:
 
 
 def test_openbao_runtime_checks_certificate_freshness_before_renewal() -> None:
-    tasks = TASKS_PATH.read_text(encoding="utf-8")
+    tasks = read_openbao_runtime_tasks_text()
 
     assert "Check whether the OpenBao external TLS certificate remains fresh enough" in tasks
     assert "openbao_tls_certificate_freshness" in tasks
@@ -114,7 +129,7 @@ def test_openbao_runtime_checks_certificate_freshness_before_renewal() -> None:
 
 def test_openbao_runtime_recovers_detached_empty_default_network_before_compose_up() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
-    tasks = TASKS_PATH.read_text(encoding="utf-8")
+    tasks = read_openbao_runtime_tasks_text()
 
     assert 'openbao_default_network_name: "{{ openbao_site_dir | basename }}_default"' in defaults
     assert "Inspect the managed OpenBao default network before compose up" in tasks
@@ -125,7 +140,7 @@ def test_openbao_runtime_recovers_detached_empty_default_network_before_compose_
 
 
 def test_openbao_runtime_retries_seal_status_during_restart_window() -> None:
-    tasks = TASKS_PATH.read_text(encoding="utf-8")
+    tasks = read_openbao_runtime_tasks_text()
 
     assert "- name: Read OpenBao seal status" in tasks
     assert "register: openbao_seal_status" in tasks
@@ -136,7 +151,7 @@ def test_openbao_runtime_retries_seal_status_during_restart_window() -> None:
 
 
 def test_openbao_runtime_continues_after_docker_chain_recheck_when_compose_health_checks_guard_recovery() -> None:
-    tasks = TASKS_PATH.read_text(encoding="utf-8")
+    tasks = read_openbao_runtime_tasks_text()
 
     assert "Recheck Docker nat chain before OpenBao startup" in tasks
     assert "failed_when: openbao_docker_nat_chain_recheck.rc not in [0, 1]" in tasks
@@ -149,7 +164,7 @@ def test_openbao_runtime_continues_after_docker_chain_recheck_when_compose_healt
 
 
 def test_openbao_runtime_recovers_dnat_chain_failures_during_compose_startup() -> None:
-    tasks = TASKS_PATH.read_text(encoding="utf-8")
+    tasks = read_openbao_runtime_tasks_text()
 
     assert "- name: Start the OpenBao stack and recover Docker bridge-chain failures" in tasks
     assert "- name: Flag Docker bridge-chain failures during OpenBao startup" in tasks
@@ -168,10 +183,11 @@ def test_openbao_runtime_persisted_approles_use_reusable_secret_ids() -> None:
 
 
 def test_openbao_runtime_rechecks_seal_state_before_auth_verification() -> None:
-    tasks = TASKS_PATH.read_text(encoding="utf-8")
+    tasks = read_openbao_runtime_tasks_text()
     ensure_unsealed_tasks = ENSURE_UNSEALED_TASKS_PATH.read_text(encoding="utf-8")
 
     assert "Ensure OpenBao remains unsealed before authentication verification" in tasks
+    assert "import_tasks: seeded_secrets_and_verification.yml" in TASKS_PATH.read_text(encoding="utf-8")
     assert "include_tasks: ensure_unsealed.yml" in tasks
     assert "Read OpenBao seal status before" in ensure_unsealed_tasks
     assert "/v1/sys/unseal" in ensure_unsealed_tasks
@@ -179,7 +195,7 @@ def test_openbao_runtime_rechecks_seal_state_before_auth_verification() -> None:
 
 
 def test_openbao_runtime_retries_policy_reads_during_post_restart_recovery() -> None:
-    tasks = TASKS_PATH.read_text(encoding="utf-8")
+    tasks = read_openbao_runtime_tasks_text()
 
     assert "- name: Read current OpenBao policies" in tasks
     assert "register: openbao_current_policies" in tasks
@@ -206,7 +222,7 @@ def test_openbao_runtime_waits_out_background_apt_maintenance() -> None:
 
 
 def test_openbao_runtime_renders_rotatable_secret_keys_dynamically() -> None:
-    tasks = TASKS_PATH.read_text(encoding="utf-8")
+    tasks = read_openbao_runtime_tasks_text()
 
     assert "- name: Seed dedicated rotatable secrets into OpenBao" in tasks
     assert "(item.value.openbao_field):" in tasks
@@ -218,7 +234,7 @@ def test_openbao_runtime_renders_rotatable_secret_keys_dynamically() -> None:
 
 
 def test_openbao_runtime_retries_other_read_side_api_checks_after_restart() -> None:
-    tasks = TASKS_PATH.read_text(encoding="utf-8")
+    tasks = read_openbao_runtime_tasks_text()
 
     assert "- name: Discover enabled auth methods" in tasks
     assert "register: openbao_auth_methods" in tasks

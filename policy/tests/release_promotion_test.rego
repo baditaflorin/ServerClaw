@@ -9,6 +9,10 @@ base_input := {
     "reasons": [],
   },
   "blocking_findings": {"count": 0},
+  "vulnerability_gate": {
+    "approved": true,
+    "reasons": [],
+  },
   "capacity_gate": {
     "approved": true,
     "reasons": [],
@@ -81,4 +85,18 @@ test_promotion_policy_rejects_missing_stage_smoke_suite if {
   )
   decision.gate_decision == "rejected"
   decision.reasons[_] == "staging smoke suites missing from staged receipt: staging-grafana-primary-path"
+}
+
+test_promotion_policy_rejects_vulnerability_gate_failure if {
+  decision := promotion.decision with input as object.union(
+    base_input,
+    {
+      "vulnerability_gate": {
+        "approved": false,
+        "reasons": ["image windmill_runtime has 3 critical findings, above the budget 0"],
+      },
+    },
+  )
+  decision.gate_decision == "rejected"
+  decision.reasons[_] == "image windmill_runtime has 3 critical findings, above the budget 0"
 }

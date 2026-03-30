@@ -147,9 +147,25 @@ def main() -> int:
     parser.add_argument("--tag", help="Override tag instead of reusing the catalog tag.")
     parser.add_argument("--apply", action="store_true", help="Run the catalog apply_targets after updating the catalog.")
     parser.add_argument("--write", action="store_true", help="Persist the updated catalog and scan receipt.")
-    parser.add_argument("--exception-reason", help="Reason for allowing a digest with critical findings.")
+    parser.add_argument("--exception-justification", help="Justification for allowing a digest with open vulnerability budget exceptions.")
+    parser.add_argument("--exception-reason", help="Deprecated alias for --exception-justification.")
     parser.add_argument("--exception-owner", help="Owner of the critical-finding exception.")
-    parser.add_argument("--exception-review-by", help="YYYY-MM-DD review date for the critical-finding exception.")
+    parser.add_argument("--exception-expires-on", help="YYYY-MM-DD expiry date for the active exception.")
+    parser.add_argument("--exception-review-by", help="Deprecated alias for --exception-expires-on.")
+    parser.add_argument(
+        "--exception-control",
+        action="append",
+        default=[],
+        help="Compensating control for the active exception. Repeat for multiple controls.",
+    )
+    parser.add_argument(
+        "--exception-controls-json",
+        help="JSON array of compensating controls for the active exception.",
+    )
+    parser.add_argument(
+        "--exception-remediation-plan",
+        help="Explicit remediation plan for clearing the active exception before expiry.",
+    )
     args = parser.parse_args()
 
     try:
@@ -166,16 +182,30 @@ def main() -> int:
         receipt, receipt_path = scan_image(image_ref, args.image_id, scanned_on)
         exception = None
         if receipt["summary"]["critical"] != 0:
-            if not (args.exception_reason and args.exception_owner and args.exception_review_by):
+            justification = args.exception_justification or args.exception_reason
+            expires_on = args.exception_expires_on or args.exception_review_by
+            controls = list(args.exception_control)
+            if args.exception_controls_json:
+                controls.extend(json.loads(args.exception_controls_json))
+            if not (
+                justification
+                and args.exception_owner
+                and expires_on
+                and controls
+                and args.exception_remediation_plan
+            ):
                 raise ValueError(
                     f"{image_ref} has {receipt['summary']['critical']} critical vulnerabilities; "
-                    "provide --exception-reason, --exception-owner, and --exception-review-by to allow it"
+                    "provide --exception-justification, --exception-owner, --exception-expires-on, "
+                    "--exception-control or --exception-controls-json, and --exception-remediation-plan to allow it"
                 )
             exception = {
-                "reason": args.exception_reason,
+                "justification": justification,
                 "owner": args.exception_owner,
+                "compensating_controls": controls,
                 "approved_on": scanned_on,
-                "review_by": args.exception_review_by,
+                "expires_on": expires_on,
+                "remediation_plan": args.exception_remediation_plan,
             }
 
         apply_results = []

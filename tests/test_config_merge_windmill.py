@@ -559,6 +559,87 @@ def test_sync_helper_retries_retryable_create_failures(tmp_path: Path, monkeypat
     }
 
 
+def test_sync_helper_retries_when_delete_settle_times_out(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    module = load_module("sync_helper_delete_settle_retry", SYNC_HELPER_PATH)
+    script_path = tmp_path / "script.py"
+    script_path.write_text("print('ok')\n", encoding="utf-8")
+    attempts = {"count": 0}
+
+    monkeypatch.setattr(module, "delete_script", lambda **kwargs: None)
+    monkeypatch.setattr(module, "create_script", lambda **kwargs: (201, "created"))
+    monkeypatch.setattr(module, "wait_for_content", lambda **kwargs: None)
+
+    def fake_wait_for_absent(**kwargs):
+        attempts["count"] += 1
+        if attempts["count"] == 1:
+            raise module.SyncError("timed out waiting for f/lv3/health/refresh_composite to disappear")
+
+    monkeypatch.setattr(module, "wait_for_absent", fake_wait_for_absent)
+
+    result = module.sync_script(
+        base_url="http://windmill.internal",
+        workspace="lv3",
+        token="token",
+        spec={
+            "path": "f/lv3/health/refresh_composite",
+            "language": "python3",
+            "summary": "summary",
+            "description": "desc",
+            "local_file": str(script_path),
+        },
+        max_attempts=3,
+        settle_interval_s=0.0,
+    )
+
+    assert result == {
+        "path": "f/lv3/health/refresh_composite",
+        "attempts": 2,
+        "status": "synced",
+    }
+
+
+def test_sync_helper_retries_when_created_script_is_not_immediately_visible(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = load_module("sync_helper_visibility_retry", SYNC_HELPER_PATH)
+    script_path = tmp_path / "script.py"
+    script_path.write_text("print('ok')\n", encoding="utf-8")
+    attempts = {"count": 0}
+
+    monkeypatch.setattr(module, "delete_script", lambda **kwargs: None)
+    monkeypatch.setattr(module, "wait_for_absent", lambda **kwargs: None)
+    monkeypatch.setattr(module, "create_script", lambda **kwargs: (201, "created"))
+
+    def fake_wait_for_content(**kwargs):
+        attempts["count"] += 1
+        if attempts["count"] == 1:
+            raise module.SyncError("timed out waiting for f/lv3/health/refresh_composite to match expected content")
+
+    monkeypatch.setattr(module, "wait_for_content", fake_wait_for_content)
+
+    result = module.sync_script(
+        base_url="http://windmill.internal",
+        workspace="lv3",
+        token="token",
+        spec={
+            "path": "f/lv3/health/refresh_composite",
+            "language": "python3",
+            "summary": "summary",
+            "description": "desc",
+            "local_file": str(script_path),
+        },
+        max_attempts=3,
+        settle_interval_s=0.0,
+    )
+
+    assert result == {
+        "path": "f/lv3/health/refresh_composite",
+        "attempts": 2,
+        "status": "synced",
+    }
+
+
 def test_sync_helper_retries_remote_disconnect(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     module = load_module("sync_helper_retry_disconnect", SYNC_HELPER_PATH)
     spec = {

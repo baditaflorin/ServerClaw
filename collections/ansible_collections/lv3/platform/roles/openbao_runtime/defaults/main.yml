@@ -1,3 +1,9 @@
+# Purpose: Declare the canonical OpenBao runtime defaults, bootstrap artifact paths, and seeded-secret inputs used by the role.
+# Use case: Loaded whenever the OpenBao runtime role or its downstream verification helpers need repo-managed default values.
+# Inputs: Inventory topology, controller-local secret manifests, platform ports, TLS settings, and local artifact file paths.
+# Outputs: Resolved default variables consumed by OpenBao convergence, verification, and seeded-secret synchronization tasks.
+# Idempotency: N/A for defaults file because it only declares variables that other tasks consume.
+# Dependencies: ADR 0165, ADR 0043, ADR 0101, and ADR 0231.
 ---
 openbao_version: 2.5.1
 openbao_image: "{{ container_image_catalog.images.openbao_runtime.ref }}"
@@ -134,10 +140,10 @@ openbao_database_roles:
   - name: postgres-readonly
     db_name: "{{ openbao_database_name }}"
     creation_statements: !unsafe |-
-      CREATE ROLE "{{name}}" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';
-      GRANT pg_read_all_data TO "{{name}}";
+      CREATE ROLE "{{ name }}" WITH LOGIN PASSWORD '{{ password }}' VALID UNTIL '{{ expiration }}';
+      GRANT pg_read_all_data TO "{{ name }}";
     revocation_statements: !unsafe |-
-      DROP ROLE IF EXISTS "{{name}}";
+      DROP ROLE IF EXISTS "{{ name }}";
     default_ttl: 1h
     max_ttl: 24h
 openbao_seeded_secret_paths:

@@ -74,6 +74,27 @@ def test_build_report_detects_new_lynis_findings_and_hardening_delta() -> None:
     assert built["summary"]["status"] == "critical"
 
 
+def test_default_lynis_hosts_reads_active_service_vms(monkeypatch) -> None:
+    monkeypatch.setattr(
+        report,
+        "load_json",
+        lambda path: {
+            "services": [
+                {"vm": "docker-runtime-lv3", "environments": {"production": {"status": "active"}}},
+                {"vm": "coolify-lv3", "environments": {"production": {"status": "active"}}},
+                {"vm": "old-host", "environments": {"production": {"status": "retired"}}},
+                {"vm": "proxmox_florin"},
+            ]
+        },
+    )
+
+    assert report.default_lynis_hosts("production") == [
+        "coolify-lv3",
+        "docker-runtime-lv3",
+        "proxmox_florin",
+    ]
+
+
 def test_build_security_events_emits_summary_and_critical_findings() -> None:
     events = report.build_security_events(
         {

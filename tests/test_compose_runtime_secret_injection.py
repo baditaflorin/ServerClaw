@@ -130,10 +130,12 @@ def test_control_plane_recovery_uses_dedicated_windmill_backup_dsn() -> None:
     assert "docker run --rm --name" in helper_service_text
     assert "--entrypoint {{ common_openbao_systemd_credentials_container_entrypoint }}" in helper_service_text
     assert "common_openbao_systemd_credentials_secret_path" in helper_text
-    assert "Ensure the local OpenBao API answers before host-native secret delivery" in helper_text
-    assert helper_text.count("register: common_openbao_systemd_credentials_api_health") == 2
-    assert "register: common_openbao_systemd_credentials_api_health\n      retries: 48\n      delay: 5" in helper_text
-    assert "register: common_openbao_systemd_credentials_health\n  retries: 48\n  delay: 5" in helper_text
+    assert "Wait for the local OpenBao API to answer" in helper_text
+    assert helper_text.count("register: common_openbao_systemd_credentials_api_health") == 1
+    assert "register: common_openbao_systemd_credentials_api_health\n  retries: 24\n  delay: 5" in helper_text
+    assert "register: common_openbao_systemd_credentials_health\n  retries: 24\n  delay: 5" in helper_text
+    assert "register: common_openbao_systemd_credentials_approle_upsert" in helper_text
+    assert "until: common_openbao_systemd_credentials_approle_upsert.status == 204" in helper_text
 
 
 def test_mail_gateway_image_includes_telemetry_module() -> None:
