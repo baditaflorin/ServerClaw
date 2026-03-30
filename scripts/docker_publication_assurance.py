@@ -9,16 +9,100 @@ import json
 import socket
 import subprocess
 import sys
+import time
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Iterable
 from urllib.parse import urlsplit
 
-from script_bootstrap import ensure_repo_root_on_path
+try:
+    from script_bootstrap import ensure_repo_root_on_path
+except ModuleNotFoundError:
+    def ensure_repo_root_on_path(script_file: str) -> Path:
+        script_path = Path(script_file).resolve()
+        repo_root = script_path.parents[1]
+        for candidate in (repo_root, script_path.parent):
+            candidate_text = str(candidate)
+            if candidate_text not in sys.path:
+                sys.path.insert(0, candidate_text)
+        if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+            del sys.modules["platform"]
+        return repo_root
 
 ensure_repo_root_on_path(__file__)
 
-from platform.retry import MaxRetriesExceeded, PlatformRetryError, RetryClass, RetryPolicy, with_retry
+try:
+    from platform.retry import MaxRetriesExceeded, PlatformRetryError, RetryClass, RetryPolicy, with_retry
+except ModuleNotFoundError:
+    class RetryClass(str, Enum):
+        TRANSIENT = "TRANSIENT"
+        BACKOFF = "BACKOFF"
+        PERMANENT = "PERMANENT"
+        FATAL = "FATAL"
+
+
+    class PlatformRetryError(RuntimeError):
+        def __init__(
+            self,
+            message: str,
+            *,
+            code: str | None = None,
+            retry_class: RetryClass | None = None,
+            retry_after: float | None = None,
+        ) -> None:
+            super().__init__(message)
+            self.code = code
+            self.retry_class = retry_class
+            self.retry_after = retry_after
+
+
+    @dataclass(frozen=True)
+    class RetryPolicy:
+        max_attempts: int = 5
+        base_delay_s: float = 1.0
+        max_delay_s: float = 60.0
+        multiplier: float = 2.0
+        jitter: bool = True
+        transient_max: int = 2
+
+
+    class MaxRetriesExceeded(RuntimeError):
+        def __init__(self, message: str, *, attempts: int, last_error: BaseException | None) -> None:
+            super().__init__(message)
+            self.attempts = attempts
+            self.last_error = last_error
+
+
+    def with_retry(
+        fn: Callable[[], Any],
+        *,
+        policy: RetryPolicy,
+        error_context: str = "",
+        sleep_fn: Callable[[float], None] = time.sleep,
+    ) -> Any:
+        last_error: BaseException | None = None
+        for attempt in range(1, policy.max_attempts + 1):
+            try:
+                return fn()
+            except Exception as exc:  # noqa: BLE001
+                last_error = exc
+                if not isinstance(exc, PlatformRetryError):
+                    raise
+                retry_class = exc.retry_class or RetryClass.PERMANENT
+                if retry_class in {RetryClass.PERMANENT, RetryClass.FATAL}:
+                    raise
+                if attempt >= policy.max_attempts:
+                    break
+                delay = exc.retry_after
+                if delay is None:
+                    delay = min(policy.base_delay_s * (policy.multiplier ** max(attempt - 1, 0)), policy.max_delay_s)
+                sleep_fn(max(delay, 0.0))
+        raise MaxRetriesExceeded(
+            f"exhausted {policy.max_attempts} attempts for {error_context or 'retry operation'}",
+            attempts=policy.max_attempts,
+            last_error=last_error,
+        ) from last_error
 
 
 LOOPBACK_HOSTS = {"127.0.0.1", "localhost"}
