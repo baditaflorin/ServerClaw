@@ -122,6 +122,48 @@
     fail_msg: >-
       Windmill API responded, but the seeded stage smoke suites script did not return a passing structured result.
 
+- name: Verify the critical Windmill verification scripts are seeded with current controller content
+  ansible.builtin.uri:
+    url: "{{ windmill_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/{{ item.path | urlencode }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ windmill_runtime_api_token }}"
+    status_code:
+      - 200
+  loop:
+    - path: "{{ windmill_healthcheck_script_path }}"
+      local_file: "{{ windmill_seed_script_root_local_dir }}/lv3-healthcheck.py"
+    - path: "{{ windmill_validation_gate_status_script_path }}"
+      local_file: "{{ windmill_seed_script_root_local_dir }}/gate-status.py"
+    - path: "{{ windmill_stage_smoke_suites_script_path }}"
+      local_file: "{{ inventory_dir }}/../config/windmill/scripts/stage-smoke-suites.py"
+  loop_control:
+    label: "{{ item.path }}"
+  delegate_to: localhost
+  become: false
+  register: windmill_verify_critical_seed_scripts
+  changed_when: false
+  failed_when: false
+  retries: 6
+  delay: 5
+  until:
+    - windmill_verify_critical_seed_scripts.status == 200
+    - ((windmill_verify_critical_seed_scripts.json | default({})).path | default('')) == item.path
+  no_log: true
+
+- name: Assert the critical Windmill verification scripts match controller content
+  ansible.builtin.assert:
+    that:
+      - item.status == 200
+      - item.json.path == item.item.path
+      - item.json.content == lookup('ansible.builtin.file', item.item.local_file)
+    fail_msg: >-
+      Windmill seeded script {{ item.item.path }} does not match controller content from {{ item.item.local_file }} after converge.
+  loop: "{{ windmill_verify_critical_seed_scripts.results }}"
+  loop_control:
+    label: "{{ item.item.path }}"
+  no_log: true
+
 - name: Verify the Windmill default operations scripts are seeded
   ansible.builtin.uri:
     url: "{{ windmill_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/{{ item | urlencode }}"

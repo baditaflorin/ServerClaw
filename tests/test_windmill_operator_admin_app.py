@@ -719,6 +719,10 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Assert the Windmill validation gate status result" in verify_tasks
     assert "gate_status.waiver_summary.totals.compliant_receipts" in verify_tasks
     assert "gate_status.waiver_summary.release_blockers" in verify_tasks
+    assert "Verify the critical Windmill verification scripts are seeded with current controller content" in verify_tasks
+    assert "Assert the critical Windmill verification scripts match controller content" in verify_tasks
+    assert "{{ windmill_seed_script_root_local_dir }}/gate-status.py" in verify_tasks
+    assert "{{ inventory_dir }}/../config/windmill/scripts/stage-smoke-suites.py" in verify_tasks
     assert "Verify the Windmill default operations scripts are seeded" in verify_tasks
     assert 'WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"' in verify_tasks
     assert 'Authorization: "Bearer {{ windmill_runtime_api_token }}"' in verify_tasks
@@ -726,6 +730,9 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "until: windmill_verify_validation_gate_status.rc == 0" in verify_tasks
     assert "failed_when: false" in verify_tasks
     assert "retries: 6" in verify_tasks
+    assert "windmill_verify_critical_seed_scripts.status == 200" in verify_tasks
+    assert "windmill_verify_critical_seed_scripts.json | default({})" in verify_tasks
+    assert "lookup('ansible.builtin.file', item.item.local_file)" in verify_tasks
     assert "windmill_verify_default_operations_scripts.status == 200" in verify_tasks
     assert "windmill_verify_default_operations_scripts.json | default({})" in verify_tasks
     assert "delegate_to: localhost" in tasks
