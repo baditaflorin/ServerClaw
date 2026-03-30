@@ -67,6 +67,11 @@ def test_validate_nats_topics_covers_active_topic_routing() -> None:
     assert result["uncovered_topics"] == []
 
 
+def test_validate_nats_topics_ignores_private_ntfy_topics() -> None:
+    result = validate_nats_topics.validate_topic_usage()
+    assert "scripts/falco_event_bridge_server.py: platform.security.critical" not in result["unknown_topics"]
+
+
 def test_build_envelope_supports_config_merge_topics() -> None:
     envelope = build_envelope(
         "platform.config.merge_conflict",

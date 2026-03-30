@@ -70,7 +70,14 @@ def extract_code_topics() -> dict[str, set[str]]:
     findings: dict[str, set[str]] = {}
     for path in iter_python_files():
         text = path.read_text(encoding="utf-8")
-        matches = set(TOPIC_PATTERN.findall(text))
+        matches: set[str] = set()
+        for line in text.splitlines():
+            # Private ntfy topic names share the platform.* namespace but are not
+            # canonical NATS subjects and should be tracked by ntfy-specific
+            # configuration, not the event-bus validator.
+            if "ntfy" in line.lower():
+                continue
+            matches.update(TOPIC_PATTERN.findall(line))
         if matches:
             findings[str(path.relative_to(REPO_ROOT))] = matches
     return findings

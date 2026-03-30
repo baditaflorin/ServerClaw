@@ -75,3 +75,31 @@
 - acquire resource locks for the four touched guests
 - `make converge-falco env=production`
 - trigger the repo-managed `__lv3_falco_smoke__` marker on each governed guest and record NATS, ntfy, Loki, and mutation-audit evidence
+
+## Current State
+
+- Rebasing onto the latest `origin/main` completed successfully on `2026-03-30`.
+- Targeted validation now passes on the rebased branch:
+  `45 passed` for `tests/test_falco_event_bridge.py`,
+  `tests/test_falco_runtime_role.py`, `tests/test_generate_platform_vars.py`,
+  and `tests/unit/test_event_taxonomy.py`; `make syntax-check-falco`,
+  `python3 scripts/workflow_catalog.py --validate`,
+  `python3 scripts/command_catalog.py --validate`, and
+  `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
+  also pass.
+- `make validate` was replayed from this rebased worktree on `2026-03-30`; the
+  workstream-local failures are fixed, and the remaining repo-wide failure is
+  unchanged pre-existing `ansible-lint` warning debt in
+  `collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml`
+  plus
+  `collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml`.
+
+## Current Blockers
+
+- The shared lock registry still holds `vm:120` for
+  `agent:codex/ws-0277-live-apply` until `2026-03-30T14:22:24Z`.
+- The shared lock registry still holds `vm:130` for
+  `agent:codex/ws-0296-live-apply` until `2026-03-30T15:24:19Z`.
+- ADR 0300 live mutation must wait until both locks clear because this
+  workstream needs the full `vm:120`, `vm:130`, `vm:140`, and `vm:150` lock set
+  before running `make converge-falco env=production`.
