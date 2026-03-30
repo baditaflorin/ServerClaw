@@ -24,13 +24,16 @@
       - python
       - -c
       - >-
-        import json, urllib.request;
-        with urllib.request.urlopen("http://127.0.0.1:8000/health/readiness", timeout=30) as response:
-            print(json.dumps({"status": response.getcode()}))
+        import sys, urllib.request;
+        sys.exit(
+            0
+            if urllib.request.urlopen("http://127.0.0.1:8000/health/readiness", timeout=30).getcode() == 200
+            else 1
+        )
   register: flagsmith_task_processor_health
   retries: 24
   delay: 5
-  until: (flagsmith_task_processor_health.stdout | trim | from_json).status == 200
+  until: flagsmith_task_processor_health.rc == 0
   changed_when: false
 
 - name: Verify the Flagsmith seeded state and environment-key evaluation path
@@ -69,7 +72,7 @@
   ansible.builtin.assert:
     that:
       - flagsmith_verify_health.status == 200
-      - (flagsmith_task_processor_health.stdout | trim | from_json).status == 200
+      - flagsmith_task_processor_health.rc == 0
       - (flagsmith_verify_seed.stdout | trim | from_json).healthy
     fail_msg: "Flagsmith answered locally, but the task processor, seeded environments, or environment-key verification did not pass."
   no_log: true

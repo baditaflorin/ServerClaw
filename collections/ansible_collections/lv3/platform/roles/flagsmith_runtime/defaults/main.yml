@@ -20,6 +20,20 @@ flagsmith_public_base_url: "https://{{ flagsmith_service_topology.public_hostnam
 flagsmith_container_name: flagsmith
 flagsmith_task_processor_container_name: flagsmith-task-processor
 flagsmith_runtime_image: "{{ container_image_catalog.images.flagsmith_runtime.ref }}"
+flagsmith_access_log_file: /dev/null
+flagsmith_access_log_format: >-
+  %(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"
+  %({origin}i)s %({access-control-allow-origin}o)s
+flagsmith_api_worker_tmp_dir: /dev/shm
+flagsmith_api_timeout_seconds: 30
+flagsmith_api_workers: 1
+flagsmith_api_threads: 1
+flagsmith_api_keepalive_seconds: 2
+flagsmith_task_processor_bind: 0.0.0.0:8000
+flagsmith_task_processor_sleep_interval_ms: 500
+flagsmith_task_processor_grace_period_ms: 20000
+flagsmith_task_processor_threads: 2
+flagsmith_task_processor_queue_pop_size: 10
 flagsmith_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
 flagsmith_database_name: flagsmith
 flagsmith_database_user: flagsmith

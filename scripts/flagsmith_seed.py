@@ -67,7 +67,10 @@ def http_json(
         url = f"{url}?{encoded_query}"
 
     data: bytes | None = None
-    headers = {"Accept": "application/json"}
+    headers = {
+        "Accept": "application/json",
+        "Connection": "close",
+    }
     if token:
         headers["Authorization"] = f"Token {token}"
     if environment_key:
@@ -163,8 +166,16 @@ def ensure_project(
     return project, True
 
 
-def list_environments(base_url: str, token: str) -> list[dict[str, Any]]:
-    return get_results(http_json(base_url, "GET", "/api/v1/environments/", token=token))
+def list_environments(base_url: str, token: str, project_id: int) -> list[dict[str, Any]]:
+    return get_results(
+        http_json(
+            base_url,
+            "GET",
+            "/api/v1/environments/",
+            token=token,
+            query={"project": project_id},
+        )
+    )
 
 
 def ensure_environment(
@@ -175,7 +186,7 @@ def ensure_environment(
 ) -> tuple[dict[str, Any], bool]:
     name = spec["name"]
     desired_allow_client_traits = bool(spec.get("allow_client_traits", True))
-    for environment in list_environments(base_url, token):
+    for environment in list_environments(base_url, token, project_id):
         if environment.get("name") == name and environment.get("project") == project_id:
             if bool(environment.get("allow_client_traits", True)) == desired_allow_client_traits:
                 return environment, False
@@ -273,6 +284,20 @@ def get_feature_state(base_url: str, token: str, environment_id: int, feature_id
     return feature_states[0]
 
 
+def normalize_feature_state_value(value: Any) -> Any:
+    if not isinstance(value, dict):
+        return value
+    if value.get("type") == "unicode":
+        return value.get("string_value")
+    if value.get("boolean_value") is not None:
+        return value.get("boolean_value")
+    if value.get("integer_value") is not None:
+        return value.get("integer_value")
+    if "string_value" in value:
+        return value.get("string_value")
+    return value
+
+
 def ensure_feature_state(
     base_url: str,
     token: str,
@@ -289,12 +314,12 @@ def ensure_feature_state(
 
     if "feature_state_value" in override:
         desired_value = override["feature_state_value"]
-        current_value = feature_state.get("feature_state_value")
+        current_value = normalize_feature_state_value(feature_state.get("feature_state_value"))
         if current_value != desired_value:
             patch_body["feature_state_value"] = desired_value
 
     if patch_body:
-        feature_state = http_json(
+        http_json(
             base_url,
             "PATCH",
             f"/api/v1/environments/{environment['api_key']}/featurestates/{feature_state['id']}/",
@@ -302,6 +327,7 @@ def ensure_feature_state(
             body=patch_body,
             expected_status={200},
         )
+        feature_state = get_feature_state(base_url, token, int(environment["id"]), int(feature["id"]))
         return feature_state, True
     return feature_state, False
 
@@ -373,7 +399,13 @@ def sdk_get_flags(base_url: str, environment_key: str, feature_name: str) -> lis
         environment_key=environment_key,
         query={"feature": feature_name},
     )
-    return get_results(payload) if isinstance(payload, dict) else payload
+    if isinstance(payload, list):
+        return payload
+    if isinstance(payload, dict):
+        if isinstance(payload.get("results"), list):
+            return payload["results"]
+        return [payload]
+    raise RuntimeError(f"expected SDK flags payload to be a list or object, got {type(payload).__name__}")
 
 
 def sdk_get_environment_document(base_url: str, environment_key: str) -> dict[str, Any]:
@@ -442,9 +474,9 @@ def reconcile(args: argparse.Namespace) -> int:
             feature_state, state_changed = ensure_feature_state(base_url, token, environment, feature, override)
             changed = changed or state_changed
             environment_states[environment_name] = {
-                "id": int(feature_state["id"]),
+                "id": int(feature_state["id"]) if feature_state.get("id") is not None else None,
                 "enabled": bool(feature_state.get("enabled", False)),
-                "feature_state_value": feature_state.get("feature_state_value"),
+                "feature_state_value": normalize_feature_state_value(feature_state.get("feature_state_value")),
             }
         features_summary[feature["name"]] = {
             "id": int(feature["id"]),
@@ -495,7 +527,7 @@ def verify(args: argparse.Namespace) -> int:
         raise RuntimeError(f"project {args.project_name!r} was not found")
 
     environments_by_name: dict[str, dict[str, Any]] = {}
-    for environment in list_environments(base_url, token):
+    for environment in list_environments(base_url, token, int(project["id"])):
         if environment.get("project") == project["id"]:
             environments_by_name[environment["name"]] = environment
 
@@ -534,7 +566,7 @@ def verify(args: argparse.Namespace) -> int:
                     f"feature {spec['name']!r} in environment {environment_name!r} has enabled={actual_enabled}, expected {expected_enabled}"
                 )
             if "feature_state_value" in override:
-                actual_value = feature_state.get("feature_state_value")
+                actual_value = normalize_feature_state_value(feature_state.get("feature_state_value"))
                 if actual_value != override["feature_state_value"]:
                     raise RuntimeError(
                         f"feature {spec['name']!r} in environment {environment_name!r} has value={actual_value!r}, expected {override['feature_state_value']!r}"
@@ -562,7 +594,7 @@ def verify(args: argparse.Namespace) -> int:
         server_api_key = get_server_api_key(base_url, token, environment)
         feature = features_by_name[args.verify_config_feature]
         feature_state = get_feature_state(base_url, token, int(environment["id"]), int(feature["id"]))
-        actual_value = feature_state.get("feature_state_value")
+        actual_value = normalize_feature_state_value(feature_state.get("feature_state_value"))
         if actual_value in (None, ""):
             actual_value = feature.get("initial_value")
         if actual_value != expected_value:

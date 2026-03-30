@@ -130,6 +130,12 @@
       content: "{{ flagsmith_admin_password }}"
   no_log: true
 
+- name: Check whether the Flagsmith OpenBao agent runtime env template already exists
+  ansible.builtin.stat:
+    path: "{{ flagsmith_openbao_agent_dir }}/runtime.env.ctmpl"
+  register: flagsmith_openbao_agent_template_before
+  no_log: true
+
 - name: Prepare OpenBao agent runtime secret injection for Flagsmith
   ansible.builtin.include_role:
     name: lv3.platform.common
@@ -165,6 +171,29 @@
       - "{{ flagsmith_legacy_env_file }}"
   no_log: true
 
+- name: Check the rendered Flagsmith OpenBao agent runtime env template after helper convergence
+  ansible.builtin.stat:
+    path: "{{ flagsmith_openbao_agent_dir }}/runtime.env.ctmpl"
+  register: flagsmith_openbao_agent_template_after
+  no_log: true
+
+- name: Record whether the Flagsmith OpenBao agent runtime env template changed
+  ansible.builtin.set_fact:
+    flagsmith_openbao_agent_template_changed: >-
+      {{
+        (
+          not (flagsmith_openbao_agent_template_before.stat.exists | default(false))
+          and (flagsmith_openbao_agent_template_after.stat.exists | default(false))
+        )
+        or
+        (
+          (flagsmith_openbao_agent_template_before.stat.checksum | default(''))
+          !=
+          (flagsmith_openbao_agent_template_after.stat.checksum | default(''))
+        )
+      }}
+  no_log: true
+
 - name: Render the Flagsmith environment file
   ansible.builtin.template:
     src: flagsmith.env.j2
@@ -192,6 +221,23 @@
     group: root
     mode: "0755"
 
+- name: Decide whether the Flagsmith compose services require forced recreation
+  ansible.builtin.set_fact:
+    flagsmith_force_recreate_required: >-
+      {{
+        (flagsmith_openbao_agent_template_changed | default(false))
+        or flagsmith_env_template.changed
+        or flagsmith_compose_template.changed
+      }}
+
+- name: Build the Flagsmith compose startup command
+  ansible.builtin.set_fact:
+    flagsmith_compose_up_argv: >-
+      {{
+        ['docker', 'compose', '--file', flagsmith_compose_file, 'up', '-d', '--remove-orphans']
+        + (['--force-recreate'] if flagsmith_force_recreate_required else [])
+      }}
+
 - name: Ensure Docker bridge networking chains are ready before Flagsmith startup
   ansible.builtin.include_role:
     name: lv3.platform.common
@@ -216,23 +262,98 @@
     or 'Downloaded newer image' in flagsmith_pull.stdout
     or 'Pull complete' in flagsmith_pull.stdout
 
-- name: Start the Flagsmith stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ flagsmith_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ flagsmith_site_dir }}"
-  register: flagsmith_up
-  changed_when: >-
-    'Creating' in flagsmith_up.stdout
-    or 'Recreating' in flagsmith_up.stdout
-    or 'Starting' in flagsmith_up.stdout
+- name: Start the Flagsmith stack and recover Docker bridge-chain failures
+  block:
+    - name: Start the Flagsmith stack
+      ansible.builtin.command:
+        argv: "{{ flagsmith_compose_up_argv }}"
+      args:
+        chdir: "{{ flagsmith_site_dir }}"
+      register: flagsmith_up
+      changed_when: >-
+        'Creating' in flagsmith_up.stdout
+        or 'Recreating' in flagsmith_up.stdout
+        or 'Starting' in flagsmith_up.stdout
+  rescue:
+    - name: Flag Docker bridge-chain and stale Flagsmith compose network failures after startup failure
+      ansible.builtin.set_fact:
+        flagsmith_docker_bridge_chain_missing: >-
+          {{
+            'No chain/target/match by that name' in (ansible_failed_result.stderr | default(''))
+            or 'Unable to enable ACCEPT OUTGOING rule' in (ansible_failed_result.stderr | default(''))
+            or 'Unable to enable DNAT rule' in (ansible_failed_result.stderr | default(''))
+          }}
+        flagsmith_compose_network_missing: >-
+          {{
+            'failed to create endpoint' in (ansible_failed_result.stderr | default(''))
+            and 'does not exist' in (ansible_failed_result.stderr | default(''))
+          }}
+
+    - name: Surface unexpected Flagsmith startup failures
+      ansible.builtin.fail:
+        msg: >-
+          {{
+            ansible_failed_result.stderr
+            | default(ansible_failed_result.stdout)
+            | default(ansible_failed_result.msg | default('Unknown Flagsmith compose startup failure.'))
+          }}
+      when: >-
+        not flagsmith_docker_bridge_chain_missing
+        and not flagsmith_compose_network_missing
+
+    - name: Reset stale Flagsmith compose resources after startup failure
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ flagsmith_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ flagsmith_site_dir }}"
+      register: flagsmith_compose_down_retry
+      changed_when: >-
+        'Stopping' in (flagsmith_compose_down_retry.stdout | default(''))
+        or 'Removing' in (flagsmith_compose_down_retry.stdout | default(''))
+        or 'Removing' in (flagsmith_compose_down_retry.stderr | default(''))
+      failed_when: false
+      when: flagsmith_docker_bridge_chain_missing or flagsmith_compose_network_missing
+
+    - name: Restart Docker to restore bridge chains before retrying Flagsmith startup
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: flagsmith_docker_bridge_chain_missing or flagsmith_compose_network_missing
+
+    - name: Ensure Docker bridge networking chains are present before retrying Flagsmith startup
+      ansible.builtin.include_role:
+        name: lv3.platform.common
+        tasks_from: docker_bridge_chains
+      vars:
+        common_docker_bridge_chains_service_name: docker
+        common_docker_bridge_chains_require_nat_chain: true
+      when: flagsmith_docker_bridge_chain_missing or flagsmith_compose_network_missing
+
+    - name: Retry Flagsmith startup after resetting stale compose resources
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ flagsmith_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+          - --force-recreate
+      args:
+        chdir: "{{ flagsmith_site_dir }}"
+      register: flagsmith_up_retry
+      changed_when: >-
+        'Creating' in flagsmith_up_retry.stdout
+        or 'Recreating' in flagsmith_up_retry.stdout
+        or 'Starting' in flagsmith_up_retry.stdout
+      when: flagsmith_docker_bridge_chain_missing or flagsmith_compose_network_missing
 
 - name: Check whether Flagsmith publishes the expected host port
   ansible.builtin.command:
@@ -301,9 +422,8 @@
         user = FFAdminUser.objects.filter(email=email).first();
         assert user is not None, f"Flagsmith bootstrap user {email} was not created";
         changed = not user.check_password(password);
-        if changed:
-            user.set_password(password);
-            user.save(update_fields=["password"]);
+        changed and user.set_password(password);
+        changed and user.save(update_fields=["password"]);
         print(json.dumps({"changed": changed, "is_superuser": bool(user.is_superuser)}))
   register: flagsmith_admin_password_sync
   retries: 24
@@ -311,7 +431,13 @@
   until: flagsmith_admin_password_sync.rc == 0
   changed_when: >-
     (
-      (flagsmith_admin_password_sync.stdout | trim | from_json).changed
+      (
+        flagsmith_admin_password_sync.stdout_lines
+        | reject('equalto', '')
+        | list
+        | last
+        | from_json
+      ).changed
       | default(false)
     )
   no_log: true
@@ -319,7 +445,14 @@
 - name: Assert the Flagsmith bootstrap identity remained a superuser
   ansible.builtin.assert:
     that:
-      - (flagsmith_admin_password_sync.stdout | trim | from_json).is_superuser
+      - >-
+          (
+            flagsmith_admin_password_sync.stdout_lines
+            | reject('equalto', '')
+            | list
+            | last
+            | from_json
+          ).is_superuser
     fail_msg: "The managed Flagsmith bootstrap identity exists, but it no longer has superuser access."
   no_log: true
 
