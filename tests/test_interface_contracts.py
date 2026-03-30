@@ -86,6 +86,11 @@ def test_check_live_apply_target_accepts_known_service() -> None:
     assert result["playbook"].endswith("/playbooks/services/n8n.yml")
 
 
+def test_check_live_apply_target_accepts_nextcloud_service() -> None:
+    result = check_live_apply_target("service:nextcloud")
+    assert result["playbook"].endswith("/playbooks/services/nextcloud.yml")
+
+
 def test_check_live_apply_target_accepts_group() -> None:
     result = check_live_apply_target("group:automation")
     assert result["playbook"].endswith("/playbooks/groups/automation.yml")

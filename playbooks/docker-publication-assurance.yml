@@ -1,0 +1,100 @@
+---
+# Playbook: docker-publication-assurance.yml
+# Purpose: Install and run the ADR 0270 Docker publication assurance helper on every managed Docker guest that declares a publication contract.
+# Use case: Run during live apply, recovery, or drift verification when Docker-hosted services must prove their bridge networks, port bindings, and listener publication path before readiness is trusted.
+#
+# Inputs (required):
+#   - env (string, required): Target environment selector used to choose the managed Docker guests.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): Guest SSH path for the managed Docker guests.
+#
+# Outputs:
+#   - The repo-managed publication assurance helper is installed on each targeted Docker guest.
+#   - Every declared Docker publication contract on that host is checked and repaired in place when the host-side publication state is broken.
+#
+# Idempotency: Fully idempotent
+#              The helper install is a managed file copy, and repairs only run when the observed publication contract is broken.
+#
+# Dependencies:
+#   - ADR 0023: Docker runtime VM baseline.
+#   - ADR 0246: Startup, liveness, and readiness semantics.
+#   - ADR 0270: Docker publication self-healing and port-programming assertions.
+#   - Role: lv3.platform.docker_runtime - installs the shared publication assurance helper on managed Docker hosts.
+#
+# Related ADRs: 0023, 0246, 0270
+# Related Runbooks: docs/runbooks/docker-publication-assurance.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-29
+
+- name: Converge Docker publication assurance on managed Docker guests
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3:coolify-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-docker-publication-assurance
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts: >-
+          {{
+            [playbook_execution_required_hosts.docker_runtime[playbook_execution_env]]
+            + (['coolify-lv3'] if playbook_execution_env == 'production' else [])
+          }}
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+
+  tasks:
+    - name: Load the health probe catalog
+      ansible.builtin.set_fact:
+        docker_publication_health_probe_catalog: >-
+          {{
+            lookup(
+              'ansible.builtin.file',
+              playbook_execution_health_probe_catalog_path
+            ) | from_json
+          }}
+      changed_when: false
+
+    - name: Initialize the host-local Docker publication contract list
+      ansible.builtin.set_fact:
+        docker_publication_host_contracts: []
+      changed_when: false
+
+    - name: Select Docker publication contracts for this host
+      ansible.builtin.set_fact:
+        docker_publication_host_contracts: >-
+          {{
+            docker_publication_host_contracts
+            + [
+              {
+                'service_id': item.key,
+                'service_probe': item.value
+              }
+            ]
+          }}
+      loop: "{{ docker_publication_health_probe_catalog.services | dict2items }}"
+      when:
+        - item.value.owning_vm == inventory_hostname
+        - item.value.readiness is defined
+        - item.value.readiness.docker_publication is defined
+      changed_when: false
+
+    - name: Run Docker publication assurance for each declared service on this host
+      ansible.builtin.include_tasks: tasks/docker-publication-assert.yml
+      vars:
+        service_health_probe_id: "{{ item.service_id }}"
+        playbook_execution_service_probe: "{{ item.service_probe }}"
+        playbook_execution_docker_publication_contract: "{{ item.service_probe.readiness.docker_publication }}"
+      loop: "{{ docker_publication_host_contracts }}"
+      loop_control:
+        label: "{{ item.service_id }}"

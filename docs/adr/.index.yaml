@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-30'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 249
+  Implemented: 250
   Partial: 7
-  Not Implemented: 67
+  Not Implemented: 66
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4462,7 +4462,7 @@ adr_index:
   - adr: '0260'
     title: Nextcloud As The Canonical Personal Data Plane For ServerClaw
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4475,6 +4475,7 @@ adr_index:
       - serverclaw
     summary: We will use Nextcloud as the canonical personal data plane for ServerClaw.
     filename: 0260-nextcloud-as-the-canonical-personal-data-plane-for-serverclaw.md
+    implemented_version: 0.177.93
   - adr: '0261'
     title: Playwright Browser Runners For ServerClaw Web Action And Extraction
     status: Accepted

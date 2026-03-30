@@ -842,6 +842,62 @@ groups:
           slo_id: nginx-edge-availability
           service_id: nginx_edge
           indicator: availability
+      - record: slo:nextcloud_availability:success_ratio_5m
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="nextcloud-availability"}[5m])
+        labels:
+          slo_id: nextcloud-availability
+          service_id: nextcloud
+          indicator: availability
+      - record: slo:nextcloud_availability:success_ratio_1h
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="nextcloud-availability"}[1h])
+        labels:
+          slo_id: nextcloud-availability
+          service_id: nextcloud
+          indicator: availability
+      - record: slo:nextcloud_availability:success_ratio_30d
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="nextcloud-availability"}[30d])
+        labels:
+          slo_id: nextcloud-availability
+          service_id: nextcloud
+          indicator: availability
+      - record: slo:nextcloud_availability:error_rate_5m
+        expr: 1 - slo:nextcloud_availability:success_ratio_5m
+        labels:
+          slo_id: nextcloud-availability
+          service_id: nextcloud
+          indicator: availability
+      - record: slo:nextcloud_availability:error_rate_1h
+        expr: 1 - slo:nextcloud_availability:success_ratio_1h
+        labels:
+          slo_id: nextcloud-availability
+          service_id: nextcloud
+          indicator: availability
+      - record: slo:nextcloud_availability:error_rate_30d
+        expr: 1 - slo:nextcloud_availability:success_ratio_30d
+        labels:
+          slo_id: nextcloud-availability
+          service_id: nextcloud
+          indicator: availability
+      - record: slo:nextcloud_availability:budget_remaining
+        expr: clamp_min(1 - (slo:nextcloud_availability:error_rate_30d / 0.005000),
+          0)
+        labels:
+          slo_id: nextcloud-availability
+          service_id: nextcloud
+          indicator: availability
+      - record: slo:nextcloud_availability:burn_rate_1h
+        expr: slo:nextcloud_availability:error_rate_1h / 0.005000
+        labels:
+          slo_id: nextcloud-availability
+          service_id: nextcloud
+          indicator: availability
+      - record: slo:nextcloud_availability:time_to_budget_exhaustion_days
+        expr: (slo:nextcloud_availability:budget_remaining * 30) / clamp_min(slo:nextcloud_availability:burn_rate_1h,
+          0.001)
+        labels:
+          slo_id: nextcloud-availability
+          service_id: nextcloud
+          indicator: availability
       - record: slo:open_webui_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="open-webui-availability"}[5m])
         labels:

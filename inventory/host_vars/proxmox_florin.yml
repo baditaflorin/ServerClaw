@@ -68,6 +68,7 @@ platform_port_assignments:
   excalidraw_room_port: 3096
   ollama_api_port: 11434
   n8n_port: 5678
+  nextcloud_port: 8084
   coolify_dashboard_port: 8000
   coolify_proxy_port: 80
   coolify_proxy_tls_port: 443
@@ -584,6 +585,26 @@ network_policy:
           ports:
             - 3006
           description: Reverse proxy access to the Outline knowledge wiki
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 8084
+          description: Reverse proxy access to the Nextcloud personal data plane
+        - source: all_guests
+          protocol: tcp
+          ports:
+            - 8084
+          description: Private guest-to-guest access to Nextcloud on the managed internal network
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 8084
+          description: Local Docker workloads that reach Nextcloud over the private runtime listener
+        - source: 192.168.0.0/16
+          protocol: tcp
+          ports:
+            - 8084
+          description: Local Docker workloads that reach Nextcloud over the private runtime listener
         - source: nginx-lv3
           protocol: tcp
           ports:
@@ -1508,6 +1529,41 @@ lv3_service_topology:
       tls: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.n8n_port }}"
+  nextcloud:
+    service_name: nextcloud
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: cloud.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: cloud
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.nextcloud_port }}"
+      client_max_body_size: 16g
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      security_headers_enabled: false
+      preserve_upstream_security_headers: true
+      exact_redirects:
+        - path: /.well-known/carddav
+          location: /remote.php/dav/
+          status: 301
+        - path: /.well-known/caldav
+          location: /remote.php/dav/
+          status: 301
   coolify:
     service_name: coolify
     owning_vm: coolify-lv3

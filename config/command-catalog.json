@@ -1173,6 +1173,44 @@
         "timeout_seconds": 900
       }
     },
+    "converge-docker-publication-assurance": {
+      "description": "Converge the shared ADR 0270 Docker publication assurance helper and repair declared Docker publication contracts on managed Docker guests.",
+      "workflow_id": "converge-docker-publication-assurance",
+      "scope": "guest_runtime",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-docker-publication-assurance passes",
+        "make validate passes before the apply",
+        "The health-probe catalog docker_publication contracts are reviewed before any live repair replay"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the helper installation, declared contract results, and direct verification of repaired Docker publication state on docker-runtime-lv3 and coolify-lv3."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the shared helper cannot be installed or if a declared Docker publication contract still fails after the governed repair path.",
+          "Stop if the replay would require undocumented manual Docker or iptables edits to restore publication."
+        ],
+        "rollback_guidance": [
+          "Prefer rerunning the governed helper and compose recreation path instead of improvising blanket Docker host resets.",
+          "If a service remains broken after the replay, preserve the failing publication evidence in the live-apply receipt before any manual recovery."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
+      }
+    },
     "converge-postgres-vm": {
       "description": "Converge the PostgreSQL VM baseline and managed database settings.",
       "workflow_id": "converge-postgres-vm",
@@ -2050,6 +2088,51 @@
       "execution": {
         "profile": "docker_runtime_systemd_make",
         "timeout_seconds": 1200
+      }
+    },
+    "converge-nextcloud": {
+      "description": "Converge Nextcloud with PostgreSQL persistence and publish it at cloud.lv3.org with DAV discovery and large-upload support.",
+      "workflow_id": "converge-nextcloud",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to publish cloud.lv3.org and expand the shared edge certificate."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-nextcloud passes",
+        "make validate passes before the apply",
+        "The public DAV exposure, upload limits, and shared-edge redirect behavior are reviewed before live rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, public and local status.php verification, admin bootstrap verification, background cron mode, and DAV redirect behavior."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if PostgreSQL, Nextcloud runtime, or shared-edge publication verification fails.",
+          "Stop if DAV discovery redirects, large-upload proxy settings, or the public status endpoint diverge from the documented contract."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Nextcloud runtime and edge configuration from version control before retrying.",
+          "Do not compensate for a broken rollout by hand-editing the Nextcloud UI or config.php outside the repo."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
       }
     },
     "converge-netbox": {
