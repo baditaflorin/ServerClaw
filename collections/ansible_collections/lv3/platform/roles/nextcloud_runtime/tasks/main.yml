@@ -421,8 +421,10 @@
   no_log: true
 
 - name: Ensure Nextcloud uses cron for background jobs
-  ansible.builtin.command:
-    argv:
+  ansible.builtin.include_tasks: occ_command.yml
+  vars:
+    nextcloud_occ_command_description: Ensure Nextcloud uses cron for background jobs
+    nextcloud_occ_command_argv:
       - docker
       - exec
       - --user
@@ -431,15 +433,12 @@
       - php
       - occ
       - background:cron
-  register: nextcloud_background_cron
-  retries: "{{ nextcloud_occ_command_retries | int }}"
-  delay: "{{ nextcloud_occ_command_delay_seconds | int }}"
-  until: nextcloud_background_cron.rc == 0
-  changed_when: false
 
 - name: Ensure Nextcloud trusted domains include the public hostname
-  ansible.builtin.command:
-    argv:
+  ansible.builtin.include_tasks: occ_command.yml
+  vars:
+    nextcloud_occ_command_description: Ensure Nextcloud trusted domains include the public hostname
+    nextcloud_occ_command_argv:
       - docker
       - exec
       - --user
@@ -451,15 +450,12 @@
       - trusted_domains
       - "1"
       - --value={{ nextcloud_public_hostname }}
-  register: nextcloud_trusted_domains_result
-  retries: "{{ nextcloud_occ_command_retries | int }}"
-  delay: "{{ nextcloud_occ_command_delay_seconds | int }}"
-  until: nextcloud_trusted_domains_result.rc == 0
-  changed_when: false
 
 - name: Ensure Nextcloud trusted proxies include the edge private IP
-  ansible.builtin.command:
-    argv:
+  ansible.builtin.include_tasks: occ_command.yml
+  vars:
+    nextcloud_occ_command_description: Ensure Nextcloud trusted proxies include the edge private IP
+    nextcloud_occ_command_argv:
       - docker
       - exec
       - --user
@@ -471,15 +467,12 @@
       - trusted_proxies
       - "0"
       - --value={{ nextcloud_trusted_proxies[0] }}
-  register: nextcloud_trusted_proxies_result
-  retries: "{{ nextcloud_occ_command_retries | int }}"
-  delay: "{{ nextcloud_occ_command_delay_seconds | int }}"
-  until: nextcloud_trusted_proxies_result.rc == 0
-  changed_when: false
 
 - name: Ensure Nextcloud overwrites the public host
-  ansible.builtin.command:
-    argv:
+  ansible.builtin.include_tasks: occ_command.yml
+  vars:
+    nextcloud_occ_command_description: Ensure Nextcloud overwrites the public host
+    nextcloud_occ_command_argv:
       - docker
       - exec
       - --user
@@ -490,15 +483,12 @@
       - config:system:set
       - overwritehost
       - --value={{ nextcloud_public_hostname }}
-  register: nextcloud_overwritehost_result
-  retries: "{{ nextcloud_occ_command_retries | int }}"
-  delay: "{{ nextcloud_occ_command_delay_seconds | int }}"
-  until: nextcloud_overwritehost_result.rc == 0
-  changed_when: false
 
 - name: Ensure Nextcloud overwrites the public protocol
-  ansible.builtin.command:
-    argv:
+  ansible.builtin.include_tasks: occ_command.yml
+  vars:
+    nextcloud_occ_command_description: Ensure Nextcloud overwrites the public protocol
+    nextcloud_occ_command_argv:
       - docker
       - exec
       - --user
@@ -509,15 +499,12 @@
       - config:system:set
       - overwriteprotocol
       - --value={{ nextcloud_overwrite_protocol }}
-  register: nextcloud_overwriteprotocol_result
-  retries: "{{ nextcloud_occ_command_retries | int }}"
-  delay: "{{ nextcloud_occ_command_delay_seconds | int }}"
-  until: nextcloud_overwriteprotocol_result.rc == 0
-  changed_when: false
 
 - name: Ensure Nextcloud overwrites the public CLI URL
-  ansible.builtin.command:
-    argv:
+  ansible.builtin.include_tasks: occ_command.yml
+  vars:
+    nextcloud_occ_command_description: Ensure Nextcloud overwrites the public CLI URL
+    nextcloud_occ_command_argv:
       - docker
       - exec
       - --user
@@ -528,15 +515,12 @@
       - config:system:set
       - overwrite.cli.url
       - --value={{ nextcloud_public_base_url }}
-  register: nextcloud_overwrite_cli_url_result
-  retries: "{{ nextcloud_occ_command_retries | int }}"
-  delay: "{{ nextcloud_occ_command_delay_seconds | int }}"
-  until: nextcloud_overwrite_cli_url_result.rc == 0
-  changed_when: false
 
 - name: Ensure Nextcloud uses Redis for file locking
-  ansible.builtin.command:
-    argv:
+  ansible.builtin.include_tasks: occ_command.yml
+  vars:
+    nextcloud_occ_command_description: Ensure Nextcloud uses Redis for file locking
+    nextcloud_occ_command_argv:
       - docker
       - exec
       - --user
@@ -547,15 +531,12 @@
       - config:system:set
       - memcache.locking
       - --value=\\OC\\Memcache\\Redis
-  register: nextcloud_memcache_locking_result
-  retries: "{{ nextcloud_occ_command_retries | int }}"
-  delay: "{{ nextcloud_occ_command_delay_seconds | int }}"
-  until: nextcloud_memcache_locking_result.rc == 0
-  changed_when: false
 
 - name: Ensure Nextcloud uses Redis for distributed cache
-  ansible.builtin.command:
-    argv:
+  ansible.builtin.include_tasks: occ_command.yml
+  vars:
+    nextcloud_occ_command_description: Ensure Nextcloud uses Redis for distributed cache
+    nextcloud_occ_command_argv:
       - docker
       - exec
       - --user
@@ -566,15 +547,12 @@
       - config:system:set
       - memcache.distributed
       - --value=\\OC\\Memcache\\Redis
-  register: nextcloud_memcache_distributed_result
-  retries: "{{ nextcloud_occ_command_retries | int }}"
-  delay: "{{ nextcloud_occ_command_delay_seconds | int }}"
-  until: nextcloud_memcache_distributed_result.rc == 0
-  changed_when: false
 
 - name: Ensure Nextcloud Redis host is configured
-  ansible.builtin.command:
-    argv:
+  ansible.builtin.include_tasks: occ_command.yml
+  vars:
+    nextcloud_occ_command_description: Ensure Nextcloud Redis host is configured
+    nextcloud_occ_command_argv:
       - docker
       - exec
       - --user
@@ -586,15 +564,12 @@
       - redis
       - host
       - --value={{ nextcloud_redis_container_name }}
-  register: nextcloud_redis_host_result
-  retries: "{{ nextcloud_occ_command_retries | int }}"
-  delay: "{{ nextcloud_occ_command_delay_seconds | int }}"
-  until: nextcloud_redis_host_result.rc == 0
-  changed_when: false
 
 - name: Ensure Nextcloud Redis port is configured
-  ansible.builtin.command:
-    argv:
+  ansible.builtin.include_tasks: occ_command.yml
+  vars:
+    nextcloud_occ_command_description: Ensure Nextcloud Redis port is configured
+    nextcloud_occ_command_argv:
       - docker
       - exec
       - --user
@@ -606,15 +581,12 @@
       - redis
       - port
       - --value=6379
-  register: nextcloud_redis_port_result
-  retries: "{{ nextcloud_occ_command_retries | int }}"
-  delay: "{{ nextcloud_occ_command_delay_seconds | int }}"
-  until: nextcloud_redis_port_result.rc == 0
-  changed_when: false
 
 - name: Ensure Nextcloud Redis password is configured
-  ansible.builtin.command:
-    argv:
+  ansible.builtin.include_tasks: occ_command.yml
+  vars:
+    nextcloud_occ_command_description: Ensure Nextcloud Redis password is configured
+    nextcloud_occ_command_argv:
       - docker
       - exec
       - --user
@@ -626,12 +598,7 @@
       - redis
       - password
       - --value={{ nextcloud_redis_password }}
-  register: nextcloud_redis_password_result
-  retries: "{{ nextcloud_occ_command_retries | int }}"
-  delay: "{{ nextcloud_occ_command_delay_seconds | int }}"
-  until: nextcloud_redis_password_result.rc == 0
-  changed_when: false
-  no_log: true
+    nextcloud_occ_command_no_log: true
 
 - name: Run the Nextcloud verification tasks
   ansible.builtin.import_tasks: verify.yml

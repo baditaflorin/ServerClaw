@@ -9,6 +9,7 @@ ROLE_DEFAULTS = REPO_ROOT / "roles" / "nextcloud_runtime" / "defaults" / "main.y
 COMPOSE_TEMPLATE = REPO_ROOT / "roles" / "nextcloud_runtime" / "templates" / "docker-compose.yml.j2"
 ENV_TEMPLATE = REPO_ROOT / "roles" / "nextcloud_runtime" / "templates" / "nextcloud.env.ctmpl.j2"
 VERIFY_TASKS = REPO_ROOT / "roles" / "nextcloud_runtime" / "tasks" / "verify.yml"
+OCC_COMMAND_TASKS = REPO_ROOT / "roles" / "nextcloud_runtime" / "tasks" / "occ_command.yml"
 POSTGRES_TASKS = REPO_ROOT / "roles" / "nextcloud_postgres" / "tasks" / "main.yml"
 
 
@@ -71,13 +72,52 @@ def test_verify_tasks_check_status_admin_and_background_job_mode() -> None:
 
 def test_runtime_occ_mutations_retry_when_docker_exec_is_transiently_unavailable() -> None:
     tasks = load_tasks(ROLE_TASKS)
-    trusted_domains_task = next(task for task in tasks if task.get("name") == "Ensure Nextcloud trusted domains include the public hostname")
+    trusted_domains_task = next(
+        task for task in tasks if task.get("name") == "Ensure Nextcloud trusted domains include the public hostname"
+    )
     redis_password_task = next(task for task in tasks if task.get("name") == "Ensure Nextcloud Redis password is configured")
+    occ_helper_tasks = load_tasks(OCC_COMMAND_TASKS)
+    run_command_task = next(task for task in occ_helper_tasks if task.get("name") == "{{ nextcloud_occ_command_description }}")
+    recovery_fact = next(
+        task for task in occ_helper_tasks if task.get("name") == "Detect whether the Nextcloud OCC command needs runtime recovery"
+    )
+    recover_block = next(
+        task for task in occ_helper_tasks if task.get("name") == "Recover the Nextcloud runtime after a concurrent interruption"
+    )
+    retry_after_recovery = next(
+        task for task in recover_block["block"] if task.get("name") == "Retry the Nextcloud OCC command after runtime recovery"
+    )
 
-    assert trusted_domains_task["retries"] == "{{ nextcloud_occ_command_retries | int }}"
-    assert trusted_domains_task["delay"] == "{{ nextcloud_occ_command_delay_seconds | int }}"
-    assert trusted_domains_task["until"] == "nextcloud_trusted_domains_result.rc == 0"
-    assert redis_password_task["until"] == "nextcloud_redis_password_result.rc == 0"
+    assert trusted_domains_task["ansible.builtin.include_tasks"] == "occ_command.yml"
+    assert trusted_domains_task["vars"]["nextcloud_occ_command_description"] == (
+        "Ensure Nextcloud trusted domains include the public hostname"
+    )
+    assert trusted_domains_task["vars"]["nextcloud_occ_command_argv"][-3:] == [
+        "trusted_domains",
+        "1",
+        "--value={{ nextcloud_public_hostname }}",
+    ]
+    assert redis_password_task["ansible.builtin.include_tasks"] == "occ_command.yml"
+    assert redis_password_task["vars"]["nextcloud_occ_command_no_log"] is True
+    assert run_command_task["retries"] == "{{ nextcloud_occ_command_retries | int }}"
+    assert run_command_task["delay"] == "{{ nextcloud_occ_command_delay_seconds | int }}"
+    assert run_command_task["until"] == "nextcloud_occ_command_result.rc == 0"
+    recovery_text = recovery_fact["ansible.builtin.set_fact"]["nextcloud_occ_command_recovery_needed"]
+    assert "is not running" in recovery_text
+    assert "Cannot connect to the Docker daemon" in recovery_text
+    assert "context deadline exceeded" in recovery_text
+    assert recover_block["when"] == "nextcloud_occ_command_recovery_needed"
+    wait_for_docker = next(
+        task
+        for task in recover_block["block"]
+        if task.get("name") == "Wait for Docker to be active before recovering the Nextcloud runtime"
+    )
+    assert wait_for_docker["ansible.builtin.command"]["argv"] == ["systemctl", "is-active", "docker"]
+    assert wait_for_docker["until"] == "nextcloud_docker_active_after_occ_failure.stdout | trim == 'active'"
+    assert wait_for_docker["retries"] == 30
+    assert retry_after_recovery["until"] == "nextcloud_occ_command_retry_result.rc == 0"
+    assert retry_after_recovery["retries"] == "{{ nextcloud_occ_command_retries | int }}"
+    assert retry_after_recovery["delay"] == "{{ nextcloud_occ_command_delay_seconds | int }}"
 
 
 def test_runtime_resets_stale_compose_networks_before_retrying_startup() -> None:
