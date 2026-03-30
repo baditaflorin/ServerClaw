@@ -1,0 +1,166 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import yaml
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+FALCO_ROLE_DEFAULTS = REPO_ROOT / "roles" / "falco_runtime" / "defaults" / "main.yml"
+FALCO_ROLE_TASKS = REPO_ROOT / "roles" / "falco_runtime" / "tasks" / "main.yml"
+FALCO_ROLE_VERIFY = REPO_ROOT / "roles" / "falco_runtime" / "tasks" / "verify.yml"
+FALCO_ROLE_META = REPO_ROOT / "roles" / "falco_runtime" / "meta" / "argument_specs.yml"
+FALCO_ROLE_TEMPLATE = REPO_ROOT / "roles" / "falco_runtime" / "templates" / "falco-runtime.yaml.j2"
+BRIDGE_ROLE_DEFAULTS = REPO_ROOT / "roles" / "falco_event_bridge_runtime" / "defaults" / "main.yml"
+BRIDGE_ROLE_TASKS = REPO_ROOT / "roles" / "falco_event_bridge_runtime" / "tasks" / "main.yml"
+BRIDGE_ROLE_META = REPO_ROOT / "roles" / "falco_event_bridge_runtime" / "meta" / "argument_specs.yml"
+PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "falco.yml"
+SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "falco.yml"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
+WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
+COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
+ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
+EVENT_TAXONOMY_PATH = REPO_ROOT / "config" / "event-taxonomy.yaml"
+NTFY_CONFIG_PATH = REPO_ROOT / "config" / "ntfy" / "server.yml"
+
+
+def load_yaml(path: Path) -> list[dict] | dict:
+    return yaml.safe_load(path.read_text(encoding="utf-8"))
+
+
+def test_falco_defaults_define_private_bridge_output_and_rule_sources() -> None:
+    defaults = load_yaml(FALCO_ROLE_DEFAULTS)
+
+    assert defaults["falco_runtime_service_name"] == "falco-modern-bpf"
+    assert defaults["falco_runtime_http_output_url"] == "http://{{ falco_runtime_bridge_host }}:{{ falco_runtime_bridge_port }}/events"
+    assert defaults["falco_runtime_rule_sources"][0]["dest"].endswith("50-lv3-platform-overrides.yaml")
+    assert "falcoctl-artifact-follow.service" in defaults["falco_runtime_disabled_services"]
+
+
+def test_falco_argument_spec_requires_repo_and_bridge_inputs() -> None:
+    specs = load_yaml(FALCO_ROLE_META)
+    options = specs["argument_specs"]["main"]["options"]
+
+    assert options["falco_runtime_repo_root"]["type"] == "path"
+    assert options["falco_runtime_packages"]["elements"] == "str"
+    assert options["falco_runtime_rule_sources"]["elements"] == "dict"
+    assert options["falco_runtime_http_output_url"]["type"] == "str"
+
+
+def test_falco_tasks_install_render_rules_and_verify_service() -> None:
+    tasks = load_yaml(FALCO_ROLE_TASKS)
+    names = [task["name"] for task in tasks]
+
+    assert "Install the Falco runtime packages" in names
+    assert "Render the Falco runtime override config" in names
+    assert "Sync the repo-managed Falco rule files" in names
+    assert "Ensure the Falco runtime service is enabled and started" in names
+    assert "Verify the Falco runtime" in names
+
+    verify_tasks = load_yaml(FALCO_ROLE_VERIFY)
+    verify_names = [task["name"] for task in verify_tasks]
+    assert "Verify the Falco runtime service is active" in verify_names
+    assert "Verify the managed Falco smoke rule is present" in verify_names
+
+
+def test_falco_template_enables_json_stdout_and_http_output() -> None:
+    template = FALCO_ROLE_TEMPLATE.read_text(encoding="utf-8")
+
+    assert "json_output: true" in template
+    assert "stdout_output:" in template
+    assert "http_output:" in template
+    assert "{{ falco_runtime_http_output_url }}" in template
+
+
+def test_bridge_defaults_reuse_private_nats_and_ntfy_contracts() -> None:
+    defaults = load_yaml(BRIDGE_ROLE_DEFAULTS)
+
+    assert defaults["falco_event_bridge_service_name"] == "lv3-falco-event-bridge"
+    assert defaults["falco_event_bridge_listen_port"] == "{{ hostvars['proxmox_florin'].platform_port_assignments.falco_event_bridge_port }}"
+    assert defaults["falco_event_bridge_nats_subject"] == "platform.security.falco"
+    assert defaults["falco_event_bridge_ntfy_topic"] == "platform.security.critical"
+
+
+def test_bridge_role_reads_controller_local_credentials_and_starts_systemd_service() -> None:
+    tasks = load_yaml(BRIDGE_ROLE_TASKS)
+    names = [task["name"] for task in tasks]
+
+    assert "Read the controller-local NATS admin password for the Falco bridge" in names
+    assert "Read the controller-local ntfy password for the Falco bridge" in names
+    assert "Render the Falco event bridge systemd unit" in names
+    assert "Ensure the Falco event bridge service is enabled and running" in names
+
+    specs = load_yaml(BRIDGE_ROLE_META)
+    options = specs["argument_specs"]["main"]["options"]
+    assert options["falco_event_bridge_listen_port"]["type"] == "int"
+    assert options["falco_event_bridge_script_sources"]["elements"] == "dict"
+
+
+def test_playbook_converges_bridge_then_falco_runtime_across_hosts() -> None:
+    playbook = load_yaml(PLAYBOOK_PATH)
+
+    assert len(playbook) == 2
+    first_roles = [role["role"] for role in playbook[0]["roles"]]
+    second_roles = [role["role"] for role in playbook[1]["roles"]]
+    assert playbook[0]["hosts"] == "docker-runtime-lv3"
+    assert playbook[1]["hosts"] == "docker-runtime-lv3:docker-build-lv3:monitoring-lv3:postgres-lv3"
+    assert first_roles[-1] == "lv3.platform.falco_event_bridge_runtime"
+    assert second_roles[-1] == "lv3.platform.falco_runtime"
+
+    wrapper = load_yaml(SERVICE_WRAPPER_PATH)
+    assert wrapper == [{"import_playbook": "../falco.yml"}]
+
+
+def test_inventory_exposes_private_bridge_port_and_guest_access_rules() -> None:
+    host_vars = load_yaml(HOST_VARS_PATH)
+
+    assert host_vars["platform_port_assignments"]["falco_event_bridge_port"] == 18080
+    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
+    build_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "docker-build-lv3" and 18080 in rule["ports"])
+    monitoring_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "monitoring-lv3" and 18080 in rule["ports"])
+    postgres_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "postgres-lv3")
+    assert 18080 in build_rule["ports"]
+    assert 18080 in monitoring_rule["ports"]
+    assert 18080 in postgres_rule["ports"]
+
+
+def test_workflow_and_command_catalogs_register_falco_converge_entrypoint() -> None:
+    workflow_catalog = json.loads(WORKFLOW_CATALOG_PATH.read_text(encoding="utf-8"))
+    command_catalog = json.loads(COMMAND_CATALOG_PATH.read_text(encoding="utf-8"))
+
+    workflow = workflow_catalog["workflows"]["converge-falco"]
+    command = command_catalog["commands"]["converge-falco"]
+
+    assert workflow["preferred_entrypoint"] == {
+        "kind": "make_target",
+        "target": "converge-falco",
+        "command": "make converge-falco",
+    }
+    assert "syntax-check-falco" in workflow["validation_targets"]
+    assert workflow["owner_runbook"] == "docs/runbooks/configure-falco-runtime.md"
+    assert command["workflow_id"] == "converge-falco"
+    assert command["approval_policy"] == "sensitive_live_change"
+    assert command["evidence"]["live_apply_receipt_required"] is True
+
+
+def test_ansible_scopes_taxonomy_ntfy_and_mutation_audit_cover_falco() -> None:
+    scopes = load_yaml(ANSIBLE_EXECUTION_SCOPES_PATH)
+    entry = scopes["playbooks"]["playbooks/falco.yml"]
+    assert entry["playbook_id"] == "falco"
+    assert entry["mutation_scope"] == "platform"
+    assert "security:falco-runtime" in entry["shared_surfaces"]
+
+    taxonomy = load_yaml(EVENT_TAXONOMY_PATH)
+    security_topics = {topic["name"]: topic for topic in taxonomy["domains"]["security"]["topics"]}
+    assert "platform.security.falco" in security_topics
+    assert security_topics["platform.security.falco"]["payload"]["required"] == [
+        "event",
+        "host",
+        "rule",
+        "priority",
+        "time",
+    ]
+
+    ntfy_config = NTFY_CONFIG_PATH.read_text(encoding="utf-8")
+    assert "{{ ntfy_runtime_username }}:platform.security.critical:rw" in ntfy_config

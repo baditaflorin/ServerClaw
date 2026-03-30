@@ -1,0 +1,33 @@
+---
+argument_specs:
+  main:
+    short_description: Run the private LV3 Falco event bridge on docker-runtime-lv3.
+    options:
+      falco_event_bridge_repo_root:
+        type: path
+        required: true
+      falco_event_bridge_site_dir:
+        type: path
+        required: true
+      falco_event_bridge_service_name:
+        type: str
+        required: true
+      falco_event_bridge_service_file:
+        type: path
+        required: true
+      falco_event_bridge_env_file:
+        type: path
+        required: true
+      falco_event_bridge_listen_port:
+        type: int
+        required: true
+      falco_event_bridge_nats_password_local_file:
+        type: path
+        required: true
+      falco_event_bridge_ntfy_password_local_file:
+        type: path
+        required: true
+      falco_event_bridge_script_sources:
+        type: list
+        elements: dict
+        required: true

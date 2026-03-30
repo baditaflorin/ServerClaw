@@ -1,0 +1,21 @@
+json_output: true
+json_include_output_property: true
+json_include_tags_property: true
+buffered_outputs: false
+
+stdout_output:
+  enabled: true
+
+syslog_output:
+  enabled: false
+
+file_output:
+  enabled: false
+
+program_output:
+  enabled: false
+
+http_output:
+  enabled: true
+  url: "{{ falco_runtime_http_output_url }}"
+  user_agent: "{{ falco_runtime_http_user_agent }}"

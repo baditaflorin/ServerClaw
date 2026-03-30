@@ -26,20 +26,21 @@ host filesystem, or spawn unexpected child processes. Without a kernel-level
 observer these events produce no alert.
 
 Falco (`falcosecurity/falco`) is a CNCF-graduated runtime security tool. It
-attaches to the Linux kernel via eBPF or a kernel module and evaluates a
+attaches to the Linux kernel via eBPF and evaluates a
 rule-based policy against every syscall made by every container process. When a
 rule matches (e.g. a shell spawned inside a container, a write to `/etc`, a
 network connection to an unexpected port, a container namespace escape attempt),
 Falco emits a structured JSON event within milliseconds. It is Apache-2.0-licensed,
-has been in production use since 2016, ships as a single binary with a Docker
-image and a Helm chart, and exposes a gRPC output API and a JSON webhook output
-that integrates with any consumer.
+has been in production use since 2016, ships as a single binary with package,
+container, and Helm distribution paths, and exposes structured JSON outputs that
+integrate with existing logging and event-routing systems.
 
 ## Decision
 
-We will deploy **Falco** as a systemd service on each production VM, using the
-eBPF probe to avoid a kernel module compile dependency, and route its output to
-the platform's Loki and NATS pipelines.
+We will deploy **Falco** as a systemd service on each selected production VM,
+using the upstream `modern_ebpf` runtime path and a private bridge on
+`docker-runtime-lv3` that fans WARNING+ events into the platform's Loki, NATS,
+ntfy, and legacy mutation-audit pipelines.
 
 ### Deployment rules
 
@@ -47,8 +48,9 @@ the platform's Loki and NATS pipelines.
   `docker-runtime-lv3`, `docker-build-lv3`, `monitoring-lv3`, and
   `postgres-lv3` hosts; the Ansible role for each VM manages Falco installation,
   version, and rules
-- Falco uses the `falco-driver-loader` eBPF probe (`falco-bpf`); it does not
-  require a kernel module or a kernel header package
+- Falco uses the upstream `modern_ebpf` service path (`falco-modern-bpf`); it
+  does not require a kernel module build, DKMS, or a host-local kernel-header
+  compile step
 - the Falco binary version is pinned in `versions/stack.yaml` and bumped via the
   Renovate Bot process (ADR 0297)
 - Falco is never run as a container on the same host it is monitoring; running
@@ -71,13 +73,16 @@ the platform's Loki and NATS pipelines.
 - Falco emits JSON events to stdout; Alloy (the Grafana agent already deployed on
   each VM) tails the Falco journald unit and ships structured log events to Loki
   with label `job="falco"`
-- a Falco webhook output is also configured to POST `priority >= WARNING` events
-  to a lightweight Windmill webhook endpoint that:
-  1. publishes the event to the NATS `platform.security.falco` subject (ADR 0276)
-  2. for `CRITICAL` events, publishes an ntfy notification to
-     `platform-security-critical` (ADR 0299)
-  3. records the event in the mutation audit log (ADR 0066) as a
-     `security_anomaly_detected` entry
+- a Falco HTTP output is also configured to POST events to a private bridge on
+  `docker-runtime-lv3`; that bridge:
+  1. publishes `priority >= WARNING` events to the NATS
+     `platform.security.falco` subject (ADR 0276)
+  2. publishes `priority >= CRITICAL` events to ntfy topic
+     `platform-security-critical` (ADR 0299); the ntfy publish surface uses a
+     hyphenated topic slug rather than the dotted NATS subject form because the
+     live ntfy HTTP path rejects dotted topic names
+  3. appends one legacy mutation-audit JSONL event with `surface="falco"` and
+     action `security_anomaly_detected` for each forwarded WARNING+ event
 - `INFO`-level events remain in Loki only; they do not trigger the NATS or ntfy
   path to avoid alert fatigue
 
@@ -99,19 +104,22 @@ the platform's Loki and NATS pipelines.
   scanning and network monitoring cannot detect
 - structured JSON events in Loki enable forensic queries for incident
   post-mortems without relying on raw kernel logs
-- the eBPF probe approach means Falco does not require a custom kernel module and
-  works on the Proxmox-managed Debian 13 kernel without additional build steps
+- the `modern_ebpf` path avoids a custom kernel module and works on the
+  Proxmox-managed Debian 13 kernel without additional build steps
 - Falco events feed the existing NATS and ntfy pipelines with no new transport
   dependency
 
 **Negative / Trade-offs**
 
-- eBPF probe attachment requires Linux 4.14+ and CAP_BPF; the Proxmox Debian 13
-  kernel meets this requirement but an upstream kernel update that changes the BPF
-  interface may require a Falco version bump
+- `modern_ebpf` still depends on compatible kernel BPF interfaces; the Proxmox
+  Debian 13 kernel meets this requirement but an upstream kernel update that
+  materially changes the BPF interface may require a Falco version bump
 - the initial rule tuning period will produce false positives until
   platform-specific suppressions are calibrated; this requires active operator
   review during the first two weeks post-deployment
+- a private bridge on `docker-runtime-lv3` becomes part of the Falco signal path;
+  if that bridge is degraded then WARNING+/CRITICAL event fan-out is degraded
+  even though local Falco detection and Loki journald capture remain available
 - Falco's CPU overhead per container increases with event volume; high-syscall
   workloads (e.g. Playwright browser runners) may require dedicated rule tuning
   to suppress chatty but benign syscall patterns

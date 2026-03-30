@@ -1,0 +1,37 @@
+---
+argument_specs:
+  main:
+    short_description: Converge repo-managed Falco runtime syscall monitoring on selected Debian guests.
+    options:
+      falco_runtime_repo_root:
+        type: path
+        required: true
+      falco_runtime_repo_key_url:
+        type: str
+        required: true
+      falco_runtime_repo_keyring:
+        type: path
+        required: true
+      falco_runtime_repo_file:
+        type: path
+        required: true
+      falco_runtime_packages:
+        type: list
+        elements: str
+        required: true
+      falco_runtime_service_name:
+        type: str
+        required: true
+      falco_runtime_config_override_file:
+        type: path
+        required: true
+      falco_runtime_rules_dir:
+        type: path
+        required: true
+      falco_runtime_rule_sources:
+        type: list
+        elements: dict
+        required: true
+      falco_runtime_http_output_url:
+        type: str
+        required: true

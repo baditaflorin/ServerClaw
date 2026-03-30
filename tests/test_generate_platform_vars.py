@@ -141,6 +141,12 @@ def test_build_platform_vars_includes_crawl4ai_private_topology() -> None:
     assert platform_vars["crawl4ai_port"] == 11235
 
 
+def test_build_platform_vars_includes_falco_bridge_port() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+
+    assert platform_vars["falco_event_bridge_port"] == 18084
+
+
 def test_build_platform_vars_includes_paperless_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     paperless = platform_vars["platform_service_topology"]["paperless"]

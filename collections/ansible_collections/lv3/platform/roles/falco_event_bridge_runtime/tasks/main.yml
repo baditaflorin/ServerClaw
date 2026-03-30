@@ -1,0 +1,100 @@
+---
+- name: Validate Falco event bridge inputs
+  ansible.builtin.assert:
+    that:
+      - falco_event_bridge_repo_root | length > 0
+      - falco_event_bridge_site_dir | length > 0
+      - falco_event_bridge_service_name | length > 0
+      - falco_event_bridge_service_file | length > 0
+      - falco_event_bridge_env_file | length > 0
+      - falco_event_bridge_listen_port | int > 0
+      - falco_event_bridge_nats_password_local_file | length > 0
+      - falco_event_bridge_ntfy_password_local_file | length > 0
+      - falco_event_bridge_script_sources | length > 0
+    fail_msg: >-
+      falco_event_bridge_runtime requires the repo root, systemd files, secret
+      inputs, and the managed script list.
+
+- name: Ensure Falco event bridge packages are present
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - python3
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Falco event bridge directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ '0755' if item != '/var/log/platform' else '0755' }}"
+  loop:
+    - "{{ falco_event_bridge_site_dir }}"
+    - /var/log/platform
+
+- name: Read the controller-local NATS admin password for the Falco bridge
+  ansible.builtin.slurp:
+    src: "{{ falco_event_bridge_nats_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: falco_event_bridge_nats_password_raw
+  no_log: true
+
+- name: Read the controller-local ntfy password for the Falco bridge
+  ansible.builtin.slurp:
+    src: "{{ falco_event_bridge_ntfy_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: falco_event_bridge_ntfy_password_raw
+  no_log: true
+
+- name: Record the Falco bridge secret facts
+  ansible.builtin.set_fact:
+    falco_event_bridge_nats_password: "{{ falco_event_bridge_nats_password_raw.content | b64decode | trim }}"
+    falco_event_bridge_ntfy_password: "{{ falco_event_bridge_ntfy_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Sync the Falco event bridge scripts
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ falco_event_bridge_script_sources }}"
+  notify: Restart Falco event bridge
+
+- name: Render the Falco event bridge environment file
+  ansible.builtin.template:
+    src: falco-event-bridge.env.j2
+    dest: "{{ falco_event_bridge_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+  notify: Restart Falco event bridge
+
+- name: Render the Falco event bridge systemd unit
+  ansible.builtin.template:
+    src: lv3-falco-event-bridge.service.j2
+    dest: "{{ falco_event_bridge_service_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Falco event bridge
+
+- name: Flush Falco event bridge handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Ensure the Falco event bridge service is enabled and running
+  ansible.builtin.systemd_service:
+    name: "{{ falco_event_bridge_service_name }}"
+    enabled: true
+    daemon_reload: true
+    state: started
+
+- name: Verify the Falco event bridge
+  ansible.builtin.import_tasks: verify.yml

@@ -1,0 +1,14 @@
+[Unit]
+Description=LV3 Falco event bridge
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile={{ falco_event_bridge_env_file }}
+ExecStart=/usr/bin/python3 {{ falco_event_bridge_site_dir }}/falco_event_bridge_server.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

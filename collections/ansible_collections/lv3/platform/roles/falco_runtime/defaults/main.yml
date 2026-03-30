@@ -1,0 +1,36 @@
+---
+falco_runtime_repo_root: "{{ inventory_dir | dirname }}"
+falco_runtime_keyring_dir: /etc/apt/keyrings
+falco_runtime_repo_key_url: https://falco.org/repo/falcosecurity-packages.asc
+falco_runtime_repo_keyring: "{{ falco_runtime_keyring_dir }}/falcosecurity.asc"
+falco_runtime_repo_file: /etc/apt/sources.list.d/falcosecurity.list
+falco_runtime_repo_definition: "deb [signed-by={{ falco_runtime_repo_keyring }}] https://download.falco.org/packages/deb stable main"
+falco_runtime_packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg
+  - falco
+falco_runtime_service_name: falco-modern-bpf
+falco_runtime_disabled_services:
+  - falco.service
+  - falco-bpf.service
+  - falcoctl-artifact-follow.service
+falco_runtime_config_dir: /etc/falco/config.d
+falco_runtime_config_override_file: "{{ falco_runtime_config_dir }}/lv3-runtime.yaml"
+falco_runtime_rules_dir: /etc/falco/rules.d
+falco_runtime_rule_sources:
+  - src: "{{ falco_runtime_repo_root }}/config/falco/rules.d/platform-overrides.yaml"
+    dest: "{{ falco_runtime_rules_dir }}/50-lv3-platform-overrides.yaml"
+  - src: "{{ falco_runtime_repo_root }}/config/falco/suppressions.yaml"
+    dest: "{{ falco_runtime_rules_dir }}/60-lv3-suppressions.yaml"
+falco_runtime_bridge_host_inventory_name: docker-runtime-lv3
+falco_runtime_bridge_host: >-
+  {{
+    '127.0.0.1'
+    if inventory_hostname == falco_runtime_bridge_host_inventory_name
+    else hostvars['proxmox_florin'].platform_guest_catalog.by_name[falco_runtime_bridge_host_inventory_name].ipv4
+  }}
+falco_runtime_bridge_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.falco_event_bridge_port }}"
+falco_runtime_http_output_url: "http://{{ falco_runtime_bridge_host }}:{{ falco_runtime_bridge_port }}/events"
+falco_runtime_http_user_agent: lv3-falco-runtime

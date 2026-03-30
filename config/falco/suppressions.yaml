@@ -1,0 +1,5 @@
+# Falco suppressions for the LV3 platform.
+#
+# Keep every suppression repo-managed and document the business reason inline.
+# No suppressions were required for the first ADR 0300 live rollout beyond the
+# repo-managed smoke rule in rules.d/platform-overrides.yaml.

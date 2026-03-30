@@ -1,0 +1,119 @@
+---
+# Playbook: falco.yml
+# Purpose: Converge repo-managed Falco syscall monitoring on the selected production guests and route WARNING+ events through the private bridge on docker-runtime-lv3.
+# Use case: Run when the Falco package path, runtime rules, bridge routing, ntfy security topic, or Falco-to-Loki/NATS verification workflow changes.
+#
+# Inputs (required):
+#   - env (str, required): Deployment environment selector used by the shared preflight helpers.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH path used by the shared scoped runner.
+#
+# Outputs:
+#   - A private Falco event bridge on docker-runtime-lv3 listening on the managed internal bridge port
+#   - Falco runtime syscall monitoring enabled on docker-runtime-lv3, docker-build-lv3, monitoring-lv3, and postgres-lv3
+#   - Falco journald events shipped to Loki with a stable `job="falco"` label and WARNING+/CRITICAL events forwarded into NATS plus ntfy
+#
+# Idempotency: Fully idempotent
+#              Package, config, bridge, firewall, and log-agent convergence can be re-run safely; verification confirms the managed services are active after each replay.
+#
+# Dependencies:
+#   - ADR 0052: Guest log shipping through Alloy and Loki.
+#   - ADR 0066 / ADR 0115: Mutation audit event contract and current dual-write bridge.
+#   - ADR 0124: ntfy push notifications.
+#   - ADR 0276: NATS JetStream event bus.
+#   - ADR 0300: Falco runtime syscall monitoring and anomaly routing.
+#   - Roles: lv3.platform.linux_guest_firewall, lv3.platform.loki_log_agent, lv3.platform.falco_event_bridge_runtime, lv3.platform.falco_runtime.
+#
+# Related ADRs: 0052, 0066, 0115, 0124, 0276, 0300
+# Related Runbooks: docs/runbooks/configure-falco-runtime.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+# =============================================================================
+
+- name: Converge the private Falco event bridge on docker-runtime-lv3
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - security
+    - service-falco
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.falco
+        playbook_execution_audit_target: falco
+        required_hosts:
+          - docker-runtime-lv3
+          - docker-build-lv3
+          - monitoring-lv3
+          - postgres-lv3
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.loki_log_agent
+      vars:
+        loki_log_agent_role: docker-runtime
+        loki_log_agent_lane: control-plane
+        loki_log_agent_nginx_logs_enabled: false
+        loki_log_agent_docker_logs_enabled: true
+    - role: lv3.platform.falco_event_bridge_runtime
+
+- name: Converge Falco syscall monitoring across the governed guests
+  hosts: docker-runtime-lv3:docker-build-lv3:monitoring-lv3:postgres-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - security
+    - service-falco
+
+  pre_tasks:
+    - name: Ensure the current target is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+    - name: Derive the Falco guest role
+      ansible.builtin.set_fact:
+        falco_guest_role: >-
+          {{
+            hostvars[groups['proxmox_hosts'][0]].proxmox_guests
+            | selectattr('name', 'equalto', inventory_hostname)
+            | map(attribute='role')
+            | first
+          }}
+
+    - name: Derive the Falco guest lane
+      ansible.builtin.set_fact:
+        falco_guest_lane: >-
+          {{
+            {
+              'docker-runtime': 'control-plane',
+              'docker-build': 'build',
+              'monitoring': 'monitoring',
+              'postgres': 'data'
+            }[falco_guest_role]
+          }}
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.loki_log_agent
+      vars:
+        loki_log_agent_role: "{{ falco_guest_role }}"
+        loki_log_agent_lane: "{{ falco_guest_lane }}"
+        loki_log_agent_nginx_logs_enabled: false
+        loki_log_agent_docker_logs_enabled: "{{ falco_guest_role == 'docker-runtime' }}"
+    - role: lv3.platform.falco_runtime
+
+  post_tasks:
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: falco

@@ -1,0 +1,116 @@
+---
+- name: Validate Falco runtime inputs
+  ansible.builtin.assert:
+    that:
+      - falco_runtime_repo_root | length > 0
+      - falco_runtime_repo_key_url | length > 0
+      - falco_runtime_repo_keyring | length > 0
+      - falco_runtime_repo_file | length > 0
+      - falco_runtime_packages | length > 0
+      - falco_runtime_service_name | length > 0
+      - falco_runtime_config_override_file | length > 0
+      - falco_runtime_rules_dir | length > 0
+      - falco_runtime_rule_sources | length > 0
+      - falco_runtime_http_output_url | length > 0
+    fail_msg: >-
+      falco_runtime requires the repo metadata, package list, rule sources,
+      managed config file, and bridge URL inputs.
+
+- name: Ensure Falco package prerequisites are present
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Falco APT keyring directory exists
+  ansible.builtin.file:
+    path: "{{ falco_runtime_keyring_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Download the Falco APT signing key
+  ansible.builtin.get_url:
+    url: "{{ falco_runtime_repo_key_url }}"
+    dest: "{{ falco_runtime_repo_keyring }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the Falco APT repository definition
+  ansible.builtin.copy:
+    dest: "{{ falco_runtime_repo_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: "{{ falco_runtime_repo_definition }}\n"
+
+- name: Install the Falco runtime packages
+  ansible.builtin.apt:
+    name: "{{ falco_runtime_packages }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+  environment:
+    FALCO_FRONTEND: noninteractive
+    FALCO_DRIVER_CHOICE: modern_ebpf
+    FALCOCTL_ENABLED: "false"
+
+- name: Ensure the managed Falco configuration directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ falco_runtime_config_dir }}"
+    - "{{ falco_runtime_rules_dir }}"
+
+- name: Render the Falco runtime override config
+  ansible.builtin.template:
+    src: falco-runtime.yaml.j2
+    dest: "{{ falco_runtime_config_override_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: falco_runtime_config
+
+- name: Sync the repo-managed Falco rule files
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ falco_runtime_rule_sources }}"
+  register: falco_runtime_rules
+
+- name: Stop and disable legacy Falco units when present
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+  failed_when: false
+  loop: "{{ falco_runtime_disabled_services }}"
+
+- name: Ensure the Falco runtime service is enabled and started
+  ansible.builtin.systemd_service:
+    name: "{{ falco_runtime_service_name }}"
+    enabled: true
+    daemon_reload: false
+    state: >-
+      {{
+        'restarted'
+        if (falco_runtime_config.changed or (falco_runtime_rules.results | selectattr('changed') | list | length > 0))
+        else 'started'
+      }}
+
+- name: Verify the Falco runtime
+  ansible.builtin.import_tasks: verify.yml

@@ -5131,6 +5131,64 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-falco": {
+      "description": "Converge the private Falco event bridge on docker-runtime-lv3 plus Falco syscall monitoring on the selected production guests.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-falco",
+        "command": "make converge-falco"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "nats_jetstream_admin_password",
+          "ntfy_alertmanager_password"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-falco"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-falco-runtime.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/falco.yml",
+        "playbooks/services/falco.yml",
+        "collections/ansible_collections/lv3/platform/roles/falco_runtime",
+        "collections/ansible_collections/lv3/platform/roles/falco_event_bridge_runtime",
+        "collections/ansible_collections/lv3/platform/roles/loki_log_agent/templates/config.alloy.j2",
+        "scripts/falco_event_bridge.py",
+        "scripts/falco_event_bridge_server.py",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/falco/rules.d/platform-overrides.yaml",
+        "config/falco/suppressions.yaml",
+        "config/event-taxonomy.yaml",
+        "config/ntfy/server.yml",
+        "docs/schema/mutation-audit-event.json"
+      ],
+      "outputs": [
+        "A private Falco bridge on docker-runtime-lv3 plus Falco syscall monitoring on docker-runtime-lv3, docker-build-lv3, monitoring-lv3, and postgres-lv3, with WARNING+ events forwarded into NATS and CRITICAL events forwarded into ntfy."
+      ],
+      "verification_commands": [
+        "make syntax-check-falco",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'systemctl is-active lv3-falco-event-bridge falco-modern-bpf && curl -fsS http://127.0.0.1:18080/healthz'",
+        "for host in 10.10.10.30 10.10.10.40 10.10.10.50; do ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@$host 'systemctl is-active falco-modern-bpf'; done"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-gitea": {
       "description": "Converge private Gitea on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and register the self-hosted Actions runner on docker-build-lv3.",
       "lifecycle_status": "active",

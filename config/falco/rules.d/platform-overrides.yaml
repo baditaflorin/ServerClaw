@@ -1,0 +1,18 @@
+- list: lv3_falco_smoke_markers
+  items:
+    - __lv3_falco_smoke__
+
+- rule: LV3 Falco smoke marker execution
+  desc: >-
+    Fire one deterministic CRITICAL event when an operator or automation path
+    intentionally runs a process whose command line contains the repo-managed
+    Falco smoke marker.
+  condition: spawned_process and proc.cmdline contains __lv3_falco_smoke__
+  output: >-
+    LV3 Falco smoke marker executed
+    (host=%evt.hostname user=%user.name proc=%proc.name cmdline=%proc.cmdline pid=%proc.pid)
+  priority: CRITICAL
+  tags:
+    - lv3
+    - smoke
+    - process

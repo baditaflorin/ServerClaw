@@ -1,0 +1,30 @@
+---
+- name: Verify the Falco runtime service is active
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - is-active
+      - "{{ falco_runtime_service_name }}"
+  register: falco_runtime_service_status
+  changed_when: false
+  failed_when: falco_runtime_service_status.stdout | trim != "active"
+
+- name: Verify the Falco version command works
+  ansible.builtin.command:
+    argv:
+      - falco
+      - --version
+  register: falco_runtime_version
+  changed_when: false
+  failed_when: falco_runtime_version.rc != 0
+
+- name: Verify the managed Falco smoke rule is present
+  ansible.builtin.command:
+    argv:
+      - grep
+      - -F
+      - __lv3_falco_smoke__
+      - "{{ falco_runtime_rules_dir }}/50-lv3-platform-overrides.yaml"
+  register: falco_runtime_smoke_rule
+  changed_when: false
+  failed_when: falco_runtime_smoke_rule.rc != 0

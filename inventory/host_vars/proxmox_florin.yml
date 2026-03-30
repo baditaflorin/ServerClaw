@@ -38,6 +38,7 @@ platform_port_assignments:
   livekit_signal_port: 7880
   livekit_tcp_port: 7881
   livekit_udp_port: 7882
+  falco_event_bridge_port: 18084
   ntfy_port: 2586
   openfga_http_port: 8098
   openfga_host_proxy_port: 8014
@@ -838,6 +839,18 @@ network_policy:
             - 8881
             - 11434
           description: Local Docker workloads that use the private Changedetection, Directus, One-API, Crawl4AI, Ollama, and SearXNG APIs
+        - source: docker-build-lv3
+          protocol: tcp
+          ports:
+            - 3003
+            - 8098
+            - 8201
+          description: Gitea Actions runner access plus OpenBao automation access from docker-build-lv3
+        - source: docker-build-lv3
+          protocol: tcp
+          ports:
+            - 18084
+          description: Private Falco event posts from docker-build-lv3 to the security bridge
         - source: nginx-lv3
           protocol: tcp
           ports:
@@ -955,8 +968,23 @@ network_policy:
         - source: monitoring-lv3
           protocol: tcp
           ports:
+            - 18084
+          description: Private Falco event posts from monitoring-lv3 to the security bridge
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
+            - 4222
+          description: Alertmanager pgaudit relay access to the private NATS JetStream listener
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
             - 4647
           description: Nomad server RPC to docker-runtime-lv3
+        - source: postgres-lv3
+          protocol: tcp
+          ports:
+            - 18084
+          description: Private Falco event posts from postgres-lv3 to the security bridge
     docker-build-lv3:
       allow_container_forwarding: true
       allowed_inbound:

@@ -1,0 +1,21 @@
+---
+- name: Verify the Falco event bridge service is active
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - is-active
+      - "{{ falco_event_bridge_service_name }}"
+  register: falco_event_bridge_service_status
+  changed_when: false
+  failed_when: falco_event_bridge_service_status.stdout | trim != "active"
+
+- name: Verify the Falco event bridge health endpoint responds
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ falco_event_bridge_listen_port }}/healthz"
+    method: GET
+    status_code: 200
+  register: falco_event_bridge_health
+  retries: 20
+  delay: 2
+  until: falco_event_bridge_health.status == 200
+  changed_when: false

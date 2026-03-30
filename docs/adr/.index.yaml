@@ -5359,7 +5359,7 @@ adr_index:
       - monitoring
       - autonomous
       - anomaly
-    summary: We will deploy Falco as a systemd service on each production VM, using the
+    summary: We will deploy Falco as a systemd service on each selected production VM,
     filename: 0300-falco-for-container-runtime-syscall-security-monitoring-and-autonomous-anomaly-detection.md
   - adr: '0301'
     title: Semgrep For SAST And Application Code Security Scanning In The CI Gate

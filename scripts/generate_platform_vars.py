@@ -81,6 +81,7 @@ PORT_KEYS = (
     "dify_port",
     "changedetection_port",
     "crawl4ai_port",
+    "falco_event_bridge_port",
     "browser_runner_port",
     "grist_port",
     "outline_port",

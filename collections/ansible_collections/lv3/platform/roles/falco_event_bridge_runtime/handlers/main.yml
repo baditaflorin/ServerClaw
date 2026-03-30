@@ -1,0 +1,6 @@
+---
+- name: Restart Falco event bridge
+  ansible.builtin.systemd_service:
+    name: "{{ falco_event_bridge_service_name }}"
+    daemon_reload: true
+    state: restarted

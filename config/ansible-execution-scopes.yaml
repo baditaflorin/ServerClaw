@@ -295,6 +295,12 @@ playbooks:
       - vm:120/service:ntfy
       - config/subdomain-catalog.json
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/falco.yml:
+    playbook_id: falco
+    mutation_scope: platform
+    shared_surfaces:
+      - security:falco-runtime
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/ntopng.yml:
     playbook_id: ntopng
     mutation_scope: host

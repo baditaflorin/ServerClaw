@@ -214,6 +214,7 @@ platform_ports:
   dify_port: 8094
   changedetection_port: 5000
   crawl4ai_port: 11235
+  falco_event_bridge_port: 18084
   browser_runner_port: 8096
   grist_port: 8484
   outline_port: 3006
@@ -316,6 +317,7 @@ platform_port_assignments:
   dify_port: 8094
   changedetection_port: 5000
   crawl4ai_port: 11235
+  falco_event_bridge_port: 18084
   browser_runner_port: 8096
   grist_port: 8484
   outline_port: 3006
@@ -5971,6 +5973,7 @@ lago_front_port: 8100
 dify_port: 8094
 changedetection_port: 5000
 crawl4ai_port: 11235
+falco_event_bridge_port: 18084
 browser_runner_port: 8096
 grist_port: 8484
 outline_port: 3006
