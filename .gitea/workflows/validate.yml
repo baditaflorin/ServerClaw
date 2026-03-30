@@ -32,10 +32,18 @@ jobs:
           git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch --depth=1 origin "${WORKFLOW_REF}"
           git checkout --force "${WORKFLOW_SHA}"
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
+      - name: Bootstrap JavaScript action runtime
+        run: |
+          set -euo pipefail
+          if command -v node >/dev/null 2>&1; then
+            node --version
+            exit 0
+          fi
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get install -y --no-install-recommends nodejs
+          node --version
+          npm --version
 
       - name: Run authoritative validation gate
         run: |
