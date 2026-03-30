@@ -6,7 +6,7 @@
   "recorded_on": "2026-03-30",
   "recorded_at": "2026-03-30T19:57:22Z",
   "recorded_by": "codex",
-  "source_commit": "bc43866bf1ea26fb36455da9f63e1966826e7520",
+  "source_commit": "22e744ecc55d01520be241150853d20e0106762c",
   "repo_version_context": "0.177.109",
   "platform_version_context": "0.130.72",
   "workflow_id": "adr-0293-temporal-mainline-live-apply",
