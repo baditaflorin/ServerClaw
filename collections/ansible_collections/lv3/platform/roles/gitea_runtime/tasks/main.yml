@@ -346,6 +346,173 @@
     or 'Downloaded newer image' in gitea_pull.stdout
     or 'Pull complete' in gitea_pull.stdout
 
+- name: Check whether the Docker nat chain exists before Gitea startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: gitea_docker_nat_chain
+  changed_when: false
+  failed_when: false
+
+- name: Restore Docker networking when the nat chain is missing before Gitea startup
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: gitea_docker_nat_chain.rc != 0
+
+- name: Recheck the Docker nat chain before Gitea startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: gitea_docker_nat_chain_recheck
+  changed_when: false
+  failed_when: gitea_docker_nat_chain_recheck.rc not in [0, 1]
+  retries: 10
+  delay: 2
+  until: gitea_docker_nat_chain_recheck.rc == 0
+  when: gitea_docker_nat_chain.rc != 0
+
+- name: Wait for the Docker daemon to answer after networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - info
+      - --format
+      - '{{ "{{.ServerVersion}}" }}'
+  register: gitea_docker_info
+  changed_when: false
+  retries: 10
+  delay: 2
+  until: gitea_docker_info.rc == 0
+  when: gitea_docker_nat_chain.rc != 0
+
+- name: Assert Docker nat chain is present before Gitea startup
+  ansible.builtin.assert:
+    that:
+      - gitea_docker_nat_chain.rc == 0 or gitea_docker_nat_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; Gitea published ports will fail."
+
+- name: Check whether the Gitea local port is already published
+  ansible.builtin.wait_for:
+    host: "{{ ansible_host }}"
+    port: "{{ gitea_http_port }}"
+    delay: 0
+    timeout: 1
+  register: gitea_local_port_probe
+  changed_when: false
+  failed_when: false
+
+- name: Check whether the current Gitea sign-in page is healthy before startup
+  ansible.builtin.uri:
+    url: "{{ gitea_private_base_url }}/user/login"
+    method: GET
+    status_code: 200
+  register: gitea_login_probe
+  changed_when: false
+  failed_when: false
+
+- name: Record whether the Gitea startup needs a force recreate
+  ansible.builtin.set_fact:
+    gitea_force_recreate: >-
+      {{
+        gitea_docker_nat_chain.rc != 0
+        or (gitea_local_port_probe.failed | default(false))
+        or (gitea_login_probe.status | default(0)) != 200
+      }}
+
+- name: Reset the Gitea stack before a force recreate
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ gitea_compose_file }}"
+      - down
+      - --remove-orphans
+  args:
+    chdir: "{{ gitea_site_dir }}"
+  register: gitea_force_recreate_down
+  failed_when: false
+  changed_when: >-
+    'Stopping' in gitea_force_recreate_down.stdout
+    or 'Removing' in gitea_force_recreate_down.stdout
+    or 'Network' in gitea_force_recreate_down.stdout
+    or 'Stopping' in gitea_force_recreate_down.stderr
+    or 'Removing' in gitea_force_recreate_down.stderr
+    or 'Network' in gitea_force_recreate_down.stderr
+  when: gitea_force_recreate
+
+- name: Remove stale Gitea compose networks after the reset
+  ansible.builtin.shell: |
+    set -euo pipefail
+    stale_networks="$(docker network ls -q --filter name={{ gitea_network_name }})"
+    if [ -n "${stale_networks}" ]; then
+      docker network rm ${stale_networks}
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: gitea_force_recreate_network_cleanup
+  changed_when: "'changed' in gitea_force_recreate_network_cleanup.stdout"
+  when: gitea_force_recreate
+
+- name: Remove stale Gitea containers before recovery
+  ansible.builtin.shell: |
+    set -euo pipefail
+    stale_ids="$(
+      docker ps -aq \
+        --filter name=^/{{ gitea_container_name }}$ \
+        --filter name=^/{{ gitea_openbao_agent_container_name }}$
+    )"
+    if [ -n "${stale_ids}" ]; then
+      docker rm -f ${stale_ids}
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: gitea_force_recreate_container_cleanup
+  changed_when: "'changed' in gitea_force_recreate_container_cleanup.stdout"
+  when: gitea_force_recreate
+
+- name: Force-recreate the Gitea stack after Docker networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ gitea_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+      - --force-recreate
+  args:
+    chdir: "{{ gitea_site_dir }}"
+  register: gitea_force_recreate_up
+  changed_when: >-
+    'Creating' in gitea_force_recreate_up.stdout
+    or 'Recreating' in gitea_force_recreate_up.stdout
+    or 'Starting' in gitea_force_recreate_up.stdout
+  failed_when: false
+  retries: 3
+  delay: 5
+  until: gitea_force_recreate_up.rc == 0
+  when: gitea_force_recreate
+
+- name: Assert the Gitea force-recreate succeeded
+  ansible.builtin.assert:
+    that:
+      - gitea_force_recreate_up.rc == 0
+    fail_msg: "{{ gitea_force_recreate_up.stderr | default(gitea_force_recreate_up.msg | default('gitea compose force-recreate failed')) }}"
+  when: gitea_force_recreate
+
 - name: Start the Gitea stack
   ansible.builtin.command:
     argv:
@@ -363,6 +530,7 @@
     'Creating' in gitea_up.stdout
     or 'Recreating' in gitea_up.stdout
     or 'Starting' in gitea_up.stdout
+  when: not gitea_force_recreate
 
 - name: Wait for Gitea to listen locally
   ansible.builtin.wait_for:

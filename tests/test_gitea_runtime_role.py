@@ -111,6 +111,28 @@ def test_gitea_waits_on_the_published_service_address() -> None:
     assert wait_task["ansible.builtin.wait_for"]["host"] == "{{ ansible_host }}"
 
 
+def test_gitea_runtime_recovers_stale_docker_networking() -> None:
+    tasks = load_tasks()
+    names = {task["name"] for task in tasks}
+
+    assert "Check whether the Docker nat chain exists before Gitea startup" in names
+    assert "Check whether the Gitea local port is already published" in names
+    assert "Check whether the current Gitea sign-in page is healthy before startup" in names
+    assert "Record whether the Gitea startup needs a force recreate" in names
+    assert "Reset the Gitea stack before a force recreate" in names
+    assert "Remove stale Gitea compose networks after the reset" in names
+    assert "Remove stale Gitea containers before recovery" in names
+    assert "Force-recreate the Gitea stack after Docker networking recovery" in names
+
+    force_recreate_task = next(
+        task for task in tasks if task["name"] == "Record whether the Gitea startup needs a force recreate"
+    )
+    force_recreate_expr = force_recreate_task["ansible.builtin.set_fact"]["gitea_force_recreate"]
+    assert "gitea_docker_nat_chain.rc != 0" in force_recreate_expr
+    assert "gitea_local_port_probe.failed" in force_recreate_expr
+    assert "gitea_login_probe.status" in force_recreate_expr
+
+
 def test_gitea_defaults_include_release_bundle_signing_paths() -> None:
     defaults = ROLE_DEFAULTS.read_text()
     assert ".local/gitea/release-bundle-cosign.key" in defaults

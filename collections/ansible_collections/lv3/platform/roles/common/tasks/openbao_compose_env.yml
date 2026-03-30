@@ -68,6 +68,14 @@
   changed_when: false
   when: (lookup('ansible.builtin.env', 'ANSIBLE_SSH_CONTROL_PATH_DIR') | default('', true) | length) > 0
 
+- name: Record whether the local OpenBao runtime needed recovery for compose env injection
+  ansible.builtin.set_fact:
+    common_openbao_compose_env_runtime_needs_recovery: >-
+      {{
+        (common_local_openbao_runtime_probe.status | default(0))
+        not in [200, 429, 472, 473, 501, 503]
+      }}
+
 - name: Wait for the Docker daemon to answer after networking recovery
   ansible.builtin.command:
     argv:

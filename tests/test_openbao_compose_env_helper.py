@@ -43,6 +43,8 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     assert "include_tasks: ensure_local_openbao_runtime.yml" in tasks
     assert "- name: Ensure the controller-local SSH control path directory exists before OpenBao API retries" in tasks
     assert "path: \"{{ lookup('ansible.builtin.env', 'ANSIBLE_SSH_CONTROL_PATH_DIR') }}\"" in tasks
+    assert "- name: Record whether the local OpenBao runtime needed recovery for compose env injection" in tasks
+    assert "common_openbao_compose_env_runtime_needs_recovery" in tasks
     assert "- name: Wait for the Docker daemon to answer after networking recovery" in tasks
     assert "register: common_openbao_compose_env_docker_info" in tasks
     assert "until: common_openbao_compose_env_docker_info.rc == 0" in tasks
