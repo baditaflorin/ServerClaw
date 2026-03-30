@@ -103,9 +103,11 @@ def test_realm_task_applies_repo_managed_smtp_settings() -> None:
 
 
 def test_role_restores_docker_nat_chain_before_startup() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     tasks = load_tasks()
     env_render = next(task for task in tasks if task.get("name") == "Render the Keycloak environment file")
     compose_render = next(task for task in tasks if task.get("name") == "Render the Keycloak compose file")
+    image_pull = next(task for task in tasks if task.get("name") == "Pull the Keycloak image")
     nat_check = next(
         task
         for task in tasks
@@ -168,6 +170,11 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     assert bridge_chain_helper["vars"]["common_docker_bridge_chains_require_nat_chain"] is True
     assert env_render["register"] == "keycloak_env_template"
     assert compose_render["register"] == "keycloak_compose_template"
+    assert defaults["keycloak_image_pull_retries"] == 5
+    assert defaults["keycloak_image_pull_delay_seconds"] == 5
+    assert image_pull["retries"] == "{{ keycloak_image_pull_retries }}"
+    assert image_pull["delay"] == "{{ keycloak_image_pull_delay_seconds }}"
+    assert image_pull["until"] == "keycloak_pull.rc == 0"
     assert "com.docker.compose.project=keycloak" in replace_cleanup["ansible.builtin.shell"]
     assert "com.docker.compose.replace" in replace_cleanup["ansible.builtin.shell"]
     assert openbao_agent_recreate["ansible.builtin.command"]["argv"][-4:] == ["up", "-d", "--force-recreate", "openbao-agent"]

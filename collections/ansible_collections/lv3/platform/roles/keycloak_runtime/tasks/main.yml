@@ -257,6 +257,9 @@
   args:
     chdir: "{{ keycloak_site_dir }}"
   register: keycloak_pull
+  retries: "{{ keycloak_image_pull_retries }}"
+  delay: "{{ keycloak_image_pull_delay_seconds }}"
+  until: keycloak_pull.rc == 0
   changed_when: >-
     'Pulling' in keycloak_pull.stdout
     or 'Downloaded newer image' in keycloak_pull.stdout

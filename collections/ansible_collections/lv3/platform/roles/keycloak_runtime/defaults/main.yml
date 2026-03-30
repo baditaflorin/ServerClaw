@@ -8,6 +8,8 @@
 keycloak_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') }}"
 keycloak_session_authority: "{{ platform_session_authority }}"
 keycloak_image: quay.io/keycloak/keycloak:26.5.4
+keycloak_image_pull_retries: 5
+keycloak_image_pull_delay_seconds: 5
 keycloak_realm_name: lv3
 keycloak_realm_display_name: LV3 Control Plane
 keycloak_site_dir: /opt/keycloak
