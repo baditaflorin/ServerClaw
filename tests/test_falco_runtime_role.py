@@ -12,6 +12,7 @@ FALCO_ROLE_TASKS = REPO_ROOT / "roles" / "falco_runtime" / "tasks" / "main.yml"
 FALCO_ROLE_VERIFY = REPO_ROOT / "roles" / "falco_runtime" / "tasks" / "verify.yml"
 FALCO_ROLE_META = REPO_ROOT / "roles" / "falco_runtime" / "meta" / "argument_specs.yml"
 FALCO_ROLE_TEMPLATE = REPO_ROOT / "roles" / "falco_runtime" / "templates" / "falco-runtime.yaml.j2"
+FALCO_ROLE_JOURNALD_TEMPLATE = REPO_ROOT / "roles" / "falco_runtime" / "templates" / "falco-journald.conf.j2"
 BRIDGE_ROLE_DEFAULTS = REPO_ROOT / "roles" / "falco_event_bridge_runtime" / "defaults" / "main.yml"
 BRIDGE_ROLE_TASKS = REPO_ROOT / "roles" / "falco_event_bridge_runtime" / "tasks" / "main.yml"
 BRIDGE_ROLE_META = REPO_ROOT / "roles" / "falco_event_bridge_runtime" / "meta" / "argument_specs.yml"
@@ -37,6 +38,8 @@ def test_falco_defaults_define_private_bridge_output_and_rule_sources() -> None:
     defaults = load_yaml(FALCO_ROLE_DEFAULTS)
 
     assert defaults["falco_runtime_service_name"] == "falco-modern-bpf"
+    assert defaults["falco_runtime_systemd_override_dir"] == "/etc/systemd/system/{{ falco_runtime_service_name }}.service.d"
+    assert defaults["falco_runtime_systemd_override_file"] == "{{ falco_runtime_systemd_override_dir }}/lv3-journald.conf"
     assert defaults["falco_runtime_http_output_url"] == "http://{{ falco_runtime_bridge_host }}:{{ falco_runtime_bridge_port }}/events"
     assert defaults["falco_runtime_rule_sources"][0]["dest"].endswith("50-lv3-platform-overrides.yaml")
     assert "falcoctl-artifact-follow.service" in defaults["falco_runtime_disabled_services"]
@@ -57,6 +60,8 @@ def test_falco_tasks_install_render_rules_and_verify_service() -> None:
     names = [task["name"] for task in tasks]
 
     assert "Install the Falco runtime packages" in names
+    assert "Ensure the Falco systemd override directory exists" in names
+    assert "Render the Falco journald systemd override" in names
     assert "Render the Falco runtime override config" in names
     assert "Sync the repo-managed Falco rule files" in names
     assert "Ensure the Falco runtime service is enabled and started" in names
@@ -70,11 +75,14 @@ def test_falco_tasks_install_render_rules_and_verify_service() -> None:
 
 def test_falco_template_enables_json_stdout_and_http_output() -> None:
     template = FALCO_ROLE_TEMPLATE.read_text(encoding="utf-8")
+    journald_template = FALCO_ROLE_JOURNALD_TEMPLATE.read_text(encoding="utf-8")
 
     assert "json_output: true" in template
     assert "stdout_output:" in template
     assert "http_output:" in template
     assert "{{ falco_runtime_http_output_url }}" in template
+    assert "StandardOutput=journal" in journald_template
+    assert "StandardError=journal" in journald_template
 
 
 def test_bridge_defaults_reuse_private_nats_and_ntfy_contracts() -> None:

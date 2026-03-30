@@ -8,6 +8,7 @@
       - falco_runtime_repo_file | length > 0
       - falco_runtime_packages | length > 0
       - falco_runtime_service_name | length > 0
+      - falco_runtime_systemd_override_file | length > 0
       - falco_runtime_config_override_file | length > 0
       - falco_runtime_rules_dir | length > 0
       - falco_runtime_rule_sources | length > 0
@@ -73,6 +74,23 @@
     - "{{ falco_runtime_config_dir }}"
     - "{{ falco_runtime_rules_dir }}"
 
+- name: Ensure the Falco systemd override directory exists
+  ansible.builtin.file:
+    path: "{{ falco_runtime_systemd_override_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the Falco journald systemd override
+  ansible.builtin.template:
+    src: falco-journald.conf.j2
+    dest: "{{ falco_runtime_systemd_override_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: falco_runtime_systemd_override
+
 - name: Render the Falco runtime override config
   ansible.builtin.template:
     src: falco-runtime.yaml.j2
@@ -104,11 +122,15 @@
   ansible.builtin.systemd_service:
     name: "{{ falco_runtime_service_name }}"
     enabled: true
-    daemon_reload: false
+    daemon_reload: "{{ falco_runtime_systemd_override.changed }}"
     state: >-
       {{
         'restarted'
-        if (falco_runtime_config.changed or (falco_runtime_rules.results | selectattr('changed') | list | length > 0))
+        if (
+          falco_runtime_systemd_override.changed
+          or falco_runtime_config.changed
+          or (falco_runtime_rules.results | selectattr('changed') | list | length > 0)
+        )
         else 'started'
       }}
 

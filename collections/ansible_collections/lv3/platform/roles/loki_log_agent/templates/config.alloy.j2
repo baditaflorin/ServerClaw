@@ -37,6 +37,20 @@ loki.relabel "journal" {
   }
 
   rule {
+    source_labels = ["__journal_syslog_identifier"]
+    regex         = "falco"
+    replacement   = "falco"
+    target_label  = "job"
+  }
+
+  rule {
+    source_labels = ["__journal_syslog_identifier"]
+    regex         = "falco"
+    replacement   = "falco"
+    target_label  = "service"
+  }
+
+  rule {
     source_labels = ["__journal_priority_keyword"]
     target_label  = "level"
   }

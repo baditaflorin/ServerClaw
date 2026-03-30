@@ -29,6 +29,7 @@ It delivers:
 - bridge service directory: `/opt/lv3/falco-event-bridge`
 - bridge environment file: `/opt/lv3/falco-event-bridge/falco-event-bridge.env`
 - bridge systemd unit: `/etc/systemd/system/lv3-falco-event-bridge.service`
+- Falco journald override: `/etc/systemd/system/falco-modern-bpf.service.d/lv3-journald.conf`
 - Falco override config: `/etc/falco/config.d/lv3-runtime.yaml`
 - Falco rules: `/etc/falco/rules.d/50-lv3-platform-overrides.yaml`
 - mutation audit sink: `/var/log/platform/mutation-audit.jsonl`
@@ -51,5 +52,8 @@ It delivers:
 - The ntfy topic uses a hyphenated slug rather than a dotted subject name
   because the live ntfy publish endpoint rejects dotted topic paths with
   `404 page not found`.
+- The upstream `falco-modern-bpf.service` unit ships with `StandardOutput=null`;
+  the repo-managed journald drop-in flips Falco back to `StandardOutput=journal`
+  and `StandardError=journal` so runtime matches remain queryable through Loki.
 - Falco rules and suppressions stay version controlled; do not hand-edit
   `/etc/falco` on the guests.

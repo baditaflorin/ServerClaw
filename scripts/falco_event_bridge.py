@@ -6,10 +6,12 @@ import base64
 import datetime as dt
 import json
 import socket
+import time
 import urllib.error
 import urllib.request
 import uuid
 from dataclasses import dataclass
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Any
 
@@ -25,6 +27,11 @@ PRIORITY_ORDER = {
     "INFO": 1,
     "DEBUG": 0,
 }
+
+NTFY_RETRY_STATUS_CODES = {429, 500, 502, 503, 504}
+NTFY_RETRY_ATTEMPTS = 4
+NTFY_RETRY_BASE_DELAY_SECONDS = 1.0
+NTFY_RETRY_MAX_DELAY_SECONDS = 15.0
 
 
 @dataclass(frozen=True)
@@ -154,6 +161,63 @@ def append_jsonl(path: str, event: dict[str, Any]) -> None:
         handle.write(json.dumps(event, sort_keys=True) + "\n")
 
 
+def parse_retry_after_seconds(value: str | None) -> float | None:
+    if value is None:
+        return None
+    raw = value.strip()
+    if not raw:
+        return None
+    try:
+        return max(float(raw), 0.0)
+    except ValueError:
+        try:
+            retry_at = parsedate_to_datetime(raw)
+        except (TypeError, ValueError, IndexError):
+            return None
+        if retry_at.tzinfo is None:
+            retry_at = retry_at.replace(tzinfo=dt.timezone.utc)
+        return max((retry_at - dt.datetime.now(dt.timezone.utc)).total_seconds(), 0.0)
+
+
+def is_retryable_ntfy_error(exc: BaseException) -> bool:
+    if isinstance(exc, urllib.error.HTTPError):
+        return exc.code in NTFY_RETRY_STATUS_CODES
+    if isinstance(exc, urllib.error.URLError):
+        return True
+    return False
+
+
+def retryable_ntfy_delay_seconds(exc: BaseException, *, delay_seconds: float) -> float:
+    retry_after = None
+    if isinstance(exc, urllib.error.HTTPError) and exc.headers is not None:
+        retry_after = parse_retry_after_seconds(exc.headers.get("Retry-After"))
+    return max(retry_after or 0.0, delay_seconds)
+
+
+def publish_ntfy_request(
+    request: urllib.request.Request,
+    *,
+    timeout_seconds: float,
+    remaining_attempts: int,
+    delay_seconds: float,
+) -> None:
+    try:
+        with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
+            if response.status >= 300:
+                raise RuntimeError(f"ntfy publish failed with HTTP {response.status}")
+    except (urllib.error.HTTPError, urllib.error.URLError) as exc:
+        if remaining_attempts > 1 and is_retryable_ntfy_error(exc):
+            time.sleep(retryable_ntfy_delay_seconds(exc, delay_seconds=delay_seconds))
+            publish_ntfy_request(
+                request,
+                timeout_seconds=timeout_seconds,
+                remaining_attempts=remaining_attempts - 1,
+                delay_seconds=min(delay_seconds * 2.0, NTFY_RETRY_MAX_DELAY_SECONDS),
+            )
+            return
+        raise RuntimeError(f"ntfy publish failed: {exc}") from exc
+
+
 def _read_control_line(connection: socket.socket) -> str:
     data = b""
     while not data.endswith(b"\r\n"):
@@ -220,12 +284,12 @@ def publish_ntfy_message(*, event: dict[str, Any], source_host: str, config: Bri
         },
         method="POST",
     )
-    try:
-        with urllib.request.urlopen(request, timeout=config.http_timeout_seconds) as response:
-            if response.status >= 300:
-                raise RuntimeError(f"ntfy publish failed with HTTP {response.status}")
-    except urllib.error.URLError as exc:
-        raise RuntimeError(f"ntfy publish failed: {exc}") from exc
+    publish_ntfy_request(
+        request,
+        timeout_seconds=config.http_timeout_seconds,
+        remaining_attempts=NTFY_RETRY_ATTEMPTS,
+        delay_seconds=NTFY_RETRY_BASE_DELAY_SECONDS,
+    )
 
 
 def bridge_event(event: dict[str, Any], *, config: BridgeConfig) -> list[str]:
@@ -258,7 +322,15 @@ def bridge_event(event: dict[str, Any], *, config: BridgeConfig) -> list[str]:
         actions.append("mutation_audit")
 
     if priority_at_least(event.get("priority"), "CRITICAL"):
-        publish_ntfy_message(event=event, source_host=source_host, config=config)
-        actions.append("ntfy")
+        try:
+            publish_ntfy_message(event=event, source_host=source_host, config=config)
+        except RuntimeError as exc:
+            print(
+                f"falco-event-bridge warning: continuing without ntfy delivery for {source_host}: {exc}",
+                flush=True,
+            )
+            actions.append("ntfy_degraded")
+        else:
+            actions.append("ntfy")
 
     return actions

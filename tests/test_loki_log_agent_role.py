@@ -80,3 +80,12 @@ def test_template_includes_postgres_audit_labels_and_metrics_pipeline() -> None:
         r"\}",
         template,
     )
+
+
+def test_template_relabels_falco_journal_entries_by_syslog_identifier() -> None:
+    template = (ROLE_ROOT / "templates" / "config.alloy.j2").read_text()
+
+    assert 'source_labels = ["__journal_syslog_identifier"]' in template
+    assert 'regex         = "falco"' in template
+    assert 'target_label  = "job"' in template
+    assert 'target_label  = "service"' in template
