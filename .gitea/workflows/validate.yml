@@ -32,17 +32,17 @@ jobs:
           git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch --depth=1 origin "${WORKFLOW_REF}"
           git checkout --force "${WORKFLOW_SHA}"
 
-      - name: Bootstrap JavaScript action runtime
+      - name: Bootstrap validation toolchain
         run: |
           set -euo pipefail
-          if command -v node >/dev/null 2>&1; then
-            node --version
+          if command -v docker >/dev/null 2>&1; then
+            docker --version
             exit 0
           fi
           export DEBIAN_FRONTEND=noninteractive
           apt-get update
-          apt-get install -y --no-install-recommends nodejs
-          node --version
+          apt-get install -y --no-install-recommends docker.io
+          docker --version
 
       - name: Run authoritative validation gate
         run: |
@@ -57,13 +57,22 @@ jobs:
           fi
           python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/gitea-last-run.json --source gitea-actions --all-lanes
 
-      - name: Upload validation artifacts
+      - name: Bundle validation artifacts
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: gitea-validation-receipts
-          path: |
-            receipts/sast/*.sarif.json
-            .local/validation-gate/*.json
-          if-no-files-found: ignore
-          retention-days: 90
+        run: |
+          set -euo pipefail
+          artifact_list="$(mktemp)"
+          for artifact_dir in receipts/sast .local/validation-gate; do
+            if [ -d "${artifact_dir}" ]; then
+              find "${artifact_dir}" -maxdepth 1 -type f \( -name '*.sarif.json' -o -name '*.json' \) >> "${artifact_list}"
+            fi
+          done
+          if [ ! -s "${artifact_list}" ]; then
+            echo "No validation artifacts found to bundle."
+            exit 0
+          fi
+          sort -u "${artifact_list}" -o "${artifact_list}"
+          tar -czf .local/validation-gate/gitea-validation-receipts.tar.gz -T "${artifact_list}"
+          echo "Bundled validation artifacts:"
+          cat "${artifact_list}"
+          ls -lh .local/validation-gate/gitea-validation-receipts.tar.gz

@@ -21,11 +21,13 @@ def test_validate_workflow_uses_pinned_python_runner_and_manual_checkout() -> No
     assert PYTHON_RUNNER_IMAGE in workflow
     assert "uses: actions/checkout@v4" not in workflow
     assert "uses: actions/setup-python@v5" not in workflow
+    assert "uses: actions/upload-artifact@v4" not in workflow
     assert MANUAL_CHECKOUT_FETCH in workflow
     assert 'git checkout --force "${WORKFLOW_SHA}"' in workflow
-    assert "Bootstrap JavaScript action runtime" in workflow
-    assert "apt-get install -y --no-install-recommends nodejs" in workflow
-    assert "uses: actions/upload-artifact@v4" in workflow
+    assert "Bootstrap validation toolchain" in workflow
+    assert "apt-get install -y --no-install-recommends docker.io" in workflow
+    assert "Bundle validation artifacts" in workflow
+    assert "gitea-validation-receipts.tar.gz" in workflow
 
 
 def test_release_bundle_workflow_uses_pinned_python_runner_and_manual_checkout() -> None:
