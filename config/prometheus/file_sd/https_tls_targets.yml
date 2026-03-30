@@ -341,6 +341,24 @@
     policy_critical: '14'
     display_url: https://matrix.lv3.org:443/_matrix/client/versions
 - targets:
+    - https://10.10.10.10:443/minio/health/live
+  labels:
+    assurance_id: minio-public
+    service_id: minio
+    service_name: MinIO
+    environment: production
+    scope: public
+    exposure: edge-published
+    auth_requirement: none
+    probe_module: http_2xx_follow_redirects
+    probe_hostname: minio.lv3.org
+    certificate_id: minio-edge
+    expected_issuer: letsencrypt
+    policy_unit: days
+    policy_warn: '21'
+    policy_critical: '14'
+    display_url: https://minio.lv3.org:443/minio/health/live
+- targets:
     - https://10.10.10.10:443/healthz
   labels:
     assurance_id: n8n-public

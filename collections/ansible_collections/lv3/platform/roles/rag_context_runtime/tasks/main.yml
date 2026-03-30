@@ -17,6 +17,9 @@
       - platform_context_env_file | length > 0
       - platform_context_local_artifact_dir | length > 0
       - platform_context_api_token_local_file | length > 0
+      - platform_context_minio_secret_key_local_file | length > 0
+      - platform_context_minio_bucket_name | length > 0
+      - platform_context_minio_endpoint | length > 0
       - platform_context_internal_port | int > 0
       - platform_context_qdrant_image | length > 0
       - platform_context_service_sources | length > 0
@@ -66,6 +69,20 @@
   changed_when: "'changed' in platform_context_token_generation.stdout"
   no_log: true
 
+- name: Ensure the platform context MinIO secret key exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ platform_context_minio_secret_key_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: platform_context_minio_secret_key_local
+
+- name: Fail if the platform context MinIO secret key is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ platform_context_minio_secret_key_local_file }} is missing on the control machine.
+      Converge MinIO before replaying platform-context so the staging bucket contract exists.
+  when: not platform_context_minio_secret_key_local.stat.exists
+
 - name: Read the platform context API token
   ansible.builtin.slurp:
     src: "{{ platform_context_api_token_remote_file }}"
@@ -77,6 +94,7 @@
     platform_context_api_token: "{{ platform_context_api_token_raw.content | b64decode | trim }}"
     platform_context_runtime_secret_payload:
       PLATFORM_CONTEXT_API_TOKEN: "{{ platform_context_api_token_raw.content | b64decode | trim }}"
+      PLATFORM_CONTEXT_STAGING_S3_SECRET_ACCESS_KEY: "{{ lookup('ansible.builtin.file', platform_context_minio_secret_key_local_file) | trim }}"
   no_log: true
 
 - name: Ensure the local platform context artifact directory exists

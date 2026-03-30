@@ -1993,6 +1993,51 @@
         "timeout_seconds": 1800
       }
     },
+    "converge-minio": {
+      "description": "Converge the shared MinIO runtime, publish the public S3 API and authenticated console, and verify the launch buckets and policies.",
+      "workflow_id": "converge-minio",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to publish minio.lv3.org, minio-console.lv3.org, and expand the shared edge certificate."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-minio passes",
+        "make validate passes before the apply",
+        "The public API blast radius, authenticated console route, and launch consumer bucket contract are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, public API health verification, console oauth2-proxy redirect verification, and bucket/CORS/lifecycle proofs."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the MinIO runtime fails to start, either public hostname routes to the wrong upstream, or the launch buckets and policies do not reconcile as declared.",
+          "Stop if the console becomes publicly reachable without the intended oauth2-proxy redirect."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good MinIO runtime and shared-edge configuration from version control before retrying.",
+          "Do not compensate for a failed rollout by manually creating buckets, access keys, or policies in the MinIO console."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
     "converge-api-gateway": {
       "description": "Converge the unified platform API gateway on docker-runtime-lv3 and publish it at api.lv3.org.",
       "workflow_id": "converge-api-gateway",

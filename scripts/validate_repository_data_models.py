@@ -504,6 +504,22 @@ def validate_service_topology_entry(
             )
             require_str(dns.get("target"), f"lv3_service_topology.{service_id}.dns.target")
             require_int(dns.get("ttl"), f"lv3_service_topology.{service_id}.dns.ttl", 1)
+            if "additional_records" in dns:
+                validate_extra_dns_records(
+                    [
+                        {
+                            "name": record.get("name"),
+                            "type": record.get("type"),
+                            "value": record.get("target"),
+                            "ttl": record.get("ttl"),
+                        }
+                        for record in require_list(
+                            dns.get("additional_records"),
+                            f"lv3_service_topology.{service_id}.dns.additional_records",
+                        )
+                    ],
+                    f"lv3_service_topology.{service_id}.dns.additional_records",
+                )
 
     edge = service.get("edge")
     if edge is not None:

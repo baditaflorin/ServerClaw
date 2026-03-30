@@ -19,6 +19,7 @@ from urllib.request import Request, urlopen
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
+from adr_catalog import resolve_service_adr_path
 from api_publication import load_api_publication_catalog
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from dependency_graph import load_dependency_graph, render_dependency_page
@@ -580,13 +581,6 @@ def port_from_url(url: str) -> int | None:
     return default_port_for_scheme(parsed.scheme)
 
 
-def adr_lookup() -> dict[str, Path]:
-    return {
-        path.name.split("-", 1)[0]: path
-        for path in ADR_DIR.glob("*.md")
-    }
-
-
 def portal_document_lookup(directory: Path) -> dict[Path, PortalDocument]:
     return {
         path: build_portal_document(path)
@@ -653,15 +647,14 @@ def service_port_rows(
 def build_service_page_context(
     service: dict[str, Any],
     *,
-    adr_paths: dict[str, Path],
     adr_documents: dict[Path, PortalDocument],
     service_subdomains: list[dict[str, Any]],
     secrets: dict[str, dict[str, Any]],
     runbook_documents: dict[Path, PortalDocument],
 ) -> dict[str, Any]:
     adr_link = None
-    if service.get("adr") in adr_paths:
-        adr_path = adr_paths[service["adr"]]
+    adr_path = resolve_service_adr_path(service)
+    if adr_path is not None:
         if adr_documents.get(adr_path, build_portal_document(adr_path)).publish_in_portal:
             adr_link = relative_site_link(
                 Path("services") / f"{service['id']}.md",
@@ -733,7 +726,6 @@ def build_service_page_context(
 def build_services_index_context(
     services: list[dict[str, Any]],
     *,
-    adr_paths: dict[str, Path],
     adr_documents: dict[Path, PortalDocument],
 ) -> dict[str, Any]:
     grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -744,6 +736,7 @@ def build_services_index_context(
     }
 
     for service in services:
+        adr_path = resolve_service_adr_path(service)
         grouped[service["category"]].append(
             {
                 **service,
@@ -752,11 +745,11 @@ def build_services_index_context(
                 "adr_link": (
                     relative_site_link(
                         Path("services/index.md"),
-                        site_path_for_repo_path(adr_paths[service["adr"]]) or Path(),
+                        site_path_for_repo_path(adr_path) or Path(),
                     )
                     if (
-                        service.get("adr") in adr_paths
-                        and adr_documents.get(adr_paths[service["adr"]], build_portal_document(adr_paths[service["adr"]])).publish_in_portal
+                        adr_path is not None
+                        and adr_documents.get(adr_path, build_portal_document(adr_path)).publish_in_portal
                     )
                     else None
                 ),
@@ -1207,7 +1200,6 @@ def render_home_and_upgrade(output_dir: Path) -> None:
 
 def render_services(output_dir: Path) -> None:
     services = load_json(SERVICE_CATALOG_PATH)["services"]
-    adr_paths = adr_lookup()
     adr_documents = portal_document_lookup(ADR_DIR)
     runbook_documents = portal_document_lookup(RUNBOOK_DIR)
     subdomains = load_json(SUBDOMAIN_CATALOG_PATH)["subdomains"]
@@ -1217,7 +1209,6 @@ def render_services(output_dir: Path) -> None:
     for service in sorted(services, key=lambda item: item["name"]):
         context = build_service_page_context(
             service,
-            adr_paths=adr_paths,
             adr_documents=adr_documents,
             service_subdomains=grouped_subdomains.get(service["id"], []),
             secrets=secrets,
@@ -1242,7 +1233,7 @@ def render_services(output_dir: Path) -> None:
         wrap_generated_page(
             render_template(
                 "services-index.md.j2",
-                **build_services_index_context(services, adr_paths=adr_paths, adr_documents=adr_documents),
+                **build_services_index_context(services, adr_documents=adr_documents),
             ),
             target_path=Path("services", "index.md"),
             sensitivity="INTERNAL",

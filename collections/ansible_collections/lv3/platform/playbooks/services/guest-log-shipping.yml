@@ -33,9 +33,12 @@
               'nginx': 'edge',
               'docker-runtime': 'control-plane',
               'docker-build': 'build',
+              'artifact-cache': 'build',
               'monitoring': 'monitoring',
               'postgres': 'data',
-              'backup': 'backup'
+              'postgres-replica': 'data',
+              'backup': 'backup',
+              'coolify': 'paas'
             }[
               (
                 hostvars[groups['proxmox_hosts'][0]].proxmox_guests

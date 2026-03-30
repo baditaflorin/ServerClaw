@@ -6,6 +6,8 @@ This runbook converges and verifies the private platform context API introduced 
 
 The service exposes an OpenAPI tool server backed by Qdrant and local Ollama embeddings. It indexes authoritative repo documents and returns cited retrieval chunks for operational questions, while preserving a keyword fallback for degraded reads.
 
+ADR 0274 adds a shared MinIO staging bucket, `rag-staging`, for raw artifact uploads that need durable object storage before extraction and indexing.
+
 ## Repo Surfaces
 
 - `playbooks/rag-context.yml`
@@ -24,6 +26,7 @@ The service exposes an OpenAPI tool server backed by Qdrant and local Ollama emb
 - private API: `http://100.118.189.95:8010`
 - Qdrant storage on `docker-runtime-lv3`
 - controller-local bearer token: `.local/platform-context/api-token.txt`
+- controller-local MinIO staging secret: `.local/platform-context/minio-secret-key.txt`
 - repo-grounded OpenAPI tool server for Open WebUI global-tool integration
 
 ## Commands
@@ -94,6 +97,7 @@ python3 scripts/index_platform_knowledge.py --dry-run
 6. `curl -s http://100.64.0.1:8010/v1/platform-summary | jq '.error.code'` returns `AUTH_TOKEN_MISSING`
 7. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/platform-context/docker-compose.yml ps && sudo ls -l /opt/platform-context/openbao /run/lv3-secrets/platform-context && sudo test ! -e /opt/platform-context/platform-context.env && curl -fsS http://127.0.0.1:11434/api/version'`
 8. If the managed live apply reports a degraded vector collection, let the role complete its bounded controller-side semantic seed repair and then schedule the full `scripts/index_platform_knowledge.py` rebuild separately when you need the entire mirrored corpus refreshed
+9. `test -s /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/minio-secret-key.txt`
 
 ## Open WebUI Integration
 
@@ -117,6 +121,7 @@ This follows the Open WebUI global OpenAPI tool-server model rather than exposin
 ## Operating Notes
 
 - The API token is required for all query and admin endpoints.
+- The runtime now also expects the shared MinIO staging secret under `.local/platform-context/minio-secret-key.txt`; rerun `make converge-minio` before replaying platform-context if that file is missing.
 - Protected endpoints now return the canonical error envelope backed by `config/error-codes.yaml`.
 - The current runtime uses the local Ollama `nomic-embed-text` embedding model. Tests may still switch to the deterministic `token-hash` backend, and the service preserves a keyword fallback if vector retrieval is temporarily unavailable.
 - Production live apply skips the inline full mirrored-corpus rebuild because the expanded Ollama semantic corpus exceeds the safe synchronous rebuild budget on `docker-runtime-lv3`.

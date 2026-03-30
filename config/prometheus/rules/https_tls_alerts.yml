@@ -868,6 +868,51 @@ groups:
           description: https://matrix.lv3.org:443/_matrix/client/versions has less
             than 14 days remaining before certificate expiry.
           runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_minio_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="minio-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: minio
+          assurance_id: minio-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: minio-public HTTPS probe is failing.
+          description: https://minio.lv3.org:443/minio/health/live is no longer completing
+            a healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_minio_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="minio-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: minio
+          assurance_id: minio-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: minio-public TLS certificate is approaching expiry.
+          description: https://minio.lv3.org:443/minio/health/live has less than 21
+            days remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_minio_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="minio-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: minio
+          assurance_id: minio-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: minio-public TLS certificate is within the critical expiry window.
+          description: https://minio.lv3.org:443/minio/health/live has less than 14
+            days remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
       - alert: HTTPSProbeFailed_n8n_public
         expr: probe_success{job="https-tls-blackbox",assurance_id="n8n-public"} ==
           0

@@ -545,6 +545,34 @@
       "notes": "PostgreSQL-backed site configuration, dashboard state, and the bootstrap recovery user metadata remain restorable with the runtime volumes."
     },
     {
+      "id": "minio-shared-object-storage",
+      "service": "minio",
+      "name": "Shared object storage buckets and IAM metadata",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "/opt/minio/data"
+      ],
+      "notes": "Repo-managed MinIO stores shared service objects, bucket metadata, and bucket-level lifecycle policy state for Loki, Langfuse exports, Gitea LFS, and RAG staging."
+    },
+    {
+      "id": "platform-context-staging-objects",
+      "service": "platform_context_api",
+      "name": "Platform-context staging object storage",
+      "class": "confidential",
+      "retention_days": 14,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "s3://rag-staging"
+      ],
+      "notes": "Raw document uploads stage in the shared MinIO bucket before extraction and should expire quickly to limit retained sensitive source material."
+    },
+    {
       "id": "serverclaw-workspace-store",
       "service": "serverclaw",
       "name": "ServerClaw workspace and chat state",

@@ -134,6 +134,12 @@ playbooks:
     shared_surfaces:
       - service:langfuse
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/minio.yml:
+    playbook_id: minio
+    mutation_scope: platform
+    shared_surfaces:
+      - service:minio
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/mail-platform.yml:
     playbook_id: mail-platform
     mutation_scope: platform
@@ -366,6 +372,12 @@ playbooks:
     mutation_scope: platform
     shared_surfaces:
       - service:nextcloud
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/minio.yml:
+    playbook_id: minio
+    mutation_scope: platform
+    shared_surfaces:
+      - service:minio
       - inventory/host_vars/proxmox_florin.yml
   playbooks/services/docker-runtime-observability.yml:
     playbook_id: docker-runtime-observability

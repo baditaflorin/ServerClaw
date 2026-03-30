@@ -4,7 +4,7 @@ This runbook covers the private Gitea deployment introduced by ADR 0143.
 
 ## Purpose
 
-`git.lv3.org` provides the self-hosted Git and CI surface for LV3. It runs privately on `docker-runtime-lv3`, uses PostgreSQL on `postgres-lv3`, authenticates operators through Keycloak, and dispatches Actions jobs to `docker-build-lv3`.
+`git.lv3.org` provides the self-hosted Git and CI surface for LV3. It runs privately on `docker-runtime-lv3`, uses PostgreSQL on `postgres-lv3`, authenticates operators through Keycloak, stores LFS payloads in the shared MinIO bucket `gitea-lfs`, and dispatches Actions jobs to `docker-build-lv3`.
 
 ## Managed Paths
 
@@ -33,6 +33,12 @@ Then run the managed converge so Gitea seeds the private repo Actions secrets:
 
 ```bash
 ansible-playbook -i inventory/hosts.yml playbooks/gitea.yml
+```
+
+Ensure the shared LFS secret already exists locally before replaying Gitea:
+
+```bash
+test -s /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/minio-secret-key.txt
 ```
 
 ## Verify
@@ -94,6 +100,12 @@ curl -sS \
   jq '{workflow_runs: [.workflow_runs[] | {id, status, conclusion, head_branch, head_sha}]}'
 ```
 
+7. Confirm the runtime env now declares MinIO-backed LFS:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'sudo grep -E "^GITEA__lfs__" /run/lv3-secrets/gitea/runtime.env'
+```
+
 ## Smoke-Test Repository Creation
 
 Use the mirrored admin token to create a repository under the managed `ops` org:
@@ -125,4 +137,5 @@ The canonical repository hook is installed under:
 - The private git push path enforces the server-side validation gate before a ref is accepted. A rejected push can fail before any Actions workflow is created.
 - The Gitea git SSH endpoint on port `2222` uses Gitea account keys, not the Proxmox host bootstrap key. For controlled automation from the operator workstation, the mirrored `ops-gitea` admin token over HTTP basic auth is the documented fallback.
 - ADR 0233 reuses the managed Gitea bootstrap path to seed the private repo Actions secrets `RELEASE_BUNDLE_COSIGN_PRIVATE_KEY`, `RELEASE_BUNDLE_COSIGN_PASSWORD`, and `RELEASE_BUNDLE_REPO_TOKEN`.
+- ADR 0274 replaces local-disk LFS storage with the shared MinIO bucket `gitea-lfs`; do not manage LFS objects directly on the docker-runtime filesystem.
 - The signed bundle build, publish, and verification flow is documented in [signed-release-bundles.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/signed-release-bundles.md).

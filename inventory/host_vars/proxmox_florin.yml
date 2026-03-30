@@ -61,6 +61,8 @@ platform_port_assignments:
   searxng_host_proxy_port: 80
   langfuse_port: 3002
   plausible_port: 8016
+  minio_api_port: 9010
+  minio_console_port: 9011
   dify_port: 8094
   changedetection_port: 5000
   browser_runner_port: 8096
@@ -1515,6 +1517,41 @@ lv3_service_topology:
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.plausible_port }}"
       security_headers_enabled: false
       preserve_upstream_security_headers: true
+  minio:
+    service_name: minio
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: minio.lv3.org
+    console_public_hostname: minio-console.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: minio
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+      additional_records:
+        - name: minio-console
+          type: A
+          target: "{{ management_ipv4 }}"
+          ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.minio_api_port }}"
+      client_max_body_size: 0
+      chunked_transfer_encoding: true
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 900
+      proxy_send_timeout_seconds: 900
+      security_headers_enabled: false
+      crawl_policy_enabled: false
   dify:
     service_name: dify
     owning_vm: docker-runtime-lv3

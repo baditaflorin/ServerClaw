@@ -33,6 +33,7 @@
               'nginx': 'edge',
               'docker-runtime': 'control-plane',
               'docker-build': 'build',
+              'artifact-cache': 'build',
               'monitoring': 'monitoring',
               'postgres': 'data',
               'postgres-replica': 'data',

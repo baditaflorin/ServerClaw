@@ -91,6 +91,16 @@ monitoring_loki_config_file: /etc/loki/config.yml
 monitoring_loki_data_dir: /var/lib/loki
 monitoring_loki_http_url: http://127.0.0.1:3100
 monitoring_loki_port: 3100
+monitoring_loki_filesystem_schema_start_date: "2026-03-22"
+monitoring_loki_minio_schema_cutover_date: "2026-03-30"
+monitoring_loki_minio_access_key_id: lokichunks
+monitoring_loki_minio_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/loki-minio-secret-key.txt
+monitoring_loki_minio_bucket_name: loki-chunks
+monitoring_loki_minio_region: us-east-1
+monitoring_loki_minio_endpoint: >-
+  {{ hostvars[groups['proxmox_hosts'][0]].lv3_service_topology.minio.private_ip }}:{{
+    hostvars[groups['proxmox_hosts'][0]].platform_port_assignments.minio_api_port
+  }}
 monitoring_loki_retention_default: 720h
 monitoring_loki_retention_edge_access: 720h
 monitoring_loki_retention_control_plane: 720h

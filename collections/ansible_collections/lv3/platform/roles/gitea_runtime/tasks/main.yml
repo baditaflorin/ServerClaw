@@ -1,4 +1,21 @@
 ---
+# Purpose: Converge the private Gitea runtime, release bootstrap contract, and shared MinIO-backed LFS settings on docker-runtime-lv3.
+# Use case: Run during Gitea deploys, upgrades, and recovery replays when the private Git and CI surface must match repo truth.
+#
+# Inputs (required):
+#   - gitea_* role defaults, controller-local secrets, and topology-derived URLs.
+#
+# Inputs (optional):
+#   - OpenBao and bootstrap overrides declared through the gitea_* role variables.
+#
+# Outputs:
+#   - Rendered runtime env and compose files, mirrored bootstrap artifacts, and a running Gitea stack.
+#
+# Idempotency: Partially idempotent
+#              Reruns reconcile the same runtime stack, bootstrap secrets, and LFS storage contract.
+#
+# Dependencies:
+#   - ADR 0143, ADR 0165, ADR 0233, and ADR 0274.
 - name: Validate Gitea runtime inputs
   ansible.builtin.assert:
     that:
@@ -20,6 +37,9 @@
       - gitea_oidc_client_secret_local_file | length > 0
       - gitea_oidc_discovery_url | length > 0
       - gitea_oidc_internal_discovery_url | length > 0
+      - gitea_minio_secret_key_local_file | length > 0
+      - gitea_minio_bucket_name | length > 0
+      - gitea_minio_endpoint | length > 0
       - gitea_admin_username | length > 0
       - gitea_admin_email | length > 0
       - gitea_admin_password_remote_file | length > 0
@@ -61,12 +81,26 @@
   become: false
   register: gitea_oidc_client_secret_local
 
+- name: Ensure the Gitea MinIO secret key exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ gitea_minio_secret_key_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: gitea_minio_secret_key_local
+
 - name: Fail if the Gitea OIDC client secret is missing locally
   ansible.builtin.fail:
     msg: >-
       {{ gitea_oidc_client_secret_local_file }} is missing on the control machine.
       Re-run the Keycloak converge so the Gitea OIDC client is provisioned before bootstrapping Gitea.
   when: not gitea_oidc_client_secret_local.stat.exists
+
+- name: Fail if the Gitea MinIO secret key is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ gitea_minio_secret_key_local_file }} is missing on the control machine.
+      Converge MinIO before deploying Gitea so the shared LFS object store credentials exist.
+  when: not gitea_minio_secret_key_local.stat.exists
 
 - name: Ensure the release-bundle Cosign private key exists on the control machine
   ansible.builtin.stat:
@@ -186,6 +220,7 @@
     gitea_admin_password: "{{ gitea_admin_password_raw.content | b64decode | trim }}"
     gitea_database_password: "{{ lookup('ansible.builtin.file', gitea_database_password_local_file) | trim }}"
     gitea_oidc_client_secret: "{{ lookup('ansible.builtin.file', gitea_oidc_client_secret_local_file) | trim }}"
+    gitea_minio_secret_key: "{{ lookup('ansible.builtin.file', gitea_minio_secret_key_local_file) | trim }}"
     gitea_release_bundle_cosign_private_key: "{{ lookup('ansible.builtin.file', gitea_release_bundle_cosign_private_key_local_file) }}"
     gitea_release_bundle_cosign_password: "{{ lookup('ansible.builtin.file', gitea_release_bundle_cosign_password_local_file) | trim }}"
     gitea_webhook_secret: "{{ gitea_webhook_secret_raw.content | b64decode | trim }}"
@@ -197,6 +232,7 @@
       GITEA__database__PASSWD: "{{ gitea_database_password }}"
       GITEA_ADMIN_PASSWORD: "{{ gitea_admin_password }}"
       GITEA_KEYCLOAK_CLIENT_SECRET: "{{ gitea_oidc_client_secret }}"
+      GITEA__lfs__MINIO_SECRET_ACCESS_KEY: "{{ gitea_minio_secret_key }}"
       GITEA_WEBHOOK_SECRET: "{{ gitea_webhook_secret }}"
   no_log: true
 
@@ -311,23 +347,99 @@
     or 'Downloaded newer image' in gitea_pull.stdout
     or 'Pull complete' in gitea_pull.stdout
 
-- name: Start the Gitea stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ gitea_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ gitea_site_dir }}"
-  register: gitea_up
-  changed_when: >-
-    'Creating' in gitea_up.stdout
-    or 'Recreating' in gitea_up.stdout
-    or 'Starting' in gitea_up.stdout
+- name: Start the Gitea stack and recover stale compose-network failures
+  block:
+    - name: Start the Gitea stack
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ gitea_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ gitea_site_dir }}"
+      register: gitea_up
+      changed_when: >-
+        'Creating' in gitea_up.stdout
+        or 'Recreating' in gitea_up.stdout
+        or 'Starting' in gitea_up.stdout
+  rescue:
+    - name: Flag stale Gitea compose-network failures during startup
+      ansible.builtin.set_fact:
+        gitea_docker_nat_chain_missing: >-
+          {{
+            'No chain/target/match by that name' in (ansible_failed_result.stderr | default(''))
+            or 'Unable to enable DNAT rule' in (ansible_failed_result.stderr | default(''))
+          }}
+        gitea_compose_network_missing: >-
+          {{
+            'failed to create endpoint' in (ansible_failed_result.stderr | default(''))
+            and 'does not exist' in (ansible_failed_result.stderr | default(''))
+          }}
+
+    - name: Surface unexpected Gitea startup failures
+      ansible.builtin.fail:
+        msg: >-
+          {{
+            ansible_failed_result.stderr
+            | default(ansible_failed_result.msg | default('gitea compose up failed'))
+          }}
+      when: >-
+        not gitea_docker_nat_chain_missing
+        and not gitea_compose_network_missing
+
+    - name: Reset stale Gitea compose resources before retrying startup
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ gitea_compose_file }}"
+          - down
+          - --remove-orphans
+      args:
+        chdir: "{{ gitea_site_dir }}"
+      register: gitea_down
+      changed_when: >-
+        'Stopping' in (gitea_down.stdout | default(''))
+        or 'Removing' in (gitea_down.stdout | default(''))
+        or 'Removing' in (gitea_down.stderr | default(''))
+      failed_when: false
+      when: gitea_compose_network_missing
+
+    - name: Reset Docker failed state before nat-chain recovery retry
+      ansible.builtin.command: systemctl reset-failed docker.service
+      changed_when: false
+      when: gitea_docker_nat_chain_missing
+
+    - name: Restart Docker to restore nat chain before retrying Gitea startup
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: gitea_docker_nat_chain_missing
+
+    - name: Retry Gitea stack startup after compose-network recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ gitea_compose_file }}"
+          - up
+          - -d
+          - --force-recreate
+          - --remove-orphans
+      args:
+        chdir: "{{ gitea_site_dir }}"
+      register: gitea_up
+      changed_when: >-
+        'Creating' in gitea_up.stdout
+        or 'Recreating' in gitea_up.stdout
+        or 'Starting' in gitea_up.stdout
+      when: gitea_docker_nat_chain_missing or gitea_compose_network_missing
 
 - name: Wait for Gitea to listen locally
   ansible.builtin.wait_for:
@@ -345,6 +457,17 @@
   retries: 24
   delay: 5
   until: gitea_login_page.status == 200
+  changed_when: false
+
+- name: Wait for the Keycloak OIDC discovery endpoint used by Gitea bootstrap
+  ansible.builtin.uri:
+    url: "{{ gitea_oidc_internal_discovery_url }}"
+    method: GET
+    status_code: 200
+  register: gitea_oidc_discovery_ready
+  retries: 60
+  delay: 5
+  until: gitea_oidc_discovery_ready.status == 200
   changed_when: false
 
 - name: Run the Gitea bootstrap script

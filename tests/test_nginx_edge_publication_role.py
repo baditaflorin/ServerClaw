@@ -88,6 +88,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
                 "home.lv3.org",
                 "langfuse.lv3.org",
                 "logs.lv3.org",
+                "minio-console.lv3.org",
                 "n8n.lv3.org",
                 "ops.lv3.org",
                 "realtime.lv3.org",
@@ -114,6 +115,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertNotIn("unauthenticated_paths", protected_sites["coolify.lv3.org"])
         self.assertNotIn("unauthenticated_paths", protected_sites["draw.lv3.org"])
         self.assertNotIn("unauthenticated_paths", protected_sites["langfuse.lv3.org"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["minio-console.lv3.org"])
         self.assertEqual(protected_sites["n8n.lv3.org"]["unauthenticated_paths"], ["/healthz"])
         self.assertEqual(
             protected_sites["n8n.lv3.org"]["unauthenticated_prefix_paths"],
@@ -230,6 +232,19 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
 
     def test_static_pages_include_robots_meta_tag(self) -> None:
         self.assertIn('<meta name="robots" content="{{ public_edge_robots_meta_content }}">', self.static_template)
+
+    def test_minio_console_is_published_with_large_upload_and_header_passthrough_overrides(self) -> None:
+        minio_console = next(
+            site for site in self.defaults["public_edge_extra_sites"] if site["hostname"] == "minio-console.lv3.org"
+        )
+
+        self.assertEqual(
+            minio_console["upstream"],
+            "http://10.10.10.20:{{ platform_port_assignments.minio_console_port }}",
+        )
+        self.assertEqual(minio_console["client_max_body_size"], 0)
+        self.assertFalse(minio_console["security_headers_enabled"])
+        self.assertTrue(minio_console["preserve_upstream_security_headers"])
 
     def test_template_supports_proxy_header_stripping_and_blocked_paths(self) -> None:
         self.assertIn("site.proxy_hide_headers | default([])", self.template)

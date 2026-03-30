@@ -73,6 +73,7 @@ def service_topology_edge_sites(catalog):
                 "client_max_body_size",
                 "crawl_policy_enabled",
                 "exact_redirects",
+                "preserve_upstream_security_headers",
                 "prefix_proxy_routes",
                 "preserve_upstream_security_headers",
                 "proxy_hide_headers",
@@ -144,6 +145,27 @@ def service_topology_dns_records(catalog, visibility=None):
                 "ttl": dns.get("ttl", 60),
             }
         )
+        for extra_record in dns.get("additional_records", []):
+            if not isinstance(extra_record, dict):
+                raise AnsibleFilterError(
+                    f"service {service_id} declares a non-mapping dns.additional_records entry"
+                )
+            if not extra_record.get("name"):
+                raise AnsibleFilterError(
+                    f"service {service_id} manages additional DNS without dns.additional_records[].name"
+                )
+            if not extra_record.get("target"):
+                raise AnsibleFilterError(
+                    f"service {service_id} manages additional DNS without dns.additional_records[].target"
+                )
+            records.append(
+                {
+                    "name": extra_record["name"],
+                    "type": extra_record.get("type", dns.get("type", "A")),
+                    "value": extra_record["target"],
+                    "ttl": extra_record.get("ttl", dns.get("ttl", 60)),
+                }
+            )
     return records
 
 

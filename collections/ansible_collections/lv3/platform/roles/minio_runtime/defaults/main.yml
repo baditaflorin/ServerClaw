@@ -1,0 +1,165 @@
+# Purpose: Set the default paths, image, ports, credentials, and bucket contracts for the shared MinIO runtime.
+# Use case: Load when converging ADR 0274 so the role can render compose state, OpenBao env injection, and bucket policy reconciliation consistently.
+# Inputs: Platform topology, image catalog, and optional role overrides.
+# Outputs: Default variables consumed by the minio_runtime tasks and templates.
+# Idempotency: Fully idempotent; defaults describe desired values only.
+# Dependencies: ADR 0077, ADR 0165, ADR 0274, and the minio_runtime role.
+---
+minio_site_dir: /opt/minio
+minio_data_dir: "{{ minio_site_dir }}/data"
+minio_policy_dir: "{{ minio_site_dir }}/policies"
+minio_secret_dir: /etc/lv3/minio
+minio_compose_file: "{{ minio_site_dir }}/docker-compose.yml"
+minio_env_file: "{{ compose_runtime_secret_root }}/minio/runtime.env"
+minio_legacy_env_file: "{{ minio_site_dir }}/minio.env"
+minio_openbao_agent_dir: "{{ minio_site_dir }}/openbao"
+minio_openbao_agent_image: "{{ openbao_agent_image }}"
+minio_openbao_agent_container_name: minio-openbao-agent
+minio_openbao_secret_path: services/minio/runtime-env
+minio_openbao_policy_name: lv3-service-minio-runtime
+minio_openbao_approle_name: minio-runtime
+minio_container_name: minio
+minio_image: "{{ container_image_catalog.images.minio_runtime.ref }}"
+minio_api_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('minio', 'internal') }}"
+minio_console_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('minio', 'console') }}"
+minio_private_api_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('minio', 'internal') }}"
+minio_public_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('minio', 'public') }}"
+minio_console_private_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('minio', 'console_internal') }}"
+minio_console_public_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('minio', 'console_public') }}"
+minio_root_user: minio-root
+minio_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/minio
+minio_root_password_local_file: "{{ minio_local_artifact_dir }}/root-password.txt"
+minio_root_password_remote_file: "{{ minio_secret_dir }}/root-password.txt"
+minio_mc_url: https://dl.min.io/client/mc/release/linux-amd64/mc
+minio_mc_checksum: sha256:01f866e9c5f9b87c2b09116fa5d7c06695b106242d829a8bb32990c00312e891
+minio_mc_bin: /usr/local/bin/mc
+minio_mc_config_dir: "{{ minio_site_dir }}/mc"
+minio_langfuse_access_key_id: langfuseapp
+minio_langfuse_secret_key_remote_file: "{{ minio_secret_dir }}/langfuse-secret-key.txt"
+minio_langfuse_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/langfuse/minio-secret-key.txt
+minio_langfuse_bucket_name: langfuse-exports
+minio_langfuse_policy_name: langfuse-exports
+minio_langfuse_allowed_origins:
+  - https://langfuse.lv3.org
+minio_langfuse_cors_smoke_object_name: __lv3-langfuse-cors-smoke.txt
+minio_langfuse_policy_document:
+  Version: "2012-10-17"
+  Statement:
+    - Sid: LangfuseBucketMetadata
+      Effect: Allow
+      Action:
+        - s3:GetBucketLocation
+        - s3:ListBucket
+      Resource:
+        - "arn:aws:s3:::{{ minio_langfuse_bucket_name }}"
+    - Sid: LangfuseBucketObjects
+      Effect: Allow
+      Action:
+        - s3:AbortMultipartUpload
+        - s3:DeleteObject
+        - s3:GetObject
+        - s3:ListMultipartUploadParts
+        - s3:PutObject
+      Resource:
+        - "arn:aws:s3:::{{ minio_langfuse_bucket_name }}/*"
+minio_gitea_access_key_id: gitealfs
+minio_gitea_secret_key_remote_file: "{{ minio_secret_dir }}/gitea-secret-key.txt"
+minio_gitea_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/minio-secret-key.txt
+minio_gitea_bucket_name: gitea-lfs
+minio_gitea_policy_name: gitea-lfs
+minio_gitea_policy_document:
+  Version: "2012-10-17"
+  Statement:
+    - Sid: GiteaBucketMetadata
+      Effect: Allow
+      Action:
+        - s3:GetBucketLocation
+        - s3:ListBucket
+      Resource:
+        - "arn:aws:s3:::{{ minio_gitea_bucket_name }}"
+    - Sid: GiteaBucketObjects
+      Effect: Allow
+      Action:
+        - s3:AbortMultipartUpload
+        - s3:DeleteObject
+        - s3:GetObject
+        - s3:ListMultipartUploadParts
+        - s3:PutObject
+      Resource:
+        - "arn:aws:s3:::{{ minio_gitea_bucket_name }}/*"
+minio_loki_access_key_id: lokichunks
+minio_loki_secret_key_remote_file: "{{ minio_secret_dir }}/loki-secret-key.txt"
+minio_loki_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/loki-minio-secret-key.txt
+minio_loki_bucket_name: loki-chunks
+minio_loki_policy_name: loki-chunks
+minio_loki_policy_document:
+  Version: "2012-10-17"
+  Statement:
+    - Sid: LokiBucketMetadata
+      Effect: Allow
+      Action:
+        - s3:GetBucketLocation
+        - s3:ListBucket
+      Resource:
+        - "arn:aws:s3:::{{ minio_loki_bucket_name }}"
+    - Sid: LokiBucketObjects
+      Effect: Allow
+      Action:
+        - s3:DeleteObject
+        - s3:GetObject
+        - s3:PutObject
+      Resource:
+        - "arn:aws:s3:::{{ minio_loki_bucket_name }}/*"
+minio_platform_context_access_key_id: ragstaging
+minio_platform_context_secret_key_remote_file: "{{ minio_secret_dir }}/platform-context-secret-key.txt"
+minio_platform_context_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/minio-secret-key.txt
+minio_platform_context_bucket_name: rag-staging
+minio_platform_context_policy_name: rag-staging
+minio_platform_context_retention_days: 14
+minio_platform_context_policy_document:
+  Version: "2012-10-17"
+  Statement:
+    - Sid: PlatformContextBucketMetadata
+      Effect: Allow
+      Action:
+        - s3:GetBucketLocation
+        - s3:ListBucket
+      Resource:
+        - "arn:aws:s3:::{{ minio_platform_context_bucket_name }}"
+    - Sid: PlatformContextBucketObjects
+      Effect: Allow
+      Action:
+        - s3:DeleteObject
+        - s3:GetObject
+        - s3:PutObject
+      Resource:
+        - "arn:aws:s3:::{{ minio_platform_context_bucket_name }}/*"
+minio_managed_consumers:
+  - name: langfuse
+    access_key_id: "{{ minio_langfuse_access_key_id }}"
+    secret_key_remote_file: "{{ minio_langfuse_secret_key_remote_file }}"
+    secret_key_local_file: "{{ minio_langfuse_secret_key_local_file }}"
+    bucket_name: "{{ minio_langfuse_bucket_name }}"
+    policy_name: "{{ minio_langfuse_policy_name }}"
+    policy_document: "{{ minio_langfuse_policy_document }}"
+  - name: gitea
+    access_key_id: "{{ minio_gitea_access_key_id }}"
+    secret_key_remote_file: "{{ minio_gitea_secret_key_remote_file }}"
+    secret_key_local_file: "{{ minio_gitea_secret_key_local_file }}"
+    bucket_name: "{{ minio_gitea_bucket_name }}"
+    policy_name: "{{ minio_gitea_policy_name }}"
+    policy_document: "{{ minio_gitea_policy_document }}"
+  - name: loki
+    access_key_id: "{{ minio_loki_access_key_id }}"
+    secret_key_remote_file: "{{ minio_loki_secret_key_remote_file }}"
+    secret_key_local_file: "{{ minio_loki_secret_key_local_file }}"
+    bucket_name: "{{ minio_loki_bucket_name }}"
+    policy_name: "{{ minio_loki_policy_name }}"
+    policy_document: "{{ minio_loki_policy_document }}"
+  - name: platform_context
+    access_key_id: "{{ minio_platform_context_access_key_id }}"
+    secret_key_remote_file: "{{ minio_platform_context_secret_key_remote_file }}"
+    secret_key_local_file: "{{ minio_platform_context_secret_key_local_file }}"
+    bucket_name: "{{ minio_platform_context_bucket_name }}"
+    policy_name: "{{ minio_platform_context_policy_name }}"
+    policy_document: "{{ minio_platform_context_policy_document }}"

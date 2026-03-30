@@ -1,0 +1,156 @@
+---
+# Purpose: Verify the local MinIO health contract, launch buckets, default Langfuse CORS behavior, and RAG lifecycle rules.
+# Inputs: Running MinIO container plus the configured local runtime URL, bucket contracts, allowed Langfuse origins, and mc client path.
+# Outputs: Health, bucket policy, lifecycle, and temporary presigned-download smoke probe results for the shared MinIO runtime.
+# Idempotency: Functionally idempotent; verification creates and removes a temporary Langfuse smoke object in the same run.
+# Dependencies: ADR 0165 and ADR 0274; requires the minio_runtime compose stack to be running.
+- name: Verify the MinIO live health endpoint responds locally
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ minio_api_port }}/minio/health/live"
+    method: GET
+    status_code: 200
+    return_content: false
+    timeout: 30
+  register: minio_verify_live
+  retries: 12
+  delay: 2
+  until: minio_verify_live.status == 200
+  changed_when: false
+
+- name: Verify the MinIO ready health endpoint responds locally
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ minio_api_port }}/minio/health/ready"
+    method: GET
+    status_code: 200
+    return_content: false
+    timeout: 30
+  register: minio_verify_ready
+  retries: 12
+  delay: 2
+  until: minio_verify_ready.status == 200
+  changed_when: false
+
+- name: Verify the managed MinIO buckets are reachable
+  ansible.builtin.command:
+    argv:
+      - "{{ minio_mc_bin }}"
+      - --config-dir
+      - "{{ minio_mc_config_dir }}"
+      - ls
+      - "local/{{ item.bucket_name }}"
+  loop: "{{ minio_managed_consumers_resolved }}"
+  changed_when: false
+
+- name: Verify the Langfuse bucket default CORS behavior
+  block:
+    - name: Create a temporary Langfuse CORS smoke file
+      ansible.builtin.tempfile:
+        state: file
+        suffix: -langfuse-cors-smoke.txt
+      register: minio_langfuse_cors_smoke_tmp
+
+    - name: Write the Langfuse CORS smoke object payload
+      ansible.builtin.copy:
+        dest: "{{ minio_langfuse_cors_smoke_tmp.path }}"
+        content: "lv3-langfuse-cors-smoke\n"
+        mode: "0600"
+      changed_when: false
+
+    - name: Upload the Langfuse CORS smoke object
+      ansible.builtin.command:
+        argv:
+          - "{{ minio_mc_bin }}"
+          - --config-dir
+          - "{{ minio_mc_config_dir }}"
+          - cp
+          - "{{ minio_langfuse_cors_smoke_tmp.path }}"
+          - "local/{{ minio_langfuse_bucket_name }}/{{ minio_langfuse_cors_smoke_object_name }}"
+      changed_when: false
+
+    - name: Generate the Langfuse CORS smoke URL
+      ansible.builtin.shell: |
+        set -euo pipefail
+        {{ minio_mc_bin | quote }} --config-dir {{ minio_mc_config_dir | quote }} share download --json --expire 5m \
+          "local/{{ minio_langfuse_bucket_name }}/{{ minio_langfuse_cors_smoke_object_name }}" \
+          | python3 -c 'import json, sys; lines = [line for line in sys.stdin.read().splitlines() if line.strip()]; data = json.loads(lines[-1]); print(data.get("share") or data.get("url") or data.get("shareURL") or "")'
+      args:
+        executable: /bin/bash
+      register: minio_langfuse_cors_smoke_url
+      changed_when: false
+
+    - name: Assert the Langfuse CORS smoke URL was generated
+      ansible.builtin.assert:
+        that:
+          - (minio_langfuse_cors_smoke_url.stdout | trim) | length > 0
+        fail_msg: >-
+          The Langfuse CORS smoke verification could not generate a presigned download URL
+          for {{ minio_langfuse_bucket_name }}/{{ minio_langfuse_cors_smoke_object_name }}.
+
+    - name: Probe the Langfuse bucket CORS headers for each declared origin
+      ansible.builtin.shell: |
+        set -euo pipefail
+        curl -sS -D - -o /dev/null \
+          -H "Origin: {{ item }}" \
+          "{{ minio_langfuse_cors_smoke_url.stdout | trim }}"
+      args:
+        executable: /bin/bash
+      loop: "{{ minio_langfuse_allowed_origins }}"
+      register: minio_langfuse_cors_probes
+      changed_when: false
+
+    - name: Assert each Langfuse origin receives an allow-origin header
+      ansible.builtin.assert:
+        that:
+          - >-
+            ('access-control-allow-origin: ' ~ (item.item | lower))
+            in (item.stdout | lower)
+            or 'access-control-allow-origin: *' in (item.stdout | lower)
+        fail_msg: >-
+          The {{ minio_langfuse_bucket_name }} bucket must return an allow-origin header
+          for {{ item.item }} from MinIO's default CORS behavior.
+      loop: "{{ minio_langfuse_cors_probes.results }}"
+  always:
+    - name: Remove the Langfuse CORS smoke object
+      ansible.builtin.command:
+        argv:
+          - "{{ minio_mc_bin }}"
+          - --config-dir
+          - "{{ minio_mc_config_dir }}"
+          - rm
+          - --force
+          - "local/{{ minio_langfuse_bucket_name }}/{{ minio_langfuse_cors_smoke_object_name }}"
+      changed_when: false
+      failed_when: false
+
+    - name: Remove the temporary Langfuse CORS smoke file
+      ansible.builtin.file:
+        path: "{{ minio_langfuse_cors_smoke_tmp.path }}"
+        state: absent
+      when: minio_langfuse_cors_smoke_tmp is defined
+
+- name: Verify the RAG staging bucket lifecycle rule
+  ansible.builtin.command:
+    argv:
+      - "{{ minio_mc_bin }}"
+      - --config-dir
+      - "{{ minio_mc_config_dir }}"
+      - ilm
+      - rule
+      - list
+      - --json
+      - "local/{{ minio_platform_context_bucket_name }}"
+  register: minio_platform_context_lifecycle_verify
+  retries: 12
+  delay: 2
+  until: minio_platform_context_lifecycle_verify.rc == 0
+  changed_when: false
+
+- name: Assert the RAG staging bucket expires objects after the declared retention period
+  ansible.builtin.assert:
+    that:
+      - >-
+        ('"Days":' ~ (minio_platform_context_retention_days | string))
+        in (minio_platform_context_lifecycle_verify.stdout | replace(' ', ''))
+    fail_msg: >-
+      The {{ minio_platform_context_bucket_name }} bucket must enforce a
+      {{ minio_platform_context_retention_days }}-day lifecycle expiry rule.
