@@ -946,6 +946,18 @@ def build_platform_vars(
         "hetzner_dns_records": dns_records["public"],
         "platform_postgres_host": postgres_service["public_hostname"],
         "openbao_postgres_host": postgres_primary_ip,
+        "openbao_http_extra_bind_addresses": render_known_templates(
+            copy.deepcopy(
+                require_list(
+                    host_vars.get("openbao_http_extra_bind_addresses", []),
+                    "host_vars.openbao_http_extra_bind_addresses",
+                )
+            ),
+            host_vars,
+            guest_ipv4_by_name,
+            resolved_ports,
+            "host_vars.openbao_http_extra_bind_addresses",
+        ),
         "openbao_controller_url": openbao_service["urls"]["controller"],
         "openfga_http_port": resolved_ports["openfga_http_port"],
         "openfga_host_proxy_port": resolved_ports["openfga_host_proxy_port"],

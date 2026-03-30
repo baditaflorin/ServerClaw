@@ -43,6 +43,9 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     assert "include_tasks: ensure_local_openbao_runtime.yml" in tasks
     assert "- name: Ensure the controller-local SSH control path directory exists before OpenBao API retries" in tasks
     assert "path: \"{{ lookup('ansible.builtin.env', 'ANSIBLE_SSH_CONTROL_PATH_DIR') }}\"" in tasks
+    assert "- name: Wait for the Docker daemon to answer after networking recovery" in tasks
+    assert "register: common_openbao_compose_env_docker_info" in tasks
+    assert "until: common_openbao_compose_env_docker_info.rc == 0" in tasks
     assert "- name: Read the local OpenBao seal status" in tasks
     assert "/v1/sys/seal-status" in tasks
     assert "- name: Unseal the local OpenBao API when runtime secret injection finds it sealed" in tasks
@@ -80,10 +83,12 @@ def test_local_openbao_recovery_helper_recovers_compose_runtime_when_api_is_down
     assert "- name: Probe whether the local OpenBao API already answers" in tasks
     assert "- name: Inspect current OpenBao container networks before local recovery" in tasks
     assert "- name: Inspect current OpenBao published ports before local recovery" in tasks
+    assert "common_local_openbao_runtime_detached" in tasks
     assert "openbao_container_name | default('lv3-openbao')" in tasks
     assert '{{ "{{json .NetworkSettings.Ports}}" }}' in tasks
     assert "- name: Restart Docker when required chains are missing before local OpenBao recovery" in tasks
     assert "- name: Assert Docker bridge chains are present before local OpenBao recovery" in tasks
+    assert "- name: Check whether the local OpenBao Compose file exists before recovery" in tasks
     assert "- name: Remove the detached OpenBao container before local recovery" in tasks
     assert "- name: Remove the stale OpenBao compose network before local recovery" in tasks
     assert "- name: Recover the local OpenBao stack when the API is unavailable" in tasks

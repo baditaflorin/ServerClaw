@@ -68,6 +68,20 @@
   changed_when: false
   when: (lookup('ansible.builtin.env', 'ANSIBLE_SSH_CONTROL_PATH_DIR') | default('', true) | length) > 0
 
+- name: Wait for the Docker daemon to answer after networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - info
+      - --format
+      - '{{ "{{.ServerVersion}}" }}'
+  register: common_openbao_compose_env_docker_info
+  changed_when: false
+  retries: 10
+  delay: 2
+  until: common_openbao_compose_env_docker_info.rc == 0
+  when: common_openbao_compose_env_runtime_needs_recovery | bool
+
 - name: Wait for the local OpenBao API to answer
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"

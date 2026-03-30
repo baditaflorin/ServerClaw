@@ -68,6 +68,8 @@ def test_validate_repo_supports_architecture_fitness_stage() -> None:
 
     assert "architecture-fitness" in script
     assert "scripts/replaceability_scorecards.py" in script
+    assert "scripts/validate_renovate_contract.py" in script
+    assert "scripts/renovate_stack_digest_guard.py" in script
 
 
 def test_validate_repo_json_stage_falls_back_without_jq() -> None:

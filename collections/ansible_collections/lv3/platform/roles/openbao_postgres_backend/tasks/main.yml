@@ -5,6 +5,7 @@
       - openbao_postgres_admin_role is match('^[a-z_][a-z0-9_]*$')
       - openbao_postgres_admin_password_local_file | length > 0
       - openbao_postgres_database | length > 0
+      - openbao_postgres_reserved_connection_role is match('^[a-z_][a-z0-9_]*$')
     fail_msg: "openbao_postgres_backend requires a safe admin role name, local password path, and target database."
 
 - name: Ensure the OpenBao local artifact directory exists on the control machine
@@ -105,5 +106,20 @@
       - "{{ openbao_postgres_database }}"
       - -c
       - "GRANT pg_read_all_data TO {{ openbao_postgres_admin_role }} WITH ADMIN OPTION"
+  changed_when: false
+  when: openbao_postgres_writable_check.stdout | trim == "1"
+
+- name: Grant reserved PostgreSQL connection capability to the OpenBao rotator role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -d
+      - "{{ openbao_postgres_database }}"
+      - -c
+      - "GRANT {{ openbao_postgres_reserved_connection_role }} TO {{ openbao_postgres_admin_role }}"
   changed_when: false
   when: openbao_postgres_writable_check.stdout | trim == "1"

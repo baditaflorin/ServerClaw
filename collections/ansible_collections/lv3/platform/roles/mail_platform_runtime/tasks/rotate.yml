@@ -471,6 +471,20 @@
   failed_when: false
   when: mail_platform_rotation_docker_network_missing
 
+- name: Remove the stale mail-platform compose network before retrying rotation
+  ansible.builtin.shell: |
+    set -euo pipefail
+    stale_networks="$(docker network ls -q --filter name=^{{ mail_platform_docker_network_name }}$)"
+    if [ -n "$stale_networks" ]; then
+      docker network rm $stale_networks
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: mail_platform_rotation_network_cleanup
+  changed_when: "'changed' in mail_platform_rotation_network_cleanup.stdout"
+  when: mail_platform_rotation_docker_network_missing
+
 - name: Retry mail platform rotation after compose-network recovery
   ansible.builtin.command:
     argv:

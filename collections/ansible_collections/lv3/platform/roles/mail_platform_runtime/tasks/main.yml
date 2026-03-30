@@ -70,6 +70,7 @@
     name:
       - python3
       - openssl
+    lock_timeout: 300
     state: present
     update_cache: true
     force_apt_get: true
@@ -652,6 +653,20 @@
     or 'Removing' in (mail_platform_down.stdout | default(''))
     or 'Removing' in (mail_platform_down.stderr | default(''))
   failed_when: false
+  when: mail_platform_docker_network_missing
+
+- name: Remove the stale mail-platform compose network before retrying startup
+  ansible.builtin.shell: |
+    set -euo pipefail
+    stale_networks="$(docker network ls -q --filter name=^{{ mail_platform_docker_network_name }}$)"
+    if [ -n "$stale_networks" ]; then
+      docker network rm $stale_networks
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: mail_platform_network_cleanup
+  changed_when: "'changed' in mail_platform_network_cleanup.stdout"
   when: mail_platform_docker_network_missing
 
 - name: Retry mail platform stack startup after compose-network recovery

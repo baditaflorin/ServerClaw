@@ -195,10 +195,14 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     assert force_recreate_down["when"] == "keycloak_force_recreate"
     assert "{{ keycloak_compose_network_name }}" in network_cleanup["ansible.builtin.shell"]
     assert network_cleanup["when"] == "keycloak_force_recreate"
-    assert "--force-recreate" in force_recreate["ansible.builtin.command"]["argv"]
-    assert "--no-deps" in force_recreate["ansible.builtin.command"]["argv"]
-    assert force_recreate["ansible.builtin.command"]["argv"][-1] == "keycloak"
-    assert force_recreate["until"] == "keycloak_up.rc == 0"
+    force_recreate_shell = force_recreate["ansible.builtin.shell"]
+    assert "docker network inspect" in force_recreate_shell
+    assert "{{ keycloak_mail_platform_docker_network_name }}" in force_recreate_shell
+    assert "docker compose --file \"{{ keycloak_compose_file }}\" up -d --force-recreate --no-deps keycloak" in force_recreate_shell
+    assert "com.docker.compose.project=keycloak" in force_recreate_shell
+    assert "com.docker.compose.service=keycloak" in force_recreate_shell
+    assert "docker rm -f $stale_ids || true" in force_recreate_shell
+    assert force_recreate["args"]["executable"] == "/bin/bash"
     force_recreate_expression = force_recreate_fact["ansible.builtin.set_fact"]["keycloak_force_recreate"]
     assert "keycloak_docker_nat_chain.rc != 0" in force_recreate_expression
     assert "keycloak_local_http_port_probe.failed" in force_recreate_expression
@@ -331,6 +335,7 @@ def test_realm_reconciliation_retries_repo_managed_keycloak_modules() -> None:
     ]
     retry_tasks = [next(task for task in realm_block["block"] if task.get("name") == name) for name in retry_task_names]
     for task in retry_tasks:
+        assert "register" in task
         assert task["retries"] == "{{ keycloak_admin_reconciliation_retries }}"
         assert task["delay"] == "{{ keycloak_admin_reconciliation_delay }}"
         assert task["until"] == f"{task['register']} is succeeded"

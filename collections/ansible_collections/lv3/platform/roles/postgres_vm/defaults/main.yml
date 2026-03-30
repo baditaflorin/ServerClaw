@@ -7,6 +7,9 @@ postgres_vm_port: 5432
 postgres_vm_postgresql_service_name: postgresql
 postgres_vm_nftables_config_file: /etc/nftables.conf
 postgres_vm_admin_role: "{{ proxmox_guest_ci_user }}"
+postgres_vm_max_connections: 110
+postgres_vm_superuser_reserved_connections: 3
+postgres_vm_reserved_connections: 5
 postgres_vm_listen_addresses:
   - 127.0.0.1
   - "{{ ansible_host }}"

@@ -9,6 +9,9 @@ services:
     ports:
       - "{{ openbao_tls_bind_address }}:{{ openbao_tls_port }}:{{ openbao_tls_port }}"
       - "{{ openbao_http_bind_address }}:{{ openbao_http_port }}:{{ openbao_http_port }}"
+{% for bind_address in openbao_http_extra_bind_addresses %}
+      - "{{ bind_address }}:{{ openbao_http_port }}:{{ openbao_http_port }}"
+{% endfor %}
     volumes:
       - {{ openbao_config_dir }}:/openbao/config
       - {{ openbao_data_dir }}:/openbao/data

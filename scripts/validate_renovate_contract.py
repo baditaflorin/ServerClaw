@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+import yaml
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+RENOVATE_CONFIG_PATH = REPO_ROOT / "renovate.json"
+RENOVATE_WORKFLOW_PATH = REPO_ROOT / ".gitea" / "workflows" / "renovate.yml"
+
+
+def require(condition: bool, message: str) -> None:
+    if not condition:
+        raise ValueError(message)
+
+
+def load_json(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def validate_renovate_config() -> None:
+    config = load_json(RENOVATE_CONFIG_PATH)
+    require(
+        config.get("$schema") == "https://docs.renovatebot.com/renovate-schema.json",
+        "renovate.json must declare the canonical Renovate schema",
+    )
+    require(config.get("platform") == "gitea", "renovate.json must target the gitea platform")
+    require(config.get("dependencyDashboard") is True, "renovate.json must enable the dependency dashboard")
+    require(config.get("automerge") is False, "renovate.json must disable automerge")
+    require(config.get("platformAutomerge") is False, "renovate.json must disable platform automerge")
+    labels = config.get("labels", [])
+    require("dependencies" in labels and "renovate" in labels, "renovate.json must label Renovate PRs clearly")
+
+    custom_managers = config.get("customManagers", [])
+    require(
+        any("image-catalog" in "".join(manager.get("managerFilePatterns", [])) for manager in custom_managers),
+        "renovate.json must manage config/image-catalog.json image refs",
+    )
+    require(
+        any("roles" in "".join(manager.get("managerFilePatterns", [])) and "defaults" in "".join(manager.get("managerFilePatterns", [])) for manager in custom_managers),
+        "renovate.json must manage Ansible role default image refs",
+    )
+    require(
+        any("versions" in "".join(manager.get("managerFilePatterns", [])) and "stack" in "".join(manager.get("managerFilePatterns", [])) for manager in custom_managers),
+        "renovate.json must manage at least one versions/stack.yaml service version",
+    )
+
+
+def validate_workflow() -> None:
+    workflow = yaml.safe_load(RENOVATE_WORKFLOW_PATH.read_text(encoding="utf-8"))
+    workflow_text = RENOVATE_WORKFLOW_PATH.read_text(encoding="utf-8")
+
+    require(workflow.get("name") == "renovate", ".gitea/workflows/renovate.yml must be named renovate")
+    trigger = workflow.get("on") or workflow.get(True) or {}
+    require("schedule" in trigger and "workflow_dispatch" in trigger, "Renovate workflow must support schedule and manual dispatch")
+
+    job = workflow["jobs"]["renovate"]
+    require(job.get("runs-on") == "self-hosted", "Renovate workflow must target the self-hosted runner")
+    require("registry.lv3.org/check-runner/renovate:" in workflow_text, "Renovate workflow must pull the Renovate image through Harbor")
+    require("@sha256:" in workflow_text, "Renovate workflow must pin the Renovate image to a digest")
+    require("ghcr.io/renovatebot/renovate" not in workflow_text, "Renovate workflow must not pull the runtime image directly from GHCR")
+    require("scripts/renovate_runtime_token.py create" in workflow_text, "Renovate workflow must mint a short-lived runtime token")
+    require("scripts/renovate_runtime_token.py cleanup" in workflow_text, "Renovate workflow must revoke the short-lived runtime token")
+    require("RENOVATE_BOOTSTRAP_ENV" in workflow_text, "Renovate workflow must source the mounted OpenBao-rendered credential bundle")
+    require("GITEA_RUNNER_HOST_DATA_DIR" in workflow_text, "Renovate workflow must translate runner-local workspace paths to host Docker paths")
+
+
+def main() -> int:
+    validate_renovate_config()
+    validate_workflow()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

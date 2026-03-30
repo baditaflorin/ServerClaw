@@ -41,6 +41,11 @@ gitea_admin_password_remote_file: "{{ gitea_secret_dir }}/admin-password"
 gitea_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-password.txt
 gitea_admin_token_remote_file: "{{ gitea_secret_dir }}/admin-token"
 gitea_admin_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-token.txt
+gitea_renovate_username: renovate-bot
+gitea_renovate_email: renovate-bot@lv3.internal
+gitea_renovate_password_remote_file: "{{ gitea_secret_dir }}/renovate-password"
+gitea_renovate_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/renovate-password.txt
+gitea_renovate_repo_permission: write
 gitea_runner_registration_token_remote_file: "{{ gitea_secret_dir }}/runner-registration-token"
 gitea_runner_registration_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/runner-registration-token.txt
 gitea_webhook_secret_remote_file: "{{ gitea_secret_dir }}/webhook-secret"

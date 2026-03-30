@@ -10,10 +10,14 @@ services:
       GITEA_RUNNER_REGISTRATION_TOKEN: {{ gitea_runner_registration_token }}
       GITEA_RUNNER_NAME: {{ gitea_runner_name }}
       GITEA_RUNNER_LABELS: {{ gitea_runner_labels }}
+      GITEA_RUNNER_HOST_DATA_DIR: {{ gitea_runner_data_dir }}
     volumes:
       - {{ gitea_runner_config_file }}:/config.yaml
       - {{ gitea_runner_data_dir }}:/data
       - /var/run/docker.sock:/var/run/docker.sock
+{% if gitea_runner_renovate_enabled %}
+      - {{ gitea_runner_renovate_credential_dir }}:{{ gitea_runner_renovate_credential_dir_in_container }}:ro
+{% endif %}
     networks:
       - default
 

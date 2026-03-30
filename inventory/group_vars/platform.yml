@@ -4101,6 +4101,8 @@ uptime_kuma_service_topology:
 hetzner_dns_records: *id001
 platform_postgres_host: database.lv3.org
 openbao_postgres_host: 10.10.10.50
+openbao_http_extra_bind_addresses:
+  - 10.10.10.20
 openbao_controller_url: https://100.64.0.1:8200
 openfga_http_port: 8098
 openfga_host_proxy_port: 8014

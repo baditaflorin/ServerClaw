@@ -6,6 +6,10 @@
       - postgres_vm_postgresql_service_name | length > 0
       - postgres_vm_listen_addresses | length > 0
       - postgres_vm_admin_role is match('^[a-z_][a-z0-9_]*$')
+      - postgres_vm_max_connections | int > 0
+      - postgres_vm_superuser_reserved_connections | int >= 0
+      - postgres_vm_reserved_connections | int >= 0
+      - (postgres_vm_superuser_reserved_connections | int) + (postgres_vm_reserved_connections | int) < (postgres_vm_max_connections | int)
     fail_msg: "postgres_vm requires PostgreSQL package and listener inputs, and postgres_vm_admin_role must be a safe identifier."
 
 - name: Install PostgreSQL guest packages

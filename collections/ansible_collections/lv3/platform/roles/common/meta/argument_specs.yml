@@ -298,3 +298,9 @@ argument_specs:
         default: ""
         description:
           - Optional explicit OpenBao API address; defaults to the local loopback listener on `openbao_http_port`.
+      common_openbao_systemd_credentials_manage_local_openbao_runtime:
+        type: bool
+        required: false
+        default: true
+        description:
+          - Whether the helper may restart and recover a local OpenBao runtime when the configured API address is unavailable.

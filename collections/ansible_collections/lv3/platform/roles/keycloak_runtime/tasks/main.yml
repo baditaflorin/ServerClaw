@@ -422,28 +422,37 @@
   when: keycloak_force_recreate
 
 - name: Force-recreate the Keycloak service after Docker networking recovery
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ keycloak_compose_file }}"
-      - up
-      - -d
-      - --force-recreate
-      - --no-deps
-      - keycloak
+  ansible.builtin.shell: |
+    set -euo pipefail
+    for attempt in $(seq 1 3); do
+      if [ "{{ keycloak_mail_platform_docker_network_name | length }}" -gt 0 ] \
+        && ! docker network inspect "{{ keycloak_mail_platform_docker_network_name }}" >/dev/null 2>&1; then
+        sleep 5
+        continue
+      fi
+
+      if docker compose --file "{{ keycloak_compose_file }}" up -d --force-recreate --no-deps keycloak; then
+        exit 0
+      fi
+
+      stale_ids="$(docker ps -aq \
+        --filter label=com.docker.compose.project=keycloak \
+        --filter label=com.docker.compose.service=keycloak)"
+      if [ -n "$stale_ids" ]; then
+        docker rm -f $stale_ids || true
+      fi
+      sleep 5
+    done
+    exit 1
   args:
     chdir: "{{ keycloak_site_dir }}"
+    executable: /bin/bash
   register: keycloak_up
   changed_when: >-
     'Creating' in keycloak_up.stdout
     or 'Recreating' in keycloak_up.stdout
     or 'Starting' in keycloak_up.stdout
   failed_when: false
-  retries: 3
-  delay: 5
-  until: keycloak_up.rc == 0
   when: keycloak_force_recreate
 
 - name: Assert the Keycloak force-recreate succeeded
@@ -660,6 +669,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_realm_group_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_realm_group_reconcile is succeeded
       loop: "{{ keycloak_realm_groups }}"
       loop_control:
         label: "{{ item.name }}"
@@ -682,6 +695,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_realm_role_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_realm_role_reconcile is succeeded
       loop: "{{ keycloak_realm_roles }}"
       loop_control:
         label: "{{ item.name }}"
@@ -702,6 +719,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_group_realm_rolemapping_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_group_realm_rolemapping_reconcile is succeeded
       loop: "{{ keycloak_group_realm_role_mappings }}"
       loop_control:
         label: "{{ item.group_name }}"
@@ -1179,6 +1200,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_service_account_realm_rolemapping_reconcile
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_service_account_realm_rolemapping_reconcile is succeeded
       loop: "{{ keycloak_service_account_realm_role_mappings }}"
       loop_control:
         label: "{{ item.service_account_user_client_id }}"

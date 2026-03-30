@@ -28,7 +28,7 @@ make syntax-check-openbao
 
 1. Reuses the shared ADR 0067 guest network policy that allows `docker-runtime-lv3` to reach `postgres-lv3`, while this workflow manages PostgreSQL authentication through `pg_hba.conf`.
 2. Creates the `openbao_rotator` PostgreSQL role with the minimum privileges needed to issue dynamic read-only credentials.
-3. Starts a Compose-managed OpenBao container under `/opt/openbao` with integrated Raft storage, a loopback-published HTTP listener on `127.0.0.1:8201`, and a managed step-ca-backed TLS listener on `:8200`.
+3. Starts a Compose-managed OpenBao container under `/opt/openbao` with integrated Raft storage, a loopback-published HTTP listener on `127.0.0.1:8201`, an optional guest-IP-published private HTTP listener for bounded automation consumers such as `docker-build-lv3`, and a managed step-ca-backed TLS listener on `:8200`.
 4. Initializes and unseals OpenBao once, then mirrors the bootstrap init payload to `.local/openbao/init.json` on the controller.
 5. Enables `kv`, `transit`, `database`, `userpass`, and `approle` paths.
 6. Creates named human and machine identities:
@@ -114,6 +114,10 @@ curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local
 ## Notes
 
 - The loopback HTTP API on `127.0.0.1:8201` remains the managed automation and operator path for bootstrap, verification, and recovery-safe forwarding.
+- ADR 0297 also allows the same HTTP listener to be published on the runtime
+  guest IP when a bounded caller such as `docker-build-lv3` needs direct access.
+  Keep that publication private and rely on the guest firewall to scope it to
+  the declared automation source only.
 - The external OpenBao API on `https://100.118.189.95:8200` is private-only, published through the Proxmox host Tailscale path, and requires a valid client certificate signed by `step-ca`.
 - The current implementation seeds existing mail, monitoring, Proxmox API, Windmill, and mail-profile artifacts into OpenBao so later consumers can fetch them without reintroducing git-managed secrets.
 - Dedicated rotatable secret paths and their metadata now align with `config/secret-catalog.json`, so future scheduled evaluators can inspect bounded credential age directly in OpenBao.

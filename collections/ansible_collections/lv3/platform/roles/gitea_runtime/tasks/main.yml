@@ -26,6 +26,11 @@
       - gitea_admin_password_local_file | length > 0
       - gitea_admin_token_remote_file | length > 0
       - gitea_admin_token_local_file | length > 0
+      - gitea_renovate_username | length > 0
+      - gitea_renovate_email | length > 0
+      - gitea_renovate_password_remote_file | length > 0
+      - gitea_renovate_password_local_file | length > 0
+      - gitea_renovate_repo_permission | length > 0
       - gitea_runner_registration_token_remote_file | length > 0
       - gitea_runner_registration_token_local_file | length > 0
       - gitea_webhook_secret_remote_file | length > 0
@@ -169,10 +174,30 @@
   changed_when: "'changed' in gitea_webhook_secret_generation.stdout"
   no_log: true
 
+- name: Generate the Gitea Renovate bot password when missing
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ gitea_renovate_password_remote_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 > "{{ gitea_renovate_password_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: gitea_renovate_password_generation
+  changed_when: "'changed' in gitea_renovate_password_generation.stdout"
+  no_log: true
+
 - name: Read the Gitea admin password
   ansible.builtin.slurp:
     src: "{{ gitea_admin_password_remote_file }}"
   register: gitea_admin_password_raw
+  no_log: true
+
+- name: Read the Gitea Renovate bot password
+  ansible.builtin.slurp:
+    src: "{{ gitea_renovate_password_remote_file }}"
+  register: gitea_renovate_password_raw
   no_log: true
 
 - name: Read the Gitea webhook secret
@@ -186,6 +211,7 @@
     gitea_admin_password: "{{ gitea_admin_password_raw.content | b64decode | trim }}"
     gitea_database_password: "{{ lookup('ansible.builtin.file', gitea_database_password_local_file) | trim }}"
     gitea_oidc_client_secret: "{{ lookup('ansible.builtin.file', gitea_oidc_client_secret_local_file) | trim }}"
+    gitea_renovate_password: "{{ gitea_renovate_password_raw.content | b64decode | trim }}"
     gitea_release_bundle_cosign_private_key: "{{ lookup('ansible.builtin.file', gitea_release_bundle_cosign_private_key_local_file) }}"
     gitea_release_bundle_cosign_password: "{{ lookup('ansible.builtin.file', gitea_release_bundle_cosign_password_local_file) | trim }}"
     gitea_webhook_secret: "{{ gitea_webhook_secret_raw.content | b64decode | trim }}"
@@ -221,6 +247,15 @@
   ansible.builtin.copy:
     dest: "{{ gitea_webhook_secret_local_file }}"
     content: "{{ gitea_webhook_secret }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror the Gitea Renovate bot password to the control machine
+  ansible.builtin.copy:
+    dest: "{{ gitea_renovate_password_local_file }}"
+    content: "{{ gitea_renovate_password }}\n"
     mode: "0600"
   delegate_to: localhost
   become: false
@@ -356,6 +391,7 @@
     GITEA_ADMIN_PASSWORD: "{{ gitea_admin_password }}"
     GITEA_DATABASE_PASSWORD: "{{ gitea_database_password }}"
     GITEA_KEYCLOAK_CLIENT_SECRET: "{{ gitea_oidc_client_secret }}"
+    GITEA_RENOVATE_PASSWORD: "{{ gitea_renovate_password }}"
     GITEA_RELEASE_BUNDLE_COSIGN_PRIVATE_KEY: "{{ gitea_release_bundle_cosign_private_key }}"
     GITEA_RELEASE_BUNDLE_COSIGN_PASSWORD: "{{ gitea_release_bundle_cosign_password }}"
   register: gitea_bootstrap

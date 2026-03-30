@@ -1,0 +1,66 @@
+name: renovate
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * *"
+
+jobs:
+  renovate:
+    runs-on: self-hosted
+    timeout-minutes: 30
+    env:
+      RENOVATE_IMAGE: registry.lv3.org/check-runner/renovate:42.76.4@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
+      RENOVATE_BOOTSTRAP_ENV: /var/run/lv3/renovate/renovate.env
+      RENOVATE_RUNTIME_ENV: .tmp/renovate.runtime.env
+      RENOVATE_RUNTIME_STATE: .tmp/renovate.runtime.json
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare Renovate runtime files
+        run: mkdir -p .tmp
+
+      - name: Mint a short-lived Renovate token
+        run: |
+          set -euo pipefail
+          test -s "${RENOVATE_BOOTSTRAP_ENV}"
+          set -a
+          . "${RENOVATE_BOOTSTRAP_ENV}"
+          set +a
+          python3 scripts/renovate_runtime_token.py create \
+            --state-file "${RENOVATE_RUNTIME_STATE}" \
+            --env-file "${RENOVATE_RUNTIME_ENV}"
+
+      - name: Run Renovate through the pinned Harbor image
+        run: |
+          set -euo pipefail
+          workspace_host_path="${PWD/#\/data/${GITEA_RUNNER_HOST_DATA_DIR}}"
+          test -d "${workspace_host_path}"
+          set -a
+          . "${RENOVATE_RUNTIME_ENV}"
+          set +a
+          docker pull "${RENOVATE_IMAGE}"
+          docker run --rm \
+            --network host \
+            -e LOG_LEVEL \
+            -e RENOVATE_PLATFORM \
+            -e RENOVATE_ENDPOINT \
+            -e RENOVATE_REPOSITORIES \
+            -e RENOVATE_TOKEN \
+            -v "${workspace_host_path}:/workspace" \
+            -w /workspace \
+            "${RENOVATE_IMAGE}" \
+            renovate
+
+      - name: Revoke the short-lived Renovate token
+        if: always()
+        run: |
+          set -euo pipefail
+          if [ -s "${RENOVATE_BOOTSTRAP_ENV}" ]; then
+            set -a
+            . "${RENOVATE_BOOTSTRAP_ENV}"
+            set +a
+          fi
+          python3 scripts/renovate_runtime_token.py cleanup \
+            --state-file "${RENOVATE_RUNTIME_STATE}"

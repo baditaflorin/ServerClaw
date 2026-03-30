@@ -107,6 +107,11 @@ def test_build_platform_vars_includes_temporal_private_loopback_topology() -> No
     assert temporal["access"]["url"] == "grpc://127.0.0.1:7233"
     assert "urls" not in temporal or temporal["urls"] == {}
 
+def test_build_platform_vars_includes_openbao_extra_bind_addresses() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+
+    assert platform_vars["openbao_http_extra_bind_addresses"] == ["10.10.10.20"]
+
 
 def test_build_platform_vars_includes_plausible_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()

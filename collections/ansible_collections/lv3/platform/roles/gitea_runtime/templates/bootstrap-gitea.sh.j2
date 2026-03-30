@@ -17,6 +17,10 @@ db_uri="postgresql://{{ gitea_database_user }}:${GITEA_DATABASE_PASSWORD}@{{ git
 admin_password="${GITEA_ADMIN_PASSWORD}"
 oidc_client_secret="${GITEA_KEYCLOAK_CLIENT_SECRET}"
 token_file="{{ gitea_admin_token_remote_file }}"
+renovate_user="{{ gitea_renovate_username }}"
+renovate_email="{{ gitea_renovate_email }}"
+renovate_password="${GITEA_RENOVATE_PASSWORD}"
+renovate_repo_permission="{{ gitea_renovate_repo_permission }}"
 runner_token_file="{{ gitea_runner_registration_token_remote_file }}"
 hook_template="{{ gitea_prereceive_hook_template }}"
 release_bundle_private_key_secret_name="{{ gitea_release_bundle_cosign_private_key_secret_name }}"
@@ -72,6 +76,17 @@ create_admin_output="$(docker exec "${container}" gitea admin user create \
   --must-change-password=false 2>&1 || true)"
 if ! grep -qi "already exists" <<<"${create_admin_output}"; then
   if [[ -n "${create_admin_output}" ]]; then
+    changed=true
+  fi
+fi
+
+create_renovate_output="$(docker exec "${container}" gitea admin user create \
+  --username "${renovate_user}" \
+  --password "${renovate_password}" \
+  --email "${renovate_email}" \
+  --must-change-password=false 2>&1 || true)"
+if ! grep -qi "already exists" <<<"${create_renovate_output}"; then
+  if [[ -n "${create_renovate_output}" ]]; then
     changed=true
   fi
 fi
@@ -152,6 +167,20 @@ if [[ "${repo_status}" == "404" ]]; then
   changed=true
 fi
 rm -f /tmp/gitea-repo.json
+
+renovate_collaborator_status="$(curl -sS -o /tmp/gitea-renovate-collaborator.json -w '%{http_code}' \
+  -H "Authorization: token ${token}" \
+  "${api_url}/api/v1/repos/${repo_org}/${repo_name}/collaborators/${renovate_user}")"
+curl -sS \
+  -X PUT \
+  -H "Authorization: token ${token}" \
+  -H 'Content-Type: application/json' \
+  -d "{\"permission\":\"${renovate_repo_permission}\"}" \
+  "${api_url}/api/v1/repos/${repo_org}/${repo_name}/collaborators/${renovate_user}" >/dev/null
+if [[ "${renovate_collaborator_status}" == "404" ]]; then
+  changed=true
+fi
+rm -f /tmp/gitea-renovate-collaborator.json
 
 repo_hook_dir="{{ gitea_data_dir }}/git/repositories/${repo_org}/${repo_name}.git/custom_hooks"
 mkdir -p "${repo_hook_dir}"

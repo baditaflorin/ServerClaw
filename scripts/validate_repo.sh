@@ -516,6 +516,8 @@ validate_architecture_fitness() {
   echo "Architecture fitness validation"
   resolve_python_bin
   "$PYTHON_BIN" "$REPO_ROOT/scripts/replaceability_scorecards.py" --validate >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_renovate_contract.py" >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/renovate_stack_digest_guard.py" --base-ref origin/main >/dev/null
 }
 
 validate_workstream_surfaces() {

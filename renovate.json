@@ -1,0 +1,92 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "platform": "gitea",
+  "extends": [
+    "config:recommended"
+  ],
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "Renovate Dashboard",
+  "automerge": false,
+  "platformAutomerge": false,
+  "baseBranches": [
+    "main"
+  ],
+  "labels": [
+    "dependencies",
+    "renovate"
+  ],
+  "prConcurrentLimit": 10,
+  "prHourlyLimit": 2,
+  "rebaseWhen": "behind-base-branch",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^config\\/image-catalog\\.json$/"
+      ],
+      "matchStrings": [
+        "\"ref\"\\s*:\\s*\"(?<depName>[^:@\\\"]+(?:\\/[^:@\\\"]+)+):(?<currentValue>[^@\\\"]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?\""
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^collections\\/ansible_collections\\/lv3\\/platform\\/roles\\/[^/]+\\/defaults\\/main\\.yml$/"
+      ],
+      "matchStrings": [
+        "(?m)^[A-Za-z0-9_]+_image:\\s+(?<depName>[^:@\\s]+(?:\\/[^:@\\s]+)+):(?<currentValue>[^@\\s]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?$"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^\\.gitea\\/workflows\\/renovate\\.yml$/"
+      ],
+      "matchStrings": [
+        "RENOVATE_IMAGE:\\s+(?<depName>registry\\.lv3\\.org\\/check-runner\\/renovate):(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^versions\\/stack\\.yaml$/"
+      ],
+      "matchStrings": [
+        "(?ms)^  ollama:.*?^    api_version: (?<currentValue>[^\\s]+)$"
+      ],
+      "depNameTemplate": "docker.io/ollama/ollama",
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^\\.gitea\\/workflows\\/release-bundle\\.yml$/"
+      ],
+      "matchStrings": [
+        "export COSIGN_VERSION=\"(?<currentValue>v[^\"]+)\""
+      ],
+      "depNameTemplate": "sigstore/cosign",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchDatasources": [
+        "docker"
+      ],
+      "pinDigests": true
+    },
+    {
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "addLabels": [
+        "breaking-change"
+      ]
+    }
+  ]
+}

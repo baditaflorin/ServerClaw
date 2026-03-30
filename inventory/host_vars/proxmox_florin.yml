@@ -102,6 +102,8 @@ platform_port_assignments:
   tesseract_ocr_port: 3008
   headscale_http_port: 8080
   vaultwarden_https_port: 8222
+openbao_http_extra_bind_addresses:
+  - "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
 proxmox_tailscale_hostname: proxmox-florin-subnet-router
 proxmox_tailscale_login_server: https://headscale.lv3.org
 proxmox_tailscale_tags: []
@@ -648,6 +650,11 @@ network_policy:
           ports:
             - 3003
           description: Gitea Actions runner access from docker-build-lv3
+        - source: docker-build-lv3
+          protocol: tcp
+          ports:
+            - 8201
+          description: OpenBao automation access from docker-build-lv3
         - source: nginx-lv3
           protocol: tcp
           ports:

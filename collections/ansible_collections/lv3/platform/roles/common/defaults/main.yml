@@ -56,3 +56,4 @@ common_openbao_systemd_credentials_container_entrypoint: /bin/vault
 common_openbao_systemd_credentials_agent_service_name: ""
 common_openbao_systemd_credentials_container_name: ""
 common_openbao_systemd_credentials_openbao_address: ""
+common_openbao_systemd_credentials_manage_local_openbao_runtime: true

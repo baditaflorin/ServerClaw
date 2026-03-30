@@ -47,6 +47,10 @@ def test_gitea_bootstrap_script_creates_admin_token_and_runner_token() -> None:
     assert "RELEASE_BUNDLE_COSIGN_PRIVATE_KEY" in template
     assert "RELEASE_BUNDLE_REPO_TOKEN" in template
     assert "/actions/secrets/" in template
+    assert 'renovate_user="{{ gitea_renovate_username }}"' in template
+    assert 'GITEA_RENOVATE_PASSWORD' in template
+    assert '/collaborators/${renovate_user}' in template
+    assert '\\"permission\\":\\"${renovate_repo_permission}\\"' in template
 
 
 def test_runner_defaults_use_mirrored_registration_token() -> None:
@@ -54,12 +58,17 @@ def test_runner_defaults_use_mirrored_registration_token() -> None:
     assert "gitea_runner_compose_bin: docker" in defaults
     assert ".local/gitea/runner-registration-token.txt" in defaults
     assert "docker-build-lv3" in defaults
+    assert "service_topology_get('openbao')" in defaults
+    assert ".local/gitea/renovate-password.txt" in defaults
+    assert "services/gitea-runner/renovate-runtime" in defaults
 
 
 def test_runner_compose_uses_registration_token_env() -> None:
     template = RUNNER_COMPOSE_TEMPLATE.read_text()
     assert "GITEA_RUNNER_REGISTRATION_TOKEN" in template
+    assert "GITEA_RUNNER_HOST_DATA_DIR" in template
     assert "/var/run/docker.sock:/var/run/docker.sock" in template
+    assert "gitea_runner_renovate_credential_dir_in_container" in template
     assert "subnet: {{ gitea_runner_network_subnet }}" in template
 
 
@@ -81,8 +90,19 @@ def test_runtime_tasks_require_oidc_secret_and_database_password() -> None:
     assert "Ensure the Gitea OIDC client secret exists on the control machine" in names
     assert "Ensure the release-bundle Cosign private key exists on the control machine" in names
     assert "Ensure the release-bundle Cosign password exists on the control machine" in names
+    assert "Generate the Gitea Renovate bot password when missing" in names
+    assert "Mirror the Gitea Renovate bot password to the control machine" in names
     assert "Mirror the Gitea admin token to the control machine" in names
     assert "Mirror the Gitea runner registration token to the control machine" in names
+
+
+def test_runner_tasks_render_the_openbao_backed_renovate_bundle() -> None:
+    runner_tasks = yaml.safe_load((ROLE_ROOT / "gitea_runner" / "tasks" / "main.yml").read_text())
+    names = {task["name"] for task in runner_tasks}
+
+    assert "Ensure the Gitea Renovate bot password exists on the control machine" in names
+    assert "Prepare the Renovate credential bundle for the Gitea runner" in names
+    assert "Confirm the Renovate credential bundle rendered successfully" in names
 
 
 def test_gitea_waits_on_the_published_service_address() -> None:
@@ -97,3 +117,5 @@ def test_gitea_defaults_include_release_bundle_signing_paths() -> None:
     assert ".local/gitea/release-bundle-cosign.password.txt" in defaults
     assert "keys/gitea-release-bundle-cosign.pub" in defaults
     assert "RELEASE_BUNDLE_REPO_TOKEN" in defaults
+    assert "gitea_renovate_username: renovate-bot" in defaults
+    assert ".local/gitea/renovate-password.txt" in defaults

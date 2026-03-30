@@ -67,6 +67,7 @@ def test_openbao_runtime_defaults_use_postgres_primary_address() -> None:
     assert 'CREATE ROLE "{{ name }}" WITH LOGIN PASSWORD \'{{ password }}\' VALID UNTIL \'{{ expiration }}\';' in defaults
     assert 'GRANT pg_read_all_data TO "{{ name }}";' in defaults
     assert 'DROP ROLE IF EXISTS "{{ name }}";' in defaults
+    assert "openbao_http_extra_bind_addresses: []" in defaults
 
 
 def test_generated_platform_vars_pin_openbao_to_postgres_primary_ip() -> None:
@@ -253,6 +254,23 @@ def test_openbao_runtime_retries_other_read_side_api_checks_after_restart() -> N
     assert "until: openbao_mail_platform_runtime_current.status in [200, 404]" in tasks
     assert "- name: Read current dedicated rotatable secrets from OpenBao" in tasks
     assert "until: openbao_rotatable_secret_current.status in [200, 404]" in tasks
+
+
+def test_openbao_compose_template_supports_private_extra_http_bindings() -> None:
+    template = (
+        REPO_ROOT
+        / "collections"
+        / "ansible_collections"
+        / "lv3"
+        / "platform"
+        / "roles"
+        / "openbao_runtime"
+        / "templates"
+        / "docker-compose.yml.j2"
+    ).read_text(encoding="utf-8")
+
+    assert "{{ openbao_http_bind_address }}:{{ openbao_http_port }}:{{ openbao_http_port }}" in template
+    assert "{% for bind_address in openbao_http_extra_bind_addresses %}" in template
 
 
 def test_openbao_playbook_refreshes_secret_ids_from_local_artifacts() -> None:

@@ -19,6 +19,7 @@ openbao_default_network_name: "{{ openbao_site_dir | basename }}_default"
 openbao_config_file: "{{ openbao_config_dir }}/openbao.hcl"
 openbao_tls_enabled: true
 openbao_http_bind_address: 127.0.0.1
+openbao_http_extra_bind_addresses: []
 openbao_http_port: "{{ platform_ports.openbao_http_port }}"
 openbao_tls_bind_address: 0.0.0.0
 openbao_tls_port: "{{ platform_ports.openbao_proxy_port }}"
