@@ -8,7 +8,7 @@
 - Owner: codex
 - Depends On: `adr-0068`, `adr-0077`, `adr-0083`, `adr-0087`, `adr-0119`, `adr-0143`, `adr-0229`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0297`, `docs/workstreams/ws-0297-live-apply.md`, `docs/runbooks/configure-gitea.md`, `docs/runbooks/configure-openbao.md`, `docs/runbooks/configure-renovate.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `.gitea/workflows/renovate.yml`, `.gitea/workflows/release-bundle.yml`, `renovate.json`, `scripts/validate_repo.sh`, `scripts/validate_renovate_contract.py`, `scripts/renovate_runtime_token.py`, `scripts/renovate_stack_digest_guard.py`, `platform/repo.py`, `README.md`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `collections/ansible_collections/lv3/platform/roles/common/`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runner/`, `tests/`, `receipts/live-applies/`, `workstreams.yaml`
+- Shared Surfaces: `docs/adr/0297`, `docs/workstreams/ws-0297-live-apply.md`, `docs/runbooks/configure-gitea.md`, `docs/runbooks/configure-openbao.md`, `docs/runbooks/configure-renovate.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `.gitea/workflows/renovate.yml`, `.gitea/workflows/release-bundle.yml`, `.gitea/workflows/validate.yml`, `renovate.json`, `scripts/validate_repo.sh`, `scripts/validate_renovate_contract.py`, `scripts/renovate_runtime_token.py`, `scripts/renovate_stack_digest_guard.py`, `platform/repo.py`, `README.md`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `collections/ansible_collections/lv3/platform/roles/common/`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runner/`, `tests/`, `receipts/live-applies/`, `workstreams.yaml`
 
 ## Scope
 
@@ -36,6 +36,7 @@
 - `inventory/group_vars/platform.yml`
 - `.gitea/workflows/renovate.yml`
 - `.gitea/workflows/release-bundle.yml`
+- `.gitea/workflows/validate.yml`
 - `renovate.json`
 - `scripts/validate_repo.sh`
 - `scripts/validate_renovate_contract.py`
@@ -60,6 +61,7 @@
 - `tests/`
 - `tests/test_docker_runtime_role.py`
 - `tests/test_generate_platform_vars.py`
+- `tests/test_gitea_workflows.py`
 - `tests/test_keycloak_runtime_role.py`
 - `tests/test_mail_platform_runtime_role.py`
 - `tests/test_openbao_compose_env_helper.py`
@@ -82,11 +84,12 @@
 - the live replay uncovered and repaired shared dependency drift outside the narrow ADR 0297 surface: Docker worktree path handling, PostgreSQL reserved connection budgeting, Keycloak realm-object retries, mail-platform stale-network recovery, and OpenBao credential helper recovery now match the settled live estate on this branch
 - branch-local evidence already proves the runner host renders `/opt/gitea-runner/credentials/renovate/renovate.env`, the runner container sees `/var/run/lv3/renovate/renovate.env`, and the Gitea admin API returns an active `renovate-bot` identity
 - the synchronized validation rerun also refreshed shared generated surfaces and one repo-local typing affordance that now belong to this documented branch boundary: the README document index picked up the Renovate runbook and workstream entries, the platform manifest and agent-coordination map refreshed to current truth, and `platform/repo.py` now carries the explicit untyped `yaml` import annotation required by the latest mainline type-check lane
-- the remaining end-to-end proof is on the repository boundary, not the runtime plumbing: the private Gitea repo `ops/proxmox_florin_server` is a separate internal snapshot on commit `9f988bf58f6f02c4add3c6292c65fbed929edac9`, so the branch still needs a governed private Gitea push plus a Renovate workflow dispatch before the workflow itself can be recorded as verified
+- the first governed private Gitea push and manual Renovate dispatch both reached the live internal repo, but the resulting `validate.yml` and `renovate.yml` runs failed immediately on `docker-build-lv3` because the default job runtime lacked `node` for `actions/checkout` and lacked `python3` in the same execution surface; the branch now carries the workflow-side fix by pinning those jobs to the Python runner image, replacing `actions/checkout` with a token-authenticated `git fetch`, and bootstrapping the Docker CLI only for Renovate
+- the remaining end-to-end proof is now the second repository-boundary replay on that workflow baseline fix: re-push the updated branch into the private Gitea repo, verify the push-triggered `validate.yml` run succeeds on the live runner, and re-dispatch the Renovate workflow until the short-lived token path succeeds end to end
 
 ## Pending Verification
 
 - refresh this worktree onto the latest `origin/main`, rerun the repo validation contract from the settled branch state, and preserve the outputs in branch-local receipts
-- publish the integrated source commit into the private Gitea repo so `.gitea/workflows/renovate.yml` exists in the live internal snapshot
-- dispatch the Renovate workflow against the pushed Gitea ref, verify the short-lived token mint / cleanup path and runner-backed Renovate container execution, and preserve the run plus dashboard or PR evidence in receipts
+- re-publish the updated source commit into the private Gitea repo so the workflow baseline fix for `validate.yml`, `renovate.yml`, and `release-bundle.yml` is present in the live internal snapshot
+- verify the push-triggered `validate.yml` run succeeds on `docker-build-lv3`, then re-dispatch the Renovate workflow against the pushed Gitea ref and preserve the successful run plus dashboard or PR evidence in receipts
 - update ADR 0297 metadata, the ADR index, and the workstream registry with the final implemented and live-applied facts once the branch-local and exact-main proofs are both complete
