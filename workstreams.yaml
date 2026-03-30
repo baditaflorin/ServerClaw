@@ -13809,7 +13809,9 @@ workstreams:
       - config/alertmanager/rules/gotenberg.yml
       - playbooks/gotenberg.yml
       - playbooks/services/gotenberg.yml
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/gotenberg_runtime/**
+      - tests/test_docker_runtime_role.py
       - tests/test_gotenberg_runtime_role.py
       - receipts/image-scans/2026-03-30-gotenberg-runtime.json
       - receipts/image-scans/2026-03-30-gotenberg-runtime.trivy.json
@@ -13863,7 +13865,9 @@ workstreams:
             - config/alertmanager/rules/gotenberg.yml
             - playbooks/gotenberg.yml
             - playbooks/services/gotenberg.yml
+            - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
             - collections/ansible_collections/lv3/platform/roles/gotenberg_runtime/**
+            - tests/test_docker_runtime_role.py
             - tests/test_gotenberg_runtime_role.py
             - receipts/image-scans/2026-03-30-gotenberg-runtime.json
             - receipts/image-scans/2026-03-30-gotenberg-runtime.trivy.json
@@ -13895,6 +13899,7 @@ workstreams:
             - docs/workstreams/ws-0278-main-integration.md
             - receipts/live-applies/2026-03-30-adr-0278-gotenberg-mainline-live-apply.json
             - receipts/live-applies/evidence/2026-03-30-ws-0278-mainline-*
+            - receipts/live-applies/evidence/2026-03-30-ws-0278-merged-main-*
           mode: exclusive
     ready_to_merge: false
     live_applied: true
