@@ -150,12 +150,13 @@
 - name: Patch nftables forward policy for Docker bridge egress
   ansible.builtin.lineinfile:
     path: "{{ docker_runtime_nftables_config_file }}"
-    line: "    {{ docker_runtime_container_forward_rule_block }}"
-    insertafter: '^\s*ct state established,related accept$'
+    line: "    ip saddr {{ item }} accept"
+    insertafter: '^\s*ct state (established,related|related,established) accept$'
+  loop: "{{ docker_runtime_container_forward_source_cidrs | reverse | list }}"
   when:
     - docker_runtime_container_forward_compat_enabled | bool
     - docker_runtime_nftables_config_stat.stat.exists
-    - docker_runtime_container_forward_rule_block | trim not in docker_runtime_nftables_config_current
+    - ("ip saddr " ~ item ~ " accept") not in docker_runtime_nftables_config_current
   register: docker_runtime_nftables_forward_patch
 
 - name: Read the nftables config after forward compatibility patch
@@ -169,10 +170,11 @@
 - name: Assert the Docker bridge forward-compat rule is present
   ansible.builtin.assert:
     that:
-      - docker_runtime_container_forward_rule_block | trim in (docker_runtime_nftables_config_after.content | b64decode)
+      - ("ip saddr " ~ item ~ " accept") in (docker_runtime_nftables_config_after.content | b64decode)
     fail_msg: >-
-      Existing nftables config did not accept the Docker bridge forward-compat patch; update
-      {{ docker_runtime_nftables_config_file }} before rerunning the Docker runtime converge.
+      Existing nftables config did not accept the Docker bridge forward-compat rule for {{ item }};
+      update {{ docker_runtime_nftables_config_file }} before rerunning the Docker runtime converge.
+  loop: "{{ docker_runtime_container_forward_source_cidrs }}"
   when:
     - docker_runtime_container_forward_compat_enabled | bool
     - docker_runtime_nftables_config_stat.stat.exists

@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-30'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 261
+  Implemented: 262
   Partial: 6
-  Not Implemented: 56
+  Not Implemented: 55
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4577,7 +4577,7 @@ adr_index:
   - adr: '0267'
     title: Expiring Gate Bypass Waivers With Structured Reason Codes
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -4590,6 +4590,7 @@ adr_index:
       - codes
     summary: We will treat every gate bypass as an expiring waiver with a structured
     filename: 0267-expiring-gate-bypass-waivers-with-structured-reason-codes.md
+    implemented_version: 0.177.105
   - adr: 0268
     title: Fresh-Worktree Bootstrap Manifests For Generated Artifacts And Local Inputs
     status: Accepted

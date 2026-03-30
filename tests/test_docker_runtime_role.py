@@ -95,14 +95,19 @@ def test_docker_runtime_patches_nftables_rule_block_once() -> None:
     tasks = load_tasks()
     build_rules = next(task for task in tasks if task["name"] == "Build the Docker bridge forward-compat rule block")
     patch_rules = next(task for task in tasks if task["name"] == "Patch nftables forward policy for Docker bridge egress")
+    assert_rules = next(task for task in tasks if task["name"] == "Assert the Docker bridge forward-compat rule is present")
     live_rules = next(
         task for task in tasks if task["name"] == "Apply Docker bridge forward-compat rules live without reloading nftables"
     )
 
     assert "docker_runtime_container_forward_rule_lines" in build_rules["ansible.builtin.set_fact"]
     assert "docker_runtime_container_forward_rule_block" in build_rules["ansible.builtin.set_fact"]
-    assert patch_rules["ansible.builtin.lineinfile"]["line"] == "    {{ docker_runtime_container_forward_rule_block }}"
-    assert "loop" not in patch_rules
+    assert patch_rules["ansible.builtin.lineinfile"]["line"] == "    ip saddr {{ item }} accept"
+    assert patch_rules["ansible.builtin.lineinfile"]["insertafter"] == (
+        r"^\s*ct state (established,related|related,established) accept$"
+    )
+    assert patch_rules["loop"] == "{{ docker_runtime_container_forward_source_cidrs | reverse | list }}"
+    assert assert_rules["loop"] == "{{ docker_runtime_container_forward_source_cidrs }}"
     assert live_rules["loop"] == "{{ docker_runtime_container_forward_source_cidrs }}"
     assert live_rules["ansible.builtin.command"]["argv"][:6] == ["nft", "add", "rule", "inet", "filter", "forward"]
 

@@ -16293,8 +16293,8 @@ workstreams:
     ready_to_merge: true
     live_applied: true
     canonical_truth:
-      changelog_entry: replays ADR 0267 from the exact 0.177.103 main tree, keeps governed validation-gate waivers live on the Windmill worker checkout, preserves the repo-root Docker publication helper repair plus apt-lock tolerance surfaced during latest-main verification, and advances platform_version to 0.130.70 after the refreshed exact-main replay succeeded end to end
+      changelog_entry: replays ADR 0267 from the exact 0.177.104 main tree, keeps governed validation-gate waivers live on the Windmill worker checkout, preserves the repo-root Docker publication helper repair plus apt-lock tolerance, and fixes the latest-main nftables forward-compat insertion regression before advancing platform_version to 0.130.70
       release_bump: patch
-      included_in_repo_version: 0.177.104
+      included_in_repo_version: 0.177.105
       latest_receipts:
         validation_gate: 2026-03-30-adr-0267-gate-bypass-waivers-mainline-live-apply
