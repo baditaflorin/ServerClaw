@@ -179,7 +179,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.92` |
+| Repository version | `0.177.93` |
 | Platform version | `0.130.60` |
 | Observed check date | `2026-03-29` |
 | Observed OS | `Debian 13` |
@@ -291,7 +291,6 @@ Template VM: `9000` `debian13-cloud-template`
 | `n8n` | `2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply` |
 | `netbox` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `network_impairment_matrix` | `2026-03-27-adr-0189-network-impairment-matrix-live-apply` |
-| `nextcloud` | `2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply` |
 | `nomad_scheduler` | `2026-03-29-adr-0232-nomad-mainline-live-apply` |
 | `notification_profiles` | `2026-03-22-adr-0050-notification-profiles-live-apply` |
 | `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
@@ -1370,7 +1369,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.92` |
+| Repository version | `0.177.93` |
 | Platform version | `0.130.60` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
