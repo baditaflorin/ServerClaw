@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.93",
+  "repo_version": "0.177.94",
   "platform_version": "0.130.62",
-  "generated_at": "2026-03-30T00:57:13Z",
-  "next_refresh_at": "2026-03-30T01:57:13Z",
+  "generated_at": "2026-03-30T01:41:02Z",
+  "next_refresh_at": "2026-03-30T02:41:02Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4637,10 +4637,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.92",
+    "last_version": "0.177.93",
     "deployed_at": "2026-03-30",
-    "summary": "implemented ADR 0260 by re-verifying repo-managed Nextcloud on docker-runtime-lv3 with a dedicated postgres backend, shared-edge DAV publication, and synchronized recovery for stale compose networks, Docker bridge chains, detached local OpenBao publication, and concurrent Docker interruptions during mutable OCC convergence on the latest realistic origin/main baseline",
-    "release_notes_url": "docs/release-notes/0.177.93.md"
+    "summary": "implemented ADR 0270 by adding a shared Docker publication assurance helper, catalog-declared host publication contracts, post-verify repair hooks, read-only observation checks, and live-apply recovery hardening for Harbor, Keycloak, OpenBao, Outline, and Langfuse when Docker publication drift surfaced during replay",
+    "release_notes_url": "docs/release-notes/0.177.94.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

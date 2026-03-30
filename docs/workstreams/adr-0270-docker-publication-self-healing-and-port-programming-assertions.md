@@ -3,7 +3,7 @@
 - ADR: [ADR 0270](../adr/0270-docker-publication-self-healing-and-port-programming-assertions.md)
 - Title: Add a shared Docker publication assurance helper, post-verify repair hook, and live apply for managed Docker guests
 - Status: live_applied
-- Implemented In Repo Version: 0.177.93
+- Implemented In Repo Version: 0.177.94
 - Live Applied In Platform Version: 0.130.62
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
@@ -112,15 +112,16 @@
   `nginx-lv3 : ok=39 changed=3 unreachable=0 failed=0 skipped=11 rescued=0 ignored=0`,
   captured in
   `receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-converge-harbor-r2.txt`.
-- The synchronized targeted regression slice returned `78 passed in 27.73s` for
-  the Harbor, Keycloak, OpenBao, Docker publication, Docker runtime,
-  observation, post-verify, and Gotenberg coverage set, captured in
-  `receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-targeted-pytests-r2.txt`.
+- The final merged-main targeted regression slice returned `101 passed in
+  25.79s` for the Harbor, Keycloak, OpenBao, Docker publication, Docker
+  runtime, observation, post-verify, Gotenberg, Nextcloud, and nginx-edge
+  publication coverage set, captured in
+  `receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-targeted-pytests-r3.txt`.
 - The merged-main repository validation path also passed from the final
   synchronized snapshot with
   `LV3_SNAPSHOT_BRANCH=main ./scripts/validate_repo.sh workstream-surfaces agent-standards yaml json data-models ansible-syntax role-argument-specs health-probes generated-docs`,
   captured in
-  `receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-validate-repo-r8.txt`.
+  `receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-validate-repo-r9.txt`.
 - Final steady-state verification after the Harbor repair is captured in
   `receipts/live-applies/evidence/2026-03-30-adr-0270-mainline-direct-and-public-verification-r2.txt`,
   which shows `harbor_public=Pong`, `harbor_local=Pong`,
@@ -133,5 +134,5 @@
 
 - exact-main replay, receipt capture, merged-main validation, and protected
   integration surface updates are complete
-- this workstream has been fast-forwarded onto `main` in the final integration
-  checkout and is ready for the `origin/main` push represented by this closeout
+- the final integrated release cut for ADR 0270 is now `0.177.94` on top of
+  the refreshed latest `origin/main` baseline
