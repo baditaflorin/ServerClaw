@@ -118,6 +118,19 @@ def test_openbao_runtime_continues_after_docker_chain_recheck_when_compose_healt
     assert "Assert Docker forward chain is present before OpenBao startup" not in tasks
 
 
+def test_openbao_runtime_recovers_dnat_chain_failures_during_compose_startup() -> None:
+    tasks = TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "- name: Start the OpenBao stack and recover Docker bridge-chain failures" in tasks
+    assert "- name: Flag Docker bridge-chain failures during OpenBao startup" in tasks
+    assert "Unable to enable DNAT rule" in tasks
+    assert "- name: Restart Docker to restore bridge chains before retrying OpenBao startup" in tasks
+    assert "- name: Recheck Docker nat chain after Docker recovery for OpenBao startup" in tasks
+    assert "- name: Remove the failed OpenBao container before retrying startup" in tasks
+    assert "- name: Remove the detached managed OpenBao default network before retrying startup" in tasks
+    assert "- name: Retry OpenBao startup after Docker bridge-chain recovery" in tasks
+
+
 def test_openbao_runtime_persisted_approles_use_reusable_secret_ids() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
 

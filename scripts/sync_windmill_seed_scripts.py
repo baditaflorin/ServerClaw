@@ -13,6 +13,9 @@ import urllib.request
 from pathlib import Path
 
 DEFAULT_HTTP_TIMEOUT_S = 10.0
+MIN_SETTLE_TIMEOUT_S = 10.0
+ABSENT_SETTLE_TIMEOUT_MULTIPLIER = 10.0
+CONTENT_SETTLE_TIMEOUT_MULTIPLIER = 30.0
 
 
 def resolve_repo_root(script_path: Path | None = None) -> Path:
@@ -250,6 +253,10 @@ def wait_for_content(
     raise SyncError(f"timed out waiting for {script_path} to match expected content")
 
 
+def settle_timeout(settle_interval_s: float, multiplier: float) -> float:
+    return max(MIN_SETTLE_TIMEOUT_S, settle_interval_s * multiplier)
+
+
 def sync_script(
     *,
     base_url: str,
@@ -262,6 +269,8 @@ def sync_script(
 ) -> dict:
     content = Path(spec["local_file"]).read_text(encoding="utf-8")
     attempts = 0
+    absent_timeout_s = settle_timeout(settle_interval_s, ABSENT_SETTLE_TIMEOUT_MULTIPLIER)
+    content_timeout_s = settle_timeout(settle_interval_s, CONTENT_SETTLE_TIMEOUT_MULTIPLIER)
 
     def sync_attempt() -> dict:
         nonlocal attempts
@@ -280,7 +289,7 @@ def sync_script(
                 workspace=workspace,
                 token=token,
                 script_path=spec["path"],
-                timeout_s=max(3.0, settle_interval_s * 4),
+                timeout_s=absent_timeout_s,
                 interval_s=settle_interval_s,
             )
         except (RetryableSyncError, OSError) as exc:
@@ -318,7 +327,7 @@ def sync_script(
             token=token,
             script_path=spec["path"],
             expected_content=content,
-            timeout_s=max(3.0, settle_interval_s * 4),
+            timeout_s=content_timeout_s,
             interval_s=settle_interval_s,
         )
         return {"path": spec["path"], "attempts": attempts, "status": "synced"}

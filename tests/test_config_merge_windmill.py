@@ -251,6 +251,51 @@ def test_sync_helper_retries_connection_reset_during_create(
     assert payload == {"path": "f/lv3/operator_onboard", "attempts": 2, "status": "synced"}
 
 
+def test_sync_helper_uses_extended_settle_timeouts(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = load_module("sync_helper_settle_timeouts", SYNC_HELPER_PATH)
+    local_file = tmp_path / "script.py"
+    local_file.write_text("print('ok')\n", encoding="utf-8")
+    spec = {
+        "path": "f/lv3/world_state/refresh_openbao_secret_expiry",
+        "local_file": str(local_file),
+        "language": "python3",
+        "summary": "Refresh world-state OpenBao secret expiry",
+        "description": "Repo-managed sync timeout test",
+    }
+    captured: dict[str, float] = {}
+
+    monkeypatch.setattr(module, "delete_script", lambda **kwargs: None)
+
+    def fake_wait_for_absent(**kwargs):
+        captured["absent_timeout_s"] = kwargs["timeout_s"]
+
+    def fake_wait_for_content(**kwargs):
+        captured["content_timeout_s"] = kwargs["timeout_s"]
+
+    monkeypatch.setattr(module, "wait_for_absent", fake_wait_for_absent)
+    monkeypatch.setattr(module, "wait_for_content", fake_wait_for_content)
+    monkeypatch.setattr(module, "create_script", lambda **kwargs: (201, "created"))
+
+    result = module.sync_script(
+        base_url="http://windmill.internal",
+        workspace="lv3",
+        token="token",
+        spec=spec,
+        max_attempts=1,
+        settle_interval_s=2.0,
+    )
+
+    assert result == {
+        "path": "f/lv3/world_state/refresh_openbao_secret_expiry",
+        "attempts": 1,
+        "status": "synced",
+    }
+    assert captured == {"absent_timeout_s": 20.0, "content_timeout_s": 60.0}
+
+
 def test_schedule_sync_helper_retries_connection_reset_during_update(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

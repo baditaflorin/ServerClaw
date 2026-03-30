@@ -131,6 +131,12 @@ preflight state and still continues into `docker compose up`; the decisive guard
 is whether the runtime can actually rebind `:8200`, answer on `127.0.0.1:8201`,
 and pass the subsequent seal-status plus AppRole verification steps.
 
+As of the `2026-03-30` exact-main replay, the role also treats a first-pass
+`docker compose up` DNAT failure as recoverable automation drift: it restarts
+Docker again, removes the half-created `lv3-openbao` container plus detached
+`openbao_default` network, rechecks `DOCKER` and `DOCKER-FORWARD`, and retries
+the stack start once before surfacing a hard failure.
+
 As of the `2026-03-29` ADR 0270 replay, the shared OpenBao helpers used by
 runtime secret injection and host-native systemd credential delivery also
 recover a missing loopback `127.0.0.1:8201` publication automatically. When the

@@ -41,10 +41,19 @@
       - --heal
       - --allow-listener-warmup-after-heal
   register: playbook_execution_docker_publication_command_result
+  retries: 6
+  delay: 2
+  until: >-
+    (
+      playbook_execution_docker_publication_command_result.stdout
+      | default('', true)
+      | trim
+      | length
+    ) > 0
   changed_when: >-
     (
       playbook_execution_docker_publication_command_result.stdout
-      | default('{}')
+      | default('{}', true)
       | from_json
     ).healed | default(false)
   failed_when: playbook_execution_docker_publication_command_result.rc != 0
@@ -54,7 +63,7 @@
     playbook_execution_docker_publication_result: >-
       {{
         playbook_execution_docker_publication_command_result.stdout
-        | default('{}')
+        | default('{}', true)
         | from_json
       }}
   changed_when: false

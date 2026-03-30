@@ -368,28 +368,121 @@
   tags:
     - mutation
 
-- name: Start the OpenBao stack
-  vars:
-    mutation_audit_action: start.openbao_stack
-    mutation_audit_target: openbao-runtime
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ openbao_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ openbao_site_dir }}"
-  register: openbao_up
-  changed_when: >-
-    'Creating' in openbao_up.stdout
-    or 'Recreating' in openbao_up.stdout
-    or 'Starting' in openbao_up.stdout
-  tags:
-    - mutation
+- name: Start the OpenBao stack and recover Docker bridge-chain failures
+  block:
+    - name: Start the OpenBao stack
+      vars:
+        mutation_audit_action: start.openbao_stack
+        mutation_audit_target: openbao-runtime
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ openbao_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ openbao_site_dir }}"
+      register: openbao_up
+      changed_when: >-
+        'Creating' in openbao_up.stdout
+        or 'Recreating' in openbao_up.stdout
+        or 'Starting' in openbao_up.stdout
+      tags:
+        - mutation
+  rescue:
+    - name: Flag Docker bridge-chain failures during OpenBao startup
+      ansible.builtin.set_fact:
+        openbao_docker_bridge_chain_missing: >-
+          {{
+            'No chain/target/match by that name' in (ansible_failed_result.stderr | default(''))
+            or 'Unable to enable DNAT rule' in (ansible_failed_result.stderr | default(''))
+          }}
+
+    - name: Surface unexpected OpenBao startup failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('OpenBao compose up failed')) }}"
+      when: not openbao_docker_bridge_chain_missing
+
+    - name: Restart Docker to restore bridge chains before retrying OpenBao startup
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: openbao_docker_bridge_chain_missing
+
+    - name: Reset SSH connection before retrying OpenBao startup after Docker recovery
+      ansible.builtin.meta: reset_connection
+      when: openbao_docker_bridge_chain_missing
+
+    - name: Recheck Docker nat chain after Docker recovery for OpenBao startup
+      ansible.builtin.command: iptables -t nat -S DOCKER
+      register: openbao_docker_nat_chain_retry
+      changed_when: false
+      failed_when: openbao_docker_nat_chain_retry.rc not in [0, 1]
+      retries: "{{ openbao_runtime_chain_recheck_retries }}"
+      delay: "{{ openbao_runtime_chain_recheck_delay_seconds }}"
+      until: openbao_docker_nat_chain_retry.rc == 0
+      when: openbao_docker_bridge_chain_missing
+
+    - name: Recheck Docker forward chain after Docker recovery for OpenBao startup
+      ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
+      register: openbao_docker_forward_chain_retry
+      changed_when: false
+      failed_when: openbao_docker_forward_chain_retry.rc not in [0, 1]
+      retries: "{{ openbao_runtime_chain_recheck_retries }}"
+      delay: "{{ openbao_runtime_chain_recheck_delay_seconds }}"
+      until: openbao_docker_forward_chain_retry.rc == 0
+      when: openbao_docker_bridge_chain_missing
+
+    - name: Remove the failed OpenBao container before retrying startup
+      ansible.builtin.command:
+        argv:
+          - docker
+          - rm
+          - -f
+          - "{{ openbao_container_name }}"
+      register: openbao_container_remove_retry
+      changed_when: openbao_container_remove_retry.rc == 0
+      failed_when: false
+      when: openbao_docker_bridge_chain_missing
+
+    - name: Remove the detached managed OpenBao default network before retrying startup
+      ansible.builtin.command:
+        argv:
+          - docker
+          - network
+          - rm
+          - "{{ openbao_default_network_name }}"
+      register: openbao_default_network_remove_retry
+      changed_when: openbao_default_network_remove_retry.rc == 0
+      failed_when: false
+      when: openbao_docker_bridge_chain_missing
+
+    - name: Retry OpenBao startup after Docker bridge-chain recovery
+      vars:
+        mutation_audit_action: start.openbao_stack
+        mutation_audit_target: openbao-runtime
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ openbao_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ openbao_site_dir }}"
+      register: openbao_up
+      changed_when: >-
+        'Creating' in openbao_up.stdout
+        or 'Recreating' in openbao_up.stdout
+        or 'Starting' in openbao_up.stdout
+      when: openbao_docker_bridge_chain_missing
+      tags:
+        - mutation
 
 - name: Install the OpenBao TLS renewal timer
   ansible.builtin.include_role:
