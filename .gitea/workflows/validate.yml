@@ -10,11 +10,27 @@ on:
 jobs:
   validate:
     runs-on: self-hosted
+    container:
+      image: registry.lv3.org/check-runner/python:3.12.10@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        env:
+          WORKFLOW_REPOSITORY: ${{ github.repository }}
+          WORKFLOW_SERVER_URL: ${{ github.server_url }}
+          WORKFLOW_REF: ${{ github.ref }}
+          WORKFLOW_SHA: ${{ github.sha }}
+          WORKFLOW_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$PWD"
+          git init .
+          if git remote get-url origin >/dev/null 2>&1; then
+            git remote set-url origin "${WORKFLOW_SERVER_URL}/${WORKFLOW_REPOSITORY}.git"
+          else
+            git remote add origin "${WORKFLOW_SERVER_URL}/${WORKFLOW_REPOSITORY}.git"
+          fi
+          git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch --depth=1 origin "${WORKFLOW_REF}"
+          git checkout --force "${WORKFLOW_SHA}"
 
       - name: Set up Python
         uses: actions/setup-python@v5

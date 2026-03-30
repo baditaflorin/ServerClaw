@@ -1,0 +1,47 @@
+validation gate: validating canonical NATS topics
+NATS topic taxonomy and routing OK
+validation gate: running remote pre-push gate
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+rsync: [receiver] write failed on "/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643/repo/.lv3-snapshots/e55128d3405ce1697af6cbbc0a56f5ce3d454cbf0f76716cf156e7f1a8d1758f.tar.gz": No space left on device (28)
+rsync error: error in file IO (code 11) at receiver.c(381) [receiver=3.4.1]
+rsync(96443): error: unexpected end of file
+remote_exec: snapshot upload failed, falling back locally for pre-push-gate
+remote_exec: running local fallback for pre-push-gate
+Validation lane selection
+  mode: auto
+  branch: codex/ws-0297-live-apply
+  selected lanes: documentation-and-adr, repository-structure-and-schema, generated-artifact-and-canonical-truth, service-syntax-and-unit, remote-builder, live-apply-and-promotion
+  blocking checks: workstream-surfaces, agent-standards, documentation-index, yaml-lint, schema-validation, policy-validation, alert-rule-validation, dependency-direction, generated-docs, generated-portals, dependency-graph, artifact-secret-scan, ansible-syntax, ansible-lint, type-check, service-completeness, packer-validate, tofu-validate, security-scan, integration-tests
+  changed files: .ansible-lint-ignore, .gitea/workflows/renovate.yml, README.md, build/platform-manifest.json, collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml, collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml, ...
+  widened to all lanes because of unknown surfaces: .ansible-lint-ignore, .gitea/workflows/renovate.yml, platform/repo.py, renovate.json
+
+CHECK                STATUS DURATION(s)
+agent-standards       passed 19.45
+alert-rule-validation passed 17.83
+ansible-lint          passed 371.11
+ansible-syntax        passed 204.31
+artifact-secret-scan  passed 31.07
+dependency-direction  passed 19.78
+dependency-graph      passed 27.09
+documentation-index   passed 20.36
+generated-docs        passed 45.47
+generated-portals     passed 98.63
+integration-tests     passed 8.37
+packer-validate       passed 60.35
+policy-validation     passed 30.27
+schema-validation     passed 117.07
+security-scan         passed 74.39
+service-completeness  passed 12.78
+tofu-validate         passed 10.46
+type-check            passed 32.89
+workstream-surfaces   passed 46.34
+yaml-lint             passed 64.81
+remote:
+remote: Create a new pull request for 'codex/ws-0297-live-apply':
+remote:   http://git.lv3.org:3009/ops/proxmox_florin_server/pulls/new/codex/ws-0297-live-apply
+remote:
+remote: . Processing 1 references
+remote: Processed 1 references in total
+To http://100.64.0.1:3009/ops/proxmox_florin_server.git
+ * [new branch]          HEAD -> codex/ws-0297-live-apply

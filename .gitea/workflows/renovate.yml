@@ -9,17 +9,48 @@ jobs:
   renovate:
     runs-on: self-hosted
     timeout-minutes: 30
+    container:
+      image: registry.lv3.org/check-runner/python:3.12.10@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
     env:
+      DOCKER_HOST: unix:///var/run/docker.sock
       RENOVATE_IMAGE: registry.lv3.org/check-runner/renovate:42.76.4@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
       RENOVATE_BOOTSTRAP_ENV: /var/run/lv3/renovate/renovate.env
       RENOVATE_RUNTIME_ENV: .tmp/renovate.runtime.env
       RENOVATE_RUNTIME_STATE: .tmp/renovate.runtime.json
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        env:
+          WORKFLOW_REPOSITORY: ${{ github.repository }}
+          WORKFLOW_SERVER_URL: ${{ github.server_url }}
+          WORKFLOW_REF: ${{ github.ref }}
+          WORKFLOW_SHA: ${{ github.sha }}
+          WORKFLOW_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$PWD"
+          git init .
+          if git remote get-url origin >/dev/null 2>&1; then
+            git remote set-url origin "${WORKFLOW_SERVER_URL}/${WORKFLOW_REPOSITORY}.git"
+          else
+            git remote add origin "${WORKFLOW_SERVER_URL}/${WORKFLOW_REPOSITORY}.git"
+          fi
+          git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" fetch --depth=1 origin "${WORKFLOW_REF}"
+          git checkout --force "${WORKFLOW_SHA}"
 
       - name: Prepare Renovate runtime files
         run: mkdir -p .tmp
+
+      - name: Install Docker CLI
+        run: |
+          set -euo pipefail
+          if command -v docker >/dev/null 2>&1; then
+            exit 0
+          fi
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get install -y --no-install-recommends docker.io
 
       - name: Mint a short-lived Renovate token
         run: |
