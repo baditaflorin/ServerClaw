@@ -41,18 +41,27 @@ def test_defaults_use_service_topology_urls_and_local_artifact_contract() -> Non
 
 def test_main_tasks_bootstrap_api_token_and_local_server_registration() -> None:
     tasks = load_yaml(TASKS_PATH)
+    task_names = [task["name"] for task in tasks]
     names = {task["name"] for task in tasks}
     assert "Ensure the Coolify deployment SSH key exists locally" in names
     assert "Ensure the Coolify root account and API settings are enforced" in names
     assert "Register the Coolify deployment SSH key and local server" in names
+    assert "Wait for the guest-local Coolify health endpoint" in names
     assert "Rotate the Coolify API token and persist it locally" in names
     assert "Persist the Coolify controller auth locally" in names
+
+    wait_for_port_idx = task_names.index("Wait for Coolify to listen on the guest dashboard port")
+    bootstrap_idx = task_names.index("Ensure the Coolify root account and API settings are enforced")
+    register_idx = task_names.index("Register the Coolify deployment SSH key and local server")
+    assert_local_server_idx = task_names.index("Assert the Coolify local deployment server is usable")
+    health_idx = task_names.index("Wait for the guest-local Coolify health endpoint")
 
     bootstrap_task = next(task for task in tasks if task["name"] == "Ensure the Coolify root account and API settings are enforced")
     register_task = next(task for task in tasks if task["name"] == "Register the Coolify deployment SSH key and local server")
     record_task = next(task for task in tasks if task["name"] == "Record the Coolify server registration payload")
     emit_assert_task = next(task for task in tasks if task["name"] == "Assert the Coolify server registration payload was emitted")
     token_task = next(task for task in tasks if task["name"] == "Rotate the Coolify API token and persist it locally")
+    assert wait_for_port_idx < bootstrap_idx < register_idx < assert_local_server_idx < health_idx
     assert "InstanceSettings" in bootstrap_task["ansible.builtin.shell"]
     assert "allowed_ips" in bootstrap_task["ansible.builtin.shell"]
     assert '"__LV3_BOOTSTRAP__"' in bootstrap_task["ansible.builtin.shell"]
