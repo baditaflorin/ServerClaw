@@ -16896,12 +16896,15 @@ workstreams:
       - docs/runbooks/configure-openbao.md
       - docs/runbooks/configure-renovate.md
       - docs/runbooks/configure-harbor.md
+      - docs/runbooks/live-apply-receipts-and-verification-evidence.md
+      - docs/runbooks/validate-repository-automation.md
       - inventory/host_vars/proxmox_florin.yml
       - inventory/group_vars/platform.yml
       - .gitea/workflows/validate.yml
       - .gitea/workflows/renovate.yml
       - .gitea/workflows/release-bundle.yml
       - renovate.json
+      - scripts/live_apply_receipts.py
       - scripts/parallel_check.py
       - scripts/validate_repo.sh
       - scripts/validate_renovate_contract.py
@@ -16926,6 +16929,7 @@ workstreams:
       - tests/test_gitea_workflows.py
       - tests/test_harbor_runtime_role.py
       - tests/test_gitea_runtime_role.py
+      - tests/test_live_apply_receipts.py
       - tests/test_keycloak_runtime_role.py
       - tests/test_mail_platform_runtime_role.py
       - tests/test_openbao_compose_env_helper.py
@@ -16956,12 +16960,16 @@ workstreams:
             - docs/runbooks/configure-gitea.md
             - docs/runbooks/configure-openbao.md
             - docs/runbooks/configure-renovate.md
+            - docs/runbooks/live-apply-receipts-and-verification-evidence.md
+            - docs/runbooks/validate-repository-automation.md
             - .gitea/workflows/renovate.yml
             - renovate.json
+            - scripts/live_apply_receipts.py
             - scripts/validate_renovate_contract.py
             - scripts/renovate_runtime_token.py
             - scripts/renovate_stack_digest_guard.py
             - platform/repo.py
+            - tests/test_live_apply_receipts.py
             - tests/test_renovate_automation.py
             - receipts/live-applies/2026-03-30-adr-0297-renovate-live-apply.json
             - receipts/live-applies/evidence/2026-03-30-ws-0297-*

@@ -56,15 +56,30 @@ def git_commit_lookup_available() -> bool:
     return command_succeeds(["git", "cat-file", "-e", "HEAD^{commit}"])
 
 
-def validate_source_commit(commit: str, path: Path) -> None:
-    if git_commit_lookup_available():
-        if not git_commit_exists(commit):
-            raise ValueError(f"{path.name}: source_commit '{commit}' is not a valid git commit")
-        return
+def strict_source_commit_object_validation_enabled() -> bool:
+    return os.environ.get("LV3_REQUIRE_RECEIPT_SOURCE_COMMIT_OBJECTS", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
 
+
+def validate_source_commit(commit: str, path: Path) -> None:
     if not COMMIT_HASH_PATTERN.fullmatch(commit):
         raise ValueError(
             f"{path.name}: source_commit '{commit}' must look like a git commit hash when .git metadata is unavailable"
+        )
+
+    if not git_commit_lookup_available():
+        return
+
+    if git_commit_exists(commit):
+        return
+
+    if strict_source_commit_object_validation_enabled():
+        raise ValueError(
+            f"{path.name}: source_commit '{commit}' is not available in the current git object database"
         )
 
 

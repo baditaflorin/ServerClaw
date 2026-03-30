@@ -64,7 +64,7 @@ runner `docker-build-lv3`.
 - generated status documents are current for their canonical inputs
 - the workflow catalog, command catalog, control-plane lane catalog, and controller-local secret manifest cross-reference cleanly
 - the API publication catalog classifies every governed API and webhook surface
-- structured live-apply receipts reference valid workflows, files, and git commits
+- structured live-apply receipts reference valid workflows and files, and record exact source git hashes; clone-local object availability can be audited explicitly with `LV3_REQUIRE_RECEIPT_SOURCE_COMMIT_OBJECTS=1`
 
 ## Tooling Model
 

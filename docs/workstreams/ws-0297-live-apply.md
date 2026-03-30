@@ -8,7 +8,7 @@
 - Owner: codex
 - Depends On: `adr-0068`, `adr-0077`, `adr-0083`, `adr-0087`, `adr-0119`, `adr-0143`, `adr-0229`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0297`, `docs/workstreams/ws-0297-live-apply.md`, `docs/runbooks/configure-gitea.md`, `docs/runbooks/configure-openbao.md`, `docs/runbooks/configure-renovate.md`, `docs/runbooks/configure-harbor.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `.gitea/workflows/renovate.yml`, `.gitea/workflows/release-bundle.yml`, `.gitea/workflows/validate.yml`, `renovate.json`, `scripts/parallel_check.py`, `scripts/validate_repo.sh`, `scripts/validate_renovate_contract.py`, `scripts/renovate_runtime_token.py`, `scripts/renovate_stack_digest_guard.py`, `platform/repo.py`, `README.md`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `collections/ansible_collections/lv3/platform/roles/common/`, `collections/ansible_collections/lv3/platform/roles/harbor_runtime/`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runner/`, `tests/`, `tests/test_parallel_check.py`, `receipts/live-applies/`, `workstreams.yaml`
+- Shared Surfaces: `docs/adr/0297`, `docs/workstreams/ws-0297-live-apply.md`, `docs/runbooks/configure-gitea.md`, `docs/runbooks/configure-openbao.md`, `docs/runbooks/configure-renovate.md`, `docs/runbooks/configure-harbor.md`, `docs/runbooks/live-apply-receipts-and-verification-evidence.md`, `docs/runbooks/validate-repository-automation.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `.gitea/workflows/renovate.yml`, `.gitea/workflows/release-bundle.yml`, `.gitea/workflows/validate.yml`, `renovate.json`, `scripts/live_apply_receipts.py`, `scripts/parallel_check.py`, `scripts/validate_repo.sh`, `scripts/validate_renovate_contract.py`, `scripts/renovate_runtime_token.py`, `scripts/renovate_stack_digest_guard.py`, `platform/repo.py`, `README.md`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `collections/ansible_collections/lv3/platform/roles/common/`, `collections/ansible_collections/lv3/platform/roles/harbor_runtime/`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runner/`, `tests/`, `tests/test_live_apply_receipts.py`, `tests/test_parallel_check.py`, `receipts/live-applies/`, `workstreams.yaml`
 
 ## Scope
 
@@ -33,12 +33,15 @@
 - `docs/runbooks/configure-openbao.md`
 - `docs/runbooks/configure-renovate.md`
 - `docs/runbooks/configure-harbor.md`
+- `docs/runbooks/live-apply-receipts-and-verification-evidence.md`
+- `docs/runbooks/validate-repository-automation.md`
 - `inventory/host_vars/proxmox_florin.yml`
 - `inventory/group_vars/platform.yml`
 - `.gitea/workflows/renovate.yml`
 - `.gitea/workflows/release-bundle.yml`
 - `.gitea/workflows/validate.yml`
 - `renovate.json`
+- `scripts/live_apply_receipts.py`
 - `scripts/parallel_check.py`
 - `scripts/validate_repo.sh`
 - `scripts/validate_renovate_contract.py`
@@ -66,6 +69,7 @@
 - `tests/test_generate_platform_vars.py`
 - `tests/test_gitea_workflows.py`
 - `tests/test_harbor_runtime_role.py`
+- `tests/test_live_apply_receipts.py`
 - `tests/test_keycloak_runtime_role.py`
 - `tests/test_mail_platform_runtime_role.py`
 - `tests/test_openbao_compose_env_helper.py`
@@ -93,6 +97,7 @@
 - the second repository-boundary replay on that workflow baseline fix initially still failed before checkout because Harbor regressed to `502 Bad Gateway` on the pinned `registry.lv3.org/check-runner/python:3.12.10@sha256:46d204...` job image pull even though the Harbor converge itself reported success; branch-local evidence now preserves both the Gitea job logs and the failed public, runtime-local, and build-host probes
 - the shared recovery path is now live again: `make converge-docker-publication-assurance env=production` repaired the stale Docker publication drift, `https://registry.lv3.org/api/v2.0/ping` returns `Pong`, `https://registry.lv3.org/v2/` and `http://127.0.0.1:8095/v2/` both answer with the expected registry auth challenge, and `docker-build-lv3` can once again pull `registry.lv3.org/check-runner/python:3.12.10`
 - the branch also now carries a Harbor runtime regression guard for this exact failure mode by asserting that the OIDC readiness recycle restored both the Harbor compose network membership and the published registry port binding before the role treats the recycle as healthy
+- the hosted `validate.yml` replay on a clean Gitea checkout also exposed a shared receipt durability gap: branch-local live-apply receipts can outlive the fetchable reachability of their original workstream commits, so this branch now updates `scripts/live_apply_receipts.py`, its regression tests, and the paired runbooks to require exact git-hash syntax by default while preserving an opt-in strict object audit through `LV3_REQUIRE_RECEIPT_SOURCE_COMMIT_OBJECTS=1`
 - the remaining end-to-end proof is now to re-push the updated branch into the private Gitea repo on top of the recovered Harbor path, verify the push-triggered `validate.yml` and `release-bundle.yml` runs succeed on the live runner, and re-dispatch the Renovate workflow until the short-lived token path succeeds end to end
 
 ## Pending Verification

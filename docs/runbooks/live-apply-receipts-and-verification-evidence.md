@@ -30,6 +30,13 @@ Validate the receipt set directly:
 scripts/live_apply_receipts.py --validate
 ```
 
+Audit the current clone for receipt source commits whose objects are still
+present locally:
+
+```bash
+LV3_REQUIRE_RECEIPT_SOURCE_COMMIT_OBJECTS=1 scripts/live_apply_receipts.py --validate
+```
+
 ## Receipt Rules
 
 Each receipt must record:
@@ -47,6 +54,11 @@ Receipts may also record:
 8. linked per-run evidence files under `receipts/live-applies/evidence/` when the live verification output is worth preserving in branch-local history
 
 Keep receipts concise and non-secret. Record evidence, not full command transcripts or sensitive outputs.
+Receipt validation always requires `source_commit` to be an exact git-hash string.
+When the current clone still contains that commit object, the validator can also
+confirm object availability; branch-local historical receipts may outlive the
+reachable lifetime of their original workstream commits, so fresh hosted clones
+must not depend on those objects remaining fetchable forever.
 
 ## Operating Rule
 

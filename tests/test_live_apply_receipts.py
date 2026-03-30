@@ -77,6 +77,39 @@ def test_validate_receipt_rejects_non_hash_when_git_metadata_lacks_objects(
         )
 
 
+def test_validate_receipt_accepts_hash_when_git_metadata_has_no_matching_object(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(live_apply_receipts, "git_metadata_available", lambda: True)
+    monkeypatch.setattr(live_apply_receipts, "git_commit_lookup_available", lambda: True)
+    monkeypatch.setattr(live_apply_receipts, "git_commit_exists", lambda _commit: False)
+    monkeypatch.setattr(live_apply_receipts, "receipt_environment_for_path", lambda _path: "production")
+    monkeypatch.delenv("LV3_REQUIRE_RECEIPT_SOURCE_COMMIT_OBJECTS", raising=False)
+
+    live_apply_receipts.validate_receipt(
+        build_receipt("c4db21b414c44e5bcd9d6c1fe5ae4fdd9e5cac99"),
+        Path("2026-03-23-test-receipt.json"),
+        {"workflows": {"test-workflow": {}}},
+    )
+
+
+def test_validate_receipt_rejects_missing_object_in_strict_mode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(live_apply_receipts, "git_metadata_available", lambda: True)
+    monkeypatch.setattr(live_apply_receipts, "git_commit_lookup_available", lambda: True)
+    monkeypatch.setattr(live_apply_receipts, "git_commit_exists", lambda _commit: False)
+    monkeypatch.setattr(live_apply_receipts, "receipt_environment_for_path", lambda _path: "production")
+    monkeypatch.setenv("LV3_REQUIRE_RECEIPT_SOURCE_COMMIT_OBJECTS", "1")
+
+    with pytest.raises(ValueError, match="current git object database"):
+        live_apply_receipts.validate_receipt(
+            build_receipt("c4db21b414c44e5bcd9d6c1fe5ae4fdd9e5cac99"),
+            Path("2026-03-23-test-receipt.json"),
+            {"workflows": {"test-workflow": {}}},
+        )
+
+
 def test_validate_receipt_accepts_legacy_live_apply_workflow_ids(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
