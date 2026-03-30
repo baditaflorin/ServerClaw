@@ -6,6 +6,7 @@ import argparse
 import datetime as dt
 import json
 import os
+import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -297,9 +298,35 @@ def suppression_for(item_id: str, suppressions: dict[str, str], today: dt.date) 
     return suppressed_until.isoformat()
 
 
-def find_adr_path(adr_id: str) -> Path | None:
+def find_adr_path(adr_id: str, *, service_id: str | None = None, service_name: str | None = None) -> Path | None:
     matches = sorted((REPO_ROOT / "docs" / "adr").glob(f"{adr_id}-*.md"))
-    return matches[0] if matches else None
+    if not matches:
+        return None
+    if len(matches) == 1:
+        return matches[0]
+
+    tokens: list[str] = []
+    for raw in (service_id, service_name):
+        if not isinstance(raw, str):
+            continue
+        tokens.extend(token for token in re.split(r"[^a-z0-9]+", raw.lower().replace("_", "-")) if token)
+
+    if tokens:
+        scored: list[tuple[int, int, Path]] = []
+        for path in matches:
+            stem = path.stem.lower()
+            score = sum(1 for token in tokens if token in stem)
+            scored.append((score, len(stem), path))
+        best_score = max(score for score, _, _ in scored)
+        if best_score > 0:
+            best_matches = [path for score, _, path in scored if score == best_score]
+            service_slug = slugify_service_id(service_id).lower() if service_id else ""
+            exact_slug_matches = [path for path in best_matches if service_slug and service_slug in path.stem.lower()]
+            if exact_slug_matches:
+                return sorted(exact_slug_matches)[0]
+            return sorted(best_matches)[0]
+
+    return matches[0]
 
 
 def role_dir_for(service_id: str, context: dict[str, Any], profile: dict[str, Any]) -> Path | None:
@@ -355,7 +382,7 @@ def evaluate_service(service_id: str, *, today: dt.date | None = None, context: 
     dashboard_path = REPO_ROOT / profile.get("dashboard_file", f"config/grafana/dashboards/{slug}.json")
     alert_rule_path = REPO_ROOT / profile.get("alert_rule_file", f"config/alertmanager/rules/{slug}.yml")
     adr_id = require_string(service.get("adr"), f"service {service_id}.adr")
-    adr_path = find_adr_path(adr_id)
+    adr_path = find_adr_path(adr_id, service_id=service_id, service_name=service.get("name"))
     service_secret_ids = {
         require_string(secret_id, "service.secret_catalog_ids[]")
         for secret_id in service.get("secret_catalog_ids", [])
