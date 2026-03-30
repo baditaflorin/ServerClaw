@@ -115,14 +115,14 @@ def test_playbook_converges_bridge_then_falco_runtime_across_hosts() -> None:
 def test_inventory_exposes_private_bridge_port_and_guest_access_rules() -> None:
     host_vars = load_yaml(HOST_VARS_PATH)
 
-    assert host_vars["platform_port_assignments"]["falco_event_bridge_port"] == 18080
+    assert host_vars["platform_port_assignments"]["falco_event_bridge_port"] == 18084
     docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
-    build_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "docker-build-lv3" and 18080 in rule["ports"])
-    monitoring_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "monitoring-lv3" and 18080 in rule["ports"])
+    build_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "docker-build-lv3" and 18084 in rule["ports"])
+    monitoring_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "monitoring-lv3" and 18084 in rule["ports"])
     postgres_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "postgres-lv3")
-    assert 18080 in build_rule["ports"]
-    assert 18080 in monitoring_rule["ports"]
-    assert 18080 in postgres_rule["ports"]
+    assert 18084 in build_rule["ports"]
+    assert 18084 in monitoring_rule["ports"]
+    assert 18084 in postgres_rule["ports"]
 
 
 def test_workflow_and_command_catalogs_register_falco_converge_entrypoint() -> None:

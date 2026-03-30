@@ -60,7 +60,7 @@
 
 - `lv3-falco-event-bridge.service` active on `docker-runtime-lv3`
 - `falco-modern-bpf.service` active on `docker-runtime-lv3`, `docker-build-lv3`, `monitoring-lv3`, and `postgres-lv3`
-- Falco bridge listener reachable on `10.10.10.20:18080` from the other governed guests
+- Falco bridge listener reachable on `10.10.10.20:18084` from the other governed guests
 - WARNING+ smoke events published to NATS subject `platform.security.falco`
 - CRITICAL smoke events published to ntfy topic `platform.security.critical`
 - WARNING+ smoke events appended to `/var/log/platform/mutation-audit.jsonl` with `surface="falco"`

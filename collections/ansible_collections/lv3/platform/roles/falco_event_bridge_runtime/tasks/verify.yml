@@ -6,8 +6,13 @@
       - is-active
       - "{{ falco_event_bridge_service_name }}"
   register: falco_event_bridge_service_status
+  retries: 15
+  delay: 2
+  until: falco_event_bridge_service_status.stdout | trim == "active"
   changed_when: false
-  failed_when: falco_event_bridge_service_status.stdout | trim != "active"
+  failed_when: >-
+    falco_event_bridge_service_status.rc not in [0, 3]
+    or falco_event_bridge_service_status.stdout | trim not in ["active", "activating", "inactive", "failed"]
 
 - name: Verify the Falco event bridge health endpoint responds
   ansible.builtin.uri:

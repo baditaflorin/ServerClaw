@@ -24,7 +24,7 @@ def env_float(name: str, default: float) -> float:
 
 def load_config() -> tuple[str, int, BridgeConfig]:
     listen_host = os.environ.get("FALCO_EVENT_BRIDGE_LISTEN_HOST", "0.0.0.0").strip() or "0.0.0.0"
-    listen_port = env_int("FALCO_EVENT_BRIDGE_LISTEN_PORT", 18080)
+    listen_port = env_int("FALCO_EVENT_BRIDGE_LISTEN_PORT", 18084)
     config = BridgeConfig(
         actor_id=os.environ.get("FALCO_EVENT_BRIDGE_ACTOR_ID", "falco-event-bridge").strip() or "falco-event-bridge",
         source_host=os.environ.get("FALCO_EVENT_BRIDGE_SOURCE_HOST", "docker-runtime-lv3").strip() or "docker-runtime-lv3",
