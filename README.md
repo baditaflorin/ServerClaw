@@ -195,7 +195,7 @@ ADR 0276 NATS JetStream is now live on production from `main`: `docker-runtime-l
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.99` |
+| Repository version | `0.177.100` |
 | Platform version | `0.130.66` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
@@ -1407,7 +1407,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.99` |
+| Repository version | `0.177.100` |
 | Platform version | `0.130.66` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
