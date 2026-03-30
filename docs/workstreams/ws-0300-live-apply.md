@@ -103,3 +103,11 @@
 - ADR 0300 live mutation must wait until both locks clear because this
   workstream needs the full `vm:120`, `vm:130`, `vm:140`, and `vm:150` lock set
   before running `make converge-falco env=production`.
+- A standard `git push` from this workstream branch currently hits the
+  pre-push gate's generated-artifact checks. The gate specifically wants:
+  `python3 scripts/generate_diagrams.py --write`,
+  `scripts/platform_manifest.py --write`, and
+  `uvx --from pyyaml python scripts/canonical_truth.py --write`.
+- The last command would rewrite the protected top-level `README.md`, so that
+  regeneration is intentionally deferred to a later merge-to-main or dedicated
+  integration step rather than being performed on this workstream branch.
