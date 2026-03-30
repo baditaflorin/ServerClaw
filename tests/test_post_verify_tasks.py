@@ -51,7 +51,10 @@ def test_post_verify_probes_run_on_service_owner_only() -> None:
         "playbook_execution_service_probe.startup is defined",
     ]
     assert liveness_task["when"] == "inventory_hostname == playbook_execution_service_probe.owning_vm"
-    assert readiness_task["when"] == "inventory_hostname == playbook_execution_service_probe.owning_vm"
+    assert readiness_task["when"] == [
+        "playbook_execution_verify_readiness | default(true)",
+        "inventory_hostname == playbook_execution_service_probe.owning_vm",
+    ]
 
 
 def test_post_verify_repairs_docker_publication_before_readiness() -> None:
@@ -66,6 +69,7 @@ def test_post_verify_repairs_docker_publication_before_readiness() -> None:
         "{{ playbook_execution_service_probe.readiness.docker_publication }}"
     )
     assert repair_task["when"] == [
+        "playbook_execution_verify_readiness | default(true)",
         "inventory_hostname == playbook_execution_service_probe.owning_vm",
         "playbook_execution_service_probe.readiness is defined",
         "playbook_execution_service_probe.readiness.docker_publication is defined",

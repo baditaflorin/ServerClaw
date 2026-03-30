@@ -86,6 +86,9 @@ map $lv3_logout_authorization $lv3_logout_id_token {
         proxy_hide_header X-Robots-Tag;
 {% endif %}
 {%- endmacro %}
+{% macro site_tls_certificate_name(site) -%}
+{{ public_edge_site_tls_materials.get(site.hostname, public_edge_cert_name) if public_edge_site_tls_materials is mapping else public_edge_cert_name }}
+{%- endmacro %}
 
 server {
     listen 80 default_server;
@@ -166,6 +169,7 @@ server {
 {% set proxy_request_buffering = site.proxy_request_buffering | default(true) %}
 {% set proxy_read_timeout_seconds = site.proxy_read_timeout_seconds | default(300) %}
 {% set proxy_send_timeout_seconds = site.proxy_send_timeout_seconds | default(proxy_read_timeout_seconds) %}
+{% set site_tls_enabled = public_edge_tls_enabled or (public_edge_site_tls_materials is mapping and site.hostname in public_edge_site_tls_materials) %}
 server {
     listen 80;
     listen [::]:80;
@@ -196,7 +200,7 @@ server {
         return {{ redirect.status | default(301) }} {{ redirect.target | default(redirect.location) }};
     }
 {% endfor %}
-{% if public_edge_tls_enabled or protected_site %}
+{% if site_tls_enabled or protected_site %}
     location / {
         return 308 https://$host$request_uri;
     }
@@ -292,7 +296,7 @@ server {
     }
 {% endif %}
 }
-{% if public_edge_tls_enabled %}
+{% if site_tls_enabled %}
 server {
     listen 443 ssl;
     listen [::]:443 ssl;
@@ -305,8 +309,8 @@ server {
 {% endif %}
 {{ render_security_headers(site, true) }}
 
-    ssl_certificate /etc/letsencrypt/live/{{ public_edge_cert_name }}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/{{ public_edge_cert_name }}/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/{{ site_tls_certificate_name(site) }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ site_tls_certificate_name(site) }}/privkey.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_prefer_server_ciphers off;
 {% if client_max_body_size is not none %}

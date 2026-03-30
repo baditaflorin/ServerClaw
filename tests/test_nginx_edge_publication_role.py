@@ -136,6 +136,14 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("Resolve public edge site and certificate catalogs", task_names)
         self.assertIn("Install the pinned Certbot Hetzner DNS plugin", task_names)
         self.assertIn(
+            "Derive site-local certificate requests for hostnames missing from the shared certificate",
+            task_names,
+        )
+        self.assertIn(
+            "Ensure site-local Let's Encrypt certificates exist for hostnames missing from the shared certificate",
+            task_names,
+        )
+        self.assertIn(
             "Assert the Hetzner DNS credential file is available when DNS-01 is enabled",
             task_names,
         )
@@ -225,6 +233,8 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn('add_header X-Robots-Tag "{{ public_edge_robots_meta_content }}" always;', self.template)
         self.assertIn("location = /robots.txt {", self.template)
         self.assertIn("server_name {{ public_edge_apex_hostname }};", self.template)
+        self.assertIn("site_tls_certificate_name(site)", self.template)
+        self.assertIn("public_edge_site_tls_materials.get(site.hostname, public_edge_cert_name)", self.template)
 
     def test_certificate_domain_expression_includes_additional_domains(self) -> None:
         certificate_domains_expr = self.defaults["public_edge_certificate_domains"]
@@ -251,6 +261,8 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("location ^~ {{ path }} {", self.template)
         self.assertIn("location ^~ {{ route.path }} {", self.template)
         self.assertIn("proxy_buffering off;", self.template)
+        self.assertIn("site_tls_enabled = public_edge_tls_enabled or", self.template)
+        self.assertIn("ssl_certificate /etc/letsencrypt/live/{{ site_tls_certificate_name(site) }}/fullchain.pem;", self.template)
 
     def test_template_supports_plausible_tracker_injection(self) -> None:
         plausible_mapping_expr = self.defaults["public_edge_plausible_tracked_sites"]

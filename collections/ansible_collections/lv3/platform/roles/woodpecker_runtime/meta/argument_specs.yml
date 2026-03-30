@@ -27,6 +27,9 @@ argument_specs:
       woodpecker_public_url:
         type: str
         required: true
+      woodpecker_gitea_runtime_url:
+        type: str
+        required: true
       woodpecker_gitea_api_url:
         type: str
         required: true

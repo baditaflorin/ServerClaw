@@ -51,12 +51,10 @@ Converge Woodpecker live:
 HETZNER_DNS_API_TOKEN=... make converge-woodpecker
 ```
 
-If the converge stops while creating `ci.lv3.org` in Hetzner DNS and the
-provider returns the planned brownout/shutdown response from the legacy
-`dns.hetzner.com` write API, do not keep retrying blindly. Either rerun
-outside the provider brownout window while the legacy token still works, or
-migrate `lv3.org` to the Hetzner Console DNS API and update the controller's
-DNS token before replaying the workflow.
+The edge publication replay now falls back to a dedicated site-local
+certificate for `ci.lv3.org` when the shared `lv3-edge` certificate does not
+yet contain the Woodpecker hostname. This keeps Woodpecker live even if
+unrelated SAN expansion on the shared edge certificate is temporarily blocked.
 
 Show the bootstrap identity:
 
@@ -82,6 +80,11 @@ Trigger the seeded repository pipeline and wait:
 make woodpecker-manage ACTION=trigger-pipeline WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main --wait'
 ```
 
+If the target forge branch does not yet contain `.woodpecker.yml`, Woodpecker
+accepts the manual trigger request with `204 No Content` but no pipeline run
+appears. Push or merge the branch carrying `.woodpecker.yml` first, then rerun
+the managed trigger command.
+
 ## Verification
 
 After a converge:
@@ -89,10 +92,11 @@ After a converge:
 1. `make syntax-check-woodpecker`
 2. `curl -fsS http://100.64.0.1:8017/healthz`
 3. `curl -fsS https://ci.lv3.org/healthz`
-4. `make woodpecker-manage ACTION=whoami`
-5. `make woodpecker-manage ACTION=list-secrets WOODPECKER_ARGS='--repo ops/proxmox_florin_server'`
-6. `make woodpecker-manage ACTION=trigger-pipeline WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main --wait'`
-7. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/woodpecker/docker-compose.yml ps && sudo ls -l /run/lv3-secrets/woodpecker /etc/lv3/woodpecker /opt/woodpecker/data'`
+4. `openssl s_client -connect ci.lv3.org:443 -servername ci.lv3.org </dev/null 2>/dev/null | openssl x509 -noout -subject -issuer -ext subjectAltName`
+5. `make woodpecker-manage ACTION=whoami`
+6. `make woodpecker-manage ACTION=list-secrets WOODPECKER_ARGS='--repo ops/proxmox_florin_server'`
+7. `make woodpecker-manage ACTION=trigger-pipeline WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main --wait'`
+8. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/woodpecker/docker-compose.yml ps && sudo ls -l /run/lv3-secrets/woodpecker /etc/lv3/woodpecker /opt/woodpecker/data'`
 
 ## Operating Rules
 

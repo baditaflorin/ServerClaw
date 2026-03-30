@@ -117,6 +117,7 @@
       ansible.builtin.import_tasks: tasks/post-verify.yml
       vars:
         service_health_probe_id: woodpecker
+        playbook_execution_verify_readiness: false
         playbook_execution_post_verify_audit_action: playbook.verify.woodpecker
 
     - name: Run shared completion notifications

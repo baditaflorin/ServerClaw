@@ -4,14 +4,14 @@
   "environment": "production",
   "applied_on": "2026-03-30",
   "recorded_on": "2026-03-30",
-  "recorded_at": "2026-03-30T17:59:00Z",
+  "recorded_at": "2026-03-30T20:49:00Z",
   "recorded_by": "codex",
-  "source_commit": "4db2d1f4dc788fa391f3cf1bf39facfcac00c218",
-  "repo_version_context": "0.177.106",
-  "platform_version_context": "0.130.71",
+  "source_commit": "2021380d3353a14d1f13eb20c79965d6a9f78570",
+  "repo_version_context": "0.177.109",
+  "platform_version_context": "0.130.72",
   "workflow_id": "converge-woodpecker",
   "adr": "0287",
-  "summary": "Validated the repo-managed Woodpecker implementation from the dedicated latest-main worktree and attempted the first production live replay from origin/main commit 4db2d1f4dc788fa391f3cf1bf39facfcac00c218. The replay reached the Hetzner DNS mutation for ci.lv3.org and then stopped because the legacy dns.hetzner.com write API returned the published brownout/shutdown response with provider error code 503. Because the playbook performs DNS reconciliation before the PostgreSQL, runtime, edge, and bootstrap stages, the Woodpecker runtime itself is not yet live from this workstream.",
+  "summary": "Replayed ADR 0287 from the latest realistic origin/main baseline and verified the Woodpecker production rollout end to end on the workstream branch. The successful `r14` live apply converged the Proxmox Tailscale proxy lane, Woodpecker PostgreSQL access, the Docker runtime stack, `ci.lv3.org` publication through the shared edge, a dedicated site-local `ci.lv3.org` Let's Encrypt certificate, and the controller-local bootstrap artifacts plus seed repository secret. The managed trigger wrapper was then hardened against Woodpecker's live `204 No Content` manual-trigger response so the final exact-main pipeline verification can wait for a newly visible run once `.woodpecker.yml` is present on the forge branch being triggered.",
   "targets": [
     {
       "kind": "host",
@@ -32,6 +32,12 @@
       "address": "10.10.10.50"
     },
     {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
       "kind": "service_endpoint",
       "name": "Woodpecker public hostname",
       "address": "https://ci.lv3.org/healthz"
@@ -46,17 +52,22 @@
     {
       "check": "Woodpecker-focused validation bundle",
       "result": "pass",
-      "observed": "`make validate-generated-vars`, `make syntax-check-woodpecker`, `uv tool run --from ansible-lint ansible-lint playbooks/woodpecker.yml playbooks/services/woodpecker.yml collections/ansible_collections/lv3/platform/roles/woodpecker_postgres collections/ansible_collections/lv3/platform/roles/woodpecker_runtime collections/ansible_collections/lv3/platform/playbooks/woodpecker.yml`, `./scripts/validate_repo.sh json health-probes data-models agent-standards`, and the targeted pytest bundle all passed from the isolated worktree, captured in the `receipts/live-applies/evidence/2026-03-30-ws-0287-*` artifacts."
+      "observed": "`make validate-generated-vars`, `make syntax-check-woodpecker`, `uv tool run --from ansible-lint ansible-lint playbooks/woodpecker.yml playbooks/services/woodpecker.yml collections/ansible_collections/lv3/platform/roles/woodpecker_postgres collections/ansible_collections/lv3/platform/roles/woodpecker_runtime collections/ansible_collections/lv3/platform/playbooks/woodpecker.yml`, `./scripts/validate_repo.sh json health-probes data-models agent-standards`, and `uv run --with pytest --with pyyaml --with jsonschema python -m pytest tests/test_generate_platform_vars.py tests/test_postgres_vm_access_policy.py tests/test_woodpecker_playbook.py tests/test_woodpecker_runtime_role.py tests/test_woodpecker_client.py tests/test_validate_service_catalog.py tests/test_validate_service_completeness.py tests/test_subdomain_catalog.py tests/test_service_redundancy.py tests/test_workstream_surface_ownership.py tests/test_ansible_execution_scopes.py tests/test_ansible_role_idempotency.py tests/test_data_catalog.py tests/test_subdomain_exposure_audit.py -q` all passed from the isolated worktree; the focused client-and-wrapper follow-up slice `uv run --with pytest python -m pytest tests/test_woodpecker_client.py tests/test_woodpecker_tool.py -q` also passed with `17 passed in 0.20s`."
     },
     {
-      "check": "First production Woodpecker replay",
+      "check": "Authoritative Woodpecker production replay",
+      "result": "pass",
+      "observed": "`HETZNER_DNS_API_TOKEN=... make converge-woodpecker env=production` completed successfully and is preserved in `receipts/live-applies/evidence/2026-03-30-ws-0287-live-apply-r14.txt`; the final recap reports `docker-runtime-lv3 : ok=156 changed=4 failed=0`, `nginx-lv3 : ok=46 changed=4 failed=0`, `postgres-lv3 : ok=51 changed=0 failed=0`, `proxmox_florin : ok=265 changed=1 failed=0`, and `localhost : ok=4 changed=0 failed=0`."
+    },
+    {
+      "check": "Public TLS, private health, and controller API verification",
+      "result": "pass",
+      "observed": "Strict validation against `https://ci.lv3.org/healthz` returned `HTTP/2 200` with `x-woodpecker-version: 3.13.0`; `curl -fsS http://100.64.0.1:8017/healthz` succeeded on the private controller path; `openssl s_client -connect ci.lv3.org:443 -servername ci.lv3.org` showed `subject=CN=ci.lv3.org`, Let's Encrypt issuer `CN=E7`, and SAN `DNS:ci.lv3.org`; `make woodpecker-manage ACTION=whoami` resolved to admin user `ops-gitea`; and `make woodpecker-manage ACTION=list-secrets WOODPECKER_ARGS='--repo ops/proxmox_florin_server'` confirmed `LV3_WOODPECKER_SECRET_SMOKE` on repo `id=1`."
+    },
+    {
+      "check": "Manual pipeline trigger readiness on the current upstream mainline",
       "result": "partial",
-      "observed": "`HETZNER_DNS_API_TOKEN=... make converge-woodpecker env=production` passed preflight, updated the Proxmox-host Tailscale proxy definitions to include the Woodpecker listener on `100.64.0.1:8017`, and then failed while creating the `ci.lv3.org` A record through the legacy Hetzner DNS API. The live replay evidence is captured in `receipts/live-applies/evidence/2026-03-30-ws-0287-live-apply-r1.txt`."
-    },
-    {
-      "check": "Direct provider brownout reproduction",
-      "result": "fail",
-      "observed": "Direct `POST https://dns.hetzner.com/api/v1/records` probes for `ci A 65.108.75.123` reproduced the provider response outside Ansible: the HTTP body returned the planned shutdown message and provider error code `503`, so the DNS create failure is external to the Woodpecker runtime implementation."
+      "observed": "The live Woodpecker API accepts `POST /api/repos/1/pipelines` with `204 No Content`, so `scripts/woodpecker_tool.py` was updated to treat `204` as a valid trigger response and discover a newly visible pipeline run before waiting. A direct `trigger-pipeline --branch main --wait` probe against the current upstream still produced no run because `origin/main` does not yet contain `.woodpecker.yml`; `git show origin/main:.woodpecker.yml` fails and `GET /api/repos/1/pipelines?branch=main` remains `[]`. The exact-main pipeline execution must therefore be re-verified immediately after this branch lands on the forge branch being triggered."
     }
   ],
   "evidence_refs": [
@@ -64,25 +75,33 @@
     "docs/runbooks/configure-woodpecker.md",
     "docs/workstreams/ws-0287-live-apply.md",
     "playbooks/woodpecker.yml",
-    "playbooks/services/woodpecker.yml",
-    "collections/ansible_collections/lv3/platform/playbooks/woodpecker.yml",
-    "collections/ansible_collections/lv3/platform/roles/woodpecker_postgres/",
-    "collections/ansible_collections/lv3/platform/roles/woodpecker_runtime/",
+    "playbooks/tasks/post-verify.yml",
+    "collections/ansible_collections/lv3/platform/playbooks/tasks/post-verify.yml",
+    "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2",
+    "collections/ansible_collections/lv3/platform/roles/woodpecker_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/woodpecker_runtime/meta/argument_specs.yml",
+    "collections/ansible_collections/lv3/platform/roles/woodpecker_runtime/tasks/main.yml",
     "platform/ansible/woodpecker.py",
-    "scripts/woodpecker_bootstrap.py",
     "scripts/woodpecker_tool.py",
     ".woodpecker.yml",
+    "tests/test_generate_platform_vars.py",
+    "tests/test_nginx_edge_publication_role.py",
+    "tests/test_post_verify_tasks.py",
+    "tests/test_woodpecker_client.py",
+    "tests/test_woodpecker_playbook.py",
+    "tests/test_woodpecker_runtime_role.py",
+    "tests/test_woodpecker_tool.py",
     "workstreams.yaml",
-    "receipts/live-applies/evidence/2026-03-30-ws-0287-validate-generated-vars-r1.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0287-syntax-check-woodpecker-r1.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0287-targeted-ansible-lint-r1.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0287-targeted-pytest-r1.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0287-validate-repo-r1.txt",
-    "receipts/live-applies/evidence/2026-03-30-ws-0287-live-apply-r1.txt"
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-live-apply-r11.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-live-apply-r12.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-live-apply-r13.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0287-live-apply-r14.txt",
+    "receipts/live-applies/2026-03-30-adr-0287-woodpecker-live-apply.json"
   ],
   "notes": [
-    "The latest realistic upstream checked during this workstream remained origin/main commit 4db2d1f4dc788fa391f3cf1bf39facfcac00c218.",
-    "The branch intentionally still leaves protected integration files unchanged: VERSION, release sections in changelog.md, versions/stack.yaml, and the top-level README mainline summary.",
-    "Finishing ADR 0287 now requires a successful DNS mutation for ci.lv3.org, which in turn requires either the end of the legacy Hetzner DNS brownout or a Hetzner Console API token after the broader DNS API migration."
+    "The latest realistic upstream checked during this workstream is `origin/main` commit `32696e7e523f0f1cd0fd3168d9701790b54f66e` with `VERSION` `0.177.109` and live platform baseline `0.130.72`.",
+    "The branch intentionally still leaves protected integration files unchanged: `VERSION`, release sections in `changelog.md`, `versions/stack.yaml`, and the top-level `README.md` mainline summary.",
+    "The remaining exact-main verification step is to land `.woodpecker.yml` on the forge branch being triggered, then rerun `make woodpecker-manage ACTION=trigger-pipeline WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main --wait'` from the integrated mainline tree."
   ]
 }

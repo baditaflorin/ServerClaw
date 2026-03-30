@@ -19,6 +19,7 @@ def test_woodpecker_runtime_defaults_bind_generated_topology_and_artifacts() -> 
     assert defaults["woodpecker_host_proxy_port"] == "{{ woodpecker_service_topology.ports.controller }}"
     assert defaults["woodpecker_public_url"] == "{{ woodpecker_service_topology.urls.public }}"
     assert defaults["woodpecker_controller_url"] == "{{ woodpecker_service_topology.urls.controller }}"
+    assert defaults["woodpecker_gitea_runtime_url"] == "{{ gitea_private_base_url }}"
     assert defaults["woodpecker_local_artifact_dir"].endswith("/.local/woodpecker")
     assert defaults["woodpecker_seed_repo_full_name"] == "ops/proxmox_florin_server"
 
@@ -47,15 +48,15 @@ def test_woodpecker_runtime_tasks_prepare_oauth_and_render_bootstrap_spec() -> N
     assert "scripts/woodpecker_bootstrap.py" in task_text
     assert "Render the Woodpecker bootstrap specification locally" in task_text
     assert "name: lv3.platform.common" in task_text
-    assert "Wait for the Gitea controller sign-in page before Woodpecker OAuth bootstrap" in task_text
+    assert "Wait for the Gitea sign-in page before Woodpecker OAuth bootstrap" in task_text
     assert "Wait for the Woodpecker local health endpoint" in task_text
     assert "woodpecker_version_path" in verify_text
 
-    gitea_wait_task = next(task for task in task_data if task["name"] == "Wait for the Gitea controller sign-in page before Woodpecker OAuth bootstrap")
+    gitea_wait_task = next(task for task in task_data if task["name"] == "Wait for the Gitea sign-in page before Woodpecker OAuth bootstrap")
     local_health_task = next(task for task in task_data if task["name"] == "Wait for the Woodpecker local health endpoint")
     verify_health_task = next(task for task in verify_data if task["name"] == "Verify the Woodpecker local health endpoint")
 
-    assert gitea_wait_task["ansible.builtin.uri"]["url"] == "{{ woodpecker_gitea_api_url }}/user/login"
+    assert gitea_wait_task["ansible.builtin.uri"]["url"] == "{{ woodpecker_gitea_runtime_url }}/user/login"
     assert gitea_wait_task["retries"] == 48
     assert gitea_wait_task["until"] == "woodpecker_gitea_login_page.status == 200"
     assert local_health_task["ansible.builtin.uri"]["status_code"] == [200, 204]

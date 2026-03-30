@@ -80,6 +80,7 @@ woodpecker_secret_smoke_events:
   - push
   - pull_request
   - manual
+woodpecker_gitea_runtime_url: "{{ gitea_private_base_url }}"
 woodpecker_gitea_api_url: "{{ gitea_controller_url }}"
 woodpecker_gitea_oauth_url: "{{ gitea_root_url }}"
 woodpecker_gitea_internal_api_url: http://gitea:3000

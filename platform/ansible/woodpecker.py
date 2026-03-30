@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import http.cookiejar
 import json
+import re
 import socket
 import time
 import urllib.error
@@ -120,6 +121,36 @@ def _pick_password_field(inputs: dict[str, dict[str, str]]) -> str:
     raise WoodpeckerError("The Gitea login form does not expose a password field")
 
 
+def _host_resolves(hostname: str | None) -> bool:
+    if not hostname:
+        return False
+    try:
+        socket.getaddrinfo(hostname, None)
+    except socket.gaierror:
+        return False
+    return True
+
+
+def _rewrite_url_if_host_unresolvable(url: str, fallback_base_url: str | None) -> str:
+    if not fallback_base_url:
+        return url
+    parsed = urllib.parse.urlsplit(url)
+    if not parsed.hostname or _host_resolves(parsed.hostname):
+        return url
+    fallback = urllib.parse.urlsplit(fallback_base_url.rstrip("/"))
+    if not fallback.scheme or not fallback.netloc:
+        return url
+    return urllib.parse.urlunsplit(
+        (
+            fallback.scheme,
+            fallback.netloc,
+            parsed.path,
+            parsed.query,
+            parsed.fragment,
+        )
+    )
+
+
 class _LoginFormParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
@@ -133,6 +164,7 @@ class _LoginFormParser(HTMLParser):
                 "action": attributes.get("action", ""),
                 "method": attributes.get("method", "get").lower(),
                 "inputs": {},
+                "buttons": [],
             }
             self._forms.append(self._current_form)
             return
@@ -141,6 +173,9 @@ class _LoginFormParser(HTMLParser):
             if not name:
                 return
             self._current_form["inputs"][name] = attributes
+            return
+        if tag == "button" and self._current_form is not None:
+            self._current_form["buttons"].append(attributes)
 
     def handle_endtag(self, tag: str) -> None:
         if tag == "form":
@@ -151,7 +186,13 @@ class _LoginFormParser(HTMLParser):
             action = str(form.get("action", "")).lower()
             if "/user/login" in action:
                 return form
-        return self._forms[0] if self._forms else None
+        for form in self._forms:
+            inputs = dict(form.get("inputs", {}))
+            if any(candidate in inputs for candidate in ("user_name", "username", "login", "email")) and any(
+                candidate in inputs for candidate in ("password", "passwd")
+            ):
+                return form
+        return None
 
 
 def _parse_login_form(html_text: str, base_url: str) -> tuple[str, dict[str, dict[str, str]], dict[str, str]]:
@@ -166,9 +207,65 @@ def _parse_login_form(html_text: str, base_url: str) -> tuple[str, dict[str, dic
     return action, inputs, payload
 
 
+def _pick_oauth_grant_form(html_text: str, base_url: str) -> tuple[str, dict[str, str]] | None:
+    parser = _LoginFormParser()
+    parser.feed(html_text)
+    for form in parser._forms:
+        action = str(form.get("action", "")).lower()
+        inputs = dict(form.get("inputs", {}))
+        if "/login/oauth/grant" not in action and not {"client_id", "redirect_uri", "state"}.issubset(inputs):
+            continue
+        payload = _hidden_inputs(inputs)
+        submit_fields: list[tuple[str, str]] = []
+        for name, attributes in inputs.items():
+            if attributes.get("type", "").lower() == "submit":
+                submit_fields.append((name, attributes.get("value", "")))
+        for attributes in form.get("buttons", []):
+            button_name = attributes.get("name", "").strip()
+            if not button_name:
+                continue
+            if attributes.get("type", "submit").lower() != "submit":
+                continue
+            submit_fields.append((button_name, attributes.get("value", "")))
+        if not submit_fields:
+            raise WoodpeckerError("The Gitea OAuth authorization page did not expose a grant button")
+        chosen_name, chosen_value = submit_fields[0]
+        for candidate_name, candidate_value in submit_fields:
+            if candidate_value.strip().lower() in {"true", "1", "yes", "allow", "authorize"}:
+                chosen_name, chosen_value = candidate_name, candidate_value
+                break
+        payload[chosen_name] = chosen_value
+        action_url = urllib.parse.urljoin(base_url, str(form.get("action") or "/login/oauth/grant"))
+        return action_url, payload
+    return None
+
+
+def _looks_like_html_document(payload: str | None) -> bool:
+    text = str(payload or "").lstrip().lower()
+    return text.startswith("<!doctype html") or text.startswith("<html") or "<html" in text[:256]
+
+
+def _parse_woodpecker_csrf_token(web_config_js: str) -> str | None:
+    match = re.search(r'window\.WOODPECKER_CSRF\s*=\s*"([^"]*)"', web_config_js)
+    if not match:
+        return None
+    token = match.group(1).strip()
+    return token or None
+
+
 class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         return None
+
+
+class _FallbackRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def __init__(self, *, fallback_base_url: str | None = None) -> None:
+        super().__init__()
+        self._fallback_base_url = fallback_base_url
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        rewritten = _rewrite_url_if_host_unresolvable(newurl, self._fallback_base_url)
+        return super().redirect_request(req, fp, code, msg, headers, rewritten)
 
 
 class GiteaClient:
@@ -379,6 +476,11 @@ class WoodpeckerClient:
                     expected_statuses=expected_statuses,
                     accept_json=accept_json,
                 )
+            except json.JSONDecodeError as exc:
+                last_error = exc
+                if accept_json:
+                    continue
+                raise WoodpeckerError(f"{method} {path} did not return JSON: {exc}") from exc
             except _HttpStatusError as exc:
                 last_error = exc
                 if exc.status == 404:
@@ -435,7 +537,7 @@ class WoodpeckerClient:
 
     def list_repository_secrets(self, repo_id: int) -> list[dict[str, Any]]:
         _status, payload = self._request_candidates(_api_candidates(f"/repos/{repo_id}/secrets"))
-        return payload
+        return list(payload or [])
 
     def create_repository_secret(self, repo_id: int, payload: dict[str, Any]) -> dict[str, Any]:
         _status, response = self._request_candidates(
@@ -487,7 +589,7 @@ class WoodpeckerClient:
             query["branch"] = branch
         suffix = "?" + urllib.parse.urlencode(query) if query else ""
         _status, payload = self._request_candidates(_api_candidates(f"/repos/{repo_id}/pipelines{suffix}"))
-        return payload
+        return list(payload or [])
 
     def trigger_pipeline(
         self,
@@ -501,7 +603,7 @@ class WoodpeckerClient:
             _api_candidates(f"/repos/{repo_id}/pipelines"),
             method="POST",
             payload=payload,
-            expected_statuses={200},
+            expected_statuses={200, 204},
         )
         return response
 
@@ -531,11 +633,21 @@ class WoodpeckerClient:
 
 
 class WoodpeckerSessionClient:
-    def __init__(self, base_url: str, *, verify_ssl: bool = True, timeout: int = 20):
+    def __init__(
+        self,
+        base_url: str,
+        *,
+        verify_ssl: bool = True,
+        timeout: int = 20,
+        redirect_fallback_base_url: str | None = None,
+    ):
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
+        self._redirect_fallback_base_url = redirect_fallback_base_url
+        self._woodpecker_csrf_token: str | None = None
         self._cookie_jar = http.cookiejar.CookieJar()
         cookie_handler = urllib.request.HTTPCookieProcessor(self._cookie_jar)
+        redirect_handler = _FallbackRedirectHandler(fallback_base_url=redirect_fallback_base_url)
         if not verify_ssl:
             import ssl
 
@@ -543,10 +655,10 @@ class WoodpeckerSessionClient:
             insecure_context.check_hostname = False
             insecure_context.verify_mode = ssl.CERT_NONE
             https_handler = urllib.request.HTTPSHandler(context=insecure_context)
-            self._opener = urllib.request.build_opener(cookie_handler, https_handler)
+            self._opener = urllib.request.build_opener(cookie_handler, https_handler, redirect_handler)
             self._no_redirect_opener = urllib.request.build_opener(cookie_handler, https_handler, _NoRedirectHandler())
         else:
-            self._opener = urllib.request.build_opener(cookie_handler)
+            self._opener = urllib.request.build_opener(cookie_handler, redirect_handler)
             self._no_redirect_opener = urllib.request.build_opener(cookie_handler, _NoRedirectHandler())
 
     def _request(
@@ -577,6 +689,7 @@ class WoodpeckerSessionClient:
         url = urllib.parse.urljoin(f"{self.base_url}/", url_or_path.lstrip("/"))
         if url_or_path.startswith("http://") or url_or_path.startswith("https://"):
             url = url_or_path
+        url = _rewrite_url_if_host_unresolvable(url, self._redirect_fallback_base_url)
         request = urllib.request.Request(url, data=data, method=method, headers=request_headers)
         opener = self._opener if follow_redirects else self._no_redirect_opener
         expected = expected_statuses or {200}
@@ -601,6 +714,19 @@ class WoodpeckerSessionClient:
             return status, json.loads(raw), response_headers, final_url
         return status, raw, response_headers, final_url
 
+    def _get_woodpecker_csrf_token(self) -> str | None:
+        if self._woodpecker_csrf_token is not None:
+            return self._woodpecker_csrf_token or None
+        _status, payload, _headers, _final_url = self._request(
+            "/web-config.js",
+            expected_statuses={200},
+            accept_json=False,
+            follow_redirects=True,
+        )
+        token = _parse_woodpecker_csrf_token(str(payload or ""))
+        self._woodpecker_csrf_token = token or ""
+        return token
+
     def login_via_gitea(self, username: str, password: str) -> dict[str, Any]:
         _status, html, _headers, final_url = self._request(
             "/authorize",
@@ -608,18 +734,48 @@ class WoodpeckerSessionClient:
             accept_json=False,
             follow_redirects=True,
         )
-        action_url, inputs, payload = _parse_login_form(str(html), final_url)
-        payload[_pick_username_field(inputs)] = username
-        payload[_pick_password_field(inputs)] = password
-        self._request(
-            action_url,
-            method="POST",
-            form=payload,
-            expected_statuses={200},
-            accept_json=False,
-            follow_redirects=True,
-            headers={"Referer": final_url},
-        )
+        current_html = str(html)
+        current_url = final_url
+        try:
+            action_url, inputs, payload = _parse_login_form(current_html, current_url)
+        except WoodpeckerError:
+            action_url = ""
+        else:
+            payload[_pick_username_field(inputs)] = username
+            payload[_pick_password_field(inputs)] = password
+            _status, html, _headers, final_url = self._request(
+                action_url,
+                method="POST",
+                form=payload,
+                expected_statuses={200},
+                accept_json=False,
+                follow_redirects=True,
+                headers={"Referer": current_url},
+            )
+            current_html = str(html)
+            current_url = final_url
+            try:
+                _parse_login_form(current_html, current_url)
+            except WoodpeckerError:
+                pass
+            else:
+                raise WoodpeckerError("The Gitea login flow returned to the sign-in page after submitting credentials")
+        grant_form = _pick_oauth_grant_form(current_html, current_url)
+        if grant_form is not None:
+            action_url, payload = grant_form
+            _status, html, _headers, final_url = self._request(
+                action_url,
+                method="POST",
+                form=payload,
+                expected_statuses={200},
+                accept_json=False,
+                follow_redirects=True,
+                headers={"Referer": current_url},
+            )
+            current_html = str(html)
+            current_url = final_url
+            if _pick_oauth_grant_form(current_html, current_url) is not None:
+                raise WoodpeckerError("The Gitea OAuth authorization page remained active after granting access")
         return self.get_user()
 
     def _request_candidates(
@@ -647,6 +803,11 @@ class WoodpeckerSessionClient:
                     follow_redirects=follow_redirects,
                     headers=headers,
                 )
+            except json.JSONDecodeError as exc:
+                last_error = exc
+                if accept_json:
+                    continue
+                raise WoodpeckerError(f"{method} {path} did not return JSON: {exc}") from exc
             except WoodpeckerError as exc:
                 last_error = exc
                 if "HTTP 404" in str(exc):
@@ -661,16 +822,31 @@ class WoodpeckerSessionClient:
         return payload
 
     def create_user_token(self) -> str:
-        _status, payload, _headers, _final_url = self._request_candidates(
-            _api_candidates("/user/token"),
-            method="POST",
-            expected_statuses={200},
-            accept_json=False,
-        )
-        token = str(payload or "").strip().strip('"')
-        if not token:
-            raise WoodpeckerError("Woodpecker did not return a usable user token")
-        return token
+        last_error: BaseException | None = None
+        csrf_token = self._get_woodpecker_csrf_token()
+        headers = {"X-CSRF-TOKEN": csrf_token} if csrf_token else None
+        for path in _api_candidates("/user/token"):
+            try:
+                _status, payload, _headers, _final_url = self._request(
+                    path,
+                    method="POST",
+                    expected_statuses={200},
+                    accept_json=False,
+                    headers=headers,
+                )
+            except WoodpeckerError as exc:
+                last_error = exc
+                if "HTTP 404" in str(exc):
+                    continue
+                raise
+            raw_token = str(payload or "").strip()
+            token = raw_token.strip('"')
+            if token and not _looks_like_html_document(raw_token):
+                return token
+            last_error = WoodpeckerError(f"POST {path} did not return a usable Woodpecker user token")
+        if last_error is not None:
+            raise WoodpeckerError(str(last_error)) from last_error
+        raise WoodpeckerError("Woodpecker did not expose any candidate user-token endpoint")
 
 
 def split_repository_full_name(full_name: str) -> tuple[str, str]:
@@ -771,7 +947,11 @@ def bootstrap_woodpecker(
             api_token = ""
 
     if client is None:
-        session = WoodpeckerSessionClient(login_base_url, verify_ssl=login_verify_ssl)
+        session = WoodpeckerSessionClient(
+            login_base_url,
+            verify_ssl=login_verify_ssl,
+            redirect_fallback_base_url=gitea_api_url,
+        )
         session.login_via_gitea(gitea_username, gitea_password)
         api_token = session.create_user_token()
         client = WoodpeckerClient(controller_base_url, api_token, verify_ssl=verify_ssl)

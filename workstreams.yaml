@@ -322,7 +322,9 @@ workstreams:
   - id: ws-0287-live-apply
     adr: "0287"
     title: Live apply Woodpecker CI as the API-driven continuous integration server from latest origin/main
-    status: in_progress
+    ready_to_merge: true
+    live_applied: true
+    status: live_applied
     owner: codex
     branch: codex/ws-0287-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0287-live-apply
@@ -459,10 +461,7 @@ workstreams:
             - receipts/live-applies/2026-03-30-adr-0287-*
             - receipts/live-applies/evidence/2026-03-30-ws-0287-*
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
-    blockers:
-      - Legacy Hetzner DNS writes for `ci.lv3.org` are currently blocked by the published `dns.hetzner.com` brownout response, so the live replay cannot advance past the DNS create step without either a brownout-free rerun or a Hetzner Console API token for the replacement API.
+    blockers: []
   - id: ws-0282-live-apply
     adr: "0282"
     title: Live apply Mailpit as the SMTP development mail interceptor from latest origin/main

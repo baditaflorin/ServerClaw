@@ -6,6 +6,7 @@ import argparse
 import json
 from pathlib import Path
 import sys
+import time
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -72,7 +73,11 @@ def build_client(auth_file: str) -> tuple[WoodpeckerClient, dict]:
     if not username or not password:
         raise WoodpeckerError("The Woodpecker auth file does not contain a usable username and password file")
 
-    session = WoodpeckerSessionClient(login_base_url, verify_ssl=login_verify_ssl)
+    session = WoodpeckerSessionClient(
+        login_base_url,
+        verify_ssl=login_verify_ssl,
+        redirect_fallback_base_url=str(auth.get("gitea_api_url") or "").strip() or None,
+    )
     session.login_via_gitea(username, password)
     api_token = session.create_user_token()
     auth["api_token"] = api_token
@@ -173,24 +178,87 @@ def command_list_pipelines(args) -> int:
     return 0
 
 
+def _pipeline_number(payload: dict | None) -> int | None:
+    if not isinstance(payload, dict):
+        return None
+    number = payload.get("number")
+    if number is None:
+        return None
+    return int(number)
+
+
+def _discover_triggered_pipeline(
+    client: WoodpeckerClient,
+    repo_id: int,
+    *,
+    branch: str,
+    timeout_seconds: int,
+    poll_seconds: int,
+    baseline: list[dict],
+) -> dict:
+    known_numbers = {
+        int(item["number"])
+        for item in baseline
+        if isinstance(item, dict) and item.get("number") is not None
+    }
+    deadline = time.monotonic() + timeout_seconds
+    latest: list[dict] = list(baseline)
+    while time.monotonic() < deadline:
+        latest = client.list_pipelines(repo_id, branch=branch)
+        candidates = [
+            item
+            for item in latest
+            if isinstance(item, dict) and item.get("number") is not None
+        ]
+        unseen = [item for item in candidates if int(item["number"]) not in known_numbers]
+        if unseen:
+            return max(unseen, key=lambda item: int(item["number"]))
+        time.sleep(poll_seconds)
+    raise WoodpeckerError(
+        "Woodpecker accepted the manual trigger request but no pipeline run became visible "
+        f"for branch {branch!r} within {timeout_seconds} seconds"
+    )
+
+
 def command_trigger_pipeline(args) -> int:
     client, auth = build_client(args.auth_file)
     repo = repository_for_action(client, auth, args.repo)
+    baseline = client.list_pipelines(int(repo["id"]), branch=args.branch) if args.wait else []
     payload = client.trigger_pipeline(
         int(repo["id"]),
         branch=args.branch,
         variables=dict(item.split("=", 1) for item in args.variable),
     )
     if args.wait:
+        number = _pipeline_number(payload)
+        if number is None:
+            payload = _discover_triggered_pipeline(
+                client,
+                int(repo["id"]),
+                branch=args.branch,
+                timeout_seconds=args.timeout,
+                poll_seconds=args.poll_interval,
+                baseline=baseline,
+            )
+            number = _pipeline_number(payload)
+        if number is None:
+            raise WoodpeckerError("Woodpecker did not return or expose a pipeline number for the triggered run")
         payload = client.wait_for_pipeline(
             int(repo["id"]),
-            int(payload["number"]),
+            number,
             timeout_seconds=args.timeout,
             poll_seconds=args.poll_interval,
         )
         print(json.dumps(payload, indent=2, sort_keys=True))
         state = str(payload.get("status") or payload.get("state") or "").strip().lower()
         return 0 if state == "success" else 1
+    if payload is None:
+        payload = {
+            "accepted": True,
+            "branch": args.branch,
+            "repo_id": int(repo["id"]),
+            "status": "accepted",
+        }
     print(json.dumps(payload, indent=2, sort_keys=True))
     return 0
 

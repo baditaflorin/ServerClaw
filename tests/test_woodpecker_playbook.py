@@ -32,7 +32,9 @@ def test_woodpecker_root_playbook_converges_proxy_postgres_runtime_and_edge() ->
         {"role": "lv3.platform.woodpecker_runtime"},
     ]
     verify = next(task for task in plays[3]["post_tasks"] if task["name"] == "Verify Woodpecker health probes")
+    post_verify = next(task for task in plays[3]["post_tasks"] if task["name"] == "Run shared post-verify checks")
     assert verify["ansible.builtin.include_role"]["name"] == "lv3.platform.woodpecker_runtime"
+    assert post_verify["vars"]["playbook_execution_verify_readiness"] is False
     assert plays[4]["roles"] == [{"role": "lv3.platform.nginx_edge_publication"}]
 
 

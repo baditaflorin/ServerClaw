@@ -206,9 +206,9 @@
   changed_when: "'changed' in woodpecker_secret_smoke_generation.stdout"
   no_log: true
 
-- name: Wait for the Gitea controller sign-in page before Woodpecker OAuth bootstrap
+- name: Wait for the Gitea sign-in page before Woodpecker OAuth bootstrap
   ansible.builtin.uri:
-    url: "{{ woodpecker_gitea_api_url }}/user/login"
+    url: "{{ woodpecker_gitea_runtime_url }}/user/login"
     method: GET
     status_code: 200
   register: woodpecker_gitea_login_page

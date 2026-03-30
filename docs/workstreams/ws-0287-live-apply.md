@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0287](../adr/0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md)
 - Title: deploy Woodpecker CI as the API-driven continuous integration server
-- Status: blocked
+- Status: live_applied
 - Branch: `codex/ws-0287-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0287-live-apply`
 - Owner: codex
@@ -74,20 +74,25 @@
 - `uv tool run --from ansible-lint ansible-lint playbooks/woodpecker.yml playbooks/services/woodpecker.yml collections/ansible_collections/lv3/platform/roles/woodpecker_postgres collections/ansible_collections/lv3/platform/roles/woodpecker_runtime collections/ansible_collections/lv3/platform/playbooks/woodpecker.yml`
 - `./scripts/validate_repo.sh json health-probes data-models agent-standards`
 - `uv run --with pytest --with pyyaml --with jsonschema python -m pytest tests/test_generate_platform_vars.py tests/test_postgres_vm_access_policy.py tests/test_woodpecker_playbook.py tests/test_woodpecker_runtime_role.py tests/test_woodpecker_client.py tests/test_validate_service_catalog.py tests/test_validate_service_completeness.py tests/test_subdomain_catalog.py tests/test_service_redundancy.py tests/test_workstream_surface_ownership.py tests/test_ansible_execution_scopes.py tests/test_ansible_role_idempotency.py tests/test_data_catalog.py tests/test_subdomain_exposure_audit.py -q`
-- `HETZNER_DNS_API_TOKEN=... make converge-woodpecker env=production` reached the live Hetzner DNS mutation step and then failed while creating the `ci.lv3.org` A record because the legacy `dns.hetzner.com` write API returned the published brownout/shutdown response.
+- `HETZNER_DNS_API_TOKEN=... make converge-woodpecker env=production` completed successfully on replay `r14`, converging the Proxmox proxy lane, PostgreSQL access, Woodpecker runtime, `ci.lv3.org` edge publication, a dedicated `ci.lv3.org` Let's Encrypt certificate, and the controller-local bootstrap artifacts plus seed repository secret.
+- `curl -fsS http://100.64.0.1:8017/healthz`
+- `curl -fsSI https://ci.lv3.org/healthz`
+- `openssl s_client -connect ci.lv3.org:443 -servername ci.lv3.org </dev/null 2>/dev/null | openssl x509 -noout -subject -issuer -ext subjectAltName`
+- `make woodpecker-manage ACTION=whoami`
+- `make woodpecker-manage ACTION=list-secrets WOODPECKER_ARGS='--repo ops/proxmox_florin_server'`
 
-## Blocker
+## Live Apply State
 
-- Latest realistic upstream remains `origin/main` commit `4db2d1f4dc788fa391f3cf1bf39facfcac00c218`.
-- The first live replay from this worktree is recorded in `receipts/live-applies/evidence/2026-03-30-ws-0287-live-apply-r1.txt`.
-- Direct provider probes reproduced the failure outside the Ansible wrapper: the legacy Hetzner DNS `POST /records` call for `ci.lv3.org -> 65.108.75.123` returned a brownout payload with provider error code `503`.
-- Because `playbooks/woodpecker.yml` performs the Hetzner DNS reconcile before the PostgreSQL/runtime/bootstrap stages, the Woodpecker runtime itself is not yet live on this branch.
-- Completion now requires one of:
-  - a successful rerun after the provider brownout ends, while the legacy DNS token still works
-  - or a Hetzner Console API token plus the broader DNS-API migration path for `lv3.org`
+- Latest realistic upstream is `origin/main` commit `32696e7e523f0f1cd0fd3168d9701790b54f66e`, which currently carries `VERSION` `0.177.109` and platform baseline `0.130.72`.
+- The successful branch-local replay is recorded in `receipts/live-applies/evidence/2026-03-30-ws-0287-live-apply-r14.txt`.
+- The public edge role now falls back to a dedicated site-local certificate for `ci.lv3.org` when the shared `lv3-edge` certificate does not yet cover the Woodpecker hostname, so unrelated SAN churn on the shared edge certificate no longer blocks the live apply.
+- The controller-local Woodpecker API bundle is verified live: `whoami` resolves to `ops-gitea` admin user `id=1`, and the seeded repository secret list contains `LV3_WOODPECKER_SECRET_SMOKE`.
+- Manual `trigger-pipeline --branch main --wait` is not yet a valid exact-main verification on this branch because `origin/main` still does not contain `.woodpecker.yml`; Woodpecker accepts the trigger request with `204 No Content`, but no pipeline becomes visible until the forge branch being triggered actually carries the workflow file.
 
 ## Remaining For Merge-To-Main
 
 - Do not update `VERSION`, release sections in `changelog.md`, the top-level integrated `README.md` summary, or `versions/stack.yaml` on this branch.
-- The protected integration files still must wait for the final exact-main replay.
-- Before merge-to-`main`, rerun `make converge-woodpecker env=production`, verify `http://100.64.0.1:8017/healthz`, `https://ci.lv3.org/healthz`, `make woodpecker-manage ACTION=whoami`, `make woodpecker-manage ACTION=list-secrets WOODPECKER_ARGS='--repo ops/proxmox_florin_server'`, and `make woodpecker-manage ACTION=trigger-pipeline WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main --wait'`.
+- The protected integration files still must wait for the final exact-main replay from the latest `origin/main`.
+- Rebase or merge this branch onto `origin/main` commit `32696e7e523f0f1cd0fd3168d9701790b54f66e` before cutting the mainline integration commit.
+- Update `VERSION`, the release notes in `changelog.md`, the top-level `README.md` integrated truth, and `versions/stack.yaml` only on the final mainline integration step.
+- After the mainline commit is pushed and the forge branch being tested contains `.woodpecker.yml`, rerun `make woodpecker-manage ACTION=trigger-pipeline WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main --wait'` and record the exact-main verification receipt.
