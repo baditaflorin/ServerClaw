@@ -176,7 +176,7 @@ atlas-refresh-snapshots:
 	$(REPO_ROOT)/scripts/run_python_with_packages.sh docker pyyaml -- scripts/atlas_schema.py snapshot --repo-root $(REPO_ROOT) --write
 
 atlas-drift-check:
-	$(REPO_ROOT)/scripts/run_python_with_packages.sh docker pyyaml -- scripts/atlas_schema.py drift --repo-root $(REPO_ROOT) --write-receipts --publish-nats --publish-ntfy
+	$(REPO_ROOT)/scripts/run_python_with_packages.sh docker nats-py pyyaml -- scripts/atlas_schema.py drift --repo-root $(REPO_ROOT) --write-receipts --publish-nats --publish-ntfy
 
 backup-coverage-ledger:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/backup_coverage_ledger.py --write-receipt

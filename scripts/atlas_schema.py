@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import difflib
 import hashlib
 import json
@@ -92,7 +93,12 @@ def load_catalog(catalog_path: Path) -> dict[str, Any]:
     return require_mapping(catalog, str(catalog_path))
 
 
-def validate_catalog(catalog: dict[str, Any], *, repo_root: Path) -> None:
+def validate_catalog(
+    catalog: dict[str, Any],
+    *,
+    repo_root: Path,
+    require_snapshot_files: bool = True,
+) -> None:
     if catalog.get("schema_version") != SUPPORTED_SCHEMA_VERSION:
         raise ValueError(
             f"config/atlas/catalog.json.schema_version must be '{SUPPORTED_SCHEMA_VERSION}'"
@@ -189,6 +195,8 @@ def validate_catalog(catalog: dict[str, Any], *, repo_root: Path) -> None:
             raise ValueError(f"duplicate Atlas snapshot path '{snapshot_path}'")
         snapshot_paths.add(snapshot_path)
         snapshot_file = repo_root / snapshot_path
+        if not require_snapshot_files and not snapshot_file.exists():
+            continue
         if not snapshot_file.is_file():
             raise ValueError(f"{entry_path}.snapshot_path references missing file '{snapshot_path}'")
         if not snapshot_file.read_text(encoding="utf-8").strip():
@@ -635,7 +643,6 @@ def maybe_publish_ntfy(
         }
 
     password = password_path.read_text(encoding="utf-8").strip()
-    token = urllib.parse.quote(f"{username}:{password}", safe="")
     request = urllib.request.Request(
         url,
         data=(
@@ -643,7 +650,7 @@ def maybe_publish_ntfy(
         ).encode("utf-8"),
         headers={
             "Authorization": "Basic "
-            + urllib.parse.quote_from_bytes(f"{username}:{password}".encode("utf-8"), safe=""),
+            + base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii"),
             "Title": "Atlas drift detected",
             "Priority": "high",
             "Tags": "warning,atlas,postgres",
@@ -655,7 +662,7 @@ def maybe_publish_ntfy(
             if response.status >= 300:
                 raise RuntimeError(f"ntfy publish failed with HTTP {response.status}")
     except Exception as exc:  # noqa: BLE001
-        return {"published": False, "count": 0, "reason": str(exc), "auth_token_length": len(token)}
+        return {"published": False, "count": 0, "reason": str(exc)}
     return {"published": True, "count": len(drifted_ids)}
 
 
@@ -727,7 +734,7 @@ def run_snapshot(
     write: bool,
 ) -> tuple[int, dict[str, Any]]:
     catalog = load_catalog(catalog_path)
-    validate_catalog(catalog, repo_root=repo_root)
+    validate_catalog(catalog, repo_root=repo_root, require_snapshot_files=not write)
     selected_ids = set(database_ids)
     databases = [
         require_mapping(entry, "config/atlas/catalog.json.databases[]")

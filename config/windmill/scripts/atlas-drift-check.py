@@ -28,6 +28,7 @@ def main(
     command = [
         str(package_runner),
         "docker",
+        "nats-py",
         "pyyaml",
         "--",
         "scripts/atlas_schema.py",

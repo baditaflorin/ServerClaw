@@ -81,3 +81,51 @@ def test_diff_preview_is_bounded() -> None:
     assert preview[0].startswith("--- windmill-snapshot")
     assert preview[-1] == "... diff truncated ..."
     assert len(preview) == 201
+
+
+def test_validate_catalog_allows_bootstrap_snapshot_creation(tmp_path: Path) -> None:
+    atlas_schema = load_module()
+    (tmp_path / "migrations").mkdir()
+    catalog = {
+        "schema_version": "1.0.0",
+        "atlas_image_ref": "docker.io/arigaio/atlas:test",
+        "dev_postgres_image": "docker.io/library/postgres:16",
+        "runtime": {
+            "openbao_guest": "docker-runtime-lv3",
+            "openbao_url": "http://127.0.0.1:8201",
+            "postgres_guest": "postgres-lv3",
+            "postgres_port": 5432,
+        },
+        "openbao": {
+            "approle_secret_id": "openbao_atlas_approle",
+            "database_role": "postgres-atlas-readonly",
+        },
+        "notifications": {
+            "nats_subject": "platform.db.schema_drift",
+            "ntfy": {
+                "url": "http://10.10.10.20:2586/platform.db.warn",
+                "username": "alertmanager",
+                "password_secret_id": "ntfy_alertmanager_password",
+            },
+        },
+        "receipts": {
+            "drift_dir": "receipts/atlas-drift",
+        },
+        "lint_targets": [
+            {
+                "id": "platform-control-plane",
+                "path": "migrations",
+                "triggers": ["migrations/"],
+                "dev_database": "atlas_lint",
+            }
+        ],
+        "databases": [
+            {
+                "id": "windmill",
+                "database": "windmill",
+                "snapshot_path": "config/atlas/windmill.hcl",
+            }
+        ],
+    }
+
+    atlas_schema.validate_catalog(catalog, repo_root=tmp_path, require_snapshot_files=False)

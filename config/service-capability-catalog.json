@@ -1928,6 +1928,7 @@
       ],
       "secret_catalog_ids": [
         "openbao_controller_approle",
+        "openbao_atlas_approle",
         "openbao_mail_platform_approle"
       ],
       "adr": "0043",

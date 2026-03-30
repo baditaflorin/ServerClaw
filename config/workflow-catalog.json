@@ -1953,6 +1953,7 @@
           "openbao_breakglass_password",
           "openbao_postgres_rotator_password",
           "openbao_controller_approle",
+          "openbao_atlas_approle",
           "openbao_mail_platform_approle"
         ]
       },
@@ -2651,6 +2652,58 @@
       "budget": {
         "max_duration_seconds": 1800,
         "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
+    },
+    "atlas-drift-check": {
+      "description": "Run the ADR 0304 Atlas schema drift check against the live PostgreSQL databases and publish structured receipts plus notifications for drift findings.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "atlas-drift-check",
+        "command": "make atlas-drift-check"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "nats_jetstream_admin_password",
+          "ntfy_alertmanager_password",
+          "openbao_atlas_approle"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-atlas.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/atlas/catalog.json",
+        "config/windmill/scripts/atlas-drift-check.py",
+        "docs/adr/0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md",
+        "docs/runbooks/configure-atlas.md",
+        "receipts/atlas-drift",
+        "scripts/atlas_schema.py",
+        "tests/test_atlas_drift_check_windmill.py",
+        "tests/test_atlas_schema.py"
+      ],
+      "outputs": [
+        "A structured Atlas schema drift summary across the declared PostgreSQL databases together with one receipt per drifted database and optional NATS plus ntfy notifications."
+      ],
+      "verification_commands": [
+        "make atlas-validate",
+        "make atlas-lint",
+        "python3 config/windmill/scripts/atlas-drift-check.py --repo-path /srv/proxmox_florin_server --no-publish-nats --no-publish-ntfy"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 220,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 2,
         "max_restarts": 0,

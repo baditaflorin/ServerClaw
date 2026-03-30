@@ -81,6 +81,19 @@ def test_openbao_runtime_defaults_use_postgres_primary_address() -> None:
     assert "revocation_statements:" in defaults
     assert '- !unsafe \'DROP ROLE IF EXISTS "{{ name }}";\'' in defaults
     assert "openbao_http_extra_bind_addresses: []" in defaults
+    assert 'openbao_atlas_approle_local_file: "{{ openbao_local_artifact_dir }}/atlas-approle.json"' in defaults
+    assert 'path "database/creds/postgres-atlas-readonly"' in (
+        REPO_ROOT
+        / "collections"
+        / "ansible_collections"
+        / "lv3"
+        / "platform"
+        / "roles"
+        / "openbao_runtime"
+        / "templates"
+        / "policy-lv3-agent-atlas.hcl.j2"
+    ).read_text(encoding="utf-8")
+    assert '  - postgres-atlas-readonly' in defaults
 
 
 def test_generated_platform_vars_pin_openbao_to_postgres_primary_ip() -> None:
@@ -203,7 +216,17 @@ def test_openbao_runtime_recovers_dnat_chain_failures_during_compose_startup() -
 def test_openbao_runtime_persisted_approles_use_reusable_secret_ids() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
 
-    assert defaults.count("secret_id_num_uses: 0") >= 3
+    assert defaults.count("secret_id_num_uses: 0") >= 4
+
+
+def test_openbao_runtime_verifies_the_atlas_approle_path() -> None:
+    tasks = read_openbao_runtime_tasks_text()
+
+    assert "Read the Atlas AppRole artifact" in tasks
+    assert "openbao_atlas_approle_raw" in tasks
+    assert "Login with the Atlas AppRole" in tasks
+    assert "Request a PostgreSQL schema-inspection credential through the Atlas AppRole" in tasks
+    assert "postgres-atlas-readonly" in tasks
 
 
 def test_openbao_runtime_rechecks_seal_state_before_auth_verification() -> None:
@@ -395,3 +418,6 @@ def test_openbao_playbook_refreshes_secret_ids_from_local_artifacts() -> None:
         task for task in tasks if task["name"] == "Persist refreshed AppRole artifacts locally after end-to-end verification"
     )
     assert "openbao_refresh_existing_artifacts[item.item.name].role_id" in persist_task["ansible.builtin.copy"]["content"]
+    assert {"name": "atlas", "local_file": "{{ openbao_atlas_approle_local_file }}"} in refresh_play["vars"][
+        "openbao_verification_approles"
+    ]

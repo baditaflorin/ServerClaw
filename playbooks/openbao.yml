@@ -133,9 +133,18 @@
       register: openbao_verify_controller_approle_raw
       no_log: true
 
+    - name: Read the Atlas AppRole artifact
+      ansible.builtin.slurp:
+        src: "{{ openbao_atlas_approle_local_file }}"
+      delegate_to: localhost
+      become: false
+      register: openbao_verify_atlas_approle_raw
+      no_log: true
+
     - name: Record controller AppRole verification facts
       ansible.builtin.set_fact:
         openbao_verify_controller_approle: "{{ openbao_verify_controller_approle_raw.content | b64decode | from_json }}"
+        openbao_verify_atlas_approle: "{{ openbao_verify_atlas_approle_raw.content | b64decode | from_json }}"
       no_log: true
 
     - name: Login to OpenBao as the controller AppRole
@@ -194,6 +203,45 @@
           - openbao_verify_postgres_login.stdout | trim == openbao_verify_postgres_dynamic_credential.json.data.username
         fail_msg: "The OpenBao-issued PostgreSQL dynamic credential could not authenticate successfully."
 
+    - name: Login to OpenBao as the Atlas AppRole
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/login"
+        method: POST
+        body_format: json
+        body:
+          role_id: "{{ openbao_verify_atlas_approle.role_id }}"
+          secret_id: "{{ openbao_verify_atlas_approle.secret_id }}"
+        return_content: true
+        status_code: 200
+      delegate_to: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+      register: openbao_verify_atlas_login
+      no_log: true
+
+    - name: Request an Atlas PostgreSQL schema-inspection credential
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/database/creds/postgres-atlas-readonly"
+        method: GET
+        headers:
+          X-Vault-Token: "{{ openbao_verify_atlas_login.json.auth.client_token }}"
+        return_content: true
+        status_code: 200
+      delegate_to: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+      register: openbao_verify_atlas_dynamic_credential
+      retries: 6
+      delay: 5
+      until:
+        - openbao_verify_atlas_dynamic_credential.status == 200
+        - (openbao_verify_atlas_dynamic_credential.json.data.username | default('')) | length > 0
+      no_log: true
+
+    - name: Assert the Atlas PostgreSQL schema-inspection credential was issued
+      ansible.builtin.assert:
+        that:
+          - openbao_verify_atlas_dynamic_credential.status == 200
+          - openbao_verify_atlas_dynamic_credential.json.data.username | default('') | length > 0
+          - openbao_verify_atlas_dynamic_credential.json.data.password | default('') | length > 0
+        fail_msg: "The Atlas AppRole could not request the expected PostgreSQL schema-inspection credential."
+
 - name: Refresh persisted OpenBao AppRole artifacts after end-to-end verification
   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'runtime-control-lv3' }}"
   become: true
@@ -206,6 +254,8 @@
     openbao_verification_approles:
       - name: controller-automation
         local_file: "{{ openbao_controller_approle_local_file }}"
+      - name: atlas
+        local_file: "{{ openbao_atlas_approle_local_file }}"
       - name: mail-platform
         local_file: "{{ openbao_mail_platform_approle_local_file }}"
 

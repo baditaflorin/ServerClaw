@@ -63,6 +63,7 @@ def test_default_operations_surface_verification_paths_are_declared() -> None:
     ).read_text()
 
     expected_paths = {
+        "f/lv3/atlas_drift_check",
         "f/lv3/post_merge_gate",
         "f/lv3/nightly_integration_tests",
         "f/lv3/serverclaw_skills",

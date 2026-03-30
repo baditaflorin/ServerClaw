@@ -50,6 +50,7 @@ def test_wrapper_executes_repo_script_and_parses_clean_json(monkeypatch, tmp_pat
 
     assert payload["status"] == "ok"
     assert captured["cwd"] == repo_root
+    assert captured["command"][1:4] == ["docker", "nats-py", "pyyaml"]
     assert "scripts/atlas_schema.py" in captured["command"]
     assert payload["report"] == {"status": "clean", "drift_count": 0}
 

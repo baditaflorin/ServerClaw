@@ -68,6 +68,7 @@ openbao_ops_password_local_file: "{{ openbao_local_artifact_dir }}/ops-password.
 openbao_breakglass_password_local_file: "{{ openbao_local_artifact_dir }}/breakglass-password.txt"
 openbao_postgres_rotator_password_local_file: "{{ openbao_local_artifact_dir }}/postgres-rotator-password.txt"
 openbao_controller_approle_local_file: "{{ openbao_local_artifact_dir }}/controller-automation-approle.json"
+openbao_atlas_approle_local_file: "{{ openbao_local_artifact_dir }}/atlas-approle.json"
 openbao_mail_platform_approle_local_file: "{{ openbao_local_artifact_dir }}/mail-platform-approle.json"
 openbao_secret_rotation_approle_local_file: "{{ openbao_local_artifact_dir }}/secret-rotation-approle.json"
 openbao_secret_catalog_file: "{{ playbook_dir }}/../config/secret-catalog.json"
@@ -94,6 +95,8 @@ openbao_policies:
     src: policy-lv3-breakglass.hcl.j2
   - name: lv3-agent-controller
     src: policy-lv3-agent-controller.hcl.j2
+  - name: lv3-agent-atlas
+    src: policy-lv3-agent-atlas.hcl.j2
   - name: lv3-agent-secret-rotation
     src: policy-lv3-agent-secret-rotation.hcl.j2
   - name: lv3-service-mail-platform
@@ -108,6 +111,15 @@ openbao_approles:
     secret_id_ttl: 15m
     secret_id_num_uses: 0
     local_file: "{{ openbao_controller_approle_local_file }}"
+  - name: atlas
+    policies:
+      - lv3-agent-atlas
+    token_ttl: 15m
+    token_max_ttl: 1h
+    token_num_uses: 0
+    secret_id_ttl: 15m
+    secret_id_num_uses: 0
+    local_file: "{{ openbao_atlas_approle_local_file }}"
   - name: mail-platform
     policies:
       - lv3-service-mail-platform
@@ -133,6 +145,7 @@ openbao_database_mount_path: database
 openbao_database_name: lv3-postgres
 openbao_database_allowed_roles:
   - postgres-readonly
+  - postgres-atlas-readonly
 openbao_database_connection_url: >-
   postgresql://{{ "{{username}}" }}:{{ "{{password}}" }}@{{ openbao_postgres_host }}:5432/postgres?sslmode=disable
 openbao_database_plugin_name: postgresql-database-plugin
@@ -145,6 +158,15 @@ openbao_database_roles:
       - !unsafe 'GRANT pg_read_all_data TO "{{ name }}";'
     revocation_statements:
       - !unsafe 'DROP ROLE IF EXISTS "{{ name }}";'
+    default_ttl: 1h
+    max_ttl: 24h
+  - name: postgres-atlas-readonly
+    db_name: "{{ openbao_database_name }}"
+    creation_statements: !unsafe |-
+      CREATE ROLE "{{name}}" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';
+      GRANT pg_read_all_data TO "{{name}}";
+    revocation_statements: !unsafe |-
+      DROP ROLE IF EXISTS "{{name}}";
     default_ttl: 1h
     max_ttl: 24h
 openbao_seeded_secret_paths:

@@ -513,6 +513,7 @@ validate_data_models() {
   "$PYTHON_BIN" "$REPO_ROOT/scripts/validate_service_completeness.py" --validate >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/agent_tool_registry.py" --export-mcp >/dev/null
   "$PYTHON_BIN" "$REPO_ROOT/scripts/mutation_audit.py" --validate-schema >/dev/null
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/atlas_schema.py" validate --repo-root "$REPO_ROOT" >/dev/null
 }
 
 validate_policy() {

@@ -571,7 +571,9 @@ def test_gate_status_workflow_catalog_and_windmill_seed_align() -> None:
     script_paths = {entry["path"] for entry in runtime_defaults["windmill_seed_scripts"]}
 
     assert "config/windmill/scripts/gate-status.py" in catalog["workflows"]["gate-status"]["implementation_refs"]
+    assert "config/windmill/scripts/atlas-drift-check.py" in catalog["workflows"]["atlas-drift-check"]["implementation_refs"]
     assert "config/windmill/scripts/stage-smoke-suites.py" in catalog["workflows"]["stage-smoke-suites"]["implementation_refs"]
+    assert "f/lv3/atlas_drift_check" in script_paths
     assert "f/lv3/gate-status" in script_paths
     assert "f/lv3/stage-smoke-suites" in script_paths
 
