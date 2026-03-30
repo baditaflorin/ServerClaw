@@ -51,16 +51,48 @@ jobs:
           apt-get update
           apt-get install -y --no-install-recommends docker.io
 
+      - name: Discover runner host paths
+        run: |
+          set -euo pipefail
+          docker_bin="$(command -v docker || command -v docker.io || true)"
+          if [ -z "${docker_bin}" ]; then
+            echo "Docker CLI is unavailable after bootstrap." >&2
+            exit 1
+          fi
+          discover_workspace_host_path() {
+            current_container_id="${HOSTNAME:-$(hostname)}"
+            workspace_host_path="$("${docker_bin}" inspect "${current_container_id}" --format "{{range .Mounts}}{{if eq .Destination \"${PWD}\"}}{{.Source}}{{end}}{{end}}" 2>/dev/null || true)"
+            if [ -n "${workspace_host_path}" ]; then
+              printf '%s\n' "${workspace_host_path}"
+              return 0
+            fi
+            "${docker_bin}" ps --filter "id=${current_container_id}" -q | while read -r container_id; do
+              "${docker_bin}" inspect "${container_id}" --format "{{range .Mounts}}{{if eq .Destination \"${PWD}\"}}{{.Source}}{{end}}{{end}}"
+            done | python3 -c 'import sys; lines=[line.strip() for line in sys.stdin if line.strip()]; print(lines[0] if lines else "", end="")'
+          }
+          discover_bootstrap_host_dir() {
+            "${docker_bin}" ps -q | while read -r container_id; do
+              "${docker_bin}" inspect "${container_id}" --format "{{range .Mounts}}{{if eq .Destination \"/var/run/lv3/renovate\"}}{{.Source}}{{end}}{{end}}"
+            done | python3 -c 'import sys; lines=[line.strip() for line in sys.stdin if line.strip()]; print(lines[0] if lines else "", end="")'
+          }
+          workspace_host_path="$(discover_workspace_host_path)"
+          if [ -z "${workspace_host_path}" ]; then
+            echo "Unable to determine the hosted workspace source path." >&2
+            exit 1
+          fi
+          bootstrap_host_dir="$(discover_bootstrap_host_dir)"
+          if [ -z "${bootstrap_host_dir}" ]; then
+            echo "Unable to determine the Renovate bootstrap credential host path." >&2
+            exit 1
+          fi
+          printf '%s\n' "${workspace_host_path}" > .tmp/workspace-host.path
+          printf '%s\n' "${bootstrap_host_dir}" > .tmp/bootstrap-host.path
+
       - name: Mint a short-lived Renovate token
         run: |
           set -euo pipefail
-          : "${GITEA_RUNNER_HOST_DATA_DIR:?GITEA_RUNNER_HOST_DATA_DIR must be set by the self-hosted runner}"
-          case "$PWD" in
-            /data/*) workspace_host_path="${GITEA_RUNNER_HOST_DATA_DIR}${PWD#/data}" ;;
-            *) echo "Unexpected workspace path: $PWD" >&2; exit 1 ;;
-          esac
-          runner_host_root="$(dirname "${GITEA_RUNNER_HOST_DATA_DIR}")"
-          bootstrap_host_dir="${runner_host_root}/credentials/renovate"
+          workspace_host_path="$(cat .tmp/workspace-host.path)"
+          bootstrap_host_dir="$(cat .tmp/bootstrap-host.path)"
           test -d "${workspace_host_path}"
           test -s "${bootstrap_host_dir}/renovate.env"
           docker run --rm \
@@ -85,10 +117,7 @@ jobs:
       - name: Run Renovate through the pinned Harbor image
         run: |
           set -euo pipefail
-          case "$PWD" in
-            /data/*) workspace_host_path="${GITEA_RUNNER_HOST_DATA_DIR}${PWD#/data}" ;;
-            *) echo "Unexpected workspace path: $PWD" >&2; exit 1 ;;
-          esac
+          workspace_host_path="$(cat .tmp/workspace-host.path)"
           test -d "${workspace_host_path}"
           set -a
           . "${RENOVATE_RUNTIME_ENV}"
@@ -110,13 +139,8 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-          : "${GITEA_RUNNER_HOST_DATA_DIR:?GITEA_RUNNER_HOST_DATA_DIR must be set by the self-hosted runner}"
-          case "$PWD" in
-            /data/*) workspace_host_path="${GITEA_RUNNER_HOST_DATA_DIR}${PWD#/data}" ;;
-            *) echo "Unexpected workspace path: $PWD" >&2; exit 1 ;;
-          esac
-          runner_host_root="$(dirname "${GITEA_RUNNER_HOST_DATA_DIR}")"
-          bootstrap_host_dir="${runner_host_root}/credentials/renovate"
+          workspace_host_path="$(cat .tmp/workspace-host.path)"
+          bootstrap_host_dir="$(cat .tmp/bootstrap-host.path)"
           if [ -s "${bootstrap_host_dir}/renovate.env" ]; then
             docker run --rm \
               --network host \

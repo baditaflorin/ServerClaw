@@ -46,9 +46,10 @@ def test_renovate_workflow_uses_harbor_pinned_image_and_runtime_token_helper() -
     assert "ghcr.io/renovatebot/renovate" not in workflow
     assert "scripts/renovate_runtime_token.py create" in workflow
     assert "scripts/renovate_runtime_token.py cleanup" in workflow
-    assert 'case "$PWD" in' in workflow
-    assert 'workspace_host_path="${GITEA_RUNNER_HOST_DATA_DIR}${PWD#/data}"' in workflow
-    assert 'bootstrap_host_dir="${runner_host_root}/credentials/renovate"' in workflow
+    assert "Discover runner host paths" in workflow
+    assert 'current_container_id="${HOSTNAME:-$(hostname)}"' in workflow
+    assert '.tmp/workspace-host.path' in workflow
+    assert '.tmp/bootstrap-host.path' in workflow
     assert '-v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro"' in workflow
     assert 'RENOVATE_HELPER_IMAGE: registry.lv3.org/check-runner/python:3.12.10@sha256:' in workflow
 
