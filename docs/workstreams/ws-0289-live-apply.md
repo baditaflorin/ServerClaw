@@ -3,61 +3,26 @@
 - ADR: [ADR 0289](../adr/0289-directus-as-the-rest-graphql-data-api-layer-over-postgres.md)
 - Title: Deploy Directus on `docker-runtime-lv3`, back it with managed Postgres, publish `data.lv3.org`, and verify REST and GraphQL access end to end
 - Status: live_applied
-- Branch: `codex/ws-0289-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-live-apply`
+- Included In Repo Version: 0.177.109
+- Exact-Main Replay Source Version: 0.177.108
+- Branch-Local Receipt: `receipts/live-applies/2026-03-30-adr-0289-directus-live-apply.json`
+- Canonical Mainline Receipt: `receipts/live-applies/2026-03-30-adr-0289-directus-mainline-live-apply.json`
+- Live Applied In Platform Version: 0.130.72
+- Observed Platform Baseline During Replay: 0.130.71
+- Implemented On: 2026-03-30
+- Live Applied On: 2026-03-30
+- Branch: `codex/ws-0289-main-release`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-main-release`
 - Owner: codex
 - Depends On: `adr-0021-public-subdomain-publication`, `adr-0042-postgresql-as-the-shared-relational-database`, `adr-0063-keycloak-sso-for-internal-services`, `adr-0077-compose-secrets-injection`, `adr-0086-backup-and-recovery`, `adr-0191-immutable-guest-replacement`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0289-live-apply.md`, `docs/adr/0289-directus-as-the-rest-graphql-data-api-layer-over-postgres.md`, `docs/runbooks/configure-directus.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `roles/directus_postgres/`, `roles/directus_runtime/`, `roles/keycloak_runtime/`, `playbooks/directus.yml`, `playbooks/services/directus.yml`, `config/*catalog*.json`, `Makefile`, `tests/`, `receipts/image-scans/`, `receipts/live-applies/`
+- Shared Surfaces: `workstreams.yaml`, `docs/workstreams/ws-0289-live-apply.md`, `docs/adr/0289-directus-as-the-rest-graphql-data-api-layer-over-postgres.md`, `docs/runbooks/configure-directus.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `roles/directus_postgres/`, `roles/directus_runtime/`, `roles/keycloak_runtime/`, `playbooks/directus.yml`, `playbooks/services/directus.yml`, `config/*catalog*.json`, `Makefile`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/release-notes/`, `versions/stack.yaml`, `build/platform-manifest.json`, `receipts/ops-portal-snapshot.html`, and `receipts/live-applies/`
 
 ## Scope
 
 - replace the placeholder Directus scaffold with a repo-managed Postgres, runtime, Keycloak, bootstrap, and verification implementation
-- live apply the service from the latest `origin/main` baseline on the shared LV3 platform
-- record enough branch-local evidence that a later merge or exact-main integration can proceed safely
-
-## Non-Goals
-
-- updating protected integration-only files before this branch is ready for the final `main` step
-- treating Directus itself as the platform API gateway
-- leaving GUI-only bootstrap steps undocumented or unautomated
-
-## Expected Repo Surfaces
-
-- `workstreams.yaml`
-- `docs/workstreams/ws-0289-live-apply.md`
-- `docs/adr/0289-directus-as-the-rest-graphql-data-api-layer-over-postgres.md`
-- `docs/runbooks/configure-directus.md`
-- `inventory/host_vars/proxmox_florin.yml`
-- `inventory/group_vars/platform.yml`
-- `scripts/generate_platform_vars.py`
-- `roles/directus_postgres/`
-- `roles/directus_runtime/`
-- `roles/keycloak_runtime/`
-- `collections/ansible_collections/lv3/platform/roles/directus_postgres/`
-- `collections/ansible_collections/lv3/platform/roles/directus_runtime/`
-- `collections/ansible_collections/lv3/platform/roles/keycloak_runtime/`
-- `playbooks/directus.yml`
-- `playbooks/services/directus.yml`
-- `scripts/directus_bootstrap.py`
-- `config/api-gateway-catalog.json`
-- `config/controller-local-secrets.json`
-- `config/data-catalog.json`
-- `config/dependency-graph.json`
-- `config/health-probe-catalog.json`
-- `config/image-catalog.json`
-- `config/secret-catalog.json`
-- `config/service-capability-catalog.json`
-- `config/service-completeness.json`
-- `config/slo-catalog.json`
-- `config/subdomain-catalog.json`
-- `config/command-catalog.json`
-- `config/workflow-catalog.json`
-- `config/ansible-execution-scopes.yaml`
-- `Makefile`
-- `tests/`
-- `receipts/image-scans/`
-- `receipts/live-applies/`
+- replay ADR 0289 from the exact `0.177.108` `origin/main` baseline, then carry the protected release and canonical-truth surfaces on top of that mainline proof
+- leave a canonical receipt and enough exact-main evidence that the pushed `origin/main` truth is self-contained
 
 ## Expected Live Surfaces
 
@@ -69,59 +34,28 @@
 
 ## Ownership Notes
 
-- this workstream owns the Directus runtime, bootstrap automation, and branch-local live-apply evidence
+- this workstream owns the Directus runtime, bootstrap automation, and the final exact-main receipt bundle
 - `docker-runtime-lv3`, `postgres-lv3`, and `nginx-lv3` are shared live surfaces, so replay must stay narrow and documented
-- protected integration files remain deferred until the final merge-to-`main` step
+- the protected integration files are now refreshed from the exact-main replay in this release worktree
 
 ## Verification
 
-- `make converge-directus env=production` passed on 2026-03-30 with final recap
-  `docker-runtime-lv3 : ok=274 changed=2 unreachable=0 failed=0 skipped=88`,
-  `postgres-lv3 : ok=70 changed=4 unreachable=0 failed=0 skipped=23`,
-  `nginx-lv3 : ok=40 changed=5 unreachable=0 failed=0 skipped=6`, and
-  `localhost : ok=23 changed=0 unreachable=0 failed=0 skipped=7`.
-- `python3 scripts/directus_bootstrap.py verify-public --base-url https://data.lv3.org ...`
-  returned `{"status": "ok", "collection": "service_registry", "service_name": "directus", "rest_items": 1, "graphql_items": 1}` and wrote the fetched OpenAPI document to `receipts/live-applies/evidence/2026-03-30-adr-0289-directus-openapi.json`.
-- Guest-local evidence confirms the runtime is up on `docker-runtime-lv3` with
-  `directus` and `directus-openbao-agent` both healthy, `curl -fsS http://127.0.0.1:8055/server/health`
-  returned `{"status":"ok"}`, and `curl -fsS http://127.0.0.1:8055/server/ping`
-  returned `pong`.
-- Public evidence confirms `data.lv3.org` resolves to `65.108.75.123` and
-  `curl -fsS https://data.lv3.org/server/health` returned `{"status":"ok"}`.
-- Branch-local automation and validation passed:
-  `make syntax-check-directus`,
-  `make preflight WORKFLOW=converge-directus`,
-  `./scripts/validate_repo.sh agent-standards`,
-  `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`,
-  `uv run --with pytest pytest -q tests/test_directus_playbook.py tests/test_directus_bootstrap.py tests/test_directus_runtime_role.py tests/test_directus_postgres_role.py tests/test_keycloak_runtime_role.py tests/test_compose_runtime_secret_injection.py tests/test_edge_publication_makefile.py tests/test_plausible_playbook.py`,
-  and `make validate-generated-portals`.
-- `make validate-generated-docs` is intentionally deferred to the exact-main
-  integration step because it regenerates the protected top-level `README.md`
-  status fragments that this workstream branch must not rewrite.
+- Release automation is preserved in `receipts/live-applies/evidence/2026-03-30-adr-0289-release-status-r1-0.177.109.txt`, `receipts/live-applies/evidence/2026-03-30-adr-0289-release-dry-run-r1-0.177.109.txt`, and `receipts/live-applies/evidence/2026-03-30-adr-0289-release-write-r1-0.177.109.txt`; the write run cut repository release `0.177.109` from the exact-main `0.177.108` baseline with the ADR 0289 changelog entry.
+- The first exact-main converge attempt is preserved in `receipts/live-applies/evidence/2026-03-30-adr-0289-directus-mainline-live-apply-r1-0.177.109.txt` and failed only because `quay.io` returned `502 Bad Gateway` while pulling `quay.io/keycloak/keycloak:26.5.4`; the committed retry hardening in the Keycloak runtime role then carried the second replay through successfully.
+- The successful exact-main replay is preserved in `receipts/live-applies/evidence/2026-03-30-adr-0289-directus-mainline-live-apply-r2-0.177.109.txt` with final recap `docker-runtime-lv3 : ok=275 changed=3 unreachable=0 failed=0 skipped=87`, `postgres-lv3 : ok=69 changed=2 unreachable=0 failed=0 skipped=23`, `nginx-lv3 : ok=40 changed=5 unreachable=0 failed=0 skipped=6`, and `localhost : ok=23 changed=0 unreachable=0 failed=0 skipped=7`.
+- Guest-local runtime verification is preserved in `receipts/live-applies/evidence/2026-03-30-adr-0289-directus-mainline-compose-ps-r1-0.177.109.txt`, `receipts/live-applies/evidence/2026-03-30-adr-0289-directus-mainline-local-health-r1-0.177.109.txt`, and `receipts/live-applies/evidence/2026-03-30-adr-0289-directus-mainline-local-ping-r1-0.177.109.txt`; `docker compose ps` shows both `directus` and `directus-openbao-agent` healthy, `curl -fsS http://127.0.0.1:8055/server/health` returned `{"status":"ok"}`, and `curl -fsS http://127.0.0.1:8055/server/ping` returned `pong`.
+- Public publication verification is preserved in `receipts/live-applies/evidence/2026-03-30-adr-0289-directus-mainline-dns-r1-0.177.109.txt`, `receipts/live-applies/evidence/2026-03-30-adr-0289-directus-mainline-public-health-r1-0.177.109.txt`, `receipts/live-applies/evidence/2026-03-30-adr-0289-directus-mainline-verify-public-r1-0.177.109.txt`, and `receipts/live-applies/evidence/2026-03-30-adr-0289-directus-mainline-openapi-r1-0.177.109.json`; `data.lv3.org` resolves to `65.108.75.123`, public health returned `{"status":"ok"}`, and the token-authenticated REST plus GraphQL verification returned `{"status": "ok", "collection": "service_registry", "service_name": "directus", "rest_items": 1, "graphql_items": 1}`.
+- The protected exact-main status surfaces were refreshed in `receipts/live-applies/evidence/2026-03-30-adr-0289-generate-adr-index-r1-0.177.109.txt`, `receipts/live-applies/evidence/2026-03-30-adr-0289-generate-status-docs-r1-0.177.109.txt`, `receipts/live-applies/evidence/2026-03-30-adr-0289-generate-platform-manifest-r1-0.177.109.txt`, and `receipts/live-applies/evidence/2026-03-30-adr-0289-generate-ops-portal-r1-0.177.109.txt`, which brought `README.md`, `build/platform-manifest.json`, and `receipts/ops-portal-snapshot.html` onto the exact-main `0.177.109 / 0.130.72` truth.
 
-## Merge Criteria
+## Results
 
-- Directus is converged from committed automation and verified locally plus publicly
-- ADR metadata, runbook notes, and workstream evidence explain the implementation variance from the original ADR text where needed
-- repo generators, focused tests, and validation automation pass on the synchronized branch tree
+- ADR 0289 is now integrated in repository release `0.177.109`.
+- The first verified exact-main Directus replay advanced the tracked platform baseline from `0.130.71` to `0.130.72`.
+- `receipts/live-applies/2026-03-30-adr-0289-directus-mainline-live-apply.json` is the canonical receipt for the merged-main Directus rollout.
+- The committed Keycloak pull retry hardening preserves the successful replay path against transient upstream registry outages that are outside repo control.
+- No repo-local merge work remains for ADR 0289 beyond the `origin/main` push of this exact receipt-bearing branch.
 
-## Remaining For Main Integration
+## Notes
 
-- Refresh the protected top-level `README.md` generated status fragments and rerun
-  `make validate-generated-docs`.
-- Bump `VERSION`, update `changelog.md`, and update `versions/stack.yaml` only on
-  the exact-`main` integration worktree after the final replay from `main`.
-- Rerun the Directus live apply from exact `origin/main`, record the mainline
-  receipt, and then finalize the ADR repo-version metadata.
-
-## Live-Apply Notes
-
-- A manual Hetzner DNS bridge was required during the brownout window for the
-  legacy DNS write API. The temporary provider-side record was `data.lv3.org ->
-  65.108.75.123` with record id `644d501af8a99d37d91f388ac4585349`; later
-  governed replays observed the canonical state.
-
-## Notes For The Next Assistant
-
-- start from the latest `origin/main` before any final integration step
-- do not reuse the placeholder `adr-0307-directus` artifacts; replace them with ADR 0289 truth
+- A manual Hetzner DNS bridge was required during the brownout window for the legacy DNS write API. The temporary provider-side record was `data.lv3.org -> 65.108.75.123` with record id `644d501af8a99d37d91f388ac4585349`; later governed replays observed the canonical state.
+- The first exact-main replay failure was external to the repo: `quay.io` returned `502 Bad Gateway` during the Keycloak image pull. The committed bounded retry loop preserves the successful replay contract without widening the mutation surface.
