@@ -114,12 +114,52 @@ def test_mail_platform_runtime_restores_docker_nat_chain_before_startup_and_rota
         for task in rotate_tasks
         if task.get("name") == "Force-recreate the mail platform runtime with rotated secret material after Docker networking recovery"
     )
+    network_flag = next(
+        task
+        for task in tasks
+        if task.get("name") == "Flag stale mail platform compose-network failures during startup"
+    )
+    network_reset = next(
+        task
+        for task in tasks
+        if task.get("name") == "Reset stale mail platform compose resources before retrying startup"
+    )
+    network_retry = next(
+        task
+        for task in tasks
+        if task.get("name") == "Retry mail platform stack startup after compose-network recovery"
+    )
+    rotate_network_flag = next(
+        task
+        for task in rotate_tasks
+        if task.get("name") == "Flag stale mail platform compose-network failures during rotation"
+    )
+    rotate_network_reset = next(
+        task
+        for task in rotate_tasks
+        if task.get("name") == "Reset stale mail platform compose resources before retrying rotation"
+    )
+    rotate_network_retry = next(
+        task
+        for task in rotate_tasks
+        if task.get("name") == "Retry mail platform rotation after compose-network recovery"
+    )
     assert nat_check["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
     assert nat_restore["ansible.builtin.service"]["name"] == "docker"
     assert "--force-recreate" in force_recreate["ansible.builtin.command"]["argv"]
+    assert force_recreate["failed_when"] is False
+    assert "failed to create endpoint" in network_flag["ansible.builtin.set_fact"]["mail_platform_docker_network_missing"]
+    assert network_reset["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
+    assert network_retry["ansible.builtin.command"]["argv"][-2:] == ["--force-recreate", "--remove-orphans"]
     assert rotate_nat_check["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
     assert rotate_nat_restore["ansible.builtin.service"]["name"] == "docker"
     assert "--force-recreate" in rotate_force_recreate["ansible.builtin.command"]["argv"]
+    assert rotate_force_recreate["failed_when"] is False
+    assert "failed to create endpoint" in rotate_network_flag["ansible.builtin.set_fact"][
+        "mail_platform_rotation_docker_network_missing"
+    ]
+    assert rotate_network_reset["ansible.builtin.command"]["argv"][-2:] == ["down", "--remove-orphans"]
+    assert rotate_network_retry["ansible.builtin.command"]["argv"][-2:] == ["stalwart", "mail-gateway"]
 
 
 def test_mail_platform_runtime_force_recreates_when_runtime_inputs_change() -> None:

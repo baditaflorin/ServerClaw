@@ -582,6 +582,7 @@
   args:
     chdir: "{{ mail_platform_site_dir }}"
   register: mail_platform_up
+  failed_when: false
   changed_when: >-
     'Creating' in mail_platform_up.stdout
     or 'Recreating' in mail_platform_up.stdout
@@ -601,11 +602,68 @@
   args:
     chdir: "{{ mail_platform_site_dir }}"
   register: mail_platform_up
+  failed_when: false
   changed_when: >-
     'Creating' in mail_platform_up.stdout
     or 'Recreating' in mail_platform_up.stdout
     or 'Starting' in mail_platform_up.stdout
   when: not mail_platform_force_recreate
+
+- name: Flag stale mail platform compose-network failures during startup
+  ansible.builtin.set_fact:
+    mail_platform_docker_network_missing: >-
+      {{
+        (mail_platform_up.rc | default(0)) != 0
+        and 'failed to create endpoint' in (mail_platform_up.stderr | default(''))
+        and 'does not exist' in (mail_platform_up.stderr | default(''))
+      }}
+
+- name: Surface unexpected mail platform startup failures
+  ansible.builtin.fail:
+    msg: >-
+      {{
+        mail_platform_up.stderr
+        | default(mail_platform_up.msg | default('mail-platform compose up failed'))
+      }}
+  when:
+    - (mail_platform_up.rc | default(0)) != 0
+    - not mail_platform_docker_network_missing
+
+- name: Reset stale mail platform compose resources before retrying startup
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ mail_platform_compose_file }}"
+      - down
+      - --remove-orphans
+  args:
+    chdir: "{{ mail_platform_site_dir }}"
+  register: mail_platform_down
+  changed_when: >-
+    'Stopping' in (mail_platform_down.stdout | default(''))
+    or 'Removing' in (mail_platform_down.stdout | default(''))
+    or 'Removing' in (mail_platform_down.stderr | default(''))
+  failed_when: false
+  when: mail_platform_docker_network_missing
+
+- name: Retry mail platform stack startup after compose-network recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ mail_platform_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - --remove-orphans
+  args:
+    chdir: "{{ mail_platform_site_dir }}"
+  register: mail_platform_up
+  changed_when: true
+  when: mail_platform_docker_network_missing
 
 - name: Wait for the Stalwart management API to listen locally
   ansible.builtin.wait_for:
