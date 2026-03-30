@@ -21,8 +21,10 @@ The JupyterHub workflow converges:
 The current live implementation makes these exploratory data and model surfaces
 available inside spawned notebook servers:
 
-- Ollama through `OPENAI_BASE_URL` and `OLLAMA_BASE_URL`
-- the private platform-context API through `PLATFORM_CONTEXT_URL`
+- Ollama through `OPENAI_BASE_URL` and `OLLAMA_BASE_URL`, routed from the
+  notebook container to the runtime host through `host.docker.internal`
+- the private platform-context API through `PLATFORM_CONTEXT_URL`, also routed
+  from the notebook container through `host.docker.internal`
 - the service-local MinIO bucket `jupyterhub-shared`
 - the repo-managed Python analysis libraries baked into the single-user image
 
@@ -97,8 +99,9 @@ curl -I https://notebooks.lv3.org/hub/oauth_login
 
 The role-level verification also exercises a repo-managed smoke user through the
 local JupyterHub admin API, starts a single-user notebook server, checks the
-spawned environment contract, and confirms the shared MinIO health path from
-inside the notebook container.
+spawned environment contract, confirms the `host.docker.internal` gateway
+mapping inside the notebook container, and checks the shared MinIO, Ollama, and
+platform-context health paths from inside the notebook container.
 
 ## Operational Notes
 

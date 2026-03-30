@@ -50,6 +50,11 @@ c.DockerSpawner.default_url = os.environ.get("JUPYTERHUB_DEFAULT_URL", "{{ jupyt
 c.DockerSpawner.start_timeout = int(os.environ.get("JUPYTERHUB_SPAWN_TIMEOUT_SECONDS", "{{ jupyterhub_spawn_timeout_seconds }}"))
 c.DockerSpawner.http_timeout = int(os.environ.get("JUPYTERHUB_SPAWN_HTTP_TIMEOUT_SECONDS", "{{ jupyterhub_spawn_http_timeout_seconds }}"))
 c.DockerSpawner.extra_create_kwargs = {"user": "root"}
+c.DockerSpawner.extra_host_config = {
+    "extra_hosts": {
+        "{{ jupyterhub_host_gateway_hostname }}": "host-gateway",
+    },
+}
 c.DockerSpawner.volumes = {"jupyterhub-user-{username}": c.DockerSpawner.notebook_dir}
 c.DockerSpawner.environment = {
     "CHOWN_HOME": "yes",

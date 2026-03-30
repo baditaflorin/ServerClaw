@@ -67,9 +67,10 @@ jupyterhub_singleuser_notebook_dir: /home/jovyan/work
 jupyterhub_default_url: /lab
 jupyterhub_verify_username: jupyterhub-smoke
 jupyterhub_hub_connect_ip: "{{ jupyterhub_container_name }}"
-jupyterhub_ollama_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('ollama', 'internal') }}"
+jupyterhub_host_gateway_hostname: host.docker.internal
+jupyterhub_ollama_base_url: "http://{{ jupyterhub_host_gateway_hostname }}:{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('ollama', 'internal') }}"
 jupyterhub_openai_base_url: "{{ jupyterhub_ollama_base_url }}/v1"
-jupyterhub_platform_context_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('platform_context_api', 'internal') }}"
+jupyterhub_platform_context_url: "http://{{ jupyterhub_host_gateway_hostname }}:{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('platform_context_api', 'internal') }}"
 jupyterhub_spawn_timeout_seconds: 300
 jupyterhub_spawn_http_timeout_seconds: 120
 jupyterhub_hub_python_dependencies:

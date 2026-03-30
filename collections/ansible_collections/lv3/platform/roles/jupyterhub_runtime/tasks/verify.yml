@@ -91,6 +91,7 @@
     docker exec "$container_name" /bin/bash -lc 'env | grep -Fqx "OLLAMA_BASE_URL={{ jupyterhub_ollama_base_url }}"'
     docker exec "$container_name" /bin/bash -lc 'env | grep -Fqx "PLATFORM_CONTEXT_URL={{ jupyterhub_platform_context_url }}"'
     docker exec "$container_name" /bin/bash -lc 'env | grep -Fqx "JUPYTERHUB_SHARED_BUCKET={{ jupyterhub_shared_bucket_name }}"'
+    docker exec "$container_name" /bin/bash -lc 'getent hosts {{ jupyterhub_host_gateway_hostname }} >/dev/null'
     docker exec "$container_name" python -c "import urllib.request; urllib.request.urlopen('http://minio:9000/minio/health/live', timeout=10)"
     docker exec "$container_name" python - <<'PY'
     import os

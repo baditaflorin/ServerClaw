@@ -40,7 +40,10 @@ def test_defaults_define_public_oidc_and_smoke_spawn_contract() -> None:
     assert defaults["jupyterhub_service_api_token_local_file"].endswith("/.local/jupyterhub/service-api-token.txt")
     assert defaults["jupyterhub_minio_root_password_local_file"].endswith("/.local/jupyterhub/minio-root-password.txt")
     assert defaults["jupyterhub_keycloak_client_secret_local_file"].endswith("/.local/keycloak/jupyterhub-client-secret.txt")
+    assert defaults["jupyterhub_host_gateway_hostname"] == "host.docker.internal"
+    assert defaults["jupyterhub_ollama_base_url"] == "http://{{ jupyterhub_host_gateway_hostname }}:{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('ollama', 'internal') }}"
     assert defaults["jupyterhub_openai_base_url"] == "{{ jupyterhub_ollama_base_url }}/v1"
+    assert defaults["jupyterhub_platform_context_url"] == "http://{{ jupyterhub_host_gateway_hostname }}:{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('platform_context_api', 'internal') }}"
     assert "jupyterhub==5.4.4" in defaults["jupyterhub_singleuser_python_dependencies"]
 
 
@@ -187,9 +190,11 @@ def test_verify_tasks_cover_local_health_admin_api_and_smoke_spawn() -> None:
     assert "jupyterhub_smoke_user_api.stdout | from_json" in smoke_name_task["ansible.builtin.set_fact"]["jupyterhub_smoke_container_name"]
     assert ".object_name" in smoke_name_task["ansible.builtin.set_fact"]["jupyterhub_smoke_container_name"]
     assert 'container_name="{{ jupyterhub_smoke_container_name }}"' in container_task["ansible.builtin.shell"]
+    assert "getent hosts {{ jupyterhub_host_gateway_hostname }}" in container_task["ansible.builtin.shell"]
     assert "http://minio:9000/minio/health/live" in container_task["ansible.builtin.shell"]
     assert 'assert client.bucket_exists(os.environ["JUPYTERHUB_SHARED_BUCKET"])' in container_task["ansible.builtin.shell"]
     assert "{{ jupyterhub_ollama_base_url }}/api/version" in container_task["ansible.builtin.shell"]
+    assert "{{ jupyterhub_platform_context_url }}/healthz" in container_task["ansible.builtin.shell"]
 
 
 def test_publish_tasks_wait_for_public_health_and_oidc_redirect() -> None:
@@ -224,6 +229,7 @@ def test_templates_define_openbao_envs_compose_and_docker_images() -> None:
     assert 'OIDC_CLIENT_SECRET=[[ with secret "kv/data/{{ jupyterhub_openbao_secret_path }}" ]][[ .Data.data.OIDC_CLIENT_SECRET ]][[ end ]]' in env_ctemplate
     assert "c.JupyterHub.authenticator_class = GenericOAuthenticator" in config_template
     assert 'c.DockerSpawner.name_template = "jupyter-{username}"' in config_template
+    assert '"{{ jupyterhub_host_gateway_hostname }}": "host-gateway"' in config_template
     assert 'c.JupyterHub.load_roles = [' in config_template
     assert "FROM {{ jupyterhub_hub_base_image }}" in hub_dockerfile
     assert "FROM {{ jupyterhub_singleuser_base_image }}" in singleuser_dockerfile
