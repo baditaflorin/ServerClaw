@@ -126,7 +126,16 @@ ListenerChecker = Callable[[str, int, float], bool]
 
 
 def run_command(argv: list[str], cwd: str | None = None) -> CommandResult:
-    completed = subprocess.run(argv, cwd=cwd, text=True, capture_output=True, check=False)
+    try:
+        completed = subprocess.run(argv, cwd=cwd, text=True, capture_output=True, check=False)
+    except FileNotFoundError as exc:
+        return CommandResult(
+            argv=list(argv),
+            returncode=127,
+            stdout="",
+            stderr=str(exc),
+            cwd=cwd,
+        )
     return CommandResult(
         argv=list(argv),
         returncode=completed.returncode,
@@ -178,6 +187,11 @@ def detect_local_ipv4_addresses(command_runner: CommandRunner = run_command) -> 
 
 def _normalize_binding_host(host: str) -> str:
     return "127.0.0.1" if host == "localhost" else host
+
+
+def _command_unavailable(result: CommandResult) -> bool:
+    message = "\n".join(part for part in (result.stdout, result.stderr) if part).lower()
+    return result.returncode == 127 or "no such file or directory" in message or "not found" in message
 
 
 def _default_port_for_url(url: str) -> int:
@@ -329,6 +343,8 @@ def _check_chain(
     command_runner: CommandRunner,
 ) -> tuple[bool, CommandResult]:
     result = command_runner(argv, None)
+    if _command_unavailable(result):
+        return False, result
     missing = result.returncode != 0
     if result.returncode not in {0, 1}:
         raise RuntimeError(f"{label} check failed unexpectedly: {result.stderr or result.stdout}")

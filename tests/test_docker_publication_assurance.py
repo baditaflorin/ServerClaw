@@ -299,6 +299,100 @@ def test_assure_docker_publication_allows_listener_warmup_after_partial_compose_
     assert result["summary"] == "docker publication primitives recovered; listener warm-up deferred to readiness verification"
 
 
+def test_assure_docker_publication_tolerates_missing_iptables_binary() -> None:
+    class MissingIptablesRunner:
+        def __call__(self, argv: list[str], cwd: str | None) -> tool.CommandResult:
+            if argv == ["hostname", "-I"]:
+                return tool.CommandResult(argv=argv, returncode=0, stdout="10.10.10.70", stderr="", cwd=cwd)
+            if argv[:3] == ["docker", "info", "--format"]:
+                return tool.CommandResult(argv=argv, returncode=0, stdout="29.3.1", stderr="", cwd=cwd)
+            if argv[:4] == ["iptables", "-t", "nat", "-S"]:
+                return tool.CommandResult(
+                    argv=argv,
+                    returncode=127,
+                    stdout="",
+                    stderr="[Errno 2] No such file or directory: 'iptables'",
+                    cwd=cwd,
+                )
+            if argv[:4] == ["iptables", "-t", "filter", "-S"]:
+                return tool.CommandResult(
+                    argv=argv,
+                    returncode=127,
+                    stdout="",
+                    stderr="[Errno 2] No such file or directory: 'iptables'",
+                    cwd=cwd,
+                )
+            if argv[:2] == ["docker", "inspect"]:
+                payload = [
+                    {
+                        "HostConfig": {
+                            "NetworkMode": "bridge",
+                            "PortBindings": {
+                                "8000/tcp": [
+                                    {"HostIp": "127.0.0.1", "HostPort": "8000"},
+                                    {"HostIp": "10.10.10.70", "HostPort": "8000"},
+                                ]
+                            },
+                        },
+                        "Config": {
+                            "Labels": {
+                                "com.docker.compose.project": "coolify",
+                                "com.docker.compose.project.working_dir": "/opt/coolify",
+                                "com.docker.compose.project.config_files": "docker-compose.yml",
+                            }
+                        },
+                        "NetworkSettings": {
+                            "Ports": {
+                                "8000/tcp": [
+                                    {"HostIp": "127.0.0.1", "HostPort": "8000"},
+                                    {"HostIp": "10.10.10.70", "HostPort": "8000"},
+                                ]
+                            },
+                            "Networks": {"coolify": {}},
+                        },
+                    }
+                ]
+                return tool.CommandResult(argv=argv, returncode=0, stdout=json.dumps(payload), stderr="", cwd=cwd)
+            raise AssertionError(f"Unexpected command: {argv}")
+
+    result = tool.assure_docker_publication(
+        service_id="coolify",
+        service_probe={
+            "liveness": {
+                "kind": "http",
+                "url": "http://127.0.0.1:8000/api/health",
+                "method": "GET",
+                "timeout_seconds": 10,
+            },
+            "readiness": {
+                "kind": "http",
+                "url": "http://127.0.0.1:8000/api/health",
+                "method": "GET",
+                "timeout_seconds": 10,
+                "docker_publication": {
+                    "container_name": "coolify",
+                    "bindings": [{"host": "10.10.10.70", "port": 8000}],
+                    "required_networks": ["coolify"],
+                },
+            },
+        },
+        contract={
+            "container_name": "coolify",
+            "bindings": [{"host": "10.10.10.70", "port": 8000}],
+            "required_networks": ["coolify"],
+        },
+        heal=False,
+        allow_listener_warmup_after_heal=False,
+        command_runner=MissingIptablesRunner(),
+        listener_checker=lambda host, port, timeout: True,
+    )
+
+    assert result["ok"] is True
+    assert result["before"]["issues"]["missing_nat_chain"] is False
+    assert result["before"]["issues"]["missing_forward_chain"] is False
+    assert result["summary"] == "docker publication contract is satisfied"
+
+
 class PostComposeChainLossRunner:
     def __init__(self) -> None:
         self.compose_attempts = 0
