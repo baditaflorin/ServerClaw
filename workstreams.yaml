@@ -16902,6 +16902,7 @@ workstreams:
       - .gitea/workflows/renovate.yml
       - .gitea/workflows/release-bundle.yml
       - renovate.json
+      - scripts/parallel_check.py
       - scripts/validate_repo.sh
       - scripts/validate_renovate_contract.py
       - scripts/renovate_runtime_token.py
@@ -16931,6 +16932,7 @@ workstreams:
       - tests/test_openbao_postgres_backend_role.py
       - tests/test_openbao_runtime_role.py
       - tests/test_openbao_systemd_credentials_helper.py
+      - tests/test_parallel_check.py
       - tests/test_postgres_vm_role.py
       - tests/test_renovate_automation.py
       - tests/test_validate_repo_cache.py
@@ -16982,10 +16984,12 @@ workstreams:
             - collections/ansible_collections/lv3/platform/roles/gitea_runner/**
             - .gitea/workflows/validate.yml
             - .gitea/workflows/release-bundle.yml
+            - scripts/parallel_check.py
             - tests/test_gitea_workflows.py
             - tests/test_gitea_runtime_role.py
             - tests/test_openbao_runtime_role.py
             - tests/test_openbao_systemd_credentials_helper.py
+            - tests/test_parallel_check.py
             - tests/test_validate_repo_cache.py
           mode: shared_contract
           contract: gitea-openbao-runner-renovate-v1

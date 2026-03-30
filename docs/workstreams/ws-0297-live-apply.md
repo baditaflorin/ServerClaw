@@ -8,7 +8,7 @@
 - Owner: codex
 - Depends On: `adr-0068`, `adr-0077`, `adr-0083`, `adr-0087`, `adr-0119`, `adr-0143`, `adr-0229`
 - Conflicts With: none
-- Shared Surfaces: `docs/adr/0297`, `docs/workstreams/ws-0297-live-apply.md`, `docs/runbooks/configure-gitea.md`, `docs/runbooks/configure-openbao.md`, `docs/runbooks/configure-renovate.md`, `docs/runbooks/configure-harbor.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `.gitea/workflows/renovate.yml`, `.gitea/workflows/release-bundle.yml`, `.gitea/workflows/validate.yml`, `renovate.json`, `scripts/validate_repo.sh`, `scripts/validate_renovate_contract.py`, `scripts/renovate_runtime_token.py`, `scripts/renovate_stack_digest_guard.py`, `platform/repo.py`, `README.md`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `collections/ansible_collections/lv3/platform/roles/common/`, `collections/ansible_collections/lv3/platform/roles/harbor_runtime/`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runner/`, `tests/`, `receipts/live-applies/`, `workstreams.yaml`
+- Shared Surfaces: `docs/adr/0297`, `docs/workstreams/ws-0297-live-apply.md`, `docs/runbooks/configure-gitea.md`, `docs/runbooks/configure-openbao.md`, `docs/runbooks/configure-renovate.md`, `docs/runbooks/configure-harbor.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `.gitea/workflows/renovate.yml`, `.gitea/workflows/release-bundle.yml`, `.gitea/workflows/validate.yml`, `renovate.json`, `scripts/parallel_check.py`, `scripts/validate_repo.sh`, `scripts/validate_renovate_contract.py`, `scripts/renovate_runtime_token.py`, `scripts/renovate_stack_digest_guard.py`, `platform/repo.py`, `README.md`, `build/platform-manifest.json`, `docs/diagrams/agent-coordination-map.excalidraw`, `collections/ansible_collections/lv3/platform/roles/common/`, `collections/ansible_collections/lv3/platform/roles/harbor_runtime/`, `collections/ansible_collections/lv3/platform/roles/openbao_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runtime/`, `collections/ansible_collections/lv3/platform/roles/gitea_runner/`, `tests/`, `tests/test_parallel_check.py`, `receipts/live-applies/`, `workstreams.yaml`
 
 ## Scope
 
@@ -39,6 +39,7 @@
 - `.gitea/workflows/release-bundle.yml`
 - `.gitea/workflows/validate.yml`
 - `renovate.json`
+- `scripts/parallel_check.py`
 - `scripts/validate_repo.sh`
 - `scripts/validate_renovate_contract.py`
 - `scripts/renovate_runtime_token.py`
@@ -69,6 +70,7 @@
 - `tests/test_mail_platform_runtime_role.py`
 - `tests/test_openbao_compose_env_helper.py`
 - `tests/test_openbao_postgres_backend_role.py`
+- `tests/test_parallel_check.py`
 - `tests/test_postgres_vm_role.py`
 - `receipts/live-applies/`
 - `workstreams.yaml`
