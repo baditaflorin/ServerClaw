@@ -377,7 +377,12 @@
             )
 
         json.dump({"actions": actions}, sys.stdout)
-    stdin: "{{ docker_runtime_post_restart_container_inspect.stdout | default('[]') }}"
+    stdin: >-
+      {{
+        (
+          (docker_runtime_post_restart_container_inspect.stdout | default('[]')) | from_json
+        ) | to_json
+      }}
   register: docker_runtime_recover_stopped_containers
   changed_when: docker_runtime_stopped_pre_restart_managed_container_names | length > 0
   when: docker_runtime_stopped_pre_restart_managed_container_names | default([]) | length > 0

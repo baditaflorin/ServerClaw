@@ -113,7 +113,9 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert reset_task["ansible.builtin.command"] == "systemctl reset-failed docker.service"
     assert reset_task["changed_when"] is False
     assert recover_containers["ansible.builtin.command"]["argv"][:2] == ["python3", "-c"]
-    assert recover_containers["ansible.builtin.command"]["stdin"] == "{{ docker_runtime_post_restart_container_inspect.stdout | default('[]') }}"
+    assert "".join(recover_containers["ansible.builtin.command"]["stdin"].split()) == (
+        "{{((docker_runtime_post_restart_container_inspect.stdout|default('[]'))|from_json)|to_json}}"
+    )
     assert "com.docker.compose.project.working_dir" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "docker_compose_up" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'command.extend(["up", "-d", *sorted(services)])' in recover_containers["ansible.builtin.command"]["argv"][2]
