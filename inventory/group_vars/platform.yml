@@ -181,6 +181,7 @@ platform_ports:
   langfuse_port: 3002
   plausible_port: 8016
   dify_port: 8094
+  changedetection_port: 5000
   browser_runner_port: 8096
   outline_port: 3006
   dozzle_http_port: 8089
@@ -254,6 +255,7 @@ platform_port_assignments:
   langfuse_port: 3002
   plausible_port: 8016
   dify_port: 8094
+  changedetection_port: 5000
   browser_runner_port: 8096
   outline_port: 3006
   dozzle_http_port: 8089
@@ -1892,6 +1894,19 @@ platform_service_topology:
       internal: 8096
     urls:
       internal: http://10.10.10.20:8096
+  changedetection:
+    service_name: changedetection
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: changedetection
+    ports:
+      internal: 5000
+    urls:
+      internal: http://10.10.10.20:5000
   platform_context_api:
     service_name: platform-context-api
     owning_vm: docker-runtime-lv3
@@ -3340,6 +3355,19 @@ public_edge_service_topology:
       internal: 8096
     urls:
       internal: http://10.10.10.20:8096
+  changedetection:
+    service_name: changedetection
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: changedetection
+    ports:
+      internal: 5000
+    urls:
+      internal: http://10.10.10.20:5000
   platform_context_api:
     service_name: platform-context-api
     owning_vm: docker-runtime-lv3
@@ -3747,6 +3775,7 @@ searxng_host_proxy_port: 80
 langfuse_port: 3002
 plausible_port: 8016
 dify_port: 8094
+changedetection_port: 5000
 browser_runner_port: 8096
 outline_port: 3006
 dozzle_http_port: 8089

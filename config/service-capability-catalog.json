@@ -199,6 +199,37 @@
       }
     },
     {
+      "id": "changedetection",
+      "name": "Changedetection.io",
+      "description": "Private upstream content, dependency feed, and provider API change monitoring service with repo-governed watch catalogue reconciliation.",
+      "category": "observability",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:5000",
+      "exposure": "private-only",
+      "health_probe_id": "changedetection",
+      "image_catalog_ids": [
+        "changedetection_runtime"
+      ],
+      "adr": "0280",
+      "runbook": "docs/runbooks/configure-changedetection.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=changedetection-availability",
+      "tags": [
+        "change-detection",
+        "external-dependencies",
+        "observability",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.20:5000",
+          "notes": "The runtime stays private to docker-runtime-lv3; authenticated operator and automation access is brokered through the shared API gateway route at https://api.lv3.org/v1/changedetection."
+        }
+      }
+    },
+    {
       "id": "dify",
       "name": "Dify",
       "description": "Visual LLM workflow and agent canvas with governed LV3 tool sync and trace export support.",

@@ -1,0 +1,26 @@
+services:
+  changedetection:
+    image: {{ changedetection_runtime_image }}
+    container_name: {{ changedetection_runtime_container_name }}
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      BASE_URL: {{ changedetection_runtime_base_url }}
+      PORT: "{{ changedetection_runtime_port }}"
+      MINIMUM_SECONDS_RECHECK_TIME: "{{ changedetection_runtime_recheck_minimum_seconds }}"
+    volumes:
+      - {{ changedetection_runtime_volume_name }}:/datastore
+    healthcheck:
+      test:
+        - CMD
+        - python3
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:{{ changedetection_runtime_port }}/', timeout=10).read()
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  {{ changedetection_runtime_volume_name }}:
+    name: {{ changedetection_runtime_volume_name }}

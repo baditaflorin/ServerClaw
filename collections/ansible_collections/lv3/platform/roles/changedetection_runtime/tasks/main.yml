@@ -1,0 +1,257 @@
+---
+# Purpose: Deploy the private Changedetection.io runtime, derive repo-managed notification routes, and reconcile the declared watch catalogue.
+- name: Validate Changedetection runtime inputs
+  ansible.builtin.assert:
+    that:
+      - changedetection_runtime_site_dir | length > 0
+      - changedetection_runtime_secret_dir | length > 0
+      - changedetection_runtime_compose_file | length > 0
+      - changedetection_runtime_watch_catalog_file | length > 0
+      - changedetection_runtime_sync_report_file | length > 0
+      - changedetection_runtime_api_token_file | length > 0
+      - changedetection_runtime_api_token_local_file | length > 0
+      - changedetection_runtime_sync_script | length > 0
+      - changedetection_runtime_image | length > 0
+      - changedetection_runtime_container_name | length > 0
+      - changedetection_runtime_port | int > 0
+      - changedetection_runtime_base_url | length > 0
+      - changedetection_runtime_recheck_minimum_seconds | int >= 3600
+      - changedetection_runtime_volume_name | length > 0
+      - changedetection_runtime_ntfy_password_local_file | length > 0
+      - changedetection_runtime_ntfy_username | length > 0
+      - changedetection_runtime_ntfy_topic | length > 0
+      - changedetection_runtime_ntfy_host | length > 0
+      - changedetection_runtime_ntfy_port | int > 0
+      - changedetection_runtime_mattermost_webhooks_remote_file | length > 0
+      - changedetection_runtime_notification_channels | length > 0
+      - changedetection_runtime_watch_groups | length > 0
+      - changedetection_runtime_watches | length > 0
+    fail_msg: >-
+      changedetection_runtime requires compose paths, an image, notification routing inputs,
+      and a non-empty repo-managed watch catalogue.
+
+- name: Ensure the controller-local Changedetection artifact directory exists
+  ansible.builtin.file:
+    path: "{{ changedetection_runtime_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Ensure the controller-local ntfy password exists
+  ansible.builtin.stat:
+    path: "{{ changedetection_runtime_ntfy_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: changedetection_runtime_ntfy_password_local
+
+- name: Fail if the controller-local ntfy password is missing
+  ansible.builtin.fail:
+    msg: >-
+      {{ changedetection_runtime_ntfy_password_local_file }} is missing on the control machine.
+      Converge ntfy first so Changedetection can route the security-advisory channel.
+  when: not changedetection_runtime_ntfy_password_local.stat.exists
+
+- name: Read the controller-local ntfy password
+  ansible.builtin.slurp:
+    src: "{{ changedetection_runtime_ntfy_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: changedetection_runtime_ntfy_password_raw
+  no_log: true
+
+- name: Read the remote Mattermost webhook manifest
+  ansible.builtin.slurp:
+    src: "{{ changedetection_runtime_mattermost_webhooks_remote_file }}"
+  register: changedetection_runtime_mattermost_manifest_raw
+  no_log: true
+
+- name: Build Changedetection notification URLs
+  ansible.builtin.set_fact:
+    changedetection_runtime_ntfy_password: "{{ changedetection_runtime_ntfy_password_raw.content | b64decode | trim }}"
+    changedetection_runtime_mattermost_manifest: "{{ changedetection_runtime_mattermost_manifest_raw.content | b64decode | from_json }}"
+    changedetection_runtime_notification_urls:
+      platform-ops: >-
+        {{
+          (
+            (
+              (
+                changedetection_runtime_mattermost_manifest.webhooks.get(
+                  changedetection_runtime_notification_channels['platform-ops'].webhook_key,
+                  {}
+                )
+              ).internal_url | default('')
+            )
+            | regex_replace('^https://', 'mmosts://')
+            | regex_replace('^http://', 'mmost://')
+            | regex_replace('/hooks/', '/')
+          )
+        }}
+      security-high: >-
+        ntfy://{{ changedetection_runtime_ntfy_username | urlencode }}:{{ changedetection_runtime_ntfy_password | urlencode }}@{{ changedetection_runtime_ntfy_host }}:{{ changedetection_runtime_ntfy_port }}/{{ changedetection_runtime_ntfy_topic }}?priority=high
+  no_log: true
+
+- name: Assert Changedetection notification routes resolved cleanly
+  ansible.builtin.assert:
+    that:
+      - changedetection_runtime_notification_urls['platform-ops'] | length > 0
+      - changedetection_runtime_notification_urls['security-high'] | length > 0
+    fail_msg: "Changedetection notification routing could not resolve the required Mattermost or ntfy endpoints."
+  no_log: true
+
+- name: Build the desired Changedetection watch catalogue
+  ansible.builtin.set_fact:
+    changedetection_runtime_desired_tags_json: |-
+      [
+      {% for group in changedetection_runtime_watch_groups %}
+      {{ (group | combine({
+        'notification_urls': [changedetection_runtime_notification_urls[group.notification_channel]],
+        'notification_muted': false
+      })) | to_json }}{% if not loop.last %},{% endif %}
+      {% endfor %}
+      ]
+  no_log: true
+
+- name: Consolidate the desired Changedetection watch catalogue
+  ansible.builtin.set_fact:
+    changedetection_runtime_desired_state:
+      schema_version: "1.0.0"
+      tags: "{{ changedetection_runtime_desired_tags_json | from_json }}"
+      watches: "{{ changedetection_runtime_watches }}"
+  no_log: true
+
+- name: Ensure Changedetection directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ changedetection_runtime_site_dir }}"
+      mode: "0755"
+    - path: "{{ changedetection_runtime_secret_dir }}"
+      mode: "0700"
+
+- name: Persist the Changedetection watch catalogue
+  ansible.builtin.copy:
+    dest: "{{ changedetection_runtime_watch_catalog_file }}"
+    content: "{{ changedetection_runtime_desired_state | to_nice_json }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the Changedetection compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ changedetection_runtime_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Changedetection image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ changedetection_runtime_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ changedetection_runtime_site_dir }}"
+  register: changedetection_runtime_pull
+  changed_when: >-
+    'Pulling' in changedetection_runtime_pull.stdout
+    or 'Downloaded newer image' in changedetection_runtime_pull.stdout
+    or 'Pull complete' in changedetection_runtime_pull.stdout
+
+- name: Start the Changedetection stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ changedetection_runtime_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ changedetection_runtime_site_dir }}"
+  register: changedetection_runtime_up
+  changed_when: >-
+    'Creating' in changedetection_runtime_up.stdout
+    or 'Recreating' in changedetection_runtime_up.stdout
+    or 'Starting' in changedetection_runtime_up.stdout
+
+- name: Wait for Changedetection to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ changedetection_runtime_port }}"
+    delay: 0
+    timeout: 240
+
+- name: Wait for the Changedetection root page
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ changedetection_runtime_port }}/"
+    method: GET
+    status_code: 200
+  register: changedetection_runtime_root
+  retries: 24
+  delay: 5
+  until: changedetection_runtime_root.status == 200
+  changed_when: false
+
+- name: Read the Changedetection API token from the datastore
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ changedetection_runtime_container_name }}"
+      - python3
+      - -c
+      - |
+        import json
+        print(json.load(open('/datastore/changedetection.json', encoding='utf-8'))['settings']['application']['api_access_token'])
+  register: changedetection_runtime_api_token_command
+  changed_when: false
+  retries: 12
+  delay: 5
+  until: changedetection_runtime_api_token_command.stdout | trim | length > 0
+  no_log: true
+
+- name: Record the Changedetection API token fact
+  ansible.builtin.set_fact:
+    changedetection_runtime_api_token: "{{ changedetection_runtime_api_token_command.stdout | trim }}"
+  no_log: true
+
+- name: Persist the Changedetection API token on the guest
+  ansible.builtin.copy:
+    dest: "{{ changedetection_runtime_api_token_file }}"
+    content: "{{ changedetection_runtime_api_token }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Mirror the Changedetection API token to the control machine
+  ansible.builtin.copy:
+    dest: "{{ changedetection_runtime_api_token_local_file }}"
+    content: "{{ changedetection_runtime_api_token }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Reconcile the Changedetection watch catalogue over the live API
+  ansible.builtin.script: >-
+    {{ changedetection_runtime_sync_script | quote }}
+    --base-url {{ changedetection_runtime_base_url | quote }}
+    --api-key-file {{ changedetection_runtime_api_token_file | quote }}
+    --desired-state-file {{ changedetection_runtime_watch_catalog_file | quote }}
+    --report-file {{ changedetection_runtime_sync_report_file | quote }}
+  register: changedetection_runtime_sync
+  changed_when: "(changedetection_runtime_sync.stdout | from_json).changed"
+
+- name: Verify Changedetection health probes
+  ansible.builtin.import_tasks: verify.yml

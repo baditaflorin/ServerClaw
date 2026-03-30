@@ -1,6 +1,34 @@
 {
   "schema_version": "1.0.0",
   "images": {
+    "changedetection_runtime": {
+      "kind": "runtime",
+      "service_id": "changedetection",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "changedetection",
+      "registry_ref": "ghcr.io/dgtlmoon/changedetection.io",
+      "tag": "0.54.7",
+      "digest": "sha256:0179240fef0ff5e7cabc52f7670e4d50cebf32d57f02a970ebf2f3a67aca0870",
+      "ref": "ghcr.io/dgtlmoon/changedetection.io:0.54.7@sha256:0179240fef0ff5e7cabc52f7670e4d50cebf32d57f02a970ebf2f3a67aca0870",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-30-changedetection-runtime.json",
+      "exception": {
+        "reason": "The pinned upstream Changedetection.io image reports critical and high Trivy findings in bundled Debian and Python components; keep it digest-pinned and review at the next image rotation window.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-30",
+        "review_by": "2026-04-13"
+      },
+      "consumers": [
+        "roles/changedetection_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-changedetection"
+      ]
+    },
     "dify_api_runtime": {
       "kind": "runtime",
       "service_id": "dify",

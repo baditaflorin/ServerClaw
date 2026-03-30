@@ -499,6 +499,16 @@
       "dashboard_file": "config/grafana/dashboards/browser-runner.json",
       "alert_rule_file": "config/alertmanager/rules/browser-runner.yml",
       "suppressed_checks": {}
+    },
+    "changedetection": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "dashboard_file": "config/grafana/dashboards/slo-overview.json",
+      "alert_rule_file": "config/prometheus/rules/slo_alerts.yml",
+      "suppressed_checks": {}
     }
   }
 }

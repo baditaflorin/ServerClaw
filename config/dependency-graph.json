@@ -66,6 +66,15 @@
       "adr": "0261"
     },
     {
+      "id": "changedetection",
+      "service": "changedetection",
+      "name": "Changedetection.io",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "observability",
+      "adr": "0280"
+    },
+    {
       "id": "dify",
       "service": "dify",
       "name": "Dify",
@@ -525,6 +534,30 @@
       "to": "api_gateway",
       "type": "soft",
       "description": "Authenticated operator access to the browser runner uses the governed API gateway route, while the private runtime can still be verified locally."
+    },
+    {
+      "from": "changedetection",
+      "to": "api_gateway",
+      "type": "soft",
+      "description": "Authenticated operator and automation access to Changedetection is brokered through the governed API gateway route, while the private runtime remains directly verifiable on docker-runtime-lv3."
+    },
+    {
+      "from": "changedetection",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Changedetection.io runtime and its datastore volume are hosted on docker-runtime-lv3."
+    },
+    {
+      "from": "changedetection",
+      "to": "mattermost",
+      "type": "soft",
+      "description": "Repo-managed watch groups route platform-ops notifications through the existing Mattermost webhook manifest."
+    },
+    {
+      "from": "changedetection",
+      "to": "ntfy",
+      "type": "soft",
+      "description": "Security-advisory watches use the private ntfy gateway for high-priority push notifications."
     },
     {
       "from": "changelog_portal",

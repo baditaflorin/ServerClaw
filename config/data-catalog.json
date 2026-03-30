@@ -3,6 +3,22 @@
   "schema_version": "1.0.0",
   "data_stores": [
     {
+      "id": "changedetection-watch-history",
+      "service": "changedetection",
+      "name": "Changedetection watch history and diff datastore",
+      "class": "internal",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "low",
+      "locations": [
+        "Docker volume changedetection-datastore on docker-runtime-lv3",
+        "/etc/lv3/changedetection/watch-catalog.json",
+        "/opt/changedetection/watch-sync-report.json"
+      ],
+      "notes": "Changedetection stores repo-managed watch metadata, snapshots, diff history, and the most recent drift-free sync report for upstream content monitoring."
+    },
+    {
       "id": "dozzle-live-log-stream",
       "service": "dozzle",
       "name": "Dozzle live log stream cache",

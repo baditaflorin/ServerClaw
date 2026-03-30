@@ -26,6 +26,17 @@
       "openapi_path": "/openapi.json"
     },
     {
+      "id": "changedetection",
+      "name": "Changedetection.io",
+      "upstream": "http://10.10.10.20:5000",
+      "gateway_prefix": "/v1/changedetection",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 60,
+      "healthcheck_path": "/"
+    },
+    {
       "id": "gitea",
       "name": "Gitea",
       "upstream": "http://10.10.10.20:3003",

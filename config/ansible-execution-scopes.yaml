@@ -79,6 +79,12 @@ playbooks:
     shared_surfaces:
       - service:gitea
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/changedetection.yml:
+    playbook_id: changedetection
+    mutation_scope: host
+    shared_surfaces:
+      - service:changedetection
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/gotenberg.yml:
     playbook_id: gotenberg
     mutation_scope: host

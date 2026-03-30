@@ -62,6 +62,7 @@ platform_port_assignments:
   langfuse_port: 3002
   plausible_port: 8016
   dify_port: 8094
+  changedetection_port: 5000
   browser_runner_port: 8096
   outline_port: 3006
   plane_port: 8093
@@ -500,6 +501,7 @@ network_policy:
           ports:
             - 3003
             - 3004
+            - 5000
             - 8000
             - 8008
             - 8010
@@ -553,16 +555,18 @@ network_policy:
           protocol: tcp
           ports:
             - 3007
+            - 5000
             - 8881
             - 11434
-          description: Local Docker workloads that use the private Gotenberg, Ollama, and SearXNG APIs
+          description: Local Docker workloads that use the private Gotenberg, Changedetection, Ollama, and SearXNG APIs
         - source: 192.168.0.0/16
           protocol: tcp
           ports:
             - 3007
+            - 5000
             - 8881
             - 11434
-          description: Local Docker workloads that use the private Gotenberg, Ollama, and SearXNG APIs
+          description: Local Docker workloads that use the private Gotenberg, Changedetection, Ollama, and SearXNG APIs
         - source: docker-build-lv3
           protocol: tcp
           ports:
@@ -646,8 +650,9 @@ network_policy:
         - source: monitoring-lv3
           protocol: tcp
           ports:
+            - 5000
             - 8089
-          description: Private monitoring probes for the Dozzle hub
+          description: Private monitoring probes for the Changedetection runtime and Dozzle hub
         - source: monitoring-lv3
           protocol: tcp
           ports:
@@ -1732,6 +1737,14 @@ lv3_service_topology:
     observability:
       guest_dashboard: false
       service_telemetry: true
+  changedetection:
+    service_name: changedetection
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
   platform_context_api:
     service_name: platform-context-api
     owning_vm: docker-runtime-lv3

@@ -2045,6 +2045,44 @@
         "timeout_seconds": 1800
       }
     },
+    "converge-changedetection": {
+      "description": "Converge the private Changedetection.io runtime on docker-runtime-lv3, refresh the governed API gateway route, and reconcile the repo-managed upstream watch catalogue.",
+      "workflow_id": "converge-changedetection",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-changedetection passes",
+        "make validate passes before the apply",
+        "The private runtime listener, governed `/v1/changedetection` gateway route, and notification routing for platform-ops plus security-high watches are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, one direct private runtime health response, one authenticated systeminfo response, the persisted drift-free sync report, and one authenticated API gateway route check."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the Changedetection runtime fails to start, the repo-managed watch catalogue does not reconcile cleanly, or the guest firewall would expose the service beyond the intended private boundary.",
+          "Stop if the shared API gateway route cannot proxy authenticated Changedetection traffic after the runtime converges."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Changedetection runtime and API gateway config bundle from version control before retrying.",
+          "Do not leave behind manual watches, tags, notification routes, or gateway drift outside the repo-managed playbook path."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
     "converge-ops-portal": {
       "description": "Converge the interactive ops portal on docker-runtime-lv3 so the browser control plane stays aligned with the shared platform API gateway contracts.",
       "workflow_id": "converge-ops-portal",

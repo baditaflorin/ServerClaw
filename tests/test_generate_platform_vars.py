@@ -46,6 +46,16 @@ def test_build_platform_vars_includes_dify_publication_topology() -> None:
     assert dify["urls"]["internal"] == "http://10.10.10.20:8094"
 
 
+def test_build_platform_vars_includes_changedetection_private_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    changedetection = platform_vars["platform_service_topology"]["changedetection"]
+
+    assert changedetection["ports"]["internal"] == 5000
+    assert changedetection["urls"]["internal"] == "http://10.10.10.20:5000"
+    assert changedetection["exposure_model"] == "private-only"
+    assert platform_vars["changedetection_port"] == 5000
+
+
 def test_build_platform_vars_includes_harbor_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     harbor = platform_vars["platform_service_topology"]["harbor"]

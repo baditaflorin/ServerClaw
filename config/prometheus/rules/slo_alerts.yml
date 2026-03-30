@@ -42,6 +42,49 @@ groups:
           description: The private browser runner remains reachable on docker-runtime-lv3
             for governed Playwright session execution.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_changedetection_availability
+        expr: (slo:changedetection_availability:error_rate_5m > (14 * 0.010000)) and
+          (slo:changedetection_availability:error_rate_1h > (14 * 0.010000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: changedetection
+          slo_id: changedetection-availability
+          indicator: availability
+        annotations:
+          summary: changedetection-availability is burning its error budget at 14x
+          description: The private Changedetection.io runtime remains reachable on
+            docker-runtime-lv3 for governed upstream release, advisory, and API change
+            monitoring.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_changedetection_availability
+        expr: slo:changedetection_availability:error_rate_1h > (3 * 0.010000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: changedetection
+          slo_id: changedetection-availability
+          indicator: availability
+        annotations:
+          summary: changedetection-availability is burning its error budget at 3x
+          description: The private Changedetection.io runtime remains reachable on
+            docker-runtime-lv3 for governed upstream release, advisory, and API change
+            monitoring.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_changedetection_availability
+        expr: slo:changedetection_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: changedetection
+          slo_id: changedetection-availability
+          indicator: availability
+        annotations:
+          summary: changedetection-availability has less than 10% error budget remaining
+          description: The private Changedetection.io runtime remains reachable on
+            docker-runtime-lv3 for governed upstream release, advisory, and API change
+            monitoring.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_dozzle_availability
         expr: (slo:dozzle_availability:error_rate_5m > (14 * 0.010000)) and (slo:dozzle_availability:error_rate_1h
           > (14 * 0.010000))

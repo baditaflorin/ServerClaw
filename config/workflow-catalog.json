@@ -6141,6 +6141,62 @@
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
       }
+    },
+    "converge-changedetection": {
+      "description": "Deploy the private Changedetection.io runtime on docker-runtime-lv3, refresh the governed API gateway route, and reconcile the repo-managed upstream watch catalogue.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-changedetection",
+        "command": "make converge-changedetection"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-changedetection"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-changedetection.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/changedetection.yml",
+        "playbooks/services/changedetection.yml",
+        "roles/changedetection_runtime",
+        "roles/api_gateway_runtime",
+        "scripts/changedetection_sync.py",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/api-gateway-catalog.json",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/slo-catalog.json",
+        "config/data-catalog.json"
+      ],
+      "outputs": [
+        "A private Changedetection.io runtime on docker-runtime-lv3 with repo-managed upstream watch groups, mirrored API token, drift-free sync proof, and an authenticated `/v1/changedetection` route on the shared platform API gateway."
+      ],
+      "verification_commands": [
+        "make syntax-check-changedetection",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/changedetection/docker-compose.yml ps && curl -fsS http://127.0.0.1:5000/'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:5000/api/v1/systeminfo -H \"x-api-key: $(sudo cat /etc/lv3/changedetection/api-token)\"'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 -c '\\''import json; payload=json.load(open(\"/opt/changedetection/watch-sync-report.json\", encoding=\"utf-8\")); assert payload[\"check_only\"] is True and payload[\"changed\"] is False; print(json.dumps(payload[\"summary\"], sort_keys=True))'\\'''",
+        "LV3_TOKEN=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt) && curl -fsS -H \"Authorization: Bearer $LV3_TOKEN\" https://api.lv3.org/v1/changedetection/"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 280,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     }
   }
 }

@@ -1,0 +1,75 @@
+---
+# Purpose: Confirm the live Changedetection runtime, watch catalogue, and idempotent API reconciliation remain healthy after converge.
+- name: Verify the Changedetection root page responds
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ changedetection_runtime_port }}/"
+    method: GET
+    status_code: 200
+    return_content: false
+    timeout: 30
+  register: changedetection_runtime_health
+  retries: 12
+  delay: 2
+  until: changedetection_runtime_health.status == 200
+  changed_when: false
+
+- name: Verify the Changedetection container is running
+  ansible.builtin.command:
+    argv:
+      - docker
+      - ps
+      - --filter
+      - "name={{ changedetection_runtime_container_name }}"
+      - --filter
+      - status=running
+      - --format
+      - "{{ '{{' }}.Names{{ '}}' }}"
+  register: changedetection_runtime_running
+  changed_when: false
+
+- name: Assert the Changedetection container is running
+  ansible.builtin.assert:
+    that:
+      - changedetection_runtime_running.stdout_lines | select('equalto', changedetection_runtime_container_name) | list | length == 1
+    fail_msg: "Changedetection container is not running."
+
+- name: Verify the Changedetection system info endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ changedetection_runtime_port }}/api/v1/systeminfo"
+    method: GET
+    headers:
+      x-api-key: "{{ changedetection_runtime_api_token }}"
+    status_code: 200
+    return_content: true
+    timeout: 30
+  register: changedetection_runtime_systeminfo
+  retries: 12
+  delay: 2
+  until: changedetection_runtime_systeminfo.status == 200
+  changed_when: false
+  no_log: true
+
+- name: Assert the Changedetection watch catalogue is loaded
+  ansible.builtin.assert:
+    that:
+      - changedetection_runtime_systeminfo.json.watch_count == (changedetection_runtime_watches | length)
+      - changedetection_runtime_systeminfo.json.tag_count == (changedetection_runtime_watch_groups | length)
+    fail_msg: "Changedetection did not load the repo-managed watch catalogue as expected."
+  no_log: true
+
+- name: Verify the Changedetection watch sync is idempotent
+  ansible.builtin.script: >-
+    {{ changedetection_runtime_sync_script | quote }}
+    --base-url {{ changedetection_runtime_base_url | quote }}
+    --api-key-file {{ changedetection_runtime_api_token_file | quote }}
+    --desired-state-file {{ changedetection_runtime_watch_catalog_file | quote }}
+    --report-file {{ changedetection_runtime_sync_report_file | quote }}
+    --check-only
+  register: changedetection_runtime_sync_check
+  changed_when: false
+
+- name: Assert the Changedetection watch sync is drift-free
+  ansible.builtin.assert:
+    that:
+      - not ((changedetection_runtime_sync_check.stdout | from_json).changed | bool)
+    fail_msg: "Changedetection drift remains after converge; the check-only sync still wants to change live tags or watches."

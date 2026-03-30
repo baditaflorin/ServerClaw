@@ -1,0 +1,29 @@
+---
+# Playbook: services/changedetection.yml
+# Purpose: Provide a leaf service import for Changedetection so repo automation can target the service cleanly through the governed live-apply wrapper.
+# Use case: Used by generated or scoped automation paths that operate on one service leaf playbook at a time.
+#
+# Inputs (required):
+#   - None.
+#
+# Inputs (optional):
+#   - Same optional inputs as playbooks/changedetection.yml.
+#
+# Outputs:
+#   - Imports the top-level Changedetection converge playbook.
+#
+# Idempotency: Fully idempotent
+#              This file is a pure import wrapper around the top-level playbook.
+#
+# Dependencies:
+#   - ADR 0280: Changedetection.io external change monitoring.
+#   - Role: changedetection_runtime — implemented in the imported playbook.
+#
+# Related ADRs: 0280
+# Related Runbooks: docs/runbooks/configure-changedetection.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+# =============================================================================
+
+- import_playbook: ../changedetection.yml
