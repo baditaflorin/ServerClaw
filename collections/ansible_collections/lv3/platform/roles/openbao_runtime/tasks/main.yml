@@ -565,7 +565,16 @@
     headers:
       X-Vault-Token: "{{ openbao_init_payload.root_token }}"
     return_content: true
+    status_code:
+      - 200
+      - 500
+      - 502
+      - 503
   register: openbao_auth_methods
+  retries: 12
+  delay: 2
+  until: openbao_auth_methods.status == 200
+  changed_when: false
   no_log: true
 
 - name: Enable userpass auth
@@ -623,7 +632,16 @@
     headers:
       X-Vault-Token: "{{ openbao_init_payload.root_token }}"
     return_content: true
+    status_code:
+      - 200
+      - 500
+      - 502
+      - 503
   register: openbao_secret_engines
+  retries: 12
+  delay: 2
+  until: openbao_secret_engines.status == 200
+  changed_when: false
   no_log: true
 
 - name: Enable kv-v2 secrets engine
@@ -716,8 +734,15 @@
     status_code:
       - 200
       - 404
+      - 500
+      - 502
+      - 503
   loop: "{{ openbao_policy_contents.results }}"
   register: openbao_current_policies
+  retries: 12
+  delay: 2
+  until: openbao_current_policies.status in [200, 404]
+  changed_when: false
   no_log: true
 
 - name: Upsert OpenBao policies
@@ -806,8 +831,15 @@
     status_code:
       - 200
       - 404
+      - 500
+      - 502
+      - 503
   loop: "{{ openbao_transit_keys }}"
   register: openbao_transit_key_statuses
+  retries: 12
+  delay: 2
+  until: openbao_transit_key_statuses.status in [200, 404]
+  changed_when: false
   no_log: true
 
 - name: Create missing OpenBao transit keys
@@ -897,7 +929,14 @@
     status_code:
       - 200
       - 404
+      - 500
+      - 502
+      - 503
   register: openbao_controller_proxmox_api_current
+  retries: 12
+  delay: 2
+  until: openbao_controller_proxmox_api_current.status in [200, 404]
+  changed_when: false
   no_log: true
 
 - name: Read current controller monitoring secret
@@ -910,7 +949,14 @@
     status_code:
       - 200
       - 404
+      - 500
+      - 502
+      - 503
   register: openbao_controller_monitoring_current
+  retries: 12
+  delay: 2
+  until: openbao_controller_monitoring_current.status in [200, 404]
+  changed_when: false
   no_log: true
 
 - name: Read current mail platform runtime secret
@@ -923,7 +969,14 @@
     status_code:
       - 200
       - 404
+      - 500
+      - 502
+      - 503
   register: openbao_mail_platform_runtime_current
+  retries: 12
+  delay: 2
+  until: openbao_mail_platform_runtime_current.status in [200, 404]
+  changed_when: false
   no_log: true
 
 - name: Read the controller-local Proxmox API payload

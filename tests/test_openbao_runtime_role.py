@@ -135,6 +135,40 @@ def test_openbao_runtime_rechecks_seal_state_before_auth_verification() -> None:
     assert "Wait for OpenBao to become active before" in ensure_unsealed_tasks
 
 
+def test_openbao_runtime_retries_policy_reads_during_post_restart_recovery() -> None:
+    tasks = TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "- name: Read current OpenBao policies" in tasks
+    assert "register: openbao_current_policies" in tasks
+    assert "      - 500" in tasks
+    assert "      - 502" in tasks
+    assert "      - 503" in tasks
+    assert "retries: 12" in tasks
+    assert "delay: 2" in tasks
+    assert "until: openbao_current_policies.status in [200, 404]" in tasks
+    assert "changed_when: false" in tasks
+
+
+def test_openbao_runtime_retries_other_read_side_api_checks_after_restart() -> None:
+    tasks = TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "- name: Discover enabled auth methods" in tasks
+    assert "register: openbao_auth_methods" in tasks
+    assert "until: openbao_auth_methods.status == 200" in tasks
+    assert "- name: Discover enabled secret engines" in tasks
+    assert "register: openbao_secret_engines" in tasks
+    assert "until: openbao_secret_engines.status == 200" in tasks
+    assert "- name: Read current OpenBao transit keys" in tasks
+    assert "register: openbao_transit_key_statuses" in tasks
+    assert "until: openbao_transit_key_statuses.status in [200, 404]" in tasks
+    assert "- name: Read current controller Proxmox API secret" in tasks
+    assert "until: openbao_controller_proxmox_api_current.status in [200, 404]" in tasks
+    assert "- name: Read current controller monitoring secret" in tasks
+    assert "until: openbao_controller_monitoring_current.status in [200, 404]" in tasks
+    assert "- name: Read current mail platform runtime secret" in tasks
+    assert "until: openbao_mail_platform_runtime_current.status in [200, 404]" in tasks
+
+
 def test_openbao_playbook_refreshes_secret_ids_from_local_artifacts() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text(encoding="utf-8"))
     refresh_play = next(

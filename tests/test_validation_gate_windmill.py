@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import subprocess
 from pathlib import Path
 
 
@@ -22,129 +23,86 @@ def test_gate_status_wrapper_blocks_when_repo_checkout_is_missing(tmp_path: Path
     assert payload["status"] == "blocked"
 
 
-def test_gate_status_wrapper_reads_repo_status_payload(tmp_path: Path) -> None:
+def test_gate_status_wrapper_executes_repo_script_and_returns_json_payload(monkeypatch, tmp_path: Path) -> None:
     module = load_module("gate_status_windmill_present", WRAPPER_PATH)
     repo_root = tmp_path
     (repo_root / "scripts").mkdir(parents=True)
-    (repo_root / "config").mkdir()
-    (repo_root / "receipts" / "gate-bypasses").mkdir(parents=True)
-    (repo_root / ".local" / "validation-gate").mkdir(parents=True)
-    (repo_root / "scripts" / "gate_status.py").write_text(
-        """
-def build_status_payload(*, manifest_path, last_run_path, remote_validate_run_path, post_merge_run_path, bypass_dir):
-    return {
-        "manifest_path": str(manifest_path),
-        "enabled_checks": [],
-        "last_run": {"status": "passed"},
-        "remote_validate_run": {"status": "passed"},
-        "post_merge_run": None,
-        "latest_bypass": None,
-        "bypass_dir": str(bypass_dir),
-    }
-""".strip()
-        + "\n",
-        encoding="utf-8",
-    )
+    (repo_root / "scripts" / "gate_status.py").write_text("# placeholder\n", encoding="utf-8")
+    captured: dict[str, object] = {}
+
+    def fake_run(command, **kwargs):
+        captured["command"] = command
+        captured["cwd"] = kwargs["cwd"]
+        captured["text"] = kwargs["text"]
+        captured["capture_output"] = kwargs["capture_output"]
+        captured["check"] = kwargs["check"]
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            '{"manifest_path":"/srv/proxmox_florin_server/config/validation-gate.json","enabled_checks":[{"id":"lint"}],"last_run":{"status":"passed"}}\n',
+            "",
+        )
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
 
     payload = module.main(repo_path=str(repo_root))
 
     assert payload["status"] == "ok"
+    assert captured["cwd"] == repo_root
+    assert captured["text"] is True
+    assert captured["capture_output"] is True
+    assert captured["check"] is False
+    assert captured["command"] == [
+        "python3",
+        str(repo_root / "scripts" / "gate_status.py"),
+        "--format",
+        "json",
+    ]
     assert payload["gate_status"]["manifest_path"].endswith("config/validation-gate.json")
     assert payload["gate_status"]["last_run"] == {"status": "passed"}
+    assert payload["returncode"] == 0
 
 
-def test_gate_status_wrapper_adds_scripts_dir_to_python_path(tmp_path: Path) -> None:
-    module = load_module("gate_status_windmill_import_path", WRAPPER_PATH)
+def test_gate_status_wrapper_returns_structured_error_when_stdout_is_not_json(
+    monkeypatch, tmp_path: Path
+) -> None:
+    module = load_module("gate_status_windmill_invalid_json", WRAPPER_PATH)
     repo_root = tmp_path
     (repo_root / "scripts").mkdir(parents=True)
-    (repo_root / "scripts" / "gate_bypass_waivers.py").write_text(
-        """
-def summarize_receipts(*, directory):
-    return {
-        "totals": {"all_receipts": 2, "legacy_receipts": 0, "compliant_receipts": 2, "open_waivers": 1, "expired_waivers": 0, "invalid_receipts": 0},
-        "latest_receipt": {"path": str(directory / "latest.json")},
-        "open_waivers": [{"path": str(directory / "open.json")}],
-        "expiring_soon": [],
-        "warnings": [],
-        "release_blockers": [],
-        "invalid_receipts": [],
-    }
-""".strip()
-        + "\n",
-        encoding="utf-8",
-    )
-    (repo_root / "scripts" / "gate_status.py").write_text(
-        """
-import gate_bypass_waivers
+    (repo_root / "scripts" / "gate_status.py").write_text("# placeholder\n", encoding="utf-8")
 
-def build_status_payload(*, manifest_path, last_run_path, post_merge_run_path, bypass_dir):
-    return {
-        "manifest_path": str(manifest_path),
-        "waiver_summary": gate_bypass_waivers.summarize_receipts(directory=bypass_dir),
-    }
-""".strip()
-        + "\n",
-        encoding="utf-8",
-    )
-    (repo_root / "receipts" / "gate-bypasses").mkdir(parents=True)
+    def fake_run(command, **kwargs):
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            "Validation gate manifest: noisy helper output\nEnabled checks: noisy helper output\n",
+            "",
+        )
 
-    payload = module.main(repo_path=str(repo_root))
-
-    assert payload["status"] == "ok"
-    assert payload["gate_status"]["waiver_summary"]["totals"]["all_receipts"] == 2
-    assert payload["gate_status"]["waiver_summary"]["open_waivers"] == [
-        {"path": str(repo_root / "receipts" / "gate-bypasses" / "open.json")}
-    ]
-
-
-def test_gate_status_wrapper_falls_back_when_waiver_helper_is_missing(tmp_path: Path) -> None:
-    module = load_module("gate_status_windmill_missing_waiver_helper", WRAPPER_PATH)
-    repo_root = tmp_path
-    (repo_root / "scripts").mkdir(parents=True)
-    (repo_root / "scripts" / "gate_status.py").write_text(
-        """
-import gate_bypass_waivers
-
-def build_status_payload(*, manifest_path, last_run_path, post_merge_run_path, bypass_dir):
-    return {
-        "manifest_path": str(manifest_path),
-        "waiver_summary": gate_bypass_waivers.summarize_receipts(directory=bypass_dir),
-    }
-""".strip()
-        + "\n",
-        encoding="utf-8",
-    )
-    (repo_root / "receipts" / "gate-bypasses").mkdir(parents=True)
-
-    payload = module.main(repo_path=str(repo_root))
-
-    assert payload["status"] == "ok"
-    assert payload["gate_status"]["waiver_summary"]["totals"] == {
-        "all_receipts": 0,
-        "legacy_receipts": 0,
-        "compliant_receipts": 0,
-        "open_waivers": 0,
-        "expired_waivers": 0,
-        "invalid_receipts": 0,
-    }
-    assert payload["gate_status"]["waiver_summary"]["release_blockers"] == []
-
-
-def test_gate_status_wrapper_returns_structured_error_when_payload_build_fails(tmp_path: Path) -> None:
-    module = load_module("gate_status_windmill_payload_failure", WRAPPER_PATH)
-    repo_root = tmp_path
-    (repo_root / "scripts").mkdir(parents=True)
-    (repo_root / "scripts" / "gate_status.py").write_text(
-        """
-def build_status_payload(*, manifest_path, last_run_path, post_merge_run_path, bypass_dir):
-    raise RuntimeError("boom")
-""".strip()
-        + "\n",
-        encoding="utf-8",
-    )
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
 
     payload = module.main(repo_path=str(repo_root))
 
     assert payload["status"] == "error"
-    assert payload["exception"] == "RuntimeError"
-    assert payload["reason"] == "boom"
+    assert payload["reason"] == "gate status command did not return valid JSON"
+    assert payload["returncode"] == 0
+    assert "Validation gate manifest" in payload["stdout"]
+
+
+def test_gate_status_wrapper_returns_structured_error_when_command_fails(monkeypatch, tmp_path: Path) -> None:
+    module = load_module("gate_status_windmill_payload_failure", WRAPPER_PATH)
+    repo_root = tmp_path
+    (repo_root / "scripts").mkdir(parents=True)
+    (repo_root / "scripts" / "gate_status.py").write_text("# placeholder\n", encoding="utf-8")
+
+    def fake_run(command, **kwargs):
+        return subprocess.CompletedProcess(command, 2, "", "boom")
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    payload = module.main(repo_path=str(repo_root))
+
+    assert payload["status"] == "error"
+    assert payload["reason"] == "gate status command failed"
+    assert payload["returncode"] == 2
+    assert payload["stderr"] == "boom"
