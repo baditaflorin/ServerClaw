@@ -1,3 +1,9 @@
+# Purpose: Converge the platform context runtime, vector backend wiring, and repo-corpus sync workflow.
+# Use case: Run during platform-context deploys, updates, and recovery replays.
+# Inputs: Runtime paths, service tokens, corpus sources, container images, and vector backend settings.
+# Outputs: Brings the platform context service and its supporting runtime assets to the repo-managed state.
+# Idempotency: Partially idempotent because bootstrap, corpus sync, and runtime restarts may refresh live state.
+# Dependencies: ADR 0165, ADR 0198, and the platform-context service catalogs.
 ---
 - name: Validate platform context runtime inputs
   ansible.builtin.assert:

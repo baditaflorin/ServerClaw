@@ -14,9 +14,17 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 
 ## Latest Release
 
-- [0.177.91 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.91.md)
+- [0.177.95 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.95.md)
 
 ## Previous Releases
+
+- [0.177.94 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.94.md)
+
+- [0.177.93 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.93.md)
+
+- [0.177.92 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.92.md)
+
+- [0.177.91 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.91.md)
 
 - [0.177.90 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.90.md)
 

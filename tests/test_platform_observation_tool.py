@@ -397,6 +397,121 @@ def test_check_service_health_marks_starting_services_as_warning(monkeypatch):
     assert finding["outputs"]["runtime_states"]["startup"] == 1
 
 
+def test_build_service_probes_retains_full_service_definition() -> None:
+    catalog = {
+        "services": {
+            "coolify": {
+                "service_name": "coolify",
+                "owning_vm": "coolify-lv3",
+                "liveness": {
+                    "kind": "http",
+                    "description": "health",
+                    "timeout_seconds": 10,
+                    "retries": 1,
+                    "delay_seconds": 0,
+                    "url": "http://127.0.0.1:8000/api/health",
+                    "method": "GET",
+                    "expected_status": [200],
+                },
+                "readiness": {
+                    "kind": "http",
+                    "description": "ready",
+                    "timeout_seconds": 10,
+                    "retries": 1,
+                    "delay_seconds": 0,
+                    "url": "http://127.0.0.1:8000/api/health",
+                    "method": "GET",
+                    "expected_status": [200],
+                    "docker_publication": {
+                        "container_name": "coolify",
+                        "bindings": [{"host": "10.10.10.70", "port": 8000}],
+                    },
+                },
+            }
+        }
+    }
+
+    probes = tool.build_service_probes(catalog)
+    readiness_probe = next(probe for probe in probes if probe["service_id"] == "coolify" and probe["phase"] == "readiness")
+
+    assert readiness_probe["service_definition"] == catalog["services"]["coolify"]
+
+
+def test_execute_structured_probe_fails_when_docker_publication_assertion_fails(monkeypatch) -> None:
+    probe = {
+        "id": "coolify-readiness",
+        "service_id": "coolify",
+        "runner": "structured",
+        "target": "coolify-lv3",
+        "phase": "readiness",
+        "definition": {
+            "kind": "http",
+            "description": "ready",
+            "timeout_seconds": 10,
+            "retries": 1,
+            "delay_seconds": 0,
+            "url": "http://127.0.0.1:8000/api/health",
+            "method": "GET",
+            "expected_status": [200],
+        },
+        "service_definition": {
+            "service_name": "coolify",
+            "owning_vm": "coolify-lv3",
+            "liveness": {
+                "kind": "http",
+                "description": "health",
+                "timeout_seconds": 10,
+                "retries": 1,
+                "delay_seconds": 0,
+                "url": "http://127.0.0.1:8000/api/health",
+                "method": "GET",
+                "expected_status": [200],
+            },
+            "readiness": {
+                "kind": "http",
+                "description": "ready",
+                "timeout_seconds": 10,
+                "retries": 1,
+                "delay_seconds": 0,
+                "url": "http://127.0.0.1:8000/api/health",
+                "method": "GET",
+                "expected_status": [200],
+                "docker_publication": {
+                    "container_name": "coolify",
+                    "bindings": [{"host": "10.10.10.70", "port": 8000}],
+                },
+            },
+        },
+    }
+
+    def fake_execute_runner(context, runner, target, command):
+        del context
+        if command.startswith("curl "):
+            assert runner == "guest_jump"
+            assert target == "coolify-lv3"
+            return tool.CommandResult(command=command, returncode=0, stdout="ok\n__STATUS__=200", stderr="")
+        assert "lv3-docker-publication-assurance" in command
+        return tool.CommandResult(
+            command=command,
+            returncode=1,
+            stdout='{"ok": false, "summary": "port bindings missing"}',
+            stderr="",
+        )
+
+    monkeypatch.setattr(tool, "execute_runner", fake_execute_runner)
+
+    ok, detail = tool.execute_structured_probe({}, probe)
+
+    assert ok is False
+    assert detail["ok"] is False
+    assert detail["docker_publication"] == {
+        "ok": False,
+        "summary": "port bindings missing",
+        "container_name": "coolify",
+    }
+    assert detail["stderr"] == "port bindings missing"
+
+
 def test_run_checks_suppresses_maintenance_findings_and_skips_webhooks(monkeypatch, tmp_path: Path):
     captured_findings = []
     webhook_payloads = []

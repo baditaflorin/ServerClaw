@@ -1,6 +1,19 @@
 import generate_platform_vars
 
 
+def iter_strings(value):
+    if isinstance(value, dict):
+        for item in value.values():
+            yield from iter_strings(item)
+        return
+    if isinstance(value, list):
+        for item in value:
+            yield from iter_strings(item)
+        return
+    if isinstance(value, str):
+        yield value
+
+
 def test_resolve_tcp_proxy_port_supports_platform_port_assignments_templates() -> None:
     ports = {"platform_context_host_proxy_port": 8010}
     resolved = generate_platform_vars.resolve_tcp_proxy_port(
@@ -42,6 +55,31 @@ def test_build_platform_vars_includes_harbor_publication_topology() -> None:
     assert harbor["ports"]["internal"] == 8095
     assert harbor["urls"]["public"] == "https://registry.lv3.org"
     assert harbor["urls"]["internal"] == "http://10.10.10.20:8095"
+
+
+def test_build_platform_vars_includes_openfga_private_controller_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    openfga = platform_vars["platform_service_topology"]["openfga"]
+
+    assert openfga["ports"]["internal"] == 8098
+    assert openfga["ports"]["controller"] == 8014
+    assert openfga["urls"]["internal"] == "http://10.10.10.20:8098"
+    assert openfga["urls"]["controller"] == "http://100.64.0.1:8014"
+    assert platform_vars["openfga_controller_url"] == "http://100.64.0.1:8014"
+
+def test_build_platform_vars_includes_nextcloud_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    nextcloud = platform_vars["platform_service_topology"]["nextcloud"]
+
+    assert nextcloud["public_hostname"] == "cloud.lv3.org"
+    assert nextcloud["dns"]["name"] == "cloud"
+    assert nextcloud["ports"]["internal"] == 8084
+    assert nextcloud["urls"]["public"] == "https://cloud.lv3.org"
+    assert nextcloud["urls"]["internal"] == "http://10.10.10.20:8084"
+    assert nextcloud["edge"]["exact_redirects"] == [
+        {"path": "/.well-known/carddav", "location": "/remote.php/dav/", "status": 301},
+        {"path": "/.well-known/caldav", "location": "/remote.php/dav/", "status": 301},
+    ]
 
 
 def test_build_platform_vars_includes_shared_session_authority_contract() -> None:
@@ -153,6 +191,39 @@ def test_build_service_urls_resolves_excalidraw_internal_url() -> None:
         "public": "https://draw.lv3.org",
         "internal": "http://10.10.10.20:3095",
     }
+
+
+def test_build_service_urls_resolves_outline_internal_url() -> None:
+    ports = {"outline_port": 3006}
+    service = {"owning_vm": "docker-runtime-lv3", "public_hostname": "wiki.lv3.org"}
+    host_vars = {"management_tailscale_ipv4": "100.118.189.95"}
+    guest_ipv4_by_name = {"docker-runtime-lv3": "10.10.10.20"}
+    stack = {"desired_state": {"host_id": "proxmox_florin"}}
+
+    port_map, urls = generate_platform_vars.build_service_urls(
+        "outline",
+        service,
+        host_vars,
+        guest_ipv4_by_name,
+        ports,
+        stack,
+    )
+
+    assert port_map == {"internal": 3006}
+    assert urls == {
+        "public": "https://wiki.lv3.org",
+        "internal": "http://10.10.10.20:3006",
+    }
+
+
+def test_build_platform_vars_renders_service_topology_without_unresolved_templates() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    service_topology = platform_vars["platform_service_topology"]
+
+    assert all("{{" not in value and "}}" not in value for value in iter_strings(service_topology))
+    assert service_topology["headscale"]["private_ip"] == platform_vars["platform_host"]["network"]["internal_ipv4"]
+    assert service_topology["outline"]["edge"]["upstream"] == service_topology["outline"]["urls"]["internal"]
+    assert service_topology["excalidraw"]["edge"]["prefix_proxy_routes"][0]["upstream"] == "http://10.10.10.20:3096"
 
 
 def test_build_platform_vars_includes_plane_publication_topology() -> None:

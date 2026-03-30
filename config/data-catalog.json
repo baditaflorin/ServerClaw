@@ -101,6 +101,21 @@
       "notes": "Repositories, issues, webhook configuration, and audit metadata are operational records that should remain restorable for multi-year incident and change reconstruction."
     },
     {
+      "id": "gotenberg-transient-render-buffers",
+      "service": "gotenberg",
+      "name": "Gotenberg transient render buffers",
+      "class": "internal",
+      "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Transient request and response buffers inside the gotenberg container on docker-runtime-lv3",
+        "Ephemeral temporary files created during Chromium and LibreOffice conversions on docker-runtime-lv3"
+      ],
+      "notes": "Gotenberg is stateless and does not persist source documents or rendered PDFs after each synchronous conversion finishes."
+    },
+    {
       "id": "grafana-annotations",
       "service": "grafana",
       "name": "Grafana annotations",
@@ -342,6 +357,21 @@
       "notes": "Secret material is retained until explicit deletion or rotation removes the prior value."
     },
     {
+      "id": "openfga-authorization-graph",
+      "service": "openfga",
+      "name": "OpenFGA authorization graph",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "PostgreSQL openfga database on postgres-lv3",
+        "serverclaw-authz store, authorization models, and tuples"
+      ],
+      "notes": "The delegated authorization graph persists named operator and service-principal relationships until the repo-managed bootstrap contract removes or replaces them."
+    },
+    {
       "id": "outline-attachment-storage",
       "service": "outline",
       "name": "Outline attachment storage",
@@ -368,6 +398,34 @@
         "Outline PostgreSQL database"
       ],
       "notes": "Outline stores workspace, user, collection, and document metadata that may include operator identities and operational text."
+    },
+    {
+      "id": "nextcloud-personal-files",
+      "service": "nextcloud",
+      "name": "Nextcloud personal files and DAV payloads",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "break_glass",
+      "pii_risk": "high",
+      "locations": [
+        "/opt/nextcloud/data/html/data"
+      ],
+      "notes": "User-owned files, attachments, calendar bodies, contacts, and task payloads remain under user-directed retention and must stay recoverable."
+    },
+    {
+      "id": "nextcloud-account-metadata",
+      "service": "nextcloud",
+      "name": "Nextcloud account and sharing metadata",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "break_glass",
+      "pii_risk": "high",
+      "locations": [
+        "Nextcloud PostgreSQL database"
+      ],
+      "notes": "Account records, shares, app state, and file metadata define the canonical personal data plane and must remain restorable with the runtime filesystem."
     },
     {
       "id": "plane-object-storage",
@@ -503,6 +561,21 @@
         "Windmill workspace logs"
       ],
       "notes": "Workflow logs can contain operator context and transient execution metadata but do not need indefinite retention."
+    },
+    {
+      "id": "browser-runner-artifacts",
+      "service": "browser_runner",
+      "name": "Browser runner bounded session artifacts",
+      "class": "confidential",
+      "retention_days": 30,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "/opt/browser-runner/data/artifacts",
+        "browser-run-session structured outputs"
+      ],
+      "notes": "Captured screenshots, PDFs, selector text, and downloaded files may contain third-party page content or delegated-session data, so retention stays intentionally short and private."
     }
   ]
 }

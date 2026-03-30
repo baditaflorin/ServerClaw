@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.91",
-  "platform_version": "0.130.60",
-  "generated_at": "2026-03-29T23:27:16Z",
-  "next_refresh_at": "2026-03-30T00:27:16Z",
+  "repo_version": "0.177.95",
+  "platform_version": "0.130.63",
+  "generated_at": "2026-03-30T03:20:23Z",
+  "next_refresh_at": "2026-03-30T04:20:23Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -26,7 +26,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.40:9093",
-        "last_live_apply": "2026-03-29T00:00:00Z"
+        "last_live_apply": "2026-03-30T00:00:00Z"
       },
       "api_gateway": {
         "service_name": "Platform API Gateway",
@@ -49,6 +49,18 @@
         "lifecycle_status": "active",
         "primary_url": "https://10.10.10.60:8007",
         "last_live_apply": "2026-03-29T00:00:00Z"
+      },
+      "browser_runner": {
+        "service_name": "Browser Runner",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://10.10.10.20:8096",
+        "last_live_apply": "2026-03-30T00:00:00Z",
+        "slo_status": "unknown"
       },
       "changelog_portal": {
         "service_name": "Deployment History Portal",
@@ -163,6 +175,18 @@
         "last_live_apply": "2026-03-30T00:00:00Z",
         "slo_status": "unknown"
       },
+      "gotenberg": {
+        "service_name": "Gotenberg",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://10.10.10.20:3007",
+        "last_live_apply": "2026-03-30T00:00:00Z",
+        "slo_status": "unknown"
+      },
       "grafana": {
         "service_name": "Grafana",
         "status": "healthy",
@@ -172,7 +196,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://grafana.lv3.org",
-        "last_live_apply": "2026-03-29T00:00:00Z",
+        "last_live_apply": "2026-03-30T00:00:00Z",
         "slo_status": "unknown"
       },
       "harbor": {
@@ -291,6 +315,18 @@
         "last_live_apply": "2026-03-30T00:00:00Z",
         "slo_status": "unknown"
       },
+      "nextcloud": {
+        "service_name": "Nextcloud",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://cloud.lv3.org",
+        "last_live_apply": "2026-03-30T00:00:00Z",
+        "slo_status": "unknown"
+      },
       "nginx_edge": {
         "service_name": "NGINX Edge",
         "status": "healthy",
@@ -312,7 +348,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:8013",
-        "last_live_apply": "2026-03-29T00:00:00Z"
+        "last_live_apply": "2026-03-30T00:00:00Z"
       },
       "ntfy": {
         "service_name": "ntfy",
@@ -369,6 +405,18 @@
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:8200",
         "last_live_apply": "2026-03-30T00:00:00Z"
+      },
+      "openfga": {
+        "service_name": "OpenFGA",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://100.64.0.1:8014",
+        "last_live_apply": "2026-03-30T00:00:00Z",
+        "slo_status": "unknown"
       },
       "ops_portal": {
         "service_name": "Platform Operations Portal",
@@ -459,7 +507,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://realtime.lv3.org",
-        "last_live_apply": "2026-03-29T00:00:00Z",
+        "last_live_apply": "2026-03-30T00:00:00Z",
         "slo_status": "unknown"
       },
       "searxng": {
@@ -957,6 +1005,32 @@
         "runbook": "docs/runbooks/configure-api-gateway.md"
       },
       {
+        "id": "converge-browser-runner",
+        "description": "Converge the private Playwright browser runner on docker-runtime-lv3, refresh the shared API gateway route, and verify the governed browser-session execution surface for operators and Dify.",
+        "tags": [
+          "converge-browser-runner",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-browser-runner.md"
+      },
+      {
         "id": "converge-control-plane-recovery",
         "description": "Converge scheduled control-plane backups on docker-runtime-lv3, stage controller recovery references, validate recurring restore drills on backup-lv3, and publish a verified off-host witness bundle.",
         "tags": [
@@ -1033,6 +1107,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-dify.md"
+      },
+      {
+        "id": "converge-docker-publication-assurance",
+        "description": "Converge the shared ADR 0270 Docker publication assurance helper on managed Docker guests and verify every declared publication contract before readiness is trusted.",
+        "tags": [
+          "converge-docker-publication-assurance",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/docker-publication-assurance.md"
       },
       {
         "id": "converge-docker-runtime",
@@ -1137,6 +1237,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-gitea.md"
+      },
+      {
+        "id": "converge-gotenberg",
+        "description": "Deploy the private Gotenberg runtime on docker-runtime-lv3 and refresh the shared API gateway route used for authenticated PDF rendering requests.",
+        "tags": [
+          "converge-gotenberg",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 280,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-gotenberg.md"
       },
       {
         "id": "converge-guest-network-policy",
@@ -1451,6 +1577,32 @@
         "runbook": "docs/runbooks/configure-netbox.md"
       },
       {
+        "id": "converge-nextcloud",
+        "description": "Converge Nextcloud on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish cloud.lv3.org with DAV redirects and large-upload support.",
+        "tags": [
+          "converge-nextcloud",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 350,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-nextcloud.md"
+      },
+      {
         "id": "converge-nomad",
         "description": "Converge the private Nomad scheduler on monitoring-lv3 plus the runtime and build clients, including controller-local TLS and ACL bootstrap artifacts and repo-managed smoke jobs.",
         "tags": [
@@ -1605,6 +1757,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-openbao.md"
+      },
+      {
+        "id": "converge-openfga",
+        "description": "Converge OpenFGA on docker-runtime-lv3, publish the Proxmox host controller proxy, and seed the repo-managed ServerClaw delegated authorization graph.",
+        "tags": [
+          "converge-openfga",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-openfga.md"
       },
       {
         "id": "converge-ops-portal",
@@ -3561,6 +3739,16 @@
         ]
       },
       {
+        "id": "configure-browser-runner",
+        "title": "Configure Browser Runner",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-browser-runner.md",
+        "workflow_ids": [
+          "converge-browser-runner"
+        ]
+      },
+      {
         "id": "configure-control-plane-recovery",
         "title": "Configure Control-Plane Recovery",
         "agent_trust_required": "T3",
@@ -3643,6 +3831,16 @@
         ]
       },
       {
+        "id": "configure-gotenberg",
+        "title": "Configure Gotenberg",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-gotenberg.md",
+        "workflow_ids": [
+          "converge-gotenberg"
+        ]
+      },
+      {
         "id": "configure-guest-network-policy",
         "title": "Configure Guest Network Policy",
         "agent_trust_required": "T3",
@@ -3696,7 +3894,7 @@
         "id": "configure-keycloak",
         "title": "Configure Keycloak",
         "agent_trust_required": "T3",
-        "steps": 10,
+        "steps": 11,
         "path": "docs/runbooks/configure-keycloak.md",
         "workflow_ids": [
           "converge-keycloak"
@@ -3773,6 +3971,16 @@
         ]
       },
       {
+        "id": "configure-nextcloud",
+        "title": "Configure Nextcloud",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-nextcloud.md",
+        "workflow_ids": [
+          "converge-nextcloud"
+        ]
+      },
+      {
         "id": "configure-nomad",
         "title": "Configure Nomad",
         "agent_trust_required": "T3",
@@ -3830,6 +4038,16 @@
         "path": "docs/runbooks/configure-openbao.md",
         "workflow_ids": [
           "converge-openbao"
+        ]
+      },
+      {
+        "id": "configure-openfga",
+        "title": "Configure OpenFGA",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-openfga.md",
+        "workflow_ids": [
+          "converge-openfga"
         ]
       },
       {
@@ -3985,6 +4203,16 @@
         "path": "docs/runbooks/disaster-recovery.md",
         "workflow_ids": [
           "disaster-recovery-runbook"
+        ]
+      },
+      {
+        "id": "docker-publication-assurance",
+        "title": "Docker Publication Assurance Runbook",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/docker-publication-assurance.md",
+        "workflow_ids": [
+          "converge-docker-publication-assurance"
         ]
       },
       {
@@ -4338,10 +4566,10 @@
     ],
     "capability_contracts": {
       "summary": {
-        "total": 6,
-        "selected": 6,
+        "total": 7,
+        "selected": 7,
         "contract_only": 0,
-        "export_ready": 6
+        "export_ready": 7
       },
       "items": [
         {
@@ -4396,6 +4624,24 @@
           "selection_notes": "Selected for self-hosted mesh coordination and controlled subnet routing into the private guest network.",
           "export_format_count": 3,
           "fallback_behaviour": "Existing private sessions may continue temporarily, but new enrollments or route changes pause until the replacement mesh control plane is ready.",
+          "failure_mode_count": 1
+        },
+        {
+          "id": "personal_data_plane",
+          "name": "Personal Data Plane",
+          "summary": "Provide durable user-owned personal files and DAV-backed calendar, contact, and task data through a replaceable standards-based contract rather than one SaaS provider API.",
+          "scope": "critical_shared_surface",
+          "owner": "platform-operations",
+          "review_cadence": "quarterly",
+          "selected_product": "Nextcloud",
+          "service_id": "nextcloud",
+          "service_name": "Nextcloud",
+          "service_url": "https://cloud.lv3.org",
+          "selection_adr": "0260",
+          "runbook": "docs/runbooks/configure-nextcloud.md",
+          "selection_notes": "Selected for self-hosted standards-based personal file and DAV data management with repo-managed runtime automation.",
+          "export_format_count": 3,
+          "fallback_behaviour": "Read-only maintenance is acceptable during migration if user data remains intact and exportable from the managed runtime.",
           "failure_mode_count": 1
         },
         {
@@ -4487,10 +4733,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.90",
-    "deployed_at": "2026-03-29",
-    "summary": "implements ADR 0254 by carrying the dedicated ServerClaw chat surface on chat.lv3.org onto current mainline truth, preserving the governed 8096 edge lane to coolify-lv3, and recording the first clean exact-main receipt from merged main",
-    "release_notes_url": "docs/release-notes/0.177.91.md"
+    "last_version": "0.177.94",
+    "deployed_at": "2026-03-30",
+    "summary": "implements ADR 0261 by publishing the private browser-runner runtime, the governed operator gateway route, and the Dify-compatible browser-run-session tool with packaged-runtime-safe config resolution and verified smoke artifacts implements ADR 0262 by deploying the OpenFGA delegated authorization runtime, the ServerClaw bootstrap contracts, the repo-managed Keycloak runtime clients, and the API gateway registration for delegated authorization checks",
+    "release_notes_url": "docs/release-notes/0.177.95.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -57,6 +57,15 @@
       "adr": "0194"
     },
     {
+      "id": "browser_runner",
+      "service": "browser_runner",
+      "name": "Browser Runner",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0261"
+    },
+    {
       "id": "dify",
       "service": "dify",
       "name": "Dify",
@@ -118,6 +127,15 @@
       "tier": 2,
       "category": "automation",
       "adr": "0143"
+    },
+    {
+      "id": "gotenberg",
+      "service": "gotenberg",
+      "name": "Gotenberg",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0278"
     },
     {
       "id": "grafana",
@@ -210,6 +228,15 @@
       "adr": "0151"
     },
     {
+      "id": "nextcloud",
+      "service": "nextcloud",
+      "name": "Nextcloud",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "data",
+      "adr": "0260"
+    },
+    {
       "id": "netbox",
       "service": "netbox",
       "name": "NetBox",
@@ -289,6 +316,15 @@
       "tier": 1,
       "category": "security",
       "adr": "0043"
+    },
+    {
+      "id": "openfga",
+      "service": "openfga",
+      "name": "OpenFGA",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "access",
+      "adr": "0262"
     },
     {
       "id": "ops_portal",
@@ -452,6 +488,18 @@
       "description": "Public access to api.lv3.org depends on the shared edge publication path, but the internal gateway remains reachable directly."
     },
     {
+      "from": "browser_runner",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The private Playwright browser runner is hosted on docker-runtime-lv3."
+    },
+    {
+      "from": "browser_runner",
+      "to": "api_gateway",
+      "type": "soft",
+      "description": "Authenticated operator access to the browser runner uses the governed API gateway route, while the private runtime can still be verified locally."
+    },
+    {
       "from": "changelog_portal",
       "to": "nginx_edge",
       "type": "hard",
@@ -582,6 +630,18 @@
       "to": "postgres",
       "type": "hard",
       "description": "Gitea persists repositories, metadata, and issue state in Postgres."
+    },
+    {
+      "from": "gotenberg",
+      "to": "api_gateway",
+      "type": "soft",
+      "description": "Authenticated operator and cross-service access can be brokered through the shared API gateway route, while private guest-network callers can still use the internal listener directly."
+    },
+    {
+      "from": "gotenberg",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Gotenberg Chromium and LibreOffice renderers are hosted on docker-runtime-lv3."
     },
     {
       "from": "grafana",
@@ -740,6 +800,24 @@
       "description": "n8n stores workflow, credential, and execution state in Postgres."
     },
     {
+      "from": "nextcloud",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Nextcloud stores account, sharing, file, and app metadata in Postgres."
+    },
+    {
+      "from": "nextcloud",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Nextcloud receives its mirrored database, Redis, and admin bootstrap secrets through the OpenBao agent before startup."
+    },
+    {
+      "from": "nextcloud",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public reachability for cloud.lv3.org and DAV discovery redirects depends on the shared NGINX edge publication path."
+    },
+    {
       "from": "netbox",
       "to": "openbao",
       "type": "startup_only",
@@ -786,6 +864,24 @@
       "to": "searxng",
       "type": "soft",
       "description": "Open WebUI delegates optional web-search requests to the private SearXNG runtime when the feature is enabled."
+    },
+    {
+      "from": "openfga",
+      "to": "postgres",
+      "type": "hard",
+      "description": "OpenFGA stores authorization stores, models, and relationship tuples in PostgreSQL."
+    },
+    {
+      "from": "openfga",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "OpenFGA reads its mirrored datastore password and preshared API key from the OpenBao-backed runtime secret path before startup."
+    },
+    {
+      "from": "openfga",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "The repo-managed bootstrap verification path checks Keycloak-issued operator and runtime identities alongside the delegated authorization graph."
     },
     {
       "from": "serverclaw",

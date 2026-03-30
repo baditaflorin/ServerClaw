@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0278-gotenberg-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_at": "2026-03-30T00:30:44Z",
+  "recorded_by": "codex",
+  "source_commit": "e1b0ceb64999621f468bb85d1c21964cfcc6b4ca",
+  "repo_version_context": "0.177.92",
+  "platform_version_context": "0.130.60",
+  "workflow_id": "live-apply-service",
+  "adr": "0278",
+  "summary": "Replayed ADR 0278 from the merged mainline after release 0.177.92 landed on `origin/main`, fixed the Docker runtime nftables persistence bug in commit `e1b0ceb64999621f468bb85d1c21964cfcc6b4ca`, re-ran the governed Gotenberg live apply successfully from that exact main commit, and captured fresh guest-local plus authenticated gateway PDF-render proofs before promoting the canonical platform version bump.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "application",
+      "name": "api.lv3.org/v1/gotenberg",
+      "address": "https://api.lv3.org/v1/gotenberg"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Remote pre-push gate on merged-main integration",
+      "result": "pass",
+      "observed": "Both `git push origin HEAD:main` runs for the ADR 0278 integration passed the full remote pre-push gate, including `agent-standards`, `alert-rule-validation`, `ansible-lint`, `ansible-syntax`, `artifact-secret-scan`, `dependency-direction`, `dependency-graph`, `documentation-index`, `generated-docs`, `generated-portals`, `integration-tests`, `packer-validate`, `policy-validation`, `schema-validation`, `security-scan`, `service-completeness`, `tofu-validate`, `type-check`, `workstream-surfaces`, and `yaml-lint`."
+    },
+    {
+      "check": "First merged-main replay exposed the Docker runtime recovery bug",
+      "result": "pass",
+      "observed": "The first authoritative merged-main replay from commit `8704a9798` failed with `iptables: No chain/target/match by that name` while starting Gotenberg because the Docker runtime role reloaded the full nftables ruleset and temporarily flushed Docker-managed tables; the failing transcript is preserved in `receipts/live-applies/evidence/2026-03-30-ws-0278-merged-main-live-apply.txt`."
+    },
+    {
+      "check": "Docker runtime replay fix on main",
+      "result": "pass",
+      "observed": "Commit `e1b0ceb64999621f468bb85d1c21964cfcc6b4ca` changed the Docker runtime role so it persists the forward-compat nftables patch without reloading the full ruleset, and the focused pytest slice for `tests/test_docker_runtime_role.py` plus `tests/test_gotenberg_runtime_role.py` passed from the exact-main integration worktree."
+    },
+    {
+      "check": "Authoritative merged-main Gotenberg replay",
+      "result": "pass",
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=gotenberg env=production EXTRA_ARGS='-e bypass_promotion=true'` completed successfully from source commit `e1b0ceb64999621f468bb85d1c21964cfcc6b4ca` with recap `docker-runtime-lv3 : ok=259 changed=112 unreachable=0 failed=0 skipped=29 rescued=0 ignored=0`, captured in `receipts/live-applies/evidence/2026-03-30-ws-0278-merged-main-live-apply-r2.txt`."
+    },
+    {
+      "check": "Merged-main private runtime verification",
+      "result": "pass",
+      "observed": "The guest-local health probe returned `{\"status\":\"up\"...}` from `http://127.0.0.1:3007/health`; the merged-main local Chromium render returned `pdf_magic=%PDF` and `pdf_bytes=31015`; and the merged-main local LibreOffice render returned `pdf_magic=%PDF` and `pdf_bytes=14041`, as captured in the `2026-03-30-ws-0278-merged-main-local-*` evidence files."
+    },
+    {
+      "check": "Merged-main authenticated gateway verification",
+      "result": "pass",
+      "observed": "Using the controller-local platform-context bearer token, `https://api.lv3.org/v1/gotenberg/health` returned `{\"status\":\"up\"...}`, and the authenticated Chromium gateway render returned `pdf_magic=%PDF` with `pdf_bytes=32038`, as captured in the `2026-03-30-ws-0278-merged-main-gateway-*` evidence files."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0278-gotenberg-as-the-document-to-pdf-rendering-service.md",
+    "docs/workstreams/ws-0278-live-apply.md",
+    "docs/workstreams/ws-0278-main-integration.md",
+    "docs/runbooks/configure-gotenberg.md",
+    "collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/gotenberg_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/gotenberg_runtime/tasks/verify.yml",
+    "tests/test_docker_runtime_role.py",
+    "tests/test_gotenberg_runtime_role.py",
+    "versions/stack.yaml",
+    "workstreams.yaml",
+    "receipts/live-applies/evidence/2026-03-30-ws-0278-merged-main-live-apply.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0278-merged-main-live-apply-r2.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0278-merged-main-local-health.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0278-merged-main-local-chromium.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0278-merged-main-local-libreoffice.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0278-merged-main-gateway-health.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0278-merged-main-gateway-chromium.txt",
+    "receipts/live-applies/2026-03-30-adr-0278-gotenberg-live-apply.json",
+    "receipts/live-applies/2026-03-30-adr-0278-gotenberg-mainline-live-apply.json"
+  ],
+  "notes": [
+    "This receipt is the canonical merged-main replay that justifies bumping `platform_version` from `0.130.60` to `0.130.61` for ADR 0278.",
+    "The service remains intentionally private on `docker-runtime-lv3`; the supported authenticated operator path is the governed API gateway route `https://api.lv3.org/v1/gotenberg`.",
+    "The earlier branch-local receipt remains part of the audit trail, but the latest canonical Gotenberg live-apply evidence now points at the merged-main receipt recorded here."
+  ]
+}

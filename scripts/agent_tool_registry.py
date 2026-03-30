@@ -37,8 +37,10 @@ REGISTRY_SCHEMA_PATH: Final[Path] = repo_path("docs", "schema", "agent-tool-regi
 AUDIT_SCHEMA_PATH: Final[Path] = repo_path("docs", "schema", "governed-tool-call-audit-event.json")
 STACK_PATH: Final[Path] = repo_path("versions", "stack.yaml")
 HOST_VARS_PATH: Final[Path] = repo_path("inventory", "host_vars", "proxmox_florin.yml")
+SERVICE_CATALOG_PATH: Final[Path] = repo_path("config", "service-capability-catalog.json")
 AUDIT_LOG_ENV: Final[str] = "LV3_AGENT_TOOL_AUDIT_LOG_PATH"
 PLATFORM_CONTEXT_TOKEN_ENV: Final[str] = "LV3_PLATFORM_CONTEXT_API_TOKEN_FILE"
+BROWSER_RUNNER_BASE_URL_ENV: Final[str] = "LV3_BROWSER_RUNNER_BASE_URL"
 DEFAULT_PLATFORM_CONTEXT_TOKEN_PATH: Final[Path] = REPO_ROOT / ".local" / "platform-context" / "api-token.txt"
 SUPPORTED_SCHEMA_VERSION: Final[str] = "1.0.0"
 ALLOWED_TOOL_CATEGORIES: Final[set[str]] = {"observe", "report", "execute", "approve"}
@@ -330,6 +332,52 @@ def load_catalog_context() -> tuple[dict[str, Any], dict[str, Any], dict[str, An
     return secret_manifest, workflow_catalog, command_catalog
 
 
+def load_service_catalog() -> list[dict[str, Any]]:
+    payload = require_mapping(load_json(SERVICE_CATALOG_PATH), str(SERVICE_CATALOG_PATH))
+    return require_list(payload.get("services"), "config/service-capability-catalog.json.services")
+
+
+def resolve_service_base_url(service_id: str, *, env_var: str | None = None) -> str:
+    if env_var:
+        override = os.environ.get(env_var)
+        if override:
+            return require_str(override, f"environment.{env_var}").rstrip("/")
+
+    for index, service in enumerate(load_service_catalog()):
+        service = require_mapping(service, f"config/service-capability-catalog.json.services[{index}]")
+        current_id = require_str(service.get("id"), f"config/service-capability-catalog.json.services[{index}].id")
+        if current_id != service_id:
+            continue
+
+        for field in ("internal_url", "public_url"):
+            value = service.get(field)
+            if value is not None:
+                return require_str(
+                    value,
+                    f"config/service-capability-catalog.json.services[{index}].{field}",
+                ).rstrip("/")
+
+        environments = require_mapping(
+            service.get("environments", {}),
+            f"config/service-capability-catalog.json.services[{index}].environments",
+        )
+        production = environments.get("production")
+        if production is not None:
+            production = require_mapping(
+                production,
+                f"config/service-capability-catalog.json.services[{index}].environments.production",
+            )
+            if production.get("url") is not None:
+                return require_str(
+                    production.get("url"),
+                    f"config/service-capability-catalog.json.services[{index}].environments.production.url",
+                ).rstrip("/")
+
+        raise ValueError(f"service '{service_id}' does not define an internal or production URL")
+
+    raise ValueError(f"service '{service_id}' is not present in config/service-capability-catalog.json")
+
+
 def tool_get_platform_status(_tool: dict[str, Any], _args: dict[str, Any]) -> dict[str, Any]:
     stack = require_mapping(load_yaml(STACK_PATH), str(STACK_PATH))
     host_vars = require_mapping(load_yaml(HOST_VARS_PATH), str(HOST_VARS_PATH))
@@ -450,6 +498,19 @@ def tool_query_platform_context(tool: dict[str, Any], args: dict[str, Any]) -> d
         raise ValueError(f"platform-context API query failed: {exc.reason}") from exc
 
 
+def tool_browser_run_session(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    from browser_runner_client import DEFAULT_TIMEOUT_SECONDS, run_session
+
+    base_url = resolve_service_base_url("browser_runner", env_var=BROWSER_RUNNER_BASE_URL_ENV)
+    timeout_seconds = require_int(
+        args.get("timeout_seconds", DEFAULT_TIMEOUT_SECONDS),
+        "arguments.timeout_seconds",
+        1,
+    )
+    payload = dict(args)
+    return run_session(base_url, payload, timeout_seconds=timeout_seconds)
+
+
 def tool_get_maintenance_windows(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
     service_id = args.get("service_id")
     if service_id is not None:
@@ -529,6 +590,7 @@ HANDLERS: Final[dict[str, Any]] = {
     "get_maintenance_windows": tool_get_maintenance_windows,
     "export_mcp_tools": tool_export_mcp_tools,
     "query_platform_context": tool_query_platform_context,
+    "browser_run_session": tool_browser_run_session,
     "check_command_approval": tool_check_command_approval,
     "run_governed_command": tool_run_governed_command,
 }

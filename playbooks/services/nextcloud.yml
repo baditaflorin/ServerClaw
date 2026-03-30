@@ -1,0 +1,29 @@
+---
+# Playbook: services/nextcloud.yml
+# Purpose: Provide the stable live-apply service wrapper for Nextcloud.
+# Use case: Run `make live-apply-service service=nextcloud` so the generic service lane can invoke the Nextcloud converge playbook.
+#
+# Inputs (required):
+#   - env (str, required): Environment selector passed by the live-apply wrapper.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH connection strategy.
+#
+# Outputs:
+#   - Imports the canonical Nextcloud converge playbook.
+#
+# Idempotency: Fully idempotent
+#              The wrapper only imports the canonical playbook and adds no extra mutation.
+#
+# Dependencies:
+#   - ADR 0260: Nextcloud as the canonical personal data plane for ServerClaw.
+#   - Requires: playbooks/nextcloud.yml
+#   - Role: imported playbook — owns all live mutations.
+#
+# Related ADRs: 0260
+# Related Runbooks: docs/runbooks/configure-nextcloud.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-29
+
+- import_playbook: ../nextcloud.yml

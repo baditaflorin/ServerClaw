@@ -1,3 +1,9 @@
+# Purpose: Converge the OpenBao runtime, initialization flow, unseal artifacts, and repo-managed auth/bootstrap contracts.
+# Use case: Run during OpenBao deployment, TLS hardening, or downstream recovery when secret delivery must match repo truth.
+# Inputs: Runtime paths, TLS materials, PostgreSQL backend inputs, local artifact files, and bootstrap identity settings.
+# Outputs: The OpenBao runtime, bootstrap payloads, auth backends, and operator credentials match the declared configuration.
+# Idempotency: Partially idempotent because first-run initialization, unseal handling, and runtime restarts intentionally change state.
+# Dependencies: ADR 0165, ADR 0043, ADR 0101, and ADR 0231.
 ---
 - name: Validate OpenBao runtime inputs
   ansible.builtin.assert:
@@ -1137,6 +1143,9 @@
   loop_control:
     label: "{{ item.key }}"
   register: openbao_rotatable_secret_current
+  retries: 6
+  delay: 2
+  until: openbao_rotatable_secret_current.status in [200, 404]
   no_log: true
 
 - name: Seed dedicated rotatable secrets into OpenBao
@@ -1147,12 +1156,21 @@
       X-Vault-Token: "{{ openbao_init_payload.root_token }}"
     body_format: json
     body:
-      data:
-        "{{ item.value.openbao_field }}": "{{ lookup('ansible.builtin.file', openbao_controller_secret_manifest.secrets[item.value.seed_controller_secret_id].path) | trim }}"
+      data: >-
+        {{
+          {
+            (item.value.openbao_field):
+              (lookup('ansible.builtin.file', openbao_controller_secret_manifest.secrets[item.value.seed_controller_secret_id].path) | trim)
+          }
+        }}
     status_code: 200
   loop: "{{ openbao_rotatable_secret_contracts | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
+  register: openbao_seed_rotatable_secret_result
+  retries: 6
+  delay: 2
+  until: openbao_seed_rotatable_secret_result.status == 200
   when: >-
     (
       openbao_rotatable_secret_current.results
@@ -1179,18 +1197,23 @@
     headers:
       X-Vault-Token: "{{ openbao_init_payload.root_token }}"
     body_format: json
-    body:
-      custom_metadata:
-        secret_id: "{{ item.key }}"
-        service: "{{ item.value.service }}"
-        owner: "{{ item.value.owner }}"
-        risk_level: "{{ item.value.risk_level }}"
-        approval_mode: "{{ item.value.approval_mode }}"
-        command_contract: "{{ item.value.command_contract }}"
-        rotation_period_days: "{{ item.value.rotation_period_days | string }}"
-        warning_window_days: "{{ item.value.warning_window_days | string }}"
-        "{{ openbao_rotation_metadata.last_rotated_metadata_key }}": "{{ item.value.last_rotated | default('unrotated', true) }}"
-        "{{ openbao_rotation_metadata.rotated_by_metadata_key }}": "openbao-seed"
+    body: >-
+      {{
+        {
+          'custom_metadata': {
+            'secret_id': item.key,
+            'service': item.value.service,
+            'owner': item.value.owner,
+            'risk_level': item.value.risk_level,
+            'approval_mode': item.value.approval_mode,
+            'command_contract': item.value.command_contract,
+            'rotation_period_days': (item.value.rotation_period_days | string),
+            'warning_window_days': (item.value.warning_window_days | string),
+            (openbao_rotation_metadata.last_rotated_metadata_key): (item.value.last_rotated | default('unrotated', true)),
+            (openbao_rotation_metadata.rotated_by_metadata_key): 'openbao-seed'
+          }
+        }
+      }}
     status_code:
       - 200
       - 204

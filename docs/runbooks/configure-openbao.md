@@ -131,6 +131,15 @@ preflight state and still continues into `docker compose up`; the decisive guard
 is whether the runtime can actually rebind `:8200`, answer on `127.0.0.1:8201`,
 and pass the subsequent seal-status plus AppRole verification steps.
 
+As of the `2026-03-29` ADR 0270 replay, the shared OpenBao helpers used by
+runtime secret injection and host-native systemd credential delivery also
+recover a missing loopback `127.0.0.1:8201` publication automatically. When the
+local health probe fails with a connection-refused style outage, the helper now
+force-recreates the `openbao` service, waits for the loopback listener to
+return, and only then retries the health call. This keeps later workflows such
+as `make converge-keycloak` from failing just because the private OpenBao API
+publication drifted while the container itself still existed.
+
 If a future rerun still leaves the guest runtime broken, the failure usually presents as `docker compose up` failing to bind `:8200` with an iptables DNAT error and `docker inspect lv3-openbao` showing an empty `NetworkSettings.Networks` object.
 
 If the automated cleanup still cannot recover the guest runtime, repair it in this order:

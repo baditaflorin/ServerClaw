@@ -100,6 +100,11 @@ platform_host:
         listen_port: 8200
         upstream_host: 10.10.10.20
         upstream_port: 8200
+      - name: openfga
+        listen_address: 100.64.0.1
+        listen_port: 8014
+        upstream_host: 10.10.10.20
+        upstream_port: 8098
       - name: semaphore
         listen_address: 100.64.0.1
         listen_port: 8020
@@ -148,6 +153,8 @@ platform_ports:
   netdata_port: 19999
   mail_platform_gateway_port: 8081
   ntfy_port: 2586
+  openfga_http_port: 8098
+  openfga_host_proxy_port: 8014
   openbao_http_port: 8201
   openbao_proxy_port: 8200
   semaphore_server_port: 3004
@@ -166,10 +173,12 @@ platform_ports:
   gitea_host_proxy_port: 3009
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
+  gotenberg_port: 3007
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
   dify_port: 8094
+  browser_runner_port: 8096
   outline_port: 3006
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
@@ -177,6 +186,7 @@ platform_ports:
   excalidraw_room_port: 3096
   ollama_api_port: 11434
   n8n_port: 5678
+  nextcloud_port: 8084
   coolify_dashboard_port: 8000
   coolify_proxy_port: 80
   coolify_proxy_tls_port: 443
@@ -213,6 +223,8 @@ platform_port_assignments:
   netdata_port: 19999
   mail_platform_gateway_port: 8081
   ntfy_port: 2586
+  openfga_http_port: 8098
+  openfga_host_proxy_port: 8014
   openbao_http_port: 8201
   openbao_proxy_port: 8200
   semaphore_server_port: 3004
@@ -231,10 +243,12 @@ platform_port_assignments:
   gitea_host_proxy_port: 3009
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
+  gotenberg_port: 3007
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
   dify_port: 8094
+  browser_runner_port: 8096
   outline_port: 3006
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
@@ -242,6 +256,7 @@ platform_port_assignments:
   excalidraw_room_port: 3096
   ollama_api_port: 11434
   n8n_port: 5678
+  nextcloud_port: 8084
   coolify_dashboard_port: 8000
   coolify_proxy_port: 80
   coolify_proxy_tls_port: 443
@@ -994,7 +1009,7 @@ platform_service_topology:
   headscale:
     service_name: headscale
     owning_vm: proxmox_florin
-    private_ip: '{{ hostvars[''proxmox_florin''].proxmox_internal_ipv4 }}'
+    private_ip: 10.10.10.1
     public_hostname: headscale.lv3.org
     exposure_model: edge-published
     observability:
@@ -1516,13 +1531,13 @@ platform_service_topology:
       tls: true
       noindex: true
       kind: proxy
-      upstream: http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3')
-        | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port
-        }}
+      upstream: http://10.10.10.20:3006
     service_id: outline
-    ports: {}
+    ports:
+      internal: 3006
     urls:
       public: https://wiki.lv3.org
+      internal: http://10.10.10.20:3006
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3
@@ -1574,8 +1589,7 @@ platform_service_topology:
       upstream: http://10.10.10.20:3095
       prefix_proxy_routes:
         - path: /socket.io/
-          upstream: http://10.10.10.20:{{ platform_port_assignments.excalidraw_room_port
-            }}
+          upstream: http://10.10.10.20:3096
     service_id: excalidraw
     ports:
       internal: 3095
@@ -1600,6 +1614,19 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8088
       controller: http://100.64.0.1:8008
+  gotenberg:
+    service_name: gotenberg
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: gotenberg
+    ports:
+      internal: 3007
+    urls:
+      internal: http://10.10.10.20:3007
   serverclaw:
     service_name: serverclaw
     owning_vm: coolify-lv3
@@ -1668,6 +1695,47 @@ platform_service_topology:
     urls:
       public: https://n8n.lv3.org
       internal: http://10.10.10.20:5678
+  nextcloud:
+    service_name: nextcloud
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: cloud.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: cloud
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8084
+      client_max_body_size: 16g
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      security_headers_enabled: false
+      preserve_upstream_security_headers: true
+      exact_redirects:
+        - path: /.well-known/carddav
+          location: /remote.php/dav/
+          status: 301
+        - path: /.well-known/caldav
+          location: /remote.php/dav/
+          status: 301
+    service_id: nextcloud
+    ports:
+      internal: 8084
+    urls:
+      public: https://cloud.lv3.org
+      internal: http://10.10.10.20:8084
   coolify:
     service_name: coolify
     owning_vm: coolify-lv3
@@ -1760,6 +1828,19 @@ platform_service_topology:
     urls:
       public: https://api.lv3.org
       internal: http://10.10.10.20:8083
+  browser_runner:
+    service_name: browser-runner
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    service_id: browser_runner
+    ports:
+      internal: 8096
+    urls:
+      internal: http://10.10.10.20:8096
   platform_context_api:
     service_name: platform-context-api
     owning_vm: docker-runtime-lv3
@@ -1907,6 +1988,24 @@ platform_service_topology:
     urls:
       internal: https://10.10.10.20:8200
       controller: https://100.64.0.1:8200
+  openfga:
+    service_name: openfga
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8014
+    service_id: openfga
+    ports:
+      internal: 8098
+      controller: 8014
+    urls:
+      internal: http://10.10.10.20:8098
+      controller: http://100.64.0.1:8014
   ntfy:
     service_name: ntfy
     owning_vm: docker-runtime-lv3
@@ -2111,6 +2210,10 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: cloud
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: coolify
       type: A
       value: 65.108.75.123
@@ -2190,6 +2293,7 @@ platform_management_allowed_tcp_ports:
   - 8004
   - 9443
   - 8200
+  - 8014
   - 8020
   - 8080
   - 8005
@@ -2304,7 +2408,7 @@ public_edge_service_topology:
   headscale:
     service_name: headscale
     owning_vm: proxmox_florin
-    private_ip: '{{ hostvars[''proxmox_florin''].proxmox_internal_ipv4 }}'
+    private_ip: 10.10.10.1
     public_hostname: headscale.lv3.org
     exposure_model: edge-published
     observability:
@@ -2826,13 +2930,13 @@ public_edge_service_topology:
       tls: true
       noindex: true
       kind: proxy
-      upstream: http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3')
-        | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port
-        }}
+      upstream: http://10.10.10.20:3006
     service_id: outline
-    ports: {}
+    ports:
+      internal: 3006
     urls:
       public: https://wiki.lv3.org
+      internal: http://10.10.10.20:3006
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3
@@ -2884,8 +2988,7 @@ public_edge_service_topology:
       upstream: http://10.10.10.20:3095
       prefix_proxy_routes:
         - path: /socket.io/
-          upstream: http://10.10.10.20:{{ platform_port_assignments.excalidraw_room_port
-            }}
+          upstream: http://10.10.10.20:3096
     service_id: excalidraw
     ports:
       internal: 3095
@@ -2910,6 +3013,19 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8088
       controller: http://100.64.0.1:8008
+  gotenberg:
+    service_name: gotenberg
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: gotenberg
+    ports:
+      internal: 3007
+    urls:
+      internal: http://10.10.10.20:3007
   serverclaw:
     service_name: serverclaw
     owning_vm: coolify-lv3
@@ -2978,6 +3094,47 @@ public_edge_service_topology:
     urls:
       public: https://n8n.lv3.org
       internal: http://10.10.10.20:5678
+  nextcloud:
+    service_name: nextcloud
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: cloud.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: cloud
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8084
+      client_max_body_size: 16g
+      proxy_request_buffering: false
+      proxy_read_timeout_seconds: 3600
+      proxy_send_timeout_seconds: 3600
+      security_headers_enabled: false
+      preserve_upstream_security_headers: true
+      exact_redirects:
+        - path: /.well-known/carddav
+          location: /remote.php/dav/
+          status: 301
+        - path: /.well-known/caldav
+          location: /remote.php/dav/
+          status: 301
+    service_id: nextcloud
+    ports:
+      internal: 8084
+    urls:
+      public: https://cloud.lv3.org
+      internal: http://10.10.10.20:8084
   coolify:
     service_name: coolify
     owning_vm: coolify-lv3
@@ -3070,6 +3227,19 @@ public_edge_service_topology:
     urls:
       public: https://api.lv3.org
       internal: http://10.10.10.20:8083
+  browser_runner:
+    service_name: browser-runner
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    service_id: browser_runner
+    ports:
+      internal: 8096
+    urls:
+      internal: http://10.10.10.20:8096
   platform_context_api:
     service_name: platform-context-api
     owning_vm: docker-runtime-lv3
@@ -3217,6 +3387,24 @@ public_edge_service_topology:
     urls:
       internal: https://10.10.10.20:8200
       controller: https://100.64.0.1:8200
+  openfga:
+    service_name: openfga
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8014
+    service_id: openfga
+    ports:
+      internal: 8098
+      controller: 8014
+    urls:
+      internal: http://10.10.10.20:8098
+      controller: http://100.64.0.1:8014
   ntfy:
     service_name: ntfy
     owning_vm: docker-runtime-lv3
@@ -3359,6 +3547,9 @@ hetzner_dns_records: *id001
 platform_postgres_host: database.lv3.org
 openbao_postgres_host: 10.10.10.50
 openbao_controller_url: https://100.64.0.1:8200
+openfga_http_port: 8098
+openfga_host_proxy_port: 8014
+openfga_controller_url: http://100.64.0.1:8014
 semaphore_server_port: 3004
 semaphore_host_proxy_port: 8020
 semaphore_private_base_url: http://10.10.10.20:3004
@@ -3416,6 +3607,7 @@ proxmox_management_allowed_tcp_ports:
   - 8004
   - 9443
   - 8200
+  - 8014
   - 8020
   - 8080
   - 8005
@@ -3447,10 +3639,12 @@ nomad_server_port: 4646
 nomad_rpc_port: 4647
 nomad_serf_port: 4648
 netbox_server_port: 8082
+gotenberg_port: 3007
 searxng_port: 8881
 searxng_host_proxy_port: 80
 langfuse_port: 3002
 dify_port: 8094
+browser_runner_port: 8096
 outline_port: 3006
 dozzle_http_port: 8089
 dozzle_agent_port: 7007
@@ -3458,6 +3652,7 @@ excalidraw_port: 3095
 excalidraw_room_port: 3096
 ollama_api_port: 11434
 n8n_port: 5678
+nextcloud_port: 8084
 coolify_dashboard_port: 8000
 coolify_proxy_port: 80
 coolify_proxy_tls_port: 443

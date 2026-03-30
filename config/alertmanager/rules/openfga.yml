@@ -1,0 +1,14 @@
+groups:
+  - name: openfga-alerts
+    rules:
+      - alert: OpenFGADown
+        expr: probe_success{service="openfga",probe_kind="readiness"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: openfga
+        annotations:
+          summary: OpenFGA is unreachable on the private controller endpoint.
+          description: The OpenFGA readiness probe through the managed private contract has been failing for at least two minutes.
+          runbook_url: https://docs.lv3.org/runbooks/configure-openfga/
+          dashboard_url: https://grafana.lv3.org/d/lv3-openfga/lv3-openfga

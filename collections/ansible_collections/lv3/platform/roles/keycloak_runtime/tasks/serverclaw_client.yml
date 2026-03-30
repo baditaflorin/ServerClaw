@@ -1,3 +1,9 @@
+# Purpose: Converge the dedicated ServerClaw public OAuth client and mirror its secret locally.
+# Use case: Run from the standalone ServerClaw play when only the public assistant client must be reconciled.
+# Inputs: Keycloak admin credentials, ServerClaw client settings, and local artifact paths.
+# Outputs: Ensures the Keycloak client exists and writes the mirrored client secret to the controller.
+# Idempotency: Partially idempotent because Keycloak reconciliation may refresh secrets and mirrored artifacts.
+# Dependencies: ADR 0165, ADR 0254, and the repo-managed Keycloak runtime.
 ---
 - name: Ensure the Keycloak bootstrap admin password exists on the control machine
   ansible.builtin.stat:

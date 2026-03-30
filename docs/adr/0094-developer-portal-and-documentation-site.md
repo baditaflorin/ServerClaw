@@ -97,7 +97,7 @@ Each service page template includes:
 ## API
 
 {% if service.api_docs_url %}
-See API reference at `{{ service.api_docs_url }}`.
+API reference: `{{ service.api_docs_url }}`
 {% endif %}
 
 ## Related ADR

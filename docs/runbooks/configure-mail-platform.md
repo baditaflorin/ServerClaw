@@ -159,6 +159,7 @@ Run these checks after converge:
 - outbound transactional delivery currently uses the Brevo HTTP API from the mail gateway
 - the private SMTP submission relay on TCP `1587` exists specifically for VM-local platform workloads that need authenticated mail without depending on public STARTTLS certificate trust, so STARTTLS is intentionally disabled on that listener
 - containerized workloads on `docker-runtime-lv3` should prefer the shared-network hostname `lv3-mail-stalwart:1587` over host-published mail ports when they need authenticated internal submission
+- if a replay hits `failed to create endpoint ... network ... does not exist` while recreating the mail-platform containers after Docker networking recovery, treat it as stale compose-network drift: rerun the repo-managed converge and let the role reset the stack with `docker compose down --remove-orphans` before retrying the startup
 - sender governance is enforced through notification-profile-specific mailbox identities and scoped API keys instead of one shared global send credential
 - the first distributed traces for this workflow come from inbound gateway requests plus outbound HTTP calls to Stalwart and Brevo, with `service.namespace=lv3` and `deployment.environment=lv3` exported through `OTEL_RESOURCE_ATTRIBUTES`
 - if direct public SMTP delivery from one profile is required later, add the sender identity, DKIM, and reverse-DNS path explicitly for that profile instead of reusing broad relay assumptions

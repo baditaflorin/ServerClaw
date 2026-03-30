@@ -1,12 +1,12 @@
-# Release 0.177.91
+# Release 0.177.95
 
 - Date: 2026-03-30
 
 ## Summary
-- implements ADR 0254 by carrying the dedicated ServerClaw chat surface on chat.lv3.org onto current mainline truth, preserving the governed 8096 edge lane to coolify-lv3, and recording the first clean exact-main receipt from merged main
+- implements ADR 0262 by deploying the OpenFGA delegated authorization runtime, the ServerClaw bootstrap contracts, the repo-managed Keycloak runtime clients, and the API gateway registration for delegated authorization checks
 
 ## Platform Impact
-- no platform version bump was required; platform version 0.130.60 remains current after the merged-main replay and end-to-end live verification on 2026-03-30
+- exact-main ADR 0262 replay establishes the first live platform version with delegated OpenFGA authorization and API gateway verification on current mainline after ADR 0270 recovery hardening
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

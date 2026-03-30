@@ -154,6 +154,12 @@ roles:
   n8n_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  nextcloud_postgres:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  nextcloud_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   netdata_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -182,6 +188,12 @@ roles:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   openbao_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  openfga_postgres:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  openfga_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   ollama_runtime:

@@ -26,6 +26,7 @@ LEGACY_WORKFLOW_ID_PATTERN = re.compile(r"^adr-\d{4}-[a-z0-9-]+-live-apply$")
 ALLOWED_RESULTS = {"pass", "partial", "fail"}
 ALLOWED_SMOKE_SUITE_STATUSES = {"passed", "failed", "skipped"}
 ALLOWED_ENVIRONMENTS = set(receipt_environment_ids())
+NON_RECEIPT_TOP_LEVEL_DIRS = {"evidence"}
 ALLOWED_CORRECTION_LOOP_DIAGNOSES = {
     "transient_failure",
     "contract_drift",
@@ -67,14 +68,18 @@ def validate_source_commit(commit: str, path: Path) -> None:
         )
 
 
-def iter_receipt_paths() -> list[Path]:
+def iter_receipt_paths(receipts_dir: Path = RECEIPTS_DIR) -> list[Path]:
+    if not receipts_dir.exists():
+        return []
     receipt_paths: list[Path] = []
-    for path in RECEIPTS_DIR.rglob("*.json"):
-        relative = path.relative_to(RECEIPTS_DIR)
+    for path in sorted(receipts_dir.rglob("*.json")):
+        if not path.is_file():
+            continue
+        relative = path.relative_to(receipts_dir)
         if "evidence" in relative.parts:
             continue
         receipt_paths.append(path)
-    return sorted(receipt_paths)
+    return receipt_paths
 
 
 def receipt_environment_for_path(path: Path) -> str:

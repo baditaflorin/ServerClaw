@@ -5,6 +5,12 @@ playbooks:
     shared_surfaces:
       - service:api-gateway
       - config/api-gateway-catalog.json
+  playbooks/browser-runner.yml:
+    playbook_id: browser-runner
+    mutation_scope: host
+    shared_surfaces:
+      - service:browser-runner
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/backup-vm.yml:
     playbook_id: backup-vm
     mutation_scope: platform
@@ -48,6 +54,13 @@ playbooks:
     shared_surfaces:
       - service:docker-runtime
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/docker-publication-assurance.yml:
+    playbook_id: docker-publication-assurance
+    mutation_scope: platform
+    shared_surfaces:
+      - service:docker-publication-assurance
+      - config/health-probe-catalog.json
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/harbor.yml:
     playbook_id: harbor
     mutation_scope: platform
@@ -65,6 +78,12 @@ playbooks:
     mutation_scope: platform
     shared_surfaces:
       - service:gitea
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/gotenberg.yml:
+    playbook_id: gotenberg
+    mutation_scope: host
+    shared_surfaces:
+      - service:gotenberg
       - inventory/host_vars/proxmox_florin.yml
   playbooks/guest-access.yml:
     playbook_id: guest-access
@@ -132,6 +151,12 @@ playbooks:
     shared_surfaces:
       - service:n8n
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/nextcloud.yml:
+    playbook_id: nextcloud
+    mutation_scope: platform
+    shared_surfaces:
+      - service:nextcloud
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/netbox.yml:
     playbook_id: netbox
     mutation_scope: platform
@@ -179,6 +204,12 @@ playbooks:
     mutation_scope: platform
     shared_surfaces:
       - service:openbao
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/openfga.yml:
+    playbook_id: openfga
+    mutation_scope: platform
+    shared_surfaces:
+      - service:openfga
       - inventory/host_vars/proxmox_florin.yml
   playbooks/portainer.yml:
     playbook_id: portainer
@@ -284,6 +315,12 @@ playbooks:
     mutation_scope: platform
     shared_surfaces:
       - service:harbor
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/nextcloud.yml:
+    playbook_id: nextcloud
+    mutation_scope: platform
+    shared_surfaces:
+      - service:nextcloud
       - inventory/host_vars/proxmox_florin.yml
   playbooks/services/docker-runtime-observability.yml:
     playbook_id: docker-runtime-observability

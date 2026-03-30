@@ -1,3 +1,9 @@
+# Purpose: Converge the Open WebUI runtime, mirrored secrets, bootstrap admin state, and runtime verification.
+# Use case: Run during Open WebUI deploys, updates, and exact-main live replays.
+# Inputs: Runtime paths, feature flags, OpenBao secret material, and optional OIDC/search settings.
+# Outputs: Brings the Open WebUI container stack and admin bootstrap state to the repo-managed target state.
+# Idempotency: Partially idempotent because bootstrap state and runtime restarts may intentionally refresh live state.
+# Dependencies: ADR 0165, ADR 0060, ADR 0145, and ADR 0148.
 ---
 - name: Validate Open WebUI runtime inputs
   ansible.builtin.assert:
