@@ -1,3 +1,9 @@
+# Purpose: Set the default runtime, secret, and application settings for the managed Nextcloud service.
+# Use case: Load when converging Nextcloud so compose, OpenBao, Redis, and OCC operations share canonical defaults.
+# Inputs: Platform topology, image catalog, and optional role overrides.
+# Outputs: Default variables consumed by the nextcloud_runtime tasks and templates.
+# Idempotency: Fully idempotent; defaults describe desired values only.
+# Dependencies: ADR 0165 metadata standard, ADR 0260, and the nextcloud_runtime role.
 ---
 nextcloud_site_dir: /opt/nextcloud
 nextcloud_data_dir: "{{ nextcloud_site_dir }}/data/html"

@@ -170,6 +170,35 @@
       }
     },
     {
+      "id": "browser_runner",
+      "name": "Browser Runner",
+      "description": "Private Playwright session runtime for governed web action, extraction, screenshots, and PDF capture.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8096",
+      "exposure": "private-only",
+      "uptime_monitor_name": "Browser Runner Private",
+      "health_probe_id": "browser_runner",
+      "adr": "0261",
+      "runbook": "docs/runbooks/configure-browser-runner.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-browser-runner/lv3-browser-runner",
+      "tags": [
+        "browser",
+        "playwright",
+        "automation",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.20:8096",
+          "notes": "The runtime stays private-only and is exposed to operators through the governed API gateway route plus the Dify tool bridge."
+        }
+      }
+    },
+    {
       "id": "dify",
       "name": "Dify",
       "description": "Visual LLM workflow and agent canvas with governed LV3 tool sync and trace export support.",

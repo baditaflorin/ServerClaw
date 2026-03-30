@@ -57,6 +57,15 @@
       "adr": "0194"
     },
     {
+      "id": "browser_runner",
+      "service": "browser_runner",
+      "name": "Browser Runner",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0261"
+    },
+    {
       "id": "dify",
       "service": "dify",
       "name": "Dify",
@@ -486,6 +495,18 @@
       "to": "nginx_edge",
       "type": "soft",
       "description": "Public access to api.lv3.org depends on the shared edge publication path, but the internal gateway remains reachable directly."
+    },
+    {
+      "from": "browser_runner",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The private Playwright browser runner is hosted on docker-runtime-lv3."
+    },
+    {
+      "from": "browser_runner",
+      "to": "api_gateway",
+      "type": "soft",
+      "description": "Authenticated operator access to the browser runner uses the governed API gateway route, while the private runtime can still be verified locally."
     },
     {
       "from": "changelog_portal",

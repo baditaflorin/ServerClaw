@@ -566,6 +566,140 @@
       "runbook": "docs/runbooks/agent-tool-registry.md"
     },
     {
+      "name": "browser-run-session",
+      "title": "Browser Run Session",
+      "description": "Execute one bounded Playwright browser session through the private ADR 0261 browser-runner runtime and return structured outputs plus artifact metadata.",
+      "category": "execute",
+      "transport": "http",
+      "endpoint": "service://browser_runner/sessions",
+      "auth": "private browser-runner runtime or governed Dify tool bridge",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "selectors": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "capture_screenshot": {
+            "type": "boolean"
+          },
+          "capture_pdf": {
+            "type": "boolean"
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "wait_until": {
+            "type": "string",
+            "enum": [
+              "load",
+              "domcontentloaded",
+              "networkidle",
+              "commit"
+            ]
+          },
+          "viewport_width": {
+            "type": "integer",
+            "minimum": 320
+          },
+          "viewport_height": {
+            "type": "integer",
+            "minimum": 200
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "required": [
+          "run_id",
+          "requested_url",
+          "final_url",
+          "title",
+          "navigation_status",
+          "text_excerpt",
+          "selector_results",
+          "artifacts",
+          "action_log",
+          "warnings"
+        ],
+        "properties": {
+          "run_id": {
+            "type": "string"
+          },
+          "requested_url": {
+            "type": "string"
+          },
+          "final_url": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "navigation_status": {
+            "type": "string"
+          },
+          "text_excerpt": {
+            "type": "string"
+          },
+          "selector_results": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "artifacts": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "action_log": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "browser_run_session"
+      },
+      "catalog_refs": {
+        "workflow_id": "converge-browser-runner",
+        "command_id": "converge-browser-runner"
+      },
+      "mcp_annotations": {
+        "destructiveHint": true,
+        "openWorldHint": true
+      },
+      "runbook": "docs/runbooks/configure-browser-runner.md"
+    },
+    {
       "name": "run-governed-command",
       "title": "Run Governed Command",
       "description": "Evaluate approval requirements and optionally execute one named mutating command contract.",

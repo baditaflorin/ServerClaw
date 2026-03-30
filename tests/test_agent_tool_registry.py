@@ -3,7 +3,9 @@ import os
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 
@@ -59,12 +61,87 @@ class AgentToolRegistryTests(unittest.TestCase):
         self.assertEqual(process.returncode, 0, process.stderr)
         payload = json.loads(process.stdout)
         tool_names = {tool["name"] for tool in payload["tools"]}
-        self.assertGreaterEqual(len(tool_names), 5)
+        self.assertGreaterEqual(len(tool_names), 6)
+        self.assertIn("browser-run-session", tool_names)
         self.assertIn("get-deployment-history", tool_names)
         self.assertIn("get-platform-status", tool_names)
         self.assertIn("get-maintenance-windows", tool_names)
         self.assertIn("query-platform-context", tool_names)
         self.assertIn("run-governed-command", tool_names)
+
+    def test_browser_run_session_uses_base_url_override_and_audits(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            audit_path = Path(temp_dir) / "audit.jsonl"
+            captured: dict[str, object] = {}
+
+            class Handler(BaseHTTPRequestHandler):
+                def do_POST(self) -> None:  # noqa: N802
+                    content_length = int(self.headers.get("Content-Length", "0"))
+                    body = self.rfile.read(content_length).decode("utf-8")
+                    captured["path"] = self.path
+                    captured["headers"] = dict(self.headers.items())
+                    captured["body"] = json.loads(body)
+
+                    payload = {
+                        "run_id": "run-123",
+                        "requested_url": "https://example.com",
+                        "final_url": "https://example.com/final",
+                        "title": "Browser Runner Smoke",
+                        "navigation_status": "completed",
+                        "text_excerpt": "done",
+                        "selector_results": [{"name": "heading", "text": "Browser Runner Smoke"}],
+                        "artifacts": [{"kind": "screenshot", "path": "artifacts/run-123/final-page.png"}],
+                        "action_log": [{"index": 0, "action": "goto", "detail": "loaded https://example.com"}],
+                        "warnings": [],
+                    }
+                    encoded = json.dumps(payload).encode("utf-8")
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/json")
+                    self.send_header("Content-Length", str(len(encoded)))
+                    self.end_headers()
+                    self.wfile.write(encoded)
+
+                def log_message(self, format: str, *args: object) -> None:  # noqa: A003
+                    return None
+
+            server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            try:
+                process = self.run_registry_with_pyyaml(
+                    "--call",
+                    "browser-run-session",
+                    "--args-json",
+                    json.dumps(
+                        {
+                            "url": "https://example.com",
+                            "steps": [{"action": "goto", "url": "https://example.com/final"}],
+                            "capture_screenshot": True,
+                            "timeout_seconds": 12,
+                        }
+                    ),
+                    env={
+                        "LV3_AGENT_TOOL_AUDIT_LOG_PATH": str(audit_path),
+                        "LV3_BROWSER_RUNNER_BASE_URL": f"http://127.0.0.1:{server.server_port}",
+                    },
+                )
+            finally:
+                server.shutdown()
+                server.server_close()
+                thread.join(timeout=5)
+
+            self.assertEqual(process.returncode, 0, process.stderr)
+            payload = json.loads(process.stdout)
+            self.assertEqual(payload["result"]["tool"], "browser-run-session")
+            self.assertFalse(payload["result"]["isError"])
+            structured = payload["result"]["structuredContent"]
+            self.assertEqual(structured["run_id"], "run-123")
+            self.assertEqual(captured["path"], "/sessions")
+            self.assertEqual(captured["body"]["url"], "https://example.com")
+            self.assertEqual(captured["body"]["timeout_seconds"], 12)
+            events = self.read_audit_events(audit_path)
+            self.assertEqual(events[0]["tool"], "browser-run-session")
+            self.assertEqual(events[0]["outcome"], "success")
 
     def test_get_maintenance_windows_uses_local_state_override(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

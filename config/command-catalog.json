@@ -1955,6 +1955,51 @@
         "timeout_seconds": 900
       }
     },
+    "converge-browser-runner": {
+      "description": "Converge the private Playwright browser runner on docker-runtime-lv3, refresh the governed gateway route, and verify the bounded browser-session execution surface.",
+      "workflow_id": "converge-browser-runner",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "keycloak_agent_client_secret",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-local Keycloak confidential-client secret used for authenticated API gateway verification."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-browser-runner passes",
+        "make validate passes before the apply",
+        "The private runtime listener, governed `/v1/browser-runner/*` gateway route, and `browser-run-session` tool contract are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, one direct private runtime smoke session, one authenticated `/v1/browser-runner/healthz` response, and one `/v1/dify-tools/browser-run-session` smoke result."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the browser-runner image build, runtime verification, API gateway replay, or governed tool verification fails.",
+          "Stop if the browser-runner route becomes publicly exposed outside the intended Keycloak or Dify trust boundary."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good browser-runner and gateway configuration from version control before retrying.",
+          "Do not leave the private browser-runner runtime partially deployed with a stale gateway route or mismatched governed tool contract."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
     "converge-ops-portal": {
       "description": "Converge the interactive ops portal on docker-runtime-lv3 so the browser control plane stays aligned with the shared platform API gateway contracts.",
       "workflow_id": "converge-ops-portal",

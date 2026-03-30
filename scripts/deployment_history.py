@@ -16,6 +16,7 @@ from typing import Any
 from controller_automation_toolkit import load_json, repo_path
 from changelog_redaction import redact_history_entries
 from environment_catalog import receipt_subdirectory_environments
+from live_apply_receipts import iter_receipt_paths
 from mutation_audit import resolve_loki_url
 
 
@@ -182,7 +183,7 @@ def collect_live_apply_entries(
 ) -> list[dict[str, Any]]:
     matchers = build_service_matchers(service_catalog)
     entries: list[dict[str, Any]] = []
-    for path in iter_json_paths(receipts_dir):
+    for path in iter_receipt_paths(receipts_dir):
         receipt = load_json(path)
         timestamp = parse_timestamp(receipt.get("recorded_on") or receipt.get("applied_on"), default_to_start_of_day=True)
         targets = receipt.get("targets", [])

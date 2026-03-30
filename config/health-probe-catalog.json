@@ -2447,6 +2447,52 @@
           ]
         }
       }
+    },
+    "browser_runner": {
+      "service_name": "browser-runner",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "browser_runner_runtime",
+      "verify_file": "roles/browser_runner_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The browser runner health endpoint responds on the private runtime listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8096/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The browser runner sessions endpoint accepts the bounded local smoke payload through the role verification path.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8096/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Browser Runner Private",
+          "type": "http",
+          "url": "http://10.10.10.20:8096/healthz",
+          "description": "Private browser-runner health endpoint on docker-runtime-lv3.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
     }
   }
 }

@@ -1,4 +1,11 @@
 - targets:
+    - http://10.10.10.20:8096/healthz
+  labels:
+    service_id: browser_runner
+    slo_id: browser-runner-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - http://10.10.10.20:8089/healthcheck
   labels:
     service_id: dozzle

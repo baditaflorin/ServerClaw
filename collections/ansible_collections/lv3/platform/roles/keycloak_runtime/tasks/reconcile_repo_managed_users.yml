@@ -1,3 +1,9 @@
+# Purpose: Reconcile repo-managed Keycloak users, credentials, and group memberships against the live realm.
+# Use case: Included by the Keycloak runtime role when named operator and service identities must match repo contracts.
+# Inputs: Keycloak admin endpoints, bootstrap admin credentials, repo-managed user definitions, and target group ids.
+# Outputs: Repo-managed Keycloak users exist with the expected enabled state, passwords, and group assignments.
+# Idempotency: Fully idempotent because the task only creates or updates drifted identities.
+# Dependencies: ADR 0165, ADR 0056, and ADR 0262.
 - name: Request a Keycloak admin token for repo-managed user reconciliation
   ansible.builtin.uri:
     url: "{{ keycloak_repo_user_admin_url }}/realms/master/protocol/openid-connect/token"

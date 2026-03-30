@@ -1,7 +1,7 @@
 # ADR 0262: OpenFGA And Keycloak For Delegated ServerClaw Capability Authorization
 
 - Status: Accepted
-- Implementation Status: Live applied from main
+- Implementation Status: Implemented
 - Implemented In Repo Version: 0.177.95
 - Implemented In Platform Version: 0.130.63
 - Implemented On: 2026-03-30

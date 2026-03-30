@@ -1,3 +1,9 @@
+# Purpose: Provision the PostgreSQL role, database, and password material used by the OpenFGA runtime.
+# Use case: Run during OpenFGA bootstrap or recovery when the delegated-auth data plane needs its backing database.
+# Inputs: Database names, secret directories, and controller-local password sources for the OpenFGA service account.
+# Outputs: Ensures the OpenFGA PostgreSQL database, role grants, and password files exist in the expected locations.
+# Idempotency: Partially idempotent because first-run secret material may be created before later runs converge on it.
+# Dependencies: ADR 0165, ADR 0026, and ADR 0262.
 ---
 - name: Validate OpenFGA PostgreSQL inputs
   ansible.builtin.assert:

@@ -180,6 +180,7 @@ platform_ports:
   searxng_host_proxy_port: 80
   langfuse_port: 3002
   dify_port: 8094
+  browser_runner_port: 8096
   outline_port: 3006
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
@@ -251,6 +252,7 @@ platform_port_assignments:
   searxng_host_proxy_port: 80
   langfuse_port: 3002
   dify_port: 8094
+  browser_runner_port: 8096
   outline_port: 3006
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
@@ -1845,6 +1847,19 @@ platform_service_topology:
     urls:
       public: https://api.lv3.org
       internal: http://10.10.10.20:8083
+  browser_runner:
+    service_name: browser-runner
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    service_id: browser_runner
+    ports:
+      internal: 8096
+    urls:
+      internal: http://10.10.10.20:8096
   platform_context_api:
     service_name: platform-context-api
     owning_vm: docker-runtime-lv3
@@ -3246,6 +3261,19 @@ public_edge_service_topology:
     urls:
       public: https://api.lv3.org
       internal: http://10.10.10.20:8083
+  browser_runner:
+    service_name: browser-runner
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    service_id: browser_runner
+    ports:
+      internal: 8096
+    urls:
+      internal: http://10.10.10.20:8096
   platform_context_api:
     service_name: platform-context-api
     owning_vm: docker-runtime-lv3
@@ -3652,6 +3680,7 @@ searxng_port: 8881
 searxng_host_proxy_port: 80
 langfuse_port: 3002
 dify_port: 8094
+browser_runner_port: 8096
 outline_port: 3006
 dozzle_http_port: 8089
 dozzle_agent_port: 7007

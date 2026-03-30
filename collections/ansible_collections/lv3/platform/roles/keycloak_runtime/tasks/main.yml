@@ -1,3 +1,9 @@
+# Purpose: Converge the repo-managed Keycloak runtime, identities, client contracts, and verification flows.
+# Use case: Run during Keycloak deployment, recovery, and delegated-auth exact-main replays.
+# Inputs: Runtime paths, database and mail credentials, realm settings, repo-managed users, and topology defaults.
+# Outputs: The live Keycloak container, runtime env, admin identities, and repo-managed clients match repo truth.
+# Idempotency: Partially idempotent because downstream compose restarts and verification probes intentionally refresh live runtime state.
+# Dependencies: ADR 0165, ADR 0056, ADR 0197, and ADR 0262.
 ---
 - name: Validate Keycloak runtime inputs
   ansible.builtin.assert:

@@ -469,6 +469,16 @@
       "requires_secrets": true,
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
+    },
+    "browser_runner": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "dashboard_file": "config/grafana/dashboards/browser-runner.json",
+      "alert_rule_file": "config/alertmanager/rules/browser-runner.yml",
+      "suppressed_checks": {}
     }
   }
 }

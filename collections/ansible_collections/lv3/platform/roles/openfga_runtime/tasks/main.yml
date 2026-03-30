@@ -1,3 +1,9 @@
+# Purpose: Converge the private OpenFGA runtime, OpenBao-backed secrets, and bootstrap configuration artifacts.
+# Use case: Run during OpenFGA deploys, updates, and exact-main replays for delegated ServerClaw authorization.
+# Inputs: Runtime paths, database credentials, preshared API keys, controller URLs, and OpenBao integration settings.
+# Outputs: Configures the OpenFGA runtime, compose stack, runtime secrets, and bootstrap material on the target host.
+# Idempotency: Partially idempotent because bootstrap assets and runtime secrets may be created or refreshed intentionally.
+# Dependencies: ADR 0165, ADR 0023, ADR 0101, and ADR 0262.
 ---
 - name: Validate OpenFGA runtime inputs
   ansible.builtin.assert:
@@ -277,6 +283,26 @@
         or (openfga_local_http_port_probe.failed | default(false))
         or (openfga_health_probe.status | default(0)) != 200
       }}
+
+- name: Remove stale OpenFGA compose resources before force recreate
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ openfga_compose_file }}"
+      - down
+      - --remove-orphans
+  args:
+    chdir: "{{ openfga_site_dir }}"
+  register: openfga_down
+  changed_when: >-
+    'Stopping' in openfga_down.stdout
+    or 'Removing' in openfga_down.stdout
+    or 'Removed' in openfga_down.stdout
+    or 'Network' in openfga_down.stdout
+  failed_when: false
+  when: openfga_force_recreate
 
 - name: Force-recreate the OpenFGA runtime stack after Docker networking recovery
   ansible.builtin.command:

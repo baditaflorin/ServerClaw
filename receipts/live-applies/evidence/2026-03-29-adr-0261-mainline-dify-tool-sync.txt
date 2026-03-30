@@ -1,0 +1,8 @@
+{
+  "action": "updated",
+  "provider_name": "lv3_platform",
+  "tool_count": 12,
+  "result": {
+    "result": "success"
+  }
+}

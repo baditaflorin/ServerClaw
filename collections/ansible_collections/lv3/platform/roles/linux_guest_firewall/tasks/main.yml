@@ -1,3 +1,9 @@
+# Purpose: Render and apply the canonical nftables guest firewall policy on managed Linux guests.
+# Use case: Include when a guest should enforce the repo-defined network policy derived from the host inventory.
+# Inputs: linux_guest_firewall_* variables plus hostvars for the canonical guest network policy.
+# Outputs: Installed nftables package, rendered guest firewall config, and enabled firewall service.
+# Idempotency: Fully idempotent; tasks converge the same guest policy on repeated runs.
+# Dependencies: ADR 0165 metadata standard, the linux_guest_firewall role defaults, and canonical host policy data.
 ---
 - name: Validate guest network policy inputs
   ansible.builtin.assert:

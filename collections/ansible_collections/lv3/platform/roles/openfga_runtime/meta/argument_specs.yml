@@ -1,3 +1,9 @@
+# Purpose: Declare the supported input contract for the OpenFGA runtime role.
+# Use case: Loaded by Ansible to validate OpenFGA runtime variables before execution.
+# Inputs: Role variables covering image pins, database wiring, bootstrap secrets, and controller URLs.
+# Outputs: Provides argument specifications used by Ansible role validation.
+# Idempotency: Fully idempotent because this file only documents the role interface.
+# Dependencies: ADR 0165 and ADR 0262.
 ---
 argument_specs:
   main:

@@ -1,3 +1,9 @@
+# Purpose: Declare the argument contract for the Gotenberg runtime role.
+# Use case: Run during syntax and argument validation before converging the Gotenberg runtime.
+# Inputs: gotenberg_runtime_* variables required by the role.
+# Outputs: Machine-readable argument specs for the gotenberg_runtime role.
+# Idempotency: Fully idempotent; metadata only validates role inputs.
+# Dependencies: ADR 0165 metadata standard, ADR 0278, and the gotenberg_runtime role tasks.
 ---
 argument_specs:
   main:

@@ -1,3 +1,9 @@
+# Purpose: Declare the supported input contract for the OpenFGA PostgreSQL helper role.
+# Use case: Loaded by Ansible to validate database bootstrap variables before the role runs.
+# Inputs: OpenFGA database names, secret paths, and controller-local password inputs.
+# Outputs: Provides argument specifications used by Ansible role validation.
+# Idempotency: Fully idempotent because this file only documents the role interface.
+# Dependencies: ADR 0165 and ADR 0262.
 ---
 argument_specs:
   main:

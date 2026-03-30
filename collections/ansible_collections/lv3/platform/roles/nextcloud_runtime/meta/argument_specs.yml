@@ -1,3 +1,9 @@
+# Purpose: Declare the argument contract for the Nextcloud runtime role.
+# Use case: Run during syntax and argument validation before converging the Nextcloud application stack.
+# Inputs: nextcloud_runtime and nextcloud_* variables required by the role tasks and templates.
+# Outputs: Machine-readable argument specs for the nextcloud_runtime role.
+# Idempotency: Fully idempotent; metadata only validates role inputs.
+# Dependencies: ADR 0165 metadata standard, ADR 0260, and the nextcloud_runtime role tasks.
 ---
 argument_specs:
   main:

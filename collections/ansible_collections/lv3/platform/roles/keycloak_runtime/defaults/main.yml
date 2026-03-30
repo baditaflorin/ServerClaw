@@ -1,3 +1,9 @@
+# Purpose: Define default paths, image pins, secret locations, and realm settings for the repo-managed Keycloak runtime.
+# Use case: Loaded whenever the Keycloak runtime role converges or validates the delegated-auth control plane.
+# Inputs: Service topology, platform-wide authority settings, image catalog entries, and OpenBao runtime defaults.
+# Outputs: Supplies stable default variables consumed by Keycloak runtime tasks and templates.
+# Idempotency: Fully idempotent because this file only declares role defaults.
+# Dependencies: ADR 0165, ADR 0046, ADR 0197, and ADR 0262.
 ---
 keycloak_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') }}"
 keycloak_session_authority: "{{ platform_session_authority }}"

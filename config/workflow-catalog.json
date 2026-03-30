@@ -6007,6 +6007,63 @@
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
       }
+    },
+    "converge-browser-runner": {
+      "description": "Converge the private Playwright browser runner on docker-runtime-lv3, refresh the shared API gateway route, and verify the governed browser-session execution surface for operators and Dify.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-browser-runner",
+        "command": "make converge-browser-runner"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "keycloak_agent_client_secret"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-browser-runner",
+        "syntax-check-api-gateway"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-browser-runner.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/browser-runner.yml",
+        "playbooks/services/browser-runner.yml",
+        "collections/ansible_collections/lv3/platform/roles/browser_runner_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/browser_runner_runtime/tasks/verify.yml",
+        "collections/ansible_collections/lv3/platform/roles/browser_runner_runtime/templates/docker-compose.yml.j2",
+        "scripts/browser_runner_service.py",
+        "scripts/browser_runner_client.py",
+        "scripts/browser_runner_smoke.py",
+        "docs/runbooks/configure-browser-runner.md",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/api-gateway-catalog.json",
+        "config/agent-tool-registry.json"
+      ],
+      "outputs": [
+        "A private Playwright browser-session runtime on docker-runtime-lv3, an authenticated `/v1/browser-runner/*` gateway route, and the governed `browser-run-session` Dify tool surface."
+      ],
+      "verification_commands": [
+        "make syntax-check-browser-runner",
+        "python3 scripts/validate_service_completeness.py --service browser_runner",
+        "curl -fsS https://api.lv3.org/v1/browser-runner/healthz -H 'Authorization: Bearer ${ACCESS_TOKEN}'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     }
   }
 }

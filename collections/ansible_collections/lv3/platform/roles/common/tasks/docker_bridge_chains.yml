@@ -1,3 +1,9 @@
+# Purpose: Wait for Docker-managed iptables bridge chains to exist before dependent publication logic runs.
+# Use case: Include after Docker starts on guests where downstream tasks rely on the DOCKER nat and forward chains.
+# Inputs: common_docker_bridge_chains_* variables describing the service name and retry behavior.
+# Outputs: Verified presence of the expected Docker bridge chains or an explicit failure.
+# Idempotency: Fully idempotent; checks state and waits without applying persistent changes.
+# Dependencies: ADR 0165 metadata standard, the common role defaults, and a Docker-managed guest.
 ---
 - name: Validate common docker_bridge_chains entrypoint inputs
   ansible.builtin.assert:

@@ -248,11 +248,12 @@ Template VM: `9000` `debian13-cloud-template`
 | Capability | Receipt |
 | --- | --- |
 | `agent_coordination` | `2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply` |
-| `api_gateway` | `2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply` |
+| `api_gateway` | `2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply` |
 | `artifact_cache_plane` | `2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply` |
 | `backup_coverage` | `2026-03-29-adr-0271-backup-coverage-ledger-mainline-live-apply` |
 | `backup_vm` | `2026-03-22-adr-0029-backup-vm-live-apply` |
 | `bounded_command_execution` | `2026-03-28-adr-0227-bounded-command-execution-mainline-live-apply` |
+| `browser_runner` | `2026-03-30-adr-0261-playwright-browser-runners-live-apply` |
 | `budgeted_workflow_scheduler` | `2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply` |
 | `build_telemetry` | `2026-03-22-adr-0028-build-telemetry-live-apply` |
 | `canonical_publication_models` | `2026-03-28-adr-0210-canonical-domain-models-live-apply` |
@@ -589,6 +590,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Config Merge Protocol](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/config-merge-protocol.md)
 - [Configure API Gateway](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-api-gateway.md)
 - [Configure Backup VM](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-backup-vm.md)
+- [Configure Browser Runner](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-browser-runner.md)
 - [Configure Build Artifact Cache](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-build-artifact-cache.md)
 - [Configure Control-Plane Recovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-control-plane-recovery.md)
 - [Configure Coolify](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-coolify.md)
@@ -1356,6 +1358,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0259-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0259-main-merge.md)
 - [Workstream ws-0260-live-apply: ADR 0260 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0260-live-apply.md)
 - [Workstream ws-0260-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0260-main-integration.md)
+- [Workstream WS-0261: Playwright Browser Runners Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0261-live-apply.md)
+- [Workstream ws-0261-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0261-main-integration.md)
 - [Workstream ws-0262-live-apply: ADR 0262 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0262-live-apply.md)
 - [Workstream ws-0263-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0263-main-merge.md)
 - [Workstream ws-0264-live-apply: Live Apply ADR 0264 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0264-live-apply.md)
@@ -1667,6 +1671,9 @@ This repository is intentionally opinionated:
 | `0259` | Live apply n8n as the external app connector fabric for ServerClaw | `live_applied` | [ws-0259-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0259-live-apply.md) |
 | `0259` | Integrate ADR 0259 exact-main replay onto current origin/main | `merged` | [ws-0259-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0259-main-merge.md) |
 | `0260` | Live-apply ADR 0260 Nextcloud personal data plane from latest origin/main | `live_applied` | [ws-0260-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0260-live-apply.md) |
+| `0261` | Live apply private Playwright browser runners for governed web action and extraction | `live_applied` | [ws-0261-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0261-live-apply.md) |
+| `0261` | Integrate ADR 0261 and ADR 0262 exact-main replay onto current origin/main | `merged` | [ws-0261-main-integration.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0261-main-integration.md) |
+| `0262` | OpenFGA and Keycloak delegated authorization live apply | `live_applied` | [ws-0262-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0262-live-apply.md) |
 | `0263` | Integrate ADR 0263 exact-main replay onto current origin/main | `merged` | [ws-0263-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0263-main-merge.md) |
 | `0263` | ServerClaw memory substrate live apply | `live_applied` | [adr-0263-serverclaw-memory-substrate.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0263-serverclaw-memory-substrate.md) |
 | `0264` | Failure-domain-isolated validation lanes live apply | `live_applied` | [ws-0264-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0264-live-apply.md) |

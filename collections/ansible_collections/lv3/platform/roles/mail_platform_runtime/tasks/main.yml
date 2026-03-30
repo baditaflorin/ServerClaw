@@ -1,3 +1,9 @@
+# Purpose: Converge the managed mail platform runtime, notification profiles, gateway assets, and mail relay credentials.
+# Use case: Run during mail-platform deploys or when downstream services depend on the repo-managed submission path.
+# Inputs: Mail platform paths, hostnames, Brevo credentials, notification profiles, and service topology inputs.
+# Outputs: The mail runtime, generated profile artifacts, and relay contracts match repo-managed configuration.
+# Idempotency: Partially idempotent because secret rendering, compose refreshes, and verification probes intentionally update live state.
+# Dependencies: ADR 0165, ADR 0050, ADR 0171, and ADR 0262.
 ---
 - name: Validate mail platform runtime inputs
   ansible.builtin.assert:

@@ -14,7 +14,7 @@ live_apply_evidence:
     mutation_ledger: 2026-03-27-adr-0115-mutation-ledger-mainline-live-apply
     public_edge_publication: 2026-03-29-adr-0255-matrix-synapse-mainline-live-apply
     agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
-    api_gateway: 2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply
+    api_gateway: 2026-03-30-adr-0262-openfga-keycloak-mainline-live-apply
     artifact_cache_plane: 2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply
     docker_publication: 2026-03-30-adr-0270-docker-publication-self-healing-and-port-programming-assertions-mainline-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
@@ -125,6 +125,7 @@ live_apply_evidence:
     stage_smoke_suites: 2026-03-29-adr-0251-stage-smoke-promotion-gates-mainline-live-apply
     gotenberg: 2026-03-30-adr-0278-gotenberg-mainline-live-apply
     nextcloud: 2026-03-30-adr-0260-nextcloud-personal-data-plane-mainline-live-apply
+    browser_runner: 2026-03-30-adr-0261-playwright-browser-runners-live-apply
     mailpit: 2026-03-30-adr-0282-mailpit-mainline-live-apply
 desired_state:
   host_id: proxmox_florin

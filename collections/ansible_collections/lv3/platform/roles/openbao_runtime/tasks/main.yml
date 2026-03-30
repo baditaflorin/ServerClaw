@@ -1,3 +1,9 @@
+# Purpose: Converge the OpenBao runtime, initialization flow, unseal artifacts, and repo-managed auth/bootstrap contracts.
+# Use case: Run during OpenBao deployment, TLS hardening, or downstream recovery when secret delivery must match repo truth.
+# Inputs: Runtime paths, TLS materials, PostgreSQL backend inputs, local artifact files, and bootstrap identity settings.
+# Outputs: The OpenBao runtime, bootstrap payloads, auth backends, and operator credentials match the declared configuration.
+# Idempotency: Partially idempotent because first-run initialization, unseal handling, and runtime restarts intentionally change state.
+# Dependencies: ADR 0165, ADR 0043, ADR 0101, and ADR 0231.
 ---
 - name: Validate OpenBao runtime inputs
   ansible.builtin.assert:

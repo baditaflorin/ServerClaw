@@ -1,3 +1,9 @@
+# Purpose: Declare the supported input contract for the Keycloak runtime role.
+# Use case: Loaded by Ansible to validate required Keycloak runtime variables before execution.
+# Inputs: Role variables covering topology, bootstrap identities, runtime secrets, and delegated-auth settings.
+# Outputs: Provides argument specifications used by Ansible role validation.
+# Idempotency: Fully idempotent because this file only documents the role interface.
+# Dependencies: ADR 0165 and ADR 0262.
 ---
 argument_specs:
   main:

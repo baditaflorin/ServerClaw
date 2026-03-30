@@ -4,6 +4,16 @@
   "review_note": "Initial objectives should be recalibrated after 30 days of production telemetry.",
   "slos": [
     {
+      "id": "browser-runner-availability",
+      "service_id": "browser_runner",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.20:8096/healthz",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The private browser runner remains reachable on docker-runtime-lv3 for governed Playwright session execution."
+    },
+    {
       "id": "dozzle-availability",
       "service_id": "dozzle",
       "indicator": "availability",

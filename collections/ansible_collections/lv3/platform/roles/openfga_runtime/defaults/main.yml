@@ -1,3 +1,9 @@
+# Purpose: Define default runtime paths, secret locations, and controller settings for the private OpenFGA service.
+# Use case: Loaded whenever the OpenFGA runtime role converges or validates the delegated-auth authorization plane.
+# Inputs: Image catalog entries, compose secret roots, OpenBao defaults, and service topology values.
+# Outputs: Supplies stable defaults consumed by the OpenFGA runtime tasks and templates.
+# Idempotency: Fully idempotent because this file only declares role defaults.
+# Dependencies: ADR 0165 and ADR 0262.
 ---
 openfga_image: "{{ container_image_catalog.images.openfga_runtime.ref }}"
 openfga_container_name: lv3-openfga

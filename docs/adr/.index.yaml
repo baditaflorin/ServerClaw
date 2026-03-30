@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-30'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 252
+  Implemented: 253
   Partial: 7
-  Not Implemented: 64
+  Not Implemented: 63
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4479,7 +4479,7 @@ adr_index:
   - adr: '0261'
     title: Playwright Browser Runners For ServerClaw Web Action And Extraction
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4492,6 +4492,7 @@ adr_index:
       - extraction
     summary: We will use Playwright browser runners as the default ServerClaw browser
     filename: 0261-playwright-browser-runners-for-serverclaw-web-action-and-extraction.md
+    implemented_version: 0.177.95
   - adr: '0262'
     title: OpenFGA And Keycloak For Delegated ServerClaw Capability Authorization
     status: Accepted

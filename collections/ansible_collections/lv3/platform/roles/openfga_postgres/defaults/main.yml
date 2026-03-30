@@ -1,3 +1,9 @@
+# Purpose: Define default PostgreSQL database names, users, and secret paths required by the OpenFGA stack.
+# Use case: Loaded whenever the OpenFGA PostgreSQL helper role provisions or validates database prerequisites.
+# Inputs: Repo-local secret paths and OpenFGA database naming defaults.
+# Outputs: Supplies stable defaults consumed by the OpenFGA PostgreSQL role tasks.
+# Idempotency: Fully idempotent because this file only declares role defaults.
+# Dependencies: ADR 0165 and ADR 0262.
 ---
 openfga_database_name: openfga
 openfga_database_user: openfga
