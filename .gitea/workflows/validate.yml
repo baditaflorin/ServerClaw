@@ -38,14 +38,17 @@ jobs:
           mkdir -p .local/validation-gate
           discover_workspace_host_path() {
             current_container_id="${HOSTNAME:-$(hostname)}"
-            workspace_host_path="$("${docker_bin}" inspect "${current_container_id}" --format "{{range .Mounts}}{{if eq .Destination \"${PWD}\"}}{{.Source}}{{end}}{{end}}" 2>/dev/null || true)"
-            if [ -n "${workspace_host_path}" ]; then
-              printf '%s\n' "${workspace_host_path}"
-              return 0
-            fi
-            "${docker_bin}" ps --filter "id=${current_container_id}" -q | while read -r container_id; do
-              "${docker_bin}" inspect "${container_id}" --format "{{range .Mounts}}{{if eq .Destination \"${PWD}\"}}{{.Source}}{{end}}{{end}}"
-            done | python3 -c 'import sys; lines=[line.strip() for line in sys.stdin if line.strip()]; print(lines[0] if lines else "", end="")'
+            cgroup_container_id="$(sed -n 's|.*docker[-/]\\([0-9a-f]\\{12,64\\}\\).*|\\1|p' /proc/self/cgroup | head -n1)"
+            named_container_id="$("${docker_bin}" ps --filter "name=WORKFLOW-validate_JOB-validate" -q | head -n1)"
+            for candidate in "${current_container_id}" "${cgroup_container_id}" "${named_container_id}"; do
+              [ -n "${candidate}" ] || continue
+              workspace_host_path="$("${docker_bin}" inspect "${candidate}" --format "{{range .Mounts}}{{if eq .Destination \"${PWD}\"}}{{.Source}}{{end}}{{end}}" 2>/dev/null || true)"
+              if [ -n "${workspace_host_path}" ]; then
+                printf '%s\n' "${workspace_host_path}"
+                return 0
+              fi
+            done
+            return 1
           }
           docker_bin="$(command -v docker || command -v docker.io || true)"
           if [ -n "${docker_bin}" ]; then

@@ -28,8 +28,9 @@ def test_validate_workflow_uses_pinned_python_runner_and_manual_checkout() -> No
     assert "apt-get install -y --no-install-recommends docker-cli" in workflow
     assert "docker-bin.path" in workflow
     assert 'current_container_id="${HOSTNAME:-$(hostname)}"' in workflow
-    assert 'inspect "${current_container_id}"' in workflow
-    assert 'ps --filter "id=${current_container_id}" -q' in workflow
+    assert "cgroup_container_id" in workflow
+    assert 'inspect "${candidate}"' in workflow
+    assert 'name=WORKFLOW-validate_JOB-validate' in workflow
     assert "workspace-host.path" in workflow
     assert "Bundle validation artifacts" in workflow
     assert '--docker-binary "${DOCKER_BIN}"' in workflow
@@ -57,7 +58,9 @@ def test_renovate_workflow_bootstraps_inside_pinned_python_runner() -> None:
     assert "apt-get install -y --no-install-recommends docker.io" in workflow
     assert "Discover runner host paths" in workflow
     assert 'current_container_id="${HOSTNAME:-$(hostname)}"' in workflow
-    assert 'inspect "${current_container_id}"' in workflow
+    assert "cgroup_container_id" in workflow
+    assert 'inspect "${candidate}"' in workflow
+    assert 'name=WORKFLOW-renovate_JOB-renovate' in workflow
     assert '/var/run/lv3/renovate' in workflow
     assert '.tmp/workspace-host.path' in workflow
     assert '.tmp/bootstrap-host.path' in workflow
