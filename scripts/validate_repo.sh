@@ -21,7 +21,7 @@ export ANSIBLE_COLLECTIONS_PATH="$REPO_ROOT/collections:$ANSIBLE_COLLECTIONS_DIR
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|compose-runtime-envs|retry-guard|dependency-direction|data-models|policy|architecture-fitness|workstream-surfaces|generated-docs|generated-portals|health-probes|alert-rules|tofu|agent-standards]...
+  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|semgrep|compose-runtime-envs|retry-guard|dependency-direction|data-models|policy|architecture-fitness|workstream-surfaces|generated-docs|generated-portals|health-probes|alert-rules|tofu|agent-standards]...
 
 Examples:
   scripts/validate_repo.sh
@@ -430,6 +430,29 @@ PY
   done
 }
 
+validate_semgrep() {
+  local semgrep_args=()
+
+  echo "Semgrep SAST and secret-pattern validation"
+  mkdir -p "$REPO_ROOT/.local/validation-gate" "$REPO_ROOT/receipts/sast"
+  semgrep_args=(
+    --repo-root
+    "$REPO_ROOT"
+    --output-dir
+    "$REPO_ROOT/receipts/sast"
+    --summary-file
+    "$REPO_ROOT/.local/validation-gate/semgrep-summary.json"
+  )
+  if [[ -n "${LV3_VALIDATION_BASE_REF:-}" ]]; then
+    semgrep_args+=(
+      --baseline-ref
+      "$LV3_VALIDATION_BASE_REF"
+      --emit-mutation-audit
+    )
+  fi
+  "$REPO_ROOT/scripts/semgrep_gate.py" "${semgrep_args[@]}"
+}
+
 validate_compose_runtime_envs() {
   local env_files=()
 
@@ -770,6 +793,7 @@ for stage in "$@"; do
       validate_ansible_idempotency
       validate_shell
       validate_json
+      validate_semgrep
       validate_compose_runtime_envs
       validate_retry_guard
       validate_dependency_direction
@@ -807,6 +831,9 @@ for stage in "$@"; do
       ;;
     json)
       validate_json
+      ;;
+    semgrep)
+      validate_semgrep
       ;;
     compose-runtime-envs)
       validate_compose_runtime_envs

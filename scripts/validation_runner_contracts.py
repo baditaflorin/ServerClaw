@@ -182,8 +182,15 @@ def normalize_cpu_architecture(raw_architecture: str) -> str:
     return aliases.get(lowered, lowered or "unknown")
 
 
-def detect_tool(binary: str) -> dict[str, Any]:
-    resolved = shutil.which(binary)
+def resolve_binary(binary: str) -> str | None:
+    candidate = Path(binary).expanduser()
+    if candidate.is_absolute() or "/" in binary:
+        return str(candidate.resolve()) if candidate.exists() else None
+    return shutil.which(binary)
+
+
+def detect_tool(binary: str, *, binary_override: str | None = None) -> dict[str, Any]:
+    resolved = resolve_binary(binary_override or binary)
     payload: dict[str, Any] = {
         "available": bool(resolved),
         "path": resolved,
@@ -211,7 +218,7 @@ def detect_tool(binary: str) -> dict[str, Any]:
     return payload
 
 
-def detect_container_runtime(engine: str) -> dict[str, Any]:
+def detect_container_runtime(engine: str, *, binary_override: str | None = None) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "engine": engine,
         "supported": True,
@@ -219,11 +226,12 @@ def detect_container_runtime(engine: str) -> dict[str, Any]:
         "path": None,
         "server_reachable": False,
     }
-    resolved = shutil.which(engine)
+    resolved = resolve_binary(binary_override or engine)
     payload["path"] = resolved
     if not resolved:
         payload["supported"] = False
-        payload["error"] = f"{engine} binary is not available"
+        requested = binary_override or engine
+        payload["error"] = f"{requested} binary is not available"
         return payload
 
     payload["available"] = True
@@ -254,14 +262,28 @@ def attest_runner(
     *,
     runner_id: str,
     workspace: Path,
+    container_runtime_binary: str | None = None,
 ) -> dict[str, Any]:
     runners = require_mapping(catalog.get("runners"), "config/validation-runner-contracts.json.runners")
     if runner_id not in runners:
         raise ValueError(f"unknown validation runner contract: {runner_id}")
     runner = require_mapping(runners[runner_id], f"config/validation-runner-contracts.json.runners.{runner_id}")
     tool_names = sorted(set(require_string_list(runner.get("required_tools"), f"runner {runner_id} required_tools")))
-    tooling = {tool_name: detect_tool(tool_name) for tool_name in tool_names}
-    runtime = detect_container_runtime(require_mapping(runner.get("container_runtime"), f"runner {runner_id} container_runtime")["engine"])
+    runtime_engine = require_mapping(
+        runner.get("container_runtime"),
+        f"runner {runner_id} container_runtime",
+    )["engine"]
+    tooling = {
+        tool_name: detect_tool(
+            tool_name,
+            binary_override=container_runtime_binary if tool_name == runtime_engine else None,
+        )
+        for tool_name in tool_names
+    }
+    runtime = detect_container_runtime(
+        runtime_engine,
+        binary_override=container_runtime_binary,
+    )
     workspace_path = workspace.resolve()
     usage = shutil.disk_usage(workspace_path)
 
@@ -404,12 +426,18 @@ def build_runner_context(
     runner_id: str,
     workspace: Path,
     lanes: list[str] | None = None,
+    container_runtime_binary: str | None = None,
 ) -> dict[str, Any]:
     runners = require_mapping(catalog.get("runners"), "config/validation-runner-contracts.json.runners")
     if runner_id not in runners:
         raise ValueError(f"unknown validation runner contract: {runner_id}")
     runner = require_mapping(runners[runner_id], f"config/validation-runner-contracts.json.runners.{runner_id}")
-    attestation = attest_runner(catalog, runner_id=runner_id, workspace=workspace)
+    attestation = attest_runner(
+        catalog,
+        runner_id=runner_id,
+        workspace=workspace,
+        container_runtime_binary=container_runtime_binary,
+    )
     lane_ids = list(lanes or [])
     lane_evaluations = {
         lane_id: evaluate_lane_eligibility(catalog, runner_id=runner_id, lane_id=lane_id, attestation=attestation).as_dict()

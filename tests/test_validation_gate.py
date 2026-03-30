@@ -31,10 +31,17 @@ def write_fake_docker(path: Path) -> None:
         "\n".join(
             [
                 "#!/usr/bin/env python3",
+                "import json",
                 "import subprocess",
                 "import sys",
                 "",
                 "args = sys.argv[1:]",
+                "if args == ['--version']:",
+                "    print('Docker version 26.1.0, build fake')",
+                "    raise SystemExit(0)",
+                "if args[:2] == ['info', '--format']:",
+                "    print('26.1.0')",
+                "    raise SystemExit(0)",
                 "command = args[args.index('sh') + 2]",
                 "raise SystemExit(subprocess.run(['sh', '-c', command]).returncode)",
             ]

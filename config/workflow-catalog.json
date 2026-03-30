@@ -81,17 +81,20 @@
       "implementation_refs": [
         "Makefile",
         "config/control-plane-lanes.json",
+        "config/semgrep/rules",
         "config/validation-lanes.yaml",
         "scripts/controller_automation_toolkit.py",
         "scripts/control_plane_lanes.py",
+        "scripts/semgrep_gate.py",
         "scripts/validate_repo.sh",
         "scripts/validation_lanes.py",
         "scripts/generate_status_docs.py",
         "scripts/validate_repository_data_models.py",
+        ".gitea/workflows/validate.yml",
         ".github/workflows/validate.yml"
       ],
       "outputs": [
-        "Repository validation result across syntax, YAML, Ansible lint, shell, JSON, canonical data-model, generated-document checks, and the ADR 0264 lane-catalog contract."
+        "Repository validation result across syntax, YAML, Ansible lint, shell, JSON, Semgrep SAST and secret-pattern scans, canonical data-model, generated-document checks, and the ADR 0264 lane-catalog contract."
       ],
       "verification_commands": [
         "make validate"

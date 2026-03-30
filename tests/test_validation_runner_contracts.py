@@ -79,6 +79,39 @@ def test_build_runner_context_records_lane_eligibility(tmp_path: Path, monkeypat
     assert payload["lane_evaluations"]["alpha"]["eligible"] is True
 
 
+def test_build_runner_context_honors_runtime_binary_override(tmp_path: Path, monkeypatch) -> None:
+    module = load_module("validation_runner_contracts_runtime_override")
+    catalog_path = tmp_path / "validation-runner-contracts.json"
+    write_catalog(catalog_path)
+    catalog = module.load_contract_catalog(catalog_path)
+    fake_docker = tmp_path / "fake-docker"
+    fake_docker.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    fake_docker.chmod(0o755)
+
+    monkeypatch.setattr(
+        module.shutil,
+        "which",
+        lambda name: None if name == "docker" else f"/usr/bin/{name}",
+    )
+
+    def fake_run(command, **kwargs):  # type: ignore[no-untyped-def]
+        return module.subprocess.CompletedProcess(command, 0, stdout="26.1.0\n", stderr="")
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    payload = module.build_runner_context(
+        catalog,
+        runner_id="test-runner",
+        workspace=tmp_path,
+        lanes=["alpha"],
+        container_runtime_binary=str(fake_docker),
+    )
+
+    assert payload["environment_attestation"]["container_runtime"]["path"] == str(fake_docker.resolve())
+    assert payload["environment_attestation"]["tooling"]["docker"]["path"] == str(fake_docker.resolve())
+    assert payload["lane_evaluations"]["alpha"]["eligible"] is True
+
+
 def test_evaluate_lane_eligibility_reports_missing_runtime(tmp_path: Path) -> None:
     module = load_module("validation_runner_contracts_missing_runtime")
     catalog_path = tmp_path / "validation-runner-contracts.json"

@@ -53,6 +53,7 @@ runner `docker-build-lv3`.
 - playbooks and roles pass the repo-managed `ansible-lint` policy
 - shell scripts pass `shellcheck`
 - repo-managed JSON artifacts pass syntax validation via `jq` when available, or a `python3` JSON parser fallback when `jq` is absent
+- repo-managed Semgrep rules scan governed code surfaces and emit SARIF receipts under `receipts/sast/`
 - service-owning roles ship and import explicit `tasks/verify.yml` contracts
 - canonical repository data models pass schema validation
 - declared-to-live attestation contracts stay covered by the focused runtime, API gateway, and ops-portal regression slice
@@ -82,6 +83,7 @@ runner `docker-build-lv3`.
 - validation collections are cached under `.ansible/validation/collections`
 - lint-oriented stages operate on tracked repository files so unrelated local work-in-progress does not fail the repo gate
 - CI runs the same contract through `make validate`
+- `make validate-semgrep` replays the shared Semgrep wrapper directly and produces the same SARIF and summary artifacts used by the remote gate
 - the private Gitea push gate replays the heavier validation contract remotely on `docker-build-lv3` before accepting a pushed ref
 - successful branch pushes to private Gitea trigger `.gitea/workflows/validate.yml` on the same `docker-build-lv3` runner, giving a server-resident confirmation of the repo state that actually crossed the git boundary
 
@@ -103,6 +105,7 @@ make validate-role-argument-specs
 make validate-ansible-lint
 make validate-shell
 make validate-json
+make validate-semgrep
 make validate-data-models
 make validate-architecture-fitness
 make validate-dependency-direction

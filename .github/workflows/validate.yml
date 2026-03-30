@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -28,5 +30,23 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y jq shellcheck
 
+      - name: Set validation diff base
+        run: |
+          git fetch origin main --depth=1 || true
+          if git show-ref --verify --quiet refs/remotes/origin/main; then
+            echo "LV3_VALIDATION_BASE_REF=origin/main" >> "$GITHUB_ENV"
+          fi
+
       - name: Run repository validation
         run: make validate
+
+      - name: Upload validation artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-receipts
+          path: |
+            receipts/sast/*.sarif.json
+            .local/validation-gate/*.json
+          if-no-files-found: ignore
+          retention-days: 90

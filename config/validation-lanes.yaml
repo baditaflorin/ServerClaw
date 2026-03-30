@@ -42,6 +42,7 @@ lanes:
       - packer-validate
       - tofu-validate
       - security-scan
+      - semgrep-sast
   live-apply-and-promotion:
     title: Live-apply and promotion lane
     description: Validate promotion-facing runtime verification and post-merge automation entrypoints.
@@ -126,6 +127,8 @@ surface_classes:
   - surface_id: validation_gate_automation
     title: Validation gate and remote execution automation
     paths:
+      - .gitea/workflows/validate.yml
+      - .github/workflows/validate.yml
       - .githooks/pre-push
       - config/build-server.json
       - config/check-runner-manifest.json
@@ -148,6 +151,15 @@ surface_classes:
       - repository-structure-and-schema
       - remote-builder
       - live-apply-and-promotion
+  - surface_id: semgrep_gate_automation
+    title: Semgrep gate rules, wrapper, and SARIF-producing workflow surfaces
+    paths:
+      - config/semgrep/**/*
+      - scripts/semgrep_gate.py
+      - tests/test_semgrep_gate.py
+    required_lanes:
+      - repository-structure-and-schema
+      - remote-builder
   - surface_id: service_automation
     title: Service automation, inventory, and runtime code
     paths:

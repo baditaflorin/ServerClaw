@@ -1,0 +1,5 @@
+schema_version: 1.0.0
+pins: []
+notes:
+  - All active ADR 0301 rules are reviewed local rules under config/semgrep/rules/.
+  - Add upstream registry rule ids here only when the repo intentionally consumes them.

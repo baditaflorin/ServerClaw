@@ -373,6 +373,7 @@ def main(argv: list[str] | None = None) -> int:
         runner_id=args.runner_id,
         workspace=workspace,
         lanes=[check.label for check in checks],
+        container_runtime_binary=args.docker_binary,
     )
     runner_unavailable_results = {
         check.label: parallel_check.CheckResult(

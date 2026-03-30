@@ -29,7 +29,7 @@
   },
   "type-check": {
     "image": "registry.lv3.org/check-runner/python:3.12.10",
-    "command": "mypy scripts/parallel_check.py scripts/policy_checks.py scripts/policy_toolchain.py scripts/validation_runner_contracts.py config/windmill/scripts/check-runner-rebuild.py tests/test_parallel_check.py tests/test_policy_checks.py tests/test_command_catalog.py tests/test_validation_runner_contracts.py",
+    "command": "mypy scripts/parallel_check.py scripts/policy_checks.py scripts/policy_toolchain.py scripts/semgrep_gate.py scripts/validation_runner_contracts.py config/windmill/scripts/check-runner-rebuild.py tests/test_parallel_check.py tests/test_semgrep_gate.py tests/test_policy_checks.py tests/test_command_catalog.py tests/test_validation_runner_contracts.py",
     "working_dir": "/workspace",
     "timeout_seconds": 120,
     "cache_mounts": ["pip"]
@@ -39,6 +39,13 @@
     "command": "trivy fs --skip-dirs .git --skip-dirs .worktrees --exit-code 1 --severity HIGH,CRITICAL .",
     "working_dir": "/workspace",
     "timeout_seconds": 240
+  },
+  "semgrep-sast": {
+    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "command": "python -m pip install --quiet --disable-pip-version-check semgrep==1.155.0 && ./scripts/validate_repo.sh semgrep",
+    "working_dir": "/workspace",
+    "timeout_seconds": 300,
+    "cache_mounts": ["pip"]
   },
   "tofu-validate": {
     "image": "registry.lv3.org/check-runner/infra:2026.03.23",

@@ -59,6 +59,7 @@ def test_docs_change_selects_docs_lane_without_remote_builder() -> None:
     )
     assert "remote-builder" not in selection.selected_lanes
     assert "security-scan" not in selection.blocking_checks
+    assert "semgrep-sast" not in selection.blocking_checks
 
 
 def test_unknown_surface_widens_to_all_lanes() -> None:

@@ -1,0 +1,38 @@
+rules:
+  # Risk: floating latest tags make builds non-reproducible and can silently
+  # pull an unreviewed upstream image into the automation estate.
+  - id: lv3.semgrep.docker.from-latest
+    languages:
+      - dockerfile
+    severity: ERROR
+    message: Pin FROM to an explicit version or digest; do not use latest.
+    paths:
+      include:
+        - docker/**/Dockerfile
+    pattern-regex: '(?im)^FROM\\s+[^\\s@]+:latest(?:\\s+AS\\s+\\S+)?$'
+
+  # Risk: apt-get without --no-install-recommends pulls an unnecessarily large
+  # package set and expands the runner attack surface.
+  - id: lv3.semgrep.docker.apt-get-no-install-recommends
+    languages:
+      - dockerfile
+    severity: ERROR
+    message: Use apt-get install --no-install-recommends in runner Dockerfiles.
+    paths:
+      include:
+        - docker/**/Dockerfile
+    patterns:
+      - pattern-regex: '(?is)apt-get\\s+install\\s+'
+      - pattern-not-regex: '(?is)apt-get\\s+install\\s+[^\\n]*--no-install-recommends'
+
+  # Risk: declaring secrets as ARG or ENV bakes them into build metadata and
+  # makes them recoverable from image history.
+  - id: lv3.semgrep.docker.secret-build-arg-or-env
+    languages:
+      - dockerfile
+    severity: ERROR
+    message: Do not pass secrets through Docker ARG or ENV; use runtime secret injection.
+    paths:
+      include:
+        - docker/**/Dockerfile
+    pattern-regex: '(?im)^(ARG|ENV)\\s+[A-Za-z0-9_]*(TOKEN|PASSWORD|SECRET|PRIVATE_KEY)[A-Za-z0-9_]*\\b'

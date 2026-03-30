@@ -36,17 +36,27 @@ the code; no SaaS dependency is required for self-hosted rule execution.
 
 ## Decision
 
-We will integrate **Semgrep** as a required step in the Gitea Actions CI
-validation gate (ADR 0087) running on `docker-build-lv3`.
+We will integrate **Semgrep** as a required step in the repo-managed
+validation gate (ADR 0087) and replay the same contract across local
+development, the build-server remote gate on `docker-build-lv3`, GitHub
+Actions, and Gitea Actions.
 
 ### Deployment rules
 
-- Semgrep runs as a Docker Compose `run` step in the Gitea Actions pipeline;
-  the image is pulled through Harbor (ADR 0068) and pinned to a SHA digest
+- Semgrep is invoked through the shared wrapper `scripts/semgrep_gate.py`,
+  exposed via `./scripts/validate_repo.sh semgrep`, `make validate-semgrep`,
+  and the lane-aware `scripts/run_gate.py` contract used by the remote gate and
+  both hosted workflow definitions
 - no Semgrep SaaS account or network call to `semgrep.dev` is made; all rules
   are stored in `config/semgrep/rules/` and resolved locally
-- the Semgrep image version is pinned in `versions/stack.yaml` and updated via
-  the Renovate Bot process (ADR 0297)
+- the authoritative remote gate and both hosted workflow definitions run the
+  `semgrep-sast` lane in the published Python check-runner image, install the
+  pinned `semgrep==1.155.0` package into that ephemeral container, and then
+  execute the shared wrapper against the checked-out repo
+- the security runner remains pinned only for Trivy, Gitleaks, and Checkov so
+  Semgrep adoption does not require a coupled security-runner publication step
+  when the registry path is degraded or Checkov's dependency pins conflict with
+  Semgrep's
 
 ### Rule sets
 
@@ -56,10 +66,12 @@ Three rule sets are applied in sequence:
    common secret shapes committed in code (API keys, PEM headers, OpenBao token
    prefixes, Gitea token prefixes); a match is always a blocking gate failure
    regardless of severity
-2. **Application SAST** (`config/semgrep/rules/sast.yaml`): Python and Go
-   patterns for shell injection, unsafe subprocess usage, SQL string formatting,
-   and unsafe deserialization; findings at `ERROR` severity are blocking; `WARNING`
-   findings produce a non-blocking annotation in the Gitea PR
+2. **Application SAST** (`config/semgrep/rules/sast.yaml`): Python and governed
+   executable-surface patterns for shell injection, unsafe subprocess usage,
+   unsafe loaders, unsafe deserialization, and unreviewed executable-shell
+   invocations in YAML; findings at `ERROR` severity are blocking, while
+   `WARNING` findings remain visible in the SARIF and gate summary but do not
+   fail the run
 3. **Dockerfile and image policy** (`config/semgrep/rules/dockerfile.yaml`):
    rules that enforce image policy (ADR 0068) conventions: no `FROM latest`, no
    `RUN apt-get` without `--no-install-recommends`, secrets not passed as `ENV`
@@ -68,12 +80,20 @@ Three rule sets are applied in sequence:
 ### Output and receipt rules
 
 - Semgrep produces a SARIF report at `receipts/sast/<git-sha>.sarif.json` for
-  every gate run; the report is archived as a CI artefact for 90 days
-- the gate summary script reads the SARIF file and counts findings by severity;
-  it exits non-zero if any blocking-severity finding is present, halting the merge
-- net-new findings (present in the current commit but not in the previous green
-  run) are logged to the mutation audit log (ADR 0066) as
-  `sast_finding_introduced` events
+  every gate run; GitHub Actions and Gitea Actions archive the SARIF output and
+  the matching summary JSON artefacts for 90 days
+- the shared wrapper writes a summary JSON payload under
+  `.local/validation-gate/semgrep-summary.json`, counts findings by severity,
+  and exits non-zero when blocking-severity findings are present
+- when a baseline ref or baseline SARIF is provided, net-new findings are
+  derived from the merged SARIF payload only when that baseline can be resolved
+  from the current checkout shape and matching Semgrep rule pack; otherwise the
+  scan still succeeds and records that baseline comparison was skipped
+- immutable snapshot and worker-mirror checkouts without usable `.git` metadata
+  force Semgrep into no-git traversal mode so the remote gate still scans real
+  repository content instead of reporting an empty target set
+- net-new findings from a resolved baseline are logged to the mutation audit
+  log (ADR 0066) as `sast_finding_introduced` events
 
 ### Custom rule governance
 

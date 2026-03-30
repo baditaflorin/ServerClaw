@@ -57,6 +57,16 @@ infrastructure_state:
     validation: Manual review
     naming_convention: "YYYY-MM-DD-adr-XXXX-description-live-apply.json"
 
+  receipts/sast/:
+    purpose: Semgrep SARIF receipts emitted by repo validation runs
+    owner: automation
+    format: SARIF JSON
+    use_for: Preserving the latest branch-local or CI Semgrep findings in a tool-consumable format
+    update_when: After `scripts/semgrep_gate.py` runs through `make validate` or the remote validation gate
+    update_by: "scripts/semgrep_gate.py"
+    validation: "python3 scripts/semgrep_gate.py --print-summary-json"
+    naming_convention: "<git-sha>.sarif.json"
+
   receipts/backup-coverage/:
     purpose: Durable ADR 0271 backup coverage ledger receipts derived from live Proxmox backup jobs, storage listings, and restore-verification evidence
     owner: automation
@@ -265,6 +275,32 @@ inventory:
 # ============================================================================
 
 automation:
+
+  config/semgrep/rules/:
+    purpose: Canonical local Semgrep rule packs for repo-managed SAST, secret-pattern detection, and Dockerfile policy checks
+    owner: human
+    format: YAML
+    use_for: Declaring the reviewed Semgrep rules enforced by `make validate`, the remote validation gate, and CI workflows
+    update_when: Adding or tuning a Semgrep rule after review of false-positive and false-negative impact
+    update_by: Agent or human implementing ADR 0301
+    validation: "./scripts/validate_repo.sh semgrep"
+    related_files:
+      - "config/semgrep/rule-pins.yaml: Governance record for any upstream rule references"
+      - "scripts/semgrep_gate.py: Shared Semgrep wrapper that emits SARIF and mutation-audit summaries"
+      - "docs/adr/0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md: Decision record"
+      - "docs/runbooks/validation-gate.md: Operator procedure"
+
+  config/semgrep/rule-pins.yaml:
+    purpose: Canonical governance file for pinned upstream Semgrep rule revisions
+    owner: human
+    format: YAML
+    use_for: Recording the exact upstream Semgrep rule revision hashes referenced by the local rule packs
+    update_when: Adding or changing an upstream Semgrep registry rule reference
+    update_by: Agent or human implementing ADR 0301 follow-up rule governance
+    validation: "python3 -c \"import yaml,sys; yaml.safe_load(open(sys.argv[1]))\" config/semgrep/rule-pins.yaml"
+    related_files:
+      - "config/semgrep/rules/: Local Semgrep rule packs"
+      - "docs/adr/0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md: Decision record"
 
   config/validation-runner-contracts.json:
     purpose: Canonical ADR 0266 catalog of validation runner capability contracts, supported lanes, and runtime attestation expectations
@@ -518,13 +554,15 @@ service_configuration:
     purpose: Validation gate configuration for local, remote, and worker post-merge checks
     owner: human
     format: JSON
-    use_for: Controlling which validation checks are active, including ADR 0230 policy-validation and ADR 0251 smoke-catalog validation on controller, build-server, and Windmill worker paths
+    use_for: Controlling which validation checks are active, including ADR 0230 policy-validation, ADR 0251 smoke-catalog validation, and ADR 0301 Semgrep SAST on controller, build-server, and Windmill worker paths
     validation: "python3 scripts/gate_status.py --repo-path ."
     related_files:
       - "config/build-server.json: remote-validate and remote-pre-push command wiring"
       - "config/validation-lanes.yaml: ADR 0264 lane-to-surface catalog that selects blocking checks"
       - "config/check-runner-manifest.json: runner-image check definitions"
+      - "config/semgrep/rules/: local Semgrep rule packs for the semgrep-sast gate"
       - "scripts/run_gate.py: gate orchestrator"
+      - "scripts/semgrep_gate.py: shared Semgrep wrapper"
       - "scripts/validation_lanes.py: lane catalog loader and selector"
       - "scripts/policy_checks.py: ADR 0230 policy-validation stage"
       - "scripts/stage_smoke_suites.py: ADR 0251 catalog validation stage"
@@ -560,11 +598,12 @@ service_configuration:
     purpose: Canonical manifest of runner-backed validation checks for remote gate execution
     owner: human
     format: JSON
-    use_for: Declaring the exact commands and container images used by the build-server check runners
+    use_for: Declaring the exact commands and container images used by the build-server check runners, including the Python-runner Semgrep SAST contract and the shared security runner for Trivy, Gitleaks, and Checkov
     update_when: Adding or changing remote validation checks or their toolchain images
     validation: "python3 scripts/policy_checks.py --validate"
     related_files:
       - "config/build-server.json: remote-validate entrypoint that invokes the manifest"
+      - "config/semgrep/rules/: local rule packs mounted into the semgrep-sast check"
       - "scripts/policy_checks.py: ADR 0230 policy-validation check command"
       - "docs/runbooks/validation-gate.md: remote gate procedure"
 

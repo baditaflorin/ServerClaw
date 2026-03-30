@@ -13,9 +13,34 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Validate repository data models
-        run: python3 scripts/validate_repository_data_models.py
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
 
-      - name: Validate service completeness
-        run: python3 scripts/service_completeness.py
+      - name: Run authoritative validation gate
+        run: |
+          mkdir -p .local/validation-gate .local/policy-toolchain .local/trivy-cache .local/packer-plugin-cache .ansible/validation/collections receipts/sast
+          export LV3_ANSIBLE_COLLECTIONS_DIR=.ansible/validation/collections
+          export LV3_ANSIBLE_COLLECTIONS_SHA_FILE=.ansible/validation/requirements.sha
+          export LV3_PACKER_PLUGIN_CACHE_DIR=.local/packer-plugin-cache
+          export LV3_POLICY_TOOLCHAIN_ROOT=.local/policy-toolchain
+          export LV3_TRIVY_CACHE_DIR=.local/trivy-cache
+          if git show-ref --verify --quiet refs/remotes/origin/main; then
+            export LV3_VALIDATION_BASE_REF=origin/main
+          fi
+          python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/gitea-last-run.json --source gitea-actions --all-lanes
+
+      - name: Upload validation artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitea-validation-receipts
+          path: |
+            receipts/sast/*.sarif.json
+            .local/validation-gate/*.json
+          if-no-files-found: ignore
+          retention-days: 90
