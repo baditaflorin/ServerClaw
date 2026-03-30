@@ -1,0 +1,10 @@
+docker-runtime-lv3 | CHANGED => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3.13"
+    },
+    "ansible_job_id": "j484032063730.2658573",
+    "changed": true,
+    "finished": 0,
+    "results_file": "/root/.ansible_async/j484032063730.2658573",
+    "started": 1
+}

@@ -67,12 +67,12 @@
 - name: Download the pinned uv archive for Windmill worker scripts
   ansible.builtin.get_url:
     url: "{{ windmill_uv_download_url }}"
-    dest: /tmp/windmill-uv.tar.gz
+    dest: "{{ windmill_uv_archive_path }}"
     mode: "0644"
 
 - name: Install the pinned uv binaries for Windmill worker scripts
   ansible.builtin.unarchive:
-    src: /tmp/windmill-uv.tar.gz
+    src: "{{ windmill_uv_archive_path }}"
     dest: "{{ windmill_uv_install_dir }}"
     remote_src: true
     extra_opts:
@@ -92,7 +92,7 @@
 
 - name: Remove the staged uv archive after installation
   ansible.builtin.file:
-    path: /tmp/windmill-uv.tar.gz
+    path: "{{ windmill_uv_archive_path }}"
     state: absent
 
 - name: Ensure the Windmill directories exist
@@ -207,6 +207,8 @@
             manifest_entries.add(relative_path.as_posix())
             continue
         add_directory(candidate)
+        if candidate.is_symlink():
+            continue
         for child in sorted(candidate.rglob("*")):
             if skip_path(child):
                 continue
@@ -258,7 +260,15 @@
     )
 
     def should_skip(path: Path) -> bool:
-        return any(part == ".DS_Store" or part.startswith("._") for part in path.parts)
+        return (
+            any(
+                part == ".DS_Store"
+                or part.startswith("._")
+                or part == "__pycache__"
+                for part in path.parts
+            )
+            or path.suffix == ".pyc"
+        )
 
     def is_preserved(path: Path) -> bool:
         path_text = path.as_posix().rstrip("/")
@@ -558,6 +568,8 @@
     for relative_root in sync_paths:
         candidate = repo_root / relative_root
         if not candidate.exists() or not candidate.is_dir() or candidate.is_symlink():
+            continue
+        if candidate.is_symlink():
             continue
         for child in sorted(
             (path for path in candidate.rglob("*") if path.is_dir() and not path.is_symlink()),

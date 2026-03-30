@@ -186,8 +186,15 @@ def test_docker_runtime_pins_public_edge_hostnames_and_address_pools() -> None:
 def test_docker_runtime_defaults_pin_governed_resolvers_and_registry_mirror() -> None:
     defaults = load_defaults()
     daemon_config = defaults["docker_runtime_daemon_config"]
+    controller_repo_root = defaults["docker_runtime_controller_repo_root"]
 
     assert defaults["docker_runtime_registry_mirrors"] == ["https://mirror.gcr.io"]
+    assert "ansible.builtin.pipe" in controller_repo_root
+    assert "git -C " in controller_repo_root
+    assert "rev-parse --show-toplevel" in controller_repo_root
+    assert defaults["docker_runtime_publication_assurance_helper_local_path"] == (
+        "{{ docker_runtime_controller_repo_root }}/scripts/docker_publication_assurance.py"
+    )
     assert defaults["docker_runtime_publication_assurance_script_path"] == "/usr/local/bin/lv3-docker-publication-assurance"
     assert defaults["docker_runtime_publication_assurance_helper_source"] == (
         "{{ inventory_dir ~ '/../scripts/docker_publication_assurance.py' }}"
@@ -209,10 +216,9 @@ def test_docker_runtime_installs_publication_assurance_helper_before_chain_check
     nftables_check_task = next(task for task in tasks if task["name"] == "Check whether nftables config exists")
 
     assert install_task["ansible.builtin.copy"]["dest"] == "{{ docker_runtime_publication_assurance_script_path }}"
-    helper_content = install_task["ansible.builtin.copy"]["content"]
-    assert "rev-parse --show-toplevel" in helper_content
-    assert "/scripts/docker_publication_assurance.py" in helper_content
-    assert "playbook_dir ~ '/../../scripts/docker_publication_assurance.py'" not in helper_content
+    assert install_task["ansible.builtin.copy"]["content"] == (
+        "{{ lookup('ansible.builtin.file', docker_runtime_publication_assurance_helper_local_path) }}"
+    )
     assert tasks.index(install_task) < tasks.index(nftables_check_task)
 
 

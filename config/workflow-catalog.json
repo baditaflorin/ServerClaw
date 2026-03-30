@@ -2632,6 +2632,66 @@
         "escalation_action": "abort_silently"
       }
     },
+    "sbom-refresh": {
+      "description": "Run the ADR 0298 Syft and Grype refresh across the managed image catalog, persist immutable receipts, and emit alerts for net-new HIGH or CRITICAL findings.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "sbom-refresh",
+        "command": "make sbom-refresh"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "nats_jetstream_admin_password",
+          "ntfy_alertmanager_password"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/sbom-cve-scanning.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/image-catalog.json",
+        "config/sbom-scanner.json",
+        "config/workflow-catalog.json",
+        "config/windmill/scripts/sbom-refresh.py",
+        "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml",
+        "playbooks/tasks/generate-host-sbom.yml",
+        "playbooks/tasks/post-verify.yml",
+        "playbooks/tasks/security-scan.yml",
+        "playbooks/gitea.yml",
+        "docs/runbooks/sbom-cve-scanning.md",
+        "receipts/sbom",
+        "receipts/cve",
+        "scripts/managed_image_gate.py",
+        "scripts/sbom_refresh.py",
+        "scripts/sbom_scanner.py",
+        "tests/test_sbom_refresh_windmill_wrapper.py",
+        "tests/test_sbom_scanner.py"
+      ],
+      "outputs": [
+        "Immutable CycloneDX SBOM receipts per managed image digest, timestamped Grype CVE receipts for each refresh, and alertable delta events for net-new HIGH or CRITICAL findings."
+      ],
+      "verification_commands": [
+        "python3 -m py_compile scripts/sbom_scanner.py scripts/sbom_refresh.py scripts/managed_image_gate.py config/windmill/scripts/sbom-refresh.py",
+        "uv run --with pytest pytest tests/test_sbom_scanner.py tests/test_sbom_refresh_windmill_wrapper.py -q",
+        "python3 scripts/managed_image_gate.py --help",
+        "python3 scripts/sbom_refresh.py --help"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 3600,
+        "max_steps": 200,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
+    },
     "weekly-security-scan": {
       "description": "Run the ADR 0142 public-surface security scan, store a receipt, and publish high or critical findings.",
       "lifecycle_status": "active",

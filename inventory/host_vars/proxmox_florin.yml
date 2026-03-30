@@ -791,6 +791,30 @@ network_policy:
         - source: docker-runtime-lv3
           protocol: tcp
           ports:
+            - 5001
+            - 5002
+            - 5003
+            - 5004
+          description: Shared runtime artifact-cache access from docker-runtime-lv3
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 5001
+            - 5002
+            - 5003
+            - 5004
+          description: Docker bridge workloads that consume the private artifact-cache plane
+        - source: 192.168.0.0/16
+          protocol: tcp
+          ports:
+            - 5001
+            - 5002
+            - 5003
+            - 5004
+          description: Docker bridge workloads that consume the private artifact-cache plane
+        - source: docker-runtime-lv3
+          protocol: tcp
+          ports:
             - 7007
           description: Dozzle hub access to the docker-build agent
         - source: monitoring-lv3

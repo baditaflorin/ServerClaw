@@ -122,6 +122,11 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_runtime_api_base_url"] == "http://127.0.0.1:{{ windmill_server_port }}"
     assert defaults["windmill_worker_network_mode"] == "{{ windmill_server_network_mode }}"
     assert "127.0.0.1" in defaults["windmill_worker_api_base_url"]
+    assert set(defaults["windmill_worker_secret_mirror_ids"]) == {
+        "bootstrap_ssh_private_key",
+        "nats_jetstream_admin_password",
+        "ntfy_alertmanager_password",
+    }
     assert defaults["windmill_runtime_api_wait_retries"] == 18
     assert defaults["windmill_runtime_api_wait_delay_seconds"] == 5
     assert defaults["windmill_worker_container_wait_retries"] == 48
@@ -166,6 +171,8 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert "OPENBAO_INIT_JSON" in defaults["windmill_operator_manager_env"]
     assert {
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/receipts/fixtures", "mode": "1777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/receipts/sbom", "mode": "1777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/receipts/cve", "mode": "1777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local", "mode": "0755"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures", "mode": "1777"}.items()),
         frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/reaper-runs", "mode": "1777"}.items()),
@@ -181,6 +188,11 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert quarterly_schedule["schedule"] == "0 0 9 * * 1"
     assert quarterly_schedule["timezone"] == "Europe/Bucharest"
     assert quarterly_schedule["args"]["schedule_guard"] == "first_monday_of_quarter"
+    sbom_schedule = next(entry for entry in defaults["windmill_seed_schedules"] if entry["path"] == "f/lv3/sbom_refresh_daily")
+    assert sbom_schedule["schedule"] == "0 30 2 * * *"
+    assert sbom_schedule["timezone"] == "Europe/Bucharest"
+    assert sbom_schedule["script_path"] == "f/lv3/sbom_refresh"
+    assert sbom_schedule["enabled"] is True
 
 
 def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> None:
@@ -679,6 +691,10 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "manifest_entries = set()" in tasks
     assert 'path.name == "__pycache__"' in tasks
     assert 'path.suffix == ".pyc"' in tasks
+    assert 'if candidate.is_symlink():' in tasks
+    assert 'if candidate.is_dir() and not candidate.is_symlink():' in tasks
+    assert tasks.count("if candidate.is_symlink():") >= 3
+    assert 'part == "__pycache__"' in tasks
     assert 'manifest_entries.add(f"{path.relative_to(repo_root).as_posix().rstrip(\'/\')}/")' in tasks
     assert "Copy the staged Windmill worker checkout manifest to the guest" in tasks
     assert "Prune stale immutable files from the Windmill worker checkout" in tasks

@@ -42,8 +42,12 @@
       {{
         lookup(
           'ansible.builtin.file',
-          lookup('ansible.builtin.pipe', 'git -C ' ~ (playbook_dir | quote) ~ ' rev-parse --show-toplevel')
-          ~ '/scripts/docker_publication_assurance.py'
+          (
+            lookup(
+              'ansible.builtin.pipe',
+              'git -C ' ~ (playbook_dir | quote) ~ ' rev-parse --show-toplevel'
+            )
+          ) ~ '/scripts/docker_publication_assurance.py'
         )
       }}
     dest: "{{ playbook_execution_docker_publication_helper_tempfile.path }}"

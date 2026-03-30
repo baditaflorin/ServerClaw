@@ -5263,7 +5263,7 @@ adr_index:
   - adr: 0298
     title: Syft And Grype For Platform-Wide SBOM Generation And Continuous CVE Scanning
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: platform
     keywords:

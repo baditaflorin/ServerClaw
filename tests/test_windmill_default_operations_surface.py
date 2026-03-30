@@ -71,6 +71,7 @@ def test_default_operations_surface_verification_paths_are_declared() -> None:
         "f/lv3/weekly_capacity_report",
         "f/lv3/weekly_security_scan",
         "f/lv3/security_posture_scan",
+        "f/lv3/sbom_refresh",
         "f/lv3/audit_token_inventory",
         "f/lv3/token_exposure_response",
         "f/lv3/collection_publish",

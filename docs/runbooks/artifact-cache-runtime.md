@@ -81,11 +81,19 @@ The output reports both:
 
 ## Verify The Runtime
 
-Check the dedicated mirror listeners:
+Check the dedicated cache mirror listeners:
 
 ```bash
 ansible -i inventory/hosts.yml artifact-cache-lv3 -m shell \
   -a 'for port in 5001 5002 5003 5004; do curl -fsS "http://10.10.10.80:${port}/v2/" >/dev/null; done' \
+  -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+```
+
+Check the mirror listeners from the shared runtime consumer host:
+
+```bash
+ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell \
+  -a 'for port in 5001 5002 5003 5004; do curl -fsS "http://10.10.10.30:${port}/v2/" >/dev/null; done' \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
@@ -127,4 +135,7 @@ ansible -i inventory/hosts.yml docker-build-lv3 -m shell \
 - The guest-side seed file lives at `/opt/artifact-cache/seed-plan.json`.
 - The managed BuildKit unit on `docker-build-lv3` is `lv3-buildkitd.service`;
   there is no generic `buildkit.service` on that guest.
+- Consumer-side verification must include `docker-runtime-lv3`; a local listener
+  on `docker-build-lv3` is not sufficient proof that the private cache plane is
+  reachable from Windmill jobs and other runtime workloads.
 - Do not publish the mirror ports on the public edge.
