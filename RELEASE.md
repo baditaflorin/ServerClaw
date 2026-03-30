@@ -1,12 +1,12 @@
-# Release 0.177.92
+# Release 0.177.93
 
 - Date: 2026-03-30
 
 ## Summary
-- implemented ADR 0278 by adding the private Gotenberg document-to-PDF runtime on docker-runtime-lv3, publishing the authenticated `/v1/gotenberg` API gateway route, and verifying Chromium plus LibreOffice PDF conversion end to end
+- implemented ADR 0260 by re-verifying repo-managed Nextcloud on docker-runtime-lv3 with a dedicated postgres backend, shared-edge DAV publication, and synchronized recovery for stale compose networks, Docker bridge chains, detached local OpenBao publication, and concurrent Docker interruptions during mutable OCC convergence on the latest realistic origin/main baseline
 
 ## Platform Impact
-- platform version advances to 0.130.61 after the exact-main ADR 0278 replay; this release integrates the private Gotenberg runtime, authenticated /v1/gotenberg route, pinned image contract, and verified Chromium plus LibreOffice rendering on top of the current 0.177.91 / 0.130.60 baseline.
+- platform version advances to 0.130.62 after the exact-main ADR 0260 replay; this release integrates the synchronized Nextcloud recovery hardening on top of the current 0.177.92 / 0.130.61 baseline.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

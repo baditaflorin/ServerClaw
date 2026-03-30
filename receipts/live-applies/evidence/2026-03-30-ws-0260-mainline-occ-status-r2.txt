@@ -1,0 +1,2 @@
+docker-runtime-lv3 | CHANGED | rc=0 >>
+{"installed":true,"version":"33.0.1.2","versionstring":"33.0.1","edition":"","maintenance":false,"needsDbUpgrade":false,"productname":"Nextcloud","extendedSupport":false}

@@ -1,4 +1,23 @@
 ---
+# Purpose: Verify that Docker is active, usable, and equipped with the publication assurance helper after convergence.
+# Use case: Run from the docker_runtime role verification path and from service playbooks that depend on the shared Docker host.
+#
+# Inputs (required):
+#   - docker_runtime_publication_assurance_script_path
+#
+# Inputs (optional):
+#   - None beyond the docker_runtime role defaults and inventory overrides.
+#
+# Outputs:
+#   - Verification evidence that Docker is active, responds on the control socket, and has the publication helper installed.
+#
+# Idempotency: Fully idempotent
+#              These tasks perform read-only verification commands.
+#
+# Dependencies:
+#   - ADR 0023: Docker runtime VM baseline.
+#   - ADR 0270: Docker publication self-healing and port-programming assertions.
+#   - Role: lv3.platform.docker_runtime - owns the managed Docker runtime state.
 - name: Verify Docker service is active
   ansible.builtin.command: systemctl is-active docker
   register: docker_runtime_service_status
@@ -20,3 +39,11 @@
   register: docker_runtime_info
   changed_when: false
   failed_when: docker_runtime_info.stdout | trim == ""
+
+- name: Verify the Docker publication assurance helper is installed
+  ansible.builtin.command:
+    argv:
+      - test
+      - -x
+      - "{{ docker_runtime_publication_assurance_script_path }}"
+  changed_when: false

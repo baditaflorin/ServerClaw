@@ -553,6 +553,46 @@ groups:
           summary: nginx-edge-availability has less than 10% error budget remaining
           description: The edge reverse proxy remains reachable for published services.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_nextcloud_availability
+        expr: (slo:nextcloud_availability:error_rate_5m > (14 * 0.005000)) and (slo:nextcloud_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: nextcloud
+          slo_id: nextcloud-availability
+          indicator: availability
+        annotations:
+          summary: nextcloud-availability is burning its error budget at 14x
+          description: The public Nextcloud status endpoint remains reachable for
+            the canonical personal file and DAV data plane.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_nextcloud_availability
+        expr: slo:nextcloud_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: nextcloud
+          slo_id: nextcloud-availability
+          indicator: availability
+        annotations:
+          summary: nextcloud-availability is burning its error budget at 3x
+          description: The public Nextcloud status endpoint remains reachable for
+            the canonical personal file and DAV data plane.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_nextcloud_availability
+        expr: slo:nextcloud_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: nextcloud
+          slo_id: nextcloud-availability
+          indicator: availability
+        annotations:
+          summary: nextcloud-availability has less than 10% error budget remaining
+          description: The public Nextcloud status endpoint remains reachable for
+            the canonical personal file and DAV data plane.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_open_webui_availability
         expr: (slo:open_webui_availability:error_rate_5m > (14 * 0.010000)) and (slo:open_webui_availability:error_rate_1h
           > (14 * 0.010000))

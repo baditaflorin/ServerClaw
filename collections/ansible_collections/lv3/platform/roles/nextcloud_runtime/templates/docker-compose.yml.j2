@@ -1,0 +1,76 @@
+services:
+  openbao-agent:
+    image: {{ nextcloud_openbao_agent_image }}
+    container_name: {{ nextcloud_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ nextcloud_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ nextcloud_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ nextcloud_env_file | dirname }}:{{ nextcloud_env_file | dirname }}
+
+  nextcloud-redis:
+    image: {{ nextcloud_redis_image }}
+    container_name: {{ nextcloud_redis_container_name }}
+    restart: unless-stopped
+    env_file:
+      - {{ nextcloud_env_file }}
+    command:
+      - /bin/sh
+      - -c
+      - exec redis-server --appendonly yes --requirepass "$$REDIS_HOST_PASSWORD"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - redis-cli -a "$$REDIS_HOST_PASSWORD" ping | grep -q PONG
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - {{ nextcloud_redis_data_dir }}:/data
+
+  nextcloud-app:
+    image: {{ nextcloud_image }}
+    container_name: {{ nextcloud_container_name }}
+    restart: unless-stopped
+    ports:
+      - "{{ nextcloud_port }}:80"
+    env_file:
+      - {{ nextcloud_env_file }}
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+      nextcloud-redis:
+        condition: service_healthy
+    volumes:
+      - {{ nextcloud_data_dir }}:/var/www/html
+
+  nextcloud-cron:
+    image: {{ nextcloud_image }}
+    container_name: {{ nextcloud_cron_container_name }}
+    restart: unless-stopped
+    entrypoint:
+      - /cron.sh
+    env_file:
+      - {{ nextcloud_env_file }}
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+      nextcloud-app:
+        condition: service_started
+      nextcloud-redis:
+        condition: service_healthy
+    volumes:
+      - {{ nextcloud_data_dir }}:/var/www/html

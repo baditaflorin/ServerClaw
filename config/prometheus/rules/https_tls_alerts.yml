@@ -913,6 +913,52 @@ groups:
           description: https://n8n.lv3.org:443/healthz has less than 14 days remaining
             before certificate expiry.
           runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: HTTPSProbeFailed_nextcloud_public
+        expr: probe_success{job="https-tls-blackbox",assurance_id="nextcloud-public"}
+          == 0
+        for: 5m
+        labels:
+          service_id: nextcloud
+          assurance_id: nextcloud-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: nextcloud-public HTTPS probe is failing.
+          description: https://cloud.lv3.org:443/status.php is no longer completing
+            a healthy HTTPS probe through blackbox exporter.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringWarning_nextcloud_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="nextcloud-public"}
+          - time()) / 86400) < 21
+        for: 15m
+        labels:
+          service_id: nextcloud
+          assurance_id: nextcloud-public
+          environment: production
+          scope: public
+          severity: warning
+        annotations:
+          summary: nextcloud-public TLS certificate is approaching expiry.
+          description: https://cloud.lv3.org:443/status.php has less than 21 days
+            remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
+      - alert: TLSCertificateExpiringCritical_nextcloud_public
+        expr: ((probe_ssl_earliest_cert_expiry{job="https-tls-blackbox",assurance_id="nextcloud-public"}
+          - time()) / 86400) < 14
+        for: 15m
+        labels:
+          service_id: nextcloud
+          assurance_id: nextcloud-public
+          environment: production
+          scope: public
+          severity: critical
+        annotations:
+          summary: nextcloud-public TLS certificate is within the critical expiry
+            window.
+          description: https://cloud.lv3.org:443/status.php has less than 14 days
+            remaining before certificate expiry.
+          runbook_url: docs/runbooks/https-tls-assurance.md
       - alert: HTTPSProbeFailed_nginx_edge_public
         expr: probe_success{job="https-tls-blackbox",assurance_id="nginx-edge-public"}
           == 0

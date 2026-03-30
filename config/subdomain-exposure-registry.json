@@ -437,6 +437,96 @@
       "notes": "ServerClaw is published through the shared NGINX edge and delegates browser authentication to its in-app Keycloak OIDC flow."
     },
     {
+      "fqdn": "cloud.lv3.org",
+      "service_id": "nextcloud",
+      "environment": "production",
+      "status": "active",
+      "owner_adr": "0260",
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "upstream-auth",
+        "audience": "operator"
+      },
+      "assertions": {
+        "publication_class": "edge-published",
+        "environment": "production",
+        "audience": "operator",
+        "auth_requirement": "upstream_auth",
+        "route_target": {
+          "service_id": "nextcloud",
+          "kind": "proxy",
+          "source": "service_topology",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.nextcloud_port }}",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "65.108.75.123"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "nextcloud",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "noindex": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.nextcloud_port }}",
+          "client_max_body_size": "16g",
+          "proxy_request_buffering": false,
+          "proxy_read_timeout_seconds": 3600,
+          "proxy_send_timeout_seconds": 3600,
+          "security_headers_enabled": false,
+          "preserve_upstream_security_headers": true,
+          "exact_redirects": [
+            {
+              "path": "/.well-known/carddav",
+              "location": "/remote.php/dav/",
+              "status": 301
+            },
+            {
+              "path": "/.well-known/caldav",
+              "location": "/remote.php/dav/",
+              "status": 301
+            }
+          ]
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": true,
+      "notes": "Published through the shared NGINX edge while Nextcloud itself enforces browser and DAV authentication plus .well-known DAV discovery redirects."
+    },
+    {
       "fqdn": "coolify.lv3.org",
       "service_id": "coolify",
       "environment": "production",
@@ -2651,12 +2741,12 @@
     }
   ],
   "summary": {
-    "catalog_total": 37,
-    "active_total": 33,
-    "active_public_total": 29,
+    "catalog_total": 38,
+    "active_total": 34,
+    "active_public_total": 30,
     "active_private_total": 4,
     "planned_total": 4,
-    "shared_edge_total": 28,
+    "shared_edge_total": 29,
     "platform_sso_total": 13
   }
 }
