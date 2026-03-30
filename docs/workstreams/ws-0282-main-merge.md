@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0282](../adr/0282-mailpit-as-the-smtp-development-mail-interceptor.md)
 - Title: Integrate ADR 0282 Mailpit exact-main replay onto `origin/main`
-- Status: ready_for_merge
+- Status: merged
 - Included In Repo Version: 0.177.96
 - Platform Version Observed During Integration: 0.130.63
 - Release Date: 2026-03-30
@@ -155,10 +155,17 @@ was already live on `0.130.60`.
   `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-mail-platform-verify-r1.txt`,
   while the authoritative current-server Mailpit proof remains the direct
   `monitoring-lv3 -> docker-runtime-lv3` probe above.
-- The branch intentionally remains `status: ready_for_merge` until the final
-  canonical-truth closeout commit is written; that keeps `workstream-surfaces`
-  valid on the branch. The final `status: merged` flip and README truth refresh
-  are the only remaining integration-only surfaces before pushing to `main`.
+- The final mainline closeout flips this workstream to `status: merged` on the
+  integrated tree and refreshes the generated canonical-truth surfaces from
+  that terminal state before pushing to `origin/main`.
+- After the terminal-state closeout, `git diff --check`,
+  `uv run --with pyyaml --with jsonschema python3 scripts/live_apply_receipts.py --validate`,
+  and `make pre-push-gate` all passed again on the detached `origin/main`
+  candidate, preserved in
+  `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-main-candidate-git-diff-check-r1.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-main-candidate-live-apply-receipts-validate-r1.txt`,
+  and
+  `receipts/live-applies/evidence/2026-03-30-ws-0282-mainline-main-candidate-pre-push-gate-r1.txt`.
 
 ## Outcome
 

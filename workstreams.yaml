@@ -167,7 +167,7 @@ workstreams:
   - id: ws-0282-main-merge
     adr: "0282"
     title: Integrate ADR 0282 Mailpit exact-main replay into current origin/main
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/ws-0282-main-merge
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-main-merge
