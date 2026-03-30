@@ -728,13 +728,14 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Assert the Windmill validation gate status result" in verify_tasks
     assert "gate_status.waiver_summary.totals.compliant_receipts" in verify_tasks
     assert "gate_status.waiver_summary.release_blockers" in verify_tasks
-    assert "Define the critical Windmill verification script expectations" in verify_tasks
     assert "windmill_verify_critical_seed_script_expectations" in verify_tasks
     assert "Verify the critical Windmill verification scripts are seeded with current controller content" in verify_tasks
     assert "Assert the critical Windmill verification scripts match controller content" in verify_tasks
     assert "windmill_seed_script_root_local_dir ~ '/gate-status.py'" in verify_tasks
     assert "inventory_dir ~ '/../config/windmill/scripts/stage-smoke-suites.py'" in verify_tasks
-    assert "lookup('ansible.builtin.file', windmill_seed_script_root_local_dir ~ '/lv3-healthcheck.py')" in verify_tasks
+    assert "lookup('ansible.builtin.file', windmill_seed_script_root_local_dir ~ '/lv3-healthcheck.py', rstrip=False)" in verify_tasks
+    assert "lookup('ansible.builtin.file', windmill_seed_script_root_local_dir ~ '/gate-status.py', rstrip=False)" in verify_tasks
+    assert "lookup('ansible.builtin.file', inventory_dir ~ '/../config/windmill/scripts/stage-smoke-suites.py', rstrip=False)" in verify_tasks
     assert "windmill_verify_critical_seed_script_expectations[item.json.path].content" in verify_tasks
     assert "windmill_verify_critical_seed_script_expectations[item.json.path].local_file" in verify_tasks
     assert "Verify the Windmill default operations scripts are seeded" in verify_tasks

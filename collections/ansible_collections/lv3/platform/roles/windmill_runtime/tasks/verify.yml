@@ -128,15 +128,15 @@
       "{{ {
         windmill_healthcheck_script_path: {
           'local_file': windmill_seed_script_root_local_dir ~ '/lv3-healthcheck.py',
-          'content': lookup('ansible.builtin.file', windmill_seed_script_root_local_dir ~ '/lv3-healthcheck.py'),
+          'content': lookup('ansible.builtin.file', windmill_seed_script_root_local_dir ~ '/lv3-healthcheck.py', rstrip=False),
         },
         windmill_validation_gate_status_script_path: {
           'local_file': windmill_seed_script_root_local_dir ~ '/gate-status.py',
-          'content': lookup('ansible.builtin.file', windmill_seed_script_root_local_dir ~ '/gate-status.py'),
+          'content': lookup('ansible.builtin.file', windmill_seed_script_root_local_dir ~ '/gate-status.py', rstrip=False),
         },
         windmill_stage_smoke_suites_script_path: {
           'local_file': inventory_dir ~ '/../config/windmill/scripts/stage-smoke-suites.py',
-          'content': lookup('ansible.builtin.file', inventory_dir ~ '/../config/windmill/scripts/stage-smoke-suites.py'),
+          'content': lookup('ansible.builtin.file', inventory_dir ~ '/../config/windmill/scripts/stage-smoke-suites.py', rstrip=False),
         },
       } }}"
   no_log: true
