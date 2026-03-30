@@ -93,8 +93,10 @@ def test_templates_render_upstream_like_runtime_contract() -> None:
     assert "gateway: {{ coolify_bridge_gateway }}" in compose
     assert "coolify-db:/var/lib/postgresql/data" in compose
     assert "redis-server --save 20 1 --loglevel warning --requirepass {{ coolify_redis_password }}" in compose
-    assert "APP_KEY={{ coolify_app_key }}" in env_template
-    assert "ROOT_USER_PASSWORD={{ coolify_root_password }}" in env_template
+    assert 'APP_KEY={{ coolify_app_key | to_json }}' in env_template
+    assert 'DB_PASSWORD={{ coolify_db_password | to_json }}' in env_template
+    assert 'ROOT_USERNAME={{ coolify_root_username | to_json }}' in env_template
+    assert 'ROOT_USER_PASSWORD={{ coolify_root_password | to_json }}' in env_template
 
 
 def test_verify_checks_private_controller_api_visibility() -> None:
