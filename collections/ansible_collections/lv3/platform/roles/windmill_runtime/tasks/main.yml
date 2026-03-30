@@ -1915,7 +1915,7 @@
   delegate_to: localhost
   become: false
   environment:
-    WINDMILL_TOKEN: "{{ windmill_runtime_api_token }}"
+    WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
   register: windmill_seed_script_sync
   changed_when: false
   tags:

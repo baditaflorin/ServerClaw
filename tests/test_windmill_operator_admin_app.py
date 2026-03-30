@@ -534,6 +534,12 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     tasks = (
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml"
     ).read_text()
+    script_sync_task = tasks.split("- name: Sync repo-managed Windmill scripts", 1)[1].split(
+        "- name: Remove the local repo-managed Windmill script manifest", 1
+    )[0]
+    schedule_sync_task = tasks.split("- name: Sync repo-managed Windmill schedules", 1)[1].split(
+        "- name: Remove the local repo-managed Windmill schedule manifest", 1
+    )[0]
     verify_tasks = (
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/verify.yml"
     ).read_text()
@@ -566,8 +572,11 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Sync repo-managed Windmill scripts" in tasks
     assert "scripts/sync_windmill_seed_scripts.py" in tasks
     assert "WINDMILL_TOKEN" in tasks
+    assert 'WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"' in script_sync_task
+    assert 'WINDMILL_TOKEN: "{{ windmill_runtime_api_token }}"' not in script_sync_task
     assert "Sync repo-managed Windmill schedules" in tasks
     assert "scripts/sync_windmill_seed_schedules.py" in tasks
+    assert 'WINDMILL_TOKEN: "{{ windmill_runtime_api_token }}"' in schedule_sync_task
     assert tasks.count("uv") >= 2
     assert tasks.count("--with") >= 2
     assert tasks.count("pyyaml") >= 2
