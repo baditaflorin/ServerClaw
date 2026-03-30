@@ -25,7 +25,7 @@ def test_validate_workflow_uses_pinned_python_runner_and_manual_checkout() -> No
     assert MANUAL_CHECKOUT_FETCH in workflow
     assert 'git checkout --force "${WORKFLOW_SHA}"' in workflow
     assert "Bootstrap validation toolchain" in workflow
-    assert "apt-get install -y --no-install-recommends docker.io" in workflow
+    assert "apt-get install -y --no-install-recommends docker-cli" in workflow
     assert "docker-bin.path" in workflow
     assert "Bundle validation artifacts" in workflow
     assert '--docker-binary "${DOCKER_BIN}"' in workflow

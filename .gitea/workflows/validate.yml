@@ -44,10 +44,10 @@ jobs:
           fi
           export DEBIAN_FRONTEND=noninteractive
           apt-get update
-          apt-get install -y --no-install-recommends docker.io
+          apt-get install -y --no-install-recommends docker-cli
           docker_bin="$(command -v docker || command -v docker.io || true)"
           if [ -z "${docker_bin}" ]; then
-            echo "Docker CLI remained unavailable after docker.io installation." >&2
+            echo "Docker CLI remained unavailable after docker-cli installation." >&2
             exit 1
           fi
           printf '%s\n' "${docker_bin}" > .local/validation-gate/docker-bin.path
