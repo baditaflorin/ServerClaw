@@ -55,7 +55,10 @@ jobs:
         run: |
           set -euo pipefail
           : "${GITEA_RUNNER_HOST_DATA_DIR:?GITEA_RUNNER_HOST_DATA_DIR must be set by the self-hosted runner}"
-          workspace_host_path="${PWD/#\/data/${GITEA_RUNNER_HOST_DATA_DIR}}"
+          case "$PWD" in
+            /data/*) workspace_host_path="${GITEA_RUNNER_HOST_DATA_DIR}${PWD#/data}" ;;
+            *) echo "Unexpected workspace path: $PWD" >&2; exit 1 ;;
+          esac
           runner_host_root="$(dirname "${GITEA_RUNNER_HOST_DATA_DIR}")"
           bootstrap_host_dir="${runner_host_root}/credentials/renovate"
           test -d "${workspace_host_path}"
@@ -82,7 +85,10 @@ jobs:
       - name: Run Renovate through the pinned Harbor image
         run: |
           set -euo pipefail
-          workspace_host_path="${PWD/#\/data/${GITEA_RUNNER_HOST_DATA_DIR}}"
+          case "$PWD" in
+            /data/*) workspace_host_path="${GITEA_RUNNER_HOST_DATA_DIR}${PWD#/data}" ;;
+            *) echo "Unexpected workspace path: $PWD" >&2; exit 1 ;;
+          esac
           test -d "${workspace_host_path}"
           set -a
           . "${RENOVATE_RUNTIME_ENV}"
@@ -105,7 +111,10 @@ jobs:
         run: |
           set -euo pipefail
           : "${GITEA_RUNNER_HOST_DATA_DIR:?GITEA_RUNNER_HOST_DATA_DIR must be set by the self-hosted runner}"
-          workspace_host_path="${PWD/#\/data/${GITEA_RUNNER_HOST_DATA_DIR}}"
+          case "$PWD" in
+            /data/*) workspace_host_path="${GITEA_RUNNER_HOST_DATA_DIR}${PWD#/data}" ;;
+            *) echo "Unexpected workspace path: $PWD" >&2; exit 1 ;;
+          esac
           runner_host_root="$(dirname "${GITEA_RUNNER_HOST_DATA_DIR}")"
           bootstrap_host_dir="${runner_host_root}/credentials/renovate"
           if [ -s "${bootstrap_host_dir}/renovate.env" ]; then

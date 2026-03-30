@@ -72,15 +72,23 @@ def test_runner_compose_uses_registration_token_env() -> None:
     assert "subnet: {{ gitea_runner_network_subnet }}" in template
 
 
+def test_runner_config_exports_host_data_dir_to_jobs() -> None:
+    template = (ROLE_ROOT / "gitea_runner" / "templates" / "config.yaml.j2").read_text()
+    assert "GITEA_RUNNER_HOST_DATA_DIR: {{ gitea_runner_data_dir }}" in template
+
+
 def test_runner_tasks_use_docker_compose_plugin() -> None:
     runner_tasks = yaml.safe_load((ROLE_ROOT / "gitea_runner" / "tasks" / "main.yml").read_text())
     task_names = {task["name"] for task in runner_tasks}
     assert "Verify Docker Compose plugin is available" in task_names
+    assert "Record whether the Gitea runner stack needs a force recreate" in task_names
 
     pull_task = next(task for task in runner_tasks if task["name"] == "Pull the Gitea runner image")
     up_task = next(task for task in runner_tasks if task["name"] == "Start the Gitea runner stack")
     assert pull_task["ansible.builtin.command"]["argv"][:2] == ["{{ gitea_runner_compose_bin }}", "compose"]
-    assert up_task["ansible.builtin.command"]["argv"][:2] == ["{{ gitea_runner_compose_bin }}", "compose"]
+    up_argv = up_task["ansible.builtin.command"]["argv"]
+    assert "gitea_runner_force_recreate" in up_argv
+    assert "--force-recreate" in up_argv
 
 
 def test_runtime_tasks_require_oidc_secret_and_database_password() -> None:

@@ -151,6 +151,7 @@
     owner: root
     group: root
     mode: "0644"
+  register: gitea_runner_config_render
 
 - name: Render the Gitea runner compose file
   ansible.builtin.template:
@@ -159,6 +160,15 @@
     owner: root
     group: root
     mode: "0644"
+  register: gitea_runner_compose_render
+
+- name: Record whether the Gitea runner stack needs a force recreate
+  ansible.builtin.set_fact:
+    gitea_runner_force_recreate: >-
+      {{
+        (gitea_runner_config_render.changed | default(false))
+        or (gitea_runner_compose_render.changed | default(false))
+      }}
 
 - name: Pull the Gitea runner image
   ansible.builtin.command:
@@ -178,14 +188,18 @@
 
 - name: Start the Gitea runner stack
   ansible.builtin.command:
-    argv:
-      - "{{ gitea_runner_compose_bin }}"
-      - compose
-      - --file
-      - "{{ gitea_runner_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
+    argv: >-
+      {{
+        [
+          gitea_runner_compose_bin,
+          'compose',
+          '--file',
+          gitea_runner_compose_file,
+          'up',
+          '-d',
+          '--remove-orphans',
+        ] + (['--force-recreate'] if gitea_runner_force_recreate else [])
+      }}
   args:
     chdir: "{{ gitea_runner_site_dir }}"
   register: gitea_runner_up
