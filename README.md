@@ -147,6 +147,12 @@ client API serves at `https://matrix.lv3.org`, the governed controller path
 stays available at `http://100.64.0.1:8015`, and the 2026-03-29 exact-main
 replay re-verified public login plus the corrected internal-edge HTTPS
 assurance path from `monitoring-lv3`.
+ADR 0256 Matrix bridges are now live on production from `main`: repo-managed
+mautrix Discord and WhatsApp bridge bots now answer at
+`@discordbot:matrix.lv3.org` and `@whatsappbot:matrix.lv3.org` through
+`https://matrix.lv3.org`, and the 2026-03-30 exact-main replay on release
+`0.177.98` re-verified the controller bootstrap path together with the public
+management-room smoke end to end.
 ADR 0260 Nextcloud is now live on production from `main`: `https://cloud.lv3.org/status.php`
 returns `installed=true`, the published `/.well-known/caldav` and
 `/.well-known/carddav` routes redirect to `https://cloud.lv3.org/remote.php/dav/`,
@@ -190,7 +196,7 @@ ADR 0276 NATS JetStream is now live on production from `main`: `docker-runtime-l
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.98` |
-| Platform version | `0.130.64` |
+| Platform version | `0.130.65` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -296,7 +302,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `log_queryability_canary` | `2026-03-28-adr-0250-log-queryability-canary-live-apply` |
 | `mail_platform` | `2026-03-24-keycloak-password-reset-mail-live-apply` |
 | `mailpit` | `2026-03-30-adr-0282-mailpit-mainline-live-apply` |
-| `matrix_synapse` | `2026-03-30-adr-0256-mautrix-bridges-live-apply` |
+| `matrix_synapse` | `2026-03-30-adr-0256-mautrix-bridges-mainline-live-apply` |
 | `mattermost` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `monitoring` | `2026-03-28-adr-0250-log-queryability-canary-live-apply` |
 | `mutation_audit` | `2026-03-23-adr-0066-mutation-audit-live-apply` |
@@ -1397,7 +1403,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.98` |
-| Platform version | `0.130.64` |
+| Platform version | `0.130.65` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |

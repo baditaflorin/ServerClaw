@@ -2206,7 +2206,7 @@ workstreams:
       release_bump: patch
       included_in_repo_version: 0.177.98
       latest_receipts:
-        matrix_synapse: 2026-03-30-adr-0256-mautrix-bridges-live-apply
+        matrix_synapse: 2026-03-30-adr-0256-mautrix-bridges-mainline-live-apply
   - id: ws-0255-main-integration
     adr: "0255"
     title: Integrate ADR 0255 exact-main replay onto current origin/main

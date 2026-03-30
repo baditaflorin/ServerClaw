@@ -6,7 +6,7 @@
 - Live-applied ADR 0256 so Matrix Synapse now provisions repo-managed mautrix Discord and WhatsApp bridges, bridge databases, bridge smoke verification, and controller-safe admin bootstrap handling.
 
 ## Platform Impact
-- adds repo-managed Matrix Synapse mautrix bridge automation, receipts, and operator verification surfaces for ADR 0256; the platform version advances only after the exact-main Matrix replay succeeds
+- adds repo-managed Matrix Synapse mautrix bridge automation, receipts, and operator verification surfaces for ADR 0256, and the exact-main replay advanced the platform version to 0.130.65
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

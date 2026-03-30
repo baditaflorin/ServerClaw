@@ -3,8 +3,8 @@
 - ADR: [ADR 0256](../adr/0256-mautrix-bridges-for-external-chat-channel-adapters.md)
 - Title: Matrix mautrix bridge live apply from latest `origin/main`
 - Status: `live_applied`
-- Implemented In Repo Version: pending exact-main integration
-- Live Applied In Platform Version: pending exact-main replay
+- Implemented In Repo Version: 0.177.98
+- Live Applied In Platform Version: 0.130.65
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0256-mainline-refresh`
@@ -56,12 +56,14 @@ merged onto the protected mainline surfaces safely.
 - the branch-local live apply now converges Synapse plus both repo-managed mautrix bridges end to end on `docker-runtime-lv3`
 - `https://matrix.lv3.org/_matrix/client/versions` returns `HTTP/2 200`, the private controller path `http://100.64.0.1:8015/_matrix/client/versions` returns `HTTP/1.1 200 OK`, and the public smoke helper now receives bridge replies from both `@discordbot:matrix.lv3.org` and `@whatsappbot:matrix.lv3.org`
 - the live replay exposed and fixed four real defects before the successful converge: stale Docker network recovery on the shared runtime guest, bridge registration file permissions for Synapse, unreliable admin bootstrap handling when `register_new_matrix_user --exists-ok` returned non-zero for an existing user, and public verification helper bugs around the Matrix versions endpoint plus login-rate-limit handling
-- the authoritative exact-main replay, release bump, and canonical `versions/stack.yaml` update still remain for the final merge-to-main step
+- the authoritative exact-main replay now passed from repo release `0.177.98`, so the Matrix bridge rollout is canonical on `main` and the platform version advances to `0.130.65`
 
 ## Live Evidence
 
 - receipt: `receipts/live-applies/2026-03-30-adr-0256-mautrix-bridges-live-apply.json`
+- canonical merged-main receipt: `receipts/live-applies/2026-03-30-adr-0256-mautrix-bridges-mainline-live-apply.json`
 - successful branch-local converge log: `receipts/live-applies/evidence/2026-03-30-ws-0256-converge-matrix-synapse-r7.txt`
+- successful merged-main converge log: `receipts/live-applies/evidence/2026-03-30-adr-0256-mainline-converge-matrix-synapse-0.177.98.txt`
 - intermediate failure logs retained for auditability:
   `receipts/live-applies/evidence/2026-03-30-ws-0256-converge-matrix-synapse-r1.txt`,
   `receipts/live-applies/evidence/2026-03-30-ws-0256-converge-matrix-synapse-r2.txt`,
@@ -72,7 +74,9 @@ merged onto the protected mainline surfaces safely.
 
 ## Mainline Integration Resolution
 
-- pending: fetch the newest `origin/main`, integrate the branch, cut the next repo version, replay `make converge-matrix-synapse` from that exact mainline commit, and then update `versions/stack.yaml`, the canonical Matrix receipt pointers, and the ADR metadata to the final merged-main values
+- exact-main integration completed from repo version `0.177.98`, and the canonical platform version now advances to `0.130.65`
+- before the exact-main replay, `origin/main` was re-fetched and confirmed to still be commit `7afd0b6e0798b93c475581ac316dd6e35c46514e`, so source commit `85d330315274610b7186a3a7f7763cb5fa312c90` represented the newest realistic mainline plus ADR 0256
+- the canonical mainline receipt is `receipts/live-applies/2026-03-30-adr-0256-mautrix-bridges-mainline-live-apply.json`, and the exact-main replay transcript is preserved in `receipts/live-applies/evidence/2026-03-30-adr-0256-mainline-converge-matrix-synapse-0.177.98.txt`
 
 ## Mainline Guardrails
 
