@@ -106,6 +106,16 @@ def test_build_platform_vars_includes_tika_private_topology() -> None:
     assert tika["exposure_model"] == "private-only"
 
 
+def test_build_platform_vars_includes_tesseract_ocr_private_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    tesseract_ocr = platform_vars["platform_service_topology"]["tesseract_ocr"]
+
+    assert tesseract_ocr["ports"]["internal"] == 3008
+    assert tesseract_ocr["urls"]["internal"] == "http://10.10.10.20:3008"
+    assert tesseract_ocr["exposure_model"] == "private-only"
+    assert platform_vars["tesseract_ocr_port"] == 3008
+
+
 def test_build_platform_vars_includes_nextcloud_publication_topology() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
     nextcloud = platform_vars["platform_service_topology"]["nextcloud"]

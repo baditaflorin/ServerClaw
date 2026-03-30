@@ -160,6 +160,147 @@ workstreams:
       included_in_repo_version: 0.177.102
       latest_receipts:
         tika: 2026-03-30-adr-0275-apache-tika-live-apply
+  - id: ws-0286-live-apply
+    adr: "0286"
+    title: Live apply Tesseract OCR from latest origin/main on top of the current Apache Tika baseline
+    ready_to_merge: false
+    live_applied: false
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0286-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0286-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0286-live-apply.md
+    depends_on:
+      - adr-0107-platform-extension-model
+      - adr-0165-workflow-idempotency
+      - adr-0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/adr/.index.yaml
+      - README.md
+      - docs/workstreams/ws-0286-live-apply.md
+      - docs/adr/0286-tesseract-ocr-service-for-scanned-image-text-extraction.md
+      - docs/runbooks/configure-tesseract-ocr.md
+      - docs/site-generated/architecture/dependency-graph.md
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - playbooks/tesseract-ocr.yml
+      - playbooks/services/tesseract-ocr.yml
+      - collections/ansible_collections/lv3/platform/playbooks/tesseract-ocr.yml
+      - collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/**
+      - config/ansible-execution-scopes.yaml
+      - config/ansible-role-idempotency.yml
+      - config/command-catalog.json
+      - config/data-catalog.json
+      - config/dependency-graph.json
+      - config/health-probe-catalog.json
+      - config/image-catalog.json
+      - config/service-capability-catalog.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      - config/slo-catalog.json
+      - config/workflow-catalog.json
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/slo_rules.yml
+      - config/grafana/dashboards/slo-overview.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/diagrams/service-dependency-graph.excalidraw
+      - Makefile
+      - requirements/tesseract-ocr.txt
+      - scripts/document_extraction.py
+      - scripts/tesseract_ocr_service.py
+      - scripts/generate_platform_vars.py
+      - scripts/validate_repo.sh
+      - tests/test_document_extraction.py
+      - tests/test_generate_platform_vars.py
+      - tests/test_service_id_resolver.py
+      - tests/test_tesseract_ocr_runtime_role.py
+      - receipts/ops-portal-snapshot.html
+      - receipts/live-applies/2026-03-30-adr-0286-tesseract-ocr-live-apply.json
+      - receipts/live-applies/evidence/2026-03-30-adr-0286-tesseract-ocr-live-apply.txt
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_index_generation
+          paths:
+            - docs/adr/.index.yaml
+          mode: shared_contract
+          contract: adr-index-generator-v1
+        - id: integration_readme_surface
+          paths:
+            - README.md
+          mode: shared_contract
+          contract: main-integration-truth-v1
+        - id: adr_0286_document_extraction_surface
+          paths:
+            - docs/workstreams/ws-0286-live-apply.md
+            - docs/adr/0286-tesseract-ocr-service-for-scanned-image-text-extraction.md
+            - docs/runbooks/configure-tesseract-ocr.md
+            - playbooks/tesseract-ocr.yml
+            - playbooks/services/tesseract-ocr.yml
+            - collections/ansible_collections/lv3/platform/playbooks/tesseract-ocr.yml
+            - collections/ansible_collections/lv3/platform/roles/tesseract_ocr_runtime/**
+            - requirements/tesseract-ocr.txt
+            - scripts/document_extraction.py
+            - scripts/tesseract_ocr_service.py
+            - tests/test_document_extraction.py
+            - tests/test_tesseract_ocr_runtime_role.py
+            - receipts/live-applies/2026-03-30-adr-0286-tesseract-ocr-live-apply.json
+            - receipts/live-applies/evidence/2026-03-30-adr-0286-tesseract-ocr-live-apply.txt
+          mode: exclusive
+        - id: docs_portal_generation_contract
+          paths:
+            - docs/site-generated/architecture/dependency-graph.md
+            - receipts/ops-portal-snapshot.html
+          mode: shared_contract
+          contract: docs-portal-generation-v1
+        - id: topology_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - scripts/generate_platform_vars.py
+            - tests/test_generate_platform_vars.py
+          mode: shared_contract
+          contract: platform-topology-v1
+        - id: service_catalogs_contract
+          paths:
+            - config/command-catalog.json
+            - config/data-catalog.json
+            - config/dependency-graph.json
+            - config/health-probe-catalog.json
+            - config/image-catalog.json
+            - config/service-capability-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/slo-catalog.json
+            - config/workflow-catalog.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/grafana/dashboards/slo-overview.json
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/diagrams/service-dependency-graph.excalidraw
+          mode: shared_contract
+          contract: service-catalogs-v1
+        - id: repository_automation_contract
+          paths:
+            - Makefile
+            - config/ansible-execution-scopes.yaml
+            - config/ansible-role-idempotency.yml
+            - scripts/validate_repo.sh
+          mode: shared_contract
+          contract: repository-automation-v1
+        - id: service_alias_contract
+          paths:
+            - tests/test_service_id_resolver.py
+          mode: shared_contract
+          contract: service-id-alias-v1
   - id: ws-0282-live-apply
     adr: "0282"
     title: Live apply Mailpit as the SMTP development mail interceptor from latest origin/main

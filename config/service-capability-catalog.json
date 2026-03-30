@@ -1851,6 +1851,34 @@
       }
     },
     {
+      "id": "tesseract_ocr",
+      "name": "Tesseract OCR",
+      "description": "Private OCR fallback API for scanned PDFs and image uploads when Apache Tika returns no embedded text.",
+      "category": "data",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:3008",
+      "exposure": "private-only",
+      "health_probe_id": "tesseract_ocr",
+      "adr": "0286",
+      "runbook": "docs/runbooks/configure-tesseract-ocr.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=tesseract-ocr-availability",
+      "tags": [
+        "ocr",
+        "document-extraction",
+        "images",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.20:3008",
+          "notes": "Tesseract OCR stays private on docker-runtime-lv3 and is intended as the second-stage fallback when Tika returns no text for image-like documents or scanned PDFs."
+        }
+      }
+    },
+    {
       "id": "uptime_kuma",
       "name": "Uptime Kuma",
       "description": "Synthetic monitoring surface used to track public and internal service reachability.",

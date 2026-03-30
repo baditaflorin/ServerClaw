@@ -317,6 +317,13 @@ playbooks:
     shared_surfaces:
       - service:tika
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/tesseract-ocr.yml:
+    playbook_id: tesseract-ocr
+    canonical_service_id: tesseract_ocr
+    mutation_scope: host
+    shared_surfaces:
+      - service:tesseract-ocr
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/uptime-kuma.yml:
     playbook_id: uptime-kuma
     mutation_scope: platform
@@ -401,6 +408,19 @@ playbooks:
     mutation_scope: host
     shared_surfaces:
       - service:proxmox-metrics
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/tika.yml:
+    playbook_id: tika
+    mutation_scope: host
+    shared_surfaces:
+      - service:tika
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/tesseract-ocr.yml:
+    playbook_id: tesseract-ocr
+    canonical_service_id: tesseract_ocr
+    mutation_scope: host
+    shared_surfaces:
+      - service:tesseract-ocr
       - inventory/host_vars/proxmox_florin.yml
   collections/ansible_collections/lv3/platform/playbooks/dozzle.yml:
     playbook_id: dozzle

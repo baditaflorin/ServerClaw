@@ -1,0 +1,49 @@
+---
+# Purpose: Verify the local Tesseract OCR health endpoint and OCR extraction route with a deterministic image fixture.
+# Inputs: Running Tesseract OCR container plus the configured local runtime URL and base64-encoded verification image.
+# Outputs: Read-only health and OCR probe results for the private OCR runtime.
+# Idempotency: Fully idempotent; these are read-only verification steps that only use temporary files.
+# Dependencies: ADR 0286 and ADR 0165; requires the Tesseract OCR compose stack to be running.
+- name: Verify the Tesseract OCR health endpoint responds locally
+  ansible.builtin.uri:
+    url: "{{ tesseract_ocr_runtime_local_base_url }}/healthz"
+    method: GET
+    status_code: 200
+    return_content: true
+    timeout: 30
+  register: tesseract_ocr_runtime_verify_health
+  retries: 12
+  delay: 5
+  until: tesseract_ocr_runtime_verify_health.status == 200
+  changed_when: false
+
+- name: Verify Tesseract OCR extracts text from the deterministic image fixture
+  ansible.builtin.shell: |
+    set -euo pipefail
+    image_file="$(mktemp --suffix=.png)"
+    response_file="$(mktemp)"
+    trap 'rm -f "$image_file" "$response_file"' EXIT
+    base64 --decode >"$image_file" <<'EOF'
+    {{ tesseract_ocr_runtime_verify_image_base64 }}
+    EOF
+    curl -fsS -o "$response_file" \
+      -F "file=@${image_file};filename={{ tesseract_ocr_runtime_verify_filename }};type=image/png" \
+      "{{ tesseract_ocr_runtime_local_base_url }}/ocr"
+    python3 - "$response_file" <<'PY'
+    import json
+    import sys
+
+    with open(sys.argv[1], "r", encoding="utf-8") as handle:
+        payload = json.load(handle)
+
+    extracted = str(payload.get("text", "")).upper()
+    assert "OCR" in extracted, payload
+    assert "OK" in extracted, payload
+    assert payload.get("extraction_method") == "tesseract", payload
+    assert payload.get("page_count") == 1, payload
+    print("verified")
+    PY
+  args:
+    executable: /bin/bash
+  register: tesseract_ocr_runtime_verify_extract
+  changed_when: false

@@ -1,0 +1,29 @@
+---
+# Playbook: services/tesseract-ocr.yml
+# Purpose: Provide the service-scoped live-apply entrypoint for Tesseract OCR.
+# Use case: Run through `make live-apply-service service=tesseract-ocr env=<environment>`.
+#
+# Inputs (required):
+#   - env (str, required): Deployment environment selector passed through to the imported playbook.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): Guest SSH routing mode for the live apply.
+#
+# Outputs:
+#   - Imports the root Tesseract OCR playbook used by the governed service live-apply wrapper.
+#
+# Idempotency: Fully idempotent
+#              This wrapper only imports the root Tesseract OCR playbook and does not mutate state on its own.
+#
+# Dependencies:
+#   - ADR 0286: Defines Tesseract OCR as the scanned-image text extraction fallback service.
+#   - Requires: playbooks/tesseract-ocr.yml.
+#   - Role: lv3.platform.tesseract_ocr_runtime — owned by the imported playbook.
+#
+# Related ADRs: 0107, 0165, 0275, 0286
+# Related Runbooks: docs/runbooks/configure-tesseract-ocr.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+
+- import_playbook: ../tesseract-ocr.yml

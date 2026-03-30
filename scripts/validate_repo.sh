@@ -543,6 +543,8 @@ validate_health_probes() {
     matrix_synapse_runtime
     mail_platform_runtime
     mailpit_runtime
+    tika_runtime
+    tesseract_ocr_runtime
     nginx_edge_publication
     ntfy_runtime
     uptime_kuma_runtime

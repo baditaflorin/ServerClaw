@@ -930,6 +930,23 @@
         "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Tika converge and extraction verification workflow."
       }
     },
+    "tesseract_ocr": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_120"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "docker-runtime-lv3",
+        "failover_trigger": "Restore docker-runtime-lv3 when Tesseract OCR or the paired private document-extraction runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild docker-runtime-lv3, then rerun the Tika and Tesseract OCR converges from git."
+      }
+    },
     "uptime_kuma": {
       "tier": "R1",
       "recovery_objective": {

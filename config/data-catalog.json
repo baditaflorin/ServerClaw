@@ -147,6 +147,21 @@
       "notes": "Apache Tika is stateless and does not persist source documents, extracted text, or metadata after each synchronous request completes, but uploaded documents may contain sensitive content in transit."
     },
     {
+      "id": "tesseract-ocr-transient-request-buffers",
+      "service": "tesseract_ocr",
+      "name": "Tesseract OCR transient request buffers",
+      "class": "internal",
+      "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Transient uploaded image and PDF buffers inside the tesseract-ocr container on docker-runtime-lv3",
+        "Ephemeral rendered page images created during PDF OCR on docker-runtime-lv3"
+      ],
+      "notes": "The OCR runtime is stateless and discards uploaded source files, rendered page images, and extracted text after each synchronous request completes."
+    },
+    {
       "id": "grafana-annotations",
       "service": "grafana",
       "name": "Grafana annotations",

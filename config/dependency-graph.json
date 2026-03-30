@@ -480,6 +480,15 @@
       "adr": "0275"
     },
     {
+      "id": "tesseract_ocr",
+      "service": "tesseract_ocr",
+      "name": "Tesseract OCR",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "data",
+      "adr": "0286"
+    },
+    {
       "id": "uptime_kuma",
       "service": "uptime_kuma",
       "name": "Uptime Kuma",
@@ -1155,6 +1164,18 @@
       "to": "openbao",
       "type": "startup_only",
       "description": "Plausible starts from OpenBao-rendered runtime secrets mirrored into its compose environment before the main container launches."
+    },
+    {
+      "from": "tesseract_ocr",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Tesseract OCR runtime and its repo-built container image are hosted on docker-runtime-lv3."
+    },
+    {
+      "from": "tesseract_ocr",
+      "to": "tika",
+      "type": "soft",
+      "description": "Document-extraction callers invoke Tika first and only fall back to Tesseract OCR when Tika returns no embedded text."
     }
   ]
 }

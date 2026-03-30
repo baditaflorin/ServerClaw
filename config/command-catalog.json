@@ -4500,6 +4500,43 @@
         "profile": "docker_runtime_systemd_make",
         "timeout_seconds": 1200
       }
+    },
+    "converge-tesseract-ocr": {
+      "description": "Converge the private Tesseract OCR runtime and the repo-managed Tika-first fallback extraction helper path on docker-runtime-lv3.",
+      "workflow_id": "converge-tesseract-ocr",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-tesseract-ocr passes",
+        "make validate passes before the apply",
+        "The private OCR listener, Tika-first fallback contract, and scanned-document CPU budget are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the Tesseract OCR health endpoint, one successful direct OCR extraction, and one successful Tika-first helper fallback response."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the Tesseract OCR runtime fails to start, OCR verification fails, the helper no longer falls back after empty Tika output, or the guest firewall would expose the service beyond the intended private boundary."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good OCR runtime state before retrying.",
+          "Do not leave behind ad hoc local-image, compose, or helper drift outside the repo-managed playbook path."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
     }
   },
   "execution_profiles": {

@@ -94,6 +94,7 @@ platform_port_assignments:
   step_ca_api_port: 9000
   step_ca_proxy_port: 9443
   tika_port: 9998
+  tesseract_ocr_port: 3008
   headscale_http_port: 8080
   vaultwarden_https_port: 8222
 proxmox_tailscale_hostname: proxmox-florin-subnet-router
@@ -572,33 +573,37 @@ network_policy:
           protocol: tcp
           ports:
             - 3007
+            - 3008
             - 8881
             - 9998
             - 11434
-          description: Private guest-to-guest document rendering, extraction, and agent API traffic
+          description: Private guest-to-guest document rendering, extraction, OCR, and agent API traffic
         - source: host
           protocol: tcp
           ports:
+            - 3008
             - 9998
-          description: Proxmox host verification and controller-side access to the private Tika extraction API
+          description: Proxmox host verification and controller-side access to the private Tika and Tesseract OCR APIs
         - source: 172.16.0.0/12
           protocol: tcp
           ports:
             - 3007
+            - 3008
             - 5000
             - 8881
             - 9998
             - 11434
-          description: Local Docker workloads that use the private Gotenberg, Changedetection, Tika, Ollama, and SearXNG APIs
+          description: Local Docker workloads that use the private Gotenberg, Tika, Tesseract OCR, Changedetection, Ollama, and SearXNG APIs
         - source: 192.168.0.0/16
           protocol: tcp
           ports:
             - 3007
+            - 3008
             - 5000
             - 8881
             - 9998
             - 11434
-          description: Local Docker workloads that use the private Gotenberg, Changedetection, Tika, Ollama, and SearXNG APIs
+          description: Local Docker workloads that use the private Gotenberg, Tika, Tesseract OCR, Changedetection, Ollama, and SearXNG APIs
         - source: docker-build-lv3
           protocol: tcp
           ports:
@@ -682,9 +687,11 @@ network_policy:
         - source: monitoring-lv3
           protocol: tcp
           ports:
+            - 3008
             - 5000
             - 8089
-          description: Private monitoring probes for the Changedetection runtime and Dozzle hub
+            - 9998
+          description: Private monitoring probes for the Tesseract OCR, Changedetection, Tika, and Dozzle runtimes
         - source: monitoring-lv3
           protocol: tcp
           ports:
@@ -1330,6 +1337,14 @@ lv3_service_topology:
       url: "{{ step_ca_controller_url }}"
   tika:
     service_name: tika
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+  tesseract_ocr:
+    service_name: tesseract-ocr
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
     exposure_model: private-only

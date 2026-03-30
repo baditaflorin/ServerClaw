@@ -27,3 +27,7 @@ def test_resolve_service_id_maps_build_artifact_cache_playbook_to_docker_build()
 
 def test_resolve_service_id_maps_nats_jetstream_playbook_to_canonical_service() -> None:
     assert service_id_resolver.resolve_service_id("nats-jetstream") == "nats_jetstream"
+
+
+def test_resolve_service_id_maps_tesseract_ocr_playbook_to_canonical_service() -> None:
+    assert service_id_resolver.resolve_service_id("tesseract-ocr") == "tesseract_ocr"

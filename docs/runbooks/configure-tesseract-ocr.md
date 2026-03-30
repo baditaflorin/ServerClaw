@@ -1,0 +1,82 @@
+# Configure Tesseract OCR
+
+## Purpose
+
+This runbook converges ADR 0286 so scanned-image and image-only documents have
+a shared, private OCR fallback service on `docker-runtime-lv3`.
+
+## Result
+
+- `docker-runtime-lv3` builds the repo-managed Tesseract OCR image from `/opt/tesseract-ocr/app`
+- the private runtime listens on `10.10.10.20:3008`
+- the service exposes `/healthz` and `/ocr`
+- repo-managed verification confirms the OCR route extracts deterministic text from a known image fixture
+- `scripts/document_extraction.py` can call Tika first and fall back to Tesseract OCR when Tika returns no text
+
+## Commands
+
+Syntax-check the Tesseract OCR workflow:
+
+```bash
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+make syntax-check-tesseract-ocr
+```
+
+Converge the private runtime directly:
+
+```bash
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+make converge-tesseract-ocr env=production
+```
+
+Run the governed live-apply wrapper:
+
+```bash
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=tesseract-ocr env=production
+```
+
+## Verification
+
+Verify the private Tesseract OCR health endpoint on `docker-runtime-lv3`:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -J ops@100.64.0.1 \
+  ops@10.10.10.20 \
+  'curl -fsS http://127.0.0.1:3008/healthz'
+```
+
+Verify direct OCR extraction through the `/ocr` endpoint:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -J ops@100.64.0.1 \
+  ops@10.10.10.20 \
+  'image=$(mktemp --suffix=.png); trap '\''rm -f "$image"'\'' EXIT; base64 --decode >"$image" <<'"'"'EOF'"'"'
+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
+EOF
+  curl -fsS -F "file=@${image};filename=ocr-ok.png;type=image/png" http://127.0.0.1:3008/ocr'
+```
+
+Verify the Tika-first fallback helper chooses OCR when Tika returns no text:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -J ops@100.64.0.1 \
+  ops@10.10.10.20 \
+  'image=$(mktemp --suffix=.png); trap '\''rm -f "$image"'\'' EXIT; base64 --decode >"$image" <<'"'"'EOF'"'"'
+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
+EOF
+  python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/document_extraction.py "$image" --tika-url http://127.0.0.1:9998 --tesseract-url http://127.0.0.1:3008'
+```
+
+## Operating Notes
+
+- Tesseract OCR is intentionally private-only. Do not publish it on the public NGINX edge.
+- The OCR runtime is stateless and should stay that way. Do not add persistent volumes or ad hoc secrets unless a future ADR changes that contract.
+- `scripts/document_extraction.py` is the supported Tika-first helper path: call Tika for every upload, then fall back to OCR only when the extracted text is empty and the content type is image-like or PDF.
+- OCR is CPU-bound. Large multi-page scanned PDFs should be queued or rate-limited instead of fired in unbounded parallel batches.

@@ -213,6 +213,7 @@ platform_ports:
   step_ca_api_port: 9000
   step_ca_proxy_port: 9443
   tika_port: 9998
+  tesseract_ocr_port: 3008
   headscale_http_port: 8080
   vaultwarden_https_port: 8222
 platform_port_assignments:
@@ -288,6 +289,7 @@ platform_port_assignments:
   step_ca_api_port: 9000
   step_ca_proxy_port: 9443
   tika_port: 9998
+  tesseract_ocr_port: 3008
   headscale_http_port: 8080
   vaultwarden_https_port: 8222
 platform_guest_catalog:
@@ -1353,6 +1355,19 @@ platform_service_topology:
       internal: 9998
     urls:
       internal: http://10.10.10.20:9998
+  tesseract_ocr:
+    service_name: tesseract-ocr
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: tesseract_ocr
+    ports:
+      internal: 3008
+    urls:
+      internal: http://10.10.10.20:3008
   semaphore:
     service_name: semaphore
     owning_vm: docker-runtime-lv3
@@ -2827,6 +2842,19 @@ public_edge_service_topology:
       internal: 9998
     urls:
       internal: http://10.10.10.20:9998
+  tesseract_ocr:
+    service_name: tesseract-ocr
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: tesseract_ocr
+    ports:
+      internal: 3008
+    urls:
+      internal: http://10.10.10.20:3008
   semaphore:
     service_name: semaphore
     owning_vm: docker-runtime-lv3
@@ -3896,3 +3924,4 @@ harbor_port: 8095
 ntopng_http_port: 3000
 portainer_https_port: 9443
 tika_port: 9998
+tesseract_ocr_port: 3008
