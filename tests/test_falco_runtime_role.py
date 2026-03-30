@@ -24,6 +24,7 @@ COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
 EVENT_TAXONOMY_PATH = REPO_ROOT / "config" / "event-taxonomy.yaml"
 NTFY_CONFIG_PATH = REPO_ROOT / "config" / "ntfy" / "server.yml"
+FALCO_SUPPRESSIONS_PATH = REPO_ROOT / "config" / "falco" / "suppressions.yaml"
 NTFY_ROLE_DEFAULTS = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "ntfy_runtime" / "defaults" / "main.yml"
 NTFY_ROLE_TASKS = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "ntfy_runtime" / "tasks" / "main.yml"
 NTFY_ROLE_HANDLERS = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "ntfy_runtime" / "handlers" / "main.yml"
@@ -83,6 +84,18 @@ def test_falco_template_enables_json_stdout_and_http_output() -> None:
     assert "{{ falco_runtime_http_output_url }}" in template
     assert "StandardOutput=journal" in journald_template
     assert "StandardError=journal" in journald_template
+
+
+def test_falco_suppressions_narrowly_allow_semgrep_drop_and_execute_noise() -> None:
+    suppressions = load_yaml(FALCO_SUPPRESSIONS_PATH)
+    semgrep_suppression = next(
+        entry for entry in suppressions if entry.get("macro") == "known_drop_and_execute_activities"
+    )
+
+    assert semgrep_suppression["override"] == {"condition": "append"}
+    assert 'container.image.repository = "registry.lv3.org/check-runner/python"' in semgrep_suppression["condition"]
+    assert 'proc.name = "semgrep-core"' in semgrep_suppression["condition"]
+    assert 'proc.exepath contains "/site-packages/semgrep/bin/semgrep-core"' in semgrep_suppression["condition"]
 
 
 def test_bridge_defaults_reuse_private_nats_and_ntfy_contracts() -> None:
