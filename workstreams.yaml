@@ -899,7 +899,7 @@ workstreams:
   - id: ws-0296-live-apply
     adr: "0296"
     title: Live apply the dedicated artifact cache VM from latest origin/main
-    status: ready_for_merge
+    status: live_applied
     owner: codex
     branch: codex/ws-0296-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-live-apply
@@ -1059,8 +1059,8 @@ workstreams:
       release_bump: patch
       included_in_repo_version: 0.177.103
       latest_receipts:
-        artifact_cache_plane: 2026-03-30-adr-0296-dedicated-artifact-cache-vm-live-apply
-        artifact_cache_vm: 2026-03-30-adr-0296-dedicated-artifact-cache-vm-live-apply
+        artifact_cache_plane: 2026-03-30-adr-0296-dedicated-artifact-cache-vm-mainline-live-apply
+        artifact_cache_vm: 2026-03-30-adr-0296-dedicated-artifact-cache-vm-mainline-live-apply
   - id: ws-0276-live-apply
     adr: "0276"
     title: Live apply the NATS JetStream platform event bus from latest origin/main

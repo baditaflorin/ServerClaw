@@ -1,9 +1,9 @@
 # ADR 0296: Dedicated Artifact-Cache VM With Phased Consumer Adoption
 
 - Status: Accepted
-- Implementation Status: Live applied
-- Implemented In Repo Version: 0.177.101
-- Implemented In Platform Version: 0.130.68
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.103
+- Implemented In Platform Version: 0.130.69
 - Implemented On: 2026-03-30
 - Date: 2026-03-29
 

@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-30'
 total_adrs: 324
 implementation_status_summary:
-  Implemented: 259
+  Implemented: 260
   Partial: 7
-  Not Implemented: 57
+  Not Implemented: 56
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -5232,7 +5232,7 @@ adr_index:
       - adoption
     summary: We will adopt artifact caching in two phases.
     filename: 0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md
-    implemented_version: 0.177.101
+    implemented_version: 0.177.103
   - adr: 0297
     title: Renovate Bot As The Automated Stack Version Upgrade Proposer
     status: Accepted
