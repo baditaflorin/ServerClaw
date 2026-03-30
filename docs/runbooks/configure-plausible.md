@@ -27,6 +27,11 @@ Run:
 HETZNER_DNS_API_TOKEN=... make converge-plausible
 ```
 
+The target validates the public subdomain contract and refreshes the shared
+`build/changelog-portal/` and `build/docs-portal/` artifacts before publishing
+`analytics.lv3.org` through the edge, so a fresh worktree does not need a
+separate portal/docs generation step.
+
 ## Generated local artifacts
 
 The workflow maintains controller-local secrets under `.local/plausible/`:

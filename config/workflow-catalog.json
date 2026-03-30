@@ -15,6 +15,9 @@
           "bootstrap_ssh_private_key",
           "hetzner_dns_api_token"
         ],
+        "bootstrap_manifest_ids": [
+          "shared-edge-generated-portals"
+        ],
         "generated_secret_ids": [
           "plausible_database_password",
           "plausible_secret_key_base",

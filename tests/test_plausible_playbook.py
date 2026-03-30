@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import yaml
@@ -7,6 +8,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "plausible.yml"
 SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "plausible.yml"
 MAKEFILE_PATH = REPO_ROOT / "Makefile"
+WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 
 
 def test_plausible_dns_stage_converges_only_the_analytics_subdomain_record() -> None:
@@ -54,4 +56,12 @@ def test_converge_plausible_target_uses_the_canonical_playbook() -> None:
     converge_block = makefile.split("converge-plausible:\n", 1)[1].split("\n\n", 1)[0]
 
     assert "$(MAKE) preflight WORKFLOW=converge-plausible" in converge_block
+    assert "uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate" in converge_block
+    assert "$(MAKE) generate-edge-static-sites" in converge_block
     assert "$(REPO_ROOT)/playbooks/plausible.yml" in converge_block
+
+
+def test_converge_plausible_workflow_bootstraps_shared_edge_generated_portals() -> None:
+    workflows = json.loads(WORKFLOW_CATALOG_PATH.read_text(encoding="utf-8"))["workflows"]
+
+    assert workflows["converge-plausible"]["preflight"]["bootstrap_manifest_ids"] == ["shared-edge-generated-portals"]
