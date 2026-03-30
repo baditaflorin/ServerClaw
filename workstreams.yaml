@@ -3779,13 +3779,14 @@ workstreams:
     ready_to_merge: true
     live_applied: true
     canonical_truth:
-      changelog_entry: integrates ADR 0269 into main by replaying the
-        vulnerability-budget and freshness gates on the merged 0.177.96 /
-        0.130.63 baseline, hardening controller-local Windmill seed sync to
-        use the host proxy URL, and preserving the exact-main proof without
-        advancing platform_version again
+      changelog_entry: refreshes ADR 0269 on the latest origin/main baseline by
+        replaying the Windmill vulnerability-budget and freshness gates on repo
+        version 0.177.104 / platform version 0.130.69, preserving the
+        worktree-safe runtime fixes and recording refreshed live evidence
       release_bump: patch
-      included_in_repo_version: 0.177.97
+      included_in_repo_version: 0.177.105
+      latest_receipts:
+        vulnerability_budget_gate: 2026-03-30-adr-0269-vulnerability-budget-gates-mainline-live-apply
   - id: ws-0253-live-apply
     adr: "0253"
     title: Unified runtime assurance scoreboard live apply
