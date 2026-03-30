@@ -28,6 +28,9 @@ roles:
   cert_renewer_sidecar:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  changedetection_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   coolify_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -169,6 +172,9 @@ roles:
   n8n_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  nats_jetstream_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   nextcloud_postgres:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -256,6 +262,9 @@ roles:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   proxmox_guests:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  repo_deploy_image_cache:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   proxmox_host_control_loops:

@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.101",
-  "platform_version": "0.130.68",
-  "generated_at": "2026-03-30T11:49:32Z",
-  "next_refresh_at": "2026-03-30T12:49:32Z",
+  "repo_version": "0.177.102",
+  "platform_version": "0.130.69",
+  "generated_at": "2026-03-30T12:28:55Z",
+  "next_refresh_at": "2026-03-30T13:28:55Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4888,10 +4888,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.100",
+    "last_version": "0.177.101",
     "deployed_at": "2026-03-30",
-    "summary": "replays ADR 0251 on the latest merged mainline by pinning the Windmill worker checkout to the active worktree during converge-windmill, replaying the Docker publication, step-ca, OpenBao, and stage-smoke verification paths on the live server, and refreshing the canonical smoke-suite and promotion-gate receipt",
-    "release_notes_url": "docs/release-notes/0.177.101.md"
+    "summary": "completed the ADR 0274 mainline live apply by hardening the Coolify bootstrap and publication path, then re-verifying governed repo-deploy base-image warming on coolify-lv3",
+    "release_notes_url": "docs/release-notes/0.177.102.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

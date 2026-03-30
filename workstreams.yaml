@@ -694,7 +694,7 @@ workstreams:
   - id: ws-0274-live-apply
     adr: "0274"
     title: Live apply governed repo-deploy base image warming from latest origin/main
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0274-main-merge-r4
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-v3
@@ -761,13 +761,17 @@ workstreams:
             - receipts/ops-portal-snapshot.html
           mode: shared_contract
           contract: generated-validation-artifacts-v1
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
     canonical_truth:
-      changelog_entry: fully implemented ADR 0274 by adding governed Coolify
-        repo-deploy base-image warming, freshness receipts, and scheduled cache
-        refresh verification on coolify-lv3
+      changelog_entry: completed the ADR 0274 mainline live apply by hardening
+        the Coolify bootstrap and publication path, then re-verifying governed
+        repo-deploy base-image warming on coolify-lv3
       release_bump: patch
+      included_in_repo_version: 0.177.102
+      latest_receipts:
+        coolify: 2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply
+        repo_deploy_base_image_cache: 2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply
   - id: ws-0295-live-apply
     adr: "0295"
     title: Live apply the shared artifact cache plane from latest origin/main

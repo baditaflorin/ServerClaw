@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply",
+  "applied_on": "2026-03-30",
+  "recorded_on": "2026-03-30",
+  "recorded_at": "2026-03-30T12:24:30Z",
+  "recorded_by": "codex",
+  "workflow_id": "adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply",
+  "adr": "0274",
+  "workstream": "ws-0274-live-apply",
+  "environment": "production",
+  "service": "coolify",
+  "source_branch": "codex/ws-0274-main-merge-r4",
+  "source_commit": "2c5ee54e46e08671ed54713b743f9c03c162f3bc",
+  "repo_version_context": "0.177.101",
+  "platform_version_context": "0.130.68",
+  "integrated_repo_version": "0.177.102",
+  "integrated_platform_version": "0.130.69",
+  "result": "pass",
+  "summary": "Replayed ADR 0274 from the latest merged origin/main candidate, re-verified the Coolify publication path directly on coolify-lv3, and confirmed the governed repo-deploy image warm-cache contract end to end.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1",
+      "public_ipv4": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "coolify-lv3",
+      "vmid": 170,
+      "address": "10.10.10.70"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "Coolify public UI",
+      "address": "https://coolify.lv3.org"
+    }
+  ],
+  "play_recap": {
+    "coolify-lv3": {
+      "ok": 161,
+      "changed": 11,
+      "unreachable": 0,
+      "failed": 0,
+      "skipped": 13,
+      "rescued": 0,
+      "ignored": 0
+    },
+    "nginx-lv3": {
+      "ok": 81,
+      "changed": 4,
+      "unreachable": 0,
+      "failed": 0,
+      "skipped": 16,
+      "rescued": 0,
+      "ignored": 0
+    },
+    "proxmox_florin": {
+      "ok": 273,
+      "changed": 5,
+      "unreachable": 0,
+      "failed": 0,
+      "skipped": 134,
+      "rescued": 0,
+      "ignored": 0
+    }
+  },
+  "verification": [
+    {
+      "check": "Repo-deploy catalog validation",
+      "result": "pass",
+      "observed": "`python3 scripts/repo_deploy_image_cache.py validate` reported `Repo-deploy base image profile catalog OK`, recorded in `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-repo-deploy-validate.txt`."
+    },
+    {
+      "check": "Repo-deploy catalog planning",
+      "result": "pass",
+      "observed": "`python3 scripts/repo_deploy_image_cache.py plan` rendered one approved profile and five seed refs, recorded in `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-repo-deploy-plan.txt`."
+    },
+    {
+      "check": "Focused Coolify and helper tests",
+      "result": "pass",
+      "observed": "`uv run --with pytest pytest tests/test_repo_deploy_image_cache.py tests/test_coolify_playbook.py tests/test_coolify_runtime_role.py tests/test_docker_publication_assurance.py` returned `27 passed in 24.60s`, recorded in `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-targeted-pytest.txt`."
+    },
+    {
+      "check": "Exact-main Coolify replay",
+      "result": "pass",
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=coolify env=production EXTRA_ARGS='-e bypass_promotion=true'` completed with zero failed or unreachable hosts, recorded in `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-live-apply.txt`; the final recap reported `coolify-lv3 : ok=161 changed=11 unreachable=0 failed=0 skipped=13`, `nginx-lv3 : ok=81 changed=4 unreachable=0 failed=0 skipped=16`, and `proxmox_florin : ok=273 changed=5 unreachable=0 failed=0 skipped=134`."
+    },
+    {
+      "check": "Docker publication contract",
+      "result": "pass",
+      "observed": "`sudo /usr/local/bin/lv3-docker-publication-assurance` returned `ok: true` with summary `docker publication contract is satisfied`, recorded in `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-docker-publication-verify.txt`."
+    },
+    {
+      "check": "Guest-local warm-cache receipt",
+      "result": "pass",
+      "observed": "`/opt/repo-deploy-image-cache/warm-status.json` reported `result: pass`, `successful_pulls: 5`, `failed_pulls: 0`, `changed_count: 0`, `plan_generated_at: 2026-03-30T12:21:46Z`, and `warmed_at: 2026-03-30T12:21:52Z`, while `lv3-repo-deploy-image-cache.timer` remained enabled and active; recorded in `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-coolify-cache-state-post.txt`."
+    },
+    {
+      "check": "Warmed image presence",
+      "result": "pass",
+      "observed": "`docker image inspect` resolved all five approved seed refs locally on `coolify-lv3`, recorded in `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-image-inspect.txt`."
+    },
+    {
+      "check": "Public edge redirect contract",
+      "result": "pass",
+      "observed": "`https://coolify.lv3.org/` and `/login` both returned the expected TLS-backed `302` redirect to `/oauth2/sign_in` with `x-robots-tag: noindex, nofollow`, recorded in `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-coolify-public-head.txt` and `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-coolify-login-head.txt`."
+    },
+    {
+      "check": "Crawl policy preservation",
+      "result": "pass",
+      "observed": "`docs.lv3.org` and `changelog.lv3.org` still served `robots.txt` with `Disallow: /` after the exact-main replay, recorded in `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-robots.txt`."
+    },
+    {
+      "check": "Host snapshot",
+      "result": "pass",
+      "observed": "The Proxmox host remained `Debian-trixie-latest-amd64-base` on kernel `6.17.13-2-pve` with `pve-manager/9.1.6` and VM `170` running after the replay, recorded in `receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-host-state-post.txt`."
+    }
+  ],
+  "evidence_refs": [
+    "receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-canonical-truth-write.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-repo-deploy-validate.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-repo-deploy-plan.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-targeted-pytest.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-host-state-pre.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-coolify-cache-state-pre.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-live-apply.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-docker-publication-verify.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-coolify-cache-state-post.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-image-inspect.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-coolify-public-head.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-coolify-login-head.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-robots.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0274-mainline-r5-host-state-post.txt"
+  ],
+  "notes": [
+    "The exact-main live apply was executed from the refreshed latest-main candidate rooted at source commit 2c5ee54e46e08671ed54713b743f9c03c162f3bc.",
+    "The live-apply wrapper required a canonical truth refresh for README.md before the latest-main replay could pass the repository gate.",
+    "The protected-file-only integration updates that move the repo to 0.177.102 and the platform metadata to 0.130.69 do not change the converged runtime behavior already verified by this replay."
+  ]
+}

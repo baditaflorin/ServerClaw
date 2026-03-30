@@ -1,9 +1,10 @@
 # ADR 0274: Governed Base Image Mirrors And Warm Caches For Repo Deployments
 
 - Status: Accepted
-- Implementation Status: Partial
-- Implemented In Repo Version: 0.177.31
-- Implemented In Platform Version: 0.130.35
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.102
+- Implemented In Platform Version: 0.130.69
+- Implemented On: 2026-03-30
 - Date: 2026-03-29
 
 ## Context
@@ -59,17 +60,20 @@ The cache workflow must:
 - record which images were warmed and when
 - fail loudly when a required image falls outside policy or freshness bounds
 
-### First implementation slice
+### Implemented slice
 
-The first live slice of this ADR now exists on `coolify-lv3`:
+The implemented live slice now exists on `coolify-lv3`:
 
-- the governed Docker runtime renders explicit public resolvers for BuildKit
-  and container pulls
-- the governed Docker runtime pins `https://mirror.gcr.io` as the approved
-  Docker Hub mirror for expected public images
-
-Scheduled image warming, freshness receipts, and deployment-profile image
-bundles are still pending follow-up work.
+- the approved repo-deploy base-image profile catalog is committed and
+  validated in repo automation
+- the governed warm plan is rendered to
+  `/opt/repo-deploy-image-cache/seed-plan.json`
+- the guest-local warm receipt is recorded at
+  `/opt/repo-deploy-image-cache/warm-status.json`
+- `lv3-repo-deploy-image-cache.timer` keeps the approved image set fresh on a
+  governed cadence
+- the refreshed exact-main Coolify replay also keeps the local publication path
+  and Docker bridge repair flow verifiable after cache refresh
 
 ### Operator contract
 

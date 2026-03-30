@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.101
-platform_version: 0.130.68
+repo_version: 0.177.102
+platform_version: 0.130.69
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -75,7 +75,7 @@ live_apply_evidence:
     capacity_classes: 2026-03-27-adr-0192-capacity-classes-live-apply
     excalidraw: 2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply
     failure_domain_policy: 2026-03-27-adr-0184-failure-domain-labels-live-apply
-    coolify: 2026-03-29-adr-0224-coolify-dns-mirror-edge-and-education-mainline-live-apply
+    coolify: 2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply
     coolify_apps: 2026-03-29-adr-0224-coolify-dns-mirror-edge-and-education-mainline-live-apply
     outline: 2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply
     network_impairment_matrix: 2026-03-27-adr-0189-network-impairment-matrix-live-apply
@@ -130,6 +130,7 @@ live_apply_evidence:
     mailpit: 2026-03-30-adr-0282-mailpit-mainline-live-apply
     plausible_analytics: 2026-03-30-adr-0283-plausible-analytics-mainline-live-apply
     changedetection: 2026-03-30-adr-0280-changedetection-mainline-live-apply
+    repo_deploy_base_image_cache: 2026-03-30-adr-0274-governed-base-image-mirrors-and-warm-caches-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -1048,8 +1049,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.101
+    current: 0.177.102
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.68
+    current: 0.130.69
     meaning: intended platform release for the actual server configuration
