@@ -46,6 +46,8 @@ def test_main_tasks_render_pull_wait_and_verify_mailpit() -> None:
     assert "Render the Mailpit compose file" in names
     assert "Pull the Mailpit image" in names
     assert "Check whether the Docker nat chain exists before recreating Mailpit published ports" in names
+    assert "Build the Mailpit compose startup command" in names
+    assert "Start the Mailpit stack with stale-network recovery" in names
     assert "Wait for the Mailpit HTTP listener" in names
     assert "Wait for the Mailpit SMTP listener" in names
     assert "Verify the Mailpit runtime" in names
@@ -54,6 +56,17 @@ def test_main_tasks_render_pull_wait_and_verify_mailpit() -> None:
         task for task in tasks if task["name"] == "Check whether the current Mailpit info endpoint is healthy before startup"
     )
     assert info_probe["ansible.builtin.uri"]["url"] == "{{ mailpit_api_url }}/info"
+
+    startup_block = next(task for task in tasks if task["name"] == "Start the Mailpit stack with stale-network recovery")
+    rescue_names = [task["name"] for task in startup_block["rescue"]]
+    assert "Detect stale Mailpit compose-network startup failures" in rescue_names
+    assert "Reset the stale Mailpit compose network before retrying startup" in rescue_names
+
+    reset_task = next(
+        task for task in startup_block["rescue"]
+        if task["name"] == "Reset the stale Mailpit compose network before retrying startup"
+    )
+    assert 'docker network rm "{{ mailpit_docker_network_name }}"' in reset_task["ansible.builtin.shell"]
 
 
 def test_verify_tasks_clear_probe_and_assert_mail_capture() -> None:

@@ -122,44 +122,71 @@
         or mailpit_pull.changed
       }}
 
-- name: Force-recreate the Mailpit stack when runtime inputs changed
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ mailpit_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-      - --force-recreate
-  args:
-    chdir: "{{ mailpit_site_dir }}"
-  register: mailpit_up
-  changed_when: >-
-    'Creating' in mailpit_up.stdout
-    or 'Recreating' in mailpit_up.stdout
-    or 'Starting' in mailpit_up.stdout
-  when: mailpit_force_recreate
+- name: Build the Mailpit compose startup command
+  ansible.builtin.set_fact:
+    mailpit_compose_up_argv: >-
+      {{
+        [
+          'docker',
+          'compose',
+          '--file',
+          mailpit_compose_file,
+          'up',
+          '-d',
+          '--remove-orphans',
+        ] + (['--force-recreate'] if mailpit_force_recreate else [])
+      }}
 
-- name: Start the Mailpit stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ mailpit_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ mailpit_site_dir }}"
-  register: mailpit_up
-  changed_when: >-
-    'Creating' in mailpit_up.stdout
-    or 'Recreating' in mailpit_up.stdout
-    or 'Starting' in mailpit_up.stdout
-  when: not mailpit_force_recreate
+- name: Start the Mailpit stack with stale-network recovery
+  block:
+    - name: Start the Mailpit stack
+      ansible.builtin.command:
+        argv: "{{ mailpit_compose_up_argv }}"
+      args:
+        chdir: "{{ mailpit_site_dir }}"
+      register: mailpit_up
+      changed_when: >-
+        'Creating' in mailpit_up.stdout
+        or 'Recreating' in mailpit_up.stdout
+        or 'Starting' in mailpit_up.stdout
+  rescue:
+    - name: Detect stale Mailpit compose-network startup failures
+      ansible.builtin.set_fact:
+        mailpit_missing_network_failure: >-
+          {{
+            'network ' in ((mailpit_up.stderr | default('')) ~ ' ' ~ (mailpit_up.stdout | default('')))
+            and ' does not exist' in ((mailpit_up.stderr | default('')) ~ ' ' ~ (mailpit_up.stdout | default('')))
+          }}
+
+    - name: Reset the stale Mailpit compose network before retrying startup
+      ansible.builtin.shell: |
+        set -euo pipefail
+        docker compose --file "{{ mailpit_compose_file }}" down --remove-orphans >/dev/null 2>&1 || true
+        docker network rm "{{ mailpit_docker_network_name }}" >/dev/null 2>&1 || true
+        echo changed
+      args:
+        chdir: "{{ mailpit_site_dir }}"
+        executable: /bin/bash
+      register: mailpit_network_reset
+      changed_when: "'changed' in mailpit_network_reset.stdout"
+      when: mailpit_missing_network_failure | bool
+
+    - name: Recreate the full Mailpit stack after stale-network cleanup
+      ansible.builtin.command:
+        argv: "{{ mailpit_compose_up_argv }}"
+      args:
+        chdir: "{{ mailpit_site_dir }}"
+      register: mailpit_network_retry_up
+      changed_when: >-
+        'Creating' in mailpit_network_retry_up.stdout
+        or 'Recreating' in mailpit_network_retry_up.stdout
+        or 'Starting' in mailpit_network_retry_up.stdout
+      when: mailpit_missing_network_failure | bool
+
+    - name: Fail when Mailpit startup failed for a reason other than stale networking
+      ansible.builtin.fail:
+        msg: "{{ mailpit_up.stderr | default('Mailpit startup failed without stderr output.') }}"
+      when: not (mailpit_missing_network_failure | bool)
 
 - name: Wait for the Mailpit HTTP listener
   ansible.builtin.wait_for:
