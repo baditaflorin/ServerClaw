@@ -82,6 +82,17 @@ def test_windmill_script_sync_uses_manifest_helper() -> None:
     assert "{{ windmill_seed_schedule_manifest_local.path }}" in tasks
 
 
+def test_make_converge_windmill_forwards_extra_args() -> None:
+    makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
+
+    target_start = makefile.index("converge-windmill:")
+    next_target = makefile.index("\nconverge-coolify:", target_start)
+    target_block = makefile[target_start:next_target]
+
+    assert "$(EXTRA_ARGS)" in target_block
+    assert "--playbook $(REPO_ROOT)/playbooks/windmill.yml" in target_block
+
+
 def test_windmill_defaults_use_git_common_dir_for_shared_local_artifacts() -> None:
     runtime_defaults = yaml.safe_load(
         (

@@ -13,27 +13,34 @@ HELPER_TASKS_PATH = (
     / "tasks"
     / "openbao_compose_env.yml"
 )
+SYSTEMD_HELPER_TASKS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "common"
+    / "tasks"
+    / "openbao_systemd_credentials.yml"
+)
+RECOVERY_TASKS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "common"
+    / "tasks"
+    / "ensure_local_openbao_runtime.yml"
+)
 
 
 def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     tasks = HELPER_TASKS_PATH.read_text(encoding="utf-8")
 
-    assert "- name: Inspect current OpenBao container networks" in tasks
-    assert "openbao_container_name | default('lv3-openbao')" in tasks
-    assert '{{ "{{json .NetworkSettings.Networks}}" }}' in tasks
-    assert "- name: Inspect current OpenBao published ports" in tasks
-    assert '{{ "{{json .NetworkSettings.Ports}}" }}' in tasks
-    assert "- name: Record whether the local OpenBao runtime needs recovery before runtime secret injection" in tasks
-    assert "common_openbao_compose_env_runtime_needs_recovery" in tasks
-    assert "- name: Ensure Docker bridge networking chains are present before recovering the local OpenBao runtime" in tasks
-    assert "tasks_from: docker_bridge_chains" in tasks
-    assert "- name: Check whether the OpenBao compose network exists before recovery" in tasks
-    assert "openbao_site_dir | default('/opt/openbao')" in tasks
-    assert "- name: Remove the detached OpenBao container before runtime secret injection recovery" in tasks
-    assert "- name: Remove the stale OpenBao compose network before runtime secret injection recovery" in tasks
-    assert "- name: Force-recreate the local OpenBao stack before runtime secret injection" in tasks
-    assert "openbao_compose_file | default('/opt/openbao/docker-compose.yml')" in tasks
-    assert "--force-recreate" in tasks
+    assert "include_tasks: ensure_local_openbao_runtime.yml" in tasks
     assert "- name: Read the local OpenBao seal status" in tasks
     assert "/v1/sys/seal-status" in tasks
     assert "- name: Unseal the local OpenBao API when runtime secret injection finds it sealed" in tasks
@@ -49,5 +56,30 @@ def test_helper_unseals_restarted_openbao_before_waiting_for_health() -> None:
     assert "until: common_openbao_compose_env_current_secret.status in [200, 404]" in tasks
     assert "- name: Read the current OpenBao policy for the runtime AppRole" in tasks
     assert "until: common_openbao_compose_env_current_policy.status in [200, 404]" in tasks
-    assert "register: common_openbao_compose_env_api_health\n  retries: 48\n  delay: 5" in tasks
-    assert "register: common_openbao_compose_env_health\n  retries: 48\n  delay: 5" in tasks
+
+
+def test_systemd_helper_reuses_local_openbao_recovery() -> None:
+    tasks = SYSTEMD_HELPER_TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "include_tasks: ensure_local_openbao_runtime.yml" in tasks
+    assert "- name: Wait for the local OpenBao API to answer" in tasks
+    assert "- name: Unseal the local OpenBao API when host-native secret delivery finds it sealed" in tasks
+
+
+def test_local_openbao_recovery_helper_recovers_compose_runtime_when_api_is_down() -> None:
+    tasks = RECOVERY_TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "- name: Probe whether the local OpenBao API already answers" in tasks
+    assert "- name: Inspect current OpenBao container networks before local recovery" in tasks
+    assert "- name: Inspect current OpenBao published ports before local recovery" in tasks
+    assert "openbao_container_name | default('lv3-openbao')" in tasks
+    assert '{{ "{{json .NetworkSettings.Ports}}" }}' in tasks
+    assert "- name: Restart Docker when required chains are missing before local OpenBao recovery" in tasks
+    assert "- name: Assert Docker bridge chains are present before local OpenBao recovery" in tasks
+    assert "- name: Remove the detached OpenBao container before local recovery" in tasks
+    assert "- name: Remove the stale OpenBao compose network before local recovery" in tasks
+    assert "- name: Recover the local OpenBao stack when the API is unavailable" in tasks
+    assert "docker" in tasks
+    assert "--remove-orphans" in tasks
+    assert "--force-recreate" in tasks
+    assert "openbao" in tasks
