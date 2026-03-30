@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0280](../adr/0280-changedetection-io-for-external-content-and-api-change-monitoring.md)
 - Title: Integrate ADR 0280 Changedetection exact-main replay onto `origin/main`
-- Status: ready_for_merge
+- Status: merged
 - Included In Repo Version: 0.177.100
 - Platform Version Observed During Integration: 0.130.66
 - Release Date: 2026-03-30
@@ -142,9 +142,15 @@ runtime plus its authenticated `/v1/changedetection` gateway contract on
   `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-remote-validate-r1-0.177.100.txt`,
   and
   `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-pre-push-gate-r1-0.177.100.txt`.
-- The only remaining closeout is the terminal `status: merged` flip on the
-  final main candidate immediately before push, followed by a last minimal
-  validation sweep on that terminal tree.
+- The terminal main-candidate closeout flips this workstream to
+  `status: merged`; after that closeout, `git diff --check`,
+  `uv run --with pyyaml --with jsonschema python scripts/live_apply_receipts.py --validate`,
+  and `make pre-push-gate` are rerun on the detached main candidate, preserved
+  in
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-main-candidate-git-diff-check-r1.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-main-candidate-live-apply-receipts-validate-r1.txt`,
+  and
+  `receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-main-candidate-pre-push-gate-r1.txt`.
 
 ## Outcome
 

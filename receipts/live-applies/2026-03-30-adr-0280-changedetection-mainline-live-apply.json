@@ -71,6 +71,11 @@
       "check": "Branch-side repository automation and validation bundle",
       "result": "pass",
       "observed": "While `ws-0280-main-merge` remained `ready_for_merge`, `git diff --check`, `uv run --with pyyaml --with jsonschema python scripts/live_apply_receipts.py --validate`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `./scripts/validate_repo.sh agent-standards workstream-surfaces health-probes`, `make remote-validate`, and `make pre-push-gate` all passed on the exact-main candidate."
+    },
+    {
+      "check": "Terminal main-candidate validation sweep",
+      "result": "pass",
+      "observed": "After flipping `ws-0280-main-merge` to `status: merged` on the detached main candidate, `git diff --check`, `uv run --with pyyaml --with jsonschema python scripts/live_apply_receipts.py --validate`, and `make pre-push-gate` were rerun to verify the terminal tree immediately before pushing `HEAD:main`."
     }
   ],
   "evidence_refs": [
@@ -112,6 +117,9 @@
     "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-branch-validate-r1-0.177.100.txt",
     "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-remote-validate-r1-0.177.100.txt",
     "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-r3-pre-push-gate-r1-0.177.100.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-main-candidate-git-diff-check-r1.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-main-candidate-live-apply-receipts-validate-r1.txt",
+    "receipts/live-applies/evidence/2026-03-30-ws-0280-mainline-main-candidate-pre-push-gate-r1.txt",
     "receipts/live-applies/2026-03-30-adr-0280-changedetection-mainline-live-apply.json"
   ],
   "notes": [
