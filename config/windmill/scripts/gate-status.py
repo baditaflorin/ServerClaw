@@ -4,92 +4,35 @@
 from __future__ import annotations
 
 import argparse
-from contextlib import contextmanager
-import importlib.util
-import inspect
 import json
+import os
 from pathlib import Path
-import sys
-import types
-from typing import Iterator
+import subprocess
+from typing import Any
 
 
-def _build_gate_bypass_waivers_fallback():
-    module = types.ModuleType("gate_bypass_waivers")
-
-    def summarize_receipts(*, directory: Path):
-        return {
-            "totals": {
-                "all_receipts": 0,
-                "legacy_receipts": 0,
-                "compliant_receipts": 0,
-                "open_waivers": 0,
-                "expired_waivers": 0,
-                "invalid_receipts": 0,
-            },
-            "latest_receipt": None,
-            "open_waivers": [],
-            "expiring_soon": [],
-            "warnings": [],
-            "release_blockers": [],
-            "invalid_receipts": [],
-            "reason_codes": [],
-            "receipt_dir": str(directory),
-        }
-
-    module.summarize_receipts = summarize_receipts
-    return module
+def gate_status_command(repo_root: Path) -> list[str]:
+    return [
+        "python3",
+        str(repo_root / "scripts" / "gate_status.py"),
+        "--manifest",
+        str(repo_root / "config" / "validation-gate.json"),
+        "--last-run",
+        str(repo_root / ".local" / "validation-gate" / "last-run.json"),
+        "--post-merge-run",
+        str(repo_root / ".local" / "validation-gate" / "post-merge-last-run.json"),
+        "--bypass-dir",
+        str(repo_root / "receipts" / "gate-bypasses"),
+        "--format",
+        "json",
+    ]
 
 
-@contextmanager
-def _gate_status_import_context(
-    repo_root: Path,
-    *,
-    inject_waiver_fallback: bool = False,
-) -> Iterator[None]:
-    scripts_dir = str(repo_root / "scripts")
-    added_scripts_dir = False
-    if scripts_dir not in sys.path:
-        sys.path.insert(0, scripts_dir)
-        added_scripts_dir = True
-
-    previous_gate_bypass_waivers = sys.modules.pop("gate_bypass_waivers", None)
-    if inject_waiver_fallback:
-        sys.modules["gate_bypass_waivers"] = _build_gate_bypass_waivers_fallback()
-
-    try:
-        yield
-    finally:
-        sys.modules.pop("gate_bypass_waivers", None)
-        if previous_gate_bypass_waivers is not None:
-            sys.modules["gate_bypass_waivers"] = previous_gate_bypass_waivers
-        if added_scripts_dir:
-            try:
-                sys.path.remove(scripts_dir)
-            except ValueError:
-                pass
-
-
-def _load_gate_status_module_once(repo_root: Path):
-    script_path = repo_root / "scripts" / "gate_status.py"
-    spec = importlib.util.spec_from_file_location("gate_status_runtime", script_path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"unable to load gate status script from {script_path}")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-def _load_gate_status_module(repo_root: Path):
-    with _gate_status_import_context(repo_root):
-        try:
-            return _load_gate_status_module_once(repo_root)
-        except ModuleNotFoundError as exc:
-            if exc.name != "gate_bypass_waivers":
-                raise
-
-    with _gate_status_import_context(repo_root, inject_waiver_fallback=True):
-        return _load_gate_status_module_once(repo_root)
+def decode_gate_status_payload(stdout: str) -> dict[str, Any]:
+    payload = json.loads(stdout)
+    if not isinstance(payload, dict):
+        raise ValueError("gate status payload must be a JSON object")
+    return payload
 
 
 def main(repo_path: str = "/srv/proxmox_florin_server") -> dict:
@@ -102,18 +45,26 @@ def main(repo_path: str = "/srv/proxmox_florin_server") -> dict:
             "expected_repo_path": str(repo_root),
         }
 
-    module = _load_gate_status_module(repo_root)
-    payload_kwargs = {
-        "manifest_path": repo_root / "config" / "validation-gate.json",
-        "last_run_path": repo_root / ".local" / "validation-gate" / "last-run.json",
-        "remote_validate_run_path": repo_root / ".local" / "validation-gate" / "remote-validate-last-run.json",
-        "post_merge_run_path": repo_root / ".local" / "validation-gate" / "post-merge-last-run.json",
-        "bypass_dir": repo_root / "receipts" / "gate-bypasses",
-    }
-    accepted_kwargs = inspect.signature(module.build_status_payload).parameters
-    payload = module.build_status_payload(
-        **{name: value for name, value in payload_kwargs.items() if name in accepted_kwargs}
+    command = gate_status_command(repo_root)
+    completed = subprocess.run(
+        command,
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+        env=dict(os.environ),
     )
+    if completed.returncode != 0:
+        return {
+            "status": "error",
+            "reason": completed.stderr.strip() or "gate status command failed",
+            "command": completed.args,
+            "returncode": completed.returncode,
+            "stdout": completed.stdout.strip(),
+            "stderr": completed.stderr.strip(),
+        }
+
+    payload = decode_gate_status_payload(completed.stdout)
     return {
         "status": "ok",
         "gate_status": payload,

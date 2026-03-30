@@ -37,6 +37,17 @@ ROLE_VERIFY = (
     / "tasks"
     / "verify.yml"
 )
+COMMON_DOCKER_BRIDGE_CHAINS = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "common"
+    / "tasks"
+    / "docker_bridge_chains.yml"
+)
 FIREWALL_TEMPLATE = (
     REPO_ROOT
     / "collections"
@@ -60,6 +71,10 @@ def load_defaults() -> dict:
 
 def load_verify() -> list[dict]:
     return yaml.safe_load(ROLE_VERIFY.read_text())
+
+
+def load_common_docker_bridge_chains() -> list[dict]:
+    return yaml.safe_load(COMMON_DOCKER_BRIDGE_CHAINS.read_text())
 
 
 def test_docker_runtime_patches_nftables_before_starting_docker() -> None:
@@ -89,6 +104,48 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     reset_task = next(task for task in tasks if task["name"] == "Reset Docker failed state before nat-chain recovery restart")
     assert reset_task["ansible.builtin.command"] == "systemctl reset-failed docker.service"
     assert reset_task["changed_when"] is False
+
+
+def test_common_docker_bridge_chains_warms_control_socket_before_restarting() -> None:
+    tasks = load_common_docker_bridge_chains()
+    task_names = {task["name"] for task in tasks}
+    assert "Warm the Docker control socket before chain health checks" in task_names
+    assert "Wait briefly for Docker bridge chains to recover after daemon activation" in task_names
+    assert "Restart Docker when required bridge chains are missing" in task_names
+    info_ready = next(task for task in tasks if task["name"] == "Warm the Docker control socket before chain health checks")
+    chain_wait = next(
+        task for task in tasks if task["name"] == "Wait briefly for Docker bridge chains to recover after daemon activation"
+    )
+    restart_task = next(task for task in tasks if task["name"] == "Restart Docker when required bridge chains are missing")
+    nat_recheck = next(task for task in tasks if task["name"] == "Recheck Docker nat chain after health evaluation")
+    forward_recheck = next(task for task in tasks if task["name"] == "Recheck Docker forward chain after health evaluation")
+    nat_assert = next(task for task in tasks if task["name"] == "Assert Docker nat chain is present after health evaluation")
+    forward_assert = next(
+        task for task in tasks if task["name"] == "Assert Docker forward chain is present after health evaluation"
+    )
+
+    assert info_ready["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "info",
+        "--format",
+        "{{ '{{.ServerVersion}}' }}",
+    ]
+    assert info_ready["retries"] == "{{ common_docker_bridge_chains_retries }}"
+    assert info_ready["delay"] == "{{ common_docker_bridge_chains_delay }}"
+    assert info_ready["until"] == "common_docker_bridge_chains_info_ready.rc == 0"
+    assert "iptables -t nat -S DOCKER" in chain_wait["ansible.builtin.shell"]
+    assert "iptables -t filter -S DOCKER-FORWARD" in chain_wait["ansible.builtin.shell"]
+    assert "sleep {{ common_docker_bridge_chains_delay }}" in chain_wait["ansible.builtin.shell"]
+    assert chain_wait["failed_when"] is False
+    assert any(".get('rc', 1)" in condition for condition in restart_task["when"])
+    assert nat_recheck["retries"] == "{{ common_docker_bridge_chains_retries }}"
+    assert nat_recheck["delay"] == "{{ common_docker_bridge_chains_delay }}"
+    assert nat_recheck["until"] == "common_docker_bridge_chains_nat_recheck.rc == 0"
+    assert forward_recheck["retries"] == "{{ common_docker_bridge_chains_retries }}"
+    assert forward_recheck["delay"] == "{{ common_docker_bridge_chains_delay }}"
+    assert forward_recheck["until"] == "common_docker_bridge_chains_forward_recheck.rc == 0"
+    assert nat_assert["ansible.builtin.assert"]["that"] == ["common_docker_bridge_chains_nat_verify.rc == 0"]
+    assert forward_assert["ansible.builtin.assert"]["that"] == ["common_docker_bridge_chains_forward_verify.rc == 0"]
 
 
 def test_docker_runtime_patches_nftables_rule_block_once() -> None:
