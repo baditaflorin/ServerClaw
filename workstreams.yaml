@@ -2813,7 +2813,7 @@ workstreams:
   - id: ws-0261-main-integration
     adr: "0261"
     title: Integrate ADR 0261 and ADR 0262 exact-main replay onto current origin/main
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/ws-0261-main-promote
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-promote

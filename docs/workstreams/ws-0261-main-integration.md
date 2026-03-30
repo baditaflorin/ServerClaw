@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0261](../adr/0261-playwright-browser-runners-for-serverclaw-web-action-and-extraction.md)
 - Title: Integrate ADR 0261 and ADR 0262 exact-main replay onto `origin/main`
-- Status: `ready_for_merge`
+- Status: `merged`
 - Included In Repo Version: 0.177.95
 - Platform Version Observed During Integration: 0.130.63
 - Release Date: 2026-03-30
@@ -75,10 +75,14 @@ before the final push to `origin/main`.
 - `make pre-push-gate` passed, and `.local/validation-gate/last-run.json`
   recorded a successful build-server validation run at
   `2026-03-30T03:46:45.513234+00:00`.
+- `git push origin HEAD:main` then published commit `0a971edbd` to
+  `origin/main` after the same promotion tree passed the remote validation lane
+  on the push path.
 
 ## Outcome
 
-- The integrated `0.177.95` tree is fully validated and ready for the final
-  `git push origin HEAD:main`.
-- After that push lands, this document and `workstreams.yaml` should be closed
-  out as `merged` on `main`.
+- The synchronized `0.177.95` integration for ADR 0261 and ADR 0262 is now on
+  `origin/main`.
+- No merge-to-main work remains for this integration workstream; the
+  browser-runner and delegated-authorization receipts now document the merged
+  current-main proofs.
