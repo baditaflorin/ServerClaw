@@ -2,12 +2,12 @@
 
 - ADR: [ADR 0280](../adr/0280-changedetection-io-for-external-content-and-api-change-monitoring.md)
 - Title: Integrate ADR 0280 Changedetection exact-main replay onto `origin/main`
-- Status: in_progress
+- Status: ready_for_merge
 - Included In Repo Version: pending
 - Platform Version Observed During Integration: 0.130.64
 - Release Date: pending
 - Live Applied On: pending
-- Branch: `codex/ws-0280-main-merge`
+- Branch: `codex/ws-0280-main-merge-r2`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0280-main-merge`
 - Owner: codex
 - Depends On: `ws-0280-live-apply`

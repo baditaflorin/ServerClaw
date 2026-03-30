@@ -15416,15 +15416,15 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0280 by adding the private Changedetection.io runtime on docker-runtime-lv3, publishing the authenticated `/v1/changedetection` API gateway route, and verifying the repo-managed external watch catalogue end to end
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.100
       latest_receipts:
         changedetection: 2026-03-30-adr-0280-changedetection-live-apply
   - id: ws-0280-main-merge
     adr: "0280"
     title: Integrate ADR 0280 exact-main replay onto current origin/main
-    status: in-progress
+    status: ready_for_merge
     owner: codex
-    branch: codex/ws-0280-main-merge
+    branch: codex/ws-0280-main-merge-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0280-main-merge
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0280-main-merge.md
     depends_on:

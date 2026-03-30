@@ -195,7 +195,7 @@ ADR 0276 NATS JetStream is now live on production from `main`: `docker-runtime-l
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.99` |
+| Repository version | `0.177.100` |
 | Platform version | `0.130.66` |
 | Observed check date | `2026-03-30` |
 | Observed OS | `Debian 13` |
@@ -602,6 +602,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Backup VM](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-backup-vm.md)
 - [Configure Browser Runner](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-browser-runner.md)
 - [Configure Build Artifact Cache](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-build-artifact-cache.md)
+- [Configure Changedetection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-changedetection.md)
 - [Configure Control-Plane Recovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-control-plane-recovery.md)
 - [Configure Coolify](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-coolify.md)
 - [Configure Dify](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-dify.md)
@@ -1384,6 +1385,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0276-live-apply: Live Apply ADR 0276 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0276-live-apply.md)
 - [Workstream ws-0278-live-apply: ADR 0278 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0278-live-apply.md)
 - [Workstream ws-0278-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0278-main-integration.md)
+- [Workstream ws-0280-live-apply: ADR 0280 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0280-live-apply.md)
+- [Workstream ws-0280-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0280-main-merge.md)
 - [Workstream ws-0282-live-apply: Live Apply ADR 0282 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0282-live-apply.md)
 - [Workstream ws-0282-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0282-main-merge.md)
 - [Workstream ws-0283-live-apply: Live Apply ADR 0283 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0283-live-apply.md)
@@ -1406,7 +1409,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.99` |
+| Repository version | `0.177.100` |
 | Platform version | `0.130.66` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |

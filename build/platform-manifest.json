@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.99",
+  "repo_version": "0.177.100",
   "platform_version": "0.130.66",
-  "generated_at": "2026-03-30T10:09:26Z",
-  "next_refresh_at": "2026-03-30T11:09:26Z",
+  "generated_at": "2026-03-30T10:20:52Z",
+  "next_refresh_at": "2026-03-30T11:20:52Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -59,6 +59,18 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:8096",
+        "last_live_apply": "2026-03-30T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "changedetection": {
+        "service_name": "Changedetection.io",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://10.10.10.20:5000",
         "last_live_apply": "2026-03-30T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -1064,6 +1076,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-browser-runner.md"
+      },
+      {
+        "id": "converge-changedetection",
+        "description": "Deploy the private Changedetection.io runtime on docker-runtime-lv3, refresh the governed API gateway route, and reconcile the repo-managed upstream watch catalogue.",
+        "tags": [
+          "converge-changedetection",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 280,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-changedetection.md"
       },
       {
         "id": "converge-control-plane-recovery",
@@ -3836,6 +3874,16 @@
         ]
       },
       {
+        "id": "configure-changedetection",
+        "title": "Configure Changedetection",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-changedetection.md",
+        "workflow_ids": [
+          "converge-changedetection"
+        ]
+      },
+      {
         "id": "configure-control-plane-recovery",
         "title": "Configure Control-Plane Recovery",
         "agent_trust_required": "T3",
@@ -4840,10 +4888,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.98",
+    "last_version": "0.177.99",
     "deployed_at": "2026-03-30",
-    "summary": "implements ADR 0283 by deploying Plausible Analytics on docker-runtime-lv3, publishing analytics.lv3.org through the shared edge, injecting the tracker into declared public pages, and recording synchronized branch-local live-apply proof before exact-main integration",
-    "release_notes_url": "docs/release-notes/0.177.99.md"
+    "summary": "implemented ADR 0280 by adding the private Changedetection.io runtime on docker-runtime-lv3, publishing the authenticated `/v1/changedetection` API gateway route, and verifying the repo-managed external watch catalogue end to end",
+    "release_notes_url": "docs/release-notes/0.177.100.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
