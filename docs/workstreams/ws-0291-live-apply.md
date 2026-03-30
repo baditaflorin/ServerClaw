@@ -2,13 +2,13 @@
 
 - ADR: [ADR 0291](../adr/0291-jupyterhub-as-the-interactive-notebook-environment.md)
 - Title: Deploy JupyterHub on `docker-runtime-lv3`, publish `notebooks.lv3.org`, and verify the interactive notebook environment end to end
-- Status: in_progress
-- Included In Repo Version: N/A
-- Branch-Local Receipt: pending
+- Status: live_applied
+- Included In Repo Version: pending
+- Branch-Local Receipt: `receipts/live-applies/2026-03-30-adr-0291-jupyterhub-live-apply.json`
 - Canonical Mainline Receipt: pending
-- Live Applied In Platform Version: N/A
-- Implemented On: pending
-- Live Applied On: pending
+- Live Applied In Platform Version: 0.130.71
+- Implemented On: 2026-03-30
+- Live Applied On: 2026-03-30
 - Branch: `codex/ws-0291-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-live-apply`
 - Owner: codex
@@ -100,8 +100,23 @@ a complete audit trail for the later exact-main replay.
 
 ## Verification
 
-- pending
+- `receipts/live-applies/2026-03-30-adr-0291-jupyterhub-live-apply.json`
+  captures the branch-local proof from repository baseline `0.177.108` and
+  platform baseline `0.130.71`.
+- `make converge-jupyterhub env=production` succeeded on replay `r10` with
+  final recap `docker-runtime-lv3 : ok=279 changed=5 failed=0 skipped=81`,
+  `localhost : ok=24 changed=0 failed=0 skipped=4`, and
+  `nginx-lv3 : ok=40 changed=5 failed=0 skipped=6`, preserved in
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-jupyterhub-converge-r10.txt`.
+- Direct controller verification confirmed the public health endpoint, the
+  Keycloak OIDC redirect at `https://notebooks.lv3.org/hub/oauth_login`, the
+  shared edge certificate SAN for `notebooks.lv3.org`, and the local JupyterHub,
+  Ollama, and platform-context probes on `docker-runtime-lv3`, preserved in
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-direct-verification.txt`.
 
 ## Outcome
 
-- pending
+- ADR 0291 is live on the current platform from the branch-local replay.
+- The remaining exact-main step is to refresh the protected release and
+  canonical-truth surfaces on the newest `origin/main` baseline and cut the
+  canonical mainline receipt.

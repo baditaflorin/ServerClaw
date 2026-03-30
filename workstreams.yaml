@@ -17661,7 +17661,7 @@ workstreams:
   - id: ws-0291-live-apply
     adr: "0291"
     title: Live apply ADR 0291 from the latest realistic origin/main
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0291-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-live-apply
@@ -17793,12 +17793,12 @@ workstreams:
             - scripts/validate_repo.sh
           mode: shared_contract
           contract: repository-automation-v1
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
   - id: ws-0291-main-merge
     adr: "0291"
     title: Integrate ADR 0291 JupyterHub exact-main replay into current origin/main
-    status: in_progress
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0291-main-merge
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge
@@ -17865,6 +17865,8 @@ workstreams:
       - docs/release-notes/*.md
       - versions/stack.yaml
       - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/diagrams/service-dependency-graph.excalidraw
       - docs/site-generated/architecture/dependency-graph.md
       - receipts/ops-portal-snapshot.html
       - receipts/live-applies/2026-03-30-adr-0291-jupyterhub-live-apply.json
@@ -17931,6 +17933,8 @@ workstreams:
             - tests/test_ollama_runtime_role.py
             - tests/test_openbao_compose_env_helper.py
             - tests/test_edge_publication_makefile.py
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/diagrams/service-dependency-graph.excalidraw
             - docs/site-generated/architecture/dependency-graph.md
             - receipts/ops-portal-snapshot.html
             - receipts/live-applies/2026-03-30-adr-0291-jupyterhub-live-apply.json
@@ -17964,10 +17968,10 @@ workstreams:
             - receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-*
             - receipts/live-applies/evidence/2026-03-30-ws-0291-main-candidate-*
           mode: exclusive
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
     canonical_truth:
       changelog_entry: integrates ADR 0291 into main by replaying JupyterHub as the authenticated interactive notebook environment on the latest realistic origin/main baseline, preserving the verified notebooks.lv3.org, Keycloak, Ollama, platform-context, and smoke-user contract without inventing a new branch-local truth source
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.110
       latest_receipts: {}
