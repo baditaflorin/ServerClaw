@@ -16998,6 +16998,7 @@ workstreams:
             - .ansible-lint-ignore
             - config/ansible-role-idempotency.yml
             - docs/runbooks/configure-harbor.md
+            - receipts/live-applies/2026-03-22-adr-0055-portainer-live-apply.json
             - scripts/generate_platform_vars.py
             - collections/ansible_collections/lv3/platform/roles/docker_runtime/**
             - collections/ansible_collections/lv3/platform/roles/harbor_runtime/**

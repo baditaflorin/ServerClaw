@@ -19,7 +19,7 @@ VALIDATE_CHECKOUT_FETCH = (
 )
 VALIDATE_MAIN_FETCH = (
     'git -c http.extraHeader="Authorization: token ${WORKFLOW_TOKEN}" '
-    'fetch origin main'
+    "fetch origin main"
 )
 
 
