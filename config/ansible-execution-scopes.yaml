@@ -326,6 +326,7 @@ playbooks:
       - inventory/host_vars/proxmox_florin.yml
   playbooks/one-api.yml:
     playbook_id: one-api
+    canonical_service_id: one_api
     mutation_scope: platform
     shared_surfaces:
       - service:one-api
