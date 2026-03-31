@@ -134,7 +134,7 @@ def test_lago_runtime_tasks_manage_secret_generation_seed_and_smoke_verification
     ]
     assert "dependency failed to start" in recovery_fact_task["ansible.builtin.set_fact"]["lago_compose_dependency_race"]
     assert "No such container:" in recovery_fact_task["ansible.builtin.set_fact"]["lago_compose_dependency_race"]
-    assert 'service "migrate" didn\'\'t complete successfully: exit 1' in recovery_fact_task["ansible.builtin.set_fact"][
+    assert 'service "migrate" didn\'\'t complete successfully' in recovery_fact_task["ansible.builtin.set_fact"][
         "lago_compose_migrate_failed"
     ]
     assert migrate_logs_task["when"] == "lago_compose_migrate_failed"

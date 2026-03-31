@@ -260,7 +260,7 @@
           }}
         lago_compose_migrate_failed: >-
           {{
-            'service "migrate" didn''t complete successfully: exit 1'
+            'service "migrate" didn''t complete successfully'
             in (ansible_failed_result.stderr | default(''))
           }}
 
