@@ -47,14 +47,13 @@ jobs:
           ensure_docker_bin() {
             docker_bin="$(cat .tmp/docker-bin.path 2>/dev/null || true)"
             if [ -n "${docker_bin}" ] && [ -x "${docker_bin}" ]; then
-              printf '%s\n' "${docker_bin}"
               return 0
             fi
             docker_bin="$(command -v docker || command -v docker.io || true)"
             if [ -z "${docker_bin}" ]; then
               export DEBIAN_FRONTEND=noninteractive
-              apt-get update
-              apt-get install -y --no-install-recommends docker.io
+              apt-get update >&2
+              apt-get install -y --no-install-recommends docker.io >&2
               docker_bin="$(command -v docker || command -v docker.io || true)"
             fi
             if [ -z "${docker_bin}" ]; then
@@ -62,9 +61,8 @@ jobs:
               return 1
             fi
             printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path
-            printf '%s\n' "${docker_bin}"
           }
-          docker_bin="$(ensure_docker_bin)"
+          ensure_docker_bin
           discover_workspace_host_path() {
             current_container_id="${HOSTNAME:-$(hostname)}"
             cgroup_container_id="$(sed -n 's|.*docker[-/]\\([0-9a-f]\\{12,64\\}\\).*|\\1|p' /proc/self/cgroup | head -n1)"
@@ -103,14 +101,13 @@ jobs:
           ensure_docker_bin() {
             docker_bin="$(cat .tmp/docker-bin.path 2>/dev/null || true)"
             if [ -n "${docker_bin}" ] && [ -x "${docker_bin}" ]; then
-              printf '%s\n' "${docker_bin}"
               return 0
             fi
             docker_bin="$(command -v docker || command -v docker.io || true)"
             if [ -z "${docker_bin}" ]; then
               export DEBIAN_FRONTEND=noninteractive
-              apt-get update
-              apt-get install -y --no-install-recommends docker.io
+              apt-get update >&2
+              apt-get install -y --no-install-recommends docker.io >&2
               docker_bin="$(command -v docker || command -v docker.io || true)"
             fi
             if [ -z "${docker_bin}" ]; then
@@ -118,9 +115,8 @@ jobs:
               return 1
             fi
             printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path
-            printf '%s\n' "${docker_bin}"
           }
-          docker_bin="$(ensure_docker_bin)"
+          ensure_docker_bin
           workspace_host_path="$(cat .tmp/workspace-host.path)"
           bootstrap_host_dir="$(cat .tmp/bootstrap-host.path)"
           test -d "${workspace_host_path}"
@@ -150,14 +146,13 @@ jobs:
           ensure_docker_bin() {
             docker_bin="$(cat .tmp/docker-bin.path 2>/dev/null || true)"
             if [ -n "${docker_bin}" ] && [ -x "${docker_bin}" ]; then
-              printf '%s\n' "${docker_bin}"
               return 0
             fi
             docker_bin="$(command -v docker || command -v docker.io || true)"
             if [ -z "${docker_bin}" ]; then
               export DEBIAN_FRONTEND=noninteractive
-              apt-get update
-              apt-get install -y --no-install-recommends docker.io
+              apt-get update >&2
+              apt-get install -y --no-install-recommends docker.io >&2
               docker_bin="$(command -v docker || command -v docker.io || true)"
             fi
             if [ -z "${docker_bin}" ]; then
@@ -165,9 +160,8 @@ jobs:
               return 1
             fi
             printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path
-            printf '%s\n' "${docker_bin}"
           }
-          docker_bin="$(ensure_docker_bin)"
+          ensure_docker_bin
           workspace_host_path="$(cat .tmp/workspace-host.path)"
           test -d "${workspace_host_path}"
           set -a
@@ -193,25 +187,23 @@ jobs:
           ensure_docker_bin() {
             docker_bin="$(cat .tmp/docker-bin.path 2>/dev/null || true)"
             if [ -n "${docker_bin}" ] && [ -x "${docker_bin}" ]; then
-              printf '%s\n' "${docker_bin}"
               return 0
             fi
             docker_bin="$(command -v docker || command -v docker.io || true)"
             if [ -z "${docker_bin}" ]; then
               export DEBIAN_FRONTEND=noninteractive
-              apt-get update
-              apt-get install -y --no-install-recommends docker.io
+              apt-get update >&2
+              apt-get install -y --no-install-recommends docker.io >&2
               docker_bin="$(command -v docker || command -v docker.io || true)"
             fi
             if [ -z "${docker_bin}" ]; then
               return 1
             fi
             printf '%s\n' "${docker_bin}" > .tmp/docker-bin.path
-            printf '%s\n' "${docker_bin}"
           }
           workspace_host_path="$(cat .tmp/workspace-host.path 2>/dev/null || true)"
           bootstrap_host_dir="$(cat .tmp/bootstrap-host.path 2>/dev/null || true)"
-          if [ -n "${workspace_host_path}" ] && [ -s "${bootstrap_host_dir}/renovate.env" ] && docker_bin="$(ensure_docker_bin)"; then
+          if [ -n "${workspace_host_path}" ] && [ -s "${bootstrap_host_dir}/renovate.env" ] && ensure_docker_bin; then
             "${docker_bin}" run --rm \
               --network host \
               -e RENOVATE_BOOTSTRAP_ENV \
