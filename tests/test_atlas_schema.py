@@ -422,6 +422,41 @@ def test_openbao_login_prefers_runtime_env_approle_json(monkeypatch) -> None:
     assert captured["timeout"] == 10
 
 
+def test_load_openbao_init_payload_prefers_runtime_env_json(monkeypatch) -> None:
+    atlas_schema = load_module()
+    monkeypatch.setenv(
+        "LV3_ATLAS_OPENBAO_INIT_JSON",
+        json.dumps({"keys_base64": ["key-one"], "root_token": "root-token"}),
+    )
+    monkeypatch.setattr(
+        atlas_schema,
+        "controller_secret_path",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("file lookup should not run")),
+    )
+
+    payload = atlas_schema.load_openbao_init_payload({"secret_manifest": {}})
+
+    assert payload == {"keys_base64": ["key-one"], "root_token": "root-token"}
+
+
+def test_load_openbao_init_payload_accepts_runtime_openbao_init_json(monkeypatch) -> None:
+    atlas_schema = load_module()
+    monkeypatch.delenv("LV3_ATLAS_OPENBAO_INIT_JSON", raising=False)
+    monkeypatch.setenv(
+        "OPENBAO_INIT_JSON",
+        json.dumps({"keys_base64": ["key-one"], "root_token": "root-token"}),
+    )
+    monkeypatch.setattr(
+        atlas_schema,
+        "controller_secret_path",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("file lookup should not run")),
+    )
+
+    payload = atlas_schema.load_openbao_init_payload({"secret_manifest": {}})
+
+    assert payload == {"keys_base64": ["key-one"], "root_token": "root-token"}
+
+
 def test_ensure_openbao_unsealed_uses_managed_init_payload_when_health_reports_sealed(
     monkeypatch,
     tmp_path: Path,

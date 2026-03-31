@@ -98,6 +98,10 @@ def test_wrapper_loads_worker_secret_files_when_runtime_env_is_missing(
     (repo_root / "scripts" / "atlas_schema.py").write_text("# placeholder\n", encoding="utf-8")
     (repo_root / "scripts" / "run_python_with_packages.sh").write_text("#!/bin/sh\n", encoding="utf-8")
     (repo_root / "scripts" / "run_python_with_packages.sh").chmod(0o755)
+    (repo_root / ".local" / "openbao" / "init.json").write_text(
+        json.dumps({"keys_base64": ["key-one"], "root_token": "root-token"}),
+        encoding="utf-8",
+    )
     (repo_root / ".local" / "openbao" / "atlas-approle.json").write_text(
         json.dumps({"role_id": "atlas-role", "secret_id": "atlas-secret"}),
         encoding="utf-8",
@@ -118,6 +122,7 @@ def test_wrapper_loads_worker_secret_files_when_runtime_env_is_missing(
         )
 
     monkeypatch.delenv("LV3_ATLAS_OPENBAO_APPROLE_JSON", raising=False)
+    monkeypatch.delenv("LV3_ATLAS_OPENBAO_INIT_JSON", raising=False)
     monkeypatch.delenv("LV3_NTFY_ALERTMANAGER_PASSWORD", raising=False)
     monkeypatch.setattr(module.subprocess, "run", fake_run)
 
@@ -127,6 +132,10 @@ def test_wrapper_loads_worker_secret_files_when_runtime_env_is_missing(
     assert json.loads(captured["env"]["LV3_ATLAS_OPENBAO_APPROLE_JSON"]) == {
         "role_id": "atlas-role",
         "secret_id": "atlas-secret",
+    }
+    assert json.loads(captured["env"]["LV3_ATLAS_OPENBAO_INIT_JSON"]) == {
+        "keys_base64": ["key-one"],
+        "root_token": "root-token",
     }
     assert captured["env"]["LV3_NTFY_ALERTMANAGER_PASSWORD"] == "ntfy-password"
 

@@ -86,6 +86,11 @@ def main(
         "LV3_ATLAS_OPENBAO_APPROLE_JSON",
         repo_root / ".local" / "openbao" / "atlas-approle.json",
     )
+    set_default_env_from_json_file(
+        command_env,
+        "LV3_ATLAS_OPENBAO_INIT_JSON",
+        repo_root / ".local" / "openbao" / "init.json",
+    )
     set_default_env_from_text_file(
         command_env,
         "LV3_NTFY_ALERTMANAGER_PASSWORD",

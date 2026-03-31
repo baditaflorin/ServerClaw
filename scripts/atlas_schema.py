@@ -517,6 +517,19 @@ def env_atlas_approle_payload() -> dict[str, Any] | None:
     return require_mapping(payload, "LV3_ATLAS_OPENBAO_APPROLE_JSON")
 
 
+def env_openbao_init_payload() -> dict[str, Any] | None:
+    for env_name in ("LV3_ATLAS_OPENBAO_INIT_JSON", "OPENBAO_INIT_JSON"):
+        raw_payload = env_secret_value(env_name)
+        if raw_payload is None:
+            continue
+        try:
+            payload = json.loads(raw_payload)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"{env_name} must contain valid JSON") from exc
+        return require_mapping(payload, env_name)
+    return None
+
+
 def openbao_health(base_url: str) -> tuple[int, dict[str, Any]]:
     request = urllib.request.Request(base_url.rstrip("/") + "/v1/sys/health", method="GET")
     try:
@@ -530,6 +543,9 @@ def openbao_health(base_url: str) -> tuple[int, dict[str, Any]]:
 
 
 def load_openbao_init_payload(context: dict[str, Any]) -> dict[str, Any]:
+    init_payload = env_openbao_init_payload()
+    if init_payload is not None:
+        return init_payload
     init_path = controller_secret_path(context, "openbao_init_payload")
     if not init_path.exists():
         raise ValueError(
