@@ -34,12 +34,13 @@ def test_defaults_pin_repo_checkout_and_receipt_locations() -> None:
     assert defaults["restic_config_backup_timer_name"] == "lv3-restic-config-backup.timer"
 
 
-def test_minio_bucket_bootstrap_keeps_mc_alias_and_commands_in_one_container() -> None:
+def test_minio_bucket_bootstrap_keeps_mc_alias_and_commands_in_one_exec_session() -> None:
     tasks = load_tasks()
     bootstrap_task = next(task for task in tasks if task.get("name") == "Ensure the MinIO restic bucket exists with object lock")
     shell = bootstrap_task["ansible.builtin.shell"]
 
-    assert shell.count("docker run --rm --network container:outline-minio") == 1
+    assert shell.count("docker exec") == 1
+    assert "outline-minio sh -ceu" in shell
     assert "mc alias set local http://127.0.0.1:9000 minio \"$MINIO_ROOT_PASSWORD\"" in shell
     assert "mc mb --ignore-existing --with-lock local/restic-config-backup" in shell
     assert "mc version enable local/restic-config-backup" in shell

@@ -1,0 +1,30 @@
+{
+  "status": "ok",
+  "target": "docker-runtime-lv3",
+  "command": "sudo python3 /srv/proxmox_florin_server/scripts/restic_config_backup.py --repo-root /srv/proxmox_florin_server --credential-file /run/lv3-systemd-credentials/restic-config-backup/runtime-config.json --mode restore-verify --triggered-by manual-restore-verify --print-report-json",
+  "returncode": 0,
+  "stdout": "{\n  \"status\": \"ok\",\n  \"mode\": \"restore-verify\",\n  \"result\": \"pass\",\n  \"receipt_path\": \"receipts/restic-restore-verifications/20260331T054832Z.json\",\n  \"report\": {\n    \"schema_version\": \"1.0.0\",\n    \"receipt_id\": \"restic-restore-verify-20260331T054832Z\",\n    \"recorded_at\": \"2026-03-31T05:48:32Z\",\n    \"recorded_on\": \"2026-03-31\",\n    \"recorded_by\": \"codex\",\n    \"restored_at\": \"2026-03-31T05:48:32Z\",\n    \"result\": \"pass\",\n    \"source_id\": \"receipts\",\n    \"snapshot_id\": \"203fcd59e12b82ae4f7ab36992b4ce75d3977ad5731448d0d93030708283c43e\",\n    \"snapshot_recorded_at\": \"2026-03-31T05:47:47Z\",\n    \"restore_path\": \"/var/lib/lv3/restic-config-backup/restore-verification/20260331T054832Z/restore/srv/proxmox_florin_server/receipts\",\n    \"restored_file_count\": 2476,\n    \"expected_minimum_files\": 1\n  }\n}\nREPORT_JSON={\"status\":\"ok\",\"mode\":\"restore-verify\",\"result\":\"pass\",\"receipt_path\":\"receipts/restic-restore-verifications/20260331T054832Z.json\",\"report\":{\"schema_version\":\"1.0.0\",\"receipt_id\":\"restic-restore-verify-20260331T054832Z\",\"recorded_at\":\"2026-03-31T05:48:32Z\",\"recorded_on\":\"2026-03-31\",\"recorded_by\":\"codex\",\"restored_at\":\"2026-03-31T05:48:32Z\",\"result\":\"pass\",\"source_id\":\"receipts\",\"snapshot_id\":\"203fcd59e12b82ae4f7ab36992b4ce75d3977ad5731448d0d93030708283c43e\",\"snapshot_recorded_at\":\"2026-03-31T05:47:47Z\",\"restore_path\":\"/var/lib/lv3/restic-config-backup/restore-verification/20260331T054832Z/restore/srv/proxmox_florin_server/receipts\",\"restored_file_count\":2476,\"expected_minimum_files\":1}}",
+  "stderr": "",
+  "report": {
+    "status": "ok",
+    "mode": "restore-verify",
+    "result": "pass",
+    "receipt_path": "receipts/restic-restore-verifications/20260331T054832Z.json",
+    "report": {
+      "schema_version": "1.0.0",
+      "receipt_id": "restic-restore-verify-20260331T054832Z",
+      "recorded_at": "2026-03-31T05:48:32Z",
+      "recorded_on": "2026-03-31",
+      "recorded_by": "codex",
+      "restored_at": "2026-03-31T05:48:32Z",
+      "result": "pass",
+      "source_id": "receipts",
+      "snapshot_id": "203fcd59e12b82ae4f7ab36992b4ce75d3977ad5731448d0d93030708283c43e",
+      "snapshot_recorded_at": "2026-03-31T05:47:47Z",
+      "restore_path": "/var/lib/lv3/restic-config-backup/restore-verification/20260331T054832Z/restore/srv/proxmox_florin_server/receipts",
+      "restored_file_count": 2476,
+      "expected_minimum_files": 1
+    }
+  },
+  "summary": null
+}

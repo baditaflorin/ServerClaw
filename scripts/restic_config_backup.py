@@ -114,6 +114,20 @@ def load_runtime_credentials(path: Path | None = None) -> dict[str, str]:
     return {str(key): str(value).strip() for key, value in payload.items() if isinstance(value, (str, int, float))}
 
 
+def snapshot_id_from_backup_stdout(stdout: str) -> str | None:
+    text = stdout.strip()
+    if not text:
+        return None
+    for line in reversed(text.splitlines()):
+        candidate = line.strip()
+        if not candidate:
+            continue
+        record = json.loads(candidate)
+        if isinstance(record, dict) and str(record.get("snapshot_id") or "").strip():
+            return str(record["snapshot_id"]).strip()
+    return None
+
+
 def resolve_minio_endpoint(catalog: dict[str, Any]) -> tuple[str, str]:
     controller_host = catalog.get("controller_host", {})
     minio = controller_host.get("minio", {})
@@ -412,7 +426,7 @@ def summarize_latest_snapshots(
                     f"'{source.expected_schedule}' policy."
                 )
             else:
-                age = generated_at - snapshot_time
+                age = max(generated_at - snapshot_time, timedelta())
                 threshold = source.freshness_minutes + DEFAULT_GRACE_MINUTES
                 if age > timedelta(minutes=threshold):
                     state = "uncovered"
@@ -654,7 +668,7 @@ def backup_source(
         "paths": [str(path) for path in source.paths],
         "retention": source.retention,
         "restic_stdout": outcome.stdout.strip(),
-        "snapshot_id": (json.loads(outcome.stdout).get("snapshot_id") if outcome.stdout.strip().startswith("{") else None),
+        "snapshot_id": snapshot_id_from_backup_stdout(outcome.stdout),
     }
 
 

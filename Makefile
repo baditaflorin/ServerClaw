@@ -167,10 +167,10 @@ backup-coverage-ledger:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/backup_coverage_ledger.py --write-receipt
 
 restic-config-backup:
-	python3 $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by manual-backup
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode backup --triggered-by manual-backup
 
 restic-config-restore-verify:
-	python3 $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode restore-verify --triggered-by manual-restore-verify
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py --env $(env) --mode restore-verify --triggered-by manual-restore-verify
 
 dr-runbook:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/disaster_recovery_runbook.py

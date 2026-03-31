@@ -178,3 +178,5 @@ def test_restic_file_assets_are_covered_from_latest_snapshot_receipt(tmp_path: P
     assert config_asset["source_kind"] == "restic_file"
     assert config_asset["coverage_state"] == "protected"
     assert config_asset["last_successful_backup"]["snapshot_id"] == "snap-config"
+    rendered = ledger.render_text(report)
+    assert "2026-03-29T18:00:00Z" in rendered

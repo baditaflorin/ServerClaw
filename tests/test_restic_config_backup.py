@@ -110,6 +110,65 @@ def test_summarize_latest_snapshots_keeps_event_driven_sources_protected(tmp_pat
     assert receipt["sources"][0]["freshness_policy"] == "event_driven"
 
 
+def test_summarize_latest_snapshots_clamps_negative_interval_age(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    (repo_root / "receipts").mkdir(parents=True)
+    (repo_root / "receipts" / "one.json").write_text("{}\n", encoding="utf-8")
+
+    restic_backup.restic_call = lambda *args, **kwargs: types.SimpleNamespace(
+        returncode=0,
+        stdout=json.dumps(
+            [
+                {
+                    "id": "snap-receipts",
+                    "time": "2026-03-30T12:00:01Z",
+                    "hostname": "docker-runtime-lv3",
+                    "paths": [str(repo_root / "receipts")],
+                    "tags": ["source:receipts", "source-label:receipts"],
+                    "summary": {"total_files_processed": 1},
+                }
+            ]
+        ),
+        stderr="",
+    )
+
+    source = restic_backup.Source(
+        "receipts",
+        "receipts",
+        (repo_root / "receipts",),
+        360,
+        "interval",
+        "every_6_hours",
+        {"keep_daily": 90},
+        False,
+        False,
+        {"path": "receipts", "expected_minimum_files": 1},
+    )
+    receipt = restic_backup.summarize_latest_snapshots(
+        catalog={"controller_host": {"minio": {"bucket": "restic-config-backup"}}},
+        sources=[source],
+        repo_root=repo_root,
+        credentials={"restic_password": "pw", "minio_secret_key": "secret", "nats_password": "x", "ntfy_password": "y"},
+        endpoint="http://10.10.10.20:9000",
+        cache_dir=tmp_path / "cache",
+        restore_verify_dir=tmp_path / "restore",
+        generated_at=datetime(2026, 3, 30, 12, 0, tzinfo=UTC),
+    )
+
+    assert receipt["sources"][0]["reasons"][0].startswith("Latest snapshot is 0 minutes old")
+
+
+def test_snapshot_id_from_backup_stdout_reads_restic_json_stream() -> None:
+    stdout = "\n".join(
+        [
+            json.dumps({"message_type": "status", "percent_done": 50}),
+            json.dumps({"message_type": "summary", "snapshot_id": "abc123", "files_new": 2}),
+        ]
+    )
+
+    assert restic_backup.snapshot_id_from_backup_stdout(stdout) == "abc123"
+
+
 def test_repo_surfaces_register_restic_backup_contract() -> None:
     workflow_catalog = json.loads(WORKFLOW_CATALOG_PATH.read_text())["workflows"]
     command_catalog = json.loads(COMMAND_CATALOG_PATH.read_text())["commands"]

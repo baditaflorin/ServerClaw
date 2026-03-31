@@ -589,9 +589,17 @@ def render_text(report: dict[str, Any]) -> str:
     for asset in report["assets"]:
         last_backup = asset["last_successful_backup"]
         last_restore = asset["last_verified_restore"]
+        last_backup_timestamp = "missing"
+        if last_backup:
+            last_backup_timestamp = str(
+                last_backup.get("timestamp")
+                or last_backup.get("recorded_at")
+                or last_backup.get("backup_date")
+                or "missing"
+            )
         lines.append(
             f"{asset['asset_id']:<20} {asset['coverage_state']:<11} {asset['storage_id']:<20} "
-            f"{(last_backup['timestamp'] if last_backup else 'missing'):<22} "
+            f"{last_backup_timestamp:<22} "
             f"{(last_restore['recorded_at'] if last_restore else 'not recorded')}"
         )
         for reason in asset["state_reasons"]:

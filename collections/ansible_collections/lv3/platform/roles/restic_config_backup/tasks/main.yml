@@ -177,9 +177,9 @@
 - name: Ensure the MinIO restic bucket exists with object lock
   ansible.builtin.shell: |
     set -euo pipefail
-    docker run --rm --network container:outline-minio \
+    docker exec \
       -e MINIO_ROOT_PASSWORD={{ restic_config_backup_minio_secret_key | quote }} \
-      minio/mc:RELEASE.2026-02-14T21-37-08Z sh -ceu '
+      outline-minio sh -ceu '
         mc alias set local http://127.0.0.1:9000 minio "$MINIO_ROOT_PASSWORD" >/dev/null
         mc mb --ignore-existing --with-lock local/restic-config-backup >/dev/null
         mc version enable local/restic-config-backup >/dev/null
