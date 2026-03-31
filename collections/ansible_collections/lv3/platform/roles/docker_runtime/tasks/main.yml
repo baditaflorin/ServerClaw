@@ -628,11 +628,17 @@
         import subprocess
         import sys
 
-        container_names = json.load(sys.stdin)
+        NONPERSISTENT_RESTART_POLICIES = set({{ docker_runtime_nonpersistent_restart_policies | to_json }})
+
+        containers = json.load(sys.stdin)
         statuses = []
         all_running = True
 
-        for container_name in container_names:
+        for container in containers:
+            container_name = (container.get("Name") or "").lstrip("/")
+            restart_policy = (container.get("HostConfig") or {}).get("RestartPolicy") or {}
+            restart_policy_name = str(restart_policy.get("Name") or "").strip().lower()
+            require_running = restart_policy_name not in NONPERSISTENT_RESTART_POLICIES
             result = subprocess.run(
                 ["docker", "inspect", container_name],
                 text=True,
@@ -640,17 +646,30 @@
             )
             if result.returncode == 0:
                 payload = json.loads(result.stdout or "[]")
-                container = payload[0] if payload else {}
-                running = bool(container.get("State", {}).get("Running"))
+                live_container = payload[0] if payload else {}
+                state = live_container.get("State", {})
+                running = bool(state.get("Running"))
+                status = str(state.get("Status") or "")
+                exit_code = state.get("ExitCode")
+                healthy = running or (
+                    not require_running
+                    and status == "exited"
+                    and exit_code == 0
+                )
                 statuses.append(
                     {
                         "requested_name": container_name,
-                        "full_name": container.get("Name") or f"/{container_name}",
+                        "full_name": live_container.get("Name") or f"/{container_name}",
                         "exists": True,
+                        "restart_policy_name": restart_policy_name,
+                        "require_running": require_running,
                         "running": running,
+                        "status": status,
+                        "exit_code": exit_code,
+                        "healthy": healthy,
                     }
                 )
-                all_running = all_running and running
+                all_running = all_running and healthy
                 continue
 
             stderr = (result.stderr or "").lower()
@@ -660,7 +679,12 @@
                         "requested_name": container_name,
                         "full_name": f"/{container_name}",
                         "exists": False,
+                        "restart_policy_name": restart_policy_name,
+                        "require_running": require_running,
                         "running": False,
+                        "status": "missing",
+                        "exit_code": None,
+                        "healthy": False,
                     }
                 )
                 all_running = False
@@ -675,13 +699,13 @@
 
         print(json.dumps(statuses))
         sys.exit(0 if all_running else 1)
-    stdin: "{{ docker_runtime_pre_restart_container_names | default([]) | to_json }}"
+    stdin: "{{ docker_runtime_pre_restart_container_details | default([]) | to_json }}"
   register: docker_runtime_recovered_container_inspect
   changed_when: false
   retries: "{{ docker_runtime_container_recovery_retries }}"
   delay: "{{ docker_runtime_container_recovery_delay_seconds }}"
   until: docker_runtime_recovered_container_inspect.rc == 0
-  when: docker_runtime_pre_restart_container_names | default([]) | length > 0
+  when: docker_runtime_pre_restart_container_details | default([]) | length > 0
 
 - name: Verify Docker runtime health probes
   ansible.builtin.import_tasks: verify.yml

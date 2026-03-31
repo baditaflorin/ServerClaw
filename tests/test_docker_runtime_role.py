@@ -116,6 +116,7 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert defaults["docker_runtime_chain_recheck_delay_seconds"] == 2
     assert defaults["docker_runtime_container_recovery_retries"] == 12
     assert defaults["docker_runtime_container_recovery_delay_seconds"] == 5
+    assert defaults["docker_runtime_nonpersistent_restart_policies"] == ["", "no"]
     assert ensure_task["vars"]["common_docker_bridge_chains_retries"] == "{{ docker_runtime_chain_recheck_retries }}"
     assert ensure_task["vars"]["common_docker_bridge_chains_delay"] == "{{ docker_runtime_chain_recheck_delay_seconds }}"
     reset_task = next(task for task in tasks if task["name"] == "Reset Docker failed state before nat-chain recovery restart")
@@ -153,9 +154,14 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert 'command.extend(["up", "-d", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert confirm_recovery["ansible.builtin.command"]["argv"][:2] == ["python3", "-c"]
     assert confirm_recovery["ansible.builtin.command"]["stdin"] == (
-        "{{ docker_runtime_pre_restart_container_names | default([]) | to_json }}"
+        "{{ docker_runtime_pre_restart_container_details | default([]) | to_json }}"
     )
     assert '["docker", "inspect", container_name]' in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert "NONPERSISTENT_RESTART_POLICIES" in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert "restart_policy_name" in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert "require_running = restart_policy_name not in NONPERSISTENT_RESTART_POLICIES" in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert 'and status == "exited"' in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert '"healthy": healthy' in confirm_recovery["ansible.builtin.command"]["argv"][2]
     assert "sys.exit(0 if all_running else 1)" in confirm_recovery["ansible.builtin.command"]["argv"][2]
     assert confirm_recovery["retries"] == "{{ docker_runtime_container_recovery_retries }}"
     assert confirm_recovery["delay"] == "{{ docker_runtime_container_recovery_delay_seconds }}"
