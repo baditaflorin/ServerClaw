@@ -3188,12 +3188,12 @@
     }
   ],
   "summary": {
-    "catalog_total": 43,
-    "active_total": 39,
-    "active_public_total": 35,
+    "catalog_total": 44,
+    "active_total": 40,
+    "active_public_total": 36,
     "active_private_total": 4,
     "planned_total": 4,
-    "shared_edge_total": 34,
+    "shared_edge_total": 35,
     "platform_sso_total": 15
   }
 }

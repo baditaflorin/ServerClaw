@@ -118,14 +118,20 @@ def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
 def test_publish_tasks_wait_for_public_status_and_verify_login_gating() -> None:
     tasks = load_yaml(PUBLISH_PATH)
     status_task = next(task for task in tasks if task.get("name") == "Wait for the Grist public status endpoint")
-    redirect_task = next(task for task in tasks if task.get("name") == "Verify the Grist public document route redirects into the auth-controlled surface")
+    redirect_task = next(task for task in tasks if task.get("name") == "Verify the Grist public document route reaches the auth-controlled surface")
     assert_task = next(task for task in tasks if task.get("name") == "Assert the Grist public document route is login-gated")
 
     assert status_task["ansible.builtin.uri"]["url"] == "{{ grist_public_base_url }}/status"
     assert redirect_task["ansible.builtin.uri"]["url"] == "{{ grist_public_base_url }}/o/docs/"
     assert redirect_task["ansible.builtin.uri"]["follow_redirects"] == "none"
+    assert redirect_task["ansible.builtin.uri"]["return_content"] is True
+    assert 200 in redirect_task["ansible.builtin.uri"]["status_code"]
     assert 302 in redirect_task["ansible.builtin.uri"]["status_code"]
-    assert "grist_publish_auth_redirect.location is defined" in assert_task["ansible.builtin.assert"]["that"]
+    login_gate_expression = assert_task["ansible.builtin.assert"]["that"][0]
+    assert "grist_publish_auth_redirect.location is defined" in login_gate_expression
+    assert "(grist_publish_auth_redirect.status | int) == 200" in login_gate_expression
+    assert "'Loading... - Grist'" in login_gate_expression
+    assert '\'"supportAnon":false\'' in login_gate_expression
 
 
 def test_verify_task_checks_the_local_status_endpoint() -> None:

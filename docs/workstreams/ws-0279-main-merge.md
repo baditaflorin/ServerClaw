@@ -2,13 +2,13 @@
 
 - ADR: [ADR 0279](../adr/0279-grist-as-the-no-code-operational-spreadsheet-database.md)
 - Title: Integrate ADR 0279 Grist exact-main replay onto `origin/main`
-- Status: ready_for_merge
+- Status: in_progress
 - Included In Repo Version: 0.177.113
 - Platform Version Observed During Integration: 0.130.75
 - Release Date: 2026-03-31
 - Live Applied On: 2026-03-31
-- Branch: `codex/ws-0279-main-merge-r2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-merge-r2`
+- Branch: `codex/ws-0279-main-publish-r2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1`
 - Owner: codex
 - Depends On: `ws-0279-live-apply`
 
