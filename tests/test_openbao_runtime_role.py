@@ -232,6 +232,9 @@ def test_openbao_runtime_renders_rotatable_secret_keys_dynamically() -> None:
     assert "\"{{ item.value.openbao_field }}\":" not in tasks
     assert "(openbao_rotation_metadata.last_rotated_metadata_key):" in tasks
     assert "(openbao_rotation_metadata.rotated_by_metadata_key): 'openbao-seed'" in tasks
+    assert "register: openbao_rotatable_secret_metadata_seed" in tasks
+    assert "until: openbao_rotatable_secret_metadata_seed.status in [200, 204]" in tasks
+    assert "- name: Assert rotation metadata for dedicated rotatable secrets was seeded successfully" in tasks
 
 
 def test_openbao_runtime_retries_other_read_side_api_checks_after_restart() -> None:
