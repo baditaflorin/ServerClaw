@@ -3,14 +3,14 @@
 - ADR: [ADR 0306](../adr/0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md)
 - Title: Land the repo-managed Checkov IaC policy gate on the live validation automation path and verify it end to end
 - Status: live_applied
-- Included In Repo Version: 0.177.115
+- Included In Repo Version: 0.177.119
 - Branch-Local Receipt: `receipts/live-applies/2026-03-31-adr-0306-checkov-iac-policy-scan-live-apply.json`
 - Canonical Mainline Receipt: `receipts/live-applies/2026-03-31-adr-0306-checkov-iac-policy-scan-mainline-live-apply.json`
 - Live Applied In Platform Version: 0.130.75
 - Implemented On: 2026-03-31
 - Live Applied On: 2026-03-31
-- Branch: `codex/ws-0306-mainline-v2`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-mainline-v2`
+- Branch: `codex/ws-0306-mainline-final-r3`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-main-context-v2`
 - Owner: codex
 - Depends On: `adr-0083-docker-check-runner`, `adr-0087-validation-gate`, `adr-0264-failure-domain-isolated-validation-lanes`, `adr-0266-validation-runner-capability-contracts-and-environment-attestation`
 - Conflicts With: none
@@ -153,34 +153,71 @@ does not yet have.
   `receipts/live-applies/evidence/2026-03-31-ws-0306-main-run-179-status-r1.json`,
   and
   `receipts/live-applies/evidence/2026-03-31-ws-0306-main-run-179-jobs-r1.json`.
-- The canonical-truth refresh is now validated on the settled branch: `uv run
+- The rebased mainline integration cut now lands on latest `origin/main` commit
+  `2411a7cd428e0eba17168aa5eed66f04c4ed48dd`: `uv run --with pyyaml python3
+  scripts/release_manager.py status --json`, the patch dry run, and the actual
+  `--bump patch` release write all completed cleanly and cut repository version
+  `0.177.119`, preserved in
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-final-r3-release-status-r1-0.177.118.txt`,
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-final-r3-release-dry-run-r1-0.177.118.txt`,
+  and
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-final-r3-release-write-r1-0.177.119.txt`.
+- The rebased `0.177.119` branch candidate passed `make check-build-server` in
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-final-r3-check-build-server-r1-0.177.119.txt`;
+  `make remote-validate` then proved every substantive ADR 0306 lane, and the
+  only remaining non-pass was the designed terminal-workstream
+  `workstream-surfaces` guard on branch `codex/ws-0306-mainline-final-r3`,
+  preserved in
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-final-r3-remote-validate-r1-0.177.119.txt`.
+- To keep the build-server validation path healthy, inactive ADR 0306 session
+  roots were removed only after confirming no active process still referenced
+  them; that bounded manual cleanup is preserved in
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-build-server-session-cleanup-r1-0.177.115.txt`
+  and the runbook now records the same safety rule.
+- The committed `0.177.119` candidate was then replayed from detached `HEAD`
+  commit `56fd6422c43789a68660150baaf0e7d0b0376b99`, where the branch guard no
+  longer applies: `make check-build-server` and `make remote-validate` both
+  passed and are preserved in
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-exact-main-verify-check-build-server-r1-0.177.119.txt`
+  and
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-exact-main-verify-remote-validate-r1-0.177.119.txt`.
+- The detached exact-head `pre-push-gate` wrapper was exercised twice. Both
+  replays passed every remote blocking check except `packer-validate` and
+  `tofu-validate` when `registry.lv3.org/check-runner/infra:2026.03.23`
+  returned transient `502 Bad Gateway` responses, preserved in
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-exact-main-verify-pre-push-gate-r1-0.177.119.txt`
+  and
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-exact-main-verify-pre-push-gate-r2-0.177.119.txt`.
+  The second replay also proved controller-local `packer-validate` and
+  `tofu-validate`, but the wrapper still stayed non-green because the fallback
+  reran already-green heavy checks under fixed controller timeouts.
+- The remaining fallback-only timeout victims were rechecked directly on the
+  detached exact head: the governed `ansible-lint` surface passed with warnings
+  only in
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-exact-main-verify-ansible-lint-r1-0.177.119.txt`,
+  and the direct Trivy filesystem `security-scan` passed in
+  `receipts/live-applies/evidence/2026-03-31-ws-0306-exact-main-verify-security-scan-r1-0.177.119.txt`.
+- The canonical-truth refresh remains validated on the settled tree: `uv run
   --with pyyaml --with jsonschema python3 scripts/live_apply_receipts.py --validate`,
   `uv run --with pyyaml --with jsonschema python3 scripts/validate_repository_data_models.py --validate`,
   `uvx --from pyyaml python3 scripts/canonical_truth.py --check`,
   `uv run --with pyyaml --with jsonschema python3 scripts/platform_manifest.py --check`,
   `git diff --check`, and
   `LV3_SNAPSHOT_BRANCH=main ./scripts/validate_repo.sh agent-standards generated-docs generated-portals`
-  all passed after refreshing stale diagrams with
-  `uvx --from pyyaml python3 scripts/generate_diagrams.py --write`, preserved in
-  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-live-apply-receipts-validate-r1-0.177.115.txt`,
-  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-data-models-r1-0.177.115.txt`,
-  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-canonical-truth-check-r1-0.177.115.txt`,
-  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-platform-manifest-check-r1-0.177.115.txt`,
-  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-git-diff-check-r1-0.177.115.txt`,
-  and
-  `receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-agent-standards-generated-r2-0.177.115.txt`.
-- the current release-candidate baseline is `0` blocking errors, `2`
-  warning-level `CKV_LV3_4` findings for `provider.proxmox insecure = true`,
-  and `876` note-level upstream Ansible findings at repo version `0.177.115`
+  all passed on the final branch tree after the release cut.
 
 ## Results
 
-- ADR 0306 is now implemented in repository version `0.177.115` and first
-  verified live on platform version `0.130.75`.
+- ADR 0306 is now implemented in repository version `0.177.119` and first
+  verified live on platform version `0.130.75`; the integrated mainline
+  baseline remains platform version `0.130.77`.
 - The branch-local receipt remains the pre-integration audit trail for the live
   replay from the latest `origin/main` lineage, while the canonical mainline
-  receipt records the exact-main hosted success boundary and the protected
-  canonical-truth updates for merge to `main`.
-- No merge-to-main follow-up remains for ADR 0306 itself; the settled exact-main
-  replay, receipts, and canonical-truth surfaces are now ready to be carried
-  onto `origin/main`.
+  receipt records the `0.177.119` integration cut on top of latest
+  `origin/main`, the earlier hosted private-main success boundary, and the
+  detached exact-head verification bundle.
+- No merge-to-main follow-up remains for ADR 0306 itself. The only residual
+  caveat observed on 2026-03-31 is external to the ADR 0306 code path: exact
+  detached `pre-push-gate` replays still depend on
+  `registry.lv3.org/check-runner/infra:2026.03.23`, which returned transient
+  `502 Bad Gateway` responses during both detached replays.

@@ -4,16 +4,16 @@
   "environment": "production",
   "applied_on": "2026-03-31",
   "recorded_on": "2026-03-31",
-  "recorded_at": "2026-03-31T09:30:23Z",
+  "recorded_at": "2026-03-31T16:10:14Z",
   "recorded_by": "codex",
-  "source_commit": "ef2803b3830cf05bb22128dcfa7860f9002b75b0",
-  "repo_version_context": "0.177.115",
-  "platform_version_context": "0.130.74",
-  "integrated_repo_version": "0.177.115",
-  "integrated_platform_version": "0.130.75",
+  "source_commit": "56fd6422c43789a68660150baaf0e7d0b0376b99",
+  "repo_version_context": "0.177.118",
+  "platform_version_context": "0.130.77",
+  "integrated_repo_version": "0.177.119",
+  "integrated_platform_version": "0.130.77",
   "workflow_id": "adr-0306-checkov-iac-policy-scan-mainline-live-apply",
   "adr": "0306",
-  "summary": "Promoted ADR 0306 into canonical mainline truth as repository version `0.177.115` and platform version `0.130.75` after replaying the exact-main private Gitea snapshot derived from source commit `ef2803b3830cf05bb22128dcfa7860f9002b75b0`. The private main `validate.yml` and `release-bundle.yml` workflows both concluded `success`, the repo-managed Gitea runtime and runner recovery re-established the hosted controller path, and the final integration step refreshes the ADR metadata, receipts, release note, and canonical platform truth around that settled exact-main success boundary.",
+  "summary": "Integrated ADR 0306 onto latest `origin/main` baseline `2411a7cd428e0eba17168aa5eed66f04c4ed48dd` as repository version `0.177.119` while preserving the already-current platform baseline `0.130.77`. The earlier exact-main private Gitea proof derived from source commit `ef2803b3830cf05bb22128dcfa7860f9002b75b0` remains the first hosted verification boundary on platform version `0.130.75`; this final integration cut adds release-manager evidence, rebased build-server validation, detached exact-head `remote-validate` success, and a bounded `pre-push-gate` caveat tied to transient `registry.lv3.org/check-runner/infra:2026.03.23` `502 Bad Gateway` responses rather than an ADR 0306 regression.",
   "targets": [
     {
       "kind": "host",
@@ -48,27 +48,37 @@
     {
       "check": "Exact-main private repository publication",
       "result": "pass",
-      "observed": "The settled `0.177.115` source tree was published onto the private Gitea `main` snapshot by creating snapshot commit `8d17ace04285790b0eca9de5415b75967cdfecf8` on top of prior private-main head `a10101240780d755f27988ee7352ac4f7cc74a7c`, preserving an exact hosted copy of source commit `ef2803b3830cf05bb22128dcfa7860f9002b75b0` for mainline verification."
+      "observed": "The earlier governed exact-main replay published source commit `ef2803b3830cf05bb22128dcfa7860f9002b75b0` onto the private Gitea `main` snapshot as commit `8d17ace04285790b0eca9de5415b75967cdfecf8` on top of prior private-main head `a10101240780d755f27988ee7352ac4f7cc74a7c`."
     },
     {
-      "check": "Exact-main hosted validation path",
+      "check": "Exact-main hosted validation and release-bundle paths",
       "result": "pass",
-      "observed": "Private Gitea `validate.yml` run `179` / job `237` concluded `success` on `main` after the exact-main snapshot publication."
+      "observed": "Private Gitea `release-bundle.yml` run `178` / jobs `235` and `236`, plus `validate.yml` run `179` / job `237`, all concluded `success` on `main` after the exact-main snapshot publication."
     },
     {
-      "check": "Exact-main hosted release bundle path",
+      "check": "Latest-main release cut and rebased branch validation",
       "result": "pass",
-      "observed": "Private Gitea `release-bundle.yml` run `178` / jobs `235` and `236` concluded `success` on `main` after the exact-main snapshot publication."
+      "observed": "On top of latest `origin/main` commit `2411a7cd428e0eba17168aa5eed66f04c4ed48dd`, `scripts/release_manager.py status --json`, the patch dry run, and the patch release write all completed and cut repository version `0.177.119`. The rebased branch candidate then passed `make check-build-server`, and `make remote-validate` exercised every blocking ADR 0306 lane; the only remaining non-pass there was the designed terminal-workstream `workstream-surfaces` guard on branch `codex/ws-0306-mainline-final-r3`."
     },
     {
-      "check": "Released-tree automation and validation bundle",
+      "check": "Detached exact-head build-server and remote-validate replay",
       "result": "pass",
-      "observed": "The integrated tree retains the earlier direct validation bundle from the settled source commit: targeted pytest (`58 passed in 309.49s`), direct Checkov wrapper scan, `make check-build-server`, `make remote-validate`, and `make pre-push-gate` all passed before the canonical-truth refresh, and the final canonical surfaces then passed `scripts/live_apply_receipts.py --validate`, `scripts/validate_repository_data_models.py --validate`, `scripts/canonical_truth.py --check`, `scripts/platform_manifest.py --check`, `git diff --check`, and `./scripts/validate_repo.sh agent-standards generated-docs generated-portals` after regenerating stale diagrams."
+      "observed": "The committed `0.177.119` candidate was replayed from detached `HEAD` commit `56fd6422c43789a68660150baaf0e7d0b0376b99`; both `make check-build-server` and `make remote-validate` passed cleanly there, and `workstream-surfaces` also passed once the branch-specific terminal guard no longer applied."
     },
     {
-      "check": "Hosted-control-plane recovery and exact-main readiness",
+      "check": "Detached exact-head pre-push gate coverage",
+      "result": "partial",
+      "observed": "The detached `make pre-push-gate` wrapper was exercised twice. Both replays passed every remote blocking check except `packer-validate` and `tofu-validate`, which hit transient `502 Bad Gateway` pulls for `registry.lv3.org/check-runner/infra:2026.03.23`. The fallback then proved `packer-validate` and `tofu-validate`, but the wrapper stayed non-green because controller-local fallback reran already-green heavy checks under fixed timeouts."
+    },
+    {
+      "check": "Detached exact-head direct timeout-victim replays",
       "result": "pass",
-      "observed": "The repo-managed host proxy, Gitea runtime, and Gitea runner recovery path restored the private controller listener and runner container before the exact-main hosted replay, so ADR 0306 is now recorded as first verified live in platform version `0.130.75`."
+      "observed": "The remaining fallback-only timeout victims were rechecked directly on the detached exact head: governed `ansible-lint` passed with warnings only, and the direct Trivy filesystem `security-scan` passed with no blocking findings."
+    },
+    {
+      "check": "Build-server session cleanup for final validation capacity",
+      "result": "pass",
+      "observed": "Inactive ADR 0306 build-server session roots were removed only after confirming no active validation process still referenced them, reclaiming bounded scratch space for the final remote replays."
     }
   ],
   "evidence_refs": [
@@ -79,8 +89,10 @@
     "versions/stack.yaml",
     "build/platform-manifest.json",
     "docs/adr/0306-checkov-for-iac-policy-compliance-scanning-of-opentofu-compose-and-ansible.md",
-    "docs/release-notes/0.177.115.md",
+    "docs/release-notes/0.177.119.md",
     "docs/release-notes/README.md",
+    "docs/runbooks/iac-policy-scanning.md",
+    "docs/runbooks/remote-build-gateway.md",
     "docs/workstreams/ws-0306-live-apply.md",
     "workstreams.yaml",
     "receipts/live-applies/2026-03-31-adr-0306-checkov-iac-policy-scan-live-apply.json",
@@ -94,23 +106,33 @@
     "receipts/live-applies/evidence/2026-03-31-ws-0306-main-run-178-jobs-r1.json",
     "receipts/live-applies/evidence/2026-03-31-ws-0306-main-run-179-status-r1.json",
     "receipts/live-applies/evidence/2026-03-31-ws-0306-main-run-179-jobs-r1.json",
-    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-targeted-pytest-r3-0.177.114.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-checkov-scan-r3-0.177.114.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-check-build-server-r2-0.177.114.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-remote-validate-r3-0.177.115.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-pre-push-gate-r1-0.177.115.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-live-apply-receipts-validate-r1-0.177.115.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-data-models-r1-0.177.115.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-canonical-truth-check-r1-0.177.115.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-platform-manifest-check-r1-0.177.115.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-git-diff-check-r1-0.177.115.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-agent-standards-generated-r2-0.177.115.txt",
     "receipts/live-applies/evidence/2026-03-31-ws-0306-gitea-proxy-recovery-r1-0.177.115.txt",
     "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-gitea-runtime-converge-r1-0.177.115.txt",
-    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-gitea-runner-converge-r2-0.177.115.txt"
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-gitea-runner-converge-r2-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-build-server-session-cleanup-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-main-context-live-apply-receipts-validate-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-main-context-data-models-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-main-context-canonical-truth-check-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-main-context-platform-manifest-check-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-main-context-git-diff-check-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-main-context-agent-standards-generated-r1-0.177.115.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-final-r3-release-status-r1-0.177.118.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-final-r3-release-dry-run-r1-0.177.118.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-final-r3-release-write-r1-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-final-r3-check-build-server-r1-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-mainline-final-r3-remote-validate-r1-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-exact-main-verify-check-build-server-r1-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-exact-main-verify-remote-validate-r1-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-exact-main-verify-pre-push-gate-r1-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-exact-main-verify-pre-push-gate-r2-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-exact-main-verify-infra-pull-probe-r1-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-exact-main-verify-ansible-lint-r1-0.177.119.txt",
+    "receipts/live-applies/evidence/2026-03-31-ws-0306-exact-main-verify-security-scan-r1-0.177.119.txt"
   ],
   "notes": [
-    "ADR 0306 is now recorded as implemented in repository version `0.177.115` and first verified live in platform version `0.130.75`.",
-    "The exact-main hosted success boundary is anchored to source commit `ef2803b3830cf05bb22128dcfa7860f9002b75b0`; the final integration commit refreshes canonical truth, receipts, and release metadata around that verified replay rather than changing the settled Checkov automation surfaces."
+    "ADR 0306 is now integrated in repository version `0.177.119`, while ADR metadata preserves `Implemented In Platform Version: 0.130.75` as the first live platform version where the control became true.",
+    "The detached exact-head `remote-validate` replay passed cleanly after the release cut and re-verified the released `0.177.119` automation surfaces without the branch-only `workstream-surfaces` guard.",
+    "The detached exact-head `pre-push-gate` wrapper remained partial only because `registry.lv3.org/check-runner/infra:2026.03.23` returned transient `502 Bad Gateway` responses and the controller fallback reran already-green heavy checks under fixed timeouts; no ADR 0306 functional regression was found in the direct `ansible-lint` and Trivy `security-scan` replays.",
+    "A bounded manual cleanup of inactive ADR 0306 build-server session roots was required to recover enough remote scratch capacity for the final replays, and the remote-build-gateway runbook now records the same safety rule."
   ]
 }
