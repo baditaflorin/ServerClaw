@@ -347,12 +347,8 @@ workstreams:
           paths:
             - docs/workstreams/ws-0275-live-apply.md
             - docs/adr/0275-apache-tika-server-for-document-text-extraction-in-the-rag-pipeline.md
-          mode: exclusive
-        - id: tika_runbook_contract
-          paths:
             - docs/runbooks/configure-tika.md
-          mode: shared_contract
-          contract: tika-runbook-v1
+          mode: exclusive
         - id: tika_platform_contract
           paths:
             - inventory/host_vars/proxmox_florin.yml
@@ -426,7 +422,7 @@ workstreams:
     title: Live apply Tesseract OCR from latest origin/main on top of the current Apache Tika baseline
     ready_to_merge: true
     live_applied: true
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/ws-0286-live-apply-r3
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0286-live-apply-r3
@@ -507,6 +503,7 @@ workstreams:
           paths:
             - docs/workstreams/ws-0286-live-apply.md
             - docs/adr/0286-tesseract-ocr-service-for-scanned-image-text-extraction.md
+            - docs/runbooks/configure-tika.md
             - docs/runbooks/configure-tesseract-ocr.md
             - playbooks/tesseract-ocr.yml
             - playbooks/services/tesseract-ocr.yml
@@ -520,11 +517,6 @@ workstreams:
             - receipts/live-applies/2026-03-30-adr-0286-tesseract-ocr-live-apply.json
             - receipts/live-applies/evidence/2026-03-30-adr-0286-*
           mode: exclusive
-        - id: adr_0286_tika_runbook_contract
-          paths:
-            - docs/runbooks/configure-tika.md
-          mode: shared_contract
-          contract: tika-runbook-v1
         - id: adr_0286_tika_prereq_verification_contract
           paths:
             - collections/ansible_collections/lv3/platform/roles/tika_runtime/tasks/verify.yml
@@ -4026,7 +4018,7 @@ workstreams:
   - id: ws-0224-repo-intake
     adr: "0224"
     title: Self-service repo intake and agent-assisted app deployments
-    status: merged
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0224-repo-intake
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0224-repo-intake
