@@ -143,6 +143,9 @@ def test_openbao_runtime_recovers_detached_empty_default_network_before_compose_
 def test_openbao_runtime_retries_seal_status_during_restart_window() -> None:
     tasks = read_openbao_runtime_tasks_text()
 
+    assert "- name: Read OpenBao initialization status" in tasks
+    assert "register: openbao_init_status" in tasks
+    assert "until: openbao_init_status.status == 200" in tasks
     assert "- name: Read OpenBao seal status" in tasks
     assert "register: openbao_seal_status" in tasks
     assert "until: openbao_seal_status.status == 200" in tasks

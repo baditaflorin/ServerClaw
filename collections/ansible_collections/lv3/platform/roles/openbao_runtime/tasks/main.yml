@@ -535,7 +535,12 @@
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/init"
     method: GET
     return_content: true
+    status_code: 200
   register: openbao_init_status
+  retries: 12
+  delay: 2
+  until: openbao_init_status.status == 200
+  changed_when: false
 
 - name: Fail if OpenBao is initialized remotely but the local init payload is missing
   ansible.builtin.fail:
