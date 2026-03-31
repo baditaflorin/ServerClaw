@@ -1447,6 +1447,14 @@ lv3_service_topology:
     observability:
       guest_dashboard: false
       service_telemetry: false
+  redpanda:
+    service_name: redpanda
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
   step_ca:
     service_name: step-ca
     owning_vm: docker-runtime-lv3
