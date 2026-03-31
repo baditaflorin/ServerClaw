@@ -27,12 +27,18 @@ docs.lv3.org remains the developer portal; Paperless intentionally publishes at 
 On `main`, run:
 
 ```bash
-HETZNER_DNS_API_TOKEN=... make live-apply-service service=paperless env=production
+ALLOW_IN_PLACE_MUTATION=true \
+HETZNER_DNS_API_TOKEN=... \
+make live-apply-service service=paperless env=production
 ```
 
 This is the required path for the authoritative platform-version bump because
 `make live-apply-service` checks canonical truth before mutation and is the
 exact-main replay that should settle the protected release surfaces.
+
+`docker-runtime-lv3` is still governed by ADR 0191 immutable guest replacement,
+so `ALLOW_IN_PLACE_MUTATION=true` is the documented narrow exception for this
+bounded in-place Paperless replay on the shared runtime guest.
 
 On a non-`main` workstream branch, expect that target to stop at the canonical
 truth gate if protected shared integration files such as `README.md`,
@@ -40,6 +46,32 @@ truth gate if protected shared integration files such as `README.md`,
 stop is expected branch-local behavior; use the direct scoped runner below and
 record the evidence in the workstream receipt instead of editing protected
 release truth on the branch.
+
+Before replaying Paperless on the shared runtime guest, confirm no competing
+automation is still mutating `docker-runtime-lv3`. A concurrent Docker restart
+can terminate `paperless` and `paperless-redis` cleanly during taxonomy
+verification and surface as a false `Wait for the Paperless authenticated
+taxonomy endpoint` failure.
+
+When another agent is working in parallel, take the service-scoped lock first:
+
+```bash
+make ensure-resource-lock-registry
+make resource-lock-acquire \
+  RESOURCE='vm:120/service:paperless' \
+  HOLDER='agent:codex/ws-0285-main-integration-r2' \
+  LOCK_TYPE=exclusive \
+  TTL_SECONDS=3600 \
+  CONTEXT_ID='ws-0285-paperless-mainline-live-apply'
+```
+
+Release it after the replay finishes:
+
+```bash
+make resource-lock-release \
+  RESOURCE='vm:120/service:paperless' \
+  HOLDER='agent:codex/ws-0285-main-integration-r2'
+```
 
 On a workstream branch where protected integration files must remain untouched, run the service playbook directly:
 

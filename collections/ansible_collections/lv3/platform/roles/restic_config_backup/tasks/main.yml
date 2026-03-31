@@ -177,6 +177,9 @@
 - name: Ensure the MinIO restic bucket exists with object lock
   ansible.builtin.shell: |
     set -euo pipefail
+    if [ "$(docker inspect --format '{% raw %}{{.State.Running}}{% endraw %}' outline-minio)" != "true" ]; then
+      docker start outline-minio >/dev/null
+    fi
     docker exec \
       -e MINIO_ROOT_PASSWORD={{ restic_config_backup_minio_secret_key | quote }} \
       outline-minio sh -ceu '

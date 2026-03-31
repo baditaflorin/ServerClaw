@@ -1,0 +1,1259 @@
+/Applications/Xcode.app/Contents/Developer/usr/bin/make preflight WORKFLOW=live-apply-service
+Preflight workflow: live-apply-service
+Description: Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.
+Bootstrap manifest: controller-local-base
+Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
+INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration-r2/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration-r2/.local/packer-plugin-cache
+Bootstrap manifest: shared-edge-generated-portals
+Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
+PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration-r2/build/ops-portal
+PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration-r2/build/changelog-portal
+PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration-r2/build/docs-portal
+Result: PASS (live-apply-service)
+/Applications/Xcode.app/Contents/Developer/usr/bin/make check-canonical-truth
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration-r2/scripts/canonical_truth.py --check
+Canonical truth OK
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration-r2/scripts/interface_contracts.py --check-live-apply "service:paperless"
+Live apply contract OK: service:paperless -> playbooks/services/paperless.yml
+Vulnerability budget gate for paperless: approved
+uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration-r2/scripts/standby_capacity.py --service "paperless"
+Service: paperless
+Tier: n/a
+Standby enforcement: not required
+Decision: approved
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration-r2/scripts/service_redundancy.py --check-live-apply --service "paperless"
+paperless: declared R1 -> platform R1 -> implemented R0 [gate=unproven] (primary_only) standby=cold@docker-runtime-lv3
+  rehearsal: No recorded R1 rehearsal proof keeps the implemented claim above R0.
+uv run --with pyyaml --with jsonschema python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration-r2/scripts/immutable_guest_replacement.py --check-live-apply --service "paperless" --allow-in-place-mutation
+override: paperless remains governed by immutable guest replacement on docker-runtime-lv3 (preview_guest, rollback 180m); ALLOW_IN_PLACE_MUTATION=true was supplied for this run.
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=1ba00466b0d34ca59913b903bd2cd821 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration-r2/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration-r2/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration-r2/inventory/hosts.yml --run-id d9de16a8ae014a029f6253b20b6e2541 --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration-r2/playbooks/services/paperless.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=7a8a6b817d8d4237b57185a4ce133285
+
+PLAY [Ensure Hetzner DNS publication for Paperless] ****************************
+
+TASK [Load controller defaults] ************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Load controller defaults","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:19.043Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Load controller defaults","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:19.080Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [Load the subdomain catalog] **********************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Load the subdomain catalog","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:19.084Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Load the subdomain catalog","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:19.109Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [Select the Paperless subdomain entry] ************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Select the Paperless subdomain entry","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:19.112Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Select the Paperless subdomain entry","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:19.159Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [Assert the Paperless subdomain is catalogued] ****************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert the Paperless subdomain is catalogued","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:19.162Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert the Paperless subdomain is catalogued","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:19.193Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [Derive the managed Hetzner record name] **********************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Derive the managed Hetzner record name","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:19.195Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Derive the managed Hetzner record name","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:19.217Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [Converge the Paperless Hetzner DNS record] *******************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Converge the Paperless Hetzner DNS record","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:19.221Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Converge the Paperless Hetzner DNS record","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:19.234Z","vm":"localhost","workflow_id":"ansible-playbook"}
+included: lv3.platform.hetzner_dns_record for localhost
+
+TASK [lv3.platform.hetzner_dns_record : Validating arguments against arg spec 'main' - Hetzner DNS record role inputs.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_record : Validating arguments against arg spec 'main' - Hetzner DNS record role inputs.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:19.259Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_record : Validating arguments against arg spec 'main' - Hetzner DNS record role inputs.","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:19.276Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_record : Ensure Hetzner DNS API token is available] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_record : Ensure Hetzner DNS API token is available","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:19.279Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_record : Ensure Hetzner DNS API token is available","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:19.317Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_record : Query Hetzner DNS zone by name] ********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_record : Query Hetzner DNS zone by name","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:19.320Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_record : Query Hetzner DNS zone by name","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:20.369Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_record : Translate Hetzner DNS zone provider payload into canonical zone facts] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_record : Translate Hetzner DNS zone provider payload into canonical zone facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:20.372Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_record : Translate Hetzner DNS zone provider payload into canonical zone facts","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:20.401Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_record : Assert that exactly one canonical DNS zone matched] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_record : Assert that exactly one canonical DNS zone matched","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:20.404Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_record : Assert that exactly one canonical DNS zone matched","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:20.431Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_record : Record the canonical DNS zone reference] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_record : Record the canonical DNS zone reference","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:20.434Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_record : Record the canonical DNS zone reference","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:20.456Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_record : Query existing Hetzner DNS records for the zone] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_record : Query existing Hetzner DNS records for the zone","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:20.458Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_record : Query existing Hetzner DNS records for the zone","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:21.282Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_record : Translate Hetzner DNS record provider payload into canonical record facts] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_record : Translate Hetzner DNS record provider payload into canonical record facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:21.285Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_record : Translate Hetzner DNS record provider payload into canonical record facts","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:21.332Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_record : Select existing canonical DNS records with the same name and type] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_record : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:21.334Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_record : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:21.369Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_record : Select exact canonical DNS record matches by value] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_record : Select exact canonical DNS record matches by value","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:21.371Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_record : Select exact canonical DNS record matches by value","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:21.403Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_record : Select canonical managed DNS records by value identity] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_record : Select canonical managed DNS records by value identity","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:21.405Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_record : Select canonical managed DNS records by value identity","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:21.447Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_record : Assert that only one canonical DNS record match exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_record : Assert that only one canonical DNS record match exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:21.450Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_record : Assert that only one canonical DNS record match exists","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:21.486Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_record : Delete the canonical DNS record when it is retired] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_record : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:21.489Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [localhost]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_record : Delete the canonical DNS record when it is retired","service_id":"ansible","target":"localhost","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:21.504Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_record : Fail with provider details when DNS record deletion did not complete] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_record : Fail with provider details when DNS record deletion did not complete","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:21.507Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [localhost]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_record : Fail with provider details when DNS record deletion did not complete","service_id":"ansible","target":"localhost","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:21.528Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_record : Create the canonical DNS record when absent] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_record : Create the canonical DNS record when absent","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:21.530Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [localhost]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_record : Create the canonical DNS record when absent","service_id":"ansible","target":"localhost","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:21.557Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_record : Query Hetzner DNS records for the zone after a create attempt] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_record : Query Hetzner DNS records for the zone after a create attempt","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:21.560Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [localhost]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_record : Query Hetzner DNS records for the zone after a create attempt","service_id":"ansible","target":"localhost","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:21.597Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_record : Fail with provider details when DNS record creation did not complete] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_record : Fail with provider details when DNS record creation did not complete","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:21.603Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [localhost]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_record : Fail with provider details when DNS record creation did not complete","service_id":"ansible","target":"localhost","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:21.646Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_record : Update the canonical DNS record when drift is detected] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_record : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:21.650Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [localhost]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_record : Update the canonical DNS record when drift is detected","service_id":"ansible","target":"localhost","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:21.698Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.hetzner_dns_record : Fail with provider details when DNS record update did not complete] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_record : Fail with provider details when DNS record update did not complete","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:21.700Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [localhost]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.hetzner_dns_record : Fail with provider details when DNS record update did not complete","service_id":"ansible","target":"localhost","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:21.731Z","vm":"localhost","workflow_id":"ansible-playbook"}
+
+PLAY [Prepare PostgreSQL for Paperless] ****************************************
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:21.801Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:25.224Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert the requested execution environment is supported] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert the requested execution environment is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:25.230Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert the requested execution environment is supported","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:25.261Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Load the controller secret manifest] *************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Load the controller secret manifest","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:25.266Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Load the controller secret manifest","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:25.327Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert required controller-local secret ids are declared] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert required controller-local secret ids are declared","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:25.332Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required controller-local secret ids are declared","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:25.364Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert required host selectors resolve in the inventory] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:25.372Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost] => (item=postgres-lv3) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": "postgres-lv3",
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:25.420Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Initialize resolved required host list] **********************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Initialize resolved required host list","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:25.432Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Initialize resolved required host list","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:25.451Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Expand required host selectors into concrete inventory hosts] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:25.463Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost] => (item=postgres-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:25.491Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Verify SSH connectivity to required hosts] *******************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Verify SSH connectivity to required hosts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:25.499Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => (item=postgres-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Verify SSH connectivity to required hosts","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:27.853Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Ensure the current target is Debian when required] ***********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Ensure the current target is Debian when required","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:27.856Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the current target is Debian when required","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:27.934Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Stat the mutation audit helper] ******************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Stat the mutation audit helper","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:27.937Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Stat the mutation audit helper","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:28.495Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Emit a best-effort playbook start audit event] ***************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Emit a best-effort playbook start audit event","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:28.504Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: Emit a best-effort playbook start audit event","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:28.520Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:28.525Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:28.597Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Wait for the target connection to become ready] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Wait for the target connection to become ready","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:28.601Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Wait for the target connection to become ready","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:30.885Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Assert the target distribution is supported] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Assert the target distribution is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:30.892Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Assert the target distribution is supported","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:30.946Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Assert required preflight variables are present] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Assert required preflight variables are present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:30.951Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.preflight : Assert required preflight variables are present","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:30.964Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Find controller-side .env files in the repository workspace] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Find controller-side .env files in the repository workspace","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:30.969Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Find controller-side .env files in the repository workspace","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:31.847Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Assert the repository workspace has no tracked or generated compose env files] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Assert the repository workspace has no tracked or generated compose env files","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:31.853Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Assert the repository workspace has no tracked or generated compose env files","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:31.893Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Validating arguments against arg spec 'main' - Enforce the canonical guest network policy with nftables on Debian guests.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Validating arguments against arg spec 'main' - Enforce the canonical guest network policy with nftables on Debian guests.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:31.904Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Validating arguments against arg spec 'main' - Enforce the canonical guest network policy with nftables on Debian guests.","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:32.007Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Validate guest network policy inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Validate guest network policy inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:32.010Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Validate guest network policy inputs","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:32.099Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Ensure nftables is installed on the guest] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Ensure nftables is installed on the guest","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:32.106Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Ensure nftables is installed on the guest","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:33.437Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Snapshot the canonical guest firewall policy inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Snapshot the canonical guest firewall policy inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:33.445Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Snapshot the canonical guest firewall policy inputs","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:33.536Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Render guest nftables policy] ********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Render guest nftables policy","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:33.543Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Render guest nftables policy","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:35.115Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Ensure nftables is enabled and started] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Ensure nftables is enabled and started","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:35.120Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Ensure nftables is enabled and started","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:36.114Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Reload guest nftables policy] ********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Reload guest nftables policy","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:36.126Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.linux_guest_firewall : Reload guest nftables policy","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:36.149Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Reset SSH connection after guest nftables policy evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Reset SSH connection after guest nftables policy evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:36.154Z","vm":"controller","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Wait for guest SSH after nftables changes] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Wait for guest SSH after nftables changes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:36.292Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.linux_guest_firewall : Wait for guest SSH after nftables changes","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:36.315Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Ensure Docker bridge networking remains available after firewall evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: Ensure Docker bridge networking remains available after firewall evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:36.319Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure Docker bridge networking remains available after firewall evaluation","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:36.335Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+included: lv3.platform.common for postgres-lv3
+
+TASK [lv3.platform.common : Validating arguments against arg spec 'docker_bridge_chains' - Ensure Docker bridge networking chains exist when Docker is active on the target host.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validating arguments against arg spec 'docker_bridge_chains' - Ensure Docker bridge networking chains exist when Docker is active on the target host.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:36.379Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validating arguments against arg spec 'docker_bridge_chains' - Ensure Docker bridge networking chains exist when Docker is active on the target host.","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:36.428Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Validate common docker_bridge_chains entrypoint inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validate common docker_bridge_chains entrypoint inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:36.436Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validate common docker_bridge_chains entrypoint inputs","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:36.488Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Detect whether the Docker service is active] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Detect whether the Docker service is active","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:36.494Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Detect whether the Docker service is active","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:38.757Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Warm the Docker control socket before chain health checks] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Warm the Docker control socket before chain health checks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:38.766Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Warm the Docker control socket before chain health checks","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:38.782Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker nat chain exists] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker nat chain exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:38.786Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Check whether Docker nat chain exists","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:38.802Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker forward chain exists] *********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker forward chain exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:38.807Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Check whether Docker forward chain exists","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:38.824Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker has running containers] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker has running containers","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:38.832Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Check whether Docker has running containers","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:38.851Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker has bridge networks beyond the default bridge] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker has bridge networks beyond the default bridge","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:38.856Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Check whether Docker has bridge networks beyond the default bridge","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:38.876Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Decide whether Docker forward-chain enforcement is required] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Decide whether Docker forward-chain enforcement is required","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:38.882Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Decide whether Docker forward-chain enforcement is required","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:38.899Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Wait briefly for Docker bridge chains to recover after daemon activation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Wait briefly for Docker bridge chains to recover after daemon activation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:38.904Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Wait briefly for Docker bridge chains to recover after daemon activation","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:38.923Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Restart Docker when required bridge chains are missing] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Restart Docker when required bridge chains are missing","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:38.936Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Restart Docker when required bridge chains are missing","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:38.962Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Recheck Docker nat chain after health evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recheck Docker nat chain after health evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:38.968Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Recheck Docker nat chain after health evaluation","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:38.991Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Recheck Docker forward chain after health evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recheck Docker forward chain after health evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:38.999Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Recheck Docker forward chain after health evaluation","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:39.036Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Verify Docker nat chain after retry loop] **********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Verify Docker nat chain after retry loop","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:39.041Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Verify Docker nat chain after retry loop","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:39.055Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Verify Docker forward chain after retry loop] ******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Verify Docker forward chain after retry loop","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:39.062Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Verify Docker forward chain after retry loop","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:39.085Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Assert Docker nat chain is present after health evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Assert Docker nat chain is present after health evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:39.100Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Assert Docker nat chain is present after health evaluation","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:39.125Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Assert Docker forward chain is present after health evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Assert Docker forward chain is present after health evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:39.131Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Assert Docker forward chain is present after health evaluation","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:39.148Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Validating arguments against arg spec 'main' - Install and harden the PostgreSQL guest used by platform services.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Validating arguments against arg spec 'main' - Install and harden the PostgreSQL guest used by platform services.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:39.165Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Validating arguments against arg spec 'main' - Install and harden the PostgreSQL guest used by platform services.","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:39.210Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Validate PostgreSQL role inputs] **************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Validate PostgreSQL role inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:39.215Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Validate PostgreSQL role inputs","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:39.262Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Install PostgreSQL guest packages] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Install PostgreSQL guest packages","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:39.267Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Install PostgreSQL guest packages","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:41.030Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Ensure PostgreSQL service is enabled and started] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Ensure PostgreSQL service is enabled and started","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:41.043Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Ensure PostgreSQL service is enabled and started","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:41.804Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Discover PostgreSQL cluster configuration] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Discover PostgreSQL cluster configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:41.808Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Discover PostgreSQL cluster configuration","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:42.322Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Assert that exactly one PostgreSQL cluster exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Assert that exactly one PostgreSQL cluster exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:42.334Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Assert that exactly one PostgreSQL cluster exists","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:42.368Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Record PostgreSQL cluster paths] **************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Record PostgreSQL cluster paths","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:42.373Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Record PostgreSQL cluster paths","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:42.403Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Ensure PostgreSQL conf.d directory exists] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Ensure PostgreSQL conf.d directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:42.411Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Ensure PostgreSQL conf.d directory exists","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:42.919Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Render managed PostgreSQL settings] ***********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Render managed PostgreSQL settings","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:42.926Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [postgres-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Render managed PostgreSQL settings","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:45.642Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Render PostgreSQL host-based authentication policy] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Render PostgreSQL host-based authentication policy","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:45.647Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Render PostgreSQL host-based authentication policy","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:47.173Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Check whether PostgreSQL admin role already exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Check whether PostgreSQL admin role already exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:47.177Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Check whether PostgreSQL admin role already exists","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:47.683Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Create PostgreSQL admin role for local peer access] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Create PostgreSQL admin role for local peer access","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:47.690Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.postgres_vm : Create PostgreSQL admin role for local peer access","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:47.715Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Verify PostgreSQL is listening on the managed TCP port] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Verify PostgreSQL is listening on the managed TCP port","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:47.720Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Verify PostgreSQL is listening on the managed TCP port","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:48.419Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.postgres_vm : Verify PostgreSQL accepts a local SQL readiness probe] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.postgres_vm : Verify PostgreSQL accepts a local SQL readiness probe","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:48.426Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Verify PostgreSQL accepts a local SQL readiness probe","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:48.955Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.paperless_postgres : Validating arguments against arg spec 'main' - Converge the PostgreSQL backend for Paperless.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.paperless_postgres : Validating arguments against arg spec 'main' - Converge the PostgreSQL backend for Paperless.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:48.961Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.paperless_postgres : Validating arguments against arg spec 'main' - Converge the PostgreSQL backend for Paperless.","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:48.996Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.paperless_postgres : Validate Paperless PostgreSQL inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.paperless_postgres : Validate Paperless PostgreSQL inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:49.005Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.paperless_postgres : Validate Paperless PostgreSQL inputs","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:49.073Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.paperless_postgres : Ensure the Paperless PostgreSQL secret directory exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.paperless_postgres : Ensure the Paperless PostgreSQL secret directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:49.082Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.paperless_postgres : Ensure the Paperless PostgreSQL secret directory exists","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:49.624Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.paperless_postgres : Ensure the local Paperless artifact directory exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.paperless_postgres : Ensure the local Paperless artifact directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:49.628Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.paperless_postgres : Ensure the local Paperless artifact directory exists","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:50.125Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.paperless_postgres : Generate the Paperless database password] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.paperless_postgres : Generate the Paperless database password","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:50.132Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.paperless_postgres : Generate the Paperless database password","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:50.552Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.paperless_postgres : Read the Paperless database password] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.paperless_postgres : Read the Paperless database password","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:50.559Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.paperless_postgres : Read the Paperless database password","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:51.061Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.paperless_postgres : Record the Paperless database password] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.paperless_postgres : Record the Paperless database password","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:51.066Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.paperless_postgres : Record the Paperless database password","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:51.104Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.paperless_postgres : Persist the Paperless database password on the PostgreSQL member] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.paperless_postgres : Persist the Paperless database password on the PostgreSQL member","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:51.109Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.paperless_postgres : Persist the Paperless database password on the PostgreSQL member","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:52.609Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.paperless_postgres : Check whether the local PostgreSQL member is writable] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.paperless_postgres : Check whether the local PostgreSQL member is writable","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:52.616Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.paperless_postgres : Check whether the local PostgreSQL member is writable","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:53.219Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.paperless_postgres : Check whether the Paperless role already exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.paperless_postgres : Check whether the Paperless role already exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:53.224Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.paperless_postgres : Check whether the Paperless role already exists","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:53.714Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.paperless_postgres : Create the Paperless role] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.paperless_postgres : Create the Paperless role","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:53.720Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.paperless_postgres : Create the Paperless role","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:53.736Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.paperless_postgres : Ensure the Paperless role password matches the managed secret] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.paperless_postgres : Ensure the Paperless role password matches the managed secret","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:53.740Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.paperless_postgres : Ensure the Paperless role password matches the managed secret","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:54.310Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.paperless_postgres : Check whether the Paperless PostgreSQL database already exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.paperless_postgres : Check whether the Paperless PostgreSQL database already exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:54.315Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.paperless_postgres : Check whether the Paperless PostgreSQL database already exists","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:54.843Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.paperless_postgres : Create the Paperless PostgreSQL database] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.paperless_postgres : Create the Paperless PostgreSQL database","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:54.847Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [postgres-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.paperless_postgres : Create the Paperless PostgreSQL database","service_id":"ansible","target":"postgres-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:46:54.864Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.paperless_postgres : Ensure the Paperless database owner is correct] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.paperless_postgres : Ensure the Paperless database owner is correct","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:54.867Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [postgres-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.paperless_postgres : Ensure the Paperless database owner is correct","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:55.446Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+RUNNING HANDLER [lv3.platform.postgres_vm : Restart PostgreSQL] ****************
+changed: [postgres-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.postgres_vm : Restart PostgreSQL","service_id":"ansible","target":"postgres-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:46:58.506Z","vm":"postgres-lv3","workflow_id":"ansible-playbook"}
+
+PLAY [Converge Paperless on the Docker runtime VM] *****************************
+
+TASK [Gathering Facts] *********************************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:46:58.547Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:04.851Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert the requested execution environment is supported] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert the requested execution environment is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:04.876Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert the requested execution environment is supported","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:04.901Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Load the controller secret manifest] *************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Load the controller secret manifest","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:04.928Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Load the controller secret manifest","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:05.001Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert required controller-local secret ids are declared] ****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert required controller-local secret ids are declared","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:05.030Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required controller-local secret ids are declared","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:05.058Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Assert required host selectors resolve in the inventory] *****************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:05.082Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost] => (item=docker-runtime-lv3) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": "docker-runtime-lv3",
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert required host selectors resolve in the inventory","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:05.116Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Initialize resolved required host list] **********************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Initialize resolved required host list","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:05.160Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Initialize resolved required host list","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:05.187Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Expand required host selectors into concrete inventory hosts] ************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:05.217Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost] => (item=docker-runtime-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Expand required host selectors into concrete inventory hosts","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:05.260Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Verify SSH connectivity to required hosts] *******************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Verify SSH connectivity to required hosts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:05.288Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => (item=docker-runtime-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Verify SSH connectivity to required hosts","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:07.559Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Ensure the current target is Debian when required] ***********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Ensure the current target is Debian when required","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:07.592Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure the current target is Debian when required","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:07.632Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Stat the mutation audit helper] ******************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Stat the mutation audit helper","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:07.668Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Stat the mutation audit helper","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:08.179Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Emit a best-effort playbook start audit event] ***************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Emit a best-effort playbook start audit event","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:08.217Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Emit a best-effort playbook start audit event","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:08.718Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:08.751Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:08.787Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Wait for the target connection to become ready] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Wait for the target connection to become ready","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:08.813Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Wait for the target connection to become ready","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:11.076Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Assert the target distribution is supported] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Assert the target distribution is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:11.108Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Assert the target distribution is supported","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:11.152Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Assert required preflight variables are present] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Assert required preflight variables are present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:11.187Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.preflight : Assert required preflight variables are present","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:47:11.202Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Find controller-side .env files in the repository workspace] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Find controller-side .env files in the repository workspace","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:11.333Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Find controller-side .env files in the repository workspace","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:11.892Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Assert the repository workspace has no tracked or generated compose env files] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Assert the repository workspace has no tracked or generated compose env files","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:11.924Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Assert the repository workspace has no tracked or generated compose env files","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:11.960Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Validating arguments against arg spec 'main' - Enforce the canonical guest network policy with nftables on Debian guests.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Validating arguments against arg spec 'main' - Enforce the canonical guest network policy with nftables on Debian guests.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:12.027Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Validating arguments against arg spec 'main' - Enforce the canonical guest network policy with nftables on Debian guests.","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:12.072Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Validate guest network policy inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Validate guest network policy inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:12.105Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Validate guest network policy inputs","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:12.168Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Ensure nftables is installed on the guest] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Ensure nftables is installed on the guest","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:12.203Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Ensure nftables is installed on the guest","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:13.390Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Snapshot the canonical guest firewall policy inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Snapshot the canonical guest firewall policy inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:13.432Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Snapshot the canonical guest firewall policy inputs","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:13.495Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Render guest nftables policy] ********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Render guest nftables policy","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:13.521Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [docker-runtime-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Render guest nftables policy","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:16.125Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Ensure nftables is enabled and started] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Ensure nftables is enabled and started","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:16.158Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Ensure nftables is enabled and started","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:16.859Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Reload guest nftables policy] ********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Reload guest nftables policy","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:16.893Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [docker-runtime-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Reload guest nftables policy","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:17.462Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Reset SSH connection after guest nftables policy evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Reset SSH connection after guest nftables policy evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:17.498Z","vm":"controller","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.linux_guest_firewall : Wait for guest SSH after nftables changes] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Wait for guest SSH after nftables changes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:17.641Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Wait for guest SSH after nftables changes","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:19.795Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Ensure Docker bridge networking remains available after firewall evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: Ensure Docker bridge networking remains available after firewall evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:19.835Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure Docker bridge networking remains available after firewall evaluation","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:19.856Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+included: lv3.platform.common for docker-runtime-lv3
+
+TASK [lv3.platform.common : Validating arguments against arg spec 'docker_bridge_chains' - Ensure Docker bridge networking chains exist when Docker is active on the target host.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validating arguments against arg spec 'docker_bridge_chains' - Ensure Docker bridge networking chains exist when Docker is active on the target host.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:19.937Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validating arguments against arg spec 'docker_bridge_chains' - Ensure Docker bridge networking chains exist when Docker is active on the target host.","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:20.001Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Validate common docker_bridge_chains entrypoint inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validate common docker_bridge_chains entrypoint inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:20.029Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validate common docker_bridge_chains entrypoint inputs","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:20.062Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Detect whether the Docker service is active] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Detect whether the Docker service is active","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:20.099Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Detect whether the Docker service is active","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:20.752Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Warm the Docker control socket before chain health checks] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Warm the Docker control socket before chain health checks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:20.792Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Warm the Docker control socket before chain health checks","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:47:20.815Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker nat chain exists] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker nat chain exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:20.849Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Check whether Docker nat chain exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:47:20.877Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker forward chain exists] *********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker forward chain exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:20.911Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Check whether Docker forward chain exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:47:20.931Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker has running containers] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker has running containers","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:20.965Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Check whether Docker has running containers","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:47:20.982Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker has bridge networks beyond the default bridge] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker has bridge networks beyond the default bridge","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:21.012Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Check whether Docker has bridge networks beyond the default bridge","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:47:21.033Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Decide whether Docker forward-chain enforcement is required] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Decide whether Docker forward-chain enforcement is required","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:21.065Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Decide whether Docker forward-chain enforcement is required","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:47:21.084Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Wait briefly for Docker bridge chains to recover after daemon activation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Wait briefly for Docker bridge chains to recover after daemon activation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:21.113Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Wait briefly for Docker bridge chains to recover after daemon activation","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:47:21.135Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Restart Docker when required bridge chains are missing] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Restart Docker when required bridge chains are missing","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:21.167Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Restart Docker when required bridge chains are missing","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:47:21.188Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Recheck Docker nat chain after health evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recheck Docker nat chain after health evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:21.224Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Recheck Docker nat chain after health evaluation","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:47:21.245Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Recheck Docker forward chain after health evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recheck Docker forward chain after health evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:21.272Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Recheck Docker forward chain after health evaluation","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:47:21.291Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Verify Docker nat chain after retry loop] **********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Verify Docker nat chain after retry loop","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:21.319Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Verify Docker nat chain after retry loop","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:47:21.336Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Verify Docker forward chain after retry loop] ******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Verify Docker forward chain after retry loop","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:21.370Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Verify Docker forward chain after retry loop","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:47:21.390Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Assert Docker nat chain is present after health evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Assert Docker nat chain is present after health evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:21.424Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Assert Docker nat chain is present after health evaluation","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:47:21.446Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Assert Docker forward chain is present after health evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Assert Docker forward chain is present after health evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:21.483Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Assert Docker forward chain is present after health evaluation","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:47:21.500Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:21.590Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Validating arguments against arg spec 'main' - Shared connectivity and Debian target validation for platform roles.","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:21.635Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Wait for the target connection to become ready] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Wait for the target connection to become ready","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:21.681Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Wait for the target connection to become ready","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:23.920Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Assert the target distribution is supported] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Assert the target distribution is supported","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:23.954Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Assert the target distribution is supported","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:23.991Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Assert required preflight variables are present] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Assert required preflight variables are present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:24.023Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => (item=docker_runtime_prereq_packages) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": "docker_runtime_prereq_packages",
+    "msg": "All assertions passed"
+}
+ok: [docker-runtime-lv3] => (item=docker_runtime_engine_packages) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": "docker_runtime_engine_packages",
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Assert required preflight variables are present","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:24.107Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Find controller-side .env files in the repository workspace] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Find controller-side .env files in the repository workspace","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:24.137Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Find controller-side .env files in the repository workspace","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:24.728Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.preflight : Assert the repository workspace has no tracked or generated compose env files] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.preflight : Assert the repository workspace has no tracked or generated compose env files","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:24.762Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3 -> localhost] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.preflight : Assert the repository workspace has no tracked or generated compose env files","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:24.791Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Validating arguments against arg spec 'main' - Install and configure the Docker runtime on Debian guests.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Validating arguments against arg spec 'main' - Install and configure the Docker runtime on Debian guests.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:24.864Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Validating arguments against arg spec 'main' - Install and configure the Docker runtime on Debian guests.","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:24.939Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Validate Docker runtime inputs] ******************************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Validate Docker runtime inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:24.966Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Validate Docker runtime inputs","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:24.989Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+included: lv3.platform.common for docker-runtime-lv3
+
+TASK [lv3.platform.common : Validating arguments against arg spec 'assert_vars' - Validate required variables before role tasks continue.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validating arguments against arg spec 'assert_vars' - Validate required variables before role tasks continue.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:25.081Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validating arguments against arg spec 'assert_vars' - Validate required variables before role tasks continue.","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:25.133Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Validate common assert_vars entrypoint inputs] *****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validate common assert_vars entrypoint inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:25.162Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validate common assert_vars entrypoint inputs","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:25.209Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Assert required variables are defined and non-empty] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Assert required variables are defined and non-empty","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:25.237Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => (item=docker_runtime_prereq_packages)
+ok: [docker-runtime-lv3] => (item=docker_runtime_conflicting_packages)
+ok: [docker-runtime-lv3] => (item=docker_runtime_engine_packages)
+ok: [docker-runtime-lv3] => (item=docker_runtime_admin_users)
+ok: [docker-runtime-lv3] => (item=docker_runtime_apt_key_url)
+ok: [docker-runtime-lv3] => (item=docker_runtime_apt_keyring_path)
+ok: [docker-runtime-lv3] => (item=docker_runtime_apt_repo_file)
+ok: [docker-runtime-lv3] => (item=docker_runtime_apt_repo_uri)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Assert required variables are defined and non-empty","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:25.547Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Assert extra validation expressions] ***************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Assert extra validation expressions","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:25.583Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Assert extra validation expressions","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:47:25.603Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Install Docker repository prerequisites] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Install Docker repository prerequisites","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:25.673Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Install Docker repository prerequisites","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:27.511Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Ensure Docker-managed directories exist] *********************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Ensure Docker-managed directories exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:27.544Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure Docker-managed directories exist","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:27.564Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+included: lv3.platform.common for docker-runtime-lv3
+
+TASK [lv3.platform.common : Validating arguments against arg spec 'directory_tree' - Ensure one or more managed directories exist with shared defaults.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validating arguments against arg spec 'directory_tree' - Ensure one or more managed directories exist with shared defaults.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:27.659Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validating arguments against arg spec 'directory_tree' - Ensure one or more managed directories exist with shared defaults.","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:27.696Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Validate common directory_tree entrypoint inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validate common directory_tree entrypoint inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:27.729Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validate common directory_tree entrypoint inputs","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:27.777Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Ensure managed directory tree entries exist] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure managed directory tree entries exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:27.806Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => (item=/etc/apt/keyrings)
+ok: [docker-runtime-lv3] => (item=/etc/docker)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure managed directory tree entries exist","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:28.895Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Download Docker apt key] *******************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Download Docker apt key","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:28.951Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Download Docker apt key","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:29.774Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Configure Docker apt repository] ***********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Configure Docker apt repository","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:29.800Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Configure Docker apt repository","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:31.304Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Remove conflicting Docker packages] ********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Remove conflicting Docker packages","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:31.347Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Remove conflicting Docker packages","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:32.298Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Install Docker runtime packages] ***********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Install Docker runtime packages","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:32.329Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Install Docker runtime packages","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:34.478Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Ensure docker admin group exists] **********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Ensure docker admin group exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:34.506Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Ensure docker admin group exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:35.115Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Grant operator access to docker group] *****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Grant operator access to docker group","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:35.150Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => (item=ops)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Grant operator access to docker group","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:35.981Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:36.011Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => (item=agents.lv3.org)
+ok: [docker-runtime-lv3] => (item=analytics.lv3.org)
+ok: [docker-runtime-lv3] => (item=api.lv3.org)
+ok: [docker-runtime-lv3] => (item=apps.lv3.org)
+ok: [docker-runtime-lv3] => (item=build.lv3.org)
+ok: [docker-runtime-lv3] => (item=chat.lv3.org)
+ok: [docker-runtime-lv3] => (item=ci.lv3.org)
+ok: [docker-runtime-lv3] => (item=cloud.lv3.org)
+ok: [docker-runtime-lv3] => (item=coolify.lv3.org)
+ok: [docker-runtime-lv3] => (item=data.lv3.org)
+ok: [docker-runtime-lv3] => (item=docker.lv3.org)
+ok: [docker-runtime-lv3] => (item=draw.lv3.org)
+ok: [docker-runtime-lv3] => (item=flags.lv3.org)
+ok: [docker-runtime-lv3] => (item=grafana.lv3.org)
+ok: [docker-runtime-lv3] => (item=headscale.lv3.org)
+ok: [docker-runtime-lv3] => (item=home.lv3.org)
+ok: [docker-runtime-lv3] => (item=langfuse.lv3.org)
+ok: [docker-runtime-lv3] => (item=logs.lv3.org)
+ok: [docker-runtime-lv3] => (item=mail.lv3.org)
+ok: [docker-runtime-lv3] => (item=matrix.lv3.org)
+ok: [docker-runtime-lv3] => (item=n8n.lv3.org)
+ok: [docker-runtime-lv3] => (item=nginx.lv3.org)
+ok: [docker-runtime-lv3] => (item=notebooks.lv3.org)
+ok: [docker-runtime-lv3] => (item=ops.lv3.org)
+ok: [docker-runtime-lv3] => (item=paperless.lv3.org)
+ok: [docker-runtime-lv3] => (item=proxmox.lv3.org)
+ok: [docker-runtime-lv3] => (item=realtime.lv3.org)
+ok: [docker-runtime-lv3] => (item=registry.lv3.org)
+ok: [docker-runtime-lv3] => (item=sso.lv3.org)
+ok: [docker-runtime-lv3] => (item=status.lv3.org)
+ok: [docker-runtime-lv3] => (item=tasks.lv3.org)
+ok: [docker-runtime-lv3] => (item=uptime.lv3.org)
+ok: [docker-runtime-lv3] => (item=wiki.lv3.org)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:54.359Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Check whether the current Docker daemon config exists] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Check whether the current Docker daemon config exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:54.400Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Check whether the current Docker daemon config exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:55.036Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Read the current Docker daemon config] *****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Read the current Docker daemon config","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:55.164Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Read the current Docker daemon config","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:55.740Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Record whether Docker currently has live-restore enabled] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Record whether Docker currently has live-restore enabled","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:55.769Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Record whether Docker currently has live-restore enabled","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:55.803Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Render Docker daemon configuration] ********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Render Docker daemon configuration","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:55.832Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [docker-runtime-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Render Docker daemon configuration","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:47:58.469Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Install the Docker publication assurance helper] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Install the Docker publication assurance helper","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:47:58.496Z","vm":"controller","workflow_id":"ansible-playbook"}
+changed: [docker-runtime-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Install the Docker publication assurance helper","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:01.227Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Check whether nftables config exists] ******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Check whether nftables config exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:01.257Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Check whether nftables config exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:01.876Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Read the existing nftables config] *********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Read the existing nftables config","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:01.906Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Read the existing nftables config","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:02.425Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Build the Docker bridge forward-compat rule block] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Build the Docker bridge forward-compat rule block","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:02.461Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Build the Docker bridge forward-compat rule block","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:02.507Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Patch nftables forward policy for Docker bridge egress] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Patch nftables forward policy for Docker bridge egress","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:02.541Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3] => (item=192.168.0.0/16)
+skipping: [docker-runtime-lv3] => (item=172.16.0.0/12)
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.docker_runtime : Patch nftables forward policy for Docker bridge egress","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:48:02.570Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Read the nftables config after forward compatibility patch] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Read the nftables config after forward compatibility patch","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:02.596Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Read the nftables config after forward compatibility patch","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:03.125Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Assert the Docker bridge forward-compat rule is present] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Assert the Docker bridge forward-compat rule is present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:03.156Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => (item=172.16.0.0/12) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": "172.16.0.0/12",
+    "msg": "All assertions passed"
+}
+ok: [docker-runtime-lv3] => (item=192.168.0.0/16) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": "192.168.0.0/16",
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Assert the Docker bridge forward-compat rule is present","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:03.224Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Read the live nftables forward chain] ******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Read the live nftables forward chain","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:03.258Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Read the live nftables forward chain","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:03.818Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Apply Docker bridge forward-compat rules live without reloading nftables] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Apply Docker bridge forward-compat rules live without reloading nftables","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:03.848Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3] => (item=172.16.0.0/12)
+skipping: [docker-runtime-lv3] => (item=192.168.0.0/16)
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.docker_runtime : Apply Docker bridge forward-compat rules live without reloading nftables","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:48:03.875Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Read the live nftables forward chain after incremental patch] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Read the live nftables forward chain after incremental patch","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:03.910Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Read the live nftables forward chain after incremental patch","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:04.502Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Assert the live Docker bridge forward-compat rules are present] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Assert the live Docker bridge forward-compat rules are present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:04.537Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => (item=172.16.0.0/12) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": "172.16.0.0/12",
+    "msg": "All assertions passed"
+}
+ok: [docker-runtime-lv3] => (item=192.168.0.0/16) => {
+    "ansible_loop_var": "item",
+    "changed": false,
+    "item": "192.168.0.0/16",
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Assert the live Docker bridge forward-compat rules are present","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:04.595Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Ensure Docker service is enabled and running] ****************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Ensure Docker service is enabled and running","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:04.628Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure Docker service is enabled and running","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:04.643Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+included: lv3.platform.common for docker-runtime-lv3
+
+TASK [lv3.platform.common : Validating arguments against arg spec 'systemd_unit' - Enable, start, and optionally verify a systemd unit.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validating arguments against arg spec 'systemd_unit' - Enable, start, and optionally verify a systemd unit.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:04.713Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validating arguments against arg spec 'systemd_unit' - Enable, start, and optionally verify a systemd unit.","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:04.746Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Validate common systemd_unit entrypoint inputs] ****
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validate common systemd_unit entrypoint inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:04.776Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validate common systemd_unit entrypoint inputs","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:04.808Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Ensure the managed systemd unit matches the requested state] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure the managed systemd unit matches the requested state","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:04.841Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure the managed systemd unit matches the requested state","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:05.889Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Verify the managed systemd unit active state] ******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Verify the managed systemd unit active state","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:05.934Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Verify the managed systemd unit active state","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:48:05.956Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Record container ids that are running before Docker restarts] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Record container ids that are running before Docker restarts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:06.023Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Record container ids that are running before Docker restarts","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:06.644Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Inspect running containers before Docker restarts] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Inspect running containers before Docker restarts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:06.679Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Inspect running containers before Docker restarts","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:09.273Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Record containers that were running before Docker restarts] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Record containers that were running before Docker restarts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:09.321Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Record containers that were running before Docker restarts","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:09.861Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Flush Docker handlers before chain health checks] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Flush Docker handlers before chain health checks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:09.906Z","vm":"controller","workflow_id":"ansible-playbook"}
+
+RUNNING HANDLER [lv3.platform.docker_runtime : Restart Docker] *****************
+changed: [docker-runtime-lv3]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Restart Docker","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:52.241Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Reset Docker failed state before nat-chain recovery restart] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Reset Docker failed state before nat-chain recovery restart","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:52.305Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Reset Docker failed state before nat-chain recovery restart","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:52.962Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [Ensure Docker bridge networking chains are present] **********************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Ensure Docker bridge networking chains are present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:53.004Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Ensure Docker bridge networking chains are present","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:53.040Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+included: lv3.platform.common for docker-runtime-lv3
+
+TASK [lv3.platform.common : Validating arguments against arg spec 'docker_bridge_chains' - Ensure Docker bridge networking chains exist when Docker is active on the target host.] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validating arguments against arg spec 'docker_bridge_chains' - Ensure Docker bridge networking chains exist when Docker is active on the target host.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:53.176Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validating arguments against arg spec 'docker_bridge_chains' - Ensure Docker bridge networking chains exist when Docker is active on the target host.","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:53.214Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Validate common docker_bridge_chains entrypoint inputs] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Validate common docker_bridge_chains entrypoint inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:53.245Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Validate common docker_bridge_chains entrypoint inputs","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:53.298Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Detect whether the Docker service is active] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Detect whether the Docker service is active","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:53.345Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Detect whether the Docker service is active","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:53.884Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Warm the Docker control socket before chain health checks] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Warm the Docker control socket before chain health checks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:53.916Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Warm the Docker control socket before chain health checks","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:54.576Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker nat chain exists] *************
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker nat chain exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:54.620Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Check whether Docker nat chain exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:55.218Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker forward chain exists] *********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker forward chain exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:55.259Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Check whether Docker forward chain exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:55.766Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker has running containers] *******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker has running containers","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:55.792Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Check whether Docker has running containers","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:56.368Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Check whether Docker has bridge networks beyond the default bridge] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Check whether Docker has bridge networks beyond the default bridge","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:56.395Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Check whether Docker has bridge networks beyond the default bridge","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:57.009Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Decide whether Docker forward-chain enforcement is required] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Decide whether Docker forward-chain enforcement is required","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:57.043Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Decide whether Docker forward-chain enforcement is required","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:57.111Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Wait briefly for Docker bridge chains to recover after daemon activation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Wait briefly for Docker bridge chains to recover after daemon activation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:57.144Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Wait briefly for Docker bridge chains to recover after daemon activation","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:48:57.172Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Restart Docker when required bridge chains are missing] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Restart Docker when required bridge chains are missing","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:57.198Z","vm":"controller","workflow_id":"ansible-playbook"}
+skipping: [docker-runtime-lv3]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.common : Restart Docker when required bridge chains are missing","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T15:48:57.223Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Recheck Docker nat chain after health evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recheck Docker nat chain after health evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:57.269Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Recheck Docker nat chain after health evaluation","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:57.814Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Recheck Docker forward chain after health evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recheck Docker forward chain after health evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:57.842Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Recheck Docker forward chain after health evaluation","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:58.437Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Verify Docker nat chain after retry loop] **********
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Verify Docker nat chain after retry loop","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:58.486Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Verify Docker nat chain after retry loop","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:59.027Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Verify Docker forward chain after retry loop] ******
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Verify Docker forward chain after retry loop","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:59.055Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Verify Docker forward chain after retry loop","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:59.586Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Assert Docker nat chain is present after health evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Assert Docker nat chain is present after health evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:59.623Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Assert Docker nat chain is present after health evaluation","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:59.681Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.common : Assert Docker forward chain is present after health evaluation] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Assert Docker forward chain is present after health evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:59.710Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Assert Docker forward chain is present after health evaluation","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:48:59.773Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Re-inspect pre-restart containers after Docker restarts] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Re-inspect pre-restart containers after Docker restarts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:48:59.878Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Re-inspect pre-restart containers after Docker restarts","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:49:01.584Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Record pre-restart containers that remained stopped after Docker restarts] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Record pre-restart containers that remained stopped after Docker restarts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:49:01.610Z","vm":"controller","workflow_id":"ansible-playbook"}
+ok: [docker-runtime-lv3]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Record pre-restart containers that remained stopped after Docker restarts","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T15:49:02.214Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+TASK [lv3.platform.docker_runtime : Recover pre-restart containers that remained stopped after Docker restarts] ***
+{"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Recover pre-restart containers that remained stopped after Docker restarts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T15:49:02.243Z","vm":"controller","workflow_id":"ansible-playbook"}
+fatal: [docker-runtime-lv3]: FAILED! => {"changed": true, "cmd": ["python3", "-c", "import json\nimport subprocess\nimport sys\nimport time\n\nTRANSIENT_DOCKER_NETWORK_ERRORS = (\n    \"No chain/target/match by that name\",\n    \"driver failed programming external connectivity\",\n)\nSTALE_COMPOSE_ENDPOINT_ERRORS = (\n    \"failed to create endpoint\",\n    \"does not exist\",\n)\n\n\ndef run_with_retry(command, cwd=None, attempts=3, delay_seconds=3):\n    for attempt in range(1, attempts + 1):\n        result = subprocess.run(command, cwd=cwd, text=True, capture_output=True)\n        if result.returncode == 0:\n            return\n\n        stderr = result.stderr or \"\"\n        if (\n            attempt == attempts\n            or not any(marker in stderr for marker in TRANSIENT_DOCKER_NETWORK_ERRORS)\n        ):\n            raise subprocess.CalledProcessError(\n                result.returncode,\n                command,\n                output=result.stdout,\n                stderr=stderr,\n            )\n\n        time.sleep(delay_seconds)\n\ncontainers = json.load(sys.stdin)\n\ndirect_start = []\ncompose_groups = {}\n\nfor container in containers:\n    name = (container.get(\"Name\") or \"\").lstrip(\"/\")\n    labels = container.get(\"Config\", {}).get(\"Labels\") or {}\n    working_dir = labels.get(\"com.docker.compose.project.working_dir\") or \"\"\n    config_files = labels.get(\"com.docker.compose.project.config_files\") or \"\"\n    service = labels.get(\"com.docker.compose.service\") or \"\"\n\n    if working_dir and service:\n        compose_group = compose_groups.setdefault(\n            (working_dir, config_files),\n            {\"services\": set(), \"container_names\": set()},\n        )\n        compose_group[\"services\"].add(service)\n        if name:\n            compose_group[\"container_names\"].add(name)\n        continue\n\n    if name:\n        direct_start.append(name)\n\nactions = []\n\nif direct_start:\n    run_with_retry([\"docker\", \"start\", *direct_start])\n    actions.append({\"type\": \"docker_start\", \"containers\": direct_start})\n\nfor (working_dir, config_files), compose_group in sorted(compose_groups.items()):\n    command = [\"docker\", \"compose\"]\n    config_file_list = [value for value in config_files.split(\",\") if value]\n    for config_file in config_file_list:\n        command.extend([\"--file\", config_file])\n    services = sorted(compose_group[\"services\"])\n    container_names = sorted(compose_group[\"container_names\"])\n    command.extend([\"up\", \"-d\", \"--force-recreate\", *services])\n\n    try:\n        run_with_retry(command, cwd=working_dir or None)\n        actions.append(\n            {\n                \"type\": \"docker_compose_up\",\n                \"working_dir\": working_dir,\n                \"config_files\": config_file_list,\n                \"services\": services,\n            }\n        )\n    except subprocess.CalledProcessError as exc:\n        stderr = exc.stderr or \"\"\n        if not (\n            container_names\n            and all(marker in stderr for marker in STALE_COMPOSE_ENDPOINT_ERRORS)\n        ):\n            raise\n\n        remove_command = [\"docker\", \"rm\", \"-f\", *container_names]\n        remove_result = subprocess.run(remove_command, text=True, capture_output=True)\n        if remove_result.returncode != 0 and \"No such container\" not in (remove_result.stderr or \"\"):\n            raise subprocess.CalledProcessError(\n                remove_result.returncode,\n                remove_command,\n                output=remove_result.stdout,\n                stderr=remove_result.stderr,\n            ) from exc\n        actions.append(\n            {\n                \"type\": \"docker_rm_stale_compose_containers\",\n                \"working_dir\": working_dir,\n                \"config_files\": config_file_list,\n                \"containers\": container_names,\n            }\n        )\n\n        recovery_command = [\"docker\", \"compose\"]\n        for config_file in config_file_list:\n            recovery_command.extend([\"--file\", config_file])\n        recovery_command.extend([\"up\", \"-d\", \"--force-recreate\", *services])\n        try:\n            run_with_retry(recovery_command, cwd=working_dir or None)\n            actions.append(\n                {\n                    \"type\": \"docker_compose_up_force_recreate\",\n                    \"working_dir\": working_dir,\n                    \"config_files\": config_file_list,\n                    \"services\": services,\n                }\n            )\n            continue\n        except subprocess.CalledProcessError as recovery_exc:\n            recovery_stderr = recovery_exc.stderr or \"\"\n            if not all(marker in recovery_stderr for marker in STALE_COMPOSE_ENDPOINT_ERRORS):\n                raise\n\n        down_command = [\"docker\", \"compose\"]\n        for config_file in config_file_list:\n            down_command.extend([\"--file\", config_file])\n        down_command.extend([\"down\", \"--remove-orphans\"])\n        run_with_retry(down_command, cwd=working_dir or None)\n        actions.append(\n            {\n                \"type\": \"docker_compose_down_remove_orphans\",\n                \"working_dir\": working_dir,\n                \"config_files\": config_file_list,\n                \"services\": services,\n            }\n        )\n\n        final_up_command = [\"docker\", \"compose\"]\n        for config_file in config_file_list:\n            final_up_command.extend([\"--file\", config_file])\n        final_up_command.extend([\"up\", \"-d\", *services])\n        run_with_retry(final_up_command, cwd=working_dir or None)\n        actions.append(\n            {\n                \"type\": \"docker_compose_up_after_down\",\n                \"working_dir\": working_dir,\n                \"config_files\": config_file_list,\n                \"services\": services,\n            }\n        )\n"], "delta": "0:03:07.361467", "end": "2026-03-31 15:52:10.092253", "msg": "non-zero return code", "rc": 1, "start": "2026-03-31 15:49:02.730786", "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 77, in <module>\n    run_with_retry(command, cwd=working_dir or None)\n    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<string>\", line 27, in run_with_retry\n    raise subprocess.CalledProcessError(\n    ...<4 lines>...\n    )\nsubprocess.CalledProcessError: Command '['docker', 'compose', '--file', '/opt/one-api/docker-compose.yml', 'up', '-d', '--force-recreate', 'one-api', 'openbao-agent']' returned non-zero exit status 1.", "stderr_lines": ["Traceback (most recent call last):", "  File \"<string>\", line 77, in <module>", "    run_with_retry(command, cwd=working_dir or None)", "    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", "  File \"<string>\", line 27, in run_with_retry", "    raise subprocess.CalledProcessError(", "    ...<4 lines>...", "    )", "subprocess.CalledProcessError: Command '['docker', 'compose', '--file', '/opt/one-api/docker-compose.yml', 'up', '-d', '--force-recreate', 'one-api', 'openbao-agent']' returned non-zero exit status 1."], "stdout": "", "stdout_lines": []}
+{"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","error_detail":"non-zero return code","ignored":false,"level":"ERROR","msg":"Task failed: lv3.platform.docker_runtime : Recover pre-restart containers that remained stopped after Docker restarts","service_id":"ansible","target":"docker-runtime-lv3","task_status":"failed","trace_id":"background","ts":"2026-03-31T15:52:10.384Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+
+PLAY RECAP *********************************************************************
+docker-runtime-lv3         : ok=91   changed=5    unreachable=0    failed=1    skipped=21   rescued=0    ignored=0
+localhost                  : ok=18   changed=0    unreachable=0    failed=0    skipped=7    rescued=0    ignored=0
+postgres-lv3               : ok=52   changed=2    unreachable=0    failed=0    skipped=21   rescued=0    ignored=0

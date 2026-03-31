@@ -140,9 +140,13 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     )
     assert "TRANSIENT_DOCKER_NETWORK_ERRORS" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "STALE_COMPOSE_ENDPOINT_ERRORS" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "OPENBAO_HEALTH_URL" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "wait_for_local_openbao" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert '"http://127.0.0.1:8201/v1/sys/health"' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "No chain/target/match by that name" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "failed to create endpoint" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "run_with_retry(command, cwd=working_dir or None)" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert 'if "openbao-agent" in services:' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'remove_command = ["docker", "rm", "-f", *container_names]' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'recovery_command.extend(["up", "-d", "--force-recreate", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'down_command.extend(["down", "--remove-orphans"])' in recover_containers["ansible.builtin.command"]["argv"][2]

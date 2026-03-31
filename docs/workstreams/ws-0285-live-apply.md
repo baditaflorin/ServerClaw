@@ -9,8 +9,8 @@
 - Live Applied In Platform Version: 0.130.75
 - Implemented On: 2026-03-31
 - Live Applied On: 2026-03-31
-- Branch: `codex/ws-0285-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-live-apply`
+- Branch: `codex/ws-0285-main-integration-r2`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration-r2`
 - Owner: codex
 - Depends On: `adr-0021-public-subdomain-publication`, `adr-0042-postgresql-as-the-shared-relational-database`, `adr-0063-keycloak-sso-for-internal-services`, `adr-0077-compose-secret-injection-pattern`, `adr-0086-backup-and-recovery-for-stateful-services`
 - Conflicts With: none
@@ -141,13 +141,51 @@
   confirmed a fresh uploaded document completed ingestion successfully and was
   cleaned back out of the archive.
 
-## Remaining For Merge-To-Main
+## Latest Mainline Integration State
 
-- rebase or merge this workstream onto the current `origin/main` head
-  `ad0050483c76e6eba2f516cbb6d4e4f4a6843476`
-- cut the protected main integration surfaces with the next repo release bump
-  and canonical-truth refresh
-- replay the exact merged `main` tree through the authoritative
-  `make live-apply-service service=paperless env=production` path
-- record the canonical mainline receipt and bump `versions/stack.yaml` to the
-  first exact-main platform version only after that replay passes
+- The current integration branch is rebased onto latest `origin/main` commit
+  `97f0580225d0eca79104ee35c702f2cef44a819c`, which already includes the
+  ADR 0306 `0.177.119` validation-gate cut.
+- The merge candidate also carries the post-branch Paperless recovery work:
+  `scripts/trigger_restic_live_apply.py` now self-heals the remote runtime
+  support bundle before invoking the restic wrapper, and
+  `scripts/restic_config_backup.py` writes a live-apply-scoped latest snapshot
+  receipt instead of reusing the repo-wide summary.
+- The shared Docker runtime recovery path is hardened on this branch: the
+  tracked `docker_runtime` role now waits for the local OpenBao listener before
+  restarting compose groups that include `openbao-agent`, which prevented the
+  One API and Outline recovery loops from racing their own secret sidecars.
+- Exact-mainline Paperless prerequisites were re-established on `0.177.119`:
+  Outline was recovered through the repo-managed scoped service playbook in
+  `receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-outline-recovery-r1-0.177.118.txt`,
+  and the authoritative restic trigger then passed in
+  `receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-restic-trigger-r11-0.177.118.txt`.
+- The authoritative wrapper is governed by ADR 0191 on `docker-runtime-lv3`.
+  `make immutable-guest-replacement-plan service=paperless` confirmed that the
+  final replay must use the documented narrow exception:
+  `ALLOW_IN_PLACE_MUTATION=true HETZNER_DNS_API_TOKEN=... make live-apply-service service=paperless env=production`.
+- The first exact-main wrapper replay with the ADR 0191 exception is preserved
+  in `receipts/live-applies/evidence/2026-03-31-ws-0285-mainline-live-apply-r9-0.177.118.txt`.
+  It converged most of the runtime but failed during the authenticated taxonomy
+  wait after an unrelated concurrent Docker restart on `docker-runtime-lv3`.
+- Guest logs and journal evidence show the failure was environmental, not a
+  Paperless config regression: `paperless` and `paperless-redis` both exited
+  cleanly after broker disconnects, and the Docker journal recorded another
+  Ansible-driven `docker.service` restart while Paperless verification was
+  already in progress.
+- As of `2026-03-31T16:52:32Z`, other agents are still actively running
+  `playbooks/windmill.yml` and `playbooks/monitoring-stack.yml` against
+  `docker-runtime-lv3`, so the final exact-main replay is waiting for a quiet
+  window to avoid another false-negative verification failure.
+
+## Remaining For Mainline Completion
+
+- wait for concurrent automation on `docker-runtime-lv3` to drain, then take
+  the Paperless service lock and rerun the authoritative exact-main wrapper on
+  latest `origin/main`
+- record the clean canonical mainline Paperless receipt on the settled replay
+- update ADR 0285 metadata with the final repo integration version and confirm
+  the first live platform version remains `0.130.75`
+- refresh the protected release surfaces, cut the next release, and verify the
+  committed exact candidate through the repo automation gates before pushing
+  `HEAD:main`

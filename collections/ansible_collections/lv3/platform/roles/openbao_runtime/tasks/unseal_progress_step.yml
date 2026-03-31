@@ -1,0 +1,29 @@
+---
+- name: Submit an available OpenBao unseal key
+  ansible.builtin.uri:
+    url: "{{ openbao_unseal_api_url }}/v1/sys/unseal"
+    method: POST
+    body_format: json
+    body:
+      key: "{{ openbao_unseal_key }}"
+    status_code: 200
+  when: openbao_unseal_progress.json.sealed | bool
+  no_log: true
+
+- name: Refresh OpenBao seal status after submitting an unseal key
+  ansible.builtin.uri:
+    url: "{{ openbao_unseal_api_url }}/v1/sys/seal-status"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: openbao_unseal_progress_refresh
+  retries: 12
+  delay: 2
+  until: openbao_unseal_progress_refresh.status == 200
+  changed_when: false
+  when: openbao_unseal_progress.json.sealed | bool
+
+- name: Record the refreshed OpenBao seal status after submitting an unseal key
+  ansible.builtin.set_fact:
+    openbao_unseal_progress: "{{ openbao_unseal_progress_refresh }}"
+  when: openbao_unseal_progress.json.sealed | bool

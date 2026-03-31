@@ -249,6 +249,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `nginx.lv3.org` | `nginx-edge` | `edge-static` | `nginx-lv3` |
 | `notebooks.lv3.org` | `jupyterhub` | `edge-published` | `docker-runtime-lv3` |
 | `ops.lv3.org` | `ops-portal` | `edge-published` | `docker-runtime-lv3` |
+| `paperless.lv3.org` | `paperless` | `edge-published` | `docker-runtime-lv3` |
 | `proxmox.lv3.org` | `proxmox-ui` | `informational-only` | `proxmox_florin` |
 | `realtime.lv3.org` | `realtime` | `edge-published` | `monitoring-lv3` |
 | `registry.lv3.org` | `harbor` | `edge-published` | `docker-runtime-lv3` |
@@ -351,6 +352,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `ops_portal` | `2026-03-29-adr-0245-declared-to-live-service-attestation-live-apply` |
 | `ops_portal_visualizations` | `2026-03-29-adr-0240-operator-visualization-panels-mainline-live-apply` |
 | `outline` | `2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply` |
+| `paperless` | `2026-03-31-adr-0285-paperless-live-apply` |
 | `piper` | `2026-03-31-adr-0284-piper-mainline-live-apply` |
 | `plane` | `2026-03-28-adr-0193-plane-mainline-live-apply` |
 | `platform_context` | `2026-03-28-adr-0198-semantic-rag-mainline-live-apply` |
@@ -669,6 +671,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure OpenBao](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-openbao.md)
 - [Configure OpenFGA](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-openfga.md)
 - [Configure Outline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-outline.md)
+- [Configure Paperless](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-paperless.md)
 - [Configure Piper](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-piper.md)
 - [Configure Plane](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-plane.md)
 - [Configure Plausible](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-plausible.md)
@@ -1445,6 +1448,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0283-live-apply: Live Apply ADR 0283 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0283-live-apply.md)
 - [Workstream ws-0284-live-apply: Live Apply ADR 0284 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0284-live-apply.md)
 - [Workstream ws-0284-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0284-main-merge.md)
+- [Workstream ws-0285-live-apply: Live Apply ADR 0285 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0285-live-apply.md)
 - [Workstream ws-0286-live-apply: Live Apply ADR 0286 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0286-live-apply.md)
 - [Workstream ws-0287-live-apply: ADR 0287 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0287-live-apply.md)
 - [Workstream ws-0288-crawl4ai-main-merge: ADR 0288 Crawl4AI Exact-Main Integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0288-crawl4ai-main-merge.md)
@@ -1795,6 +1799,7 @@ This repository is intentionally opinionated:
 | `0283` | Live apply Plausible Analytics from latest origin/main | `live_applied` | [ws-0283-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0283-live-apply.md) |
 | `0284` | Live apply Piper TTS from latest origin/main and capture the verified private voice path | `merged` | [ws-0284-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0284-live-apply.md) |
 | `0284` | Integrate ADR 0284 Piper exact-main replay into current origin/main | `live_applied` | [ws-0284-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0284-main-merge.md) |
+| `0285` | Live apply Paperless-ngx as the document archive API from latest origin/main | `live_applied` | [ws-0285-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0285-live-apply.md) |
 | `0286` | Live apply Tesseract OCR from latest origin/main on top of the current Apache Tika baseline | `merged` | [ws-0286-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0286-live-apply.md) |
 | `0287` | Live apply Woodpecker CI as the API-driven continuous integration server from latest origin/main | `merged` | [ws-0287-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0287-live-apply.md) |
 | `0288` | Integrate ADR 0288 Crawl4AI exact-main replay onto current origin/main | `merged` | [ws-0288-crawl4ai-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0288-crawl4ai-main-merge.md) |

@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 
 ## Unreleased
 
+- implemented ADR 0285 by bringing the Paperless document archive service, its OpenBao and Keycloak recovery hardening, and the corrected public smoke-upload verification path onto main
+
 ## Latest Release
 
 - [0.177.119 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.119.md)

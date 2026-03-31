@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.119",
   "platform_version": "0.130.77",
-  "generated_at": "2026-03-31T15:15:59Z",
-  "next_refresh_at": "2026-03-31T16:15:59Z",
+  "generated_at": "2026-03-31T17:53:53Z",
+  "next_refresh_at": "2026-03-31T18:53:53Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -520,6 +520,18 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://wiki.lv3.org",
+        "last_live_apply": "2026-03-31T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "paperless": {
+        "service_name": "Paperless-ngx",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://paperless.lv3.org",
         "last_live_apply": "2026-03-31T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -2155,6 +2167,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/platform-operations-portal.md"
+      },
+      {
+        "id": "converge-paperless",
+        "description": "Deploy the public Paperless-ngx archive on docker-runtime-lv3, refresh the governed API gateway route, and reconcile the repo-managed taxonomy and smoke verification path.",
+        "tags": [
+          "converge-paperless",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-paperless.md"
       },
       {
         "id": "converge-piper",
@@ -4776,6 +4814,16 @@
         "path": "docs/runbooks/configure-openfga.md",
         "workflow_ids": [
           "converge-openfga"
+        ]
+      },
+      {
+        "id": "configure-paperless",
+        "title": "Configure Paperless",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-paperless.md",
+        "workflow_ids": [
+          "converge-paperless"
         ]
       },
       {

@@ -2158,8 +2158,8 @@ workstreams:
     title: Live apply Paperless-ngx as the document archive API from latest origin/main
     status: live_applied
     owner: codex
-    branch: codex/ws-0285-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-live-apply
+    branch: codex/ws-0285-main-integration-r2
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration-r2
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0285-live-apply.md
     depends_on:
       - adr-0021-public-subdomain-publication
@@ -2300,7 +2300,7 @@ workstreams:
         archive service, its OpenBao and Keycloak recovery hardening, and the
         corrected public smoke-upload verification path onto main
       release_bump: patch
-      included_in_repo_version: 0.177.116
+      included_in_repo_version: null
       latest_receipts:
         paperless: 2026-03-31-adr-0285-paperless-live-apply
   - id: ws-0295-live-apply

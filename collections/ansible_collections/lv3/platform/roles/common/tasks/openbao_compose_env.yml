@@ -119,17 +119,30 @@
   until: common_openbao_compose_env_seal_status.status == 200
   changed_when: false
 
+- name: Record the local OpenBao unseal keys for runtime secret injection
+  ansible.builtin.set_fact:
+    common_openbao_compose_env_unseal_keys: >-
+      {{
+        common_openbao_compose_env_init_payload.keys_base64[
+          :
+          (
+            common_openbao_compose_env_init_payload.secret_threshold
+            | default(common_openbao_compose_env_init_payload.keys_base64 | length, true)
+            | int
+          )
+        ]
+      }}
+    common_openbao_unseal_progress: "{{ common_openbao_compose_env_seal_status }}"
+  no_log: true
+
 - name: Unseal the local OpenBao API when runtime secret injection finds it sealed
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/unseal"
-    method: POST
-    body_format: json
-    body:
-      key: "{{ item }}"
-    status_code: 200
-  loop: "{{ common_openbao_compose_env_init_payload.keys_base64[: (openbao_init_key_threshold | default(2) | int)] }}"
-  register: common_openbao_compose_env_unseal_result
-  when: common_openbao_compose_env_seal_status.json.sealed | bool
+  ansible.builtin.include_tasks: openbao_unseal_progress_step.yml
+  loop: "{{ common_openbao_compose_env_unseal_keys }}"
+  loop_control:
+    loop_var: common_openbao_unseal_key
+  vars:
+    common_openbao_unseal_api_url: "http://127.0.0.1:{{ openbao_http_port }}"
+  when: common_openbao_unseal_progress.json.sealed | bool
   no_log: true
 
 - name: Confirm the local OpenBao API is unsealed
@@ -141,7 +154,9 @@
   register: common_openbao_compose_env_unsealed_status
   retries: 12
   delay: 2
-  until: common_openbao_compose_env_unsealed_status.status == 200
+  until:
+    - common_openbao_compose_env_unsealed_status.status == 200
+    - not (common_openbao_compose_env_unsealed_status.json.sealed | bool)
   changed_when: false
 
 - name: Assert the local OpenBao API is unsealed before runtime secret injection

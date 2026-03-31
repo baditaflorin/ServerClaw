@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import ipaddress
 import json
 import os
 import shlex
@@ -130,27 +131,70 @@ def snapshot_id_from_backup_stdout(stdout: str) -> str | None:
     return None
 
 
-def resolve_minio_endpoint(catalog: dict[str, Any]) -> tuple[str, str]:
-    controller_host = catalog.get("controller_host", {})
-    minio = controller_host.get("minio", {})
-    container_name = str(minio.get("container_name") or "").strip()
-    if not container_name:
-        raise ValueError("restic catalog is missing controller_host.minio.container_name")
+def inspect_container_state(container_name: str) -> dict[str, Any]:
     inspect = run_command(
         [
             "docker",
             "inspect",
             container_name,
             "--format",
-            "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}",
+            "{{json .State}}",
         ]
     )
     if inspect.returncode != 0:
         detail = inspect.stderr.strip() or inspect.stdout.strip() or f"failed to inspect {container_name}"
         raise RuntimeError(detail)
-    host = inspect.stdout.strip()
-    if not host:
+    try:
+        state = json.loads(inspect.stdout.strip() or "{}")
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"unable to parse Docker state for {container_name}") from exc
+    if not isinstance(state, dict):
+        raise RuntimeError(f"Docker state for {container_name} must be an object")
+    return state
+
+
+def ensure_container_running(container_name: str) -> None:
+    state = inspect_container_state(container_name)
+    if bool(state.get("Running")):
+        return
+    start = run_command(["docker", "start", container_name])
+    if start.returncode != 0:
+        detail = start.stderr.strip() or start.stdout.strip() or f"failed to start {container_name}"
+        raise RuntimeError(detail)
+
+
+def resolve_minio_endpoint(catalog: dict[str, Any]) -> tuple[str, str]:
+    controller_host = catalog.get("controller_host", {})
+    minio = controller_host.get("minio", {})
+    container_name = str(minio.get("container_name") or "").strip()
+    if not container_name:
+        raise ValueError("restic catalog is missing controller_host.minio.container_name")
+    ensure_container_running(container_name)
+    inspect = run_command(
+        [
+            "docker",
+            "inspect",
+            container_name,
+            "--format",
+            "{{range .NetworkSettings.Networks}}{{if .IPAddress}}{{.IPAddress}} {{end}}{{end}}",
+        ]
+    )
+    if inspect.returncode != 0:
+        detail = inspect.stderr.strip() or inspect.stdout.strip() or f"failed to inspect {container_name}"
+        raise RuntimeError(detail)
+    addresses: list[str] = []
+    for token in inspect.stdout.split():
+        candidate = token.strip()
+        if not candidate:
+            continue
+        try:
+            ipaddress.ip_address(candidate)
+        except ValueError:
+            continue
+        addresses.append(candidate)
+    if not addresses:
         raise RuntimeError(f"{container_name} has no reachable container IP")
+    host = addresses[0]
     return host, f"http://{host}:9000"
 
 
@@ -602,6 +646,34 @@ def refresh_latest_snapshot_receipt_for_live_apply(
     }
 
 
+def build_live_apply_latest_snapshot_receipt(
+    *,
+    existing_receipt: dict[str, Any] | None,
+    resolved_sources: list[Source],
+    live_apply_sources: list[Source],
+    source_results: list[dict[str, Any]],
+    repo_root: Path,
+    endpoint: str,
+    host_name: str,
+    generated_at: datetime,
+    bucket: str,
+) -> dict[str, Any]:
+    # Live-apply hooks should never force a repository-wide snapshot scan. If the
+    # cached latest receipt is unavailable, synthesize a narrowed receipt from the
+    # live-apply sources we just backed up and let the scheduled backup refresh the
+    # full repository-wide snapshot view later.
+    return refresh_latest_snapshot_receipt_for_live_apply(
+        existing_receipt=existing_receipt or {},
+        sources=resolved_sources if existing_receipt is not None else live_apply_sources,
+        source_results=source_results,
+        repo_root=repo_root,
+        endpoint=endpoint,
+        host_name=host_name,
+        generated_at=generated_at,
+        bucket=bucket,
+    )
+
+
 def write_json(path: Path, payload: dict[str, Any]) -> None:
     ensure_directory(path.parent)
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
@@ -1006,10 +1078,11 @@ def main(argv: list[str] | None = None) -> int:
             cache_dir=args.cache_dir,
         )
         existing_latest_receipt = load_existing_latest_snapshot_receipt(args.latest_snapshot_receipt)
-        if args.live_apply_trigger and existing_latest_receipt is not None:
-            latest_receipt = refresh_latest_snapshot_receipt_for_live_apply(
+        if args.live_apply_trigger:
+            latest_receipt = build_live_apply_latest_snapshot_receipt(
                 existing_receipt=existing_latest_receipt,
-                sources=resolved_sources,
+                resolved_sources=resolved_sources,
+                live_apply_sources=selected_sources,
                 source_results=source_results,
                 repo_root=repo_root,
                 endpoint=endpoint,
