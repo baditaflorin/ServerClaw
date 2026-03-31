@@ -19,11 +19,6 @@ argument_specs:
         required: true
         description:
           - Systemd service name used to manage PostgreSQL.
-      postgres_vm_max_connections:
-        type: int
-        required: true
-        description:
-          - Maximum concurrent PostgreSQL connections reserved for the managed guest.
       postgres_vm_nftables_config_file:
         type: path
         required: true
