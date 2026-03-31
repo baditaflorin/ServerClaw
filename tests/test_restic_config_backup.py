@@ -394,7 +394,7 @@ def test_resolve_minio_endpoint_recovers_compose_managed_container(monkeypatch) 
     def fake_run_command(argv, **kwargs):
         nonlocal inspect_count
         calls.append(argv)
-        if argv == ["docker", "inspect", "outline-minio"]:
+        if argv == ["docker", "inspect", "minio"]:
             inspect_count += 1
             running = inspect_count > 1
             return types.SimpleNamespace(
@@ -429,16 +429,14 @@ def test_resolve_minio_endpoint_recovers_compose_managed_container(monkeypatch) 
     monkeypatch.setattr(restic_backup.time, "sleep", lambda _: None)
     monkeypatch.setattr(restic_backup.urllib.request, "urlopen", lambda *args, **kwargs: FakeResponse())
 
-    host, endpoint = restic_backup.resolve_minio_endpoint(
-        {"controller_host": {"minio": {"container_name": "outline-minio"}}}
-    )
+    host, endpoint = restic_backup.resolve_minio_endpoint({"controller_host": {"minio": {"container_name": "minio"}}})
 
     assert host == "10.200.18.2"
     assert endpoint == "http://10.200.18.2:9000"
     assert calls == [
-        ["docker", "inspect", "outline-minio"],
+        ["docker", "inspect", "minio"],
         ["docker", "compose", "--file", "/opt/outline/docker-compose.yml", "up", "-d", "minio"],
-        ["docker", "inspect", "outline-minio"],
+        ["docker", "inspect", "minio"],
     ]
 
 
@@ -507,9 +505,11 @@ def test_repo_surfaces_register_restic_backup_contract() -> None:
     assert "restic-config-backup" in workflow_catalog
     assert "restic-config-restore-verify" in workflow_catalog
     assert "converge-restic-config-backup" in workflow_catalog
+    assert workflow_catalog["converge-restic-config-backup"]["preflight"]["required_secret_ids"][1] == "minio_root_password"
     assert command_catalog["run-restic-config-backup"]["workflow_id"] == "restic-config-backup"
     assert command_catalog["run-restic-config-restore-verify"]["workflow_id"] == "restic-config-restore-verify"
     assert command_catalog["converge-restic-config-backup"]["workflow_id"] == "converge-restic-config-backup"
+    assert command_catalog["converge-restic-config-backup"]["inputs"][1]["name"] == "minio_root_password"
     assert "playbooks/restic-config-backup.yml" in execution_scopes
 
 

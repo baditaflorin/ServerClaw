@@ -31,8 +31,10 @@ restic_config_backup_latest_snapshot_receipt: "{{ restic_config_backup_repo_chec
 restic_config_backup_restore_verification_dir: "{{ restic_config_backup_repo_checkout_host_path }}/receipts/restic-restore-verifications"
 restic_config_backup_repository_password_local_file: >-
   {{ restic_config_backup_controller_repo_common_root }}/.local/restic-config-backup/repository-password.txt
+restic_config_backup_minio_container_name: minio
+restic_config_backup_minio_access_key: minio-root
 restic_config_backup_minio_secret_key_local_file: >-
-  {{ restic_config_backup_controller_repo_common_root }}/.local/outline/minio-root-password.txt
+  {{ restic_config_backup_controller_repo_common_root }}/.local/minio/root-password.txt
 restic_config_backup_nats_password_local_file: >-
   {{ restic_config_backup_controller_repo_common_root }}/.local/nats/jetstream-admin-password.txt
 restic_config_backup_ntfy_password_local_file: >-

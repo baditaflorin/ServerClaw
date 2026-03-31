@@ -44,6 +44,9 @@ def test_edge_sites_preserve_proxy_hardening_fields() -> None:
                     "noindex": True,
                     "proxy_hide_headers": ["X-Grafana-Version", "Via"],
                     "blocked_exact_paths": [{"path": "/api/health", "status": 404}],
+                    "crawl_policy_enabled": False,
+                    "preserve_upstream_security_headers": True,
+                    "security_headers_enabled": False,
                 },
             }
         }
@@ -56,6 +59,9 @@ def test_edge_sites_preserve_proxy_hardening_fields() -> None:
             "upstream": "http://10.10.10.40:3000",
             "proxy_hide_headers": ["X-Grafana-Version", "Via"],
             "blocked_exact_paths": [{"path": "/api/health", "status": 404}],
+            "crawl_policy_enabled": False,
+            "preserve_upstream_security_headers": True,
+            "security_headers_enabled": False,
         }
     ]
 
@@ -163,3 +169,34 @@ def test_edge_certificate_domains_include_aliases() -> None:
     )
 
     assert domains == ["*.apps.lv3.org", "apps.lv3.org"]
+
+
+def test_service_topology_dns_records_include_additional_records() -> None:
+    filters = load_module()
+    records = filters.service_topology_dns_records(
+        {
+            "minio": {
+                "dns": {
+                    "managed": True,
+                    "visibility": "public",
+                    "name": "minio",
+                    "type": "A",
+                    "target": "65.108.75.123",
+                    "ttl": 60,
+                    "additional_records": [
+                        {
+                            "name": "minio-console",
+                            "type": "A",
+                            "target": "65.108.75.123",
+                            "ttl": 60,
+                        }
+                    ],
+                }
+            }
+        }
+    )
+
+    assert records == [
+        {"name": "minio", "type": "A", "value": "65.108.75.123", "ttl": 60},
+        {"name": "minio-console", "type": "A", "value": "65.108.75.123", "ttl": 60},
+    ]

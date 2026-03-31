@@ -26,6 +26,7 @@ This runbook converges the dedicated monitoring VM `140` at `10.10.10.40` with:
 - Alloy-based log shipping from the Proxmox host and all managed guests into Loki
 - NGINX access and error log shipping from `nginx-lv3`
 - Docker container log shipping from `docker-runtime-lv3`
+- shared MinIO object storage for the Loki chunk backend after the 2026-03-30 schema cutover
 
 Grafana is available both on the private VM and at [https://grafana.lv3.org](https://grafana.lv3.org).
 The public hostname is operator-facing only: anonymous dashboard access is denied, public dashboard sharing is disabled, and the public edge now returns `404` for `/api/health` so the external surface does not disclose the running Grafana version.
@@ -40,6 +41,7 @@ make converge-monitoring
 
 - The shared monitoring converge path validates Alertmanager delivery into the private ntfy paging gateway and expects the controller-local secret file `.local/ntfy/alertmanager-password.txt`.
 - If that file is missing in a fresh worktree, run `make converge-ntfy` first or materialize the existing controller-local secret before rerunning `make converge-monitoring`.
+- The Loki chunk backend now also expects `.local/monitoring/loki-minio-secret-key.txt`; if it is missing, rerun `make converge-minio` before replaying the monitoring stack.
 
 ## What the playbook does
 
@@ -65,6 +67,7 @@ make converge-monitoring
 20. Exposes a shared OTLP endpoint for traced internal services such as the private mail gateway.
 21. Installs Grafana Alloy on `proxmox_florin` and every managed guest, labels log streams consistently, and ships host journald, guest journald, NGINX file logs, and Docker container logs into Loki.
 22. Installs Loki Canary on `monitoring-lv3`, scrapes its assurance metrics in Prometheus, imports the `LV3 Log Canary` Grafana dashboard, and alerts when the log-path canary stops being writable or queryable.
+23. Keeps Loki on the existing filesystem schema for pre-2026-03-30 data while writing post-cutover chunks to the shared MinIO bucket `loki-chunks`.
 
 ## Operator Access Flow
 
@@ -172,6 +175,12 @@ Verify Loki can still query the canary stream:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'start=$(date -u -d "15 minutes ago" +%s000000000); end=$(date -u +%s000000000); curl -fsSG --data-urlencode "query={name=\"loki-canary\",stream=\"stdout\"}" --data-urlencode limit=5 --data-urlencode start=$start --data-urlencode end=$end http://127.0.0.1:3100/loki/api/v1/query_range | jq -c .data.result'
+```
+
+Verify the shared-object-store cutover settings are present in Loki:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'sudo grep -E "object_store: s3|bucketnames: loki-chunks|delete_request_store: s3" /etc/loki/config.yml'
 ```
 
 If the canary raises alerts or one of these checks fails, continue in [docs/runbooks/log-queryability-canary.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/log-queryability-canary.md).
@@ -294,6 +303,7 @@ The control machine keeps one mirrored token outside git for host-side Proxmox c
 
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/proxmox-writer.token`
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/guest-writer.token`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/loki-minio-secret-key.txt`
 
 The shared trace ingress for instrumented private services is:
 

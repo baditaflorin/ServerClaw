@@ -215,6 +215,16 @@ public_edge_extra_sites:
     proxy_request_buffering: false
     proxy_read_timeout_seconds: 900
     proxy_send_timeout_seconds: 900
+  - hostname: minio-console.lv3.org
+    kind: proxy
+    upstream: "http://10.10.10.20:{{ platform_port_assignments.minio_console_port }}"
+    client_max_body_size: 0
+    chunked_transfer_encoding: true
+    proxy_request_buffering: false
+    proxy_read_timeout_seconds: 900
+    proxy_send_timeout_seconds: 900
+    security_headers_enabled: false
+    preserve_upstream_security_headers: true
   - hostname: changelog.lv3.org
     kind: static_dir
     source_dir: changelog-portal
@@ -249,6 +259,8 @@ public_edge_authenticated_sites:
     unauthenticated_paths:
       - /healthz
   langfuse.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+  minio-console.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
   tasks.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180

@@ -32,6 +32,9 @@ def test_defaults_pin_repo_checkout_and_receipt_locations() -> None:
         "/receipts/restic-restore-verifications"
     )
     assert defaults["restic_config_backup_timer_name"] == "lv3-restic-config-backup.timer"
+    assert defaults["restic_config_backup_minio_container_name"] == "minio"
+    assert defaults["restic_config_backup_minio_access_key"] == "minio-root"
+    assert defaults["restic_config_backup_minio_secret_key_local_file"].endswith("/.local/minio/root-password.txt")
 
 
 def test_minio_bucket_bootstrap_keeps_mc_alias_and_commands_in_one_exec_session() -> None:
@@ -40,12 +43,43 @@ def test_minio_bucket_bootstrap_keeps_mc_alias_and_commands_in_one_exec_session(
     shell = bootstrap_task["ansible.builtin.shell"]
 
     assert shell.count("docker exec") == 1
-    assert "docker inspect --format '{% raw %}{{.State.Running}}{% endraw %}' outline-minio" in shell
-    assert "docker start outline-minio >/dev/null" in shell
-    assert "outline-minio sh -ceu" in shell
-    assert "mc alias set local http://127.0.0.1:9000 minio \"$MINIO_ROOT_PASSWORD\"" in shell
+    assert "docker inspect --format '{% raw %}{{.State.Running}}{% endraw %}' {{ restic_config_backup_minio_container_name | quote }}" in shell
+    assert "docker start {{ restic_config_backup_minio_container_name | quote }} >/dev/null" in shell
+    assert "{{ restic_config_backup_minio_container_name | quote }} sh -ceu" in shell
+    assert "-e MINIO_ROOT_USER={{ restic_config_backup_minio_access_key | quote }}" in shell
+    assert "mc alias set local http://127.0.0.1:9000 \"$MINIO_ROOT_USER\" \"$MINIO_ROOT_PASSWORD\"" in shell
     assert "mc mb --ignore-existing --with-lock local/restic-config-backup" in shell
     assert "mc version enable local/restic-config-backup" in shell
+
+
+def test_runtime_support_files_are_staged_into_worker_checkout_before_validation_run() -> None:
+    tasks = load_tasks()
+    sync_task = next(task for task in tasks if task.get("name") == "Sync restic runtime support files into the worker checkout")
+
+    assert sync_task["ansible.builtin.copy"]["dest"] == "{{ restic_config_backup_repo_checkout_host_path }}/{{ item.dest }}"
+    loop = sync_task["loop"]
+    assert loop == [
+        {
+            "src": "{{ playbook_dir | dirname }}/scripts/restic_config_backup.py",
+            "dest": "scripts/restic_config_backup.py",
+            "mode": "0755",
+        },
+        {
+            "src": "{{ playbook_dir | dirname }}/scripts/script_bootstrap.py",
+            "dest": "scripts/script_bootstrap.py",
+            "mode": "0644",
+        },
+        {
+            "src": "{{ playbook_dir | dirname }}/scripts/controller_automation_toolkit.py",
+            "dest": "scripts/controller_automation_toolkit.py",
+            "mode": "0644",
+        },
+        {
+            "src": "{{ playbook_dir | dirname }}/config/restic-file-backup-catalog.json",
+            "dest": "config/restic-file-backup-catalog.json",
+            "mode": "0644",
+        },
+    ]
 
 
 def test_service_template_allows_runtime_state_and_receipts_writes() -> None:

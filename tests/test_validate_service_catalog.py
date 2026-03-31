@@ -1,4 +1,5 @@
 import io
+import copy
 import sys
 import unittest
 from contextlib import redirect_stdout
@@ -127,6 +128,24 @@ class ValidateServiceCatalogTest(unittest.TestCase):
         }
 
         with self.assertRaisesRegex(ValueError, "stage_ready requires at least one smoke suite id"):
+            service_catalog.validate_service_catalog(catalog)
+
+    def test_repo_catalog_minio_uses_explicit_adr_file_for_duplicated_number(self) -> None:
+        catalog = service_catalog.load_service_catalog()
+        minio = next(item for item in catalog["services"] if item["id"] == "minio")
+
+        self.assertEqual(minio["adr"], "0274")
+        self.assertEqual(
+            minio["adr_file"],
+            "docs/adr/0274-minio-as-the-s3-compatible-object-storage-layer.md",
+        )
+
+    def test_ambiguous_adr_requires_explicit_adr_file(self) -> None:
+        catalog = copy.deepcopy(service_catalog.load_service_catalog())
+        minio = next(item for item in catalog["services"] if item["id"] == "minio")
+        minio.pop("adr_file", None)
+
+        with self.assertRaisesRegex(ValueError, r"adr_file is required because ADR 0274 resolves to multiple files"):
             service_catalog.validate_service_catalog(catalog)
 
 

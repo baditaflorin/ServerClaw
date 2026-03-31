@@ -57,7 +57,7 @@ plane_backend_image: "{{ container_image_catalog.images.plane_backend_runtime.re
 plane_proxy_image: "{{ container_image_catalog.images.plane_proxy_runtime.ref }}"
 plane_valkey_image: "{{ container_image_catalog.images.netbox_redis_runtime.ref }}"
 plane_rabbitmq_image: "{{ container_image_catalog.images.plane_rabbitmq_runtime.ref }}"
-plane_minio_image: "{{ container_image_catalog.images.langfuse_minio_runtime.ref }}"
+plane_minio_image: "{{ container_image_catalog.images.minio_runtime.ref }}"
 plane_web_container_name: plane-web
 plane_space_container_name: plane-space
 plane_admin_container_name: plane-admin

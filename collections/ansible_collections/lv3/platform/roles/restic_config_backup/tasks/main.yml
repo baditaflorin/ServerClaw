@@ -174,16 +174,38 @@
     group: root
     mode: "0644"
 
+- name: Sync restic runtime support files into the worker checkout
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ restic_config_backup_repo_checkout_host_path }}/{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - src: "{{ playbook_dir | dirname }}/scripts/restic_config_backup.py"
+      dest: scripts/restic_config_backup.py
+      mode: "0755"
+    - src: "{{ playbook_dir | dirname }}/scripts/script_bootstrap.py"
+      dest: scripts/script_bootstrap.py
+      mode: "0644"
+    - src: "{{ playbook_dir | dirname }}/scripts/controller_automation_toolkit.py"
+      dest: scripts/controller_automation_toolkit.py
+      mode: "0644"
+    - src: "{{ playbook_dir | dirname }}/config/restic-file-backup-catalog.json"
+      dest: config/restic-file-backup-catalog.json
+      mode: "0644"
+
 - name: Ensure the MinIO restic bucket exists with object lock
   ansible.builtin.shell: |
     set -euo pipefail
-    if [ "$(docker inspect --format '{% raw %}{{.State.Running}}{% endraw %}' outline-minio)" != "true" ]; then
-      docker start outline-minio >/dev/null
+    if [ "$(docker inspect --format '{% raw %}{{.State.Running}}{% endraw %}' {{ restic_config_backup_minio_container_name | quote }})" != "true" ]; then
+      docker start {{ restic_config_backup_minio_container_name | quote }} >/dev/null
     fi
     docker exec \
+      -e MINIO_ROOT_USER={{ restic_config_backup_minio_access_key | quote }} \
       -e MINIO_ROOT_PASSWORD={{ restic_config_backup_minio_secret_key | quote }} \
-      outline-minio sh -ceu '
-        mc alias set local http://127.0.0.1:9000 minio "$MINIO_ROOT_PASSWORD" >/dev/null
+      {{ restic_config_backup_minio_container_name | quote }} sh -ceu '
+        mc alias set local http://127.0.0.1:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD" >/dev/null
         mc mb --ignore-existing --with-lock local/restic-config-backup >/dev/null
         mc version enable local/restic-config-backup >/dev/null
       '

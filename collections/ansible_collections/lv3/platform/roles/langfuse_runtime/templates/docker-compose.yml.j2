@@ -41,21 +41,6 @@ services:
       - {{ langfuse_clickhouse_data_dir }}:/var/lib/clickhouse
       - {{ langfuse_clickhouse_log_dir }}:/var/log/clickhouse-server
 
-  minio:
-    image: {{ langfuse_minio_image }}
-    container_name: {{ langfuse_minio_container_name }}
-    restart: unless-stopped
-    command:
-      - server
-      - --console-address
-      - :9001
-      - /data
-    environment:
-      MINIO_ROOT_USER: {{ langfuse_minio_root_user }}
-      MINIO_ROOT_PASSWORD: {{ langfuse_minio_root_password }}
-    volumes:
-      - {{ langfuse_minio_data_dir }}:/data
-
   redis:
     image: {{ langfuse_redis_image }}
     container_name: {{ langfuse_redis_container_name }}
@@ -86,8 +71,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      minio:
-        condition: service_started
       openbao-agent:
         condition: service_healthy
     env_file:
@@ -102,8 +85,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      minio:
-        condition: service_started
       langfuse-worker:
         condition: service_started
       openbao-agent:

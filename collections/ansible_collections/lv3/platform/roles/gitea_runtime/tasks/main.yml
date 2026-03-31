@@ -20,6 +20,9 @@
       - gitea_oidc_client_secret_local_file | length > 0
       - gitea_oidc_discovery_url | length > 0
       - gitea_oidc_internal_discovery_url | length > 0
+      - gitea_minio_secret_key_local_file | length > 0
+      - gitea_minio_bucket_name | length > 0
+      - gitea_minio_endpoint | length > 0
       - gitea_admin_username | length > 0
       - gitea_admin_email | length > 0
       - gitea_admin_password_remote_file | length > 0
@@ -66,12 +69,26 @@
   become: false
   register: gitea_oidc_client_secret_local
 
+- name: Ensure the Gitea MinIO secret key exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ gitea_minio_secret_key_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: gitea_minio_secret_key_local
+
 - name: Fail if the Gitea OIDC client secret is missing locally
   ansible.builtin.fail:
     msg: >-
       {{ gitea_oidc_client_secret_local_file }} is missing on the control machine.
       Re-run the Keycloak converge so the Gitea OIDC client is provisioned before bootstrapping Gitea.
   when: not gitea_oidc_client_secret_local.stat.exists
+
+- name: Fail if the Gitea MinIO secret key is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ gitea_minio_secret_key_local_file }} is missing on the control machine.
+      Converge MinIO before deploying Gitea so the shared LFS object store credentials exist.
+  when: not gitea_minio_secret_key_local.stat.exists
 
 - name: Ensure the release-bundle Cosign private key exists on the control machine
   ansible.builtin.stat:
@@ -211,6 +228,7 @@
     gitea_admin_password: "{{ gitea_admin_password_raw.content | b64decode | trim }}"
     gitea_database_password: "{{ lookup('ansible.builtin.file', gitea_database_password_local_file) | trim }}"
     gitea_oidc_client_secret: "{{ lookup('ansible.builtin.file', gitea_oidc_client_secret_local_file) | trim }}"
+    gitea_minio_secret_key: "{{ lookup('ansible.builtin.file', gitea_minio_secret_key_local_file) | trim }}"
     gitea_renovate_password: "{{ gitea_renovate_password_raw.content | b64decode | trim }}"
     gitea_release_bundle_cosign_private_key: "{{ lookup('ansible.builtin.file', gitea_release_bundle_cosign_private_key_local_file) }}"
     gitea_release_bundle_cosign_password: "{{ lookup('ansible.builtin.file', gitea_release_bundle_cosign_password_local_file) | trim }}"
@@ -223,6 +241,7 @@
       GITEA__database__PASSWD: "{{ gitea_database_password }}"
       GITEA_ADMIN_PASSWORD: "{{ gitea_admin_password }}"
       GITEA_KEYCLOAK_CLIENT_SECRET: "{{ gitea_oidc_client_secret }}"
+      GITEA__lfs__MINIO_SECRET_ACCESS_KEY: "{{ gitea_minio_secret_key }}"
       GITEA_WEBHOOK_SECRET: "{{ gitea_webhook_secret }}"
   no_log: true
 
@@ -400,6 +419,17 @@
       - gitea_docker_nat_chain.rc == 0 or gitea_docker_nat_chain_recheck.rc == 0
     fail_msg: "Docker is running but the nat DOCKER chain is missing; Gitea published ports will fail."
 
+- name: Wait for the shared MinIO API endpoint used by Gitea LFS
+  ansible.builtin.uri:
+    url: "http://{{ gitea_minio_endpoint }}/minio/health/live"
+    method: GET
+    status_code: 200
+  register: gitea_minio_ready
+  retries: 60
+  delay: 5
+  until: gitea_minio_ready.status == 200
+  changed_when: false
+
 - name: Check whether the Gitea local port is already published
   ansible.builtin.wait_for:
     host: "{{ ansible_host }}"
@@ -562,15 +592,15 @@
   until: gitea_login_page.status == 200
   changed_when: false
 
-- name: Wait for the internal Keycloak OIDC discovery document before bootstrapping Gitea
+- name: Wait for the Keycloak OIDC discovery endpoint used by Gitea bootstrap
   ansible.builtin.uri:
     url: "{{ gitea_oidc_internal_discovery_url }}"
     method: GET
     status_code: 200
-  register: gitea_oidc_discovery
-  retries: 48
+  register: gitea_oidc_discovery_ready
+  retries: 60
   delay: 5
-  until: gitea_oidc_discovery.status == 200
+  until: gitea_oidc_discovery_ready.status == 200
   changed_when: false
 
 - name: Run the Gitea bootstrap script

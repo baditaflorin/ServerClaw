@@ -12,9 +12,16 @@ common:
 
 schema_config:
   configs:
-    - from: "2026-03-22"
+    - from: "{{ monitoring_loki_filesystem_schema_start_date }}"
       store: tsdb
       object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+    - from: "{{ monitoring_loki_minio_schema_cutover_date }}"
+      store: tsdb
+      object_store: s3
       schema: v13
       index:
         prefix: index_
@@ -26,6 +33,14 @@ storage_config:
     cache_location: {{ monitoring_loki_data_dir }}/index_cache
   filesystem:
     directory: {{ monitoring_loki_data_dir }}/chunks
+  aws:
+    bucketnames: {{ monitoring_loki_minio_bucket_name }}
+    endpoint: {{ monitoring_loki_minio_endpoint }}
+    region: {{ monitoring_loki_minio_region }}
+    access_key_id: {{ monitoring_loki_minio_access_key_id }}
+    secret_access_key: {{ monitoring_loki_minio_secret_key }}
+    insecure: true
+    s3forcepathstyle: true
 
 limits_config:
   max_query_lookback: {{ monitoring_loki_retention_control_plane }}
@@ -42,7 +57,7 @@ compactor:
   working_directory: {{ monitoring_loki_data_dir }}/retention
   compaction_interval: 10m
   retention_enabled: true
-  delete_request_store: filesystem
+  delete_request_store: s3
 
 analytics:
   reporting_enabled: false

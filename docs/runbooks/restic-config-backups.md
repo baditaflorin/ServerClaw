@@ -31,13 +31,15 @@ runtime.
    `/run/lv3-systemd-credentials/restic-config-backup/runtime-config.json`.
 3. The `lv3-restic-config-backup.service` and `lv3-restic-config-backup.timer`
    systemd units.
-4. The MinIO bucket `restic-config-backup` with Object Lock and versioning.
+4. The minimal worker-checkout support files required by the timer and manual
+   entrypoints.
+5. The MinIO bucket `restic-config-backup` with Object Lock and versioning.
 
-When `docker-runtime-lv3` has gone through a broad Docker recovery, `outline-minio`
-may exist but remain stopped. The repo-managed converge task and live-apply trigger
-now treat that as recoverable and start the container before bucket bootstrap or
-Restic endpoint discovery instead of failing on the stale `invalid IP` inspect
-result.
+When `docker-runtime-lv3` has gone through a broad Docker recovery, the shared
+`minio` container may exist but remain stopped. The repo-managed converge task
+and live-apply trigger now treat that as recoverable and start the container
+before bucket bootstrap or Restic endpoint discovery instead of failing on the
+stale `invalid IP` inspect result.
 
 ## Verification
 
@@ -63,11 +65,20 @@ make backup-coverage-ledger
 
 ## Notes
 
-- The manual and Windmill paths both execute the mirrored worker checkout at
-  `/srv/proxmox_florin_server`; keep the Windmill checkout current before
-  relying on the live backup helpers.
-- The MinIO endpoint is resolved from the live `outline-minio` container IP
+- The manual, timer, and Windmill paths all execute the mirrored worker checkout
+  at `/srv/proxmox_florin_server`. The converge role and live-apply trigger
+  stage the minimal backup support files there before validation runs, but the
+  broader worker checkout should still be kept current for ongoing scheduled use.
+- The MinIO endpoint is resolved from the live shared `minio` container IP
   instead of assuming a host-published port.
 - Stale notifications are best-effort: NATS publication and ntfy delivery are
   recorded in the backup receipt, but a notification failure does not discard a
   successful Restic snapshot receipt.
+- If a backup run is interrupted and the next replay reports `repository is
+  already locked`, confirm the named PID on `docker-runtime-lv3` is gone and
+  then clear the stale repository lock with `restic unlock` before retrying the
+  managed workflow.
+- If the shared MinIO layer or the Restic path starts hanging after a broader
+  Docker-runtime recovery, check `/` headroom on `docker-runtime-lv3` and
+  follow [docker-runtime-disk-pressure.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/docs/runbooks/docker-runtime-disk-pressure.md)
+  before replaying the managed backup or MinIO live-apply wrapper.

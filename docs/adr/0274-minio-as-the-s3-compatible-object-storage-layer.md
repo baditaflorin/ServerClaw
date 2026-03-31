@@ -1,9 +1,10 @@
 # ADR 0274: MinIO As The S3-Compatible Object Storage Layer
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.124
+- Implemented In Platform Version: 0.130.79
+- Implemented On: 2026-03-31
 - Date: 2026-03-29
 
 ## Context

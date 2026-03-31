@@ -1294,6 +1294,68 @@
         "reason": "Mailpit is intentionally private-only and is verified through role-level HTTP and SMTP probes instead of an always-on public monitor."
       }
     },
+    "minio": {
+      "service_name": "minio",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "minio_runtime",
+      "verify_file": "roles/minio_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "MinIO startup completes once the local ready endpoint reports the S3 API is ready to serve requests.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:9010/minio/health/ready",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The MinIO live health endpoint responds on the local S3 API listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:9010/minio/health/live",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The MinIO ready health endpoint confirms the shared object store is ready for bucket operations.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:9010/minio/health/ready",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "tls_certificate_ids": [
+        "minio-edge",
+        "minio-console-edge"
+      ],
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "MinIO Public Health",
+          "type": "http",
+          "url": "https://minio.lv3.org/minio/health/live",
+          "description": "Public MinIO S3 API health endpoint published through the shared NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
     "redpanda": {
       "service_name": "redpanda",
       "owning_vm": "docker-runtime-lv3",
