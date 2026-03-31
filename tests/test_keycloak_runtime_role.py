@@ -60,6 +60,14 @@ def test_defaults_define_internal_mail_submission_for_realm_mail() -> None:
         "{{ keycloak_jupyterhub_root_url }}/",
         "{{ keycloak_session_authority.shared_proxy_cleanup_url }}",
     ]
+    assert defaults["keycloak_paperless_client_id"] == "paperless"
+    assert defaults["keycloak_paperless_client_secret_local_file"].endswith("/.local/keycloak/paperless-client-secret.txt")
+    assert defaults["keycloak_paperless_root_url"] == "https://paperless.lv3.org"
+    assert defaults["keycloak_paperless_post_logout_redirect_uris"] == [
+        "{{ keycloak_paperless_root_url }}",
+        "{{ keycloak_paperless_root_url }}/",
+        "{{ keycloak_session_authority.shared_proxy_cleanup_url }}",
+    ]
     assert smtp_server["auth"] == "{{ keycloak_mail_platform_submission_auth_enabled }}"
     assert smtp_server["host"] == "{{ keycloak_mail_platform_submission_host }}"
     assert smtp_server["port"] == "{{ keycloak_mail_platform_submission_port }}"
@@ -474,6 +482,30 @@ def test_role_manages_jupyterhub_client_secret() -> None:
     )
     assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_jupyterhub_client_id }}"
     assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_jupyterhub_client_secret_local_file }}"
+
+
+def test_role_manages_paperless_client_secret() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    tasks = load_tasks()
+    realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
+    paperless_client_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Ensure the Paperless OAuth client exists"
+    )
+    read_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the Paperless client secret")
+    mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the Paperless client secret to the control machine")
+
+    assert defaults["keycloak_paperless_client_id"] == "paperless"
+    assert defaults["keycloak_paperless_client_secret_local_file"].endswith("/.local/keycloak/paperless-client-secret.txt")
+    assert defaults["keycloak_paperless_root_url"] == "https://paperless.lv3.org"
+    assert paperless_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_paperless_client_id }}"
+    assert paperless_client_task["community.general.keycloak_client"]["redirect_uris"] == [
+        "{{ keycloak_paperless_root_url }}/accounts/oidc/keycloak/login/callback/"
+    ]
+    assert paperless_client_task["community.general.keycloak_client"]["valid_post_logout_redirect_uris"] == (
+        "{{ keycloak_paperless_post_logout_redirect_uris }}"
+    )
+    assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_paperless_client_id }}"
+    assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_paperless_client_secret_local_file }}"
 
 
 def test_role_manages_serverclaw_client_secret() -> None:

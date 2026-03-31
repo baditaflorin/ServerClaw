@@ -338,6 +338,19 @@
     ]
   },
   {
+    "name": "Paperless Public Health",
+    "type": "http",
+    "url": "https://paperless.lv3.org/",
+    "description": "Public Paperless root published through the shared NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": [
+      "200-399"
+    ]
+  },
+  {
     "name": "Plane Public",
     "type": "http",
     "url": "https://tasks.lv3.org/",

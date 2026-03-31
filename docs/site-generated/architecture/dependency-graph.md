@@ -18,7 +18,7 @@ Generated from `config/dependency-graph.json`.
 | Tier | Services |
 | --- | --- |
 | `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Harbor, Headscale, JupyterHub, Mail Platform, Mailpit, NATS JetStream, NGINX Edge, Netdata Realtime Metrics, Nomad, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, Gotenberg, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Temporal, Tesseract OCR, Vaultwarden, Windmill, n8n |
+| `2` | Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, Gotenberg, Keycloak, Langfuse, Matrix Synapse, Mattermost, NetBox, Nextcloud, Open WebUI, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Semaphore, ServerClaw, Temporal, Tesseract OCR, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway, Woodpecker CI |
 | `4` | Ops Portal |
 
@@ -75,6 +75,7 @@ graph TD
     open_webui["Open WebUI\nTier 2"]
     openfga["OpenFGA\nTier 2"]
     outline["Outline\nTier 2"]
+    paperless["Paperless-ngx\nTier 2"]
     plane["Plane\nTier 2"]
     plausible["Plausible Analytics\nTier 2"]
     status_page["Public Status Page\nTier 2"]
@@ -185,6 +186,12 @@ graph TD
     outline -->|soft| nginx_edge
     outline -->|startup_only| openbao
     outline -->|hard| postgres
+    paperless -->|soft| api_gateway
+    paperless -->|hard| docker_runtime
+    paperless -->|soft| keycloak
+    paperless -->|soft| nginx_edge
+    paperless -->|startup_only| openbao
+    paperless -->|hard| postgres
     plane -->|soft| keycloak
     plane -->|soft| nginx_edge
     plane -->|startup_only| openbao

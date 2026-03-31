@@ -461,6 +461,34 @@
       "notes": "Netdata stores short-lived host and guest metrics for live operator troubleshooting and anomaly triage; long-term retention remains outside the scope of this service."
     },
     {
+      "id": "paperless-document-archive",
+      "service": "paperless",
+      "name": "Paperless document archive",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "break_glass",
+      "pii_risk": "high",
+      "locations": [
+        "Docker volumes paperless-media, paperless-data, paperless-export, and paperless-consume on docker-runtime-lv3"
+      ],
+      "notes": "Paperless stores uploaded source files, OCR output, and exportable archive artifacts that must remain recoverable."
+    },
+    {
+      "id": "paperless-document-metadata",
+      "service": "paperless",
+      "name": "Paperless document metadata",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "break_glass",
+      "pii_risk": "high",
+      "locations": [
+        "Paperless PostgreSQL database on postgres-lv3"
+      ],
+      "notes": "Paperless stores document metadata, taxonomy, correspondents, and operator actions alongside the archive state."
+    },
+    {
       "id": "nextcloud-account-metadata",
       "service": "nextcloud",
       "name": "Nextcloud account and sharing metadata",

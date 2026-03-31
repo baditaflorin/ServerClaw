@@ -49,7 +49,7 @@ for the platform.
   accounts are disabled except for the break-glass admin account whose
   password is stored in OpenBao (ADR 0077)
 - The service is published under the platform subdomain model (ADR 0021) at
-  `docs.<domain>`; the REST API is at `docs.<domain>/api/`
+  `paperless.<domain>`; the REST API is at `paperless.<domain>/api/`
 - Paperless-ngx uses the shared PostgreSQL cluster (ADR 0042) with a
   dedicated `paperless` database
 - The document media directory (original files, OCR text, thumbnails) is
@@ -90,6 +90,15 @@ for the platform.
 - the document `archive_serial_number` field is used to correlate Paperless
   records with external identifiers (e.g. invoice numbers, contract IDs)
   from upstream systems
+
+## Implementation Notes
+
+- The original draft reserved `docs.<domain>` for Paperless publication, but
+  that hostname is already the live developer portal from ADR 0094 and remains
+  protected by the shared portal-auth contract.
+- The implemented rollout therefore publishes Paperless at
+  `paperless.<domain>` so the document archive can be introduced without
+  displacing the existing docs surface.
 
 ## Consequences
 

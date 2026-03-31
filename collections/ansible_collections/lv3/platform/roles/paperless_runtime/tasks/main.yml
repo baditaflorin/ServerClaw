@@ -1,0 +1,503 @@
+---
+# Purpose: Deploy Paperless-ngx and reconcile the repo-managed document taxonomy.
+
+- name: Validate Paperless runtime inputs
+  ansible.builtin.assert:
+    that:
+      - paperless_site_dir | length > 0
+      - paperless_secret_dir | length > 0
+      - paperless_compose_file | length > 0
+      - paperless_env_file | length > 0
+      - paperless_internal_port | int > 0
+      - paperless_internal_base_url | length > 0
+      - paperless_public_base_url | length > 0
+      - paperless_database_password_local_file | length > 0
+      - paperless_keycloak_client_secret_local_file | length > 0
+      - paperless_sync_script | length > 0
+      - paperless_taxonomy_manifest | length > 0
+      - paperless_taxonomy_manifest_file | length > 0
+      - paperless_sync_report_file | length > 0
+      - paperless_api_token_file | length > 0
+      - paperless_api_token_local_file | length > 0
+      - paperless_image | length > 0
+      - paperless_redis_image | length > 0
+    fail_msg: >-
+      paperless_runtime requires runtime paths, image refs, database auth,
+      the Keycloak client secret, and taxonomy reconciliation inputs.
+
+- name: Check whether the Paperless database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ paperless_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: paperless_database_password_local
+
+- name: Check whether the Paperless Keycloak client secret exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ paperless_keycloak_client_secret_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: paperless_keycloak_client_secret_local
+
+- name: Fail if the Paperless database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ paperless_database_password_local_file }} is missing on the control machine.
+      Converge paperless_postgres before deploying Paperless.
+  when: not paperless_database_password_local.stat.exists
+
+- name: Fail if the Paperless Keycloak client secret is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ paperless_keycloak_client_secret_local_file }} is missing on the control machine.
+      Converge the Keycloak runtime before deploying Paperless.
+  when: not paperless_keycloak_client_secret_local.stat.exists
+
+- name: Ensure the Paperless runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Paperless runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ paperless_site_dir }}"
+      mode: "0755"
+    - path: "{{ paperless_secret_dir }}"
+      mode: "0700"
+
+- name: Ensure the Paperless controller-local artifact directory exists
+  ansible.builtin.file:
+    path: "{{ paperless_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the Paperless runtime secrets
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item.path }}" ]; then
+      umask 077
+      {{ item.command }} > "{{ item.path }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop:
+    - path: "{{ paperless_secret_key_remote_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ paperless_redis_password_remote_file }}"
+      command: "openssl rand -base64 24 | tr -d '\\n'"
+    - path: "{{ paperless_admin_password_remote_file }}"
+      command: "openssl rand -base64 24 | tr -d '\\n'"
+  register: paperless_secret_generation
+  changed_when: "'changed' in paperless_secret_generation.stdout"
+  no_log: true
+
+- name: Read the Paperless runtime secrets
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  register: paperless_secret_reads
+  loop:
+    - "{{ paperless_secret_key_remote_file }}"
+    - "{{ paperless_redis_password_remote_file }}"
+    - "{{ paperless_admin_password_remote_file }}"
+  no_log: true
+
+- name: Record the Paperless runtime secrets
+  ansible.builtin.set_fact:
+    paperless_secret_key: "{{ paperless_secret_reads.results[0].content | b64decode | trim }}"
+    paperless_redis_password: "{{ paperless_secret_reads.results[1].content | b64decode | trim }}"
+    paperless_admin_password: "{{ paperless_secret_reads.results[2].content | b64decode | trim }}"
+    paperless_database_password: "{{ lookup('ansible.builtin.file', paperless_database_password_local_file) | trim }}"
+    paperless_oidc_provider_json: >-
+      {{
+        {
+          'openid_connect': {
+            'APPS': [
+              {
+                'provider_id': paperless_keycloak_provider_id,
+                'name': 'Keycloak',
+                'client_id': paperless_keycloak_client_id,
+                'secret': lookup('ansible.builtin.file', paperless_keycloak_client_secret_local_file) | trim,
+                'settings': {
+                  'server_url': paperless_keycloak_issuer ~ '/.well-known/openid-configuration'
+                }
+              }
+            ]
+          }
+        } | to_json
+      }}
+    paperless_runtime_secret_payload:
+      PAPERLESS_DBPASS: "{{ lookup('ansible.builtin.file', paperless_database_password_local_file) | trim }}"
+      PAPERLESS_REDIS: "redis://:{{ paperless_secret_reads.results[1].content | b64decode | trim | urlencode | replace('/', '%2F') }}@broker:6379"
+      PAPERLESS_SECRET_KEY: "{{ paperless_secret_reads.results[0].content | b64decode | trim }}"
+      PAPERLESS_ADMIN_PASSWORD: "{{ paperless_secret_reads.results[2].content | b64decode | trim }}"
+      PAPERLESS_SOCIALACCOUNT_PROVIDERS: >-
+        {{
+          {
+            'openid_connect': {
+              'APPS': [
+                {
+                  'provider_id': paperless_keycloak_provider_id,
+                  'name': 'Keycloak',
+                  'client_id': paperless_keycloak_client_id,
+                  'secret': lookup('ansible.builtin.file', paperless_keycloak_client_secret_local_file) | trim,
+                  'settings': {
+                    'server_url': paperless_keycloak_issuer ~ '/.well-known/openid-configuration'
+                  }
+                }
+              ]
+            }
+          } | to_json
+        }}
+  no_log: true
+
+- name: Mirror the Paperless runtime secrets to the control machine
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.content }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  loop:
+    - dest: "{{ paperless_secret_key_local_file }}"
+      content: "{{ paperless_secret_key }}"
+    - dest: "{{ paperless_redis_password_local_file }}"
+      content: "{{ paperless_redis_password }}"
+    - dest: "{{ paperless_admin_password_local_file }}"
+      content: "{{ paperless_admin_password }}"
+  no_log: true
+
+- name: Persist the Paperless taxonomy manifest on the guest
+  ansible.builtin.copy:
+    dest: "{{ paperless_taxonomy_manifest_file }}"
+    content: "{{ paperless_taxonomy_manifest | to_nice_json }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Mirror the Paperless taxonomy manifest to the control machine
+  ansible.builtin.copy:
+    dest: "{{ paperless_taxonomy_local_file }}"
+    content: "{{ paperless_taxonomy_manifest | to_nice_json }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+
+- name: Prepare OpenBao agent runtime secret injection for Paperless
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: paperless
+    common_openbao_compose_env_agent_dir: "{{ paperless_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ paperless_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ paperless_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ paperless_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ paperless_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ paperless_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ paperless_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ paperless_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ paperless_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ paperless_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ paperless_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: paperless.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ paperless_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ paperless_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ paperless_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ paperless_legacy_env_file }}"
+  no_log: true
+
+- name: Render the Paperless environment file
+  ansible.builtin.template:
+    src: paperless.env.j2
+    dest: "{{ paperless_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  register: paperless_env_template
+  no_log: true
+
+- name: Render the Paperless compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ paperless_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: paperless_compose_template
+
+- name: Pull the Paperless images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ paperless_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ paperless_site_dir }}"
+  register: paperless_pull
+  changed_when: >-
+    'Pulling' in paperless_pull.stdout
+    or 'Downloaded newer image' in paperless_pull.stdout
+    or 'Pull complete' in paperless_pull.stdout
+
+- name: Check whether the Docker nat chain exists before Paperless startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: paperless_docker_nat_chain
+  changed_when: false
+  failed_when: false
+
+- name: Restore Docker networking when the nat chain is missing before Paperless startup
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: paperless_docker_nat_chain.rc != 0
+
+- name: Recheck the Docker nat chain before Paperless startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: paperless_docker_nat_chain_recheck
+  changed_when: false
+  failed_when: paperless_docker_nat_chain_recheck.rc not in [0, 1]
+  retries: 10
+  delay: 2
+  until: paperless_docker_nat_chain_recheck.rc == 0
+  when: paperless_docker_nat_chain.rc != 0
+
+- name: Wait for the Docker daemon to answer after networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - info
+      - --format
+      - '{{ "{{.ServerVersion}}" }}'
+  register: paperless_docker_info
+  changed_when: false
+  retries: 10
+  delay: 2
+  until: paperless_docker_info.rc == 0
+  when: paperless_docker_nat_chain.rc != 0
+
+- name: Assert Docker nat chain is present before Paperless startup
+  ansible.builtin.assert:
+    that:
+      - paperless_docker_nat_chain.rc == 0 or paperless_docker_nat_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; Paperless published ports will fail."
+
+- name: Check whether the Paperless local port is already published
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ paperless_internal_port }}"
+    delay: 0
+    timeout: 1
+  register: paperless_local_port_probe
+  changed_when: false
+  failed_when: false
+
+- name: Check whether the current Paperless local root endpoint is healthy before startup
+  ansible.builtin.uri:
+    url: "{{ paperless_internal_base_url }}/"
+    method: GET
+    status_code:
+      - 200
+      - 302
+  register: paperless_root_probe
+  changed_when: false
+  failed_when: false
+
+- name: Record whether the Paperless startup needs a force recreate
+  ansible.builtin.set_fact:
+    paperless_force_recreate: >-
+      {{
+        paperless_docker_nat_chain.rc != 0
+        or (paperless_env_template.changed | default(false))
+        or (paperless_compose_template.changed | default(false))
+        or (paperless_pull.changed | default(false))
+        or (paperless_local_port_probe.failed | default(false))
+        or (paperless_root_probe.status | default(0)) not in [200, 302]
+      }}
+
+- name: Force-recreate the Paperless runtime stack after Docker networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ paperless_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+      - --force-recreate
+  args:
+    chdir: "{{ paperless_site_dir }}"
+  register: paperless_force_recreate_up
+  changed_when: >-
+    'Creating' in paperless_force_recreate_up.stdout
+    or 'Recreating' in paperless_force_recreate_up.stdout
+    or 'Starting' in paperless_force_recreate_up.stdout
+  failed_when: false
+  retries: 3
+  delay: 5
+  until: paperless_force_recreate_up.rc == 0
+  when: paperless_force_recreate
+
+- name: Assert the Paperless force-recreate succeeded
+  ansible.builtin.assert:
+    that:
+      - paperless_force_recreate_up.rc == 0
+    fail_msg: "{{ paperless_force_recreate_up.stderr | default(paperless_force_recreate_up.msg | default('paperless compose force-recreate failed')) }}"
+  when: paperless_force_recreate
+
+- name: Start the Paperless runtime stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ paperless_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ paperless_site_dir }}"
+  register: paperless_start_up
+  changed_when: >-
+    'Creating' in paperless_start_up.stdout
+    or 'Recreating' in paperless_start_up.stdout
+    or 'Starting' in paperless_start_up.stdout
+  when: not paperless_force_recreate
+
+- name: Assert the Paperless runtime stack started successfully
+  ansible.builtin.assert:
+    that:
+      - paperless_start_up.rc == 0
+    fail_msg: "{{ paperless_start_up.stderr | default(paperless_start_up.msg | default('paperless compose up failed')) }}"
+  when: not paperless_force_recreate
+
+- name: Wait for the Paperless runtime listener
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ paperless_internal_port }}"
+    delay: 0
+    timeout: 300
+
+- name: Wait for the Paperless local root endpoint
+  ansible.builtin.uri:
+    url: "{{ paperless_internal_base_url }}/"
+    method: GET
+    status_code:
+      - 200
+      - 302
+  register: paperless_root_check
+  retries: 36
+  delay: 5
+  until: paperless_root_check.status in [200, 302]
+  changed_when: false
+
+- name: Bootstrap the Paperless API token locally
+  ansible.builtin.script: >-
+    {{ paperless_sync_script | quote }}
+    bootstrap-token
+    --base-url {{ paperless_internal_base_url | quote }}
+    --username {{ paperless_admin_username | quote }}
+    --password-file {{ paperless_admin_password_remote_file | quote }}
+    --token-file {{ paperless_api_token_file | quote }}
+  register: paperless_bootstrap_token
+  changed_when: "(paperless_bootstrap_token.stdout | from_json).changed"
+  no_log: true
+
+- name: Read the Paperless API token from the guest
+  ansible.builtin.slurp:
+    src: "{{ paperless_api_token_file }}"
+  register: paperless_api_token_raw
+  no_log: true
+
+- name: Record the Paperless API token
+  ansible.builtin.set_fact:
+    paperless_api_token: "{{ paperless_api_token_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Mirror the Paperless API token to the control machine
+  ansible.builtin.copy:
+    dest: "{{ paperless_api_token_local_file }}"
+    content: "{{ paperless_api_token }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Persist the Paperless API token in OpenBao
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ paperless_openbao_api_token_path }}"
+    method: POST
+    body_format: json
+    body:
+      data:
+        token: "{{ paperless_api_token }}"
+    headers:
+      X-Vault-Token: "{{ (lookup('ansible.builtin.file', openbao_init_local_file) | from_json).root_token }}"
+    status_code:
+      - 200
+      - 204
+  no_log: true
+
+- name: Reconcile the Paperless taxonomy over the live API
+  ansible.builtin.script: >-
+    {{ paperless_sync_script | quote }}
+    sync
+    --base-url {{ paperless_internal_base_url | quote }}
+    --api-token-file {{ paperless_api_token_file | quote }}
+    --desired-state-file {{ paperless_taxonomy_manifest_file | quote }}
+    --report-file {{ paperless_sync_report_file | quote }}
+  register: paperless_taxonomy_sync
+  changed_when: "(paperless_taxonomy_sync.stdout | from_json).changed"
+
+- name: Mirror the Paperless sync report to the control machine
+  ansible.builtin.slurp:
+    src: "{{ paperless_sync_report_file }}"
+  register: paperless_sync_report_raw
+
+- name: Persist the Paperless sync report locally
+  ansible.builtin.copy:
+    dest: "{{ paperless_sync_report_local_file }}"
+    content: "{{ paperless_sync_report_raw.content | b64decode }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+
+- name: Verify the Paperless runtime
+  ansible.builtin.import_tasks: verify.yml
