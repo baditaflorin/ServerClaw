@@ -767,6 +767,8 @@
     path: "{{ item.path }}"
     state: directory
     mode: "{{ item.mode }}"
+    owner: "{{ proxmox_host_admin_user }}"
+    group: "{{ proxmox_host_admin_user }}"
   loop: "{{ windmill_worker_repo_secret_directories }}"
   no_log: true
 
@@ -775,6 +777,8 @@
     src: "{{ item.src }}"
     dest: "{{ item.path }}"
     mode: "{{ item.mode }}"
+    owner: "{{ proxmox_host_admin_user }}"
+    group: "{{ proxmox_host_admin_user }}"
   loop: "{{ windmill_worker_repo_secret_files }}"
   no_log: true
 
@@ -1006,6 +1010,33 @@
         | combine(
             {'LV3_NATS_PASSWORD': windmill_nats_password}
             if (windmill_nats_password | default('') | trim | length > 0)
+            else {}
+          )
+        | combine(
+            {
+              'LV3_ATLAS_OPENBAO_APPROLE_JSON':
+                (
+                  lookup('ansible.builtin.file', windmill_atlas_approle_local_file)
+                  | from_json
+                  | to_json
+                )
+            }
+            if (
+              lookup('ansible.builtin.file', windmill_atlas_approle_local_file, errors='ignore')
+              | default('', true)
+              | trim
+              | length > 0
+            )
+            else {}
+          )
+        | combine(
+            {'LV3_NTFY_ALERTMANAGER_PASSWORD': lookup('ansible.builtin.file', windmill_ntfy_alertmanager_password_local_file) | trim}
+            if (
+              lookup('ansible.builtin.file', windmill_ntfy_alertmanager_password_local_file, errors='ignore')
+              | default('', true)
+              | trim
+              | length > 0
+            )
             else {}
           )
         | combine(
@@ -1387,12 +1418,20 @@
   until: windmill_worker_container_wait.rc == 0
   changed_when: false
 
-- name: Check whether the rendered Windmill runtime env exposes worker scheduler variables
+- name: Check whether the rendered Windmill runtime env and live worker container expose the required runtime contract
   ansible.builtin.shell: |
     set -euo pipefail
     test -s "{{ windmill_env_file }}"
     grep '^LV3_WINDMILL_BASE_URL=' "{{ windmill_env_file }}"
     grep '^LV3_WINDMILL_TOKEN=' "{{ windmill_env_file }}"
+    grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' "{{ windmill_env_file }}"
+    grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' "{{ windmill_env_file }}"
+    docker exec windmill-windmill_worker-1 sh -lc '
+      test -n "${LV3_WINDMILL_BASE_URL:-}"
+      test -n "${LV3_WINDMILL_TOKEN:-}"
+      test -n "${LV3_ATLAS_OPENBAO_APPROLE_JSON:-}"
+      test -n "${LV3_NTFY_ALERTMANAGER_PASSWORD:-}"
+    '
   args:
     executable: /bin/bash
   register: windmill_runtime_env_contract
@@ -1425,12 +1464,20 @@
   tags:
     - mutation
 
-- name: Wait for the rendered Windmill runtime env to expose worker scheduler variables
+- name: Wait for the rendered Windmill runtime env and live worker container to expose the required runtime contract
   ansible.builtin.shell: |
     set -euo pipefail
     test -s "{{ windmill_env_file }}"
     grep '^LV3_WINDMILL_BASE_URL=' "{{ windmill_env_file }}"
     grep '^LV3_WINDMILL_TOKEN=' "{{ windmill_env_file }}"
+    grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' "{{ windmill_env_file }}"
+    grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' "{{ windmill_env_file }}"
+    docker exec windmill-windmill_worker-1 sh -lc '
+      test -n "${LV3_WINDMILL_BASE_URL:-}"
+      test -n "${LV3_WINDMILL_TOKEN:-}"
+      test -n "${LV3_ATLAS_OPENBAO_APPROLE_JSON:-}"
+      test -n "${LV3_NTFY_ALERTMANAGER_PASSWORD:-}"
+    '
   args:
     executable: /bin/bash
   register: windmill_runtime_env_contract_verify
@@ -2068,39 +2115,41 @@
     mutation_audit_action: sync.windmill_raw_apps
     mutation_audit_target: "{{ item.path }}"
     mutation_audit_emit_on_success: true
-  ansible.builtin.command:
-    argv:
-      - docker
-      - run
-      - --rm
-      - --network
-      - host
-      - -e
-      - WM_WORKSPACE
-      - -e
-      - WM_TOKEN
-      - -e
-      - BASE_INTERNAL_URL
-      - -v
-      - "{{ windmill_seed_app_sync_dir.path }}:/workspace"
-      - "{{ windmill_image }}"
-      - sh
-      - -lc
-      - >-
-        cd /workspace
-        && wmill sync push
-        --yes
-        --skip-variables
-        --skip-secrets
-        --skip-resources
-        --skip-resource-types
-        --skip-scripts
-        --skip-flows
-        --skip-folders
-        --skip-workspace-dependencies
-        --skip-branch-validation
-        --includes "{{ item.sync_pattern }}"
-        --message "Repo-managed Windmill raw app sync"
+  ansible.builtin.shell: |
+    set -euo pipefail
+    windmill_version_url="{{ windmill_runtime_api_base_url }}/api/version"
+    if ! curl -fsS "$windmill_version_url" >/dev/null; then
+      docker compose --file "{{ windmill_compose_file }}" up -d --remove-orphans \
+        openbao-agent windmill_server windmill_worker windmill_worker_native >/dev/null
+      for _ in $(seq 1 {{ windmill_runtime_api_wait_retries }}); do
+        if curl -fsS "$windmill_version_url" >/dev/null; then
+          break
+        fi
+        sleep {{ windmill_runtime_api_wait_delay_seconds }}
+      done
+      curl -fsS "$windmill_version_url" >/dev/null
+    fi
+    docker run --rm --network host \
+      -e WM_WORKSPACE \
+      -e WM_TOKEN \
+      -e BASE_INTERNAL_URL \
+      -v "{{ windmill_seed_app_sync_dir.path }}:/workspace" \
+      "{{ windmill_image }}" \
+      sh -lc 'cd /workspace && wmill sync push \
+        --yes \
+        --skip-variables \
+        --skip-secrets \
+        --skip-resources \
+        --skip-resource-types \
+        --skip-scripts \
+        --skip-flows \
+        --skip-folders \
+        --skip-workspace-dependencies \
+        --skip-branch-validation \
+        --includes "{{ item.sync_pattern }}" \
+        --message "Repo-managed Windmill raw app sync"'
+  args:
+    executable: /bin/bash
   loop: "{{ windmill_seed_raw_apps | default([]) }}"
   loop_control:
     label: "{{ item.path }}"

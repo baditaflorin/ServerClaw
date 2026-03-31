@@ -941,32 +941,73 @@
   tags:
     - mutation
 
-- name: Configure the PostgreSQL dynamic credential backend
-  vars:
-    mutation_audit_action: configure.openbao_database_backend
-    mutation_audit_target: openbao-runtime
-    mutation_audit_emit_on_success: true
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/{{ openbao_database_mount_path }}/config/{{ openbao_database_name }}"
-    method: POST
-    headers:
-      X-Vault-Token: "{{ openbao_init_payload.root_token }}"
-    body_format: json
-    body:
-      plugin_name: "{{ openbao_database_plugin_name }}"
-      allowed_roles: "{{ openbao_database_allowed_roles | join(',') }}"
-      connection_url: "{{ openbao_database_connection_url }}"
-      username: "{{ openbao_postgres_admin_role }}"
-      password: "{{ openbao_postgres_rotator_password }}"
-      password_authentication: "{{ openbao_database_password_authentication }}"
-    status_code: 204
-  register: openbao_database_backend_result
-  retries: 6
-  delay: 2
-  until: openbao_database_backend_result.status == 204
-  no_log: true
-  tags:
-    - mutation
+- name: Configure the PostgreSQL dynamic credential backend through recovery-aware retries
+  block:
+    - name: Ensure OpenBao remains unsealed before configuring the PostgreSQL dynamic credential backend
+      ansible.builtin.include_tasks: ensure_unsealed.yml
+      vars:
+        openbao_unseal_context: configuring the PostgreSQL dynamic credential backend
+        openbao_unseal_init_payload: "{{ openbao_init_payload }}"
+
+    - name: Configure the PostgreSQL dynamic credential backend
+      vars:
+        mutation_audit_action: configure.openbao_database_backend
+        mutation_audit_target: openbao-runtime
+        mutation_audit_emit_on_success: true
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/{{ openbao_database_mount_path }}/config/{{ openbao_database_name }}"
+        method: POST
+        headers:
+          X-Vault-Token: "{{ openbao_init_payload.root_token }}"
+        body_format: json
+        body:
+          plugin_name: "{{ openbao_database_plugin_name }}"
+          allowed_roles: "{{ openbao_database_allowed_roles | join(',') }}"
+          connection_url: "{{ openbao_database_connection_url }}"
+          username: "{{ openbao_postgres_admin_role }}"
+          password: "{{ openbao_postgres_rotator_password }}"
+          password_authentication: "{{ openbao_database_password_authentication }}"
+        status_code: 204
+      register: openbao_database_backend_result
+      retries: 6
+      delay: 2
+      until: openbao_database_backend_result.status == 204
+      no_log: true
+      tags:
+        - mutation
+  rescue:
+    - name: Ensure OpenBao remains unsealed before retrying the PostgreSQL dynamic credential backend configuration
+      ansible.builtin.include_tasks: ensure_unsealed.yml
+      vars:
+        openbao_unseal_context: retrying the PostgreSQL dynamic credential backend configuration
+        openbao_unseal_init_payload: "{{ openbao_init_payload }}"
+
+    - name: Retry configuring the PostgreSQL dynamic credential backend after runtime recovery
+      vars:
+        mutation_audit_action: configure.openbao_database_backend
+        mutation_audit_target: openbao-runtime
+        mutation_audit_emit_on_success: true
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/{{ openbao_database_mount_path }}/config/{{ openbao_database_name }}"
+        method: POST
+        headers:
+          X-Vault-Token: "{{ openbao_init_payload.root_token }}"
+        body_format: json
+        body:
+          plugin_name: "{{ openbao_database_plugin_name }}"
+          allowed_roles: "{{ openbao_database_allowed_roles | join(',') }}"
+          connection_url: "{{ openbao_database_connection_url }}"
+          username: "{{ openbao_postgres_admin_role }}"
+          password: "{{ openbao_postgres_rotator_password }}"
+          password_authentication: "{{ openbao_database_password_authentication }}"
+        status_code: 204
+      register: openbao_database_backend_retry_result
+      retries: 6
+      delay: 2
+      until: openbao_database_backend_retry_result.status == 204
+      no_log: true
+      tags:
+        - mutation
 
 - name: Configure OpenBao database roles
   vars:

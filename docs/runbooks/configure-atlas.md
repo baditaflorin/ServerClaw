@@ -61,6 +61,11 @@ Outputs:
 - optional NATS notifications on `platform.db.schema_drift`
 - optional ntfy alerts for drift findings
 
+The seeded Windmill checkout also consumes repo-local runtime artifacts under
+`.local/` when the job subprocess environment omits the equivalent secret
+variables. That fallback keeps the governed `f/lv3/atlas_drift_check` path
+usable from the isolated checkout without storing secrets in the repository.
+
 ## Verification
 
 Run the repo-side path in this order:
@@ -97,6 +102,14 @@ python3 scripts/windmill_run_wait_result.py \
   --payload-json '{}'
 ```
 
+If `make converge-windmill` fails while syncing repo-managed raw apps with a
+Windmill API connection error, check whether another concurrent playbook
+cleanly stopped the Windmill stack between the earlier health check and the
+`wmill sync push` helper. The managed role now restarts the minimal compose
+subset (`openbao-agent`, `windmill_server`, `windmill_worker`,
+`windmill_worker_native`) before retrying that sync step, so a rerun from the
+same tree should recover once the shared hosts are quiet enough.
+
 ## Notes
 
 - `make atlas-refresh-snapshots` is the only supported path for refreshing the
@@ -114,3 +127,9 @@ python3 scripts/windmill_run_wait_result.py \
   repointing the image.
 - `make atlas-drift-check` is read-only against PostgreSQL. It should produce
   receipts and notifications, but it must not mutate database schema state.
+- The seeded Windmill wrapper prefers the runtime environment when
+  `LV3_ATLAS_OPENBAO_APPROLE_JSON` and
+  `LV3_NTFY_ALERTMANAGER_PASSWORD` are present, but it will fall back to
+  `.local/openbao/atlas-approle.json` and
+  `.local/ntfy/alertmanager-password.txt` inside the isolated checkout when the
+  worker subprocess drops those values.

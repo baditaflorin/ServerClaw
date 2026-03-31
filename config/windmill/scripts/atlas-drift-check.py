@@ -15,6 +15,32 @@ def set_default_env(env: dict[str, str], name: str, value: str) -> None:
         env[name] = value
 
 
+def set_default_env_from_text_file(env: dict[str, str], name: str, path: Path) -> None:
+    if env.get(name, "").strip():
+        return
+    try:
+        value = path.read_text(encoding="utf-8").strip()
+    except OSError:
+        return
+    if value:
+        env[name] = value
+
+
+def set_default_env_from_json_file(env: dict[str, str], name: str, path: Path) -> None:
+    if env.get(name, "").strip():
+        return
+    try:
+        raw_value = path.read_text(encoding="utf-8").strip()
+    except OSError:
+        return
+    if not raw_value:
+        return
+    try:
+        env[name] = json.dumps(json.loads(raw_value))
+    except json.JSONDecodeError:
+        env[name] = raw_value
+
+
 def main(
     repo_path: str = "/srv/proxmox_florin_server",
     publish_nats: bool = True,
@@ -55,6 +81,16 @@ def main(
     # Windmill workers run on the private runtime guest and can talk to Atlas dependencies directly.
     set_default_env(command_env, "LV3_ATLAS_FORCE_DIRECT_ENDPOINTS", "1")
     set_default_env(command_env, "LV3_NATS_URL", "nats://127.0.0.1:4222")
+    set_default_env_from_json_file(
+        command_env,
+        "LV3_ATLAS_OPENBAO_APPROLE_JSON",
+        repo_root / ".local" / "openbao" / "atlas-approle.json",
+    )
+    set_default_env_from_text_file(
+        command_env,
+        "LV3_NTFY_ALERTMANAGER_PASSWORD",
+        repo_root / ".local" / "ntfy" / "alertmanager-password.txt",
+    )
     completed = subprocess.run(
         command,
         cwd=repo_root,

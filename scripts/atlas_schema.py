@@ -46,6 +46,7 @@ except ModuleNotFoundError as exc:
     )
 
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path, write_json
+from platform.events import load_topic_index
 from platform.events.publisher import publish_nats_events
 
 
@@ -145,6 +146,38 @@ def validate_catalog(
         notifications.get("nats_subject"),
         "config/atlas/catalog.json.notifications.nats_subject",
     )
+    nats_subject = require_str(
+        notifications.get("nats_subject"),
+        "config/atlas/catalog.json.notifications.nats_subject",
+    )
+    topic_spec = load_topic_index().get(nats_subject)
+    if topic_spec is None:
+        raise ValueError(
+            "config/atlas/catalog.json.notifications.nats_subject "
+            f"references unknown NATS topic '{nats_subject}'"
+        )
+    if topic_spec.get("status") != "active":
+        raise ValueError(
+            "config/atlas/catalog.json.notifications.nats_subject "
+            f"must reference an active NATS topic, got '{nats_subject}'"
+        )
+    drift_event_payload_keys = {
+        "database_id",
+        "database",
+        "severity",
+        "snapshot_path",
+        "snapshot_sha256",
+        "live_sha256",
+    }
+    unsupported_required_keys = sorted(
+        set(topic_spec.get("payload_required", ())) - drift_event_payload_keys
+    )
+    if unsupported_required_keys:
+        raise ValueError(
+            "config/atlas/catalog.json.notifications.nats_subject "
+            f"requires unsupported payload keys for Atlas drift events: "
+            f"{', '.join(unsupported_required_keys)}"
+        )
     ntfy = require_mapping(
         notifications.get("ntfy"),
         "config/atlas/catalog.json.notifications.ntfy",
@@ -279,7 +312,8 @@ def lint_scope_args(
 
 
 def normalize_snapshot(content: str) -> str:
-    return content.strip() + "\n"
+    normalized_lines = [line.rstrip() for line in content.splitlines()]
+    return "\n".join(normalized_lines).strip() + "\n"
 
 
 def hash_text(content: str) -> str:
@@ -467,25 +501,115 @@ def controller_secret_path(context: dict[str, Any], secret_id: str) -> Path:
     return resolve_repo_local_path(require_str(secret.get("path"), f"secret {secret_id}.path"))
 
 
+def env_secret_value(name: str) -> str | None:
+    value = os.environ.get(name, "").strip()
+    return value if value else None
+
+
+def env_atlas_approle_payload() -> dict[str, Any] | None:
+    raw_payload = env_secret_value("LV3_ATLAS_OPENBAO_APPROLE_JSON")
+    if raw_payload is None:
+        return None
+    try:
+        payload = json.loads(raw_payload)
+    except json.JSONDecodeError as exc:
+        raise ValueError("LV3_ATLAS_OPENBAO_APPROLE_JSON must contain valid JSON") from exc
+    return require_mapping(payload, "LV3_ATLAS_OPENBAO_APPROLE_JSON")
+
+
+def openbao_health(base_url: str) -> tuple[int, dict[str, Any]]:
+    request = urllib.request.Request(base_url.rstrip("/") + "/v1/sys/health", method="GET")
+    try:
+        with urllib.request.urlopen(request, timeout=10) as response:
+            status = response.status
+            payload = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        status = exc.code
+        payload = json.loads(exc.read().decode("utf-8"))
+    return status, require_mapping(payload, "OpenBao sys/health response")
+
+
+def load_openbao_init_payload(context: dict[str, Any]) -> dict[str, Any]:
+    init_path = controller_secret_path(context, "openbao_init_payload")
+    if not init_path.exists():
+        raise ValueError(
+            f"OpenBao init payload is missing at {init_path}. "
+            "Converge OpenBao first so the managed init artifact exists for recovery."
+        )
+    return require_mapping(load_json(init_path), str(init_path))
+
+
+def ensure_openbao_unsealed(context: dict[str, Any], base_url: str) -> None:
+    _, health_payload = openbao_health(base_url)
+    if not bool(health_payload.get("sealed")):
+        return
+
+    init_payload = load_openbao_init_payload(context)
+    key_shares = require_list(init_payload.get("keys_base64"), "openbao_init_payload.keys_base64")
+    if not key_shares:
+        raise ValueError("openbao_init_payload.keys_base64 must not be empty")
+
+    for index, key_share in enumerate(key_shares):
+        request = urllib.request.Request(
+            base_url.rstrip("/") + "/v1/sys/unseal",
+            data=json.dumps(
+                {
+                    "key": require_str(
+                        key_share,
+                        f"openbao_init_payload.keys_base64[{index}]",
+                    )
+                }
+            ).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(request, timeout=10) as response:
+            payload = require_mapping(
+                json.loads(response.read().decode("utf-8")),
+                "OpenBao sys/unseal response",
+            )
+        if not bool(payload.get("sealed")):
+            break
+
+    deadline = time.time() + 10
+    while time.time() < deadline:
+        _, health_payload = openbao_health(base_url)
+        if not bool(health_payload.get("sealed")):
+            return
+        time.sleep(1)
+
+    raise RuntimeError(
+        f"OpenBao remained sealed at {base_url} after the managed unseal sequence"
+    )
+
+
 def openbao_login(context: dict[str, Any], base_url: str, catalog: dict[str, Any]) -> str:
     openbao = require_mapping(catalog.get("openbao"), "config/atlas/catalog.json.openbao")
-    approle_secret_id = require_str(
-        openbao.get("approle_secret_id"),
-        "config/atlas/catalog.json.openbao.approle_secret_id",
-    )
-    approle_file = controller_secret_path(context, approle_secret_id)
-    if not approle_file.exists():
-        raise ValueError(
-            f"OpenBao Atlas AppRole artifact is missing at {approle_file}. "
-            "Converge OpenBao first so the repo-managed AppRole file exists."
+    ensure_openbao_unsealed(context, base_url)
+    approle = env_atlas_approle_payload()
+    if approle is None:
+        approle_secret_id = require_str(
+            openbao.get("approle_secret_id"),
+            "config/atlas/catalog.json.openbao.approle_secret_id",
         )
-    approle = require_mapping(load_json(approle_file), str(approle_file))
+        approle_file = controller_secret_path(context, approle_secret_id)
+        if not approle_file.exists():
+            raise ValueError(
+                f"OpenBao Atlas AppRole artifact is missing at {approle_file}. "
+                "Converge OpenBao first so the repo-managed AppRole file exists."
+            )
+        approle = require_mapping(load_json(approle_file), str(approle_file))
+        approle_role_id_path = f"{approle_file}.role_id"
+        approle_secret_id_path = f"{approle_file}.secret_id"
+    else:
+        approle_role_id_path = "LV3_ATLAS_OPENBAO_APPROLE_JSON.role_id"
+        approle_secret_id_path = "LV3_ATLAS_OPENBAO_APPROLE_JSON.secret_id"
     request = urllib.request.Request(
         base_url.rstrip("/") + "/v1/auth/approle/login",
         data=json.dumps(
             {
-                "role_id": require_str(approle.get("role_id"), f"{approle_file}.role_id"),
-                "secret_id": require_str(approle.get("secret_id"), f"{approle_file}.secret_id"),
+                "role_id": require_str(approle.get("role_id"), approle_role_id_path),
+                "secret_id": require_str(approle.get("secret_id"), approle_secret_id_path),
             }
         ).encode("utf-8"),
         headers={"Content-Type": "application/json"},
@@ -689,21 +813,22 @@ def maybe_publish_ntfy(
     ntfy = require_mapping(ntfy := notifications.get("ntfy"), "config/atlas/catalog.json.notifications.ntfy")
     url = require_str(ntfy.get("url"), "config/atlas/catalog.json.notifications.ntfy.url")
     username = require_str(ntfy.get("username"), "config/atlas/catalog.json.notifications.ntfy.username")
-    password_path = controller_secret_path(
-        context,
-        require_str(
-            ntfy.get("password_secret_id"),
-            "config/atlas/catalog.json.notifications.ntfy.password_secret_id",
-        ),
-    )
-    if not password_path.exists():
-        return {
-            "published": False,
-            "count": 0,
-            "reason": f"ntfy password file missing at {password_path}",
-        }
-
-    password = password_path.read_text(encoding="utf-8").strip()
+    password = env_secret_value("LV3_NTFY_ALERTMANAGER_PASSWORD")
+    if password is None:
+        password_path = controller_secret_path(
+            context,
+            require_str(
+                ntfy.get("password_secret_id"),
+                "config/atlas/catalog.json.notifications.ntfy.password_secret_id",
+            ),
+        )
+        if not password_path.exists():
+            return {
+                "published": False,
+                "count": 0,
+                "reason": f"ntfy password file missing at {password_path}",
+            }
+        password = password_path.read_text(encoding="utf-8").strip()
     request = urllib.request.Request(
         url,
         data=(

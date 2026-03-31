@@ -107,6 +107,8 @@ windmill_superadmin_secret_remote_file: "{{ windmill_secret_dir }}/superadmin-se
 windmill_local_artifact_dir: "{{ windmill_controller_repo_common_root ~ '/.local/windmill' }}"
 windmill_superadmin_secret_local_file: "{{ windmill_local_artifact_dir }}/superadmin-secret.txt"
 windmill_controller_local_root: "{{ windmill_local_artifact_dir | dirname }}"
+windmill_atlas_approle_local_file: "{{ windmill_controller_local_root }}/openbao/atlas-approle.json"
+windmill_ntfy_alertmanager_password_local_file: "{{ windmill_controller_local_root }}/ntfy/alertmanager-password.txt"
 windmill_bootstrap_identity_email: superadmin_secret@windmill.dev
 windmill_bootstrap_identity_username: superadmin_secret
 windmill_bootstrap_identity_login_type: password

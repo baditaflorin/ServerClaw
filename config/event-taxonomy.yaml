@@ -136,6 +136,25 @@ domains:
             - source
             - severity
 
+  db:
+    description: Database schema automation and drift notification events.
+    topics:
+      - name: platform.db.schema_drift
+        description: Atlas detected live schema drift for one managed database snapshot.
+        status: active
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0304-atlas-schema-automation
+        payload:
+          required:
+            - database_id
+            - database
+            - severity
+            - snapshot_path
+            - snapshot_sha256
+            - live_sha256
+
   security:
     description: Security posture summaries plus high and critical findings.
     topics:

@@ -269,7 +269,7 @@ def test_openbao_runtime_reconciles_allowed_roles_after_database_role_upserts() 
     tasks = yaml.safe_load(TASKS_PATH.read_text(encoding="utf-8"))
     task_names = [task["name"] for task in tasks]
 
-    backend_index = task_names.index("Configure the PostgreSQL dynamic credential backend")
+    backend_index = task_names.index("Configure the PostgreSQL dynamic credential backend through recovery-aware retries")
     roles_index = task_names.index("Configure OpenBao database roles")
     reconcile_index = task_names.index(
         "Reconcile PostgreSQL dynamic credential backend allowed roles after role upserts"
@@ -277,11 +277,27 @@ def test_openbao_runtime_reconciles_allowed_roles_after_database_role_upserts() 
 
     assert backend_index < roles_index < reconcile_index
 
-    reconcile_task = tasks[reconcile_index]
-    uri_module = reconcile_task["ansible.builtin.uri"]
+    backend_task = tasks[backend_index]
+    configure_task = backend_task["block"][1]
+    uri_module = configure_task["ansible.builtin.uri"]
 
     assert uri_module["body"]["allowed_roles"] == "{{ openbao_database_allowed_roles | join(',') }}"
-    assert reconcile_task["register"] == "openbao_database_backend_allowed_roles_result"
+    assert (
+        backend_task["block"][0]["name"]
+        == "Ensure OpenBao remains unsealed before configuring the PostgreSQL dynamic credential backend"
+    )
+    assert configure_task["register"] == "openbao_database_backend_result"
+    assert configure_task["until"] == "openbao_database_backend_result.status == 204"
+    assert (
+        backend_task["rescue"][0]["name"]
+        == "Ensure OpenBao remains unsealed before retrying the PostgreSQL dynamic credential backend configuration"
+    )
+    assert (
+        backend_task["rescue"][1]["name"]
+        == "Retry configuring the PostgreSQL dynamic credential backend after runtime recovery"
+    )
+
+    reconcile_task = tasks[reconcile_index]
     assert (
         reconcile_task["until"]
         == "openbao_database_backend_allowed_roles_result.status == 204"
@@ -439,12 +455,13 @@ def test_openbao_runtime_verification_requests_skip_become_on_loopback() -> None
     assert "- name: Read AppRole role IDs" in tasks
     assert "until: openbao_approle_role_ids.status == 200" in tasks
     assert "- name: Generate fresh short-lived AppRole secret IDs" in tasks
-    assert "until: openbao_generated_secret_ids.status == 200" in tasks
+    assert "until: openbao_generated_secret_ids.status | default(0) == 200" in tasks
     assert "- name: Assert fresh short-lived AppRole secret IDs were generated successfully" in tasks
     assert "- name: Verify userpass login for the ops operator" in tasks
     assert "until: openbao_ops_login.status == 200" in tasks
     assert "- name: Login with the controller AppRole" in tasks
-    assert "until: openbao_controller_login.status == 200" in tasks
+    assert "- openbao_controller_login.status | default(0) == 200" in tasks
+    assert "- openbao_controller_login.json.auth.client_token | default('') | length > 0" in tasks
     assert "- name: Read the controller Proxmox API secret through the AppRole" in tasks
     assert "until: openbao_controller_secret_read.status == 200" in tasks
     assert "- name: Encrypt test material with the controller transit key" in tasks
@@ -452,12 +469,12 @@ def test_openbao_runtime_verification_requests_skip_become_on_loopback() -> None
     assert "- name: Decrypt test material with the controller transit key" in tasks
     assert "until: openbao_controller_transit_decrypt.status == 200" in tasks
     assert "- name: Login with the mail-platform AppRole" in tasks
-    assert "until: openbao_mail_platform_login.status == 200" in tasks
+    assert "- openbao_mail_platform_login.status | default(0) == 200" in tasks
+    assert "- openbao_mail_platform_login.json.auth.client_token | default('') | length > 0" in tasks
     assert "- name: Read the mail-platform runtime secret through the AppRole" in tasks
     assert "until: openbao_mail_platform_secret_read.status == 200" in tasks
     assert "- name: Refresh short-lived AppRole secret IDs after managed verification" in tasks
-    assert "until: openbao_refreshed_secret_ids.status == 200" in tasks
-    assert "- name: Assert refreshed short-lived AppRole secret IDs were generated successfully" in tasks
+    assert "until: openbao_refreshed_secret_ids.status | default(0) == 200" in tasks
 
 
 def test_openbao_compose_template_supports_private_extra_http_bindings() -> None:

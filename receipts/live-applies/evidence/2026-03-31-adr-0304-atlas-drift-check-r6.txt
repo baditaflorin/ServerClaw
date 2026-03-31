@@ -1,0 +1,161 @@
+/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/scripts/run_python_with_packages.sh docker nats-py pyyaml -- scripts/atlas_schema.py drift --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline --write-receipts --publish-nats --publish-ntfy
+{
+  "catalog_path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/config/atlas/catalog.json",
+  "checked_databases": [
+    {
+      "database": "dify",
+      "database_id": "dify",
+      "live_sha256": "9a0b3016b8cdba9f321598ce2e8314c1bd1fcb7351a649f002fd35e236998249",
+      "snapshot_path": "config/atlas/dify.hcl",
+      "snapshot_sha256": "9a0b3016b8cdba9f321598ce2e8314c1bd1fcb7351a649f002fd35e236998249"
+    },
+    {
+      "database": "gitea",
+      "database_id": "gitea",
+      "live_sha256": "1a1e4e11e151cfa06e8511f759c8ae62fb162d0a44923f671b9e90e76dff6fbe",
+      "snapshot_path": "config/atlas/gitea.hcl",
+      "snapshot_sha256": "1a1e4e11e151cfa06e8511f759c8ae62fb162d0a44923f671b9e90e76dff6fbe"
+    },
+    {
+      "database": "glitchtip",
+      "database_id": "glitchtip",
+      "live_sha256": "c58d39a900cd7aff84e329a64378e92cd9e56261aecb0c1f27663eb77a90ef86",
+      "snapshot_path": "config/atlas/glitchtip.hcl",
+      "snapshot_sha256": "c58d39a900cd7aff84e329a64378e92cd9e56261aecb0c1f27663eb77a90ef86"
+    },
+    {
+      "database": "keycloak",
+      "database_id": "keycloak",
+      "live_sha256": "81c1412cf6a78eece7b1c1aef8f61c41526a153016eb4a0deb89bf48400c318a",
+      "snapshot_path": "config/atlas/keycloak.hcl",
+      "snapshot_sha256": "81c1412cf6a78eece7b1c1aef8f61c41526a153016eb4a0deb89bf48400c318a"
+    },
+    {
+      "database": "langfuse",
+      "database_id": "langfuse",
+      "live_sha256": "78bf38135748a925dd4d69bb2fe1dd8f26549d40ffdedde688dceed03bc328cd",
+      "snapshot_path": "config/atlas/langfuse.hcl",
+      "snapshot_sha256": "78bf38135748a925dd4d69bb2fe1dd8f26549d40ffdedde688dceed03bc328cd"
+    },
+    {
+      "database": "matrix_synapse",
+      "database_id": "matrix_synapse",
+      "live_sha256": "bc00e800acc2a6e533749d8b936d057b27bb15ca5e30ff4fc76a3512a9820b2b",
+      "snapshot_path": "config/atlas/matrix_synapse.hcl",
+      "snapshot_sha256": "bc00e800acc2a6e533749d8b936d057b27bb15ca5e30ff4fc76a3512a9820b2b"
+    },
+    {
+      "database": "mattermost",
+      "database_id": "mattermost",
+      "live_sha256": "70595befd750d42f3e95fb8b14efb1f172c730915e18c045105d852a513fc635",
+      "snapshot_path": "config/atlas/mattermost.hcl",
+      "snapshot_sha256": "70595befd750d42f3e95fb8b14efb1f172c730915e18c045105d852a513fc635"
+    },
+    {
+      "database": "mautrix_discord",
+      "database_id": "mautrix_discord",
+      "live_sha256": "058a2e0e6aca4486f6b275164ed8827bdd6947fba8d5c3103ddfeb9489afa643",
+      "snapshot_path": "config/atlas/mautrix_discord.hcl",
+      "snapshot_sha256": "058a2e0e6aca4486f6b275164ed8827bdd6947fba8d5c3103ddfeb9489afa643"
+    },
+    {
+      "database": "mautrix_whatsapp",
+      "database_id": "mautrix_whatsapp",
+      "live_sha256": "17acdc7f3cf61b7083343d49becbc55534502d778a82353990eeb6c6527399c5",
+      "snapshot_path": "config/atlas/mautrix_whatsapp.hcl",
+      "snapshot_sha256": "17acdc7f3cf61b7083343d49becbc55534502d778a82353990eeb6c6527399c5"
+    },
+    {
+      "database": "n8n",
+      "database_id": "n8n",
+      "live_sha256": "16ac0b45adab7cf10acd8f59caf64a18d531a5cf44f21b9cc94d99faed750e78",
+      "snapshot_path": "config/atlas/n8n.hcl",
+      "snapshot_sha256": "16ac0b45adab7cf10acd8f59caf64a18d531a5cf44f21b9cc94d99faed750e78"
+    },
+    {
+      "database": "netbox",
+      "database_id": "netbox",
+      "live_sha256": "5a7241239cb2fb4938a44c4fe3621b98192fefa510c5b5e3a2596ef4d06f88e9",
+      "snapshot_path": "config/atlas/netbox.hcl",
+      "snapshot_sha256": "5a7241239cb2fb4938a44c4fe3621b98192fefa510c5b5e3a2596ef4d06f88e9"
+    },
+    {
+      "database": "nextcloud",
+      "database_id": "nextcloud",
+      "live_sha256": "264fa739679d4135f2a84f425be3aa8f4480acfeb0f221fd04d5f37e95dab648",
+      "snapshot_path": "config/atlas/nextcloud.hcl",
+      "snapshot_sha256": "264fa739679d4135f2a84f425be3aa8f4480acfeb0f221fd04d5f37e95dab648"
+    },
+    {
+      "database": "openfga",
+      "database_id": "openfga",
+      "live_sha256": "6e30677847fd6d27d709d21987389850ccd29e81478855fed3a244d54d371934",
+      "snapshot_path": "config/atlas/openfga.hcl",
+      "snapshot_sha256": "6e30677847fd6d27d709d21987389850ccd29e81478855fed3a244d54d371934"
+    },
+    {
+      "database": "outline",
+      "database_id": "outline",
+      "live_sha256": "0b34bff9c5022a08d025bc9a2d2305806511c595d42cd6f42dcd698b2e179da4",
+      "snapshot_path": "config/atlas/outline.hcl",
+      "snapshot_sha256": "0b34bff9c5022a08d025bc9a2d2305806511c595d42cd6f42dcd698b2e179da4"
+    },
+    {
+      "database": "outline_production",
+      "database_id": "outline_production",
+      "live_sha256": "0b34bff9c5022a08d025bc9a2d2305806511c595d42cd6f42dcd698b2e179da4",
+      "snapshot_path": "config/atlas/outline_production.hcl",
+      "snapshot_sha256": "0b34bff9c5022a08d025bc9a2d2305806511c595d42cd6f42dcd698b2e179da4"
+    },
+    {
+      "database": "outline_staging",
+      "database_id": "outline_staging",
+      "live_sha256": "0b34bff9c5022a08d025bc9a2d2305806511c595d42cd6f42dcd698b2e179da4",
+      "snapshot_path": "config/atlas/outline_staging.hcl",
+      "snapshot_sha256": "0b34bff9c5022a08d025bc9a2d2305806511c595d42cd6f42dcd698b2e179da4"
+    },
+    {
+      "database": "plane",
+      "database_id": "plane",
+      "live_sha256": "942ecf1714102508c1405b1949ebea5d04451d5a438990b5c7256836e739f430",
+      "snapshot_path": "config/atlas/plane.hcl",
+      "snapshot_sha256": "942ecf1714102508c1405b1949ebea5d04451d5a438990b5c7256836e739f430"
+    },
+    {
+      "database": "semaphore",
+      "database_id": "semaphore",
+      "live_sha256": "0741cef90f899ac148e56bdbeb7e9346ef01fce2b61079a7ef2772194dce3793",
+      "snapshot_path": "config/atlas/semaphore.hcl",
+      "snapshot_sha256": "0741cef90f899ac148e56bdbeb7e9346ef01fce2b61079a7ef2772194dce3793"
+    },
+    {
+      "database": "vaultwarden",
+      "database_id": "vaultwarden",
+      "live_sha256": "f188b97267ecb1febac8dc462058881071f0f306ed90f700da8fb97ac7cefdb7",
+      "snapshot_path": "config/atlas/vaultwarden.hcl",
+      "snapshot_sha256": "f188b97267ecb1febac8dc462058881071f0f306ed90f700da8fb97ac7cefdb7"
+    },
+    {
+      "database": "windmill",
+      "database_id": "windmill",
+      "live_sha256": "c66a5c96d79eedf5fd6890d2362444d86dc7b497af716be7da77f7901fd04b70",
+      "snapshot_path": "config/atlas/windmill.hcl",
+      "snapshot_sha256": "c66a5c96d79eedf5fd6890d2362444d86dc7b497af716be7da77f7901fd04b70"
+    }
+  ],
+  "drift_count": 0,
+  "drifted_databases": [],
+  "notifications": {
+    "nats": {
+      "count": 0,
+      "published": false
+    },
+    "ntfy": {
+      "count": 0,
+      "published": false
+    }
+  },
+  "receipt_errors": [],
+  "receipt_paths": [],
+  "status": "clean"
+}

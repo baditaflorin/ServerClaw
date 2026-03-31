@@ -225,39 +225,6 @@
   loop_control:
     label: "{{ windmill_verify_atlas_helper_files_local.results[item].item }}"
 
-- name: Run the Windmill Atlas drift check script
-  ansible.builtin.shell: >
-    python3 {{ (playbook_dir | dirname ~ '/scripts/windmill_run_wait_result.py') | quote }}
-    --base-url {{ windmill_base_url | quote }}
-    --workspace {{ windmill_workspace_id | quote }}
-    --path {{ windmill_atlas_drift_check_script_path | quote }}
-    --payload-json '{}'
-    --timeout {{ windmill_seed_job_timeout_seconds }}
-  args:
-    executable: /bin/bash
-  delegate_to: localhost
-  become: false
-  environment:
-    WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"
-    WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
-  register: windmill_verify_atlas_drift_check
-  retries: 3
-  delay: 10
-  until: windmill_verify_atlas_drift_check.rc == 0
-  changed_when: false
-  failed_when: false
-  no_log: true
-
-- name: Assert the Windmill Atlas drift check result
-  ansible.builtin.assert:
-    that:
-      - (windmill_verify_atlas_drift_check.stdout | from_json).status == "ok"
-      - (windmill_verify_atlas_drift_check.stdout | from_json).result.status == "ok"
-      - (windmill_verify_atlas_drift_check.stdout | from_json).result.report.status == "clean"
-      - ((windmill_verify_atlas_drift_check.stdout | from_json).result.report.checked_databases | length) >= 1
-    fail_msg: >-
-      Windmill API responded, but the seeded Atlas drift check script did not return the expected clean structured result.
-
 - name: Define the critical Windmill verification script expectations
   ansible.builtin.set_fact:
     windmill_verify_critical_seed_script_expectations:
@@ -274,6 +241,10 @@
           'local_file': inventory_dir ~ '/../config/windmill/scripts/stage-smoke-suites.py',
           'content': lookup('ansible.builtin.file', inventory_dir ~ '/../config/windmill/scripts/stage-smoke-suites.py', rstrip=False),
         },
+        windmill_atlas_drift_check_script_path: {
+          'local_file': inventory_dir ~ '/../config/windmill/scripts/atlas-drift-check.py',
+          'content': lookup('ansible.builtin.file', inventory_dir ~ '/../config/windmill/scripts/atlas-drift-check.py', rstrip=False),
+        },
       } }}"
   no_log: true
 
@@ -289,6 +260,7 @@
     - path: "{{ windmill_healthcheck_script_path }}"
     - path: "{{ windmill_validation_gate_status_script_path }}"
     - path: "{{ windmill_stage_smoke_suites_script_path }}"
+    - path: "{{ windmill_atlas_drift_check_script_path }}"
   loop_control:
     label: "{{ item.path }}"
   delegate_to: localhost
@@ -401,6 +373,7 @@
     - path: "{{ windmill_healthcheck_script_path }}"
     - path: "{{ windmill_validation_gate_status_script_path }}"
     - path: "{{ windmill_stage_smoke_suites_script_path }}"
+    - path: "{{ windmill_atlas_drift_check_script_path }}"
   loop_control:
     label: "{{ item.path }}"
   delegate_to: localhost
@@ -428,6 +401,38 @@
   loop_control:
     label: "{{ item.item.path }}"
   no_log: true
+
+- name: Run the Windmill Atlas drift check script
+  ansible.builtin.shell: >
+    python3 {{ (playbook_dir | dirname ~ '/scripts/windmill_run_wait_result.py') | quote }}
+    --base-url {{ windmill_base_url | quote }}
+    --workspace {{ windmill_workspace_id | quote }}
+    --path {{ windmill_atlas_drift_check_script_path | quote }}
+    --payload-json '{}'
+    --timeout {{ windmill_seed_job_timeout_seconds }}
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  environment:
+    WINDMILL_BOOTSTRAP_SECRET: "{{ windmill_superadmin_secret }}"
+    WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
+  register: windmill_verify_atlas_drift_check
+  retries: 3
+  delay: 10
+  until: windmill_verify_atlas_drift_check.rc == 0
+  changed_when: false
+  failed_when: false
+  no_log: true
+
+- name: Assert the Windmill Atlas drift check result
+  ansible.builtin.assert:
+    that:
+      - (windmill_verify_atlas_drift_check.stdout | from_json).status == "ok"
+      - (windmill_verify_atlas_drift_check.stdout | from_json).report.status == "clean"
+      - ((windmill_verify_atlas_drift_check.stdout | from_json).report.checked_databases | length) >= 1
+    fail_msg: >-
+      Windmill API responded, but the seeded Atlas drift check script did not return the expected clean structured result.
 
 - name: Verify the Windmill default operations scripts are seeded
   ansible.builtin.uri:

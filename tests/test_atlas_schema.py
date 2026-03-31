@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import json
 import sys
 from pathlib import Path
@@ -84,6 +85,14 @@ def test_diff_preview_is_bounded() -> None:
     assert len(preview) == 201
 
 
+def test_normalize_snapshot_strips_trailing_whitespace_per_line() -> None:
+    atlas_schema = load_module()
+
+    normalized = atlas_schema.normalize_snapshot("line one  \nline two\t \n\n")
+
+    assert normalized == "line one\nline two\n"
+
+
 def test_validate_catalog_allows_bootstrap_snapshot_creation(tmp_path: Path) -> None:
     atlas_schema = load_module()
     (tmp_path / "migrations").mkdir()
@@ -131,6 +140,139 @@ def test_validate_catalog_allows_bootstrap_snapshot_creation(tmp_path: Path) -> 
     }
 
     atlas_schema.validate_catalog(catalog, repo_root=tmp_path, require_snapshot_files=False)
+
+
+def test_validate_catalog_rejects_unknown_nats_subject(tmp_path: Path, monkeypatch) -> None:
+    atlas_schema = load_module()
+    (tmp_path / "migrations").mkdir()
+    catalog = {
+        "schema_version": "1.0.0",
+        "atlas_image_ref": "docker.io/arigaio/atlas:test",
+        "dev_postgres_image": "docker.io/library/postgres:16",
+        "runtime": {
+            "openbao_guest": "docker-runtime-lv3",
+            "openbao_url": "http://127.0.0.1:8201",
+            "postgres_guest": "postgres-lv3",
+            "postgres_port": 5432,
+        },
+        "openbao": {
+            "approle_secret_id": "openbao_atlas_approle",
+            "database_role": "postgres-atlas-readonly",
+        },
+        "notifications": {
+            "nats_subject": "platform.db.missing",
+            "ntfy": {
+                "url": "http://10.10.10.20:2586/platform.db.warn",
+                "username": "alertmanager",
+                "password_secret_id": "ntfy_alertmanager_password",
+            },
+        },
+        "receipts": {
+            "drift_dir": "receipts/atlas-drift",
+        },
+        "lint_targets": [
+            {
+                "id": "platform-control-plane",
+                "path": "migrations",
+                "latest": 1,
+                "triggers": ["migrations/"],
+                "dev_database": "atlas_lint",
+            }
+        ],
+        "databases": [
+            {
+                "id": "windmill",
+                "database": "windmill",
+                "snapshot_path": "config/atlas/windmill.hcl",
+            }
+        ],
+    }
+
+    monkeypatch.setattr(atlas_schema, "load_topic_index", lambda: {})
+
+    try:
+        atlas_schema.validate_catalog(catalog, repo_root=tmp_path, require_snapshot_files=False)
+    except ValueError as exc:
+        assert "references unknown NATS topic" in str(exc)
+    else:
+        raise AssertionError("validate_catalog should reject unknown Atlas NATS subjects")
+
+
+def test_validate_catalog_rejects_incompatible_nats_payload_contract(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    atlas_schema = load_module()
+    (tmp_path / "migrations").mkdir()
+    catalog = {
+        "schema_version": "1.0.0",
+        "atlas_image_ref": "docker.io/arigaio/atlas:test",
+        "dev_postgres_image": "docker.io/library/postgres:16",
+        "runtime": {
+            "openbao_guest": "docker-runtime-lv3",
+            "openbao_url": "http://127.0.0.1:8201",
+            "postgres_guest": "postgres-lv3",
+            "postgres_port": 5432,
+        },
+        "openbao": {
+            "approle_secret_id": "openbao_atlas_approle",
+            "database_role": "postgres-atlas-readonly",
+        },
+        "notifications": {
+            "nats_subject": "platform.db.schema_drift",
+            "ntfy": {
+                "url": "http://10.10.10.20:2586/platform.db.warn",
+                "username": "alertmanager",
+                "password_secret_id": "ntfy_alertmanager_password",
+            },
+        },
+        "receipts": {
+            "drift_dir": "receipts/atlas-drift",
+        },
+        "lint_targets": [
+            {
+                "id": "platform-control-plane",
+                "path": "migrations",
+                "latest": 1,
+                "triggers": ["migrations/"],
+                "dev_database": "atlas_lint",
+            }
+        ],
+        "databases": [
+            {
+                "id": "windmill",
+                "database": "windmill",
+                "snapshot_path": "config/atlas/windmill.hcl",
+            }
+        ],
+    }
+
+    monkeypatch.setattr(
+        atlas_schema,
+        "load_topic_index",
+        lambda: {
+            "platform.db.schema_drift": {
+                "status": "active",
+                "payload_required": [
+                    "database_id",
+                    "database",
+                    "severity",
+                    "snapshot_path",
+                    "snapshot_sha256",
+                    "live_sha256",
+                    "extra_required_key",
+                ],
+            }
+        },
+    )
+
+    try:
+        atlas_schema.validate_catalog(catalog, repo_root=tmp_path, require_snapshot_files=False)
+    except ValueError as exc:
+        assert "requires unsupported payload keys" in str(exc)
+        assert "extra_required_key" in str(exc)
+    else:
+        raise AssertionError("validate_catalog should reject incompatible NATS payload contracts")
 
 
 def test_run_drift_does_not_create_receipt_dir_when_schema_is_clean(monkeypatch, tmp_path: Path) -> None:
@@ -228,6 +370,168 @@ def test_run_drift_does_not_create_receipt_dir_when_schema_is_clean(monkeypatch,
     assert payload["status"] == "clean"
     assert payload["receipt_paths"] == []
     assert payload["receipt_errors"] == []
+
+
+def test_openbao_login_prefers_runtime_env_approle_json(monkeypatch) -> None:
+    atlas_schema = load_module()
+    captured: dict[str, object] = {}
+    recovered: list[str] = []
+
+    class FakeResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self):
+            return json.dumps({"auth": {"client_token": "env-token"}}).encode("utf-8")
+
+    def fake_urlopen(request, timeout):
+        captured["url"] = request.full_url
+        captured["payload"] = json.loads(request.data.decode("utf-8"))
+        captured["timeout"] = timeout
+        return FakeResponse()
+
+    monkeypatch.setenv(
+        "LV3_ATLAS_OPENBAO_APPROLE_JSON",
+        json.dumps({"role_id": "role-from-env", "secret_id": "secret-from-env"}),
+    )
+    monkeypatch.setattr(
+        atlas_schema,
+        "ensure_openbao_unsealed",
+        lambda _context, base_url: recovered.append(base_url),
+    )
+    monkeypatch.setattr(
+        atlas_schema,
+        "controller_secret_path",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("file lookup should not run")),
+    )
+    monkeypatch.setattr(atlas_schema.urllib.request, "urlopen", fake_urlopen)
+
+    token = atlas_schema.openbao_login(
+        {"secret_manifest": {}},
+        "http://127.0.0.1:8201",
+        {"openbao": {"approle_secret_id": "openbao_atlas_approle"}},
+    )
+
+    assert token == "env-token"
+    assert recovered == ["http://127.0.0.1:8201"]
+    assert captured["url"] == "http://127.0.0.1:8201/v1/auth/approle/login"
+    assert captured["payload"] == {"role_id": "role-from-env", "secret_id": "secret-from-env"}
+    assert captured["timeout"] == 10
+
+
+def test_ensure_openbao_unsealed_uses_managed_init_payload_when_health_reports_sealed(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    atlas_schema = load_module()
+    unseal_keys: list[str] = []
+    health_calls = 0
+
+    init_payload_path = tmp_path / "openbao-init.json"
+    init_payload_path.write_text(
+        json.dumps({"keys_base64": ["key-one", "key-two", "key-three"]}),
+        encoding="utf-8",
+    )
+
+    class FakeResponse:
+        def __init__(self, payload: dict[str, object], *, status: int = 200) -> None:
+            self._payload = payload
+            self.status = status
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self) -> bytes:
+            return json.dumps(self._payload).encode("utf-8")
+
+    def fake_urlopen(request, timeout):
+        nonlocal health_calls
+        if request.full_url.endswith("/v1/sys/health"):
+            health_calls += 1
+            payload = {"initialized": True, "sealed": health_calls == 1, "standby": False}
+            if health_calls == 1:
+                raise atlas_schema.urllib.error.HTTPError(
+                    request.full_url,
+                    503,
+                    "sealed",
+                    hdrs=None,
+                    fp=io.BytesIO(json.dumps(payload).encode("utf-8")),
+                )
+            return FakeResponse(payload)
+        if request.full_url.endswith("/v1/sys/unseal"):
+            key = json.loads(request.data.decode("utf-8"))["key"]
+            unseal_keys.append(key)
+            return FakeResponse({"sealed": key != "key-two"})
+        raise AssertionError(f"unexpected url {request.full_url}")
+
+    monkeypatch.setattr(
+        atlas_schema,
+        "controller_secret_path",
+        lambda _context, secret_id: init_payload_path
+        if secret_id == "openbao_init_payload"
+        else (_ for _ in ()).throw(AssertionError(f"unexpected secret id {secret_id}")),
+    )
+    monkeypatch.setattr(atlas_schema.urllib.request, "urlopen", fake_urlopen)
+
+    atlas_schema.ensure_openbao_unsealed({"secret_manifest": {}}, "http://10.10.10.20:8201")
+
+    assert unseal_keys == ["key-one", "key-two"]
+    assert health_calls == 2
+
+
+def test_maybe_publish_ntfy_prefers_runtime_env_password(monkeypatch) -> None:
+    atlas_schema = load_module()
+    captured: dict[str, object] = {}
+
+    class FakeResponse:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    def fake_urlopen(request, timeout):
+        captured["authorization"] = request.get_header("Authorization")
+        captured["title"] = request.get_header("Title")
+        captured["payload"] = request.data.decode("utf-8")
+        captured["timeout"] = timeout
+        return FakeResponse()
+
+    monkeypatch.setenv("LV3_NTFY_ALERTMANAGER_PASSWORD", "runtime-secret")
+    monkeypatch.setattr(
+        atlas_schema,
+        "controller_secret_path",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("file lookup should not run")),
+    )
+    monkeypatch.setattr(atlas_schema.urllib.request, "urlopen", fake_urlopen)
+
+    payload = atlas_schema.maybe_publish_ntfy(
+        catalog={
+            "notifications": {
+                "ntfy": {
+                    "url": "http://10.10.10.20:2586/platform.db.warn",
+                    "username": "alertmanager",
+                    "password_secret_id": "ntfy_alertmanager_password",
+                }
+            }
+        },
+        context={"secret_manifest": {}},
+        drifted_ids=["windmill"],
+    )
+
+    assert payload == {"published": True, "count": 1}
+    assert captured["authorization"] == "Basic YWxlcnRtYW5hZ2VyOnJ1bnRpbWUtc2VjcmV0"
+    assert captured["title"] == "Atlas drift detected"
+    assert captured["payload"] == "Atlas drift detected for database snapshots: windmill"
+    assert captured["timeout"] == 10
 
 
 def test_normalize_global_option_order_moves_repo_flags_before_subcommand() -> None:

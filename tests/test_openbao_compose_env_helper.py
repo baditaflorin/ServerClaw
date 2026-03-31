@@ -134,6 +134,10 @@ def test_systemd_helper_reuses_local_openbao_recovery() -> None:
 def test_local_openbao_recovery_helper_recovers_compose_runtime_when_api_is_down() -> None:
     tasks = RECOVERY_TASKS_PATH.read_text(encoding="utf-8")
 
+    assert "common_local_openbao_runtime_log_dir" in tasks
+    assert "common_local_openbao_runtime_audit_log_file" in tasks
+    assert "- name: Ensure the local OpenBao log directory retains managed ownership before helper API calls" in tasks
+    assert "- name: Ensure the local OpenBao audit log file retains managed ownership before helper API calls" in tasks
     assert "- name: Probe whether the local OpenBao API already answers" in tasks
     assert "- name: Ensure the local OpenBao log directory exists with managed ownership before helper recovery" in tasks
     assert "- name: Ensure the local OpenBao audit log file exists with managed ownership before helper recovery" in tasks

@@ -3,8 +3,8 @@
 - ADR: [ADR 0304](../adr/0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md)
 - Title: Verify Atlas schema linting, snapshot refresh, and Windmill drift detection from the latest realistic `origin/main` baseline
 - Status: in_progress
-- Latest `origin/main`: `bb94f851a3398daaceb8348280afdd4adb6815d1`
-- Latest `origin/main` Repo Version: `0.177.113`
+- Latest `origin/main`: `24214be7347227612051af0f8c1080f114c45402`
+- Latest `origin/main` Repo Version: `0.177.122`
 - Branch: `codex/ws-0304-mainline`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline`
 - Owner: codex
@@ -25,53 +25,70 @@
 
 ## Current State
 
-- Branch commit `3ae16236c` captures the current fix set:
-  - OpenBao now reconciles database backend `allowed_roles` after role upserts
-  - controller-local AppRole artifact refresh now retries one role at a time
-    after re-unsealing OpenBao
-  - Windmill now remirrors `scripts/atlas_schema.py`,
-    `scripts/run_python_with_packages.sh`, and `config/atlas/` immediately
-    before Atlas verification and asserts the guest-side checksums match the
-    controller workspace
-  - the compose and systemd OpenBao helper paths now wait for `status == 200`
-    and `sealed == false` before secret delivery continues
-- Focused repo proof is already clean on this branch:
-  - `uv run --with pytest pytest tests/test_atlas_schema.py tests/test_atlas_drift_check_windmill.py tests/test_parallel_check.py tests/test_validation_gate.py tests/test_openbao_compose_env_helper.py tests/test_openbao_systemd_credentials_helper.py tests/test_compose_runtime_secret_injection.py tests/test_openbao_runtime_role.py tests/test_openbao_postgres_backend_role.py tests/test_windmill_default_operations_surface.py tests/test_windmill_operator_admin_app.py -q`
-    returned `100 passed in 6.90s`
-  - `make atlas-validate` returned `status: ok`
-  - `make atlas-lint` returned `status: ok`
-- The current live blocker is reproduced and diagnosed:
-  - `make atlas-refresh-snapshots` currently fails with `HTTP Error 500`
-  - the staged diagnostic in
-    `receipts/live-applies/evidence/2026-03-31-adr-0304-openbao-dynamic-creds-error-r1.txt`
-    shows OpenBao AppRole login succeeds but
-    `GET /v1/database/creds/postgres-atlas-readonly` returns
-    `"postgres-atlas-readonly" is not an allowed role`
-- The remaining live replays are intentionally waiting for a safe shared-host
-  window because multiple other workstreams are actively mutating
-  `docker-runtime-lv3` and `postgres-lv3`
+- The branch now carries the full ADR 0304 hardening set needed for live apply:
+  - `scripts/atlas_schema.py` now validates the declared NATS subject against
+    the active taxonomy, normalizes trailing whitespace in inspected HCL
+    snapshots, prefers runtime-provided OpenBao and ntfy secrets when present,
+    and can recover a sealed OpenBao instance through the managed init payload
+    before the Atlas AppRole login
+  - the OpenBao runtime and helper tasks now wait for the cluster to be
+    unsealed before continuing secret delivery and refresh the controller-local
+    Atlas AppRole artifact through the managed path
+  - the Windmill runtime contract now injects
+    `LV3_ATLAS_OPENBAO_APPROLE_JSON` and
+    `LV3_NTFY_ALERTMANAGER_PASSWORD`, asserts those values exist both in the
+    rendered runtime env and in the live worker container, and copies the
+    controller-local secret artifacts into the isolated checkout with stable
+    ownership
+  - `config/windmill/scripts/atlas-drift-check.py` now self-hydrates the Atlas
+    AppRole JSON and ntfy password from the repo-local `.local/` artifacts when
+    the worker subprocess environment drops those variables, so the seeded
+    Windmill script still runs from the isolated checkout
+  - the repo-managed Windmill raw-app sync path now checks the Windmill API and
+    will restart the minimal compose subset before `wmill sync push` if another
+    concurrent playbook has cleanly stopped the stack
+- Focused repo proof is clean on the current branch tip:
+  - `uv run --with pytest pytest tests/test_atlas_schema.py tests/test_atlas_drift_check_windmill.py tests/test_windmill_operator_admin_app.py tests/test_openbao_compose_env_helper.py tests/test_openbao_runtime_role.py tests/test_compose_runtime_secret_injection.py tests/test_openbao_systemd_credentials_helper.py -q`
+    returned `88 passed in 1.05s`
+  - `./scripts/validate_repo.sh agent-standards` passed
+  - earlier branch-local validation also passed for `make atlas-validate`,
+    `make atlas-lint`, and
+    `uv run --with pyyaml python scripts/validate_nats_topics.py --validate`
+- Live proof has progressed materially:
+  - `make converge-openbao` succeeded and the Atlas AppRole now mints the
+    `postgres-atlas-readonly` dynamic credential again
+  - `make atlas-drift-check` returned a clean report with `drift_count: 0`
+    and no published notifications
+  - the governed Windmill job failure was reproduced, diagnosed, and fixed: the
+    worker wrapper previously lost the Atlas AppRole artifact when the job
+    subprocess env was narrowed, and later the raw-app sync failed because
+    another playbook had stopped the Windmill stack between checks
+- The remaining blocker is shared-host contention rather than an uncovered ADR
+  0304 bug. Multiple other workstreams are still actively mutating
+  `docker-runtime-lv3`, `proxmox_florin`, `postgres-lv3`, and `nginx-lv3`, so
+  the final `make converge-windmill env=production` replay is waiting for a
+  safer window before the exact end-to-end verification is retried.
 
 ## Verification So Far
 
+- `receipts/live-applies/evidence/2026-03-31-adr-0304-converge-openbao-r6.txt`
+- `receipts/live-applies/evidence/2026-03-31-adr-0304-atlas-drift-check-r6.txt`
+- `receipts/live-applies/evidence/2026-03-31-adr-0304-atlas-drift-check-job-inspect-r3.txt`
+- `receipts/live-applies/evidence/2026-03-31-adr-0304-converge-windmill-r16.txt`
 - `receipts/live-applies/evidence/2026-03-31-adr-0304-targeted-checks-r1.txt`
 - `receipts/live-applies/evidence/2026-03-31-adr-0304-atlas-validate-r1.txt`
 - `receipts/live-applies/evidence/2026-03-31-adr-0304-atlas-lint-r1.txt`
-- `receipts/live-applies/evidence/2026-03-31-adr-0304-atlas-refresh-snapshots-r1.txt`
-- `receipts/live-applies/evidence/2026-03-31-adr-0304-atlas-snapshot-probe-r1.txt`
-- `receipts/live-applies/evidence/2026-03-31-adr-0304-atlas-snapshot-diagnose-r1.txt`
-- `receipts/live-applies/evidence/2026-03-31-adr-0304-openbao-dynamic-creds-error-r1.txt`
 
 ## Remaining Before Merge-To-Main
 
-- rerun `make converge-openbao` from this worktree after the shared runtime
-  hosts clear, then confirm `postgres-atlas-readonly` can mint dynamic
-  credentials again
-- rerun `make atlas-refresh-snapshots` and `make atlas-drift-check`
-- replay the governed Windmill verification from this worktree and confirm the
-  seeded `f/lv3/atlas_drift_check` script returns `status: ok` and
-  `report.status: clean`
-- update ADR 0304 metadata, the ADR index, and the final branch-local
-  live-apply receipt once the live proof is complete
-- rebase onto the latest `origin/main`, run the final repo validation and
-  release-management paths, then update protected `main`-only files as part of
-  the exact-main integration
+- wait for a safe shared-host window, then rerun
+  `make converge-windmill env=production` from this worktree and capture a new
+  receipt proving the raw-app sync survives transient Windmill downtime
+- rerun the governed Windmill verification and confirm
+  `f/lv3/atlas_drift_check` returns `status: ok` with `report.status: clean`
+- rerun the final repo validation path from the post-live branch tip and record
+  the fresh evidence used for merge
+- update ADR 0304 metadata, regenerate `docs/adr/.index.yaml`, and mark
+  `workstreams.yaml` ready-to-merge once the live proof is complete
+- refresh onto the latest `origin/main`, then update the protected `main`-only
+  files as part of the exact-main integration before merging and pushing

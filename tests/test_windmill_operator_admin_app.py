@@ -130,6 +130,8 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert "windmill_worker_superadmin_secret_file" in defaults_text
     assert defaults["windmill_worker_superadmin_secret_dir"] == "{{ windmill_worker_repo_checkout_host_path }}/.local/windmill"
     assert defaults["windmill_worker_superadmin_secret_file"] == "{{ windmill_worker_superadmin_secret_dir }}/superadmin-secret.txt"
+    assert defaults["windmill_atlas_approle_local_file"] == "{{ windmill_controller_local_root }}/openbao/atlas-approle.json"
+    assert defaults["windmill_ntfy_alertmanager_password_local_file"] == "{{ windmill_controller_local_root }}/ntfy/alertmanager-password.txt"
     assert defaults["windmill_runtime_api_base_url"] == "http://127.0.0.1:{{ windmill_server_port }}"
     assert defaults["windmill_worker_network_mode"] == "{{ windmill_server_network_mode }}"
     assert "127.0.0.1" in defaults["windmill_worker_api_base_url"]
@@ -714,6 +716,11 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert 'WM_TOKEN: "{{ windmill_runtime_api_token }}"' in tasks
     assert "BASE_INTERNAL_URL" in tasks
     assert "windmill_runtime_api_base_url" in tasks
+    assert 'windmill_version_url="{{ windmill_runtime_api_base_url }}/api/version"' in tasks
+    assert 'if ! curl -fsS "$windmill_version_url" >/dev/null; then' in tasks
+    assert 'docker compose --file "{{ windmill_compose_file }}" up -d --remove-orphans \\' in tasks
+    assert 'openbao-agent windmill_server windmill_worker windmill_worker_native >/dev/null' in tasks
+    assert "sleep {{ windmill_runtime_api_wait_delay_seconds }}" in tasks
     assert "Build the local staging archive for the Windmill worker checkout" in tasks
     assert "python3 - <<'PY'" in tasks
     assert "gzip.GzipFile" in tasks
@@ -852,9 +859,11 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Verify the critical Windmill verification scripts are seeded with current controller content after any repair attempt" in verify_tasks
     assert "Assert the critical Windmill verification scripts match controller content" in verify_tasks
     assert "windmill_seed_script_root_local_dir ~ '/gate-status.py'" in verify_tasks
+    assert "inventory_dir ~ '/../config/windmill/scripts/atlas-drift-check.py'" in verify_tasks
     assert "inventory_dir ~ '/../config/windmill/scripts/stage-smoke-suites.py'" in verify_tasks
     assert "lookup('ansible.builtin.file', windmill_seed_script_root_local_dir ~ '/lv3-healthcheck.py', rstrip=False)" in verify_tasks
     assert "lookup('ansible.builtin.file', windmill_seed_script_root_local_dir ~ '/gate-status.py', rstrip=False)" in verify_tasks
+    assert "lookup('ansible.builtin.file', inventory_dir ~ '/../config/windmill/scripts/atlas-drift-check.py', rstrip=False)" in verify_tasks
     assert "lookup('ansible.builtin.file', inventory_dir ~ '/../config/windmill/scripts/stage-smoke-suites.py', rstrip=False)" in verify_tasks
     assert "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/" in verify_tasks
     assert 'Authorization: "Bearer {{ windmill_bootstrap_session_token }}"' in verify_tasks
@@ -892,6 +901,11 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert defaults["windmill_seed_app_repo_root_local_dir"] == "{{ windmill_seed_repo_root_local_dir }}/config/windmill/apps"
     assert defaults["windmill_worker_repo_checkout_host_path"] == "/srv/proxmox_florin_server"
     assert defaults["windmill_worker_repo_checkout_container_path"] == "/srv/proxmox_florin_server"
+    assert "grep '^LV3_ATLAS_OPENBAO_APPROLE_JSON=' \"{{ windmill_env_file }}\"" in tasks
+    assert "grep '^LV3_NTFY_ALERTMANAGER_PASSWORD=' \"{{ windmill_env_file }}\"" in tasks
+    assert "docker exec windmill-windmill_worker-1 sh -lc '" in tasks
+    assert 'test -n "${LV3_ATLAS_OPENBAO_APPROLE_JSON:-}"' in tasks
+    assert 'test -n "${LV3_NTFY_ALERTMANAGER_PASSWORD:-}"' in tasks
     assert "{{ windmill_worker_repo_checkout_host_path }}:{{ windmill_worker_repo_checkout_container_path }}" in compose_template
     assert "network_mode: {{ windmill_worker_network_mode }}" in compose_template
     assert "openbao_runtime" in compose_template
@@ -910,6 +924,10 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "TF_VAR_proxmox_endpoint" in runtime_ctmpl_template
     assert "TF_VAR_proxmox_api_token" in runtime_ctmpl_template
     assert 'LV3_WINDMILL_TOKEN=[[ with secret "kv/data/{{ windmill_openbao_secret_path }}" ]][[ .Data.data.LV3_WINDMILL_TOKEN ]][[ end ]]' in runtime_ctmpl_template
+    assert "LV3_ATLAS_OPENBAO_APPROLE_JSON=" in runtime_template
+    assert "LV3_NTFY_ALERTMANAGER_PASSWORD=" in runtime_template
+    assert '[[ end ]][[ if (index .Data.data "LV3_ATLAS_OPENBAO_APPROLE_JSON") ]]LV3_ATLAS_OPENBAO_APPROLE_JSON=' in runtime_ctmpl_template
+    assert '[[ end ]][[ if (index .Data.data "LV3_NTFY_ALERTMANAGER_PASSWORD") ]]LV3_NTFY_ALERTMANAGER_PASSWORD=' in runtime_ctmpl_template
     assert "{% for item in windmill_operator_manager_env" in runtime_ctmpl_template
 
 
@@ -942,10 +960,17 @@ def test_windmill_verify_remirrors_atlas_surfaces_immediately_before_atlas_drift
     atlas_helper_assert_index = task_names.index(
         "Assert the Windmill Atlas verification helper files match controller state immediately before Atlas verification"
     )
+    critical_scripts_verify_index = task_names.index(
+        "Verify the critical Windmill verification scripts are seeded with current controller content"
+    )
+    critical_scripts_assert_index = task_names.index(
+        "Assert the critical Windmill verification scripts match controller content"
+    )
     atlas_drift_check_index = task_names.index("Run the Windmill Atlas drift check script")
 
     assert stage_smoke_assert_index < atlas_helper_collect_index < atlas_helper_mirror_index < atlas_snapshot_mirror_index
     assert atlas_snapshot_mirror_index < atlas_helper_assert_index < atlas_drift_check_index
+    assert atlas_helper_assert_index < critical_scripts_verify_index < critical_scripts_assert_index < atlas_drift_check_index
 
 
 def test_windmill_worker_secret_mirror_uses_ops_ownership() -> None:
@@ -953,7 +978,33 @@ def test_windmill_worker_secret_mirror_uses_ops_ownership() -> None:
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml"
     ).read_text(encoding="utf-8")
 
+    loaded_tasks = yaml.safe_load(
+        (
+            REPO_ROOT
+            / "collections"
+            / "ansible_collections"
+            / "lv3"
+            / "platform"
+            / "roles"
+            / "windmill_runtime"
+            / "tasks"
+            / "main.yml"
+        ).read_text(encoding="utf-8")
+    )
+    mirror_secret_task = next(
+        task
+        for task in loaded_tasks
+        if task["name"] == "Mirror the Windmill worker checkout bootstrap secret files"
+    )
+    ensure_secret_dir_task = next(
+        task
+        for task in loaded_tasks
+        if task["name"] == "Ensure the Windmill worker checkout secret directories exist"
+    )
+
     assert "Ensure the mirrored worker secret directories exist" in tasks
     assert "Mirror the worker-executed controller-local secrets into the repo checkout" in tasks
-    assert "owner: \"{{ proxmox_host_admin_user }}\"" in tasks
-    assert "group: \"{{ proxmox_host_admin_user }}\"" in tasks
+    assert ensure_secret_dir_task["ansible.builtin.file"]["owner"] == "{{ proxmox_host_admin_user }}"
+    assert ensure_secret_dir_task["ansible.builtin.file"]["group"] == "{{ proxmox_host_admin_user }}"
+    assert mirror_secret_task["ansible.builtin.copy"]["owner"] == "{{ proxmox_host_admin_user }}"
+    assert mirror_secret_task["ansible.builtin.copy"]["group"] == "{{ proxmox_host_admin_user }}"
