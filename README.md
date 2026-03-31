@@ -719,6 +719,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Health Probe Contracts Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/health-probe-contracts.md)
 - [HTTP Security Headers](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/http-security-headers.md)
 - [HTTPS And TLS Assurance](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/https-tls-assurance.md)
+- [IaC Policy Scanning](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/iac-policy-scanning.md)
 - [Identity Taxonomy And Managed Principals](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/identity-taxonomy-and-managed-principals.md)
 - [Immutable Guest Replacement](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/immutable-guest-replacement.md)
 - [Incident Triage Engine](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/incident-triage-engine.md)
@@ -1462,6 +1463,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0301-live-apply: Live Apply ADR 0301 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0301-live-apply.md)
 - [Workstream ws-0302-live-apply: ADR 0302 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0302-live-apply.md)
 - [Workstream ws-0302-main-integration](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0302-main-integration.md)
+- [Workstream ws-0306-live-apply: Live Apply ADR 0306 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0306-live-apply.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
