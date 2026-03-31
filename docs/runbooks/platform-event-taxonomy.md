@@ -16,7 +16,7 @@ ADR 0124 makes `config/event-taxonomy.yaml` the canonical registry for platform 
 - `platform.drift.*`
 - `platform.security.*`
 - `platform.maintenance.*`
-- `platform.backup.restore-verification.*`
+- `platform.backup.*`
 - `platform.world_state.refreshed`
 - `platform.mutation.recorded`
 

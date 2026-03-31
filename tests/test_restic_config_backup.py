@@ -14,6 +14,7 @@ TRIGGER_SCRIPT_PATH = REPO_ROOT / "scripts" / "trigger_restic_live_apply.py"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
+CONTROL_PLANE_LANES_PATH = REPO_ROOT / "config" / "control-plane-lanes.json"
 
 
 def _load_module(path: Path, name: str):
@@ -183,6 +184,14 @@ def test_repo_surfaces_register_restic_backup_contract() -> None:
     assert "playbooks/restic-config-backup.yml" in execution_scopes
 
 
+def test_control_plane_lane_routes_backup_topic_family() -> None:
+    lanes = json.loads(CONTROL_PLANE_LANES_PATH.read_text())
+    event_surfaces = lanes["lanes"]["event"]["current_surfaces"]
+    backup_surface = next(surface for surface in event_surfaces if surface["id"] == "platform-backup-subjects")
+
+    assert backup_surface["endpoint"] == "platform.backup.*"
+
+
 def test_trigger_remote_command_includes_live_apply_flag() -> None:
     command = trigger.build_remote_command(
         mode="backup",
@@ -193,3 +202,79 @@ def test_trigger_remote_command_includes_live_apply_flag() -> None:
     )
 
     assert "--live-apply-trigger" in command
+
+
+def test_post_ntfy_notification_uses_human_readable_title(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    class _Response:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    def fake_urlopen(request, timeout=0):
+        captured["url"] = request.full_url
+        captured["title"] = request.headers["Title"]
+        captured["body"] = request.data.decode("utf-8")
+        captured["timeout"] = timeout
+        return _Response()
+
+    monkeypatch.setattr(restic_backup.urllib.request, "urlopen", fake_urlopen)
+
+    result = restic_backup.post_ntfy_notification(
+        {"controller_host": {"ntfy": {"url": "http://127.0.0.1:2586", "topic": "platform-alerts"}}},
+        {"ntfy_password": "secret"},
+        "stale backup detected",
+    )
+
+    assert result["status"] == "sent"
+    assert captured["title"] == "Restic backup critical"
+    assert captured["body"] == "stale backup detected"
+
+
+def test_emit_stale_signals_uses_human_readable_notification_text(tmp_path: Path, monkeypatch) -> None:
+    latest_receipt = {
+        "recorded_at": "2026-03-31T06:02:17Z",
+        "sources": [
+            {
+                "source_id": "receipts",
+                "freshness_policy": "interval",
+                "state": "uncovered",
+                "reasons": ["Latest snapshot is 420 minutes old; threshold is 390 minutes."],
+                "freshness_minutes": 360,
+            }
+        ],
+    }
+    receipt_path = tmp_path / "latest.json"
+    messages: list[str] = []
+
+    monkeypatch.setattr(
+        restic_backup,
+        "publish_stale_event",
+        lambda catalog, credentials, payload: {"channel": "nats", "status": "sent", "payload": payload},
+    )
+
+    def fake_post_ntfy_notification(catalog, credentials, message):
+        messages.append(message)
+        return {"channel": "ntfy", "status": "sent"}
+
+    monkeypatch.setattr(restic_backup, "post_ntfy_notification", fake_post_ntfy_notification)
+
+    notifications = restic_backup.emit_stale_signals(
+        catalog={"controller_host": {}},
+        credentials={"nats_password": "x", "ntfy_password": "y"},
+        latest_receipt=latest_receipt,
+        latest_receipt_path=receipt_path,
+    )
+
+    assert len(notifications) == 2
+    assert messages == [
+        "Restic backup source is stale\n"
+        "Source: receipts\n"
+        f"Latest snapshot receipt: {receipt_path}\n"
+        "Latest snapshot is 420 minutes old; threshold is 390 minutes."
+    ]

@@ -448,15 +448,15 @@
         {
           "id": "platform-backup-subjects",
           "kind": "event_subject",
-          "endpoint": "platform.backup.restore-verification.*",
-          "auth": "Internal NATS publication from ADR 0099 through the private docker-runtime-lv3 event bus runtime.",
+          "endpoint": "platform.backup.*",
+          "auth": "Internal NATS publication from ADR 0099 and ADR 0302 through the private docker-runtime-lv3 event bus runtime.",
           "owner_refs": [
             "proxmox_florin"
           ],
           "workflow_refs": [
             "restore-verification"
           ],
-          "notes": "Restore verification emits canonical completion and failure subjects so backup policy consumers can react without polling receipts."
+          "notes": "Backup automation emits canonical restore-verification and stale-source subjects so backup policy consumers can react without polling receipts."
         },
         {
           "id": "platform-world-state-events",

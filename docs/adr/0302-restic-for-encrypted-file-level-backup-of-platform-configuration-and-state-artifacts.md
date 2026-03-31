@@ -85,8 +85,8 @@ by the Gitea repository history.
   backup-coverage assertion ledger (ADR 0271) consumes this file to confirm each
   path is covered and within the freshness SLA
 - if a snapshot is older than its scheduled interval plus a 30-minute grace
-  period, a `platform.backup.stale` NATS event is emitted (ADR 0276) and an ntfy
-  `platform.backup.critical` notification is sent (ADR 0299)
+  period, a `platform.backup.stale` NATS event is emitted (ADR 0276) and a
+  critical restic backup ntfy notification is sent (ADR 0299)
 
 ### Restore procedure rule
 

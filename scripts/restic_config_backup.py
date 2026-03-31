@@ -35,6 +35,8 @@ DEFAULT_RUNTIME_STATE_DIR = Path("/var/lib/lv3/restic-config-backup")
 DEFAULT_RUNTIME_CONFIG_NAME = "runtime-config.json"
 DEFAULT_TRIGGER = "manual"
 DEFAULT_GRACE_MINUTES = 30
+NTFY_CRITICAL_TITLE = "Restic backup critical"
+NTFY_STALE_MESSAGE_PREFIX = "Restic backup source is stale"
 
 
 @dataclass(frozen=True)
@@ -496,7 +498,7 @@ def post_ntfy_notification(
         method="POST",
         headers={
             "Authorization": "Basic " + base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii"),
-            "Title": "platform.backup.critical",
+            "Title": NTFY_CRITICAL_TITLE,
             "Priority": "4",
         },
     )
@@ -595,7 +597,7 @@ def emit_stale_signals(
         }
         notifications.append(publish_stale_event(catalog, credentials, payload))
         message = (
-            f"platform.backup.critical\nSource: {source['source_id']}\n"
+            f"{NTFY_STALE_MESSAGE_PREFIX}\nSource: {source['source_id']}\n"
             f"Latest snapshot receipt: {display_path(latest_receipt_path)}\n{summary}"
         )
         notifications.append(post_ntfy_notification(catalog, credentials, message))

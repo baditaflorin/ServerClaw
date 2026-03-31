@@ -231,12 +231,12 @@
     },
     {
       "id": "platform-backup-subjects",
-      "title": "Backup verification event subjects",
+      "title": "Backup event subjects",
       "lane": "event",
       "lane_surface_ref": "platform-backup-subjects",
       "publication_tier": "internal-only",
       "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
-      "approval_notes": "ADR 0099 backup verification events stay private-first because they disclose restore posture and recent backup health."
+      "approval_notes": "ADR 0099 and ADR 0302 backup events stay private-first because they disclose restore posture and recent backup health."
     },
     {
       "id": "platform-world-state-events",

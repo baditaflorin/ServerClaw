@@ -461,7 +461,7 @@ password SSH disabled on host and guests
 | `platform-drift-subjects` | `event` | `event_subject` | `platform.drift.*` |
 | `platform-security-subjects` | `event` | `event_subject` | `platform.security.*` |
 | `maintenance-window-subjects` | `event` | `event_subject` | `platform.maintenance.*` |
-| `platform-backup-subjects` | `event` | `event_subject` | `platform.backup.restore-verification.*` |
+| `platform-backup-subjects` | `event` | `event_subject` | `platform.backup.*` |
 | `platform-world-state-events` | `event` | `event_subject` | `platform.world_state.refreshed` |
 | `platform-ledger-events` | `event` | `event_subject` | `platform.mutation.recorded` |
 | `platform-agent-events` | `event` | `event_subject` | `platform.agent.*` |
@@ -501,7 +501,7 @@ password SSH disabled on host and guests
 | `platform-drift-subjects` | `internal-only` | `event` | `platform.drift.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `platform-security-subjects` | `internal-only` | `event` | `platform.security.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `maintenance-window-subjects` | `internal-only` | `event` | `platform.maintenance.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
-| `platform-backup-subjects` | `internal-only` | `event` | `platform.backup.restore-verification.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
+| `platform-backup-subjects` | `internal-only` | `event` | `platform.backup.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `platform-world-state-events` | `internal-only` | `event` | `platform.world_state.refreshed` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `platform-ledger-events` | `internal-only` | `event` | `platform.mutation.recorded` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `platform-agent-events` | `internal-only` | `event` | `platform.agent.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
