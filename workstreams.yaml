@@ -6031,7 +6031,7 @@ workstreams:
   - id: ws-0257-live-apply
     adr: "0257"
     title: ServerClaw skill packs live apply
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0257-openclaw-skills-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-openclaw-skills
@@ -6104,12 +6104,15 @@ workstreams:
             - tests/test_serverclaw_skills_windmill.py
             - tests/test_agent_tool_registry.py
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      latest_receipts:
+        serverclaw_skills: 2026-03-31-adr-0257-serverclaw-skill-packs-mainline-live-apply
   - id: ws-0257-main-merge
     adr: "0257"
     title: Integrate ADR 0257 exact-main replay onto current origin/main
-    status: in_progress
+    status: ready_for_merge
     owner: codex
     branch: codex/ws-0257-main-merge
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-main-merge
@@ -6151,8 +6154,11 @@ workstreams:
             - build/platform-manifest.json
             - receipts/live-applies/
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implements ADR 0257 by carrying the governed ServerClaw SKILL.md skill-pack contract onto the current mainline baseline, hardening exact-main OpenBao replay stability, and recording the verified controller, API gateway, and Windmill workspace-precedence proof set
+      release_bump: patch
   - id: ws-0259-main-merge
     adr: "0259"
     title: Integrate ADR 0259 exact-main replay onto current origin/main

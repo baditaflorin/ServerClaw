@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0257](../adr/0257-openclaw-compatible-skill-md-packs-and-workspace-precedence-for-serverclaw.md)
 - Title: Implement the governed ServerClaw `SKILL.md` contract across controller, API gateway, and Windmill from the latest `origin/main`
-- Status: in_progress
+- Status: live_applied
 - Branch: `codex/ws-0257-openclaw-skills-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-openclaw-skills`
 - Owner: codex
@@ -69,9 +69,76 @@
 
 ## Outcome
 
-- in progress
+- live apply completed from the latest realistic `origin/main` baseline and the
+  durable proof set is recorded in
+  `receipts/live-applies/2026-03-31-adr-0257-serverclaw-skill-packs-mainline-live-apply.json`
+- the governed skill-pack contract now resolves consistently through the
+  controller CLI, the tool registry, the public API gateway surface, and the
+  seeded Windmill wrapper for the `ops` workspace
+- the exact-main replay also captured and fixed one adjacent runtime blocker:
+  transient OpenBao `500/502/503` reads during restart windows now retry long
+  enough for the rotatable-secret verification path to settle on
+  `docker-runtime-lv3`
+
+## Live Apply Outcome
+
+- The latest-main replay ran against `origin/main` commit `0b86b8ac4e2c868bab2b489ecff1e44a3913a10c`
+  with repo version context `0.177.116`, platform version context `0.130.75`,
+  and final runtime-tree source commit `808b924df84dd7fdfd3f3871b5cfe1225b6b22a4`.
+- `make converge-api-gateway` succeeded with evidence log
+  `receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-converge-api-gateway-r14-0.177.116.txt`,
+  and the public `list-serverclaw-skills` proof returned HTTP `200` together
+  with the expected workspace-local `platform-observe` override in
+  `receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-api-gateway-list-serverclaw-skills-r7-0.177.116.json`.
+- The exact-main replay re-established adjacent certificate/runtime
+  dependencies: `step-ca` health returned `{"status":"ok"}` in
+  `receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-step-ca-health-r2-0.177.116.txt`,
+  and the stabilized OpenBao replay completed with recap
+  `docker-runtime-lv3 ok=176 changed=9 failed=0`, `postgres-lv3 ok=49 changed=2 failed=0`
+  in
+  `receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-converge-openbao-r20-0.177.116.txt`.
+- `make converge-windmill` completed cleanly with recap
+  `docker-runtime-lv3 ok=328 changed=54 failed=0`,
+  `postgres-lv3 ok=72 changed=0 failed=0`,
+  `proxmox_florin ok=41 changed=4 failed=0`
+  in
+  `receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-converge-windmill-r27-0.177.116.txt`.
+- The seeded Windmill wrapper proof in
+  `receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-windmill-serverclaw-skills-r4-0.177.116.json`
+  returned the same two active skills as the controller and gateway proofs,
+  including the `ops` workspace-local `platform-observe` override shadowing the
+  bundled pack.
+- Focused repository validation passed on the exact-main branch: the targeted
+  ADR 0257 pytest slice passed (`52 passed`), the OpenBao role regression slice
+  passed (`19 passed`), `make syntax-check-windmill`,
+  `make syntax-check-api-gateway`, `./scripts/validate_repo.sh agent-standards`,
+  and `scripts/validate_repository_data_models.py --validate` all passed.
+
+## Live Apply Evidence
+
+- Receipt: `receipts/live-applies/2026-03-31-adr-0257-serverclaw-skill-packs-mainline-live-apply.json`
+- Controller proof:
+  `receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-controller-skill-packs-r7-0.177.116.json`
+- Tool registry proof:
+  `receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-tool-registry-list-serverclaw-skills-r7-0.177.116.json`
+- API gateway converge:
+  `receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-converge-api-gateway-r14-0.177.116.txt`
+- Public API proof:
+  `receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-api-gateway-list-serverclaw-skills-r7-0.177.116.json`
+- OpenBao converge:
+  `receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-converge-openbao-r20-0.177.116.txt`
+- Windmill converge:
+  `receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-converge-windmill-r27-0.177.116.txt`
+- Windmill direct proof:
+  `receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-windmill-serverclaw-skills-r4-0.177.116.json`
+- Step-ca health proof:
+  `receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-step-ca-health-r2-0.177.116.txt`
 
 ## Notes For The Next Assistant
 
-- if the live apply finishes on this branch before merge-to-main, update ADR 0257 metadata and record the exact receipt id here
-- protected integration files can wait until the final mainline integration step, but the receipt, workstream doc, and ADR metadata must already say what remains
+- The live apply is complete and the receipt id is
+  `2026-03-31-adr-0257-serverclaw-skill-packs-mainline-live-apply`.
+- Protected integration files still remain for the final merge-to-main step:
+  update ADR 0257 metadata with the released repo/platform versions, cut the
+  next `VERSION` and `changelog.md` release, and refresh generated canonical
+  truth from the merged `main` baseline.

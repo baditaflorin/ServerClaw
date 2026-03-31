@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0257](../adr/0257-openclaw-compatible-skill-md-packs-and-workspace-precedence-for-serverclaw.md)
 - Title: Integrate ADR 0257 exact-main replay onto `origin/main`
-- Status: `in_progress`
+- Status: `ready_for_merge`
 - Branch: `codex/ws-0257-main-merge`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-main-merge`
 - Owner: codex
@@ -33,32 +33,34 @@ only after the integrated platform verification is complete.
 
 ## Verification
 
-- fetched `origin/main` on 2026-03-30 and confirmed the current tip as
-  `020c5f5ad` with repo version `0.177.88`
-- replayed `make converge-windmill` from this worktree and reached
-  `Result: PASS (converge-windmill)` with a clean `PLAY RECAP`; the replay
-  exercised the Docker bridge-chain recovery path that this branch hardens
-- revalidated the repo-side regressions that unblock the exact-main replay:
-  `tests/test_api_gateway_runtime_role.py`,
-  `tests/test_config_merge_windmill.py`,
-  `tests/test_docker_runtime_role.py`,
-  `tests/test_ephemeral_lifecycle_repo_surfaces.py`,
-  `tests/test_validation_gate.py`,
-  `tests/test_validation_gate_windmill.py`,
-  `tests/test_windmill_operator_admin_app.py`
-- direct post-rebase gateway, controller, and runtime-assurance checks still
-  remain before the final merge-to-main step
+- fetched `origin/main` on 2026-03-31 and confirmed the current tip as
+  `0b86b8ac4e2c868bab2b489ecff1e44a3913a10c` with repo version `0.177.116`
+- the exact-main replay completed across all required live surfaces:
+  `make converge-api-gateway`,
+  `make converge-openbao`,
+  `make converge-windmill`,
+  and the adjacent `step-ca` health proof all passed from this worktree
+- controller, governed tool registry, public API gateway, and seeded Windmill
+  direct proofs all resolved the same governed skill set for workspace `ops`,
+  including the workspace-local `platform-observe` override shadowing the
+  bundled pack
+- the only code hardening required to finish the replay was the new OpenBao
+  transient-read retry contract now committed in source commit
+  `808b924df84dd7fdfd3f3871b5cfe1225b6b22a4`
+- focused repository validation also passed on the exact-main branch:
+  `52 passed` across the ADR 0257 skill-pack slices, `19 passed` for the
+  OpenBao role regression slice, `make syntax-check-windmill`,
+  `make syntax-check-api-gateway`, `./scripts/validate_repo.sh agent-standards`,
+  and `scripts/validate_repository_data_models.py --validate`
 
 ## Outcome
 
-- branch-local replay hardening is implemented, including:
-  - governed ServerClaw skill-pack sync additions for the API gateway runtime
-  - macOS-safe API gateway tree sync that avoids AppleDouble/xattr ownership
-    leakage during remote extraction
-  - repo-root path resolution for `scripts/gate_status.py`
-  - retry classification for transient Windmill backend SQL transport failures
-  - Docker/Windmill recovery for missing `DOCKER` and `DOCKER-FORWARD` chains
-  - workspace-scoped Windmill schedule flag convergence using one SQL update
-- protected integration files intentionally remain untouched here until the
-  rebased branch finishes its final live verification on top of the latest
-  `origin/main`
+- the latest realistic `origin/main` replay is complete and this branch is now
+  ready for final merge-to-`main`
+- protected integration files intentionally still remain untouched on this
+  branch: ADR metadata, `VERSION`, `changelog.md`, `README.md`,
+  `docs/release-notes/`, `versions/stack.yaml`, and `build/platform-manifest.json`
+  should be refreshed only during the final `main` integration step
+- the branch carries durable live evidence in
+  `receipts/live-applies/2026-03-31-adr-0257-serverclaw-skill-packs-mainline-live-apply.json`
+  so the final merge step can promote the exact proof set without replay drift
