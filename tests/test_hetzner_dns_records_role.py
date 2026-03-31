@@ -59,6 +59,10 @@ def test_multi_record_role_retries_transient_provider_errors() -> None:
     assert "delay: 2" in record_tasks
     assert "429" in record_tasks
     assert "504" in record_tasks
+    assert "return_content: true" in record_tasks
+    assert "hetzner_dns_record_create_response.json.error.code" in record_tasks
+    assert "hetzner_dns_record_update_response.json.error.code" in record_tasks
+    assert "hetzner_dns_record_delete_response.json.error.code" in record_tasks
 
 
 def test_multi_record_role_marks_provider_mutations_as_changed() -> None:

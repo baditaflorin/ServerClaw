@@ -1,3 +1,9 @@
+# Purpose: Define default runtime paths, ports, and credential locations for the shared mail platform role.
+# Use case: Load during mail-platform convergence so compose rendering, gateway wiring, and artifact mirroring resolve consistently.
+# Inputs: Platform topology, image catalog, shared secret roots, and optional mail-platform overrides.
+# Outputs: Default variables consumed by the mail_platform_runtime tasks and templates.
+# Idempotency: Fully idempotent; defaults declare desired values only.
+# Dependencies: ADR 0165 metadata standard, ADR 0130, and the mail_platform_runtime role tasks.
 ---
 # Purpose: Declare the canonical mail-platform runtime defaults, secrets, ports, and policy metadata used by the managed Stalwart and gateway stack.
 # Use case: Loaded whenever the mail_platform_runtime role converges or verifies the live mail platform.
@@ -103,6 +109,10 @@ mail_platform_gateway_trace_service_name: mail-gateway
 mail_platform_gateway_trace_service_namespace: lv3
 mail_platform_gateway_trace_environment: lv3
 mail_platform_gateway_trace_otlp_endpoint: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('grafana', 'otlp_http') }}"
+mail_platform_gateway_sentry_dsn_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/glitchtip/mail-gateway.dsn
+mail_platform_gateway_sentry_dsn: "{{ lookup('ansible.builtin.file', mail_platform_gateway_sentry_dsn_local_file, errors='ignore') | trim }}"
+mail_platform_gateway_sentry_environment: "{{ env | default('production') }}"
+mail_platform_gateway_sentry_release: "{{ lookup('ansible.builtin.file', '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/VERSION') | trim }}"
 mail_platform_metrics_username: prometheus
 mail_platform_webhook_events:
   - queue.queue-message-authenticated

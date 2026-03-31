@@ -1,0 +1,85 @@
+# Purpose: Set the default paths, topology, images, and bootstrap artifact locations for the GlitchTip runtime role.
+# Use case: Load during GlitchTip convergence so compose rendering, OIDC bootstrap, and DSN publication use one consistent variable set.
+# Inputs: Platform topology, image catalog, secret roots, and optional runtime overrides.
+# Outputs: Default variables consumed by the glitchtip_runtime tasks and templates.
+# Idempotency: Fully idempotent; defaults declare desired values only.
+# Dependencies: ADR 0165 metadata standard, ADR 0281, and the glitchtip_runtime role tasks.
+---
+glitchtip_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('glitchtip') }}"
+glitchtip_site_dir: /opt/glitchtip
+glitchtip_data_dir: "{{ glitchtip_site_dir }}/data"
+glitchtip_uploads_dir: "{{ glitchtip_data_dir }}/uploads"
+glitchtip_secret_dir: /etc/lv3/glitchtip
+glitchtip_compose_file: "{{ glitchtip_site_dir }}/docker-compose.yml"
+glitchtip_env_file: "{{ compose_runtime_secret_root }}/glitchtip/runtime.env"
+glitchtip_legacy_env_file: "{{ glitchtip_site_dir }}/glitchtip.env"
+glitchtip_bootstrap_script_file: "{{ glitchtip_site_dir }}/bootstrap-glitchtip.py"
+glitchtip_openbao_agent_dir: "{{ glitchtip_site_dir }}/openbao"
+glitchtip_openbao_agent_image: "{{ openbao_agent_image }}"
+glitchtip_openbao_agent_container_name: glitchtip-openbao-agent
+glitchtip_openbao_secret_path: services/glitchtip/runtime-env
+glitchtip_openbao_policy_name: lv3-service-glitchtip-runtime
+glitchtip_openbao_approle_name: glitchtip-runtime
+glitchtip_internal_port: "{{ platform_service_topology | platform_service_port('glitchtip', 'internal') }}"
+glitchtip_internal_base_url: "{{ platform_service_topology | platform_service_url('glitchtip', 'internal') }}"
+glitchtip_public_base_url: "https://{{ glitchtip_service_topology.public_hostname }}"
+glitchtip_container_name: glitchtip
+glitchtip_valkey_container_name: glitchtip-valkey
+glitchtip_compose_network_name: glitchtip_default
+glitchtip_image: "{{ container_image_catalog.images.glitchtip_runtime.ref }}"
+glitchtip_valkey_image: "{{ container_image_catalog.images.glitchtip_valkey_runtime.ref }}"
+glitchtip_database_name: glitchtip
+glitchtip_database_user: glitchtip
+glitchtip_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+glitchtip_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/glitchtip/database-password.txt
+glitchtip_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/glitchtip
+glitchtip_secret_key_local_file: "{{ glitchtip_local_artifact_dir }}/secret-key.txt"
+glitchtip_valkey_password_local_file: "{{ glitchtip_local_artifact_dir }}/valkey-password.txt"
+glitchtip_admin_password_local_file: "{{ glitchtip_local_artifact_dir }}/admin-password.txt"
+glitchtip_api_token_local_file: "{{ glitchtip_local_artifact_dir }}/api-token.txt"
+glitchtip_projects_local_file: "{{ glitchtip_local_artifact_dir }}/projects.json"
+glitchtip_mail_gateway_dsn_local_file: "{{ glitchtip_local_artifact_dir }}/mail-gateway.dsn"
+glitchtip_windmill_jobs_dsn_local_file: "{{ glitchtip_local_artifact_dir }}/windmill-jobs.dsn"
+glitchtip_platform_findings_event_url_local_file: "{{ glitchtip_local_artifact_dir }}/platform-findings-event-url.txt"
+glitchtip_keycloak_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/glitchtip-client-secret.txt
+glitchtip_mattermost_incoming_webhooks_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/incoming-webhooks.json
+glitchtip_ntfy_alertmanager_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy/alertmanager-password.txt
+glitchtip_mail_submission_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/server-mailbox-password.txt
+glitchtip_secret_key_remote_file: "{{ glitchtip_secret_dir }}/secret-key"
+glitchtip_valkey_password_remote_file: "{{ glitchtip_secret_dir }}/valkey-password"
+glitchtip_keycloak_client_id: glitchtip
+glitchtip_keycloak_provider: openid_connect
+glitchtip_keycloak_provider_id: keycloak
+glitchtip_keycloak_server_url: https://sso.lv3.org/realms/lv3
+glitchtip_bootstrap_admin_email: glitchtip-admin@lv3.org
+glitchtip_bootstrap_admin_name: LV3 GlitchTip Admin
+glitchtip_api_token_label: lv3-platform-automation
+glitchtip_api_token_scopes:
+  - org:read
+  - team:read
+  - project:read
+  - project:write
+  - event:read
+glitchtip_organization_name: LV3
+glitchtip_organization_slug: lv3
+glitchtip_team_slug: platform-ops
+glitchtip_bootstrap_projects:
+  - slug: mail-gateway
+    name: Mail Gateway
+    dsn_local_file: "{{ glitchtip_mail_gateway_dsn_local_file }}"
+  - slug: windmill-jobs
+    name: Windmill Jobs
+    dsn_local_file: "{{ glitchtip_windmill_jobs_dsn_local_file }}"
+  - slug: platform-findings
+    name: Platform Findings
+    dsn_local_file: "{{ glitchtip_platform_findings_event_url_local_file }}"
+glitchtip_default_from_email: server@lv3.org
+glitchtip_default_reply_to_email: server@lv3.org
+glitchtip_mail_host: "{{ ansible_host }}"
+glitchtip_mail_port: "{{ smtp_port }}"
+glitchtip_mail_starttls: "{{ smtp_starttls }}"
+glitchtip_mail_url_scheme: "{{ 'smtp+tls' if (glitchtip_mail_starttls | bool) else 'smtp' }}"
+glitchtip_mail_username: "{{ smtp_username }}"
+glitchtip_alert_ntfy_username: alertmanager
+glitchtip_alert_ntfy_topic: platform-alerts
+glitchtip_instance_name: LV3 Error Tracking

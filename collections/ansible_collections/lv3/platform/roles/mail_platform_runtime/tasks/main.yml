@@ -228,6 +228,7 @@
       metrics_password: "{{ mail_platform_metrics_password_raw.content | b64decode | trim }}"
       mailbox_password: "{{ mail_platform_mailbox_password_raw.content | b64decode | trim }}"
       stalwart_admin_password: "{{ mail_platform_admin_password_raw.content | b64decode | trim }}"
+      sentry_dsn: "{{ mail_platform_gateway_sentry_dsn }}"
   no_log: true
 
 - name: Record notification profile runtime facts
@@ -544,13 +545,78 @@
       - DOCKER
   register: mail_platform_docker_nat_chain
   changed_when: false
-  failed_when: false
+  failed_when: mail_platform_docker_nat_chain.rc not in [0, 1]
 
-- name: Restore Docker networking when the nat chain is missing before mail-platform startup
+- name: Check whether the Docker forward chain exists before mail-platform startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - filter
+      - -S
+      - DOCKER-FORWARD
+  register: mail_platform_docker_forward_chain
+  changed_when: false
+  failed_when: mail_platform_docker_forward_chain.rc not in [0, 1]
+
+- name: Restore Docker networking when bridge chains are missing before mail-platform startup
   ansible.builtin.service:
     name: docker
     state: restarted
-  when: mail_platform_docker_nat_chain.rc != 0
+  when: mail_platform_docker_nat_chain.rc != 0 or mail_platform_docker_forward_chain.rc != 0
+
+- name: Recheck the Docker nat chain before mail-platform startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: mail_platform_docker_nat_chain_recheck
+  changed_when: false
+  failed_when: mail_platform_docker_nat_chain_recheck.rc not in [0, 1]
+  retries: 10
+  delay: 2
+  until: mail_platform_docker_nat_chain_recheck.rc == 0
+  when: mail_platform_docker_nat_chain.rc != 0 or mail_platform_docker_forward_chain.rc != 0
+
+- name: Recheck the Docker forward chain before mail-platform startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - filter
+      - -S
+      - DOCKER-FORWARD
+  register: mail_platform_docker_forward_chain_recheck
+  changed_when: false
+  failed_when: mail_platform_docker_forward_chain_recheck.rc not in [0, 1]
+  retries: 10
+  delay: 2
+  until: mail_platform_docker_forward_chain_recheck.rc == 0
+  when: mail_platform_docker_nat_chain.rc != 0 or mail_platform_docker_forward_chain.rc != 0
+
+- name: Wait for the Docker daemon to answer after bridge recovery before mail-platform startup
+  ansible.builtin.command:
+    argv:
+      - docker
+      - info
+      - --format
+      - '{{ "{{.ServerVersion}}" }}'
+  register: mail_platform_docker_info
+  changed_when: false
+  retries: 10
+  delay: 2
+  until: mail_platform_docker_info.rc == 0
+  when: mail_platform_docker_nat_chain.rc != 0 or mail_platform_docker_forward_chain.rc != 0
+
+- name: Assert Docker bridge chains are present before mail-platform startup
+  ansible.builtin.assert:
+    that:
+      - mail_platform_docker_nat_chain.rc == 0 or mail_platform_docker_nat_chain_recheck.rc == 0
+      - mail_platform_docker_forward_chain.rc == 0 or mail_platform_docker_forward_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the DOCKER or DOCKER-FORWARD chains are missing; mail-platform startup will fail."
 
 - name: Check whether the Stalwart management port is already published locally
   ansible.builtin.wait_for:
@@ -559,6 +625,26 @@
     delay: 0
     timeout: 1
   register: mail_platform_stalwart_port_probe
+  changed_when: false
+  failed_when: false
+
+- name: Probe whether the mail platform can attach a fresh container to the shared bridge network
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ mail_platform_compose_file }}"
+      - run
+      - --rm
+      - --no-deps
+      - mail-gateway
+      - python
+      - -c
+      - pass
+  args:
+    chdir: "{{ mail_platform_site_dir }}"
+  register: mail_platform_network_attach_probe
   changed_when: false
   failed_when: false
 
@@ -573,6 +659,7 @@
         or (mail_platform_gateway_profiles.changed | default(false))
         or (mail_platform_compose.changed | default(false))
         or (mail_platform_gateway_build.changed | default(false))
+        or (mail_platform_network_attach_probe.rc | default(0)) != 0
       }}
 
 - name: Reset the mail platform stack before a force recreate

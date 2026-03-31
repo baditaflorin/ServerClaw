@@ -49,6 +49,15 @@ def _load_environment_catalog(repo_root: Path):
     return environment_catalog
 
 
+def emit_glitchtip_notification(repo_root: Path, target_url: str, payload: dict[str, Any]) -> None:
+    scripts_dir = repo_root / "scripts"
+    if str(scripts_dir) not in sys.path:
+        sys.path.insert(0, str(scripts_dir))
+    from glitchtip_event import emit_glitchtip_event
+
+    emit_glitchtip_event(target_url, payload)
+
+
 def build_summary(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     return (
@@ -141,7 +150,8 @@ def publish_notifications(repo_root: Path, payload: dict[str, Any]) -> None:
         or maybe_read_secret_path(repo_root, "glitchtip_platform_findings_event_url")
     )
     if glitchtip_url:
-        post_json_webhook(
+        emit_glitchtip_notification(
+            repo_root,
             glitchtip_url,
             {
                 "message": "ADR 0111 nightly integration suite failed",

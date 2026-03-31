@@ -84,6 +84,16 @@
       "description": "The private Gotenberg document rendering API remains reachable on runtime-ai-lv3 for synchronous PDF conversion workflows."
     },
     {
+      "id": "glitchtip-availability",
+      "service_id": "glitchtip",
+      "description": "The public GlitchTip health endpoint remains reachable for browser sign-in, DSN ingestion, and repo-managed smoke verification.",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "probe_module": "http_2xx_follow_redirects",
+      "target_url": "https://errors.lv3.org/api/0/internal/health/",
+      "window_days": 30
+    },
+    {
       "id": "grafana-availability",
       "service_id": "grafana",
       "indicator": "availability",

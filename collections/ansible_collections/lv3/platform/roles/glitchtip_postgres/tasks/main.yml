@@ -1,0 +1,165 @@
+---
+# Purpose: Provision the managed PostgreSQL role and database for GlitchTip and mirror its password artifacts locally and remotely.
+# Use case: Run during GlitchTip convergence before the application runtime starts so the backend database exists and credentials are synchronized.
+# Inputs: Database name and user plus the local and remote password file paths used by GlitchTip automation.
+# Outputs: A writable GlitchTip PostgreSQL role and database plus the corresponding password artifacts on the controller and postgres host.
+# Idempotency: Partially idempotent; reruns reconcile the same role/database and only generate the password when the local artifact is missing.
+# Dependencies: ADR 0165 metadata standard, ADR 0281, and a writable postgres primary.
+- name: Validate GlitchTip PostgreSQL inputs
+  ansible.builtin.assert:
+    that:
+      - glitchtip_database_name | length > 0
+      - glitchtip_database_user | length > 0
+      - glitchtip_postgres_secret_dir | length > 0
+      - glitchtip_postgres_password_file | length > 0
+      - glitchtip_database_password_local_file | length > 0
+    fail_msg: "glitchtip_postgres requires database names and password paths."
+
+- name: Ensure the GlitchTip PostgreSQL secret directory exists
+  ansible.builtin.file:
+    path: "{{ glitchtip_postgres_secret_dir }}"
+    state: directory
+    owner: root
+    group: postgres
+    mode: "0750"
+
+- name: Ensure the local GlitchTip artifact directory exists
+  ansible.builtin.file:
+    path: "{{ glitchtip_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the GlitchTip database password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ glitchtip_database_password_local_file }}" ]; then
+      umask 077
+      openssl rand -hex 24 > "{{ glitchtip_database_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: glitchtip_postgres_password_generation
+  changed_when: "'changed' in glitchtip_postgres_password_generation.stdout"
+  no_log: true
+
+- name: Read the GlitchTip database password
+  ansible.builtin.slurp:
+    src: "{{ glitchtip_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: glitchtip_postgres_password_raw
+  no_log: true
+
+- name: Record the GlitchTip database password
+  ansible.builtin.set_fact:
+    glitchtip_database_password: "{{ glitchtip_postgres_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Persist the GlitchTip database password on the PostgreSQL member
+  ansible.builtin.copy:
+    dest: "{{ glitchtip_postgres_password_file }}"
+    content: "{{ glitchtip_database_password }}\n"
+    owner: root
+    group: postgres
+    mode: "0640"
+  no_log: true
+
+- name: Check whether the local PostgreSQL member is writable
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT CASE WHEN pg_is_in_recovery() THEN 0 ELSE 1 END"
+  register: glitchtip_postgres_writable_check
+  changed_when: false
+
+- name: Check whether the GlitchTip role already exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_roles WHERE rolname = '{{ glitchtip_database_user }}'"
+  register: glitchtip_postgres_role_check
+  changed_when: false
+  when: glitchtip_postgres_writable_check.stdout | trim == "1"
+
+- name: Create the GlitchTip role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        CREATE ROLE {{ glitchtip_database_user }} LOGIN
+        PASSWORD '{{ glitchtip_database_password }}'
+  changed_when: true
+  no_log: true
+  when:
+    - glitchtip_postgres_writable_check.stdout | trim == "1"
+    - glitchtip_postgres_role_check.stdout != "1"
+
+- name: Ensure the GlitchTip role password matches the managed secret
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER ROLE {{ glitchtip_database_user }} PASSWORD '{{ glitchtip_database_password }}'"
+  changed_when: false
+  no_log: true
+  when: glitchtip_postgres_writable_check.stdout | trim == "1"
+
+- name: Check whether the GlitchTip database already exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_database WHERE datname = '{{ glitchtip_database_name }}'"
+  register: glitchtip_postgres_database_check
+  changed_when: false
+  when: glitchtip_postgres_writable_check.stdout | trim == "1"
+
+- name: Create the GlitchTip database
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "CREATE DATABASE {{ glitchtip_database_name }} OWNER {{ glitchtip_database_user }}"
+  changed_when: true
+  when:
+    - glitchtip_postgres_writable_check.stdout | trim == "1"
+    - glitchtip_postgres_database_check.stdout != "1"
+
+- name: Ensure the GlitchTip database owner is correct
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER DATABASE {{ glitchtip_database_name }} OWNER TO {{ glitchtip_database_user }}"
+  changed_when: false
+  when: glitchtip_postgres_writable_check.stdout | trim == "1"

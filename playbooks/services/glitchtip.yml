@@ -1,0 +1,8 @@
+---
+# Purpose: Provide the service-scoped live-apply entry point for GlitchTip.
+# Use case: Used by make live-apply-service service=glitchtip env=<environment>.
+# Outputs: Imports the full GlitchTip converge playbook without duplicating service logic.
+# Idempotency: Matches playbooks/glitchtip.yml.
+# Dependencies: ADR 0281 and playbooks/glitchtip.yml.
+
+- import_playbook: ../glitchtip.yml

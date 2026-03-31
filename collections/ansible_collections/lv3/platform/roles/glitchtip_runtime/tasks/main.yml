@@ -1,0 +1,651 @@
+---
+# Purpose: Deploy GlitchTip and bootstrap the repo-managed org, team, projects, and DSN artifacts.
+# Use case: Run during GlitchTip convergence to reconcile the compose runtime, Keycloak integration, and controller-local DSN mirrors.
+# Inputs: GlitchTip topology, images, secret files, Keycloak client credentials, and bootstrap project definitions.
+# Outputs: A running GlitchTip stack, synchronized runtime secrets, and controller-local API token and DSN artifacts for producers.
+# Idempotency: Partially idempotent; reruns reconcile the same runtime and refresh bootstrap artifacts while preserving stable generated secrets.
+# Dependencies: ADR 0165 metadata standard, ADR 0281, docker runtime availability, OpenBao secret injection, and the Keycloak client secret mirror.
+
+- name: Validate GlitchTip runtime inputs
+  ansible.builtin.assert:
+    that:
+      - glitchtip_site_dir | length > 0
+      - glitchtip_data_dir | length > 0
+      - glitchtip_secret_dir | length > 0
+      - glitchtip_compose_file | length > 0
+      - glitchtip_env_file | length > 0
+      - glitchtip_bootstrap_script_file | length > 0
+      - glitchtip_internal_port | int > 0
+      - glitchtip_internal_base_url | length > 0
+      - glitchtip_public_base_url | length > 0
+      - glitchtip_database_password_local_file | length > 0
+      - glitchtip_keycloak_client_secret_local_file | length > 0
+      - glitchtip_api_token_local_file | length > 0
+      - glitchtip_admin_password_local_file | length > 0
+      - glitchtip_image | length > 0
+      - glitchtip_valkey_image | length > 0
+    fail_msg: >-
+      glitchtip_runtime requires runtime paths, image refs, database auth,
+      bootstrap artifact paths, and the repo-managed Keycloak client secret.
+
+- name: Check whether the GlitchTip database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ glitchtip_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: glitchtip_database_password_local
+
+- name: Check whether the GlitchTip Keycloak client secret exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ glitchtip_keycloak_client_secret_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: glitchtip_keycloak_client_secret_local
+
+- name: Check whether the GlitchTip mail submission password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ glitchtip_mail_submission_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: glitchtip_mail_submission_password_local
+
+- name: Fail if the GlitchTip database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ glitchtip_database_password_local_file }} is missing on the control machine.
+      Converge glitchtip_postgres before deploying GlitchTip.
+  when: not glitchtip_database_password_local.stat.exists
+
+- name: Fail if the GlitchTip Keycloak client secret is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ glitchtip_keycloak_client_secret_local_file }} is missing on the control machine.
+      Converge the Keycloak runtime before deploying GlitchTip.
+  when: not glitchtip_keycloak_client_secret_local.stat.exists
+
+- name: Fail if the GlitchTip mail submission password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ glitchtip_mail_submission_password_local_file }} is missing on the control machine.
+      Converge the mail platform before deploying GlitchTip.
+  when: not glitchtip_mail_submission_password_local.stat.exists
+
+- name: Ensure the GlitchTip runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+      - python3
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the GlitchTip runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ glitchtip_site_dir }}"
+      mode: "0755"
+    - path: "{{ glitchtip_data_dir }}"
+      mode: "0755"
+    - path: "{{ glitchtip_uploads_dir }}"
+      mode: "0755"
+    - path: "{{ glitchtip_secret_dir }}"
+      mode: "0700"
+
+- name: Generate the GlitchTip runtime secrets
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item.path }}" ]; then
+      umask 077
+      {{ item.command }} > "{{ item.path }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop:
+    - path: "{{ glitchtip_secret_key_remote_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ glitchtip_valkey_password_remote_file }}"
+      command: "openssl rand -base64 24 | tr -d '\\n'"
+  register: glitchtip_secret_generation
+  changed_when: "'changed' in glitchtip_secret_generation.stdout"
+  no_log: true
+
+- name: Read the GlitchTip runtime secrets
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  register: glitchtip_secret_reads
+  loop:
+    - "{{ glitchtip_secret_key_remote_file }}"
+    - "{{ glitchtip_valkey_password_remote_file }}"
+  no_log: true
+
+- name: Ensure the local GlitchTip artifact directory exists
+  ansible.builtin.file:
+    path: "{{ glitchtip_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the local GlitchTip break-glass admin password when missing
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ glitchtip_admin_password_local_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 | tr -d '\n' > "{{ glitchtip_admin_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: glitchtip_admin_password_generation
+  changed_when: "'changed' in glitchtip_admin_password_generation.stdout"
+  no_log: true
+
+- name: Generate the local GlitchTip API token when missing
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ glitchtip_api_token_local_file }}" ]; then
+      umask 077
+      python3 -c 'import secrets; print(secrets.token_hex(32))' > "{{ glitchtip_api_token_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: glitchtip_api_token_generation
+  changed_when: "'changed' in glitchtip_api_token_generation.stdout"
+  no_log: true
+
+- name: Read the GlitchTip local bootstrap artifacts
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  delegate_to: localhost
+  become: false
+  register: glitchtip_local_bootstrap_reads
+  loop:
+    - "{{ glitchtip_admin_password_local_file }}"
+    - "{{ glitchtip_api_token_local_file }}"
+  no_log: true
+
+- name: Check whether the GlitchTip Mattermost webhook catalog exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ glitchtip_mattermost_incoming_webhooks_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: glitchtip_mattermost_webhooks_local
+
+- name: Check whether the GlitchTip ntfy password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ glitchtip_ntfy_alertmanager_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: glitchtip_ntfy_password_local
+
+- name: Record the GlitchTip runtime and bootstrap secrets
+  ansible.builtin.set_fact:
+    glitchtip_secret_key: "{{ glitchtip_secret_reads.results[0].content | b64decode | trim }}"
+    glitchtip_valkey_password: "{{ glitchtip_secret_reads.results[1].content | b64decode | trim }}"
+    glitchtip_database_password: "{{ lookup('ansible.builtin.file', glitchtip_database_password_local_file) | trim }}"
+    glitchtip_keycloak_client_secret: "{{ lookup('ansible.builtin.file', glitchtip_keycloak_client_secret_local_file) | trim }}"
+    glitchtip_mail_submission_password: "{{ lookup('ansible.builtin.file', glitchtip_mail_submission_password_local_file) | trim }}"
+    glitchtip_admin_password: "{{ glitchtip_local_bootstrap_reads.results[0].content | b64decode | trim }}"
+    glitchtip_api_token: "{{ glitchtip_local_bootstrap_reads.results[1].content | b64decode | trim }}"
+    glitchtip_mattermost_alert_url: >-
+      {{
+        (
+          lookup('ansible.builtin.file', glitchtip_mattermost_incoming_webhooks_local_file)
+          | from_json
+        ).webhooks.alerts.internal_url
+        if glitchtip_mattermost_webhooks_local.stat.exists
+        else ''
+      }}
+    glitchtip_ntfy_alert_url: >-
+      {{
+        'http://' ~ glitchtip_alert_ntfy_username ~ ':'
+        ~ ((lookup('ansible.builtin.file', glitchtip_ntfy_alertmanager_password_local_file) | trim) | urlencode)
+        ~ '@' ~ ansible_host ~ ':' ~ (hostvars['proxmox_florin'].platform_port_assignments.ntfy_port | string)
+        ~ '/' ~ glitchtip_alert_ntfy_topic
+        if glitchtip_ntfy_password_local.stat.exists
+        else ''
+      }}
+    glitchtip_runtime_secret_payload:
+      DATABASE_URL: >-
+        postgresql://{{ glitchtip_database_user }}:{{ (lookup('ansible.builtin.file', glitchtip_database_password_local_file) | trim) | urlencode }}@{{ glitchtip_database_host }}:5432/{{ glitchtip_database_name }}
+      VALKEY_URL: "redis://:{{ glitchtip_secret_reads.results[1].content | b64decode | trim | urlencode | replace('/', '%2F') }}@valkey:6379/0"
+      SECRET_KEY: "{{ glitchtip_secret_reads.results[0].content | b64decode | trim }}"
+      GLITCHTIP_DOMAIN: "{{ glitchtip_public_base_url }}"
+      PORT: "8000"
+      ENABLE_USER_REGISTRATION: "false"
+      ENABLE_ORGANIZATION_CREATION: "false"
+      ENABLE_ADMIN: "true"
+      DEFAULT_FROM_EMAIL: "{{ glitchtip_default_from_email }}"
+      DEFAULT_REPLY_TO_EMAIL: "{{ glitchtip_default_reply_to_email }}"
+      EMAIL_URL: >-
+        {{ glitchtip_mail_url_scheme }}://{{ glitchtip_mail_username | urlencode }}:{{ (lookup('ansible.builtin.file', glitchtip_mail_submission_password_local_file) | trim) | urlencode }}@{{ glitchtip_mail_host }}:{{ glitchtip_mail_port }}
+      GLITCHTIP_INSTANCE_NAME: "{{ glitchtip_instance_name }}"
+      MEDIA_ROOT: /code/uploads
+  no_log: true
+
+- name: Mirror the GlitchTip runtime secrets to the control machine
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.content }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  loop:
+    - dest: "{{ glitchtip_secret_key_local_file }}"
+      content: "{{ glitchtip_secret_key }}"
+    - dest: "{{ glitchtip_valkey_password_local_file }}"
+      content: "{{ glitchtip_valkey_password }}"
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for GlitchTip
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: glitchtip
+    common_openbao_compose_env_agent_dir: "{{ glitchtip_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ glitchtip_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ glitchtip_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ glitchtip_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ glitchtip_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ glitchtip_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ glitchtip_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ glitchtip_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ glitchtip_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ glitchtip_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ glitchtip_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: glitchtip.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ glitchtip_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ glitchtip_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ glitchtip_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ glitchtip_legacy_env_file }}"
+  no_log: true
+
+- name: Render the GlitchTip environment file
+  ansible.builtin.template:
+    src: glitchtip.env.j2
+    dest: "{{ glitchtip_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  register: glitchtip_env_template
+  no_log: true
+
+- name: Render the GlitchTip bootstrap script
+  ansible.builtin.template:
+    src: bootstrap-glitchtip.py.j2
+    dest: "{{ glitchtip_bootstrap_script_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  register: glitchtip_bootstrap_template
+  no_log: true
+
+- name: Render the GlitchTip compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ glitchtip_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: glitchtip_compose_template
+
+- name: Pull the GlitchTip images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ glitchtip_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ glitchtip_site_dir }}"
+  register: glitchtip_pull
+  changed_when: >-
+    'Pulling' in glitchtip_pull.stdout
+    or 'Downloaded newer image' in glitchtip_pull.stdout
+    or 'Pull complete' in glitchtip_pull.stdout
+
+- name: Check whether the Docker nat chain exists before GlitchTip startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: glitchtip_docker_nat_chain
+  changed_when: false
+  failed_when: false
+
+- name: Check whether the Docker forward chain exists before GlitchTip startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - filter
+      - -S
+      - DOCKER-FORWARD
+  register: glitchtip_docker_forward_chain
+  changed_when: false
+  failed_when: false
+
+- name: Restore Docker networking when bridge chains are missing before GlitchTip startup
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: glitchtip_docker_nat_chain.rc != 0 or glitchtip_docker_forward_chain.rc != 0
+
+- name: Recheck the Docker nat chain before GlitchTip startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: glitchtip_docker_nat_chain_recheck
+  changed_when: false
+  failed_when: glitchtip_docker_nat_chain_recheck.rc not in [0, 1]
+  retries: 10
+  delay: 2
+  until: glitchtip_docker_nat_chain_recheck.rc == 0
+  when: glitchtip_docker_nat_chain.rc != 0 or glitchtip_docker_forward_chain.rc != 0
+
+- name: Recheck the Docker forward chain before GlitchTip startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - filter
+      - -S
+      - DOCKER-FORWARD
+  register: glitchtip_docker_forward_chain_recheck
+  changed_when: false
+  failed_when: glitchtip_docker_forward_chain_recheck.rc not in [0, 1]
+  retries: 10
+  delay: 2
+  until: glitchtip_docker_forward_chain_recheck.rc == 0
+  when: glitchtip_docker_nat_chain.rc != 0 or glitchtip_docker_forward_chain.rc != 0
+
+- name: Wait for the Docker daemon to answer after bridge recovery before GlitchTip startup
+  ansible.builtin.command:
+    argv:
+      - docker
+      - info
+      - --format
+      - '{{ "{{.ServerVersion}}" }}'
+  register: glitchtip_docker_info
+  changed_when: false
+  retries: 10
+  delay: 2
+  until: glitchtip_docker_info.rc == 0
+  when: glitchtip_docker_nat_chain.rc != 0 or glitchtip_docker_forward_chain.rc != 0
+
+- name: Assert Docker bridge chains are present before GlitchTip startup
+  ansible.builtin.assert:
+    that:
+      - glitchtip_docker_nat_chain.rc == 0 or glitchtip_docker_nat_chain_recheck.rc == 0
+      - glitchtip_docker_forward_chain.rc == 0 or glitchtip_docker_forward_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the DOCKER or DOCKER-FORWARD chains are missing; GlitchTip startup will fail."
+
+- name: Check whether the GlitchTip local port is already published
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ glitchtip_internal_port }}"
+    delay: 0
+    timeout: 1
+  register: glitchtip_local_port_probe
+  changed_when: false
+  failed_when: false
+
+- name: Check whether the current GlitchTip local health endpoint is healthy before startup
+  ansible.builtin.uri:
+    url: "{{ glitchtip_internal_base_url }}/api/0/internal/health/"
+    method: GET
+    status_code: 200
+  register: glitchtip_health_probe
+  changed_when: false
+  failed_when: false
+
+- name: Probe whether GlitchTip can attach a fresh container to its compose bridge network
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ glitchtip_compose_file }}"
+      - run
+      - --rm
+      - --no-deps
+      - valkey
+      - "true"
+  args:
+    chdir: "{{ glitchtip_site_dir }}"
+  register: glitchtip_network_attach_probe
+  changed_when: false
+  failed_when: false
+
+- name: Record whether the GlitchTip startup needs a force recreate
+  ansible.builtin.set_fact:
+    glitchtip_force_recreate: >-
+      {{
+        glitchtip_docker_nat_chain.rc != 0
+        or glitchtip_docker_forward_chain.rc != 0
+        or (glitchtip_env_template.changed | default(false))
+        or (glitchtip_bootstrap_template.changed | default(false))
+        or (glitchtip_compose_template.changed | default(false))
+        or (glitchtip_pull.changed | default(false))
+        or (glitchtip_local_port_probe.failed | default(false))
+        or (glitchtip_health_probe.status | default(0)) != 200
+        or (glitchtip_network_attach_probe.rc | default(0)) != 0
+      }}
+
+- name: Reset the GlitchTip stack before a force recreate
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ glitchtip_compose_file }}"
+      - down
+      - --remove-orphans
+  args:
+    chdir: "{{ glitchtip_site_dir }}"
+  register: glitchtip_force_recreate_down
+  failed_when: false
+  changed_when: >-
+    'Stopping' in glitchtip_force_recreate_down.stdout
+    or 'Removing' in glitchtip_force_recreate_down.stdout
+    or 'Network' in glitchtip_force_recreate_down.stdout
+    or 'Stopping' in glitchtip_force_recreate_down.stderr
+    or 'Removing' in glitchtip_force_recreate_down.stderr
+    or 'Network' in glitchtip_force_recreate_down.stderr
+  when: glitchtip_force_recreate
+
+- name: Remove stale GlitchTip compose networks after the reset
+  ansible.builtin.shell: |
+    set -euo pipefail
+    stale_networks="$(docker network ls -q --filter name={{ glitchtip_compose_network_name }})"
+    if [ -n "${stale_networks}" ]; then
+      docker network rm ${stale_networks}
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: glitchtip_force_recreate_network_cleanup
+  changed_when: "'changed' in glitchtip_force_recreate_network_cleanup.stdout"
+  when: glitchtip_force_recreate
+
+- name: Remove stale GlitchTip project containers before recovery
+  ansible.builtin.shell: |
+    set -euo pipefail
+    stale_ids="$(docker ps -aq --filter label=com.docker.compose.project=glitchtip)"
+    if [ -n "$stale_ids" ]; then
+      docker rm -f $stale_ids
+      echo changed
+    fi
+  args:
+    chdir: "{{ glitchtip_site_dir }}"
+    executable: /bin/bash
+  register: glitchtip_project_container_cleanup
+  changed_when: "'changed' in glitchtip_project_container_cleanup.stdout"
+  when: glitchtip_force_recreate
+
+- name: Remove stale GlitchTip compose replacement containers before recovery
+  ansible.builtin.shell: |
+    set -euo pipefail
+    stale_ids="$(docker ps -aq \
+      --filter label=com.docker.compose.project=glitchtip \
+      --filter label=com.docker.compose.replace)"
+    if [ -n "$stale_ids" ]; then
+      docker rm -f $stale_ids
+      echo changed
+    fi
+  args:
+    chdir: "{{ glitchtip_site_dir }}"
+    executable: /bin/bash
+  register: glitchtip_replace_cleanup
+  changed_when: "'changed' in glitchtip_replace_cleanup.stdout"
+  when: glitchtip_force_recreate
+
+- name: Force-recreate the GlitchTip runtime stack after Docker networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ glitchtip_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+      - --force-recreate
+  args:
+    chdir: "{{ glitchtip_site_dir }}"
+  register: glitchtip_force_recreate_up
+  changed_when: >-
+    'Creating' in glitchtip_force_recreate_up.stdout
+    or 'Recreating' in glitchtip_force_recreate_up.stdout
+    or 'Starting' in glitchtip_force_recreate_up.stdout
+  failed_when: false
+  retries: 3
+  delay: 5
+  until: glitchtip_force_recreate_up.rc == 0
+  when: glitchtip_force_recreate
+
+- name: Assert the GlitchTip force-recreate succeeded
+  ansible.builtin.assert:
+    that:
+      - glitchtip_force_recreate_up.rc == 0
+    fail_msg: "{{ glitchtip_force_recreate_up.stderr | default(glitchtip_force_recreate_up.msg | default('glitchtip compose force-recreate failed')) }}"
+  when: glitchtip_force_recreate
+
+- name: Start the GlitchTip runtime stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ glitchtip_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ glitchtip_site_dir }}"
+  register: glitchtip_start_up
+  changed_when: >-
+    'Creating' in glitchtip_start_up.stdout
+    or 'Recreating' in glitchtip_start_up.stdout
+    or 'Starting' in glitchtip_start_up.stdout
+  when: not glitchtip_force_recreate
+
+- name: Assert the GlitchTip runtime stack started successfully
+  ansible.builtin.assert:
+    that:
+      - glitchtip_start_up.rc == 0
+    fail_msg: "{{ glitchtip_start_up.stderr | default(glitchtip_start_up.msg | default('glitchtip compose up failed')) }}"
+  when: not glitchtip_force_recreate
+
+- name: Wait for the GlitchTip runtime listener
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ glitchtip_internal_port }}"
+    delay: 0
+    timeout: 240
+
+- name: Wait for the GlitchTip local health endpoint
+  ansible.builtin.uri:
+    url: "{{ glitchtip_internal_base_url }}/api/0/internal/health/"
+    method: GET
+    status_code: 200
+  register: glitchtip_health_check
+  retries: 36
+  delay: 5
+  until: glitchtip_health_check.status == 200
+  changed_when: false
+
+- name: Bootstrap the GlitchTip repo-managed org, team, and project artifacts
+  ansible.builtin.shell: |
+    set -euo pipefail
+    docker exec -i {{ glitchtip_container_name }} python manage.py shell < {{ glitchtip_bootstrap_script_file }}
+  args:
+    executable: /bin/bash
+  register: glitchtip_bootstrap_run
+  changed_when: false
+  no_log: true
+
+- name: Record the GlitchTip bootstrap payload
+  ansible.builtin.set_fact:
+    glitchtip_bootstrap_payload: >-
+      {{
+        (
+          glitchtip_bootstrap_run.stdout_lines
+          | reject('equalto', '')
+          | list
+          | last
+        ) | from_json
+      }}
+  no_log: true
+
+- name: Mirror the GlitchTip bootstrap artifacts to the control machine
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.content }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  loop:
+    - dest: "{{ glitchtip_projects_local_file }}"
+      content: "{{ (glitchtip_bootstrap_payload | to_nice_json(indent=2, sort_keys=True)) ~ '\n' }}"
+    - dest: "{{ glitchtip_mail_gateway_dsn_local_file }}"
+      content: "{{ glitchtip_bootstrap_payload.projects['mail-gateway'].dsn ~ '\n' }}"
+    - dest: "{{ glitchtip_windmill_jobs_dsn_local_file }}"
+      content: "{{ glitchtip_bootstrap_payload.projects['windmill-jobs'].dsn ~ '\n' }}"
+    - dest: "{{ glitchtip_platform_findings_event_url_local_file }}"
+      content: "{{ glitchtip_bootstrap_payload.projects['platform-findings'].dsn ~ '\n' }}"
+  no_log: true
+
+- name: Verify the GlitchTip runtime
+  ansible.builtin.import_tasks: verify.yml

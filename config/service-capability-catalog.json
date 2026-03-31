@@ -699,6 +699,56 @@
       }
     },
     {
+      "id": "glitchtip",
+      "name": "GlitchTip",
+      "description": "Sentry-compatible application error tracker with repo-managed projects, DSNs, and Keycloak-backed browser sign-in.",
+      "category": "observability",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:3005",
+      "public_url": "https://errors.lv3.org",
+      "subdomain": "errors.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "GlitchTip Public Health",
+      "health_probe_id": "glitchtip",
+      "image_catalog_ids": [
+        "glitchtip_runtime",
+        "glitchtip_valkey_runtime"
+      ],
+      "secret_catalog_ids": [
+        "glitchtip_database_password",
+        "glitchtip_secret_key",
+        "glitchtip_valkey_password",
+        "glitchtip_admin_password",
+        "glitchtip_api_token",
+        "glitchtip_mail_gateway_dsn",
+        "glitchtip_windmill_jobs_dsn",
+        "glitchtip_platform_findings_event_url",
+        "keycloak_glitchtip_client_secret",
+        "mail_platform_server_mailbox_password"
+      ],
+      "adr": "0281",
+      "runbook": "docs/runbooks/configure-glitchtip.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-glitchtip/lv3-glitchtip",
+      "tags": [
+        "errors",
+        "sentry-compatible",
+        "glitchtip",
+        "oidc",
+        "observability"
+      ],
+      "notes": "Browser sign-in is delegated to the in-app Keycloak OIDC flow, while the public DSN store path and health endpoint remain reachable for SDK delivery and verification traffic.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://errors.lv3.org",
+          "subdomain": "errors.lv3.org",
+          "notes": "The public GlitchTip surface is published through the shared NGINX edge, but the application itself owns browser authentication through the repo-managed Keycloak client and project-scoped DSN issuance."
+        }
+      }
+    },
+    {
       "id": "grafana",
       "name": "Grafana",
       "description": "Metrics dashboards, platform overview, and service detail dashboards.",

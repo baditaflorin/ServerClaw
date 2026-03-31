@@ -1,0 +1,69 @@
+---
+# Purpose: Describe the required runtime variables for the GlitchTip stack.
+# Use case: Run during syntax and argument validation before converging the managed GlitchTip runtime.
+# Inputs: glitchtip_* variables required by the runtime role.
+# Outputs: Machine-readable argument specs for glitchtip_runtime.
+# Idempotency: Fully idempotent; metadata only validates role inputs.
+# Dependencies: ADR 0165 metadata standard, ADR 0281, and the glitchtip_runtime role tasks.
+
+argument_specs:
+  main:
+    short_description: Converge the GlitchTip runtime, OIDC bootstrap, and controller-local DSN artifacts.
+    options:
+      glitchtip_site_dir:
+        type: path
+        required: true
+      glitchtip_data_dir:
+        type: path
+        required: true
+      glitchtip_secret_dir:
+        type: path
+        required: true
+      glitchtip_compose_file:
+        type: path
+        required: true
+      glitchtip_env_file:
+        type: path
+        required: true
+      glitchtip_bootstrap_script_file:
+        type: path
+        required: true
+      glitchtip_image:
+        type: str
+        required: true
+      glitchtip_valkey_image:
+        type: str
+        required: true
+      glitchtip_internal_port:
+        type: int
+        required: true
+      glitchtip_internal_base_url:
+        type: str
+        required: true
+      glitchtip_public_base_url:
+        type: str
+        required: true
+      glitchtip_compose_network_name:
+        type: str
+        required: true
+      glitchtip_database_host:
+        type: str
+        required: true
+      glitchtip_database_name:
+        type: str
+        required: true
+      glitchtip_database_user:
+        type: str
+        required: true
+      glitchtip_database_password_local_file:
+        type: path
+        required: true
+      glitchtip_keycloak_client_secret_local_file:
+        type: path
+        required: true
+      glitchtip_api_token_local_file:
+        type: path
+        required: true
+      glitchtip_admin_password_local_file:
+        type: path
+        required: true

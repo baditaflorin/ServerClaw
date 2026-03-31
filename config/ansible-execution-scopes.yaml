@@ -370,6 +370,12 @@ playbooks:
     shared_surfaces:
       - service:one-api
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/glitchtip.yml:
+    playbook_id: glitchtip
+    mutation_scope: platform
+    shared_surfaces:
+      - service:glitchtip
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/temporal.yml:
     playbook_id: temporal
     canonical_service_id: temporal
@@ -545,6 +551,11 @@ playbooks:
     mutation_scope: platform
     shared_surfaces:
       - service:minio
+  playbooks/services/glitchtip.yml:
+    playbook_id: glitchtip
+    mutation_scope: platform
+    shared_surfaces:
+      - service:glitchtip
       - inventory/host_vars/proxmox_florin.yml
   playbooks/services/docker-runtime-observability.yml:
     playbook_id: docker-runtime-observability

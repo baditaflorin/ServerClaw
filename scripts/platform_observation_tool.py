@@ -32,6 +32,7 @@ from controller_automation_toolkit import (
     write_json,
 )
 from maintenance_window_tool import list_active_windows_best_effort, suppress_findings_for_maintenance
+from glitchtip_event import emit_glitchtip_event
 from platform.degradation import default_state_path
 from platform.events import build_envelope
 from platform.health.semantics import (
@@ -1154,7 +1155,7 @@ def run_checks(args: argparse.Namespace) -> int:
         for finding in findings:
             if finding["severity"] in {"ok", "suppressed"}:
                 continue
-            post_json_webhook(
+            emit_glitchtip_event(
                 glitchtip_url,
                 {
                     "message": finding["summary"],

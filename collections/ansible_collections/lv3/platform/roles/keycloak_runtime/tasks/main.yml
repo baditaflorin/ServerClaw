@@ -1853,6 +1853,22 @@
       until: keycloak_grist_client_secret_info is succeeded
       no_log: true
 
+    - name: Read the GlitchTip client secret
+      community.general.keycloak_clientsecret_info:
+        realm: "{{ keycloak_realm_name }}"
+        client_id: "{{ keycloak_glitchtip_client_id }}"
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+      register: keycloak_glitchtip_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_glitchtip_client_secret_info is succeeded
+      no_log: true
+
     - name: Read the Outline client secret
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
@@ -1973,6 +1989,7 @@
     keycloak_agent_client_secret: "{{ keycloak_agent_client_secret_info.clientsecret_info.value }}"
     keycloak_langfuse_client_secret: "{{ keycloak_langfuse_client_secret_info.clientsecret_info.value }}"
     keycloak_grist_client_secret: "{{ keycloak_grist_client_secret_info.clientsecret_info.value }}"
+    keycloak_glitchtip_client_secret: "{{ keycloak_glitchtip_client_secret_info.clientsecret_info.value }}"
     keycloak_directus_client_secret: "{{ keycloak_directus_client_secret_info.clientsecret_info.value }}"
     keycloak_outline_client_secret: "{{ keycloak_outline_client_secret_info.clientsecret_info.value }}"
     keycloak_jupyterhub_client_secret: "{{ keycloak_jupyterhub_client_secret_info.clientsecret_info.value }}"
@@ -2032,6 +2049,15 @@
   ansible.builtin.copy:
     dest: "{{ keycloak_grist_client_secret_local_file }}"
     content: "{{ keycloak_grist_client_secret }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror the GlitchTip client secret to the control machine
+  ansible.builtin.copy:
+    dest: "{{ keycloak_glitchtip_client_secret_local_file }}"
+    content: "{{ keycloak_glitchtip_client_secret }}\n"
     mode: "0600"
   delegate_to: localhost
   become: false

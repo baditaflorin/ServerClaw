@@ -209,6 +209,19 @@
       "alert_rule_file": "config/alertmanager/rules/gotenberg.yml",
       "suppressed_checks": {}
     },
+    "glitchtip": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "keycloak_client_generated": true,
+      "dashboard_file": "config/grafana/dashboards/glitchtip.json",
+      "alert_rule_file": "config/alertmanager/rules/glitchtip.yml",
+      "suppressed_checks": {
+        "api_gateway": "2026-09-30"
+      }
+    },
     "grafana": {
       "service_type": "vm-service",
       "requires_subdomain": true,

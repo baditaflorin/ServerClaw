@@ -9,6 +9,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 _TELEMETRY_CONFIGURED = False
+_SENTRY_CONFIGURED = False
 
 
 def parse_resource_attributes(raw_attributes: str) -> dict[str, str]:
@@ -25,8 +26,35 @@ def parse_resource_attributes(raw_attributes: str) -> dict[str, str]:
     return attributes
 
 
+def configure_sentry(app) -> None:
+    global _SENTRY_CONFIGURED
+
+    dsn = os.getenv("SENTRY_DSN", "").strip()
+    if _SENTRY_CONFIGURED or not dsn:
+        return
+
+    import sentry_sdk
+    from sentry_sdk.integrations.fastapi import FastApiIntegration
+    from sentry_sdk.integrations.httpx import HttpxIntegration
+
+    sentry_sdk.init(
+        dsn=dsn,
+        environment=os.getenv("SENTRY_ENVIRONMENT", "").strip() or None,
+        release=os.getenv("SENTRY_RELEASE", "").strip() or None,
+        traces_sample_rate=0.0,
+        profiles_sample_rate=0.0,
+        integrations=[
+            FastApiIntegration(transaction_style="endpoint"),
+            HttpxIntegration(),
+        ],
+    )
+    _SENTRY_CONFIGURED = True
+
+
 def configure_telemetry(app) -> None:
     global _TELEMETRY_CONFIGURED
+
+    configure_sentry(app)
 
     endpoint = os.getenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "").strip()
     if _TELEMETRY_CONFIGURED or not endpoint:

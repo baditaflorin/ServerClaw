@@ -40,6 +40,7 @@ from drift_lib import (
     utc_now,
 )
 from mutation_audit import build_event, emit_event_best_effort
+from glitchtip_event import emit_glitchtip_event
 from platform_observation_tool import maybe_read_secret_path, post_json_webhook
 from subdomain_catalog import load_public_edge_defaults, load_subdomain_catalog
 DEFAULT_ENVIRONMENT = "production"
@@ -877,7 +878,7 @@ def post_glitchtip_events(events: list[dict[str, Any]], webhook_url: str) -> Non
     for event in events:
         if event.get("event") != "platform.security.critical-finding":
             continue
-        post_json_webhook(
+        emit_glitchtip_event(
             webhook_url,
             {
                 "message": f"Public surface security critical finding: {event['finding_id']}",

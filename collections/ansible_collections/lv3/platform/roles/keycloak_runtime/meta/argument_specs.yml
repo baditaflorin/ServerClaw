@@ -276,6 +276,16 @@ argument_specs:
         required: true
         description:
           - Controller-local file used to mirror the Grist client secret.
+      keycloak_glitchtip_client_id:
+        type: str
+        required: true
+        description:
+          - OIDC client id used by GlitchTip.
+      keycloak_glitchtip_client_secret_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file used to mirror the GlitchTip client secret.
       keycloak_grafana_groups:
         type: dict
         required: true

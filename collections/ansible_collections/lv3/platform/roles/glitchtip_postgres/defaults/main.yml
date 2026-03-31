@@ -1,0 +1,13 @@
+# Purpose: Define the default PostgreSQL names, paths, and controller-local artifacts for the GlitchTip backend role.
+# Use case: Load during GlitchTip convergence so the database role, secret files, and local password mirror resolve consistently.
+# Inputs: Optional glitchtip_postgres_* overrides plus the shared controller-local artifact layout.
+# Outputs: Default variables consumed by the glitchtip_postgres role tasks.
+# Idempotency: Fully idempotent; defaults declare desired values only.
+# Dependencies: ADR 0165 metadata standard, ADR 0281, and the glitchtip_postgres role tasks.
+---
+glitchtip_database_name: glitchtip
+glitchtip_database_user: glitchtip
+glitchtip_postgres_secret_dir: /etc/lv3/glitchtip
+glitchtip_postgres_password_file: "{{ glitchtip_postgres_secret_dir }}/database-password"
+glitchtip_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/glitchtip
+glitchtip_database_password_local_file: "{{ glitchtip_local_artifact_dir }}/database-password.txt"

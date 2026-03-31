@@ -902,3 +902,35 @@ def test_role_manages_serverclaw_runtime_client_and_removes_the_stale_operator_d
     assert runtime_token_task["ansible.builtin.uri"]["body"]["grant_type"] == "client_credentials"
     assert runtime_token_task["ansible.builtin.uri"]["body"]["client_id"] == "{{ keycloak_serverclaw_runtime_client_id }}"
     assert "keycloak_serverclaw_runtime_token.json.access_token" in str(assert_task["ansible.builtin.assert"]["that"])
+
+
+
+def test_role_manages_glitchtip_client_secret() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    tasks = load_tasks()
+    realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
+    glitchtip_client_task = next(
+        task for task in realm_block["block"] if task.get("name") == "Ensure the GlitchTip OAuth client exists"
+    )
+    read_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the GlitchTip client secret")
+    mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the GlitchTip client secret to the control machine")
+
+    assert defaults["keycloak_glitchtip_client_id"] == "glitchtip"
+    assert defaults["keycloak_glitchtip_client_secret_local_file"].endswith("/.local/keycloak/glitchtip-client-secret.txt")
+    assert defaults["keycloak_glitchtip_root_url"] == "https://errors.lv3.org"
+    assert defaults["keycloak_glitchtip_post_logout_redirect_uris"] == [
+        "{{ keycloak_glitchtip_root_url }}",
+        "{{ keycloak_glitchtip_root_url }}/",
+        "{{ keycloak_glitchtip_root_url }}/login",
+    ]
+    assert glitchtip_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_glitchtip_client_id }}"
+    assert glitchtip_client_task["community.general.keycloak_client"]["redirect_uris"] == [
+        "{{ keycloak_glitchtip_root_url }}/accounts/oidc/keycloak/login/callback/"
+    ]
+    assert glitchtip_client_task["community.general.keycloak_client"]["valid_post_logout_redirect_uris"] == (
+        "{{ keycloak_glitchtip_post_logout_redirect_uris }}"
+    )
+    assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == (
+        "{{ keycloak_glitchtip_client_id }}"
+    )
+    assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_glitchtip_client_secret_local_file }}"

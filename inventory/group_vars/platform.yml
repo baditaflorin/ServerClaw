@@ -207,6 +207,7 @@ platform_ports:
   plausible_port: 8016
   minio_api_port: 9010
   minio_console_port: 9011
+  glitchtip_port: 3005
   flagsmith_port: 8017
   lago_api_port: 8099
   lago_front_port: 8100
@@ -308,6 +309,7 @@ platform_port_assignments:
   plausible_port: 8016
   minio_api_port: 9010
   minio_console_port: 9011
+  glitchtip_port: 3005
   flagsmith_port: 8017
   lago_api_port: 8099
   lago_front_port: 8100
@@ -2162,6 +2164,34 @@ platform_service_topology:
       internal: http://10.10.10.20:9010
       console_internal: http://10.10.10.20:9011
       console_public: https://minio-console.lv3.org
+  glitchtip:
+    service_name: glitchtip
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: errors.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: errors
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:3005
+    service_id: glitchtip
+    ports:
+      internal: 3005
+    urls:
+      public: https://errors.lv3.org
+      internal: http://10.10.10.20:3005
   lago:
     service_name: lago
     owning_vm: docker-runtime-lv3
@@ -3403,6 +3433,10 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: errors
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: billing
       type: A
       value: 65.108.75.123
@@ -4462,6 +4496,34 @@ public_edge_service_topology:
       internal: http://10.10.10.20:9010
       console_internal: http://10.10.10.20:9011
       console_public: https://minio-console.lv3.org
+  glitchtip:
+    service_name: glitchtip
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: errors.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: errors
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:3005
+    service_id: glitchtip
+    ports:
+      internal: 3005
+    urls:
+      public: https://errors.lv3.org
+      internal: http://10.10.10.20:3005
   lago:
     service_name: lago
     owning_vm: docker-runtime-lv3
@@ -5781,6 +5843,7 @@ langfuse_port: 3002
 plausible_port: 8016
 minio_api_port: 9010
 minio_console_port: 9011
+glitchtip_port: 3005
 flagsmith_port: 8017
 lago_api_port: 8099
 lago_front_port: 8100

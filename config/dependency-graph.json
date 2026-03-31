@@ -658,6 +658,15 @@
       "tier": 3,
       "category": "automation",
       "adr": "0287"
+    },
+    {
+      "id": "glitchtip",
+      "service": "glitchtip",
+      "name": "GlitchTip",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "observability",
+      "adr": "0281"
     }
   ],
   "edges": [
@@ -1662,6 +1671,54 @@
       "to": "postgres",
       "type": "hard",
       "description": "Woodpecker persists repository metadata, secrets, and pipeline history in Postgres."
+    },
+    {
+      "from": "glitchtip",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The GlitchTip web runtime, project bootstrap flow, and supporting Valkey container run on docker-runtime-lv3."
+    },
+    {
+      "from": "glitchtip",
+      "to": "postgres",
+      "type": "hard",
+      "description": "GlitchTip stores issues, grouped events, and project metadata in the shared PostgreSQL cluster."
+    },
+    {
+      "from": "glitchtip",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "GlitchTip starts from OpenBao-rendered runtime secrets mirrored into its compose environment before the main container launches."
+    },
+    {
+      "from": "glitchtip",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "GlitchTip delegates browser sign-in to the shared Keycloak OIDC broker through a repo-managed confidential client."
+    },
+    {
+      "from": "glitchtip",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public access to errors.lv3.org depends on the shared NGINX edge publication path."
+    },
+    {
+      "from": "glitchtip",
+      "to": "mail_platform",
+      "type": "soft",
+      "description": "Digest delivery and password-recovery mail use the repo-managed server mailbox and internal submission relay on mail-platform."
+    },
+    {
+      "from": "glitchtip",
+      "to": "mattermost",
+      "type": "soft",
+      "description": "New issue alerts are routed to the platform-ops Mattermost webhook manifest."
+    },
+    {
+      "from": "glitchtip",
+      "to": "ntfy",
+      "type": "soft",
+      "description": "High-priority regression notifications are delivered through the private ntfy paging gateway."
     }
   ]
 }

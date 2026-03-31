@@ -1,0 +1,66 @@
+services:
+  openbao-agent:
+    image: {{ glitchtip_openbao_agent_image }}
+    container_name: {{ glitchtip_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ glitchtip_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ glitchtip_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ glitchtip_env_file | dirname }}:{{ glitchtip_env_file | dirname }}
+
+  valkey:
+    image: {{ glitchtip_valkey_image }}
+    container_name: {{ glitchtip_valkey_container_name }}
+    restart: unless-stopped
+    command:
+      - valkey-server
+      - --requirepass
+      - {{ glitchtip_valkey_password }}
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - redis-cli -a "{{ glitchtip_valkey_password }}" ping | grep PONG
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  glitchtip:
+    image: {{ glitchtip_image }}
+    container_name: {{ glitchtip_container_name }}
+    restart: unless-stopped
+    command:
+      - ./bin/run-all-in-one.sh
+    depends_on:
+      valkey:
+        condition: service_healthy
+      openbao-agent:
+        condition: service_healthy
+    env_file:
+      - {{ glitchtip_env_file }}
+    ports:
+      - "{{ ansible_host }}:{{ glitchtip_internal_port }}:8000"
+      - "127.0.0.1:{{ glitchtip_internal_port }}:8000"
+    volumes:
+      - {{ glitchtip_uploads_dir }}:/code/uploads
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen("http://127.0.0.1:8000/api/0/internal/health/", timeout=5).read()
+      interval: 10s
+      timeout: 5s
+      retries: 24

@@ -1,0 +1,13 @@
+---
+# Purpose: Verify the local GlitchTip runtime health after compose convergence.
+
+- name: Verify the GlitchTip local health endpoint
+  ansible.builtin.uri:
+    url: "{{ glitchtip_internal_base_url }}/api/0/internal/health/"
+    method: GET
+    status_code: 200
+  register: glitchtip_verify_local_health
+  retries: 12
+  delay: 5
+  until: glitchtip_verify_local_health.status == 200
+  changed_when: false

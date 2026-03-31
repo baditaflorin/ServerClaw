@@ -3666,6 +3666,79 @@
           ]
         }
       }
+    },
+    "glitchtip": {
+      "service_name": "glitchtip",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "glitchtip_runtime",
+      "verify_file": "roles/glitchtip_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "GlitchTip startup completes once the local internal health endpoint returns 200 on docker-runtime-lv3.",
+        "timeout_seconds": 300,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:3005/api/0/internal/health/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The local GlitchTip health endpoint continues to answer on docker-runtime-lv3.",
+        "timeout_seconds": 300,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:3005/api/0/internal/health/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The public GlitchTip health endpoint answers through the shared NGINX edge with Keycloak OIDC settings and project ingestion online.",
+        "timeout_seconds": 300,
+        "retries": 36,
+        "delay_seconds": 5,
+        "url": "https://errors.lv3.org/api/0/internal/health/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "docker_publication": {
+          "container_name": "glitchtip",
+          "bindings": [
+            {
+              "host": "10.10.10.20",
+              "port": 3005
+            }
+          ],
+          "required_networks": [
+            "glitchtip_default"
+          ]
+        }
+      },
+      "tls_certificate_ids": [
+        "errors-edge"
+      ],
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "GlitchTip Public Health",
+          "type": "http",
+          "url": "https://errors.lv3.org/api/0/internal/health/",
+          "description": "Public GlitchTip health endpoint published through the shared NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
     }
   }
 }

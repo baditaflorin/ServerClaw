@@ -325,6 +325,46 @@ groups:
           description: The private Gotenberg document rendering API remains reachable
             on runtime-ai-lv3 for synchronous PDF conversion workflows.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_glitchtip_availability
+        expr: (slo:glitchtip_availability:error_rate_5m > (14 * 0.005000)) and (slo:glitchtip_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: glitchtip
+          slo_id: glitchtip-availability
+          indicator: availability
+        annotations:
+          summary: glitchtip-availability is burning its error budget at 14x
+          description: The public GlitchTip health endpoint remains reachable for
+            browser sign-in, DSN ingestion, and repo-managed smoke verification.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_glitchtip_availability
+        expr: slo:glitchtip_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: glitchtip
+          slo_id: glitchtip-availability
+          indicator: availability
+        annotations:
+          summary: glitchtip-availability is burning its error budget at 3x
+          description: The public GlitchTip health endpoint remains reachable for
+            browser sign-in, DSN ingestion, and repo-managed smoke verification.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_glitchtip_availability
+        expr: slo:glitchtip_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: glitchtip
+          slo_id: glitchtip-availability
+          indicator: availability
+        annotations:
+          summary: glitchtip-availability has less than 10% error budget remaining
+          description: The public GlitchTip health endpoint remains reachable for
+            browser sign-in, DSN ingestion, and repo-managed smoke verification.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_grafana_availability
         expr: (slo:grafana_availability:error_rate_5m > (14 * 0.005000)) and (slo:grafana_availability:error_rate_1h
           > (14 * 0.005000))

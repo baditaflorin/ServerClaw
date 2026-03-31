@@ -1,0 +1,5 @@
+---
+# depends_on:
+#   - playbooks/services/public-edge.yml
+---
+- import_playbook: ../glitchtip.yml

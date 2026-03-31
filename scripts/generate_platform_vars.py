@@ -74,6 +74,7 @@ PORT_KEYS = (
     "plausible_port",
     "minio_api_port",
     "minio_console_port",
+    "glitchtip_port",
     "flagsmith_port",
     "lago_api_port",
     "lago_front_port",
@@ -613,6 +614,12 @@ def build_service_urls(
         port_map["admin"] = ports["redpanda_admin_port"]
         port_map["http_proxy"] = ports["redpanda_http_proxy_port"]
         port_map["schema_registry"] = ports["redpanda_schema_registry_port"]
+    elif service_id == "glitchtip":
+        urls["internal"] = service_url("http", private_ip, ports["glitchtip_port"])
+        port_map["internal"] = ports["glitchtip_port"]
+    elif service_id == "glitchtip":
+        urls["internal"] = service_url("http", private_ip, ports["glitchtip_port"])
+        port_map["internal"] = ports["glitchtip_port"]
     elif service_id == "dify":
         urls["internal"] = service_url("http", private_ip, ports["dify_port"])
         port_map["internal"] = ports["dify_port"]

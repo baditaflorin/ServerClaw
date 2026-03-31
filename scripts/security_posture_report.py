@@ -29,6 +29,7 @@ from drift_lib import (
 from environment_catalog import environment_choices, primary_environment
 from mutation_audit import build_event, emit_event_best_effort
 from parse_lynis_report import DEFAULT_SUPPRESSIONS_PATH, load_suppressions, parse_path
+from glitchtip_event import emit_glitchtip_event
 from platform_observation_tool import maybe_read_secret_path, post_json_webhook
 
 
@@ -389,7 +390,7 @@ def post_glitchtip_events(events: list[dict[str, Any]], webhook_url: str) -> Non
         if event.get("event") != "platform.security.critical-finding":
             continue
         kind = event.get("kind", "security-finding")
-        post_json_webhook(
+        emit_glitchtip_event(
             webhook_url,
             {
                 "message": f"Security posture critical finding: {kind}",

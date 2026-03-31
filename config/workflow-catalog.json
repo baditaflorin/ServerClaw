@@ -7716,6 +7716,79 @@
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
       }
+    },
+    "converge-glitchtip": {
+      "description": "Converge GlitchTip on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at errors.lv3.org, and verify public DSN ingestion end to end.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-glitchtip",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-glitchtip"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "bootstrap_manifest_ids": [
+          "shared-edge-generated-portals"
+        ],
+        "generated_secret_ids": [
+          "glitchtip_database_password",
+          "glitchtip_secret_key",
+          "glitchtip_valkey_password",
+          "glitchtip_admin_password",
+          "glitchtip_api_token",
+          "glitchtip_mail_gateway_dsn",
+          "glitchtip_windmill_jobs_dsn",
+          "glitchtip_platform_findings_event_url",
+          "keycloak_glitchtip_client_secret"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-glitchtip"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-glitchtip.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/glitchtip.yml",
+        "playbooks/services/glitchtip.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/glitchtip.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/services/glitchtip.yml",
+        "collections/ansible_collections/lv3/platform/roles/glitchtip_postgres",
+        "collections/ansible_collections/lv3/platform/roles/glitchtip_runtime",
+        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/files/mail-gateway/telemetry.py",
+        "inventory/host_vars/proxmox_florin.yml",
+        "scripts/glitchtip_event.py",
+        "scripts/glitchtip_event_smoke.py",
+        "config/service-capability-catalog.json",
+        "config/subdomain-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/service-completeness.json"
+      ],
+      "outputs": [
+        "A repo-managed GlitchTip runtime on docker-runtime-lv3 with PostgreSQL on postgres-lv3, Keycloak-backed browser sign-in, mirrored bootstrap credentials, and project-scoped DSNs for first-party producer integrations."
+      ],
+      "verification_commands": [
+        "make syntax-check-glitchtip",
+        "curl -fsS https://errors.lv3.org/api/0/internal/health/",
+        "curl -fsS https://errors.lv3.org/_allauth/browser/v1/config",
+        "python3 scripts/glitchtip_event_smoke.py --base-url https://errors.lv3.org --organization-slug lv3 --api-token-file .local/glitchtip/api-token.txt --dsn-file .local/glitchtip/platform-findings-event-url.txt"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     }
   }
 }

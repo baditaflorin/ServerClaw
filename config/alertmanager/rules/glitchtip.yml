@@ -1,0 +1,24 @@
+groups:
+  - name: lv3-glitchtip
+    rules:
+      - alert: GlitchTipPublicHealthDown
+        expr: probe_success{service="glitchtip",probe_kind="readiness"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: glitchtip
+        annotations:
+          summary: GlitchTip is unreachable on the public health endpoint.
+          description: The GlitchTip readiness probe through errors.lv3.org has been failing for at least two minutes.
+          runbook_url: https://docs.lv3.org/runbooks/configure-glitchtip/
+
+      - alert: GlitchTipLocalHealthDown
+        expr: probe_success{service="glitchtip",probe_kind="liveness"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: glitchtip
+        annotations:
+          summary: GlitchTip is unhealthy on docker-runtime-lv3.
+          description: The private GlitchTip liveness probe on docker-runtime-lv3 has been failing for at least two minutes.
+          runbook_url: https://docs.lv3.org/runbooks/configure-glitchtip/

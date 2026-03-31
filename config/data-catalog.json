@@ -206,19 +206,20 @@
       "notes": "Gotenberg is stateless and does not persist source documents or rendered PDFs after each synchronous conversion finishes."
     },
     {
-      "id": "tika-transient-document-extraction",
-      "service": "tika",
-      "name": "Apache Tika transient document extraction payloads",
+      "id": "glitchtip-issues-and-project-artifacts",
+      "service": "glitchtip",
+      "name": "GlitchTip grouped issues, events, and DSN project artifacts",
       "class": "confidential",
-      "retention_days": null,
-      "backup_included": false,
+      "retention_days": 365,
+      "backup_included": true,
       "access_role": "platform-operator",
       "pii_risk": "high",
       "locations": [
-        "Transient request and response buffers inside the tika container on docker-runtime-lv3",
-        "Ephemeral extracted plaintext and metadata returned synchronously to callers on docker-runtime-lv3"
+        "PostgreSQL database glitchtip on postgres-lv3",
+        "/opt/glitchtip/data/uploads on docker-runtime-lv3",
+        ".local/glitchtip/projects.json on the control machine"
       ],
-      "notes": "Apache Tika is stateless and does not persist source documents, extracted text, or metadata after each synchronous request completes, but uploaded documents may contain sensitive content in transit."
+      "notes": "GlitchTip stores grouped exception payloads, issue metadata, notification state, uploaded artifacts, and the repo-managed DSN project catalogue for first-party producers."
     },
     {
       "id": "tesseract-ocr-transient-request-buffers",
@@ -893,6 +894,21 @@
         "Grafana Tempo datasource"
       ],
       "notes": "Trace payloads support short-lived troubleshooting and should remain bounded to protect monitoring disk capacity."
+    },
+    {
+      "id": "tika-transient-document-extraction",
+      "service": "tika",
+      "name": "Apache Tika transient document extraction payloads",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "Transient request and response buffers inside the tika container on docker-runtime-lv3",
+        "Ephemeral extracted plaintext and metadata returned synchronously to callers on docker-runtime-lv3"
+      ],
+      "notes": "Apache Tika is stateless and does not persist source documents, extracted text, or metadata after each synchronous request completes, but uploaded documents may contain sensitive content in transit."
     },
     {
       "id": "tls-private-keys",

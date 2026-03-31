@@ -736,3 +736,17 @@ def test_build_platform_vars_includes_coolify_wildcard_dns_record() -> None:
         "value": "65.108.75.123",
         "ttl": 60,
     }
+
+
+
+def test_build_platform_vars_includes_glitchtip_publication_topology() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    glitchtip = platform_vars["platform_service_topology"]["glitchtip"]
+
+    assert glitchtip["public_hostname"] == "errors.lv3.org"
+    assert glitchtip["dns"]["name"] == "errors"
+    assert glitchtip["ports"]["internal"] == 3005
+    assert glitchtip["urls"]["public"] == "https://errors.lv3.org"
+    assert glitchtip["urls"]["internal"] == "http://10.10.10.20:3005"
+    assert glitchtip["edge"]["upstream"] == glitchtip["urls"]["internal"]
+    assert platform_vars["glitchtip_port"] == 3005

@@ -448,6 +448,62 @@ groups:
           slo_id: gotenberg-availability
           service_id: gotenberg
           indicator: availability
+      - record: slo:glitchtip_availability:success_ratio_5m
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="glitchtip-availability"}[5m])
+        labels:
+          slo_id: glitchtip-availability
+          service_id: glitchtip
+          indicator: availability
+      - record: slo:glitchtip_availability:success_ratio_1h
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="glitchtip-availability"}[1h])
+        labels:
+          slo_id: glitchtip-availability
+          service_id: glitchtip
+          indicator: availability
+      - record: slo:glitchtip_availability:success_ratio_30d
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="glitchtip-availability"}[30d])
+        labels:
+          slo_id: glitchtip-availability
+          service_id: glitchtip
+          indicator: availability
+      - record: slo:glitchtip_availability:error_rate_5m
+        expr: 1 - slo:glitchtip_availability:success_ratio_5m
+        labels:
+          slo_id: glitchtip-availability
+          service_id: glitchtip
+          indicator: availability
+      - record: slo:glitchtip_availability:error_rate_1h
+        expr: 1 - slo:glitchtip_availability:success_ratio_1h
+        labels:
+          slo_id: glitchtip-availability
+          service_id: glitchtip
+          indicator: availability
+      - record: slo:glitchtip_availability:error_rate_30d
+        expr: 1 - slo:glitchtip_availability:success_ratio_30d
+        labels:
+          slo_id: glitchtip-availability
+          service_id: glitchtip
+          indicator: availability
+      - record: slo:glitchtip_availability:budget_remaining
+        expr: clamp_min(1 - (slo:glitchtip_availability:error_rate_30d / 0.005000),
+          0)
+        labels:
+          slo_id: glitchtip-availability
+          service_id: glitchtip
+          indicator: availability
+      - record: slo:glitchtip_availability:burn_rate_1h
+        expr: slo:glitchtip_availability:error_rate_1h / 0.005000
+        labels:
+          slo_id: glitchtip-availability
+          service_id: glitchtip
+          indicator: availability
+      - record: slo:glitchtip_availability:time_to_budget_exhaustion_days
+        expr: (slo:glitchtip_availability:budget_remaining * 30) / clamp_min(slo:glitchtip_availability:burn_rate_1h,
+          0.001)
+        labels:
+          slo_id: glitchtip-availability
+          service_id: glitchtip
+          indicator: availability
       - record: slo:grafana_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="grafana-availability"}[5m])
         labels:

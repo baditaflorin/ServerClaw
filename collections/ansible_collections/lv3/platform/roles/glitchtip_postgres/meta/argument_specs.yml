@@ -1,0 +1,26 @@
+# Purpose: Declare the required argument contract for the GlitchTip PostgreSQL backend role.
+# Use case: Run during syntax and argument validation before converging the managed GlitchTip database state.
+# Inputs: glitchtip_database_* and glitchtip_postgres_* variables required by the role.
+# Outputs: Machine-readable argument specs for glitchtip_postgres.
+# Idempotency: Fully idempotent; metadata only validates role inputs.
+# Dependencies: ADR 0165 metadata standard, ADR 0281, and the glitchtip_postgres role tasks.
+---
+argument_specs:
+  main:
+    short_description: Converge the PostgreSQL backend for GlitchTip.
+    options:
+      glitchtip_database_name:
+        type: str
+        required: true
+      glitchtip_database_user:
+        type: str
+        required: true
+      glitchtip_postgres_secret_dir:
+        type: path
+        required: true
+      glitchtip_postgres_password_file:
+        type: path
+        required: true
+      glitchtip_database_password_local_file:
+        type: path
+        required: true

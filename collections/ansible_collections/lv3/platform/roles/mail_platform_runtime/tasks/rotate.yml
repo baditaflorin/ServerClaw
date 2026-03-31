@@ -300,13 +300,25 @@
       - DOCKER
   register: mail_platform_rotation_docker_nat_chain
   changed_when: false
-  failed_when: false
+  failed_when: mail_platform_rotation_docker_nat_chain.rc not in [0, 1]
 
-- name: Restore Docker networking when the nat chain is missing before mail-platform rotation
+- name: Check whether the Docker forward chain exists before mail-platform rotation
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - filter
+      - -S
+      - DOCKER-FORWARD
+  register: mail_platform_rotation_docker_forward_chain
+  changed_when: false
+  failed_when: mail_platform_rotation_docker_forward_chain.rc not in [0, 1]
+
+- name: Restore Docker networking when bridge chains are missing before mail-platform rotation
   ansible.builtin.service:
     name: docker
     state: restarted
-  when: mail_platform_rotation_docker_nat_chain.rc != 0
+  when: mail_platform_rotation_docker_nat_chain.rc != 0 or mail_platform_rotation_docker_forward_chain.rc != 0
 
 - name: Recheck the Docker nat chain before mail-platform rotation
   ansible.builtin.command:
@@ -318,12 +330,29 @@
       - DOCKER
   register: mail_platform_rotation_docker_nat_chain_recheck
   changed_when: false
+  failed_when: mail_platform_rotation_docker_nat_chain_recheck.rc not in [0, 1]
   retries: 10
   delay: 2
   until: mail_platform_rotation_docker_nat_chain_recheck.rc == 0
-  when: mail_platform_rotation_docker_nat_chain.rc != 0
+  when: mail_platform_rotation_docker_nat_chain.rc != 0 or mail_platform_rotation_docker_forward_chain.rc != 0
 
-- name: Wait for the Docker daemon to answer after networking recovery for mail-platform rotation
+- name: Recheck the Docker forward chain before mail-platform rotation
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - filter
+      - -S
+      - DOCKER-FORWARD
+  register: mail_platform_rotation_docker_forward_chain_recheck
+  changed_when: false
+  failed_when: mail_platform_rotation_docker_forward_chain_recheck.rc not in [0, 1]
+  retries: 10
+  delay: 2
+  until: mail_platform_rotation_docker_forward_chain_recheck.rc == 0
+  when: mail_platform_rotation_docker_nat_chain.rc != 0 or mail_platform_rotation_docker_forward_chain.rc != 0
+
+- name: Wait for the Docker daemon to answer after bridge recovery for mail-platform rotation
   ansible.builtin.command:
     argv:
       - docker
@@ -335,13 +364,14 @@
   retries: 10
   delay: 2
   until: mail_platform_rotation_docker_info.rc == 0
-  when: mail_platform_rotation_docker_nat_chain.rc != 0
+  when: mail_platform_rotation_docker_nat_chain.rc != 0 or mail_platform_rotation_docker_forward_chain.rc != 0
 
-- name: Assert Docker nat chain is present before mail-platform rotation
+- name: Assert Docker bridge chains are present before mail-platform rotation
   ansible.builtin.assert:
     that:
       - mail_platform_rotation_docker_nat_chain.rc == 0 or mail_platform_rotation_docker_nat_chain_recheck.rc == 0
-    fail_msg: "Docker is running but the nat DOCKER chain is missing; mail-platform rotation published ports will fail."
+      - mail_platform_rotation_docker_forward_chain.rc == 0 or mail_platform_rotation_docker_forward_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the DOCKER or DOCKER-FORWARD chains are missing; mail-platform rotation will fail."
 
 - name: Remove stale mail-platform compose resources before rotation force recreate
   ansible.builtin.command:
@@ -363,7 +393,7 @@
     or 'Removing' in mail_platform_rotation_down.stdout
     or 'Removed' in mail_platform_rotation_down.stdout
   failed_when: false
-  when: mail_platform_rotation_docker_nat_chain.rc != 0
+  when: mail_platform_rotation_docker_nat_chain.rc != 0 or mail_platform_rotation_docker_forward_chain.rc != 0
 
 - name: Force-recreate the mail platform runtime with rotated secret material after Docker networking recovery
   ansible.builtin.shell: |
@@ -383,7 +413,7 @@
   retries: 3
   delay: 5
   until: mail_platform_rotation_up.rc == 0
-  when: mail_platform_rotation_docker_nat_chain.rc != 0
+  when: mail_platform_rotation_docker_nat_chain.rc != 0 or mail_platform_rotation_docker_forward_chain.rc != 0
 
 - name: Assert the mail platform rotation force-recreate succeeded
   ansible.builtin.assert:
@@ -394,7 +424,7 @@
         mail_platform_rotation_up.stderr
         | default(mail_platform_rotation_up.msg | default('mail-platform rotation compose force-recreate failed'))
       }}
-  when: mail_platform_rotation_docker_nat_chain.rc != 0
+  when: mail_platform_rotation_docker_nat_chain.rc != 0 or mail_platform_rotation_docker_forward_chain.rc != 0
 
 - name: Restart the mail platform runtime with rotated secret material
   ansible.builtin.command:
@@ -419,7 +449,7 @@
   retries: 3
   delay: 5
   until: mail_platform_rotation_up.rc == 0
-  when: mail_platform_rotation_docker_nat_chain.rc == 0
+  when: mail_platform_rotation_docker_nat_chain.rc == 0 and mail_platform_rotation_docker_forward_chain.rc == 0
 
 - name: Assert the mail platform rotation restart succeeded
   ansible.builtin.assert:
@@ -430,7 +460,7 @@
         mail_platform_rotation_up.stderr
         | default(mail_platform_rotation_up.msg | default('mail-platform rotation compose up failed'))
       }}
-  when: mail_platform_rotation_docker_nat_chain.rc == 0
+  when: mail_platform_rotation_docker_nat_chain.rc == 0 and mail_platform_rotation_docker_forward_chain.rc == 0
 
 - name: Flag stale mail platform compose-network failures during rotation
   ansible.builtin.set_fact:

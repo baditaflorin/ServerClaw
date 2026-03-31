@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path, run_command
+from glitchtip_event import emit_glitchtip_event
 from workflow_catalog import load_secret_manifest, validate_secret_manifest
 
 
@@ -360,7 +361,7 @@ def maybe_emit_failure(rotation_event: dict, glitchtip_event: dict) -> None:
 
     glitchtip_url = os.environ.get("SECRET_ROTATION_GLITCHTIP_EVENT_URL")
     if glitchtip_url:
-        post_json(glitchtip_url, glitchtip_event)
+        emit_glitchtip_event(glitchtip_url, glitchtip_event)
 
 
 def list_catalog(catalog: dict, *, now: dt.datetime) -> int:

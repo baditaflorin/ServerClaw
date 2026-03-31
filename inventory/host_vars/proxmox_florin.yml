@@ -77,6 +77,7 @@ platform_port_assignments:
   flagsmith_port: 8017
   lago_api_port: 8099
   lago_front_port: 8100
+  glitchtip_port: 3005
   dify_port: 8094
   changedetection_port: 5000
   crawl4ai_port: 11235
@@ -2076,6 +2077,28 @@ lv3_service_topology:
       proxy_send_timeout_seconds: 900
       security_headers_enabled: false
       crawl_policy_enabled: false
+  glitchtip:
+    service_name: glitchtip
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: errors.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: errors
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.glitchtip_port }}"
   lago:
     service_name: lago
     owning_vm: docker-runtime-lv3

@@ -1957,6 +1957,50 @@
       "apply_targets": [
         "converge-woodpecker"
       ]
+    },
+    "glitchtip_runtime": {
+      "kind": "runtime",
+      "service_id": "glitchtip",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "glitchtip",
+      "registry_ref": "docker.io/glitchtip/glitchtip",
+      "tag": "6.1.3",
+      "digest": "sha256:826337215a97602fcb32df400786b7db8575fd6921bdf686b05133735ed71b58",
+      "ref": "docker.io/glitchtip/glitchtip:6.1.3@sha256:826337215a97602fcb32df400786b7db8575fd6921bdf686b05133735ed71b58",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-30-glitchtip-runtime.json",
+      "consumers": [
+        "collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-glitchtip"
+      ]
+    },
+    "glitchtip_valkey_runtime": {
+      "kind": "runtime",
+      "service_id": "glitchtip",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "glitchtip-valkey",
+      "registry_ref": "docker.io/valkey/valkey",
+      "tag": "9.0.3-alpine",
+      "digest": "sha256:f42ba740748f48bb79cf1b3a96dd688f2dfe374c687d350377c00927fcb39c2b",
+      "ref": "docker.io/valkey/valkey:9.0.3-alpine@sha256:f42ba740748f48bb79cf1b3a96dd688f2dfe374c687d350377c00927fcb39c2b",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-30",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-30-glitchtip-valkey-runtime.json",
+      "consumers": [
+        "collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-glitchtip"
+      ]
     }
   }
 }

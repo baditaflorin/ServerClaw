@@ -1,0 +1,231 @@
+import json
+
+from allauth.account.models import EmailAddress
+from allauth.socialaccount.models import SocialApp
+
+from apps.alerts.constants import RecipientType
+from apps.alerts.models import AlertRecipient, ProjectAlert
+from apps.api_tokens.models import APIToken
+from apps.organizations_ext.models import Organization, OrganizationSocialApp, OrganizationUser
+from apps.projects.models import Project
+from apps.teams.models import Team
+from apps.users.models import User
+
+
+ADMIN_EMAIL = {{ glitchtip_bootstrap_admin_email | to_json }}
+ADMIN_NAME = {{ glitchtip_bootstrap_admin_name | to_json }}
+ADMIN_PASSWORD = {{ glitchtip_admin_password | to_json }}
+API_TOKEN_LABEL = {{ glitchtip_api_token_label | to_json }}
+API_TOKEN_VALUE = {{ glitchtip_api_token | to_json }}
+API_TOKEN_SCOPES = {{ glitchtip_api_token_scopes | to_json }}
+ORG_NAME = {{ glitchtip_organization_name | to_json }}
+ORG_SLUG = {{ glitchtip_organization_slug | to_json }}
+TEAM_SLUG = {{ glitchtip_team_slug | to_json }}
+PUBLIC_URL = {{ glitchtip_public_base_url | to_json }}
+KEYCLOAK_CLIENT_ID = {{ glitchtip_keycloak_client_id | to_json }}
+KEYCLOAK_CLIENT_SECRET = {{ glitchtip_keycloak_client_secret | to_json }}
+KEYCLOAK_PROVIDER = {{ glitchtip_keycloak_provider | to_json }}
+KEYCLOAK_PROVIDER_ID = {{ glitchtip_keycloak_provider_id | to_json }}
+KEYCLOAK_SERVER_URL = {{ glitchtip_keycloak_server_url | to_json }}
+MATTERMOST_ALERT_URL = {{ glitchtip_mattermost_alert_url | to_json }}
+NTFY_ALERT_URL = {{ glitchtip_ntfy_alert_url | to_json }}
+PROJECT_SPECS = {{ glitchtip_bootstrap_projects | to_json }}
+
+
+def ensure_admin_user() -> User:
+    user, _ = User.objects.get_or_create(
+        email=ADMIN_EMAIL,
+        defaults={
+            "name": ADMIN_NAME,
+            "is_active": True,
+            "is_staff": True,
+            "is_superuser": True,
+        },
+    )
+    changed = False
+    if user.name != ADMIN_NAME:
+        user.name = ADMIN_NAME
+        changed = True
+    if not user.is_active:
+        user.is_active = True
+        changed = True
+    if not user.is_staff:
+        user.is_staff = True
+        changed = True
+    if not user.is_superuser:
+        user.is_superuser = True
+        changed = True
+    user.set_password(ADMIN_PASSWORD)
+    changed = True
+    if changed:
+        user.save()
+    EmailAddress.objects.update_or_create(
+        user=user,
+        email=ADMIN_EMAIL,
+        defaults={"verified": True, "primary": True},
+    )
+    return user
+
+
+def ensure_organization(user: User):
+    org, _ = Organization.objects.get_or_create(
+        slug=ORG_SLUG,
+        defaults={
+            "name": ORG_NAME,
+            "open_membership": False,
+        },
+    )
+    if org.name != ORG_NAME or org.open_membership:
+        org.name = ORG_NAME
+        org.open_membership = False
+        org.save(update_fields=["name", "open_membership"])
+    org_user = OrganizationUser.objects.filter(organization=org, user=user).first()
+    if org_user is None:
+        org.add_user(user)
+        org_user = OrganizationUser.objects.get(organization=org, user=user)
+    return org, org_user
+
+
+def ensure_team(org: Organization, org_user):
+    team, _ = Team.objects.get_or_create(organization=org, slug=TEAM_SLUG)
+    team.members.add(org_user)
+    return team
+
+
+def ensure_social_app(org: Organization):
+    app, _ = SocialApp.objects.get_or_create(
+        provider=KEYCLOAK_PROVIDER,
+        provider_id=KEYCLOAK_PROVIDER_ID,
+        defaults={
+            "name": "LV3 Keycloak",
+            "client_id": KEYCLOAK_CLIENT_ID,
+            "secret": KEYCLOAK_CLIENT_SECRET,
+            "settings": {"server_url": KEYCLOAK_SERVER_URL},
+        },
+    )
+    changed = False
+    if app.name != "LV3 Keycloak":
+        app.name = "LV3 Keycloak"
+        changed = True
+    if app.client_id != KEYCLOAK_CLIENT_ID:
+        app.client_id = KEYCLOAK_CLIENT_ID
+        changed = True
+    if app.secret != KEYCLOAK_CLIENT_SECRET:
+        app.secret = KEYCLOAK_CLIENT_SECRET
+        changed = True
+    settings = app.settings or {}
+    if settings.get("server_url") != KEYCLOAK_SERVER_URL:
+        app.settings = {"server_url": KEYCLOAK_SERVER_URL}
+        changed = True
+    if changed:
+        app.save()
+    OrganizationSocialApp.objects.get_or_create(organization=org, social_app=app)
+    return app
+
+
+def ensure_api_token(user: User) -> APIToken:
+    token = APIToken.objects.filter(token=API_TOKEN_VALUE).first()
+    if token is None:
+        APIToken.objects.filter(user=user, label=API_TOKEN_LABEL).exclude(token=API_TOKEN_VALUE).delete()
+        token = APIToken.objects.create(user=user, label=API_TOKEN_LABEL, token=API_TOKEN_VALUE)
+    else:
+        changed = False
+        if token.user_id != user.id:
+            token.user = user
+            changed = True
+        if token.label != API_TOKEN_LABEL:
+            token.label = API_TOKEN_LABEL
+            changed = True
+        if changed:
+            token.save(update_fields=["user", "label"])
+    token.add_permissions(API_TOKEN_SCOPES)
+    return token
+
+
+def ensure_alerts(project: Project):
+    alert, _ = ProjectAlert.objects.get_or_create(
+        project=project,
+        name="New or regressed issues",
+        defaults={"timespan_minutes": 1, "quantity": 1},
+    )
+    if alert.timespan_minutes != 1 or alert.quantity != 1:
+        alert.timespan_minutes = 1
+        alert.quantity = 1
+        alert.save(update_fields=["timespan_minutes", "quantity"])
+
+    desired_recipients = []
+    if MATTERMOST_ALERT_URL:
+        desired_recipients.append((RecipientType.GENERAL_WEBHOOK, MATTERMOST_ALERT_URL))
+    if NTFY_ALERT_URL:
+        desired_recipients.append((RecipientType.NTFY, NTFY_ALERT_URL))
+
+    for recipient_type, url in desired_recipients:
+        AlertRecipient.objects.update_or_create(
+            alert=alert,
+            recipient_type=recipient_type,
+            url=url,
+            defaults={"tags_to_add": ["environment", "server_name", "release"]},
+        )
+
+    if desired_recipients:
+        desired_keys = {(recipient_type, url) for recipient_type, url in desired_recipients}
+        for recipient in AlertRecipient.objects.filter(alert=alert):
+            key = (recipient.recipient_type, recipient.url)
+            if recipient.recipient_type in {RecipientType.GENERAL_WEBHOOK, RecipientType.NTFY} and key not in desired_keys:
+                recipient.delete()
+
+    return alert
+
+
+def ensure_projects(org: Organization, team: Team):
+    payload = {}
+    for spec in PROJECT_SPECS:
+        project = Project.objects.filter(organization=org, slug=spec["slug"]).first()
+        if project is None:
+            project = Project.objects.filter(organization=org, name=spec["name"]).first()
+        if project is None:
+            project = Project.objects.create(organization=org, name=spec["name"])
+        if project.name != spec["name"]:
+            project.name = spec["name"]
+            project.save(update_fields=["name"])
+        team.projects.add(project)
+        project_key = project.projectkey_set.order_by("created").first()
+        alert = ensure_alerts(project)
+        payload[project.slug] = {
+            "id": project.id,
+            "name": project.name,
+            "slug": project.slug,
+            "dsn": project_key.get_dsn() if project_key else "",
+            "alert_name": alert.name,
+            "alert_recipients": [
+                {"recipient_type": recipient.recipient_type, "url": recipient.url}
+                for recipient in AlertRecipient.objects.filter(alert=alert).order_by("recipient_type", "url")
+            ],
+        }
+    return payload
+
+
+user = ensure_admin_user()
+org, org_user = ensure_organization(user)
+team = ensure_team(org, org_user)
+social_app = ensure_social_app(org)
+token = ensure_api_token(user)
+projects = ensure_projects(org, team)
+
+print(
+    json.dumps(
+        {
+            "admin_email": user.email,
+            "organization": {"id": org.id, "name": org.name, "slug": org.slug},
+            "team": {"id": team.id, "slug": team.slug},
+            "api_token": {"label": token.label, "token": token.token, "scopes": token.get_scopes()},
+            "social_app": {
+                "name": social_app.name,
+                "provider": social_app.provider,
+                "provider_id": social_app.provider_id,
+            },
+            "projects": projects,
+        },
+        sort_keys=True,
+    )
+)

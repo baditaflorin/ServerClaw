@@ -16,6 +16,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from controller_automation_toolkit import resolve_repo_local_path, write_json
+from glitchtip_event import emit_glitchtip_event
 from platform.faults import DockerSocketClient, FaultInjector, is_first_sunday_utc, load_scenario_catalog
 from platform.ledger import LedgerWriter
 
@@ -94,7 +95,7 @@ def publish_notifications(repo_root: Path, report: dict[str, Any]) -> None:
         or maybe_read_secret_path(repo_root, "glitchtip_platform_findings_event_url")
     )
     if glitchtip_url:
-        post_json_webhook(
+        emit_glitchtip_event(
             glitchtip_url,
             {
                 "message": "ADR 0171 fault injection detected a regression",
