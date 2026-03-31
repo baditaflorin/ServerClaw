@@ -89,14 +89,22 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     defaults = load_defaults()
     task_names = {task["name"] for task in tasks}
     assert "Record container ids that are running before Docker restarts" in task_names
+    assert "Inspect running containers before Docker restarts" in task_names
     assert "Record containers that were running before Docker restarts" in task_names
     assert "Flush Docker handlers before chain health checks" in task_names
     assert "Reset Docker failed state before nat-chain recovery restart" in task_names
     assert "Ensure Docker bridge networking chains are present" in task_names
+    assert "Re-inspect pre-restart containers after Docker restarts" in task_names
+    assert "Record pre-restart containers that remained stopped after Docker restarts" in task_names
     assert "Recover pre-restart containers that remained stopped after Docker restarts" in task_names
     assert "Confirm pre-restart containers recovered after Docker restarts" in task_names
+    inspect_pre_restart = next(task for task in tasks if task["name"] == "Inspect running containers before Docker restarts")
     record_containers = next(task for task in tasks if task["name"] == "Record containers that were running before Docker restarts")
     ensure_task = next(task for task in tasks if task["name"] == "Ensure Docker bridge networking chains are present")
+    recheck_pre_restart = next(task for task in tasks if task["name"] == "Re-inspect pre-restart containers after Docker restarts")
+    record_stopped = next(
+        task for task in tasks if task["name"] == "Record pre-restart containers that remained stopped after Docker restarts"
+    )
     recover_containers = next(task for task in tasks if task["name"] == "Recover pre-restart containers that remained stopped after Docker restarts")
     confirm_recovery = next(task for task in tasks if task["name"] == "Confirm pre-restart containers recovered after Docker restarts")
     include_role = ensure_task["ansible.builtin.include_role"]
@@ -113,12 +121,22 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     reset_task = next(task for task in tasks if task["name"] == "Reset Docker failed state before nat-chain recovery restart")
     assert reset_task["ansible.builtin.command"] == "systemctl reset-failed docker.service"
     assert reset_task["changed_when"] is False
+    assert inspect_pre_restart["ansible.builtin.command"]["argv"][:2] == ["python3", "-c"]
+    assert inspect_pre_restart["ansible.builtin.command"]["stdin"] == "{{ docker_runtime_pre_restart_container_ids.stdout_lines | to_json }}"
+    assert '["docker", "inspect", container_id]' in inspect_pre_restart["ansible.builtin.command"]["argv"][2]
+    assert '"no such object" in stderr' in inspect_pre_restart["ansible.builtin.command"]["argv"][2]
+    assert "docker_runtime_pre_restart_container_details" in record_containers["ansible.builtin.set_fact"]
     assert "RestartPolicy" not in record_containers["ansible.builtin.set_fact"]["docker_runtime_pre_restart_container_names"]
+    assert recheck_pre_restart["ansible.builtin.command"]["argv"][:2] == ["python3", "-c"]
+    assert recheck_pre_restart["ansible.builtin.command"]["stdin"] == (
+        "{{ docker_runtime_pre_restart_container_names | default([]) | to_json }}"
+    )
+    assert '["docker", "inspect", container_name]' in recheck_pre_restart["ansible.builtin.command"]["argv"][2]
+    assert "docker_runtime_stopped_pre_restart_container_details" in record_stopped["ansible.builtin.set_fact"]
     assert recover_containers["ansible.builtin.command"]["argv"][:2] == ["python3", "-c"]
     assert "".join(recover_containers["ansible.builtin.command"]["stdin"].split()) == (
-        "{{((docker_runtime_post_restart_container_inspect.stdout|default('[]'))|from_json)|to_json}}"
+        "{{(docker_runtime_stopped_pre_restart_container_details|default([]))|to_json}}"
     )
-    assert "docker_runtime_pre_restart_container_names" in confirm_recovery["ansible.builtin.command"]["argv"]
     assert "TRANSIENT_DOCKER_NETWORK_ERRORS" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "STALE_COMPOSE_ENDPOINT_ERRORS" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "No chain/target/match by that name" in recover_containers["ansible.builtin.command"]["argv"][2]
@@ -133,8 +151,15 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert "com.docker.compose.project.working_dir" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "docker_compose_up" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'command.extend(["up", "-d", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert confirm_recovery["ansible.builtin.command"]["argv"][:2] == ["python3", "-c"]
+    assert confirm_recovery["ansible.builtin.command"]["stdin"] == (
+        "{{ docker_runtime_pre_restart_container_names | default([]) | to_json }}"
+    )
+    assert '["docker", "inspect", container_name]' in confirm_recovery["ansible.builtin.command"]["argv"][2]
+    assert "sys.exit(0 if all_running else 1)" in confirm_recovery["ansible.builtin.command"]["argv"][2]
     assert confirm_recovery["retries"] == "{{ docker_runtime_container_recovery_retries }}"
     assert confirm_recovery["delay"] == "{{ docker_runtime_container_recovery_delay_seconds }}"
+    assert confirm_recovery["until"] == "docker_runtime_recovered_container_inspect.rc == 0"
 
 
 def test_common_docker_bridge_chains_warms_control_socket_before_restarting() -> None:
