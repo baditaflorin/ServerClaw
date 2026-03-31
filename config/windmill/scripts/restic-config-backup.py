@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+"""Windmill wrapper for ADR 0302 restic config backups."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import subprocess
+from pathlib import Path
+
+
+def extract_report_json(stdout: str) -> dict | None:
+    for line in reversed(stdout.splitlines()):
+        if line.startswith("REPORT_JSON="):
+            return json.loads(line.removeprefix("REPORT_JSON="))
+    return None
+
+
+def build_command(
+    repo_root: Path,
+    *,
+    mode: str,
+    triggered_by: str,
+    live_apply_trigger: bool,
+) -> list[str]:
+    command = [
+        "python3",
+        str(repo_root / "scripts" / "restic_config_backup.py"),
+        "--repo-root",
+        str(repo_root),
+        "--mode",
+        mode,
+        "--triggered-by",
+        triggered_by,
+        "--print-report-json",
+    ]
+    if live_apply_trigger:
+        command.append("--live-apply-trigger")
+    return command
+
+
+def main(
+    repo_path: str = "/srv/proxmox_florin_server",
+    mode: str = "backup",
+    triggered_by: str = "windmill-schedule",
+    live_apply_trigger: bool = False,
+) -> dict[str, object]:
+    repo_root = Path(repo_path)
+    script_path = repo_root / "scripts" / "restic_config_backup.py"
+    if not script_path.exists():
+        return {
+            "status": "blocked",
+            "reason": "restic backup surfaces are missing from the worker checkout",
+            "expected_repo_path": str(repo_root),
+        }
+
+    command = build_command(
+        repo_root,
+        mode=mode,
+        triggered_by=triggered_by,
+        live_apply_trigger=live_apply_trigger,
+    )
+    result = subprocess.run(command, cwd=repo_root, text=True, capture_output=True, check=False)
+    report = extract_report_json(result.stdout)
+    payload: dict[str, object] = {
+        "status": "ok" if result.returncode == 0 else "error",
+        "command": " ".join(command),
+        "returncode": result.returncode,
+        "stdout": result.stdout.strip(),
+        "stderr": result.stderr.strip(),
+    }
+    if report is not None:
+        payload["report"] = report
+        if isinstance(report, dict):
+            payload["summary"] = report.get("summary") or ((report.get("report") or {}).get("summary"))
+    return payload
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Run the ADR 0302 restic workflow from Windmill.")
+    parser.add_argument("--repo-path", default="/srv/proxmox_florin_server")
+    parser.add_argument("--mode", choices=["backup", "restore-verify"], default="backup")
+    parser.add_argument("--triggered-by", default="windmill-schedule")
+    parser.add_argument("--live-apply-trigger", action="store_true")
+    return parser
+
+
+if __name__ == "__main__":
+    args = build_parser().parse_args()
+    print(
+        json.dumps(
+            main(
+                repo_path=args.repo_path,
+                mode=args.mode,
+                triggered_by=args.triggered_by,
+                live_apply_trigger=args.live_apply_trigger,
+            ),
+            indent=2,
+            sort_keys=True,
+        )
+    )

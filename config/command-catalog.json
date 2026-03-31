@@ -4033,6 +4033,141 @@
         "timeout_seconds": 900
       }
     },
+    "converge-restic-config-backup": {
+      "description": "Converge the ADR 0302 Restic runtime, repository bootstrap, and schedule on docker-runtime-lv3.",
+      "workflow_id": "converge-restic-config-backup",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "outline_minio_root_password",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-local MinIO root password used to bootstrap the `restic-config-backup` bucket."
+        },
+        {
+          "name": "nats_jetstream_admin_password",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-local NATS admin password used to provision stale-backup publication credentials."
+        },
+        {
+          "name": "ntfy_alertmanager_password",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-local ntfy password mirrored into the ADR 0302 runtime credential bundle."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-restic-config-backup passes",
+        "make validate passes before the apply",
+        "The docker-runtime worker checkout exists at /srv/proxmox_florin_server and matches the repo state being applied"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, timer status, MinIO bucket bootstrap result, one successful backup run, and one successful restore-verification run."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the runtime credential provisioning, MinIO repository bootstrap, or systemd timer installation fails.",
+          "Stop if the converge leaves docker-runtime-lv3 without a working ADR 0302 backup entrypoint or without the expected worker checkout path."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good repo state and re-converge before retrying.",
+          "Do not compensate for a failed converge with ad hoc systemd units, manual restic password files, or unmanaged MinIO bucket changes."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
+    "run-restic-config-backup": {
+      "description": "Run the ADR 0302 Restic file-level backup workflow through the managed docker-runtime-lv3 SSH path.",
+      "workflow_id": "restic-config-backup",
+      "scope": "guest_runtime",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes on the repo state used for the backup run",
+        "ADR 0302 has already been converged on docker-runtime-lv3",
+        "The managed worker checkout and runtime credential file are present on docker-runtime-lv3 before the run starts"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the generated backup receipt, the refreshed latest-snapshot summary, and any stale-source notifications emitted during the run."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the remote worker checkout, runtime credentials, or MinIO repository path are unavailable.",
+          "Stop if the backup run fails before writing a durable receipt or if the latest-snapshot summary becomes ambiguous."
+        ],
+        "rollback_guidance": [
+          "Repair the ADR 0302 converge path before retrying the run.",
+          "Do not hand-run ad hoc restic commands outside the repo-managed script unless the live incident is separately documented."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
+      }
+    },
+    "run-restic-config-restore-verify": {
+      "description": "Run the ADR 0302 restore-verification rehearsal through the managed docker-runtime-lv3 SSH path.",
+      "workflow_id": "restic-config-restore-verify",
+      "scope": "guest_runtime",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes on the repo state used for the restore verification",
+        "ADR 0302 has already been converged on docker-runtime-lv3",
+        "At least one successful ADR 0302 receipts snapshot exists in the repository backend before the rehearsal runs"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the generated restore-verification receipt and the restored file-count assertion for the latest receipts snapshot."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the restore rehearsal cannot distinguish an empty repository from a genuine restore failure.",
+          "Stop if the restored receipts tree does not meet the governed file-count expectation."
+        ],
+        "rollback_guidance": [
+          "Repair the ADR 0302 backup path and produce a fresh backup receipt before retrying the restore rehearsal.",
+          "Treat repeated restore-verification failures as backup health incidents instead of continuing unrelated live applies."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1200
+      }
+    },
     "open-maintenance-window": {
       "description": "Open one governed ADR 0080 maintenance window for a planned live change so expected alert noise is suppressed.",
       "workflow_id": "open-maintenance-window",

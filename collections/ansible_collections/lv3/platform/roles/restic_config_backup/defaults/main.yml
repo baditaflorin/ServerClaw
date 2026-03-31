@@ -1,0 +1,63 @@
+---
+# Purpose: Define ADR 0302 restic config backup defaults, runtime paths, and controller-local secret locations.
+# Use case: Loaded whenever the restic_config_backup role converges or validates the backup timer on docker-runtime-lv3.
+# Inputs: Repo checkout path, OpenBao helper defaults, controller-local secrets, and MinIO bucket settings.
+# Outputs: Stable defaults consumed by the restic_config_backup role.
+# Idempotency: Fully idempotent because this file only declares defaults.
+# Dependencies: ADR 0165 and ADR 0302.
+
+restic_config_backup_runtime_root: /opt/restic-config-backup
+restic_config_backup_runtime_config_dir: /etc/lv3/restic-config-backup
+restic_config_backup_runtime_state_dir: /var/lib/lv3/restic-config-backup
+restic_config_backup_runtime_cache_dir: "{{ restic_config_backup_runtime_state_dir }}/cache"
+restic_config_backup_runtime_script: /usr/local/libexec/lv3-restic-config-backup.sh
+restic_config_backup_service_name: lv3-restic-config-backup.service
+restic_config_backup_timer_name: lv3-restic-config-backup.timer
+restic_config_backup_on_calendar: "*-*-* 02,08,14,20:00:00"
+restic_config_backup_controller_repo_common_root: >-
+  {{
+    (
+      lookup(
+        'ansible.builtin.pipe',
+        'git -C ' ~ ((playbook_dir | dirname) | quote) ~ ' rev-parse --path-format=absolute --git-common-dir'
+      )
+      | dirname
+    )
+  }}
+restic_config_backup_repo_checkout_host_path: /srv/proxmox_florin_server
+restic_config_backup_catalog_repo_path: "{{ restic_config_backup_repo_checkout_host_path }}/config/restic-file-backup-catalog.json"
+restic_config_backup_backup_receipts_dir: "{{ restic_config_backup_repo_checkout_host_path }}/receipts/restic-backups"
+restic_config_backup_latest_snapshot_receipt: "{{ restic_config_backup_repo_checkout_host_path }}/receipts/restic-snapshots-latest.json"
+restic_config_backup_restore_verification_dir: "{{ restic_config_backup_repo_checkout_host_path }}/receipts/restic-restore-verifications"
+restic_config_backup_repository_password_local_file: >-
+  {{ restic_config_backup_controller_repo_common_root }}/.local/restic-config-backup/repository-password.txt
+restic_config_backup_minio_secret_key_local_file: >-
+  {{ restic_config_backup_controller_repo_common_root }}/.local/outline/minio-root-password.txt
+restic_config_backup_nats_password_local_file: >-
+  {{ restic_config_backup_controller_repo_common_root }}/.local/nats/jetstream-admin-password.txt
+restic_config_backup_ntfy_password_local_file: >-
+  {{ restic_config_backup_controller_repo_common_root }}/.local/ntfy/alertmanager-password.txt
+restic_config_backup_runtime_openbao_secret_path: services/restic-config-backup/runtime-config
+restic_config_backup_runtime_openbao_policy_name: lv3-restic-config-backup-runtime
+restic_config_backup_runtime_openbao_approle_name: restic-config-backup
+restic_config_backup_runtime_openbao_agent_dir: "{{ restic_config_backup_runtime_config_dir }}/openbao-agent"
+restic_config_backup_runtime_openbao_agent_service_name: lv3-restic-config-backup-openbao-agent
+restic_config_backup_runtime_openbao_agent_container_name: lv3-restic-config-backup-openbao-agent
+restic_config_backup_runtime_credential_dir: /run/lv3-systemd-credentials/restic-config-backup
+restic_config_backup_runtime_credential_file: "{{ restic_config_backup_runtime_credential_dir }}/runtime-config.json"
+restic_config_backup_runtime_openbao_agent_config_file: "{{ restic_config_backup_runtime_openbao_agent_dir }}/agent.hcl"
+restic_config_backup_runtime_openbao_agent_template_file: "{{ restic_config_backup_runtime_openbao_agent_dir }}/runtime-config.ctmpl"
+restic_config_backup_runtime_openbao_role_id_file: "{{ restic_config_backup_runtime_openbao_agent_dir }}/role_id"
+restic_config_backup_runtime_openbao_secret_id_file: "{{ restic_config_backup_runtime_openbao_agent_dir }}/secret_id"
+restic_config_backup_runtime_config_payload:
+  restic_password: ""
+  minio_secret_key: ""
+  nats_password: ""
+  ntfy_password: ""
+restic_config_backup_runtime_openbao_secret_payload:
+  runtime_config_json: "{{ restic_config_backup_runtime_config_payload | to_nice_json }}"
+restic_config_backup_runtime_openbao_policy_rules: |-
+  path "kv/data/{{ restic_config_backup_runtime_openbao_secret_path }}" {
+    capabilities = ["read"]
+  }
+restic_config_backup_run_backup_now: true

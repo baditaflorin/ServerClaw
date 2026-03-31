@@ -1,0 +1,206 @@
+---
+# Purpose: Converge the ADR 0302 restic file-level backup runtime on docker-runtime-lv3.
+# Use case: Run from playbooks/restic-config-backup.yml to install the systemd timer, OpenBao runtime credential bundle, and initial backup replay.
+# Inputs: Repo checkout path, controller-local password artifacts, and OpenBao helper defaults.
+# Outputs: Managed restic backup service, timer, runtime state directories, and OpenBao-backed credential delivery.
+# Idempotency: Idempotent; reruns only rewrite managed files and restart the timer if inputs changed.
+# Dependencies: ADR 0165, ADR 0302, and the lv3.platform.common OpenBao credential helper.
+
+- name: Validate restic config backup inputs
+  ansible.builtin.assert:
+    that:
+      - restic_config_backup_runtime_root | length > 0
+      - restic_config_backup_runtime_config_dir | length > 0
+      - restic_config_backup_runtime_state_dir | length > 0
+      - restic_config_backup_runtime_script | length > 0
+      - restic_config_backup_repo_checkout_host_path | length > 0
+      - restic_config_backup_runtime_openbao_secret_path | length > 0
+      - restic_config_backup_runtime_openbao_policy_name | length > 0
+      - restic_config_backup_runtime_openbao_approle_name | length > 0
+      - restic_config_backup_runtime_openbao_agent_dir | length > 0
+      - restic_config_backup_runtime_credential_dir | length > 0
+      - restic_config_backup_runtime_credential_file | length > 0
+      - openbao_init_local_file | length > 0
+    fail_msg: "restic_config_backup requires runtime paths, the repo checkout mirror, and OpenBao bootstrap inputs."
+
+- name: Ensure the worker checkout exists on docker-runtime-lv3
+  ansible.builtin.stat:
+    path: "{{ restic_config_backup_repo_checkout_host_path }}"
+  register: restic_config_backup_repo_checkout
+
+- name: Fail when the worker checkout is missing
+  ansible.builtin.assert:
+    that:
+      - restic_config_backup_repo_checkout.stat.exists
+      - restic_config_backup_repo_checkout.stat.isdir
+    fail_msg: >-
+      {{ restic_config_backup_repo_checkout_host_path }} is missing on docker-runtime-lv3.
+      Converge Windmill first so the worker checkout mirror exists before ADR 0302 is enabled.
+
+- name: Ensure controller-local restic password directory exists
+  ansible.builtin.file:
+    path: "{{ restic_config_backup_repository_password_local_file | dirname }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the controller-local restic repository password when missing
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ restic_config_backup_repository_password_local_file }}" ]; then
+      openssl rand -base64 48 > "{{ restic_config_backup_repository_password_local_file }}"
+      chmod 600 "{{ restic_config_backup_repository_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: restic_config_backup_password_generate
+  changed_when: "'changed' in restic_config_backup_password_generate.stdout"
+
+- name: Read the controller-local restic repository password
+  ansible.builtin.set_fact:
+    restic_config_backup_repository_password: >-
+      {{
+        lookup('ansible.builtin.file', restic_config_backup_repository_password_local_file) | trim
+      }}
+    restic_config_backup_minio_secret_key: >-
+      {{
+        lookup('ansible.builtin.file', restic_config_backup_minio_secret_key_local_file) | trim
+      }}
+    restic_config_backup_nats_password: >-
+      {{
+        lookup('ansible.builtin.file', restic_config_backup_nats_password_local_file) | trim
+      }}
+    restic_config_backup_ntfy_password: >-
+      {{
+        lookup('ansible.builtin.file', restic_config_backup_ntfy_password_local_file) | trim
+      }}
+  delegate_to: localhost
+  become: false
+
+- name: Assert restic runtime secrets are available locally
+  ansible.builtin.assert:
+    that:
+      - restic_config_backup_repository_password | length > 0
+      - restic_config_backup_minio_secret_key | length > 0
+      - restic_config_backup_nats_password | length > 0
+      - restic_config_backup_ntfy_password | length > 0
+    fail_msg: "Controller-local restic, MinIO, NATS, or ntfy credentials are missing."
+
+- name: Install restic runtime packages
+  ansible.builtin.apt:
+    name:
+      - restic
+      - python3
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the restic runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ restic_config_backup_runtime_root }}"
+      mode: "0755"
+    - path: "{{ restic_config_backup_runtime_config_dir }}"
+      mode: "0700"
+    - path: "{{ restic_config_backup_runtime_state_dir }}"
+      mode: "0700"
+    - path: "{{ restic_config_backup_runtime_cache_dir }}"
+      mode: "0700"
+    - path: "{{ restic_config_backup_runtime_openbao_agent_dir }}"
+      mode: "0700"
+
+- name: Record the restic runtime credential payload
+  ansible.builtin.set_fact:
+    restic_config_backup_runtime_config_payload:
+      restic_password: "{{ restic_config_backup_repository_password }}"
+      minio_secret_key: "{{ restic_config_backup_minio_secret_key }}"
+      nats_password: "{{ restic_config_backup_nats_password }}"
+      ntfy_password: "{{ restic_config_backup_ntfy_password }}"
+
+- name: Provision OpenBao-backed systemd credentials for the restic backup service
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_systemd_credentials
+  vars:
+    common_openbao_systemd_credentials_service_name: restic-config-backup
+    common_openbao_systemd_credentials_agent_dir: "{{ restic_config_backup_runtime_openbao_agent_dir }}"
+    common_openbao_systemd_credentials_credential_dir: "{{ restic_config_backup_runtime_credential_dir }}"
+    common_openbao_systemd_credentials_credential_file: "{{ restic_config_backup_runtime_credential_file }}"
+    common_openbao_systemd_credentials_secret_path: "{{ restic_config_backup_runtime_openbao_secret_path }}"
+    common_openbao_systemd_credentials_secret_payload: "{{ restic_config_backup_runtime_openbao_secret_payload }}"
+    common_openbao_systemd_credentials_policy_name: "{{ restic_config_backup_runtime_openbao_policy_name }}"
+    common_openbao_systemd_credentials_policy_rules: "{{ restic_config_backup_runtime_openbao_policy_rules }}"
+    common_openbao_systemd_credentials_approle_name: "{{ restic_config_backup_runtime_openbao_approle_name }}"
+    common_openbao_systemd_credentials_agent_config_file: "{{ restic_config_backup_runtime_openbao_agent_config_file }}"
+    common_openbao_systemd_credentials_agent_template_file: "{{ restic_config_backup_runtime_openbao_agent_template_file }}"
+    common_openbao_systemd_credentials_agent_template_content: >-
+      [[ with secret "kv/data/{{ restic_config_backup_runtime_openbao_secret_path }}" ]][[ .Data.data.runtime_config_json ]][[ end ]]
+    common_openbao_systemd_credentials_role_id_file: "{{ restic_config_backup_runtime_openbao_role_id_file }}"
+    common_openbao_systemd_credentials_secret_id_file: "{{ restic_config_backup_runtime_openbao_secret_id_file }}"
+    common_openbao_systemd_credentials_image: "{{ openbao_agent_image }}"
+    common_openbao_systemd_credentials_agent_service_name: "{{ restic_config_backup_runtime_openbao_agent_service_name }}"
+    common_openbao_systemd_credentials_container_name: "{{ restic_config_backup_runtime_openbao_agent_container_name }}"
+
+- name: Render the restic runtime wrapper
+  ansible.builtin.template:
+    src: lv3-restic-config-backup.sh.j2
+    dest: "{{ restic_config_backup_runtime_script }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the restic systemd service
+  ansible.builtin.template:
+    src: lv3-restic-config-backup.service.j2
+    dest: "/etc/systemd/system/{{ restic_config_backup_service_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the restic systemd timer
+  ansible.builtin.template:
+    src: lv3-restic-config-backup.timer.j2
+    dest: "/etc/systemd/system/{{ restic_config_backup_timer_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Ensure the MinIO restic bucket exists with object lock
+  ansible.builtin.shell: |
+    set -euo pipefail
+    docker run --rm --network container:outline-minio \
+      -e MINIO_ROOT_PASSWORD={{ restic_config_backup_minio_secret_key | quote }} \
+      minio/mc:RELEASE.2026-02-14T21-37-08Z sh -ceu '
+        mc alias set local http://127.0.0.1:9000 minio "$MINIO_ROOT_PASSWORD" >/dev/null
+        mc mb --ignore-existing --with-lock local/restic-config-backup >/dev/null
+        mc version enable local/restic-config-backup >/dev/null
+      '
+  args:
+    executable: /bin/bash
+  changed_when: false
+
+- name: Enable and start the restic backup timer
+  ansible.builtin.systemd:
+    name: "{{ restic_config_backup_timer_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: Run the restic backup service immediately
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - start
+      - "{{ restic_config_backup_service_name }}"
+  register: restic_config_backup_run_now
+  changed_when: true
+  when: restic_config_backup_run_backup_now | bool

@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0.0",
+  "controller_host": {
+    "inventory_hostname": "docker-runtime-lv3",
+    "minio": {
+      "container_name": "outline-minio",
+      "bucket": "restic-config-backup",
+      "access_key": "minio",
+      "region": "eu-central-1",
+      "bucket_lookup": "path"
+    },
+    "nats": {
+      "host": "127.0.0.1",
+      "port": 4222,
+      "username": "jetstream-admin",
+      "subject": "platform.backup.stale"
+    },
+    "ntfy": {
+      "url": "http://127.0.0.1:2586",
+      "topic": "platform-alerts",
+      "username": "alertmanager"
+    }
+  },
+  "sources": [
+    {
+      "id": "receipts",
+      "label": "receipts",
+      "paths": [
+        "receipts"
+      ],
+      "freshness_minutes": 360,
+      "freshness_policy": "interval",
+      "expected_schedule": "every_6_hours",
+      "retention": {
+        "keep_daily": 90,
+        "keep_monthly": 12
+      },
+      "restore_verification": {
+        "path": "receipts",
+        "expected_minimum_files": 1
+      }
+    },
+    {
+      "id": "config",
+      "label": "config",
+      "paths": [
+        "config"
+      ],
+      "freshness_minutes": 1440,
+      "freshness_policy": "event_driven",
+      "expected_schedule": "successful_live_apply",
+      "retention": {
+        "keep_daily": 30,
+        "keep_monthly": 6
+      },
+      "trigger_on_live_apply": true
+    },
+    {
+      "id": "versions_stack",
+      "label": "versions_stack",
+      "paths": [
+        "versions/stack.yaml"
+      ],
+      "freshness_minutes": 1440,
+      "freshness_policy": "event_driven",
+      "expected_schedule": "successful_live_apply",
+      "retention": {
+        "keep_daily": 30
+      },
+      "trigger_on_live_apply": true
+    },
+    {
+      "id": "controller_secret_manifest",
+      "label": "controller_secret_manifest",
+      "paths": [
+        "config/controller-local-secrets.json"
+      ],
+      "freshness_minutes": 1440,
+      "freshness_policy": "interval",
+      "expected_schedule": "daily",
+      "retention": {
+        "keep_daily": 90
+      }
+    },
+    {
+      "id": "falco_overrides",
+      "label": "falco_overrides",
+      "paths": [
+        "config/falco"
+      ],
+      "freshness_minutes": 1440,
+      "freshness_policy": "event_driven",
+      "expected_schedule": "successful_live_apply",
+      "retention": {
+        "keep_daily": 30
+      },
+      "trigger_on_live_apply": true,
+      "optional": true
+    }
+  ]
+}

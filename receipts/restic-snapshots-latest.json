@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0.0",
+  "recorded_at": "",
+  "recorded_on": "",
+  "recorded_by": "codex",
+  "repository": {
+    "bucket": "restic-config-backup",
+    "endpoint": ""
+  },
+  "summary": {
+    "governed_sources": 0,
+    "protected": 0,
+    "uncovered": 0,
+    "inactive": 0,
+    "uncovered_sources": [],
+    "inactive_sources": []
+  },
+  "sources": []
+}

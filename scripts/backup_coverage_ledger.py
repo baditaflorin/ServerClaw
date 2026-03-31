@@ -20,6 +20,8 @@ from drift_lib import build_host_ssh_command, isoformat, load_controller_context
 HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 REDUNDANCY_CATALOG_PATH = repo_path("config", "service-redundancy-catalog.json")
 DR_TARGETS_PATH = repo_path("config", "disaster-recovery-targets.json")
+RESTIC_FILE_CATALOG_PATH = repo_path("config", "restic-file-backup-catalog.json")
+RESTIC_LATEST_SNAPSHOTS_PATH = repo_path("receipts", "restic-snapshots-latest.json")
 RESTORE_RECEIPTS_DIR = repo_path("receipts", "restore-verifications")
 DEFAULT_RECEIPTS_DIR = repo_path("receipts", "backup-coverage")
 DEFAULT_PBS_STORAGE_ID = "lv3-backup-pbs"
@@ -31,13 +33,15 @@ SOURCE_ID_PATTERN = re.compile(r"^(pbs_vm|proxmox_offsite_vm)_(\d+)$")
 @dataclass(frozen=True)
 class GovernedAsset:
     asset_id: str
-    vmid: int
+    vmid: int | None
     source_id: str
     source_kind: str
     storage_id: str
     expected_schedule: str
-    expected_max_age_hours: int
+    expected_max_age_hours: float
     dependent_services: list[str]
+    source_paths: list[str] | None = None
+    inline_retention_policy: dict[str, Any] | None = None
 
 
 def _display_path(path: Path) -> str:
@@ -173,6 +177,64 @@ def build_governed_assets(
     return assets
 
 
+def load_restic_catalog(path: Path = RESTIC_FILE_CATALOG_PATH) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    payload = load_json(path)
+    if not isinstance(payload, dict):
+        raise ValueError(f"{path} must define an object")
+    return payload
+
+
+def load_restic_latest_receipt(path: Path = RESTIC_LATEST_SNAPSHOTS_PATH) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    payload = load_json(path)
+    if not isinstance(payload, dict):
+        raise ValueError(f"{path} must define an object")
+    return payload
+
+
+def build_restic_governed_assets(catalog: dict[str, Any]) -> list[GovernedAsset]:
+    if not catalog:
+        return []
+    minio = ((catalog.get("controller_host") or {}).get("minio") or {}) if isinstance(catalog, dict) else {}
+    storage_id = str(minio.get("bucket") or "restic-config-backup")
+    assets: list[GovernedAsset] = []
+    for raw in catalog.get("sources", []):
+        if not isinstance(raw, dict):
+            continue
+        source_id = str(raw.get("id") or "").strip()
+        if not source_id:
+            continue
+        assets.append(
+            GovernedAsset(
+                asset_id=str(raw.get("label") or source_id),
+                vmid=None,
+                source_id=source_id,
+                source_kind="restic_file",
+                storage_id=storage_id,
+                expected_schedule=str(raw.get("expected_schedule") or "unspecified"),
+                expected_max_age_hours=float(raw.get("freshness_minutes") or 0) / 60.0,
+                dependent_services=[],
+                source_paths=[str(path) for path in raw.get("paths") or []],
+                inline_retention_policy=raw.get("retention") if isinstance(raw.get("retention"), dict) else {},
+            )
+        )
+    return assets
+
+
+def index_restic_latest_sources(latest_receipt: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    indexed: dict[str, dict[str, Any]] = {}
+    for source in latest_receipt.get("sources", []):
+        if not isinstance(source, dict):
+            continue
+        source_id = str(source.get("source_id") or "").strip()
+        if source_id:
+            indexed[source_id] = source
+    return indexed
+
+
 def load_restore_evidence(restore_dir: Path = RESTORE_RECEIPTS_DIR) -> dict[int, dict[str, Any]]:
     evidence_by_vmid: dict[int, dict[str, Any]] = {}
     if not restore_dir.is_dir():
@@ -250,6 +312,12 @@ def load_storage_listing(context: dict[str, Any], storage_id: str) -> dict[str, 
 
 
 def summarize_retention(job: dict[str, Any] | None, asset: GovernedAsset, dr_targets: dict[str, Any]) -> dict[str, Any]:
+    if asset.source_kind == "restic_file":
+        return {
+            "source": "restic_file_catalog",
+            "job_id": "restic-config-backup",
+            "policy": asset.inline_retention_policy or {},
+        }
     if job is not None:
         prune = job.get("prune-backups") or {}
         return {
@@ -289,10 +357,16 @@ def evaluate_asset(
     matching_jobs = [
         job
         for job in jobs
-        if str(job.get("storage") or "") == asset.storage_id and asset.vmid in parse_job_vmids(job.get("vmid"))
+        if asset.vmid is not None
+        and str(job.get("storage") or "") == asset.storage_id
+        and asset.vmid in parse_job_vmids(job.get("vmid"))
     ]
     fallback_job = fallback_job_for_storage(jobs, asset.storage_id)
-    rows = [row for row in storage_listing.get("rows", []) if int(row.get("vmid", -1)) == asset.vmid]
+    rows = [
+        row
+        for row in storage_listing.get("rows", [])
+        if asset.vmid is not None and int(row.get("vmid", -1)) == asset.vmid
+    ]
     latest_backup = max(
         (row for row in rows if isinstance(row.get("timestamp"), datetime)),
         key=lambda row: row["timestamp"],
@@ -357,19 +431,61 @@ def evaluate_asset(
     }
 
 
+def evaluate_restic_asset(
+    asset: GovernedAsset,
+    latest_source: dict[str, Any] | None,
+) -> dict[str, Any]:
+    if latest_source is None:
+        coverage_state = "uncovered"
+        state_reasons = [f"No restic snapshot receipt exists for source {asset.source_id}."]
+        last_successful_backup = None
+        last_verified_restore = None
+    else:
+        latest_state = str(latest_source.get("state") or "uncovered")
+        coverage_state = "protected" if latest_state in {"protected", "inactive"} else "uncovered"
+        state_reasons = list(latest_source.get("reasons") or [])
+        if not state_reasons:
+            state_reasons = [f"Latest restic receipt classified source {asset.source_id} as {latest_state}."]
+        last_successful_backup = latest_source.get("latest_snapshot")
+        last_verified_restore = latest_source.get("last_restore_verification")
+
+    return {
+        "asset_id": asset.asset_id,
+        "vmid": asset.vmid,
+        "source_id": asset.source_id,
+        "source_kind": asset.source_kind,
+        "storage_id": asset.storage_id,
+        "dependent_services": asset.dependent_services,
+        "source_paths": asset.source_paths or [],
+        "expected_schedule": asset.expected_schedule,
+        "expected_max_age_hours": asset.expected_max_age_hours,
+        "governed_job_ids": [],
+        "retention_policy": summarize_retention(None, asset, {}),
+        "coverage_state": coverage_state,
+        "state_reasons": state_reasons,
+        "last_successful_backup": last_successful_backup,
+        "last_verified_restore": last_verified_restore,
+    }
+
+
 def build_backup_coverage_report(
     *,
     now: datetime | None = None,
     host_vars_path: Path = HOST_VARS_PATH,
     redundancy_catalog_path: Path = REDUNDANCY_CATALOG_PATH,
     dr_targets_path: Path = DR_TARGETS_PATH,
+    restic_catalog_path: Path = RESTIC_FILE_CATALOG_PATH,
+    restic_latest_path: Path = RESTIC_LATEST_SNAPSHOTS_PATH,
     restore_dir: Path = RESTORE_RECEIPTS_DIR,
 ) -> dict[str, Any]:
     now = (now or utc_now()).astimezone(UTC)
     host_vars = load_yaml(host_vars_path)
     redundancy_catalog = load_json(redundancy_catalog_path)
     dr_targets = load_json(dr_targets_path)
+    restic_catalog = load_restic_catalog(restic_catalog_path)
+    restic_latest = load_restic_latest_receipt(restic_latest_path)
     assets = build_governed_assets(host_vars, redundancy_catalog, dr_targets)
+    restic_assets = build_restic_governed_assets(restic_catalog)
     context = load_controller_context()
     jobs = load_backup_jobs(context)
     storage_ids = sorted({asset.storage_id for asset in assets})
@@ -378,6 +494,7 @@ def build_backup_coverage_report(
         for storage_id in storage_ids
     }
     restore_evidence = load_restore_evidence(restore_dir)
+    restic_latest_sources = index_restic_latest_sources(restic_latest)
 
     evaluated_assets = [
         evaluate_asset(
@@ -390,6 +507,10 @@ def build_backup_coverage_report(
         )
         for asset in assets
     ]
+    evaluated_assets.extend(
+        evaluate_restic_asset(asset, restic_latest_sources.get(asset.source_id))
+        for asset in restic_assets
+    )
 
     counts = defaultdict(int)
     uncovered_assets: list[str] = []
@@ -434,6 +555,12 @@ def build_backup_coverage_report(
                 }
                 for storage_id, listing in storage_listings.items()
             },
+            "restic_file_backup": {
+                "catalog_path": _display_path(restic_catalog_path),
+                "latest_snapshot_receipt_path": _display_path(restic_latest_path),
+                "latest_snapshot_recorded_at": restic_latest.get("recorded_at"),
+                "governed_sources": len(restic_assets),
+            },
         },
     }
 
@@ -469,7 +596,10 @@ def render_text(report: dict[str, Any]) -> str:
         )
         for reason in asset["state_reasons"]:
             lines.append(f"  - {reason}")
-        lines.append(f"  - dependent services: {', '.join(asset['dependent_services'])}")
+        if asset["dependent_services"]:
+            lines.append(f"  - dependent services: {', '.join(asset['dependent_services'])}")
+        elif asset.get("source_paths"):
+            lines.append(f"  - source paths: {', '.join(asset['source_paths'])}")
     return "\n".join(lines)
 
 
@@ -485,6 +615,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--host-vars", type=Path, default=HOST_VARS_PATH)
     parser.add_argument("--redundancy-catalog", type=Path, default=REDUNDANCY_CATALOG_PATH)
     parser.add_argument("--dr-targets", type=Path, default=DR_TARGETS_PATH)
+    parser.add_argument("--restic-catalog", type=Path, default=RESTIC_FILE_CATALOG_PATH)
+    parser.add_argument("--restic-latest", type=Path, default=RESTIC_LATEST_SNAPSHOTS_PATH)
     parser.add_argument("--restore-dir", type=Path, default=RESTORE_RECEIPTS_DIR)
     parser.add_argument("--receipts-dir", type=Path, default=DEFAULT_RECEIPTS_DIR)
     parser.add_argument("--format", choices=["text", "json"], default="text")
@@ -501,6 +633,8 @@ def main(argv: list[str] | None = None) -> int:
             host_vars_path=args.host_vars,
             redundancy_catalog_path=args.redundancy_catalog,
             dr_targets_path=args.dr_targets,
+            restic_catalog_path=args.restic_catalog,
+            restic_latest_path=args.restic_latest,
             restore_dir=args.restore_dir,
         )
         if args.write_receipt:
