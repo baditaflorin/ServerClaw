@@ -72,6 +72,9 @@ def test_lago_runtime_tasks_manage_secret_generation_seed_and_smoke_verification
     secret_task = next(task for task in tasks if task["name"] == "Generate the Lago runtime secrets")
     mirror_task = next(task for task in tasks if task["name"] == "Mirror the Lago runtime secrets to the control machine")
     producer_catalog_task = next(task for task in tasks if task["name"] == "Render the controller-local Lago producer catalog")
+    postgres_wait_task = next(
+        task for task in tasks if task["name"] == "Wait for the Lago PostgreSQL endpoint to accept TCP connections"
+    )
     startup_task = next(task for task in tasks if task["name"] == "Start the Lago runtime and recover Docker bridge-chain failures")
     redis_bgsave_task = next(task for task in tasks if task["name"] == "Trigger a Lago Redis background save")
     redis_persistence_task = next(task for task in tasks if task["name"] == "Wait for Lago Redis background save to succeed")
@@ -91,9 +94,80 @@ def test_lago_runtime_tasks_manage_secret_generation_seed_and_smoke_verification
     assert "openssl genrsa 2048" in secret_task["loop"][2]["command"]
     assert mirror_task["delegate_to"] == "localhost"
     assert producer_catalog_task["delegate_to"] == "localhost"
+    assert postgres_wait_task["ansible.builtin.wait_for"]["host"] == "{{ lago_database_host }}"
+    assert postgres_wait_task["ansible.builtin.wait_for"]["port"] == "{{ lago_database_port }}"
+    assert postgres_wait_task["ansible.builtin.wait_for"]["timeout"] == 300
     assert startup_task["block"][0]["name"] == "Start the Lago stack"
-    assert startup_task["rescue"][-1]["name"] == "Retry Lago startup after Docker bridge-chain recovery"
+    recovery_fact_task = next(
+        task
+        for task in startup_task["rescue"]
+        if task["name"] == "Flag Docker bridge-chain, Lago compose dependency-race, and migrate failures during startup"
+    )
+    migrate_logs_task = next(
+        task for task in startup_task["rescue"] if task["name"] == "Capture Lago migrate logs after startup failure"
+    )
+    migrate_race_fact_task = next(
+        task for task in startup_task["rescue"] if task["name"] == "Flag Lago migrate database-race failures during startup"
+    )
+    unexpected_failure_task = next(
+        task for task in startup_task["rescue"] if task["name"] == "Surface unexpected Lago startup failures"
+    )
+    bridge_retry_task = next(
+        task for task in startup_task["rescue"] if task["name"] == "Retry Lago startup after Docker bridge-chain recovery"
+    )
+    dependency_retry_task = next(
+        task for task in startup_task["rescue"] if task["name"] == "Retry Lago startup after compose dependency race"
+    )
+    migrate_wait_retry_task = next(
+        task
+        for task in startup_task["rescue"]
+        if task["name"] == "Wait for the Lago PostgreSQL endpoint before retrying startup after migrate failure"
+    )
+    migrate_remove_task = next(
+        task for task in startup_task["rescue"] if task["name"] == "Remove the failed Lago migrate container before retrying startup"
+    )
+    migrate_retry_task = next(
+        task for task in startup_task["rescue"] if task["name"] == "Retry Lago startup after migrate database race"
+    )
+    assert "No chain/target/match by that name" in recovery_fact_task["ansible.builtin.set_fact"][
+        "lago_docker_bridge_chain_missing"
+    ]
+    assert "dependency failed to start" in recovery_fact_task["ansible.builtin.set_fact"]["lago_compose_dependency_race"]
+    assert "No such container:" in recovery_fact_task["ansible.builtin.set_fact"]["lago_compose_dependency_race"]
+    assert 'service "migrate" didn\'\'t complete successfully: exit 1' in recovery_fact_task["ansible.builtin.set_fact"][
+        "lago_compose_migrate_failed"
+    ]
+    assert migrate_logs_task["when"] == "lago_compose_migrate_failed"
+    assert "connection to server at" in migrate_race_fact_task["ansible.builtin.set_fact"]["lago_migrate_database_race"]
+    assert "failed: Connection timed out" in migrate_race_fact_task["ansible.builtin.set_fact"]["lago_migrate_database_race"]
+    assert "failed: Connection refused" in migrate_race_fact_task["ansible.builtin.set_fact"]["lago_migrate_database_race"]
+    assert "not lago_docker_bridge_chain_missing" in unexpected_failure_task["when"]
+    assert "not lago_compose_dependency_race" in unexpected_failure_task["when"]
+    assert "not (lago_migrate_database_race | default(false))" in unexpected_failure_task["when"]
+    assert bridge_retry_task["when"] == "lago_docker_bridge_chain_missing"
+    assert dependency_retry_task["ansible.builtin.command"]["argv"][-3:] == ["up", "-d", "--remove-orphans"]
+    assert dependency_retry_task["retries"] == 3
+    assert dependency_retry_task["delay"] == 5
+    assert dependency_retry_task["until"] == "lago_up_dependency_retry.rc == 0"
+    assert dependency_retry_task["when"] == "lago_compose_dependency_race"
+    assert migrate_wait_retry_task["ansible.builtin.wait_for"]["host"] == "{{ lago_database_host }}"
+    assert migrate_wait_retry_task["ansible.builtin.wait_for"]["port"] == "{{ lago_database_port }}"
+    assert migrate_wait_retry_task["when"] == "lago_migrate_database_race | default(false)"
+    assert migrate_remove_task["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "rm",
+        "-f",
+        "{{ lago_migrate_container_name }}",
+    ]
+    assert migrate_remove_task["when"] == "lago_migrate_database_race | default(false)"
+    assert "'No such container:' not in (lago_migrate_remove.stderr | default(''))" in migrate_remove_task["failed_when"]
+    assert migrate_retry_task["ansible.builtin.command"]["argv"][-3:] == ["up", "-d", "--remove-orphans"]
+    assert migrate_retry_task["retries"] == 3
+    assert migrate_retry_task["delay"] == 5
+    assert migrate_retry_task["until"] == "lago_up_migrate_retry.rc == 0"
+    assert migrate_retry_task["when"] == "lago_migrate_database_race | default(false)"
     assert redis_bgsave_task["ansible.builtin.command"]["argv"][-1] == "BGSAVE"
+    assert redis_persistence_task["retries"] == 60
     assert redis_persistence_task["ansible.builtin.command"]["argv"][-2:] == ["INFO", "persistence"]
     assert redis_persistence_task["until"] == (
         "'rdb_last_bgsave_status:ok' in (lago_redis_persistence_info.stdout | default(''))"
@@ -103,6 +177,9 @@ def test_lago_runtime_tasks_manage_secret_generation_seed_and_smoke_verification
     assert customer_task["ansible.builtin.uri"]["url"] == "{{ lago_direct_api_local_base_url }}/api/v1/customers"
     assert subscription_task["ansible.builtin.uri"]["url"] == "{{ lago_direct_api_local_base_url }}/api/v1/subscriptions"
     assert event_task["ansible.builtin.uri"]["url"] == "{{ lago_direct_api_local_base_url }}/api/v1/events"
+    assert event_task["retries"] == 12
+    assert event_task["delay"] == 5
+    assert event_task["until"] == "lago_direct_smoke_event.status == 200"
     assert verify_task["ansible.builtin.import_tasks"] == "verify.yml"
 
 

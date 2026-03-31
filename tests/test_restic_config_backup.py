@@ -15,6 +15,7 @@ WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
 CONTROL_PLANE_LANES_PATH = REPO_ROOT / "config" / "control-plane-lanes.json"
+MAKEFILE_PATH = REPO_ROOT / "Makefile"
 
 
 def _load_module(path: Path, name: str):
@@ -202,6 +203,18 @@ def test_trigger_remote_command_includes_live_apply_flag() -> None:
     )
 
     assert "--live-apply-trigger" in command
+
+
+def test_make_live_apply_targets_bootstrap_pyyaml_for_restic_trigger() -> None:
+    makefile = MAKEFILE_PATH.read_text(encoding="utf-8")
+
+    for target in ("live-apply-group", "live-apply-service", "live-apply-site", "live-apply-waves"):
+        start = makefile.index(f"{target}:")
+        next_target = makefile.find("\n\n", start)
+        if next_target == -1:
+            next_target = len(makefile)
+        block = makefile[start:next_target]
+        assert "uv run --with pyyaml python $(REPO_ROOT)/scripts/trigger_restic_live_apply.py" in block
 
 
 def test_post_ntfy_notification_uses_human_readable_title(monkeypatch) -> None:

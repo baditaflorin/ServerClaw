@@ -256,6 +256,8 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "Sync the controller-local Lago billing producer catalog" in tasks
     assert "Render an empty Lago billing producer catalog when no controller-local catalog exists" in tasks
     assert "ansible.builtin.meta: reset_connection" in tasks
+    assert "Wait for SSH after resetting the connection before API gateway verification" in tasks
+    assert "ansible.builtin.wait_for_connection" in tasks
     assert "Build the API gateway image" in tasks
     assert "mktemp -d /tmp/api-gateway-build." in tasks
     assert 'DOCKER_BUILDKIT=0 docker build --pull=false -t "{{ api_gateway_image_name }}:latest"' in tasks

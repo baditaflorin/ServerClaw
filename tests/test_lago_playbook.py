@@ -40,6 +40,15 @@ def test_lago_playbook_converges_dns_postgres_runtime_edge_and_public_verify() -
         {"role": "lv3.platform.api_gateway_runtime"},
     ]
     assert nginx_play["roles"] == [{"role": "lv3.platform.nginx_edge_publication"}]
+    assert verify_play["vars_files"] == ["{{ playbook_dir }}/../../../../../inventory/group_vars/platform.yml"]
+    assert verify_play["vars"]["lago_public_base_url"] == "{{ platform_service_topology.lago.urls.public }}"
+    assert verify_play["vars"]["lago_public_ingest_url"] == "{{ lago_public_base_url }}/api/v1/events"
+    assert verify_play["vars"]["lago_api_local_base_url"] == "{{ platform_service_topology.lago.urls.api }}"
+    assert verify_play["vars"]["lago_direct_api_local_base_url"] == (
+        "http://127.0.0.1:{{ platform_service_topology.lago.ports.api }}"
+    )
+    assert verify_play["vars"]["lago_org_api_key_local_file"].endswith("/.local/lago/org-api-key.txt")
+    assert verify_play["vars"]["lago_smoke_producer_token_local_file"].endswith("/.local/lago/smoke-producer-token.txt")
 
     public_smoke_task = next(
         task for task in verify_play["tasks"] if task["name"] == "Submit a public Lago smoke event through the API gateway adapter"
@@ -49,9 +58,16 @@ def test_lago_playbook_converges_dns_postgres_runtime_edge_and_public_verify() -
     )
 
     assert public_smoke_task["ansible.builtin.uri"]["url"] == "{{ lago_public_ingest_url }}"
-    assert usage_task["ansible.builtin.uri"]["url"] == (
-        "{{ lago_api_local_base_url }}/api/v1/customers/{{ lago_smoke_external_customer_id }}/current_usage"
+    assert public_smoke_task["retries"] == 24
+    assert public_smoke_task["delay"] == 5
+    assert public_smoke_task["until"] == "lago_public_smoke_event.status == 200"
+    assert (
+        "{{ lago_direct_api_local_base_url }}/api/v1/customers/{{ lago_smoke_external_customer_id }}/current_usage"
+        in usage_task["ansible.builtin.uri"]["url"]
     )
+    assert "?external_subscription_id={{ lago_smoke_external_subscription_id | urlencode }}" in usage_task[
+        "ansible.builtin.uri"
+    ]["url"]
 
 
 def test_root_lago_playbook_imports_the_collection_entrypoint() -> None:

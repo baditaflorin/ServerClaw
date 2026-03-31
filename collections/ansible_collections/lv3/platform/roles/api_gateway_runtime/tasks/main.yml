@@ -578,5 +578,9 @@
 - name: Verify the API gateway runtime
   ansible.builtin.meta: reset_connection
 
+- name: Wait for SSH after resetting the connection before API gateway verification
+  ansible.builtin.wait_for_connection:
+    timeout: 60
+
 - name: Verify the API gateway runtime
   ansible.builtin.import_tasks: verify.yml
