@@ -7,6 +7,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 ROLE_ROOT = REPO_ROOT / "roles" / "langfuse_runtime"
 DEFAULTS_PATH = ROLE_ROOT / "defaults" / "main.yml"
 TASKS_PATH = ROLE_ROOT / "tasks" / "main.yml"
+VERIFY_TASKS_PATH = ROLE_ROOT / "tasks" / "verify.yml"
 COMPOSE_TEMPLATE = ROLE_ROOT / "templates" / "docker-compose.yml.j2"
 ENV_TEMPLATE = ROLE_ROOT / "templates" / "langfuse.env.j2"
 ENV_CTEMPLATE = ROLE_ROOT / "templates" / "langfuse.env.ctmpl.j2"
@@ -14,6 +15,10 @@ ENV_CTEMPLATE = ROLE_ROOT / "templates" / "langfuse.env.ctmpl.j2"
 
 def load_tasks() -> list[dict]:
     return yaml.safe_load(TASKS_PATH.read_text())
+
+
+def load_verify_tasks() -> list[dict]:
+    return yaml.safe_load(VERIFY_TASKS_PATH.read_text())
 
 
 def test_defaults_use_shared_minio_contract() -> None:
@@ -71,3 +76,17 @@ def test_tasks_recover_stale_compose_network_during_langfuse_startup() -> None:
     assert "Flag stale Langfuse compose-network failures during startup" in rescue_names
     assert "Reset stale Langfuse compose resources before retrying startup" in rescue_names
     assert "Retry Langfuse stack startup after compose-network recovery" in rescue_names
+
+
+def test_verify_retries_bootstrap_project_api_until_langfuse_db_recovers() -> None:
+    verify_tasks = load_verify_tasks()
+    verify_task = next(
+        task
+        for task in verify_tasks
+        if task.get("name") == "Verify the Langfuse bootstrap project API is reachable"
+    )
+
+    assert verify_task["retries"] == 30
+    assert verify_task["delay"] == 5
+    assert verify_task["until"] == "(langfuse_verify_project.status | default(0)) == 200"
+    assert verify_task["failed_when"] is False

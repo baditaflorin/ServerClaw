@@ -673,6 +673,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_realm_groups_result
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_realm_groups_result is succeeded
       loop: "{{ keycloak_realm_groups }}"
       loop_control:
         label: "{{ item.name }}"
@@ -691,6 +695,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_realm_roles_result
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_realm_roles_result is succeeded
       loop: "{{ keycloak_realm_roles }}"
       loop_control:
         label: "{{ item.name }}"
@@ -707,6 +715,10 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+      register: keycloak_group_realm_rolemapping_result
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_group_realm_rolemapping_result is succeeded
       loop: "{{ keycloak_group_realm_role_mappings }}"
       loop_control:
         label: "{{ item.group_name }}"
@@ -1078,6 +1090,9 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
       register: keycloak_grafana_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_grafana_client_secret_info is succeeded
       no_log: true
 
     - name: Read the operations portal client secret
@@ -1091,6 +1106,9 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
       register: keycloak_ops_portal_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_ops_portal_client_secret_info is succeeded
       no_log: true
 
     - name: Read the Gitea client secret
@@ -1104,6 +1122,9 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
       register: keycloak_gitea_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_gitea_client_secret_info is succeeded
       no_log: true
 
     - name: Read the agent client secret
@@ -1117,6 +1138,9 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
       register: keycloak_agent_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_agent_client_secret_info is succeeded
       no_log: true
 
     - name: Read the Langfuse client secret
@@ -1130,6 +1154,9 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
       register: keycloak_langfuse_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_langfuse_client_secret_info is succeeded
       no_log: true
 
     - name: Read the Outline client secret
@@ -1143,6 +1170,9 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
       register: keycloak_outline_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_outline_client_secret_info is succeeded
       no_log: true
 
     - name: Read the ServerClaw client secret
@@ -1156,6 +1186,9 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
       register: keycloak_serverclaw_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_serverclaw_client_secret_info is succeeded
       no_log: true
 
     - name: Read the API gateway client secret
@@ -1169,6 +1202,9 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
       register: keycloak_api_gateway_client_secret_info
+      retries: "{{ keycloak_admin_reconciliation_retries }}"
+      delay: "{{ keycloak_admin_reconciliation_delay }}"
+      until: keycloak_api_gateway_client_secret_info is succeeded
       no_log: true
 
     - name: Read the ServerClaw runtime client secret

@@ -1905,6 +1905,7 @@
       "exposure": "private-only",
       "health_probe_id": "tesseract_ocr",
       "adr": "0286",
+      "adr_file": "docs/adr/0286-tesseract-ocr-service-for-scanned-image-text-extraction.md",
       "runbook": "docs/runbooks/configure-tesseract-ocr.md",
       "dashboard_url": "https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=tesseract-ocr-availability",
       "tags": [

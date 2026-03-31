@@ -290,7 +290,18 @@ def test_realm_reconciliation_retries_repo_managed_keycloak_modules() -> None:
             for task in realm_block["block"]
             if task.get("name") == "Ensure the obsolete ServerClaw operator CLI direct-grant client is absent"
         ),
+        next(task for task in realm_block["block"] if task.get("name") == "Ensure the Keycloak realm groups exist"),
+        next(task for task in realm_block["block"] if task.get("name") == "Ensure the Keycloak realm roles exist"),
+        next(task for task in realm_block["block"] if task.get("name") == "Ensure realm roles are mapped to Keycloak groups"),
         next(task for task in realm_block["block"] if task.get("name") == "Ensure the ServerClaw runtime client exists"),
+        next(task for task in realm_block["block"] if task.get("name") == "Read the Grafana client secret"),
+        next(task for task in realm_block["block"] if task.get("name") == "Read the operations portal client secret"),
+        next(task for task in realm_block["block"] if task.get("name") == "Read the Gitea client secret"),
+        next(task for task in realm_block["block"] if task.get("name") == "Read the agent client secret"),
+        next(task for task in realm_block["block"] if task.get("name") == "Read the Langfuse client secret"),
+        next(task for task in realm_block["block"] if task.get("name") == "Read the Outline client secret"),
+        next(task for task in realm_block["block"] if task.get("name") == "Read the ServerClaw client secret"),
+        next(task for task in realm_block["block"] if task.get("name") == "Read the API gateway client secret"),
         next(task for task in realm_block["block"] if task.get("name") == "Read the ServerClaw runtime client secret"),
     ]
     for task in runtime_contract_tasks:

@@ -347,6 +347,17 @@
     or 'Downloaded newer image' in gitea_pull.stdout
     or 'Pull complete' in gitea_pull.stdout
 
+- name: Wait for the shared MinIO API endpoint used by Gitea LFS
+  ansible.builtin.uri:
+    url: "http://{{ gitea_minio_endpoint }}/minio/health/live"
+    method: GET
+    status_code: 200
+  register: gitea_minio_ready
+  retries: 60
+  delay: 5
+  until: gitea_minio_ready.status == 200
+  changed_when: false
+
 - name: Start the Gitea stack and recover stale compose-network failures
   block:
     - name: Start the Gitea stack
@@ -420,6 +431,34 @@
         name: docker
         state: restarted
       when: gitea_docker_nat_chain_missing
+
+    - name: Wait for Docker nat chain to return before retrying Gitea startup
+      ansible.builtin.command:
+        argv:
+          - iptables
+          - --wait
+          - -t
+          - nat
+          - -nL
+          - DOCKER
+      register: gitea_docker_nat_chain_recheck
+      retries: 24
+      delay: 5
+      until: gitea_docker_nat_chain_recheck.rc == 0
+      changed_when: false
+      when: gitea_docker_nat_chain_missing
+
+    - name: Wait for the shared MinIO API endpoint before retrying Gitea startup
+      ansible.builtin.uri:
+        url: "http://{{ gitea_minio_endpoint }}/minio/health/live"
+        method: GET
+        status_code: 200
+      register: gitea_minio_ready_after_recovery
+      retries: 60
+      delay: 5
+      until: gitea_minio_ready_after_recovery.status == 200
+      changed_when: false
+      when: gitea_docker_nat_chain_missing or gitea_compose_network_missing
 
     - name: Retry Gitea stack startup after compose-network recovery
       ansible.builtin.command:

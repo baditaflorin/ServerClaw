@@ -113,6 +113,7 @@ def test_runtime_tasks_recover_stale_compose_network_during_gitea_startup() -> N
     assert "Flag stale Gitea compose-network failures during startup" in rescue_names
     assert "Reset Docker failed state before nat-chain recovery retry" in rescue_names
     assert "Restart Docker to restore nat chain before retrying Gitea startup" in rescue_names
+    assert "Wait for Docker nat chain to return before retrying Gitea startup" in rescue_names
     assert "Reset stale Gitea compose resources before retrying startup" in rescue_names
     assert "Retry Gitea stack startup after compose-network recovery" in rescue_names
     assert "Unable to enable DNAT rule" in recovery_fact["ansible.builtin.set_fact"]["gitea_docker_nat_chain_missing"]
