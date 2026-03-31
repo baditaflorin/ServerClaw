@@ -1,0 +1,23 @@
+2026-03-31T10:18:41Z
+=== billing api health headers ===
+curl: (60) SSL: no alternative certificate subject name matches target host name 'billing.lv3.org'
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+=== billing api health body ===
+curl: (60) SSL: no alternative certificate subject name matches target host name 'billing.lv3.org'
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+
+=== billing root headers ===
+curl: (60) SSL: no alternative certificate subject name matches target host name 'billing.lv3.org'
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.

@@ -227,6 +227,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `analytics.lv3.org` | `plausible` | `edge-published` | `docker-runtime-lv3` |
 | `api.lv3.org` | `api-gateway` | `edge-published` | `docker-runtime-lv3` |
 | `apps.lv3.org` | `coolify-apps` | `edge-published` | `coolify-lv3` |
+| `billing.lv3.org` | `lago` | `edge-published` | `docker-runtime-lv3` |
 | `build.lv3.org` | `docker-build` | `informational-only` | `docker-build-lv3` |
 | `chat.lv3.org` | `serverclaw` | `edge-published` | `coolify-lv3` |
 | `ci.lv3.org` | `woodpecker` | `edge-published` | `docker-runtime-lv3` |
@@ -646,6 +647,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Host Control Loops](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-host-control-loops.md)
 - [Configure JupyterHub](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-jupyterhub.md)
 - [Configure Keycloak](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-keycloak.md)
+- [Configure Lago](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-lago.md)
 - [Configure Langfuse](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-langfuse.md)
 - [Configure Mail Platform](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-mail-platform.md)
 - [Configure Mailpit](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-mailpit.md)
@@ -1441,6 +1443,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0289-live-apply: Live Apply ADR 0289 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0289-live-apply.md)
 - [Workstream ws-0291-live-apply: Live Apply ADR 0291 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0291-live-apply.md)
 - [Workstream ws-0291-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0291-main-merge.md)
+- [Workstream ws-0292-live-apply: Live Apply ADR 0292 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0292-live-apply.md)
 - [Workstream WS-0293: Temporal Durable Workflow Engine Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0293-live-apply.md)
 - [Workstream ws-0295-live-apply: Live Apply ADR 0295 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0295-live-apply.md)
 - [Workstream WS-0296: Education Repo Refresh And Named Deploy Profiles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0296-education-refresh.md)

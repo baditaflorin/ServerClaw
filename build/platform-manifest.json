@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.115",
   "platform_version": "0.130.75",
-  "generated_at": "2026-03-31T08:14:56Z",
-  "next_refresh_at": "2026-03-31T09:14:56Z",
+  "generated_at": "2026-03-31T10:02:33Z",
+  "next_refresh_at": "2026-03-31T11:02:33Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -292,6 +292,17 @@
         "primary_url": "https://sso.lv3.org",
         "last_live_apply": "2026-03-31T00:00:00Z",
         "slo_status": "unknown"
+      },
+      "lago": {
+        "service_name": "Lago",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://billing.lv3.org",
+        "last_live_apply": "2026-03-31T00:00:00Z"
       },
       "langfuse": {
         "service_name": "Langfuse",
@@ -1664,6 +1675,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-keycloak.md"
+      },
+      {
+        "id": "converge-lago",
+        "description": "Converge Lago on docker-runtime-lv3, prepare the shared PostgreSQL backing database, publish billing.lv3.org through the shared edge, and verify public producer ingest plus current-usage aggregation end to end.",
+        "tags": [
+          "converge-lago",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-lago.md"
       },
       {
         "id": "converge-langfuse",
@@ -4531,6 +4568,16 @@
         "path": "docs/runbooks/configure-keycloak.md",
         "workflow_ids": [
           "converge-keycloak"
+        ]
+      },
+      {
+        "id": "configure-lago",
+        "title": "Configure Lago",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-lago.md",
+        "workflow_ids": [
+          "converge-lago"
         ]
       },
       {

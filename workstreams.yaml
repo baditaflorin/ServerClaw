@@ -1848,7 +1848,7 @@ workstreams:
     title: Live apply Lago as the usage metering and billing API layer from latest origin/main
     status: in_progress
     owner: codex
-    branch: codex/ws-0292-live-apply-r2
+    branch: codex/ws-0292-main-integration-r1
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0292-live-apply.md
     depends_on:
@@ -1862,9 +1862,17 @@ workstreams:
     shared_surfaces:
       - workstreams.yaml
       - Makefile
+      - README.md
+      - RELEASE.md
+      - VERSION
+      - changelog.md
       - docs/workstreams/ws-0292-live-apply.md
       - docs/adr/.index.yaml
       - docs/adr/0292-lago-as-the-usage-metering-and-billing-api-layer.md
+      - docs/release-notes/README.md
+      - docs/release-notes/*.md
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/diagrams/service-dependency-graph.excalidraw
       - docs/runbooks/configure-lago.md
       - docs/site-generated/architecture/dependency-graph.md
       - inventory/host_vars/proxmox_florin.yml
@@ -1877,6 +1885,9 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/lago_runtime/
       - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/
       - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
+      - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
       - scripts/api_gateway/main.py
       - scripts/generate_platform_vars.py
       - config/ansible-execution-scopes.yaml
@@ -1899,6 +1910,8 @@ workstreams:
       - config/subdomain-exposure-registry.json
       - config/uptime-kuma/monitors.json
       - config/workflow-catalog.json
+      - build/platform-manifest.json
+      - versions/stack.yaml
       - receipts/image-scans/
       - receipts/live-applies/
       - receipts/live-applies/evidence/
@@ -1935,6 +1948,18 @@ workstreams:
             - Makefile
           mode: shared_contract
           contract: automation-entrypoints-v1
+        - id: platform_truth_generation
+          paths:
+            - README.md
+            - RELEASE.md
+            - VERSION
+            - changelog.md
+            - docs/release-notes/README.md
+            - docs/release-notes/*.md
+            - versions/stack.yaml
+            - build/platform-manifest.json
+          mode: shared_contract
+          contract: canonical-truth-v1
         - id: topology_contract
           paths:
             - inventory/host_vars/proxmox_florin.yml
@@ -1950,6 +1975,13 @@ workstreams:
             - config/api-gateway-catalog.json
           mode: shared_contract
           contract: published-api-and-edge-v1
+        - id: docker_runtime_recovery_contract
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml
+            - collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+          mode: shared_contract
+          contract: live-replay-recovery-v1
         - id: service_catalog_contract
           paths:
             - config/ansible-execution-scopes.yaml
@@ -1976,6 +2008,8 @@ workstreams:
           contract: service-catalogs-v1
         - id: generated_views
           paths:
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - docs/diagrams/service-dependency-graph.excalidraw
             - docs/site-generated/architecture/dependency-graph.md
             - receipts/ops-portal-snapshot.html
           mode: shared_contract

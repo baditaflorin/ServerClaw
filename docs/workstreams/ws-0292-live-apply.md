@@ -3,12 +3,12 @@
 - ADR: [ADR 0292](../adr/0292-lago-as-the-usage-metering-and-billing-api-layer.md)
 - Title: Deploy Lago as the repo-managed usage metering and billing API layer, publish `billing.lv3.org`, and verify metered ingestion end to end
 - Status: in_progress
-- Branch: `codex/ws-0292-live-apply-r2`
+- Branch: `codex/ws-0292-main-integration-r1`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2`
 - Owner: codex
 - Depends On: `adr-0021-public-subdomain-publication`, `adr-0042-postgresql-as-the-shared-relational-database`, `adr-0063-keycloak-sso-for-internal-services`, `adr-0077-compose-secret-injection-pattern`, `adr-0086-backup-and-recovery`, `adr-0276-nats-jetstream-as-the-platform-event-bus`
 - Conflicts With: none
-- Shared Surfaces: `workstreams.yaml`, `Makefile`, `docs/adr/0292`, `docs/workstreams/ws-0292-live-apply.md`, `docs/runbooks/configure-lago.md`, `docs/site-generated/architecture/dependency-graph.md`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `playbooks/lago.yml`, `playbooks/services/lago.yml`, `collections/ansible_collections/lv3/platform/playbooks/lago.yml`, `collections/ansible_collections/lv3/platform/playbooks/services/lago.yml`, `roles/lago_postgres/`, `roles/lago_runtime/`, `roles/api_gateway_runtime/`, `roles/nginx_edge_publication/`, `scripts/api_gateway/main.py`, `scripts/generate_platform_vars.py`, `config/*catalog*.json`, `config/ansible-execution-scopes.yaml`, `config/ansible-role-idempotency.yml`, `config/prometheus/file_sd/https_tls_targets.yml`, `config/prometheus/rules/https_tls_alerts.yml`, `config/uptime-kuma/monitors.json`, `receipts/image-scans/`, `receipts/live-applies/`, `receipts/live-applies/evidence/`, `receipts/ops-portal-snapshot.html`, `tests/`
+- Shared Surfaces: `workstreams.yaml`, `Makefile`, `README.md`, `RELEASE.md`, `VERSION`, `changelog.md`, `docs/adr/0292`, `docs/workstreams/ws-0292-live-apply.md`, `docs/runbooks/configure-lago.md`, `docs/release-notes/README.md`, `docs/release-notes/*.md`, `docs/diagrams/agent-coordination-map.excalidraw`, `docs/diagrams/service-dependency-graph.excalidraw`, `docs/site-generated/architecture/dependency-graph.md`, `build/platform-manifest.json`, `versions/stack.yaml`, `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`, `playbooks/lago.yml`, `playbooks/services/lago.yml`, `collections/ansible_collections/lv3/platform/playbooks/lago.yml`, `collections/ansible_collections/lv3/platform/playbooks/services/lago.yml`, `roles/lago_postgres/`, `roles/lago_runtime/`, `roles/api_gateway_runtime/`, `roles/nginx_edge_publication/`, `collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml`, `collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml`, `collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml`, `scripts/api_gateway/main.py`, `scripts/generate_platform_vars.py`, `config/*catalog*.json`, `config/ansible-execution-scopes.yaml`, `config/ansible-role-idempotency.yml`, `config/prometheus/file_sd/https_tls_targets.yml`, `config/prometheus/rules/https_tls_alerts.yml`, `config/uptime-kuma/monitors.json`, `receipts/image-scans/`, `receipts/live-applies/`, `receipts/live-applies/evidence/`, `receipts/ops-portal-snapshot.html`, `tests/`
 
 ## Scope
 
@@ -28,10 +28,20 @@
 
 - `workstreams.yaml`
 - `Makefile`
+- `README.md`
+- `RELEASE.md`
+- `VERSION`
+- `changelog.md`
 - `docs/workstreams/ws-0292-live-apply.md`
 - `docs/adr/0292-lago-as-the-usage-metering-and-billing-api-layer.md`
+- `docs/release-notes/README.md`
+- `docs/release-notes/*.md`
+- `docs/diagrams/agent-coordination-map.excalidraw`
+- `docs/diagrams/service-dependency-graph.excalidraw`
 - `docs/runbooks/configure-lago.md`
 - `docs/site-generated/architecture/dependency-graph.md`
+- `build/platform-manifest.json`
+- `versions/stack.yaml`
 - `inventory/host_vars/proxmox_florin.yml`
 - `inventory/group_vars/platform.yml`
 - `playbooks/lago.yml`
@@ -42,6 +52,9 @@
 - `collections/ansible_collections/lv3/platform/roles/lago_runtime/`
 - `collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/`
 - `collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/`
+- `collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains.yml`
+- `collections/ansible_collections/lv3/platform/roles/docker_runtime/defaults/main.yml`
+- `collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml`
 - `scripts/api_gateway/main.py`
 - `scripts/generate_platform_vars.py`
 - `config/ansible-execution-scopes.yaml`
@@ -114,6 +127,7 @@
   - `receipts/live-applies/evidence/2026-03-31-ws-0292-billing-health-headers-r5.txt`
   - `receipts/live-applies/evidence/2026-03-31-ws-0292-billing-health-body-r5.txt`
   - `receipts/live-applies/evidence/2026-03-31-ws-0292-converge-r15.txt`
+- Branch-local evidence was first captured on `codex/ws-0292-live-apply-r2`; the authoritative exact-main replay now continues on `codex/ws-0292-main-integration-r1`.
 
 ## Remaining For Merge-To-Main
 
