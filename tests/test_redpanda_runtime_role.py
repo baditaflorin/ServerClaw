@@ -118,3 +118,7 @@ def test_templates_define_bootstrap_env_and_host_network_runtime() -> None:
     assert "kafka_enable_authorization: true" in start_template
     assert "schema_registry_client:" in start_template
     assert "export RP_BOOTSTRAP_USER=" in start_template
+    assert "exec redpanda \\" in start_template
+    assert "--redpanda-cfg /etc/redpanda/redpanda.yaml" in start_template
+    assert "redpanda start" not in start_template
+    assert "--check=false" not in start_template

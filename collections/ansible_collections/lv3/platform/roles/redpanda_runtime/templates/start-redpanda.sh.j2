@@ -95,8 +95,8 @@ EOF
 
 export RP_BOOTSTRAP_USER="${REDPANDA_ADMIN_USER}:${REDPANDA_ADMIN_PASSWORD}"
 
-exec redpanda start \
-  --check=false \
+exec redpanda \
+  --redpanda-cfg /etc/redpanda/redpanda.yaml \
   --overprovisioned \
   --smp {{ redpanda_smp }} \
   --memory {{ redpanda_memory }} \
