@@ -260,9 +260,25 @@ def test_openbao_runtime_retries_other_read_side_api_checks_after_restart() -> N
     assert "until: openbao_mail_platform_runtime_current.status in [200, 404]" in tasks
     assert "- name: Read current dedicated rotatable secrets from OpenBao" in tasks
     assert "until: openbao_rotatable_secret_current.status in [200, 404]" in tasks
+    assert "- name: Read AppRole role IDs" in tasks
+    assert "until: openbao_approle_role_ids.status == 200" in tasks
     assert "- name: Generate fresh short-lived AppRole secret IDs" in tasks
     assert "until: openbao_generated_secret_ids.status == 200" in tasks
     assert "- name: Assert fresh short-lived AppRole secret IDs were generated successfully" in tasks
+    assert "- name: Verify userpass login for the ops operator" in tasks
+    assert "until: openbao_ops_login.status == 200" in tasks
+    assert "- name: Login with the controller AppRole" in tasks
+    assert "until: openbao_controller_login.status == 200" in tasks
+    assert "- name: Read the controller Proxmox API secret through the AppRole" in tasks
+    assert "until: openbao_controller_secret_read.status == 200" in tasks
+    assert "- name: Encrypt test material with the controller transit key" in tasks
+    assert "until: openbao_controller_transit_encrypt.status == 200" in tasks
+    assert "- name: Decrypt test material with the controller transit key" in tasks
+    assert "until: openbao_controller_transit_decrypt.status == 200" in tasks
+    assert "- name: Login with the mail-platform AppRole" in tasks
+    assert "until: openbao_mail_platform_login.status == 200" in tasks
+    assert "- name: Read the mail-platform runtime secret through the AppRole" in tasks
+    assert "until: openbao_mail_platform_secret_read.status == 200" in tasks
     assert "- name: Refresh short-lived AppRole secret IDs after managed verification" in tasks
     assert "until: openbao_refreshed_secret_ids.status == 200" in tasks
     assert "- name: Assert refreshed short-lived AppRole secret IDs were generated successfully" in tasks
