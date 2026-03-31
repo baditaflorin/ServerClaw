@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0288](../adr/0288-crawl4ai-as-the-llm-optimised-web-content-crawler.md)
 - Title: integrate the private Crawl4AI runtime onto the latest `origin/main` without disturbing the already-merged Flagsmith ws-0288 records
-- Status: ready_for_merge
+- Status: merged
 - Included In Repo Version: 0.177.115
 - Canonical Mainline Receipt: `2026-03-31-adr-0288-crawl4ai-mainline-live-apply`
 - Live Applied In Platform Version: 0.130.75
@@ -56,8 +56,7 @@ the registry and workstream docs stay merge-safe.
   the mirrored `release_tracks.platform_versioning.current` stack field, and
   the Crawl4AI startup failure classifier for missing Docker `DOCKER`
   iptables chains.
-- This workstream is branch-complete and ready for the final `main` merge; the
-  branch-local exact-main evidence remains the audit trail for replaying ADR
-  0288 onto the latest realistic `origin/main` baseline
-  `0.177.114 / 0.130.74` and promoting the result as
-  `0.177.115 / 0.130.75`.
+- This workstream is now merged on `main`; the branch-local exact-main
+  evidence remains the audit trail for replaying ADR 0288 onto the latest
+  realistic `origin/main` baseline `0.177.114 / 0.130.74` and promoting the
+  result as `0.177.115 / 0.130.75`.

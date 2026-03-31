@@ -18428,7 +18428,7 @@ workstreams:
   - id: ws-0288-crawl4ai-main-merge
     adr: "0288"
     title: Integrate ADR 0288 Crawl4AI exact-main replay onto current origin/main
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/ws-0288-crawl4ai-main-merge-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0288-crawl4ai-main-merge-r2
