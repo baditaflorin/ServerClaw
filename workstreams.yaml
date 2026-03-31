@@ -4845,6 +4845,9 @@ workstreams:
     ready_to_merge: false
     live_applied: false
     blockers:
+      - full post-rebase replay evidence `2026-03-31-ws-0293-livekit-branch-edge-public-verify-r4.txt` reached the final controller-side public room-lifecycle probe and then failed when `livekit.lv3.org` flipped back to a hostname-mismatched certificate during concurrent shared-edge mutations
+      - in-window diagnostics showed `docker-runtime-lv3` still listening locally on `*:7880/*:7881` while `nginx-lv3` timed out reaching `10.10.10.20:7880` and the live nftables input chain lacked the branch-declared LiveKit ingress rules, so the runtime and edge surfaces are still being clobbered by concurrent shared-host replays
+      - broad replay cannot restart cleanly until `vm:120` clears; ADR 0153 currently reports `agent:codex/ws-0290-live-apply` holding `vm:120/service:redpanda` through `2026-03-31T08:03:44Z`
       - The branch is now rebased onto `origin/main` `58dad5d37ae16ceb3a73bc2fe4554b2a449e8f83` / repo version `0.177.112` and the targeted post-rebase validation passes, but a fresh full LiveKit replay from that rebased tip is still blocked by concurrent `nginx-lv3`, `docker-runtime-lv3`, and `proxmox_florin` applies; the latest pre-rebase evidence shows the only failing step was the public hostname verification after another workstream rewrote the shared edge config and removed `livekit.lv3.org`.
   - id: ws-0248-live-apply
     adr: "0248"
