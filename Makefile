@@ -660,7 +660,6 @@ syntax-check-paperless:
 
 syntax-check-redpanda:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/redpanda.yml --syntax-check
-
 syntax-check-changedetection:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/changedetection.yml --syntax-check
 
