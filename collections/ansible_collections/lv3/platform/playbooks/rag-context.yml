@@ -22,4 +22,5 @@
 
   roles:
     - role: lv3.platform.docker_runtime
+    - role: lv3.platform.ollama_runtime
     - role: lv3.platform.rag_context_runtime

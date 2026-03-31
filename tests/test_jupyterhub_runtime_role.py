@@ -172,7 +172,11 @@ def test_verify_tasks_cover_local_health_admin_api_and_smoke_spawn() -> None:
     assert "Verify the JupyterHub local health endpoint" in names
     assert "Exercise JupyterHub smoke-user provisioning through the local admin API" in names
     assert "Record the spawned Jupyter single-user container name from the admin API payload" in names
-    assert "Verify the spawned Jupyter single-user container exposes the expected platform contract" in names
+    assert "Verify the spawned Jupyter single-user container exposes the expected environment contract" in names
+    assert "Wait for the spawned Jupyter single-user container to reach MinIO health" in names
+    assert "Wait for the spawned Jupyter single-user container to verify the shared MinIO bucket" in names
+    assert "Wait for the spawned Jupyter single-user container to reach the Ollama API" in names
+    assert "Wait for the spawned Jupyter single-user container to reach the platform-context API" in names
     assert "Stop the JupyterHub smoke user server" in names
 
     admin_api_task = next(
@@ -181,20 +185,44 @@ def test_verify_tasks_cover_local_health_admin_api_and_smoke_spawn() -> None:
     assert "{{ jupyterhub_internal_base_url }}" in admin_api_task["ansible.builtin.shell"]
     assert "/hub/api/users/{username}/server" in admin_api_task["ansible.builtin.shell"]
 
-    container_task = next(
-        task for task in verify if task["name"] == "Verify the spawned Jupyter single-user container exposes the expected platform contract"
+    container_env_task = next(
+        task for task in verify if task["name"] == "Verify the spawned Jupyter single-user container exposes the expected environment contract"
+    )
+    minio_health_task = next(
+        task for task in verify if task["name"] == "Wait for the spawned Jupyter single-user container to reach MinIO health"
+    )
+    minio_bucket_task = next(
+        task for task in verify if task["name"] == "Wait for the spawned Jupyter single-user container to verify the shared MinIO bucket"
+    )
+    ollama_task = next(
+        task for task in verify if task["name"] == "Wait for the spawned Jupyter single-user container to reach the Ollama API"
+    )
+    platform_context_task = next(
+        task for task in verify if task["name"] == "Wait for the spawned Jupyter single-user container to reach the platform-context API"
     )
     smoke_name_task = next(
         task for task in verify if task["name"] == "Record the spawned Jupyter single-user container name from the admin API payload"
     )
     assert "jupyterhub_smoke_user_api.stdout | from_json" in smoke_name_task["ansible.builtin.set_fact"]["jupyterhub_smoke_container_name"]
     assert ".object_name" in smoke_name_task["ansible.builtin.set_fact"]["jupyterhub_smoke_container_name"]
-    assert 'container_name="{{ jupyterhub_smoke_container_name }}"' in container_task["ansible.builtin.shell"]
-    assert "getent hosts {{ jupyterhub_host_gateway_hostname }}" in container_task["ansible.builtin.shell"]
-    assert "http://minio:9000/minio/health/live" in container_task["ansible.builtin.shell"]
-    assert 'assert client.bucket_exists(os.environ["JUPYTERHUB_SHARED_BUCKET"])' in container_task["ansible.builtin.shell"]
-    assert "{{ jupyterhub_ollama_base_url }}/api/version" in container_task["ansible.builtin.shell"]
-    assert "{{ jupyterhub_platform_context_url }}/healthz" in container_task["ansible.builtin.shell"]
+    assert 'container_name="{{ jupyterhub_smoke_container_name }}"' in container_env_task["ansible.builtin.shell"]
+    assert "getent hosts {{ jupyterhub_host_gateway_hostname }}" in container_env_task["ansible.builtin.shell"]
+    assert "http://minio:9000/minio/health/live" in minio_health_task["ansible.builtin.shell"]
+    assert 'assert client.bucket_exists(os.environ["JUPYTERHUB_SHARED_BUCKET"])' in minio_bucket_task["ansible.builtin.shell"]
+    assert "{{ jupyterhub_ollama_base_url }}/api/version" in ollama_task["ansible.builtin.shell"]
+    assert "{{ jupyterhub_platform_context_url }}/healthz" in platform_context_task["ansible.builtin.shell"]
+    assert minio_health_task["until"] == "jupyterhub_smoke_container_minio_health.rc == 0"
+    assert minio_bucket_task["until"] == "jupyterhub_smoke_container_minio_bucket.rc == 0"
+    assert ollama_task["until"] == "jupyterhub_smoke_container_ollama.rc == 0"
+    assert platform_context_task["until"] == "jupyterhub_smoke_container_platform_context.rc == 0"
+    assert minio_health_task["retries"] == 12
+    assert minio_bucket_task["retries"] == 12
+    assert ollama_task["retries"] == 12
+    assert platform_context_task["retries"] == 12
+    assert minio_health_task["delay"] == 5
+    assert minio_bucket_task["delay"] == 5
+    assert ollama_task["delay"] == 5
+    assert platform_context_task["delay"] == 5
 
 
 def test_publish_tasks_wait_for_public_health_and_oidc_redirect() -> None:

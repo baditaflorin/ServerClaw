@@ -61,6 +61,8 @@ platform_context_embedding_model: nomic-embed-text
 platform_context_embedding_dimension: 0
 platform_context_verify_rebuild_local: false
 platform_context_seed_when_degraded: true
+platform_context_verify_request_retries: 12
+platform_context_verify_request_delay_seconds: 5
 platform_context_verification_question: what retrieval backend is active for platform context
 platform_context_memory_verification_scope_kind: workspace
 platform_context_memory_verification_scope_id: adr-0263-smoke

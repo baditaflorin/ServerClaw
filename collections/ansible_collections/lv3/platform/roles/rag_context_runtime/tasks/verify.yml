@@ -85,6 +85,40 @@
       synchronous rebuild budget on docker-runtime-lv3.
   when: not (platform_context_verify_rebuild_local | bool)
 
+- name: Wait for the Qdrant API before live query verification
+  ansible.builtin.uri:
+    url: http://127.0.0.1:6333/collections
+    method: GET
+    status_code: 200
+  register: platform_context_qdrant_verify_ready
+  retries: "{{ platform_context_verify_request_retries }}"
+  delay: "{{ platform_context_verify_request_delay_seconds }}"
+  until: platform_context_qdrant_verify_ready.status == 200
+  changed_when: false
+
+- name: Wait for Ollama again before live query verification when semantic embeddings use the local Ollama backend
+  ansible.builtin.uri:
+    url: "{{ platform_context_ollama_url }}/api/version"
+    method: GET
+    status_code: 200
+  register: platform_context_ollama_verify_ready
+  retries: "{{ platform_context_verify_request_retries }}"
+  delay: "{{ platform_context_verify_request_delay_seconds }}"
+  until: platform_context_ollama_verify_ready.status == 200
+  changed_when: false
+  when: platform_context_embedding_backend == "ollama"
+
+- name: Wait for the platform context health endpoint again before live query verification
+  ansible.builtin.uri:
+    url: "{{ platform_context_private_url }}/healthz"
+    method: GET
+    status_code: 200
+  register: platform_context_query_health
+  retries: "{{ platform_context_verify_request_retries }}"
+  delay: "{{ platform_context_verify_request_delay_seconds }}"
+  until: platform_context_query_health.status == 200
+  changed_when: false
+
 - name: Verify the platform context query endpoint
   ansible.builtin.uri:
     url: "{{ platform_context_private_url }}/v1/context/query"
@@ -99,6 +133,9 @@
     status_code: 200
     return_content: true
   register: platform_context_query
+  retries: "{{ platform_context_verify_request_retries }}"
+  delay: "{{ platform_context_verify_request_delay_seconds }}"
+  until: platform_context_query.status == 200
   changed_when: false
   no_log: true
 
@@ -146,6 +183,9 @@
     status_code: 200
     return_content: true
   register: platform_context_query_repaired
+  retries: "{{ platform_context_verify_request_retries }}"
+  delay: "{{ platform_context_verify_request_delay_seconds }}"
+  until: platform_context_query_repaired.status == 200
   changed_when: false
   no_log: true
   when:
@@ -221,6 +261,9 @@
     status_code: 200
     return_content: true
   register: platform_context_memory_query
+  retries: "{{ platform_context_verify_request_retries }}"
+  delay: "{{ platform_context_verify_request_delay_seconds }}"
+  until: platform_context_memory_query.status == 200
   changed_when: false
 
 - name: Assert the ServerClaw memory query returned the smoke entry through semantic and keyword recall

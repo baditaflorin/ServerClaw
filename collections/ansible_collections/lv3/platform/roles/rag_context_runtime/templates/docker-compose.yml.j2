@@ -36,8 +36,6 @@ services:
     container_name: platform-context-api
     restart: unless-stopped
     depends_on:
-      openbao-agent:
-        condition: service_healthy
       qdrant:
         condition: service_started
     env_file:

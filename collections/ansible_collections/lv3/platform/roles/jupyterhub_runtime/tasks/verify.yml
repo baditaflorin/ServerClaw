@@ -82,7 +82,7 @@
         )
       }}
 
-- name: Verify the spawned Jupyter single-user container exposes the expected platform contract
+- name: Verify the spawned Jupyter single-user container exposes the expected environment contract
   ansible.builtin.shell: |
     set -euo pipefail
     container_name="{{ jupyterhub_smoke_container_name }}"
@@ -92,7 +92,27 @@
     docker exec "$container_name" /bin/bash -lc 'env | grep -Fqx "PLATFORM_CONTEXT_URL={{ jupyterhub_platform_context_url }}"'
     docker exec "$container_name" /bin/bash -lc 'env | grep -Fqx "JUPYTERHUB_SHARED_BUCKET={{ jupyterhub_shared_bucket_name }}"'
     docker exec "$container_name" /bin/bash -lc 'getent hosts {{ jupyterhub_host_gateway_hostname }} >/dev/null'
+  args:
+    executable: /bin/bash
+  changed_when: false
+
+- name: Wait for the spawned Jupyter single-user container to reach MinIO health
+  ansible.builtin.shell: |
+    set -euo pipefail
+    container_name="{{ jupyterhub_smoke_container_name }}"
     docker exec "$container_name" python -c "import urllib.request; urllib.request.urlopen('http://minio:9000/minio/health/live', timeout=10)"
+  args:
+    executable: /bin/bash
+  register: jupyterhub_smoke_container_minio_health
+  retries: 12
+  delay: 5
+  until: jupyterhub_smoke_container_minio_health.rc == 0
+  changed_when: false
+
+- name: Wait for the spawned Jupyter single-user container to verify the shared MinIO bucket
+  ansible.builtin.shell: |
+    set -euo pipefail
+    container_name="{{ jupyterhub_smoke_container_name }}"
     docker exec "$container_name" python - <<'PY'
     import os
     from minio import Minio
@@ -106,11 +126,38 @@
     )
     assert client.bucket_exists(os.environ["JUPYTERHUB_SHARED_BUCKET"])
     PY
+  args:
+    executable: /bin/bash
+  register: jupyterhub_smoke_container_minio_bucket
+  retries: 12
+  delay: 5
+  until: jupyterhub_smoke_container_minio_bucket.rc == 0
+  changed_when: false
+
+- name: Wait for the spawned Jupyter single-user container to reach the Ollama API
+  ansible.builtin.shell: |
+    set -euo pipefail
+    container_name="{{ jupyterhub_smoke_container_name }}"
     docker exec "$container_name" python -c "import urllib.request; urllib.request.urlopen('{{ jupyterhub_ollama_base_url }}/api/version', timeout=10)"
+  args:
+    executable: /bin/bash
+  register: jupyterhub_smoke_container_ollama
+  retries: 12
+  delay: 5
+  until: jupyterhub_smoke_container_ollama.rc == 0
+  changed_when: false
+
+- name: Wait for the spawned Jupyter single-user container to reach the platform-context API
+  ansible.builtin.shell: |
+    set -euo pipefail
+    container_name="{{ jupyterhub_smoke_container_name }}"
     docker exec "$container_name" python -c "import urllib.request; urllib.request.urlopen('{{ jupyterhub_platform_context_url }}/healthz', timeout=10)"
   args:
     executable: /bin/bash
-  register: jupyterhub_smoke_container_contract
+  register: jupyterhub_smoke_container_platform_context
+  retries: 12
+  delay: 5
+  until: jupyterhub_smoke_container_platform_context.rc == 0
   changed_when: false
 
 - name: Stop the JupyterHub smoke user server

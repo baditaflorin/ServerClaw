@@ -139,7 +139,7 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert ensure_task["vars"]["common_docker_bridge_chains_require_nat_chain"] == "{{ docker_runtime_require_nat_chain }}"
     assert defaults["docker_runtime_chain_recheck_retries"] == 30
     assert defaults["docker_runtime_chain_recheck_delay_seconds"] == 2
-    assert defaults["docker_runtime_container_recovery_retries"] == 12
+    assert defaults["docker_runtime_container_recovery_retries"] == 30
     assert defaults["docker_runtime_container_recovery_delay_seconds"] == 5
     assert defaults["docker_runtime_openbao_recovery_timeout_seconds"] == 180
     assert defaults["docker_runtime_openbao_recovery_delay_seconds"] == 5
@@ -208,6 +208,7 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert '"http://127.0.0.1:8201/v1/sys/unseal"' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "OPENBAO_READY_STATUS_CODES = {200, 429, 472, 473, 501, 503}" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "def compose_group_sort_key(item):" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "NONPERSISTENT_RESTART_POLICIES" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "No chain/target/match by that name" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "failed to create endpoint" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "retry_on_any_error=True" in recover_containers["ansible.builtin.command"]["argv"][2]
@@ -218,6 +219,8 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert "def is_local_openbao_group(" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'normalized_working_dir == "/opt/openbao"' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert '"lv3-openbao" in container_names' in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "restart_policy_name not in NONPERSISTENT_RESTART_POLICIES" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "run_with_retry(command, cwd=working_dir or None)" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'service.endswith("-openbao-agent")' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'service == "openbao"' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "if services_provide_local_openbao(services):" in recover_containers["ansible.builtin.command"]["argv"][2]
@@ -233,6 +236,7 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert 'final_up_command.extend(["up", "-d", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "docker_compose_down_remove_orphans" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "docker_compose_up_after_down" in recover_containers["ansible.builtin.command"]["argv"][2]
+    assert "docker_skip_missing_direct_start" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "com.docker.compose.project.working_dir" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert "docker_compose_up" in recover_containers["ansible.builtin.command"]["argv"][2]
     assert 'command.extend(["up", "-d", "--force-recreate", *services])' in recover_containers["ansible.builtin.command"]["argv"][2]

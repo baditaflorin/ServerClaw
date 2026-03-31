@@ -541,6 +541,23 @@
   until: platform_context_docker_info.rc == 0
   when: platform_context_docker_nat_chain.rc != 0
 
+- name: Verify the rendered platform context runtime env contract before startup
+  ansible.builtin.shell: |
+    set -euo pipefail
+    test -s "{{ platform_context_env_file }}"
+    grep -Fqx "PLATFORM_CONTEXT_CORPUS_ROOT={{ platform_context_corpus_dir }}" "{{ platform_context_env_file }}"
+    grep -Fqx "PLATFORM_CONTEXT_COLLECTION={{ platform_context_qdrant_collection }}" "{{ platform_context_env_file }}"
+    grep -Fqx "PLATFORM_CONTEXT_MEMORY_COLLECTION={{ platform_context_memory_collection }}" "{{ platform_context_env_file }}"
+    grep -Fq "PLATFORM_CONTEXT_API_TOKEN=" "{{ platform_context_env_file }}"
+  args:
+    executable: /bin/bash
+  register: platform_context_runtime_env_contract
+  retries: 24
+  delay: 2
+  until: platform_context_runtime_env_contract.rc == 0
+  changed_when: false
+  no_log: true
+
 - name: Build and start the platform context stack and recover stale compose networks
   block:
     - name: Build the platform context API image with host networking

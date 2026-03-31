@@ -507,6 +507,7 @@
         import urllib.error
         import urllib.request
 
+        NONPERSISTENT_RESTART_POLICIES = set({{ docker_runtime_nonpersistent_restart_policies | to_json }})
         TRANSIENT_DOCKER_NETWORK_ERRORS = (
             "No chain/target/match by that name",
             "driver failed programming external connectivity",
@@ -680,6 +681,8 @@
         for container in containers:
             name = (container.get("Name") or "").lstrip("/")
             labels = container.get("Config", {}).get("Labels") or {}
+            restart_policy = (container.get("HostConfig") or {}).get("RestartPolicy") or {}
+            restart_policy_name = str(restart_policy.get("Name") or "").strip().lower()
             working_dir = labels.get("com.docker.compose.project.working_dir") or ""
             config_files = labels.get("com.docker.compose.project.config_files") or ""
             service = labels.get("com.docker.compose.service") or ""
@@ -694,7 +697,7 @@
                     compose_group["container_names"].add(name)
                 continue
 
-            if name:
+            if name and restart_policy_name not in NONPERSISTENT_RESTART_POLICIES:
                 if "openbao-agent" in name:
                     openbao_direct_start.append(name)
                 else:
@@ -703,8 +706,36 @@
         actions = []
 
         if direct_start:
-            run_with_retry(["docker", "start", *direct_start])
-            actions.append({"type": "docker_start", "containers": direct_start})
+            existing_direct_start = []
+            missing_direct_start = []
+            for container_name in direct_start:
+                result = subprocess.run(
+                    ["docker", "inspect", container_name],
+                    text=True,
+                    capture_output=True,
+                )
+                if result.returncode == 0:
+                    existing_direct_start.append(container_name)
+                    continue
+
+                stderr = (result.stderr or "").lower()
+                if "no such object" in stderr:
+                    missing_direct_start.append(container_name)
+                    continue
+
+                raise subprocess.CalledProcessError(
+                    result.returncode,
+                    result.args,
+                    output=result.stdout,
+                    stderr=result.stderr,
+                )
+
+            if existing_direct_start:
+                run_with_retry(["docker", "start", *existing_direct_start])
+                actions.append({"type": "docker_start", "containers": existing_direct_start})
+
+            if missing_direct_start:
+                actions.append({"type": "docker_skip_missing_direct_start", "containers": missing_direct_start})
 
         def is_local_openbao_group(working_dir, config_files, services, container_names):
             normalized_working_dir = (working_dir or "").rstrip("/")
@@ -930,6 +961,7 @@
 
             stderr = (result.stderr or "").lower()
             if "no such object" in stderr:
+                healthy = not require_running
                 statuses.append(
                     {
                         "requested_name": container_name,
@@ -940,10 +972,10 @@
                         "running": False,
                         "status": "missing",
                         "exit_code": None,
-                        "healthy": False,
+                        "healthy": healthy,
                     }
                 )
-                all_running = False
+                all_running = all_running and healthy
                 continue
 
             raise subprocess.CalledProcessError(

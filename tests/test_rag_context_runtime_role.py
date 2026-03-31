@@ -21,6 +21,10 @@ def load_verify_tasks() -> list[dict]:
     return yaml.safe_load(VERIFY_TASKS.read_text())
 
 
+def load_defaults() -> dict:
+    return yaml.safe_load(ROLE_DEFAULTS.read_text())
+
+
 def test_pull_task_only_targets_external_qdrant_image() -> None:
     tasks = load_tasks()
     pull_task = next(task for task in tasks if task.get("name") == "Pull the platform context images")
@@ -118,6 +122,11 @@ def test_role_dockerfile_copies_script_bootstrap_into_runtime_image() -> None:
 
 
 def test_role_uses_classic_builder_for_platform_context_stack_bring_up() -> None:
+    env_contract_task = next(
+        task
+        for task in load_tasks()
+        if task.get("name") == "Verify the rendered platform context runtime env contract before startup"
+    )
     startup_block = next(
         task
         for task in load_tasks()
@@ -132,6 +141,16 @@ def test_role_uses_classic_builder_for_platform_context_stack_bring_up() -> None
     assert build_task["environment"]["DOCKER_BUILDKIT"] == "0"
     assert build_task["environment"]["COMPOSE_DOCKER_CLI_BUILD"] == "0"
     assert "--no-build" in start_task["ansible.builtin.command"]["argv"]
+    assert 'PLATFORM_CONTEXT_CORPUS_ROOT={{ platform_context_corpus_dir }}' in env_contract_task["ansible.builtin.shell"]
+    assert 'PLATFORM_CONTEXT_MEMORY_COLLECTION={{ platform_context_memory_collection }}' in env_contract_task["ansible.builtin.shell"]
+    assert 'PLATFORM_CONTEXT_API_TOKEN=' in env_contract_task["ansible.builtin.shell"]
+
+
+def test_compose_template_starts_platform_context_without_openbao_health_gate() -> None:
+    template = COMPOSE_TEMPLATE.read_text(encoding="utf-8")
+    platform_context_api_section = template.split("  platform-context-api:", 1)[1]
+    assert "qdrant:" in platform_context_api_section
+    assert "openbao-agent:\n        condition: service_healthy" not in platform_context_api_section
 
 
 def test_role_resets_stale_compose_networks_before_retrying_platform_context_startup() -> None:
@@ -200,6 +219,63 @@ def test_verify_tasks_repair_degraded_vector_index_from_controller_seed() -> Non
     assert repair_task["delegate_to"] == "localhost"
     assert repair_task["become"] is False
     assert "--include-path" in repair_task["ansible.builtin.command"]["cmd"]
+
+
+def test_verify_tasks_wait_for_runtime_dependencies_before_query_smoke_tests() -> None:
+    tasks = load_verify_tasks()
+    defaults = load_defaults()
+    qdrant_wait = next(
+        task for task in tasks if task.get("name") == "Wait for the Qdrant API before live query verification"
+    )
+    ollama_wait = next(
+        task
+        for task in tasks
+        if task.get("name")
+        == "Wait for Ollama again before live query verification when semantic embeddings use the local Ollama backend"
+    )
+    health_wait = next(
+        task
+        for task in tasks
+        if task.get("name") == "Wait for the platform context health endpoint again before live query verification"
+    )
+    assert defaults["platform_context_verify_request_retries"] == 12
+    assert defaults["platform_context_verify_request_delay_seconds"] == 5
+    assert qdrant_wait["ansible.builtin.uri"]["url"] == "http://127.0.0.1:6333/collections"
+    assert qdrant_wait["retries"] == "{{ platform_context_verify_request_retries }}"
+    assert qdrant_wait["delay"] == "{{ platform_context_verify_request_delay_seconds }}"
+    assert qdrant_wait["until"] == "platform_context_qdrant_verify_ready.status == 200"
+    assert ollama_wait["ansible.builtin.uri"]["url"] == "{{ platform_context_ollama_url }}/api/version"
+    assert ollama_wait["retries"] == "{{ platform_context_verify_request_retries }}"
+    assert ollama_wait["delay"] == "{{ platform_context_verify_request_delay_seconds }}"
+    assert ollama_wait["until"] == "platform_context_ollama_verify_ready.status == 200"
+    assert ollama_wait["when"] == 'platform_context_embedding_backend == "ollama"'
+    assert health_wait["ansible.builtin.uri"]["url"] == "{{ platform_context_private_url }}/healthz"
+    assert health_wait["retries"] == "{{ platform_context_verify_request_retries }}"
+    assert health_wait["delay"] == "{{ platform_context_verify_request_delay_seconds }}"
+    assert health_wait["until"] == "platform_context_query_health.status == 200"
+
+
+def test_verify_tasks_retry_live_query_smoke_checks() -> None:
+    tasks = load_verify_tasks()
+    query_task = next(task for task in tasks if task.get("name") == "Verify the platform context query endpoint")
+    repaired_query_task = next(
+        task for task in tasks if task.get("name") == "Re-verify the platform context query endpoint after seed repair"
+    )
+    smoke_task = next(
+        task
+        for task in tasks
+        if task.get("name")
+        == "Verify the ServerClaw memory query endpoint returns the smoke entry through both recall paths"
+    )
+    assert query_task["retries"] == "{{ platform_context_verify_request_retries }}"
+    assert query_task["delay"] == "{{ platform_context_verify_request_delay_seconds }}"
+    assert query_task["until"] == "platform_context_query.status == 200"
+    assert repaired_query_task["retries"] == "{{ platform_context_verify_request_retries }}"
+    assert repaired_query_task["delay"] == "{{ platform_context_verify_request_delay_seconds }}"
+    assert repaired_query_task["until"] == "platform_context_query_repaired.status == 200"
+    assert smoke_task["retries"] == "{{ platform_context_verify_request_retries }}"
+    assert smoke_task["delay"] == "{{ platform_context_verify_request_delay_seconds }}"
+    assert smoke_task["until"] == "platform_context_memory_query.status == 200"
 
 
 def test_verify_tasks_smoke_serverclaw_memory_query() -> None:
