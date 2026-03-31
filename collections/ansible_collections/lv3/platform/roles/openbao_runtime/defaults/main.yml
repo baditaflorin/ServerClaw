@@ -141,10 +141,10 @@ openbao_database_roles:
   - name: postgres-readonly
     db_name: "{{ openbao_database_name }}"
     creation_statements: !unsafe |-
-      CREATE ROLE "{{ name }}" WITH LOGIN PASSWORD '{{ password }}' VALID UNTIL '{{ expiration }}';
-      GRANT pg_read_all_data TO "{{ name }}";
+      CREATE ROLE "{{name}}" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';
+      GRANT pg_read_all_data TO "{{name}}";
     revocation_statements: !unsafe |-
-      DROP ROLE IF EXISTS "{{ name }}";
+      DROP ROLE IF EXISTS "{{name}}";
     default_ttl: 1h
     max_ttl: 24h
 openbao_seeded_secret_paths:
