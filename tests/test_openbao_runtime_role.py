@@ -260,6 +260,12 @@ def test_openbao_runtime_retries_other_read_side_api_checks_after_restart() -> N
     assert "until: openbao_mail_platform_runtime_current.status in [200, 404]" in tasks
     assert "- name: Read current dedicated rotatable secrets from OpenBao" in tasks
     assert "until: openbao_rotatable_secret_current.status in [200, 404]" in tasks
+    assert "- name: Generate fresh short-lived AppRole secret IDs" in tasks
+    assert "until: openbao_generated_secret_ids.status == 200" in tasks
+    assert "- name: Assert fresh short-lived AppRole secret IDs were generated successfully" in tasks
+    assert "- name: Refresh short-lived AppRole secret IDs after managed verification" in tasks
+    assert "until: openbao_refreshed_secret_ids.status == 200" in tasks
+    assert "- name: Assert refreshed short-lived AppRole secret IDs were generated successfully" in tasks
 
 
 def test_openbao_compose_template_supports_private_extra_http_bindings() -> None:
