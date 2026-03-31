@@ -168,19 +168,17 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         obtain_task = next(
             task for task in self.tasks if task["name"] == "Obtain the public edge Let's Encrypt certificate"
         )
-        expand_task = next(
+        site_local_task = next(
             task
             for task in self.tasks
-            if task["name"] == "Expand the public edge Let's Encrypt certificate when domains were added"
+            if task["name"] == "Ensure site-local Let's Encrypt certificates exist for hostnames missing from the shared certificate"
         )
         self.assertEqual(obtain_task["register"], "public_edge_certbot_issue")
         self.assertEqual(obtain_task["retries"], "{{ public_edge_certbot_retries }}")
         self.assertEqual(obtain_task["delay"], "{{ public_edge_certbot_delay_seconds }}")
         self.assertEqual(obtain_task["until"], "public_edge_certbot_issue.rc == 0")
-        self.assertEqual(expand_task["register"], "public_edge_certbot_expand")
-        self.assertEqual(expand_task["retries"], "{{ public_edge_certbot_retries }}")
-        self.assertEqual(expand_task["delay"], "{{ public_edge_certbot_delay_seconds }}")
-        self.assertEqual(expand_task["until"], "public_edge_certbot_expand.rc == 0")
+        self.assertEqual(site_local_task["loop"], "{{ public_edge_site_certificate_requirements | default([]) }}")
+        self.assertEqual(site_local_task["when"], "item.missing_domains | length > 0")
 
     def test_tasks_resolve_edge_catalogs_before_validation(self) -> None:
         task_names = [task["name"] for task in self.tasks]

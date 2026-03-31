@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0291](../adr/0291-jupyterhub-as-the-interactive-notebook-environment.md)
 - Title: Integrate ADR 0291 JupyterHub exact-main replay onto `origin/main`
-- Status: live_applied
-- Included In Repo Version: 0.177.110
-- Platform Version Observed During Integration: 0.130.72
+- Status: merged
+- Included In Repo Version: 0.177.111
+- Platform Version Observed During Integration: 0.130.73
 - Release Date: 2026-03-30
 - Live Applied On: 2026-03-30
 - Branch: `codex/ws-0291-main-merge`
@@ -145,8 +145,8 @@ branch-local state alone.
 
 ## Outcome
 
-- Release `0.177.110` is the integrated repo version for ADR 0291.
-- Platform version remains `0.130.72` because the notebook environment first
+- Release `0.177.111` is the integrated repo version for ADR 0291.
+- Platform version remains `0.130.73` because the notebook environment first
   became true on `0.130.71`; the exact-main replay verifies that already-live
   capability on the newer synchronized baseline instead of advancing the
   platform version again.

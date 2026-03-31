@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.110",
+  "repo_version": "0.177.111",
   "platform_version": "0.130.73",
-  "generated_at": "2026-03-30T22:39:50Z",
-  "next_refresh_at": "2026-03-30T23:39:50Z",
+  "generated_at": "2026-03-31T00:06:16Z",
+  "next_refresh_at": "2026-03-31T01:06:16Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -266,6 +266,18 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://home.lv3.org",
+        "last_live_apply": "2026-03-30T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "jupyterhub": {
+        "service_name": "JupyterHub",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://notebooks.lv3.org",
         "last_live_apply": "2026-03-30T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -1588,6 +1600,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-homepage.md"
+      },
+      {
+        "id": "converge-jupyterhub",
+        "description": "Deploy JupyterHub on docker-runtime-lv3, publish it at notebooks.lv3.org, and verify the interactive notebook spawn contract against current platform services.",
+        "tags": [
+          "converge-jupyterhub",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-jupyterhub.md"
       },
       {
         "id": "converge-keycloak",
@@ -4334,6 +4372,16 @@
         ]
       },
       {
+        "id": "configure-jupyterhub",
+        "title": "Configure JupyterHub",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-jupyterhub.md",
+        "workflow_ids": [
+          "converge-jupyterhub"
+        ]
+      },
+      {
         "id": "configure-keycloak",
         "title": "Configure Keycloak",
         "agent_trust_required": "T3",
@@ -5237,10 +5285,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.109",
-    "deployed_at": "2026-03-30",
-    "summary": "implements ADR 0287 by bringing the repo-managed Woodpecker CI control plane, API bootstrap and trigger recovery paths, dedicated `ci.lv3.org` publication, and verified live-apply evidence onto main from the latest exact-main baseline",
-    "release_notes_url": "docs/release-notes/0.177.110.md"
+    "last_version": "0.177.110",
+    "deployed_at": "2026-03-31",
+    "summary": "integrates ADR 0291 into main by replaying JupyterHub as the authenticated interactive notebook environment on the latest realistic origin/main baseline, preserving the verified notebooks.lv3.org, Keycloak, Ollama, platform-context, and smoke-user contract without inventing a new branch-local truth source",
+    "release_notes_url": "docs/release-notes/0.177.111.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

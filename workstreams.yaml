@@ -165,7 +165,7 @@ workstreams:
     title: Live apply Tesseract OCR from latest origin/main on top of the current Apache Tika baseline
     ready_to_merge: true
     live_applied: true
-    status: live_applied
+    status: merged
     owner: codex
     branch: codex/ws-0286-live-apply-r3
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0286-live-apply-r3
@@ -540,7 +540,7 @@ workstreams:
   - id: ws-0282-live-apply
     adr: "0282"
     title: Live apply Mailpit as the SMTP development mail interceptor from latest origin/main
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/ws-0282-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-live-apply
@@ -17979,6 +17979,6 @@ workstreams:
     canonical_truth:
       changelog_entry: integrates ADR 0291 into main by replaying JupyterHub as the authenticated interactive notebook environment on the latest realistic origin/main baseline, preserving the verified notebooks.lv3.org, Keycloak, Ollama, platform-context, and smoke-user contract without inventing a new branch-local truth source
       release_bump: patch
-      included_in_repo_version: 0.177.110
+      included_in_repo_version: 0.177.111
       latest_receipts:
         jupyterhub: 2026-03-30-adr-0291-jupyterhub-mainline-live-apply
