@@ -5,8 +5,8 @@
 - Status: merged
 - Included In Repo Version: 0.177.111
 - Platform Version Observed During Integration: 0.130.73
-- Release Date: 2026-03-30
-- Live Applied On: 2026-03-30
+- Release Date: 2026-03-31
+- Live Applied On: 2026-03-31
 - Branch: `codex/ws-0291-main-merge`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge`
 - Owner: codex
@@ -95,16 +95,15 @@ branch-local state alone.
 ## Verification
 
 - `git fetch origin --prune` refreshed this workstream onto the newer
-  `origin/main` commit `456984e2e2d0c8e5ca32c8d652ecf154961f4f22`, which already
-  carried the Flagsmith exact-main closeout on top of repo version `0.177.109`
-  and platform version `0.130.72` before the JupyterHub integration work
-  continued.
-- The focused exact-main compatibility slice reran successfully on that rebased
-  tree with `73 passed in 4.49s`, plus `make syntax-check-jupyterhub`,
-  `make syntax-check-ollama`, and
+  `origin/main` commit `4e698dfd4ae0d729ed122a16dc8da571470acdc9`, which already
+  carried repo version `0.177.110` and platform version `0.130.73` before the
+  final ADR 0291 integration pass.
+- The focused exact-tip compatibility slice reran successfully on the released
+  `0.177.111` tree with `87 passed in 4.22s`, plus
+  `make syntax-check-jupyterhub`, `make syntax-check-ollama`, and
   `python3 scripts/validate_service_completeness.py --service jupyterhub`;
   the full transcript is preserved in
-  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-targeted-checks-r2.txt`.
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-targeted-checks-r5.txt`.
 - The first exact-main wrapper attempt exposed a missing
   `keycloak_jupyterhub_client_secret` catalog entry after the rebase and the
   second stopped at the expected canonical-truth guard before the release tree
@@ -113,35 +112,44 @@ branch-local state alone.
   `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-portal-generators-r1.txt`,
   and `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-r2.txt`.
 - `LV3_SKIP_OUTLINE_SYNC=1 uv run --with pyyaml python scripts/release_manager.py ...`
-  prepared release `0.177.110` while preserving `platform_version: 0.130.72`,
-  preserved in
-  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-release-status-r2.txt`,
-  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-release-dry-run-r1.txt`,
-  and `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-release-write-r1.txt`.
+  cut release `0.177.111` on `2026-03-31` while preserving
+  `platform_version: 0.130.73`.
 - `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=jupyterhub env=production`
-  succeeded from committed source `2d53cf4eeaaa3da136eef6d44f79d7393f6329c3`
-  with final recap `docker-runtime-lv3 : ok=278 changed=5 failed=0 skipped=82`,
-  `localhost : ok=24 changed=0 failed=0 skipped=4`, and
-  `nginx-lv3 : ok=40 changed=5 failed=0 skipped=6`, preserved in
-  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-r4.txt`.
+  succeeded from committed source `89639b54194fcdd8713a4676bb53d961475afb91`
+  with final recap `docker-runtime-lv3 : ok=281 changed=5 failed=0 skipped=82`,
+  `localhost : ok=24 changed=0 failed=0 skipped=7`, and
+  `nginx-lv3 : ok=46 changed=4 failed=0 skipped=7`, preserved in
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-r11.txt`;
+  that replay also recovered missing Docker bridge chains on
+  `docker-runtime-lv3` before revalidating the smoke-user notebook contract.
 - Fresh controller verification after the exact-main replay confirmed the
   public health endpoint, the Keycloak OIDC redirect, the shared edge
   certificate SAN set including `DNS:notebooks.lv3.org` and
   `DNS:flags.lv3.org`, and the local `docker-runtime-lv3` JupyterHub, Ollama,
   and platform-context probes,
   preserved in
-  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-direct-verification-r3.txt`.
-- Final repo automation and validation gates passed from the detached exact-main
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-direct-verification-r5.txt`.
+- The post-release validation sweep first surfaced duplicate
+  `directus_postgres` / `directus_runtime` idempotency entries after the
+  rebase plus stale generated SLO and subdomain-exposure assets; the duplicate
+  block was removed from `config/ansible-role-idempotency.yml`, then
+  `scripts/generate_slo_rules.py --write` and
+  `scripts/subdomain_exposure_audit.py --write-registry` refreshed the
+  generated surfaces, and `scripts/platform_manifest.py --write` refreshed
+  `build/platform-manifest.json` after the remote builder correctly flagged the
+  stale manifest in an intermediate `make pre-push-gate` pass.
+- Final repo automation and validation gates passed from the released exact-tip
   tree, including `make check-build-server`, `make validate`,
   `make remote-validate`, `make pre-push-gate`,
-  `python scripts/live_apply_receipts.py --validate`, and `git diff --check`,
+  `python3 scripts/live_apply_receipts.py --validate`, and `git diff --check`,
   preserved in
-  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-check-build-server-r2.txt`,
-  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-validate-r4.txt`,
-  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-remote-validate-r4.txt`,
-  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-pre-push-gate-r2.txt`,
-  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-receipts-validate-r3.txt`,
-  and `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-git-diff-check-r3.txt`.
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-check-build-server-r4.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-validate-r16.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-remote-validate-r6.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-platform-manifest-write-r2.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-pre-push-gate-r6.txt`,
+  `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-live-apply-receipts-validate-r7.txt`,
+  and `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-git-diff-check-r7.txt`.
 
 ## Outcome
 

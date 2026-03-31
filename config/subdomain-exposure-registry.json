@@ -3116,12 +3116,12 @@
     }
   ],
   "summary": {
-    "catalog_total": 42,
-    "active_total": 38,
-    "active_public_total": 34,
+    "catalog_total": 43,
+    "active_total": 39,
+    "active_public_total": 35,
     "active_private_total": 4,
     "planned_total": 4,
-    "shared_edge_total": 33,
+    "shared_edge_total": 34,
     "platform_sso_total": 15
   }
 }

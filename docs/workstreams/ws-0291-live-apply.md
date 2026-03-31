@@ -121,6 +121,6 @@ a complete audit trail for the later exact-main replay.
 - `receipts/live-applies/2026-03-30-adr-0291-jupyterhub-mainline-live-apply.json`
   supersedes the branch-local receipt as the canonical exact-main proof while
   preserving the earlier branch-local audit trail.
-- The current integrated mainline baseline remains `0.130.72` with no
+- The current integrated mainline baseline remains `0.130.73` with no
   additional platform-version bump beyond the earlier `0.130.71` live-apply
   milestone for ADR 0291.
