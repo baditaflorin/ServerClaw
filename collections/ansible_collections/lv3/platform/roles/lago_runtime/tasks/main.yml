@@ -50,6 +50,7 @@
       - python3
     state: present
     update_cache: true
+    lock_timeout: "{{ lago_runtime_apt_lock_timeout }}"
     force_apt_get: true
 
 - name: Ensure the Lago runtime directories exist

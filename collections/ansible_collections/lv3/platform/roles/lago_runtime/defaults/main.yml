@@ -50,6 +50,7 @@ lago_redis_cable_db: 2
 lago_redis_url: "redis://{{ lago_redis_host }}:{{ lago_redis_port }}/{{ lago_redis_sidekiq_db }}"
 lago_redis_cache_url: "redis://{{ lago_redis_host }}:{{ lago_redis_port }}/{{ lago_redis_cache_db }}"
 lago_redis_cable_url: "redis://:{{ lago_redis_password | urlencode }}@{{ lago_redis_host }}:{{ lago_redis_port }}/{{ lago_redis_cable_db }}"
+lago_runtime_apt_lock_timeout: 1200
 lago_database_name: lago
 lago_database_user: lago
 lago_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"

@@ -32,6 +32,7 @@ def test_lago_runtime_defaults_reference_service_topology_images_and_local_secre
     assert defaults["lago_redis_cable_url"] == (
         "redis://:{{ lago_redis_password | urlencode }}@{{ lago_redis_host }}:{{ lago_redis_port }}/{{ lago_redis_cable_db }}"
     )
+    assert defaults["lago_runtime_apt_lock_timeout"] == 1200
     assert defaults["lago_public_base_url"] == "{{ platform_service_topology.lago.urls.public }}"
     assert defaults["lago_public_api_base_url"] == "{{ platform_service_topology.lago.urls.public }}/api"
     assert defaults["lago_api_local_base_url"] == "{{ platform_service_topology.lago.urls.api }}"
@@ -76,6 +77,7 @@ def test_lago_runtime_tasks_manage_secret_generation_seed_and_smoke_verification
     verify_task = next(task for task in tasks if task["name"] == "Verify the Lago runtime")
 
     assert "curl" in packages_task["ansible.builtin.apt"]["name"]
+    assert packages_task["ansible.builtin.apt"]["lock_timeout"] == "{{ lago_runtime_apt_lock_timeout }}"
     assert "openssl genrsa 2048" in secret_task["loop"][2]["command"]
     assert mirror_task["delegate_to"] == "localhost"
     assert producer_catalog_task["delegate_to"] == "localhost"

@@ -218,6 +218,7 @@ def test_docker_runtime_installs_publication_assurance_helper_before_chain_check
 
 def test_docker_runtime_waits_out_background_apt_maintenance() -> None:
     tasks = load_tasks()
+    defaults = load_defaults()
     prereq_task = next(task for task in tasks if task["name"] == "Install Docker repository prerequisites")
     remove_conflicts_task = next(task for task in tasks if task["name"] == "Remove conflicting Docker packages")
     install_runtime_task = next(task for task in tasks if task["name"] == "Install Docker runtime packages")
@@ -226,20 +227,22 @@ def test_docker_runtime_waits_out_background_apt_maintenance() -> None:
     remove_conflicts_apt = remove_conflicts_task["ansible.builtin.apt"]
     install_runtime_apt = install_runtime_task["ansible.builtin.apt"]
 
+    assert defaults["docker_runtime_apt_lock_timeout"] == 1200
+
     assert prereq_apt["name"] == "{{ docker_runtime_prereq_packages }}"
     assert prereq_apt["state"] == "present"
     assert prereq_apt["update_cache"] is True
-    assert prereq_apt["lock_timeout"] == 300
+    assert prereq_apt["lock_timeout"] == "{{ docker_runtime_apt_lock_timeout }}"
     assert prereq_apt["force_apt_get"] is True
 
     assert remove_conflicts_apt["name"] == "{{ docker_runtime_conflicting_packages }}"
     assert remove_conflicts_apt["state"] == "absent"
-    assert remove_conflicts_apt["lock_timeout"] == 300
+    assert remove_conflicts_apt["lock_timeout"] == "{{ docker_runtime_apt_lock_timeout }}"
 
     assert install_runtime_apt["name"] == "{{ docker_runtime_engine_packages }}"
     assert install_runtime_apt["state"] == "present"
     assert install_runtime_apt["update_cache"] is True
-    assert install_runtime_apt["lock_timeout"] == 300
+    assert install_runtime_apt["lock_timeout"] == "{{ docker_runtime_apt_lock_timeout }}"
     assert install_runtime_apt["force_apt_get"] is True
 
 
