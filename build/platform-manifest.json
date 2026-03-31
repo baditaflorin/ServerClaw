@@ -328,6 +328,17 @@
         "last_live_apply": "2026-04-01T00:00:00Z",
         "slo_status": "unknown"
       },
+      "livekit": {
+        "service_name": "LiveKit",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://livekit.lv3.org",
+        "last_live_apply": "2026-03-31T00:00:00Z"
+      },
       "mail_platform": {
         "service_name": "Mail Platform",
         "status": "healthy",
@@ -1824,6 +1835,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-langfuse.md"
+      },
+      {
+        "id": "converge-livekit",
+        "description": "Converge LiveKit on docker-runtime-lv3, program Proxmox public TCP and UDP media forwarding, and publish livekit.lv3.org through the shared NGINX edge.",
+        "tags": [
+          "converge-livekit",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-livekit.md"
       },
       {
         "id": "converge-mail-platform",
@@ -4900,6 +4937,16 @@
         "path": "docs/runbooks/configure-langfuse.md",
         "workflow_ids": [
           "converge-langfuse"
+        ]
+      },
+      {
+        "id": "configure-livekit",
+        "title": "Configure LiveKit",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-livekit.md",
+        "workflow_ids": [
+          "converge-livekit"
         ]
       },
       {
