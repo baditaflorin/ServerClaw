@@ -89,7 +89,8 @@
     - name: Probe the Langfuse bucket CORS headers for each declared origin
       ansible.builtin.shell: |
         set -euo pipefail
-        curl -sS -D - -o /dev/null \
+        curl -fsS --retry 12 --retry-delay 2 --retry-connrefused --connect-timeout 5 --max-time 30 \
+          -D - -o /dev/null \
           -H "Origin: {{ item }}" \
           "{{ minio_langfuse_cors_smoke_url.stdout | trim }}"
       args:

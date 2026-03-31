@@ -86,4 +86,6 @@ def test_verify_tasks_probe_health_buckets_cors_and_lifecycle() -> None:
     assert "Verify the RAG staging bucket lifecycle rule" in names
     assert "minio_managed_consumers_resolved" in verify_text
     assert "share download --json --expire 5m" in verify_text
+    assert "--retry-connrefused" in verify_text
+    assert "--connect-timeout 5 --max-time 30" in verify_text
     assert "access-control-allow-origin" in verify_text

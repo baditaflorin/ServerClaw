@@ -1,18 +1,12 @@
-# Release 0.177.123
+# Release 0.177.124
 
 - Date: 2026-03-31
 
 ## Summary
-- implemented ADRs 0307 through 0316 by defining the cohesive platform
-  workbench, journey-aware entry routing, onboarding checklist, task-oriented
-  navigation, command palette, notification center, contextual help,
-  resumable-task reentry, canonical page states, and journey scorecards for
-  human onboarding and user flow
+- implements ADR 0274 by introducing the shared MinIO object-storage runtime, wiring the first S3 consumers, and recording the verified exact-main live-apply evidence plus the shared Restic backup integration
 
 ## Platform Impact
-- repository architecture only; platform version remains `0.130.78` because
-  this release records product and onboarding direction rather than a live
-  infrastructure apply
+- exact-main validation confirms the shared MinIO object-storage runtime, edge publication, and MinIO-backed Restic recovery path; platform version advances to 0.130.79 with this release
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

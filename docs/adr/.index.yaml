@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-04-01'
 total_adrs: 336
 implementation_status_summary:
-  Implemented: 282
+  Implemented: 283
   Partial: 7
-  Not Implemented: 46
+  Not Implemented: 45
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4724,7 +4724,7 @@ adr_index:
   - adr: '0274'
     title: MinIO As The S3-Compatible Object Storage Layer
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-29'
     concern: storage
     keywords:
@@ -4736,6 +4736,7 @@ adr_index:
       - layer
     summary: We will deploy MinIO in standalone mode on the docker-runtime VM as the
     filename: 0274-minio-as-the-s3-compatible-object-storage-layer.md
+    implemented_version: 0.177.124
   - adr: '0275'
     title: Apache Tika Server For Document Text Extraction In The RAG Pipeline
     status: Accepted

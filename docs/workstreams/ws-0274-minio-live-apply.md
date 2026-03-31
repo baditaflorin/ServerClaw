@@ -2,13 +2,13 @@
 
 - ADR: [ADR 0274](../adr/0274-minio-as-the-s3-compatible-object-storage-layer.md)
 - Title: Deploy the shared MinIO object storage layer on `docker-runtime-lv3`, rewire the first S3 consumers, and record the first platform version where ADR 0274 is true
-- Status: in_progress
-- Implemented In Repo Version: pending next main release
-- Latest Verified Receipt: `receipts/live-applies/2026-03-30-adr-0274-minio-object-storage-live-apply.json`
-- Live Applied In Platform Version: 0.130.69
-- Latest Observed On Platform Version: 0.130.69
-- Implemented On: 2026-03-30
-- Live Applied On: 2026-03-30
+- Status: live_applied
+- Included In Repo Version: 0.177.124
+- Canonical Mainline Receipt: `receipts/live-applies/2026-03-31-adr-0274-minio-object-storage-mainline-live-apply.json`
+- Live Applied In Platform Version: 0.130.79
+- Implemented On: 2026-03-31
+- Live Applied On: 2026-03-31
+- Release Date: 2026-03-31
 - Branch: `codex/ws-0274-mainline-refresh-v6`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6`
 - Owner: codex
@@ -25,7 +25,6 @@
 
 ## Non-Goals
 
-- bumping `VERSION`, `changelog.md`, the top-level integrated `README.md`, or `versions/stack.yaml` on this workstream branch
 - migrating non-launch consumers such as Outline or Plane off their local MinIO sidecars
 - turning standalone MinIO into an HA storage cluster
 
@@ -72,21 +71,21 @@
 
 ## Ownership Notes
 
-- this workstream owns the exact-main live apply and the new MinIO runtime surfaces; shared topology, edge, and catalog files remain under their existing repo contracts
-- the branch intentionally uses a dedicated clean worktree because another local worktree already held unrelated uncommitted edits under the same `ws-0274-live-apply` name
-- latest `origin/main` already uses `ws-0274-live-apply` for the other duplicated ADR 0274, so this branch disambiguates the MinIO rollout as `ws-0274-minio-live-apply`
-- shared integration truth files stay untouched here unless this branch becomes the final synchronized `main` integration step
+- this workstream owns the exact-main MinIO live apply and the shared object-storage runtime surfaces; shared topology, edge, and catalog files remain under their existing repo contracts
+- the branch intentionally used a dedicated clean worktree because another local worktree already held unrelated uncommitted edits under the same `ws-0274-live-apply` name
+- latest `origin/main` already used `ws-0274-live-apply` for the other duplicated ADR 0274, so this branch disambiguated the MinIO rollout as `ws-0274-minio-live-apply`
+- the final integration step on `main` updates the protected release surfaces, the canonical platform version, and the merged README status summary together with the canonical receipt
 
 ## Verification
 
-- `git fetch origin && git merge-base --is-ancestor origin/main HEAD`
-- focused unit tests for the MinIO runtime and all rewired consumers
-- syntax checks and converge runs for the MinIO service plus each affected consumer path
-- live MinIO bucket, policy, and endpoint probes from both the controller and the target guests
-- repo-wide validation gates including generated artifacts, data models, workstream ownership, and docs/portal generation
+- the latest realistic integration baseline was refreshed from `origin/main` commit `14b18869a2ff421ec12596bd199af0adb09a95b8`, which still carried repository version `0.177.123` and platform version `0.130.78`
+- focused pytest for the MinIO, Restic, and OpenBao recovery surfaces passed on the release candidate together with `make syntax-check-minio`, `make syntax-check-restic-config-backup`, and `ansible-playbook -i inventory/hosts.yml playbooks/openbao.yml --syntax-check`
+- the exact-main MinIO replay succeeded on the pre-release baseline and preserved public API health, authenticated console redirect, and the event-driven Restic backup trigger as committed evidence
+- the first release-candidate replay preserved an unrelated Docker recovery hiccup where the shared Keycloak compose group retried while local OpenBao was sealed; the failure was documented, the shared stack recovered cleanly, and the canonical receipt keeps that evidence instead of hiding it
+- controller-side `make restic-config-backup env=production` and `make restic-config-restore-verify env=production` re-confirm the shared MinIO-backed backup and restore path for the new `minio-root` repository contract
+- final repo validation passes include canonical-truth regeneration, live-apply receipt validation, generated docs, data models, workstream ownership, and the remote validation gates from the integrated release tree
 
-## Merge-To-Main Remaining
+## Notes
 
-- cut the next synchronized main release and record the first merged repo version where ADR 0274 is true
-- replay the verified MinIO rollout from merged `main` so `versions/stack.yaml` can advance from `0.130.69` to the first exact-main platform version that includes this ADR
-- refresh the protected integration surfaces on `main` only: `VERSION`, `changelog.md`, the top-level `README.md` status summary, and `versions/stack.yaml`
+- `receipts/live-applies/2026-03-30-adr-0274-minio-object-storage-live-apply.json` remains the historical branch-local proof from the pre-mainline rollout; the canonical truth now lives in the 2026-03-31 mainline receipt.
+- Outline and Plane intentionally keep their local MinIO sidecars; this workstream only establishes the shared object-storage layer and the first governed consumers.

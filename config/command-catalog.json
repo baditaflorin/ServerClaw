@@ -4341,7 +4341,7 @@
           "description": "Controller-side SSH key used through the Proxmox jump path."
         },
         {
-          "name": "outline_minio_root_password",
+          "name": "minio_root_password",
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
@@ -4365,7 +4365,7 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-restic-config-backup passes",
         "make validate passes before the apply",
-        "The docker-runtime worker checkout exists at /srv/proxmox_florin_server and matches the repo state being applied"
+        "The docker-runtime worker checkout exists at /srv/proxmox_florin_server so converge can stage the required restic runtime support files before the immediate validation run"
       ],
       "evidence": {
         "live_apply_receipt_required": true,

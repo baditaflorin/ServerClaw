@@ -383,14 +383,14 @@ def test_resolve_minio_endpoint_starts_stopped_container_and_ignores_invalid_tok
 
     def fake_run_command(argv, **kwargs):
         calls.append(argv)
-        if argv == ["docker", "inspect", "outline-minio", "--format", "{{json .State}}"]:
+        if argv == ["docker", "inspect", "minio", "--format", "{{json .State}}"]:
             return types.SimpleNamespace(returncode=0, stdout='{"Running": false}', stderr="")
-        if argv == ["docker", "start", "outline-minio"]:
-            return types.SimpleNamespace(returncode=0, stdout="outline-minio\n", stderr="")
+        if argv == ["docker", "start", "minio"]:
+            return types.SimpleNamespace(returncode=0, stdout="minio\n", stderr="")
         if argv == [
             "docker",
             "inspect",
-            "outline-minio",
+            "minio",
             "--format",
             "{{range .NetworkSettings.Networks}}{{if .IPAddress}}{{.IPAddress}} {{end}}{{end}}",
         ]:
@@ -399,19 +399,17 @@ def test_resolve_minio_endpoint_starts_stopped_container_and_ignores_invalid_tok
 
     monkeypatch.setattr(restic_backup, "run_command", fake_run_command)
 
-    host, endpoint = restic_backup.resolve_minio_endpoint(
-        {"controller_host": {"minio": {"container_name": "outline-minio"}}}
-    )
+    host, endpoint = restic_backup.resolve_minio_endpoint({"controller_host": {"minio": {"container_name": "minio"}}})
 
     assert host == "10.200.18.2"
     assert endpoint == "http://10.200.18.2:9000"
     assert calls == [
-        ["docker", "inspect", "outline-minio", "--format", "{{json .State}}"],
-        ["docker", "start", "outline-minio"],
+        ["docker", "inspect", "minio", "--format", "{{json .State}}"],
+        ["docker", "start", "minio"],
         [
             "docker",
             "inspect",
-            "outline-minio",
+            "minio",
             "--format",
             "{{range .NetworkSettings.Networks}}{{if .IPAddress}}{{.IPAddress}} {{end}}{{end}}",
         ],
@@ -426,9 +424,11 @@ def test_repo_surfaces_register_restic_backup_contract() -> None:
     assert "restic-config-backup" in workflow_catalog
     assert "restic-config-restore-verify" in workflow_catalog
     assert "converge-restic-config-backup" in workflow_catalog
+    assert workflow_catalog["converge-restic-config-backup"]["preflight"]["required_secret_ids"][1] == "minio_root_password"
     assert command_catalog["run-restic-config-backup"]["workflow_id"] == "restic-config-backup"
     assert command_catalog["run-restic-config-restore-verify"]["workflow_id"] == "restic-config-restore-verify"
     assert command_catalog["converge-restic-config-backup"]["workflow_id"] == "converge-restic-config-backup"
+    assert command_catalog["converge-restic-config-backup"]["inputs"][1]["name"] == "minio_root_password"
     assert "playbooks/restic-config-backup.yml" in execution_scopes
 
 

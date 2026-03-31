@@ -2705,7 +2705,7 @@
         "required": true,
         "required_secret_ids": [
           "bootstrap_ssh_private_key",
-          "outline_minio_root_password",
+          "minio_root_password",
           "nats_jetstream_admin_password",
           "ntfy_alertmanager_password"
         ],

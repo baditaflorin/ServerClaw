@@ -93,3 +93,8 @@ test -s /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platf
 - The runtime is intentionally standalone on `docker-runtime-lv3`; recovery depends on the VM and its repo-managed data path rather than a multi-node MinIO cluster.
 - Consumer buckets stay private by default. Cross-service access requires an explicit bucket policy change in the role, not an ad hoc console edit.
 - MinIO's S3-compatible `PutBucketCors` API is not used here. The role verifies the required Langfuse browser-origin behavior with a presigned-download smoke probe because MinIO documents default CORS handling instead of bucket-local CORS mutation.
+- If `make live-apply-service service=minio env=production` fails after the
+  Docker-runtime recovery path has restarted shared services, check
+  `docker-runtime-lv3` disk headroom and recover the guest with
+  [docker-runtime-disk-pressure.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/docs/runbooks/docker-runtime-disk-pressure.md)
+  before replaying the managed workflow.

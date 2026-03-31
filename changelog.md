@@ -12,13 +12,13 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 
 ## Unreleased
 
-- implements ADR 0274 by introducing the shared MinIO object-storage runtime, wiring the first S3 consumers, and recording the verified latest-origin/main live-apply evidence before exact-main integration
-
 ## Latest Release
 
-- [0.177.123 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.123.md)
+- [0.177.124 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.124.md)
 
 ## Previous Releases
+
+- [0.177.123 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.123.md)
 
 - [0.177.122 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.122.md)
 
