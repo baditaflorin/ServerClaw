@@ -1,0 +1,158 @@
+schema_version: "1.0.0"
+
+publication:
+  public_base_url: https://ntfy.lv3.org
+  internal_base_url: http://10.10.10.20:2586
+
+topics:
+  platform.monitoring.critical:
+    description: Critical Alertmanager notifications delivered to the operator push channel.
+    default_title: LV3 critical alert
+    default_priority: 5
+    default_tags:
+      - warning
+      - rotating_light
+  platform.security.warn:
+    description: Changedetection security-advisory notifications that need operator review.
+    default_title: LV3 security advisory
+    default_priority: 4
+    default_tags:
+      - warning
+      - shield
+  platform.security.critical:
+    description: Critical security findings promoted through the Windmill NATS bridge.
+    default_title: LV3 critical security finding
+    default_priority: 5
+    default_tags:
+      - warning
+      - rotating_light
+      - shield
+  platform.ansible.info:
+    description: Successful governed Ansible applies and verification completions.
+    default_title: LV3 Ansible completion
+    default_priority: 3
+    default_tags:
+      - wrench
+      - white_check_mark
+  platform.ansible.warn:
+    description: Ansible mutation start notifications before governed live changes begin.
+    default_title: LV3 Ansible apply started
+    default_priority: 4
+    default_tags:
+      - wrench
+      - warning
+  platform.ansible.critical:
+    description: Mutation-tagged Ansible task failures that require operator attention.
+    default_title: LV3 Ansible failure
+    default_priority: 5
+    default_tags:
+      - wrench
+      - rotating_light
+  platform.ci.critical:
+    description: Gitea validation failures that block a merge.
+    default_title: LV3 validation gate failure
+    default_priority: 5
+    default_tags:
+      - ci
+      - rotating_light
+  platform.watchdog.critical:
+    description: Watchdog or stale-job escalations bridged from NATS through Windmill.
+    default_title: LV3 watchdog escalation
+    default_priority: 5
+    default_tags:
+      - rotating_light
+      - hourglass_flowing_sand
+
+users:
+  alertmanager:
+    username: alertmanager
+    password_secret_id: ntfy_alertmanager_password
+    publish_topics:
+      - platform.monitoring.critical
+  changedetection:
+    username: changedetection
+    password_secret_id: ntfy_changedetection_password
+    publish_topics:
+      - platform.security.warn
+  ansible:
+    username: ansible
+    password_secret_id: ntfy_ansible_password
+    token_secret_id: ntfy_ansible_token
+    token_label: ansible
+    publish_topics:
+      - platform.ansible.info
+      - platform.ansible.warn
+      - platform.ansible.critical
+  gitea_actions:
+    username: gitea-actions
+    password_secret_id: ntfy_gitea_actions_password
+    token_secret_id: ntfy_gitea_actions_token
+    token_label: gitea-actions
+    publish_topics:
+      - platform.ci.critical
+  windmill:
+    username: windmill
+    password_secret_id: ntfy_windmill_password
+    token_secret_id: ntfy_windmill_token
+    token_label: windmill
+    publish_topics:
+      - platform.security.critical
+      - platform.watchdog.critical
+  ops:
+    username: ops
+    password_secret_id: ntfy_ops_password
+    subscribe_topics:
+      - platform.monitoring.critical
+      - platform.security.warn
+      - platform.security.critical
+      - platform.ansible.info
+      - platform.ansible.warn
+      - platform.ansible.critical
+      - platform.ci.critical
+      - platform.watchdog.critical
+
+windmill:
+  resource_type:
+    name: ntfy_platform_channel
+    description: Repo-managed Windmill resource type for the LV3 ntfy push channel.
+    schema:
+      type: object
+      additionalProperties: false
+      required:
+        - base_url
+        - bearer_token
+        - publisher
+      properties:
+        base_url:
+          type: string
+          description: Base URL for the published ntfy endpoint.
+        bearer_token:
+          type: string
+          description: Repo-managed ntfy access token for the calling Windmill publisher.
+        publisher:
+          type: string
+          description: Registry publisher id used for governance checks.
+  resource:
+    path: ntfy/platform
+    publisher: windmill
+    description: Repo-managed Windmill ntfy publication channel for operator push delivery.
+  bridge:
+    dedupe_window_seconds: 900
+    subjects:
+      - subject: platform.security.critical-finding
+        consumer: ntfy-security-critical
+        topic: platform.security.critical
+        title: LV3 critical security finding
+        priority: 5
+        tags:
+          - warning
+          - rotating_light
+          - shield
+      - subject: platform.watchdog.stale_job_aborted
+        consumer: ntfy-watchdog-critical
+        topic: platform.watchdog.critical
+        title: LV3 watchdog escalation
+        priority: 5
+        tags:
+          - rotating_light
+          - hourglass_flowing_sand

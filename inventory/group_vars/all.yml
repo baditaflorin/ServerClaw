@@ -380,6 +380,14 @@ playbook_execution_correlation_id: >-
 playbook_execution_controller_secret_manifest_path: "{{ inventory_dir | dirname }}/config/controller-local-secrets.json"
 playbook_execution_health_probe_catalog_path: "{{ inventory_dir | dirname }}/config/health-probe-catalog.json"
 playbook_execution_mutation_audit_script: "{{ inventory_dir | dirname }}/scripts/mutation_audit.py"
+playbook_execution_ntfy_publish_script: "{{ inventory_dir | dirname }}/scripts/ntfy_publish.py"
+playbook_execution_ntfy_topic_registry_path: "{{ inventory_dir | dirname }}/config/ntfy/topics.yaml"
+playbook_execution_ntfy_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('ntfy', 'internal') }}"
+playbook_execution_ntfy_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy/ansible-token.txt
+playbook_execution_ntfy_dedupe_state_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/state/ntfy/ansible-playbooks.json
+playbook_execution_ntfy_start_topic: platform.ansible.warn
+playbook_execution_ntfy_success_topic: platform.ansible.info
+playbook_execution_ntfy_failure_topic: platform.ansible.critical
 playbook_execution_mattermost_webhook_url: "{{ lookup('ansible.builtin.env', 'LV3_MATTERMOST_WEBHOOK') | default('', true) }}"
 playbook_execution_nats_notify_command: "{{ lookup('ansible.builtin.env', 'LV3_NATS_NOTIFY_COMMAND') | default('', true) }}"
 playbook_execution_host_patterns:

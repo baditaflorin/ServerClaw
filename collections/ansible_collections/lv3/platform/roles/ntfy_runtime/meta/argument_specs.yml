@@ -1,7 +1,7 @@
 ---
 argument_specs:
   main:
-    short_description: Converge the ntfy runtime used for ADR 0097 critical paging.
+    short_description: Converge the ntfy runtime used for ADR 0299 push delivery.
     options:
       ntfy_runtime_image:
         type: str
@@ -18,8 +18,14 @@ argument_specs:
       ntfy_runtime_config_template:
         type: path
         required: true
-      ntfy_runtime_password_local_file:
+      ntfy_runtime_topic_registry_file:
         type: path
+        required: true
+      ntfy_runtime_controller_secret_manifest_path:
+        type: path
+        required: true
+      ntfy_runtime_public_base_url:
+        type: str
         required: true
       ntfy_runtime_port:
         type: int

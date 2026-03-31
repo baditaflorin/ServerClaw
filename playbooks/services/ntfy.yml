@@ -1,0 +1,29 @@
+---
+# Playbook: services/ntfy.yml
+# Purpose: Provide a leaf service import for ntfy so governed live-apply automation can target the notification channel directly.
+# Use case: Used by repo-managed service wrappers and merge-safe live applies that need the ntfy service in isolation.
+#
+# Inputs (required):
+#   - None.
+#
+# Inputs (optional):
+#   - Same optional inputs as playbooks/ntfy.yml.
+#
+# Outputs:
+#   - Imports the top-level ntfy converge playbook.
+#
+# Idempotency: Fully idempotent
+#              This file is a pure import wrapper around the top-level playbook.
+#
+# Dependencies:
+#   - ADR 0299: Ntfy as the self-hosted push notification channel for programmatic alert delivery.
+#   - Role: ntfy_runtime — implemented in the imported playbook.
+#
+# Related ADRs: 0299
+# Related Runbooks: docs/runbooks/configure-ntfy.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-30
+# =============================================================================
+
+- import_playbook: ../ntfy.yml

@@ -26,6 +26,7 @@ hook_template="{{ gitea_prereceive_hook_template }}"
 release_bundle_private_key_secret_name="{{ gitea_release_bundle_cosign_private_key_secret_name }}"
 release_bundle_password_secret_name="{{ gitea_release_bundle_cosign_password_secret_name }}"
 release_bundle_repo_token_secret_name="{{ gitea_release_bundle_repo_token_secret_name }}"
+ntfy_token_secret_name="{{ gitea_ntfy_token_secret_name }}"
 
 exec_gitea() {
   docker exec "${container}" gitea "$@"
@@ -209,6 +210,14 @@ if ! grep -q "\"name\":\"${release_bundle_repo_token_secret_name}\"" <<<"${repo_
     "${release_bundle_repo_token_secret_name}" \
     "GITEA_RELEASE_BUNDLE_REPO_TOKEN" \
     "Repository token for ADR 0233 release-bundle publish and verification workflows"
+  changed=true
+fi
+
+if ! grep -q "\"name\":\"${ntfy_token_secret_name}\"" <<<"${repo_action_secrets}"; then
+  put_repo_action_secret \
+    "${ntfy_token_secret_name}" \
+    "GITEA_NTFY_TOKEN" \
+    "ntfy token for ADR 0299 validation failure notifications"
   changed=true
 fi
 

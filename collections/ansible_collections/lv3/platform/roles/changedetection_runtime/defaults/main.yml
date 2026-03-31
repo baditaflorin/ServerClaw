@@ -15,9 +15,9 @@ changedetection_runtime_internal_base_url: "{{ hostvars['proxmox_florin'].platfo
 changedetection_runtime_base_url: "{{ changedetection_runtime_internal_base_url }}"
 changedetection_runtime_recheck_minimum_seconds: 3600
 changedetection_runtime_volume_name: changedetection-datastore
-changedetection_runtime_ntfy_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy/alertmanager-password.txt
-changedetection_runtime_ntfy_username: alertmanager
-changedetection_runtime_ntfy_topic: platform-alerts
+changedetection_runtime_ntfy_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy/changedetection-password.txt
+changedetection_runtime_ntfy_username: changedetection
+changedetection_runtime_ntfy_topic: platform.security.warn
 changedetection_runtime_ntfy_host: "{{ hostvars['proxmox_florin'].platform_guest_catalog.by_name['docker-runtime-lv3'].ipv4 }}"
 changedetection_runtime_ntfy_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('ntfy', 'internal') }}"
 changedetection_runtime_mattermost_webhooks_remote_file: /etc/lv3/mattermost/incoming-webhooks.json

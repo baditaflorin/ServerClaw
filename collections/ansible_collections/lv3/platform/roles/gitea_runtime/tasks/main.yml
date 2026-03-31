@@ -50,6 +50,8 @@
       - gitea_release_bundle_cosign_private_key_secret_name | length > 0
       - gitea_release_bundle_cosign_password_secret_name | length > 0
       - gitea_release_bundle_repo_token_secret_name | length > 0
+      - gitea_ntfy_token_local_file | length > 0
+      - gitea_ntfy_token_secret_name | length > 0
       - gitea_repo_org | length > 0
       - gitea_repo_name | length > 0
     fail_msg: "gitea_runtime requires runtime paths, database credentials, OIDC inputs, and bootstrap artifact paths."
@@ -137,6 +139,20 @@
       {{ gitea_release_bundle_cosign_public_key_repo_file }} is missing from the repository checkout.
       Commit the matching public key before converging Gitea so release bundles can be verified later.
   when: not gitea_release_bundle_public_key_repo.stat.exists
+
+- name: Ensure the ntfy Actions token exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ gitea_ntfy_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: gitea_ntfy_token_local
+
+- name: Fail if the ntfy Actions token is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ gitea_ntfy_token_local_file }} is missing on the control machine.
+      Converge ntfy first so the repo-managed validation workflow can publish failure alerts.
+  when: not gitea_ntfy_token_local.stat.exists
 
 - name: Ensure Gitea runtime packages are present
   ansible.builtin.apt:
@@ -238,6 +254,7 @@
     gitea_renovate_password: "{{ gitea_renovate_password_raw.content | b64decode | trim }}"
     gitea_release_bundle_cosign_private_key: "{{ lookup('ansible.builtin.file', gitea_release_bundle_cosign_private_key_local_file) }}"
     gitea_release_bundle_cosign_password: "{{ lookup('ansible.builtin.file', gitea_release_bundle_cosign_password_local_file) | trim }}"
+    gitea_ntfy_token: "{{ lookup('ansible.builtin.file', gitea_ntfy_token_local_file) | trim }}"
     gitea_webhook_secret: "{{ gitea_webhook_secret_raw.content | b64decode | trim }}"
   no_log: true
 
@@ -249,6 +266,7 @@
       GITEA_KEYCLOAK_CLIENT_SECRET: "{{ gitea_oidc_client_secret }}"
       GITEA__lfs__MINIO_SECRET_ACCESS_KEY: "{{ gitea_minio_secret_key }}"
       GITEA_WEBHOOK_SECRET: "{{ gitea_webhook_secret }}"
+      GITEA_NTFY_TOKEN: "{{ gitea_ntfy_token }}"
   no_log: true
 
 - name: Ensure the local Gitea artifact directory exists
@@ -621,6 +639,7 @@
     GITEA_RENOVATE_PASSWORD: "{{ gitea_renovate_password }}"
     GITEA_RELEASE_BUNDLE_COSIGN_PRIVATE_KEY: "{{ gitea_release_bundle_cosign_private_key }}"
     GITEA_RELEASE_BUNDLE_COSIGN_PASSWORD: "{{ gitea_release_bundle_cosign_password }}"
+    GITEA_NTFY_TOKEN: "{{ gitea_ntfy_token }}"
   register: gitea_bootstrap
   changed_when: "'GITEA_BOOTSTRAP_CHANGED=true' in gitea_bootstrap.stdout"
   no_log: true

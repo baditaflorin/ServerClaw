@@ -1,5 +1,6 @@
 ---
-ntfy_runtime_image: binwiederhier/ntfy:v2.14.0
+ntfy_runtime_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('ntfy') }}"
+ntfy_runtime_image: "{{ container_image_catalog.images.ntfy_runtime.ref }}"
 ntfy_runtime_container_name: ntfy
 ntfy_runtime_site_dir: /opt/ntfy
 ntfy_runtime_data_dir: /var/lib/ntfy
@@ -8,9 +9,15 @@ ntfy_runtime_cache_file: "{{ ntfy_runtime_data_dir }}/cache.db"
 ntfy_runtime_compose_file: "{{ ntfy_runtime_site_dir }}/docker-compose.yml"
 ntfy_runtime_config_template: "{{ inventory_dir | dirname }}/config/ntfy/server.yml"
 ntfy_runtime_config_file: "{{ ntfy_runtime_site_dir }}/server.yml"
+ntfy_runtime_topic_registry_file: "{{ inventory_dir | dirname }}/config/ntfy/topics.yaml"
+ntfy_runtime_controller_secret_manifest_path: "{{ inventory_dir | dirname }}/config/controller-local-secrets.json"
 ntfy_runtime_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy
-ntfy_runtime_password_local_file: "{{ ntfy_runtime_local_artifact_dir }}/alertmanager-password.txt"
-ntfy_runtime_password_hash_remote_file: "{{ ntfy_runtime_site_dir }}/password.hash"
-ntfy_runtime_username: alertmanager
-ntfy_runtime_port: 2586
-ntfy_runtime_base_url: "http://{{ hostvars['proxmox_florin'].platform_guest_catalog.by_name['docker-runtime-lv3'].ipv4 }}:2586"
+ntfy_runtime_remote_auth_dir: "{{ ntfy_runtime_site_dir }}/auth"
+ntfy_runtime_auth_file: "{{ ntfy_runtime_data_dir }}/user.db"
+ntfy_runtime_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('ntfy', 'internal') }}"
+ntfy_runtime_public_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('ntfy', 'public') }}"
+ntfy_runtime_internal_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('ntfy', 'internal') }}"
+ntfy_runtime_base_url: "{{ ntfy_runtime_public_base_url }}"
+ntfy_runtime_visitor_request_limit_burst: 60
+ntfy_runtime_visitor_request_limit_replenish: 10s
+ntfy_runtime_visitor_message_daily_limit: 1000

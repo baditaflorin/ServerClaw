@@ -14,10 +14,11 @@
       - ntfy_runtime_data_dir | length > 0
       - ntfy_runtime_compose_file | length > 0
       - ntfy_runtime_config_template | length > 0
-      - ntfy_runtime_password_local_file | length > 0
-      - ntfy_runtime_username | length > 0
+      - ntfy_runtime_topic_registry_file | length > 0
+      - ntfy_runtime_controller_secret_manifest_path | length > 0
+      - ntfy_runtime_public_base_url | length > 0
       - ntfy_runtime_port | int > 0
-    fail_msg: "ntfy_runtime requires image, compose, config, and password inputs."
+    fail_msg: "ntfy_runtime requires image, compose, config, topic registry, and secret manifest inputs."
 
 - name: Ensure python bcrypt support is present
   ansible.builtin.apt:
@@ -28,41 +29,202 @@
     update_cache: true
     force_apt_get: true
 
-- name: Ensure controller-local ntfy artifact directory exists
-  ansible.builtin.file:
-    path: "{{ ntfy_runtime_local_artifact_dir }}"
-    state: directory
-    mode: "0700"
+- name: Load the controller-local secret manifest
+  ansible.builtin.set_fact:
+    ntfy_runtime_secret_manifest: "{{ lookup('ansible.builtin.file', ntfy_runtime_controller_secret_manifest_path) | from_json }}"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Load the ntfy topic registry
+  ansible.builtin.set_fact:
+    ntfy_runtime_topic_registry: "{{ lookup('ansible.builtin.file', ntfy_runtime_topic_registry_file) | from_yaml }}"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Build the required ntfy controller-local secret id list
+  ansible.builtin.set_fact:
+    ntfy_runtime_required_secret_ids: >-
+      {%- set ids = [] -%}
+      {%- for _, user in ntfy_runtime_topic_registry.users.items() -%}
+      {%- if user.password_secret_id is defined -%}
+      {%- set _ = ids.append(user.password_secret_id) -%}
+      {%- endif -%}
+      {%- if user.token_secret_id is defined -%}
+      {%- set _ = ids.append(user.token_secret_id) -%}
+      {%- endif -%}
+      {%- endfor -%}
+      {{ ids | unique }}
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Assert ntfy controller-local secrets are declared
+  ansible.builtin.assert:
+    that:
+      - ntfy_runtime_required_secret_ids | difference(ntfy_runtime_secret_manifest.secrets.keys() | list) | length == 0
+    fail_msg: >-
+      Missing ntfy controller-local secret ids:
+      {{ ntfy_runtime_required_secret_ids | difference(ntfy_runtime_secret_manifest.secrets.keys() | list) | join(', ') }}.
   delegate_to: localhost
   become: false
 
-- name: Ensure controller-local ntfy password exists
+- name: Resolve ntfy users from the topic registry and secret manifest
+  ansible.builtin.set_fact:
+    ntfy_runtime_registry_users: >-
+      {%- set resolved = [] -%}
+      {%- for user_id, user in ntfy_runtime_topic_registry.users.items() -%}
+      {%- set password_secret_id = user.password_secret_id | default('') -%}
+      {%- set token_secret_id = user.token_secret_id | default('') -%}
+      {%- set password_path = ntfy_runtime_secret_manifest.secrets[password_secret_id].path if password_secret_id else '' -%}
+      {%- set token_path = ntfy_runtime_secret_manifest.secrets[token_secret_id].path if token_secret_id else '' -%}
+      {%- set _ = resolved.append(
+            {
+              'user_id': user_id,
+              'username': user.username,
+              'role': user.role | default('user'),
+              'token_label': user.token_label | default(user_id),
+              'publish_topics': user.publish_topics | default([]),
+              'subscribe_topics': user.subscribe_topics | default([]),
+              'password_path': password_path,
+              'token_path': token_path,
+            }
+          ) -%}
+      {%- endfor -%}
+      {{ resolved }}
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Build the ntfy controller-local secret directories
+  ansible.builtin.set_fact:
+    ntfy_runtime_secret_directories: >-
+      {{
+        (
+          ntfy_runtime_registry_users
+          | map(attribute='password_path')
+          | reject('equalto', '')
+          | map('dirname')
+          | list
+          +
+          ntfy_runtime_registry_users
+          | map(attribute='token_path')
+          | reject('equalto', '')
+          | map('dirname')
+          | list
+        ) | unique
+      }}
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Ensure ntfy controller-local secret directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0700"
+  loop: "{{ ntfy_runtime_secret_directories }}"
+  delegate_to: localhost
+  become: false
+
+- name: Ensure controller-local ntfy passwords exist
   ansible.builtin.shell: |
     set -euo pipefail
-    if [ ! -s "{{ ntfy_runtime_password_local_file }}" ]; then
+    if [ ! -s "{{ item.password_path }}" ]; then
       umask 077
-      openssl rand -base64 24 > "{{ ntfy_runtime_password_local_file }}"
+      openssl rand -base64 24 > "{{ item.password_path }}"
       echo changed
     fi
   args:
     executable: /bin/bash
+  loop: "{{ ntfy_runtime_registry_users }}"
+  loop_control:
+    label: "{{ item.user_id }}"
+  when: item.password_path | length > 0
   delegate_to: localhost
   become: false
   register: ntfy_runtime_password_generation
   changed_when: "'changed' in ntfy_runtime_password_generation.stdout"
   no_log: true
 
-- name: Read controller-local ntfy password
-  ansible.builtin.slurp:
-    src: "{{ ntfy_runtime_password_local_file }}"
+- name: Ensure controller-local ntfy tokens exist
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item.token_path }}" ]; then
+      umask 077
+      printf 'tk_%s\n' "$(openssl rand -hex 24)" > "{{ item.token_path }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop: "{{ ntfy_runtime_registry_users }}"
+  loop_control:
+    label: "{{ item.user_id }}"
+  when: item.token_path | length > 0
   delegate_to: localhost
   become: false
-  register: ntfy_runtime_password_raw
+  register: ntfy_runtime_token_generation
+  changed_when: "'changed' in ntfy_runtime_token_generation.stdout"
   no_log: true
 
-- name: Record ntfy password fact
+- name: Build the ntfy credential file list
   ansible.builtin.set_fact:
-    ntfy_runtime_password: "{{ ntfy_runtime_password_raw.content | b64decode | trim }}"
+    ntfy_runtime_credential_files: >-
+      {%- set resolved = [] -%}
+      {%- for user in ntfy_runtime_registry_users -%}
+      {%- if user.password_path | length > 0 -%}
+      {%- set _ = resolved.append({'user_id': user.user_id, 'username': user.username, 'kind': 'password', 'path': user.password_path, 'role': user.role, 'token_label': user.token_label, 'publish_topics': user.publish_topics, 'subscribe_topics': user.subscribe_topics}) -%}
+      {%- endif -%}
+      {%- if user.token_path | length > 0 -%}
+      {%- set _ = resolved.append({'user_id': user.user_id, 'username': user.username, 'kind': 'token', 'path': user.token_path, 'role': user.role, 'token_label': user.token_label, 'publish_topics': user.publish_topics, 'subscribe_topics': user.subscribe_topics}) -%}
+      {%- endif -%}
+      {%- endfor -%}
+      {{ resolved }}
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Read controller-local ntfy credential files
+  ansible.builtin.slurp:
+    src: "{{ item.path }}"
+  loop: "{{ ntfy_runtime_credential_files }}"
+  loop_control:
+    label: "{{ item.user_id }}:{{ item.kind }}"
+  delegate_to: localhost
+  become: false
+  register: ntfy_runtime_credential_slurps
+  no_log: true
+
+- name: Record resolved ntfy user credentials
+  ansible.builtin.set_fact:
+    ntfy_runtime_users_resolved: >-
+      {%- set resolved = {} -%}
+      {%- for user in ntfy_runtime_registry_users -%}
+      {%- set _ = resolved.update(
+            {
+              user.user_id: {
+                'user_id': user.user_id,
+                'username': user.username,
+                'role': user.role,
+                'token_label': user.token_label,
+                'publish_topics': user.publish_topics,
+                'subscribe_topics': user.subscribe_topics,
+              }
+            }
+          ) -%}
+      {%- endfor -%}
+      {%- for result in ntfy_runtime_credential_slurps.results -%}
+      {%- set item = result.item -%}
+      {%- if item.kind == 'password' -%}
+      {%- set _ = resolved[item.user_id].update({'password': result.content | b64decode | trim, 'password_path': item.path}) -%}
+      {%- else -%}
+      {%- set _ = resolved[item.user_id].update({'token': result.content | b64decode | trim, 'token_path': item.path}) -%}
+      {%- endif -%}
+      {%- endfor -%}
+      {{ resolved.values() | list | sort(attribute='username') }}
+  delegate_to: localhost
+  become: false
   no_log: true
 
 - name: Ensure ntfy directories exist
@@ -76,8 +238,9 @@
     - "{{ ntfy_runtime_site_dir }}"
     - "{{ ntfy_runtime_data_dir }}"
     - "{{ ntfy_runtime_attachment_dir }}"
+    - "{{ ntfy_runtime_remote_auth_dir }}"
 
-- name: Generate ntfy password hash
+- name: Generate ntfy password hashes
   ansible.builtin.command:
     argv:
       - python3
@@ -85,7 +248,7 @@
       - |
         import bcrypt, os, pathlib
         password = os.environ["NTFY_RUNTIME_PASSWORD"].encode()
-        output = pathlib.Path("{{ ntfy_runtime_password_hash_remote_file }}")
+        output = pathlib.Path("{{ ntfy_runtime_remote_auth_dir }}/{{ item.username }}.hash")
         if output.exists():
             existing = output.read_text(encoding="utf-8").strip().encode()
             if bcrypt.checkpw(password, existing):
@@ -94,20 +257,80 @@
         output.write_text(bcrypt.hashpw(password, bcrypt.gensalt()).decode() + "\n", encoding="utf-8")
         print("changed")
   environment:
-    NTFY_RUNTIME_PASSWORD: "{{ ntfy_runtime_password }}"
+    NTFY_RUNTIME_PASSWORD: "{{ item.password }}"
+  loop: "{{ ntfy_runtime_users_resolved }}"
+  loop_control:
+    label: "{{ item.user_id }}"
+  when: item.password is defined
   register: ntfy_runtime_password_hash_generation
   changed_when: "'changed' in ntfy_runtime_password_hash_generation.stdout"
   no_log: true
 
-- name: Read ntfy password hash
+- name: Read ntfy password hashes
   ansible.builtin.slurp:
-    src: "{{ ntfy_runtime_password_hash_remote_file }}"
-  register: ntfy_runtime_password_hash_raw
+    src: "{{ ntfy_runtime_remote_auth_dir }}/{{ item.username }}.hash"
+  loop: "{{ ntfy_runtime_users_resolved }}"
+  loop_control:
+    label: "{{ item.user_id }}"
+  when: item.password is defined
+  register: ntfy_runtime_password_hash_slurps
   no_log: true
 
-- name: Record ntfy password hash fact
+- name: Build the resolved ntfy auth configuration
   ansible.builtin.set_fact:
-    ntfy_runtime_password_hash: "{{ ntfy_runtime_password_hash_raw.content | b64decode | trim }}"
+    ntfy_runtime_auth_users: >-
+      {%- set hash_map = {} -%}
+      {%- for result in ntfy_runtime_password_hash_slurps.results -%}
+      {%- if not result.skipped | default(false) -%}
+      {%- set _ = hash_map.update({result.item.user_id: result.content | b64decode | trim}) -%}
+      {%- endif -%}
+      {%- endfor -%}
+      {%- set users = [] -%}
+      {%- for user in ntfy_runtime_users_resolved -%}
+      {%- if user.password is defined -%}
+      {%- set _ = users.append({'username': user.username, 'password_hash': hash_map[user.user_id], 'role': user.role}) -%}
+      {%- endif -%}
+      {%- endfor -%}
+      {{ users }}
+    ntfy_runtime_auth_tokens: >-
+      {%- set tokens = [] -%}
+      {%- for user in ntfy_runtime_users_resolved -%}
+      {%- if user.token is defined -%}
+      {%- set _ = tokens.append({'username': user.username, 'token': user.token, 'label': user.token_label}) -%}
+      {%- endif -%}
+      {%- endfor -%}
+      {{ tokens }}
+    ntfy_runtime_auth_access: >-
+      {%- set access = [] -%}
+      {%- for user in ntfy_runtime_users_resolved -%}
+      {%- for topic in user.publish_topics | default([]) -%}
+      {%- set _ = access.append({'username': user.username, 'topic': topic, 'permission': 'rw'}) -%}
+      {%- endfor -%}
+      {%- for topic in user.subscribe_topics | default([]) -%}
+      {%- if topic not in (user.publish_topics | default([])) -%}
+      {%- set _ = access.append({'username': user.username, 'topic': topic, 'permission': 'ro'}) -%}
+      {%- endif -%}
+      {%- endfor -%}
+      {%- endfor -%}
+      {{ access }}
+    ntfy_runtime_auth_user_lines: >-
+      {%- set users = [] -%}
+      {%- for user in ntfy_runtime_auth_users -%}
+      {%- set _ = users.append(user.username ~ ':' ~ user.password_hash ~ ':' ~ user.role) -%}
+      {%- endfor -%}
+      {{ users }}
+    ntfy_runtime_auth_token_lines: >-
+      {%- set tokens = [] -%}
+      {%- for token in ntfy_runtime_auth_tokens -%}
+      {%- set _ = tokens.append(token.username ~ ':' ~ token.token ~ ':' ~ token.label) -%}
+      {%- endfor -%}
+      {{ tokens }}
+    ntfy_runtime_auth_access_lines: >-
+      {%- set access = [] -%}
+      {%- for entry in ntfy_runtime_auth_access -%}
+      {%- set _ = access.append(entry.username ~ ':' ~ entry.topic ~ ':' ~ entry.permission) -%}
+      {%- endfor -%}
+      {{ access }}
   no_log: true
 
 - name: Render ntfy server config

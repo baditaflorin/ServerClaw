@@ -999,12 +999,27 @@
   register: windmill_superadmin_secret_raw
   no_log: true
 
+- name: Ensure the Windmill ntfy token exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ windmill_ntfy_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: windmill_ntfy_token_local
+
+- name: Fail if the Windmill ntfy token is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ windmill_ntfy_token_local_file }} is missing on the control machine.
+      Converge ntfy first so Windmill can bridge NATS subjects into the push channel.
+  when: not windmill_ntfy_token_local.stat.exists
+
 - name: Record the Windmill superadmin secret
   ansible.builtin.set_fact:
     windmill_superadmin_secret: "{{ windmill_superadmin_secret_raw.content | b64decode | trim }}"
     windmill_database_password: "{{ lookup('ansible.builtin.file', windmill_database_password_local_file) | trim }}"
     windmill_proxmox_api_token_payload: "{{ lookup('ansible.builtin.file', proxmox_api_token_local_file) | from_json }}"
     windmill_proxmox_api_token_payload_raw: "{{ lookup('ansible.builtin.file', proxmox_api_token_local_file) | trim }}"
+    windmill_ntfy_token: "{{ lookup('ansible.builtin.file', windmill_ntfy_token_local_file) | trim }}"
   no_log: true
 
 - name: Build the Windmill runtime secret payload
@@ -1019,6 +1034,8 @@
           'LV3_GRAPH_DSN': windmill_platform_dsn,
           'WORLD_STATE_DSN': windmill_world_state_dsn,
           'LV3_NATS_URL': windmill_nats_url,
+          'LV3_NTFY_BASE_URL': windmill_ntfy_base_url,
+          'LV3_NTFY_TOKEN': windmill_ntfy_token,
           'TF_VAR_proxmox_endpoint': windmill_proxmox_api_token_payload.api_url,
           'TF_VAR_proxmox_api_token': windmill_proxmox_api_token_payload.full_token_id ~ '=' ~ windmill_proxmox_api_token_payload.value,
         }
@@ -2212,6 +2229,61 @@
 - name: Remove the local repo-managed Windmill script manifest
   ansible.builtin.file:
     path: "{{ windmill_seed_script_manifest_local.path }}"
+    state: absent
+  delegate_to: localhost
+  become: false
+
+- name: Create a local manifest path for repo-managed Windmill resources
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .json
+  delegate_to: localhost
+  become: false
+  register: windmill_seed_resource_manifest_local
+
+- name: Render the repo-managed Windmill resource manifest locally
+  ansible.builtin.copy:
+    dest: "{{ windmill_seed_resource_manifest_local.path }}"
+    content: >-
+      {{
+        {
+          'resource_types': windmill_seed_resource_types,
+          'resources': windmill_seed_resources,
+        } | to_nice_json
+      }}
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Sync repo-managed Windmill resources
+  vars:
+    mutation_audit_action: sync.windmill_resources
+    mutation_audit_target: windmill-workspace
+    mutation_audit_emit_on_success: true
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ windmill_worker_checkout_repo_root_local_dir }}/scripts/sync_windmill_resources.py"
+      - --base-url
+      - "{{ windmill_private_base_url }}"
+      - --workspace
+      - "{{ windmill_workspace_id }}"
+      - --token
+      - "{{ windmill_runtime_api_token }}"
+      - --manifest
+      - "{{ windmill_seed_resource_manifest_local.path }}"
+  delegate_to: localhost
+  become: false
+  register: windmill_seed_resource_sync
+  changed_when: false
+  no_log: true
+  tags:
+    - mutation
+
+- name: Remove the local repo-managed Windmill resource manifest
+  ansible.builtin.file:
+    path: "{{ windmill_seed_resource_manifest_local.path }}"
     state: absent
   delegate_to: localhost
   become: false

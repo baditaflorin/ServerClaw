@@ -78,6 +78,10 @@ windmill_nats_password: >-
     | default('', true)
     | trim
   }}
+windmill_ntfy_base_url: https://ntfy.lv3.org
+windmill_ntfy_token_local_file: "{{ windmill_controller_repo_common_root }}/.local/ntfy/windmill-token.txt"
+windmill_ntfy_resource_type_name: ntfy_platform_channel
+windmill_ntfy_resource_path: ntfy/platform
 windmill_ledger_postgres_user: patroni
 windmill_ledger_postgres_database: postgres
 windmill_ledger_postgres_host: "{{ hostvars[windmill_database_inventory_host].ansible_host }}"
@@ -433,6 +437,11 @@ windmill_seed_scripts:
     language: python3
     summary: ADR 0251 stage smoke suites
     description: Repo-managed wrapper that runs the declared stage-scoped smoke suites for one service and environment through the shared integration-suite engine.
+  - path: f/lv3/ntfy_nats_bridge
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/ntfy-nats-bridge.py"
+    language: python3
+    summary: ADR 0299 ntfy NATS bridge
+    description: Repo-managed bridge that republishes selected high-priority NATS subjects to the ntfy push channel.
   - path: f/lv3/scheduler_watchdog_loop
     local_file: "{{ windmill_seed_script_root_local_dir }}/scheduler-watchdog-loop.py"
     language: python3
@@ -806,6 +815,16 @@ windmill_seed_schedules:
     summary: ADR 0155 queued intent dispatcher safety schedule
     description: Repo-managed minute safety schedule that drains queued conflict-blocked intents if release-triggered dispatch was missed.
     no_flow_overlap: true
+  - path: f/lv3/ntfy_nats_bridge_every_minute
+    schedule: "15 * * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/ntfy_nats_bridge
+    args:
+      max_messages_per_subject: 10
+    enabled: true
+    summary: ADR 0299 ntfy NATS bridge
+    description: Repo-managed minute bridge that republishes selected high-priority NATS subjects through the ntfy operator push channel.
+    no_flow_overlap: true
   - path: f/lv3/scheduler_watchdog_every_30s
     schedule: "*/30 * * * * *"
     timezone: Europe/Bucharest
@@ -1123,3 +1142,15 @@ windmill_seed_raw_apps:
     relative_dir: f/lv3/operator_access_admin.raw_app
     sync_pattern: f/lv3/operator_access_admin.raw_app/**
     summary: Browser-first operator access admin console
+windmill_seed_resource_types:
+  - name: "{{ (lookup('ansible.builtin.file', windmill_worker_checkout_repo_root_local_dir ~ '/config/ntfy/topics.yaml') | from_yaml).windmill.resource_type.name }}"
+    description: "{{ (lookup('ansible.builtin.file', windmill_worker_checkout_repo_root_local_dir ~ '/config/ntfy/topics.yaml') | from_yaml).windmill.resource_type.description }}"
+    schema: "{{ (lookup('ansible.builtin.file', windmill_worker_checkout_repo_root_local_dir ~ '/config/ntfy/topics.yaml') | from_yaml).windmill.resource_type.schema }}"
+windmill_seed_resources:
+  - path: "{{ (lookup('ansible.builtin.file', windmill_worker_checkout_repo_root_local_dir ~ '/config/ntfy/topics.yaml') | from_yaml).windmill.resource.path }}"
+    description: "{{ (lookup('ansible.builtin.file', windmill_worker_checkout_repo_root_local_dir ~ '/config/ntfy/topics.yaml') | from_yaml).windmill.resource.description }}"
+    resource_type: "{{ windmill_ntfy_resource_type_name }}"
+    value:
+      base_url: "{{ windmill_ntfy_base_url }}"
+      bearer_token: "{{ lookup('ansible.builtin.file', windmill_ntfy_token_local_file) | trim }}"
+      publisher: windmill

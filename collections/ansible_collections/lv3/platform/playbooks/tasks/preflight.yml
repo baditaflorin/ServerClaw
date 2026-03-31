@@ -130,3 +130,55 @@
   when:
     - playbook_execution_emit_audit | bool
     - playbook_execution_mutation_audit_script_stat.stat.exists
+
+- name: Stat the ntfy publish helper
+  ansible.builtin.stat:
+    path: "{{ playbook_execution_ntfy_publish_script }}"
+  delegate_to: localhost
+  become: false
+  run_once: true
+  register: playbook_execution_ntfy_publish_script_stat
+  changed_when: false
+
+- name: Stat the controller-local ntfy Ansible token
+  ansible.builtin.stat:
+    path: "{{ playbook_execution_ntfy_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  run_once: true
+  register: playbook_execution_ntfy_token_local_stat
+  changed_when: false
+
+- name: Publish a best-effort ntfy start notification
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ playbook_execution_ntfy_publish_script }}"
+      - --registry
+      - "{{ playbook_execution_ntfy_topic_registry_path }}"
+      - --publisher
+      - ansible
+      - --topic
+      - "{{ playbook_execution_ntfy_start_topic }}"
+      - --base-url
+      - "{{ playbook_execution_ntfy_base_url }}"
+      - --token-file
+      - "{{ playbook_execution_ntfy_token_local_file }}"
+      - --message
+      - >-
+        {{ playbook_execution_audit_target | default(playbook_name | default(inventory_hostname)) }}
+        ({{ playbook_execution_env }}) started. Correlation id: {{ playbook_execution_correlation_id }}.
+      - --sequence-id
+      - "ansible:{{ playbook_execution_correlation_id }}:start"
+      - --dedupe-state-file
+      - "{{ playbook_execution_ntfy_dedupe_state_file }}"
+      - --dedupe-window-seconds
+      - "900"
+  delegate_to: localhost
+  become: false
+  run_once: true
+  changed_when: false
+  failed_when: false
+  when:
+    - playbook_execution_ntfy_publish_script_stat.stat.exists
+    - playbook_execution_ntfy_token_local_stat.stat.exists

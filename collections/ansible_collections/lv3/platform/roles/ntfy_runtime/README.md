@@ -1,3 +1,3 @@
 # ntfy_runtime
 
-Deploys the private ntfy push gateway on `docker-runtime-lv3`, protects the `platform-alerts` topic with a repo-managed credential, and verifies the health endpoint used by Alertmanager paging.
+Deploys the ADR 0299 ntfy push channel on `docker-runtime-lv3`, renders the governed topic registry from `config/ntfy/topics.yaml`, and mirrors repo-managed publisher credentials under `.local/ntfy/`.

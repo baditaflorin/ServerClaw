@@ -11,6 +11,39 @@
   run_once: true
   changed_when: false
 
+- name: Publish a best-effort ntfy completion notification
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ playbook_execution_ntfy_publish_script }}"
+      - --registry
+      - "{{ playbook_execution_ntfy_topic_registry_path }}"
+      - --publisher
+      - ansible
+      - --topic
+      - "{{ playbook_execution_ntfy_success_topic }}"
+      - --base-url
+      - "{{ playbook_execution_ntfy_base_url }}"
+      - --token-file
+      - "{{ playbook_execution_ntfy_token_local_file }}"
+      - --message
+      - >-
+        {{ playbook_execution_notification_payload.service }}
+        ({{ playbook_execution_notification_payload.environment }})
+        completed. Correlation id: {{ playbook_execution_notification_payload.correlation_id }}.
+      - --sequence-id
+      - "ansible:{{ playbook_execution_notification_payload.correlation_id }}:success"
+      - --dedupe-state-file
+      - "{{ playbook_execution_ntfy_dedupe_state_file }}"
+      - --dedupe-window-seconds
+      - "900"
+  delegate_to: localhost
+  become: false
+  run_once: true
+  changed_when: false
+  failed_when: false
+  when: (playbook_execution_ntfy_token_local_file | default('')) | length > 0
+
 - name: Publish a best-effort Mattermost completion notification
   ansible.builtin.uri:
     url: "{{ playbook_execution_mattermost_webhook_url }}"

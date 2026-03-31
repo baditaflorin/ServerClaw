@@ -1,15 +1,15 @@
 base-url: "{{ ntfy_runtime_base_url }}"
 listen-http: ":{{ ntfy_runtime_port }}"
-behind-proxy: false
+behind-proxy: true
+enable-login: true
+enable-signup: false
 cache-file: "{{ ntfy_runtime_cache_file }}"
 attachment-cache-dir: "{{ ntfy_runtime_attachment_dir }}"
-auth-file: "{{ ntfy_runtime_data_dir }}/user.db"
+auth-file: "{{ ntfy_runtime_auth_file }}"
 auth-default-access: deny-all
-auth-users:
-  - "{{ ntfy_runtime_username }}:{{ ntfy_runtime_password_hash }}:user"
-# Keep a dedicated verification topic so workflow smoke tests do not page the
-# production platform-alerts stream.
-auth-access:
-  - "{{ ntfy_runtime_username }}:platform-alerts:rw"
-  - "{{ ntfy_runtime_username }}:platform-alerts-sbom-verify:rw"
-  - "{{ ntfy_runtime_username }}:platform.slo.warn:rw"
+visitor-request-limit-burst: "{{ ntfy_runtime_visitor_request_limit_burst }}"
+visitor-request-limit-replenish: "{{ ntfy_runtime_visitor_request_limit_replenish }}"
+visitor-message-daily-limit: "{{ ntfy_runtime_visitor_message_daily_limit }}"
+auth-users: {{ ntfy_runtime_auth_user_lines | to_json }}
+auth-tokens: {{ ntfy_runtime_auth_token_lines | to_json }}
+auth-access: {{ ntfy_runtime_auth_access_lines | to_json }}

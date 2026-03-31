@@ -114,6 +114,9 @@ jobs:
           fi
           python3 scripts/run_gate.py --workspace . --docker-binary "${DOCKER_BIN}" --status-file .local/validation-gate/gitea-last-run.json --source gitea-actions --all-lanes
 
+      - name: Validate service completeness
+        run: python3 scripts/service_completeness.py
+
       - name: Run k6 smoke gate
         run: |
           set -euo pipefail
@@ -140,3 +143,16 @@ jobs:
           echo "Bundled validation artifacts:"
           cat "${artifact_list}"
           ls -lh .local/validation-gate/gitea-validation-receipts.tar.gz
+
+      - name: Notify ntfy on validation failure
+        if: failure()
+        env:
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+        run: |
+          python3 scripts/ntfy_publish.py \
+            --publisher gitea_actions \
+            --topic platform.ci.critical \
+            --base-url https://ntfy.lv3.org \
+            --token "$NTFY_TOKEN" \
+            --message "Repository validation failed for ${GITHUB_REF_NAME:-unknown} at ${GITHUB_SHA:-unknown}." \
+            --sequence-id "gitea:${GITHUB_SHA:-unknown}:validate"
