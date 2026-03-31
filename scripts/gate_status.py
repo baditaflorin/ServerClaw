@@ -142,14 +142,6 @@ def build_status_payload(
             "payload": bypass_payload,
         }
     return payload
-
-
-def resolve_repo_path(path: Path) -> Path:
-    if path.is_absolute():
-        return path
-    return REPO_ROOT / path
-
-
 def print_run_summary(label: str, payload: dict[str, Any] | None) -> None:
     if payload is None:
         print(f"{label}: none recorded")

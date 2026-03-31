@@ -87,8 +87,8 @@
     "receipts/sbom/host-docker-runtime-lv3-2026-03-31.cdx.json"
   ],
   "notes": [
-    "This receipt records the latest-main live replay and proof set before the protected integration files are refreshed on `main`.",
-    "The final merge-to-main step still needs to update ADR 0257 metadata, cut the next repository release, and advance `versions/stack.yaml.platform_version` from the current integrated baseline once the mainline promotion is complete.",
+    "This receipt records the latest-main live replay that was promoted during the 2026-03-31 mainline integration as repository version 0.177.117 and platform version 0.130.76.",
+    "ADR 0257 metadata, release surfaces, README status, and versions/stack canonical truth were refreshed during the same mainline integration step that promoted this receipt.",
     "The OpenBao retry hardening was the only code change required during this exact-main replay; the controller, gateway, and Windmill skill-resolution contract itself remained stable."
   ]
 }

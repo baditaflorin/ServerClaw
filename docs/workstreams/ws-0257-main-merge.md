@@ -2,7 +2,10 @@
 
 - ADR: [ADR 0257](../adr/0257-openclaw-compatible-skill-md-packs-and-workspace-precedence-for-serverclaw.md)
 - Title: Integrate ADR 0257 exact-main replay onto `origin/main`
-- Status: `ready_for_merge`
+- Status: `merged`
+- Included In Repo Version: 0.177.117
+- Platform Version Observed During Merge: 0.130.76
+- Release Date: 2026-03-31
 - Branch: `codex/ws-0257-main-merge`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-main-merge`
 - Owner: codex
@@ -55,12 +58,14 @@ only after the integrated platform verification is complete.
 
 ## Outcome
 
-- the latest realistic `origin/main` replay is complete and this branch is now
-  ready for final merge-to-`main`
-- protected integration files intentionally still remain untouched on this
-  branch: ADR metadata, `VERSION`, `changelog.md`, `README.md`,
-  `docs/release-notes/`, `versions/stack.yaml`, and `build/platform-manifest.json`
-  should be refreshed only during the final `main` integration step
-- the branch carries durable live evidence in
-  `receipts/live-applies/2026-03-31-adr-0257-serverclaw-skill-packs-mainline-live-apply.json`
-  so the final merge step can promote the exact proof set without replay drift
+- Release `0.177.117` carries ADR 0257's exact-main replay onto merged mainline
+  truth.
+- The integrated platform baseline advanced from `0.130.75` to `0.130.76`
+  after the exact-main replay and verification completed.
+- `versions/stack.yaml` now points `serverclaw_skills` at
+  `2026-03-31-adr-0257-serverclaw-skill-packs-mainline-live-apply`, while ADR
+  0257 itself records `0.177.117` / `0.130.76` as the first merged repo and
+  platform versions where the decision became true.
+- `README.md`, `RELEASE.md`, `changelog.md`, `docs/release-notes/`,
+  `versions/stack.yaml`, and `build/platform-manifest.json` were all refreshed
+  from this merged baseline during the same integration step.

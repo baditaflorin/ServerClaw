@@ -19,3 +19,4 @@
     exit "${restart_rc:-1}"
   args:
     executable: /bin/bash
+  changed_when: true

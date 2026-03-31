@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.116",
-  "platform_version": "0.130.75",
-  "generated_at": "2026-03-31T09:51:08Z",
-  "next_refresh_at": "2026-03-31T10:51:08Z",
+  "repo_version": "0.177.117",
+  "platform_version": "0.130.76",
+  "generated_at": "2026-03-31T12:14:02Z",
+  "next_refresh_at": "2026-03-31T13:14:02Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4956,7 +4956,7 @@
         "id": "configure-windmill",
         "title": "Configure Windmill",
         "agent_trust_required": "T3",
-        "steps": 24,
+        "steps": 25,
         "path": "docs/runbooks/configure-windmill.md",
         "workflow_ids": [
           "converge-windmill"
@@ -5554,10 +5554,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.115",
+    "last_version": "0.177.116",
     "deployed_at": "2026-03-31",
-    "summary": "implements ADR 0290 by bringing the private Redpanda Kafka-compatible streaming platform, topic reconciliation, and authenticated Admin API, HTTP Proxy, and Schema Registry runtime onto main after the exact-main governed replay on docker-runtime-lv3",
-    "release_notes_url": "docs/release-notes/0.177.116.md"
+    "summary": "implements ADR 0257 by carrying the governed ServerClaw SKILL.md skill-pack contract onto the current mainline baseline, hardening exact-main OpenBao replay stability, and recording the verified controller, API gateway, and Windmill workspace-precedence proof set",
+    "release_notes_url": "docs/release-notes/0.177.117.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

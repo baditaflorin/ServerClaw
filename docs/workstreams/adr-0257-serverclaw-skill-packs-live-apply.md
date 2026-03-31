@@ -3,6 +3,10 @@
 - ADR: [ADR 0257](../adr/0257-openclaw-compatible-skill-md-packs-and-workspace-precedence-for-serverclaw.md)
 - Title: Implement the governed ServerClaw `SKILL.md` contract across controller, API gateway, and Windmill from the latest `origin/main`
 - Status: live_applied
+- Implemented In Repo Version: 0.177.117
+- Live Applied In Platform Version: 0.130.76
+- Implemented On: 2026-03-31
+- Live Applied On: 2026-03-31
 - Branch: `codex/ws-0257-openclaw-skills-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-openclaw-skills`
 - Owner: codex
@@ -134,11 +138,14 @@
 - Step-ca health proof:
   `receipts/live-applies/evidence/2026-03-31-adr-0257-mainline-step-ca-health-r2-0.177.116.txt`
 
-## Notes For The Next Assistant
+## Mainline Integration Outcome
 
-- The live apply is complete and the receipt id is
-  `2026-03-31-adr-0257-serverclaw-skill-packs-mainline-live-apply`.
-- Protected integration files still remain for the final merge-to-main step:
-  update ADR 0257 metadata with the released repo/platform versions, cut the
-  next `VERSION` and `changelog.md` release, and refresh generated canonical
-  truth from the merged `main` baseline.
+- Release `0.177.117` was cut on 2026-03-31 from the merged mainline publish
+  worktree.
+- ADR 0257 metadata, `VERSION`, `changelog.md`, `README.md`,
+  `docs/release-notes/`, `versions/stack.yaml`, and the generated canonical
+  truth surfaces now record this live apply as integrated mainline truth.
+- `versions/stack.yaml.live_apply_evidence.latest_receipts.serverclaw_skills`
+  now points at
+  `2026-03-31-adr-0257-serverclaw-skill-packs-mainline-live-apply`, and the
+  integrated platform version advanced to `0.130.76`.

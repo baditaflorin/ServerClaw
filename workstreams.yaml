@@ -6112,7 +6112,7 @@ workstreams:
   - id: ws-0257-main-merge
     adr: "0257"
     title: Integrate ADR 0257 exact-main replay onto current origin/main
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/ws-0257-main-merge
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0257-main-merge
@@ -6159,6 +6159,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implements ADR 0257 by carrying the governed ServerClaw SKILL.md skill-pack contract onto the current mainline baseline, hardening exact-main OpenBao replay stability, and recording the verified controller, API gateway, and Windmill workspace-precedence proof set
       release_bump: patch
+      included_in_repo_version: 0.177.117
   - id: ws-0259-main-merge
     adr: "0259"
     title: Integrate ADR 0259 exact-main replay onto current origin/main
