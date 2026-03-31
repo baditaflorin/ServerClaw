@@ -56,4 +56,6 @@ def test_postgres_vm_argument_specs_declare_max_connections() -> None:
 def test_postgres_vm_template_renders_the_managed_connection_limit() -> None:
     template = POSTGRES_VM_TEMPLATE_PATH.read_text()
 
-    assert "max_connections = '{{ postgres_vm_max_connections }}'" in template
+    assert "max_connections = {{ postgres_vm_max_connections }}" in template
+    assert "superuser_reserved_connections = {{ postgres_vm_superuser_reserved_connections }}" in template
+    assert "reserved_connections = {{ postgres_vm_reserved_connections }}" in template
