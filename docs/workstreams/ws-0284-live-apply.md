@@ -3,13 +3,13 @@
 - ADR: [ADR 0284](../adr/0284-piper-tts-as-the-cpu-neural-text-to-speech-service.md)
 - Title: Deploy the private Piper text-to-speech runtime and verify the live `/api/tts` path
 - Status: ready_for_merge
-- Included In Repo Version: pending merge to main
+- Included In Repo Version: 0.177.113
 - Branch-Local Receipt: `receipts/live-applies/2026-03-31-adr-0284-piper-live-apply.json`
 - Canonical Mainline Receipt: pending exact-main integration
 - Live Applied In Platform Version: 0.130.74
 - Implemented On: 2026-03-31
 - Live Applied On: 2026-03-31
-- Branch: `codex/ws-0284-live-apply`
+- Branch: `codex/ws-0284-main-merge`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0284-live-apply`
 - Owner: codex
 - Depends On: `adr-0107`, `adr-0165`, `adr-0293`
@@ -84,16 +84,12 @@ safe exact-main merge.
 
 ## Merge-To-Main Remaining
 
-- Refresh the protected canonical-truth surfaces from `main`, including
-  `README.md`, `VERSION`, `changelog.md`, `RELEASE.md`,
-  `docs/release-notes/`, `build/platform-manifest.json`, and
-  `versions/stack.yaml`.
 - Rerun the governed `live-apply-service` wrapper from the exact-main tree so
-  the canonical mainline receipt captures the committed source instead of only
-  the branch-local replay evidence.
-- Update this workstream from `ready_for_merge` to `merged`, replace the
-  pending repo-version and canonical-receipt placeholders with exact-main
-  values, and then push `origin/main`.
+  the canonical mainline receipt captures committed `0.177.113` source instead
+  of only the earlier branch-local replay evidence.
+- Replace the pending canonical-mainline receipt placeholder with the exact
+  mainline replay receipt, flip this workstream to its terminal integrated
+  state, and then push `origin/main`.
 
 ## Outcome
 

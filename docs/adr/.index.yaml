@@ -4902,7 +4902,7 @@ adr_index:
       - service
     summary: We will deploy Piper TTS as the canonical CPU neural text-to-speech service.
     filename: 0284-piper-tts-as-the-cpu-neural-text-to-speech-service.md
-    implemented_version: 0.130.74
+    implemented_version: 0.177.113
   - adr: 0285
     title: Paperless-ngx As The Document Management And Archive API
     status: Accepted

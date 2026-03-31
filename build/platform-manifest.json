@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.112",
+  "repo_version": "0.177.113",
   "platform_version": "0.130.74",
-  "generated_at": "2026-03-31T04:27:52Z",
-  "next_refresh_at": "2026-03-31T05:27:52Z",
+  "generated_at": "2026-03-31T05:46:44Z",
+  "next_refresh_at": "2026-03-31T06:46:44Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -26,7 +26,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.40:9093",
-        "last_live_apply": "2026-03-30T00:00:00Z"
+        "last_live_apply": "2026-03-31T00:00:00Z"
       },
       "api_gateway": {
         "service_name": "Platform API Gateway",
@@ -508,6 +508,18 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://wiki.lv3.org",
+        "last_live_apply": "2026-03-31T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "piper": {
+        "service_name": "Piper",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://10.10.10.20:8100",
         "last_live_apply": "2026-03-31T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -2094,6 +2106,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/platform-operations-portal.md"
+      },
+      {
+        "id": "converge-piper",
+        "description": "Deploy the private Piper text-to-speech runtime on docker-runtime-lv3, load the repo-managed default voice, and verify the `/api/tts` WAV contract.",
+        "tags": [
+          "converge-piper",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 260,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-piper.md"
       },
       {
         "id": "converge-plane",
@@ -4552,6 +4590,16 @@
         ]
       },
       {
+        "id": "configure-piper",
+        "title": "Configure Piper",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-piper.md",
+        "workflow_ids": [
+          "converge-piper"
+        ]
+      },
+      {
         "id": "configure-plane",
         "title": "Configure Plane",
         "agent_trust_required": "T3",
@@ -5285,10 +5333,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.111",
+    "last_version": "0.177.112",
     "deployed_at": "2026-03-31",
-    "summary": "implements ADR 0297 by deploying the repo-managed Renovate proposal path through private Gitea Actions, OpenBao-minted short-lived tokens, and the Harbor-pinned runtime while preserving exact-main dashboard and governed update PR creation",
-    "release_notes_url": "docs/release-notes/0.177.112.md"
+    "summary": "implements ADR 0284 by bringing the private Piper text-to-speech runtime, the verified 8100 private voice path, and the recorded live-apply recovery evidence onto main while preserving the already-current 0.130.74 platform baseline",
+    "release_notes_url": "docs/release-notes/0.177.113.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
