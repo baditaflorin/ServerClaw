@@ -8,6 +8,7 @@
   "dependencyDashboardTitle": "Renovate Dashboard",
   "automerge": false,
   "platformAutomerge": false,
+  "gitAuthor": "Renovate Bot <renovate-bot@lv3.internal>",
   "baseBranches": [
     "main"
   ],

@@ -34,6 +34,7 @@ def test_renovate_config_targets_gitea_and_custom_repo_surfaces() -> None:
     assert config["dependencyDashboard"] is True
     assert config["automerge"] is False
     assert config["platformAutomerge"] is False
+    assert config["gitAuthor"] == "Renovate Bot <renovate-bot@lv3.internal>"
     assert any("image-catalog" in "".join(manager["managerFilePatterns"]) for manager in config["customManagers"])
     assert any("versions" in "".join(manager["managerFilePatterns"]) and "stack" in "".join(manager["managerFilePatterns"]) for manager in config["customManagers"])
 
