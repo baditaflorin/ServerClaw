@@ -241,7 +241,7 @@ api_gateway_keycloak_jwks_url: "{{ api_gateway_keycloak_internal_base_url }}/rea
 api_gateway_keycloak_issuer_url: https://sso.lv3.org/realms/lv3
 api_gateway_keycloak_token_url: https://sso.lv3.org/realms/lv3/protocol/openid-connect/token
 api_gateway_keycloak_verify_base_url: http://127.0.0.1:18080
-api_gateway_keycloak_verify_ready_retries: 24
+api_gateway_keycloak_verify_ready_retries: 60
 api_gateway_keycloak_verify_ready_delay: 5
 api_gateway_keycloak_verify_token_retries: 18
 api_gateway_keycloak_verify_token_delay: 5

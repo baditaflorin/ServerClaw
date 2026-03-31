@@ -78,7 +78,7 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "api_gateway_keycloak_internal_base_url" in defaults
     assert "http://127.0.0.1:18080" in defaults
     assert "api_gateway_keycloak_verify_base_url: http://127.0.0.1:18080" in defaults
-    assert "api_gateway_keycloak_verify_ready_retries: 24" in defaults
+    assert "api_gateway_keycloak_verify_ready_retries: 60" in defaults
     assert "api_gateway_keycloak_verify_ready_delay: 5" in defaults
     assert "api_gateway_keycloak_verify_token_retries: 18" in defaults
     assert "api_gateway_keycloak_verify_token_delay: 5" in defaults
