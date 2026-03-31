@@ -323,7 +323,15 @@ def test_openbao_playbook_refreshes_secret_ids_from_local_artifacts() -> None:
     assert "Read the persisted AppRole artifacts before refreshing secret IDs" in task_names
     assert "Record persisted AppRole artifact facts before refreshing secret IDs" in task_names
     assert "Ensure OpenBao remains unsealed before refreshing controller-local AppRole artifacts" in task_names
+    assert "Assert refreshed AppRole secret IDs were generated successfully after end-to-end verification" in task_names
     assert "Read AppRole role IDs for refreshed controller-local artifacts" not in task_names
+
+    refresh_task = next(
+        task for task in tasks if task["name"] == "Generate refreshed AppRole secret IDs after end-to-end verification"
+    )
+    assert refresh_task["retries"] == 6
+    assert refresh_task["delay"] == 2
+    assert refresh_task["until"] == "openbao_refresh_secret_ids.status == 200"
 
     persist_task = next(
         task for task in tasks if task["name"] == "Persist refreshed AppRole artifacts locally after end-to-end verification"
