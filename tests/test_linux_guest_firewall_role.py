@@ -70,3 +70,21 @@ def test_coolify_guest_policy_enables_container_forwarding_for_published_ports()
         if rule["source"] == "nginx-lv3"
     }
     assert published_sources["nginx-lv3"] == (80, 443, 8000, 8096)
+
+
+def test_livekit_guest_policy_allows_edge_signalling_and_public_media_ingress() -> None:
+    host_vars = yaml.safe_load(HOST_VARS_PATH.read_text())
+    docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
+
+    assert any(
+        rule["source"] == "nginx-lv3" and rule["protocol"] == "tcp" and 7880 in rule["ports"]
+        for rule in docker_runtime_rules
+    )
+    assert any(
+        rule["source"] == "public" and rule["protocol"] == "tcp" and 7881 in rule["ports"]
+        for rule in docker_runtime_rules
+    )
+    assert any(
+        rule["source"] == "public" and rule["protocol"] == "udp" and 7882 in rule["ports"]
+        for rule in docker_runtime_rules
+    )

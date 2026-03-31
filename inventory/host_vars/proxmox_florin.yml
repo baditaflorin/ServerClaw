@@ -635,6 +635,21 @@ network_policy:
         - source: nginx-lv3
           protocol: tcp
           ports:
+            - 7880
+          description: Reverse proxy access to the LiveKit signalling API
+        - source: public
+          protocol: tcp
+          ports:
+            - 7881
+          description: Public TCP media ingress forwarded by the host for LiveKit
+        - source: public
+          protocol: udp
+          ports:
+            - 7882
+          description: Public UDP media ingress forwarded by the host for LiveKit
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
             - 8016
           description: Reverse proxy access to Plausible Analytics and tracker endpoints
         - source: nginx-lv3
