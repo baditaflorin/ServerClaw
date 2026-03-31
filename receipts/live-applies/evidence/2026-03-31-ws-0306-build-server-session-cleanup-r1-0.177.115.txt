@@ -1,0 +1,12 @@
+Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
+BEFORE
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1       158G  146G  5.3G  97% /
+
+253M	/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0306-live-apply-a113608006
+416M	/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0306-mainline-final-9797a9fbe6
+65M	/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0306-main-publish-r1-e544a6c91b
+
+AFTER
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1       158G  145G  6.0G  97% /

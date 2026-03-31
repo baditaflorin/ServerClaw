@@ -68,6 +68,10 @@ That run now records `.local/validation-gate/remote-validate-last-run.json` in t
 - the declared capability contract for that runner
 - the per-run environment attestation for architecture, tooling, container runtime, network class, and scratch-space guarantees
 
+The `remote-validate` path now also includes ADR 0306 `iac-policy-scan`, so the
+build server proves the same Checkov-backed IaC policy contract that the local
+pre-push gate uses.
+
 Run the full pre-push gate remotely, but allow local fallback if the build server is offline:
 
 ```bash
@@ -150,4 +154,5 @@ Review `.rsync-exclude` before adding any new local secret material.
 
 - `check-build-server` is intentionally a dry-run snapshot upload plus SSH health check. It should be safe to run repeatedly.
 - the gateway preserves a stable session namespace per checkout by default; set `LV3_SESSION_ID` when you need a human-readable namespace for debugging or live verification
+- if remote disk pressure is caused by abandoned `.lv3-session-workspaces/<session_slug>` roots, delete only inactive session directories after confirming no active `remote_exec.sh`, `rsync`, or runner process still references them; root-owned runner artifacts may require `sudo`, and every manual cleanup should be recorded in the matching live-apply receipt
 - ADR 0266 adds runner capability contracts and per-run attestation on top of ADR 0083. Commands without runner metadata still execute as managed remote shell commands, but the governed validation paths now record the runner identity they actually used.
