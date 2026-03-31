@@ -520,7 +520,6 @@ def test_gate_status_resolves_default_paths_from_repo_root(tmp_path: Path) -> No
 
     for relative_path in (
         "scripts/__init__.py",
-        "scripts/controller_automation_toolkit.py",
         "scripts/gate_bypass_waivers.py",
         "scripts/gate_status.py",
         "scripts/validation_lanes.py",
@@ -531,6 +530,11 @@ def test_gate_status_resolves_default_paths_from_repo_root(tmp_path: Path) -> No
         destination = repo_root / relative_path
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text((REPO_ROOT / relative_path).read_text(encoding="utf-8"), encoding="utf-8")
+
+    (repo_root / "scripts" / "controller_automation_toolkit.py").write_text(
+        "def emit_cli_error(*args, **kwargs):\n    return None\n",
+        encoding="utf-8",
+    )
 
     (repo_root / ".local" / "validation-gate" / "post-merge-last-run.json").write_text(
         json.dumps({"status": "passed", "executed_at": "2026-03-29T16:39:41+00:00", "source": "windmill"}),
