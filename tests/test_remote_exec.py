@@ -25,10 +25,14 @@ def make_fake_ssh(path: Path) -> None:
         """#!/usr/bin/env bash
 set -euo pipefail
 printf '%s\n' "$*" >> "${REMOTE_EXEC_SSH_LOG:?}"
+stdin_payload="$(cat || true)"
+if [[ -n "$stdin_payload" ]]; then
+  printf 'STDIN<<EOF\n%s\nEOF\n' "$stdin_payload" >> "${REMOTE_EXEC_SSH_LOG:?}"
+fi
 if [[ "${REMOTE_EXEC_SSH_FAIL:-0}" == "1" ]]; then
   exit 255
 fi
-if [[ "${REMOTE_EXEC_REMOTE_FAIL:-0}" == "1" && "$*" != *" true" && "$*" != *"mkdir -p"* && "$*" != *"tar -xzf"* && "$*" != *"test -f"* ]]; then
+if [[ "${REMOTE_EXEC_REMOTE_FAIL:-0}" == "1" && "$*" != *" true" && "$*" != *"bash -s"* && "$*" != *"mkdir -p"* && "$*" != *"tar -xzf"* && "$*" != *"test -f"* ]]; then
   exit 1
 fi
 if [[ "$*" == *"docker run"* ]]; then
@@ -435,6 +439,31 @@ def test_remote_exec_materializes_worktree_git_metadata_for_remote_workspace(tmp
     assert "--delete" not in rsync_log
     assert "repository-snapshot-" in rsync_log
     assert ".lv3-snapshots" in rsync_log
+
+
+def test_remote_exec_prunes_remote_workspace_by_retention_policy(tmp_path: Path) -> None:
+    completed = run_remote_exec(
+        tmp_path,
+        "remote-lint",
+        extra_env={
+            "REMOTE_EXEC_SESSION_RETENTION_DAYS": "1",
+            "REMOTE_EXEC_SESSION_KEEP_COUNT": "64",
+            "REMOTE_EXEC_RUN_RETENTION_DAYS": "3",
+            "REMOTE_EXEC_RUN_KEEP_COUNT": "12",
+            "REMOTE_EXEC_SNAPSHOT_RETENTION_DAYS": "4",
+            "REMOTE_EXEC_SNAPSHOT_KEEP_COUNT": "5",
+        },
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    ssh_log = completed.ssh_log.read_text()  # type: ignore[attr-defined]
+    assert "-mtime +1" in ssh_log
+    assert "head -n -64" in ssh_log
+    assert "head -n -12" in ssh_log
+    assert "head -n -5" in ssh_log
+    assert ".lv3-session-workspaces" in ssh_log
+    assert ".lv3-runs" in ssh_log
+    assert ".lv3-snapshots" in ssh_log
 
 
 def test_remote_exec_syncs_remote_gate_status_back_to_local_checkout(tmp_path: Path) -> None:

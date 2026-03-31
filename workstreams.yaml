@@ -19530,7 +19530,7 @@ workstreams:
   - id: ws-0305-live-apply
     adr: "0305"
     title: Live apply ADR 0305 k6 load testing and SLO error-budget burn validation from latest origin/main
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0305-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-live-apply
@@ -19550,6 +19550,7 @@ workstreams:
       - docs/workstreams/ws-0305-live-apply.md
       - docs/adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
       - docs/runbooks/k6-load-testing.md
+      - docs/runbooks/configure-openfga.md
       - docs/schema/k6-receipt.schema.json
       - docs/schema/capacity-model.schema.json
       - docs/adr/.index.yaml
@@ -19558,6 +19559,11 @@ workstreams:
       - config/image-catalog.json
       - config/capacity-model.json
       - config/k6/scripts/http-slo-probe.js
+      - config/service-capability-catalog.json
+      - config/slo-catalog.json
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/grafana/dashboards/slo-overview.json
       - config/workflow-catalog.json
       - config/command-catalog.json
       - config/control-plane-lanes.json
@@ -19566,6 +19572,7 @@ workstreams:
       - config/ntfy/server.yml
       - inventory/host_vars/proxmox_florin.yml
       - inventory/group_vars/platform.yml
+      - playbooks/openfga.yml
       - playbooks/services/guest-log-shipping.yml
       - collections/ansible_collections/lv3/platform/playbooks/services/guest-log-shipping.yml
       - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
@@ -19575,14 +19582,17 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/ensure_unsealed.yml
       - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml
       - collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/unseal_key.yml
+      - collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml
       - scripts/capacity_report.py
       - scripts/generate_platform_vars.py
       - scripts/k6_load_testing.py
       - scripts/promotion_pipeline.py
+      - scripts/serverclaw_authz.py
       - scripts/slo_tracking.py
       - scripts/validate_nats_topics.py
       - scripts/validate_repository_data_models.py
       - platform/slo.py
+      - docs/site-generated/architecture/dependency-graph.md
       - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/**
       - config/windmill/scripts/k6-load-testing.py
@@ -19591,9 +19601,14 @@ workstreams:
       - tests/test_k6_load_testing_windmill.py
       - tests/test_gitea_workflows.py
       - tests/test_monitoring_vm_role.py
+      - tests/test_openfga_metadata.py
+      - tests/test_openfga_runtime_role.py
       - tests/test_openbao_compose_env_helper.py
       - tests/test_openbao_runtime_role.py
       - tests/test_openbao_systemd_credentials_helper.py
+      - tests/test_proxmox_network_role.py
+      - tests/test_published_artifact_secret_scan.py
+      - tests/test_serverclaw_authz.py
       - tests/test_windmill_default_operations_surface.py
       - tests/test_windmill_operator_admin_app.py
       - tests/test_promotion_pipeline.py
@@ -19621,6 +19636,7 @@ workstreams:
             - docs/workstreams/ws-0305-live-apply.md
             - docs/adr/0305-k6-for-continuous-load-testing-and-slo-error-budget-burn-validation.md
             - docs/runbooks/k6-load-testing.md
+            - docs/runbooks/configure-openfga.md
           mode: exclusive
         - id: adr_0305_repository_automation
           paths:
@@ -19632,6 +19648,7 @@ workstreams:
             - config/api-publication.json
             - config/event-taxonomy.yaml
             - config/ntfy/server.yml
+            - playbooks/openfga.yml
             - playbooks/services/guest-log-shipping.yml
             - collections/ansible_collections/lv3/platform/playbooks/services/guest-log-shipping.yml
             - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
@@ -19644,6 +19661,7 @@ workstreams:
             - scripts/k6_load_testing.py
             - scripts/capacity_report.py
             - scripts/promotion_pipeline.py
+            - scripts/serverclaw_authz.py
             - scripts/slo_tracking.py
             - scripts/validate_nats_topics.py
             - scripts/validate_repository_data_models.py
@@ -19653,9 +19671,13 @@ workstreams:
             - tests/test_gitea_workflows.py
             - tests/test_capacity_report.py
             - tests/test_monitoring_vm_role.py
+            - tests/test_openfga_metadata.py
+            - tests/test_openfga_runtime_role.py
             - tests/test_openbao_compose_env_helper.py
             - tests/test_openbao_runtime_role.py
             - tests/test_openbao_systemd_credentials_helper.py
+            - tests/test_published_artifact_secret_scan.py
+            - tests/test_serverclaw_authz.py
             - tests/test_windmill_default_operations_surface.py
             - tests/test_windmill_operator_admin_app.py
             - tests/test_promotion_pipeline.py
@@ -19664,6 +19686,15 @@ workstreams:
             - tests/unit/test_event_taxonomy.py
           mode: shared_contract
           contract: repository-automation-v1
+        - id: adr_0305_slo_catalog_contract
+          paths:
+            - config/service-capability-catalog.json
+            - config/slo-catalog.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/grafana/dashboards/slo-overview.json
+          mode: shared_contract
+          contract: generated-slo-v1
         - id: adr_0305_platform_contract
           paths:
             - inventory/host_vars/proxmox_florin.yml
@@ -19678,6 +19709,12 @@ workstreams:
             - docs/schema/capacity-model.schema.json
           mode: shared_contract
           contract: platform-topology-v1
+        - id: adr_0305_guest_network_policy
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml
+            - tests/test_proxmox_network_role.py
+          mode: shared_contract
+          contract: guest-network-policy-v1
         - id: adr_0305_image_policy
           paths:
             - config/image-catalog.json
@@ -19685,10 +19722,15 @@ workstreams:
             - receipts/image-scans/2026-03-31-k6-runtime.trivy.json
           mode: shared_contract
           contract: image-policy-v1
+        - id: adr_0305_generated_portals
+          paths:
+            - docs/site-generated/architecture/dependency-graph.md
+          mode: shared_contract
+          contract: generated-portals-v1
         - id: adr_0305_live_receipts
           paths:
             - receipts/k6/**
             - receipts/live-applies/**
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true

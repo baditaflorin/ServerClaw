@@ -159,6 +159,28 @@ def test_build_regression_payload_uses_previous_receipt(tmp_path: Path) -> None:
     assert round(payload["regression_ratio"], 2) == 0.30
 
 
+def test_current_commit_prefers_snapshot_commit_env(monkeypatch, tmp_path: Path) -> None:
+    snapshot_commit = "8465168a90426723fad3083b78878575cff20534"
+
+    monkeypatch.setenv("LV3_SNAPSHOT_SOURCE_COMMIT", snapshot_commit)
+    monkeypatch.setattr(
+        k6_load_testing,
+        "run_git",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("run_git should not be called")),
+    )
+
+    assert k6_load_testing.current_commit(tmp_path) == snapshot_commit
+
+
+def test_current_commit_uses_git_when_snapshot_env_is_missing(monkeypatch, tmp_path: Path) -> None:
+    expected_commit = "5ce5deae525879610a61c9065a63e951a21bc968"
+
+    monkeypatch.delenv("LV3_SNAPSHOT_SOURCE_COMMIT", raising=False)
+    monkeypatch.setattr(k6_load_testing, "run_git", lambda *_args, **_kwargs: expected_commit)
+
+    assert k6_load_testing.current_commit(tmp_path) == expected_commit
+
+
 def test_validate_k6_receipt_rejects_unbalanced_counts(tmp_path: Path) -> None:
     summary_path = tmp_path / "receipts" / "k6" / "raw" / "summary.json"
     summary_path.parent.mkdir(parents=True)
@@ -272,3 +294,254 @@ def test_run_k6_uses_host_workspace_override(monkeypatch, tmp_path: Path) -> Non
     assert f"/host/gitea-runner/workspace:{tmp_path}" in command
     assert "--user" in command
     assert f"{k6_load_testing.os.getuid()}:{k6_load_testing.os.getgid()}" in command
+
+
+def test_main_resolves_relative_repo_root_before_running_k6(monkeypatch, tmp_path: Path) -> None:
+    captured: dict[str, object] = {}
+    output_dir = tmp_path / "receipts" / "k6"
+    recorded_at = k6_load_testing.dt.datetime(2026, 3, 31, 6, 0, 0, tzinfo=k6_load_testing.dt.timezone.utc)
+
+    def fake_build_targets(**kwargs):  # type: ignore[no-untyped-def]
+        captured["build_targets_repo_root"] = kwargs["repo_root"]
+        return [{"service_id": "openfga"}]
+
+    def fake_write_run_config(**kwargs):  # type: ignore[no-untyped-def]
+        captured["write_run_config_repo_root"] = kwargs["repo_root"]
+        path = kwargs["repo_root"] / ".local" / "k6" / "config.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("{}", encoding="utf-8")
+        return path
+
+    def fake_run_k6(**kwargs):  # type: ignore[no-untyped-def]
+        captured["run_k6_repo_root"] = kwargs["repo_root"]
+        captured["run_k6_summary_path"] = kwargs["summary_path"]
+        kwargs["summary_path"].parent.mkdir(parents=True, exist_ok=True)
+        kwargs["summary_path"].write_text("{}", encoding="utf-8")
+        return 0, ""
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(k6_load_testing, "utc_now", lambda: recorded_at)
+    monkeypatch.setattr(k6_load_testing, "build_targets", fake_build_targets)
+    monkeypatch.setattr(k6_load_testing, "write_run_config", fake_write_run_config)
+    monkeypatch.setattr(k6_load_testing, "default_prometheus_remote_write_url", lambda _repo_root: "http://10.10.10.40:9090/api/v1/write")
+    monkeypatch.setattr(k6_load_testing, "run_k6", fake_run_k6)
+    monkeypatch.setattr(k6_load_testing, "load_json", lambda _path: {})
+    monkeypatch.setattr(k6_load_testing, "build_receipts", lambda **_kwargs: [output_dir / "load-openfga-20260331T060000Z.json"])
+
+    exit_code = k6_load_testing.main(
+        [
+            "--repo-root",
+            ".",
+            "--scenario",
+            "load",
+            "--runner-context",
+            "build-server",
+            "--environment",
+            "production",
+            "--output-dir",
+            str(output_dir),
+        ]
+    )
+
+    assert exit_code == 0
+    assert captured["build_targets_repo_root"] == tmp_path.resolve()
+    assert captured["write_run_config_repo_root"] == tmp_path.resolve()
+    assert captured["run_k6_repo_root"] == tmp_path.resolve()
+    assert captured["run_k6_summary_path"] == output_dir / "raw" / "20260331T060000Z-load-summary.json"
+
+
+def test_main_writes_receipts_when_k6_returns_nonzero_but_summary_exists(monkeypatch, tmp_path: Path, capsys) -> None:
+    output_dir = tmp_path / "receipts" / "k6"
+    recorded_at = k6_load_testing.dt.datetime(2026, 3, 31, 10, 35, 58, tzinfo=k6_load_testing.dt.timezone.utc)
+    build_receipts_called: dict[str, bool] = {"value": False}
+
+    def fake_write_run_config(**kwargs):  # type: ignore[no-untyped-def]
+        path = kwargs["repo_root"] / ".local" / "k6" / "config.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("{}", encoding="utf-8")
+        return path
+
+    def fake_run_k6(**kwargs):  # type: ignore[no-untyped-def]
+        kwargs["summary_path"].parent.mkdir(parents=True, exist_ok=True)
+        kwargs["summary_path"].write_text("{}", encoding="utf-8")
+        return 99, "k6 threshold failure"
+
+    def fake_build_receipts(**kwargs):  # type: ignore[no-untyped-def]
+        build_receipts_called["value"] = True
+        receipt_path = kwargs["output_dir"] / "load-openfga-20260331T103558Z.json"
+        receipt_path.parent.mkdir(parents=True, exist_ok=True)
+        receipt_path.write_text("{}", encoding="utf-8")
+        return [receipt_path]
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(k6_load_testing, "utc_now", lambda: recorded_at)
+    monkeypatch.setattr(k6_load_testing, "build_targets", lambda **_kwargs: [{"service_id": "openfga"}])
+    monkeypatch.setattr(k6_load_testing, "write_run_config", fake_write_run_config)
+    monkeypatch.setattr(k6_load_testing, "default_prometheus_remote_write_url", lambda _repo_root: "http://10.10.10.40:9090/api/v1/write")
+    monkeypatch.setattr(k6_load_testing, "run_k6", fake_run_k6)
+    monkeypatch.setattr(k6_load_testing, "load_json", lambda _path: {})
+    monkeypatch.setattr(k6_load_testing, "build_receipts", fake_build_receipts)
+
+    exit_code = k6_load_testing.main(
+        [
+            "--repo-root",
+            ".",
+            "--scenario",
+            "load",
+            "--runner-context",
+            "build-server",
+            "--environment",
+            "production",
+            "--output-dir",
+            str(output_dir),
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 99
+    assert build_receipts_called["value"] is True
+    assert "k6 threshold failure" in captured.err
+    assert '"status": "failed"' in captured.out
+
+
+def test_build_receipts_uses_service_checks_and_top_level_metric_fields(monkeypatch, tmp_path: Path) -> None:
+    recorded_at = k6_load_testing.dt.datetime(2026, 3, 31, 10, 19, 30, tzinfo=k6_load_testing.dt.timezone.utc)
+    summary_path = tmp_path / "receipts" / "k6" / "raw" / "20260331T101930Z-load-summary.json"
+    summary_path.parent.mkdir(parents=True, exist_ok=True)
+    summary_path.write_text("{}", encoding="utf-8")
+
+    monkeypatch.setattr(
+        k6_load_testing,
+        "load_image_catalog",
+        lambda: {"images": {"k6_runtime": {"ref": "docker.io/grafana/k6:1.7.1@sha256:test"}}},
+    )
+    monkeypatch.setattr(k6_load_testing, "current_commit", lambda _repo_root: "deadbeef")
+    monkeypatch.setattr(k6_load_testing, "current_repo_version", lambda _repo_root: "0.1.0")
+    monkeypatch.setattr(k6_load_testing, "build_regression_payload", lambda **_kwargs: {"checked": False, "baseline_receipt": None, "baseline_p95_ms": None, "current_p95_ms": 5.79, "regression_ratio": None, "threshold_ratio": 0.2, "regressed": False})
+    monkeypatch.setattr(k6_load_testing, "default_prometheus_remote_write_url", lambda _repo_root: "http://10.10.10.40:9090/api/v1/write")
+
+    summary = {
+        "metrics": {
+            "checks{service_id:openfga}": {
+                "passes": 1392,
+                "fails": 0,
+                "value": 1,
+            },
+            "http_req_duration{service_id:openfga}": {
+                "p(95)": 5.790530650000001,
+                "avg": 2.2285226321839082,
+                "max": 35.630874,
+            },
+        }
+    }
+    targets = [
+        {
+            "service_id": "openfga",
+            "service_name": "OpenFGA",
+            "target_url": "http://10.10.10.20:8098/healthz",
+            "availability_slo_id": "openfga-availability",
+            "availability_objective_percent": 99.5,
+            "latency_slo_id": "openfga-latency",
+            "latency_threshold_ms": 500.0,
+            "vus": 9,
+            "duration": None,
+            "ramp_up_duration": "1m",
+            "hold_duration": "5m",
+            "think_time_seconds": 1.0,
+            "request_timeout_seconds": 10.0,
+        }
+    ]
+
+    receipts = k6_load_testing.build_receipts(
+        repo_root=tmp_path,
+        scenario="load",
+        runner_context="build-server",
+        environment="production",
+        recorded_at=recorded_at,
+        summary_path=summary_path,
+        summary=summary,
+        targets=targets,
+        output_dir=tmp_path / "receipts" / "k6",
+        publish_nats=False,
+        notify_ntfy_flag=False,
+    )
+
+    assert len(receipts) == 1
+    payload = json.loads(receipts[0].read_text(encoding="utf-8"))
+    assert payload["metrics"]["request_count"] == 1392
+    assert payload["metrics"]["success_count"] == 1392
+    assert payload["metrics"]["failed_count"] == 0
+    assert payload["metrics"]["http_req_duration_p95_ms"] == 5.790530650000001
+    assert payload["metrics"]["http_req_duration_avg_ms"] == 2.2285226321839082
+    assert payload["metrics"]["http_req_duration_max_ms"] == 35.630874
+
+
+def test_build_receipts_keeps_failed_receipt_when_ntfy_warning_delivery_fails(monkeypatch, tmp_path: Path, capsys) -> None:
+    recorded_at = k6_load_testing.dt.datetime(2026, 3, 31, 10, 47, 16, tzinfo=k6_load_testing.dt.timezone.utc)
+    summary_path = tmp_path / "receipts" / "k6" / "raw" / "20260331T104716Z-load-summary.json"
+    summary_path.parent.mkdir(parents=True, exist_ok=True)
+    summary_path.write_text("{}", encoding="utf-8")
+
+    monkeypatch.setattr(
+        k6_load_testing,
+        "load_image_catalog",
+        lambda: {"images": {"k6_runtime": {"ref": "docker.io/grafana/k6:1.7.1@sha256:test"}}},
+    )
+    monkeypatch.setattr(k6_load_testing, "current_commit", lambda _repo_root: "deadbeef")
+    monkeypatch.setattr(k6_load_testing, "current_repo_version", lambda _repo_root: "0.1.0")
+    monkeypatch.setattr(k6_load_testing, "build_regression_payload", lambda **_kwargs: {"checked": False, "baseline_receipt": None, "baseline_p95_ms": None, "current_p95_ms": 900.0, "regression_ratio": None, "threshold_ratio": 0.2, "regressed": False})
+    monkeypatch.setattr(k6_load_testing, "default_prometheus_remote_write_url", lambda _repo_root: "http://10.10.10.40:9090/api/v1/write")
+    monkeypatch.setattr(k6_load_testing, "notify_ntfy", lambda **_kwargs: (_ for _ in ()).throw(ValueError("missing secret")))
+
+    summary = {
+        "metrics": {
+            "checks{service_id:openfga}": {
+                "passes": 0,
+                "fails": 12,
+                "value": 0,
+            },
+            "http_req_duration{service_id:openfga}": {
+                "p(95)": 900.0,
+                "avg": 800.0,
+                "max": 1200.0,
+            },
+        }
+    }
+    targets = [
+        {
+            "service_id": "openfga",
+            "service_name": "OpenFGA",
+            "target_url": "http://10.10.10.20:8098/healthz",
+            "availability_slo_id": "openfga-availability",
+            "availability_objective_percent": 99.5,
+            "latency_slo_id": "openfga-latency",
+            "latency_threshold_ms": 500.0,
+            "vus": 9,
+            "duration": None,
+            "ramp_up_duration": "1m",
+            "hold_duration": "5m",
+            "think_time_seconds": 1.0,
+            "request_timeout_seconds": 10.0,
+        }
+    ]
+
+    receipts = k6_load_testing.build_receipts(
+        repo_root=tmp_path,
+        scenario="load",
+        runner_context="build-server",
+        environment="production",
+        recorded_at=recorded_at,
+        summary_path=summary_path,
+        summary=summary,
+        targets=targets,
+        output_dir=tmp_path / "receipts" / "k6",
+        publish_nats=False,
+        notify_ntfy_flag=True,
+    )
+
+    captured = capsys.readouterr()
+    assert "failed to deliver ntfy warning" in captured.err
+    payload = json.loads(receipts[0].read_text(encoding="utf-8"))
+    assert payload["result"] == "failed"
+    assert payload["notifications"]["ntfy_topic_notified"] is None
+    assert any("ntfy notification unavailable: missing secret" == reason for reason in payload["failure_reasons"])

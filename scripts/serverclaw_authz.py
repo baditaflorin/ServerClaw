@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import importlib.util
 import json
 import subprocess
 import sys
@@ -16,6 +17,27 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+PLATFORM_PACKAGE_DIR = REPO_ROOT / "platform"
+loaded_platform = sys.modules.get("platform")
+loaded_platform_file = str(getattr(loaded_platform, "__file__", "")) if loaded_platform is not None else ""
+if PLATFORM_PACKAGE_DIR.exists() and not loaded_platform_file.startswith(str(PLATFORM_PACKAGE_DIR)):
+    sys.modules.pop("platform", None)
+    platform_init = PLATFORM_PACKAGE_DIR / "__init__.py"
+    platform_spec = importlib.util.spec_from_file_location(
+        "platform",
+        platform_init,
+        submodule_search_locations=[str(PLATFORM_PACKAGE_DIR)],
+    )
+    assert platform_spec is not None
+    assert platform_spec.loader is not None
+    platform_module = importlib.util.module_from_spec(platform_spec)
+    sys.modules["platform"] = platform_module
+    platform_spec.loader.exec_module(platform_module)
+
 from platform.retry import MaxRetriesExceeded, RetryPolicy, with_retry
 
 try:
@@ -24,9 +46,6 @@ except ImportError:  # pragma: no cover - exercised on older controller Python r
     from datetime import timezone
 
     UTC = timezone.utc
-
-
-REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 def detect_common_repo_root(repo_root: Path) -> Path:

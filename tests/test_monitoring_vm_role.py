@@ -11,6 +11,7 @@ PLATFORM_DASHBOARD_TEMPLATE = REPO_ROOT / "roles" / "monitoring_vm" / "templates
 MAIL_DASHBOARD_TEMPLATE = REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "lv3-mail-platform.json.j2"
 VM_DASHBOARD_TEMPLATE = REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "lv3-vm-detail.json.j2"
 LOKI_CANARY_SERVICE_TEMPLATE = REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "loki-canary.service.j2"
+HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 
 
 def load_tasks(path: Path) -> list[dict]:
@@ -33,6 +34,12 @@ def test_defaults_expose_private_prometheus_remote_write_endpoint() -> None:
         "http://{{ hostvars[groups['proxmox_hosts'][0]].lv3_service_topology.grafana.private_ip }}:9090/api/v1/write"
     )
     assert "{{ monitoring_prometheus_listen_address }}" in template
+
+
+def test_inventory_explicitly_pins_private_prometheus_bind_for_live_k6_replays() -> None:
+    host_vars = yaml.safe_load(HOST_VARS_PATH.read_text())
+
+    assert host_vars["monitoring_prometheus_listen_address"] == "0.0.0.0:9090"
 
 
 def test_main_tasks_explicitly_disable_public_dashboards_and_embedding() -> None:

@@ -87,6 +87,9 @@ def isoformat(value: dt.datetime) -> str:
 
 
 def current_commit(repo_root: Path) -> str:
+    snapshot_commit = os.environ.get("LV3_SNAPSHOT_SOURCE_COMMIT", "").strip()
+    if snapshot_commit:
+        return snapshot_commit
     return run_git(repo_root, "rev-parse", "HEAD")
 
 
@@ -371,10 +374,24 @@ def load_summary_metric(summary: dict[str, Any], metric_name: str, service_id: s
 
 def metric_value(summary: dict[str, Any], metric_name: str, service_id: str, field: str, default: float = 0.0) -> float:
     metric = load_summary_metric(summary, metric_name, service_id)
+    if field in metric and isinstance(metric[field], (int, float)) and not isinstance(metric[field], bool):
+        return float(metric[field])
     values = metric.get("values", {})
     if isinstance(values, dict) and field in values:
         return float(values[field])
     return default
+
+
+def service_request_counts(summary: dict[str, Any], service_id: str) -> tuple[int, int]:
+    checks_metric = load_summary_metric(summary, "checks", service_id)
+    passes = checks_metric.get("passes")
+    fails = checks_metric.get("fails")
+    if isinstance(passes, int) and isinstance(fails, int):
+        return passes, fails
+
+    success_count = int(metric_value(summary, "lv3_successful_requests", service_id, "count"))
+    failed_count = int(metric_value(summary, "lv3_failed_requests", service_id, "count"))
+    return success_count, failed_count
 
 
 def build_regression_payload(
@@ -519,8 +536,7 @@ def build_receipts(
     image_ref = require_mapping(load_image_catalog()["images"]["k6_runtime"], "k6_runtime")["ref"]
     for target in targets:
         service_id = target["service_id"]
-        success_count = int(metric_value(summary, "lv3_successful_requests", service_id, "count"))
-        failed_count = int(metric_value(summary, "lv3_failed_requests", service_id, "count"))
+        success_count, failed_count = service_request_counts(summary, service_id)
         request_count = success_count + failed_count
         error_rate = (failed_count / request_count) if request_count else 0.0
         p95_ms = metric_value(summary, "http_req_duration", service_id, "p(95)")
@@ -560,21 +576,35 @@ def build_receipts(
         nats_published = False
         ntfy_topic = None
         if publish_nats:
-            nats_published = publish_regression_event(
-                repo_root=repo_root,
-                service_id=service_id,
-                scenario=scenario,
-                receipt_path=receipt_path,
-                regression=regression,
-            )
+            try:
+                nats_published = publish_regression_event(
+                    repo_root=repo_root,
+                    service_id=service_id,
+                    scenario=scenario,
+                    receipt_path=receipt_path,
+                    regression=regression,
+                )
+            except Exception as exc:  # noqa: BLE001
+                failure_reasons.append(f"nats regression notification unavailable: {exc}")
+                print(
+                    f"k6 receipt warning for {service_id}: failed to publish NATS regression event: {exc}",
+                    file=sys.stderr,
+                )
         if notify_ntfy_flag:
-            ntfy_topic = notify_ntfy(
-                repo_root=repo_root,
-                service_id=service_id,
-                scenario=scenario,
-                budget_remaining_pct=error_budget_remaining_pct,
-                receipt_path=receipt_path,
-            )
+            try:
+                ntfy_topic = notify_ntfy(
+                    repo_root=repo_root,
+                    service_id=service_id,
+                    scenario=scenario,
+                    budget_remaining_pct=error_budget_remaining_pct,
+                    receipt_path=receipt_path,
+                )
+            except Exception as exc:  # noqa: BLE001
+                failure_reasons.append(f"ntfy notification unavailable: {exc}")
+                print(
+                    f"k6 receipt warning for {service_id}: failed to deliver ntfy warning: {exc}",
+                    file=sys.stderr,
+                )
 
         receipt = {
             "$schema": "docs/schema/k6-receipt.schema.json",
@@ -706,7 +736,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_arg_parser()
     args = parser.parse_args(argv)
-    repo_root = Path(args.repo_root)
+    repo_root = Path(args.repo_root).resolve()
     if args.validate:
         return validate_k6_receipts(repo_root)
     if not args.scenario:
@@ -740,7 +770,7 @@ def main(argv: list[str] | None = None) -> int:
         summary_path=summary_path,
         prometheus_remote_write_url=prometheus_remote_write_url,
     )
-    if returncode != 0:
+    if returncode != 0 and not summary_path.exists():
         print(output, file=sys.stderr)
         return returncode
     summary = load_json(summary_path)
@@ -757,10 +787,12 @@ def main(argv: list[str] | None = None) -> int:
         publish_nats=args.publish_nats,
         notify_ntfy_flag=args.notify_ntfy,
     )
+    if returncode != 0:
+        print(output, file=sys.stderr)
     print(
         json.dumps(
             {
-                "status": "ok",
+                "status": "ok" if returncode == 0 else "failed",
                 "scenario": args.scenario,
                 "runner_context": args.runner_context,
                 "services": [target["service_id"] for target in targets],
@@ -770,7 +802,7 @@ def main(argv: list[str] | None = None) -> int:
             indent=2,
         )
     )
-    return 0
+    return returncode
 
 
 if __name__ == "__main__":

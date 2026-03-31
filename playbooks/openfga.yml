@@ -106,6 +106,10 @@
     - name: Bootstrap the ServerClaw authorization store, model, and tuples
       ansible.builtin.command:
         argv:
+          - uv
+          - run
+          - --with
+          - pyyaml
           - python3
           - "{{ openfga_bootstrap_script }}"
           - apply

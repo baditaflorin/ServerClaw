@@ -42,6 +42,10 @@ The Windmill worker seeds `f/lv3/k6_load_testing` and schedules:
 
 - Prometheus remote-write must be reachable on the private monitoring address
   from `docker-build-lv3` and `docker-runtime-lv3`.
+- Private OpenFGA smoke and load probes must target the guest-reachable runtime
+  listener on `http://10.10.10.20:8098/healthz`; the
+  `http://100.64.0.1:8014` controller proxy is Tailscale-bound and is only for
+  controller-local bootstrap and verification.
 - The private Gitea `validate.yml` smoke gate runs inside a containerized runner,
   so it must export `LV3_DOCKER_WORKSPACE_PATH` before calling `make k6-smoke`
   or the nested `docker run` cannot mount the checkout from the runner host.

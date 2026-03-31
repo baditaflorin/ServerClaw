@@ -1,9 +1,10 @@
 # ADR 0305: k6 For Continuous Load Testing And SLO Error Budget Burn Validation
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: not yet
+- Implemented In Platform Version: 0.130.75
+- Implemented On: 2026-03-31
 - Date: 2026-03-29
 
 ## Context
@@ -92,6 +93,36 @@ Three k6 test scenario types are defined:
   `platform.slo.warn` notification (ADR 0299) and block Renovate version bump
   PRs for that service (via a Gitea Actions check that reads the latest k6 receipt)
 
+### Implemented live replay
+
+- the branch-local live apply on 2026-03-31 replayed the monitoring, guest
+  network policy, Windmill, and OpenFGA surfaces needed for the ADR 0305
+  execution path, with the successful corrective runs preserved under
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-converge-monitoring-r7.txt`,
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-converge-openfga-r5.txt`,
+  and `receipts/live-applies/evidence/2026-03-31-ws-0305-converge-windmill-r4.txt`
+- the authoritative build-server smoke replay passed from
+  `docker-build-lv3`, producing synced receipts
+  `receipts/k6/smoke-keycloak-20260331T103411Z.json` and
+  `receipts/k6/smoke-openfga-20260331T103411Z.json` plus the raw summary
+  export, as captured in
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-k6-smoke-r9.txt` and
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-k6-receipt-sync-r2.txt`
+- the authoritative build-server load replay now preserves failed receipts and
+  returns a non-zero exit when thresholds are crossed instead of dropping the
+  evidence path; the final run is captured in
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-k6-load-r6.txt` and
+  `receipts/live-applies/evidence/2026-03-31-ws-0305-k6-receipt-sync-r3.txt`
+- the live platform did not meet the configured 1% error-rate objective during
+  that final load replay: Keycloak recorded `1725` requests with `400` failures
+  (`23.19%` error rate) and OpenFGA recorded `995` requests with `42` failures
+  (`4.22%` error rate), both with error budget remaining reduced to `0.0%` in
+  the synced receipts
+- repository automation gaps discovered during live apply were fixed in-repo on
+  this workstream: gitless snapshot commit capture, relative repo-root handling,
+  k6 summary parsing, failure-path receipt generation, non-fatal ntfy warning
+  handling, and remote build workspace retention cleanup
+
 ## Consequences
 
 **Positive**
@@ -112,9 +143,11 @@ Three k6 test scenario types are defined:
 - k6 JavaScript scripts require operator skill to write and maintain; poorly
   written scripts (missing sleep between iterations, unrealistic request
   patterns) produce misleading results
-- the Prometheus remote-write endpoint must be reachable from the build host or
-  the Windmill worker; this requires a network path from `docker-build-lv3` to
-  `monitoring-lv3` that is currently unused
+- the implemented live replay proved the dependent telemetry path is itself an
+  operational risk surface: during the final 2026-03-31 load run, Prometheus
+  remote-write calls from `docker-build-lv3` to `monitoring-lv3` repeatedly hit
+  request timeouts and the build host lacked the ntfy warning secret; the
+  receipt path now records those failures without hiding the load-test result
 
 ## Boundaries
 

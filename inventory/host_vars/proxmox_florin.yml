@@ -108,6 +108,7 @@ platform_port_assignments:
   tesseract_ocr_port: 3008
   headscale_http_port: 8080
   vaultwarden_https_port: 8222
+monitoring_prometheus_listen_address: 0.0.0.0:9090
 openbao_http_extra_bind_addresses:
   - "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
 proxmox_tailscale_hostname: proxmox-florin-subnet-router
@@ -650,9 +651,10 @@ network_policy:
         - source: host
           protocol: tcp
           ports:
+            - 8098
             - 3008
             - 9998
-          description: Proxmox host verification and controller-side access to the private Tika and Tesseract OCR APIs
+          description: Proxmox host verification and controller-side access to the private OpenFGA, Tika, and Tesseract OCR APIs
         - source: 172.16.0.0/12
           protocol: tcp
           ports:
@@ -691,6 +693,7 @@ network_policy:
           protocol: tcp
           ports:
             - 3003
+            - 8098
           description: Gitea Actions runner access from docker-build-lv3
         - source: docker-build-lv3
           protocol: tcp
@@ -780,12 +783,13 @@ network_policy:
         - source: monitoring-lv3
           protocol: tcp
           ports:
+            - 8098
             - 3008
             - 5000
             - 8089
             - 8100
             - 9998
-          description: Private monitoring probes for the Tesseract OCR, Changedetection, Dozzle, Piper, and Tika runtimes
+          description: Private monitoring probes for the OpenFGA, Tesseract OCR, Changedetection, Dozzle, Piper, and Tika runtimes
         - source: monitoring-lv3
           protocol: tcp
           ports:
