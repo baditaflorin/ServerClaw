@@ -74,3 +74,12 @@ def test_openbao_systemd_credentials_unit_waits_with_a_valid_shell_if_clause() -
 
     assert "for attempt in $(seq 1 30); do if " in template
     assert " ]; then exit 0; fi; sleep 1; done;" in template
+
+
+def test_openbao_systemd_credentials_restarts_and_rechecks_when_secret_payload_changes() -> None:
+    tasks = HELPER_TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "register: common_openbao_systemd_credentials_secret_write" in tasks
+    assert "common_openbao_systemd_credentials_secret_write is defined and common_openbao_systemd_credentials_secret_write.changed" in tasks
+    assert "Wait for the refreshed host-native credential file after OpenBao secret changes" in tasks
+    assert "common_openbao_systemd_credentials_refreshed_credential_file" in tasks
