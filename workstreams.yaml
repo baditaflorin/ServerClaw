@@ -674,7 +674,7 @@ workstreams:
   - id: ws-0275-live-apply
     adr: "0275"
     title: ADR 0275 live apply from latest origin/main
-    status: ready_for_merge
+    status: in_progress
     owner: codex
     branch: codex/ws-0275-live-apply-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0275-live-apply-r2
@@ -2914,8 +2914,8 @@ workstreams:
     title: Live apply ADR 0274 shared MinIO object storage from latest origin/main
     status: ready_for_merge
     owner: codex
-    branch: codex/ws-0274-minio-live-apply
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-minio-live-apply
+    branch: codex/ws-0274-mainline-refresh-v6
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0274-minio-live-apply.md
     depends_on:
       - adr-0021-public-subdomain-publication-at-the-nginx-edge

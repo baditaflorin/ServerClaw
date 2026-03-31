@@ -2,15 +2,15 @@
 
 - ADR: [ADR 0274](../adr/0274-minio-as-the-s3-compatible-object-storage-layer.md)
 - Title: Deploy the shared MinIO object storage layer on `docker-runtime-lv3`, rewire the first S3 consumers, and record the first platform version where ADR 0274 is true
-- Status: ready_for_merge
+- Status: in_progress
 - Implemented In Repo Version: pending next main release
 - Latest Verified Receipt: `receipts/live-applies/2026-03-30-adr-0274-minio-object-storage-live-apply.json`
 - Live Applied In Platform Version: 0.130.69
 - Latest Observed On Platform Version: 0.130.69
 - Implemented On: 2026-03-30
 - Live Applied On: 2026-03-30
-- Branch: `codex/ws-0274-minio-live-apply`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-minio-live-apply`
+- Branch: `codex/ws-0274-mainline-refresh-v6`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6`
 - Owner: codex
 - Depends On: `adr-0021`, `adr-0077`, `adr-0143`, `adr-0146`, `adr-0198`, `adr-0274`
 - Conflicts With: none
