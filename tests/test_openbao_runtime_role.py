@@ -64,9 +64,11 @@ def test_openbao_runtime_defaults_use_postgres_primary_address() -> None:
     assert "postgres_ha.initial_primary" in defaults
     assert "ansible_host" in defaults
     assert "@{{ openbao_postgres_host }}:5432/postgres?sslmode=disable" in defaults
-    assert 'CREATE ROLE "{{name}}" WITH LOGIN PASSWORD \'{{password}}\' VALID UNTIL \'{{expiration}}\';' in defaults
-    assert 'GRANT pg_read_all_data TO "{{name}}";' in defaults
-    assert 'DROP ROLE IF EXISTS "{{name}}";' in defaults
+    assert "creation_statements:" in defaults
+    assert "- !unsafe 'CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD ''{{password}}'' VALID UNTIL ''{{expiration}}'';'" in defaults
+    assert '- !unsafe \'GRANT pg_read_all_data TO "{{name}}";\'' in defaults
+    assert "revocation_statements:" in defaults
+    assert '- !unsafe \'DROP ROLE IF EXISTS "{{name}}";\'' in defaults
     assert "openbao_http_extra_bind_addresses: []" in defaults
 
 
@@ -210,6 +212,19 @@ def test_openbao_runtime_retries_policy_reads_during_post_restart_recovery() -> 
     assert "delay: 2" in tasks
     assert "until: openbao_current_policies.status in [200, 404]" in tasks
     assert "changed_when: false" in tasks
+
+
+def test_openbao_runtime_sends_database_role_statements_to_openbao_as_lists() -> None:
+    tasks = TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "openbao_database_role_creation_statements" in tasks
+    assert "openbao_database_role_revocation_statements" in tasks
+    assert "openbao_database_role_rollback_statements" in tasks
+    assert "openbao_database_role_renew_statements" in tasks
+    assert "item.creation_statements is not string" in tasks
+    assert "(item.rollback_statements | default([])) is not string" in tasks
+    assert "creation_statements: \"{{ openbao_database_role_creation_statements }}\"" in tasks
+    assert "revocation_statements: \"{{ openbao_database_role_revocation_statements }}\"" in tasks
 
 
 def test_openbao_runtime_waits_out_background_apt_maintenance() -> None:
